@@ -1,0 +1,1 @@
+add_executable(directoryd src/directory_server.cpp)

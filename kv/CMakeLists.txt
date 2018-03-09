@@ -1,0 +1,1 @@
+add_executable(kvd src/kv_server.cpp)
