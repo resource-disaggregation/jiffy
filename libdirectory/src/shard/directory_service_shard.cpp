@@ -164,8 +164,8 @@ storage_mode directory_service_shard::mode(const std::string &path) {
   return get_node_as_file(path)->mode();
 }
 
-std::vector<std::string> directory_service_shard::nodes(const std::string &path) {
-  return get_node_as_file(path)->nodes();
+std::vector<std::string> directory_service_shard::data_blocks(const std::string &path) {
+  return get_node_as_file(path)->data_blocks();
 }
 
 bool directory_service_shard::is_regular_file(const std::string &path) {
@@ -196,20 +196,20 @@ void directory_service_shard::mode(const std::string &path, const storage_mode &
   get_node_as_file(path)->mode(mode);
 }
 
-void directory_service_shard::add_node(const std::string &path, const std::string &node) {
-  get_node_as_file(path)->add_node(node);
+void directory_service_shard::add_data_block(const std::string &path, const std::string &node) {
+  get_node_as_file(path)->add_data_block(node);
 }
 
-void directory_service_shard::remove_node(const std::string &path, std::size_t i) {
-  get_node_as_file(path)->remove_node(i);
+void directory_service_shard::remove_data_block(const std::string &path, std::size_t i) {
+  get_node_as_file(path)->remove_data_block(i);
 }
 
-void directory_service_shard::remove_node(const std::string &path, const std::string &node) {
-  get_node_as_file(path)->remove_node(node);
+void directory_service_shard::remove_data_block(const std::string &path, const std::string &node) {
+  get_node_as_file(path)->remove_data_block(node);
 }
 
-void directory_service_shard::clear_nodes(const std::string &path) {
-  get_node_as_file(path)->clear_nodes();
+void directory_service_shard::remove_all_data_blocks(const std::string &path) {
+  get_node_as_file(path)->remove_all_data_blocks();
 }
 
 std::shared_ptr<ds_node> directory_service_shard::get_node_unsafe(const std::string &path) const {

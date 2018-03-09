@@ -13,7 +13,7 @@ class directory_lease_service_handler : public directory_lease_serviceIf {
   void create(const std::string &path) override;
   void load(const std::string &persistent_path, const std::string &memory_path) override;
   void renew_lease(rpc_keep_alive_ack &_return, const rpc_keep_alive &msg) override;
-  void release(const std::string &path, const rpc_release_mode mode) override;
+  void remove(const std::string &path, rpc_remove_mode mode) override;
 
  private:
   std::shared_ptr<directory_service_shard> shard_;

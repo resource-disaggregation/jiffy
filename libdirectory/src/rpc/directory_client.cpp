@@ -111,16 +111,16 @@ std::vector<directory_entry> directory_client::recursive_directory_entries(const
 data_status directory_client::dstatus(const std::string &path) {
   rpc_data_status s;
   client_->dstatus(s, path);
-  return data_status(static_cast<storage_mode>(s.storage_mode), s.data_nodes);
+  return data_status(static_cast<storage_mode>(s.storage_mode), s.data_blocks);
 }
 
 storage_mode directory_client::mode(const std::string &path) {
   return static_cast<storage_mode>(client_->mode(path));
 }
 
-std::vector<std::string> directory_client::nodes(const std::string &path) {
+std::vector<std::string> directory_client::data_blocks(const std::string &path) {
   std::vector<std::string> out;
-  client_->nodes(out, path);
+  client_->data_blocks(out, path);
   return out;
 }
 

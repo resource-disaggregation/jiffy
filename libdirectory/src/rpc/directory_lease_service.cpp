@@ -58,19 +58,19 @@ directory_lease_service_renew_lease_presult::~directory_lease_service_renew_leas
 }
 
 
-directory_lease_service_release_args::~directory_lease_service_release_args() throw() {
+directory_lease_service_remove_args::~directory_lease_service_remove_args() throw() {
 }
 
 
-directory_lease_service_release_pargs::~directory_lease_service_release_pargs() throw() {
+directory_lease_service_remove_pargs::~directory_lease_service_remove_pargs() throw() {
 }
 
 
-directory_lease_service_release_result::~directory_lease_service_release_result() throw() {
+directory_lease_service_remove_result::~directory_lease_service_remove_result() throw() {
 }
 
 
-directory_lease_service_release_presult::~directory_lease_service_release_presult() throw() {
+directory_lease_service_remove_presult::~directory_lease_service_remove_presult() throw() {
 }
 
 }} // namespace

@@ -580,7 +580,7 @@ uint32_t directory_lease_service_renew_lease_presult::read(Protocol_* iprot) {
 
 
 template <class Protocol_>
-uint32_t directory_lease_service_release_args::read(Protocol_* iprot) {
+uint32_t directory_lease_service_remove_args::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -613,7 +613,7 @@ uint32_t directory_lease_service_release_args::read(Protocol_* iprot) {
         if (ftype == ::apache::thrift::protocol::T_I32) {
           int32_t ecast58;
           xfer += iprot->readI32(ecast58);
-          this->mode = (rpc_release_mode)ecast58;
+          this->mode = (rpc_remove_mode)ecast58;
           this->__isset.mode = true;
         } else {
           xfer += iprot->skip(ftype);
@@ -632,10 +632,10 @@ uint32_t directory_lease_service_release_args::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t directory_lease_service_release_args::write(Protocol_* oprot) const {
+uint32_t directory_lease_service_remove_args::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("directory_lease_service_release_args");
+  xfer += oprot->writeStructBegin("directory_lease_service_remove_args");
 
   xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeString(this->path);
@@ -652,10 +652,10 @@ uint32_t directory_lease_service_release_args::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t directory_lease_service_release_pargs::write(Protocol_* oprot) const {
+uint32_t directory_lease_service_remove_pargs::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("directory_lease_service_release_pargs");
+  xfer += oprot->writeStructBegin("directory_lease_service_remove_pargs");
 
   xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeString((*(this->path)));
@@ -672,7 +672,7 @@ uint32_t directory_lease_service_release_pargs::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t directory_lease_service_release_result::read(Protocol_* iprot) {
+uint32_t directory_lease_service_remove_result::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -714,11 +714,11 @@ uint32_t directory_lease_service_release_result::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t directory_lease_service_release_result::write(Protocol_* oprot) const {
+uint32_t directory_lease_service_remove_result::write(Protocol_* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("directory_lease_service_release_result");
+  xfer += oprot->writeStructBegin("directory_lease_service_remove_result");
 
   if (this->__isset.ex) {
     xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
@@ -732,7 +732,7 @@ uint32_t directory_lease_service_release_result::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t directory_lease_service_release_presult::read(Protocol_* iprot) {
+uint32_t directory_lease_service_remove_presult::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -957,19 +957,19 @@ void directory_lease_serviceClientT<Protocol_>::recv_renew_lease(rpc_keep_alive_
 }
 
 template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::release(const std::string& path, const rpc_release_mode mode)
+void directory_lease_serviceClientT<Protocol_>::remove(const std::string& path, const rpc_remove_mode mode)
 {
-  send_release(path, mode);
-  recv_release();
+  send_remove(path, mode);
+  recv_remove();
 }
 
 template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::send_release(const std::string& path, const rpc_release_mode mode)
+void directory_lease_serviceClientT<Protocol_>::send_remove(const std::string& path, const rpc_remove_mode mode)
 {
   int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("release", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("remove", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  directory_lease_service_release_pargs args;
+  directory_lease_service_remove_pargs args;
   args.path = &path;
   args.mode = &mode;
   args.write(this->oprot_);
@@ -980,7 +980,7 @@ void directory_lease_serviceClientT<Protocol_>::send_release(const std::string& 
 }
 
 template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::recv_release()
+void directory_lease_serviceClientT<Protocol_>::recv_remove()
 {
 
   int32_t rseqid = 0;
@@ -1000,12 +1000,12 @@ void directory_lease_serviceClientT<Protocol_>::recv_release()
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("release") != 0) {
+  if (fname.compare("remove") != 0) {
     this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  directory_lease_service_release_presult result;
+  directory_lease_service_remove_presult result;
   result.read(this->iprot_);
   this->iprot_->readMessageEnd();
   this->iprot_->getTransport()->readEnd();
@@ -1401,40 +1401,40 @@ void directory_lease_serviceProcessorT<Protocol_>::process_renew_lease(int32_t s
 }
 
 template <class Protocol_>
-void directory_lease_serviceProcessorT<Protocol_>::process_release(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void directory_lease_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("directory_lease_service.release", callContext);
+    ctx = this->eventHandler_->getContext("directory_lease_service.remove", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_lease_service.release");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_lease_service.remove");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "directory_lease_service.release");
+    this->eventHandler_->preRead(ctx, "directory_lease_service.remove");
   }
 
-  directory_lease_service_release_args args;
+  directory_lease_service_remove_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "directory_lease_service.release", bytes);
+    this->eventHandler_->postRead(ctx, "directory_lease_service.remove", bytes);
   }
 
-  directory_lease_service_release_result result;
+  directory_lease_service_remove_result result;
   try {
-    iface_->release(args.path, args.mode);
+    iface_->remove(args.path, args.mode);
   } catch (directory_lease_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "directory_lease_service.release");
+      this->eventHandler_->handlerError(ctx, "directory_lease_service.remove");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("release", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("remove", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -1443,55 +1443,55 @@ void directory_lease_serviceProcessorT<Protocol_>::process_release(int32_t seqid
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "directory_lease_service.release");
+    this->eventHandler_->preWrite(ctx, "directory_lease_service.remove");
   }
 
-  oprot->writeMessageBegin("release", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("remove", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "directory_lease_service.release", bytes);
+    this->eventHandler_->postWrite(ctx, "directory_lease_service.remove", bytes);
   }
 }
 
 template <class Protocol_>
-void directory_lease_serviceProcessorT<Protocol_>::process_release(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+void directory_lease_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("directory_lease_service.release", callContext);
+    ctx = this->eventHandler_->getContext("directory_lease_service.remove", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_lease_service.release");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_lease_service.remove");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "directory_lease_service.release");
+    this->eventHandler_->preRead(ctx, "directory_lease_service.remove");
   }
 
-  directory_lease_service_release_args args;
+  directory_lease_service_remove_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "directory_lease_service.release", bytes);
+    this->eventHandler_->postRead(ctx, "directory_lease_service.remove", bytes);
   }
 
-  directory_lease_service_release_result result;
+  directory_lease_service_remove_result result;
   try {
-    iface_->release(args.path, args.mode);
+    iface_->remove(args.path, args.mode);
   } catch (directory_lease_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "directory_lease_service.release");
+      this->eventHandler_->handlerError(ctx, "directory_lease_service.remove");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("release", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("remove", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -1500,17 +1500,17 @@ void directory_lease_serviceProcessorT<Protocol_>::process_release(int32_t seqid
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "directory_lease_service.release");
+    this->eventHandler_->preWrite(ctx, "directory_lease_service.remove");
   }
 
-  oprot->writeMessageBegin("release", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("remove", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "directory_lease_service.release", bytes);
+    this->eventHandler_->postWrite(ctx, "directory_lease_service.remove", bytes);
   }
 }
 
@@ -1785,20 +1785,20 @@ void directory_lease_serviceConcurrentClientT<Protocol_>::recv_renew_lease(rpc_k
 }
 
 template <class Protocol_>
-void directory_lease_serviceConcurrentClientT<Protocol_>::release(const std::string& path, const rpc_release_mode mode)
+void directory_lease_serviceConcurrentClientT<Protocol_>::remove(const std::string& path, const rpc_remove_mode mode)
 {
-  int32_t seqid = send_release(path, mode);
-  recv_release(seqid);
+  int32_t seqid = send_remove(path, mode);
+  recv_remove(seqid);
 }
 
 template <class Protocol_>
-int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_release(const std::string& path, const rpc_release_mode mode)
+int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_remove(const std::string& path, const rpc_remove_mode mode)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("release", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("remove", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  directory_lease_service_release_pargs args;
+  directory_lease_service_remove_pargs args;
   args.path = &path;
   args.mode = &mode;
   args.write(this->oprot_);
@@ -1812,7 +1812,7 @@ int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_release(const 
 }
 
 template <class Protocol_>
-void directory_lease_serviceConcurrentClientT<Protocol_>::recv_release(const int32_t seqid)
+void directory_lease_serviceConcurrentClientT<Protocol_>::recv_remove(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -1841,7 +1841,7 @@ void directory_lease_serviceConcurrentClientT<Protocol_>::recv_release(const int
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
       }
-      if (fname.compare("release") != 0) {
+      if (fname.compare("remove") != 0) {
         this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
@@ -1850,7 +1850,7 @@ void directory_lease_serviceConcurrentClientT<Protocol_>::recv_release(const int
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
-      directory_lease_service_release_presult result;
+      directory_lease_service_remove_presult result;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
       this->iprot_->getTransport()->readEnd();

@@ -35,7 +35,7 @@ class directory_client : public directory_service {
   bool is_regular_file(const std::string &path) override;
   bool is_directory(const std::string &path) override;
   storage_mode mode(const std::string &path) override;
-  std::vector<std::string> nodes(const std::string &path) override;
+  std::vector<std::string> data_blocks(const std::string &path) override;
 
  private:
   std::shared_ptr<apache::thrift::transport::TSocket> socket_;

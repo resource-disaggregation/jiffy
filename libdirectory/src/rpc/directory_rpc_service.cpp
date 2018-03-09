@@ -266,19 +266,19 @@ directory_rpc_service_mode_presult::~directory_rpc_service_mode_presult() throw(
 }
 
 
-directory_rpc_service_nodes_args::~directory_rpc_service_nodes_args() throw() {
+directory_rpc_service_data_blocks_args::~directory_rpc_service_data_blocks_args() throw() {
 }
 
 
-directory_rpc_service_nodes_pargs::~directory_rpc_service_nodes_pargs() throw() {
+directory_rpc_service_data_blocks_pargs::~directory_rpc_service_data_blocks_pargs() throw() {
 }
 
 
-directory_rpc_service_nodes_result::~directory_rpc_service_nodes_result() throw() {
+directory_rpc_service_data_blocks_result::~directory_rpc_service_data_blocks_result() throw() {
 }
 
 
-directory_rpc_service_nodes_presult::~directory_rpc_service_nodes_presult() throw() {
+directory_rpc_service_data_blocks_presult::~directory_rpc_service_data_blocks_presult() throw() {
 }
 
 

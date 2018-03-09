@@ -117,7 +117,7 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
   using ::apache::thrift::protocol::TProtocolException;
 
   bool isset_storage_mode = false;
-  bool isset_data_nodes = false;
+  bool isset_data_blocks = false;
 
   while (true)
   {
@@ -140,19 +140,19 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
       case 2:
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
-            this->data_nodes.clear();
+            this->data_blocks.clear();
             uint32_t _size4;
             ::apache::thrift::protocol::TType _etype7;
             xfer += iprot->readListBegin(_etype7, _size4);
-            this->data_nodes.resize(_size4);
+            this->data_blocks.resize(_size4);
             uint32_t _i8;
             for (_i8 = 0; _i8 < _size4; ++_i8)
             {
-              xfer += iprot->readString(this->data_nodes[_i8]);
+              xfer += iprot->readString(this->data_blocks[_i8]);
             }
             xfer += iprot->readListEnd();
           }
-          isset_data_nodes = true;
+          isset_data_blocks = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -168,7 +168,7 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
 
   if (!isset_storage_mode)
     throw TProtocolException(TProtocolException::INVALID_DATA);
-  if (!isset_data_nodes)
+  if (!isset_data_blocks)
     throw TProtocolException(TProtocolException::INVALID_DATA);
   return xfer;
 }
@@ -183,11 +183,11 @@ uint32_t rpc_data_status::write(Protocol_* oprot) const {
   xfer += oprot->writeI32((int32_t)this->storage_mode);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("data_nodes", ::apache::thrift::protocol::T_LIST, 2);
+  xfer += oprot->writeFieldBegin("data_blocks", ::apache::thrift::protocol::T_LIST, 2);
   {
-    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->data_nodes.size()));
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->data_blocks.size()));
     std::vector<std::string> ::const_iterator _iter9;
-    for (_iter9 = this->data_nodes.begin(); _iter9 != this->data_nodes.end(); ++_iter9)
+    for (_iter9 = this->data_blocks.begin(); _iter9 != this->data_blocks.end(); ++_iter9)
     {
       xfer += oprot->writeString((*_iter9));
     }

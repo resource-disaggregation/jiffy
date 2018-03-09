@@ -192,7 +192,7 @@ class data_status {
   data_status() : mode_(storage_mode::in_memory) {}
   data_status(storage_mode mode, std::vector<std::string> nodes) : mode_(mode), data_nodes_(std::move(nodes)) {}
 
-  const std::vector<std::string> &data_nodes() const {
+  const std::vector<std::string> &data_blocks() const {
     return data_nodes_;
   }
 
@@ -204,19 +204,19 @@ class data_status {
     mode_ = mode;
   }
 
-  void clear_data_nodes() {
+  void remove_all_data_blocks() {
     data_nodes_.clear();
   }
 
-  void add_data_node(const std::string &node) {
+  void add_data_block(const std::string &node) {
     data_nodes_.push_back(node);
   }
 
-  void remove_data_node(std::size_t i) {
+  void remove_data_block(std::size_t i) {
     data_nodes_.erase(data_nodes_.begin() + i);
   }
 
-  void remove_data_node(const std::string &node) {
+  void remove_data_block(const std::string &node) {
     data_nodes_.erase(std::remove(data_nodes_.begin(), data_nodes_.end(), node), data_nodes_.end());
   }
 
@@ -258,7 +258,7 @@ class directory_service {
 
   virtual storage_mode mode(const std::string &path) = 0;
 
-  virtual std::vector<std::string> nodes(const std::string& path) = 0;
+  virtual std::vector<std::string> data_blocks(const std::string &path) = 0;
 
   // Check file type
   virtual bool is_regular_file(const std::string &path) = 0;
@@ -277,13 +277,13 @@ class directory_management_service {
 
   virtual void mode(const std::string &path, const storage_mode& mode) = 0;
 
-  virtual void add_node(const std::string &path, const std::string& node) = 0;
+  virtual void add_data_block(const std::string &path, const std::string &node) = 0;
 
-  virtual void remove_node(const std::string &path, std::size_t i) = 0;
+  virtual void remove_data_block(const std::string &path, std::size_t i) = 0;
 
-  virtual void remove_node(const std::string &path, const std::string& node) = 0;
+  virtual void remove_data_block(const std::string &path, const std::string &node) = 0;
 
-  virtual void clear_nodes(const std::string &path) = 0;
+  virtual void remove_all_data_blocks(const std::string &path) = 0;
 };
 
 }

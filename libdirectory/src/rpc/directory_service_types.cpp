@@ -81,19 +81,19 @@ std::ostream& operator<<(std::ostream& out, const rpc_storage_mode val) {
   return out;
 }
 
-int _krpc_release_modeValues[] = {
+int _krpc_remove_modeValues[] = {
   rpc_delete,
   rpc_flush
 };
-const char* _krpc_release_modeNames[] = {
+const char* _krpc_remove_modeNames[] = {
   "rpc_delete",
   "rpc_flush"
 };
-const std::map<int, const char*> _rpc_release_mode_VALUES_TO_NAMES(::apache::thrift::TEnumIterator(2, _krpc_release_modeValues, _krpc_release_modeNames), ::apache::thrift::TEnumIterator(-1, NULL, NULL));
+const std::map<int, const char*> _rpc_remove_mode_VALUES_TO_NAMES(::apache::thrift::TEnumIterator(2, _krpc_remove_modeValues, _krpc_remove_modeNames), ::apache::thrift::TEnumIterator(-1, NULL, NULL));
 
-std::ostream& operator<<(std::ostream& out, const rpc_release_mode val) {
-  std::map<int, const char*>::const_iterator it = _rpc_release_mode_VALUES_TO_NAMES.find(val);
-  if (it != _rpc_release_mode_VALUES_TO_NAMES.end()) {
+std::ostream& operator<<(std::ostream& out, const rpc_remove_mode val) {
+  std::map<int, const char*>::const_iterator it = _rpc_remove_mode_VALUES_TO_NAMES.find(val);
+  if (it != _rpc_remove_mode_VALUES_TO_NAMES.end()) {
     out << it->second;
   } else {
     out << static_cast<int>(val);
@@ -160,8 +160,8 @@ void rpc_data_status::__set_storage_mode(const rpc_storage_mode val) {
   this->storage_mode = val;
 }
 
-void rpc_data_status::__set_data_nodes(const std::vector<std::string> & val) {
-  this->data_nodes = val;
+void rpc_data_status::__set_data_blocks(const std::vector<std::string> & val) {
+  this->data_blocks = val;
 }
 std::ostream& operator<<(std::ostream& out, const rpc_data_status& obj)
 {
@@ -173,23 +173,23 @@ std::ostream& operator<<(std::ostream& out, const rpc_data_status& obj)
 void swap(rpc_data_status &a, rpc_data_status &b) {
   using ::std::swap;
   swap(a.storage_mode, b.storage_mode);
-  swap(a.data_nodes, b.data_nodes);
+  swap(a.data_blocks, b.data_blocks);
 }
 
 rpc_data_status::rpc_data_status(const rpc_data_status& other10) {
   storage_mode = other10.storage_mode;
-  data_nodes = other10.data_nodes;
+  data_blocks = other10.data_blocks;
 }
 rpc_data_status& rpc_data_status::operator=(const rpc_data_status& other11) {
   storage_mode = other11.storage_mode;
-  data_nodes = other11.data_nodes;
+  data_blocks = other11.data_blocks;
   return *this;
 }
 void rpc_data_status::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
   out << "rpc_data_status(";
   out << "storage_mode=" << to_string(storage_mode);
-  out << ", " << "data_nodes=" << to_string(data_nodes);
+  out << ", " << "data_blocks=" << to_string(data_blocks);
   out << ")";
 }
 

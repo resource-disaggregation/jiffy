@@ -51,14 +51,14 @@ extern const std::map<int, const char*> _rpc_storage_mode_VALUES_TO_NAMES;
 
 std::ostream& operator<<(std::ostream& out, const rpc_storage_mode val);
 
-enum rpc_release_mode {
+enum rpc_remove_mode {
   rpc_delete = 0,
   rpc_flush = 1
 };
 
-extern const std::map<int, const char*> _rpc_release_mode_VALUES_TO_NAMES;
+extern const std::map<int, const char*> _rpc_remove_mode_VALUES_TO_NAMES;
 
-std::ostream& operator<<(std::ostream& out, const rpc_release_mode val);
+std::ostream& operator<<(std::ostream& out, const rpc_remove_mode val);
 
 typedef int32_t rpc_perms;
 
@@ -135,17 +135,17 @@ class rpc_data_status {
 
   virtual ~rpc_data_status() throw();
   rpc_storage_mode storage_mode;
-  std::vector<std::string>  data_nodes;
+  std::vector<std::string>  data_blocks;
 
   void __set_storage_mode(const rpc_storage_mode val);
 
-  void __set_data_nodes(const std::vector<std::string> & val);
+  void __set_data_blocks(const std::vector<std::string> & val);
 
   bool operator == (const rpc_data_status & rhs) const
   {
     if (!(storage_mode == rhs.storage_mode))
       return false;
-    if (!(data_nodes == rhs.data_nodes))
+    if (!(data_blocks == rhs.data_blocks))
       return false;
     return true;
   }

@@ -229,21 +229,71 @@ TEST_CASE("recursive_directory_entries_test", "[file][dir]") {
   REQUIRE(entries.at(3).last_write_time() <= t3);
 }
 
-TEST_CASE("dstatus_test", "[file][dir]") {
+TEST_CASE("dstatus_test", "[file]") {
   directory_service_shard shard;
   REQUIRE_NOTHROW(shard.create_file("/sandbox/file.txt"));
   REQUIRE_THROWS_AS(shard.dstatus("/sandbox"), directory_service_exception);
   REQUIRE(shard.dstatus("/sandbox/file.txt").mode() == storage_mode::in_memory);
-  REQUIRE(shard.dstatus("/sandbox/file.txt").data_nodes().empty());
+  REQUIRE(shard.dstatus("/sandbox/file.txt").data_blocks().empty());
 
   data_status status(storage_mode::in_memory_grace, {"a", "b", "c", "d"});
   REQUIRE_NOTHROW(shard.dstatus("/sandbox/file.txt", status));
   REQUIRE(shard.dstatus("/sandbox/file.txt").mode() == storage_mode::in_memory_grace);
-  REQUIRE(shard.dstatus("/sandbox/file.txt").data_nodes().size() == 4);
-  REQUIRE(shard.dstatus("/sandbox/file.txt").data_nodes().at(0) == "a");
-  REQUIRE(shard.dstatus("/sandbox/file.txt").data_nodes().at(1) == "b");
-  REQUIRE(shard.dstatus("/sandbox/file.txt").data_nodes().at(2) == "c");
-  REQUIRE(shard.dstatus("/sandbox/file.txt").data_nodes().at(3) == "d");
+  REQUIRE(shard.dstatus("/sandbox/file.txt").data_blocks().size() == 4);
+  REQUIRE(shard.dstatus("/sandbox/file.txt").data_blocks().at(0) == "a");
+  REQUIRE(shard.dstatus("/sandbox/file.txt").data_blocks().at(1) == "b");
+  REQUIRE(shard.dstatus("/sandbox/file.txt").data_blocks().at(2) == "c");
+  REQUIRE(shard.dstatus("/sandbox/file.txt").data_blocks().at(3) == "d");
+}
+
+TEST_CASE("storage_mode_test", "[file]") {
+  directory_service_shard shard;
+
+  REQUIRE_NOTHROW(shard.create_file("/sandbox/file.txt"));
+  REQUIRE_THROWS_AS(shard.mode("/sandbox"), directory_service_exception);
+  REQUIRE(shard.mode("/sandbox/file.txt") == storage_mode::in_memory);
+
+  REQUIRE_NOTHROW(shard.mode("/sandbox/file.txt", storage_mode::in_memory_grace));
+  REQUIRE(shard.mode("/sandbox/file.txt") == storage_mode::in_memory_grace);
+
+  REQUIRE_NOTHROW(shard.mode("/sandbox/file.txt", storage_mode::flushing));
+  REQUIRE(shard.mode("/sandbox/file.txt") == storage_mode::flushing);
+
+  REQUIRE_NOTHROW(shard.mode("/sandbox/file.txt", storage_mode::on_disk));
+  REQUIRE(shard.mode("/sandbox/file.txt") == storage_mode::on_disk);
+}
+
+TEST_CASE("blocks_test", "[file]") {
+  directory_service_shard shard;
+
+  REQUIRE_NOTHROW(shard.create_file("/sandbox/file.txt"));
+  REQUIRE_THROWS_AS(shard.data_blocks("/sandbox"), directory_service_exception);
+  auto blocks = shard.data_blocks("/sandbox/file.txt");
+  REQUIRE(blocks.empty());
+
+//  REQUIRE_NOTHROW(shard.add_data_block("/sandbox/file.txt", "a"));
+//  REQUIRE_NOTHROW(shard.add_data_block("/sandbox/file.txt", "b"));
+//  REQUIRE_NOTHROW(shard.add_data_block("/sandbox/file.txt", "c"));
+//  REQUIRE_NOTHROW(shard.add_data_block("/sandbox/file.txt", "d"));
+//  REQUIRE(shard.data_blocks("/sandbox/file.txt").size() == 4);
+//  REQUIRE(shard.data_blocks("/sandbox/file.txt").at(0) == "a");
+//  REQUIRE(shard.data_blocks("/sandbox/file.txt").at(1) == "b");
+//  REQUIRE(shard.data_blocks("/sandbox/file.txt").at(2) == "c");
+//  REQUIRE(shard.data_blocks("/sandbox/file.txt").at(3) == "d");
+//
+//  REQUIRE_NOTHROW(shard.remove_data_block("/sandbox/file.txt", 1));
+//  REQUIRE(shard.data_blocks("/sandbox/file.txt").size() == 3);
+//  REQUIRE(shard.data_blocks("/sandbox/file.txt").at(0) == "a");
+//  REQUIRE(shard.data_blocks("/sandbox/file.txt").at(1) == "c");
+//  REQUIRE(shard.data_blocks("/sandbox/file.txt").at(2) == "d");
+//
+//  REQUIRE_NOTHROW(shard.remove_data_block("/sandbox/file.txt", "c"));
+//  REQUIRE(shard.data_blocks("/sandbox/file.txt").size() == 2);
+//  REQUIRE(shard.data_blocks("/sandbox/file.txt").at(0) == "a");
+//  REQUIRE(shard.data_blocks("/sandbox/file.txt").at(1) == "d");
+//
+//  REQUIRE_NOTHROW(shard.remove_all_data_blocks("/sandbox/file.txt"));
+//  REQUIRE(shard.data_blocks("/sandbox/file.txt").empty());
 }
 
 TEST_CASE("file_type_test", "[file][dir]") {

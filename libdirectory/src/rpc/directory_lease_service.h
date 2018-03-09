@@ -24,7 +24,7 @@ class directory_lease_serviceIf {
   virtual void create(const std::string& path) = 0;
   virtual void load(const std::string& persistent_path, const std::string& memory_path) = 0;
   virtual void renew_lease(rpc_keep_alive_ack& _return, const rpc_keep_alive& msg) = 0;
-  virtual void release(const std::string& path, const rpc_release_mode mode) = 0;
+  virtual void remove(const std::string& path, const rpc_remove_mode mode) = 0;
 };
 
 class directory_lease_serviceIfFactory {
@@ -63,7 +63,7 @@ class directory_lease_serviceNull : virtual public directory_lease_serviceIf {
   void renew_lease(rpc_keep_alive_ack& /* _return */, const rpc_keep_alive& /* msg */) {
     return;
   }
-  void release(const std::string& /* path */, const rpc_release_mode /* mode */) {
+  void remove(const std::string& /* path */, const rpc_remove_mode /* mode */) {
     return;
   }
 };
@@ -413,31 +413,31 @@ class directory_lease_service_renew_lease_presult {
 
 };
 
-typedef struct _directory_lease_service_release_args__isset {
-  _directory_lease_service_release_args__isset() : path(false), mode(false) {}
+typedef struct _directory_lease_service_remove_args__isset {
+  _directory_lease_service_remove_args__isset() : path(false), mode(false) {}
   bool path :1;
   bool mode :1;
-} _directory_lease_service_release_args__isset;
+} _directory_lease_service_remove_args__isset;
 
-class directory_lease_service_release_args {
+class directory_lease_service_remove_args {
  public:
 
-  directory_lease_service_release_args(const directory_lease_service_release_args&);
-  directory_lease_service_release_args& operator=(const directory_lease_service_release_args&);
-  directory_lease_service_release_args() : path(), mode((rpc_release_mode)0) {
+  directory_lease_service_remove_args(const directory_lease_service_remove_args&);
+  directory_lease_service_remove_args& operator=(const directory_lease_service_remove_args&);
+  directory_lease_service_remove_args() : path(), mode((rpc_remove_mode)0) {
   }
 
-  virtual ~directory_lease_service_release_args() throw();
+  virtual ~directory_lease_service_remove_args() throw();
   std::string path;
-  rpc_release_mode mode;
+  rpc_remove_mode mode;
 
-  _directory_lease_service_release_args__isset __isset;
+  _directory_lease_service_remove_args__isset __isset;
 
   void __set_path(const std::string& val);
 
-  void __set_mode(const rpc_release_mode val);
+  void __set_mode(const rpc_remove_mode val);
 
-  bool operator == (const directory_lease_service_release_args & rhs) const
+  bool operator == (const directory_lease_service_remove_args & rhs) const
   {
     if (!(path == rhs.path))
       return false;
@@ -445,11 +445,11 @@ class directory_lease_service_release_args {
       return false;
     return true;
   }
-  bool operator != (const directory_lease_service_release_args &rhs) const {
+  bool operator != (const directory_lease_service_remove_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_lease_service_release_args & ) const;
+  bool operator < (const directory_lease_service_remove_args & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -459,50 +459,50 @@ class directory_lease_service_release_args {
 };
 
 
-class directory_lease_service_release_pargs {
+class directory_lease_service_remove_pargs {
  public:
 
 
-  virtual ~directory_lease_service_release_pargs() throw();
+  virtual ~directory_lease_service_remove_pargs() throw();
   const std::string* path;
-  const rpc_release_mode* mode;
+  const rpc_remove_mode* mode;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
 
 };
 
-typedef struct _directory_lease_service_release_result__isset {
-  _directory_lease_service_release_result__isset() : ex(false) {}
+typedef struct _directory_lease_service_remove_result__isset {
+  _directory_lease_service_remove_result__isset() : ex(false) {}
   bool ex :1;
-} _directory_lease_service_release_result__isset;
+} _directory_lease_service_remove_result__isset;
 
-class directory_lease_service_release_result {
+class directory_lease_service_remove_result {
  public:
 
-  directory_lease_service_release_result(const directory_lease_service_release_result&);
-  directory_lease_service_release_result& operator=(const directory_lease_service_release_result&);
-  directory_lease_service_release_result() {
+  directory_lease_service_remove_result(const directory_lease_service_remove_result&);
+  directory_lease_service_remove_result& operator=(const directory_lease_service_remove_result&);
+  directory_lease_service_remove_result() {
   }
 
-  virtual ~directory_lease_service_release_result() throw();
+  virtual ~directory_lease_service_remove_result() throw();
   directory_lease_service_exception ex;
 
-  _directory_lease_service_release_result__isset __isset;
+  _directory_lease_service_remove_result__isset __isset;
 
   void __set_ex(const directory_lease_service_exception& val);
 
-  bool operator == (const directory_lease_service_release_result & rhs) const
+  bool operator == (const directory_lease_service_remove_result & rhs) const
   {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_lease_service_release_result &rhs) const {
+  bool operator != (const directory_lease_service_remove_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_lease_service_release_result & ) const;
+  bool operator < (const directory_lease_service_remove_result & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -511,19 +511,19 @@ class directory_lease_service_release_result {
 
 };
 
-typedef struct _directory_lease_service_release_presult__isset {
-  _directory_lease_service_release_presult__isset() : ex(false) {}
+typedef struct _directory_lease_service_remove_presult__isset {
+  _directory_lease_service_remove_presult__isset() : ex(false) {}
   bool ex :1;
-} _directory_lease_service_release_presult__isset;
+} _directory_lease_service_remove_presult__isset;
 
-class directory_lease_service_release_presult {
+class directory_lease_service_remove_presult {
  public:
 
 
-  virtual ~directory_lease_service_release_presult() throw();
+  virtual ~directory_lease_service_remove_presult() throw();
   directory_lease_service_exception ex;
 
-  _directory_lease_service_release_presult__isset __isset;
+  _directory_lease_service_remove_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -565,9 +565,9 @@ class directory_lease_serviceClientT : virtual public directory_lease_serviceIf 
   void renew_lease(rpc_keep_alive_ack& _return, const rpc_keep_alive& msg);
   void send_renew_lease(const rpc_keep_alive& msg);
   void recv_renew_lease(rpc_keep_alive_ack& _return);
-  void release(const std::string& path, const rpc_release_mode mode);
-  void send_release(const std::string& path, const rpc_release_mode mode);
-  void recv_release();
+  void remove(const std::string& path, const rpc_remove_mode mode);
+  void send_remove(const std::string& path, const rpc_remove_mode mode);
+  void recv_remove();
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
@@ -602,8 +602,8 @@ class directory_lease_serviceProcessorT : public ::apache::thrift::TDispatchProc
   void process_load(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_renew_lease(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_renew_lease(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_release(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_release(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_remove(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_remove(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
  public:
   directory_lease_serviceProcessorT(::apache::thrift::stdcxx::shared_ptr<directory_lease_serviceIf> iface) :
     iface_(iface) {
@@ -616,9 +616,9 @@ class directory_lease_serviceProcessorT : public ::apache::thrift::TDispatchProc
     processMap_["renew_lease"] = ProcessFunctions(
       &directory_lease_serviceProcessorT::process_renew_lease,
       &directory_lease_serviceProcessorT::process_renew_lease);
-    processMap_["release"] = ProcessFunctions(
-      &directory_lease_serviceProcessorT::process_release,
-      &directory_lease_serviceProcessorT::process_release);
+    processMap_["remove"] = ProcessFunctions(
+      &directory_lease_serviceProcessorT::process_remove,
+      &directory_lease_serviceProcessorT::process_remove);
   }
 
   virtual ~directory_lease_serviceProcessorT() {}
@@ -680,13 +680,13 @@ class directory_lease_serviceMultiface : virtual public directory_lease_serviceI
     return;
   }
 
-  void release(const std::string& path, const rpc_release_mode mode) {
+  void remove(const std::string& path, const rpc_remove_mode mode) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->release(path, mode);
+      ifaces_[i]->remove(path, mode);
     }
-    ifaces_[i]->release(path, mode);
+    ifaces_[i]->remove(path, mode);
   }
 
 };
@@ -729,9 +729,9 @@ class directory_lease_serviceConcurrentClientT : virtual public directory_lease_
   void renew_lease(rpc_keep_alive_ack& _return, const rpc_keep_alive& msg);
   int32_t send_renew_lease(const rpc_keep_alive& msg);
   void recv_renew_lease(rpc_keep_alive_ack& _return, const int32_t seqid);
-  void release(const std::string& path, const rpc_release_mode mode);
-  int32_t send_release(const std::string& path, const rpc_release_mode mode);
-  void recv_release(const int32_t seqid);
+  void remove(const std::string& path, const rpc_remove_mode mode);
+  int32_t send_remove(const std::string& path, const rpc_remove_mode mode);
+  void recv_remove(const int32_t seqid);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;

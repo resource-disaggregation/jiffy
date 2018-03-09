@@ -24,7 +24,11 @@ add_library(directory STATIC
         src/rpc/directory_client.cpp
         src/rpc/directory_client.h
         src/rpc/directory_lease_service_handler.cpp
-        src/rpc/directory_lease_service_handler.h src/rpc/directory_lease_service_factory.cpp src/rpc/directory_lease_service_factory.h src/rpc/directory_lease_server.cpp src/rpc/directory_lease_server.h)
+        src/rpc/directory_lease_service_handler.h
+        src/rpc/directory_lease_service_factory.cpp
+        src/rpc/directory_lease_service_factory.h
+        src/rpc/directory_lease_server.cpp
+        src/rpc/directory_lease_server.h)
 if (GENERATE_THRIFT)
   add_dependencies(directory thriftgen_directory)
 endif ()
@@ -37,13 +41,17 @@ if (BUILD_TESTS)
   include_directories(${Boost_INCLUDE_DIRS})
 
   add_executable(ds_shard_test test/directory_service_shard_test.cpp)
-  if (NOT USE_SYSTEM_CATCH)
-    add_dependencies(ds_shard_test catch)
-  endif ()
   target_link_libraries(ds_shard_test directory)
-  set_target_properties(ds_shard_test PROPERTIES LINKER_LANGUAGE CXX)
 
   add_executable(ds_rpc_test test/directory_rpc_service_handler_test.cpp)
-  add_dependencies(ds_rpc_test catch)
   target_link_libraries(ds_rpc_test directory)
+
+  add_executable(ds_lease_test test/directory_lease_service_handler_test.cpp)
+  target_link_libraries(ds_lease_test directory)
+
+  if (NOT USE_SYSTEM_CATCH)
+    add_dependencies(ds_shard_test catch)
+    add_dependencies(ds_rpc_test catch)
+    add_dependencies(ds_lease_test catch)
+  endif ()
 endif ()

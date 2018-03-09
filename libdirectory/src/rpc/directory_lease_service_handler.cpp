@@ -18,7 +18,7 @@ void directory_lease_service_handler::renew_lease(rpc_keep_alive_ack &_return, c
 
 }
 
-void directory_lease_service_handler::release(const std::string &path, const rpc_release_mode mode) {
+void directory_lease_service_handler::remove(const std::string &path, rpc_remove_mode mode) {
 
 }
 

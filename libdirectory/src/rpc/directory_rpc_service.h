@@ -37,7 +37,7 @@ class directory_rpc_serviceIf {
   virtual void recursive_directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path) = 0;
   virtual void dstatus(rpc_data_status& _return, const std::string& path) = 0;
   virtual rpc_storage_mode mode(const std::string& path) = 0;
-  virtual void nodes(std::vector<std::string> & _return, const std::string& path) = 0;
+  virtual void data_blocks(std::vector<std::string> & _return, const std::string& path) = 0;
   virtual bool is_regular_file(const std::string& path) = 0;
   virtual bool is_directory(const std::string& path) = 0;
 };
@@ -122,7 +122,7 @@ class directory_rpc_serviceNull : virtual public directory_rpc_serviceIf {
     rpc_storage_mode _return = (rpc_storage_mode)0;
     return _return;
   }
-  void nodes(std::vector<std::string> & /* _return */, const std::string& /* path */) {
+  void data_blocks(std::vector<std::string> & /* _return */, const std::string& /* path */) {
     return;
   }
   bool is_regular_file(const std::string& /* path */) {
@@ -1988,37 +1988,37 @@ class directory_rpc_service_mode_presult {
 
 };
 
-typedef struct _directory_rpc_service_nodes_args__isset {
-  _directory_rpc_service_nodes_args__isset() : path(false) {}
+typedef struct _directory_rpc_service_data_blocks_args__isset {
+  _directory_rpc_service_data_blocks_args__isset() : path(false) {}
   bool path :1;
-} _directory_rpc_service_nodes_args__isset;
+} _directory_rpc_service_data_blocks_args__isset;
 
-class directory_rpc_service_nodes_args {
+class directory_rpc_service_data_blocks_args {
  public:
 
-  directory_rpc_service_nodes_args(const directory_rpc_service_nodes_args&);
-  directory_rpc_service_nodes_args& operator=(const directory_rpc_service_nodes_args&);
-  directory_rpc_service_nodes_args() : path() {
+  directory_rpc_service_data_blocks_args(const directory_rpc_service_data_blocks_args&);
+  directory_rpc_service_data_blocks_args& operator=(const directory_rpc_service_data_blocks_args&);
+  directory_rpc_service_data_blocks_args() : path() {
   }
 
-  virtual ~directory_rpc_service_nodes_args() throw();
+  virtual ~directory_rpc_service_data_blocks_args() throw();
   std::string path;
 
-  _directory_rpc_service_nodes_args__isset __isset;
+  _directory_rpc_service_data_blocks_args__isset __isset;
 
   void __set_path(const std::string& val);
 
-  bool operator == (const directory_rpc_service_nodes_args & rhs) const
+  bool operator == (const directory_rpc_service_data_blocks_args & rhs) const
   {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_nodes_args &rhs) const {
+  bool operator != (const directory_rpc_service_data_blocks_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_nodes_args & ) const;
+  bool operator < (const directory_rpc_service_data_blocks_args & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -2028,11 +2028,11 @@ class directory_rpc_service_nodes_args {
 };
 
 
-class directory_rpc_service_nodes_pargs {
+class directory_rpc_service_data_blocks_pargs {
  public:
 
 
-  virtual ~directory_rpc_service_nodes_pargs() throw();
+  virtual ~directory_rpc_service_data_blocks_pargs() throw();
   const std::string* path;
 
   template <class Protocol_>
@@ -2040,31 +2040,31 @@ class directory_rpc_service_nodes_pargs {
 
 };
 
-typedef struct _directory_rpc_service_nodes_result__isset {
-  _directory_rpc_service_nodes_result__isset() : success(false), ex(false) {}
+typedef struct _directory_rpc_service_data_blocks_result__isset {
+  _directory_rpc_service_data_blocks_result__isset() : success(false), ex(false) {}
   bool success :1;
   bool ex :1;
-} _directory_rpc_service_nodes_result__isset;
+} _directory_rpc_service_data_blocks_result__isset;
 
-class directory_rpc_service_nodes_result {
+class directory_rpc_service_data_blocks_result {
  public:
 
-  directory_rpc_service_nodes_result(const directory_rpc_service_nodes_result&);
-  directory_rpc_service_nodes_result& operator=(const directory_rpc_service_nodes_result&);
-  directory_rpc_service_nodes_result() {
+  directory_rpc_service_data_blocks_result(const directory_rpc_service_data_blocks_result&);
+  directory_rpc_service_data_blocks_result& operator=(const directory_rpc_service_data_blocks_result&);
+  directory_rpc_service_data_blocks_result() {
   }
 
-  virtual ~directory_rpc_service_nodes_result() throw();
+  virtual ~directory_rpc_service_data_blocks_result() throw();
   std::vector<std::string>  success;
   directory_rpc_service_exception ex;
 
-  _directory_rpc_service_nodes_result__isset __isset;
+  _directory_rpc_service_data_blocks_result__isset __isset;
 
   void __set_success(const std::vector<std::string> & val);
 
   void __set_ex(const directory_rpc_service_exception& val);
 
-  bool operator == (const directory_rpc_service_nodes_result & rhs) const
+  bool operator == (const directory_rpc_service_data_blocks_result & rhs) const
   {
     if (!(success == rhs.success))
       return false;
@@ -2072,11 +2072,11 @@ class directory_rpc_service_nodes_result {
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_nodes_result &rhs) const {
+  bool operator != (const directory_rpc_service_data_blocks_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_nodes_result & ) const;
+  bool operator < (const directory_rpc_service_data_blocks_result & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -2085,21 +2085,21 @@ class directory_rpc_service_nodes_result {
 
 };
 
-typedef struct _directory_rpc_service_nodes_presult__isset {
-  _directory_rpc_service_nodes_presult__isset() : success(false), ex(false) {}
+typedef struct _directory_rpc_service_data_blocks_presult__isset {
+  _directory_rpc_service_data_blocks_presult__isset() : success(false), ex(false) {}
   bool success :1;
   bool ex :1;
-} _directory_rpc_service_nodes_presult__isset;
+} _directory_rpc_service_data_blocks_presult__isset;
 
-class directory_rpc_service_nodes_presult {
+class directory_rpc_service_data_blocks_presult {
  public:
 
 
-  virtual ~directory_rpc_service_nodes_presult() throw();
+  virtual ~directory_rpc_service_data_blocks_presult() throw();
   std::vector<std::string> * success;
   directory_rpc_service_exception ex;
 
-  _directory_rpc_service_nodes_presult__isset __isset;
+  _directory_rpc_service_data_blocks_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -2416,9 +2416,9 @@ class directory_rpc_serviceClientT : virtual public directory_rpc_serviceIf {
   rpc_storage_mode mode(const std::string& path);
   void send_mode(const std::string& path);
   rpc_storage_mode recv_mode();
-  void nodes(std::vector<std::string> & _return, const std::string& path);
-  void send_nodes(const std::string& path);
-  void recv_nodes(std::vector<std::string> & _return);
+  void data_blocks(std::vector<std::string> & _return, const std::string& path);
+  void send_data_blocks(const std::string& path);
+  void recv_data_blocks(std::vector<std::string> & _return);
   bool is_regular_file(const std::string& path);
   void send_is_regular_file(const std::string& path);
   bool recv_is_regular_file();
@@ -2485,8 +2485,8 @@ class directory_rpc_serviceProcessorT : public ::apache::thrift::TDispatchProces
   void process_dstatus(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_mode(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_mode(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_nodes(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_nodes(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_data_blocks(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_data_blocks(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_is_regular_file(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_is_regular_file(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_is_directory(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -2542,9 +2542,9 @@ class directory_rpc_serviceProcessorT : public ::apache::thrift::TDispatchProces
     processMap_["mode"] = ProcessFunctions(
       &directory_rpc_serviceProcessorT::process_mode,
       &directory_rpc_serviceProcessorT::process_mode);
-    processMap_["nodes"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_nodes,
-      &directory_rpc_serviceProcessorT::process_nodes);
+    processMap_["data_blocks"] = ProcessFunctions(
+      &directory_rpc_serviceProcessorT::process_data_blocks,
+      &directory_rpc_serviceProcessorT::process_data_blocks);
     processMap_["is_regular_file"] = ProcessFunctions(
       &directory_rpc_serviceProcessorT::process_is_regular_file,
       &directory_rpc_serviceProcessorT::process_is_regular_file);
@@ -2732,13 +2732,13 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     return ifaces_[i]->mode(path);
   }
 
-  void nodes(std::vector<std::string> & _return, const std::string& path) {
+  void data_blocks(std::vector<std::string> & _return, const std::string& path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->nodes(_return, path);
+      ifaces_[i]->data_blocks(_return, path);
     }
-    ifaces_[i]->nodes(_return, path);
+    ifaces_[i]->data_blocks(_return, path);
     return;
   }
 
@@ -2839,9 +2839,9 @@ class directory_rpc_serviceConcurrentClientT : virtual public directory_rpc_serv
   rpc_storage_mode mode(const std::string& path);
   int32_t send_mode(const std::string& path);
   rpc_storage_mode recv_mode(const int32_t seqid);
-  void nodes(std::vector<std::string> & _return, const std::string& path);
-  int32_t send_nodes(const std::string& path);
-  void recv_nodes(std::vector<std::string> & _return, const int32_t seqid);
+  void data_blocks(std::vector<std::string> & _return, const std::string& path);
+  int32_t send_data_blocks(const std::string& path);
+  void recv_data_blocks(std::vector<std::string> & _return, const int32_t seqid);
   bool is_regular_file(const std::string& path);
   int32_t send_is_regular_file(const std::string& path);
   bool recv_is_regular_file(const int32_t seqid);

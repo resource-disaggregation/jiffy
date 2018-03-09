@@ -166,29 +166,29 @@ class ds_file_node : public ds_node {
     dstatus_.mode(m);
   }
 
-  const std::vector<std::string> &nodes() const {
+  const std::vector<std::string> &data_blocks() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.data_nodes();
+    dstatus_.data_blocks();
   }
 
-  void add_node(const std::string &n) {
+  void add_data_block(const std::string &n) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.add_data_node(n);
+    dstatus_.add_data_block(n);
   }
 
-  void remove_node(std::size_t i) {
+  void remove_data_block(std::size_t i) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.remove_data_node(i);
+    dstatus_.remove_data_block(i);
   }
 
-  void remove_node(const std::string &n) {
+  void remove_data_block(const std::string &n) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.remove_data_node(n);
+    dstatus_.remove_data_block(n);
   }
 
-  void clear_nodes() {
+  void remove_all_data_blocks() {
     std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.clear_data_nodes();
+    dstatus_.remove_all_data_blocks();
   }
 
   std::size_t file_size() const override {
@@ -243,7 +243,7 @@ class directory_service_shard : public directory_service, public directory_manag
 
   storage_mode mode(const std::string &path) override;
 
-  std::vector<std::string> nodes(const std::string &path) override;
+  std::vector<std::string> data_blocks(const std::string &path) override;
 
   bool is_regular_file(const std::string &path) override;
   bool is_directory(const std::string &path) override;
@@ -256,13 +256,13 @@ class directory_service_shard : public directory_service, public directory_manag
 
   void mode(const std::string &path, const storage_mode &mode) override;
 
-  void add_node(const std::string &path, const std::string &node) override;
+  void add_data_block(const std::string &path, const std::string &node) override;
 
-  void remove_node(const std::string &path, std::size_t i) override;
+  void remove_data_block(const std::string &path, std::size_t i) override;
 
-  void remove_node(const std::string &path, const std::string &node) override;
+  void remove_data_block(const std::string &path, const std::string &node) override;
 
-  void clear_nodes(const std::string &path) override;
+  void remove_all_data_blocks(const std::string &path) override;
 
  private:
   std::shared_ptr<ds_node> get_node_unsafe(const std::string &path) const;

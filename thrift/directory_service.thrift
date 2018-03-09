@@ -30,7 +30,7 @@ struct rpc_file_status {
 
 struct rpc_data_status {
   1: required rpc_storage_mode storage_mode,
-  2: required list<string> data_nodes,
+  2: required list<string> data_blocks,
 }
 
 struct rpc_dir_entry {
@@ -88,7 +88,7 @@ service directory_rpc_service {
   rpc_storage_mode mode(1: string path)
     throws (1: directory_rpc_service_exception ex),
 
-  list<string> nodes(1: string path)
+  list<string> data_blocks(1: string path)
     throws (1: directory_rpc_service_exception ex),
 
   bool is_regular_file(1: string path)
@@ -108,7 +108,7 @@ struct rpc_keep_alive_ack {
   2: i64 tot_bytes,
 }
 
-enum rpc_release_mode {
+enum rpc_remove_mode {
   rpc_delete = 0,
   rpc_flush = 1,
 }
@@ -127,6 +127,6 @@ service directory_lease_service {
   rpc_keep_alive_ack renew_lease(1: rpc_keep_alive msg)
     throws (1: directory_lease_service_exception ex),
 
-  void release(1: string path, 2: rpc_release_mode mode)
+  void remove(1: string path, 2: rpc_remove_mode mode)
     throws (1: directory_lease_service_exception ex),
 }

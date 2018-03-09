@@ -142,7 +142,7 @@ void directory_rpc_service_handler::dstatus(rpc_data_status& _return, const std:
   try {
     auto s = shard_->dstatus(path);
     _return.storage_mode = (rpc_storage_mode) s.mode();
-    _return.data_nodes = s.data_nodes();
+    _return.data_blocks = s.data_blocks();
   } catch (directory_service_exception &e) {
     throw make_exception(e);
   }
@@ -156,9 +156,9 @@ rpc_storage_mode directory_rpc_service_handler::mode(const std::string &path) {
   }
 }
 
-void directory_rpc_service_handler::nodes(std::vector<std::string> &_return, const std::string &path) {
+void directory_rpc_service_handler::data_blocks(std::vector<std::string> &_return, const std::string &path) {
   try {
-    _return = shard_->nodes(path);
+    _return = shard_->data_blocks(path);
   } catch (directory_service_exception &e) {
     throw make_exception(e);
   }
