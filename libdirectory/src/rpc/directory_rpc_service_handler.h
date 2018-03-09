@@ -2,13 +2,13 @@
 #define ELASTICMEM_DIRECTORY_RPC_SERVICE_HANDLER_H
 
 #include "directory_rpc_service.h"
-#include "../shard/directory_service_shard.h"
+#include "../tree/directory_tree.h"
 
 namespace elasticmem {
 namespace directory {
 class directory_rpc_service_handler : public directory_rpc_serviceIf {
  public:
-  explicit directory_rpc_service_handler(std::shared_ptr<directory_service_shard> shard);
+  explicit directory_rpc_service_handler(std::shared_ptr<directory_tree> shard);
   void create_directory(const std::string &path) override;
   void create_directories(const std::string &path) override;
   void create_file(const std::string &path) override;
@@ -31,7 +31,7 @@ class directory_rpc_service_handler : public directory_rpc_serviceIf {
 
  private:
   directory_rpc_service_exception make_exception(directory_service_exception &ex) const;
-  std::shared_ptr<directory_service_shard> shard_;
+  std::shared_ptr<directory_tree> shard_;
 };
 }
 }

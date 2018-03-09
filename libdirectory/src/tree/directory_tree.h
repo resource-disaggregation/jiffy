@@ -168,7 +168,7 @@ class ds_file_node : public ds_node {
 
   const std::vector<std::string> &data_blocks() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.data_blocks();
+    return dstatus_.data_blocks();
   }
 
   void add_data_block(const std::string &n) {
@@ -209,9 +209,9 @@ class ds_file_node : public ds_node {
   std::atomic<std::size_t> size_;
 };
 
-class directory_service_shard : public directory_service, public directory_management_service {
+class directory_tree : public directory_service, public directory_management_service {
  public:
-  directory_service_shard();
+  directory_tree();
 
   void create_directory(const std::string &path) override;
   void create_directories(const std::string &path) override;

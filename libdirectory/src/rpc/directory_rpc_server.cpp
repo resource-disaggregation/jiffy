@@ -14,7 +14,7 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
-std::shared_ptr<TThreadedServer> directory_rpc_server::create(std::shared_ptr<directory_service_shard> shard,
+std::shared_ptr<TThreadedServer> directory_rpc_server::create(std::shared_ptr<directory_tree> shard,
                                                               const std::string &address,
                                                               int port) {
   std::shared_ptr<directory_rpc_serviceIfFactory> clone_factory(new directory_rpc_service_factory(std::move(shard)));

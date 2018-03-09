@@ -15,7 +15,7 @@ using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
 std::shared_ptr<apache::thrift::server::TThreadedServer> directory_lease_server::create(std::shared_ptr<
-    directory_service_shard> shard, const std::string &address, int port) {
+    directory_tree> shard, const std::string &address, int port) {
   std::shared_ptr<directory_lease_serviceIfFactory>
       clone_factory(new directory_lease_service_factory(std::move(shard)));
   std::shared_ptr<directory_lease_serviceProcessorFactory>

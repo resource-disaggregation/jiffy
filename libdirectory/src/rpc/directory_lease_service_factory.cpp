@@ -10,7 +10,7 @@ namespace directory {
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::transport;
 
-directory_lease_service_factory::directory_lease_service_factory(std::shared_ptr<directory_service_shard> shard)
+directory_lease_service_factory::directory_lease_service_factory(std::shared_ptr<directory_tree> shard)
     : shard_(std::move(shard)) {}
 
 directory_lease_serviceIf *directory_lease_service_factory::getHandler(const ::apache::thrift::TConnectionInfo &conn_info) {

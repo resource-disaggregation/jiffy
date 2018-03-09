@@ -1,4 +1,4 @@
-#include "directory_service_shard.h"
+#include "directory_tree.h"
 
 #include <experimental/filesystem>
 #include <iostream>
@@ -7,9 +7,9 @@
 namespace elasticmem {
 namespace directory {
 
-directory_service_shard::directory_service_shard() : root_(std::make_shared<ds_dir_node>(std::string("/"))) {}
+directory_tree::directory_tree() : root_(std::make_shared<ds_dir_node>(std::string("/"))) {}
 
-void directory_service_shard::create_directory(const std::string &path) {
+void directory_tree::create_directory(const std::string &path) {
   std::string ptemp = path;
   std::string directory_name = directory_utils::pop_path_element(ptemp);
   auto parent = get_node_as_dir(ptemp);
@@ -18,7 +18,7 @@ void directory_service_shard::create_directory(const std::string &path) {
   }
 }
 
-void directory_service_shard::create_directories(const std::string &path) {
+void directory_tree::create_directories(const std::string &path) {
   std::string p_so_far(root_->name());
   std::shared_ptr<ds_dir_node> dir_node = root_;
   for (auto &name: directory_utils::path_elements(path)) {
@@ -38,7 +38,7 @@ void directory_service_shard::create_directories(const std::string &path) {
   }
 }
 
-void directory_service_shard::create_file(const std::string &path) {
+void directory_tree::create_file(const std::string &path) {
   namespace fs = std::experimental::filesystem;
   fs::path p(path);
   std::string filename = p.filename();
@@ -60,23 +60,23 @@ void directory_service_shard::create_file(const std::string &path) {
   parent->add_child(child);
 }
 
-bool directory_service_shard::exists(const std::string &path) const {
+bool directory_tree::exists(const std::string &path) const {
   return get_node_unsafe(path) != nullptr;
 }
 
-std::size_t directory_service_shard::file_size(const std::string &path) const {
+std::size_t directory_tree::file_size(const std::string &path) const {
   return get_node(path)->file_size();
 }
 
-std::time_t directory_service_shard::last_write_time(const std::string &path) const {
+std::time_t directory_tree::last_write_time(const std::string &path) const {
   return get_node(path)->last_write_time();
 }
 
-perms directory_service_shard::permissions(const std::string &path) {
+perms directory_tree::permissions(const std::string &path) {
   return get_node(path)->permissions();
 }
 
-void directory_service_shard::permissions(const std::string &path, const perms &prms, perm_options opts) {
+void directory_tree::permissions(const std::string &path, const perms &prms, perm_options opts) {
   auto node = get_node(path);
   switch (opts) {
     case perm_options::replace: {
@@ -94,7 +94,7 @@ void directory_service_shard::permissions(const std::string &path, const perms &
   }
 }
 
-void directory_service_shard::remove(const std::string &path) {
+void directory_tree::remove(const std::string &path) {
   std::string ptemp = path;
   std::string child_name = directory_utils::pop_path_element(ptemp);
   auto parent = get_node_as_dir(ptemp);
@@ -108,7 +108,7 @@ void directory_service_shard::remove(const std::string &path) {
   parent->remove_child(child_name);
 }
 
-void directory_service_shard::remove_all(const std::string &path) {
+void directory_tree::remove_all(const std::string &path) {
   std::string ptemp = path;
   std::string child_name = directory_utils::pop_path_element(ptemp);
   auto parent = get_node_as_dir(ptemp);
@@ -119,7 +119,7 @@ void directory_service_shard::remove_all(const std::string &path) {
   parent->remove_child(child_name);
 }
 
-void directory_service_shard::rename(const std::string &old_path, const std::string &new_path) {
+void directory_tree::rename(const std::string &old_path, const std::string &new_path) {
   if (old_path == new_path)
     return;
   std::string ptemp = old_path;
@@ -144,75 +144,75 @@ void directory_service_shard::rename(const std::string &old_path, const std::str
   new_parent->add_child(old_child);
 }
 
-file_status directory_service_shard::status(const std::string &path) const {
+file_status directory_tree::status(const std::string &path) const {
   return get_node(path)->status();
 }
 
-std::vector<directory_entry> directory_service_shard::directory_entries(const std::string &path) {
+std::vector<directory_entry> directory_tree::directory_entries(const std::string &path) {
   return get_node_as_dir(path)->entries();
 }
 
-std::vector<directory_entry> directory_service_shard::recursive_directory_entries(const std::string &path) {
+std::vector<directory_entry> directory_tree::recursive_directory_entries(const std::string &path) {
   return get_node_as_dir(path)->recursive_entries();
 }
 
-data_status directory_service_shard::dstatus(const std::string &path) {
+data_status directory_tree::dstatus(const std::string &path) {
   return get_node_as_file(path)->dstatus();
 }
 
-storage_mode directory_service_shard::mode(const std::string &path) {
+storage_mode directory_tree::mode(const std::string &path) {
   return get_node_as_file(path)->mode();
 }
 
-std::vector<std::string> directory_service_shard::data_blocks(const std::string &path) {
+std::vector<std::string> directory_tree::data_blocks(const std::string &path) {
   return get_node_as_file(path)->data_blocks();
 }
 
-bool directory_service_shard::is_regular_file(const std::string &path) {
+bool directory_tree::is_regular_file(const std::string &path) {
   return get_node(path)->is_regular_file();
 }
 
-bool directory_service_shard::is_directory(const std::string &path) {
+bool directory_tree::is_directory(const std::string &path) {
   return get_node(path)->is_directory();
 }
 
-void directory_service_shard::touch(const std::string &path) {
+void directory_tree::touch(const std::string &path) {
   touch(get_node(path), std::time(nullptr));
 }
 
-void directory_service_shard::grow(const std::string &path, std::size_t bytes) {
+void directory_tree::grow(const std::string &path, std::size_t bytes) {
   get_node_as_file(path)->grow(bytes);
 }
 
-void directory_service_shard::shrink(const std::string &path, std::size_t bytes) {
+void directory_tree::shrink(const std::string &path, std::size_t bytes) {
   get_node_as_file(path)->shrink(bytes);
 }
 
-void directory_service_shard::dstatus(const std::string &path, const data_status &status) {
+void directory_tree::dstatus(const std::string &path, const data_status &status) {
   get_node_as_file(path)->dstatus(status);
 }
 
-void directory_service_shard::mode(const std::string &path, const storage_mode &mode) {
+void directory_tree::mode(const std::string &path, const storage_mode &mode) {
   get_node_as_file(path)->mode(mode);
 }
 
-void directory_service_shard::add_data_block(const std::string &path, const std::string &node) {
+void directory_tree::add_data_block(const std::string &path, const std::string &node) {
   get_node_as_file(path)->add_data_block(node);
 }
 
-void directory_service_shard::remove_data_block(const std::string &path, std::size_t i) {
+void directory_tree::remove_data_block(const std::string &path, std::size_t i) {
   get_node_as_file(path)->remove_data_block(i);
 }
 
-void directory_service_shard::remove_data_block(const std::string &path, const std::string &node) {
+void directory_tree::remove_data_block(const std::string &path, const std::string &node) {
   get_node_as_file(path)->remove_data_block(node);
 }
 
-void directory_service_shard::remove_all_data_blocks(const std::string &path) {
+void directory_tree::remove_all_data_blocks(const std::string &path) {
   get_node_as_file(path)->remove_all_data_blocks();
 }
 
-std::shared_ptr<ds_node> directory_service_shard::get_node_unsafe(const std::string &path) const {
+std::shared_ptr<ds_node> directory_tree::get_node_unsafe(const std::string &path) const {
   std::shared_ptr<ds_node> node = root_;
   for (auto &name: directory_utils::path_elements(path)) {
     if (!node->is_directory()) {
@@ -227,7 +227,7 @@ std::shared_ptr<ds_node> directory_service_shard::get_node_unsafe(const std::str
   return node;
 }
 
-std::shared_ptr<ds_node> directory_service_shard::get_node(const std::string &path) const {
+std::shared_ptr<ds_node> directory_tree::get_node(const std::string &path) const {
   auto node = get_node_unsafe(path);
   if (node == nullptr) {
     throw directory_service_exception("Path does not exist: " + path);
@@ -235,7 +235,7 @@ std::shared_ptr<ds_node> directory_service_shard::get_node(const std::string &pa
   return node;
 }
 
-std::shared_ptr<ds_dir_node> directory_service_shard::get_node_as_dir(const std::string &path) const {
+std::shared_ptr<ds_dir_node> directory_tree::get_node_as_dir(const std::string &path) const {
   auto node = get_node(path);
   if (node->is_regular_file()) {
     throw directory_service_exception("Path corresponds to a file: " + path);
@@ -243,7 +243,7 @@ std::shared_ptr<ds_dir_node> directory_service_shard::get_node_as_dir(const std:
   return std::dynamic_pointer_cast<ds_dir_node>(node);
 }
 
-std::shared_ptr<ds_file_node> directory_service_shard::get_node_as_file(const std::string &path) const {
+std::shared_ptr<ds_file_node> directory_tree::get_node_as_file(const std::string &path) const {
   auto node = get_node(path);
   if (!node->is_regular_file()) {
     throw directory_service_exception("Path corresponds to a directory: " + path);
@@ -251,7 +251,7 @@ std::shared_ptr<ds_file_node> directory_service_shard::get_node_as_file(const st
   return std::dynamic_pointer_cast<ds_file_node>(node);
 }
 
-void directory_service_shard::touch(std::shared_ptr<ds_node> node, std::time_t time) {
+void directory_tree::touch(std::shared_ptr<ds_node> node, std::time_t time) {
   node->last_write_time(time);
   if (node->is_regular_file()) {
     return;

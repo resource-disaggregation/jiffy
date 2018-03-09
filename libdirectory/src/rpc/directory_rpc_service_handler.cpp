@@ -3,7 +3,7 @@
 namespace elasticmem {
 namespace directory {
 
-directory_rpc_service_handler::directory_rpc_service_handler(std::shared_ptr<directory_service_shard> shard)
+directory_rpc_service_handler::directory_rpc_service_handler(std::shared_ptr<directory_tree> shard)
     : shard_(std::move(shard)) {}
 
 void directory_rpc_service_handler::create_directory(const std::string &path) {

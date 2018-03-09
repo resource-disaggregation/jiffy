@@ -10,7 +10,7 @@ namespace directory {
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::transport;
 
-directory_rpc_service_factory::directory_rpc_service_factory(std::shared_ptr<directory_service_shard> shard)
+directory_rpc_service_factory::directory_rpc_service_factory(std::shared_ptr<directory_tree> shard)
     : shard_(std::move(shard)) {
 }
 

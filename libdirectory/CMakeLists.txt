@@ -2,8 +2,8 @@ add_library(directory STATIC
         src/directory_service.h
         src/directory_service.cpp
         src/utils/directory_utils.h
-        src/shard/directory_service_shard.h
-        src/shard/directory_service_shard.cpp
+        src/tree/directory_tree.h
+        src/tree/directory_tree.cpp
         src/rpc/directory_lease_service.cpp
         src/rpc/directory_lease_service.h
         src/rpc/directory_lease_service.tcc
@@ -40,13 +40,13 @@ if (BUILD_TESTS)
   include_directories(${CATCH_INCLUDE_DIR})
   include_directories(${Boost_INCLUDE_DIRS})
 
-  add_executable(ds_shard_test test/directory_service_shard_test.cpp)
+  add_executable(ds_shard_test test/directory_tree_test.cpp)
   target_link_libraries(ds_shard_test directory)
 
-  add_executable(ds_rpc_test test/directory_rpc_service_handler_test.cpp)
+  add_executable(ds_rpc_test test/directory_rpc_service_test.cpp)
   target_link_libraries(ds_rpc_test directory)
 
-  add_executable(ds_lease_test test/directory_lease_service_handler_test.cpp)
+  add_executable(ds_lease_test test/directory_lease_service_test.cpp)
   target_link_libraries(ds_lease_test directory)
 
   if (NOT USE_SYSTEM_CATCH)
