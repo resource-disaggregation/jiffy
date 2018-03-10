@@ -23,7 +23,7 @@ class kv_rpc_serviceIf {
   virtual ~kv_rpc_serviceIf() {}
   virtual void put(const int32_t block_id, const std::string& key, const std::string& value) = 0;
   virtual void get(std::string& _return, const int32_t block_id, const std::string& key) = 0;
-  virtual void update(std::string& _return, const int32_t block_id, const std::string& key, const std::string& value) = 0;
+  virtual void update(const int32_t block_id, const std::string& key, const std::string& value) = 0;
   virtual void remove(const int32_t block_id, const std::string& key) = 0;
   virtual int64_t size(const int32_t block_id) = 0;
 };
@@ -61,7 +61,7 @@ class kv_rpc_serviceNull : virtual public kv_rpc_serviceIf {
   void get(std::string& /* _return */, const int32_t /* block_id */, const std::string& /* key */) {
     return;
   }
-  void update(std::string& /* _return */, const int32_t /* block_id */, const std::string& /* key */, const std::string& /* value */) {
+  void update(const int32_t /* block_id */, const std::string& /* key */, const std::string& /* value */) {
     return;
   }
   void remove(const int32_t /* block_id */, const std::string& /* key */) {
@@ -389,8 +389,7 @@ class kv_rpc_service_update_pargs {
 };
 
 typedef struct _kv_rpc_service_update_result__isset {
-  _kv_rpc_service_update_result__isset() : success(false), ex(false) {}
-  bool success :1;
+  _kv_rpc_service_update_result__isset() : ex(false) {}
   bool ex :1;
 } _kv_rpc_service_update_result__isset;
 
@@ -399,23 +398,18 @@ class kv_rpc_service_update_result {
 
   kv_rpc_service_update_result(const kv_rpc_service_update_result&);
   kv_rpc_service_update_result& operator=(const kv_rpc_service_update_result&);
-  kv_rpc_service_update_result() : success() {
+  kv_rpc_service_update_result() {
   }
 
   virtual ~kv_rpc_service_update_result() throw();
-  std::string success;
   kv_rpc_exception ex;
 
   _kv_rpc_service_update_result__isset __isset;
-
-  void __set_success(const std::string& val);
 
   void __set_ex(const kv_rpc_exception& val);
 
   bool operator == (const kv_rpc_service_update_result & rhs) const
   {
-    if (!(success == rhs.success))
-      return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
@@ -434,8 +428,7 @@ class kv_rpc_service_update_result {
 };
 
 typedef struct _kv_rpc_service_update_presult__isset {
-  _kv_rpc_service_update_presult__isset() : success(false), ex(false) {}
-  bool success :1;
+  _kv_rpc_service_update_presult__isset() : ex(false) {}
   bool ex :1;
 } _kv_rpc_service_update_presult__isset;
 
@@ -444,7 +437,6 @@ class kv_rpc_service_update_presult {
 
 
   virtual ~kv_rpc_service_update_presult() throw();
-  std::string* success;
   kv_rpc_exception ex;
 
   _kv_rpc_service_update_presult__isset __isset;
@@ -721,9 +713,9 @@ class kv_rpc_serviceClientT : virtual public kv_rpc_serviceIf {
   void get(std::string& _return, const int32_t block_id, const std::string& key);
   void send_get(const int32_t block_id, const std::string& key);
   void recv_get(std::string& _return);
-  void update(std::string& _return, const int32_t block_id, const std::string& key, const std::string& value);
+  void update(const int32_t block_id, const std::string& key, const std::string& value);
   void send_update(const int32_t block_id, const std::string& key, const std::string& value);
-  void recv_update(std::string& _return);
+  void recv_update();
   void remove(const int32_t block_id, const std::string& key);
   void send_remove(const int32_t block_id, const std::string& key);
   void recv_remove();
@@ -838,14 +830,13 @@ class kv_rpc_serviceMultiface : virtual public kv_rpc_serviceIf {
     return;
   }
 
-  void update(std::string& _return, const int32_t block_id, const std::string& key, const std::string& value) {
+  void update(const int32_t block_id, const std::string& key, const std::string& value) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->update(_return, block_id, key, value);
+      ifaces_[i]->update(block_id, key, value);
     }
-    ifaces_[i]->update(_return, block_id, key, value);
-    return;
+    ifaces_[i]->update(block_id, key, value);
   }
 
   void remove(const int32_t block_id, const std::string& key) {
@@ -903,9 +894,9 @@ class kv_rpc_serviceConcurrentClientT : virtual public kv_rpc_serviceIf {
   void get(std::string& _return, const int32_t block_id, const std::string& key);
   int32_t send_get(const int32_t block_id, const std::string& key);
   void recv_get(std::string& _return, const int32_t seqid);
-  void update(std::string& _return, const int32_t block_id, const std::string& key, const std::string& value);
+  void update(const int32_t block_id, const std::string& key, const std::string& value);
   int32_t send_update(const int32_t block_id, const std::string& key, const std::string& value);
-  void recv_update(std::string& _return, const int32_t seqid);
+  void recv_update(const int32_t seqid);
   void remove(const int32_t block_id, const std::string& key);
   int32_t send_remove(const int32_t block_id, const std::string& key);
   void recv_remove(const int32_t seqid);

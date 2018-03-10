@@ -562,14 +562,6 @@ uint32_t kv_rpc_service_update_result::read(Protocol_* iprot) {
     }
     switch (fid)
     {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readBinary(this->success);
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -597,11 +589,7 @@ uint32_t kv_rpc_service_update_result::write(Protocol_* oprot) const {
 
   xfer += oprot->writeStructBegin("kv_rpc_service_update_result");
 
-  if (this->__isset.success) {
-    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_STRING, 0);
-    xfer += oprot->writeBinary(this->success);
-    xfer += oprot->writeFieldEnd();
-  } else if (this->__isset.ex) {
+  if (this->__isset.ex) {
     xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
     xfer += this->ex.write(oprot);
     xfer += oprot->writeFieldEnd();
@@ -634,14 +622,6 @@ uint32_t kv_rpc_service_update_presult::read(Protocol_* iprot) {
     }
     switch (fid)
     {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readBinary((*(this->success)));
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -1179,10 +1159,10 @@ void kv_rpc_serviceClientT<Protocol_>::recv_get(std::string& _return)
 }
 
 template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::update(std::string& _return, const int32_t block_id, const std::string& key, const std::string& value)
+void kv_rpc_serviceClientT<Protocol_>::update(const int32_t block_id, const std::string& key, const std::string& value)
 {
   send_update(block_id, key, value);
-  recv_update(_return);
+  recv_update();
 }
 
 template <class Protocol_>
@@ -1203,7 +1183,7 @@ void kv_rpc_serviceClientT<Protocol_>::send_update(const int32_t block_id, const
 }
 
 template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::recv_update(std::string& _return)
+void kv_rpc_serviceClientT<Protocol_>::recv_update()
 {
 
   int32_t rseqid = 0;
@@ -1229,19 +1209,14 @@ void kv_rpc_serviceClientT<Protocol_>::recv_update(std::string& _return)
     this->iprot_->getTransport()->readEnd();
   }
   kv_rpc_service_update_presult result;
-  result.success = &_return;
   result.read(this->iprot_);
   this->iprot_->readMessageEnd();
   this->iprot_->getTransport()->readEnd();
 
-  if (result.__isset.success) {
-    // _return pointer has now been filled
-    return;
-  }
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "update failed: unknown result");
+  return;
 }
 
 template <class Protocol_>
@@ -1662,8 +1637,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_update(int32_t seqid, ::apache
 
   kv_rpc_service_update_result result;
   try {
-    iface_->update(result.success, args.block_id, args.key, args.value);
-    result.__isset.success = true;
+    iface_->update(args.block_id, args.key, args.value);
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -1720,8 +1694,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_update(int32_t seqid, Protocol
 
   kv_rpc_service_update_result result;
   try {
-    iface_->update(result.success, args.block_id, args.key, args.value);
-    result.__isset.success = true;
+    iface_->update(args.block_id, args.key, args.value);
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -2172,10 +2145,10 @@ void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_get(std::string& _return, 
 }
 
 template <class Protocol_>
-void kv_rpc_serviceConcurrentClientT<Protocol_>::update(std::string& _return, const int32_t block_id, const std::string& key, const std::string& value)
+void kv_rpc_serviceConcurrentClientT<Protocol_>::update(const int32_t block_id, const std::string& key, const std::string& value)
 {
   int32_t seqid = send_update(block_id, key, value);
-  recv_update(_return, seqid);
+  recv_update(seqid);
 }
 
 template <class Protocol_>
@@ -2200,7 +2173,7 @@ int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_update(const int32_t bl
 }
 
 template <class Protocol_>
-void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_update(std::string& _return, const int32_t seqid)
+void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_update(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -2239,22 +2212,16 @@ void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_update(std::string& _retur
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
       kv_rpc_service_update_presult result;
-      result.success = &_return;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
       this->iprot_->getTransport()->readEnd();
 
-      if (result.__isset.success) {
-        // _return pointer has now been filled
-        sentry.commit();
-        return;
-      }
       if (result.__isset.ex) {
         sentry.commit();
         throw result.ex;
       }
-      // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "update failed: unknown result");
+      sentry.commit();
+      return;
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);

@@ -14,11 +14,8 @@ void kv_rpc_service_handler::get(std::string &_return, const int32_t block_id, c
   _return.assign(blocks_.at(static_cast<std::size_t>(block_id))->get(key));
 }
 
-void kv_rpc_service_handler::update(std::string &_return,
-                                    const int32_t block_id,
-                                    const std::string &key,
-                                    const std::string &value) {
-  _return.assign(blocks_.at(static_cast<std::size_t>(block_id))->update(key, value));
+void kv_rpc_service_handler::update(const int32_t block_id, const std::string &key, const std::string &value) {
+  blocks_.at(static_cast<std::size_t>(block_id))->update(key, value);
 }
 
 void kv_rpc_service_handler::remove(const int32_t block_id, const std::string &key) {

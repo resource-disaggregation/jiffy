@@ -21,6 +21,8 @@ namespace elasticmem { namespace kv {
 class kv_management_rpc_serviceIf {
  public:
   virtual ~kv_management_rpc_serviceIf() {}
+  virtual void flush(const int32_t block_id, const std::string& path) = 0;
+  virtual void load(const int32_t block_id, const std::string& path) = 0;
   virtual void clear(const int32_t block_id) = 0;
   virtual int64_t storage_capacity(const int32_t block_id) = 0;
   virtual int64_t storage_size(const int32_t block_id) = 0;
@@ -53,6 +55,12 @@ class kv_management_rpc_serviceIfSingletonFactory : virtual public kv_management
 class kv_management_rpc_serviceNull : virtual public kv_management_rpc_serviceIf {
  public:
   virtual ~kv_management_rpc_serviceNull() {}
+  void flush(const int32_t /* block_id */, const std::string& /* path */) {
+    return;
+  }
+  void load(const int32_t /* block_id */, const std::string& /* path */) {
+    return;
+  }
   void clear(const int32_t /* block_id */) {
     return;
   }
@@ -64,6 +72,240 @@ class kv_management_rpc_serviceNull : virtual public kv_management_rpc_serviceIf
     int64_t _return = 0;
     return _return;
   }
+};
+
+typedef struct _kv_management_rpc_service_flush_args__isset {
+  _kv_management_rpc_service_flush_args__isset() : block_id(false), path(false) {}
+  bool block_id :1;
+  bool path :1;
+} _kv_management_rpc_service_flush_args__isset;
+
+class kv_management_rpc_service_flush_args {
+ public:
+
+  kv_management_rpc_service_flush_args(const kv_management_rpc_service_flush_args&);
+  kv_management_rpc_service_flush_args& operator=(const kv_management_rpc_service_flush_args&);
+  kv_management_rpc_service_flush_args() : block_id(0), path() {
+  }
+
+  virtual ~kv_management_rpc_service_flush_args() throw();
+  int32_t block_id;
+  std::string path;
+
+  _kv_management_rpc_service_flush_args__isset __isset;
+
+  void __set_block_id(const int32_t val);
+
+  void __set_path(const std::string& val);
+
+  bool operator == (const kv_management_rpc_service_flush_args & rhs) const
+  {
+    if (!(block_id == rhs.block_id))
+      return false;
+    if (!(path == rhs.path))
+      return false;
+    return true;
+  }
+  bool operator != (const kv_management_rpc_service_flush_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const kv_management_rpc_service_flush_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class kv_management_rpc_service_flush_pargs {
+ public:
+
+
+  virtual ~kv_management_rpc_service_flush_pargs() throw();
+  const int32_t* block_id;
+  const std::string* path;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _kv_management_rpc_service_flush_result__isset {
+  _kv_management_rpc_service_flush_result__isset() : ex(false) {}
+  bool ex :1;
+} _kv_management_rpc_service_flush_result__isset;
+
+class kv_management_rpc_service_flush_result {
+ public:
+
+  kv_management_rpc_service_flush_result(const kv_management_rpc_service_flush_result&);
+  kv_management_rpc_service_flush_result& operator=(const kv_management_rpc_service_flush_result&);
+  kv_management_rpc_service_flush_result() {
+  }
+
+  virtual ~kv_management_rpc_service_flush_result() throw();
+  kv_management_rpc_exception ex;
+
+  _kv_management_rpc_service_flush_result__isset __isset;
+
+  void __set_ex(const kv_management_rpc_exception& val);
+
+  bool operator == (const kv_management_rpc_service_flush_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const kv_management_rpc_service_flush_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const kv_management_rpc_service_flush_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _kv_management_rpc_service_flush_presult__isset {
+  _kv_management_rpc_service_flush_presult__isset() : ex(false) {}
+  bool ex :1;
+} _kv_management_rpc_service_flush_presult__isset;
+
+class kv_management_rpc_service_flush_presult {
+ public:
+
+
+  virtual ~kv_management_rpc_service_flush_presult() throw();
+  kv_management_rpc_exception ex;
+
+  _kv_management_rpc_service_flush_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
+typedef struct _kv_management_rpc_service_load_args__isset {
+  _kv_management_rpc_service_load_args__isset() : block_id(false), path(false) {}
+  bool block_id :1;
+  bool path :1;
+} _kv_management_rpc_service_load_args__isset;
+
+class kv_management_rpc_service_load_args {
+ public:
+
+  kv_management_rpc_service_load_args(const kv_management_rpc_service_load_args&);
+  kv_management_rpc_service_load_args& operator=(const kv_management_rpc_service_load_args&);
+  kv_management_rpc_service_load_args() : block_id(0), path() {
+  }
+
+  virtual ~kv_management_rpc_service_load_args() throw();
+  int32_t block_id;
+  std::string path;
+
+  _kv_management_rpc_service_load_args__isset __isset;
+
+  void __set_block_id(const int32_t val);
+
+  void __set_path(const std::string& val);
+
+  bool operator == (const kv_management_rpc_service_load_args & rhs) const
+  {
+    if (!(block_id == rhs.block_id))
+      return false;
+    if (!(path == rhs.path))
+      return false;
+    return true;
+  }
+  bool operator != (const kv_management_rpc_service_load_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const kv_management_rpc_service_load_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class kv_management_rpc_service_load_pargs {
+ public:
+
+
+  virtual ~kv_management_rpc_service_load_pargs() throw();
+  const int32_t* block_id;
+  const std::string* path;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _kv_management_rpc_service_load_result__isset {
+  _kv_management_rpc_service_load_result__isset() : ex(false) {}
+  bool ex :1;
+} _kv_management_rpc_service_load_result__isset;
+
+class kv_management_rpc_service_load_result {
+ public:
+
+  kv_management_rpc_service_load_result(const kv_management_rpc_service_load_result&);
+  kv_management_rpc_service_load_result& operator=(const kv_management_rpc_service_load_result&);
+  kv_management_rpc_service_load_result() {
+  }
+
+  virtual ~kv_management_rpc_service_load_result() throw();
+  kv_management_rpc_exception ex;
+
+  _kv_management_rpc_service_load_result__isset __isset;
+
+  void __set_ex(const kv_management_rpc_exception& val);
+
+  bool operator == (const kv_management_rpc_service_load_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const kv_management_rpc_service_load_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const kv_management_rpc_service_load_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _kv_management_rpc_service_load_presult__isset {
+  _kv_management_rpc_service_load_presult__isset() : ex(false) {}
+  bool ex :1;
+} _kv_management_rpc_service_load_presult__isset;
+
+class kv_management_rpc_service_load_presult {
+ public:
+
+
+  virtual ~kv_management_rpc_service_load_presult() throw();
+  kv_management_rpc_exception ex;
+
+  _kv_management_rpc_service_load_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
 };
 
 typedef struct _kv_management_rpc_service_clear_args__isset {
@@ -438,6 +680,12 @@ class kv_management_rpc_serviceClientT : virtual public kv_management_rpc_servic
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
+  void flush(const int32_t block_id, const std::string& path);
+  void send_flush(const int32_t block_id, const std::string& path);
+  void recv_flush();
+  void load(const int32_t block_id, const std::string& path);
+  void send_load(const int32_t block_id, const std::string& path);
+  void recv_load();
   void clear(const int32_t block_id);
   void send_clear(const int32_t block_id);
   void recv_clear();
@@ -475,6 +723,10 @@ class kv_management_rpc_serviceProcessorT : public ::apache::thrift::TDispatchPr
   };
   typedef std::map<std::string, ProcessFunctions> ProcessMap;
   ProcessMap processMap_;
+  void process_flush(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_flush(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_load(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_load(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_clear(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_clear(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_storage_capacity(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -484,6 +736,12 @@ class kv_management_rpc_serviceProcessorT : public ::apache::thrift::TDispatchPr
  public:
   kv_management_rpc_serviceProcessorT(::apache::thrift::stdcxx::shared_ptr<kv_management_rpc_serviceIf> iface) :
     iface_(iface) {
+    processMap_["flush"] = ProcessFunctions(
+      &kv_management_rpc_serviceProcessorT::process_flush,
+      &kv_management_rpc_serviceProcessorT::process_flush);
+    processMap_["load"] = ProcessFunctions(
+      &kv_management_rpc_serviceProcessorT::process_load,
+      &kv_management_rpc_serviceProcessorT::process_load);
     processMap_["clear"] = ProcessFunctions(
       &kv_management_rpc_serviceProcessorT::process_clear,
       &kv_management_rpc_serviceProcessorT::process_clear);
@@ -526,6 +784,24 @@ class kv_management_rpc_serviceMultiface : virtual public kv_management_rpc_serv
     ifaces_.push_back(iface);
   }
  public:
+  void flush(const int32_t block_id, const std::string& path) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->flush(block_id, path);
+    }
+    ifaces_[i]->flush(block_id, path);
+  }
+
+  void load(const int32_t block_id, const std::string& path) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->load(block_id, path);
+    }
+    ifaces_[i]->load(block_id, path);
+  }
+
   void clear(const int32_t block_id) {
     size_t sz = ifaces_.size();
     size_t i = 0;
@@ -584,6 +860,12 @@ class kv_management_rpc_serviceConcurrentClientT : virtual public kv_management_
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
+  void flush(const int32_t block_id, const std::string& path);
+  int32_t send_flush(const int32_t block_id, const std::string& path);
+  void recv_flush(const int32_t seqid);
+  void load(const int32_t block_id, const std::string& path);
+  int32_t send_load(const int32_t block_id, const std::string& path);
+  void recv_load(const int32_t seqid);
   void clear(const int32_t block_id);
   int32_t send_clear(const int32_t block_id);
   void recv_clear(const int32_t seqid);

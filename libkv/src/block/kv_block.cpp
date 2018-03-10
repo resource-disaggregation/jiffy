@@ -3,43 +3,71 @@
 namespace elasticmem {
 namespace kv {
 
-void kv_block::put(const kv_service::key_type &key, const kv_service::value_type &value) {
-  entries_.insert(key, value);
+kv_block::kv_block(std::shared_ptr<persistent_service> persistent,
+                   const std::string &remote_storage_prefix,
+                   const std::string &local_storage_prefix,
+                   std::shared_ptr<serializer> ser,
+                   std::shared_ptr<deserializer> deser)
+    : persistent_(std::move(persistent)),
+      local_storage_prefix_(local_storage_prefix),
+      remote_storage_prefix_(remote_storage_prefix),
+      ser_(std::move(ser)), deser_(std::move(deser)) {}
+
+void kv_block::put(const key_type &key, const value_type &value) {
+  block_.insert(key, value);
 }
 
-const kv_service::value_type &kv_block::get(const kv_service::key_type &key) {
-  return entries_.find(key);
+value_type kv_block::get(const key_type &key) {
+  return block_.find(key);
 }
 
-const kv_service::value_type &kv_block::update(const kv_service::key_type &key,
-                                                       const kv_service::value_type &value) {
-  kv_service::value_type ret = value;
-  if (!entries_.update(key, ret)) {
+void kv_block::update(const key_type &key,
+                                   const value_type &value) {
+  value_type ret = value;
+  if (!block_.update(key, ret)) {
     throw std::out_of_range("No such key [" + key + "]");
   }
-  return ret;
 }
 
-void kv_block::remove(const kv_service::key_type &key) {
-  if (!entries_.erase(key)) {
+void kv_block::remove(const key_type &key) {
+  if (!block_.erase(key)) {
     throw std::out_of_range("No such key [" + key + "]");
   }
 }
 
 void kv_block::clear() {
-  entries_.clear();
+  block_.clear();
 }
 
-std::size_t kv_block::size() {
-  entries_.size(); // TODO: This should return size in bytes...
+std::size_t kv_block::size() const {
+  return block_.size();
+}
+
+bool kv_block::empty() const {
+  return block_.empty();
+}
+
+void kv_block::load(const std::string &path) {
+  locked_block_type ltable = block_.lock_table();
+  persistent_->read(remote_storage_prefix_ + path, local_storage_prefix_ + path);
+  deser_->deserialize(local_storage_prefix_ + path, ltable);
+  ltable.unlock();
+}
+
+void kv_block::flush(const std::string &path) {
+  locked_block_type ltable = block_.lock_table();
+  ser_->serialize(ltable, local_storage_prefix_ + path);
+  persistent_->write(local_storage_prefix_ + path, remote_storage_prefix_ + path);
+  ltable.clear();
+  ltable.unlock();
 }
 
 std::size_t kv_block::storage_capacity() {
-  entries_.capacity(); // TODO: This should return the storage_capacity in bytes...
+  return block_.capacity(); // TODO: This should return the storage_capacity in bytes...
 }
 
 std::size_t kv_block::storage_size() {
-  entries_.size();
+  return block_.size(); // TODO: This should return the storage_size in bytes...
 }
 
 }

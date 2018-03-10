@@ -12,7 +12,7 @@ class kv_rpc_service_handler: public kv_rpc_serviceIf {
   explicit kv_rpc_service_handler(std::vector<std::shared_ptr<kv_block>>& blocks);
   void put(int32_t block_id, const std::string &key, const std::string &value) override;
   void get(std::string &_return, int32_t block_id, const std::string &key) override;
-  void update(std::string &_return, int32_t block_id, const std::string &key, const std::string &value) override;
+  void update(int32_t block_id, const std::string &key, const std::string &value) override;
   void remove(int32_t block_id, const std::string &key) override;
  private:
   std::vector<std::shared_ptr<kv_block>>& blocks_;

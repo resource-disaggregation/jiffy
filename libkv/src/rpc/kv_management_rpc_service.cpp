@@ -10,6 +10,38 @@
 namespace elasticmem { namespace kv {
 
 
+kv_management_rpc_service_flush_args::~kv_management_rpc_service_flush_args() throw() {
+}
+
+
+kv_management_rpc_service_flush_pargs::~kv_management_rpc_service_flush_pargs() throw() {
+}
+
+
+kv_management_rpc_service_flush_result::~kv_management_rpc_service_flush_result() throw() {
+}
+
+
+kv_management_rpc_service_flush_presult::~kv_management_rpc_service_flush_presult() throw() {
+}
+
+
+kv_management_rpc_service_load_args::~kv_management_rpc_service_load_args() throw() {
+}
+
+
+kv_management_rpc_service_load_pargs::~kv_management_rpc_service_load_pargs() throw() {
+}
+
+
+kv_management_rpc_service_load_result::~kv_management_rpc_service_load_result() throw() {
+}
+
+
+kv_management_rpc_service_load_presult::~kv_management_rpc_service_load_presult() throw() {
+}
+
+
 kv_management_rpc_service_clear_args::~kv_management_rpc_service_clear_args() throw() {
 }
 
