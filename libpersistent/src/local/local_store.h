@@ -4,7 +4,7 @@
 #include "../persistent_service.h"
 
 namespace elasticmem {
-namespace kv {
+namespace persistent {
 
 class local_store: public persistent_service {
  public:

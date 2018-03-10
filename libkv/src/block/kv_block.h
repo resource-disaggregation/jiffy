@@ -15,7 +15,7 @@ class kv_block : public kv_management_service {
   typedef cuckoohash_map<key_type, value_type> block_type;
   typedef block_type::locked_table locked_block_type;
 
-  explicit kv_block(std::shared_ptr<persistent_service> persistent,
+  explicit kv_block(std::shared_ptr<persistent::persistent_service> persistent,
                     const std::string &remote_storage_prefix,
                     const std::string &local_storage_prefix = "/tmp",
                     std::shared_ptr<serializer> ser = std::make_shared<binary_serializer>(),
@@ -45,7 +45,7 @@ class kv_block : public kv_management_service {
 
  private:
   block_type block_;
-  std::shared_ptr<persistent_service> persistent_;
+  std::shared_ptr<persistent::persistent_service> persistent_;
   std::string local_storage_prefix_;
   std::string remote_storage_prefix_;
   std::shared_ptr<serializer> ser_;

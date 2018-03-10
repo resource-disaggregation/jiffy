@@ -4,7 +4,7 @@
 #include <string>
 
 namespace elasticmem {
-namespace kv {
+namespace persistent {
 
 class persistent_service {
  public:

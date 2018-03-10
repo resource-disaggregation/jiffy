@@ -3,7 +3,7 @@
 namespace elasticmem {
 namespace kv {
 
-kv_block::kv_block(std::shared_ptr<persistent_service> persistent,
+kv_block::kv_block(std::shared_ptr<persistent::persistent_service> persistent,
                    const std::string &remote_storage_prefix,
                    const std::string &local_storage_prefix,
                    std::shared_ptr<serializer> ser,
@@ -22,7 +22,7 @@ value_type kv_block::get(const key_type &key) {
 }
 
 void kv_block::update(const key_type &key,
-                                   const value_type &value) {
+                      const value_type &value) {
   value_type ret = value;
   if (!block_.update(key, ret)) {
     throw std::out_of_range("No such key [" + key + "]");
