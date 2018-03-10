@@ -73,5 +73,21 @@ kv_rpc_service_remove_result::~kv_rpc_service_remove_result() throw() {
 kv_rpc_service_remove_presult::~kv_rpc_service_remove_presult() throw() {
 }
 
+
+kv_rpc_service_size_args::~kv_rpc_service_size_args() throw() {
+}
+
+
+kv_rpc_service_size_pargs::~kv_rpc_service_size_pargs() throw() {
+}
+
+
+kv_rpc_service_size_result::~kv_rpc_service_size_result() throw() {
+}
+
+
+kv_rpc_service_size_presult::~kv_rpc_service_size_presult() throw() {
+}
+
 }} // namespace
 

@@ -26,51 +26,35 @@ kv_management_rpc_service_clear_presult::~kv_management_rpc_service_clear_presul
 }
 
 
-kv_management_rpc_service_size_args::~kv_management_rpc_service_size_args() throw() {
+kv_management_rpc_service_storage_capacity_args::~kv_management_rpc_service_storage_capacity_args() throw() {
 }
 
 
-kv_management_rpc_service_size_pargs::~kv_management_rpc_service_size_pargs() throw() {
+kv_management_rpc_service_storage_capacity_pargs::~kv_management_rpc_service_storage_capacity_pargs() throw() {
 }
 
 
-kv_management_rpc_service_size_result::~kv_management_rpc_service_size_result() throw() {
+kv_management_rpc_service_storage_capacity_result::~kv_management_rpc_service_storage_capacity_result() throw() {
 }
 
 
-kv_management_rpc_service_size_presult::~kv_management_rpc_service_size_presult() throw() {
+kv_management_rpc_service_storage_capacity_presult::~kv_management_rpc_service_storage_capacity_presult() throw() {
 }
 
 
-kv_management_rpc_service_capacity_args::~kv_management_rpc_service_capacity_args() throw() {
+kv_management_rpc_service_storage_size_args::~kv_management_rpc_service_storage_size_args() throw() {
 }
 
 
-kv_management_rpc_service_capacity_pargs::~kv_management_rpc_service_capacity_pargs() throw() {
+kv_management_rpc_service_storage_size_pargs::~kv_management_rpc_service_storage_size_pargs() throw() {
 }
 
 
-kv_management_rpc_service_capacity_result::~kv_management_rpc_service_capacity_result() throw() {
+kv_management_rpc_service_storage_size_result::~kv_management_rpc_service_storage_size_result() throw() {
 }
 
 
-kv_management_rpc_service_capacity_presult::~kv_management_rpc_service_capacity_presult() throw() {
-}
-
-
-kv_management_rpc_service_num_entries_args::~kv_management_rpc_service_num_entries_args() throw() {
-}
-
-
-kv_management_rpc_service_num_entries_pargs::~kv_management_rpc_service_num_entries_pargs() throw() {
-}
-
-
-kv_management_rpc_service_num_entries_result::~kv_management_rpc_service_num_entries_result() throw() {
-}
-
-
-kv_management_rpc_service_num_entries_presult::~kv_management_rpc_service_num_entries_presult() throw() {
+kv_management_rpc_service_storage_size_presult::~kv_management_rpc_service_storage_size_presult() throw() {
 }
 
 }} // namespace

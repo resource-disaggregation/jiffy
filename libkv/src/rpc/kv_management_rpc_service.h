@@ -21,10 +21,9 @@ namespace elasticmem { namespace kv {
 class kv_management_rpc_serviceIf {
  public:
   virtual ~kv_management_rpc_serviceIf() {}
-  virtual void clear() = 0;
-  virtual int64_t size() = 0;
-  virtual int64_t capacity() = 0;
-  virtual int64_t num_entries() = 0;
+  virtual void clear(const int32_t block_id) = 0;
+  virtual int64_t storage_capacity(const int32_t block_id) = 0;
+  virtual int64_t storage_size(const int32_t block_id) = 0;
 };
 
 class kv_management_rpc_serviceIfFactory {
@@ -54,36 +53,43 @@ class kv_management_rpc_serviceIfSingletonFactory : virtual public kv_management
 class kv_management_rpc_serviceNull : virtual public kv_management_rpc_serviceIf {
  public:
   virtual ~kv_management_rpc_serviceNull() {}
-  void clear() {
+  void clear(const int32_t /* block_id */) {
     return;
   }
-  int64_t size() {
+  int64_t storage_capacity(const int32_t /* block_id */) {
     int64_t _return = 0;
     return _return;
   }
-  int64_t capacity() {
-    int64_t _return = 0;
-    return _return;
-  }
-  int64_t num_entries() {
+  int64_t storage_size(const int32_t /* block_id */) {
     int64_t _return = 0;
     return _return;
   }
 };
 
+typedef struct _kv_management_rpc_service_clear_args__isset {
+  _kv_management_rpc_service_clear_args__isset() : block_id(false) {}
+  bool block_id :1;
+} _kv_management_rpc_service_clear_args__isset;
 
 class kv_management_rpc_service_clear_args {
  public:
 
   kv_management_rpc_service_clear_args(const kv_management_rpc_service_clear_args&);
   kv_management_rpc_service_clear_args& operator=(const kv_management_rpc_service_clear_args&);
-  kv_management_rpc_service_clear_args() {
+  kv_management_rpc_service_clear_args() : block_id(0) {
   }
 
   virtual ~kv_management_rpc_service_clear_args() throw();
+  int32_t block_id;
 
-  bool operator == (const kv_management_rpc_service_clear_args & /* rhs */) const
+  _kv_management_rpc_service_clear_args__isset __isset;
+
+  void __set_block_id(const int32_t val);
+
+  bool operator == (const kv_management_rpc_service_clear_args & rhs) const
   {
+    if (!(block_id == rhs.block_id))
+      return false;
     return true;
   }
   bool operator != (const kv_management_rpc_service_clear_args &rhs) const {
@@ -105,6 +111,7 @@ class kv_management_rpc_service_clear_pargs {
 
 
   virtual ~kv_management_rpc_service_clear_pargs() throw();
+  const int32_t* block_id;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -169,26 +176,37 @@ class kv_management_rpc_service_clear_presult {
 
 };
 
+typedef struct _kv_management_rpc_service_storage_capacity_args__isset {
+  _kv_management_rpc_service_storage_capacity_args__isset() : block_id(false) {}
+  bool block_id :1;
+} _kv_management_rpc_service_storage_capacity_args__isset;
 
-class kv_management_rpc_service_size_args {
+class kv_management_rpc_service_storage_capacity_args {
  public:
 
-  kv_management_rpc_service_size_args(const kv_management_rpc_service_size_args&);
-  kv_management_rpc_service_size_args& operator=(const kv_management_rpc_service_size_args&);
-  kv_management_rpc_service_size_args() {
+  kv_management_rpc_service_storage_capacity_args(const kv_management_rpc_service_storage_capacity_args&);
+  kv_management_rpc_service_storage_capacity_args& operator=(const kv_management_rpc_service_storage_capacity_args&);
+  kv_management_rpc_service_storage_capacity_args() : block_id(0) {
   }
 
-  virtual ~kv_management_rpc_service_size_args() throw();
+  virtual ~kv_management_rpc_service_storage_capacity_args() throw();
+  int32_t block_id;
 
-  bool operator == (const kv_management_rpc_service_size_args & /* rhs */) const
+  _kv_management_rpc_service_storage_capacity_args__isset __isset;
+
+  void __set_block_id(const int32_t val);
+
+  bool operator == (const kv_management_rpc_service_storage_capacity_args & rhs) const
   {
+    if (!(block_id == rhs.block_id))
+      return false;
     return true;
   }
-  bool operator != (const kv_management_rpc_service_size_args &rhs) const {
+  bool operator != (const kv_management_rpc_service_storage_capacity_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const kv_management_rpc_service_size_args & ) const;
+  bool operator < (const kv_management_rpc_service_storage_capacity_args & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -198,42 +216,43 @@ class kv_management_rpc_service_size_args {
 };
 
 
-class kv_management_rpc_service_size_pargs {
+class kv_management_rpc_service_storage_capacity_pargs {
  public:
 
 
-  virtual ~kv_management_rpc_service_size_pargs() throw();
+  virtual ~kv_management_rpc_service_storage_capacity_pargs() throw();
+  const int32_t* block_id;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
 
 };
 
-typedef struct _kv_management_rpc_service_size_result__isset {
-  _kv_management_rpc_service_size_result__isset() : success(false), ex(false) {}
+typedef struct _kv_management_rpc_service_storage_capacity_result__isset {
+  _kv_management_rpc_service_storage_capacity_result__isset() : success(false), ex(false) {}
   bool success :1;
   bool ex :1;
-} _kv_management_rpc_service_size_result__isset;
+} _kv_management_rpc_service_storage_capacity_result__isset;
 
-class kv_management_rpc_service_size_result {
+class kv_management_rpc_service_storage_capacity_result {
  public:
 
-  kv_management_rpc_service_size_result(const kv_management_rpc_service_size_result&);
-  kv_management_rpc_service_size_result& operator=(const kv_management_rpc_service_size_result&);
-  kv_management_rpc_service_size_result() : success(0) {
+  kv_management_rpc_service_storage_capacity_result(const kv_management_rpc_service_storage_capacity_result&);
+  kv_management_rpc_service_storage_capacity_result& operator=(const kv_management_rpc_service_storage_capacity_result&);
+  kv_management_rpc_service_storage_capacity_result() : success(0) {
   }
 
-  virtual ~kv_management_rpc_service_size_result() throw();
+  virtual ~kv_management_rpc_service_storage_capacity_result() throw();
   int64_t success;
   kv_management_rpc_exception ex;
 
-  _kv_management_rpc_service_size_result__isset __isset;
+  _kv_management_rpc_service_storage_capacity_result__isset __isset;
 
   void __set_success(const int64_t val);
 
   void __set_ex(const kv_management_rpc_exception& val);
 
-  bool operator == (const kv_management_rpc_service_size_result & rhs) const
+  bool operator == (const kv_management_rpc_service_storage_capacity_result & rhs) const
   {
     if (!(success == rhs.success))
       return false;
@@ -241,11 +260,11 @@ class kv_management_rpc_service_size_result {
       return false;
     return true;
   }
-  bool operator != (const kv_management_rpc_service_size_result &rhs) const {
+  bool operator != (const kv_management_rpc_service_storage_capacity_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const kv_management_rpc_service_size_result & ) const;
+  bool operator < (const kv_management_rpc_service_storage_capacity_result & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -254,47 +273,58 @@ class kv_management_rpc_service_size_result {
 
 };
 
-typedef struct _kv_management_rpc_service_size_presult__isset {
-  _kv_management_rpc_service_size_presult__isset() : success(false), ex(false) {}
+typedef struct _kv_management_rpc_service_storage_capacity_presult__isset {
+  _kv_management_rpc_service_storage_capacity_presult__isset() : success(false), ex(false) {}
   bool success :1;
   bool ex :1;
-} _kv_management_rpc_service_size_presult__isset;
+} _kv_management_rpc_service_storage_capacity_presult__isset;
 
-class kv_management_rpc_service_size_presult {
+class kv_management_rpc_service_storage_capacity_presult {
  public:
 
 
-  virtual ~kv_management_rpc_service_size_presult() throw();
+  virtual ~kv_management_rpc_service_storage_capacity_presult() throw();
   int64_t* success;
   kv_management_rpc_exception ex;
 
-  _kv_management_rpc_service_size_presult__isset __isset;
+  _kv_management_rpc_service_storage_capacity_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
 
 };
 
+typedef struct _kv_management_rpc_service_storage_size_args__isset {
+  _kv_management_rpc_service_storage_size_args__isset() : block_id(false) {}
+  bool block_id :1;
+} _kv_management_rpc_service_storage_size_args__isset;
 
-class kv_management_rpc_service_capacity_args {
+class kv_management_rpc_service_storage_size_args {
  public:
 
-  kv_management_rpc_service_capacity_args(const kv_management_rpc_service_capacity_args&);
-  kv_management_rpc_service_capacity_args& operator=(const kv_management_rpc_service_capacity_args&);
-  kv_management_rpc_service_capacity_args() {
+  kv_management_rpc_service_storage_size_args(const kv_management_rpc_service_storage_size_args&);
+  kv_management_rpc_service_storage_size_args& operator=(const kv_management_rpc_service_storage_size_args&);
+  kv_management_rpc_service_storage_size_args() : block_id(0) {
   }
 
-  virtual ~kv_management_rpc_service_capacity_args() throw();
+  virtual ~kv_management_rpc_service_storage_size_args() throw();
+  int32_t block_id;
 
-  bool operator == (const kv_management_rpc_service_capacity_args & /* rhs */) const
+  _kv_management_rpc_service_storage_size_args__isset __isset;
+
+  void __set_block_id(const int32_t val);
+
+  bool operator == (const kv_management_rpc_service_storage_size_args & rhs) const
   {
+    if (!(block_id == rhs.block_id))
+      return false;
     return true;
   }
-  bool operator != (const kv_management_rpc_service_capacity_args &rhs) const {
+  bool operator != (const kv_management_rpc_service_storage_size_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const kv_management_rpc_service_capacity_args & ) const;
+  bool operator < (const kv_management_rpc_service_storage_size_args & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -304,42 +334,43 @@ class kv_management_rpc_service_capacity_args {
 };
 
 
-class kv_management_rpc_service_capacity_pargs {
+class kv_management_rpc_service_storage_size_pargs {
  public:
 
 
-  virtual ~kv_management_rpc_service_capacity_pargs() throw();
+  virtual ~kv_management_rpc_service_storage_size_pargs() throw();
+  const int32_t* block_id;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
 
 };
 
-typedef struct _kv_management_rpc_service_capacity_result__isset {
-  _kv_management_rpc_service_capacity_result__isset() : success(false), ex(false) {}
+typedef struct _kv_management_rpc_service_storage_size_result__isset {
+  _kv_management_rpc_service_storage_size_result__isset() : success(false), ex(false) {}
   bool success :1;
   bool ex :1;
-} _kv_management_rpc_service_capacity_result__isset;
+} _kv_management_rpc_service_storage_size_result__isset;
 
-class kv_management_rpc_service_capacity_result {
+class kv_management_rpc_service_storage_size_result {
  public:
 
-  kv_management_rpc_service_capacity_result(const kv_management_rpc_service_capacity_result&);
-  kv_management_rpc_service_capacity_result& operator=(const kv_management_rpc_service_capacity_result&);
-  kv_management_rpc_service_capacity_result() : success(0) {
+  kv_management_rpc_service_storage_size_result(const kv_management_rpc_service_storage_size_result&);
+  kv_management_rpc_service_storage_size_result& operator=(const kv_management_rpc_service_storage_size_result&);
+  kv_management_rpc_service_storage_size_result() : success(0) {
   }
 
-  virtual ~kv_management_rpc_service_capacity_result() throw();
+  virtual ~kv_management_rpc_service_storage_size_result() throw();
   int64_t success;
   kv_management_rpc_exception ex;
 
-  _kv_management_rpc_service_capacity_result__isset __isset;
+  _kv_management_rpc_service_storage_size_result__isset __isset;
 
   void __set_success(const int64_t val);
 
   void __set_ex(const kv_management_rpc_exception& val);
 
-  bool operator == (const kv_management_rpc_service_capacity_result & rhs) const
+  bool operator == (const kv_management_rpc_service_storage_size_result & rhs) const
   {
     if (!(success == rhs.success))
       return false;
@@ -347,11 +378,11 @@ class kv_management_rpc_service_capacity_result {
       return false;
     return true;
   }
-  bool operator != (const kv_management_rpc_service_capacity_result &rhs) const {
+  bool operator != (const kv_management_rpc_service_storage_size_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const kv_management_rpc_service_capacity_result & ) const;
+  bool operator < (const kv_management_rpc_service_storage_size_result & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -360,127 +391,21 @@ class kv_management_rpc_service_capacity_result {
 
 };
 
-typedef struct _kv_management_rpc_service_capacity_presult__isset {
-  _kv_management_rpc_service_capacity_presult__isset() : success(false), ex(false) {}
+typedef struct _kv_management_rpc_service_storage_size_presult__isset {
+  _kv_management_rpc_service_storage_size_presult__isset() : success(false), ex(false) {}
   bool success :1;
   bool ex :1;
-} _kv_management_rpc_service_capacity_presult__isset;
+} _kv_management_rpc_service_storage_size_presult__isset;
 
-class kv_management_rpc_service_capacity_presult {
+class kv_management_rpc_service_storage_size_presult {
  public:
 
 
-  virtual ~kv_management_rpc_service_capacity_presult() throw();
+  virtual ~kv_management_rpc_service_storage_size_presult() throw();
   int64_t* success;
   kv_management_rpc_exception ex;
 
-  _kv_management_rpc_service_capacity_presult__isset __isset;
-
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-
-};
-
-
-class kv_management_rpc_service_num_entries_args {
- public:
-
-  kv_management_rpc_service_num_entries_args(const kv_management_rpc_service_num_entries_args&);
-  kv_management_rpc_service_num_entries_args& operator=(const kv_management_rpc_service_num_entries_args&);
-  kv_management_rpc_service_num_entries_args() {
-  }
-
-  virtual ~kv_management_rpc_service_num_entries_args() throw();
-
-  bool operator == (const kv_management_rpc_service_num_entries_args & /* rhs */) const
-  {
-    return true;
-  }
-  bool operator != (const kv_management_rpc_service_num_entries_args &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const kv_management_rpc_service_num_entries_args & ) const;
-
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
-
-};
-
-
-class kv_management_rpc_service_num_entries_pargs {
- public:
-
-
-  virtual ~kv_management_rpc_service_num_entries_pargs() throw();
-
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
-
-};
-
-typedef struct _kv_management_rpc_service_num_entries_result__isset {
-  _kv_management_rpc_service_num_entries_result__isset() : success(false), ex(false) {}
-  bool success :1;
-  bool ex :1;
-} _kv_management_rpc_service_num_entries_result__isset;
-
-class kv_management_rpc_service_num_entries_result {
- public:
-
-  kv_management_rpc_service_num_entries_result(const kv_management_rpc_service_num_entries_result&);
-  kv_management_rpc_service_num_entries_result& operator=(const kv_management_rpc_service_num_entries_result&);
-  kv_management_rpc_service_num_entries_result() : success(0) {
-  }
-
-  virtual ~kv_management_rpc_service_num_entries_result() throw();
-  int64_t success;
-  kv_management_rpc_exception ex;
-
-  _kv_management_rpc_service_num_entries_result__isset __isset;
-
-  void __set_success(const int64_t val);
-
-  void __set_ex(const kv_management_rpc_exception& val);
-
-  bool operator == (const kv_management_rpc_service_num_entries_result & rhs) const
-  {
-    if (!(success == rhs.success))
-      return false;
-    if (!(ex == rhs.ex))
-      return false;
-    return true;
-  }
-  bool operator != (const kv_management_rpc_service_num_entries_result &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const kv_management_rpc_service_num_entries_result & ) const;
-
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
-
-};
-
-typedef struct _kv_management_rpc_service_num_entries_presult__isset {
-  _kv_management_rpc_service_num_entries_presult__isset() : success(false), ex(false) {}
-  bool success :1;
-  bool ex :1;
-} _kv_management_rpc_service_num_entries_presult__isset;
-
-class kv_management_rpc_service_num_entries_presult {
- public:
-
-
-  virtual ~kv_management_rpc_service_num_entries_presult() throw();
-  int64_t* success;
-  kv_management_rpc_exception ex;
-
-  _kv_management_rpc_service_num_entries_presult__isset __isset;
+  _kv_management_rpc_service_storage_size_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -513,18 +438,15 @@ class kv_management_rpc_serviceClientT : virtual public kv_management_rpc_servic
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void clear();
-  void send_clear();
+  void clear(const int32_t block_id);
+  void send_clear(const int32_t block_id);
   void recv_clear();
-  int64_t size();
-  void send_size();
-  int64_t recv_size();
-  int64_t capacity();
-  void send_capacity();
-  int64_t recv_capacity();
-  int64_t num_entries();
-  void send_num_entries();
-  int64_t recv_num_entries();
+  int64_t storage_capacity(const int32_t block_id);
+  void send_storage_capacity(const int32_t block_id);
+  int64_t recv_storage_capacity();
+  int64_t storage_size(const int32_t block_id);
+  void send_storage_size(const int32_t block_id);
+  int64_t recv_storage_size();
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
@@ -555,27 +477,22 @@ class kv_management_rpc_serviceProcessorT : public ::apache::thrift::TDispatchPr
   ProcessMap processMap_;
   void process_clear(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_clear(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_size(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_size(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_capacity(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_capacity(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_num_entries(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_num_entries(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_storage_capacity(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_storage_capacity(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_storage_size(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_storage_size(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
  public:
   kv_management_rpc_serviceProcessorT(::apache::thrift::stdcxx::shared_ptr<kv_management_rpc_serviceIf> iface) :
     iface_(iface) {
     processMap_["clear"] = ProcessFunctions(
       &kv_management_rpc_serviceProcessorT::process_clear,
       &kv_management_rpc_serviceProcessorT::process_clear);
-    processMap_["size"] = ProcessFunctions(
-      &kv_management_rpc_serviceProcessorT::process_size,
-      &kv_management_rpc_serviceProcessorT::process_size);
-    processMap_["capacity"] = ProcessFunctions(
-      &kv_management_rpc_serviceProcessorT::process_capacity,
-      &kv_management_rpc_serviceProcessorT::process_capacity);
-    processMap_["num_entries"] = ProcessFunctions(
-      &kv_management_rpc_serviceProcessorT::process_num_entries,
-      &kv_management_rpc_serviceProcessorT::process_num_entries);
+    processMap_["storage_capacity"] = ProcessFunctions(
+      &kv_management_rpc_serviceProcessorT::process_storage_capacity,
+      &kv_management_rpc_serviceProcessorT::process_storage_capacity);
+    processMap_["storage_size"] = ProcessFunctions(
+      &kv_management_rpc_serviceProcessorT::process_storage_size,
+      &kv_management_rpc_serviceProcessorT::process_storage_size);
   }
 
   virtual ~kv_management_rpc_serviceProcessorT() {}
@@ -609,40 +526,31 @@ class kv_management_rpc_serviceMultiface : virtual public kv_management_rpc_serv
     ifaces_.push_back(iface);
   }
  public:
-  void clear() {
+  void clear(const int32_t block_id) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->clear();
+      ifaces_[i]->clear(block_id);
     }
-    ifaces_[i]->clear();
+    ifaces_[i]->clear(block_id);
   }
 
-  int64_t size() {
+  int64_t storage_capacity(const int32_t block_id) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->size();
+      ifaces_[i]->storage_capacity(block_id);
     }
-    return ifaces_[i]->size();
+    return ifaces_[i]->storage_capacity(block_id);
   }
 
-  int64_t capacity() {
+  int64_t storage_size(const int32_t block_id) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->capacity();
+      ifaces_[i]->storage_size(block_id);
     }
-    return ifaces_[i]->capacity();
-  }
-
-  int64_t num_entries() {
-    size_t sz = ifaces_.size();
-    size_t i = 0;
-    for (; i < (sz - 1); ++i) {
-      ifaces_[i]->num_entries();
-    }
-    return ifaces_[i]->num_entries();
+    return ifaces_[i]->storage_size(block_id);
   }
 
 };
@@ -676,18 +584,15 @@ class kv_management_rpc_serviceConcurrentClientT : virtual public kv_management_
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void clear();
-  int32_t send_clear();
+  void clear(const int32_t block_id);
+  int32_t send_clear(const int32_t block_id);
   void recv_clear(const int32_t seqid);
-  int64_t size();
-  int32_t send_size();
-  int64_t recv_size(const int32_t seqid);
-  int64_t capacity();
-  int32_t send_capacity();
-  int64_t recv_capacity(const int32_t seqid);
-  int64_t num_entries();
-  int32_t send_num_entries();
-  int64_t recv_num_entries(const int32_t seqid);
+  int64_t storage_capacity(const int32_t block_id);
+  int32_t send_storage_capacity(const int32_t block_id);
+  int64_t recv_storage_capacity(const int32_t seqid);
+  int64_t storage_size(const int32_t block_id);
+  int32_t send_storage_size(const int32_t block_id);
+  int64_t recv_storage_size(const int32_t seqid);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;

@@ -21,10 +21,11 @@ namespace elasticmem { namespace kv {
 class kv_rpc_serviceIf {
  public:
   virtual ~kv_rpc_serviceIf() {}
-  virtual void put(const std::string& key, const std::string& value) = 0;
-  virtual void get(std::string& _return, const std::string& key) = 0;
-  virtual void update(std::string& _return, const std::string& key, const std::string& value) = 0;
-  virtual void remove(const std::string& key) = 0;
+  virtual void put(const int32_t block_id, const std::string& key, const std::string& value) = 0;
+  virtual void get(std::string& _return, const int32_t block_id, const std::string& key) = 0;
+  virtual void update(std::string& _return, const int32_t block_id, const std::string& key, const std::string& value) = 0;
+  virtual void remove(const int32_t block_id, const std::string& key) = 0;
+  virtual int64_t size(const int32_t block_id) = 0;
 };
 
 class kv_rpc_serviceIfFactory {
@@ -54,22 +55,27 @@ class kv_rpc_serviceIfSingletonFactory : virtual public kv_rpc_serviceIfFactory 
 class kv_rpc_serviceNull : virtual public kv_rpc_serviceIf {
  public:
   virtual ~kv_rpc_serviceNull() {}
-  void put(const std::string& /* key */, const std::string& /* value */) {
+  void put(const int32_t /* block_id */, const std::string& /* key */, const std::string& /* value */) {
     return;
   }
-  void get(std::string& /* _return */, const std::string& /* key */) {
+  void get(std::string& /* _return */, const int32_t /* block_id */, const std::string& /* key */) {
     return;
   }
-  void update(std::string& /* _return */, const std::string& /* key */, const std::string& /* value */) {
+  void update(std::string& /* _return */, const int32_t /* block_id */, const std::string& /* key */, const std::string& /* value */) {
     return;
   }
-  void remove(const std::string& /* key */) {
+  void remove(const int32_t /* block_id */, const std::string& /* key */) {
     return;
+  }
+  int64_t size(const int32_t /* block_id */) {
+    int64_t _return = 0;
+    return _return;
   }
 };
 
 typedef struct _kv_rpc_service_put_args__isset {
-  _kv_rpc_service_put_args__isset() : key(false), value(false) {}
+  _kv_rpc_service_put_args__isset() : block_id(false), key(false), value(false) {}
+  bool block_id :1;
   bool key :1;
   bool value :1;
 } _kv_rpc_service_put_args__isset;
@@ -79,14 +85,17 @@ class kv_rpc_service_put_args {
 
   kv_rpc_service_put_args(const kv_rpc_service_put_args&);
   kv_rpc_service_put_args& operator=(const kv_rpc_service_put_args&);
-  kv_rpc_service_put_args() : key(), value() {
+  kv_rpc_service_put_args() : block_id(0), key(), value() {
   }
 
   virtual ~kv_rpc_service_put_args() throw();
+  int32_t block_id;
   std::string key;
   std::string value;
 
   _kv_rpc_service_put_args__isset __isset;
+
+  void __set_block_id(const int32_t val);
 
   void __set_key(const std::string& val);
 
@@ -94,6 +103,8 @@ class kv_rpc_service_put_args {
 
   bool operator == (const kv_rpc_service_put_args & rhs) const
   {
+    if (!(block_id == rhs.block_id))
+      return false;
     if (!(key == rhs.key))
       return false;
     if (!(value == rhs.value))
@@ -119,6 +130,7 @@ class kv_rpc_service_put_pargs {
 
 
   virtual ~kv_rpc_service_put_pargs() throw();
+  const int32_t* block_id;
   const std::string* key;
   const std::string* value;
 
@@ -186,7 +198,8 @@ class kv_rpc_service_put_presult {
 };
 
 typedef struct _kv_rpc_service_get_args__isset {
-  _kv_rpc_service_get_args__isset() : key(false) {}
+  _kv_rpc_service_get_args__isset() : block_id(false), key(false) {}
+  bool block_id :1;
   bool key :1;
 } _kv_rpc_service_get_args__isset;
 
@@ -195,18 +208,23 @@ class kv_rpc_service_get_args {
 
   kv_rpc_service_get_args(const kv_rpc_service_get_args&);
   kv_rpc_service_get_args& operator=(const kv_rpc_service_get_args&);
-  kv_rpc_service_get_args() : key() {
+  kv_rpc_service_get_args() : block_id(0), key() {
   }
 
   virtual ~kv_rpc_service_get_args() throw();
+  int32_t block_id;
   std::string key;
 
   _kv_rpc_service_get_args__isset __isset;
+
+  void __set_block_id(const int32_t val);
 
   void __set_key(const std::string& val);
 
   bool operator == (const kv_rpc_service_get_args & rhs) const
   {
+    if (!(block_id == rhs.block_id))
+      return false;
     if (!(key == rhs.key))
       return false;
     return true;
@@ -230,6 +248,7 @@ class kv_rpc_service_get_pargs {
 
 
   virtual ~kv_rpc_service_get_pargs() throw();
+  const int32_t* block_id;
   const std::string* key;
 
   template <class Protocol_>
@@ -304,7 +323,8 @@ class kv_rpc_service_get_presult {
 };
 
 typedef struct _kv_rpc_service_update_args__isset {
-  _kv_rpc_service_update_args__isset() : key(false), value(false) {}
+  _kv_rpc_service_update_args__isset() : block_id(false), key(false), value(false) {}
+  bool block_id :1;
   bool key :1;
   bool value :1;
 } _kv_rpc_service_update_args__isset;
@@ -314,14 +334,17 @@ class kv_rpc_service_update_args {
 
   kv_rpc_service_update_args(const kv_rpc_service_update_args&);
   kv_rpc_service_update_args& operator=(const kv_rpc_service_update_args&);
-  kv_rpc_service_update_args() : key(), value() {
+  kv_rpc_service_update_args() : block_id(0), key(), value() {
   }
 
   virtual ~kv_rpc_service_update_args() throw();
+  int32_t block_id;
   std::string key;
   std::string value;
 
   _kv_rpc_service_update_args__isset __isset;
+
+  void __set_block_id(const int32_t val);
 
   void __set_key(const std::string& val);
 
@@ -329,6 +352,8 @@ class kv_rpc_service_update_args {
 
   bool operator == (const kv_rpc_service_update_args & rhs) const
   {
+    if (!(block_id == rhs.block_id))
+      return false;
     if (!(key == rhs.key))
       return false;
     if (!(value == rhs.value))
@@ -354,6 +379,7 @@ class kv_rpc_service_update_pargs {
 
 
   virtual ~kv_rpc_service_update_pargs() throw();
+  const int32_t* block_id;
   const std::string* key;
   const std::string* value;
 
@@ -429,7 +455,8 @@ class kv_rpc_service_update_presult {
 };
 
 typedef struct _kv_rpc_service_remove_args__isset {
-  _kv_rpc_service_remove_args__isset() : key(false) {}
+  _kv_rpc_service_remove_args__isset() : block_id(false), key(false) {}
+  bool block_id :1;
   bool key :1;
 } _kv_rpc_service_remove_args__isset;
 
@@ -438,18 +465,23 @@ class kv_rpc_service_remove_args {
 
   kv_rpc_service_remove_args(const kv_rpc_service_remove_args&);
   kv_rpc_service_remove_args& operator=(const kv_rpc_service_remove_args&);
-  kv_rpc_service_remove_args() : key() {
+  kv_rpc_service_remove_args() : block_id(0), key() {
   }
 
   virtual ~kv_rpc_service_remove_args() throw();
+  int32_t block_id;
   std::string key;
 
   _kv_rpc_service_remove_args__isset __isset;
+
+  void __set_block_id(const int32_t val);
 
   void __set_key(const std::string& val);
 
   bool operator == (const kv_rpc_service_remove_args & rhs) const
   {
+    if (!(block_id == rhs.block_id))
+      return false;
     if (!(key == rhs.key))
       return false;
     return true;
@@ -473,6 +505,7 @@ class kv_rpc_service_remove_pargs {
 
 
   virtual ~kv_rpc_service_remove_pargs() throw();
+  const int32_t* block_id;
   const std::string* key;
 
   template <class Protocol_>
@@ -538,6 +571,124 @@ class kv_rpc_service_remove_presult {
 
 };
 
+typedef struct _kv_rpc_service_size_args__isset {
+  _kv_rpc_service_size_args__isset() : block_id(false) {}
+  bool block_id :1;
+} _kv_rpc_service_size_args__isset;
+
+class kv_rpc_service_size_args {
+ public:
+
+  kv_rpc_service_size_args(const kv_rpc_service_size_args&);
+  kv_rpc_service_size_args& operator=(const kv_rpc_service_size_args&);
+  kv_rpc_service_size_args() : block_id(0) {
+  }
+
+  virtual ~kv_rpc_service_size_args() throw();
+  int32_t block_id;
+
+  _kv_rpc_service_size_args__isset __isset;
+
+  void __set_block_id(const int32_t val);
+
+  bool operator == (const kv_rpc_service_size_args & rhs) const
+  {
+    if (!(block_id == rhs.block_id))
+      return false;
+    return true;
+  }
+  bool operator != (const kv_rpc_service_size_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const kv_rpc_service_size_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class kv_rpc_service_size_pargs {
+ public:
+
+
+  virtual ~kv_rpc_service_size_pargs() throw();
+  const int32_t* block_id;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _kv_rpc_service_size_result__isset {
+  _kv_rpc_service_size_result__isset() : success(false), ex(false) {}
+  bool success :1;
+  bool ex :1;
+} _kv_rpc_service_size_result__isset;
+
+class kv_rpc_service_size_result {
+ public:
+
+  kv_rpc_service_size_result(const kv_rpc_service_size_result&);
+  kv_rpc_service_size_result& operator=(const kv_rpc_service_size_result&);
+  kv_rpc_service_size_result() : success(0) {
+  }
+
+  virtual ~kv_rpc_service_size_result() throw();
+  int64_t success;
+  kv_management_rpc_exception ex;
+
+  _kv_rpc_service_size_result__isset __isset;
+
+  void __set_success(const int64_t val);
+
+  void __set_ex(const kv_management_rpc_exception& val);
+
+  bool operator == (const kv_rpc_service_size_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const kv_rpc_service_size_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const kv_rpc_service_size_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _kv_rpc_service_size_presult__isset {
+  _kv_rpc_service_size_presult__isset() : success(false), ex(false) {}
+  bool success :1;
+  bool ex :1;
+} _kv_rpc_service_size_presult__isset;
+
+class kv_rpc_service_size_presult {
+ public:
+
+
+  virtual ~kv_rpc_service_size_presult() throw();
+  int64_t* success;
+  kv_management_rpc_exception ex;
+
+  _kv_rpc_service_size_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
 template <class Protocol_>
 class kv_rpc_serviceClientT : virtual public kv_rpc_serviceIf {
  public:
@@ -564,18 +715,21 @@ class kv_rpc_serviceClientT : virtual public kv_rpc_serviceIf {
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void put(const std::string& key, const std::string& value);
-  void send_put(const std::string& key, const std::string& value);
+  void put(const int32_t block_id, const std::string& key, const std::string& value);
+  void send_put(const int32_t block_id, const std::string& key, const std::string& value);
   void recv_put();
-  void get(std::string& _return, const std::string& key);
-  void send_get(const std::string& key);
+  void get(std::string& _return, const int32_t block_id, const std::string& key);
+  void send_get(const int32_t block_id, const std::string& key);
   void recv_get(std::string& _return);
-  void update(std::string& _return, const std::string& key, const std::string& value);
-  void send_update(const std::string& key, const std::string& value);
+  void update(std::string& _return, const int32_t block_id, const std::string& key, const std::string& value);
+  void send_update(const int32_t block_id, const std::string& key, const std::string& value);
   void recv_update(std::string& _return);
-  void remove(const std::string& key);
-  void send_remove(const std::string& key);
+  void remove(const int32_t block_id, const std::string& key);
+  void send_remove(const int32_t block_id, const std::string& key);
   void recv_remove();
+  int64_t size(const int32_t block_id);
+  void send_size(const int32_t block_id);
+  int64_t recv_size();
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
@@ -612,6 +766,8 @@ class kv_rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Pr
   void process_update(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_remove(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_remove(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_size(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_size(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
  public:
   kv_rpc_serviceProcessorT(::apache::thrift::stdcxx::shared_ptr<kv_rpc_serviceIf> iface) :
     iface_(iface) {
@@ -627,6 +783,9 @@ class kv_rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Pr
     processMap_["remove"] = ProcessFunctions(
       &kv_rpc_serviceProcessorT::process_remove,
       &kv_rpc_serviceProcessorT::process_remove);
+    processMap_["size"] = ProcessFunctions(
+      &kv_rpc_serviceProcessorT::process_size,
+      &kv_rpc_serviceProcessorT::process_size);
   }
 
   virtual ~kv_rpc_serviceProcessorT() {}
@@ -660,42 +819,51 @@ class kv_rpc_serviceMultiface : virtual public kv_rpc_serviceIf {
     ifaces_.push_back(iface);
   }
  public:
-  void put(const std::string& key, const std::string& value) {
+  void put(const int32_t block_id, const std::string& key, const std::string& value) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->put(key, value);
+      ifaces_[i]->put(block_id, key, value);
     }
-    ifaces_[i]->put(key, value);
+    ifaces_[i]->put(block_id, key, value);
   }
 
-  void get(std::string& _return, const std::string& key) {
+  void get(std::string& _return, const int32_t block_id, const std::string& key) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->get(_return, key);
+      ifaces_[i]->get(_return, block_id, key);
     }
-    ifaces_[i]->get(_return, key);
+    ifaces_[i]->get(_return, block_id, key);
     return;
   }
 
-  void update(std::string& _return, const std::string& key, const std::string& value) {
+  void update(std::string& _return, const int32_t block_id, const std::string& key, const std::string& value) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->update(_return, key, value);
+      ifaces_[i]->update(_return, block_id, key, value);
     }
-    ifaces_[i]->update(_return, key, value);
+    ifaces_[i]->update(_return, block_id, key, value);
     return;
   }
 
-  void remove(const std::string& key) {
+  void remove(const int32_t block_id, const std::string& key) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->remove(key);
+      ifaces_[i]->remove(block_id, key);
     }
-    ifaces_[i]->remove(key);
+    ifaces_[i]->remove(block_id, key);
+  }
+
+  int64_t size(const int32_t block_id) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->size(block_id);
+    }
+    return ifaces_[i]->size(block_id);
   }
 
 };
@@ -729,18 +897,21 @@ class kv_rpc_serviceConcurrentClientT : virtual public kv_rpc_serviceIf {
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void put(const std::string& key, const std::string& value);
-  int32_t send_put(const std::string& key, const std::string& value);
+  void put(const int32_t block_id, const std::string& key, const std::string& value);
+  int32_t send_put(const int32_t block_id, const std::string& key, const std::string& value);
   void recv_put(const int32_t seqid);
-  void get(std::string& _return, const std::string& key);
-  int32_t send_get(const std::string& key);
+  void get(std::string& _return, const int32_t block_id, const std::string& key);
+  int32_t send_get(const int32_t block_id, const std::string& key);
   void recv_get(std::string& _return, const int32_t seqid);
-  void update(std::string& _return, const std::string& key, const std::string& value);
-  int32_t send_update(const std::string& key, const std::string& value);
+  void update(std::string& _return, const int32_t block_id, const std::string& key, const std::string& value);
+  int32_t send_update(const int32_t block_id, const std::string& key, const std::string& value);
   void recv_update(std::string& _return, const int32_t seqid);
-  void remove(const std::string& key);
-  int32_t send_remove(const std::string& key);
+  void remove(const int32_t block_id, const std::string& key);
+  int32_t send_remove(const int32_t block_id, const std::string& key);
   void recv_remove(const int32_t seqid);
+  int64_t size(const int32_t block_id);
+  int32_t send_size(const int32_t block_id);
+  int64_t recv_size(const int32_t seqid);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;

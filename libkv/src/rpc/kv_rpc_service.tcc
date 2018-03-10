@@ -35,6 +35,14 @@ uint32_t kv_rpc_service_put_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readBinary(this->key);
           this->__isset.key = true;
@@ -42,7 +50,7 @@ uint32_t kv_rpc_service_put_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readBinary(this->value);
           this->__isset.value = true;
@@ -68,11 +76,15 @@ uint32_t kv_rpc_service_put_args::write(Protocol_* oprot) const {
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_put_args");
 
-  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeBinary(this->key);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("value", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeFieldBegin("value", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeBinary(this->value);
   xfer += oprot->writeFieldEnd();
 
@@ -88,11 +100,15 @@ uint32_t kv_rpc_service_put_pargs::write(Protocol_* oprot) const {
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_put_pargs");
 
-  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeBinary((*(this->key)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("value", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeFieldBegin("value", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeBinary((*(this->value)));
   xfer += oprot->writeFieldEnd();
 
@@ -228,6 +244,14 @@ uint32_t kv_rpc_service_get_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readBinary(this->key);
           this->__isset.key = true;
@@ -253,7 +277,11 @@ uint32_t kv_rpc_service_get_args::write(Protocol_* oprot) const {
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_get_args");
 
-  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeBinary(this->key);
   xfer += oprot->writeFieldEnd();
 
@@ -269,7 +297,11 @@ uint32_t kv_rpc_service_get_pargs::write(Protocol_* oprot) const {
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_get_pargs");
 
-  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeBinary((*(this->key)));
   xfer += oprot->writeFieldEnd();
 
@@ -425,6 +457,14 @@ uint32_t kv_rpc_service_update_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readBinary(this->key);
           this->__isset.key = true;
@@ -432,7 +472,7 @@ uint32_t kv_rpc_service_update_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readBinary(this->value);
           this->__isset.value = true;
@@ -458,11 +498,15 @@ uint32_t kv_rpc_service_update_args::write(Protocol_* oprot) const {
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_update_args");
 
-  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeBinary(this->key);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("value", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeFieldBegin("value", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeBinary(this->value);
   xfer += oprot->writeFieldEnd();
 
@@ -478,11 +522,15 @@ uint32_t kv_rpc_service_update_pargs::write(Protocol_* oprot) const {
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_update_pargs");
 
-  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeBinary((*(this->key)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("value", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeFieldBegin("value", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeBinary((*(this->value)));
   xfer += oprot->writeFieldEnd();
 
@@ -638,6 +686,14 @@ uint32_t kv_rpc_service_remove_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readBinary(this->key);
           this->__isset.key = true;
@@ -663,7 +719,11 @@ uint32_t kv_rpc_service_remove_args::write(Protocol_* oprot) const {
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_remove_args");
 
-  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeBinary(this->key);
   xfer += oprot->writeFieldEnd();
 
@@ -679,7 +739,11 @@ uint32_t kv_rpc_service_remove_pargs::write(Protocol_* oprot) const {
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_remove_pargs");
 
-  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeBinary((*(this->key)));
   xfer += oprot->writeFieldEnd();
 
@@ -791,20 +855,218 @@ uint32_t kv_rpc_service_remove_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
+
 template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::put(const std::string& key, const std::string& value)
+uint32_t kv_rpc_service_size_args::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t kv_rpc_service_size_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("kv_rpc_service_size_args");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t kv_rpc_service_size_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("kv_rpc_service_size_pargs");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t kv_rpc_service_size_result::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->success);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t kv_rpc_service_size_result::write(Protocol_* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("kv_rpc_service_size_result");
+
+  if (this->__isset.success) {
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I64, 0);
+    xfer += oprot->writeI64(this->success);
+    xfer += oprot->writeFieldEnd();
+  } else if (this->__isset.ex) {
+    xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ex.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t kv_rpc_service_size_presult::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64((*(this->success)));
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+void kv_rpc_serviceClientT<Protocol_>::put(const int32_t block_id, const std::string& key, const std::string& value)
 {
-  send_put(key, value);
+  send_put(block_id, key, value);
   recv_put();
 }
 
 template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::send_put(const std::string& key, const std::string& value)
+void kv_rpc_serviceClientT<Protocol_>::send_put(const int32_t block_id, const std::string& key, const std::string& value)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("put", ::apache::thrift::protocol::T_CALL, cseqid);
 
   kv_rpc_service_put_pargs args;
+  args.block_id = &block_id;
   args.key = &key;
   args.value = &value;
   args.write(this->oprot_);
@@ -852,19 +1114,20 @@ void kv_rpc_serviceClientT<Protocol_>::recv_put()
 }
 
 template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::get(std::string& _return, const std::string& key)
+void kv_rpc_serviceClientT<Protocol_>::get(std::string& _return, const int32_t block_id, const std::string& key)
 {
-  send_get(key);
+  send_get(block_id, key);
   recv_get(_return);
 }
 
 template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::send_get(const std::string& key)
+void kv_rpc_serviceClientT<Protocol_>::send_get(const int32_t block_id, const std::string& key)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("get", ::apache::thrift::protocol::T_CALL, cseqid);
 
   kv_rpc_service_get_pargs args;
+  args.block_id = &block_id;
   args.key = &key;
   args.write(this->oprot_);
 
@@ -916,19 +1179,20 @@ void kv_rpc_serviceClientT<Protocol_>::recv_get(std::string& _return)
 }
 
 template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::update(std::string& _return, const std::string& key, const std::string& value)
+void kv_rpc_serviceClientT<Protocol_>::update(std::string& _return, const int32_t block_id, const std::string& key, const std::string& value)
 {
-  send_update(key, value);
+  send_update(block_id, key, value);
   recv_update(_return);
 }
 
 template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::send_update(const std::string& key, const std::string& value)
+void kv_rpc_serviceClientT<Protocol_>::send_update(const int32_t block_id, const std::string& key, const std::string& value)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("update", ::apache::thrift::protocol::T_CALL, cseqid);
 
   kv_rpc_service_update_pargs args;
+  args.block_id = &block_id;
   args.key = &key;
   args.value = &value;
   args.write(this->oprot_);
@@ -981,19 +1245,20 @@ void kv_rpc_serviceClientT<Protocol_>::recv_update(std::string& _return)
 }
 
 template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::remove(const std::string& key)
+void kv_rpc_serviceClientT<Protocol_>::remove(const int32_t block_id, const std::string& key)
 {
-  send_remove(key);
+  send_remove(block_id, key);
   recv_remove();
 }
 
 template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::send_remove(const std::string& key)
+void kv_rpc_serviceClientT<Protocol_>::send_remove(const int32_t block_id, const std::string& key)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("remove", ::apache::thrift::protocol::T_CALL, cseqid);
 
   kv_rpc_service_remove_pargs args;
+  args.block_id = &block_id;
   args.key = &key;
   args.write(this->oprot_);
 
@@ -1037,6 +1302,70 @@ void kv_rpc_serviceClientT<Protocol_>::recv_remove()
     throw result.ex;
   }
   return;
+}
+
+template <class Protocol_>
+int64_t kv_rpc_serviceClientT<Protocol_>::size(const int32_t block_id)
+{
+  send_size(block_id);
+  return recv_size();
+}
+
+template <class Protocol_>
+void kv_rpc_serviceClientT<Protocol_>::send_size(const int32_t block_id)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("size", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  kv_rpc_service_size_pargs args;
+  args.block_id = &block_id;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+int64_t kv_rpc_serviceClientT<Protocol_>::recv_size()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("size") != 0) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  int64_t _return;
+  kv_rpc_service_size_presult result;
+  result.success = &_return;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+
+  if (result.__isset.success) {
+    return _return;
+  }
+  if (result.__isset.ex) {
+    throw result.ex;
+  }
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "size failed: unknown result");
 }
 
 template <class Protocol_>
@@ -1103,7 +1432,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_put(int32_t seqid, ::apache::t
 
   kv_rpc_service_put_result result;
   try {
-    iface_->put(args.key, args.value);
+    iface_->put(args.block_id, args.key, args.value);
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -1160,7 +1489,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_put(int32_t seqid, Protocol_* 
 
   kv_rpc_service_put_result result;
   try {
-    iface_->put(args.key, args.value);
+    iface_->put(args.block_id, args.key, args.value);
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -1217,7 +1546,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_get(int32_t seqid, ::apache::t
 
   kv_rpc_service_get_result result;
   try {
-    iface_->get(result.success, args.key);
+    iface_->get(result.success, args.block_id, args.key);
     result.__isset.success = true;
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
@@ -1275,7 +1604,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_get(int32_t seqid, Protocol_* 
 
   kv_rpc_service_get_result result;
   try {
-    iface_->get(result.success, args.key);
+    iface_->get(result.success, args.block_id, args.key);
     result.__isset.success = true;
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
@@ -1333,7 +1662,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_update(int32_t seqid, ::apache
 
   kv_rpc_service_update_result result;
   try {
-    iface_->update(result.success, args.key, args.value);
+    iface_->update(result.success, args.block_id, args.key, args.value);
     result.__isset.success = true;
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
@@ -1391,7 +1720,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_update(int32_t seqid, Protocol
 
   kv_rpc_service_update_result result;
   try {
-    iface_->update(result.success, args.key, args.value);
+    iface_->update(result.success, args.block_id, args.key, args.value);
     result.__isset.success = true;
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
@@ -1449,7 +1778,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, ::apache
 
   kv_rpc_service_remove_result result;
   try {
-    iface_->remove(args.key);
+    iface_->remove(args.block_id, args.key);
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -1506,7 +1835,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, Protocol
 
   kv_rpc_service_remove_result result;
   try {
-    iface_->remove(args.key);
+    iface_->remove(args.block_id, args.key);
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -1540,6 +1869,122 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, Protocol
 }
 
 template <class Protocol_>
+void kv_rpc_serviceProcessorT<Protocol_>::process_size(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("kv_rpc_service.size", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "kv_rpc_service.size");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "kv_rpc_service.size");
+  }
+
+  kv_rpc_service_size_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "kv_rpc_service.size", bytes);
+  }
+
+  kv_rpc_service_size_result result;
+  try {
+    result.success = iface_->size(args.block_id);
+    result.__isset.success = true;
+  } catch (kv_management_rpc_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "kv_rpc_service.size");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("size", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "kv_rpc_service.size");
+  }
+
+  oprot->writeMessageBegin("size", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "kv_rpc_service.size", bytes);
+  }
+}
+
+template <class Protocol_>
+void kv_rpc_serviceProcessorT<Protocol_>::process_size(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("kv_rpc_service.size", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "kv_rpc_service.size");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "kv_rpc_service.size");
+  }
+
+  kv_rpc_service_size_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "kv_rpc_service.size", bytes);
+  }
+
+  kv_rpc_service_size_result result;
+  try {
+    result.success = iface_->size(args.block_id);
+    result.__isset.success = true;
+  } catch (kv_management_rpc_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "kv_rpc_service.size");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("size", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "kv_rpc_service.size");
+  }
+
+  oprot->writeMessageBegin("size", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "kv_rpc_service.size", bytes);
+  }
+}
+
+template <class Protocol_>
 ::apache::thrift::stdcxx::shared_ptr< ::apache::thrift::TProcessor > kv_rpc_serviceProcessorFactoryT<Protocol_>::getProcessor(const ::apache::thrift::TConnectionInfo& connInfo) {
   ::apache::thrift::ReleaseHandler< kv_rpc_serviceIfFactory > cleanup(handlerFactory_);
   ::apache::thrift::stdcxx::shared_ptr< kv_rpc_serviceIf > handler(handlerFactory_->getHandler(connInfo), cleanup);
@@ -1548,20 +1993,21 @@ template <class Protocol_>
 }
 
 template <class Protocol_>
-void kv_rpc_serviceConcurrentClientT<Protocol_>::put(const std::string& key, const std::string& value)
+void kv_rpc_serviceConcurrentClientT<Protocol_>::put(const int32_t block_id, const std::string& key, const std::string& value)
 {
-  int32_t seqid = send_put(key, value);
+  int32_t seqid = send_put(block_id, key, value);
   recv_put(seqid);
 }
 
 template <class Protocol_>
-int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_put(const std::string& key, const std::string& value)
+int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_put(const int32_t block_id, const std::string& key, const std::string& value)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("put", ::apache::thrift::protocol::T_CALL, cseqid);
 
   kv_rpc_service_put_pargs args;
+  args.block_id = &block_id;
   args.key = &key;
   args.value = &value;
   args.write(this->oprot_);
@@ -1634,20 +2080,21 @@ void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_put(const int32_t seqid)
 }
 
 template <class Protocol_>
-void kv_rpc_serviceConcurrentClientT<Protocol_>::get(std::string& _return, const std::string& key)
+void kv_rpc_serviceConcurrentClientT<Protocol_>::get(std::string& _return, const int32_t block_id, const std::string& key)
 {
-  int32_t seqid = send_get(key);
+  int32_t seqid = send_get(block_id, key);
   recv_get(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_get(const std::string& key)
+int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_get(const int32_t block_id, const std::string& key)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("get", ::apache::thrift::protocol::T_CALL, cseqid);
 
   kv_rpc_service_get_pargs args;
+  args.block_id = &block_id;
   args.key = &key;
   args.write(this->oprot_);
 
@@ -1725,20 +2172,21 @@ void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_get(std::string& _return, 
 }
 
 template <class Protocol_>
-void kv_rpc_serviceConcurrentClientT<Protocol_>::update(std::string& _return, const std::string& key, const std::string& value)
+void kv_rpc_serviceConcurrentClientT<Protocol_>::update(std::string& _return, const int32_t block_id, const std::string& key, const std::string& value)
 {
-  int32_t seqid = send_update(key, value);
+  int32_t seqid = send_update(block_id, key, value);
   recv_update(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_update(const std::string& key, const std::string& value)
+int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_update(const int32_t block_id, const std::string& key, const std::string& value)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("update", ::apache::thrift::protocol::T_CALL, cseqid);
 
   kv_rpc_service_update_pargs args;
+  args.block_id = &block_id;
   args.key = &key;
   args.value = &value;
   args.write(this->oprot_);
@@ -1817,20 +2265,21 @@ void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_update(std::string& _retur
 }
 
 template <class Protocol_>
-void kv_rpc_serviceConcurrentClientT<Protocol_>::remove(const std::string& key)
+void kv_rpc_serviceConcurrentClientT<Protocol_>::remove(const int32_t block_id, const std::string& key)
 {
-  int32_t seqid = send_remove(key);
+  int32_t seqid = send_remove(block_id, key);
   recv_remove(seqid);
 }
 
 template <class Protocol_>
-int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_remove(const std::string& key)
+int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_remove(const int32_t block_id, const std::string& key)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("remove", ::apache::thrift::protocol::T_CALL, cseqid);
 
   kv_rpc_service_remove_pargs args;
+  args.block_id = &block_id;
   args.key = &key;
   args.write(this->oprot_);
 
@@ -1892,6 +2341,97 @@ void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_remove(const int32_t seqid
       }
       sentry.commit();
       return;
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+template <class Protocol_>
+int64_t kv_rpc_serviceConcurrentClientT<Protocol_>::size(const int32_t block_id)
+{
+  int32_t seqid = send_size(block_id);
+  return recv_size(seqid);
+}
+
+template <class Protocol_>
+int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_size(const int32_t block_id)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("size", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  kv_rpc_service_size_pargs args;
+  args.block_id = &block_id;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+template <class Protocol_>
+int64_t kv_rpc_serviceConcurrentClientT<Protocol_>::recv_size(const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      this->iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(this->iprot_);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("size") != 0) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      int64_t _return;
+      kv_rpc_service_size_presult result;
+      result.success = &_return;
+      result.read(this->iprot_);
+      this->iprot_->readMessageEnd();
+      this->iprot_->getTransport()->readEnd();
+
+      if (result.__isset.success) {
+        sentry.commit();
+        return _return;
+      }
+      if (result.__isset.ex) {
+        sentry.commit();
+        throw result.ex;
+      }
+      // in a bad state, don't commit
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "size failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);

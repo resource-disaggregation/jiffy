@@ -32,7 +32,20 @@ uint32_t kv_management_rpc_service_clear_args::read(Protocol_* iprot) {
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    xfer += iprot->skip(ftype);
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
     xfer += iprot->readFieldEnd();
   }
 
@@ -47,6 +60,10 @@ uint32_t kv_management_rpc_service_clear_args::write(Protocol_* oprot) const {
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_management_rpc_service_clear_args");
 
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -58,6 +75,10 @@ uint32_t kv_management_rpc_service_clear_pargs::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_management_rpc_service_clear_pargs");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
@@ -169,7 +190,7 @@ uint32_t kv_management_rpc_service_clear_presult::read(Protocol_* iprot) {
 
 
 template <class Protocol_>
-uint32_t kv_management_rpc_service_size_args::read(Protocol_* iprot) {
+uint32_t kv_management_rpc_service_storage_capacity_args::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -188,7 +209,20 @@ uint32_t kv_management_rpc_service_size_args::read(Protocol_* iprot) {
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    xfer += iprot->skip(ftype);
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
     xfer += iprot->readFieldEnd();
   }
 
@@ -198,10 +232,14 @@ uint32_t kv_management_rpc_service_size_args::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t kv_management_rpc_service_size_args::write(Protocol_* oprot) const {
+uint32_t kv_management_rpc_service_storage_capacity_args::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("kv_management_rpc_service_size_args");
+  xfer += oprot->writeStructBegin("kv_management_rpc_service_storage_capacity_args");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
@@ -210,10 +248,14 @@ uint32_t kv_management_rpc_service_size_args::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t kv_management_rpc_service_size_pargs::write(Protocol_* oprot) const {
+uint32_t kv_management_rpc_service_storage_capacity_pargs::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("kv_management_rpc_service_size_pargs");
+  xfer += oprot->writeStructBegin("kv_management_rpc_service_storage_capacity_pargs");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
@@ -222,7 +264,7 @@ uint32_t kv_management_rpc_service_size_pargs::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t kv_management_rpc_service_size_result::read(Protocol_* iprot) {
+uint32_t kv_management_rpc_service_storage_capacity_result::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -272,11 +314,11 @@ uint32_t kv_management_rpc_service_size_result::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t kv_management_rpc_service_size_result::write(Protocol_* oprot) const {
+uint32_t kv_management_rpc_service_storage_capacity_result::write(Protocol_* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("kv_management_rpc_service_size_result");
+  xfer += oprot->writeStructBegin("kv_management_rpc_service_storage_capacity_result");
 
   if (this->__isset.success) {
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I64, 0);
@@ -294,7 +336,7 @@ uint32_t kv_management_rpc_service_size_result::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t kv_management_rpc_service_size_presult::read(Protocol_* iprot) {
+uint32_t kv_management_rpc_service_storage_capacity_presult::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -345,7 +387,7 @@ uint32_t kv_management_rpc_service_size_presult::read(Protocol_* iprot) {
 
 
 template <class Protocol_>
-uint32_t kv_management_rpc_service_capacity_args::read(Protocol_* iprot) {
+uint32_t kv_management_rpc_service_storage_size_args::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -364,7 +406,20 @@ uint32_t kv_management_rpc_service_capacity_args::read(Protocol_* iprot) {
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    xfer += iprot->skip(ftype);
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
     xfer += iprot->readFieldEnd();
   }
 
@@ -374,10 +429,14 @@ uint32_t kv_management_rpc_service_capacity_args::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t kv_management_rpc_service_capacity_args::write(Protocol_* oprot) const {
+uint32_t kv_management_rpc_service_storage_size_args::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("kv_management_rpc_service_capacity_args");
+  xfer += oprot->writeStructBegin("kv_management_rpc_service_storage_size_args");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
@@ -386,10 +445,14 @@ uint32_t kv_management_rpc_service_capacity_args::write(Protocol_* oprot) const 
 
 
 template <class Protocol_>
-uint32_t kv_management_rpc_service_capacity_pargs::write(Protocol_* oprot) const {
+uint32_t kv_management_rpc_service_storage_size_pargs::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("kv_management_rpc_service_capacity_pargs");
+  xfer += oprot->writeStructBegin("kv_management_rpc_service_storage_size_pargs");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
@@ -398,7 +461,7 @@ uint32_t kv_management_rpc_service_capacity_pargs::write(Protocol_* oprot) const
 
 
 template <class Protocol_>
-uint32_t kv_management_rpc_service_capacity_result::read(Protocol_* iprot) {
+uint32_t kv_management_rpc_service_storage_size_result::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -448,11 +511,11 @@ uint32_t kv_management_rpc_service_capacity_result::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t kv_management_rpc_service_capacity_result::write(Protocol_* oprot) const {
+uint32_t kv_management_rpc_service_storage_size_result::write(Protocol_* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("kv_management_rpc_service_capacity_result");
+  xfer += oprot->writeStructBegin("kv_management_rpc_service_storage_size_result");
 
   if (this->__isset.success) {
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I64, 0);
@@ -470,183 +533,7 @@ uint32_t kv_management_rpc_service_capacity_result::write(Protocol_* oprot) cons
 
 
 template <class Protocol_>
-uint32_t kv_management_rpc_service_capacity_presult::read(Protocol_* iprot) {
-
-  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64((*(this->success)));
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->ex.read(iprot);
-          this->__isset.ex = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t kv_management_rpc_service_num_entries_args::read(Protocol_* iprot) {
-
-  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    xfer += iprot->skip(ftype);
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-template <class Protocol_>
-uint32_t kv_management_rpc_service_num_entries_args::write(Protocol_* oprot) const {
-  uint32_t xfer = 0;
-  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("kv_management_rpc_service_num_entries_args");
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t kv_management_rpc_service_num_entries_pargs::write(Protocol_* oprot) const {
-  uint32_t xfer = 0;
-  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("kv_management_rpc_service_num_entries_pargs");
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t kv_management_rpc_service_num_entries_result::read(Protocol_* iprot) {
-
-  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->success);
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->ex.read(iprot);
-          this->__isset.ex = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-template <class Protocol_>
-uint32_t kv_management_rpc_service_num_entries_result::write(Protocol_* oprot) const {
-
-  uint32_t xfer = 0;
-
-  xfer += oprot->writeStructBegin("kv_management_rpc_service_num_entries_result");
-
-  if (this->__isset.success) {
-    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I64, 0);
-    xfer += oprot->writeI64(this->success);
-    xfer += oprot->writeFieldEnd();
-  } else if (this->__isset.ex) {
-    xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
-    xfer += this->ex.write(oprot);
-    xfer += oprot->writeFieldEnd();
-  }
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t kv_management_rpc_service_num_entries_presult::read(Protocol_* iprot) {
+uint32_t kv_management_rpc_service_storage_size_presult::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -696,19 +583,20 @@ uint32_t kv_management_rpc_service_num_entries_presult::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-void kv_management_rpc_serviceClientT<Protocol_>::clear()
+void kv_management_rpc_serviceClientT<Protocol_>::clear(const int32_t block_id)
 {
-  send_clear();
+  send_clear(block_id);
   recv_clear();
 }
 
 template <class Protocol_>
-void kv_management_rpc_serviceClientT<Protocol_>::send_clear()
+void kv_management_rpc_serviceClientT<Protocol_>::send_clear(const int32_t block_id)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("clear", ::apache::thrift::protocol::T_CALL, cseqid);
 
   kv_management_rpc_service_clear_pargs args;
+  args.block_id = &block_id;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -754,19 +642,20 @@ void kv_management_rpc_serviceClientT<Protocol_>::recv_clear()
 }
 
 template <class Protocol_>
-int64_t kv_management_rpc_serviceClientT<Protocol_>::size()
+int64_t kv_management_rpc_serviceClientT<Protocol_>::storage_capacity(const int32_t block_id)
 {
-  send_size();
-  return recv_size();
+  send_storage_capacity(block_id);
+  return recv_storage_capacity();
 }
 
 template <class Protocol_>
-void kv_management_rpc_serviceClientT<Protocol_>::send_size()
+void kv_management_rpc_serviceClientT<Protocol_>::send_storage_capacity(const int32_t block_id)
 {
   int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("size", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("storage_capacity", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  kv_management_rpc_service_size_pargs args;
+  kv_management_rpc_service_storage_capacity_pargs args;
+  args.block_id = &block_id;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -775,7 +664,7 @@ void kv_management_rpc_serviceClientT<Protocol_>::send_size()
 }
 
 template <class Protocol_>
-int64_t kv_management_rpc_serviceClientT<Protocol_>::recv_size()
+int64_t kv_management_rpc_serviceClientT<Protocol_>::recv_storage_capacity()
 {
 
   int32_t rseqid = 0;
@@ -795,13 +684,13 @@ int64_t kv_management_rpc_serviceClientT<Protocol_>::recv_size()
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("size") != 0) {
+  if (fname.compare("storage_capacity") != 0) {
     this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
   int64_t _return;
-  kv_management_rpc_service_size_presult result;
+  kv_management_rpc_service_storage_capacity_presult result;
   result.success = &_return;
   result.read(this->iprot_);
   this->iprot_->readMessageEnd();
@@ -813,23 +702,24 @@ int64_t kv_management_rpc_serviceClientT<Protocol_>::recv_size()
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "size failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "storage_capacity failed: unknown result");
 }
 
 template <class Protocol_>
-int64_t kv_management_rpc_serviceClientT<Protocol_>::capacity()
+int64_t kv_management_rpc_serviceClientT<Protocol_>::storage_size(const int32_t block_id)
 {
-  send_capacity();
-  return recv_capacity();
+  send_storage_size(block_id);
+  return recv_storage_size();
 }
 
 template <class Protocol_>
-void kv_management_rpc_serviceClientT<Protocol_>::send_capacity()
+void kv_management_rpc_serviceClientT<Protocol_>::send_storage_size(const int32_t block_id)
 {
   int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("capacity", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("storage_size", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  kv_management_rpc_service_capacity_pargs args;
+  kv_management_rpc_service_storage_size_pargs args;
+  args.block_id = &block_id;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -838,7 +728,7 @@ void kv_management_rpc_serviceClientT<Protocol_>::send_capacity()
 }
 
 template <class Protocol_>
-int64_t kv_management_rpc_serviceClientT<Protocol_>::recv_capacity()
+int64_t kv_management_rpc_serviceClientT<Protocol_>::recv_storage_size()
 {
 
   int32_t rseqid = 0;
@@ -858,13 +748,13 @@ int64_t kv_management_rpc_serviceClientT<Protocol_>::recv_capacity()
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("capacity") != 0) {
+  if (fname.compare("storage_size") != 0) {
     this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
   int64_t _return;
-  kv_management_rpc_service_capacity_presult result;
+  kv_management_rpc_service_storage_size_presult result;
   result.success = &_return;
   result.read(this->iprot_);
   this->iprot_->readMessageEnd();
@@ -876,70 +766,7 @@ int64_t kv_management_rpc_serviceClientT<Protocol_>::recv_capacity()
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "capacity failed: unknown result");
-}
-
-template <class Protocol_>
-int64_t kv_management_rpc_serviceClientT<Protocol_>::num_entries()
-{
-  send_num_entries();
-  return recv_num_entries();
-}
-
-template <class Protocol_>
-void kv_management_rpc_serviceClientT<Protocol_>::send_num_entries()
-{
-  int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("num_entries", ::apache::thrift::protocol::T_CALL, cseqid);
-
-  kv_management_rpc_service_num_entries_pargs args;
-  args.write(this->oprot_);
-
-  this->oprot_->writeMessageEnd();
-  this->oprot_->getTransport()->writeEnd();
-  this->oprot_->getTransport()->flush();
-}
-
-template <class Protocol_>
-int64_t kv_management_rpc_serviceClientT<Protocol_>::recv_num_entries()
-{
-
-  int32_t rseqid = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TMessageType mtype;
-
-  this->iprot_->readMessageBegin(fname, mtype, rseqid);
-  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
-    ::apache::thrift::TApplicationException x;
-    x.read(this->iprot_);
-    this->iprot_->readMessageEnd();
-    this->iprot_->getTransport()->readEnd();
-    throw x;
-  }
-  if (mtype != ::apache::thrift::protocol::T_REPLY) {
-    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-    this->iprot_->readMessageEnd();
-    this->iprot_->getTransport()->readEnd();
-  }
-  if (fname.compare("num_entries") != 0) {
-    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-    this->iprot_->readMessageEnd();
-    this->iprot_->getTransport()->readEnd();
-  }
-  int64_t _return;
-  kv_management_rpc_service_num_entries_presult result;
-  result.success = &_return;
-  result.read(this->iprot_);
-  this->iprot_->readMessageEnd();
-  this->iprot_->getTransport()->readEnd();
-
-  if (result.__isset.success) {
-    return _return;
-  }
-  if (result.__isset.ex) {
-    throw result.ex;
-  }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "num_entries failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "storage_size failed: unknown result");
 }
 
 template <class Protocol_>
@@ -1006,7 +833,7 @@ void kv_management_rpc_serviceProcessorT<Protocol_>::process_clear(int32_t seqid
 
   kv_management_rpc_service_clear_result result;
   try {
-    iface_->clear();
+    iface_->clear(args.block_id);
   } catch (kv_management_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -1063,7 +890,7 @@ void kv_management_rpc_serviceProcessorT<Protocol_>::process_clear(int32_t seqid
 
   kv_management_rpc_service_clear_result result;
   try {
-    iface_->clear();
+    iface_->clear(args.block_id);
   } catch (kv_management_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -1097,41 +924,41 @@ void kv_management_rpc_serviceProcessorT<Protocol_>::process_clear(int32_t seqid
 }
 
 template <class Protocol_>
-void kv_management_rpc_serviceProcessorT<Protocol_>::process_size(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void kv_management_rpc_serviceProcessorT<Protocol_>::process_storage_capacity(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("kv_management_rpc_service.size", callContext);
+    ctx = this->eventHandler_->getContext("kv_management_rpc_service.storage_capacity", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "kv_management_rpc_service.size");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "kv_management_rpc_service.storage_capacity");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "kv_management_rpc_service.size");
+    this->eventHandler_->preRead(ctx, "kv_management_rpc_service.storage_capacity");
   }
 
-  kv_management_rpc_service_size_args args;
+  kv_management_rpc_service_storage_capacity_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "kv_management_rpc_service.size", bytes);
+    this->eventHandler_->postRead(ctx, "kv_management_rpc_service.storage_capacity", bytes);
   }
 
-  kv_management_rpc_service_size_result result;
+  kv_management_rpc_service_storage_capacity_result result;
   try {
-    result.success = iface_->size();
+    result.success = iface_->storage_capacity(args.block_id);
     result.__isset.success = true;
   } catch (kv_management_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "kv_management_rpc_service.size");
+      this->eventHandler_->handlerError(ctx, "kv_management_rpc_service.storage_capacity");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("size", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("storage_capacity", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -1140,56 +967,56 @@ void kv_management_rpc_serviceProcessorT<Protocol_>::process_size(int32_t seqid,
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "kv_management_rpc_service.size");
+    this->eventHandler_->preWrite(ctx, "kv_management_rpc_service.storage_capacity");
   }
 
-  oprot->writeMessageBegin("size", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("storage_capacity", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "kv_management_rpc_service.size", bytes);
+    this->eventHandler_->postWrite(ctx, "kv_management_rpc_service.storage_capacity", bytes);
   }
 }
 
 template <class Protocol_>
-void kv_management_rpc_serviceProcessorT<Protocol_>::process_size(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+void kv_management_rpc_serviceProcessorT<Protocol_>::process_storage_capacity(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("kv_management_rpc_service.size", callContext);
+    ctx = this->eventHandler_->getContext("kv_management_rpc_service.storage_capacity", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "kv_management_rpc_service.size");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "kv_management_rpc_service.storage_capacity");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "kv_management_rpc_service.size");
+    this->eventHandler_->preRead(ctx, "kv_management_rpc_service.storage_capacity");
   }
 
-  kv_management_rpc_service_size_args args;
+  kv_management_rpc_service_storage_capacity_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "kv_management_rpc_service.size", bytes);
+    this->eventHandler_->postRead(ctx, "kv_management_rpc_service.storage_capacity", bytes);
   }
 
-  kv_management_rpc_service_size_result result;
+  kv_management_rpc_service_storage_capacity_result result;
   try {
-    result.success = iface_->size();
+    result.success = iface_->storage_capacity(args.block_id);
     result.__isset.success = true;
   } catch (kv_management_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "kv_management_rpc_service.size");
+      this->eventHandler_->handlerError(ctx, "kv_management_rpc_service.storage_capacity");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("size", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("storage_capacity", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -1198,56 +1025,56 @@ void kv_management_rpc_serviceProcessorT<Protocol_>::process_size(int32_t seqid,
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "kv_management_rpc_service.size");
+    this->eventHandler_->preWrite(ctx, "kv_management_rpc_service.storage_capacity");
   }
 
-  oprot->writeMessageBegin("size", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("storage_capacity", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "kv_management_rpc_service.size", bytes);
+    this->eventHandler_->postWrite(ctx, "kv_management_rpc_service.storage_capacity", bytes);
   }
 }
 
 template <class Protocol_>
-void kv_management_rpc_serviceProcessorT<Protocol_>::process_capacity(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void kv_management_rpc_serviceProcessorT<Protocol_>::process_storage_size(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("kv_management_rpc_service.capacity", callContext);
+    ctx = this->eventHandler_->getContext("kv_management_rpc_service.storage_size", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "kv_management_rpc_service.capacity");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "kv_management_rpc_service.storage_size");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "kv_management_rpc_service.capacity");
+    this->eventHandler_->preRead(ctx, "kv_management_rpc_service.storage_size");
   }
 
-  kv_management_rpc_service_capacity_args args;
+  kv_management_rpc_service_storage_size_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "kv_management_rpc_service.capacity", bytes);
+    this->eventHandler_->postRead(ctx, "kv_management_rpc_service.storage_size", bytes);
   }
 
-  kv_management_rpc_service_capacity_result result;
+  kv_management_rpc_service_storage_size_result result;
   try {
-    result.success = iface_->capacity();
+    result.success = iface_->storage_size(args.block_id);
     result.__isset.success = true;
   } catch (kv_management_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "kv_management_rpc_service.capacity");
+      this->eventHandler_->handlerError(ctx, "kv_management_rpc_service.storage_size");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("capacity", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("storage_size", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -1256,56 +1083,56 @@ void kv_management_rpc_serviceProcessorT<Protocol_>::process_capacity(int32_t se
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "kv_management_rpc_service.capacity");
+    this->eventHandler_->preWrite(ctx, "kv_management_rpc_service.storage_size");
   }
 
-  oprot->writeMessageBegin("capacity", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("storage_size", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "kv_management_rpc_service.capacity", bytes);
+    this->eventHandler_->postWrite(ctx, "kv_management_rpc_service.storage_size", bytes);
   }
 }
 
 template <class Protocol_>
-void kv_management_rpc_serviceProcessorT<Protocol_>::process_capacity(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+void kv_management_rpc_serviceProcessorT<Protocol_>::process_storage_size(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("kv_management_rpc_service.capacity", callContext);
+    ctx = this->eventHandler_->getContext("kv_management_rpc_service.storage_size", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "kv_management_rpc_service.capacity");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "kv_management_rpc_service.storage_size");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "kv_management_rpc_service.capacity");
+    this->eventHandler_->preRead(ctx, "kv_management_rpc_service.storage_size");
   }
 
-  kv_management_rpc_service_capacity_args args;
+  kv_management_rpc_service_storage_size_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "kv_management_rpc_service.capacity", bytes);
+    this->eventHandler_->postRead(ctx, "kv_management_rpc_service.storage_size", bytes);
   }
 
-  kv_management_rpc_service_capacity_result result;
+  kv_management_rpc_service_storage_size_result result;
   try {
-    result.success = iface_->capacity();
+    result.success = iface_->storage_size(args.block_id);
     result.__isset.success = true;
   } catch (kv_management_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "kv_management_rpc_service.capacity");
+      this->eventHandler_->handlerError(ctx, "kv_management_rpc_service.storage_size");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("capacity", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("storage_size", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -1314,133 +1141,17 @@ void kv_management_rpc_serviceProcessorT<Protocol_>::process_capacity(int32_t se
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "kv_management_rpc_service.capacity");
+    this->eventHandler_->preWrite(ctx, "kv_management_rpc_service.storage_size");
   }
 
-  oprot->writeMessageBegin("capacity", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("storage_size", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "kv_management_rpc_service.capacity", bytes);
-  }
-}
-
-template <class Protocol_>
-void kv_management_rpc_serviceProcessorT<Protocol_>::process_num_entries(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
-  if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("kv_management_rpc_service.num_entries", callContext);
-  }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "kv_management_rpc_service.num_entries");
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "kv_management_rpc_service.num_entries");
-  }
-
-  kv_management_rpc_service_num_entries_args args;
-  args.read(iprot);
-  iprot->readMessageEnd();
-  uint32_t bytes = iprot->getTransport()->readEnd();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "kv_management_rpc_service.num_entries", bytes);
-  }
-
-  kv_management_rpc_service_num_entries_result result;
-  try {
-    result.success = iface_->num_entries();
-    result.__isset.success = true;
-  } catch (kv_management_rpc_exception &ex) {
-    result.ex = ex;
-    result.__isset.ex = true;
-  } catch (const std::exception& e) {
-    if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "kv_management_rpc_service.num_entries");
-    }
-
-    ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("num_entries", ::apache::thrift::protocol::T_EXCEPTION, seqid);
-    x.write(oprot);
-    oprot->writeMessageEnd();
-    oprot->getTransport()->writeEnd();
-    oprot->getTransport()->flush();
-    return;
-  }
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "kv_management_rpc_service.num_entries");
-  }
-
-  oprot->writeMessageBegin("num_entries", ::apache::thrift::protocol::T_REPLY, seqid);
-  result.write(oprot);
-  oprot->writeMessageEnd();
-  bytes = oprot->getTransport()->writeEnd();
-  oprot->getTransport()->flush();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "kv_management_rpc_service.num_entries", bytes);
-  }
-}
-
-template <class Protocol_>
-void kv_management_rpc_serviceProcessorT<Protocol_>::process_num_entries(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
-  if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("kv_management_rpc_service.num_entries", callContext);
-  }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "kv_management_rpc_service.num_entries");
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "kv_management_rpc_service.num_entries");
-  }
-
-  kv_management_rpc_service_num_entries_args args;
-  args.read(iprot);
-  iprot->readMessageEnd();
-  uint32_t bytes = iprot->getTransport()->readEnd();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "kv_management_rpc_service.num_entries", bytes);
-  }
-
-  kv_management_rpc_service_num_entries_result result;
-  try {
-    result.success = iface_->num_entries();
-    result.__isset.success = true;
-  } catch (kv_management_rpc_exception &ex) {
-    result.ex = ex;
-    result.__isset.ex = true;
-  } catch (const std::exception& e) {
-    if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "kv_management_rpc_service.num_entries");
-    }
-
-    ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("num_entries", ::apache::thrift::protocol::T_EXCEPTION, seqid);
-    x.write(oprot);
-    oprot->writeMessageEnd();
-    oprot->getTransport()->writeEnd();
-    oprot->getTransport()->flush();
-    return;
-  }
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "kv_management_rpc_service.num_entries");
-  }
-
-  oprot->writeMessageBegin("num_entries", ::apache::thrift::protocol::T_REPLY, seqid);
-  result.write(oprot);
-  oprot->writeMessageEnd();
-  bytes = oprot->getTransport()->writeEnd();
-  oprot->getTransport()->flush();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "kv_management_rpc_service.num_entries", bytes);
+    this->eventHandler_->postWrite(ctx, "kv_management_rpc_service.storage_size", bytes);
   }
 }
 
@@ -1453,20 +1164,21 @@ template <class Protocol_>
 }
 
 template <class Protocol_>
-void kv_management_rpc_serviceConcurrentClientT<Protocol_>::clear()
+void kv_management_rpc_serviceConcurrentClientT<Protocol_>::clear(const int32_t block_id)
 {
-  int32_t seqid = send_clear();
+  int32_t seqid = send_clear(block_id);
   recv_clear(seqid);
 }
 
 template <class Protocol_>
-int32_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::send_clear()
+int32_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::send_clear(const int32_t block_id)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("clear", ::apache::thrift::protocol::T_CALL, cseqid);
 
   kv_management_rpc_service_clear_pargs args;
+  args.block_id = &block_id;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -1537,20 +1249,21 @@ void kv_management_rpc_serviceConcurrentClientT<Protocol_>::recv_clear(const int
 }
 
 template <class Protocol_>
-int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::size()
+int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::storage_capacity(const int32_t block_id)
 {
-  int32_t seqid = send_size();
-  return recv_size(seqid);
+  int32_t seqid = send_storage_capacity(block_id);
+  return recv_storage_capacity(seqid);
 }
 
 template <class Protocol_>
-int32_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::send_size()
+int32_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::send_storage_capacity(const int32_t block_id)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("size", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("storage_capacity", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  kv_management_rpc_service_size_pargs args;
+  kv_management_rpc_service_storage_capacity_pargs args;
+  args.block_id = &block_id;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -1562,7 +1275,7 @@ int32_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::send_size()
 }
 
 template <class Protocol_>
-int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::recv_size(const int32_t seqid)
+int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::recv_storage_capacity(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -1591,7 +1304,7 @@ int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::recv_size(const i
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
       }
-      if (fname.compare("size") != 0) {
+      if (fname.compare("storage_capacity") != 0) {
         this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
@@ -1601,7 +1314,7 @@ int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::recv_size(const i
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
       int64_t _return;
-      kv_management_rpc_service_size_presult result;
+      kv_management_rpc_service_storage_capacity_presult result;
       result.success = &_return;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
@@ -1616,7 +1329,7 @@ int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::recv_size(const i
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "size failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "storage_capacity failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -1627,20 +1340,21 @@ int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::recv_size(const i
 }
 
 template <class Protocol_>
-int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::capacity()
+int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::storage_size(const int32_t block_id)
 {
-  int32_t seqid = send_capacity();
-  return recv_capacity(seqid);
+  int32_t seqid = send_storage_size(block_id);
+  return recv_storage_size(seqid);
 }
 
 template <class Protocol_>
-int32_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::send_capacity()
+int32_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::send_storage_size(const int32_t block_id)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("capacity", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("storage_size", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  kv_management_rpc_service_capacity_pargs args;
+  kv_management_rpc_service_storage_size_pargs args;
+  args.block_id = &block_id;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -1652,7 +1366,7 @@ int32_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::send_capacity()
 }
 
 template <class Protocol_>
-int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::recv_capacity(const int32_t seqid)
+int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::recv_storage_size(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -1681,7 +1395,7 @@ int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::recv_capacity(con
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
       }
-      if (fname.compare("capacity") != 0) {
+      if (fname.compare("storage_size") != 0) {
         this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
@@ -1691,7 +1405,7 @@ int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::recv_capacity(con
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
       int64_t _return;
-      kv_management_rpc_service_capacity_presult result;
+      kv_management_rpc_service_storage_size_presult result;
       result.success = &_return;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
@@ -1706,97 +1420,7 @@ int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::recv_capacity(con
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "capacity failed: unknown result");
-    }
-    // seqid != rseqid
-    this->sync_.updatePending(fname, mtype, rseqid);
-
-    // this will temporarily unlock the readMutex, and let other clients get work done
-    this->sync_.waitForWork(seqid);
-  } // end while(true)
-}
-
-template <class Protocol_>
-int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::num_entries()
-{
-  int32_t seqid = send_num_entries();
-  return recv_num_entries(seqid);
-}
-
-template <class Protocol_>
-int32_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::send_num_entries()
-{
-  int32_t cseqid = this->sync_.generateSeqId();
-  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("num_entries", ::apache::thrift::protocol::T_CALL, cseqid);
-
-  kv_management_rpc_service_num_entries_pargs args;
-  args.write(this->oprot_);
-
-  this->oprot_->writeMessageEnd();
-  this->oprot_->getTransport()->writeEnd();
-  this->oprot_->getTransport()->flush();
-
-  sentry.commit();
-  return cseqid;
-}
-
-template <class Protocol_>
-int64_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::recv_num_entries(const int32_t seqid)
-{
-
-  int32_t rseqid = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TMessageType mtype;
-
-  // the read mutex gets dropped and reacquired as part of waitForWork()
-  // The destructor of this sentry wakes up other clients
-  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
-
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
-      this->iprot_->readMessageBegin(fname, mtype, rseqid);
-    }
-    if(seqid == rseqid) {
-      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
-        ::apache::thrift::TApplicationException x;
-        x.read(this->iprot_);
-        this->iprot_->readMessageEnd();
-        this->iprot_->getTransport()->readEnd();
-        sentry.commit();
-        throw x;
-      }
-      if (mtype != ::apache::thrift::protocol::T_REPLY) {
-        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-        this->iprot_->readMessageEnd();
-        this->iprot_->getTransport()->readEnd();
-      }
-      if (fname.compare("num_entries") != 0) {
-        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-        this->iprot_->readMessageEnd();
-        this->iprot_->getTransport()->readEnd();
-
-        // in a bad state, don't commit
-        using ::apache::thrift::protocol::TProtocolException;
-        throw TProtocolException(TProtocolException::INVALID_DATA);
-      }
-      int64_t _return;
-      kv_management_rpc_service_num_entries_presult result;
-      result.success = &_return;
-      result.read(this->iprot_);
-      this->iprot_->readMessageEnd();
-      this->iprot_->getTransport()->readEnd();
-
-      if (result.__isset.success) {
-        sentry.commit();
-        return _return;
-      }
-      if (result.__isset.ex) {
-        sentry.commit();
-        throw result.ex;
-      }
-      // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "num_entries failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "storage_size failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
