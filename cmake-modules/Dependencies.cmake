@@ -1,11 +1,8 @@
 include(ExternalProject)
 
 set(THRIFT_VERSION "0.11.0")
-set(BOOST_VERSION "1.53")
 
 find_package(Threads REQUIRED)
-find_package(Boost ${BOOST_VERSION} REQUIRED)
-message(STATUS "Boost include dir: ${Boost_INCLUDE_DIRS}")
 
 set(EXTERNAL_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CMAKE_CXX_FLAGS_${UPPERCASE_BUILD_TYPE}}")
 set(EXTERNAL_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ${CMAKE_C_FLAGS_${UPPERCASE_BUILD_TYPE}}")
@@ -72,7 +69,7 @@ else ()
 endif ()
 
 # Google Test framework
-if (BUILD_TESTS)
+if (BUILD_TESTS AND NOT USE_SYSTEM_CATCH)
   find_package(Git REQUIRED)
   ExternalProject_Add(catch
           PREFIX ${CMAKE_BINARY_DIR}/catch

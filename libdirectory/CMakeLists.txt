@@ -38,7 +38,6 @@ set_target_properties(directory PROPERTIES LINKER_LANGUAGE CXX)
 if (BUILD_TESTS)
   include_directories(${THRIFT_INCLUDE_DIR})
   include_directories(${CATCH_INCLUDE_DIR})
-  include_directories(${Boost_INCLUDE_DIRS})
 
   add_executable(ds_tree_test test/directory_tree_test.cpp)
   target_link_libraries(ds_tree_test directory)
