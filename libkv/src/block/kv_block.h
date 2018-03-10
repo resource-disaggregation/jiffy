@@ -8,9 +8,9 @@
 namespace elasticmem {
 namespace kv {
 
-class kv_service_shard : public kv_service, public kv_management_service {
+class kv_block : public kv_service, public kv_management_service {
  public:
-  kv_service_shard() = default;
+  kv_block() = default;
 
   void put(const key_type &key, const value_type &value) override;
 
@@ -24,9 +24,9 @@ class kv_service_shard : public kv_service, public kv_management_service {
 
   std::size_t size() override;
 
-  std::size_t capacity() override;
+  std::size_t storage_capacity() override;
 
-  std::size_t num_entries() override;
+  std::size_t storage_size() override;
 
  private:
   cuckoohash_map<key_type, value_type> entries_;

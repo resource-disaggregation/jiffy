@@ -20,16 +20,19 @@ class kv_service {
   virtual value_type const &update(const key_type &key, const value_type &value) = 0;
 
   virtual void remove(const key_type &key) = 0;
+
+  virtual std::size_t size() = 0;
 };
 
 class kv_management_service {
+ public:
+  virtual void flush() = 0;
+
   virtual void clear() = 0;
 
-  virtual std::size_t size() = 0;
+  virtual std::size_t storage_capacity() = 0;
 
-  virtual std::size_t capacity() = 0;
-
-  virtual std::size_t num_entries() = 0;
+  virtual std::size_t storage_size() = 0;
 };
 
 }
