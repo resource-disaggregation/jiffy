@@ -24,8 +24,10 @@ if (GENERATE_THRIFT)
   add_subdirectory(thrift)
 endif ()
 
-add_subdirectory(libdirectory)
+add_subdirectory(libpersistent)
 add_subdirectory(libkv)
+add_subdirectory(libdirectory)
+
 
 add_subdirectory(directory)
 add_subdirectory(kv)
