@@ -21,7 +21,7 @@ directory_rpc_serviceIf *directory_rpc_service_factory::getHandler(const TConnec
             << "\t\t\tSocketInfo: " << sock->getSocketInfo() << "\n"
             << "\t\t\tPeerHost: " << sock->getPeerHost() << "\n"
             << "\t\t\tPeerAddress: " << sock->getPeerAddress() << "\n"
-            << "\t\t\tPeerPort: " << sock->getPeerPort();
+            << "\t\t\tPeerPort: " << sock->getPeerPort() << "\n";
   return new directory_rpc_service_handler(shard_);
 }
 
