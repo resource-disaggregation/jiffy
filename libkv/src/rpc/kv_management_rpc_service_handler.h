@@ -10,11 +10,11 @@ namespace kv {
 class kv_management_rpc_service_handler: public kv_management_rpc_serviceIf {
  public:
   explicit kv_management_rpc_service_handler(std::vector<std::shared_ptr<kv_block>>& blocks);
-  void flush(const int32_t block_id, const std::string &path) override;
-  void load(const int32_t block_id, const std::string &path) override;
-  void clear(const int32_t block_id) override;
-  int64_t storage_capacity(const int32_t block_id) override;
-  int64_t storage_size(const int32_t block_id) override;
+  void flush(int32_t block_id, const std::string& persistent_store_prefix, const std::string &path) override;
+  void load(int32_t block_id, const std::string& persistent_store_prefix, const std::string &path) override;
+  void clear(int32_t block_id) override;
+  int64_t storage_capacity(int32_t block_id) override;
+  int64_t storage_size(int32_t block_id) override;
  private:
   std::vector<std::shared_ptr<kv_block>>& blocks_;
 };

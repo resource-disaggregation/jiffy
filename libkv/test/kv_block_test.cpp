@@ -13,7 +13,7 @@ class noop_store : public persistent_service {
 };
 
 TEST_CASE("put_get_test", "[put][get]") {
-  kv_block block(std::make_shared<noop_store>(), "/tmp");
+  kv_block block(std::make_shared<noop_store>());
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_NOTHROW(block.put(std::to_string(i), std::to_string(i)));
   }
@@ -26,7 +26,7 @@ TEST_CASE("put_get_test", "[put][get]") {
 }
 
 TEST_CASE("put_update_get_test", "[put][update][get]") {
-  kv_block block(std::make_shared<noop_store>(), "/tmp");
+  kv_block block(std::make_shared<noop_store>());
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_NOTHROW(block.put(std::to_string(i), std::to_string(i)));
   }
@@ -45,7 +45,7 @@ TEST_CASE("put_update_get_test", "[put][update][get]") {
 }
 
 TEST_CASE("put_remove_get_test", "[put][update][get]") {
-  kv_block block(std::make_shared<noop_store>(), "/tmp");
+  kv_block block(std::make_shared<noop_store>());
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_NOTHROW(block.put(std::to_string(i), std::to_string(i)));
   }
@@ -61,7 +61,7 @@ TEST_CASE("put_remove_get_test", "[put][update][get]") {
 }
 
 TEST_CASE("size_test", "[put][size][storage_size][clear]") {
-  kv_block block(std::make_shared<noop_store>(), "/tmp");
+  kv_block block(std::make_shared<noop_store>());
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_NOTHROW(block.put(std::to_string(i), std::to_string(i)));
   }
@@ -73,14 +73,14 @@ TEST_CASE("size_test", "[put][size][storage_size][clear]") {
 }
 
 TEST_CASE("flush_load_test", "[put][flush][clear][load][get]") {
-  kv_block block(std::make_shared<noop_store>(), "/tmp");
+  kv_block block(std::make_shared<noop_store>());
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_NOTHROW(block.put(std::to_string(i), std::to_string(i)));
   }
-  REQUIRE_NOTHROW(block.flush("/test"));
+  REQUIRE_NOTHROW(block.flush("/tmp", "/test"));
   REQUIRE_NOTHROW(block.clear());
   REQUIRE(block.empty());
-  REQUIRE_NOTHROW(block.load("/test"));
+  REQUIRE_NOTHROW(block.load("/tmp", "/test"));
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.get(std::to_string(i)) == std::to_string(i));
   }

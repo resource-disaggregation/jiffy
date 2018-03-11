@@ -21,8 +21,8 @@ namespace elasticmem { namespace kv {
 class kv_management_rpc_serviceIf {
  public:
   virtual ~kv_management_rpc_serviceIf() {}
-  virtual void flush(const int32_t block_id, const std::string& path) = 0;
-  virtual void load(const int32_t block_id, const std::string& path) = 0;
+  virtual void flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path) = 0;
+  virtual void load(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path) = 0;
   virtual void clear(const int32_t block_id) = 0;
   virtual int64_t storage_capacity(const int32_t block_id) = 0;
   virtual int64_t storage_size(const int32_t block_id) = 0;
@@ -55,10 +55,10 @@ class kv_management_rpc_serviceIfSingletonFactory : virtual public kv_management
 class kv_management_rpc_serviceNull : virtual public kv_management_rpc_serviceIf {
  public:
   virtual ~kv_management_rpc_serviceNull() {}
-  void flush(const int32_t /* block_id */, const std::string& /* path */) {
+  void flush(const int32_t /* block_id */, const std::string& /* persistent_store_prefix */, const std::string& /* path */) {
     return;
   }
-  void load(const int32_t /* block_id */, const std::string& /* path */) {
+  void load(const int32_t /* block_id */, const std::string& /* persistent_store_prefix */, const std::string& /* path */) {
     return;
   }
   void clear(const int32_t /* block_id */) {
@@ -75,8 +75,9 @@ class kv_management_rpc_serviceNull : virtual public kv_management_rpc_serviceIf
 };
 
 typedef struct _kv_management_rpc_service_flush_args__isset {
-  _kv_management_rpc_service_flush_args__isset() : block_id(false), path(false) {}
+  _kv_management_rpc_service_flush_args__isset() : block_id(false), persistent_store_prefix(false), path(false) {}
   bool block_id :1;
+  bool persistent_store_prefix :1;
   bool path :1;
 } _kv_management_rpc_service_flush_args__isset;
 
@@ -85,22 +86,27 @@ class kv_management_rpc_service_flush_args {
 
   kv_management_rpc_service_flush_args(const kv_management_rpc_service_flush_args&);
   kv_management_rpc_service_flush_args& operator=(const kv_management_rpc_service_flush_args&);
-  kv_management_rpc_service_flush_args() : block_id(0), path() {
+  kv_management_rpc_service_flush_args() : block_id(0), persistent_store_prefix(), path() {
   }
 
   virtual ~kv_management_rpc_service_flush_args() throw();
   int32_t block_id;
+  std::string persistent_store_prefix;
   std::string path;
 
   _kv_management_rpc_service_flush_args__isset __isset;
 
   void __set_block_id(const int32_t val);
 
+  void __set_persistent_store_prefix(const std::string& val);
+
   void __set_path(const std::string& val);
 
   bool operator == (const kv_management_rpc_service_flush_args & rhs) const
   {
     if (!(block_id == rhs.block_id))
+      return false;
+    if (!(persistent_store_prefix == rhs.persistent_store_prefix))
       return false;
     if (!(path == rhs.path))
       return false;
@@ -126,6 +132,7 @@ class kv_management_rpc_service_flush_pargs {
 
   virtual ~kv_management_rpc_service_flush_pargs() throw();
   const int32_t* block_id;
+  const std::string* persistent_store_prefix;
   const std::string* path;
 
   template <class Protocol_>
@@ -192,8 +199,9 @@ class kv_management_rpc_service_flush_presult {
 };
 
 typedef struct _kv_management_rpc_service_load_args__isset {
-  _kv_management_rpc_service_load_args__isset() : block_id(false), path(false) {}
+  _kv_management_rpc_service_load_args__isset() : block_id(false), persistent_store_prefix(false), path(false) {}
   bool block_id :1;
+  bool persistent_store_prefix :1;
   bool path :1;
 } _kv_management_rpc_service_load_args__isset;
 
@@ -202,22 +210,27 @@ class kv_management_rpc_service_load_args {
 
   kv_management_rpc_service_load_args(const kv_management_rpc_service_load_args&);
   kv_management_rpc_service_load_args& operator=(const kv_management_rpc_service_load_args&);
-  kv_management_rpc_service_load_args() : block_id(0), path() {
+  kv_management_rpc_service_load_args() : block_id(0), persistent_store_prefix(), path() {
   }
 
   virtual ~kv_management_rpc_service_load_args() throw();
   int32_t block_id;
+  std::string persistent_store_prefix;
   std::string path;
 
   _kv_management_rpc_service_load_args__isset __isset;
 
   void __set_block_id(const int32_t val);
 
+  void __set_persistent_store_prefix(const std::string& val);
+
   void __set_path(const std::string& val);
 
   bool operator == (const kv_management_rpc_service_load_args & rhs) const
   {
     if (!(block_id == rhs.block_id))
+      return false;
+    if (!(persistent_store_prefix == rhs.persistent_store_prefix))
       return false;
     if (!(path == rhs.path))
       return false;
@@ -243,6 +256,7 @@ class kv_management_rpc_service_load_pargs {
 
   virtual ~kv_management_rpc_service_load_pargs() throw();
   const int32_t* block_id;
+  const std::string* persistent_store_prefix;
   const std::string* path;
 
   template <class Protocol_>
@@ -680,11 +694,11 @@ class kv_management_rpc_serviceClientT : virtual public kv_management_rpc_servic
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void flush(const int32_t block_id, const std::string& path);
-  void send_flush(const int32_t block_id, const std::string& path);
+  void flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path);
+  void send_flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path);
   void recv_flush();
-  void load(const int32_t block_id, const std::string& path);
-  void send_load(const int32_t block_id, const std::string& path);
+  void load(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path);
+  void send_load(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path);
   void recv_load();
   void clear(const int32_t block_id);
   void send_clear(const int32_t block_id);
@@ -784,22 +798,22 @@ class kv_management_rpc_serviceMultiface : virtual public kv_management_rpc_serv
     ifaces_.push_back(iface);
   }
  public:
-  void flush(const int32_t block_id, const std::string& path) {
+  void flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->flush(block_id, path);
+      ifaces_[i]->flush(block_id, persistent_store_prefix, path);
     }
-    ifaces_[i]->flush(block_id, path);
+    ifaces_[i]->flush(block_id, persistent_store_prefix, path);
   }
 
-  void load(const int32_t block_id, const std::string& path) {
+  void load(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->load(block_id, path);
+      ifaces_[i]->load(block_id, persistent_store_prefix, path);
     }
-    ifaces_[i]->load(block_id, path);
+    ifaces_[i]->load(block_id, persistent_store_prefix, path);
   }
 
   void clear(const int32_t block_id) {
@@ -860,11 +874,11 @@ class kv_management_rpc_serviceConcurrentClientT : virtual public kv_management_
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void flush(const int32_t block_id, const std::string& path);
-  int32_t send_flush(const int32_t block_id, const std::string& path);
+  void flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path);
+  int32_t send_flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path);
   void recv_flush(const int32_t seqid);
-  void load(const int32_t block_id, const std::string& path);
-  int32_t send_load(const int32_t block_id, const std::string& path);
+  void load(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path);
+  int32_t send_load(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path);
   void recv_load(const int32_t seqid);
   void clear(const int32_t block_id);
   int32_t send_clear(const int32_t block_id);

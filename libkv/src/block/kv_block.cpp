@@ -1,16 +1,16 @@
 #include "kv_block.h"
 
+#include <utility>
+
 namespace elasticmem {
 namespace kv {
 
 kv_block::kv_block(std::shared_ptr<persistent::persistent_service> persistent,
-                   const std::string &remote_storage_prefix,
-                   const std::string &local_storage_prefix,
+                   std::string local_storage_prefix,
                    std::shared_ptr<serializer> ser,
                    std::shared_ptr<deserializer> deser)
     : persistent_(std::move(persistent)),
-      local_storage_prefix_(local_storage_prefix),
-      remote_storage_prefix_(remote_storage_prefix),
+      local_storage_prefix_(std::move(local_storage_prefix)),
       ser_(std::move(ser)), deser_(std::move(deser)) {}
 
 void kv_block::put(const key_type &key, const value_type &value) {
@@ -47,17 +47,17 @@ bool kv_block::empty() const {
   return block_.empty();
 }
 
-void kv_block::load(const std::string &path) {
+void kv_block::load(const std::string &remote_storage_prefix, const std::string &path) {
   locked_block_type ltable = block_.lock_table();
-  persistent_->read(remote_storage_prefix_ + path, local_storage_prefix_ + path);
+  persistent_->read(remote_storage_prefix + path, local_storage_prefix_ + path);
   deser_->deserialize(local_storage_prefix_ + path, ltable);
   ltable.unlock();
 }
 
-void kv_block::flush(const std::string &path) {
+void kv_block::flush(const std::string &remote_storage_prefix, const std::string &path) {
   locked_block_type ltable = block_.lock_table();
   ser_->serialize(ltable, local_storage_prefix_ + path);
-  persistent_->write(local_storage_prefix_ + path, remote_storage_prefix_ + path);
+  persistent_->write(local_storage_prefix_ + path, remote_storage_prefix + path);
   ltable.clear();
   ltable.unlock();
 }

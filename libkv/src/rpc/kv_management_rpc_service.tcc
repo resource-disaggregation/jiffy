@@ -44,6 +44,14 @@ uint32_t kv_management_rpc_service_flush_args::read(Protocol_* iprot) {
         break;
       case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->persistent_store_prefix);
+          this->__isset.persistent_store_prefix = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
           this->__isset.path = true;
         } else {
@@ -72,7 +80,11 @@ uint32_t kv_management_rpc_service_flush_args::write(Protocol_* oprot) const {
   xfer += oprot->writeI32(this->block_id);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeFieldBegin("persistent_store_prefix", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->persistent_store_prefix);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeString(this->path);
   xfer += oprot->writeFieldEnd();
 
@@ -92,7 +104,11 @@ uint32_t kv_management_rpc_service_flush_pargs::write(Protocol_* oprot) const {
   xfer += oprot->writeI32((*(this->block_id)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeFieldBegin("persistent_store_prefix", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString((*(this->persistent_store_prefix)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeString((*(this->path)));
   xfer += oprot->writeFieldEnd();
 
@@ -237,6 +253,14 @@ uint32_t kv_management_rpc_service_load_args::read(Protocol_* iprot) {
         break;
       case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->persistent_store_prefix);
+          this->__isset.persistent_store_prefix = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
           this->__isset.path = true;
         } else {
@@ -265,7 +289,11 @@ uint32_t kv_management_rpc_service_load_args::write(Protocol_* oprot) const {
   xfer += oprot->writeI32(this->block_id);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeFieldBegin("persistent_store_prefix", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->persistent_store_prefix);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeString(this->path);
   xfer += oprot->writeFieldEnd();
 
@@ -285,7 +313,11 @@ uint32_t kv_management_rpc_service_load_pargs::write(Protocol_* oprot) const {
   xfer += oprot->writeI32((*(this->block_id)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeFieldBegin("persistent_store_prefix", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString((*(this->persistent_store_prefix)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeString((*(this->path)));
   xfer += oprot->writeFieldEnd();
 
@@ -969,20 +1001,21 @@ uint32_t kv_management_rpc_service_storage_size_presult::read(Protocol_* iprot) 
 }
 
 template <class Protocol_>
-void kv_management_rpc_serviceClientT<Protocol_>::flush(const int32_t block_id, const std::string& path)
+void kv_management_rpc_serviceClientT<Protocol_>::flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path)
 {
-  send_flush(block_id, path);
+  send_flush(block_id, persistent_store_prefix, path);
   recv_flush();
 }
 
 template <class Protocol_>
-void kv_management_rpc_serviceClientT<Protocol_>::send_flush(const int32_t block_id, const std::string& path)
+void kv_management_rpc_serviceClientT<Protocol_>::send_flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("flush", ::apache::thrift::protocol::T_CALL, cseqid);
 
   kv_management_rpc_service_flush_pargs args;
   args.block_id = &block_id;
+  args.persistent_store_prefix = &persistent_store_prefix;
   args.path = &path;
   args.write(this->oprot_);
 
@@ -1029,20 +1062,21 @@ void kv_management_rpc_serviceClientT<Protocol_>::recv_flush()
 }
 
 template <class Protocol_>
-void kv_management_rpc_serviceClientT<Protocol_>::load(const int32_t block_id, const std::string& path)
+void kv_management_rpc_serviceClientT<Protocol_>::load(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path)
 {
-  send_load(block_id, path);
+  send_load(block_id, persistent_store_prefix, path);
   recv_load();
 }
 
 template <class Protocol_>
-void kv_management_rpc_serviceClientT<Protocol_>::send_load(const int32_t block_id, const std::string& path)
+void kv_management_rpc_serviceClientT<Protocol_>::send_load(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("load", ::apache::thrift::protocol::T_CALL, cseqid);
 
   kv_management_rpc_service_load_pargs args;
   args.block_id = &block_id;
+  args.persistent_store_prefix = &persistent_store_prefix;
   args.path = &path;
   args.write(this->oprot_);
 
@@ -1339,7 +1373,7 @@ void kv_management_rpc_serviceProcessorT<Protocol_>::process_flush(int32_t seqid
 
   kv_management_rpc_service_flush_result result;
   try {
-    iface_->flush(args.block_id, args.path);
+    iface_->flush(args.block_id, args.persistent_store_prefix, args.path);
   } catch (kv_management_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -1396,7 +1430,7 @@ void kv_management_rpc_serviceProcessorT<Protocol_>::process_flush(int32_t seqid
 
   kv_management_rpc_service_flush_result result;
   try {
-    iface_->flush(args.block_id, args.path);
+    iface_->flush(args.block_id, args.persistent_store_prefix, args.path);
   } catch (kv_management_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -1453,7 +1487,7 @@ void kv_management_rpc_serviceProcessorT<Protocol_>::process_load(int32_t seqid,
 
   kv_management_rpc_service_load_result result;
   try {
-    iface_->load(args.block_id, args.path);
+    iface_->load(args.block_id, args.persistent_store_prefix, args.path);
   } catch (kv_management_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -1510,7 +1544,7 @@ void kv_management_rpc_serviceProcessorT<Protocol_>::process_load(int32_t seqid,
 
   kv_management_rpc_service_load_result result;
   try {
-    iface_->load(args.block_id, args.path);
+    iface_->load(args.block_id, args.persistent_store_prefix, args.path);
   } catch (kv_management_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -1898,14 +1932,14 @@ template <class Protocol_>
 }
 
 template <class Protocol_>
-void kv_management_rpc_serviceConcurrentClientT<Protocol_>::flush(const int32_t block_id, const std::string& path)
+void kv_management_rpc_serviceConcurrentClientT<Protocol_>::flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path)
 {
-  int32_t seqid = send_flush(block_id, path);
+  int32_t seqid = send_flush(block_id, persistent_store_prefix, path);
   recv_flush(seqid);
 }
 
 template <class Protocol_>
-int32_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::send_flush(const int32_t block_id, const std::string& path)
+int32_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::send_flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -1913,6 +1947,7 @@ int32_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::send_flush(const 
 
   kv_management_rpc_service_flush_pargs args;
   args.block_id = &block_id;
+  args.persistent_store_prefix = &persistent_store_prefix;
   args.path = &path;
   args.write(this->oprot_);
 
@@ -1984,14 +2019,14 @@ void kv_management_rpc_serviceConcurrentClientT<Protocol_>::recv_flush(const int
 }
 
 template <class Protocol_>
-void kv_management_rpc_serviceConcurrentClientT<Protocol_>::load(const int32_t block_id, const std::string& path)
+void kv_management_rpc_serviceConcurrentClientT<Protocol_>::load(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path)
 {
-  int32_t seqid = send_load(block_id, path);
+  int32_t seqid = send_load(block_id, persistent_store_prefix, path);
   recv_load(seqid);
 }
 
 template <class Protocol_>
-int32_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::send_load(const int32_t block_id, const std::string& path)
+int32_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::send_load(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -1999,6 +2034,7 @@ int32_t kv_management_rpc_serviceConcurrentClientT<Protocol_>::send_load(const i
 
   kv_management_rpc_service_load_pargs args;
   args.block_id = &block_id;
+  args.persistent_store_prefix = &persistent_store_prefix;
   args.path = &path;
   args.write(this->oprot_);
 
