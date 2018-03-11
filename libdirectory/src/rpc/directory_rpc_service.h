@@ -37,6 +37,7 @@ class directory_rpc_serviceIf {
   virtual void recursive_directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path) = 0;
   virtual void dstatus(rpc_data_status& _return, const std::string& path) = 0;
   virtual rpc_storage_mode mode(const std::string& path) = 0;
+  virtual void persistent_store_prefix(std::string& _return, const std::string& path) = 0;
   virtual void data_blocks(std::vector<std::string> & _return, const std::string& path) = 0;
   virtual bool is_regular_file(const std::string& path) = 0;
   virtual bool is_directory(const std::string& path) = 0;
@@ -121,6 +122,9 @@ class directory_rpc_serviceNull : virtual public directory_rpc_serviceIf {
   rpc_storage_mode mode(const std::string& /* path */) {
     rpc_storage_mode _return = (rpc_storage_mode)0;
     return _return;
+  }
+  void persistent_store_prefix(std::string& /* _return */, const std::string& /* path */) {
+    return;
   }
   void data_blocks(std::vector<std::string> & /* _return */, const std::string& /* path */) {
     return;
@@ -1988,6 +1992,124 @@ class directory_rpc_service_mode_presult {
 
 };
 
+typedef struct _directory_rpc_service_persistent_store_prefix_args__isset {
+  _directory_rpc_service_persistent_store_prefix_args__isset() : path(false) {}
+  bool path :1;
+} _directory_rpc_service_persistent_store_prefix_args__isset;
+
+class directory_rpc_service_persistent_store_prefix_args {
+ public:
+
+  directory_rpc_service_persistent_store_prefix_args(const directory_rpc_service_persistent_store_prefix_args&);
+  directory_rpc_service_persistent_store_prefix_args& operator=(const directory_rpc_service_persistent_store_prefix_args&);
+  directory_rpc_service_persistent_store_prefix_args() : path() {
+  }
+
+  virtual ~directory_rpc_service_persistent_store_prefix_args() throw();
+  std::string path;
+
+  _directory_rpc_service_persistent_store_prefix_args__isset __isset;
+
+  void __set_path(const std::string& val);
+
+  bool operator == (const directory_rpc_service_persistent_store_prefix_args & rhs) const
+  {
+    if (!(path == rhs.path))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_rpc_service_persistent_store_prefix_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_rpc_service_persistent_store_prefix_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class directory_rpc_service_persistent_store_prefix_pargs {
+ public:
+
+
+  virtual ~directory_rpc_service_persistent_store_prefix_pargs() throw();
+  const std::string* path;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_rpc_service_persistent_store_prefix_result__isset {
+  _directory_rpc_service_persistent_store_prefix_result__isset() : success(false), ex(false) {}
+  bool success :1;
+  bool ex :1;
+} _directory_rpc_service_persistent_store_prefix_result__isset;
+
+class directory_rpc_service_persistent_store_prefix_result {
+ public:
+
+  directory_rpc_service_persistent_store_prefix_result(const directory_rpc_service_persistent_store_prefix_result&);
+  directory_rpc_service_persistent_store_prefix_result& operator=(const directory_rpc_service_persistent_store_prefix_result&);
+  directory_rpc_service_persistent_store_prefix_result() : success() {
+  }
+
+  virtual ~directory_rpc_service_persistent_store_prefix_result() throw();
+  std::string success;
+  directory_rpc_service_exception ex;
+
+  _directory_rpc_service_persistent_store_prefix_result__isset __isset;
+
+  void __set_success(const std::string& val);
+
+  void __set_ex(const directory_rpc_service_exception& val);
+
+  bool operator == (const directory_rpc_service_persistent_store_prefix_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_rpc_service_persistent_store_prefix_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_rpc_service_persistent_store_prefix_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_rpc_service_persistent_store_prefix_presult__isset {
+  _directory_rpc_service_persistent_store_prefix_presult__isset() : success(false), ex(false) {}
+  bool success :1;
+  bool ex :1;
+} _directory_rpc_service_persistent_store_prefix_presult__isset;
+
+class directory_rpc_service_persistent_store_prefix_presult {
+ public:
+
+
+  virtual ~directory_rpc_service_persistent_store_prefix_presult() throw();
+  std::string* success;
+  directory_rpc_service_exception ex;
+
+  _directory_rpc_service_persistent_store_prefix_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
 typedef struct _directory_rpc_service_data_blocks_args__isset {
   _directory_rpc_service_data_blocks_args__isset() : path(false) {}
   bool path :1;
@@ -2416,6 +2538,9 @@ class directory_rpc_serviceClientT : virtual public directory_rpc_serviceIf {
   rpc_storage_mode mode(const std::string& path);
   void send_mode(const std::string& path);
   rpc_storage_mode recv_mode();
+  void persistent_store_prefix(std::string& _return, const std::string& path);
+  void send_persistent_store_prefix(const std::string& path);
+  void recv_persistent_store_prefix(std::string& _return);
   void data_blocks(std::vector<std::string> & _return, const std::string& path);
   void send_data_blocks(const std::string& path);
   void recv_data_blocks(std::vector<std::string> & _return);
@@ -2485,6 +2610,8 @@ class directory_rpc_serviceProcessorT : public ::apache::thrift::TDispatchProces
   void process_dstatus(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_mode(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_mode(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_persistent_store_prefix(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_persistent_store_prefix(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_data_blocks(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_data_blocks(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_is_regular_file(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -2542,6 +2669,9 @@ class directory_rpc_serviceProcessorT : public ::apache::thrift::TDispatchProces
     processMap_["mode"] = ProcessFunctions(
       &directory_rpc_serviceProcessorT::process_mode,
       &directory_rpc_serviceProcessorT::process_mode);
+    processMap_["persistent_store_prefix"] = ProcessFunctions(
+      &directory_rpc_serviceProcessorT::process_persistent_store_prefix,
+      &directory_rpc_serviceProcessorT::process_persistent_store_prefix);
     processMap_["data_blocks"] = ProcessFunctions(
       &directory_rpc_serviceProcessorT::process_data_blocks,
       &directory_rpc_serviceProcessorT::process_data_blocks);
@@ -2732,6 +2862,16 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     return ifaces_[i]->mode(path);
   }
 
+  void persistent_store_prefix(std::string& _return, const std::string& path) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->persistent_store_prefix(_return, path);
+    }
+    ifaces_[i]->persistent_store_prefix(_return, path);
+    return;
+  }
+
   void data_blocks(std::vector<std::string> & _return, const std::string& path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
@@ -2839,6 +2979,9 @@ class directory_rpc_serviceConcurrentClientT : virtual public directory_rpc_serv
   rpc_storage_mode mode(const std::string& path);
   int32_t send_mode(const std::string& path);
   rpc_storage_mode recv_mode(const int32_t seqid);
+  void persistent_store_prefix(std::string& _return, const std::string& path);
+  int32_t send_persistent_store_prefix(const std::string& path);
+  void recv_persistent_store_prefix(std::string& _return, const int32_t seqid);
   void data_blocks(std::vector<std::string> & _return, const std::string& path);
   int32_t send_data_blocks(const std::string& path);
   void recv_data_blocks(std::vector<std::string> & _return, const int32_t seqid);

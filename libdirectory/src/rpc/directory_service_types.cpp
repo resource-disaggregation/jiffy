@@ -160,6 +160,10 @@ void rpc_data_status::__set_storage_mode(const rpc_storage_mode val) {
   this->storage_mode = val;
 }
 
+void rpc_data_status::__set_persistent_store_prefix(const std::string& val) {
+  this->persistent_store_prefix = val;
+}
+
 void rpc_data_status::__set_data_blocks(const std::vector<std::string> & val) {
   this->data_blocks = val;
 }
@@ -173,15 +177,18 @@ std::ostream& operator<<(std::ostream& out, const rpc_data_status& obj)
 void swap(rpc_data_status &a, rpc_data_status &b) {
   using ::std::swap;
   swap(a.storage_mode, b.storage_mode);
+  swap(a.persistent_store_prefix, b.persistent_store_prefix);
   swap(a.data_blocks, b.data_blocks);
 }
 
 rpc_data_status::rpc_data_status(const rpc_data_status& other10) {
   storage_mode = other10.storage_mode;
+  persistent_store_prefix = other10.persistent_store_prefix;
   data_blocks = other10.data_blocks;
 }
 rpc_data_status& rpc_data_status::operator=(const rpc_data_status& other11) {
   storage_mode = other11.storage_mode;
+  persistent_store_prefix = other11.persistent_store_prefix;
   data_blocks = other11.data_blocks;
   return *this;
 }
@@ -189,6 +196,7 @@ void rpc_data_status::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
   out << "rpc_data_status(";
   out << "storage_mode=" << to_string(storage_mode);
+  out << ", " << "persistent_store_prefix=" << to_string(persistent_store_prefix);
   out << ", " << "data_blocks=" << to_string(data_blocks);
   out << ")";
 }
@@ -281,51 +289,6 @@ const char* directory_rpc_service_exception::what() const throw() {
 }
 
 
-rpc_keep_alive::~rpc_keep_alive() throw() {
-}
-
-
-void rpc_keep_alive::__set_path(const std::string& val) {
-  this->path = val;
-}
-
-void rpc_keep_alive::__set_bytes_added(const int64_t val) {
-  this->bytes_added = val;
-}
-std::ostream& operator<<(std::ostream& out, const rpc_keep_alive& obj)
-{
-  obj.printTo(out);
-  return out;
-}
-
-
-void swap(rpc_keep_alive &a, rpc_keep_alive &b) {
-  using ::std::swap;
-  swap(a.path, b.path);
-  swap(a.bytes_added, b.bytes_added);
-  swap(a.__isset, b.__isset);
-}
-
-rpc_keep_alive::rpc_keep_alive(const rpc_keep_alive& other16) {
-  path = other16.path;
-  bytes_added = other16.bytes_added;
-  __isset = other16.__isset;
-}
-rpc_keep_alive& rpc_keep_alive::operator=(const rpc_keep_alive& other17) {
-  path = other17.path;
-  bytes_added = other17.bytes_added;
-  __isset = other17.__isset;
-  return *this;
-}
-void rpc_keep_alive::printTo(std::ostream& out) const {
-  using ::apache::thrift::to_string;
-  out << "rpc_keep_alive(";
-  out << "path=" << to_string(path);
-  out << ", " << "bytes_added=" << to_string(bytes_added);
-  out << ")";
-}
-
-
 rpc_keep_alive_ack::~rpc_keep_alive_ack() throw() {
 }
 
@@ -336,6 +299,7 @@ void rpc_keep_alive_ack::__set_path(const std::string& val) {
 
 void rpc_keep_alive_ack::__set_tot_bytes(const int64_t val) {
   this->tot_bytes = val;
+__isset.tot_bytes = true;
 }
 std::ostream& operator<<(std::ostream& out, const rpc_keep_alive_ack& obj)
 {
@@ -351,22 +315,22 @@ void swap(rpc_keep_alive_ack &a, rpc_keep_alive_ack &b) {
   swap(a.__isset, b.__isset);
 }
 
-rpc_keep_alive_ack::rpc_keep_alive_ack(const rpc_keep_alive_ack& other18) {
-  path = other18.path;
-  tot_bytes = other18.tot_bytes;
-  __isset = other18.__isset;
+rpc_keep_alive_ack::rpc_keep_alive_ack(const rpc_keep_alive_ack& other16) {
+  path = other16.path;
+  tot_bytes = other16.tot_bytes;
+  __isset = other16.__isset;
 }
-rpc_keep_alive_ack& rpc_keep_alive_ack::operator=(const rpc_keep_alive_ack& other19) {
-  path = other19.path;
-  tot_bytes = other19.tot_bytes;
-  __isset = other19.__isset;
+rpc_keep_alive_ack& rpc_keep_alive_ack::operator=(const rpc_keep_alive_ack& other17) {
+  path = other17.path;
+  tot_bytes = other17.tot_bytes;
+  __isset = other17.__isset;
   return *this;
 }
 void rpc_keep_alive_ack::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
   out << "rpc_keep_alive_ack(";
   out << "path=" << to_string(path);
-  out << ", " << "tot_bytes=" << to_string(tot_bytes);
+  out << ", " << "tot_bytes="; (__isset.tot_bytes ? (out << to_string(tot_bytes)) : (out << "<null>"));
   out << ")";
 }
 
@@ -391,13 +355,13 @@ void swap(directory_lease_service_exception &a, directory_lease_service_exceptio
   swap(a.__isset, b.__isset);
 }
 
-directory_lease_service_exception::directory_lease_service_exception(const directory_lease_service_exception& other20) : TException() {
-  msg = other20.msg;
-  __isset = other20.__isset;
+directory_lease_service_exception::directory_lease_service_exception(const directory_lease_service_exception& other18) : TException() {
+  msg = other18.msg;
+  __isset = other18.__isset;
 }
-directory_lease_service_exception& directory_lease_service_exception::operator=(const directory_lease_service_exception& other21) {
-  msg = other21.msg;
-  __isset = other21.__isset;
+directory_lease_service_exception& directory_lease_service_exception::operator=(const directory_lease_service_exception& other19) {
+  msg = other19.msg;
+  __isset = other19.__isset;
   return *this;
 }
 void directory_lease_service_exception::printTo(std::ostream& out) const {

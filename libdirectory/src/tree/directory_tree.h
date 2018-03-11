@@ -166,6 +166,16 @@ class ds_file_node : public ds_node {
     dstatus_.mode(m);
   }
 
+  const std::string &persistent_store_prefix() const {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    return dstatus_.persistent_store_prefix();
+  }
+
+  void persistent_store_prefix(const std::string& prefix) {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    dstatus_.persistent_store_prefix(prefix);
+  }
+
   const std::vector<std::string> &data_blocks() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_.data_blocks();
@@ -243,6 +253,8 @@ class directory_tree : public directory_service, public directory_management_ser
 
   storage_mode mode(const std::string &path) override;
 
+  std::string persistent_store_prefix(const std::string &path) override;
+
   std::vector<std::string> data_blocks(const std::string &path) override;
 
   bool is_regular_file(const std::string &path) override;
@@ -255,6 +267,8 @@ class directory_tree : public directory_service, public directory_management_ser
   void shrink(const std::string &path, std::size_t bytes) override;
 
   void mode(const std::string &path, const storage_mode &mode) override;
+
+  void persistent_store_prefix(const std::string &path, const std::string& prefix) override;
 
   void add_data_block(const std::string &path, const std::string &node) override;
 

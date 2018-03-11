@@ -162,7 +162,7 @@ class directory_entry {
  public:
   directory_entry() = default;
 
-  directory_entry(std::string name, const file_status& status)
+  directory_entry(std::string name, const file_status &status)
       : name_(std::move(name)),
         status_(status) {}
 
@@ -190,7 +190,8 @@ class directory_entry {
 class data_status {
  public:
   data_status() : mode_(storage_mode::in_memory) {}
-  data_status(storage_mode mode, std::vector<std::string> nodes) : mode_(mode), data_nodes_(std::move(nodes)) {}
+  data_status(storage_mode mode, std::string persistent_store_prefix, std::vector<std::string> nodes)
+      : mode_(mode), persistent_store_prefix_(std::move(persistent_store_prefix)), data_nodes_(std::move(nodes)) {}
 
   const std::vector<std::string> &data_blocks() const {
     return data_nodes_;
@@ -202,6 +203,14 @@ class data_status {
 
   void mode(storage_mode mode) {
     mode_ = mode;
+  }
+
+  const std::string &persistent_store_prefix() const {
+    return persistent_store_prefix_;
+  }
+
+  void persistent_store_prefix(const std::string& prefix) {
+    persistent_store_prefix_ = prefix;
   }
 
   void remove_all_data_blocks() {
@@ -222,6 +231,7 @@ class data_status {
 
  private:
   storage_mode mode_;
+  std::string persistent_store_prefix_;
   std::vector<std::string> data_nodes_;
 };
 
@@ -258,6 +268,8 @@ class directory_service {
 
   virtual storage_mode mode(const std::string &path) = 0;
 
+  virtual std::string persistent_store_prefix(const std::string &path) = 0;
+
   virtual std::vector<std::string> data_blocks(const std::string &path) = 0;
 
   // Check file type
@@ -275,7 +287,9 @@ class directory_management_service {
 
   virtual void dstatus(const std::string &path, const data_status &status) = 0;
 
-  virtual void mode(const std::string &path, const storage_mode& mode) = 0;
+  virtual void mode(const std::string &path, const storage_mode &mode) = 0;
+
+  virtual void persistent_store_prefix(const std::string& path, const std::string& prefix) = 0;
 
   virtual void add_data_block(const std::string &path, const std::string &node) = 0;
 

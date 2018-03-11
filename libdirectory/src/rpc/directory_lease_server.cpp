@@ -13,10 +13,11 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
-std::shared_ptr<apache::thrift::server::TThreadedServer> directory_lease_server::create(std::shared_ptr<
-    directory_tree> shard, const std::string &address, int port) {
+std::shared_ptr<TThreadedServer> directory_lease_server::create(std::shared_ptr<directory_tree> tree,
+                                                                std::shared_ptr<kv::kv_management_service> kv,
+                                                                const std::string &address, int port) {
   std::shared_ptr<directory_lease_serviceIfFactory>
-      clone_factory(new directory_lease_service_factory(std::move(shard)));
+      clone_factory(new directory_lease_service_factory(std::move(tree), std::move(kv)));
   std::shared_ptr<directory_lease_serviceProcessorFactory>
       proc_factory(new directory_lease_serviceProcessorFactory(clone_factory));
   std::shared_ptr<TServerSocket> sock(new TServerSocket(address, port));

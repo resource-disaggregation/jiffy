@@ -32,10 +32,11 @@ class directory_client : public directory_service {
   std::vector<directory_entry> directory_entries(const std::string &path) override;
   std::vector<directory_entry> recursive_directory_entries(const std::string &path) override;
   data_status dstatus(const std::string &path) override;
+  storage_mode mode(const std::string &path) override;
+  std::string persistent_store_prefix(const std::string &path) override;
+  std::vector<std::string> data_blocks(const std::string &path) override;
   bool is_regular_file(const std::string &path) override;
   bool is_directory(const std::string &path) override;
-  storage_mode mode(const std::string &path) override;
-  std::vector<std::string> data_blocks(const std::string &path) override;
 
  private:
   std::shared_ptr<apache::thrift::transport::TSocket> socket_;

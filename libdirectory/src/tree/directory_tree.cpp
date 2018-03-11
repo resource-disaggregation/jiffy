@@ -164,6 +164,10 @@ storage_mode directory_tree::mode(const std::string &path) {
   return get_node_as_file(path)->mode();
 }
 
+std::string directory_tree::persistent_store_prefix(const std::string &path) {
+  return get_node_as_file(path)->persistent_store_prefix();
+}
+
 std::vector<std::string> directory_tree::data_blocks(const std::string &path) {
   return get_node_as_file(path)->data_blocks();
 }
@@ -194,6 +198,10 @@ void directory_tree::dstatus(const std::string &path, const data_status &status)
 
 void directory_tree::mode(const std::string &path, const storage_mode &mode) {
   get_node_as_file(path)->mode(mode);
+}
+
+void directory_tree::persistent_store_prefix(const std::string &path, const std::string &prefix) {
+  get_node_as_file(path)->persistent_store_prefix(prefix);
 }
 
 void directory_tree::add_data_block(const std::string &path, const std::string &node) {

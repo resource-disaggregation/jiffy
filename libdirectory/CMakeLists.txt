@@ -1,3 +1,5 @@
+include_directories(../libkv/src ../libpersistent/src)
+
 add_library(directory STATIC
         src/directory_service.h
         src/directory_service.cpp
@@ -32,7 +34,7 @@ add_library(directory STATIC
 if (GENERATE_THRIFT)
   add_dependencies(directory thriftgen_directory)
 endif ()
-target_link_libraries(directory ${THRIFT_LIBRARIES})
+target_link_libraries(directory kv ${THRIFT_LIBRARIES})
 set_target_properties(directory PROPERTIES LINKER_LANGUAGE CXX)
 
 if (BUILD_TESTS)

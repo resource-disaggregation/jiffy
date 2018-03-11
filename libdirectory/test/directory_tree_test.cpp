@@ -234,11 +234,13 @@ TEST_CASE("dstatus_test", "[file]") {
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file.txt"));
   REQUIRE_THROWS_AS(tree.dstatus("/sandbox"), directory_service_exception);
   REQUIRE(tree.dstatus("/sandbox/file.txt").mode() == storage_mode::in_memory);
+  REQUIRE(tree.dstatus("/sandbox/file.txt").persistent_store_prefix().empty());
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().empty());
 
-  data_status status(storage_mode::in_memory_grace, {"a", "b", "c", "d"});
+  data_status status(storage_mode::in_memory_grace, "/tmp", {"a", "b", "c", "d"});
   REQUIRE_NOTHROW(tree.dstatus("/sandbox/file.txt", status));
   REQUIRE(tree.dstatus("/sandbox/file.txt").mode() == storage_mode::in_memory_grace);
+  REQUIRE(tree.dstatus("/sandbox/file.txt").persistent_store_prefix() == "/tmp");
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().size() == 4);
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0) == "a");
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(1) == "b");

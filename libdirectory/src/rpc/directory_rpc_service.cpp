@@ -266,6 +266,22 @@ directory_rpc_service_mode_presult::~directory_rpc_service_mode_presult() throw(
 }
 
 
+directory_rpc_service_persistent_store_prefix_args::~directory_rpc_service_persistent_store_prefix_args() throw() {
+}
+
+
+directory_rpc_service_persistent_store_prefix_pargs::~directory_rpc_service_persistent_store_prefix_pargs() throw() {
+}
+
+
+directory_rpc_service_persistent_store_prefix_result::~directory_rpc_service_persistent_store_prefix_result() throw() {
+}
+
+
+directory_rpc_service_persistent_store_prefix_presult::~directory_rpc_service_persistent_store_prefix_presult() throw() {
+}
+
+
 directory_rpc_service_data_blocks_args::~directory_rpc_service_data_blocks_args() throw() {
 }
 

@@ -24,11 +24,11 @@ class directory_rpc_service_handler : public directory_rpc_serviceIf {
   void directory_entries(std::vector<rpc_dir_entry> &_return, const std::string &path) override;
   void recursive_directory_entries(std::vector<rpc_dir_entry> &_return, const std::string &path) override;
   void dstatus(rpc_data_status &_return, const std::string &path) override;
+  rpc_storage_mode mode(const std::string &path) override;
+  void persistent_store_prefix(std::string &_return, const std::string &path) override;
+  void data_blocks(std::vector<std::string> &_return, const std::string &path) override;
   bool is_regular_file(const std::string &path) override;
   bool is_directory(const std::string &path) override;
-  rpc_storage_mode mode(const std::string &path) override;
-  void data_blocks(std::vector<std::string> &_return, const std::string &path) override;
-
  private:
   directory_rpc_service_exception make_exception(directory_service_exception &ex) const;
   std::shared_ptr<directory_tree> shard_;

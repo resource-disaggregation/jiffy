@@ -15,7 +15,8 @@ directory_client::directory_client(const std::string &host, int port) {
 }
 
 directory_client::~directory_client() {
-  disconnect();
+  if (transport_ != nullptr)
+    disconnect();
 }
 
 void directory_client::connect(const std::string &host, int port) {
@@ -111,11 +112,17 @@ std::vector<directory_entry> directory_client::recursive_directory_entries(const
 data_status directory_client::dstatus(const std::string &path) {
   rpc_data_status s;
   client_->dstatus(s, path);
-  return data_status(static_cast<storage_mode>(s.storage_mode), s.data_blocks);
+  return data_status(static_cast<storage_mode>(s.storage_mode), s.persistent_store_prefix, s.data_blocks);
 }
 
 storage_mode directory_client::mode(const std::string &path) {
   return static_cast<storage_mode>(client_->mode(path));
+}
+
+std::string directory_client::persistent_store_prefix(const std::string &path) {
+  std::string out;
+  client_->persistent_store_prefix(out, path);
+  return out;
 }
 
 std::vector<std::string> directory_client::data_blocks(const std::string &path) {

@@ -117,6 +117,7 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
   using ::apache::thrift::protocol::TProtocolException;
 
   bool isset_storage_mode = false;
+  bool isset_persistent_store_prefix = false;
   bool isset_data_blocks = false;
 
   while (true)
@@ -138,6 +139,14 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
         }
         break;
       case 2:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->persistent_store_prefix);
+          isset_persistent_store_prefix = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->data_blocks.clear();
@@ -168,6 +177,8 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
 
   if (!isset_storage_mode)
     throw TProtocolException(TProtocolException::INVALID_DATA);
+  if (!isset_persistent_store_prefix)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
   if (!isset_data_blocks)
     throw TProtocolException(TProtocolException::INVALID_DATA);
   return xfer;
@@ -183,7 +194,11 @@ uint32_t rpc_data_status::write(Protocol_* oprot) const {
   xfer += oprot->writeI32((int32_t)this->storage_mode);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("data_blocks", ::apache::thrift::protocol::T_LIST, 2);
+  xfer += oprot->writeFieldBegin("persistent_store_prefix", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->persistent_store_prefix);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("data_blocks", ::apache::thrift::protocol::T_LIST, 3);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->data_blocks.size()));
     std::vector<std::string> ::const_iterator _iter9;
@@ -336,75 +351,6 @@ uint32_t directory_rpc_service_exception::write(Protocol_* oprot) const {
 }
 
 template <class Protocol_>
-uint32_t rpc_keep_alive::read(Protocol_* iprot) {
-
-  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->path);
-          this->__isset.path = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 2:
-        if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->bytes_added);
-          this->__isset.bytes_added = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-template <class Protocol_>
-uint32_t rpc_keep_alive::write(Protocol_* oprot) const {
-  uint32_t xfer = 0;
-  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("rpc_keep_alive");
-
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString(this->path);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("bytes_added", ::apache::thrift::protocol::T_I64, 2);
-  xfer += oprot->writeI64(this->bytes_added);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-template <class Protocol_>
 uint32_t rpc_keep_alive_ack::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
@@ -417,6 +363,7 @@ uint32_t rpc_keep_alive_ack::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
+  bool isset_path = false;
 
   while (true)
   {
@@ -429,7 +376,7 @@ uint32_t rpc_keep_alive_ack::read(Protocol_* iprot) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
-          this->__isset.path = true;
+          isset_path = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -451,6 +398,8 @@ uint32_t rpc_keep_alive_ack::read(Protocol_* iprot) {
 
   xfer += iprot->readStructEnd();
 
+  if (!isset_path)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
   return xfer;
 }
 
@@ -464,10 +413,11 @@ uint32_t rpc_keep_alive_ack::write(Protocol_* oprot) const {
   xfer += oprot->writeString(this->path);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("tot_bytes", ::apache::thrift::protocol::T_I64, 2);
-  xfer += oprot->writeI64(this->tot_bytes);
-  xfer += oprot->writeFieldEnd();
-
+  if (this->__isset.tot_bytes) {
+    xfer += oprot->writeFieldBegin("tot_bytes", ::apache::thrift::protocol::T_I64, 2);
+    xfer += oprot->writeI64(this->tot_bytes);
+    xfer += oprot->writeFieldEnd();
+  }
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;

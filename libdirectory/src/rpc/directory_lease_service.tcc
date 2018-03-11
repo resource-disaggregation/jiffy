@@ -42,6 +42,14 @@ uint32_t directory_lease_service_create_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->persistent_store_prefix);
+          this->__isset.persistent_store_prefix = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -64,6 +72,10 @@ uint32_t directory_lease_service_create_args::write(Protocol_* oprot) const {
   xfer += oprot->writeString(this->path);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("persistent_store_prefix", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->persistent_store_prefix);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -78,6 +90,10 @@ uint32_t directory_lease_service_create_pargs::write(Protocol_* oprot) const {
 
   xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeString((*(this->path)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("persistent_store_prefix", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString((*(this->persistent_store_prefix)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -213,16 +229,8 @@ uint32_t directory_lease_service_load_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->persistent_path);
-          this->__isset.persistent_path = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 2:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->memory_path);
-          this->__isset.memory_path = true;
+          xfer += iprot->readString(this->path);
+          this->__isset.path = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -245,12 +253,8 @@ uint32_t directory_lease_service_load_args::write(Protocol_* oprot) const {
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_lease_service_load_args");
 
-  xfer += oprot->writeFieldBegin("persistent_path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString(this->persistent_path);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("memory_path", ::apache::thrift::protocol::T_STRING, 2);
-  xfer += oprot->writeString(this->memory_path);
+  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString(this->path);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -265,12 +269,8 @@ uint32_t directory_lease_service_load_pargs::write(Protocol_* oprot) const {
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_lease_service_load_pargs");
 
-  xfer += oprot->writeFieldBegin("persistent_path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString((*(this->persistent_path)));
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("memory_path", ::apache::thrift::protocol::T_STRING, 2);
-  xfer += oprot->writeString((*(this->memory_path)));
+  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString((*(this->path)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -405,9 +405,17 @@ uint32_t directory_lease_service_renew_lease_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->msg.read(iprot);
-          this->__isset.msg = true;
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->path);
+          this->__isset.path = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->bytes_added);
+          this->__isset.bytes_added = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -430,8 +438,12 @@ uint32_t directory_lease_service_renew_lease_args::write(Protocol_* oprot) const
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_lease_service_renew_lease_args");
 
-  xfer += oprot->writeFieldBegin("msg", ::apache::thrift::protocol::T_STRUCT, 1);
-  xfer += this->msg.write(oprot);
+  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString(this->path);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("bytes_added", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeI64(this->bytes_added);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -446,8 +458,12 @@ uint32_t directory_lease_service_renew_lease_pargs::write(Protocol_* oprot) cons
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_lease_service_renew_lease_pargs");
 
-  xfer += oprot->writeFieldBegin("msg", ::apache::thrift::protocol::T_STRUCT, 1);
-  xfer += (*(this->msg)).write(oprot);
+  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString((*(this->path)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("bytes_added", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeI64((*(this->bytes_added)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -611,9 +627,9 @@ uint32_t directory_lease_service_remove_args::read(Protocol_* iprot) {
         break;
       case 2:
         if (ftype == ::apache::thrift::protocol::T_I32) {
-          int32_t ecast58;
-          xfer += iprot->readI32(ecast58);
-          this->mode = (rpc_remove_mode)ecast58;
+          int32_t ecast56;
+          xfer += iprot->readI32(ecast56);
+          this->mode = (rpc_remove_mode)ecast56;
           this->__isset.mode = true;
         } else {
           xfer += iprot->skip(ftype);
@@ -774,20 +790,21 @@ uint32_t directory_lease_service_remove_presult::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::create(const std::string& path)
+void directory_lease_serviceClientT<Protocol_>::create(const std::string& path, const std::string& persistent_store_prefix)
 {
-  send_create(path);
+  send_create(path, persistent_store_prefix);
   recv_create();
 }
 
 template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::send_create(const std::string& path)
+void directory_lease_serviceClientT<Protocol_>::send_create(const std::string& path, const std::string& persistent_store_prefix)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("create", ::apache::thrift::protocol::T_CALL, cseqid);
 
   directory_lease_service_create_pargs args;
   args.path = &path;
+  args.persistent_store_prefix = &persistent_store_prefix;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -833,21 +850,20 @@ void directory_lease_serviceClientT<Protocol_>::recv_create()
 }
 
 template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::load(const std::string& persistent_path, const std::string& memory_path)
+void directory_lease_serviceClientT<Protocol_>::load(const std::string& path)
 {
-  send_load(persistent_path, memory_path);
+  send_load(path);
   recv_load();
 }
 
 template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::send_load(const std::string& persistent_path, const std::string& memory_path)
+void directory_lease_serviceClientT<Protocol_>::send_load(const std::string& path)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("load", ::apache::thrift::protocol::T_CALL, cseqid);
 
   directory_lease_service_load_pargs args;
-  args.persistent_path = &persistent_path;
-  args.memory_path = &memory_path;
+  args.path = &path;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -893,20 +909,21 @@ void directory_lease_serviceClientT<Protocol_>::recv_load()
 }
 
 template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::renew_lease(rpc_keep_alive_ack& _return, const rpc_keep_alive& msg)
+void directory_lease_serviceClientT<Protocol_>::renew_lease(rpc_keep_alive_ack& _return, const std::string& path, const int64_t bytes_added)
 {
-  send_renew_lease(msg);
+  send_renew_lease(path, bytes_added);
   recv_renew_lease(_return);
 }
 
 template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::send_renew_lease(const rpc_keep_alive& msg)
+void directory_lease_serviceClientT<Protocol_>::send_renew_lease(const std::string& path, const int64_t bytes_added)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("renew_lease", ::apache::thrift::protocol::T_CALL, cseqid);
 
   directory_lease_service_renew_lease_pargs args;
-  args.msg = &msg;
+  args.path = &path;
+  args.bytes_added = &bytes_added;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -1080,7 +1097,7 @@ void directory_lease_serviceProcessorT<Protocol_>::process_create(int32_t seqid,
 
   directory_lease_service_create_result result;
   try {
-    iface_->create(args.path);
+    iface_->create(args.path, args.persistent_store_prefix);
   } catch (directory_lease_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -1137,7 +1154,7 @@ void directory_lease_serviceProcessorT<Protocol_>::process_create(int32_t seqid,
 
   directory_lease_service_create_result result;
   try {
-    iface_->create(args.path);
+    iface_->create(args.path, args.persistent_store_prefix);
   } catch (directory_lease_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -1194,7 +1211,7 @@ void directory_lease_serviceProcessorT<Protocol_>::process_load(int32_t seqid, :
 
   directory_lease_service_load_result result;
   try {
-    iface_->load(args.persistent_path, args.memory_path);
+    iface_->load(args.path);
   } catch (directory_lease_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -1251,7 +1268,7 @@ void directory_lease_serviceProcessorT<Protocol_>::process_load(int32_t seqid, P
 
   directory_lease_service_load_result result;
   try {
-    iface_->load(args.persistent_path, args.memory_path);
+    iface_->load(args.path);
   } catch (directory_lease_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -1308,7 +1325,7 @@ void directory_lease_serviceProcessorT<Protocol_>::process_renew_lease(int32_t s
 
   directory_lease_service_renew_lease_result result;
   try {
-    iface_->renew_lease(result.success, args.msg);
+    iface_->renew_lease(result.success, args.path, args.bytes_added);
     result.__isset.success = true;
   } catch (directory_lease_service_exception &ex) {
     result.ex = ex;
@@ -1366,7 +1383,7 @@ void directory_lease_serviceProcessorT<Protocol_>::process_renew_lease(int32_t s
 
   directory_lease_service_renew_lease_result result;
   try {
-    iface_->renew_lease(result.success, args.msg);
+    iface_->renew_lease(result.success, args.path, args.bytes_added);
     result.__isset.success = true;
   } catch (directory_lease_service_exception &ex) {
     result.ex = ex;
@@ -1523,14 +1540,14 @@ template <class Protocol_>
 }
 
 template <class Protocol_>
-void directory_lease_serviceConcurrentClientT<Protocol_>::create(const std::string& path)
+void directory_lease_serviceConcurrentClientT<Protocol_>::create(const std::string& path, const std::string& persistent_store_prefix)
 {
-  int32_t seqid = send_create(path);
+  int32_t seqid = send_create(path, persistent_store_prefix);
   recv_create(seqid);
 }
 
 template <class Protocol_>
-int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_create(const std::string& path)
+int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_create(const std::string& path, const std::string& persistent_store_prefix)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -1538,6 +1555,7 @@ int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_create(const s
 
   directory_lease_service_create_pargs args;
   args.path = &path;
+  args.persistent_store_prefix = &persistent_store_prefix;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -1608,22 +1626,21 @@ void directory_lease_serviceConcurrentClientT<Protocol_>::recv_create(const int3
 }
 
 template <class Protocol_>
-void directory_lease_serviceConcurrentClientT<Protocol_>::load(const std::string& persistent_path, const std::string& memory_path)
+void directory_lease_serviceConcurrentClientT<Protocol_>::load(const std::string& path)
 {
-  int32_t seqid = send_load(persistent_path, memory_path);
+  int32_t seqid = send_load(path);
   recv_load(seqid);
 }
 
 template <class Protocol_>
-int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_load(const std::string& persistent_path, const std::string& memory_path)
+int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_load(const std::string& path)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("load", ::apache::thrift::protocol::T_CALL, cseqid);
 
   directory_lease_service_load_pargs args;
-  args.persistent_path = &persistent_path;
-  args.memory_path = &memory_path;
+  args.path = &path;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -1694,21 +1711,22 @@ void directory_lease_serviceConcurrentClientT<Protocol_>::recv_load(const int32_
 }
 
 template <class Protocol_>
-void directory_lease_serviceConcurrentClientT<Protocol_>::renew_lease(rpc_keep_alive_ack& _return, const rpc_keep_alive& msg)
+void directory_lease_serviceConcurrentClientT<Protocol_>::renew_lease(rpc_keep_alive_ack& _return, const std::string& path, const int64_t bytes_added)
 {
-  int32_t seqid = send_renew_lease(msg);
+  int32_t seqid = send_renew_lease(path, bytes_added);
   recv_renew_lease(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_renew_lease(const rpc_keep_alive& msg)
+int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_renew_lease(const std::string& path, const int64_t bytes_added)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("renew_lease", ::apache::thrift::protocol::T_CALL, cseqid);
 
   directory_lease_service_renew_lease_pargs args;
-  args.msg = &msg;
+  args.path = &path;
+  args.bytes_added = &bytes_added;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();

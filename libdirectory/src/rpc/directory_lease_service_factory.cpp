@@ -10,8 +10,9 @@ namespace directory {
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::transport;
 
-directory_lease_service_factory::directory_lease_service_factory(std::shared_ptr<directory_tree> shard)
-    : shard_(std::move(shard)) {}
+directory_lease_service_factory::directory_lease_service_factory(std::shared_ptr<directory_tree> tree,
+                                                                 std::shared_ptr<kv::kv_management_service> kv)
+    : tree_(std::move(tree)), kv_(std::move(kv)) {}
 
 directory_lease_serviceIf *directory_lease_service_factory::getHandler(const ::apache::thrift::TConnectionInfo &conn_info) {
   std::shared_ptr<TSocket> sock = std::dynamic_pointer_cast<TSocket>(
@@ -21,7 +22,7 @@ directory_lease_serviceIf *directory_lease_service_factory::getHandler(const ::a
             << "\t\t\tPeerHost: " << sock->getPeerHost() << "\n"
             << "\t\t\tPeerAddress: " << sock->getPeerAddress() << "\n"
             << "\t\t\tPeerPort: " << sock->getPeerPort();
-  return new directory_lease_service_handler(shard_);
+  return new directory_lease_service_handler(tree_, kv_);
 }
 
 void directory_lease_service_factory::releaseHandler(directory_lease_serviceIf *handler) {

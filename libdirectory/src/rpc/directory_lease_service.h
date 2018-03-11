@@ -21,9 +21,9 @@ namespace elasticmem { namespace directory {
 class directory_lease_serviceIf {
  public:
   virtual ~directory_lease_serviceIf() {}
-  virtual void create(const std::string& path) = 0;
-  virtual void load(const std::string& persistent_path, const std::string& memory_path) = 0;
-  virtual void renew_lease(rpc_keep_alive_ack& _return, const rpc_keep_alive& msg) = 0;
+  virtual void create(const std::string& path, const std::string& persistent_store_prefix) = 0;
+  virtual void load(const std::string& path) = 0;
+  virtual void renew_lease(rpc_keep_alive_ack& _return, const std::string& path, const int64_t bytes_added) = 0;
   virtual void remove(const std::string& path, const rpc_remove_mode mode) = 0;
 };
 
@@ -54,13 +54,13 @@ class directory_lease_serviceIfSingletonFactory : virtual public directory_lease
 class directory_lease_serviceNull : virtual public directory_lease_serviceIf {
  public:
   virtual ~directory_lease_serviceNull() {}
-  void create(const std::string& /* path */) {
+  void create(const std::string& /* path */, const std::string& /* persistent_store_prefix */) {
     return;
   }
-  void load(const std::string& /* persistent_path */, const std::string& /* memory_path */) {
+  void load(const std::string& /* path */) {
     return;
   }
-  void renew_lease(rpc_keep_alive_ack& /* _return */, const rpc_keep_alive& /* msg */) {
+  void renew_lease(rpc_keep_alive_ack& /* _return */, const std::string& /* path */, const int64_t /* bytes_added */) {
     return;
   }
   void remove(const std::string& /* path */, const rpc_remove_mode /* mode */) {
@@ -69,8 +69,9 @@ class directory_lease_serviceNull : virtual public directory_lease_serviceIf {
 };
 
 typedef struct _directory_lease_service_create_args__isset {
-  _directory_lease_service_create_args__isset() : path(false) {}
+  _directory_lease_service_create_args__isset() : path(false), persistent_store_prefix(false) {}
   bool path :1;
+  bool persistent_store_prefix :1;
 } _directory_lease_service_create_args__isset;
 
 class directory_lease_service_create_args {
@@ -78,19 +79,24 @@ class directory_lease_service_create_args {
 
   directory_lease_service_create_args(const directory_lease_service_create_args&);
   directory_lease_service_create_args& operator=(const directory_lease_service_create_args&);
-  directory_lease_service_create_args() : path() {
+  directory_lease_service_create_args() : path(), persistent_store_prefix() {
   }
 
   virtual ~directory_lease_service_create_args() throw();
   std::string path;
+  std::string persistent_store_prefix;
 
   _directory_lease_service_create_args__isset __isset;
 
   void __set_path(const std::string& val);
 
+  void __set_persistent_store_prefix(const std::string& val);
+
   bool operator == (const directory_lease_service_create_args & rhs) const
   {
     if (!(path == rhs.path))
+      return false;
+    if (!(persistent_store_prefix == rhs.persistent_store_prefix))
       return false;
     return true;
   }
@@ -114,6 +120,7 @@ class directory_lease_service_create_pargs {
 
   virtual ~directory_lease_service_create_pargs() throw();
   const std::string* path;
+  const std::string* persistent_store_prefix;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -179,9 +186,8 @@ class directory_lease_service_create_presult {
 };
 
 typedef struct _directory_lease_service_load_args__isset {
-  _directory_lease_service_load_args__isset() : persistent_path(false), memory_path(false) {}
-  bool persistent_path :1;
-  bool memory_path :1;
+  _directory_lease_service_load_args__isset() : path(false) {}
+  bool path :1;
 } _directory_lease_service_load_args__isset;
 
 class directory_lease_service_load_args {
@@ -189,24 +195,19 @@ class directory_lease_service_load_args {
 
   directory_lease_service_load_args(const directory_lease_service_load_args&);
   directory_lease_service_load_args& operator=(const directory_lease_service_load_args&);
-  directory_lease_service_load_args() : persistent_path(), memory_path() {
+  directory_lease_service_load_args() : path() {
   }
 
   virtual ~directory_lease_service_load_args() throw();
-  std::string persistent_path;
-  std::string memory_path;
+  std::string path;
 
   _directory_lease_service_load_args__isset __isset;
 
-  void __set_persistent_path(const std::string& val);
-
-  void __set_memory_path(const std::string& val);
+  void __set_path(const std::string& val);
 
   bool operator == (const directory_lease_service_load_args & rhs) const
   {
-    if (!(persistent_path == rhs.persistent_path))
-      return false;
-    if (!(memory_path == rhs.memory_path))
+    if (!(path == rhs.path))
       return false;
     return true;
   }
@@ -229,8 +230,7 @@ class directory_lease_service_load_pargs {
 
 
   virtual ~directory_lease_service_load_pargs() throw();
-  const std::string* persistent_path;
-  const std::string* memory_path;
+  const std::string* path;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -296,8 +296,9 @@ class directory_lease_service_load_presult {
 };
 
 typedef struct _directory_lease_service_renew_lease_args__isset {
-  _directory_lease_service_renew_lease_args__isset() : msg(false) {}
-  bool msg :1;
+  _directory_lease_service_renew_lease_args__isset() : path(false), bytes_added(false) {}
+  bool path :1;
+  bool bytes_added :1;
 } _directory_lease_service_renew_lease_args__isset;
 
 class directory_lease_service_renew_lease_args {
@@ -305,19 +306,24 @@ class directory_lease_service_renew_lease_args {
 
   directory_lease_service_renew_lease_args(const directory_lease_service_renew_lease_args&);
   directory_lease_service_renew_lease_args& operator=(const directory_lease_service_renew_lease_args&);
-  directory_lease_service_renew_lease_args() {
+  directory_lease_service_renew_lease_args() : path(), bytes_added(0) {
   }
 
   virtual ~directory_lease_service_renew_lease_args() throw();
-  rpc_keep_alive msg;
+  std::string path;
+  int64_t bytes_added;
 
   _directory_lease_service_renew_lease_args__isset __isset;
 
-  void __set_msg(const rpc_keep_alive& val);
+  void __set_path(const std::string& val);
+
+  void __set_bytes_added(const int64_t val);
 
   bool operator == (const directory_lease_service_renew_lease_args & rhs) const
   {
-    if (!(msg == rhs.msg))
+    if (!(path == rhs.path))
+      return false;
+    if (!(bytes_added == rhs.bytes_added))
       return false;
     return true;
   }
@@ -340,7 +346,8 @@ class directory_lease_service_renew_lease_pargs {
 
 
   virtual ~directory_lease_service_renew_lease_pargs() throw();
-  const rpc_keep_alive* msg;
+  const std::string* path;
+  const int64_t* bytes_added;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -556,14 +563,14 @@ class directory_lease_serviceClientT : virtual public directory_lease_serviceIf 
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void create(const std::string& path);
-  void send_create(const std::string& path);
+  void create(const std::string& path, const std::string& persistent_store_prefix);
+  void send_create(const std::string& path, const std::string& persistent_store_prefix);
   void recv_create();
-  void load(const std::string& persistent_path, const std::string& memory_path);
-  void send_load(const std::string& persistent_path, const std::string& memory_path);
+  void load(const std::string& path);
+  void send_load(const std::string& path);
   void recv_load();
-  void renew_lease(rpc_keep_alive_ack& _return, const rpc_keep_alive& msg);
-  void send_renew_lease(const rpc_keep_alive& msg);
+  void renew_lease(rpc_keep_alive_ack& _return, const std::string& path, const int64_t bytes_added);
+  void send_renew_lease(const std::string& path, const int64_t bytes_added);
   void recv_renew_lease(rpc_keep_alive_ack& _return);
   void remove(const std::string& path, const rpc_remove_mode mode);
   void send_remove(const std::string& path, const rpc_remove_mode mode);
@@ -652,31 +659,31 @@ class directory_lease_serviceMultiface : virtual public directory_lease_serviceI
     ifaces_.push_back(iface);
   }
  public:
-  void create(const std::string& path) {
+  void create(const std::string& path, const std::string& persistent_store_prefix) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->create(path);
+      ifaces_[i]->create(path, persistent_store_prefix);
     }
-    ifaces_[i]->create(path);
+    ifaces_[i]->create(path, persistent_store_prefix);
   }
 
-  void load(const std::string& persistent_path, const std::string& memory_path) {
+  void load(const std::string& path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->load(persistent_path, memory_path);
+      ifaces_[i]->load(path);
     }
-    ifaces_[i]->load(persistent_path, memory_path);
+    ifaces_[i]->load(path);
   }
 
-  void renew_lease(rpc_keep_alive_ack& _return, const rpc_keep_alive& msg) {
+  void renew_lease(rpc_keep_alive_ack& _return, const std::string& path, const int64_t bytes_added) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->renew_lease(_return, msg);
+      ifaces_[i]->renew_lease(_return, path, bytes_added);
     }
-    ifaces_[i]->renew_lease(_return, msg);
+    ifaces_[i]->renew_lease(_return, path, bytes_added);
     return;
   }
 
@@ -720,14 +727,14 @@ class directory_lease_serviceConcurrentClientT : virtual public directory_lease_
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void create(const std::string& path);
-  int32_t send_create(const std::string& path);
+  void create(const std::string& path, const std::string& persistent_store_prefix);
+  int32_t send_create(const std::string& path, const std::string& persistent_store_prefix);
   void recv_create(const int32_t seqid);
-  void load(const std::string& persistent_path, const std::string& memory_path);
-  int32_t send_load(const std::string& persistent_path, const std::string& memory_path);
+  void load(const std::string& path);
+  int32_t send_load(const std::string& path);
   void recv_load(const int32_t seqid);
-  void renew_lease(rpc_keep_alive_ack& _return, const rpc_keep_alive& msg);
-  int32_t send_renew_lease(const rpc_keep_alive& msg);
+  void renew_lease(rpc_keep_alive_ack& _return, const std::string& path, const int64_t bytes_added);
+  int32_t send_renew_lease(const std::string& path, const int64_t bytes_added);
   void recv_renew_lease(rpc_keep_alive_ack& _return, const int32_t seqid);
   void remove(const std::string& path, const rpc_remove_mode mode);
   int32_t send_remove(const std::string& path, const rpc_remove_mode mode);

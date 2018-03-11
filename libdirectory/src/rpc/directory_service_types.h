@@ -70,8 +70,6 @@ class rpc_dir_entry;
 
 class directory_rpc_service_exception;
 
-class rpc_keep_alive;
-
 class rpc_keep_alive_ack;
 
 class directory_lease_service_exception;
@@ -130,20 +128,25 @@ class rpc_data_status {
 
   rpc_data_status(const rpc_data_status&);
   rpc_data_status& operator=(const rpc_data_status&);
-  rpc_data_status() : storage_mode((rpc_storage_mode)0) {
+  rpc_data_status() : storage_mode((rpc_storage_mode)0), persistent_store_prefix() {
   }
 
   virtual ~rpc_data_status() throw();
   rpc_storage_mode storage_mode;
+  std::string persistent_store_prefix;
   std::vector<std::string>  data_blocks;
 
   void __set_storage_mode(const rpc_storage_mode val);
+
+  void __set_persistent_store_prefix(const std::string& val);
 
   void __set_data_blocks(const std::vector<std::string> & val);
 
   bool operator == (const rpc_data_status & rhs) const
   {
     if (!(storage_mode == rhs.storage_mode))
+      return false;
+    if (!(persistent_store_prefix == rhs.persistent_store_prefix))
       return false;
     if (!(data_blocks == rhs.data_blocks))
       return false;
@@ -250,59 +253,8 @@ void swap(directory_rpc_service_exception &a, directory_rpc_service_exception &b
 
 std::ostream& operator<<(std::ostream& out, const directory_rpc_service_exception& obj);
 
-typedef struct _rpc_keep_alive__isset {
-  _rpc_keep_alive__isset() : path(false), bytes_added(false) {}
-  bool path :1;
-  bool bytes_added :1;
-} _rpc_keep_alive__isset;
-
-class rpc_keep_alive {
- public:
-
-  rpc_keep_alive(const rpc_keep_alive&);
-  rpc_keep_alive& operator=(const rpc_keep_alive&);
-  rpc_keep_alive() : path(), bytes_added(0) {
-  }
-
-  virtual ~rpc_keep_alive() throw();
-  std::string path;
-  int64_t bytes_added;
-
-  _rpc_keep_alive__isset __isset;
-
-  void __set_path(const std::string& val);
-
-  void __set_bytes_added(const int64_t val);
-
-  bool operator == (const rpc_keep_alive & rhs) const
-  {
-    if (!(path == rhs.path))
-      return false;
-    if (!(bytes_added == rhs.bytes_added))
-      return false;
-    return true;
-  }
-  bool operator != (const rpc_keep_alive &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const rpc_keep_alive & ) const;
-
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
-
-  virtual void printTo(std::ostream& out) const;
-};
-
-void swap(rpc_keep_alive &a, rpc_keep_alive &b);
-
-std::ostream& operator<<(std::ostream& out, const rpc_keep_alive& obj);
-
 typedef struct _rpc_keep_alive_ack__isset {
-  _rpc_keep_alive_ack__isset() : path(false), tot_bytes(false) {}
-  bool path :1;
+  _rpc_keep_alive_ack__isset() : tot_bytes(false) {}
   bool tot_bytes :1;
 } _rpc_keep_alive_ack__isset;
 
@@ -328,7 +280,9 @@ class rpc_keep_alive_ack {
   {
     if (!(path == rhs.path))
       return false;
-    if (!(tot_bytes == rhs.tot_bytes))
+    if (__isset.tot_bytes != rhs.__isset.tot_bytes)
+      return false;
+    else if (__isset.tot_bytes && !(tot_bytes == rhs.tot_bytes))
       return false;
     return true;
   }
