@@ -18,7 +18,7 @@ kv_rpc_serviceIf *kv_rpc_service_factory::getHandler(const TConnectionInfo &conn
             << "\t\t\tSocketInfo: " << sock->getSocketInfo() << "\n"
             << "\t\t\tPeerHost: " << sock->getPeerHost() << "\n"
             << "\t\t\tPeerAddress: " << sock->getPeerAddress() << "\n"
-            << "\t\t\tPeerPort: " << sock->getPeerPort();
+            << "\t\t\tPeerPort: " << sock->getPeerPort() << "\n";
   return new kv_rpc_service_handler(blocks_);
 }
 

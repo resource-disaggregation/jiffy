@@ -19,7 +19,7 @@ kv_management_rpc_serviceIf *kv_management_rpc_service_factory::getHandler(const
             << "\t\t\tSocketInfo: " << sock->getSocketInfo() << "\n"
             << "\t\t\tPeerHost: " << sock->getPeerHost() << "\n"
             << "\t\t\tPeerAddress: " << sock->getPeerAddress() << "\n"
-            << "\t\t\tPeerPort: " << sock->getPeerPort();
+            << "\t\t\tPeerPort: " << sock->getPeerPort() << "\n";
   return new kv_management_rpc_service_handler(blocks_);
 }
 

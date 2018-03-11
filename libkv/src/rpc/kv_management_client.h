@@ -7,12 +7,12 @@
 namespace elasticmem {
 namespace kv {
 
-class kv_management_rpc_client {
+class kv_management_client {
  public:
   typedef kv_management_rpc_serviceClient thrift_client;
-  kv_management_rpc_client() = default;
-  ~kv_management_rpc_client();
-  kv_management_rpc_client(const std::string &hostname, int port);
+  kv_management_client() = default;
+  ~kv_management_client();
+  kv_management_client(const std::string &hostname, int port);
   void connect(const std::string &hostname, int port);
   void disconnect();
 
@@ -23,10 +23,10 @@ class kv_management_rpc_client {
   int64_t storage_size(int32_t block_id);
 
  private:
-  std::shared_ptr<apache::thrift::transport::TSocket> socket_;
-  std::shared_ptr<apache::thrift::transport::TTransport> transport_;
-  std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_;
-  std::shared_ptr<thrift_client> client_;
+  std::shared_ptr<apache::thrift::transport::TSocket> socket_{};
+  std::shared_ptr<apache::thrift::transport::TTransport> transport_{};
+  std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_{};
+  std::shared_ptr<thrift_client> client_{};
 };
 
 }

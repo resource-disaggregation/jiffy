@@ -10,12 +10,19 @@
 namespace elasticmem {
 namespace kv {
 
+class noop_store : public persistent::persistent_service {
+ public:
+  void write(const std::string &, const std::string &) override {}
+  void read(const std::string &, const std::string &) override {}
+  void remove(const std::string &) override {}
+};
+
 class kv_block {
  public:
   typedef cuckoohash_map<key_type, value_type> block_type;
   typedef block_type::locked_table locked_block_type;
 
-  explicit kv_block(std::shared_ptr<persistent::persistent_service> persistent,
+  explicit kv_block(std::shared_ptr<persistent::persistent_service> persistent = std::make_shared<noop_store>(),
                     std::string local_storage_prefix = "/tmp",
                     std::shared_ptr<serializer> ser = std::make_shared<binary_serializer>(),
                     std::shared_ptr<deserializer> deser = std::make_shared<binary_deserializer>());
@@ -32,9 +39,9 @@ class kv_block {
 
   bool empty() const;
 
-  void load(const std::string& remote_storage_prefix, const std::string &path);
+  void load(const std::string &remote_storage_prefix, const std::string &path);
 
-  void flush(const std::string& remote_storage_prefix, const std::string &path);
+  void flush(const std::string &remote_storage_prefix, const std::string &path);
 
   std::size_t storage_capacity();
 

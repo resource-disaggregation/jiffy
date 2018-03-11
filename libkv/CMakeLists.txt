@@ -30,7 +30,7 @@ add_library(kv
         src/serializer/csv_serde.h
         src/serializer/serde.h
         src/serializer/binary_serde.cpp
-        src/serializer/binary_serde.h src/manager/kv_manager.cpp src/manager/kv_manager.h src/rpc/kv_management_rpc_client.cpp src/rpc/kv_management_rpc_client.h src/manager/block_name_parser.cpp src/manager/block_name_parser.h)
+        src/serializer/binary_serde.h src/manager/kv_manager.cpp src/manager/kv_manager.h src/rpc/kv_management_client.cpp src/rpc/kv_management_client.h src/manager/block_name_parser.cpp src/manager/block_name_parser.h)
 if (GENERATE_THRIFT)
   add_dependencies(kv thriftgen_kv)
 endif ()
