@@ -1,6 +1,5 @@
 #include "directory_lease_server.h"
 #include "directory_lease_service_factory.h"
-#include "directory_rpc_service.h"
 
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
