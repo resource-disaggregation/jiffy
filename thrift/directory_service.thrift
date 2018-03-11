@@ -30,7 +30,8 @@ struct rpc_file_status {
 
 struct rpc_data_status {
   1: required rpc_storage_mode storage_mode,
-  2: required list<string> data_blocks,
+  2: required string persistent_store_prefix,
+  3: required list<string> data_blocks,
 }
 
 struct rpc_dir_entry {
@@ -88,6 +89,9 @@ service directory_rpc_service {
   rpc_storage_mode mode(1: string path)
     throws (1: directory_rpc_service_exception ex),
 
+  string persistent_store_prefix(1: string path)
+      throws (1: directory_rpc_service_exception ex),
+
   list<string> data_blocks(1: string path)
     throws (1: directory_rpc_service_exception ex),
 
@@ -98,14 +102,9 @@ service directory_rpc_service {
     throws (1: directory_rpc_service_exception ex),
 }
 
-struct rpc_keep_alive {
-  1: string path,
-  2: i64 bytes_added,
-}
-
 struct rpc_keep_alive_ack {
-  1: string path,
-  2: i64 tot_bytes,
+  1: required string path,
+  2: optional i64 tot_bytes,
 }
 
 enum rpc_remove_mode {
@@ -118,13 +117,13 @@ exception directory_lease_service_exception {
 }
 
 service directory_lease_service {
-  void create(1: string path)
+  void create(1: string path, 2: string persistent_store_prefix)
     throws (1: directory_lease_service_exception ex),
 
-  void load(1: string persistent_path, 2: string memory_path)
+  void load(1: string path)
     throws (1: directory_lease_service_exception ex),
 
-  rpc_keep_alive_ack renew_lease(1: rpc_keep_alive msg)
+  rpc_keep_alive_ack renew_lease(1: string path, 2: i64 bytes_added)
     throws (1: directory_lease_service_exception ex),
 
   void remove(1: string path, 2: rpc_remove_mode mode)

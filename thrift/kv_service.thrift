@@ -27,10 +27,10 @@ service kv_rpc_service {
 }
 
 service kv_management_rpc_service {
-  void flush(1: i32 block_id, 2: string path)
+  void flush(1: i32 block_id, 2: string persistent_store_prefix, 3: string path)
     throws (1: kv_management_rpc_exception ex),
 
-  void load(1: i32 block_id, 2: string path)
+  void load(1: i32 block_id, 2: string persistent_store_prefix, 3: string path)
     throws (1: kv_management_rpc_exception ex),
 
   void clear(1: i32 block_id)
