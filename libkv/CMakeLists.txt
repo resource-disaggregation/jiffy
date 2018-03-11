@@ -3,9 +3,21 @@ add_library(kv
         src/kv_service.h
         src/block/kv_block.cpp
         src/block/kv_block.h
+        src/rpc/kv_management_rpc_server.cpp
+        src/rpc/kv_management_rpc_server.h
+        src/rpc/kv_management_rpc_service_handler.cpp
+        src/rpc/kv_management_rpc_service_handler.h
+        src/rpc/kv_management_rpc_service_factory.cpp
+        src/rpc/kv_management_rpc_service_factory.h
         src/rpc/kv_management_rpc_service.cpp
         src/rpc/kv_management_rpc_service.h
         src/rpc/kv_management_rpc_service.tcc
+        src/rpc/kv_rpc_server.cpp
+        src/rpc/kv_rpc_server.h
+        src/rpc/kv_rpc_service_handler.cpp
+        src/rpc/kv_rpc_service_handler.h
+        src/rpc/kv_rpc_service_factory.cpp
+        src/rpc/kv_rpc_service_factory.h
         src/rpc/kv_rpc_service.cpp
         src/rpc/kv_rpc_service.h
         src/rpc/kv_rpc_service.tcc
@@ -14,8 +26,6 @@ add_library(kv
         src/rpc/kv_service_types.cpp
         src/rpc/kv_service_types.h
         src/rpc/kv_service_types.tcc
-        src/rpc/kv_rpc_service_handler.cpp
-        src/rpc/kv_rpc_service_handler.h
         src/serializer/csv_serde.cpp
         src/serializer/csv_serde.h
         src/serializer/serde.h

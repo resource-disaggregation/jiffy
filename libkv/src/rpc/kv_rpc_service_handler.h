@@ -14,6 +14,7 @@ class kv_rpc_service_handler: public kv_rpc_serviceIf {
   void get(std::string &_return, int32_t block_id, const std::string &key) override;
   void update(int32_t block_id, const std::string &key, const std::string &value) override;
   void remove(int32_t block_id, const std::string &key) override;
+  int64_t size(const int32_t block_id) override;
  private:
   std::vector<std::shared_ptr<kv_block>>& blocks_;
 };

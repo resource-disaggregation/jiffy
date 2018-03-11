@@ -22,5 +22,9 @@ void kv_rpc_service_handler::remove(const int32_t block_id, const std::string &k
   blocks_.at(static_cast<std::size_t>(block_id))->remove(key);
 }
 
+int64_t kv_rpc_service_handler::size(const int32_t block_id) {
+  return static_cast<int64_t>(blocks_.at(static_cast<std::size_t>(block_id))->size());
+}
+
 }
 }
