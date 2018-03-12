@@ -47,12 +47,8 @@ if (BUILD_TESTS)
   add_executable(ds_rpc_test test/directory_rpc_service_test.cpp)
   target_link_libraries(ds_rpc_test directory)
 
-  add_executable(ds_lease_test test/directory_lease_service_test.cpp)
-  target_link_libraries(ds_lease_test directory)
-
   if (NOT USE_SYSTEM_CATCH)
     add_dependencies(ds_tree_test catch)
     add_dependencies(ds_rpc_test catch)
-    add_dependencies(ds_lease_test catch)
   endif ()
 endif ()
