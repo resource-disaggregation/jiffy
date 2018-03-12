@@ -1,0 +1,8 @@
+#ifndef ELASTICMEM_RANDOM_BLOCK_ALLOCATOR_H
+#define ELASTICMEM_RANDOM_BLOCK_ALLOCATOR_H
+
+class random_block_allocator {
+
+};
+
+#endif //ELASTICMEM_RANDOM_BLOCK_ALLOCATOR_H

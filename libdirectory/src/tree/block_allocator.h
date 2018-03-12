@@ -1,0 +1,25 @@
+#ifndef ELASTICMEM_BLOCK_ALLOCATOR_H
+#define ELASTICMEM_BLOCK_ALLOCATOR_H
+
+#include <string>
+#include <vector>
+
+namespace elasticmem {
+namespace directory {
+
+class block_allocator {
+ public:
+  virtual std::string allocate(const std::string &hint) = 0;
+  virtual void free(const std::string &block_name) = 0;
+  virtual void add_blocks(const std::vector<std::string> &block_names) = 0;
+  virtual void remove_blocks(const std::vector<std::string> &block_names) = 0;
+
+  virtual std::size_t num_free_blocks() = 0;
+  virtual std::size_t num_allocated_blocks() = 0;
+  virtual std::size_t num_total_blocks() = 0;
+};
+
+}
+}
+
+#endif //ELASTICMEM_BLOCK_ALLOCATOR_H
