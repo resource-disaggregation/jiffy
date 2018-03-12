@@ -183,7 +183,12 @@ bool directory_tree::is_directory(const std::string &path) {
 }
 
 void directory_tree::touch(const std::string &path) {
-  touch(get_node(path), detail::now_ms());
+  auto time = detail::now_ms();
+  auto node = touch_node_path(path, time);
+  if (node == nullptr) {
+    throw directory_service_exception("Path does not exist: " + path);
+  }
+  touch(node, time);
 }
 
 void directory_tree::grow(const std::string &path, std::size_t bytes) {
@@ -261,6 +266,22 @@ std::shared_ptr<ds_file_node> directory_tree::get_node_as_file(const std::string
     throw directory_service_exception("Path corresponds to a directory: " + path);
   }
   return std::dynamic_pointer_cast<ds_file_node>(node);
+}
+
+std::shared_ptr<ds_node> directory_tree::touch_node_path(const std::string &path, const std::uint64_t time) const {
+  std::shared_ptr<ds_node> node = root_;
+  for (auto &name: directory_utils::path_elements(path)) {
+    if (!node->is_directory()) {
+      return nullptr;
+    } else {
+      node = std::dynamic_pointer_cast<ds_dir_node>(node)->get_child(name);
+      if (node == nullptr) {
+        return nullptr;
+      }
+      node->last_write_time(time);
+    }
+  }
+  return node;
 }
 
 void directory_tree::touch(std::shared_ptr<ds_node> node, std::uint64_t time) {

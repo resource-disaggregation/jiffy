@@ -291,6 +291,8 @@ class directory_tree : public directory_service, public directory_management_ser
 
   std::shared_ptr<ds_file_node> get_node_as_file(const std::string &path) const;
 
+  std::shared_ptr<ds_node> touch_node_path(const std::string &path, const std::uint64_t time) const;
+
   void touch(std::shared_ptr<ds_node> node, std::uint64_t time);
 
   std::shared_ptr<ds_dir_node> root_;

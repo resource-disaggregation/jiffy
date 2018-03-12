@@ -43,18 +43,22 @@ if (BUILD_TESTS)
   include_directories(${THRIFT_INCLUDE_DIR})
   include_directories(${CATCH_INCLUDE_DIR})
 
+  add_executable(block_allocator_test test/block_allocator_test.cpp)
+  target_link_libraries(block_allocator_test directory)
+
   add_executable(ds_tree_test test/directory_tree_test.cpp)
   target_link_libraries(ds_tree_test directory)
 
   add_executable(ds_rpc_test test/directory_rpc_service_test.cpp)
   target_link_libraries(ds_rpc_test directory)
 
-  add_executable(block_allocator_test test/block_allocator_test.cpp)
-  target_link_libraries(block_allocator_test directory)
+  add_executable(lease_manager_test test/lease_manager_test.cpp)
+  target_link_libraries(lease_manager_test directory)
 
   if (NOT USE_SYSTEM_CATCH)
+    add_dependencies(block_allocator_test catch)
     add_dependencies(ds_tree_test catch)
     add_dependencies(ds_rpc_test catch)
-    add_dependencies(block_allocator_test catch)
+    add_dependencies(lease_manager_test catch)
   endif ()
 endif ()
