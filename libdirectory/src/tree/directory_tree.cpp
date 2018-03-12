@@ -7,7 +7,9 @@
 namespace elasticmem {
 namespace directory {
 
-directory_tree::directory_tree() : root_(std::make_shared<ds_dir_node>(std::string("/"))) {}
+directory_tree::directory_tree(std::shared_ptr<block_allocator> allocator)
+    : root_(std::make_shared<ds_dir_node>(std::string("/"))),
+      allocator_(std::move(allocator)) {}
 
 void directory_tree::create_directory(const std::string &path) {
   std::string ptemp = path;
@@ -68,7 +70,7 @@ std::size_t directory_tree::file_size(const std::string &path) const {
   return get_node(path)->file_size();
 }
 
-std::time_t directory_tree::last_write_time(const std::string &path) const {
+std::uint64_t directory_tree::last_write_time(const std::string &path) const {
   return get_node(path)->last_write_time();
 }
 
@@ -181,7 +183,7 @@ bool directory_tree::is_directory(const std::string &path) {
 }
 
 void directory_tree::touch(const std::string &path) {
-  touch(get_node(path), std::time(nullptr));
+  touch(get_node(path), detail::now_ms());
 }
 
 void directory_tree::grow(const std::string &path, std::size_t bytes) {
@@ -204,20 +206,22 @@ void directory_tree::persistent_store_prefix(const std::string &path, const std:
   get_node_as_file(path)->persistent_store_prefix(prefix);
 }
 
-void directory_tree::add_data_block(const std::string &path, const std::string &node) {
-  get_node_as_file(path)->add_data_block(node);
+void directory_tree::add_data_block(const std::string &path) {
+  get_node_as_file(path)->add_data_block(allocator_->allocate(""));
 }
 
-void directory_tree::remove_data_block(const std::string &path, std::size_t i) {
-  get_node_as_file(path)->remove_data_block(i);
-}
-
-void directory_tree::remove_data_block(const std::string &path, const std::string &node) {
-  get_node_as_file(path)->remove_data_block(node);
+void directory_tree::remove_data_block(const std::string &path, const std::string &block) {
+  get_node_as_file(path)->remove_data_block(block);
+  allocator_->free(block);
 }
 
 void directory_tree::remove_all_data_blocks(const std::string &path) {
-  get_node_as_file(path)->remove_all_data_blocks();
+  auto node = get_node_as_file(path);
+  auto blocks = node->data_blocks();
+  node->remove_all_data_blocks();
+  for (const auto &block: blocks) {
+    allocator_->free(block);
+  }
 }
 
 std::shared_ptr<ds_node> directory_tree::get_node_unsafe(const std::string &path) const {
@@ -259,7 +263,7 @@ std::shared_ptr<ds_file_node> directory_tree::get_node_as_file(const std::string
   return std::dynamic_pointer_cast<ds_file_node>(node);
 }
 
-void directory_tree::touch(std::shared_ptr<ds_node> node, std::time_t time) {
+void directory_tree::touch(std::shared_ptr<ds_node> node, std::uint64_t time) {
   node->last_write_time(time);
   if (node->is_regular_file()) {
     return;

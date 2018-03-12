@@ -127,7 +127,7 @@ class file_status {
         permissions_(),
         last_write_time_(0) {}
 
-  file_status(file_type type, const perms &prms, std::time_t last_write_time)
+  file_status(file_type type, const perms &prms, std::uint64_t last_write_time)
       : type_(type),
         permissions_(prms),
         last_write_time_(last_write_time) {}
@@ -144,18 +144,18 @@ class file_status {
     permissions_ = prms;
   }
 
-  const std::time_t &last_write_time() const {
+  const std::uint64_t &last_write_time() const {
     return last_write_time_;
   }
 
-  void last_write_time(std::time_t time) {
+  void last_write_time(std::uint64_t time) {
     last_write_time_ = time;
   }
 
  private:
   file_type type_;
   perms permissions_;
-  std::time_t last_write_time_;
+  std::uint64_t last_write_time_;
 };
 
 class directory_entry {
@@ -178,7 +178,7 @@ class directory_entry {
     return status_.permissions();
   }
 
-  const std::time_t &last_write_time() const {
+  const std::uint64_t &last_write_time() const {
     return status_.last_write_time();
   }
 
@@ -191,10 +191,10 @@ class data_status {
  public:
   data_status() : mode_(storage_mode::in_memory) {}
   data_status(storage_mode mode, std::string persistent_store_prefix, std::vector<std::string> nodes)
-      : mode_(mode), persistent_store_prefix_(std::move(persistent_store_prefix)), data_nodes_(std::move(nodes)) {}
+      : mode_(mode), persistent_store_prefix_(std::move(persistent_store_prefix)), data_blocks_(std::move(nodes)) {}
 
   const std::vector<std::string> &data_blocks() const {
-    return data_nodes_;
+    return data_blocks_;
   }
 
   const storage_mode &mode() const {
@@ -214,25 +214,21 @@ class data_status {
   }
 
   void remove_all_data_blocks() {
-    data_nodes_.clear();
+    data_blocks_.clear();
   }
 
-  void add_data_block(const std::string &node) {
-    data_nodes_.push_back(node);
+  void add_data_block(const std::string &block) {
+    data_blocks_.push_back(block);
   }
 
-  void remove_data_block(std::size_t i) {
-    data_nodes_.erase(data_nodes_.begin() + i);
-  }
-
-  void remove_data_block(const std::string &node) {
-    data_nodes_.erase(std::remove(data_nodes_.begin(), data_nodes_.end(), node), data_nodes_.end());
+  void remove_data_block(const std::string &block) {
+    data_blocks_.erase(std::remove(data_blocks_.begin(), data_blocks_.end(), block), data_blocks_.end());
   }
 
  private:
   storage_mode mode_;
   std::string persistent_store_prefix_;
-  std::vector<std::string> data_nodes_;
+  std::vector<std::string> data_blocks_;
 };
 
 class directory_service {
@@ -248,7 +244,7 @@ class directory_service {
 
   virtual std::size_t file_size(const std::string &path) const = 0;
 
-  virtual std::time_t last_write_time(const std::string &path) const = 0;
+  virtual std::uint64_t last_write_time(const std::string &path) const = 0;
 
   virtual perms permissions(const std::string &path) = 0;
   virtual void permissions(const std::string &path, const perms &permsissions, perm_options opts) = 0;
@@ -291,9 +287,7 @@ class directory_management_service {
 
   virtual void persistent_store_prefix(const std::string& path, const std::string& prefix) = 0;
 
-  virtual void add_data_block(const std::string &path, const std::string &node) = 0;
-
-  virtual void remove_data_block(const std::string &path, std::size_t i) = 0;
+  virtual void add_data_block(const std::string &path) = 0;
 
   virtual void remove_data_block(const std::string &path, const std::string &node) = 0;
 

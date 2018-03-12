@@ -53,8 +53,8 @@ std::size_t directory_client::file_size(const std::string &path) const {
   return static_cast<size_t>(client_->file_size(path));
 }
 
-std::time_t directory_client::last_write_time(const std::string &path) const {
-  return client_->last_write_time(path);
+std::uint64_t directory_client::last_write_time(const std::string &path) const {
+  return static_cast<uint64_t>(client_->last_write_time(path));
 }
 
 perms directory_client::permissions(const std::string &path) {
@@ -80,18 +80,19 @@ void directory_client::rename(const std::string &old_path, const std::string &ne
 file_status directory_client::status(const std::string &path) const {
   rpc_file_status s;
   client_->status(s, path);
-  return file_status(static_cast<file_type>(s.type), perms(static_cast<uint16_t>(s.permissions)), s.last_write_time);;
+  return file_status(static_cast<file_type>(s.type), perms(static_cast<uint16_t>(s.permissions)),
+                     static_cast<uint64_t>(s.last_write_time));;
 }
 
 std::vector<directory_entry> directory_client::directory_entries(const std::string &path) {
   std::vector<rpc_dir_entry> entries;
   client_->directory_entries(entries, path);
   std::vector<directory_entry> out;
-  for (const auto& e: entries) {
+  for (const auto &e: entries) {
     out.emplace_back(e.name,
                      file_status(static_cast<file_type>(e.status.type),
                                  perms(static_cast<uint16_t>(e.status.permissions)),
-                                 e.status.last_write_time));
+                                 static_cast<uint64_t>(e.status.last_write_time)));
   }
   return out;
 }
@@ -100,11 +101,11 @@ std::vector<directory_entry> directory_client::recursive_directory_entries(const
   std::vector<rpc_dir_entry> entries;
   client_->recursive_directory_entries(entries, path);
   std::vector<directory_entry> out;
-  for (const auto& e: entries) {
+  for (const auto &e: entries) {
     out.emplace_back(e.name,
                      file_status(static_cast<file_type>(e.status.type),
                                  perms(static_cast<uint16_t>(e.status.permissions)),
-                                 e.status.last_write_time));
+                                 static_cast<uint64_t>(e.status.last_write_time)));
   }
   return out;
 }

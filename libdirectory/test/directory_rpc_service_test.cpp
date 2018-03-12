@@ -5,6 +5,7 @@
 #include <thread>
 #include "../src/rpc/directory_client.h"
 #include "../src/rpc/directory_rpc_server.h"
+#include "../src/tree/random_block_allocator.h"
 
 using namespace ::elasticmem::directory;
 using namespace ::apache::thrift::transport;
@@ -26,7 +27,9 @@ static void wait_till_server_ready(const std::string &host, int port) {
 }
 
 TEST_CASE("create_directory_test", "[dir]") {
-  auto t = std::make_shared<directory_tree>();
+  std::vector<std::string> blocks = {"a", "b", "c", "d"};
+  auto alloc = std::make_shared<random_block_allocator>(blocks);
+  auto t = std::make_shared<directory_tree>(alloc);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -50,7 +53,9 @@ TEST_CASE("create_directory_test", "[dir]") {
 }
 
 TEST_CASE("create_file_test", "[file][dir]") {
-  auto t = std::make_shared<directory_tree>();
+  std::vector<std::string> blocks = {"a", "b", "c", "d"};
+  auto alloc = std::make_shared<random_block_allocator>(blocks);
+  auto t = std::make_shared<directory_tree>(alloc);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -73,7 +78,9 @@ TEST_CASE("create_file_test", "[file][dir]") {
 }
 
 TEST_CASE("exists_test", "[file][dir]") {
-  auto t = std::make_shared<directory_tree>();
+  std::vector<std::string> blocks = {"a", "b", "c", "d"};
+  auto alloc = std::make_shared<random_block_allocator>(blocks);
+  auto t = std::make_shared<directory_tree>(alloc);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -92,7 +99,9 @@ TEST_CASE("exists_test", "[file][dir]") {
 }
 
 TEST_CASE("file_size", "[file][dir][grow][shrink]") {
-  auto t = std::make_shared<directory_tree>();
+  std::vector<std::string> blocks = {"a", "b", "c", "d"};
+  auto alloc = std::make_shared<random_block_allocator>(blocks);
+  auto t = std::make_shared<directory_tree>(alloc);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -117,28 +126,30 @@ TEST_CASE("file_size", "[file][dir][grow][shrink]") {
 }
 
 TEST_CASE("last_write_time_test", "[file][dir][touch]") {
-  auto t = std::make_shared<directory_tree>();
+  std::vector<std::string> blocks = {"a", "b", "c", "d"};
+  auto alloc = std::make_shared<random_block_allocator>(blocks);
+  auto t = std::make_shared<directory_tree>(alloc);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
 
   directory_client tree(HOST, PORT);
 
-  std::time_t before = std::time(nullptr);
+  std::uint64_t before = detail::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file"));
-  std::time_t after = std::time(nullptr);
+  std::uint64_t after = detail::now_ms();
   REQUIRE(before <= tree.last_write_time("/sandbox/file"));
   REQUIRE(tree.last_write_time("/sandbox/file") <= after);
 
-  before = std::time(nullptr);
+  before = detail::now_ms();
   REQUIRE_NOTHROW(t->touch("/sandbox/file"));
-  after = std::time(nullptr);
+  after = detail::now_ms();
   REQUIRE(before <= tree.last_write_time("/sandbox/file"));
   REQUIRE(tree.last_write_time("/sandbox/file") <= after);
 
-  before = std::time(nullptr);
+  before = detail::now_ms();
   REQUIRE_NOTHROW(t->touch("/sandbox"));
-  after = std::time(nullptr);
+  after = detail::now_ms();
   REQUIRE(before <= tree.last_write_time("/sandbox"));
   REQUIRE(tree.last_write_time("/sandbox") <= after);
   REQUIRE(before <= tree.last_write_time("/sandbox/file"));
@@ -152,7 +163,9 @@ TEST_CASE("last_write_time_test", "[file][dir][touch]") {
 }
 
 TEST_CASE("permissions_test", "[file][dir]") {
-  auto t = std::make_shared<directory_tree>();
+  std::vector<std::string> blocks = {"a", "b", "c", "d"};
+  auto alloc = std::make_shared<random_block_allocator>(blocks);
+  auto t = std::make_shared<directory_tree>(alloc);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -188,7 +201,9 @@ TEST_CASE("permissions_test", "[file][dir]") {
 }
 
 TEST_CASE("remove_test", "[file][dir]") {
-  auto t = std::make_shared<directory_tree>();
+  std::vector<std::string> blocks = {"a", "b", "c", "d"};
+  auto alloc = std::make_shared<random_block_allocator>(blocks);
+  auto t = std::make_shared<directory_tree>(alloc);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -216,7 +231,9 @@ TEST_CASE("remove_test", "[file][dir]") {
 }
 
 TEST_CASE("rename_test", "[file][dir]") {
-  auto t = std::make_shared<directory_tree>();
+  std::vector<std::string> blocks = {"a", "b", "c", "d"};
+  auto alloc = std::make_shared<random_block_allocator>(blocks);
+  auto t = std::make_shared<directory_tree>(alloc);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -242,23 +259,25 @@ TEST_CASE("rename_test", "[file][dir]") {
 }
 
 TEST_CASE("status_test", "[file][dir]") {
-  auto t = std::make_shared<directory_tree>();
+  std::vector<std::string> blocks = {"a", "b", "c", "d"};
+  auto alloc = std::make_shared<random_block_allocator>(blocks);
+  auto t = std::make_shared<directory_tree>(alloc);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
 
   directory_client tree(HOST, PORT);
-  std::time_t before = std::time(nullptr);
+  std::uint64_t before = detail::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file"));
-  std::time_t after = std::time(nullptr);
+  std::uint64_t after = detail::now_ms();
   REQUIRE(tree.status("/sandbox/file").permissions() == perms::all);
   REQUIRE(tree.status("/sandbox/file").type() == file_type::regular);
   REQUIRE(before <= tree.status("/sandbox/file").last_write_time());
   REQUIRE(tree.status("/sandbox/file").last_write_time() <= after);
 
-  before = std::time(nullptr);
+  before = detail::now_ms();
   REQUIRE_NOTHROW(tree.create_directory("/sandbox/dir"));
-  after = std::time(nullptr);
+  after = detail::now_ms();
   REQUIRE(tree.status("/sandbox/dir").permissions() == perms::all);
   REQUIRE(tree.status("/sandbox/dir").type() == file_type::directory);
   REQUIRE(before <= tree.status("/sandbox/dir").last_write_time());
@@ -271,20 +290,22 @@ TEST_CASE("status_test", "[file][dir]") {
 }
 
 TEST_CASE("directory_entries_test", "[file][dir]") {
-  auto t = std::make_shared<directory_tree>();
+  std::vector<std::string> blocks = {"a", "b", "c", "d"};
+  auto alloc = std::make_shared<random_block_allocator>(blocks);
+  auto t = std::make_shared<directory_tree>(alloc);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
 
   directory_client tree(HOST, PORT);
 
-  std::time_t t0 = std::time(nullptr);
+  std::uint64_t t0 = detail::now_ms();
   REQUIRE_NOTHROW(tree.create_directories("/sandbox/a/b"));
-  std::time_t t1 = std::time(nullptr);
+  std::uint64_t t1 = detail::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file1.txt"));
-  std::time_t t2 = std::time(nullptr);
+  std::uint64_t t2 = detail::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file2.txt"));
-  std::time_t t3 = std::time(nullptr);
+  std::uint64_t t3 = detail::now_ms();
 
   std::vector<directory_entry> entries;
   REQUIRE_NOTHROW(entries = tree.directory_entries("/sandbox"));
@@ -312,20 +333,22 @@ TEST_CASE("directory_entries_test", "[file][dir]") {
 }
 
 TEST_CASE("recursive_directory_entries_test", "[file][dir]") {
-  auto t = std::make_shared<directory_tree>();
+  std::vector<std::string> blocks = {"a", "b", "c", "d"};
+  auto alloc = std::make_shared<random_block_allocator>(blocks);
+  auto t = std::make_shared<directory_tree>(alloc);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
 
   directory_client tree(HOST, PORT);
 
-  std::time_t t0 = std::time(nullptr);
+  std::uint64_t t0 = detail::now_ms();
   REQUIRE_NOTHROW(tree.create_directories("/sandbox/a/b"));
-  std::time_t t1 = std::time(nullptr);
+  std::uint64_t t1 = detail::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file1.txt"));
-  std::time_t t2 = std::time(nullptr);
+  std::uint64_t t2 = detail::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file2.txt"));
-  std::time_t t3 = std::time(nullptr);
+  std::uint64_t t3 = detail::now_ms();
 
   std::vector<directory_entry> entries;
   REQUIRE_NOTHROW(entries = tree.recursive_directory_entries("/sandbox"));
@@ -358,7 +381,9 @@ TEST_CASE("recursive_directory_entries_test", "[file][dir]") {
 }
 
 TEST_CASE("dstatus_test", "[file]") {
-  auto t = std::make_shared<directory_tree>();
+  std::vector<std::string> blocks = {"a", "b", "c", "d"};
+  auto alloc = std::make_shared<random_block_allocator>(blocks);
+  auto t = std::make_shared<directory_tree>(alloc);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -387,7 +412,9 @@ TEST_CASE("dstatus_test", "[file]") {
 }
 
 TEST_CASE("storage_mode_test", "[file]") {
-  auto t = std::make_shared<directory_tree>();
+  std::vector<std::string> blocks = {"a", "b", "c", "d"};
+  auto alloc = std::make_shared<random_block_allocator>(blocks);
+  auto t = std::make_shared<directory_tree>(alloc);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -414,7 +441,9 @@ TEST_CASE("storage_mode_test", "[file]") {
 }
 
 TEST_CASE("blocks_test", "[file]") {
-  auto t = std::make_shared<directory_tree>();
+  std::vector<std::string> blocks = {"a", "b", "c", "d"};
+  auto alloc = std::make_shared<random_block_allocator>(blocks);
+  auto t = std::make_shared<directory_tree>(alloc);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -425,29 +454,35 @@ TEST_CASE("blocks_test", "[file]") {
   REQUIRE_THROWS_AS(tree.data_blocks("/sandbox"), directory_rpc_service_exception);
   REQUIRE(tree.data_blocks("/sandbox/file.txt").empty());
 
-  REQUIRE_NOTHROW(t->add_data_block("/sandbox/file.txt", "a"));
-  REQUIRE_NOTHROW(t->add_data_block("/sandbox/file.txt", "b"));
-  REQUIRE_NOTHROW(t->add_data_block("/sandbox/file.txt", "c"));
-  REQUIRE_NOTHROW(t->add_data_block("/sandbox/file.txt", "d"));
-  REQUIRE(tree.data_blocks("/sandbox/file.txt").size() == 4);
-  REQUIRE(tree.data_blocks("/sandbox/file.txt").at(0) == "a");
-  REQUIRE(tree.data_blocks("/sandbox/file.txt").at(1) == "b");
-  REQUIRE(tree.data_blocks("/sandbox/file.txt").at(2) == "c");
-  REQUIRE(tree.data_blocks("/sandbox/file.txt").at(3) == "d");
-
-  REQUIRE_NOTHROW(t->remove_data_block("/sandbox/file.txt", 1));
-  REQUIRE(tree.data_blocks("/sandbox/file.txt").size() == 3);
-  REQUIRE(tree.data_blocks("/sandbox/file.txt").at(0) == "a");
-  REQUIRE(tree.data_blocks("/sandbox/file.txt").at(1) == "c");
-  REQUIRE(tree.data_blocks("/sandbox/file.txt").at(2) == "d");
+  REQUIRE_NOTHROW(t->add_data_block("/sandbox/file.txt"));
+  REQUIRE_NOTHROW(t->add_data_block("/sandbox/file.txt"));
+  REQUIRE_NOTHROW(t->add_data_block("/sandbox/file.txt"));
+  REQUIRE_NOTHROW(t->add_data_block("/sandbox/file.txt"));
+  std::vector<std::string> file_blocks;
+  REQUIRE_NOTHROW(file_blocks = tree.data_blocks("/sandbox/file.txt"));
+  std::sort(file_blocks.begin(), file_blocks.end());
+  REQUIRE(file_blocks.size() == 4);
+  REQUIRE(file_blocks.at(0) == "a");
+  REQUIRE(file_blocks.at(1) == "b");
+  REQUIRE(file_blocks.at(2) == "c");
+  REQUIRE(file_blocks.at(3) == "d");
+  REQUIRE(alloc->num_free_blocks() == 0);
+  REQUIRE(alloc->num_allocated_blocks() == 4);
 
   REQUIRE_NOTHROW(t->remove_data_block("/sandbox/file.txt", "c"));
-  REQUIRE(tree.data_blocks("/sandbox/file.txt").size() == 2);
-  REQUIRE(tree.data_blocks("/sandbox/file.txt").at(0) == "a");
-  REQUIRE(tree.data_blocks("/sandbox/file.txt").at(1) == "d");
+  REQUIRE_NOTHROW(file_blocks = tree.data_blocks("/sandbox/file.txt"));
+  std::sort(file_blocks.begin(), file_blocks.end());
+  REQUIRE(file_blocks.size() == 3);
+  REQUIRE(file_blocks.at(0) == "a");
+  REQUIRE(file_blocks.at(1) == "b");
+  REQUIRE(file_blocks.at(2) == "d");
+  REQUIRE(alloc->num_free_blocks() == 1);
+  REQUIRE(alloc->num_allocated_blocks() == 3);
 
   REQUIRE_NOTHROW(t->remove_all_data_blocks("/sandbox/file.txt"));
   REQUIRE(tree.data_blocks("/sandbox/file.txt").empty());
+  REQUIRE(alloc->num_free_blocks() == 4);
+  REQUIRE(alloc->num_allocated_blocks() == 0);
 
   server->stop();
   if (serve_thread.joinable()) {
@@ -456,7 +491,9 @@ TEST_CASE("blocks_test", "[file]") {
 }
 
 TEST_CASE("file_type_test", "[file][dir]") {
-  auto t = std::make_shared<directory_tree>();
+  std::vector<std::string> blocks = {"a", "b", "c", "d"};
+  auto alloc = std::make_shared<random_block_allocator>(blocks);
+  auto t = std::make_shared<directory_tree>(alloc);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);

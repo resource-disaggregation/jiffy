@@ -8,9 +8,21 @@
 #include <shared_mutex>
 
 #include "../directory_service.h"
+#include "block_allocator.h"
 
 namespace elasticmem {
 namespace directory {
+
+namespace detail {
+
+static std::uint64_t now_ms() {
+  namespace ts = std::chrono;
+  return static_cast<uint64_t>(ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count());
+}
+
+}
+
+class lease_manager;
 
 class ds_node {
  public:
@@ -33,13 +45,13 @@ class ds_node {
 
   virtual std::size_t file_size() const = 0;
 
-  std::time_t last_write_time() const { return status_.last_write_time(); }
+  std::uint64_t last_write_time() const { return status_.last_write_time(); }
 
   void permissions(const perms &prms) { status_.permissions(prms); }
 
   perms permissions() const { return status_.permissions(); }
 
-  void last_write_time(std::time_t time) { status_.last_write_time(time); }
+  void last_write_time(std::uint64_t time) { status_.last_write_time(time); }
 
  private:
   std::string name_{};
@@ -49,9 +61,8 @@ class ds_node {
 class ds_dir_node : public ds_node {
  public:
   typedef std::map<std::string, std::shared_ptr<ds_node>> child_map;
-
   explicit ds_dir_node(const std::string &name)
-      : ds_node(name, file_status(file_type::directory, perms(perms::all), std::time(nullptr))) {}
+      : ds_node(name, file_status(file_type::directory, perms(perms::all), detail::now_ms())) {}
 
   std::shared_ptr<ds_node> get_child(const std::string &name) const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
@@ -144,7 +155,7 @@ class ds_dir_node : public ds_node {
 class ds_file_node : public ds_node {
  public:
   explicit ds_file_node(const std::string &name)
-      : ds_node(name, file_status(file_type::regular, perms(perms::all), std::time(nullptr))), dstatus_{}, size_(0) {}
+      : ds_node(name, file_status(file_type::regular, perms(perms::all), detail::now_ms())), dstatus_{}, size_(0) {}
 
   const data_status &dstatus() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
@@ -171,7 +182,7 @@ class ds_file_node : public ds_node {
     return dstatus_.persistent_store_prefix();
   }
 
-  void persistent_store_prefix(const std::string& prefix) {
+  void persistent_store_prefix(const std::string &prefix) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     dstatus_.persistent_store_prefix(prefix);
   }
@@ -181,19 +192,14 @@ class ds_file_node : public ds_node {
     return dstatus_.data_blocks();
   }
 
-  void add_data_block(const std::string &n) {
+  void add_data_block(const std::string &block) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.add_data_block(n);
+    dstatus_.add_data_block(block);
   }
 
-  void remove_data_block(std::size_t i) {
+  void remove_data_block(const std::string &block) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.remove_data_block(i);
-  }
-
-  void remove_data_block(const std::string &n) {
-    std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.remove_data_block(n);
+    dstatus_.remove_data_block(block);
   }
 
   void remove_all_data_blocks() {
@@ -221,7 +227,7 @@ class ds_file_node : public ds_node {
 
 class directory_tree : public directory_service, public directory_management_service {
  public:
-  directory_tree();
+  explicit directory_tree(std::shared_ptr<block_allocator> allocator);
 
   void create_directory(const std::string &path) override;
   void create_directories(const std::string &path) override;
@@ -232,7 +238,7 @@ class directory_tree : public directory_service, public directory_management_ser
 
   std::size_t file_size(const std::string &path) const override;
 
-  std::time_t last_write_time(const std::string &path) const override;
+  std::uint64_t last_write_time(const std::string &path) const override;
 
   perms permissions(const std::string &path) override;
   void permissions(const std::string &path, const perms &permissions, perm_options opts) override;
@@ -268,13 +274,11 @@ class directory_tree : public directory_service, public directory_management_ser
 
   void mode(const std::string &path, const storage_mode &mode) override;
 
-  void persistent_store_prefix(const std::string &path, const std::string& prefix) override;
+  void persistent_store_prefix(const std::string &path, const std::string &prefix) override;
 
-  void add_data_block(const std::string &path, const std::string &node) override;
+  void add_data_block(const std::string &path) override;
 
-  void remove_data_block(const std::string &path, std::size_t i) override;
-
-  void remove_data_block(const std::string &path, const std::string &node) override;
+  void remove_data_block(const std::string &path, const std::string &block) override;
 
   void remove_all_data_blocks(const std::string &path) override;
 
@@ -287,9 +291,12 @@ class directory_tree : public directory_service, public directory_management_ser
 
   std::shared_ptr<ds_file_node> get_node_as_file(const std::string &path) const;
 
-  void touch(std::shared_ptr<ds_node> node, std::time_t time);
+  void touch(std::shared_ptr<ds_node> node, std::uint64_t time);
 
   std::shared_ptr<ds_dir_node> root_;
+  std::shared_ptr<block_allocator> allocator_;
+
+  friend class lease_manager;
 };
 
 }

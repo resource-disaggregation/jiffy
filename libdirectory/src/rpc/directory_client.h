@@ -22,7 +22,7 @@ class directory_client : public directory_service {
   void create_file(const std::string &path) override;
   bool exists(const std::string &path) const override;
   std::size_t file_size(const std::string &path) const override;
-  std::time_t last_write_time(const std::string &path) const override;
+  std::uint64_t last_write_time(const std::string &path) const override;
   perms permissions(const std::string &path) override;
   void permissions(const std::string &path, const perms &permsissions, perm_options opts) override;
   void remove(const std::string &path) override;
@@ -39,10 +39,10 @@ class directory_client : public directory_service {
   bool is_directory(const std::string &path) override;
 
  private:
-  std::shared_ptr<apache::thrift::transport::TSocket> socket_;
-  std::shared_ptr<apache::thrift::transport::TTransport> transport_;
-  std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_;
-  std::shared_ptr<thrift_client> client_;
+  std::shared_ptr<apache::thrift::transport::TSocket> socket_{};
+  std::shared_ptr<apache::thrift::transport::TTransport> transport_{};
+  std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_{};
+  std::shared_ptr<thrift_client> client_{};
 };
 
 }
