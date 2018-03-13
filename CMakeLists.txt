@@ -17,6 +17,7 @@ set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake-modules")
 
 # CMake modules
+include(Functions)
 include(BuildOptions)
 include(Dependencies)
 
@@ -28,9 +29,10 @@ add_subdirectory(libpersistent)
 add_subdirectory(libkv)
 add_subdirectory(libdirectory)
 
-
 add_subdirectory(directory)
 add_subdirectory(kv)
+
+add_subdirectory(pyclient)
 
 if (BUILD_TESTS)
   enable_testing(true)

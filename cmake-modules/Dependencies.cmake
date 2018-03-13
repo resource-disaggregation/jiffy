@@ -4,6 +4,15 @@ set(THRIFT_VERSION "0.11.0")
 
 find_package(Threads REQUIRED)
 
+include(FindPythonInterp)
+if (NOT PYTHONINTERP_FOUND)
+  message(FATAL_ERROR "Cannot build python client without python interpretor")
+endif ()
+find_python_module(setuptools REQUIRED)
+if (NOT PY_SETUPTOOLS)
+  message(FATAL_ERROR "Python setuptools is required for python client")
+endif ()
+
 set(EXTERNAL_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CMAKE_CXX_FLAGS_${UPPERCASE_BUILD_TYPE}}")
 set(EXTERNAL_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ${CMAKE_C_FLAGS_${UPPERCASE_BUILD_TYPE}}")
 
