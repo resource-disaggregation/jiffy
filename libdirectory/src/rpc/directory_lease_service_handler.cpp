@@ -11,8 +11,7 @@ directory_lease_service_handler::directory_lease_service_handler(std::shared_ptr
 
 void directory_lease_service_handler::create(const std::string &path, const std::string &persistent_store_prefix) {
   try {
-    tree_->create_file(path);
-    tree_->persistent_store_prefix(path, persistent_store_prefix);
+    tree_->create_file(path, persistent_store_prefix);
   } catch (directory_service_exception &ex) {
     throw make_exception(ex);
   }

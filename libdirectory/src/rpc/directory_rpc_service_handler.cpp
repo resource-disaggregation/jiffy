@@ -22,9 +22,9 @@ void directory_rpc_service_handler::create_directories(const std::string &path) 
   }
 }
 
-void directory_rpc_service_handler::create_file(const std::string &path) {
+void directory_rpc_service_handler::create_file(const std::string &path, const std::string &persistent_store_prefix) {
   try {
-    shard_->create_file(path);
+    shard_->create_file(path, persistent_store_prefix);
   } catch (directory_service_exception &e) {
     throw make_exception(e);
   }
@@ -138,7 +138,7 @@ void directory_rpc_service_handler::recursive_directory_entries(std::vector<rpc_
   }
 }
 
-void directory_rpc_service_handler::dstatus(rpc_data_status& _return, const std::string &path) {
+void directory_rpc_service_handler::dstatus(rpc_data_status &_return, const std::string &path) {
   try {
     auto s = shard_->dstatus(path);
     _return.storage_mode = (rpc_storage_mode) s.mode();

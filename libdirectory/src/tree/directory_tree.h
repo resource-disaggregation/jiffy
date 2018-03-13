@@ -232,7 +232,7 @@ class directory_tree : public directory_service, public directory_management_ser
   void create_directory(const std::string &path) override;
   void create_directories(const std::string &path) override;
 
-  void create_file(const std::string &path) override;
+  void create_file(const std::string &path, const std::string &persistent_store_prefix) override;
 
   bool exists(const std::string &path) const override;
 

@@ -396,6 +396,14 @@ uint32_t directory_rpc_service_create_file_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->persistent_store_prefix);
+          this->__isset.persistent_store_prefix = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -418,6 +426,10 @@ uint32_t directory_rpc_service_create_file_args::write(Protocol_* oprot) const {
   xfer += oprot->writeString(this->path);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("persistent_store_prefix", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->persistent_store_prefix);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -432,6 +444,10 @@ uint32_t directory_rpc_service_create_file_pargs::write(Protocol_* oprot) const 
 
   xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeString((*(this->path)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("persistent_store_prefix", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString((*(this->persistent_store_prefix)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -4080,20 +4096,21 @@ void directory_rpc_serviceClientT<Protocol_>::recv_create_directories()
 }
 
 template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::create_file(const std::string& path)
+void directory_rpc_serviceClientT<Protocol_>::create_file(const std::string& path, const std::string& persistent_store_prefix)
 {
-  send_create_file(path);
+  send_create_file(path, persistent_store_prefix);
   recv_create_file();
 }
 
 template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_create_file(const std::string& path)
+void directory_rpc_serviceClientT<Protocol_>::send_create_file(const std::string& path, const std::string& persistent_store_prefix)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("create_file", ::apache::thrift::protocol::T_CALL, cseqid);
 
   directory_rpc_service_create_file_pargs args;
   args.path = &path;
+  args.persistent_store_prefix = &persistent_store_prefix;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -5501,7 +5518,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_create_file(int32_t seq
 
   directory_rpc_service_create_file_result result;
   try {
-    iface_->create_file(args.path);
+    iface_->create_file(args.path, args.persistent_store_prefix);
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -5558,7 +5575,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_create_file(int32_t seq
 
   directory_rpc_service_create_file_result result;
   try {
-    iface_->create_file(args.path);
+    iface_->create_file(args.path, args.persistent_store_prefix);
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -7734,14 +7751,14 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_create_directories(
 }
 
 template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::create_file(const std::string& path)
+void directory_rpc_serviceConcurrentClientT<Protocol_>::create_file(const std::string& path, const std::string& persistent_store_prefix)
 {
-  int32_t seqid = send_create_file(path);
+  int32_t seqid = send_create_file(path, persistent_store_prefix);
   recv_create_file(seqid);
 }
 
 template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_create_file(const std::string& path)
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_create_file(const std::string& path, const std::string& persistent_store_prefix)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -7749,6 +7766,7 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_create_file(cons
 
   directory_rpc_service_create_file_pargs args;
   args.path = &path;
+  args.persistent_store_prefix = &persistent_store_prefix;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();

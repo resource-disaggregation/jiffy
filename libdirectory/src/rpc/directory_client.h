@@ -19,12 +19,12 @@ class directory_client : public directory_service {
   void disconnect();
   void create_directory(const std::string &path) override;
   void create_directories(const std::string &path) override;
-  void create_file(const std::string &path) override;
+  void create_file(const std::string &path, const std::string &persistent_store_prefix) override;
   bool exists(const std::string &path) const override;
   std::size_t file_size(const std::string &path) const override;
   std::uint64_t last_write_time(const std::string &path) const override;
   perms permissions(const std::string &path) override;
-  void permissions(const std::string &path, const perms &permsissions, perm_options opts) override;
+  void permissions(const std::string &path, const perms &prms, perm_options opts) override;
   void remove(const std::string &path) override;
   void remove_all(const std::string &path) override;
   void rename(const std::string &old_path, const std::string &new_path) override;

@@ -40,7 +40,7 @@ void directory_tree::create_directories(const std::string &path) {
   }
 }
 
-void directory_tree::create_file(const std::string &path) {
+void directory_tree::create_file(const std::string &path, const std::string &persistent_store_prefix) {
   namespace fs = std::experimental::filesystem;
   fs::path p(path);
   std::string filename = p.filename();
@@ -58,7 +58,8 @@ void directory_tree::create_file(const std::string &path) {
   }
 
   auto parent = std::dynamic_pointer_cast<ds_dir_node>(node);
-  auto child = std::dynamic_pointer_cast<ds_node>(std::make_shared<ds_file_node>(filename));
+  auto child = std::make_shared<ds_file_node>(filename);
+  child->persistent_store_prefix(persistent_store_prefix);
   parent->add_child(child);
 }
 

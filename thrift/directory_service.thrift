@@ -49,7 +49,7 @@ service directory_rpc_service {
   void create_directories(1: string path)
     throws (1: directory_rpc_service_exception ex),
 
-  void create_file(1: string path)
+  void create_file(1: string path, 2: string persistent_store_prefix)
     throws (1: directory_rpc_service_exception ex),
 
   bool exists(1: string path)

@@ -41,8 +41,8 @@ void directory_client::create_directories(const std::string &path) {
   client_->create_directories(path);
 }
 
-void directory_client::create_file(const std::string &path) {
-  client_->create_file(path);
+void directory_client::create_file(const std::string &path, const std::string &persistent_store_prefix) {
+  client_->create_file(path, persistent_store_prefix);
 }
 
 bool directory_client::exists(const std::string &path) const {

@@ -11,7 +11,7 @@ class directory_rpc_service_handler : public directory_rpc_serviceIf {
   explicit directory_rpc_service_handler(std::shared_ptr<directory_tree> shard);
   void create_directory(const std::string &path) override;
   void create_directories(const std::string &path) override;
-  void create_file(const std::string &path) override;
+  void create_file(const std::string &path, const std::string &persistent_store_prefix) override;
   bool exists(const std::string &path) override;
   int64_t file_size(const std::string &path) override;
   int64_t last_write_time(const std::string &path) override;

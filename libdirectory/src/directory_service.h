@@ -209,7 +209,7 @@ class data_status {
     return persistent_store_prefix_;
   }
 
-  void persistent_store_prefix(const std::string& prefix) {
+  void persistent_store_prefix(const std::string &prefix) {
     persistent_store_prefix_ = prefix;
   }
 
@@ -238,7 +238,7 @@ class directory_service {
   virtual void create_directory(const std::string &path) = 0;
   virtual void create_directories(const std::string &path) = 0;
 
-  virtual void create_file(const std::string &path) = 0;
+  virtual void create_file(const std::string &path, const std::string &persistent_store_prefix) = 0;
 
   virtual bool exists(const std::string &path) const = 0;
 
@@ -285,7 +285,7 @@ class directory_management_service {
 
   virtual void mode(const std::string &path, const storage_mode &mode) = 0;
 
-  virtual void persistent_store_prefix(const std::string& path, const std::string& prefix) = 0;
+  virtual void persistent_store_prefix(const std::string &path, const std::string &prefix) = 0;
 
   virtual void add_data_block(const std::string &path) = 0;
 

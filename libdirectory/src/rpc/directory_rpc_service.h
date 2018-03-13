@@ -23,7 +23,7 @@ class directory_rpc_serviceIf {
   virtual ~directory_rpc_serviceIf() {}
   virtual void create_directory(const std::string& path) = 0;
   virtual void create_directories(const std::string& path) = 0;
-  virtual void create_file(const std::string& path) = 0;
+  virtual void create_file(const std::string& path, const std::string& persistent_store_prefix) = 0;
   virtual bool exists(const std::string& path) = 0;
   virtual int64_t file_size(const std::string& path) = 0;
   virtual int64_t last_write_time(const std::string& path) = 0;
@@ -76,7 +76,7 @@ class directory_rpc_serviceNull : virtual public directory_rpc_serviceIf {
   void create_directories(const std::string& /* path */) {
     return;
   }
-  void create_file(const std::string& /* path */) {
+  void create_file(const std::string& /* path */, const std::string& /* persistent_store_prefix */) {
     return;
   }
   bool exists(const std::string& /* path */) {
@@ -360,8 +360,9 @@ class directory_rpc_service_create_directories_presult {
 };
 
 typedef struct _directory_rpc_service_create_file_args__isset {
-  _directory_rpc_service_create_file_args__isset() : path(false) {}
+  _directory_rpc_service_create_file_args__isset() : path(false), persistent_store_prefix(false) {}
   bool path :1;
+  bool persistent_store_prefix :1;
 } _directory_rpc_service_create_file_args__isset;
 
 class directory_rpc_service_create_file_args {
@@ -369,19 +370,24 @@ class directory_rpc_service_create_file_args {
 
   directory_rpc_service_create_file_args(const directory_rpc_service_create_file_args&);
   directory_rpc_service_create_file_args& operator=(const directory_rpc_service_create_file_args&);
-  directory_rpc_service_create_file_args() : path() {
+  directory_rpc_service_create_file_args() : path(), persistent_store_prefix() {
   }
 
   virtual ~directory_rpc_service_create_file_args() throw();
   std::string path;
+  std::string persistent_store_prefix;
 
   _directory_rpc_service_create_file_args__isset __isset;
 
   void __set_path(const std::string& val);
 
+  void __set_persistent_store_prefix(const std::string& val);
+
   bool operator == (const directory_rpc_service_create_file_args & rhs) const
   {
     if (!(path == rhs.path))
+      return false;
+    if (!(persistent_store_prefix == rhs.persistent_store_prefix))
       return false;
     return true;
   }
@@ -405,6 +411,7 @@ class directory_rpc_service_create_file_pargs {
 
   virtual ~directory_rpc_service_create_file_pargs() throw();
   const std::string* path;
+  const std::string* persistent_store_prefix;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -2496,8 +2503,8 @@ class directory_rpc_serviceClientT : virtual public directory_rpc_serviceIf {
   void create_directories(const std::string& path);
   void send_create_directories(const std::string& path);
   void recv_create_directories();
-  void create_file(const std::string& path);
-  void send_create_file(const std::string& path);
+  void create_file(const std::string& path, const std::string& persistent_store_prefix);
+  void send_create_file(const std::string& path, const std::string& persistent_store_prefix);
   void recv_create_file();
   bool exists(const std::string& path);
   void send_exists(const std::string& path);
@@ -2732,13 +2739,13 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     ifaces_[i]->create_directories(path);
   }
 
-  void create_file(const std::string& path) {
+  void create_file(const std::string& path, const std::string& persistent_store_prefix) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->create_file(path);
+      ifaces_[i]->create_file(path, persistent_store_prefix);
     }
-    ifaces_[i]->create_file(path);
+    ifaces_[i]->create_file(path, persistent_store_prefix);
   }
 
   bool exists(const std::string& path) {
@@ -2937,8 +2944,8 @@ class directory_rpc_serviceConcurrentClientT : virtual public directory_rpc_serv
   void create_directories(const std::string& path);
   int32_t send_create_directories(const std::string& path);
   void recv_create_directories(const int32_t seqid);
-  void create_file(const std::string& path);
-  int32_t send_create_file(const std::string& path);
+  void create_file(const std::string& path, const std::string& persistent_store_prefix);
+  int32_t send_create_file(const std::string& path, const std::string& persistent_store_prefix);
   void recv_create_file(const int32_t seqid);
   bool exists(const std::string& path);
   int32_t send_exists(const std::string& path);

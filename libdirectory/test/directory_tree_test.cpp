@@ -27,13 +27,13 @@ TEST_CASE("create_file_test", "[file][dir]") {
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   directory_tree tree(alloc);
 
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/a.txt"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/a.txt", "/tmp"));
   REQUIRE(tree.is_regular_file("/sandbox/a.txt"));
 
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/foo/bar/baz/a"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/foo/bar/baz/a", "/tmp"));
   REQUIRE(tree.is_regular_file("/sandbox/foo/bar/baz/a"));
 
-  REQUIRE_THROWS_AS(tree.create_file("/sandbox/foo/bar/baz/a/b"), directory_service_exception);
+  REQUIRE_THROWS_AS(tree.create_file("/sandbox/foo/bar/baz/a/b", "/tmp"), directory_service_exception);
   REQUIRE_THROWS_AS(tree.create_directories("/sandbox/foo/bar/baz/a/b"),
                     directory_service_exception);
 }
@@ -43,7 +43,7 @@ TEST_CASE("exists_test", "[file][dir]") {
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   directory_tree tree(alloc);
 
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/file"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/file", "/tmp"));
   REQUIRE(tree.exists("/sandbox"));
   REQUIRE(tree.exists("/sandbox/file"));
   REQUIRE(!tree.exists("/sandbox/foo"));
@@ -54,14 +54,14 @@ TEST_CASE("file_size", "[file][dir][grow][shrink]") {
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   directory_tree tree(alloc);
 
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/file"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/file", "/tmp"));
   REQUIRE(tree.file_size("/sandbox/file") == 0);
   REQUIRE_NOTHROW(tree.grow("/sandbox/file", 20));
   REQUIRE(tree.file_size("/sandbox/file") == 20);
   REQUIRE_NOTHROW(tree.shrink("/sandbox/file", 5));
   REQUIRE(tree.file_size("/sandbox/file") == 15);
 
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/file2"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/file2", "/tmp"));
   REQUIRE_NOTHROW(tree.grow("/sandbox/file2", 20));
   REQUIRE(tree.file_size("/sandbox") == 35);
 }
@@ -72,7 +72,7 @@ TEST_CASE("last_write_time_test", "[file][dir][touch]") {
   directory_tree tree(alloc);
 
   std::uint64_t before = detail::now_ms();
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/file"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/file", "/tmp"));
   std::uint64_t after = detail::now_ms();
   REQUIRE(before <= tree.last_write_time("/sandbox/file"));
   REQUIRE(tree.last_write_time("/sandbox/file") <= after);
@@ -98,7 +98,7 @@ TEST_CASE("permissions_test", "[file][dir]") {
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   directory_tree tree(alloc);
 
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/file"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/file", "/tmp"));
   REQUIRE(tree.permissions("/sandbox") == perms::all);
   REQUIRE(tree.permissions("/sandbox/file") == perms::all);
 
@@ -126,7 +126,7 @@ TEST_CASE("remove_test", "[file][dir]") {
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   directory_tree tree(alloc);
 
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/abcdef/example/a/b"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/abcdef/example/a/b", "/tmp"));
 
   REQUIRE_NOTHROW(tree.remove("/sandbox/abcdef/example/a/b"));
   REQUIRE(!tree.exists("/sandbox/abcdef/example/a/b"));
@@ -146,7 +146,7 @@ TEST_CASE("rename_test", "[file][dir]") {
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   directory_tree tree(alloc);
 
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/from/file1.txt"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/from/file1.txt", "/tmp"));
   REQUIRE_NOTHROW(tree.create_directory("/sandbox/to"));
 
   REQUIRE_THROWS_AS(tree.rename("/sandbox/from/file1.txt", "/sandbox/to/"), directory_service_exception);
@@ -166,7 +166,7 @@ TEST_CASE("status_test", "[file][dir]") {
   directory_tree tree(alloc);
 
   std::uint64_t before = detail::now_ms();
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/file"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/file", "/tmp"));
   std::uint64_t after = detail::now_ms();
   REQUIRE(tree.status("/sandbox/file").permissions() == perms::all);
   REQUIRE(tree.status("/sandbox/file").type() == file_type::regular);
@@ -190,9 +190,9 @@ TEST_CASE("directory_entries_test", "[file][dir]") {
   std::uint64_t t0 = detail::now_ms();
   REQUIRE_NOTHROW(tree.create_directories("/sandbox/a/b"));
   std::uint64_t t1 = detail::now_ms();
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/file1.txt"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/file1.txt", "/tmp"));
   std::uint64_t t2 = detail::now_ms();
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/file2.txt"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/file2.txt", "/tmp"));
   std::uint64_t t3 = detail::now_ms();
 
   std::vector<directory_entry> entries;
@@ -223,9 +223,9 @@ TEST_CASE("recursive_directory_entries_test", "[file][dir]") {
   std::uint64_t t0 = detail::now_ms();
   REQUIRE_NOTHROW(tree.create_directories("/sandbox/a/b"));
   std::uint64_t t1 = detail::now_ms();
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/file1.txt"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/file1.txt", "/tmp"));
   std::uint64_t t2 = detail::now_ms();
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/file2.txt"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/file2.txt", "/tmp"));
   std::uint64_t t3 = detail::now_ms();
 
   std::vector<directory_entry> entries;
@@ -258,16 +258,16 @@ TEST_CASE("dstatus_test", "[file]") {
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   directory_tree tree(alloc);
 
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/file.txt"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/file.txt", "/tmp"));
   REQUIRE_THROWS_AS(tree.dstatus("/sandbox"), directory_service_exception);
   REQUIRE(tree.dstatus("/sandbox/file.txt").mode() == storage_mode::in_memory);
-  REQUIRE(tree.dstatus("/sandbox/file.txt").persistent_store_prefix().empty());
+  REQUIRE(tree.dstatus("/sandbox/file.txt").persistent_store_prefix() == "/tmp");
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().empty());
 
-  data_status status(storage_mode::in_memory_grace, "/tmp", {"a", "b", "c", "d"});
+  data_status status(storage_mode::in_memory_grace, "/tmp2", {"a", "b", "c", "d"});
   REQUIRE_NOTHROW(tree.dstatus("/sandbox/file.txt", status));
   REQUIRE(tree.dstatus("/sandbox/file.txt").mode() == storage_mode::in_memory_grace);
-  REQUIRE(tree.dstatus("/sandbox/file.txt").persistent_store_prefix() == "/tmp");
+  REQUIRE(tree.dstatus("/sandbox/file.txt").persistent_store_prefix() == "/tmp2");
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().size() == 4);
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0) == "a");
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(1) == "b");
@@ -280,7 +280,7 @@ TEST_CASE("storage_mode_test", "[file]") {
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   directory_tree tree(alloc);
 
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/file.txt"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/file.txt", "/tmp"));
   REQUIRE_THROWS_AS(tree.mode("/sandbox"), directory_service_exception);
   REQUIRE(tree.mode("/sandbox/file.txt") == storage_mode::in_memory);
 
@@ -299,7 +299,7 @@ TEST_CASE("blocks_test", "[file]") {
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   directory_tree tree(alloc);
 
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/file.txt"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/file.txt", "/tmp"));
   REQUIRE_THROWS_AS(tree.data_blocks("/sandbox"), directory_service_exception);
   REQUIRE(tree.data_blocks("/sandbox/file.txt").empty());
 
@@ -339,7 +339,7 @@ TEST_CASE("file_type_test", "[file][dir]") {
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   directory_tree tree(alloc);
 
-  REQUIRE_NOTHROW(tree.create_file("/sandbox/file.txt"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/file.txt", "/tmp"));
   REQUIRE(tree.is_regular_file("/sandbox/file.txt"));
   REQUIRE_FALSE(tree.is_directory("/sandbox/file.txt"));
 
