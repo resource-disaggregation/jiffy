@@ -51,15 +51,6 @@ extern const std::map<int, const char*> _rpc_storage_mode_VALUES_TO_NAMES;
 
 std::ostream& operator<<(std::ostream& out, const rpc_storage_mode val);
 
-enum rpc_remove_mode {
-  rpc_delete = 0,
-  rpc_flush = 1
-};
-
-extern const std::map<int, const char*> _rpc_remove_mode_VALUES_TO_NAMES;
-
-std::ostream& operator<<(std::ostream& out, const rpc_remove_mode val);
-
 typedef int32_t rpc_perms;
 
 class rpc_file_status;
@@ -70,7 +61,11 @@ class rpc_dir_entry;
 
 class directory_rpc_service_exception;
 
-class rpc_keep_alive_ack;
+class rpc_file_metadata;
+
+class lease_update;
+
+class lease_ack;
 
 class directory_lease_service_exception;
 
@@ -253,44 +248,36 @@ void swap(directory_rpc_service_exception &a, directory_rpc_service_exception &b
 
 std::ostream& operator<<(std::ostream& out, const directory_rpc_service_exception& obj);
 
-typedef struct _rpc_keep_alive_ack__isset {
-  _rpc_keep_alive_ack__isset() : tot_bytes(false) {}
-  bool tot_bytes :1;
-} _rpc_keep_alive_ack__isset;
 
-class rpc_keep_alive_ack {
+class rpc_file_metadata {
  public:
 
-  rpc_keep_alive_ack(const rpc_keep_alive_ack&);
-  rpc_keep_alive_ack& operator=(const rpc_keep_alive_ack&);
-  rpc_keep_alive_ack() : path(), tot_bytes(0) {
+  rpc_file_metadata(const rpc_file_metadata&);
+  rpc_file_metadata& operator=(const rpc_file_metadata&);
+  rpc_file_metadata() : path(), bytes(0) {
   }
 
-  virtual ~rpc_keep_alive_ack() throw();
+  virtual ~rpc_file_metadata() throw();
   std::string path;
-  int64_t tot_bytes;
-
-  _rpc_keep_alive_ack__isset __isset;
+  int64_t bytes;
 
   void __set_path(const std::string& val);
 
-  void __set_tot_bytes(const int64_t val);
+  void __set_bytes(const int64_t val);
 
-  bool operator == (const rpc_keep_alive_ack & rhs) const
+  bool operator == (const rpc_file_metadata & rhs) const
   {
     if (!(path == rhs.path))
       return false;
-    if (__isset.tot_bytes != rhs.__isset.tot_bytes)
-      return false;
-    else if (__isset.tot_bytes && !(tot_bytes == rhs.tot_bytes))
+    if (!(bytes == rhs.bytes))
       return false;
     return true;
   }
-  bool operator != (const rpc_keep_alive_ack &rhs) const {
+  bool operator != (const rpc_file_metadata &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_keep_alive_ack & ) const;
+  bool operator < (const rpc_file_metadata & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -300,9 +287,105 @@ class rpc_keep_alive_ack {
   virtual void printTo(std::ostream& out) const;
 };
 
-void swap(rpc_keep_alive_ack &a, rpc_keep_alive_ack &b);
+void swap(rpc_file_metadata &a, rpc_file_metadata &b);
 
-std::ostream& operator<<(std::ostream& out, const rpc_keep_alive_ack& obj);
+std::ostream& operator<<(std::ostream& out, const rpc_file_metadata& obj);
+
+
+class lease_update {
+ public:
+
+  lease_update(const lease_update&);
+  lease_update& operator=(const lease_update&);
+  lease_update() {
+  }
+
+  virtual ~lease_update() throw();
+  std::vector<rpc_file_metadata>  to_renew;
+  std::vector<std::string>  to_flush;
+  std::vector<std::string>  to_remove;
+
+  void __set_to_renew(const std::vector<rpc_file_metadata> & val);
+
+  void __set_to_flush(const std::vector<std::string> & val);
+
+  void __set_to_remove(const std::vector<std::string> & val);
+
+  bool operator == (const lease_update & rhs) const
+  {
+    if (!(to_renew == rhs.to_renew))
+      return false;
+    if (!(to_flush == rhs.to_flush))
+      return false;
+    if (!(to_remove == rhs.to_remove))
+      return false;
+    return true;
+  }
+  bool operator != (const lease_update &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const lease_update & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+  virtual void printTo(std::ostream& out) const;
+};
+
+void swap(lease_update &a, lease_update &b);
+
+std::ostream& operator<<(std::ostream& out, const lease_update& obj);
+
+
+class lease_ack {
+ public:
+
+  lease_ack(const lease_ack&);
+  lease_ack& operator=(const lease_ack&);
+  lease_ack() : flushed(0), removed(0) {
+  }
+
+  virtual ~lease_ack() throw();
+  std::vector<rpc_file_metadata>  renewed;
+  int64_t flushed;
+  int64_t removed;
+
+  void __set_renewed(const std::vector<rpc_file_metadata> & val);
+
+  void __set_flushed(const int64_t val);
+
+  void __set_removed(const int64_t val);
+
+  bool operator == (const lease_ack & rhs) const
+  {
+    if (!(renewed == rhs.renewed))
+      return false;
+    if (!(flushed == rhs.flushed))
+      return false;
+    if (!(removed == rhs.removed))
+      return false;
+    return true;
+  }
+  bool operator != (const lease_ack &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const lease_ack & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+  virtual void printTo(std::ostream& out) const;
+};
+
+void swap(lease_ack &a, lease_ack &b);
+
+std::ostream& operator<<(std::ostream& out, const lease_ack& obj);
 
 typedef struct _directory_lease_service_exception__isset {
   _directory_lease_service_exception__isset() : msg(false) {}

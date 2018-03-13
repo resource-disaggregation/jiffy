@@ -102,14 +102,21 @@ service directory_rpc_service {
     throws (1: directory_rpc_service_exception ex),
 }
 
-struct rpc_keep_alive_ack {
+struct rpc_file_metadata {
   1: required string path,
-  2: optional i64 tot_bytes,
+  2: required i64 bytes,
 }
 
-enum rpc_remove_mode {
-  rpc_delete = 0,
-  rpc_flush = 1,
+struct lease_update {
+  1: required list<rpc_file_metadata> to_renew,
+  2: required list<string> to_flush,
+  3: required list<string> to_remove,
+}
+
+struct lease_ack {
+  1: required list<rpc_file_metadata> renewed,
+  2: required i64 flushed,
+  3: required i64 removed,
 }
 
 exception directory_lease_service_exception {
@@ -117,15 +124,6 @@ exception directory_lease_service_exception {
 }
 
 service directory_lease_service {
-  void create(1: string path, 2: string persistent_store_prefix)
-    throws (1: directory_lease_service_exception ex),
-
-  void load(1: string path)
-    throws (1: directory_lease_service_exception ex),
-
-  rpc_keep_alive_ack renew_lease(1: string path, 2: i64 bytes_added)
-    throws (1: directory_lease_service_exception ex),
-
-  void remove(1: string path, 2: rpc_remove_mode mode)
+  lease_ack update_leases(1: lease_update updates)
     throws (1: directory_lease_service_exception ex),
 }

@@ -9,52 +9,45 @@ directory_lease_service_handler::directory_lease_service_handler(std::shared_ptr
                                                                  std::shared_ptr<kv::kv_management_service> kv)
     : tree_(std::move(tree)), kv_(std::move(kv)) {}
 
-void directory_lease_service_handler::create(const std::string &path, const std::string &persistent_store_prefix) {
+void directory_lease_service_handler::update_leases(lease_ack &_return, const lease_update &updates) {
   try {
-    tree_->create_file(path, persistent_store_prefix);
-  } catch (directory_service_exception &ex) {
-    throw make_exception(ex);
-  }
-}
-
-void directory_lease_service_handler::load(const std::string &path) {
-  try {
-    auto s = tree_->dstatus(path);
-    for (const std::string &block_name: s.data_blocks()) {
-      kv_->load(block_name, s.persistent_store_prefix(), path);
-    }
-  } catch (directory_service_exception &ex) {
-    throw make_exception(ex);
-  }
-}
-
-void directory_lease_service_handler::renew_lease(rpc_keep_alive_ack &_return,
-                                                  const std::string &path,
-                                                  const int64_t bytes_added) {
-  try {
-    tree_->touch(path);
-    if (tree_->is_regular_file(path)) {
-      if (bytes_added < 0) {
-        tree_->shrink(path, static_cast<size_t>(std::abs(bytes_added)));
-      } else {
-        tree_->grow(path, static_cast<size_t>(std::abs(bytes_added)));
+    // Handle renewals
+    for (const auto &entry: updates.to_renew) {
+      tree_->touch(entry.path);
+      if (tree_->is_regular_file(entry.path)) {
+        if (entry.bytes < 0) {
+          tree_->shrink(entry.path, static_cast<size_t>(std::abs(entry.bytes)));
+        } else {
+          tree_->grow(entry.path, static_cast<size_t>(std::abs(entry.bytes)));
+        }
       }
+      rpc_file_metadata renew_ack;
+      renew_ack.path = entry.path;
+      renew_ack.bytes = static_cast<int64_t>(tree_->file_size(entry.path));
+      _return.renewed.push_back(renew_ack);
     }
-    _return.path = path;
-    _return.tot_bytes = static_cast<int64_t>(tree_->file_size(path));
+
+    // Handle flushes
+    _return.flushed = 0;
+    for (const auto &path: updates.to_flush) {
+      auto s = tree_->dstatus(path);
+      for (const std::string &block_name: s.data_blocks()) {
+        kv_->flush(block_name, s.persistent_store_prefix(), path);
+      }
+      ++_return.flushed;
+    }
+
+    // Handle removals
+    _return.removed = 0;
+    for (const auto &path: updates.to_remove) {
+      auto s = tree_->dstatus(path);
+      for (const std::string &block_name: s.data_blocks()) {
+        kv_->clear(block_name);
+      }
+      ++_return.removed;
+    }
   } catch (directory_service_exception &ex) {
     throw make_exception(ex);
-  }
-}
-
-void directory_lease_service_handler::remove(const std::string &path, const rpc_remove_mode mode) {
-  auto s = tree_->dstatus(path);
-  for (const std::string &block_name: s.data_blocks()) {
-    if (mode == rpc_remove_mode::rpc_flush) {
-      kv_->flush(block_name, s.persistent_store_prefix(), path);
-    } else {
-      kv_->clear(block_name);
-    }
   }
 }
 

@@ -81,26 +81,6 @@ std::ostream& operator<<(std::ostream& out, const rpc_storage_mode val) {
   return out;
 }
 
-int _krpc_remove_modeValues[] = {
-  rpc_delete,
-  rpc_flush
-};
-const char* _krpc_remove_modeNames[] = {
-  "rpc_delete",
-  "rpc_flush"
-};
-const std::map<int, const char*> _rpc_remove_mode_VALUES_TO_NAMES(::apache::thrift::TEnumIterator(2, _krpc_remove_modeValues, _krpc_remove_modeNames), ::apache::thrift::TEnumIterator(-1, NULL, NULL));
-
-std::ostream& operator<<(std::ostream& out, const rpc_remove_mode val) {
-  std::map<int, const char*>::const_iterator it = _rpc_remove_mode_VALUES_TO_NAMES.find(val);
-  if (it != _rpc_remove_mode_VALUES_TO_NAMES.end()) {
-    out << it->second;
-  } else {
-    out << static_cast<int>(val);
-  }
-  return out;
-}
-
 
 rpc_file_status::~rpc_file_status() throw() {
 }
@@ -289,48 +269,144 @@ const char* directory_rpc_service_exception::what() const throw() {
 }
 
 
-rpc_keep_alive_ack::~rpc_keep_alive_ack() throw() {
+rpc_file_metadata::~rpc_file_metadata() throw() {
 }
 
 
-void rpc_keep_alive_ack::__set_path(const std::string& val) {
+void rpc_file_metadata::__set_path(const std::string& val) {
   this->path = val;
 }
 
-void rpc_keep_alive_ack::__set_tot_bytes(const int64_t val) {
-  this->tot_bytes = val;
-__isset.tot_bytes = true;
+void rpc_file_metadata::__set_bytes(const int64_t val) {
+  this->bytes = val;
 }
-std::ostream& operator<<(std::ostream& out, const rpc_keep_alive_ack& obj)
+std::ostream& operator<<(std::ostream& out, const rpc_file_metadata& obj)
 {
   obj.printTo(out);
   return out;
 }
 
 
-void swap(rpc_keep_alive_ack &a, rpc_keep_alive_ack &b) {
+void swap(rpc_file_metadata &a, rpc_file_metadata &b) {
   using ::std::swap;
   swap(a.path, b.path);
-  swap(a.tot_bytes, b.tot_bytes);
-  swap(a.__isset, b.__isset);
+  swap(a.bytes, b.bytes);
 }
 
-rpc_keep_alive_ack::rpc_keep_alive_ack(const rpc_keep_alive_ack& other16) {
+rpc_file_metadata::rpc_file_metadata(const rpc_file_metadata& other16) {
   path = other16.path;
-  tot_bytes = other16.tot_bytes;
-  __isset = other16.__isset;
+  bytes = other16.bytes;
 }
-rpc_keep_alive_ack& rpc_keep_alive_ack::operator=(const rpc_keep_alive_ack& other17) {
+rpc_file_metadata& rpc_file_metadata::operator=(const rpc_file_metadata& other17) {
   path = other17.path;
-  tot_bytes = other17.tot_bytes;
-  __isset = other17.__isset;
+  bytes = other17.bytes;
   return *this;
 }
-void rpc_keep_alive_ack::printTo(std::ostream& out) const {
+void rpc_file_metadata::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
-  out << "rpc_keep_alive_ack(";
+  out << "rpc_file_metadata(";
   out << "path=" << to_string(path);
-  out << ", " << "tot_bytes="; (__isset.tot_bytes ? (out << to_string(tot_bytes)) : (out << "<null>"));
+  out << ", " << "bytes=" << to_string(bytes);
+  out << ")";
+}
+
+
+lease_update::~lease_update() throw() {
+}
+
+
+void lease_update::__set_to_renew(const std::vector<rpc_file_metadata> & val) {
+  this->to_renew = val;
+}
+
+void lease_update::__set_to_flush(const std::vector<std::string> & val) {
+  this->to_flush = val;
+}
+
+void lease_update::__set_to_remove(const std::vector<std::string> & val) {
+  this->to_remove = val;
+}
+std::ostream& operator<<(std::ostream& out, const lease_update& obj)
+{
+  obj.printTo(out);
+  return out;
+}
+
+
+void swap(lease_update &a, lease_update &b) {
+  using ::std::swap;
+  swap(a.to_renew, b.to_renew);
+  swap(a.to_flush, b.to_flush);
+  swap(a.to_remove, b.to_remove);
+}
+
+lease_update::lease_update(const lease_update& other36) {
+  to_renew = other36.to_renew;
+  to_flush = other36.to_flush;
+  to_remove = other36.to_remove;
+}
+lease_update& lease_update::operator=(const lease_update& other37) {
+  to_renew = other37.to_renew;
+  to_flush = other37.to_flush;
+  to_remove = other37.to_remove;
+  return *this;
+}
+void lease_update::printTo(std::ostream& out) const {
+  using ::apache::thrift::to_string;
+  out << "lease_update(";
+  out << "to_renew=" << to_string(to_renew);
+  out << ", " << "to_flush=" << to_string(to_flush);
+  out << ", " << "to_remove=" << to_string(to_remove);
+  out << ")";
+}
+
+
+lease_ack::~lease_ack() throw() {
+}
+
+
+void lease_ack::__set_renewed(const std::vector<rpc_file_metadata> & val) {
+  this->renewed = val;
+}
+
+void lease_ack::__set_flushed(const int64_t val) {
+  this->flushed = val;
+}
+
+void lease_ack::__set_removed(const int64_t val) {
+  this->removed = val;
+}
+std::ostream& operator<<(std::ostream& out, const lease_ack& obj)
+{
+  obj.printTo(out);
+  return out;
+}
+
+
+void swap(lease_ack &a, lease_ack &b) {
+  using ::std::swap;
+  swap(a.renewed, b.renewed);
+  swap(a.flushed, b.flushed);
+  swap(a.removed, b.removed);
+}
+
+lease_ack::lease_ack(const lease_ack& other44) {
+  renewed = other44.renewed;
+  flushed = other44.flushed;
+  removed = other44.removed;
+}
+lease_ack& lease_ack::operator=(const lease_ack& other45) {
+  renewed = other45.renewed;
+  flushed = other45.flushed;
+  removed = other45.removed;
+  return *this;
+}
+void lease_ack::printTo(std::ostream& out) const {
+  using ::apache::thrift::to_string;
+  out << "lease_ack(";
+  out << "renewed=" << to_string(renewed);
+  out << ", " << "flushed=" << to_string(flushed);
+  out << ", " << "removed=" << to_string(removed);
   out << ")";
 }
 
@@ -355,13 +431,13 @@ void swap(directory_lease_service_exception &a, directory_lease_service_exceptio
   swap(a.__isset, b.__isset);
 }
 
-directory_lease_service_exception::directory_lease_service_exception(const directory_lease_service_exception& other18) : TException() {
-  msg = other18.msg;
-  __isset = other18.__isset;
+directory_lease_service_exception::directory_lease_service_exception(const directory_lease_service_exception& other46) : TException() {
+  msg = other46.msg;
+  __isset = other46.__isset;
 }
-directory_lease_service_exception& directory_lease_service_exception::operator=(const directory_lease_service_exception& other19) {
-  msg = other19.msg;
-  __isset = other19.__isset;
+directory_lease_service_exception& directory_lease_service_exception::operator=(const directory_lease_service_exception& other47) {
+  msg = other47.msg;
+  __isset = other47.__isset;
   return *this;
 }
 void directory_lease_service_exception::printTo(std::ostream& out) const {

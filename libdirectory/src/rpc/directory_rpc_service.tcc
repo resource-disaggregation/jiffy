@@ -1190,9 +1190,9 @@ uint32_t directory_rpc_service_set_permissions_args::read(Protocol_* iprot) {
         break;
       case 3:
         if (ftype == ::apache::thrift::protocol::T_I32) {
-          int32_t ecast20;
-          xfer += iprot->readI32(ecast20);
-          this->opts = (rpc_perm_options)ecast20;
+          int32_t ecast48;
+          xfer += iprot->readI32(ecast48);
+          this->opts = (rpc_perm_options)ecast48;
           this->__isset.opts = true;
         } else {
           xfer += iprot->skip(ftype);
@@ -2402,14 +2402,14 @@ uint32_t directory_rpc_service_directory_entries_result::read(Protocol_* iprot) 
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->success.clear();
-            uint32_t _size21;
-            ::apache::thrift::protocol::TType _etype24;
-            xfer += iprot->readListBegin(_etype24, _size21);
-            this->success.resize(_size21);
-            uint32_t _i25;
-            for (_i25 = 0; _i25 < _size21; ++_i25)
+            uint32_t _size49;
+            ::apache::thrift::protocol::TType _etype52;
+            xfer += iprot->readListBegin(_etype52, _size49);
+            this->success.resize(_size49);
+            uint32_t _i53;
+            for (_i53 = 0; _i53 < _size49; ++_i53)
             {
-              xfer += this->success[_i25].read(iprot);
+              xfer += this->success[_i53].read(iprot);
             }
             xfer += iprot->readListEnd();
           }
@@ -2449,10 +2449,10 @@ uint32_t directory_rpc_service_directory_entries_result::write(Protocol_* oprot)
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_LIST, 0);
     {
       xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->success.size()));
-      std::vector<rpc_dir_entry> ::const_iterator _iter26;
-      for (_iter26 = this->success.begin(); _iter26 != this->success.end(); ++_iter26)
+      std::vector<rpc_dir_entry> ::const_iterator _iter54;
+      for (_iter54 = this->success.begin(); _iter54 != this->success.end(); ++_iter54)
       {
-        xfer += (*_iter26).write(oprot);
+        xfer += (*_iter54).write(oprot);
       }
       xfer += oprot->writeListEnd();
     }
@@ -2494,14 +2494,14 @@ uint32_t directory_rpc_service_directory_entries_presult::read(Protocol_* iprot)
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             (*(this->success)).clear();
-            uint32_t _size27;
-            ::apache::thrift::protocol::TType _etype30;
-            xfer += iprot->readListBegin(_etype30, _size27);
-            (*(this->success)).resize(_size27);
-            uint32_t _i31;
-            for (_i31 = 0; _i31 < _size27; ++_i31)
+            uint32_t _size55;
+            ::apache::thrift::protocol::TType _etype58;
+            xfer += iprot->readListBegin(_etype58, _size55);
+            (*(this->success)).resize(_size55);
+            uint32_t _i59;
+            for (_i59 = 0; _i59 < _size55; ++_i59)
             {
-              xfer += (*(this->success))[_i31].read(iprot);
+              xfer += (*(this->success))[_i59].read(iprot);
             }
             xfer += iprot->readListEnd();
           }
@@ -2631,14 +2631,14 @@ uint32_t directory_rpc_service_recursive_directory_entries_result::read(Protocol
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->success.clear();
-            uint32_t _size32;
-            ::apache::thrift::protocol::TType _etype35;
-            xfer += iprot->readListBegin(_etype35, _size32);
-            this->success.resize(_size32);
-            uint32_t _i36;
-            for (_i36 = 0; _i36 < _size32; ++_i36)
+            uint32_t _size60;
+            ::apache::thrift::protocol::TType _etype63;
+            xfer += iprot->readListBegin(_etype63, _size60);
+            this->success.resize(_size60);
+            uint32_t _i64;
+            for (_i64 = 0; _i64 < _size60; ++_i64)
             {
-              xfer += this->success[_i36].read(iprot);
+              xfer += this->success[_i64].read(iprot);
             }
             xfer += iprot->readListEnd();
           }
@@ -2678,10 +2678,10 @@ uint32_t directory_rpc_service_recursive_directory_entries_result::write(Protoco
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_LIST, 0);
     {
       xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->success.size()));
-      std::vector<rpc_dir_entry> ::const_iterator _iter37;
-      for (_iter37 = this->success.begin(); _iter37 != this->success.end(); ++_iter37)
+      std::vector<rpc_dir_entry> ::const_iterator _iter65;
+      for (_iter65 = this->success.begin(); _iter65 != this->success.end(); ++_iter65)
       {
-        xfer += (*_iter37).write(oprot);
+        xfer += (*_iter65).write(oprot);
       }
       xfer += oprot->writeListEnd();
     }
@@ -2723,14 +2723,14 @@ uint32_t directory_rpc_service_recursive_directory_entries_presult::read(Protoco
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             (*(this->success)).clear();
-            uint32_t _size38;
-            ::apache::thrift::protocol::TType _etype41;
-            xfer += iprot->readListBegin(_etype41, _size38);
-            (*(this->success)).resize(_size38);
-            uint32_t _i42;
-            for (_i42 = 0; _i42 < _size38; ++_i42)
+            uint32_t _size66;
+            ::apache::thrift::protocol::TType _etype69;
+            xfer += iprot->readListBegin(_etype69, _size66);
+            (*(this->success)).resize(_size66);
+            uint32_t _i70;
+            for (_i70 = 0; _i70 < _size66; ++_i70)
             {
-              xfer += (*(this->success))[_i42].read(iprot);
+              xfer += (*(this->success))[_i70].read(iprot);
             }
             xfer += iprot->readListEnd();
           }
@@ -3055,9 +3055,9 @@ uint32_t directory_rpc_service_mode_result::read(Protocol_* iprot) {
     {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_I32) {
-          int32_t ecast43;
-          xfer += iprot->readI32(ecast43);
-          this->success = (rpc_storage_mode)ecast43;
+          int32_t ecast71;
+          xfer += iprot->readI32(ecast71);
+          this->success = (rpc_storage_mode)ecast71;
           this->__isset.success = true;
         } else {
           xfer += iprot->skip(ftype);
@@ -3129,9 +3129,9 @@ uint32_t directory_rpc_service_mode_presult::read(Protocol_* iprot) {
     {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_I32) {
-          int32_t ecast44;
-          xfer += iprot->readI32(ecast44);
-          (*(this->success)) = (rpc_storage_mode)ecast44;
+          int32_t ecast72;
+          xfer += iprot->readI32(ecast72);
+          (*(this->success)) = (rpc_storage_mode)ecast72;
           this->__isset.success = true;
         } else {
           xfer += iprot->skip(ftype);
@@ -3455,14 +3455,14 @@ uint32_t directory_rpc_service_data_blocks_result::read(Protocol_* iprot) {
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->success.clear();
-            uint32_t _size45;
-            ::apache::thrift::protocol::TType _etype48;
-            xfer += iprot->readListBegin(_etype48, _size45);
-            this->success.resize(_size45);
-            uint32_t _i49;
-            for (_i49 = 0; _i49 < _size45; ++_i49)
+            uint32_t _size73;
+            ::apache::thrift::protocol::TType _etype76;
+            xfer += iprot->readListBegin(_etype76, _size73);
+            this->success.resize(_size73);
+            uint32_t _i77;
+            for (_i77 = 0; _i77 < _size73; ++_i77)
             {
-              xfer += iprot->readString(this->success[_i49]);
+              xfer += iprot->readString(this->success[_i77]);
             }
             xfer += iprot->readListEnd();
           }
@@ -3502,10 +3502,10 @@ uint32_t directory_rpc_service_data_blocks_result::write(Protocol_* oprot) const
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_LIST, 0);
     {
       xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->success.size()));
-      std::vector<std::string> ::const_iterator _iter50;
-      for (_iter50 = this->success.begin(); _iter50 != this->success.end(); ++_iter50)
+      std::vector<std::string> ::const_iterator _iter78;
+      for (_iter78 = this->success.begin(); _iter78 != this->success.end(); ++_iter78)
       {
-        xfer += oprot->writeString((*_iter50));
+        xfer += oprot->writeString((*_iter78));
       }
       xfer += oprot->writeListEnd();
     }
@@ -3547,14 +3547,14 @@ uint32_t directory_rpc_service_data_blocks_presult::read(Protocol_* iprot) {
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             (*(this->success)).clear();
-            uint32_t _size51;
-            ::apache::thrift::protocol::TType _etype54;
-            xfer += iprot->readListBegin(_etype54, _size51);
-            (*(this->success)).resize(_size51);
-            uint32_t _i55;
-            for (_i55 = 0; _i55 < _size51; ++_i55)
+            uint32_t _size79;
+            ::apache::thrift::protocol::TType _etype82;
+            xfer += iprot->readListBegin(_etype82, _size79);
+            (*(this->success)).resize(_size79);
+            uint32_t _i83;
+            for (_i83 = 0; _i83 < _size79; ++_i83)
             {
-              xfer += iprot->readString((*(this->success))[_i55]);
+              xfer += iprot->readString((*(this->success))[_i83]);
             }
             xfer += iprot->readListEnd();
           }

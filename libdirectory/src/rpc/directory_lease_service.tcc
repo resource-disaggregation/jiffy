@@ -13,97 +13,7 @@ namespace elasticmem { namespace directory {
 
 
 template <class Protocol_>
-uint32_t directory_lease_service_create_args::read(Protocol_* iprot) {
-
-  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->path);
-          this->__isset.path = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 2:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->persistent_store_prefix);
-          this->__isset.persistent_store_prefix = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-template <class Protocol_>
-uint32_t directory_lease_service_create_args::write(Protocol_* oprot) const {
-  uint32_t xfer = 0;
-  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("directory_lease_service_create_args");
-
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString(this->path);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("persistent_store_prefix", ::apache::thrift::protocol::T_STRING, 2);
-  xfer += oprot->writeString(this->persistent_store_prefix);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t directory_lease_service_create_pargs::write(Protocol_* oprot) const {
-  uint32_t xfer = 0;
-  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("directory_lease_service_create_pargs");
-
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString((*(this->path)));
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("persistent_store_prefix", ::apache::thrift::protocol::T_STRING, 2);
-  xfer += oprot->writeString((*(this->persistent_store_prefix)));
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t directory_lease_service_create_result::read(Protocol_* iprot) {
+uint32_t directory_lease_service_update_leases_args::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -126,8 +36,8 @@ uint32_t directory_lease_service_create_result::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->ex.read(iprot);
-          this->__isset.ex = true;
+          xfer += this->updates.read(iprot);
+          this->__isset.updates = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -145,116 +55,13 @@ uint32_t directory_lease_service_create_result::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t directory_lease_service_create_result::write(Protocol_* oprot) const {
-
-  uint32_t xfer = 0;
-
-  xfer += oprot->writeStructBegin("directory_lease_service_create_result");
-
-  if (this->__isset.ex) {
-    xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
-    xfer += this->ex.write(oprot);
-    xfer += oprot->writeFieldEnd();
-  }
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t directory_lease_service_create_presult::read(Protocol_* iprot) {
-
-  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->ex.read(iprot);
-          this->__isset.ex = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t directory_lease_service_load_args::read(Protocol_* iprot) {
-
-  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->path);
-          this->__isset.path = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-template <class Protocol_>
-uint32_t directory_lease_service_load_args::write(Protocol_* oprot) const {
+uint32_t directory_lease_service_update_leases_args::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("directory_lease_service_load_args");
+  xfer += oprot->writeStructBegin("directory_lease_service_update_leases_args");
 
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString(this->path);
+  xfer += oprot->writeFieldBegin("updates", ::apache::thrift::protocol::T_STRUCT, 1);
+  xfer += this->updates.write(oprot);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -264,13 +71,13 @@ uint32_t directory_lease_service_load_args::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t directory_lease_service_load_pargs::write(Protocol_* oprot) const {
+uint32_t directory_lease_service_update_leases_pargs::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("directory_lease_service_load_pargs");
+  xfer += oprot->writeStructBegin("directory_lease_service_update_leases_pargs");
 
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString((*(this->path)));
+  xfer += oprot->writeFieldBegin("updates", ::apache::thrift::protocol::T_STRUCT, 1);
+  xfer += (*(this->updates)).write(oprot);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -280,200 +87,7 @@ uint32_t directory_lease_service_load_pargs::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t directory_lease_service_load_result::read(Protocol_* iprot) {
-
-  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->ex.read(iprot);
-          this->__isset.ex = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-template <class Protocol_>
-uint32_t directory_lease_service_load_result::write(Protocol_* oprot) const {
-
-  uint32_t xfer = 0;
-
-  xfer += oprot->writeStructBegin("directory_lease_service_load_result");
-
-  if (this->__isset.ex) {
-    xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
-    xfer += this->ex.write(oprot);
-    xfer += oprot->writeFieldEnd();
-  }
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t directory_lease_service_load_presult::read(Protocol_* iprot) {
-
-  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->ex.read(iprot);
-          this->__isset.ex = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t directory_lease_service_renew_lease_args::read(Protocol_* iprot) {
-
-  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->path);
-          this->__isset.path = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 2:
-        if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->bytes_added);
-          this->__isset.bytes_added = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-template <class Protocol_>
-uint32_t directory_lease_service_renew_lease_args::write(Protocol_* oprot) const {
-  uint32_t xfer = 0;
-  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("directory_lease_service_renew_lease_args");
-
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString(this->path);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("bytes_added", ::apache::thrift::protocol::T_I64, 2);
-  xfer += oprot->writeI64(this->bytes_added);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t directory_lease_service_renew_lease_pargs::write(Protocol_* oprot) const {
-  uint32_t xfer = 0;
-  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("directory_lease_service_renew_lease_pargs");
-
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString((*(this->path)));
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("bytes_added", ::apache::thrift::protocol::T_I64, 2);
-  xfer += oprot->writeI64((*(this->bytes_added)));
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t directory_lease_service_renew_lease_result::read(Protocol_* iprot) {
+uint32_t directory_lease_service_update_leases_result::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -523,11 +137,11 @@ uint32_t directory_lease_service_renew_lease_result::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t directory_lease_service_renew_lease_result::write(Protocol_* oprot) const {
+uint32_t directory_lease_service_update_leases_result::write(Protocol_* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("directory_lease_service_renew_lease_result");
+  xfer += oprot->writeStructBegin("directory_lease_service_update_leases_result");
 
   if (this->__isset.success) {
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_STRUCT, 0);
@@ -545,7 +159,7 @@ uint32_t directory_lease_service_renew_lease_result::write(Protocol_* oprot) con
 
 
 template <class Protocol_>
-uint32_t directory_lease_service_renew_lease_presult::read(Protocol_* iprot) {
+uint32_t directory_lease_service_update_leases_presult::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -594,217 +208,21 @@ uint32_t directory_lease_service_renew_lease_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
 template <class Protocol_>
-uint32_t directory_lease_service_remove_args::read(Protocol_* iprot) {
-
-  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->path);
-          this->__isset.path = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 2:
-        if (ftype == ::apache::thrift::protocol::T_I32) {
-          int32_t ecast56;
-          xfer += iprot->readI32(ecast56);
-          this->mode = (rpc_remove_mode)ecast56;
-          this->__isset.mode = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-template <class Protocol_>
-uint32_t directory_lease_service_remove_args::write(Protocol_* oprot) const {
-  uint32_t xfer = 0;
-  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("directory_lease_service_remove_args");
-
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString(this->path);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("mode", ::apache::thrift::protocol::T_I32, 2);
-  xfer += oprot->writeI32((int32_t)this->mode);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t directory_lease_service_remove_pargs::write(Protocol_* oprot) const {
-  uint32_t xfer = 0;
-  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("directory_lease_service_remove_pargs");
-
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString((*(this->path)));
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("mode", ::apache::thrift::protocol::T_I32, 2);
-  xfer += oprot->writeI32((int32_t)(*(this->mode)));
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t directory_lease_service_remove_result::read(Protocol_* iprot) {
-
-  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->ex.read(iprot);
-          this->__isset.ex = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-template <class Protocol_>
-uint32_t directory_lease_service_remove_result::write(Protocol_* oprot) const {
-
-  uint32_t xfer = 0;
-
-  xfer += oprot->writeStructBegin("directory_lease_service_remove_result");
-
-  if (this->__isset.ex) {
-    xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
-    xfer += this->ex.write(oprot);
-    xfer += oprot->writeFieldEnd();
-  }
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t directory_lease_service_remove_presult::read(Protocol_* iprot) {
-
-  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->ex.read(iprot);
-          this->__isset.ex = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::create(const std::string& path, const std::string& persistent_store_prefix)
+void directory_lease_serviceClientT<Protocol_>::update_leases(lease_ack& _return, const lease_update& updates)
 {
-  send_create(path, persistent_store_prefix);
-  recv_create();
+  send_update_leases(updates);
+  recv_update_leases(_return);
 }
 
 template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::send_create(const std::string& path, const std::string& persistent_store_prefix)
+void directory_lease_serviceClientT<Protocol_>::send_update_leases(const lease_update& updates)
 {
   int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("create", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("update_leases", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  directory_lease_service_create_pargs args;
-  args.path = &path;
-  args.persistent_store_prefix = &persistent_store_prefix;
+  directory_lease_service_update_leases_pargs args;
+  args.updates = &updates;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -813,7 +231,7 @@ void directory_lease_serviceClientT<Protocol_>::send_create(const std::string& p
 }
 
 template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::recv_create()
+void directory_lease_serviceClientT<Protocol_>::recv_update_leases(lease_ack& _return)
 {
 
   int32_t rseqid = 0;
@@ -833,131 +251,12 @@ void directory_lease_serviceClientT<Protocol_>::recv_create()
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("create") != 0) {
+  if (fname.compare("update_leases") != 0) {
     this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  directory_lease_service_create_presult result;
-  result.read(this->iprot_);
-  this->iprot_->readMessageEnd();
-  this->iprot_->getTransport()->readEnd();
-
-  if (result.__isset.ex) {
-    throw result.ex;
-  }
-  return;
-}
-
-template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::load(const std::string& path)
-{
-  send_load(path);
-  recv_load();
-}
-
-template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::send_load(const std::string& path)
-{
-  int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("load", ::apache::thrift::protocol::T_CALL, cseqid);
-
-  directory_lease_service_load_pargs args;
-  args.path = &path;
-  args.write(this->oprot_);
-
-  this->oprot_->writeMessageEnd();
-  this->oprot_->getTransport()->writeEnd();
-  this->oprot_->getTransport()->flush();
-}
-
-template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::recv_load()
-{
-
-  int32_t rseqid = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TMessageType mtype;
-
-  this->iprot_->readMessageBegin(fname, mtype, rseqid);
-  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
-    ::apache::thrift::TApplicationException x;
-    x.read(this->iprot_);
-    this->iprot_->readMessageEnd();
-    this->iprot_->getTransport()->readEnd();
-    throw x;
-  }
-  if (mtype != ::apache::thrift::protocol::T_REPLY) {
-    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-    this->iprot_->readMessageEnd();
-    this->iprot_->getTransport()->readEnd();
-  }
-  if (fname.compare("load") != 0) {
-    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-    this->iprot_->readMessageEnd();
-    this->iprot_->getTransport()->readEnd();
-  }
-  directory_lease_service_load_presult result;
-  result.read(this->iprot_);
-  this->iprot_->readMessageEnd();
-  this->iprot_->getTransport()->readEnd();
-
-  if (result.__isset.ex) {
-    throw result.ex;
-  }
-  return;
-}
-
-template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::renew_lease(rpc_keep_alive_ack& _return, const std::string& path, const int64_t bytes_added)
-{
-  send_renew_lease(path, bytes_added);
-  recv_renew_lease(_return);
-}
-
-template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::send_renew_lease(const std::string& path, const int64_t bytes_added)
-{
-  int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("renew_lease", ::apache::thrift::protocol::T_CALL, cseqid);
-
-  directory_lease_service_renew_lease_pargs args;
-  args.path = &path;
-  args.bytes_added = &bytes_added;
-  args.write(this->oprot_);
-
-  this->oprot_->writeMessageEnd();
-  this->oprot_->getTransport()->writeEnd();
-  this->oprot_->getTransport()->flush();
-}
-
-template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::recv_renew_lease(rpc_keep_alive_ack& _return)
-{
-
-  int32_t rseqid = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TMessageType mtype;
-
-  this->iprot_->readMessageBegin(fname, mtype, rseqid);
-  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
-    ::apache::thrift::TApplicationException x;
-    x.read(this->iprot_);
-    this->iprot_->readMessageEnd();
-    this->iprot_->getTransport()->readEnd();
-    throw x;
-  }
-  if (mtype != ::apache::thrift::protocol::T_REPLY) {
-    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-    this->iprot_->readMessageEnd();
-    this->iprot_->getTransport()->readEnd();
-  }
-  if (fname.compare("renew_lease") != 0) {
-    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-    this->iprot_->readMessageEnd();
-    this->iprot_->getTransport()->readEnd();
-  }
-  directory_lease_service_renew_lease_presult result;
+  directory_lease_service_update_leases_presult result;
   result.success = &_return;
   result.read(this->iprot_);
   this->iprot_->readMessageEnd();
@@ -970,67 +269,7 @@ void directory_lease_serviceClientT<Protocol_>::recv_renew_lease(rpc_keep_alive_
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "renew_lease failed: unknown result");
-}
-
-template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::remove(const std::string& path, const rpc_remove_mode mode)
-{
-  send_remove(path, mode);
-  recv_remove();
-}
-
-template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::send_remove(const std::string& path, const rpc_remove_mode mode)
-{
-  int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("remove", ::apache::thrift::protocol::T_CALL, cseqid);
-
-  directory_lease_service_remove_pargs args;
-  args.path = &path;
-  args.mode = &mode;
-  args.write(this->oprot_);
-
-  this->oprot_->writeMessageEnd();
-  this->oprot_->getTransport()->writeEnd();
-  this->oprot_->getTransport()->flush();
-}
-
-template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::recv_remove()
-{
-
-  int32_t rseqid = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TMessageType mtype;
-
-  this->iprot_->readMessageBegin(fname, mtype, rseqid);
-  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
-    ::apache::thrift::TApplicationException x;
-    x.read(this->iprot_);
-    this->iprot_->readMessageEnd();
-    this->iprot_->getTransport()->readEnd();
-    throw x;
-  }
-  if (mtype != ::apache::thrift::protocol::T_REPLY) {
-    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-    this->iprot_->readMessageEnd();
-    this->iprot_->getTransport()->readEnd();
-  }
-  if (fname.compare("remove") != 0) {
-    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-    this->iprot_->readMessageEnd();
-    this->iprot_->getTransport()->readEnd();
-  }
-  directory_lease_service_remove_presult result;
-  result.read(this->iprot_);
-  this->iprot_->readMessageEnd();
-  this->iprot_->getTransport()->readEnd();
-
-  if (result.__isset.ex) {
-    throw result.ex;
-  }
-  return;
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "update_leases failed: unknown result");
 }
 
 template <class Protocol_>
@@ -1074,269 +313,41 @@ bool directory_lease_serviceProcessorT<Protocol_>::dispatchCallTemplated(Protoco
 }
 
 template <class Protocol_>
-void directory_lease_serviceProcessorT<Protocol_>::process_create(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void directory_lease_serviceProcessorT<Protocol_>::process_update_leases(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("directory_lease_service.create", callContext);
+    ctx = this->eventHandler_->getContext("directory_lease_service.update_leases", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_lease_service.create");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_lease_service.update_leases");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "directory_lease_service.create");
+    this->eventHandler_->preRead(ctx, "directory_lease_service.update_leases");
   }
 
-  directory_lease_service_create_args args;
+  directory_lease_service_update_leases_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "directory_lease_service.create", bytes);
+    this->eventHandler_->postRead(ctx, "directory_lease_service.update_leases", bytes);
   }
 
-  directory_lease_service_create_result result;
+  directory_lease_service_update_leases_result result;
   try {
-    iface_->create(args.path, args.persistent_store_prefix);
-  } catch (directory_lease_service_exception &ex) {
-    result.ex = ex;
-    result.__isset.ex = true;
-  } catch (const std::exception& e) {
-    if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "directory_lease_service.create");
-    }
-
-    ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("create", ::apache::thrift::protocol::T_EXCEPTION, seqid);
-    x.write(oprot);
-    oprot->writeMessageEnd();
-    oprot->getTransport()->writeEnd();
-    oprot->getTransport()->flush();
-    return;
-  }
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "directory_lease_service.create");
-  }
-
-  oprot->writeMessageBegin("create", ::apache::thrift::protocol::T_REPLY, seqid);
-  result.write(oprot);
-  oprot->writeMessageEnd();
-  bytes = oprot->getTransport()->writeEnd();
-  oprot->getTransport()->flush();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "directory_lease_service.create", bytes);
-  }
-}
-
-template <class Protocol_>
-void directory_lease_serviceProcessorT<Protocol_>::process_create(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
-  if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("directory_lease_service.create", callContext);
-  }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_lease_service.create");
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "directory_lease_service.create");
-  }
-
-  directory_lease_service_create_args args;
-  args.read(iprot);
-  iprot->readMessageEnd();
-  uint32_t bytes = iprot->getTransport()->readEnd();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "directory_lease_service.create", bytes);
-  }
-
-  directory_lease_service_create_result result;
-  try {
-    iface_->create(args.path, args.persistent_store_prefix);
-  } catch (directory_lease_service_exception &ex) {
-    result.ex = ex;
-    result.__isset.ex = true;
-  } catch (const std::exception& e) {
-    if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "directory_lease_service.create");
-    }
-
-    ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("create", ::apache::thrift::protocol::T_EXCEPTION, seqid);
-    x.write(oprot);
-    oprot->writeMessageEnd();
-    oprot->getTransport()->writeEnd();
-    oprot->getTransport()->flush();
-    return;
-  }
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "directory_lease_service.create");
-  }
-
-  oprot->writeMessageBegin("create", ::apache::thrift::protocol::T_REPLY, seqid);
-  result.write(oprot);
-  oprot->writeMessageEnd();
-  bytes = oprot->getTransport()->writeEnd();
-  oprot->getTransport()->flush();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "directory_lease_service.create", bytes);
-  }
-}
-
-template <class Protocol_>
-void directory_lease_serviceProcessorT<Protocol_>::process_load(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
-  if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("directory_lease_service.load", callContext);
-  }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_lease_service.load");
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "directory_lease_service.load");
-  }
-
-  directory_lease_service_load_args args;
-  args.read(iprot);
-  iprot->readMessageEnd();
-  uint32_t bytes = iprot->getTransport()->readEnd();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "directory_lease_service.load", bytes);
-  }
-
-  directory_lease_service_load_result result;
-  try {
-    iface_->load(args.path);
-  } catch (directory_lease_service_exception &ex) {
-    result.ex = ex;
-    result.__isset.ex = true;
-  } catch (const std::exception& e) {
-    if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "directory_lease_service.load");
-    }
-
-    ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("load", ::apache::thrift::protocol::T_EXCEPTION, seqid);
-    x.write(oprot);
-    oprot->writeMessageEnd();
-    oprot->getTransport()->writeEnd();
-    oprot->getTransport()->flush();
-    return;
-  }
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "directory_lease_service.load");
-  }
-
-  oprot->writeMessageBegin("load", ::apache::thrift::protocol::T_REPLY, seqid);
-  result.write(oprot);
-  oprot->writeMessageEnd();
-  bytes = oprot->getTransport()->writeEnd();
-  oprot->getTransport()->flush();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "directory_lease_service.load", bytes);
-  }
-}
-
-template <class Protocol_>
-void directory_lease_serviceProcessorT<Protocol_>::process_load(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
-  if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("directory_lease_service.load", callContext);
-  }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_lease_service.load");
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "directory_lease_service.load");
-  }
-
-  directory_lease_service_load_args args;
-  args.read(iprot);
-  iprot->readMessageEnd();
-  uint32_t bytes = iprot->getTransport()->readEnd();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "directory_lease_service.load", bytes);
-  }
-
-  directory_lease_service_load_result result;
-  try {
-    iface_->load(args.path);
-  } catch (directory_lease_service_exception &ex) {
-    result.ex = ex;
-    result.__isset.ex = true;
-  } catch (const std::exception& e) {
-    if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "directory_lease_service.load");
-    }
-
-    ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("load", ::apache::thrift::protocol::T_EXCEPTION, seqid);
-    x.write(oprot);
-    oprot->writeMessageEnd();
-    oprot->getTransport()->writeEnd();
-    oprot->getTransport()->flush();
-    return;
-  }
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "directory_lease_service.load");
-  }
-
-  oprot->writeMessageBegin("load", ::apache::thrift::protocol::T_REPLY, seqid);
-  result.write(oprot);
-  oprot->writeMessageEnd();
-  bytes = oprot->getTransport()->writeEnd();
-  oprot->getTransport()->flush();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "directory_lease_service.load", bytes);
-  }
-}
-
-template <class Protocol_>
-void directory_lease_serviceProcessorT<Protocol_>::process_renew_lease(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
-  if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("directory_lease_service.renew_lease", callContext);
-  }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_lease_service.renew_lease");
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "directory_lease_service.renew_lease");
-  }
-
-  directory_lease_service_renew_lease_args args;
-  args.read(iprot);
-  iprot->readMessageEnd();
-  uint32_t bytes = iprot->getTransport()->readEnd();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "directory_lease_service.renew_lease", bytes);
-  }
-
-  directory_lease_service_renew_lease_result result;
-  try {
-    iface_->renew_lease(result.success, args.path, args.bytes_added);
+    iface_->update_leases(result.success, args.updates);
     result.__isset.success = true;
   } catch (directory_lease_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "directory_lease_service.renew_lease");
+      this->eventHandler_->handlerError(ctx, "directory_lease_service.update_leases");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("renew_lease", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("update_leases", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -1345,56 +356,56 @@ void directory_lease_serviceProcessorT<Protocol_>::process_renew_lease(int32_t s
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "directory_lease_service.renew_lease");
+    this->eventHandler_->preWrite(ctx, "directory_lease_service.update_leases");
   }
 
-  oprot->writeMessageBegin("renew_lease", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("update_leases", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "directory_lease_service.renew_lease", bytes);
+    this->eventHandler_->postWrite(ctx, "directory_lease_service.update_leases", bytes);
   }
 }
 
 template <class Protocol_>
-void directory_lease_serviceProcessorT<Protocol_>::process_renew_lease(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+void directory_lease_serviceProcessorT<Protocol_>::process_update_leases(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("directory_lease_service.renew_lease", callContext);
+    ctx = this->eventHandler_->getContext("directory_lease_service.update_leases", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_lease_service.renew_lease");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_lease_service.update_leases");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "directory_lease_service.renew_lease");
+    this->eventHandler_->preRead(ctx, "directory_lease_service.update_leases");
   }
 
-  directory_lease_service_renew_lease_args args;
+  directory_lease_service_update_leases_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "directory_lease_service.renew_lease", bytes);
+    this->eventHandler_->postRead(ctx, "directory_lease_service.update_leases", bytes);
   }
 
-  directory_lease_service_renew_lease_result result;
+  directory_lease_service_update_leases_result result;
   try {
-    iface_->renew_lease(result.success, args.path, args.bytes_added);
+    iface_->update_leases(result.success, args.updates);
     result.__isset.success = true;
   } catch (directory_lease_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "directory_lease_service.renew_lease");
+      this->eventHandler_->handlerError(ctx, "directory_lease_service.update_leases");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("renew_lease", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("update_leases", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -1403,131 +414,17 @@ void directory_lease_serviceProcessorT<Protocol_>::process_renew_lease(int32_t s
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "directory_lease_service.renew_lease");
+    this->eventHandler_->preWrite(ctx, "directory_lease_service.update_leases");
   }
 
-  oprot->writeMessageBegin("renew_lease", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("update_leases", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "directory_lease_service.renew_lease", bytes);
-  }
-}
-
-template <class Protocol_>
-void directory_lease_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
-  if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("directory_lease_service.remove", callContext);
-  }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_lease_service.remove");
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "directory_lease_service.remove");
-  }
-
-  directory_lease_service_remove_args args;
-  args.read(iprot);
-  iprot->readMessageEnd();
-  uint32_t bytes = iprot->getTransport()->readEnd();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "directory_lease_service.remove", bytes);
-  }
-
-  directory_lease_service_remove_result result;
-  try {
-    iface_->remove(args.path, args.mode);
-  } catch (directory_lease_service_exception &ex) {
-    result.ex = ex;
-    result.__isset.ex = true;
-  } catch (const std::exception& e) {
-    if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "directory_lease_service.remove");
-    }
-
-    ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("remove", ::apache::thrift::protocol::T_EXCEPTION, seqid);
-    x.write(oprot);
-    oprot->writeMessageEnd();
-    oprot->getTransport()->writeEnd();
-    oprot->getTransport()->flush();
-    return;
-  }
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "directory_lease_service.remove");
-  }
-
-  oprot->writeMessageBegin("remove", ::apache::thrift::protocol::T_REPLY, seqid);
-  result.write(oprot);
-  oprot->writeMessageEnd();
-  bytes = oprot->getTransport()->writeEnd();
-  oprot->getTransport()->flush();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "directory_lease_service.remove", bytes);
-  }
-}
-
-template <class Protocol_>
-void directory_lease_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
-  if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("directory_lease_service.remove", callContext);
-  }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_lease_service.remove");
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "directory_lease_service.remove");
-  }
-
-  directory_lease_service_remove_args args;
-  args.read(iprot);
-  iprot->readMessageEnd();
-  uint32_t bytes = iprot->getTransport()->readEnd();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "directory_lease_service.remove", bytes);
-  }
-
-  directory_lease_service_remove_result result;
-  try {
-    iface_->remove(args.path, args.mode);
-  } catch (directory_lease_service_exception &ex) {
-    result.ex = ex;
-    result.__isset.ex = true;
-  } catch (const std::exception& e) {
-    if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "directory_lease_service.remove");
-    }
-
-    ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("remove", ::apache::thrift::protocol::T_EXCEPTION, seqid);
-    x.write(oprot);
-    oprot->writeMessageEnd();
-    oprot->getTransport()->writeEnd();
-    oprot->getTransport()->flush();
-    return;
-  }
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "directory_lease_service.remove");
-  }
-
-  oprot->writeMessageBegin("remove", ::apache::thrift::protocol::T_REPLY, seqid);
-  result.write(oprot);
-  oprot->writeMessageEnd();
-  bytes = oprot->getTransport()->writeEnd();
-  oprot->getTransport()->flush();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "directory_lease_service.remove", bytes);
+    this->eventHandler_->postWrite(ctx, "directory_lease_service.update_leases", bytes);
   }
 }
 
@@ -1540,22 +437,21 @@ template <class Protocol_>
 }
 
 template <class Protocol_>
-void directory_lease_serviceConcurrentClientT<Protocol_>::create(const std::string& path, const std::string& persistent_store_prefix)
+void directory_lease_serviceConcurrentClientT<Protocol_>::update_leases(lease_ack& _return, const lease_update& updates)
 {
-  int32_t seqid = send_create(path, persistent_store_prefix);
-  recv_create(seqid);
+  int32_t seqid = send_update_leases(updates);
+  recv_update_leases(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_create(const std::string& path, const std::string& persistent_store_prefix)
+int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_update_leases(const lease_update& updates)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("create", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("update_leases", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  directory_lease_service_create_pargs args;
-  args.path = &path;
-  args.persistent_store_prefix = &persistent_store_prefix;
+  directory_lease_service_update_leases_pargs args;
+  args.updates = &updates;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -1567,7 +463,7 @@ int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_create(const s
 }
 
 template <class Protocol_>
-void directory_lease_serviceConcurrentClientT<Protocol_>::recv_create(const int32_t seqid)
+void directory_lease_serviceConcurrentClientT<Protocol_>::recv_update_leases(lease_ack& _return, const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -1596,7 +492,7 @@ void directory_lease_serviceConcurrentClientT<Protocol_>::recv_create(const int3
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
       }
-      if (fname.compare("create") != 0) {
+      if (fname.compare("update_leases") != 0) {
         this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
@@ -1605,178 +501,7 @@ void directory_lease_serviceConcurrentClientT<Protocol_>::recv_create(const int3
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
-      directory_lease_service_create_presult result;
-      result.read(this->iprot_);
-      this->iprot_->readMessageEnd();
-      this->iprot_->getTransport()->readEnd();
-
-      if (result.__isset.ex) {
-        sentry.commit();
-        throw result.ex;
-      }
-      sentry.commit();
-      return;
-    }
-    // seqid != rseqid
-    this->sync_.updatePending(fname, mtype, rseqid);
-
-    // this will temporarily unlock the readMutex, and let other clients get work done
-    this->sync_.waitForWork(seqid);
-  } // end while(true)
-}
-
-template <class Protocol_>
-void directory_lease_serviceConcurrentClientT<Protocol_>::load(const std::string& path)
-{
-  int32_t seqid = send_load(path);
-  recv_load(seqid);
-}
-
-template <class Protocol_>
-int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_load(const std::string& path)
-{
-  int32_t cseqid = this->sync_.generateSeqId();
-  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("load", ::apache::thrift::protocol::T_CALL, cseqid);
-
-  directory_lease_service_load_pargs args;
-  args.path = &path;
-  args.write(this->oprot_);
-
-  this->oprot_->writeMessageEnd();
-  this->oprot_->getTransport()->writeEnd();
-  this->oprot_->getTransport()->flush();
-
-  sentry.commit();
-  return cseqid;
-}
-
-template <class Protocol_>
-void directory_lease_serviceConcurrentClientT<Protocol_>::recv_load(const int32_t seqid)
-{
-
-  int32_t rseqid = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TMessageType mtype;
-
-  // the read mutex gets dropped and reacquired as part of waitForWork()
-  // The destructor of this sentry wakes up other clients
-  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
-
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
-      this->iprot_->readMessageBegin(fname, mtype, rseqid);
-    }
-    if(seqid == rseqid) {
-      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
-        ::apache::thrift::TApplicationException x;
-        x.read(this->iprot_);
-        this->iprot_->readMessageEnd();
-        this->iprot_->getTransport()->readEnd();
-        sentry.commit();
-        throw x;
-      }
-      if (mtype != ::apache::thrift::protocol::T_REPLY) {
-        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-        this->iprot_->readMessageEnd();
-        this->iprot_->getTransport()->readEnd();
-      }
-      if (fname.compare("load") != 0) {
-        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-        this->iprot_->readMessageEnd();
-        this->iprot_->getTransport()->readEnd();
-
-        // in a bad state, don't commit
-        using ::apache::thrift::protocol::TProtocolException;
-        throw TProtocolException(TProtocolException::INVALID_DATA);
-      }
-      directory_lease_service_load_presult result;
-      result.read(this->iprot_);
-      this->iprot_->readMessageEnd();
-      this->iprot_->getTransport()->readEnd();
-
-      if (result.__isset.ex) {
-        sentry.commit();
-        throw result.ex;
-      }
-      sentry.commit();
-      return;
-    }
-    // seqid != rseqid
-    this->sync_.updatePending(fname, mtype, rseqid);
-
-    // this will temporarily unlock the readMutex, and let other clients get work done
-    this->sync_.waitForWork(seqid);
-  } // end while(true)
-}
-
-template <class Protocol_>
-void directory_lease_serviceConcurrentClientT<Protocol_>::renew_lease(rpc_keep_alive_ack& _return, const std::string& path, const int64_t bytes_added)
-{
-  int32_t seqid = send_renew_lease(path, bytes_added);
-  recv_renew_lease(_return, seqid);
-}
-
-template <class Protocol_>
-int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_renew_lease(const std::string& path, const int64_t bytes_added)
-{
-  int32_t cseqid = this->sync_.generateSeqId();
-  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("renew_lease", ::apache::thrift::protocol::T_CALL, cseqid);
-
-  directory_lease_service_renew_lease_pargs args;
-  args.path = &path;
-  args.bytes_added = &bytes_added;
-  args.write(this->oprot_);
-
-  this->oprot_->writeMessageEnd();
-  this->oprot_->getTransport()->writeEnd();
-  this->oprot_->getTransport()->flush();
-
-  sentry.commit();
-  return cseqid;
-}
-
-template <class Protocol_>
-void directory_lease_serviceConcurrentClientT<Protocol_>::recv_renew_lease(rpc_keep_alive_ack& _return, const int32_t seqid)
-{
-
-  int32_t rseqid = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TMessageType mtype;
-
-  // the read mutex gets dropped and reacquired as part of waitForWork()
-  // The destructor of this sentry wakes up other clients
-  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
-
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
-      this->iprot_->readMessageBegin(fname, mtype, rseqid);
-    }
-    if(seqid == rseqid) {
-      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
-        ::apache::thrift::TApplicationException x;
-        x.read(this->iprot_);
-        this->iprot_->readMessageEnd();
-        this->iprot_->getTransport()->readEnd();
-        sentry.commit();
-        throw x;
-      }
-      if (mtype != ::apache::thrift::protocol::T_REPLY) {
-        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-        this->iprot_->readMessageEnd();
-        this->iprot_->getTransport()->readEnd();
-      }
-      if (fname.compare("renew_lease") != 0) {
-        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-        this->iprot_->readMessageEnd();
-        this->iprot_->getTransport()->readEnd();
-
-        // in a bad state, don't commit
-        using ::apache::thrift::protocol::TProtocolException;
-        throw TProtocolException(TProtocolException::INVALID_DATA);
-      }
-      directory_lease_service_renew_lease_presult result;
+      directory_lease_service_update_leases_presult result;
       result.success = &_return;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
@@ -1792,93 +517,7 @@ void directory_lease_serviceConcurrentClientT<Protocol_>::recv_renew_lease(rpc_k
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "renew_lease failed: unknown result");
-    }
-    // seqid != rseqid
-    this->sync_.updatePending(fname, mtype, rseqid);
-
-    // this will temporarily unlock the readMutex, and let other clients get work done
-    this->sync_.waitForWork(seqid);
-  } // end while(true)
-}
-
-template <class Protocol_>
-void directory_lease_serviceConcurrentClientT<Protocol_>::remove(const std::string& path, const rpc_remove_mode mode)
-{
-  int32_t seqid = send_remove(path, mode);
-  recv_remove(seqid);
-}
-
-template <class Protocol_>
-int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_remove(const std::string& path, const rpc_remove_mode mode)
-{
-  int32_t cseqid = this->sync_.generateSeqId();
-  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("remove", ::apache::thrift::protocol::T_CALL, cseqid);
-
-  directory_lease_service_remove_pargs args;
-  args.path = &path;
-  args.mode = &mode;
-  args.write(this->oprot_);
-
-  this->oprot_->writeMessageEnd();
-  this->oprot_->getTransport()->writeEnd();
-  this->oprot_->getTransport()->flush();
-
-  sentry.commit();
-  return cseqid;
-}
-
-template <class Protocol_>
-void directory_lease_serviceConcurrentClientT<Protocol_>::recv_remove(const int32_t seqid)
-{
-
-  int32_t rseqid = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TMessageType mtype;
-
-  // the read mutex gets dropped and reacquired as part of waitForWork()
-  // The destructor of this sentry wakes up other clients
-  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
-
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
-      this->iprot_->readMessageBegin(fname, mtype, rseqid);
-    }
-    if(seqid == rseqid) {
-      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
-        ::apache::thrift::TApplicationException x;
-        x.read(this->iprot_);
-        this->iprot_->readMessageEnd();
-        this->iprot_->getTransport()->readEnd();
-        sentry.commit();
-        throw x;
-      }
-      if (mtype != ::apache::thrift::protocol::T_REPLY) {
-        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-        this->iprot_->readMessageEnd();
-        this->iprot_->getTransport()->readEnd();
-      }
-      if (fname.compare("remove") != 0) {
-        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-        this->iprot_->readMessageEnd();
-        this->iprot_->getTransport()->readEnd();
-
-        // in a bad state, don't commit
-        using ::apache::thrift::protocol::TProtocolException;
-        throw TProtocolException(TProtocolException::INVALID_DATA);
-      }
-      directory_lease_service_remove_presult result;
-      result.read(this->iprot_);
-      this->iprot_->readMessageEnd();
-      this->iprot_->getTransport()->readEnd();
-
-      if (result.__isset.ex) {
-        sentry.commit();
-        throw result.ex;
-      }
-      sentry.commit();
-      return;
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "update_leases failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);

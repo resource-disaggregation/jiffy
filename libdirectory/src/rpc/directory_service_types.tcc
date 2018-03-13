@@ -351,7 +351,7 @@ uint32_t directory_rpc_service_exception::write(Protocol_* oprot) const {
 }
 
 template <class Protocol_>
-uint32_t rpc_keep_alive_ack::read(Protocol_* iprot) {
+uint32_t rpc_file_metadata::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -364,6 +364,7 @@ uint32_t rpc_keep_alive_ack::read(Protocol_* iprot) {
   using ::apache::thrift::protocol::TProtocolException;
 
   bool isset_path = false;
+  bool isset_bytes = false;
 
   while (true)
   {
@@ -383,8 +384,8 @@ uint32_t rpc_keep_alive_ack::read(Protocol_* iprot) {
         break;
       case 2:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->tot_bytes);
-          this->__isset.tot_bytes = true;
+          xfer += iprot->readI64(this->bytes);
+          isset_bytes = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -400,24 +401,285 @@ uint32_t rpc_keep_alive_ack::read(Protocol_* iprot) {
 
   if (!isset_path)
     throw TProtocolException(TProtocolException::INVALID_DATA);
+  if (!isset_bytes)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
   return xfer;
 }
 
 template <class Protocol_>
-uint32_t rpc_keep_alive_ack::write(Protocol_* oprot) const {
+uint32_t rpc_file_metadata::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("rpc_keep_alive_ack");
+  xfer += oprot->writeStructBegin("rpc_file_metadata");
 
   xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeString(this->path);
   xfer += oprot->writeFieldEnd();
 
-  if (this->__isset.tot_bytes) {
-    xfer += oprot->writeFieldBegin("tot_bytes", ::apache::thrift::protocol::T_I64, 2);
-    xfer += oprot->writeI64(this->tot_bytes);
-    xfer += oprot->writeFieldEnd();
+  xfer += oprot->writeFieldBegin("bytes", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeI64(this->bytes);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t lease_update::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+  bool isset_to_renew = false;
+  bool isset_to_flush = false;
+  bool isset_to_remove = false;
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            this->to_renew.clear();
+            uint32_t _size18;
+            ::apache::thrift::protocol::TType _etype21;
+            xfer += iprot->readListBegin(_etype21, _size18);
+            this->to_renew.resize(_size18);
+            uint32_t _i22;
+            for (_i22 = 0; _i22 < _size18; ++_i22)
+            {
+              xfer += this->to_renew[_i22].read(iprot);
+            }
+            xfer += iprot->readListEnd();
+          }
+          isset_to_renew = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            this->to_flush.clear();
+            uint32_t _size23;
+            ::apache::thrift::protocol::TType _etype26;
+            xfer += iprot->readListBegin(_etype26, _size23);
+            this->to_flush.resize(_size23);
+            uint32_t _i27;
+            for (_i27 = 0; _i27 < _size23; ++_i27)
+            {
+              xfer += iprot->readString(this->to_flush[_i27]);
+            }
+            xfer += iprot->readListEnd();
+          }
+          isset_to_flush = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            this->to_remove.clear();
+            uint32_t _size28;
+            ::apache::thrift::protocol::TType _etype31;
+            xfer += iprot->readListBegin(_etype31, _size28);
+            this->to_remove.resize(_size28);
+            uint32_t _i32;
+            for (_i32 = 0; _i32 < _size28; ++_i32)
+            {
+              xfer += iprot->readString(this->to_remove[_i32]);
+            }
+            xfer += iprot->readListEnd();
+          }
+          isset_to_remove = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
   }
+
+  xfer += iprot->readStructEnd();
+
+  if (!isset_to_renew)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
+  if (!isset_to_flush)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
+  if (!isset_to_remove)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t lease_update::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("lease_update");
+
+  xfer += oprot->writeFieldBegin("to_renew", ::apache::thrift::protocol::T_LIST, 1);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->to_renew.size()));
+    std::vector<rpc_file_metadata> ::const_iterator _iter33;
+    for (_iter33 = this->to_renew.begin(); _iter33 != this->to_renew.end(); ++_iter33)
+    {
+      xfer += (*_iter33).write(oprot);
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("to_flush", ::apache::thrift::protocol::T_LIST, 2);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->to_flush.size()));
+    std::vector<std::string> ::const_iterator _iter34;
+    for (_iter34 = this->to_flush.begin(); _iter34 != this->to_flush.end(); ++_iter34)
+    {
+      xfer += oprot->writeString((*_iter34));
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("to_remove", ::apache::thrift::protocol::T_LIST, 3);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->to_remove.size()));
+    std::vector<std::string> ::const_iterator _iter35;
+    for (_iter35 = this->to_remove.begin(); _iter35 != this->to_remove.end(); ++_iter35)
+    {
+      xfer += oprot->writeString((*_iter35));
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t lease_ack::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+  bool isset_renewed = false;
+  bool isset_flushed = false;
+  bool isset_removed = false;
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            this->renewed.clear();
+            uint32_t _size38;
+            ::apache::thrift::protocol::TType _etype41;
+            xfer += iprot->readListBegin(_etype41, _size38);
+            this->renewed.resize(_size38);
+            uint32_t _i42;
+            for (_i42 = 0; _i42 < _size38; ++_i42)
+            {
+              xfer += this->renewed[_i42].read(iprot);
+            }
+            xfer += iprot->readListEnd();
+          }
+          isset_renewed = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->flushed);
+          isset_flushed = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->removed);
+          isset_removed = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  if (!isset_renewed)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
+  if (!isset_flushed)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
+  if (!isset_removed)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t lease_ack::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("lease_ack");
+
+  xfer += oprot->writeFieldBegin("renewed", ::apache::thrift::protocol::T_LIST, 1);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->renewed.size()));
+    std::vector<rpc_file_metadata> ::const_iterator _iter43;
+    for (_iter43 = this->renewed.begin(); _iter43 != this->renewed.end(); ++_iter43)
+    {
+      xfer += (*_iter43).write(oprot);
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("flushed", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeI64(this->flushed);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("removed", ::apache::thrift::protocol::T_I64, 3);
+  xfer += oprot->writeI64(this->removed);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
