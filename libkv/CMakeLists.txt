@@ -40,13 +40,12 @@ set_target_properties(kv PROPERTIES LINKER_LANGUAGE CXX)
 if (BUILD_TESTS)
   include_directories(${CATCH_INCLUDE_DIR})
 
-  add_executable(kv_block_test test/kv_block_test.cpp)
-  target_link_libraries(kv_block_test kv)
-
-  add_executable(kv_manager_test test/kv_manager_test.cpp)
-  target_link_libraries(kv_manager_test kv)
+  add_executable(kv_tests
+          test/kv_block_test.cpp
+          test/kv_manager_test.cpp
+          test/kv_tests.cpp)
+  target_link_libraries(kv_tests kv)
   if (NOT USE_SYSTEM_CATCH)
-    add_dependencies(kv_block_test catch)
-    add_dependencies(kv_manager_test catch)
+    add_dependencies(kv_tests catch)
   endif()
 endif ()

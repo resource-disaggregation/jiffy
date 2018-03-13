@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 #include "../src/tree/directory_tree.h"
 #include "../src/tree/random_block_allocator.h"

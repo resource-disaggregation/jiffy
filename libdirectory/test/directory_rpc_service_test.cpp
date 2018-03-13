@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
 #include <thrift/transport/TTransportException.h>
@@ -26,7 +25,7 @@ static void wait_till_server_ready(const std::string &host, int port) {
   }
 }
 
-TEST_CASE("create_directory_test", "[dir]") {
+TEST_CASE("rpc_create_directory_test", "[dir]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d"};
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto t = std::make_shared<directory_tree>(alloc);
@@ -52,7 +51,7 @@ TEST_CASE("create_directory_test", "[dir]") {
   }
 }
 
-TEST_CASE("create_file_test", "[file][dir]") {
+TEST_CASE("rpc_create_file_test", "[file][dir]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d"};
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto t = std::make_shared<directory_tree>(alloc);
@@ -77,7 +76,7 @@ TEST_CASE("create_file_test", "[file][dir]") {
   }
 }
 
-TEST_CASE("exists_test", "[file][dir]") {
+TEST_CASE("rpc_exists_test", "[file][dir]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d"};
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto t = std::make_shared<directory_tree>(alloc);
@@ -98,7 +97,7 @@ TEST_CASE("exists_test", "[file][dir]") {
   }
 }
 
-TEST_CASE("file_size", "[file][dir][grow][shrink]") {
+TEST_CASE("rpc_file_size", "[file][dir][grow][shrink]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d"};
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto t = std::make_shared<directory_tree>(alloc);
@@ -125,7 +124,7 @@ TEST_CASE("file_size", "[file][dir][grow][shrink]") {
   }
 }
 
-TEST_CASE("last_write_time_test", "[file][dir][touch]") {
+TEST_CASE("rpc_last_write_time_test", "[file][dir][touch]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d"};
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto t = std::make_shared<directory_tree>(alloc);
@@ -162,7 +161,7 @@ TEST_CASE("last_write_time_test", "[file][dir][touch]") {
   }
 }
 
-TEST_CASE("permissions_test", "[file][dir]") {
+TEST_CASE("rpc_permissions_test", "[file][dir]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d"};
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto t = std::make_shared<directory_tree>(alloc);
@@ -200,7 +199,7 @@ TEST_CASE("permissions_test", "[file][dir]") {
   }
 }
 
-TEST_CASE("remove_test", "[file][dir]") {
+TEST_CASE("rpc_remove_test", "[file][dir]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d"};
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto t = std::make_shared<directory_tree>(alloc);
@@ -230,7 +229,7 @@ TEST_CASE("remove_test", "[file][dir]") {
   }
 }
 
-TEST_CASE("rename_test", "[file][dir]") {
+TEST_CASE("rpc_rename_test", "[file][dir]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d"};
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto t = std::make_shared<directory_tree>(alloc);
@@ -258,7 +257,7 @@ TEST_CASE("rename_test", "[file][dir]") {
   }
 }
 
-TEST_CASE("status_test", "[file][dir]") {
+TEST_CASE("rpc_status_test", "[file][dir]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d"};
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto t = std::make_shared<directory_tree>(alloc);
@@ -289,7 +288,7 @@ TEST_CASE("status_test", "[file][dir]") {
   }
 }
 
-TEST_CASE("directory_entries_test", "[file][dir]") {
+TEST_CASE("rpc_directory_entries_test", "[file][dir]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d"};
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto t = std::make_shared<directory_tree>(alloc);
@@ -332,7 +331,7 @@ TEST_CASE("directory_entries_test", "[file][dir]") {
   }
 }
 
-TEST_CASE("recursive_directory_entries_test", "[file][dir]") {
+TEST_CASE("rpc_recursive_directory_entries_test", "[file][dir]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d"};
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto t = std::make_shared<directory_tree>(alloc);
@@ -380,7 +379,7 @@ TEST_CASE("recursive_directory_entries_test", "[file][dir]") {
   }
 }
 
-TEST_CASE("dstatus_test", "[file]") {
+TEST_CASE("rpc_dstatus_test", "[file]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d"};
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto t = std::make_shared<directory_tree>(alloc);
@@ -411,7 +410,7 @@ TEST_CASE("dstatus_test", "[file]") {
   }
 }
 
-TEST_CASE("storage_mode_test", "[file]") {
+TEST_CASE("rpc_storage_mode_test", "[file]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d"};
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto t = std::make_shared<directory_tree>(alloc);
@@ -440,7 +439,7 @@ TEST_CASE("storage_mode_test", "[file]") {
   }
 }
 
-TEST_CASE("blocks_test", "[file]") {
+TEST_CASE("rpc_blocks_test", "[file]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d"};
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto t = std::make_shared<directory_tree>(alloc);
@@ -490,7 +489,7 @@ TEST_CASE("blocks_test", "[file]") {
   }
 }
 
-TEST_CASE("file_type_test", "[file][dir]") {
+TEST_CASE("rpc_file_type_test", "[file][dir]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d"};
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto t = std::make_shared<directory_tree>(alloc);

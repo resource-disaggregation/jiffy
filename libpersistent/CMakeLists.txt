@@ -8,9 +8,11 @@ set_target_properties(persistent PROPERTIES LINKER_LANGUAGE CXX)
 if (BUILD_TESTS)
   include_directories(${CATCH_INCLUDE_DIR})
 
-  add_executable(local_store_test test/local_store_test.cpp)
+  add_executable(persistent_tests
+          test/local_store_test.cpp
+          test/persistent_tests.cpp)
   if (NOT USE_SYSTEM_CATCH)
-    add_dependencies(local_store_test catch)
+    add_dependencies(persistent_tests catch)
   endif()
-  target_link_libraries(local_store_test persistent)
+  target_link_libraries(persistent_tests persistent)
 endif ()

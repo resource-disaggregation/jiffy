@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 #include "../src/block/kv_block.h"
 
@@ -53,7 +52,7 @@ TEST_CASE("put_remove_get_test", "[put][update][get]") {
   }
 }
 
-TEST_CASE("size_test", "[put][size][storage_size][clear]") {
+TEST_CASE("storage_size_test", "[put][size][storage_size][clear]") {
   kv_block block;
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_NOTHROW(block.put(std::to_string(i), std::to_string(i)));

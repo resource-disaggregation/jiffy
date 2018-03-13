@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
 #include "../src/lease/lease_manager.h"
@@ -16,9 +15,9 @@ TEST_CASE("lease_manager_test") {
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto tree = std::make_shared<directory_tree>(alloc);
   lease_manager mgr(tree, LEASE_PERIOD_MS, GRACE_PERIOD_MS);
-  REQUIRE_NOTHROW(tree->create_file("/sandbox/a/b/c/file.txt"));
-  REQUIRE_NOTHROW(tree->create_file("/sandbox/a/b/file.txt"));
-  REQUIRE_NOTHROW(tree->create_file("/sandbox/a/file.txt"));
+  REQUIRE_NOTHROW(tree->create_file("/sandbox/a/b/c/file.txt", "/tmp"));
+  REQUIRE_NOTHROW(tree->create_file("/sandbox/a/b/file.txt", "/tmp"));
+  REQUIRE_NOTHROW(tree->create_file("/sandbox/a/file.txt", "/tmp"));
   REQUIRE(tree->exists("/sandbox/a/b/c/file.txt"));
   REQUIRE(tree->exists("/sandbox/a/b/file.txt"));
   REQUIRE(tree->exists("/sandbox/a/file.txt"));
