@@ -9,7 +9,7 @@ namespace directory {
 
 class lease_manager {
  public:
-  lease_manager(std::shared_ptr<directory_tree> tree, std::uint64_t lease_period_s, std::uint64_t grace_period_s);
+  lease_manager(std::shared_ptr<directory_tree> tree, std::uint64_t lease_period_ms, std::uint64_t grace_period_ms);
   ~lease_manager();
 
   void start();

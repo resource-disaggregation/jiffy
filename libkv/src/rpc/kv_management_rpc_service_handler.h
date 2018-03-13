@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_KV_RPC_SERVICE_HANDLER_H
-#define ELASTICMEM_KV_RPC_SERVICE_HANDLER_H
+#ifndef ELASTICMEM_KV_MANAGEMENT_RPC_SERVICE_HANDLER_H
+#define ELASTICMEM_KV_MANAGEMENT_RPC_SERVICE_HANDLER_H
 
 #include "../block/kv_block.h"
 #include "kv_management_rpc_service.h"
@@ -22,4 +22,4 @@ class kv_management_rpc_service_handler: public kv_management_rpc_serviceIf {
 }
 }
 
-#endif //ELASTICMEM_KV_RPC_SERVICE_HANDLER_H
+#endif //ELASTICMEM_KV_MANAGEMENT_RPC_SERVICE_HANDLER_H

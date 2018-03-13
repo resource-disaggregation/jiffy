@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_KV_RPC_SERVICE_FACTORY_H
-#define ELASTICMEM_KV_RPC_SERVICE_FACTORY_H
+#ifndef ELASTICMEM_KV_MANAGEMENT_RPC_SERVICE_FACTORY_H
+#define ELASTICMEM_KV_MANAGEMENT_RPC_SERVICE_FACTORY_H
 
 #include "../block/kv_block.h"
 #include "kv_management_rpc_service.h"
@@ -19,4 +19,4 @@ class kv_management_rpc_service_factory: public kv_management_rpc_serviceIfFacto
 }
 }
 
-#endif //ELASTICMEM_KV_RPC_SERVICE_FACTORY_H
+#endif //ELASTICMEM_KV_MANAGEMENT_RPC_SERVICE_FACTORY_H

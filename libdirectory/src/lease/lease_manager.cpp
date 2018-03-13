@@ -6,9 +6,9 @@ namespace elasticmem {
 namespace directory {
 
 lease_manager::lease_manager(std::shared_ptr<directory_tree> tree,
-                             std::uint64_t lease_period_s,
-                             std::uint64_t grace_period_s)
-    : lease_period_ms_(lease_period_s), grace_period_ms_(grace_period_s), tree_(std::move(tree)), stop_(false) {
+                             std::uint64_t lease_period_ms,
+                             std::uint64_t grace_period_ms)
+    : lease_period_ms_(lease_period_ms), grace_period_ms_(grace_period_ms), tree_(std::move(tree)), stop_(false) {
 }
 
 lease_manager::~lease_manager() {
