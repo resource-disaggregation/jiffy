@@ -14,11 +14,7 @@ kv_rpc_service_factory::kv_rpc_service_factory(std::vector<std::shared_ptr<kv_bl
 kv_rpc_serviceIf *kv_rpc_service_factory::getHandler(const TConnectionInfo &conn_info) {
   std::shared_ptr<TSocket> sock = std::dynamic_pointer_cast<TSocket>(
       conn_info.transport);
-  std::cerr << "Incoming connection\n"
-            << "\t\t\tSocketInfo: " << sock->getSocketInfo() << "\n"
-            << "\t\t\tPeerHost: " << sock->getPeerHost() << "\n"
-            << "\t\t\tPeerAddress: " << sock->getPeerAddress() << "\n"
-            << "\t\t\tPeerPort: " << sock->getPeerPort() << "\n";
+  std::cout << "[TRACE] Incoming connection from " << sock->getSocketInfo() << std::endl;
   return new kv_rpc_service_handler(blocks_);
 }
 

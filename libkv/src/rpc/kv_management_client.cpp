@@ -30,6 +30,8 @@ void kv_management_client::connect(const std::string &host, int port) {
 void kv_management_client::disconnect() {
   if (transport_->isOpen()) {
     transport_->close();
+  }if (transport_->isOpen()) {
+    transport_->close();
   }
 }
 

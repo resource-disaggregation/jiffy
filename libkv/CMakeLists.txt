@@ -3,6 +3,8 @@ add_library(kv
         src/kv_management_service.h
         src/block/kv_block.cpp
         src/block/kv_block.h
+        src/rpc/kv_management_client.cpp
+        src/rpc/kv_management_client.h
         src/rpc/kv_management_rpc_server.cpp
         src/rpc/kv_management_rpc_server.h
         src/rpc/kv_management_rpc_service_handler.cpp
@@ -12,6 +14,8 @@ add_library(kv
         src/rpc/kv_management_rpc_service.cpp
         src/rpc/kv_management_rpc_service.h
         src/rpc/kv_management_rpc_service.tcc
+        src/rpc/kv_client.cpp
+        src/rpc/kv_client.h
         src/rpc/kv_rpc_server.cpp
         src/rpc/kv_rpc_server.h
         src/rpc/kv_rpc_service_handler.cpp
@@ -30,7 +34,11 @@ add_library(kv
         src/serializer/csv_serde.h
         src/serializer/serde.h
         src/serializer/binary_serde.cpp
-        src/serializer/binary_serde.h src/manager/kv_manager.cpp src/manager/kv_manager.h src/rpc/kv_management_client.cpp src/rpc/kv_management_client.h src/manager/block_name_parser.cpp src/manager/block_name_parser.h)
+        src/serializer/binary_serde.h
+        src/manager/kv_manager.cpp
+        src/manager/kv_manager.h
+        src/manager/block_name_parser.cpp
+        src/manager/block_name_parser.h)
 if (GENERATE_THRIFT)
   add_dependencies(kv thriftgen_kv)
 endif ()
@@ -43,6 +51,7 @@ if (BUILD_TESTS)
   add_executable(kv_tests
           test/kv_block_test.cpp
           test/kv_manager_test.cpp
+          test/kv_rpc_test.cpp
           test/kv_tests.cpp)
   target_link_libraries(kv_tests kv)
   if (NOT USE_SYSTEM_CATCH)
