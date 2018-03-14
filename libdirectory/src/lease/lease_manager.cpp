@@ -1,6 +1,7 @@
 #include <iostream>
 #include <chrono>
 #include "lease_manager.h"
+#include "../utils/directory_utils.h"
 
 namespace elasticmem {
 namespace directory {
@@ -46,26 +47,30 @@ void lease_manager::remove_expired_leases() {
   namespace ts = std::chrono;
   auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
   auto node = std::dynamic_pointer_cast<ds_dir_node>(tree_->root_);
+  std::string parent_path;
   for (const auto &entry: *node) {
-    remove_expired_nodes(node, entry.first, cur_epoch);
+    remove_expired_nodes(node, entry.first, parent_path, cur_epoch);
   }
 }
 
 void lease_manager::remove_expired_nodes(std::shared_ptr<ds_dir_node> parent,
+                                         const std::string &parent_path,
                                          const std::string &child_name,
                                          std::uint64_t epoch) {
+  auto child_path = parent_path;
+  directory_utils::push_path_element(child_path, child_name);
   auto child = parent->get_child(child_name);
   auto time_since_last_renewal = epoch - child->last_write_time();
   auto lease_duration = static_cast<uint64_t>(lease_period_ms_.count());
   auto extended_lease_duration = lease_duration + static_cast<uint64_t>(grace_period_ms_.count());
   if (time_since_last_renewal >= extended_lease_duration) {
     // Remove child since its lease has expired
-    std::cout << "[INFO] Lease expired for " << parent->name() << "/" << child_name << std::endl;
+    std::cout << "[INFO] Lease expired for " << child_path << std::endl;
     parent->remove_child(child_name);
   } else if (child->is_directory()) {
     auto node = std::dynamic_pointer_cast<ds_dir_node>(child);
     for (const auto &entry: *node) {
-      remove_expired_nodes(node, entry.first, epoch);
+      remove_expired_nodes(node, entry.first, child_path, epoch);
     }
   }
 }
