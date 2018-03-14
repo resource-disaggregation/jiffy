@@ -17,11 +17,7 @@ directory_lease_service_factory::directory_lease_service_factory(std::shared_ptr
 directory_lease_serviceIf *directory_lease_service_factory::getHandler(const ::apache::thrift::TConnectionInfo &conn_info) {
   std::shared_ptr<TSocket> sock = std::dynamic_pointer_cast<TSocket>(
       conn_info.transport);
-  std::cerr << "Incoming connection\n"
-            << "\t\t\tSocketInfo: " << sock->getSocketInfo() << "\n"
-            << "\t\t\tPeerHost: " << sock->getPeerHost() << "\n"
-            << "\t\t\tPeerAddress: " << sock->getPeerAddress() << "\n"
-            << "\t\t\tPeerPort: " << sock->getPeerPort() << "\n";
+  std::cout << "[TRACE] Incoming connection from " << sock->getSocketInfo() << std::endl;
   return new directory_lease_service_handler(tree_, kv_);
 }
 
