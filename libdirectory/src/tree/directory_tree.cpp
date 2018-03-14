@@ -59,6 +59,7 @@ void directory_tree::create_file(const std::string &path, const std::string &per
 
   auto parent = std::dynamic_pointer_cast<ds_dir_node>(node);
   auto child = std::make_shared<ds_file_node>(filename);
+  child->add_data_block(allocator_->allocate(""));
   child->persistent_store_prefix(persistent_store_prefix);
   parent->add_child(child);
 }
