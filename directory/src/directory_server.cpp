@@ -20,20 +20,32 @@ int main() {
   std::vector<std::string> blocks;
 
   // TODO: Fix
-  for (std::size_t i = 0; i < 64; i++) {
+  for (std::size_t i = 0; i < 8; i++) {
     blocks.push_back("127.0.0.0:9092:" + std::to_string(i));
   }
 
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto t = std::make_shared<directory_tree>(alloc);
   auto directory_server = directory_rpc_server::create(t, host, service_port);
-  std::thread directory_serve_thread([&directory_server] { directory_server->serve(); });
+  std::thread directory_serve_thread([&directory_server] {
+    try {
+      directory_server->serve();
+    } catch (std::exception &e) {
+      std::cerr << "Directory server error: " << e.what() << std::endl;
+    }
+  });
 
   std::cout << "Directory server listening on " << host << ":" << service_port << std::endl;
 
   auto kv = std::make_shared<kv_manager>();
   auto lease_server = directory_lease_server::create(t, kv, host, lease_port);
-  std::thread lease_serve_thread([&lease_server] { lease_server->serve(); });
+  std::thread lease_serve_thread([&lease_server] {
+    try {
+      lease_server->serve();
+    } catch (std::exception &e) {
+      std::cerr << "Lease server error: " << e.what() << std::endl;
+    }
+  });
 
   std::cout << "Lease server listening on " << host << ":" << lease_port << std::endl;
 
