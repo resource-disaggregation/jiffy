@@ -1,0 +1,12 @@
+#ifndef ELASTICMEM_BLOCK_ALLOCATION_CLIENT_H
+#define ELASTICMEM_BLOCK_ALLOCATION_CLIENT_H
+
+
+
+class block_allocation_client {
+
+};
+
+
+
+#endif //ELASTICMEM_BLOCK_ALLOCATION_CLIENT_H

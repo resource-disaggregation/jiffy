@@ -7,16 +7,55 @@
 #include <directory/lease/lease_manager.h>
 #include <directory/lease/directory_lease_server.h>
 #include <storage/manager/storage_manager.h>
+#include <utils/signal_handling.h>
+#include <utils/cmd_parse.h>
 
 using namespace ::elasticmem::directory;
 using namespace ::elasticmem::storage;
+using namespace ::elasticmem::utils;
 
-int main() {
-  std::string host = "0.0.0.0";
-  int service_port = 9090;
-  int lease_port = 9091;
-  uint64_t lease_period_ms = 10000;
-  uint64_t grace_period_ms = 10000;
+int main(int argc, char **argv) {
+  signal_handling::install_signal_handler(argv[0], SIGSEGV, SIGKILL, SIGSTOP, SIGTRAP);
+
+  cmd_options opts;
+  opts.add(cmd_option("address", 'a', false).set_default("0.0.0.0").set_description("Address server binds to"));
+  opts.add(cmd_option("service-port", 's', false).set_default("9090").set_description(
+      "Port that directory service listens on"));
+  opts.add(cmd_option("lease-port", 'l', false).set_default("9091").set_description(
+      "Port that lease service listens on"));
+  opts.add(cmd_option("block-port", 'b', false).set_default("9092").set_description(
+      "Port that block advertisement service listens on"));
+  opts.add(cmd_option("lease-period-ms", 'p', false).set_default("10000").set_description(
+      "Lease duration (in ms) that lease service advertises"));
+  opts.add(cmd_option("grace-period-ms", 'g', false).set_default("10000").set_description(
+      "Grace period (in ms) that lease service waits for beyond lease duration"));
+
+  cmd_parser parser(argc, argv, opts);
+  if (parser.get_flag("help")) {
+    std::cout << parser.help_msg() << std::endl;
+    return 0;
+  }
+
+  std::string address;
+  int service_port;
+  int lease_port;
+  int block_port;
+  uint64_t lease_period_ms;
+  uint64_t grace_period_ms;
+
+  try {
+    address = parser.get("address");
+    service_port = parser.get_int("service-port");
+    lease_port = parser.get_int("lease-port");
+    block_port = parser.get_int("block-port");
+    lease_period_ms = static_cast<uint64_t>(parser.get_long("lease-period-ms"));
+    grace_period_ms = static_cast<uint64_t>(parser.get_long("grace-period-ms"));
+  } catch (cmd_parse_exception& ex) {
+    std::cerr << "Could not parse command line args: " << ex.what() << std::endl;
+    std::cerr << parser.help_msg() << std::endl;
+    return -1;
+  }
+
   std::vector<std::string> blocks;
 
   // TODO: Fix
@@ -26,7 +65,7 @@ int main() {
 
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   auto tree = std::make_shared<directory_tree>(alloc);
-  auto directory_server = directory_rpc_server::create(tree, host, service_port);
+  auto directory_server = directory_rpc_server::create(tree, address, service_port);
   std::thread directory_serve_thread([&directory_server] {
     try {
       directory_server->serve();
@@ -35,10 +74,10 @@ int main() {
     }
   });
 
-  std::cout << "Directory server listening on " << host << ":" << service_port << std::endl;
+  std::cout << "Directory server listening on " << address << ":" << service_port << std::endl;
 
   auto storage = std::make_shared<storage_manager>();
-  auto lease_server = directory_lease_server::create(tree, storage, host, lease_port);
+  auto lease_server = directory_lease_server::create(tree, storage, address, lease_port);
   std::thread lease_serve_thread([&lease_server] {
     try {
       lease_server->serve();
@@ -47,7 +86,7 @@ int main() {
     }
   });
 
-  std::cout << "Lease server listening on " << host << ":" << lease_port << std::endl;
+  std::cout << "Lease server listening on " << address << ":" << lease_port << std::endl;
 
   lease_manager lmgr(tree, lease_period_ms, grace_period_ms);
   lmgr.start();
