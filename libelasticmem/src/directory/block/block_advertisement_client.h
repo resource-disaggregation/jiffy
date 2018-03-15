@@ -1,0 +1,33 @@
+#ifndef ELASTICMEM_BLOCK_ALLOCATION_CLIENT_H
+#define ELASTICMEM_BLOCK_ALLOCATION_CLIENT_H
+
+#include <thrift/transport/TSocket.h>
+#include "block_allocation_service.h"
+
+namespace elasticmem {
+namespace directory {
+
+class block_allocation_client {
+ public:
+  typedef block_allocation_serviceClient thrift_client;
+
+  block_allocation_client() = default;
+  ~block_allocation_client();
+  block_allocation_client(const std::string &hostname, int port);
+  void connect(const std::string &hostname, int port);
+  void disconnect();
+
+  void advertise_blocks(const std::vector<std::string>& block_names);
+  void retract_blocks(const std::vector<std::string>& block_names);
+
+ private:
+  std::shared_ptr<apache::thrift::transport::TSocket> socket_{};
+  std::shared_ptr<apache::thrift::transport::TTransport> transport_{};
+  std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_{};
+  std::shared_ptr<thrift_client> client_{};
+};
+
+}
+}
+
+#endif //ELASTICMEM_BLOCK_ALLOCATION_CLIENT_H

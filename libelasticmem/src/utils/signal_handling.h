@@ -14,19 +14,18 @@
 namespace elasticmem {
 namespace utils {
 
-class error_handling {
+class signal_handling {
  public:
   static const uint32_t MAX_FRAMES = 64;
   static char exec_path[1024];
 
-  static inline void install_signal_handler(const char *exec) {
-  }
+  static inline void install_signal_handler(const char *) {}
 
   template<typename ...args>
   static inline void install_signal_handler(const char *exec, int sig,
                                             args ... more) {
-    signal(sig, error_handling::sighandler_stacktrace);
-    error_handling::install_signal_handler(exec, std::forward<int>(more)...);
+    signal(sig, signal_handling::sighandler_stacktrace);
+    signal_handling::install_signal_handler(exec, std::forward<int>(more)...);
   }
 
   static std::string stacktrace() {

@@ -1,14 +1,22 @@
 include_directories(${THRIFT_INCLUDE_DIR})
 add_library(elasticmem STATIC
-        src/directory/block/block_allocator.h
+        src/directory/block/block_advertisement_client.cpp
+        src/directory/block/block_advertisement_client.h
         src/directory/block/block_allocation_service.cpp
         src/directory/block/block_allocation_service.h
         src/directory/block/block_allocation_service.tcc
         src/directory/block/block_allocation_service_constants.cpp
         src/directory/block/block_allocation_service_constants.h
+        src/directory/block/block_allocation_service_factory.cpp
+        src/directory/block/block_allocation_service_factory.h
+        src/directory/block/block_allocation_service_handler.cpp
+        src/directory/block/block_allocation_service_handler.h
         src/directory/block/block_allocation_service_types.cpp
         src/directory/block/block_allocation_service_types.h
         src/directory/block/block_allocation_service_types.tcc
+        src/directory/block/block_allocation_server.cpp
+        src/directory/block/block_allocation_server.h
+        src/directory/block/block_allocator.h
         src/directory/block/random_block_allocator.cpp
         src/directory/block/random_block_allocator.h
         src/directory/fs/directory_client.cpp
@@ -92,6 +100,7 @@ add_library(elasticmem STATIC
         src/storage/kv/kv_rpc_service_types.cpp
         src/storage/kv/kv_rpc_service_types.h
         src/storage/kv/kv_rpc_service_types.tcc
+        src/storage/block_management_ops.h
         src/storage/storage_management_service.h
         src/persistent/local/local_store.cpp
         src/persistent/local/local_store.h
@@ -101,7 +110,7 @@ add_library(elasticmem STATIC
         src/utils/logger.h
         src/utils/rand_utils.h
         src/utils/signal_handling.h
-        src/utils/time_utils.h src/storage/block_management_ops.h)
+        src/utils/time_utils.h)
 if (GENERATE_THRIFT)
   add_dependencies(elasticmem thriftgen_directory thriftgen_kv)
 endif ()
