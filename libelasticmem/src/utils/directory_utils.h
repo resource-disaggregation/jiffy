@@ -5,7 +5,7 @@
 #include <experimental/filesystem>
 
 namespace elasticmem {
-namespace directory {
+namespace utils {
 
 class directory_utils {
  public:
@@ -27,7 +27,7 @@ class directory_utils {
     return out;
   }
 
-  static void push_path_element(std::string &path, const std::string& element) {
+  static void push_path_element(std::string &path, const std::string &element) {
     namespace fs = std::experimental::filesystem;
     path = path + fs::path::preferred_separator + element;
   }
