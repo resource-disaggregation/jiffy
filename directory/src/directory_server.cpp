@@ -1,15 +1,15 @@
 #include <iostream>
 #include <vector>
 #include <thread>
-#include <directory/tree/directory_tree.h>
-#include <directory/tree/random_block_allocator.h>
-#include <directory/rpc/directory_rpc_server.h>
+#include <directory/fs/directory_tree.h>
+#include <directory/block/random_block_allocator.h>
+#include <directory/fs/directory_rpc_server.h>
 #include <directory/lease/lease_manager.h>
-#include <directory/rpc/directory_lease_server.h>
-#include <kv/manager/kv_manager.h>
+#include <directory/lease/directory_lease_server.h>
+#include <storage/manager/storage_manager.h>
 
 using namespace ::elasticmem::directory;
-using namespace ::elasticmem::kv;
+using namespace ::elasticmem::storage;
 
 int main() {
   std::string host = "0.0.0.0";
@@ -25,8 +25,8 @@ int main() {
   }
 
   auto alloc = std::make_shared<random_block_allocator>(blocks);
-  auto t = std::make_shared<directory_tree>(alloc);
-  auto directory_server = directory_rpc_server::create(t, host, service_port);
+  auto tree = std::make_shared<directory_tree>(alloc);
+  auto directory_server = directory_rpc_server::create(tree, host, service_port);
   std::thread directory_serve_thread([&directory_server] {
     try {
       directory_server->serve();
@@ -37,8 +37,8 @@ int main() {
 
   std::cout << "Directory server listening on " << host << ":" << service_port << std::endl;
 
-  auto kv = std::make_shared<kv_manager>();
-  auto lease_server = directory_lease_server::create(t, kv, host, lease_port);
+  auto storage = std::make_shared<storage_manager>();
+  auto lease_server = directory_lease_server::create(tree, storage, host, lease_port);
   std::thread lease_serve_thread([&lease_server] {
     try {
       lease_server->serve();
@@ -49,7 +49,7 @@ int main() {
 
   std::cout << "Lease server listening on " << host << ":" << lease_port << std::endl;
 
-  lease_manager lmgr(t, lease_period_ms, grace_period_ms);
+  lease_manager lmgr(tree, lease_period_ms, grace_period_ms);
   lmgr.start();
 
   if (directory_serve_thread.joinable()) {

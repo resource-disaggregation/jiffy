@@ -1,7 +1,7 @@
 #include "catch.hpp"
 
 #include "../src/directory/lease/lease_manager.h"
-#include "../src/directory/tree/random_block_allocator.h"
+#include "../src/directory/block/random_block_allocator.h"
 
 #define LEASE_PERIOD_MS 100
 #define GRACE_PERIOD_MS 100

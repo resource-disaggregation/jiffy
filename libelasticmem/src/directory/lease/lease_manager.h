@@ -2,7 +2,7 @@
 #define ELASTICMEM_LEASE_MANAGER_H
 
 #include <thread>
-#include "../tree/directory_tree.h"
+#include "../fs/directory_tree.h"
 
 namespace elasticmem {
 namespace directory {

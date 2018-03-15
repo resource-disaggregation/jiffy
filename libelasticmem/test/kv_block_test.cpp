@@ -1,7 +1,7 @@
 #include "catch.hpp"
-#include "../src/kv/block/kv_block.h"
+#include "../src/storage/kv/kv_block.h"
 
-using namespace ::elasticmem::kv;
+using namespace ::elasticmem::storage;
 using namespace ::elasticmem::persistent;
 
 TEST_CASE("put_get_test", "[put][get]") {

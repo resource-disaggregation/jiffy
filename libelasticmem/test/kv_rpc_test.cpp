@@ -1,10 +1,10 @@
 #include <catch.hpp>
 #include <thrift/transport/TTransportException.h>
-#include "../src/kv/block/kv_block.h"
-#include "../src/kv/rpc/kv_client.h"
-#include "../src/kv/rpc/kv_rpc_server.h"
+#include "../src/storage/kv/kv_block.h"
+#include "../src/storage/kv/kv_client.h"
+#include "../src/storage/kv/kv_rpc_server.h"
 
-using namespace ::elasticmem::kv;
+using namespace ::elasticmem::storage;
 using namespace ::apache::thrift::transport;
 
 #define NUM_BLOCKS 1

@@ -2,12 +2,12 @@
 
 #include <thrift/transport/TTransportException.h>
 #include <thread>
-#include "../src/directory/rpc/directory_lease_client.h"
-#include "../src/directory/rpc/directory_lease_server.h"
-#include "../src/directory/tree/random_block_allocator.h"
+#include "../src/directory/lease/directory_lease_client.h"
+#include "../src/directory/lease/directory_lease_server.h"
+#include "../src/directory/block/random_block_allocator.h"
 #include "test_utils.h"
 
-using namespace ::elasticmem::kv;
+using namespace ::elasticmem::storage;
 using namespace ::elasticmem::directory;
 using namespace ::apache::thrift::transport;
 

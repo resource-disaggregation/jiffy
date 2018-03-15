@@ -3,9 +3,9 @@
 
 #include <string>
 #include <vector>
-#include "../src/kv/kv_management_service.h"
+#include "../src/storage/storage_management_service.h"
 
-class dummy_kv_manager : public elasticmem::kv::kv_management_service {
+class dummy_kv_manager : public elasticmem::storage::storage_management_service {
  public:
   dummy_kv_manager() = default;
 

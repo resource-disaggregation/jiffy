@@ -28,7 +28,7 @@ endif ()
 add_subdirectory(libelasticmem)
 
 add_subdirectory(directory)
-add_subdirectory(kv)
+add_subdirectory(storage)
 
 add_subdirectory(pyclient)
 
