@@ -7,87 +7,69 @@
 #include "kv_rpc_service.h"
 #include "kv_rpc_service.tcc"
 
-namespace elasticmem { namespace kv {
-
+namespace elasticmem {
+namespace kv {
 
 kv_rpc_service_put_args::~kv_rpc_service_put_args() throw() {
 }
 
-
 kv_rpc_service_put_pargs::~kv_rpc_service_put_pargs() throw() {
 }
-
 
 kv_rpc_service_put_result::~kv_rpc_service_put_result() throw() {
 }
 
-
 kv_rpc_service_put_presult::~kv_rpc_service_put_presult() throw() {
 }
-
 
 kv_rpc_service_get_args::~kv_rpc_service_get_args() throw() {
 }
 
-
 kv_rpc_service_get_pargs::~kv_rpc_service_get_pargs() throw() {
 }
-
 
 kv_rpc_service_get_result::~kv_rpc_service_get_result() throw() {
 }
 
-
 kv_rpc_service_get_presult::~kv_rpc_service_get_presult() throw() {
 }
-
 
 kv_rpc_service_update_args::~kv_rpc_service_update_args() throw() {
 }
 
-
 kv_rpc_service_update_pargs::~kv_rpc_service_update_pargs() throw() {
 }
-
 
 kv_rpc_service_update_result::~kv_rpc_service_update_result() throw() {
 }
 
-
 kv_rpc_service_update_presult::~kv_rpc_service_update_presult() throw() {
 }
-
 
 kv_rpc_service_remove_args::~kv_rpc_service_remove_args() throw() {
 }
 
-
 kv_rpc_service_remove_pargs::~kv_rpc_service_remove_pargs() throw() {
 }
-
 
 kv_rpc_service_remove_result::~kv_rpc_service_remove_result() throw() {
 }
 
-
 kv_rpc_service_remove_presult::~kv_rpc_service_remove_presult() throw() {
 }
-
 
 kv_rpc_service_size_args::~kv_rpc_service_size_args() throw() {
 }
 
-
 kv_rpc_service_size_pargs::~kv_rpc_service_size_pargs() throw() {
 }
-
 
 kv_rpc_service_size_result::~kv_rpc_service_size_result() throw() {
 }
 
-
 kv_rpc_service_size_presult::~kv_rpc_service_size_presult() throw() {
 }
 
-}} // namespace
+}
+} // namespace
 

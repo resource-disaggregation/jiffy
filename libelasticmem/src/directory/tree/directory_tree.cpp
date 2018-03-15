@@ -7,6 +7,8 @@
 namespace elasticmem {
 namespace directory {
 
+using namespace utils;
+
 directory_tree::directory_tree(std::shared_ptr<block_allocator> allocator)
     : root_(std::make_shared<ds_dir_node>(std::string("/"))),
       allocator_(std::move(allocator)) {}

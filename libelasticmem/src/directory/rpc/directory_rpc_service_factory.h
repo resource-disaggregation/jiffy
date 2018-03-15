@@ -7,7 +7,7 @@
 namespace elasticmem {
 namespace directory {
 
-class directory_rpc_service_factory: public directory_rpc_serviceIfFactory {
+class directory_rpc_service_factory : public directory_rpc_serviceIfFactory {
  public:
   explicit directory_rpc_service_factory(std::shared_ptr<directory_tree> shard);
   directory_rpc_serviceIf *getHandler(const ::apache::thrift::TConnectionInfo &connInfo) override;

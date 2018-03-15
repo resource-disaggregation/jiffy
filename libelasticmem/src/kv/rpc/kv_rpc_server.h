@@ -9,7 +9,7 @@ namespace kv {
 
 class kv_rpc_server {
  public:
-  static std::shared_ptr<apache::thrift::server::TThreadedServer> create(std::vector<std::shared_ptr<kv_block>>& blocks,
+  static std::shared_ptr<apache::thrift::server::TThreadedServer> create(std::vector<std::shared_ptr<kv_block>> &blocks,
                                                                          const std::string &address,
                                                                          int port);
 

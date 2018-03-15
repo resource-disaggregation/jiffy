@@ -19,7 +19,10 @@ class lease_manager {
  private:
   void remove_expired_leases();
 
-  void remove_expired_nodes(std::shared_ptr<ds_dir_node> parent, const std::string& parent_path, const std::string &child_name, std::uint64_t epoch);
+  void remove_expired_nodes(std::shared_ptr<ds_dir_node> parent,
+                            const std::string &parent_path,
+                            const std::string &child_name,
+                            std::uint64_t epoch);
 
   std::chrono::milliseconds lease_period_ms_;
   std::chrono::milliseconds grace_period_ms_;

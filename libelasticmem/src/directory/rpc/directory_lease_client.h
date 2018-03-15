@@ -17,7 +17,7 @@ class directory_lease_client {
   void connect(const std::string &hostname, int port);
   void disconnect();
 
-  rpc_lease_ack update_leases(const rpc_lease_update& updates);
+  rpc_lease_ack update_leases(const rpc_lease_update &updates);
 
  private:
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};

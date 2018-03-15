@@ -13,6 +13,7 @@ from thrift.TRecursive import fix_spec
 import sys
 
 from thrift.transport import TTransport
+
 all_structs = []
 
 
@@ -22,12 +23,12 @@ class kv_rpc_exception(TException):
      - msg
     """
 
-
-    def __init__(self, msg=None,):
+    def __init__(self, msg=None, ):
         self.msg = msg
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans,
+                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -81,12 +82,12 @@ class kv_management_rpc_exception(TException):
      - msg
     """
 
-
-    def __init__(self, msg=None,):
+    def __init__(self, msg=None, ):
         self.msg = msg
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans,
+                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -132,15 +133,17 @@ class kv_management_rpc_exception(TException):
 
     def __ne__(self, other):
         return not (self == other)
+
+
 all_structs.append(kv_rpc_exception)
 kv_rpc_exception.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'msg', 'UTF8', None, ),  # 1
+    (1, TType.STRING, 'msg', 'UTF8', None,),  # 1
 )
 all_structs.append(kv_management_rpc_exception)
 kv_management_rpc_exception.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'msg', 'UTF8', None, ),  # 1
+    (1, TType.STRING, 'msg', 'UTF8', None,),  # 1
 )
 fix_spec(all_structs)
 del all_structs

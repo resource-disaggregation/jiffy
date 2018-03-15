@@ -13,6 +13,7 @@ from thrift.TRecursive import fix_spec
 import sys
 
 from thrift.transport import TTransport
+
 all_structs = []
 
 
@@ -81,14 +82,14 @@ class rpc_file_status(object):
      - last_write_time
     """
 
-
-    def __init__(self, type=None, permissions=None, last_write_time=None,):
+    def __init__(self, type=None, permissions=None, last_write_time=None, ):
         self.type = type
         self.permissions = permissions
         self.last_write_time = last_write_time
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans,
+                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -165,14 +166,14 @@ class rpc_data_status(object):
      - data_blocks
     """
 
-
-    def __init__(self, storage_mode=None, persistent_store_prefix=None, data_blocks=None,):
+    def __init__(self, storage_mode=None, persistent_store_prefix=None, data_blocks=None, ):
         self.storage_mode = storage_mode
         self.persistent_store_prefix = persistent_store_prefix
         self.data_blocks = data_blocks
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans,
+                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -187,7 +188,8 @@ class rpc_data_status(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRING:
-                    self.persistent_store_prefix = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                    self.persistent_store_prefix = iprot.readString().decode('utf-8') if sys.version_info[
+                                                                                             0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
@@ -216,7 +218,8 @@ class rpc_data_status(object):
             oprot.writeFieldEnd()
         if self.persistent_store_prefix is not None:
             oprot.writeFieldBegin('persistent_store_prefix', TType.STRING, 2)
-            oprot.writeString(self.persistent_store_prefix.encode('utf-8') if sys.version_info[0] == 2 else self.persistent_store_prefix)
+            oprot.writeString(self.persistent_store_prefix.encode('utf-8') if sys.version_info[
+                                                                                  0] == 2 else self.persistent_store_prefix)
             oprot.writeFieldEnd()
         if self.data_blocks is not None:
             oprot.writeFieldBegin('data_blocks', TType.LIST, 3)
@@ -256,13 +259,13 @@ class rpc_dir_entry(object):
      - status
     """
 
-
-    def __init__(self, name=None, status=None,):
+    def __init__(self, name=None, status=None, ):
         self.name = name
         self.status = status
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans,
+                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -327,12 +330,12 @@ class directory_rpc_service_exception(TException):
      - msg
     """
 
-
-    def __init__(self, msg=None,):
+    def __init__(self, msg=None, ):
         self.msg = msg
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans,
+                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -389,13 +392,13 @@ class rpc_file_metadata(object):
      - bytes
     """
 
-
-    def __init__(self, path=None, bytes=None,):
+    def __init__(self, path=None, bytes=None, ):
         self.path = path
         self.bytes = bytes
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans,
+                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -461,14 +464,14 @@ class lease_update(object):
      - to_remove
     """
 
-
-    def __init__(self, to_renew=None, to_flush=None, to_remove=None,):
+    def __init__(self, to_renew=None, to_flush=None, to_remove=None, ):
         self.to_renew = to_renew
         self.to_flush = to_flush
         self.to_remove = to_remove
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans,
+                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -570,14 +573,14 @@ class lease_ack(object):
      - removed
     """
 
-
-    def __init__(self, renewed=None, flushed=None, removed=None,):
+    def __init__(self, renewed=None, flushed=None, removed=None, ):
         self.renewed = renewed
         self.flushed = flushed
         self.removed = removed
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans,
+                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -661,12 +664,12 @@ class directory_lease_service_exception(TException):
      - msg
     """
 
-
-    def __init__(self, msg=None,):
+    def __init__(self, msg=None, ):
         self.msg = msg
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans,
+                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -712,55 +715,57 @@ class directory_lease_service_exception(TException):
 
     def __ne__(self, other):
         return not (self == other)
+
+
 all_structs.append(rpc_file_status)
 rpc_file_status.thrift_spec = (
     None,  # 0
-    (1, TType.I32, 'type', None, None, ),  # 1
-    (2, TType.I32, 'permissions', None, None, ),  # 2
-    (3, TType.I64, 'last_write_time', None, None, ),  # 3
+    (1, TType.I32, 'type', None, None,),  # 1
+    (2, TType.I32, 'permissions', None, None,),  # 2
+    (3, TType.I64, 'last_write_time', None, None,),  # 3
 )
 all_structs.append(rpc_data_status)
 rpc_data_status.thrift_spec = (
     None,  # 0
-    (1, TType.I32, 'storage_mode', None, None, ),  # 1
-    (2, TType.STRING, 'persistent_store_prefix', 'UTF8', None, ),  # 2
-    (3, TType.LIST, 'data_blocks', (TType.STRING, 'UTF8', False), None, ),  # 3
+    (1, TType.I32, 'storage_mode', None, None,),  # 1
+    (2, TType.STRING, 'persistent_store_prefix', 'UTF8', None,),  # 2
+    (3, TType.LIST, 'data_blocks', (TType.STRING, 'UTF8', False), None,),  # 3
 )
 all_structs.append(rpc_dir_entry)
 rpc_dir_entry.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'name', 'UTF8', None, ),  # 1
-    (2, TType.STRUCT, 'status', [rpc_file_status, None], None, ),  # 2
+    (1, TType.STRING, 'name', 'UTF8', None,),  # 1
+    (2, TType.STRUCT, 'status', [rpc_file_status, None], None,),  # 2
 )
 all_structs.append(directory_rpc_service_exception)
 directory_rpc_service_exception.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'msg', 'UTF8', None, ),  # 1
+    (1, TType.STRING, 'msg', 'UTF8', None,),  # 1
 )
 all_structs.append(rpc_file_metadata)
 rpc_file_metadata.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
-    (2, TType.I64, 'bytes', None, None, ),  # 2
+    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (2, TType.I64, 'bytes', None, None,),  # 2
 )
 all_structs.append(lease_update)
 lease_update.thrift_spec = (
     None,  # 0
-    (1, TType.LIST, 'to_renew', (TType.STRUCT, [rpc_file_metadata, None], False), None, ),  # 1
-    (2, TType.LIST, 'to_flush', (TType.STRING, 'UTF8', False), None, ),  # 2
-    (3, TType.LIST, 'to_remove', (TType.STRING, 'UTF8', False), None, ),  # 3
+    (1, TType.LIST, 'to_renew', (TType.STRUCT, [rpc_file_metadata, None], False), None,),  # 1
+    (2, TType.LIST, 'to_flush', (TType.STRING, 'UTF8', False), None,),  # 2
+    (3, TType.LIST, 'to_remove', (TType.STRING, 'UTF8', False), None,),  # 3
 )
 all_structs.append(lease_ack)
 lease_ack.thrift_spec = (
     None,  # 0
-    (1, TType.LIST, 'renewed', (TType.STRUCT, [rpc_file_metadata, None], False), None, ),  # 1
-    (2, TType.I64, 'flushed', None, None, ),  # 2
-    (3, TType.I64, 'removed', None, None, ),  # 3
+    (1, TType.LIST, 'renewed', (TType.STRUCT, [rpc_file_metadata, None], False), None,),  # 1
+    (2, TType.I64, 'flushed', None, None,),  # 2
+    (3, TType.I64, 'removed', None, None,),  # 3
 )
 all_structs.append(directory_lease_service_exception)
 directory_lease_service_exception.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'msg', 'UTF8', None, ),  # 1
+    (1, TType.STRING, 'msg', 'UTF8', None,),  # 1
 )
 fix_spec(all_structs)
 del all_structs

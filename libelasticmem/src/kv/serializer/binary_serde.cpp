@@ -25,11 +25,11 @@ std::size_t binary_deserializer::deserialize(const std::string &path, block_type
   while (!in.eof()) {
     std::size_t key_size;
     std::size_t value_size;
-    in.read(reinterpret_cast<char*>(&key_size), sizeof(key_size));
+    in.read(reinterpret_cast<char *>(&key_size), sizeof(key_size));
     std::string key;
     key.resize(key_size);
     in.read(&key[0], key_size);
-    in.read(reinterpret_cast<char*>(&value_size), sizeof(value_size));
+    in.read(reinterpret_cast<char *>(&value_size), sizeof(value_size));
     std::string value;
     value.resize(value_size);
     in.read(&value[0], value_size);

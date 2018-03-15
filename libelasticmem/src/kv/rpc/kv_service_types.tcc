@@ -9,10 +9,11 @@
 
 #include "kv_service_types.h"
 
-namespace elasticmem { namespace kv {
+namespace elasticmem {
+namespace kv {
 
-template <class Protocol_>
-uint32_t kv_rpc_exception::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_rpc_exception::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -24,15 +25,12 @@ uint32_t kv_rpc_exception::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->msg);
@@ -41,8 +39,7 @@ uint32_t kv_rpc_exception::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -53,8 +50,8 @@ uint32_t kv_rpc_exception::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t kv_rpc_exception::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_rpc_exception::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_exception");
@@ -68,8 +65,8 @@ uint32_t kv_rpc_exception::write(Protocol_* oprot) const {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t kv_management_rpc_exception::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_management_rpc_exception::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -81,15 +78,12 @@ uint32_t kv_management_rpc_exception::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->msg);
@@ -98,8 +92,7 @@ uint32_t kv_management_rpc_exception::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -110,8 +103,8 @@ uint32_t kv_management_rpc_exception::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t kv_management_rpc_exception::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_management_rpc_exception::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_management_rpc_exception");
@@ -125,6 +118,7 @@ uint32_t kv_management_rpc_exception::write(Protocol_* oprot) const {
   return xfer;
 }
 
-}} // namespace
+}
+} // namespace
 
 #endif

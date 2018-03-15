@@ -9,6 +9,7 @@
 
 import sys
 import pprint
+
 if sys.version_info[0] > 2:
     from urllib.parse import urlparse
 else:
@@ -21,7 +22,8 @@ from elasticmem.directory.ttypes import *
 
 if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('')
-    print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] [-novalidate] [-ca_certs certs] [-keyfile keyfile] [-certfile certfile] function [arg1 [arg2...]]')
+    print('Usage: ' + sys.argv[
+        0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] [-novalidate] [-ca_certs certs] [-keyfile keyfile] [-certfile certfile] function [arg1 [arg2...]]')
     print('')
     print('Functions:')
     print('  void create_directory(string path)')
@@ -94,15 +96,15 @@ if sys.argv[argi] == '-novalidate':
     argi += 1
 
 if sys.argv[argi] == '-ca_certs':
-    ca_certs = sys.argv[argi+1]
+    ca_certs = sys.argv[argi + 1]
     argi += 2
 
 if sys.argv[argi] == '-keyfile':
-    keyfile = sys.argv[argi+1]
+    keyfile = sys.argv[argi + 1]
     argi += 2
 
 if sys.argv[argi] == '-certfile':
-    certfile = sys.argv[argi+1]
+    certfile = sys.argv[argi + 1]
     argi += 2
 
 cmd = sys.argv[argi]
@@ -112,7 +114,8 @@ if http:
     transport = THttpClient.THttpClient(host, port, uri)
 else:
     if ssl:
-        socket = TSSLSocket.TSSLSocket(host, port, validate=validate, ca_certs=ca_certs, keyfile=keyfile, certfile=certfile)
+        socket = TSSLSocket.TSSLSocket(host, port, validate=validate, ca_certs=ca_certs, keyfile=keyfile,
+                                       certfile=certfile)
     else:
         socket = TSocket.TSocket(host, port)
     if framed:
@@ -127,121 +130,121 @@ if cmd == 'create_directory':
     if len(args) != 1:
         print('create_directory requires 1 args')
         sys.exit(1)
-    pp.pprint(client.create_directory(args[0],))
+    pp.pprint(client.create_directory(args[0], ))
 
 elif cmd == 'create_directories':
     if len(args) != 1:
         print('create_directories requires 1 args')
         sys.exit(1)
-    pp.pprint(client.create_directories(args[0],))
+    pp.pprint(client.create_directories(args[0], ))
 
 elif cmd == 'create_file':
     if len(args) != 2:
         print('create_file requires 2 args')
         sys.exit(1)
-    pp.pprint(client.create_file(args[0], args[1],))
+    pp.pprint(client.create_file(args[0], args[1], ))
 
 elif cmd == 'exists':
     if len(args) != 1:
         print('exists requires 1 args')
         sys.exit(1)
-    pp.pprint(client.exists(args[0],))
+    pp.pprint(client.exists(args[0], ))
 
 elif cmd == 'file_size':
     if len(args) != 1:
         print('file_size requires 1 args')
         sys.exit(1)
-    pp.pprint(client.file_size(args[0],))
+    pp.pprint(client.file_size(args[0], ))
 
 elif cmd == 'last_write_time':
     if len(args) != 1:
         print('last_write_time requires 1 args')
         sys.exit(1)
-    pp.pprint(client.last_write_time(args[0],))
+    pp.pprint(client.last_write_time(args[0], ))
 
 elif cmd == 'set_permissions':
     if len(args) != 3:
         print('set_permissions requires 3 args')
         sys.exit(1)
-    pp.pprint(client.set_permissions(args[0], eval(args[1]), eval(args[2]),))
+    pp.pprint(client.set_permissions(args[0], eval(args[1]), eval(args[2]), ))
 
 elif cmd == 'get_permissions':
     if len(args) != 1:
         print('get_permissions requires 1 args')
         sys.exit(1)
-    pp.pprint(client.get_permissions(args[0],))
+    pp.pprint(client.get_permissions(args[0], ))
 
 elif cmd == 'remove':
     if len(args) != 1:
         print('remove requires 1 args')
         sys.exit(1)
-    pp.pprint(client.remove(args[0],))
+    pp.pprint(client.remove(args[0], ))
 
 elif cmd == 'remove_all':
     if len(args) != 1:
         print('remove_all requires 1 args')
         sys.exit(1)
-    pp.pprint(client.remove_all(args[0],))
+    pp.pprint(client.remove_all(args[0], ))
 
 elif cmd == 'rename':
     if len(args) != 2:
         print('rename requires 2 args')
         sys.exit(1)
-    pp.pprint(client.rename(args[0], args[1],))
+    pp.pprint(client.rename(args[0], args[1], ))
 
 elif cmd == 'status':
     if len(args) != 1:
         print('status requires 1 args')
         sys.exit(1)
-    pp.pprint(client.status(args[0],))
+    pp.pprint(client.status(args[0], ))
 
 elif cmd == 'directory_entries':
     if len(args) != 1:
         print('directory_entries requires 1 args')
         sys.exit(1)
-    pp.pprint(client.directory_entries(args[0],))
+    pp.pprint(client.directory_entries(args[0], ))
 
 elif cmd == 'recursive_directory_entries':
     if len(args) != 1:
         print('recursive_directory_entries requires 1 args')
         sys.exit(1)
-    pp.pprint(client.recursive_directory_entries(args[0],))
+    pp.pprint(client.recursive_directory_entries(args[0], ))
 
 elif cmd == 'dstatus':
     if len(args) != 1:
         print('dstatus requires 1 args')
         sys.exit(1)
-    pp.pprint(client.dstatus(args[0],))
+    pp.pprint(client.dstatus(args[0], ))
 
 elif cmd == 'mode':
     if len(args) != 1:
         print('mode requires 1 args')
         sys.exit(1)
-    pp.pprint(client.mode(args[0],))
+    pp.pprint(client.mode(args[0], ))
 
 elif cmd == 'persistent_store_prefix':
     if len(args) != 1:
         print('persistent_store_prefix requires 1 args')
         sys.exit(1)
-    pp.pprint(client.persistent_store_prefix(args[0],))
+    pp.pprint(client.persistent_store_prefix(args[0], ))
 
 elif cmd == 'data_blocks':
     if len(args) != 1:
         print('data_blocks requires 1 args')
         sys.exit(1)
-    pp.pprint(client.data_blocks(args[0],))
+    pp.pprint(client.data_blocks(args[0], ))
 
 elif cmd == 'is_regular_file':
     if len(args) != 1:
         print('is_regular_file requires 1 args')
         sys.exit(1)
-    pp.pprint(client.is_regular_file(args[0],))
+    pp.pprint(client.is_regular_file(args[0], ))
 
 elif cmd == 'is_directory':
     if len(args) != 1:
         print('is_directory requires 1 args')
         sys.exit(1)
-    pp.pprint(client.is_directory(args[0],))
+    pp.pprint(client.is_directory(args[0], ))
 
 else:
     print('Unrecognized method %s' % cmd)

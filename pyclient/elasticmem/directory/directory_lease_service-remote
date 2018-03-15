@@ -9,6 +9,7 @@
 
 import sys
 import pprint
+
 if sys.version_info[0] > 2:
     from urllib.parse import urlparse
 else:
@@ -21,7 +22,8 @@ from elasticmem.directory.ttypes import *
 
 if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('')
-    print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] [-novalidate] [-ca_certs certs] [-keyfile keyfile] [-certfile certfile] function [arg1 [arg2...]]')
+    print('Usage: ' + sys.argv[
+        0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] [-novalidate] [-ca_certs certs] [-keyfile keyfile] [-certfile certfile] function [arg1 [arg2...]]')
     print('')
     print('Functions:')
     print('  lease_ack update_leases(lease_update updates)')
@@ -75,15 +77,15 @@ if sys.argv[argi] == '-novalidate':
     argi += 1
 
 if sys.argv[argi] == '-ca_certs':
-    ca_certs = sys.argv[argi+1]
+    ca_certs = sys.argv[argi + 1]
     argi += 2
 
 if sys.argv[argi] == '-keyfile':
-    keyfile = sys.argv[argi+1]
+    keyfile = sys.argv[argi + 1]
     argi += 2
 
 if sys.argv[argi] == '-certfile':
-    certfile = sys.argv[argi+1]
+    certfile = sys.argv[argi + 1]
     argi += 2
 
 cmd = sys.argv[argi]
@@ -93,7 +95,8 @@ if http:
     transport = THttpClient.THttpClient(host, port, uri)
 else:
     if ssl:
-        socket = TSSLSocket.TSSLSocket(host, port, validate=validate, ca_certs=ca_certs, keyfile=keyfile, certfile=certfile)
+        socket = TSSLSocket.TSSLSocket(host, port, validate=validate, ca_certs=ca_certs, keyfile=keyfile,
+                                       certfile=certfile)
     else:
         socket = TSocket.TSocket(host, port)
     if framed:
@@ -108,7 +111,7 @@ if cmd == 'update_leases':
     if len(args) != 1:
         print('update_leases requires 1 args')
         sys.exit(1)
-    pp.pprint(client.update_leases(eval(args[0]),))
+    pp.pprint(client.update_leases(eval(args[0]), ))
 
 else:
     print('Unrecognized method %s' % cmd)

@@ -9,7 +9,8 @@
 
 #include "directory_service_types.h"
 
-namespace elasticmem { namespace directory {
+namespace elasticmem {
+namespace directory {
 
 class directory_serviceConstants {
  public:
@@ -19,6 +20,7 @@ class directory_serviceConstants {
 
 extern const directory_serviceConstants g_directory_service_constants;
 
-}} // namespace
+}
+} // namespace
 
 #endif

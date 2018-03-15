@@ -20,13 +20,13 @@ static std::vector<std::shared_ptr<kv_block>> init_blocks() {
   return blks;
 }
 
-static void wait_till_server_ready(const std::string& host, int port) {
+static void wait_till_server_ready(const std::string &host, int port) {
   bool check = true;
   while (check) {
     try {
       kv_client(host, port, 0);
       check = false;
-    } catch (TTransportException& e) {
+    } catch (TTransportException &e) {
       usleep(100000);
     }
   }
@@ -36,7 +36,7 @@ static std::vector<std::shared_ptr<kv_block>> blocks = init_blocks();
 
 TEST_CASE("rpc_put_get_test", "[put][get]") {
   auto server = kv_rpc_server::create(blocks, HOST, PORT);
-  std::thread serve_thread([&server]{ server->serve(); });
+  std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
 
   kv_client block_client(HOST, PORT, 0);
@@ -59,7 +59,7 @@ TEST_CASE("rpc_put_get_test", "[put][get]") {
 
 TEST_CASE("rpc_put_update_get_test", "[put][update][get]") {
   auto server = kv_rpc_server::create(blocks, HOST, PORT);
-  std::thread serve_thread([&server]{ server->serve(); });
+  std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
 
   kv_client block_client(HOST, PORT, 0);
@@ -88,7 +88,7 @@ TEST_CASE("rpc_put_update_get_test", "[put][update][get]") {
 
 TEST_CASE("rpc_put_remove_get_test", "[put][update][get]") {
   auto server = kv_rpc_server::create(blocks, HOST, PORT);
-  std::thread serve_thread([&server]{ server->serve(); });
+  std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
 
   kv_client block_client(HOST, PORT, 0);
@@ -114,7 +114,7 @@ TEST_CASE("rpc_put_remove_get_test", "[put][update][get]") {
 
 TEST_CASE("rpc_storage_size_test", "[put][size][storage_size][clear]") {
   auto server = kv_rpc_server::create(blocks, HOST, PORT);
-  std::thread serve_thread([&server]{ server->serve(); });
+  std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
 
   kv_client block_client(HOST, PORT, 0);

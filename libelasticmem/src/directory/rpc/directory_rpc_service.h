@@ -11,36 +11,37 @@
 #include <thrift/async/TConcurrentClientSyncInfo.h>
 #include "directory_service_types.h"
 
-namespace elasticmem { namespace directory {
+namespace elasticmem {
+namespace directory {
 
 #ifdef _MSC_VER
-  #pragma warning( push )
-  #pragma warning (disable : 4250 ) //inheriting methods via dominance 
+#pragma warning( push )
+#pragma warning (disable : 4250 ) //inheriting methods via dominance
 #endif
 
 class directory_rpc_serviceIf {
  public:
   virtual ~directory_rpc_serviceIf() {}
-  virtual void create_directory(const std::string& path) = 0;
-  virtual void create_directories(const std::string& path) = 0;
-  virtual void create_file(const std::string& path, const std::string& persistent_store_prefix) = 0;
-  virtual bool exists(const std::string& path) = 0;
-  virtual int64_t file_size(const std::string& path) = 0;
-  virtual int64_t last_write_time(const std::string& path) = 0;
-  virtual void set_permissions(const std::string& path, const rpc_perms perms, const rpc_perm_options opts) = 0;
-  virtual rpc_perms get_permissions(const std::string& path) = 0;
-  virtual void remove(const std::string& path) = 0;
-  virtual void remove_all(const std::string& path) = 0;
-  virtual void rename(const std::string& old_path, const std::string& new_path) = 0;
-  virtual void status(rpc_file_status& _return, const std::string& path) = 0;
-  virtual void directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path) = 0;
-  virtual void recursive_directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path) = 0;
-  virtual void dstatus(rpc_data_status& _return, const std::string& path) = 0;
-  virtual rpc_storage_mode mode(const std::string& path) = 0;
-  virtual void persistent_store_prefix(std::string& _return, const std::string& path) = 0;
-  virtual void data_blocks(std::vector<std::string> & _return, const std::string& path) = 0;
-  virtual bool is_regular_file(const std::string& path) = 0;
-  virtual bool is_directory(const std::string& path) = 0;
+  virtual void create_directory(const std::string &path) = 0;
+  virtual void create_directories(const std::string &path) = 0;
+  virtual void create_file(const std::string &path, const std::string &persistent_store_prefix) = 0;
+  virtual bool exists(const std::string &path) = 0;
+  virtual int64_t file_size(const std::string &path) = 0;
+  virtual int64_t last_write_time(const std::string &path) = 0;
+  virtual void set_permissions(const std::string &path, const rpc_perms perms, const rpc_perm_options opts) = 0;
+  virtual rpc_perms get_permissions(const std::string &path) = 0;
+  virtual void remove(const std::string &path) = 0;
+  virtual void remove_all(const std::string &path) = 0;
+  virtual void rename(const std::string &old_path, const std::string &new_path) = 0;
+  virtual void status(rpc_file_status &_return, const std::string &path) = 0;
+  virtual void directory_entries(std::vector<rpc_dir_entry> &_return, const std::string &path) = 0;
+  virtual void recursive_directory_entries(std::vector<rpc_dir_entry> &_return, const std::string &path) = 0;
+  virtual void dstatus(rpc_data_status &_return, const std::string &path) = 0;
+  virtual rpc_storage_mode mode(const std::string &path) = 0;
+  virtual void persistent_store_prefix(std::string &_return, const std::string &path) = 0;
+  virtual void data_blocks(std::vector<std::string> &_return, const std::string &path) = 0;
+  virtual bool is_regular_file(const std::string &path) = 0;
+  virtual bool is_directory(const std::string &path) = 0;
 };
 
 class directory_rpc_serviceIfFactory {
@@ -49,19 +50,20 @@ class directory_rpc_serviceIfFactory {
 
   virtual ~directory_rpc_serviceIfFactory() {}
 
-  virtual directory_rpc_serviceIf* getHandler(const ::apache::thrift::TConnectionInfo& connInfo) = 0;
-  virtual void releaseHandler(directory_rpc_serviceIf* /* handler */) = 0;
+  virtual directory_rpc_serviceIf *getHandler(const ::apache::thrift::TConnectionInfo &connInfo) = 0;
+  virtual void releaseHandler(directory_rpc_serviceIf * /* handler */) = 0;
 };
 
 class directory_rpc_serviceIfSingletonFactory : virtual public directory_rpc_serviceIfFactory {
  public:
-  directory_rpc_serviceIfSingletonFactory(const ::apache::thrift::stdcxx::shared_ptr<directory_rpc_serviceIf>& iface) : iface_(iface) {}
+  directory_rpc_serviceIfSingletonFactory(const ::apache::thrift::stdcxx::shared_ptr<directory_rpc_serviceIf> &iface)
+      : iface_(iface) {}
   virtual ~directory_rpc_serviceIfSingletonFactory() {}
 
-  virtual directory_rpc_serviceIf* getHandler(const ::apache::thrift::TConnectionInfo&) {
+  virtual directory_rpc_serviceIf *getHandler(const ::apache::thrift::TConnectionInfo &) {
     return iface_.get();
   }
-  virtual void releaseHandler(directory_rpc_serviceIf* /* handler */) {}
+  virtual void releaseHandler(directory_rpc_serviceIf * /* handler */) {}
 
  protected:
   ::apache::thrift::stdcxx::shared_ptr<directory_rpc_serviceIf> iface_;
@@ -70,70 +72,70 @@ class directory_rpc_serviceIfSingletonFactory : virtual public directory_rpc_ser
 class directory_rpc_serviceNull : virtual public directory_rpc_serviceIf {
  public:
   virtual ~directory_rpc_serviceNull() {}
-  void create_directory(const std::string& /* path */) {
+  void create_directory(const std::string & /* path */) {
     return;
   }
-  void create_directories(const std::string& /* path */) {
+  void create_directories(const std::string & /* path */) {
     return;
   }
-  void create_file(const std::string& /* path */, const std::string& /* persistent_store_prefix */) {
+  void create_file(const std::string & /* path */, const std::string & /* persistent_store_prefix */) {
     return;
   }
-  bool exists(const std::string& /* path */) {
+  bool exists(const std::string & /* path */) {
     bool _return = false;
     return _return;
   }
-  int64_t file_size(const std::string& /* path */) {
+  int64_t file_size(const std::string & /* path */) {
     int64_t _return = 0;
     return _return;
   }
-  int64_t last_write_time(const std::string& /* path */) {
+  int64_t last_write_time(const std::string & /* path */) {
     int64_t _return = 0;
     return _return;
   }
-  void set_permissions(const std::string& /* path */, const rpc_perms /* perms */, const rpc_perm_options /* opts */) {
+  void set_permissions(const std::string & /* path */, const rpc_perms /* perms */, const rpc_perm_options /* opts */) {
     return;
   }
-  rpc_perms get_permissions(const std::string& /* path */) {
+  rpc_perms get_permissions(const std::string & /* path */) {
     rpc_perms _return = 0;
     return _return;
   }
-  void remove(const std::string& /* path */) {
+  void remove(const std::string & /* path */) {
     return;
   }
-  void remove_all(const std::string& /* path */) {
+  void remove_all(const std::string & /* path */) {
     return;
   }
-  void rename(const std::string& /* old_path */, const std::string& /* new_path */) {
+  void rename(const std::string & /* old_path */, const std::string & /* new_path */) {
     return;
   }
-  void status(rpc_file_status& /* _return */, const std::string& /* path */) {
+  void status(rpc_file_status & /* _return */, const std::string & /* path */) {
     return;
   }
-  void directory_entries(std::vector<rpc_dir_entry> & /* _return */, const std::string& /* path */) {
+  void directory_entries(std::vector<rpc_dir_entry> & /* _return */, const std::string & /* path */) {
     return;
   }
-  void recursive_directory_entries(std::vector<rpc_dir_entry> & /* _return */, const std::string& /* path */) {
+  void recursive_directory_entries(std::vector<rpc_dir_entry> & /* _return */, const std::string & /* path */) {
     return;
   }
-  void dstatus(rpc_data_status& /* _return */, const std::string& /* path */) {
+  void dstatus(rpc_data_status & /* _return */, const std::string & /* path */) {
     return;
   }
-  rpc_storage_mode mode(const std::string& /* path */) {
-    rpc_storage_mode _return = (rpc_storage_mode)0;
+  rpc_storage_mode mode(const std::string & /* path */) {
+    rpc_storage_mode _return = (rpc_storage_mode) 0;
     return _return;
   }
-  void persistent_store_prefix(std::string& /* _return */, const std::string& /* path */) {
+  void persistent_store_prefix(std::string & /* _return */, const std::string & /* path */) {
     return;
   }
-  void data_blocks(std::vector<std::string> & /* _return */, const std::string& /* path */) {
+  void data_blocks(std::vector<std::string> & /* _return */, const std::string & /* path */) {
     return;
   }
-  bool is_regular_file(const std::string& /* path */) {
+  bool is_regular_file(const std::string & /* path */) {
     bool _return = false;
     return _return;
   }
-  bool is_directory(const std::string& /* path */) {
+  bool is_directory(const std::string & /* path */) {
     bool _return = false;
     return _return;
   }
@@ -147,8 +149,8 @@ typedef struct _directory_rpc_service_create_directory_args__isset {
 class directory_rpc_service_create_directory_args {
  public:
 
-  directory_rpc_service_create_directory_args(const directory_rpc_service_create_directory_args&);
-  directory_rpc_service_create_directory_args& operator=(const directory_rpc_service_create_directory_args&);
+  directory_rpc_service_create_directory_args(const directory_rpc_service_create_directory_args &);
+  directory_rpc_service_create_directory_args &operator=(const directory_rpc_service_create_directory_args &);
   directory_rpc_service_create_directory_args() : path() {
   }
 
@@ -157,37 +159,34 @@ class directory_rpc_service_create_directory_args {
 
   _directory_rpc_service_create_directory_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_create_directory_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_create_directory_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_create_directory_args &rhs) const {
+  bool operator!=(const directory_rpc_service_create_directory_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_create_directory_args & ) const;
+  bool operator<(const directory_rpc_service_create_directory_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_create_directory_pargs {
  public:
 
-
   virtual ~directory_rpc_service_create_directory_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -199,8 +198,8 @@ typedef struct _directory_rpc_service_create_directory_result__isset {
 class directory_rpc_service_create_directory_result {
  public:
 
-  directory_rpc_service_create_directory_result(const directory_rpc_service_create_directory_result&);
-  directory_rpc_service_create_directory_result& operator=(const directory_rpc_service_create_directory_result&);
+  directory_rpc_service_create_directory_result(const directory_rpc_service_create_directory_result &);
+  directory_rpc_service_create_directory_result &operator=(const directory_rpc_service_create_directory_result &);
   directory_rpc_service_create_directory_result() {
   }
 
@@ -209,24 +208,23 @@ class directory_rpc_service_create_directory_result {
 
   _directory_rpc_service_create_directory_result__isset __isset;
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_create_directory_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_create_directory_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_create_directory_result &rhs) const {
+  bool operator!=(const directory_rpc_service_create_directory_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_create_directory_result & ) const;
+  bool operator<(const directory_rpc_service_create_directory_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -238,14 +236,13 @@ typedef struct _directory_rpc_service_create_directory_presult__isset {
 class directory_rpc_service_create_directory_presult {
  public:
 
-
   virtual ~directory_rpc_service_create_directory_presult() throw();
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_create_directory_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -257,8 +254,8 @@ typedef struct _directory_rpc_service_create_directories_args__isset {
 class directory_rpc_service_create_directories_args {
  public:
 
-  directory_rpc_service_create_directories_args(const directory_rpc_service_create_directories_args&);
-  directory_rpc_service_create_directories_args& operator=(const directory_rpc_service_create_directories_args&);
+  directory_rpc_service_create_directories_args(const directory_rpc_service_create_directories_args &);
+  directory_rpc_service_create_directories_args &operator=(const directory_rpc_service_create_directories_args &);
   directory_rpc_service_create_directories_args() : path() {
   }
 
@@ -267,37 +264,34 @@ class directory_rpc_service_create_directories_args {
 
   _directory_rpc_service_create_directories_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_create_directories_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_create_directories_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_create_directories_args &rhs) const {
+  bool operator!=(const directory_rpc_service_create_directories_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_create_directories_args & ) const;
+  bool operator<(const directory_rpc_service_create_directories_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_create_directories_pargs {
  public:
 
-
   virtual ~directory_rpc_service_create_directories_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -309,8 +303,8 @@ typedef struct _directory_rpc_service_create_directories_result__isset {
 class directory_rpc_service_create_directories_result {
  public:
 
-  directory_rpc_service_create_directories_result(const directory_rpc_service_create_directories_result&);
-  directory_rpc_service_create_directories_result& operator=(const directory_rpc_service_create_directories_result&);
+  directory_rpc_service_create_directories_result(const directory_rpc_service_create_directories_result &);
+  directory_rpc_service_create_directories_result &operator=(const directory_rpc_service_create_directories_result &);
   directory_rpc_service_create_directories_result() {
   }
 
@@ -319,24 +313,23 @@ class directory_rpc_service_create_directories_result {
 
   _directory_rpc_service_create_directories_result__isset __isset;
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_create_directories_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_create_directories_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_create_directories_result &rhs) const {
+  bool operator!=(const directory_rpc_service_create_directories_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_create_directories_result & ) const;
+  bool operator<(const directory_rpc_service_create_directories_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -348,14 +341,13 @@ typedef struct _directory_rpc_service_create_directories_presult__isset {
 class directory_rpc_service_create_directories_presult {
  public:
 
-
   virtual ~directory_rpc_service_create_directories_presult() throw();
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_create_directories_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -368,8 +360,8 @@ typedef struct _directory_rpc_service_create_file_args__isset {
 class directory_rpc_service_create_file_args {
  public:
 
-  directory_rpc_service_create_file_args(const directory_rpc_service_create_file_args&);
-  directory_rpc_service_create_file_args& operator=(const directory_rpc_service_create_file_args&);
+  directory_rpc_service_create_file_args(const directory_rpc_service_create_file_args &);
+  directory_rpc_service_create_file_args &operator=(const directory_rpc_service_create_file_args &);
   directory_rpc_service_create_file_args() : path(), persistent_store_prefix() {
   }
 
@@ -379,42 +371,39 @@ class directory_rpc_service_create_file_args {
 
   _directory_rpc_service_create_file_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  void __set_persistent_store_prefix(const std::string& val);
+  void __set_persistent_store_prefix(const std::string &val);
 
-  bool operator == (const directory_rpc_service_create_file_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_create_file_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     if (!(persistent_store_prefix == rhs.persistent_store_prefix))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_create_file_args &rhs) const {
+  bool operator!=(const directory_rpc_service_create_file_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_create_file_args & ) const;
+  bool operator<(const directory_rpc_service_create_file_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_create_file_pargs {
  public:
 
-
   virtual ~directory_rpc_service_create_file_pargs() throw();
-  const std::string* path;
-  const std::string* persistent_store_prefix;
+  const std::string *path;
+  const std::string *persistent_store_prefix;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -426,8 +415,8 @@ typedef struct _directory_rpc_service_create_file_result__isset {
 class directory_rpc_service_create_file_result {
  public:
 
-  directory_rpc_service_create_file_result(const directory_rpc_service_create_file_result&);
-  directory_rpc_service_create_file_result& operator=(const directory_rpc_service_create_file_result&);
+  directory_rpc_service_create_file_result(const directory_rpc_service_create_file_result &);
+  directory_rpc_service_create_file_result &operator=(const directory_rpc_service_create_file_result &);
   directory_rpc_service_create_file_result() {
   }
 
@@ -436,24 +425,23 @@ class directory_rpc_service_create_file_result {
 
   _directory_rpc_service_create_file_result__isset __isset;
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_create_file_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_create_file_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_create_file_result &rhs) const {
+  bool operator!=(const directory_rpc_service_create_file_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_create_file_result & ) const;
+  bool operator<(const directory_rpc_service_create_file_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -465,14 +453,13 @@ typedef struct _directory_rpc_service_create_file_presult__isset {
 class directory_rpc_service_create_file_presult {
  public:
 
-
   virtual ~directory_rpc_service_create_file_presult() throw();
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_create_file_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -484,8 +471,8 @@ typedef struct _directory_rpc_service_exists_args__isset {
 class directory_rpc_service_exists_args {
  public:
 
-  directory_rpc_service_exists_args(const directory_rpc_service_exists_args&);
-  directory_rpc_service_exists_args& operator=(const directory_rpc_service_exists_args&);
+  directory_rpc_service_exists_args(const directory_rpc_service_exists_args &);
+  directory_rpc_service_exists_args &operator=(const directory_rpc_service_exists_args &);
   directory_rpc_service_exists_args() : path() {
   }
 
@@ -494,37 +481,34 @@ class directory_rpc_service_exists_args {
 
   _directory_rpc_service_exists_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_exists_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_exists_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_exists_args &rhs) const {
+  bool operator!=(const directory_rpc_service_exists_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_exists_args & ) const;
+  bool operator<(const directory_rpc_service_exists_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_exists_pargs {
  public:
 
-
   virtual ~directory_rpc_service_exists_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -537,8 +521,8 @@ typedef struct _directory_rpc_service_exists_result__isset {
 class directory_rpc_service_exists_result {
  public:
 
-  directory_rpc_service_exists_result(const directory_rpc_service_exists_result&);
-  directory_rpc_service_exists_result& operator=(const directory_rpc_service_exists_result&);
+  directory_rpc_service_exists_result(const directory_rpc_service_exists_result &);
+  directory_rpc_service_exists_result &operator=(const directory_rpc_service_exists_result &);
   directory_rpc_service_exists_result() : success(0) {
   }
 
@@ -550,26 +534,25 @@ class directory_rpc_service_exists_result {
 
   void __set_success(const bool val);
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_exists_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_exists_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_exists_result &rhs) const {
+  bool operator!=(const directory_rpc_service_exists_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_exists_result & ) const;
+  bool operator<(const directory_rpc_service_exists_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -582,15 +565,14 @@ typedef struct _directory_rpc_service_exists_presult__isset {
 class directory_rpc_service_exists_presult {
  public:
 
-
   virtual ~directory_rpc_service_exists_presult() throw();
-  bool* success;
+  bool *success;
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_exists_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -602,8 +584,8 @@ typedef struct _directory_rpc_service_file_size_args__isset {
 class directory_rpc_service_file_size_args {
  public:
 
-  directory_rpc_service_file_size_args(const directory_rpc_service_file_size_args&);
-  directory_rpc_service_file_size_args& operator=(const directory_rpc_service_file_size_args&);
+  directory_rpc_service_file_size_args(const directory_rpc_service_file_size_args &);
+  directory_rpc_service_file_size_args &operator=(const directory_rpc_service_file_size_args &);
   directory_rpc_service_file_size_args() : path() {
   }
 
@@ -612,37 +594,34 @@ class directory_rpc_service_file_size_args {
 
   _directory_rpc_service_file_size_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_file_size_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_file_size_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_file_size_args &rhs) const {
+  bool operator!=(const directory_rpc_service_file_size_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_file_size_args & ) const;
+  bool operator<(const directory_rpc_service_file_size_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_file_size_pargs {
  public:
 
-
   virtual ~directory_rpc_service_file_size_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -655,8 +634,8 @@ typedef struct _directory_rpc_service_file_size_result__isset {
 class directory_rpc_service_file_size_result {
  public:
 
-  directory_rpc_service_file_size_result(const directory_rpc_service_file_size_result&);
-  directory_rpc_service_file_size_result& operator=(const directory_rpc_service_file_size_result&);
+  directory_rpc_service_file_size_result(const directory_rpc_service_file_size_result &);
+  directory_rpc_service_file_size_result &operator=(const directory_rpc_service_file_size_result &);
   directory_rpc_service_file_size_result() : success(0) {
   }
 
@@ -668,26 +647,25 @@ class directory_rpc_service_file_size_result {
 
   void __set_success(const int64_t val);
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_file_size_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_file_size_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_file_size_result &rhs) const {
+  bool operator!=(const directory_rpc_service_file_size_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_file_size_result & ) const;
+  bool operator<(const directory_rpc_service_file_size_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -700,15 +678,14 @@ typedef struct _directory_rpc_service_file_size_presult__isset {
 class directory_rpc_service_file_size_presult {
  public:
 
-
   virtual ~directory_rpc_service_file_size_presult() throw();
-  int64_t* success;
+  int64_t *success;
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_file_size_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -720,8 +697,8 @@ typedef struct _directory_rpc_service_last_write_time_args__isset {
 class directory_rpc_service_last_write_time_args {
  public:
 
-  directory_rpc_service_last_write_time_args(const directory_rpc_service_last_write_time_args&);
-  directory_rpc_service_last_write_time_args& operator=(const directory_rpc_service_last_write_time_args&);
+  directory_rpc_service_last_write_time_args(const directory_rpc_service_last_write_time_args &);
+  directory_rpc_service_last_write_time_args &operator=(const directory_rpc_service_last_write_time_args &);
   directory_rpc_service_last_write_time_args() : path() {
   }
 
@@ -730,37 +707,34 @@ class directory_rpc_service_last_write_time_args {
 
   _directory_rpc_service_last_write_time_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_last_write_time_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_last_write_time_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_last_write_time_args &rhs) const {
+  bool operator!=(const directory_rpc_service_last_write_time_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_last_write_time_args & ) const;
+  bool operator<(const directory_rpc_service_last_write_time_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_last_write_time_pargs {
  public:
 
-
   virtual ~directory_rpc_service_last_write_time_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -773,8 +747,8 @@ typedef struct _directory_rpc_service_last_write_time_result__isset {
 class directory_rpc_service_last_write_time_result {
  public:
 
-  directory_rpc_service_last_write_time_result(const directory_rpc_service_last_write_time_result&);
-  directory_rpc_service_last_write_time_result& operator=(const directory_rpc_service_last_write_time_result&);
+  directory_rpc_service_last_write_time_result(const directory_rpc_service_last_write_time_result &);
+  directory_rpc_service_last_write_time_result &operator=(const directory_rpc_service_last_write_time_result &);
   directory_rpc_service_last_write_time_result() : success(0) {
   }
 
@@ -786,26 +760,25 @@ class directory_rpc_service_last_write_time_result {
 
   void __set_success(const int64_t val);
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_last_write_time_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_last_write_time_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_last_write_time_result &rhs) const {
+  bool operator!=(const directory_rpc_service_last_write_time_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_last_write_time_result & ) const;
+  bool operator<(const directory_rpc_service_last_write_time_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -818,15 +791,14 @@ typedef struct _directory_rpc_service_last_write_time_presult__isset {
 class directory_rpc_service_last_write_time_presult {
  public:
 
-
   virtual ~directory_rpc_service_last_write_time_presult() throw();
-  int64_t* success;
+  int64_t *success;
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_last_write_time_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -840,9 +812,9 @@ typedef struct _directory_rpc_service_set_permissions_args__isset {
 class directory_rpc_service_set_permissions_args {
  public:
 
-  directory_rpc_service_set_permissions_args(const directory_rpc_service_set_permissions_args&);
-  directory_rpc_service_set_permissions_args& operator=(const directory_rpc_service_set_permissions_args&);
-  directory_rpc_service_set_permissions_args() : path(), perms(0), opts((rpc_perm_options)0) {
+  directory_rpc_service_set_permissions_args(const directory_rpc_service_set_permissions_args &);
+  directory_rpc_service_set_permissions_args &operator=(const directory_rpc_service_set_permissions_args &);
+  directory_rpc_service_set_permissions_args() : path(), perms(0), opts((rpc_perm_options) 0) {
   }
 
   virtual ~directory_rpc_service_set_permissions_args() throw();
@@ -852,14 +824,13 @@ class directory_rpc_service_set_permissions_args {
 
   _directory_rpc_service_set_permissions_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
   void __set_perms(const rpc_perms val);
 
   void __set_opts(const rpc_perm_options val);
 
-  bool operator == (const directory_rpc_service_set_permissions_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_set_permissions_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     if (!(perms == rhs.perms))
@@ -868,31 +839,29 @@ class directory_rpc_service_set_permissions_args {
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_set_permissions_args &rhs) const {
+  bool operator!=(const directory_rpc_service_set_permissions_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_set_permissions_args & ) const;
+  bool operator<(const directory_rpc_service_set_permissions_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_set_permissions_pargs {
  public:
 
-
   virtual ~directory_rpc_service_set_permissions_pargs() throw();
-  const std::string* path;
-  const rpc_perms* perms;
-  const rpc_perm_options* opts;
+  const std::string *path;
+  const rpc_perms *perms;
+  const rpc_perm_options *opts;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -904,8 +873,8 @@ typedef struct _directory_rpc_service_set_permissions_result__isset {
 class directory_rpc_service_set_permissions_result {
  public:
 
-  directory_rpc_service_set_permissions_result(const directory_rpc_service_set_permissions_result&);
-  directory_rpc_service_set_permissions_result& operator=(const directory_rpc_service_set_permissions_result&);
+  directory_rpc_service_set_permissions_result(const directory_rpc_service_set_permissions_result &);
+  directory_rpc_service_set_permissions_result &operator=(const directory_rpc_service_set_permissions_result &);
   directory_rpc_service_set_permissions_result() {
   }
 
@@ -914,24 +883,23 @@ class directory_rpc_service_set_permissions_result {
 
   _directory_rpc_service_set_permissions_result__isset __isset;
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_set_permissions_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_set_permissions_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_set_permissions_result &rhs) const {
+  bool operator!=(const directory_rpc_service_set_permissions_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_set_permissions_result & ) const;
+  bool operator<(const directory_rpc_service_set_permissions_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -943,14 +911,13 @@ typedef struct _directory_rpc_service_set_permissions_presult__isset {
 class directory_rpc_service_set_permissions_presult {
  public:
 
-
   virtual ~directory_rpc_service_set_permissions_presult() throw();
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_set_permissions_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -962,8 +929,8 @@ typedef struct _directory_rpc_service_get_permissions_args__isset {
 class directory_rpc_service_get_permissions_args {
  public:
 
-  directory_rpc_service_get_permissions_args(const directory_rpc_service_get_permissions_args&);
-  directory_rpc_service_get_permissions_args& operator=(const directory_rpc_service_get_permissions_args&);
+  directory_rpc_service_get_permissions_args(const directory_rpc_service_get_permissions_args &);
+  directory_rpc_service_get_permissions_args &operator=(const directory_rpc_service_get_permissions_args &);
   directory_rpc_service_get_permissions_args() : path() {
   }
 
@@ -972,37 +939,34 @@ class directory_rpc_service_get_permissions_args {
 
   _directory_rpc_service_get_permissions_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_get_permissions_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_get_permissions_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_get_permissions_args &rhs) const {
+  bool operator!=(const directory_rpc_service_get_permissions_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_get_permissions_args & ) const;
+  bool operator<(const directory_rpc_service_get_permissions_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_get_permissions_pargs {
  public:
 
-
   virtual ~directory_rpc_service_get_permissions_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1015,8 +979,8 @@ typedef struct _directory_rpc_service_get_permissions_result__isset {
 class directory_rpc_service_get_permissions_result {
  public:
 
-  directory_rpc_service_get_permissions_result(const directory_rpc_service_get_permissions_result&);
-  directory_rpc_service_get_permissions_result& operator=(const directory_rpc_service_get_permissions_result&);
+  directory_rpc_service_get_permissions_result(const directory_rpc_service_get_permissions_result &);
+  directory_rpc_service_get_permissions_result &operator=(const directory_rpc_service_get_permissions_result &);
   directory_rpc_service_get_permissions_result() : success(0) {
   }
 
@@ -1028,26 +992,25 @@ class directory_rpc_service_get_permissions_result {
 
   void __set_success(const rpc_perms val);
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_get_permissions_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_get_permissions_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_get_permissions_result &rhs) const {
+  bool operator!=(const directory_rpc_service_get_permissions_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_get_permissions_result & ) const;
+  bool operator<(const directory_rpc_service_get_permissions_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1060,15 +1023,14 @@ typedef struct _directory_rpc_service_get_permissions_presult__isset {
 class directory_rpc_service_get_permissions_presult {
  public:
 
-
   virtual ~directory_rpc_service_get_permissions_presult() throw();
-  rpc_perms* success;
+  rpc_perms *success;
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_get_permissions_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -1080,8 +1042,8 @@ typedef struct _directory_rpc_service_remove_args__isset {
 class directory_rpc_service_remove_args {
  public:
 
-  directory_rpc_service_remove_args(const directory_rpc_service_remove_args&);
-  directory_rpc_service_remove_args& operator=(const directory_rpc_service_remove_args&);
+  directory_rpc_service_remove_args(const directory_rpc_service_remove_args &);
+  directory_rpc_service_remove_args &operator=(const directory_rpc_service_remove_args &);
   directory_rpc_service_remove_args() : path() {
   }
 
@@ -1090,37 +1052,34 @@ class directory_rpc_service_remove_args {
 
   _directory_rpc_service_remove_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_remove_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_remove_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_remove_args &rhs) const {
+  bool operator!=(const directory_rpc_service_remove_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_remove_args & ) const;
+  bool operator<(const directory_rpc_service_remove_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_remove_pargs {
  public:
 
-
   virtual ~directory_rpc_service_remove_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1132,8 +1091,8 @@ typedef struct _directory_rpc_service_remove_result__isset {
 class directory_rpc_service_remove_result {
  public:
 
-  directory_rpc_service_remove_result(const directory_rpc_service_remove_result&);
-  directory_rpc_service_remove_result& operator=(const directory_rpc_service_remove_result&);
+  directory_rpc_service_remove_result(const directory_rpc_service_remove_result &);
+  directory_rpc_service_remove_result &operator=(const directory_rpc_service_remove_result &);
   directory_rpc_service_remove_result() {
   }
 
@@ -1142,24 +1101,23 @@ class directory_rpc_service_remove_result {
 
   _directory_rpc_service_remove_result__isset __isset;
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_remove_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_remove_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_remove_result &rhs) const {
+  bool operator!=(const directory_rpc_service_remove_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_remove_result & ) const;
+  bool operator<(const directory_rpc_service_remove_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1171,14 +1129,13 @@ typedef struct _directory_rpc_service_remove_presult__isset {
 class directory_rpc_service_remove_presult {
  public:
 
-
   virtual ~directory_rpc_service_remove_presult() throw();
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_remove_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -1190,8 +1147,8 @@ typedef struct _directory_rpc_service_remove_all_args__isset {
 class directory_rpc_service_remove_all_args {
  public:
 
-  directory_rpc_service_remove_all_args(const directory_rpc_service_remove_all_args&);
-  directory_rpc_service_remove_all_args& operator=(const directory_rpc_service_remove_all_args&);
+  directory_rpc_service_remove_all_args(const directory_rpc_service_remove_all_args &);
+  directory_rpc_service_remove_all_args &operator=(const directory_rpc_service_remove_all_args &);
   directory_rpc_service_remove_all_args() : path() {
   }
 
@@ -1200,37 +1157,34 @@ class directory_rpc_service_remove_all_args {
 
   _directory_rpc_service_remove_all_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_remove_all_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_remove_all_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_remove_all_args &rhs) const {
+  bool operator!=(const directory_rpc_service_remove_all_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_remove_all_args & ) const;
+  bool operator<(const directory_rpc_service_remove_all_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_remove_all_pargs {
  public:
 
-
   virtual ~directory_rpc_service_remove_all_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1242,8 +1196,8 @@ typedef struct _directory_rpc_service_remove_all_result__isset {
 class directory_rpc_service_remove_all_result {
  public:
 
-  directory_rpc_service_remove_all_result(const directory_rpc_service_remove_all_result&);
-  directory_rpc_service_remove_all_result& operator=(const directory_rpc_service_remove_all_result&);
+  directory_rpc_service_remove_all_result(const directory_rpc_service_remove_all_result &);
+  directory_rpc_service_remove_all_result &operator=(const directory_rpc_service_remove_all_result &);
   directory_rpc_service_remove_all_result() {
   }
 
@@ -1252,24 +1206,23 @@ class directory_rpc_service_remove_all_result {
 
   _directory_rpc_service_remove_all_result__isset __isset;
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_remove_all_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_remove_all_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_remove_all_result &rhs) const {
+  bool operator!=(const directory_rpc_service_remove_all_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_remove_all_result & ) const;
+  bool operator<(const directory_rpc_service_remove_all_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1281,14 +1234,13 @@ typedef struct _directory_rpc_service_remove_all_presult__isset {
 class directory_rpc_service_remove_all_presult {
  public:
 
-
   virtual ~directory_rpc_service_remove_all_presult() throw();
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_remove_all_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -1301,8 +1253,8 @@ typedef struct _directory_rpc_service_rename_args__isset {
 class directory_rpc_service_rename_args {
  public:
 
-  directory_rpc_service_rename_args(const directory_rpc_service_rename_args&);
-  directory_rpc_service_rename_args& operator=(const directory_rpc_service_rename_args&);
+  directory_rpc_service_rename_args(const directory_rpc_service_rename_args &);
+  directory_rpc_service_rename_args &operator=(const directory_rpc_service_rename_args &);
   directory_rpc_service_rename_args() : old_path(), new_path() {
   }
 
@@ -1312,42 +1264,39 @@ class directory_rpc_service_rename_args {
 
   _directory_rpc_service_rename_args__isset __isset;
 
-  void __set_old_path(const std::string& val);
+  void __set_old_path(const std::string &val);
 
-  void __set_new_path(const std::string& val);
+  void __set_new_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_rename_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_rename_args &rhs) const {
     if (!(old_path == rhs.old_path))
       return false;
     if (!(new_path == rhs.new_path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_rename_args &rhs) const {
+  bool operator!=(const directory_rpc_service_rename_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_rename_args & ) const;
+  bool operator<(const directory_rpc_service_rename_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_rename_pargs {
  public:
 
-
   virtual ~directory_rpc_service_rename_pargs() throw();
-  const std::string* old_path;
-  const std::string* new_path;
+  const std::string *old_path;
+  const std::string *new_path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1359,8 +1308,8 @@ typedef struct _directory_rpc_service_rename_result__isset {
 class directory_rpc_service_rename_result {
  public:
 
-  directory_rpc_service_rename_result(const directory_rpc_service_rename_result&);
-  directory_rpc_service_rename_result& operator=(const directory_rpc_service_rename_result&);
+  directory_rpc_service_rename_result(const directory_rpc_service_rename_result &);
+  directory_rpc_service_rename_result &operator=(const directory_rpc_service_rename_result &);
   directory_rpc_service_rename_result() {
   }
 
@@ -1369,24 +1318,23 @@ class directory_rpc_service_rename_result {
 
   _directory_rpc_service_rename_result__isset __isset;
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_rename_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_rename_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_rename_result &rhs) const {
+  bool operator!=(const directory_rpc_service_rename_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_rename_result & ) const;
+  bool operator<(const directory_rpc_service_rename_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1398,14 +1346,13 @@ typedef struct _directory_rpc_service_rename_presult__isset {
 class directory_rpc_service_rename_presult {
  public:
 
-
   virtual ~directory_rpc_service_rename_presult() throw();
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_rename_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -1417,8 +1364,8 @@ typedef struct _directory_rpc_service_status_args__isset {
 class directory_rpc_service_status_args {
  public:
 
-  directory_rpc_service_status_args(const directory_rpc_service_status_args&);
-  directory_rpc_service_status_args& operator=(const directory_rpc_service_status_args&);
+  directory_rpc_service_status_args(const directory_rpc_service_status_args &);
+  directory_rpc_service_status_args &operator=(const directory_rpc_service_status_args &);
   directory_rpc_service_status_args() : path() {
   }
 
@@ -1427,37 +1374,34 @@ class directory_rpc_service_status_args {
 
   _directory_rpc_service_status_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_status_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_status_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_status_args &rhs) const {
+  bool operator!=(const directory_rpc_service_status_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_status_args & ) const;
+  bool operator<(const directory_rpc_service_status_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_status_pargs {
  public:
 
-
   virtual ~directory_rpc_service_status_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1470,8 +1414,8 @@ typedef struct _directory_rpc_service_status_result__isset {
 class directory_rpc_service_status_result {
  public:
 
-  directory_rpc_service_status_result(const directory_rpc_service_status_result&);
-  directory_rpc_service_status_result& operator=(const directory_rpc_service_status_result&);
+  directory_rpc_service_status_result(const directory_rpc_service_status_result &);
+  directory_rpc_service_status_result &operator=(const directory_rpc_service_status_result &);
   directory_rpc_service_status_result() {
   }
 
@@ -1481,28 +1425,27 @@ class directory_rpc_service_status_result {
 
   _directory_rpc_service_status_result__isset __isset;
 
-  void __set_success(const rpc_file_status& val);
+  void __set_success(const rpc_file_status &val);
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_status_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_status_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_status_result &rhs) const {
+  bool operator!=(const directory_rpc_service_status_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_status_result & ) const;
+  bool operator<(const directory_rpc_service_status_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1515,15 +1458,14 @@ typedef struct _directory_rpc_service_status_presult__isset {
 class directory_rpc_service_status_presult {
  public:
 
-
   virtual ~directory_rpc_service_status_presult() throw();
-  rpc_file_status* success;
+  rpc_file_status *success;
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_status_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -1535,8 +1477,8 @@ typedef struct _directory_rpc_service_directory_entries_args__isset {
 class directory_rpc_service_directory_entries_args {
  public:
 
-  directory_rpc_service_directory_entries_args(const directory_rpc_service_directory_entries_args&);
-  directory_rpc_service_directory_entries_args& operator=(const directory_rpc_service_directory_entries_args&);
+  directory_rpc_service_directory_entries_args(const directory_rpc_service_directory_entries_args &);
+  directory_rpc_service_directory_entries_args &operator=(const directory_rpc_service_directory_entries_args &);
   directory_rpc_service_directory_entries_args() : path() {
   }
 
@@ -1545,37 +1487,34 @@ class directory_rpc_service_directory_entries_args {
 
   _directory_rpc_service_directory_entries_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_directory_entries_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_directory_entries_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_directory_entries_args &rhs) const {
+  bool operator!=(const directory_rpc_service_directory_entries_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_directory_entries_args & ) const;
+  bool operator<(const directory_rpc_service_directory_entries_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_directory_entries_pargs {
  public:
 
-
   virtual ~directory_rpc_service_directory_entries_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1588,39 +1527,38 @@ typedef struct _directory_rpc_service_directory_entries_result__isset {
 class directory_rpc_service_directory_entries_result {
  public:
 
-  directory_rpc_service_directory_entries_result(const directory_rpc_service_directory_entries_result&);
-  directory_rpc_service_directory_entries_result& operator=(const directory_rpc_service_directory_entries_result&);
+  directory_rpc_service_directory_entries_result(const directory_rpc_service_directory_entries_result &);
+  directory_rpc_service_directory_entries_result &operator=(const directory_rpc_service_directory_entries_result &);
   directory_rpc_service_directory_entries_result() {
   }
 
   virtual ~directory_rpc_service_directory_entries_result() throw();
-  std::vector<rpc_dir_entry>  success;
+  std::vector<rpc_dir_entry> success;
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_directory_entries_result__isset __isset;
 
-  void __set_success(const std::vector<rpc_dir_entry> & val);
+  void __set_success(const std::vector<rpc_dir_entry> &val);
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_directory_entries_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_directory_entries_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_directory_entries_result &rhs) const {
+  bool operator!=(const directory_rpc_service_directory_entries_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_directory_entries_result & ) const;
+  bool operator<(const directory_rpc_service_directory_entries_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1633,15 +1571,14 @@ typedef struct _directory_rpc_service_directory_entries_presult__isset {
 class directory_rpc_service_directory_entries_presult {
  public:
 
-
   virtual ~directory_rpc_service_directory_entries_presult() throw();
-  std::vector<rpc_dir_entry> * success;
+  std::vector<rpc_dir_entry> *success;
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_directory_entries_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -1653,8 +1590,8 @@ typedef struct _directory_rpc_service_recursive_directory_entries_args__isset {
 class directory_rpc_service_recursive_directory_entries_args {
  public:
 
-  directory_rpc_service_recursive_directory_entries_args(const directory_rpc_service_recursive_directory_entries_args&);
-  directory_rpc_service_recursive_directory_entries_args& operator=(const directory_rpc_service_recursive_directory_entries_args&);
+  directory_rpc_service_recursive_directory_entries_args(const directory_rpc_service_recursive_directory_entries_args &);
+  directory_rpc_service_recursive_directory_entries_args &operator=(const directory_rpc_service_recursive_directory_entries_args &);
   directory_rpc_service_recursive_directory_entries_args() : path() {
   }
 
@@ -1663,37 +1600,34 @@ class directory_rpc_service_recursive_directory_entries_args {
 
   _directory_rpc_service_recursive_directory_entries_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_recursive_directory_entries_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_recursive_directory_entries_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_recursive_directory_entries_args &rhs) const {
+  bool operator!=(const directory_rpc_service_recursive_directory_entries_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_recursive_directory_entries_args & ) const;
+  bool operator<(const directory_rpc_service_recursive_directory_entries_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_recursive_directory_entries_pargs {
  public:
 
-
   virtual ~directory_rpc_service_recursive_directory_entries_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1706,39 +1640,38 @@ typedef struct _directory_rpc_service_recursive_directory_entries_result__isset 
 class directory_rpc_service_recursive_directory_entries_result {
  public:
 
-  directory_rpc_service_recursive_directory_entries_result(const directory_rpc_service_recursive_directory_entries_result&);
-  directory_rpc_service_recursive_directory_entries_result& operator=(const directory_rpc_service_recursive_directory_entries_result&);
+  directory_rpc_service_recursive_directory_entries_result(const directory_rpc_service_recursive_directory_entries_result &);
+  directory_rpc_service_recursive_directory_entries_result &operator=(const directory_rpc_service_recursive_directory_entries_result &);
   directory_rpc_service_recursive_directory_entries_result() {
   }
 
   virtual ~directory_rpc_service_recursive_directory_entries_result() throw();
-  std::vector<rpc_dir_entry>  success;
+  std::vector<rpc_dir_entry> success;
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_recursive_directory_entries_result__isset __isset;
 
-  void __set_success(const std::vector<rpc_dir_entry> & val);
+  void __set_success(const std::vector<rpc_dir_entry> &val);
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_recursive_directory_entries_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_recursive_directory_entries_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_recursive_directory_entries_result &rhs) const {
+  bool operator!=(const directory_rpc_service_recursive_directory_entries_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_recursive_directory_entries_result & ) const;
+  bool operator<(const directory_rpc_service_recursive_directory_entries_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1751,15 +1684,14 @@ typedef struct _directory_rpc_service_recursive_directory_entries_presult__isset
 class directory_rpc_service_recursive_directory_entries_presult {
  public:
 
-
   virtual ~directory_rpc_service_recursive_directory_entries_presult() throw();
-  std::vector<rpc_dir_entry> * success;
+  std::vector<rpc_dir_entry> *success;
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_recursive_directory_entries_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -1771,8 +1703,8 @@ typedef struct _directory_rpc_service_dstatus_args__isset {
 class directory_rpc_service_dstatus_args {
  public:
 
-  directory_rpc_service_dstatus_args(const directory_rpc_service_dstatus_args&);
-  directory_rpc_service_dstatus_args& operator=(const directory_rpc_service_dstatus_args&);
+  directory_rpc_service_dstatus_args(const directory_rpc_service_dstatus_args &);
+  directory_rpc_service_dstatus_args &operator=(const directory_rpc_service_dstatus_args &);
   directory_rpc_service_dstatus_args() : path() {
   }
 
@@ -1781,37 +1713,34 @@ class directory_rpc_service_dstatus_args {
 
   _directory_rpc_service_dstatus_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_dstatus_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_dstatus_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_dstatus_args &rhs) const {
+  bool operator!=(const directory_rpc_service_dstatus_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_dstatus_args & ) const;
+  bool operator<(const directory_rpc_service_dstatus_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_dstatus_pargs {
  public:
 
-
   virtual ~directory_rpc_service_dstatus_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1824,8 +1753,8 @@ typedef struct _directory_rpc_service_dstatus_result__isset {
 class directory_rpc_service_dstatus_result {
  public:
 
-  directory_rpc_service_dstatus_result(const directory_rpc_service_dstatus_result&);
-  directory_rpc_service_dstatus_result& operator=(const directory_rpc_service_dstatus_result&);
+  directory_rpc_service_dstatus_result(const directory_rpc_service_dstatus_result &);
+  directory_rpc_service_dstatus_result &operator=(const directory_rpc_service_dstatus_result &);
   directory_rpc_service_dstatus_result() {
   }
 
@@ -1835,28 +1764,27 @@ class directory_rpc_service_dstatus_result {
 
   _directory_rpc_service_dstatus_result__isset __isset;
 
-  void __set_success(const rpc_data_status& val);
+  void __set_success(const rpc_data_status &val);
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_dstatus_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_dstatus_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_dstatus_result &rhs) const {
+  bool operator!=(const directory_rpc_service_dstatus_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_dstatus_result & ) const;
+  bool operator<(const directory_rpc_service_dstatus_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1869,15 +1797,14 @@ typedef struct _directory_rpc_service_dstatus_presult__isset {
 class directory_rpc_service_dstatus_presult {
  public:
 
-
   virtual ~directory_rpc_service_dstatus_presult() throw();
-  rpc_data_status* success;
+  rpc_data_status *success;
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_dstatus_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -1889,8 +1816,8 @@ typedef struct _directory_rpc_service_mode_args__isset {
 class directory_rpc_service_mode_args {
  public:
 
-  directory_rpc_service_mode_args(const directory_rpc_service_mode_args&);
-  directory_rpc_service_mode_args& operator=(const directory_rpc_service_mode_args&);
+  directory_rpc_service_mode_args(const directory_rpc_service_mode_args &);
+  directory_rpc_service_mode_args &operator=(const directory_rpc_service_mode_args &);
   directory_rpc_service_mode_args() : path() {
   }
 
@@ -1899,37 +1826,34 @@ class directory_rpc_service_mode_args {
 
   _directory_rpc_service_mode_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_mode_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_mode_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_mode_args &rhs) const {
+  bool operator!=(const directory_rpc_service_mode_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_mode_args & ) const;
+  bool operator<(const directory_rpc_service_mode_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_mode_pargs {
  public:
 
-
   virtual ~directory_rpc_service_mode_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1942,9 +1866,9 @@ typedef struct _directory_rpc_service_mode_result__isset {
 class directory_rpc_service_mode_result {
  public:
 
-  directory_rpc_service_mode_result(const directory_rpc_service_mode_result&);
-  directory_rpc_service_mode_result& operator=(const directory_rpc_service_mode_result&);
-  directory_rpc_service_mode_result() : success((rpc_storage_mode)0) {
+  directory_rpc_service_mode_result(const directory_rpc_service_mode_result &);
+  directory_rpc_service_mode_result &operator=(const directory_rpc_service_mode_result &);
+  directory_rpc_service_mode_result() : success((rpc_storage_mode) 0) {
   }
 
   virtual ~directory_rpc_service_mode_result() throw();
@@ -1955,26 +1879,25 @@ class directory_rpc_service_mode_result {
 
   void __set_success(const rpc_storage_mode val);
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_mode_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_mode_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_mode_result &rhs) const {
+  bool operator!=(const directory_rpc_service_mode_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_mode_result & ) const;
+  bool operator<(const directory_rpc_service_mode_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1987,15 +1910,14 @@ typedef struct _directory_rpc_service_mode_presult__isset {
 class directory_rpc_service_mode_presult {
  public:
 
-
   virtual ~directory_rpc_service_mode_presult() throw();
-  rpc_storage_mode* success;
+  rpc_storage_mode *success;
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_mode_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -2007,8 +1929,8 @@ typedef struct _directory_rpc_service_persistent_store_prefix_args__isset {
 class directory_rpc_service_persistent_store_prefix_args {
  public:
 
-  directory_rpc_service_persistent_store_prefix_args(const directory_rpc_service_persistent_store_prefix_args&);
-  directory_rpc_service_persistent_store_prefix_args& operator=(const directory_rpc_service_persistent_store_prefix_args&);
+  directory_rpc_service_persistent_store_prefix_args(const directory_rpc_service_persistent_store_prefix_args &);
+  directory_rpc_service_persistent_store_prefix_args &operator=(const directory_rpc_service_persistent_store_prefix_args &);
   directory_rpc_service_persistent_store_prefix_args() : path() {
   }
 
@@ -2017,37 +1939,34 @@ class directory_rpc_service_persistent_store_prefix_args {
 
   _directory_rpc_service_persistent_store_prefix_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_persistent_store_prefix_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_persistent_store_prefix_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_persistent_store_prefix_args &rhs) const {
+  bool operator!=(const directory_rpc_service_persistent_store_prefix_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_persistent_store_prefix_args & ) const;
+  bool operator<(const directory_rpc_service_persistent_store_prefix_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_persistent_store_prefix_pargs {
  public:
 
-
   virtual ~directory_rpc_service_persistent_store_prefix_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2060,8 +1979,8 @@ typedef struct _directory_rpc_service_persistent_store_prefix_result__isset {
 class directory_rpc_service_persistent_store_prefix_result {
  public:
 
-  directory_rpc_service_persistent_store_prefix_result(const directory_rpc_service_persistent_store_prefix_result&);
-  directory_rpc_service_persistent_store_prefix_result& operator=(const directory_rpc_service_persistent_store_prefix_result&);
+  directory_rpc_service_persistent_store_prefix_result(const directory_rpc_service_persistent_store_prefix_result &);
+  directory_rpc_service_persistent_store_prefix_result &operator=(const directory_rpc_service_persistent_store_prefix_result &);
   directory_rpc_service_persistent_store_prefix_result() : success() {
   }
 
@@ -2071,28 +1990,27 @@ class directory_rpc_service_persistent_store_prefix_result {
 
   _directory_rpc_service_persistent_store_prefix_result__isset __isset;
 
-  void __set_success(const std::string& val);
+  void __set_success(const std::string &val);
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_persistent_store_prefix_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_persistent_store_prefix_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_persistent_store_prefix_result &rhs) const {
+  bool operator!=(const directory_rpc_service_persistent_store_prefix_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_persistent_store_prefix_result & ) const;
+  bool operator<(const directory_rpc_service_persistent_store_prefix_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2105,15 +2023,14 @@ typedef struct _directory_rpc_service_persistent_store_prefix_presult__isset {
 class directory_rpc_service_persistent_store_prefix_presult {
  public:
 
-
   virtual ~directory_rpc_service_persistent_store_prefix_presult() throw();
-  std::string* success;
+  std::string *success;
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_persistent_store_prefix_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -2125,8 +2042,8 @@ typedef struct _directory_rpc_service_data_blocks_args__isset {
 class directory_rpc_service_data_blocks_args {
  public:
 
-  directory_rpc_service_data_blocks_args(const directory_rpc_service_data_blocks_args&);
-  directory_rpc_service_data_blocks_args& operator=(const directory_rpc_service_data_blocks_args&);
+  directory_rpc_service_data_blocks_args(const directory_rpc_service_data_blocks_args &);
+  directory_rpc_service_data_blocks_args &operator=(const directory_rpc_service_data_blocks_args &);
   directory_rpc_service_data_blocks_args() : path() {
   }
 
@@ -2135,37 +2052,34 @@ class directory_rpc_service_data_blocks_args {
 
   _directory_rpc_service_data_blocks_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_data_blocks_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_data_blocks_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_data_blocks_args &rhs) const {
+  bool operator!=(const directory_rpc_service_data_blocks_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_data_blocks_args & ) const;
+  bool operator<(const directory_rpc_service_data_blocks_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_data_blocks_pargs {
  public:
 
-
   virtual ~directory_rpc_service_data_blocks_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2178,39 +2092,38 @@ typedef struct _directory_rpc_service_data_blocks_result__isset {
 class directory_rpc_service_data_blocks_result {
  public:
 
-  directory_rpc_service_data_blocks_result(const directory_rpc_service_data_blocks_result&);
-  directory_rpc_service_data_blocks_result& operator=(const directory_rpc_service_data_blocks_result&);
+  directory_rpc_service_data_blocks_result(const directory_rpc_service_data_blocks_result &);
+  directory_rpc_service_data_blocks_result &operator=(const directory_rpc_service_data_blocks_result &);
   directory_rpc_service_data_blocks_result() {
   }
 
   virtual ~directory_rpc_service_data_blocks_result() throw();
-  std::vector<std::string>  success;
+  std::vector<std::string> success;
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_data_blocks_result__isset __isset;
 
-  void __set_success(const std::vector<std::string> & val);
+  void __set_success(const std::vector<std::string> &val);
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_data_blocks_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_data_blocks_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_data_blocks_result &rhs) const {
+  bool operator!=(const directory_rpc_service_data_blocks_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_data_blocks_result & ) const;
+  bool operator<(const directory_rpc_service_data_blocks_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2223,15 +2136,14 @@ typedef struct _directory_rpc_service_data_blocks_presult__isset {
 class directory_rpc_service_data_blocks_presult {
  public:
 
-
   virtual ~directory_rpc_service_data_blocks_presult() throw();
-  std::vector<std::string> * success;
+  std::vector<std::string> *success;
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_data_blocks_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -2243,8 +2155,8 @@ typedef struct _directory_rpc_service_is_regular_file_args__isset {
 class directory_rpc_service_is_regular_file_args {
  public:
 
-  directory_rpc_service_is_regular_file_args(const directory_rpc_service_is_regular_file_args&);
-  directory_rpc_service_is_regular_file_args& operator=(const directory_rpc_service_is_regular_file_args&);
+  directory_rpc_service_is_regular_file_args(const directory_rpc_service_is_regular_file_args &);
+  directory_rpc_service_is_regular_file_args &operator=(const directory_rpc_service_is_regular_file_args &);
   directory_rpc_service_is_regular_file_args() : path() {
   }
 
@@ -2253,37 +2165,34 @@ class directory_rpc_service_is_regular_file_args {
 
   _directory_rpc_service_is_regular_file_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_is_regular_file_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_is_regular_file_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_is_regular_file_args &rhs) const {
+  bool operator!=(const directory_rpc_service_is_regular_file_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_is_regular_file_args & ) const;
+  bool operator<(const directory_rpc_service_is_regular_file_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_is_regular_file_pargs {
  public:
 
-
   virtual ~directory_rpc_service_is_regular_file_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2296,8 +2205,8 @@ typedef struct _directory_rpc_service_is_regular_file_result__isset {
 class directory_rpc_service_is_regular_file_result {
  public:
 
-  directory_rpc_service_is_regular_file_result(const directory_rpc_service_is_regular_file_result&);
-  directory_rpc_service_is_regular_file_result& operator=(const directory_rpc_service_is_regular_file_result&);
+  directory_rpc_service_is_regular_file_result(const directory_rpc_service_is_regular_file_result &);
+  directory_rpc_service_is_regular_file_result &operator=(const directory_rpc_service_is_regular_file_result &);
   directory_rpc_service_is_regular_file_result() : success(0) {
   }
 
@@ -2309,26 +2218,25 @@ class directory_rpc_service_is_regular_file_result {
 
   void __set_success(const bool val);
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_is_regular_file_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_is_regular_file_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_is_regular_file_result &rhs) const {
+  bool operator!=(const directory_rpc_service_is_regular_file_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_is_regular_file_result & ) const;
+  bool operator<(const directory_rpc_service_is_regular_file_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2341,15 +2249,14 @@ typedef struct _directory_rpc_service_is_regular_file_presult__isset {
 class directory_rpc_service_is_regular_file_presult {
  public:
 
-
   virtual ~directory_rpc_service_is_regular_file_presult() throw();
-  bool* success;
+  bool *success;
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_is_regular_file_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -2361,8 +2268,8 @@ typedef struct _directory_rpc_service_is_directory_args__isset {
 class directory_rpc_service_is_directory_args {
  public:
 
-  directory_rpc_service_is_directory_args(const directory_rpc_service_is_directory_args&);
-  directory_rpc_service_is_directory_args& operator=(const directory_rpc_service_is_directory_args&);
+  directory_rpc_service_is_directory_args(const directory_rpc_service_is_directory_args &);
+  directory_rpc_service_is_directory_args &operator=(const directory_rpc_service_is_directory_args &);
   directory_rpc_service_is_directory_args() : path() {
   }
 
@@ -2371,37 +2278,34 @@ class directory_rpc_service_is_directory_args {
 
   _directory_rpc_service_is_directory_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_path(const std::string &val);
 
-  bool operator == (const directory_rpc_service_is_directory_args & rhs) const
-  {
+  bool operator==(const directory_rpc_service_is_directory_args &rhs) const {
     if (!(path == rhs.path))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_is_directory_args &rhs) const {
+  bool operator!=(const directory_rpc_service_is_directory_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_is_directory_args & ) const;
+  bool operator<(const directory_rpc_service_is_directory_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class directory_rpc_service_is_directory_pargs {
  public:
 
-
   virtual ~directory_rpc_service_is_directory_pargs() throw();
-  const std::string* path;
+  const std::string *path;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2414,8 +2318,8 @@ typedef struct _directory_rpc_service_is_directory_result__isset {
 class directory_rpc_service_is_directory_result {
  public:
 
-  directory_rpc_service_is_directory_result(const directory_rpc_service_is_directory_result&);
-  directory_rpc_service_is_directory_result& operator=(const directory_rpc_service_is_directory_result&);
+  directory_rpc_service_is_directory_result(const directory_rpc_service_is_directory_result &);
+  directory_rpc_service_is_directory_result &operator=(const directory_rpc_service_is_directory_result &);
   directory_rpc_service_is_directory_result() : success(0) {
   }
 
@@ -2427,26 +2331,25 @@ class directory_rpc_service_is_directory_result {
 
   void __set_success(const bool val);
 
-  void __set_ex(const directory_rpc_service_exception& val);
+  void __set_ex(const directory_rpc_service_exception &val);
 
-  bool operator == (const directory_rpc_service_is_directory_result & rhs) const
-  {
+  bool operator==(const directory_rpc_service_is_directory_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_is_directory_result &rhs) const {
+  bool operator!=(const directory_rpc_service_is_directory_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_is_directory_result & ) const;
+  bool operator<(const directory_rpc_service_is_directory_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2459,259 +2362,333 @@ typedef struct _directory_rpc_service_is_directory_presult__isset {
 class directory_rpc_service_is_directory_presult {
  public:
 
-
   virtual ~directory_rpc_service_is_directory_presult() throw();
-  bool* success;
+  bool *success;
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_is_directory_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
-template <class Protocol_>
+template<class Protocol_>
 class directory_rpc_serviceClientT : virtual public directory_rpc_serviceIf {
  public:
-  directory_rpc_serviceClientT(apache::thrift::stdcxx::shared_ptr< Protocol_> prot) {
+  directory_rpc_serviceClientT(apache::thrift::stdcxx::shared_ptr<Protocol_> prot) {
     setProtocolT(prot);
   }
-  directory_rpc_serviceClientT(apache::thrift::stdcxx::shared_ptr< Protocol_> iprot, apache::thrift::stdcxx::shared_ptr< Protocol_> oprot) {
-    setProtocolT(iprot,oprot);
+  directory_rpc_serviceClientT(apache::thrift::stdcxx::shared_ptr<Protocol_> iprot,
+                               apache::thrift::stdcxx::shared_ptr<Protocol_> oprot) {
+    setProtocolT(iprot, oprot);
   }
  private:
-  void setProtocolT(apache::thrift::stdcxx::shared_ptr< Protocol_> prot) {
-  setProtocolT(prot,prot);
+  void setProtocolT(apache::thrift::stdcxx::shared_ptr<Protocol_> prot) {
+    setProtocolT(prot, prot);
   }
-  void setProtocolT(apache::thrift::stdcxx::shared_ptr< Protocol_> iprot, apache::thrift::stdcxx::shared_ptr< Protocol_> oprot) {
-    piprot_=iprot;
-    poprot_=oprot;
+  void setProtocolT(apache::thrift::stdcxx::shared_ptr<Protocol_> iprot,
+                    apache::thrift::stdcxx::shared_ptr<Protocol_> oprot) {
+    piprot_ = iprot;
+    poprot_ = oprot;
     iprot_ = iprot.get();
     oprot_ = oprot.get();
   }
  public:
-  apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getInputProtocol() {
+  apache::thrift::stdcxx::shared_ptr<::apache::thrift::protocol::TProtocol> getInputProtocol() {
     return this->piprot_;
   }
-  apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
+  apache::thrift::stdcxx::shared_ptr<::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void create_directory(const std::string& path);
-  void send_create_directory(const std::string& path);
+  void create_directory(const std::string &path);
+  void send_create_directory(const std::string &path);
   void recv_create_directory();
-  void create_directories(const std::string& path);
-  void send_create_directories(const std::string& path);
+  void create_directories(const std::string &path);
+  void send_create_directories(const std::string &path);
   void recv_create_directories();
-  void create_file(const std::string& path, const std::string& persistent_store_prefix);
-  void send_create_file(const std::string& path, const std::string& persistent_store_prefix);
+  void create_file(const std::string &path, const std::string &persistent_store_prefix);
+  void send_create_file(const std::string &path, const std::string &persistent_store_prefix);
   void recv_create_file();
-  bool exists(const std::string& path);
-  void send_exists(const std::string& path);
+  bool exists(const std::string &path);
+  void send_exists(const std::string &path);
   bool recv_exists();
-  int64_t file_size(const std::string& path);
-  void send_file_size(const std::string& path);
+  int64_t file_size(const std::string &path);
+  void send_file_size(const std::string &path);
   int64_t recv_file_size();
-  int64_t last_write_time(const std::string& path);
-  void send_last_write_time(const std::string& path);
+  int64_t last_write_time(const std::string &path);
+  void send_last_write_time(const std::string &path);
   int64_t recv_last_write_time();
-  void set_permissions(const std::string& path, const rpc_perms perms, const rpc_perm_options opts);
-  void send_set_permissions(const std::string& path, const rpc_perms perms, const rpc_perm_options opts);
+  void set_permissions(const std::string &path, const rpc_perms perms, const rpc_perm_options opts);
+  void send_set_permissions(const std::string &path, const rpc_perms perms, const rpc_perm_options opts);
   void recv_set_permissions();
-  rpc_perms get_permissions(const std::string& path);
-  void send_get_permissions(const std::string& path);
+  rpc_perms get_permissions(const std::string &path);
+  void send_get_permissions(const std::string &path);
   rpc_perms recv_get_permissions();
-  void remove(const std::string& path);
-  void send_remove(const std::string& path);
+  void remove(const std::string &path);
+  void send_remove(const std::string &path);
   void recv_remove();
-  void remove_all(const std::string& path);
-  void send_remove_all(const std::string& path);
+  void remove_all(const std::string &path);
+  void send_remove_all(const std::string &path);
   void recv_remove_all();
-  void rename(const std::string& old_path, const std::string& new_path);
-  void send_rename(const std::string& old_path, const std::string& new_path);
+  void rename(const std::string &old_path, const std::string &new_path);
+  void send_rename(const std::string &old_path, const std::string &new_path);
   void recv_rename();
-  void status(rpc_file_status& _return, const std::string& path);
-  void send_status(const std::string& path);
-  void recv_status(rpc_file_status& _return);
-  void directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path);
-  void send_directory_entries(const std::string& path);
-  void recv_directory_entries(std::vector<rpc_dir_entry> & _return);
-  void recursive_directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path);
-  void send_recursive_directory_entries(const std::string& path);
-  void recv_recursive_directory_entries(std::vector<rpc_dir_entry> & _return);
-  void dstatus(rpc_data_status& _return, const std::string& path);
-  void send_dstatus(const std::string& path);
-  void recv_dstatus(rpc_data_status& _return);
-  rpc_storage_mode mode(const std::string& path);
-  void send_mode(const std::string& path);
+  void status(rpc_file_status &_return, const std::string &path);
+  void send_status(const std::string &path);
+  void recv_status(rpc_file_status &_return);
+  void directory_entries(std::vector<rpc_dir_entry> &_return, const std::string &path);
+  void send_directory_entries(const std::string &path);
+  void recv_directory_entries(std::vector<rpc_dir_entry> &_return);
+  void recursive_directory_entries(std::vector<rpc_dir_entry> &_return, const std::string &path);
+  void send_recursive_directory_entries(const std::string &path);
+  void recv_recursive_directory_entries(std::vector<rpc_dir_entry> &_return);
+  void dstatus(rpc_data_status &_return, const std::string &path);
+  void send_dstatus(const std::string &path);
+  void recv_dstatus(rpc_data_status &_return);
+  rpc_storage_mode mode(const std::string &path);
+  void send_mode(const std::string &path);
   rpc_storage_mode recv_mode();
-  void persistent_store_prefix(std::string& _return, const std::string& path);
-  void send_persistent_store_prefix(const std::string& path);
-  void recv_persistent_store_prefix(std::string& _return);
-  void data_blocks(std::vector<std::string> & _return, const std::string& path);
-  void send_data_blocks(const std::string& path);
-  void recv_data_blocks(std::vector<std::string> & _return);
-  bool is_regular_file(const std::string& path);
-  void send_is_regular_file(const std::string& path);
+  void persistent_store_prefix(std::string &_return, const std::string &path);
+  void send_persistent_store_prefix(const std::string &path);
+  void recv_persistent_store_prefix(std::string &_return);
+  void data_blocks(std::vector<std::string> &_return, const std::string &path);
+  void send_data_blocks(const std::string &path);
+  void recv_data_blocks(std::vector<std::string> &_return);
+  bool is_regular_file(const std::string &path);
+  void send_is_regular_file(const std::string &path);
   bool recv_is_regular_file();
-  bool is_directory(const std::string& path);
-  void send_is_directory(const std::string& path);
+  bool is_directory(const std::string &path);
+  void send_is_directory(const std::string &path);
   bool recv_is_directory();
  protected:
-  apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
-  apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
-  Protocol_* iprot_;
-  Protocol_* oprot_;
+  apache::thrift::stdcxx::shared_ptr<Protocol_> piprot_;
+  apache::thrift::stdcxx::shared_ptr<Protocol_> poprot_;
+  Protocol_ *iprot_;
+  Protocol_ *oprot_;
 };
 
-typedef directory_rpc_serviceClientT< ::apache::thrift::protocol::TProtocol> directory_rpc_serviceClient;
+typedef directory_rpc_serviceClientT<::apache::thrift::protocol::TProtocol> directory_rpc_serviceClient;
 
-template <class Protocol_>
+template<class Protocol_>
 class directory_rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Protocol_> {
  protected:
   ::apache::thrift::stdcxx::shared_ptr<directory_rpc_serviceIf> iface_;
-  virtual bool dispatchCall(::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, const std::string& fname, int32_t seqid, void* callContext);
-  virtual bool dispatchCallTemplated(Protocol_* iprot, Protocol_* oprot, const std::string& fname, int32_t seqid, void* callContext);
+  virtual bool dispatchCall(::apache::thrift::protocol::TProtocol *iprot,
+                            ::apache::thrift::protocol::TProtocol *oprot,
+                            const std::string &fname,
+                            int32_t seqid,
+                            void *callContext);
+  virtual bool dispatchCallTemplated(Protocol_ *iprot,
+                                     Protocol_ *oprot,
+                                     const std::string &fname,
+                                     int32_t seqid,
+                                     void *callContext);
  private:
-  typedef  void (directory_rpc_serviceProcessorT::*ProcessFunction)(int32_t, ::apache::thrift::protocol::TProtocol*, ::apache::thrift::protocol::TProtocol*, void*);
-  typedef void (directory_rpc_serviceProcessorT::*SpecializedProcessFunction)(int32_t, Protocol_*, Protocol_*, void*);
+  typedef void(directory_rpc_serviceProcessorT::*ProcessFunction)
+      (int32_t, ::apache::thrift::protocol::TProtocol *, ::apache::thrift::protocol::TProtocol *, void *);
+  typedef void
+  (directory_rpc_serviceProcessorT::*SpecializedProcessFunction)(int32_t, Protocol_ *, Protocol_ *, void *);
   struct ProcessFunctions {
     ProcessFunction generic;
     SpecializedProcessFunction specialized;
     ProcessFunctions(ProcessFunction g, SpecializedProcessFunction s) :
-      generic(g),
-      specialized(s) {}
+        generic(g),
+        specialized(s) {}
     ProcessFunctions() : generic(NULL), specialized(NULL) {}
   };
   typedef std::map<std::string, ProcessFunctions> ProcessMap;
   ProcessMap processMap_;
-  void process_create_directory(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_create_directory(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_create_directories(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_create_directories(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_create_file(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_create_file(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_exists(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_exists(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_file_size(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_file_size(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_last_write_time(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_last_write_time(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_set_permissions(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_set_permissions(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_get_permissions(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_get_permissions(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_remove(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_remove(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_remove_all(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_remove_all(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_rename(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_rename(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_status(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_status(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_directory_entries(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_directory_entries(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_recursive_directory_entries(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_recursive_directory_entries(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_dstatus(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_dstatus(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_mode(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_mode(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_persistent_store_prefix(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_persistent_store_prefix(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_data_blocks(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_data_blocks(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_is_regular_file(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_is_regular_file(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_is_directory(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_is_directory(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_create_directory(int32_t seqid,
+                                ::apache::thrift::protocol::TProtocol *iprot,
+                                ::apache::thrift::protocol::TProtocol *oprot,
+                                void *callContext);
+  void process_create_directory(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_create_directories(int32_t seqid,
+                                  ::apache::thrift::protocol::TProtocol *iprot,
+                                  ::apache::thrift::protocol::TProtocol *oprot,
+                                  void *callContext);
+  void process_create_directories(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_create_file(int32_t seqid,
+                           ::apache::thrift::protocol::TProtocol *iprot,
+                           ::apache::thrift::protocol::TProtocol *oprot,
+                           void *callContext);
+  void process_create_file(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_exists(int32_t seqid,
+                      ::apache::thrift::protocol::TProtocol *iprot,
+                      ::apache::thrift::protocol::TProtocol *oprot,
+                      void *callContext);
+  void process_exists(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_file_size(int32_t seqid,
+                         ::apache::thrift::protocol::TProtocol *iprot,
+                         ::apache::thrift::protocol::TProtocol *oprot,
+                         void *callContext);
+  void process_file_size(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_last_write_time(int32_t seqid,
+                               ::apache::thrift::protocol::TProtocol *iprot,
+                               ::apache::thrift::protocol::TProtocol *oprot,
+                               void *callContext);
+  void process_last_write_time(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_set_permissions(int32_t seqid,
+                               ::apache::thrift::protocol::TProtocol *iprot,
+                               ::apache::thrift::protocol::TProtocol *oprot,
+                               void *callContext);
+  void process_set_permissions(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_get_permissions(int32_t seqid,
+                               ::apache::thrift::protocol::TProtocol *iprot,
+                               ::apache::thrift::protocol::TProtocol *oprot,
+                               void *callContext);
+  void process_get_permissions(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_remove(int32_t seqid,
+                      ::apache::thrift::protocol::TProtocol *iprot,
+                      ::apache::thrift::protocol::TProtocol *oprot,
+                      void *callContext);
+  void process_remove(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_remove_all(int32_t seqid,
+                          ::apache::thrift::protocol::TProtocol *iprot,
+                          ::apache::thrift::protocol::TProtocol *oprot,
+                          void *callContext);
+  void process_remove_all(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_rename(int32_t seqid,
+                      ::apache::thrift::protocol::TProtocol *iprot,
+                      ::apache::thrift::protocol::TProtocol *oprot,
+                      void *callContext);
+  void process_rename(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_status(int32_t seqid,
+                      ::apache::thrift::protocol::TProtocol *iprot,
+                      ::apache::thrift::protocol::TProtocol *oprot,
+                      void *callContext);
+  void process_status(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_directory_entries(int32_t seqid,
+                                 ::apache::thrift::protocol::TProtocol *iprot,
+                                 ::apache::thrift::protocol::TProtocol *oprot,
+                                 void *callContext);
+  void process_directory_entries(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_recursive_directory_entries(int32_t seqid,
+                                           ::apache::thrift::protocol::TProtocol *iprot,
+                                           ::apache::thrift::protocol::TProtocol *oprot,
+                                           void *callContext);
+  void process_recursive_directory_entries(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_dstatus(int32_t seqid,
+                       ::apache::thrift::protocol::TProtocol *iprot,
+                       ::apache::thrift::protocol::TProtocol *oprot,
+                       void *callContext);
+  void process_dstatus(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_mode(int32_t seqid,
+                    ::apache::thrift::protocol::TProtocol *iprot,
+                    ::apache::thrift::protocol::TProtocol *oprot,
+                    void *callContext);
+  void process_mode(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_persistent_store_prefix(int32_t seqid,
+                                       ::apache::thrift::protocol::TProtocol *iprot,
+                                       ::apache::thrift::protocol::TProtocol *oprot,
+                                       void *callContext);
+  void process_persistent_store_prefix(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_data_blocks(int32_t seqid,
+                           ::apache::thrift::protocol::TProtocol *iprot,
+                           ::apache::thrift::protocol::TProtocol *oprot,
+                           void *callContext);
+  void process_data_blocks(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_is_regular_file(int32_t seqid,
+                               ::apache::thrift::protocol::TProtocol *iprot,
+                               ::apache::thrift::protocol::TProtocol *oprot,
+                               void *callContext);
+  void process_is_regular_file(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_is_directory(int32_t seqid,
+                            ::apache::thrift::protocol::TProtocol *iprot,
+                            ::apache::thrift::protocol::TProtocol *oprot,
+                            void *callContext);
+  void process_is_directory(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
  public:
   directory_rpc_serviceProcessorT(::apache::thrift::stdcxx::shared_ptr<directory_rpc_serviceIf> iface) :
-    iface_(iface) {
+      iface_(iface) {
     processMap_["create_directory"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_create_directory,
-      &directory_rpc_serviceProcessorT::process_create_directory);
+        &directory_rpc_serviceProcessorT::process_create_directory,
+        &directory_rpc_serviceProcessorT::process_create_directory);
     processMap_["create_directories"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_create_directories,
-      &directory_rpc_serviceProcessorT::process_create_directories);
+        &directory_rpc_serviceProcessorT::process_create_directories,
+        &directory_rpc_serviceProcessorT::process_create_directories);
     processMap_["create_file"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_create_file,
-      &directory_rpc_serviceProcessorT::process_create_file);
+        &directory_rpc_serviceProcessorT::process_create_file,
+        &directory_rpc_serviceProcessorT::process_create_file);
     processMap_["exists"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_exists,
-      &directory_rpc_serviceProcessorT::process_exists);
+        &directory_rpc_serviceProcessorT::process_exists,
+        &directory_rpc_serviceProcessorT::process_exists);
     processMap_["file_size"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_file_size,
-      &directory_rpc_serviceProcessorT::process_file_size);
+        &directory_rpc_serviceProcessorT::process_file_size,
+        &directory_rpc_serviceProcessorT::process_file_size);
     processMap_["last_write_time"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_last_write_time,
-      &directory_rpc_serviceProcessorT::process_last_write_time);
+        &directory_rpc_serviceProcessorT::process_last_write_time,
+        &directory_rpc_serviceProcessorT::process_last_write_time);
     processMap_["set_permissions"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_set_permissions,
-      &directory_rpc_serviceProcessorT::process_set_permissions);
+        &directory_rpc_serviceProcessorT::process_set_permissions,
+        &directory_rpc_serviceProcessorT::process_set_permissions);
     processMap_["get_permissions"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_get_permissions,
-      &directory_rpc_serviceProcessorT::process_get_permissions);
+        &directory_rpc_serviceProcessorT::process_get_permissions,
+        &directory_rpc_serviceProcessorT::process_get_permissions);
     processMap_["remove"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_remove,
-      &directory_rpc_serviceProcessorT::process_remove);
+        &directory_rpc_serviceProcessorT::process_remove,
+        &directory_rpc_serviceProcessorT::process_remove);
     processMap_["remove_all"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_remove_all,
-      &directory_rpc_serviceProcessorT::process_remove_all);
+        &directory_rpc_serviceProcessorT::process_remove_all,
+        &directory_rpc_serviceProcessorT::process_remove_all);
     processMap_["rename"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_rename,
-      &directory_rpc_serviceProcessorT::process_rename);
+        &directory_rpc_serviceProcessorT::process_rename,
+        &directory_rpc_serviceProcessorT::process_rename);
     processMap_["status"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_status,
-      &directory_rpc_serviceProcessorT::process_status);
+        &directory_rpc_serviceProcessorT::process_status,
+        &directory_rpc_serviceProcessorT::process_status);
     processMap_["directory_entries"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_directory_entries,
-      &directory_rpc_serviceProcessorT::process_directory_entries);
+        &directory_rpc_serviceProcessorT::process_directory_entries,
+        &directory_rpc_serviceProcessorT::process_directory_entries);
     processMap_["recursive_directory_entries"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_recursive_directory_entries,
-      &directory_rpc_serviceProcessorT::process_recursive_directory_entries);
+        &directory_rpc_serviceProcessorT::process_recursive_directory_entries,
+        &directory_rpc_serviceProcessorT::process_recursive_directory_entries);
     processMap_["dstatus"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_dstatus,
-      &directory_rpc_serviceProcessorT::process_dstatus);
+        &directory_rpc_serviceProcessorT::process_dstatus,
+        &directory_rpc_serviceProcessorT::process_dstatus);
     processMap_["mode"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_mode,
-      &directory_rpc_serviceProcessorT::process_mode);
+        &directory_rpc_serviceProcessorT::process_mode,
+        &directory_rpc_serviceProcessorT::process_mode);
     processMap_["persistent_store_prefix"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_persistent_store_prefix,
-      &directory_rpc_serviceProcessorT::process_persistent_store_prefix);
+        &directory_rpc_serviceProcessorT::process_persistent_store_prefix,
+        &directory_rpc_serviceProcessorT::process_persistent_store_prefix);
     processMap_["data_blocks"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_data_blocks,
-      &directory_rpc_serviceProcessorT::process_data_blocks);
+        &directory_rpc_serviceProcessorT::process_data_blocks,
+        &directory_rpc_serviceProcessorT::process_data_blocks);
     processMap_["is_regular_file"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_is_regular_file,
-      &directory_rpc_serviceProcessorT::process_is_regular_file);
+        &directory_rpc_serviceProcessorT::process_is_regular_file,
+        &directory_rpc_serviceProcessorT::process_is_regular_file);
     processMap_["is_directory"] = ProcessFunctions(
-      &directory_rpc_serviceProcessorT::process_is_directory,
-      &directory_rpc_serviceProcessorT::process_is_directory);
+        &directory_rpc_serviceProcessorT::process_is_directory,
+        &directory_rpc_serviceProcessorT::process_is_directory);
   }
 
   virtual ~directory_rpc_serviceProcessorT() {}
 };
 
-typedef directory_rpc_serviceProcessorT< ::apache::thrift::protocol::TDummyProtocol > directory_rpc_serviceProcessor;
+typedef directory_rpc_serviceProcessorT<::apache::thrift::protocol::TDummyProtocol> directory_rpc_serviceProcessor;
 
-template <class Protocol_>
+template<class Protocol_>
 class directory_rpc_serviceProcessorFactoryT : public ::apache::thrift::TProcessorFactory {
  public:
-  directory_rpc_serviceProcessorFactoryT(const ::apache::thrift::stdcxx::shared_ptr< directory_rpc_serviceIfFactory >& handlerFactory) :
+  directory_rpc_serviceProcessorFactoryT(const ::apache::thrift::stdcxx::shared_ptr<directory_rpc_serviceIfFactory> &handlerFactory)
+      :
       handlerFactory_(handlerFactory) {}
 
-  ::apache::thrift::stdcxx::shared_ptr< ::apache::thrift::TProcessor > getProcessor(const ::apache::thrift::TConnectionInfo& connInfo);
+  ::apache::thrift::stdcxx::shared_ptr<::apache::thrift::TProcessor> getProcessor(const ::apache::thrift::TConnectionInfo &connInfo);
 
  protected:
-  ::apache::thrift::stdcxx::shared_ptr< directory_rpc_serviceIfFactory > handlerFactory_;
+  ::apache::thrift::stdcxx::shared_ptr<directory_rpc_serviceIfFactory> handlerFactory_;
 };
 
-typedef directory_rpc_serviceProcessorFactoryT< ::apache::thrift::protocol::TDummyProtocol > directory_rpc_serviceProcessorFactory;
+typedef directory_rpc_serviceProcessorFactoryT<::apache::thrift::protocol::TDummyProtocol>
+    directory_rpc_serviceProcessorFactory;
 
 class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
  public:
-  directory_rpc_serviceMultiface(std::vector<apache::thrift::stdcxx::shared_ptr<directory_rpc_serviceIf> >& ifaces) : ifaces_(ifaces) {
+  directory_rpc_serviceMultiface(std::vector<apache::thrift::stdcxx::shared_ptr<directory_rpc_serviceIf> > &ifaces)
+      : ifaces_(ifaces) {
   }
   virtual ~directory_rpc_serviceMultiface() {}
  protected:
@@ -2721,7 +2698,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     ifaces_.push_back(iface);
   }
  public:
-  void create_directory(const std::string& path) {
+  void create_directory(const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2730,7 +2707,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     ifaces_[i]->create_directory(path);
   }
 
-  void create_directories(const std::string& path) {
+  void create_directories(const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2739,7 +2716,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     ifaces_[i]->create_directories(path);
   }
 
-  void create_file(const std::string& path, const std::string& persistent_store_prefix) {
+  void create_file(const std::string &path, const std::string &persistent_store_prefix) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2748,7 +2725,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     ifaces_[i]->create_file(path, persistent_store_prefix);
   }
 
-  bool exists(const std::string& path) {
+  bool exists(const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2757,7 +2734,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     return ifaces_[i]->exists(path);
   }
 
-  int64_t file_size(const std::string& path) {
+  int64_t file_size(const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2766,7 +2743,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     return ifaces_[i]->file_size(path);
   }
 
-  int64_t last_write_time(const std::string& path) {
+  int64_t last_write_time(const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2775,7 +2752,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     return ifaces_[i]->last_write_time(path);
   }
 
-  void set_permissions(const std::string& path, const rpc_perms perms, const rpc_perm_options opts) {
+  void set_permissions(const std::string &path, const rpc_perms perms, const rpc_perm_options opts) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2784,7 +2761,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     ifaces_[i]->set_permissions(path, perms, opts);
   }
 
-  rpc_perms get_permissions(const std::string& path) {
+  rpc_perms get_permissions(const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2793,7 +2770,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     return ifaces_[i]->get_permissions(path);
   }
 
-  void remove(const std::string& path) {
+  void remove(const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2802,7 +2779,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     ifaces_[i]->remove(path);
   }
 
-  void remove_all(const std::string& path) {
+  void remove_all(const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2811,7 +2788,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     ifaces_[i]->remove_all(path);
   }
 
-  void rename(const std::string& old_path, const std::string& new_path) {
+  void rename(const std::string &old_path, const std::string &new_path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2820,7 +2797,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     ifaces_[i]->rename(old_path, new_path);
   }
 
-  void status(rpc_file_status& _return, const std::string& path) {
+  void status(rpc_file_status &_return, const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2830,7 +2807,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     return;
   }
 
-  void directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path) {
+  void directory_entries(std::vector<rpc_dir_entry> &_return, const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2840,7 +2817,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     return;
   }
 
-  void recursive_directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path) {
+  void recursive_directory_entries(std::vector<rpc_dir_entry> &_return, const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2850,7 +2827,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     return;
   }
 
-  void dstatus(rpc_data_status& _return, const std::string& path) {
+  void dstatus(rpc_data_status &_return, const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2860,7 +2837,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     return;
   }
 
-  rpc_storage_mode mode(const std::string& path) {
+  rpc_storage_mode mode(const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2869,7 +2846,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     return ifaces_[i]->mode(path);
   }
 
-  void persistent_store_prefix(std::string& _return, const std::string& path) {
+  void persistent_store_prefix(std::string &_return, const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2879,7 +2856,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     return;
   }
 
-  void data_blocks(std::vector<std::string> & _return, const std::string& path) {
+  void data_blocks(std::vector<std::string> &_return, const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2889,7 +2866,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     return;
   }
 
-  bool is_regular_file(const std::string& path) {
+  bool is_regular_file(const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2898,7 +2875,7 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
     return ifaces_[i]->is_regular_file(path);
   }
 
-  bool is_directory(const std::string& path) {
+  bool is_directory(const std::string &path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -2912,107 +2889,111 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
 // The 'concurrent' client is a thread safe client that correctly handles
 // out of order responses.  It is slower than the regular client, so should
 // only be used when you need to share a connection among multiple threads
-template <class Protocol_>
+template<class Protocol_>
 class directory_rpc_serviceConcurrentClientT : virtual public directory_rpc_serviceIf {
  public:
-  directory_rpc_serviceConcurrentClientT(apache::thrift::stdcxx::shared_ptr< Protocol_> prot) {
+  directory_rpc_serviceConcurrentClientT(apache::thrift::stdcxx::shared_ptr<Protocol_> prot) {
     setProtocolT(prot);
   }
-  directory_rpc_serviceConcurrentClientT(apache::thrift::stdcxx::shared_ptr< Protocol_> iprot, apache::thrift::stdcxx::shared_ptr< Protocol_> oprot) {
-    setProtocolT(iprot,oprot);
+  directory_rpc_serviceConcurrentClientT(apache::thrift::stdcxx::shared_ptr<Protocol_> iprot,
+                                         apache::thrift::stdcxx::shared_ptr<Protocol_> oprot) {
+    setProtocolT(iprot, oprot);
   }
  private:
-  void setProtocolT(apache::thrift::stdcxx::shared_ptr< Protocol_> prot) {
-  setProtocolT(prot,prot);
+  void setProtocolT(apache::thrift::stdcxx::shared_ptr<Protocol_> prot) {
+    setProtocolT(prot, prot);
   }
-  void setProtocolT(apache::thrift::stdcxx::shared_ptr< Protocol_> iprot, apache::thrift::stdcxx::shared_ptr< Protocol_> oprot) {
-    piprot_=iprot;
-    poprot_=oprot;
+  void setProtocolT(apache::thrift::stdcxx::shared_ptr<Protocol_> iprot,
+                    apache::thrift::stdcxx::shared_ptr<Protocol_> oprot) {
+    piprot_ = iprot;
+    poprot_ = oprot;
     iprot_ = iprot.get();
     oprot_ = oprot.get();
   }
  public:
-  apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getInputProtocol() {
+  apache::thrift::stdcxx::shared_ptr<::apache::thrift::protocol::TProtocol> getInputProtocol() {
     return this->piprot_;
   }
-  apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
+  apache::thrift::stdcxx::shared_ptr<::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void create_directory(const std::string& path);
-  int32_t send_create_directory(const std::string& path);
+  void create_directory(const std::string &path);
+  int32_t send_create_directory(const std::string &path);
   void recv_create_directory(const int32_t seqid);
-  void create_directories(const std::string& path);
-  int32_t send_create_directories(const std::string& path);
+  void create_directories(const std::string &path);
+  int32_t send_create_directories(const std::string &path);
   void recv_create_directories(const int32_t seqid);
-  void create_file(const std::string& path, const std::string& persistent_store_prefix);
-  int32_t send_create_file(const std::string& path, const std::string& persistent_store_prefix);
+  void create_file(const std::string &path, const std::string &persistent_store_prefix);
+  int32_t send_create_file(const std::string &path, const std::string &persistent_store_prefix);
   void recv_create_file(const int32_t seqid);
-  bool exists(const std::string& path);
-  int32_t send_exists(const std::string& path);
+  bool exists(const std::string &path);
+  int32_t send_exists(const std::string &path);
   bool recv_exists(const int32_t seqid);
-  int64_t file_size(const std::string& path);
-  int32_t send_file_size(const std::string& path);
+  int64_t file_size(const std::string &path);
+  int32_t send_file_size(const std::string &path);
   int64_t recv_file_size(const int32_t seqid);
-  int64_t last_write_time(const std::string& path);
-  int32_t send_last_write_time(const std::string& path);
+  int64_t last_write_time(const std::string &path);
+  int32_t send_last_write_time(const std::string &path);
   int64_t recv_last_write_time(const int32_t seqid);
-  void set_permissions(const std::string& path, const rpc_perms perms, const rpc_perm_options opts);
-  int32_t send_set_permissions(const std::string& path, const rpc_perms perms, const rpc_perm_options opts);
+  void set_permissions(const std::string &path, const rpc_perms perms, const rpc_perm_options opts);
+  int32_t send_set_permissions(const std::string &path, const rpc_perms perms, const rpc_perm_options opts);
   void recv_set_permissions(const int32_t seqid);
-  rpc_perms get_permissions(const std::string& path);
-  int32_t send_get_permissions(const std::string& path);
+  rpc_perms get_permissions(const std::string &path);
+  int32_t send_get_permissions(const std::string &path);
   rpc_perms recv_get_permissions(const int32_t seqid);
-  void remove(const std::string& path);
-  int32_t send_remove(const std::string& path);
+  void remove(const std::string &path);
+  int32_t send_remove(const std::string &path);
   void recv_remove(const int32_t seqid);
-  void remove_all(const std::string& path);
-  int32_t send_remove_all(const std::string& path);
+  void remove_all(const std::string &path);
+  int32_t send_remove_all(const std::string &path);
   void recv_remove_all(const int32_t seqid);
-  void rename(const std::string& old_path, const std::string& new_path);
-  int32_t send_rename(const std::string& old_path, const std::string& new_path);
+  void rename(const std::string &old_path, const std::string &new_path);
+  int32_t send_rename(const std::string &old_path, const std::string &new_path);
   void recv_rename(const int32_t seqid);
-  void status(rpc_file_status& _return, const std::string& path);
-  int32_t send_status(const std::string& path);
-  void recv_status(rpc_file_status& _return, const int32_t seqid);
-  void directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path);
-  int32_t send_directory_entries(const std::string& path);
-  void recv_directory_entries(std::vector<rpc_dir_entry> & _return, const int32_t seqid);
-  void recursive_directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path);
-  int32_t send_recursive_directory_entries(const std::string& path);
-  void recv_recursive_directory_entries(std::vector<rpc_dir_entry> & _return, const int32_t seqid);
-  void dstatus(rpc_data_status& _return, const std::string& path);
-  int32_t send_dstatus(const std::string& path);
-  void recv_dstatus(rpc_data_status& _return, const int32_t seqid);
-  rpc_storage_mode mode(const std::string& path);
-  int32_t send_mode(const std::string& path);
+  void status(rpc_file_status &_return, const std::string &path);
+  int32_t send_status(const std::string &path);
+  void recv_status(rpc_file_status &_return, const int32_t seqid);
+  void directory_entries(std::vector<rpc_dir_entry> &_return, const std::string &path);
+  int32_t send_directory_entries(const std::string &path);
+  void recv_directory_entries(std::vector<rpc_dir_entry> &_return, const int32_t seqid);
+  void recursive_directory_entries(std::vector<rpc_dir_entry> &_return, const std::string &path);
+  int32_t send_recursive_directory_entries(const std::string &path);
+  void recv_recursive_directory_entries(std::vector<rpc_dir_entry> &_return, const int32_t seqid);
+  void dstatus(rpc_data_status &_return, const std::string &path);
+  int32_t send_dstatus(const std::string &path);
+  void recv_dstatus(rpc_data_status &_return, const int32_t seqid);
+  rpc_storage_mode mode(const std::string &path);
+  int32_t send_mode(const std::string &path);
   rpc_storage_mode recv_mode(const int32_t seqid);
-  void persistent_store_prefix(std::string& _return, const std::string& path);
-  int32_t send_persistent_store_prefix(const std::string& path);
-  void recv_persistent_store_prefix(std::string& _return, const int32_t seqid);
-  void data_blocks(std::vector<std::string> & _return, const std::string& path);
-  int32_t send_data_blocks(const std::string& path);
-  void recv_data_blocks(std::vector<std::string> & _return, const int32_t seqid);
-  bool is_regular_file(const std::string& path);
-  int32_t send_is_regular_file(const std::string& path);
+  void persistent_store_prefix(std::string &_return, const std::string &path);
+  int32_t send_persistent_store_prefix(const std::string &path);
+  void recv_persistent_store_prefix(std::string &_return, const int32_t seqid);
+  void data_blocks(std::vector<std::string> &_return, const std::string &path);
+  int32_t send_data_blocks(const std::string &path);
+  void recv_data_blocks(std::vector<std::string> &_return, const int32_t seqid);
+  bool is_regular_file(const std::string &path);
+  int32_t send_is_regular_file(const std::string &path);
   bool recv_is_regular_file(const int32_t seqid);
-  bool is_directory(const std::string& path);
-  int32_t send_is_directory(const std::string& path);
+  bool is_directory(const std::string &path);
+  int32_t send_is_directory(const std::string &path);
   bool recv_is_directory(const int32_t seqid);
  protected:
-  apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
-  apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
-  Protocol_* iprot_;
-  Protocol_* oprot_;
+  apache::thrift::stdcxx::shared_ptr<Protocol_> piprot_;
+  apache::thrift::stdcxx::shared_ptr<Protocol_> poprot_;
+  Protocol_ *iprot_;
+  Protocol_ *oprot_;
   ::apache::thrift::async::TConcurrentClientSyncInfo sync_;
 };
 
-typedef directory_rpc_serviceConcurrentClientT< ::apache::thrift::protocol::TProtocol> directory_rpc_serviceConcurrentClient;
+typedef directory_rpc_serviceConcurrentClientT<::apache::thrift::protocol::TProtocol>
+    directory_rpc_serviceConcurrentClient;
 
 #ifdef _MSC_VER
-  #pragma warning( pop )
+#pragma warning( pop )
 #endif
 
-}} // namespace
+}
+} // namespace
 
 #include "directory_rpc_service.tcc"
 #include "directory_service_types.tcc"

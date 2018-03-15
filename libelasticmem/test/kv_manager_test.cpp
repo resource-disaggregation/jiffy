@@ -22,13 +22,13 @@ static std::vector<std::shared_ptr<kv_block>> init_blocks() {
   return blks;
 }
 
-static void wait_till_server_ready(const std::string& host, int port) {
+static void wait_till_server_ready(const std::string &host, int port) {
   bool check = true;
   while (check) {
     try {
       kv_management_client(host, port);
       check = false;
-    } catch (TTransportException& e) {
+    } catch (TTransportException &e) {
       usleep(100000);
     }
   }
@@ -38,7 +38,7 @@ static std::vector<std::shared_ptr<kv_block>> blocks = init_blocks();
 
 TEST_CASE("manager_storage_size_test", "[storage_size][storage_capacity][clear]") {
   auto server = kv_management_rpc_server::create(blocks, HOST, PORT);
-  std::thread serve_thread([&server]{ server->serve(); });
+  std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
 
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -60,7 +60,7 @@ TEST_CASE("manager_storage_size_test", "[storage_size][storage_capacity][clear]"
 
 TEST_CASE("manager_flush_load_test", "[put][flush][clear][load][get]") {
   auto server = kv_management_rpc_server::create(blocks, HOST, PORT);
-  std::thread serve_thread([&server]{ server->serve(); });
+  std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
 
   for (std::size_t i = 0; i < 1000; ++i) {

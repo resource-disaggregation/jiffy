@@ -9,7 +9,8 @@
 
 #include "kv_service_types.h"
 
-namespace elasticmem { namespace kv {
+namespace elasticmem {
+namespace kv {
 
 class kv_serviceConstants {
  public:
@@ -19,6 +20,7 @@ class kv_serviceConstants {
 
 extern const kv_serviceConstants g_kv_service_constants;
 
-}} // namespace
+}
+} // namespace
 
 #endif

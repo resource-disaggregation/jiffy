@@ -78,7 +78,12 @@ add_library(elasticmem STATIC
         src/persistent/persistent_service.h
         src/persistent/local/local_store.cpp
         src/persistent/local/local_store.h
-        src/utils/directory_utils.h)
+        src/utils/directory_utils.h
+        src/utils/signal_handling.h
+        src/utils/cmd_parse.h
+        src/utils/logger.h
+        src/utils/time_utils.h
+        src/utils/rand_utils.h)
 if (GENERATE_THRIFT)
   add_dependencies(elasticmem thriftgen_directory thriftgen_kv)
 endif ()

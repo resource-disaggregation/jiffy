@@ -20,7 +20,7 @@ int main() {
   std::thread management_serve_thread([&management_server] {
     try {
       management_server->serve();
-    } catch (std::exception& e) {
+    } catch (std::exception &e) {
       std::cerr << "KV management server error: " << e.what() << std::endl;
     }
   });
@@ -31,7 +31,7 @@ int main() {
   std::thread kv_serve_thread([&kv_server] {
     try {
       kv_server->serve();
-    } catch (std::exception& e) {
+    } catch (std::exception &e) {
       std::cerr << "KV server error: " << e.what() << std::endl;
     }
   });

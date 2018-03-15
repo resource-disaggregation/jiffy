@@ -6,6 +6,9 @@ from directory.directory_client import DirectoryClient
 from directory.lease_client import LeaseClient
 from elasticmem.directory.ttypes import rpc_file_metadata
 from kv.kv_client import KVClient
+import logging
+
+logging.basicConfig()
 
 
 class RemoveMode:
@@ -31,10 +34,17 @@ class LeaseRenewalWorker(threading.Thread):
         self.to_remove = to_remove
         super(LeaseRenewalWorker, self).__init__()
 
+    def bytes_written(self, path):
+        if path in self.kvs:
+            return self.kvs[path].bytes_written
+        else:
+            return 0
+
     def run(self):
         while True:
+            print "to_renew=%s, to_flush=%s, to_remove=%s" % (self.to_renew, self.to_flush, self.to_remove)
             s = now_ms()
-            to_renew_metadata = [rpc_file_metadata(path, self.kvs[path].bytes_written) for path in self.to_renew]
+            to_renew_metadata = [rpc_file_metadata(path, self.bytes_written(path)) for path in self.to_renew]
             ack = self.ls.update_lease(to_renew_metadata, self.to_flush, self.to_remove)
             self.tot_bytes = {entry.path: entry.bytes for entry in ack.renewed}
             del self.to_flush[:]
@@ -73,10 +83,8 @@ class ElasticMemClient:
     def create_scope(self, path, persistent_store_prefix):
         self.ds.create_file(path, persistent_store_prefix)
         blocks = self.ds.data_blocks(path)
-        print "Blocks in file %s" % path
-        print blocks
-        self.kvs[path] = KVClient(blocks)
         self.paths_to_renew.append(path)
+        self.kvs[path] = KVClient(blocks)
         return self.kvs[path]
 
     def get_scope(self, path):

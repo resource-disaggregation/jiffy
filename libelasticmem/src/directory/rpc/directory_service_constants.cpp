@@ -6,12 +6,14 @@
  */
 #include "directory_service_constants.h"
 
-namespace elasticmem { namespace directory {
+namespace elasticmem {
+namespace directory {
 
 const directory_serviceConstants g_directory_service_constants;
 
 directory_serviceConstants::directory_serviceConstants() {
 }
 
-}} // namespace
+}
+} // namespace
 

@@ -20,6 +20,7 @@ class BlockConnection:
 
     def close(self):
         if self.transport_.isOpen():
+            print "Closing BlockConnection"
             self.transport_.close()
 
     def put(self, key, value):

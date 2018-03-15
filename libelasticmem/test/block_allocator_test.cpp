@@ -31,7 +31,6 @@ TEST_CASE("random_block_allocator_test", "[allocate][free][add_blocks][remove_bl
   REQUIRE(allocator.num_allocated_blocks() == 3);
   REQUIRE(allocator.num_total_blocks() == 4);
 
-
   REQUIRE_NOTHROW(blk = allocator.allocate());
   REQUIRE(std::find(blocks.begin(), blocks.end(), blk) != blocks.end());
   REQUIRE(allocator.num_free_blocks() == 0);
@@ -70,5 +69,5 @@ TEST_CASE("random_block_allocator_test", "[allocate][free][add_blocks][remove_bl
   REQUIRE(allocator.num_free_blocks() == 4);
   REQUIRE(allocator.num_allocated_blocks() == 0);
   REQUIRE(allocator.num_total_blocks() == 4);
-  REQUIRE_THROWS_AS(allocator.remove_blocks({ "h" }), std::out_of_range);
+  REQUIRE_THROWS_AS(allocator.remove_blocks({"h"}), std::out_of_range);
 }

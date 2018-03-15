@@ -8,12 +8,11 @@
 #ifndef directory_rpc_service_TCC
 #define directory_rpc_service_TCC
 
+namespace elasticmem {
+namespace directory {
 
-namespace elasticmem { namespace directory {
-
-
-template <class Protocol_>
-uint32_t directory_rpc_service_create_directory_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_directory_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -25,15 +24,12 @@ uint32_t directory_rpc_service_create_directory_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -42,8 +38,7 @@ uint32_t directory_rpc_service_create_directory_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -54,8 +49,8 @@ uint32_t directory_rpc_service_create_directory_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_create_directory_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_directory_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_create_directory_args");
@@ -69,9 +64,8 @@ uint32_t directory_rpc_service_create_directory_args::write(Protocol_* oprot) co
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_create_directory_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_directory_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_create_directory_pargs");
@@ -85,9 +79,8 @@ uint32_t directory_rpc_service_create_directory_pargs::write(Protocol_* oprot) c
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_create_directory_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_directory_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -99,15 +92,12 @@ uint32_t directory_rpc_service_create_directory_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -116,8 +106,7 @@ uint32_t directory_rpc_service_create_directory_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -128,8 +117,8 @@ uint32_t directory_rpc_service_create_directory_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_create_directory_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_directory_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -145,9 +134,8 @@ uint32_t directory_rpc_service_create_directory_result::write(Protocol_* oprot) 
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_create_directory_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_directory_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -159,15 +147,12 @@ uint32_t directory_rpc_service_create_directory_presult::read(Protocol_* iprot) 
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -176,8 +161,7 @@ uint32_t directory_rpc_service_create_directory_presult::read(Protocol_* iprot) 
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -188,9 +172,8 @@ uint32_t directory_rpc_service_create_directory_presult::read(Protocol_* iprot) 
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_create_directories_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_directories_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -202,15 +185,12 @@ uint32_t directory_rpc_service_create_directories_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -219,8 +199,7 @@ uint32_t directory_rpc_service_create_directories_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -231,8 +210,8 @@ uint32_t directory_rpc_service_create_directories_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_create_directories_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_directories_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_create_directories_args");
@@ -246,9 +225,8 @@ uint32_t directory_rpc_service_create_directories_args::write(Protocol_* oprot) 
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_create_directories_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_directories_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_create_directories_pargs");
@@ -262,9 +240,8 @@ uint32_t directory_rpc_service_create_directories_pargs::write(Protocol_* oprot)
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_create_directories_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_directories_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -276,15 +253,12 @@ uint32_t directory_rpc_service_create_directories_result::read(Protocol_* iprot)
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -293,8 +267,7 @@ uint32_t directory_rpc_service_create_directories_result::read(Protocol_* iprot)
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -305,8 +278,8 @@ uint32_t directory_rpc_service_create_directories_result::read(Protocol_* iprot)
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_create_directories_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_directories_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -322,9 +295,8 @@ uint32_t directory_rpc_service_create_directories_result::write(Protocol_* oprot
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_create_directories_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_directories_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -336,15 +308,12 @@ uint32_t directory_rpc_service_create_directories_presult::read(Protocol_* iprot
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -353,8 +322,7 @@ uint32_t directory_rpc_service_create_directories_presult::read(Protocol_* iprot
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -365,9 +333,8 @@ uint32_t directory_rpc_service_create_directories_presult::read(Protocol_* iprot
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_create_file_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_file_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -379,15 +346,12 @@ uint32_t directory_rpc_service_create_file_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -404,8 +368,7 @@ uint32_t directory_rpc_service_create_file_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -416,8 +379,8 @@ uint32_t directory_rpc_service_create_file_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_create_file_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_file_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_create_file_args");
@@ -435,9 +398,8 @@ uint32_t directory_rpc_service_create_file_args::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_create_file_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_file_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_create_file_pargs");
@@ -455,9 +417,8 @@ uint32_t directory_rpc_service_create_file_pargs::write(Protocol_* oprot) const 
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_create_file_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_file_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -469,15 +430,12 @@ uint32_t directory_rpc_service_create_file_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -486,8 +444,7 @@ uint32_t directory_rpc_service_create_file_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -498,8 +455,8 @@ uint32_t directory_rpc_service_create_file_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_create_file_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_file_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -515,9 +472,8 @@ uint32_t directory_rpc_service_create_file_result::write(Protocol_* oprot) const
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_create_file_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_create_file_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -529,15 +485,12 @@ uint32_t directory_rpc_service_create_file_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -546,8 +499,7 @@ uint32_t directory_rpc_service_create_file_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -558,9 +510,8 @@ uint32_t directory_rpc_service_create_file_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_exists_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_exists_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -572,15 +523,12 @@ uint32_t directory_rpc_service_exists_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -589,8 +537,7 @@ uint32_t directory_rpc_service_exists_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -601,8 +548,8 @@ uint32_t directory_rpc_service_exists_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_exists_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_exists_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_exists_args");
@@ -616,9 +563,8 @@ uint32_t directory_rpc_service_exists_args::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_exists_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_exists_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_exists_pargs");
@@ -632,9 +578,8 @@ uint32_t directory_rpc_service_exists_pargs::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_exists_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_exists_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -646,15 +591,12 @@ uint32_t directory_rpc_service_exists_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_BOOL) {
           xfer += iprot->readBool(this->success);
@@ -671,8 +613,7 @@ uint32_t directory_rpc_service_exists_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -683,8 +624,8 @@ uint32_t directory_rpc_service_exists_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_exists_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_exists_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -704,9 +645,8 @@ uint32_t directory_rpc_service_exists_result::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_exists_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_exists_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -718,15 +658,12 @@ uint32_t directory_rpc_service_exists_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_BOOL) {
           xfer += iprot->readBool((*(this->success)));
@@ -743,8 +680,7 @@ uint32_t directory_rpc_service_exists_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -755,9 +691,8 @@ uint32_t directory_rpc_service_exists_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_file_size_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_file_size_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -769,15 +704,12 @@ uint32_t directory_rpc_service_file_size_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -786,8 +718,7 @@ uint32_t directory_rpc_service_file_size_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -798,8 +729,8 @@ uint32_t directory_rpc_service_file_size_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_file_size_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_file_size_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_file_size_args");
@@ -813,9 +744,8 @@ uint32_t directory_rpc_service_file_size_args::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_file_size_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_file_size_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_file_size_pargs");
@@ -829,9 +759,8 @@ uint32_t directory_rpc_service_file_size_pargs::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_file_size_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_file_size_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -843,15 +772,12 @@ uint32_t directory_rpc_service_file_size_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->success);
@@ -868,8 +794,7 @@ uint32_t directory_rpc_service_file_size_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -880,8 +805,8 @@ uint32_t directory_rpc_service_file_size_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_file_size_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_file_size_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -901,9 +826,8 @@ uint32_t directory_rpc_service_file_size_result::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_file_size_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_file_size_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -915,15 +839,12 @@ uint32_t directory_rpc_service_file_size_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64((*(this->success)));
@@ -940,8 +861,7 @@ uint32_t directory_rpc_service_file_size_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -952,9 +872,8 @@ uint32_t directory_rpc_service_file_size_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_last_write_time_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_last_write_time_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -966,15 +885,12 @@ uint32_t directory_rpc_service_last_write_time_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -983,8 +899,7 @@ uint32_t directory_rpc_service_last_write_time_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -995,8 +910,8 @@ uint32_t directory_rpc_service_last_write_time_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_last_write_time_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_last_write_time_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_last_write_time_args");
@@ -1010,9 +925,8 @@ uint32_t directory_rpc_service_last_write_time_args::write(Protocol_* oprot) con
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_last_write_time_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_last_write_time_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_last_write_time_pargs");
@@ -1026,9 +940,8 @@ uint32_t directory_rpc_service_last_write_time_pargs::write(Protocol_* oprot) co
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_last_write_time_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_last_write_time_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1040,15 +953,12 @@ uint32_t directory_rpc_service_last_write_time_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->success);
@@ -1065,8 +975,7 @@ uint32_t directory_rpc_service_last_write_time_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -1077,8 +986,8 @@ uint32_t directory_rpc_service_last_write_time_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_last_write_time_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_last_write_time_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -1098,9 +1007,8 @@ uint32_t directory_rpc_service_last_write_time_result::write(Protocol_* oprot) c
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_last_write_time_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_last_write_time_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1112,15 +1020,12 @@ uint32_t directory_rpc_service_last_write_time_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64((*(this->success)));
@@ -1137,8 +1042,7 @@ uint32_t directory_rpc_service_last_write_time_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -1149,9 +1053,8 @@ uint32_t directory_rpc_service_last_write_time_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_set_permissions_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_set_permissions_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1163,15 +1066,12 @@ uint32_t directory_rpc_service_set_permissions_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -1192,14 +1092,13 @@ uint32_t directory_rpc_service_set_permissions_args::read(Protocol_* iprot) {
         if (ftype == ::apache::thrift::protocol::T_I32) {
           int32_t ecast40;
           xfer += iprot->readI32(ecast40);
-          this->opts = (rpc_perm_options)ecast40;
+          this->opts = (rpc_perm_options) ecast40;
           this->__isset.opts = true;
         } else {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -1210,8 +1109,8 @@ uint32_t directory_rpc_service_set_permissions_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_set_permissions_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_set_permissions_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_set_permissions_args");
@@ -1225,7 +1124,7 @@ uint32_t directory_rpc_service_set_permissions_args::write(Protocol_* oprot) con
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("opts", ::apache::thrift::protocol::T_I32, 3);
-  xfer += oprot->writeI32((int32_t)this->opts);
+  xfer += oprot->writeI32((int32_t) this->opts);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -1233,9 +1132,8 @@ uint32_t directory_rpc_service_set_permissions_args::write(Protocol_* oprot) con
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_set_permissions_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_set_permissions_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_set_permissions_pargs");
@@ -1249,7 +1147,7 @@ uint32_t directory_rpc_service_set_permissions_pargs::write(Protocol_* oprot) co
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("opts", ::apache::thrift::protocol::T_I32, 3);
-  xfer += oprot->writeI32((int32_t)(*(this->opts)));
+  xfer += oprot->writeI32((int32_t) (*(this->opts)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -1257,9 +1155,8 @@ uint32_t directory_rpc_service_set_permissions_pargs::write(Protocol_* oprot) co
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_set_permissions_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_set_permissions_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1271,15 +1168,12 @@ uint32_t directory_rpc_service_set_permissions_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -1288,8 +1182,7 @@ uint32_t directory_rpc_service_set_permissions_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -1300,8 +1193,8 @@ uint32_t directory_rpc_service_set_permissions_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_set_permissions_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_set_permissions_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -1317,9 +1210,8 @@ uint32_t directory_rpc_service_set_permissions_result::write(Protocol_* oprot) c
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_set_permissions_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_set_permissions_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1331,15 +1223,12 @@ uint32_t directory_rpc_service_set_permissions_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -1348,8 +1237,7 @@ uint32_t directory_rpc_service_set_permissions_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -1360,9 +1248,8 @@ uint32_t directory_rpc_service_set_permissions_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_get_permissions_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_get_permissions_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1374,15 +1261,12 @@ uint32_t directory_rpc_service_get_permissions_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -1391,8 +1275,7 @@ uint32_t directory_rpc_service_get_permissions_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -1403,8 +1286,8 @@ uint32_t directory_rpc_service_get_permissions_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_get_permissions_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_get_permissions_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_get_permissions_args");
@@ -1418,9 +1301,8 @@ uint32_t directory_rpc_service_get_permissions_args::write(Protocol_* oprot) con
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_get_permissions_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_get_permissions_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_get_permissions_pargs");
@@ -1434,9 +1316,8 @@ uint32_t directory_rpc_service_get_permissions_pargs::write(Protocol_* oprot) co
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_get_permissions_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_get_permissions_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1448,15 +1329,12 @@ uint32_t directory_rpc_service_get_permissions_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_I32) {
           xfer += iprot->readI32(this->success);
@@ -1473,8 +1351,7 @@ uint32_t directory_rpc_service_get_permissions_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -1485,8 +1362,8 @@ uint32_t directory_rpc_service_get_permissions_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_get_permissions_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_get_permissions_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -1506,9 +1383,8 @@ uint32_t directory_rpc_service_get_permissions_result::write(Protocol_* oprot) c
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_get_permissions_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_get_permissions_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1520,15 +1396,12 @@ uint32_t directory_rpc_service_get_permissions_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_I32) {
           xfer += iprot->readI32((*(this->success)));
@@ -1545,8 +1418,7 @@ uint32_t directory_rpc_service_get_permissions_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -1557,9 +1429,8 @@ uint32_t directory_rpc_service_get_permissions_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_remove_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_remove_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1571,15 +1442,12 @@ uint32_t directory_rpc_service_remove_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -1588,8 +1456,7 @@ uint32_t directory_rpc_service_remove_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -1600,8 +1467,8 @@ uint32_t directory_rpc_service_remove_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_remove_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_remove_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_remove_args");
@@ -1615,9 +1482,8 @@ uint32_t directory_rpc_service_remove_args::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_remove_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_remove_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_remove_pargs");
@@ -1631,9 +1497,8 @@ uint32_t directory_rpc_service_remove_pargs::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_remove_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_remove_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1645,15 +1510,12 @@ uint32_t directory_rpc_service_remove_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -1662,8 +1524,7 @@ uint32_t directory_rpc_service_remove_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -1674,8 +1535,8 @@ uint32_t directory_rpc_service_remove_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_remove_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_remove_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -1691,9 +1552,8 @@ uint32_t directory_rpc_service_remove_result::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_remove_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_remove_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1705,15 +1565,12 @@ uint32_t directory_rpc_service_remove_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -1722,8 +1579,7 @@ uint32_t directory_rpc_service_remove_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -1734,9 +1590,8 @@ uint32_t directory_rpc_service_remove_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_remove_all_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_remove_all_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1748,15 +1603,12 @@ uint32_t directory_rpc_service_remove_all_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -1765,8 +1617,7 @@ uint32_t directory_rpc_service_remove_all_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -1777,8 +1628,8 @@ uint32_t directory_rpc_service_remove_all_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_remove_all_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_remove_all_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_remove_all_args");
@@ -1792,9 +1643,8 @@ uint32_t directory_rpc_service_remove_all_args::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_remove_all_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_remove_all_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_remove_all_pargs");
@@ -1808,9 +1658,8 @@ uint32_t directory_rpc_service_remove_all_pargs::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_remove_all_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_remove_all_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1822,15 +1671,12 @@ uint32_t directory_rpc_service_remove_all_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -1839,8 +1685,7 @@ uint32_t directory_rpc_service_remove_all_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -1851,8 +1696,8 @@ uint32_t directory_rpc_service_remove_all_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_remove_all_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_remove_all_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -1868,9 +1713,8 @@ uint32_t directory_rpc_service_remove_all_result::write(Protocol_* oprot) const 
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_remove_all_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_remove_all_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1882,15 +1726,12 @@ uint32_t directory_rpc_service_remove_all_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -1899,8 +1740,7 @@ uint32_t directory_rpc_service_remove_all_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -1911,9 +1751,8 @@ uint32_t directory_rpc_service_remove_all_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_rename_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_rename_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1925,15 +1764,12 @@ uint32_t directory_rpc_service_rename_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->old_path);
@@ -1950,8 +1786,7 @@ uint32_t directory_rpc_service_rename_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -1962,8 +1797,8 @@ uint32_t directory_rpc_service_rename_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_rename_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_rename_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_rename_args");
@@ -1981,9 +1816,8 @@ uint32_t directory_rpc_service_rename_args::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_rename_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_rename_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_rename_pargs");
@@ -2001,9 +1835,8 @@ uint32_t directory_rpc_service_rename_pargs::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_rename_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_rename_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2015,15 +1848,12 @@ uint32_t directory_rpc_service_rename_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -2032,8 +1862,7 @@ uint32_t directory_rpc_service_rename_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -2044,8 +1873,8 @@ uint32_t directory_rpc_service_rename_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_rename_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_rename_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -2061,9 +1890,8 @@ uint32_t directory_rpc_service_rename_result::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_rename_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_rename_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2075,15 +1903,12 @@ uint32_t directory_rpc_service_rename_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -2092,8 +1917,7 @@ uint32_t directory_rpc_service_rename_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -2104,9 +1928,8 @@ uint32_t directory_rpc_service_rename_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_status_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_status_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2118,15 +1941,12 @@ uint32_t directory_rpc_service_status_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -2135,8 +1955,7 @@ uint32_t directory_rpc_service_status_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -2147,8 +1966,8 @@ uint32_t directory_rpc_service_status_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_status_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_status_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_status_args");
@@ -2162,9 +1981,8 @@ uint32_t directory_rpc_service_status_args::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_status_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_status_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_status_pargs");
@@ -2178,9 +1996,8 @@ uint32_t directory_rpc_service_status_pargs::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_status_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_status_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2192,15 +2009,12 @@ uint32_t directory_rpc_service_status_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->success.read(iprot);
@@ -2217,8 +2031,7 @@ uint32_t directory_rpc_service_status_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -2229,8 +2042,8 @@ uint32_t directory_rpc_service_status_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_status_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_status_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -2250,9 +2063,8 @@ uint32_t directory_rpc_service_status_result::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_status_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_status_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2264,15 +2076,12 @@ uint32_t directory_rpc_service_status_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += (*(this->success)).read(iprot);
@@ -2289,8 +2098,7 @@ uint32_t directory_rpc_service_status_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -2301,9 +2109,8 @@ uint32_t directory_rpc_service_status_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_directory_entries_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_directory_entries_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2315,15 +2122,12 @@ uint32_t directory_rpc_service_directory_entries_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -2332,8 +2136,7 @@ uint32_t directory_rpc_service_directory_entries_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -2344,8 +2147,8 @@ uint32_t directory_rpc_service_directory_entries_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_directory_entries_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_directory_entries_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_directory_entries_args");
@@ -2359,9 +2162,8 @@ uint32_t directory_rpc_service_directory_entries_args::write(Protocol_* oprot) c
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_directory_entries_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_directory_entries_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_directory_entries_pargs");
@@ -2375,9 +2177,8 @@ uint32_t directory_rpc_service_directory_entries_pargs::write(Protocol_* oprot) 
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_directory_entries_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_directory_entries_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2389,15 +2190,12 @@ uint32_t directory_rpc_service_directory_entries_result::read(Protocol_* iprot) 
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
@@ -2407,8 +2205,7 @@ uint32_t directory_rpc_service_directory_entries_result::read(Protocol_* iprot) 
             xfer += iprot->readListBegin(_etype44, _size41);
             this->success.resize(_size41);
             uint32_t _i45;
-            for (_i45 = 0; _i45 < _size41; ++_i45)
-            {
+            for (_i45 = 0; _i45 < _size41; ++_i45) {
               xfer += this->success[_i45].read(iprot);
             }
             xfer += iprot->readListEnd();
@@ -2426,8 +2223,7 @@ uint32_t directory_rpc_service_directory_entries_result::read(Protocol_* iprot) 
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -2438,8 +2234,8 @@ uint32_t directory_rpc_service_directory_entries_result::read(Protocol_* iprot) 
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_directory_entries_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_directory_entries_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -2449,9 +2245,8 @@ uint32_t directory_rpc_service_directory_entries_result::write(Protocol_* oprot)
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_LIST, 0);
     {
       xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->success.size()));
-      std::vector<rpc_dir_entry> ::const_iterator _iter46;
-      for (_iter46 = this->success.begin(); _iter46 != this->success.end(); ++_iter46)
-      {
+      std::vector<rpc_dir_entry>::const_iterator _iter46;
+      for (_iter46 = this->success.begin(); _iter46 != this->success.end(); ++_iter46) {
         xfer += (*_iter46).write(oprot);
       }
       xfer += oprot->writeListEnd();
@@ -2467,9 +2262,8 @@ uint32_t directory_rpc_service_directory_entries_result::write(Protocol_* oprot)
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_directory_entries_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_directory_entries_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2481,15 +2275,12 @@ uint32_t directory_rpc_service_directory_entries_presult::read(Protocol_* iprot)
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
@@ -2499,8 +2290,7 @@ uint32_t directory_rpc_service_directory_entries_presult::read(Protocol_* iprot)
             xfer += iprot->readListBegin(_etype50, _size47);
             (*(this->success)).resize(_size47);
             uint32_t _i51;
-            for (_i51 = 0; _i51 < _size47; ++_i51)
-            {
+            for (_i51 = 0; _i51 < _size47; ++_i51) {
               xfer += (*(this->success))[_i51].read(iprot);
             }
             xfer += iprot->readListEnd();
@@ -2518,8 +2308,7 @@ uint32_t directory_rpc_service_directory_entries_presult::read(Protocol_* iprot)
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -2530,9 +2319,8 @@ uint32_t directory_rpc_service_directory_entries_presult::read(Protocol_* iprot)
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_recursive_directory_entries_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_recursive_directory_entries_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2544,15 +2332,12 @@ uint32_t directory_rpc_service_recursive_directory_entries_args::read(Protocol_*
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -2561,8 +2346,7 @@ uint32_t directory_rpc_service_recursive_directory_entries_args::read(Protocol_*
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -2573,8 +2357,8 @@ uint32_t directory_rpc_service_recursive_directory_entries_args::read(Protocol_*
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_recursive_directory_entries_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_recursive_directory_entries_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_recursive_directory_entries_args");
@@ -2588,9 +2372,8 @@ uint32_t directory_rpc_service_recursive_directory_entries_args::write(Protocol_
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_recursive_directory_entries_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_recursive_directory_entries_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_recursive_directory_entries_pargs");
@@ -2604,9 +2387,8 @@ uint32_t directory_rpc_service_recursive_directory_entries_pargs::write(Protocol
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_recursive_directory_entries_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_recursive_directory_entries_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2618,15 +2400,12 @@ uint32_t directory_rpc_service_recursive_directory_entries_result::read(Protocol
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
@@ -2636,8 +2415,7 @@ uint32_t directory_rpc_service_recursive_directory_entries_result::read(Protocol
             xfer += iprot->readListBegin(_etype55, _size52);
             this->success.resize(_size52);
             uint32_t _i56;
-            for (_i56 = 0; _i56 < _size52; ++_i56)
-            {
+            for (_i56 = 0; _i56 < _size52; ++_i56) {
               xfer += this->success[_i56].read(iprot);
             }
             xfer += iprot->readListEnd();
@@ -2655,8 +2433,7 @@ uint32_t directory_rpc_service_recursive_directory_entries_result::read(Protocol
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -2667,8 +2444,8 @@ uint32_t directory_rpc_service_recursive_directory_entries_result::read(Protocol
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_recursive_directory_entries_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_recursive_directory_entries_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -2678,9 +2455,8 @@ uint32_t directory_rpc_service_recursive_directory_entries_result::write(Protoco
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_LIST, 0);
     {
       xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->success.size()));
-      std::vector<rpc_dir_entry> ::const_iterator _iter57;
-      for (_iter57 = this->success.begin(); _iter57 != this->success.end(); ++_iter57)
-      {
+      std::vector<rpc_dir_entry>::const_iterator _iter57;
+      for (_iter57 = this->success.begin(); _iter57 != this->success.end(); ++_iter57) {
         xfer += (*_iter57).write(oprot);
       }
       xfer += oprot->writeListEnd();
@@ -2696,9 +2472,8 @@ uint32_t directory_rpc_service_recursive_directory_entries_result::write(Protoco
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_recursive_directory_entries_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_recursive_directory_entries_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2710,15 +2485,12 @@ uint32_t directory_rpc_service_recursive_directory_entries_presult::read(Protoco
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
@@ -2728,8 +2500,7 @@ uint32_t directory_rpc_service_recursive_directory_entries_presult::read(Protoco
             xfer += iprot->readListBegin(_etype61, _size58);
             (*(this->success)).resize(_size58);
             uint32_t _i62;
-            for (_i62 = 0; _i62 < _size58; ++_i62)
-            {
+            for (_i62 = 0; _i62 < _size58; ++_i62) {
               xfer += (*(this->success))[_i62].read(iprot);
             }
             xfer += iprot->readListEnd();
@@ -2747,8 +2518,7 @@ uint32_t directory_rpc_service_recursive_directory_entries_presult::read(Protoco
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -2759,9 +2529,8 @@ uint32_t directory_rpc_service_recursive_directory_entries_presult::read(Protoco
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_dstatus_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_dstatus_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2773,15 +2542,12 @@ uint32_t directory_rpc_service_dstatus_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -2790,8 +2556,7 @@ uint32_t directory_rpc_service_dstatus_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -2802,8 +2567,8 @@ uint32_t directory_rpc_service_dstatus_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_dstatus_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_dstatus_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_dstatus_args");
@@ -2817,9 +2582,8 @@ uint32_t directory_rpc_service_dstatus_args::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_dstatus_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_dstatus_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_dstatus_pargs");
@@ -2833,9 +2597,8 @@ uint32_t directory_rpc_service_dstatus_pargs::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_dstatus_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_dstatus_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2847,15 +2610,12 @@ uint32_t directory_rpc_service_dstatus_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->success.read(iprot);
@@ -2872,8 +2632,7 @@ uint32_t directory_rpc_service_dstatus_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -2884,8 +2643,8 @@ uint32_t directory_rpc_service_dstatus_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_dstatus_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_dstatus_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -2905,9 +2664,8 @@ uint32_t directory_rpc_service_dstatus_result::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_dstatus_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_dstatus_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2919,15 +2677,12 @@ uint32_t directory_rpc_service_dstatus_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += (*(this->success)).read(iprot);
@@ -2944,8 +2699,7 @@ uint32_t directory_rpc_service_dstatus_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -2956,9 +2710,8 @@ uint32_t directory_rpc_service_dstatus_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_mode_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_mode_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2970,15 +2723,12 @@ uint32_t directory_rpc_service_mode_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -2987,8 +2737,7 @@ uint32_t directory_rpc_service_mode_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -2999,8 +2748,8 @@ uint32_t directory_rpc_service_mode_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_mode_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_mode_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_mode_args");
@@ -3014,9 +2763,8 @@ uint32_t directory_rpc_service_mode_args::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_mode_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_mode_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_mode_pargs");
@@ -3030,9 +2778,8 @@ uint32_t directory_rpc_service_mode_pargs::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_mode_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_mode_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -3044,20 +2791,17 @@ uint32_t directory_rpc_service_mode_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_I32) {
           int32_t ecast63;
           xfer += iprot->readI32(ecast63);
-          this->success = (rpc_storage_mode)ecast63;
+          this->success = (rpc_storage_mode) ecast63;
           this->__isset.success = true;
         } else {
           xfer += iprot->skip(ftype);
@@ -3071,8 +2815,7 @@ uint32_t directory_rpc_service_mode_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -3083,8 +2826,8 @@ uint32_t directory_rpc_service_mode_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_mode_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_mode_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -3092,7 +2835,7 @@ uint32_t directory_rpc_service_mode_result::write(Protocol_* oprot) const {
 
   if (this->__isset.success) {
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I32, 0);
-    xfer += oprot->writeI32((int32_t)this->success);
+    xfer += oprot->writeI32((int32_t) this->success);
     xfer += oprot->writeFieldEnd();
   } else if (this->__isset.ex) {
     xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
@@ -3104,9 +2847,8 @@ uint32_t directory_rpc_service_mode_result::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_mode_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_mode_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -3118,20 +2860,17 @@ uint32_t directory_rpc_service_mode_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_I32) {
           int32_t ecast64;
           xfer += iprot->readI32(ecast64);
-          (*(this->success)) = (rpc_storage_mode)ecast64;
+          (*(this->success)) = (rpc_storage_mode) ecast64;
           this->__isset.success = true;
         } else {
           xfer += iprot->skip(ftype);
@@ -3145,8 +2884,7 @@ uint32_t directory_rpc_service_mode_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -3157,9 +2895,8 @@ uint32_t directory_rpc_service_mode_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_persistent_store_prefix_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_persistent_store_prefix_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -3171,15 +2908,12 @@ uint32_t directory_rpc_service_persistent_store_prefix_args::read(Protocol_* ipr
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -3188,8 +2922,7 @@ uint32_t directory_rpc_service_persistent_store_prefix_args::read(Protocol_* ipr
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -3200,8 +2933,8 @@ uint32_t directory_rpc_service_persistent_store_prefix_args::read(Protocol_* ipr
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_persistent_store_prefix_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_persistent_store_prefix_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_persistent_store_prefix_args");
@@ -3215,9 +2948,8 @@ uint32_t directory_rpc_service_persistent_store_prefix_args::write(Protocol_* op
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_persistent_store_prefix_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_persistent_store_prefix_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_persistent_store_prefix_pargs");
@@ -3231,9 +2963,8 @@ uint32_t directory_rpc_service_persistent_store_prefix_pargs::write(Protocol_* o
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_persistent_store_prefix_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_persistent_store_prefix_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -3245,15 +2976,12 @@ uint32_t directory_rpc_service_persistent_store_prefix_result::read(Protocol_* i
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->success);
@@ -3270,8 +2998,7 @@ uint32_t directory_rpc_service_persistent_store_prefix_result::read(Protocol_* i
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -3282,8 +3009,8 @@ uint32_t directory_rpc_service_persistent_store_prefix_result::read(Protocol_* i
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_persistent_store_prefix_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_persistent_store_prefix_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -3303,9 +3030,8 @@ uint32_t directory_rpc_service_persistent_store_prefix_result::write(Protocol_* 
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_persistent_store_prefix_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_persistent_store_prefix_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -3317,15 +3043,12 @@ uint32_t directory_rpc_service_persistent_store_prefix_presult::read(Protocol_* 
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString((*(this->success)));
@@ -3342,8 +3065,7 @@ uint32_t directory_rpc_service_persistent_store_prefix_presult::read(Protocol_* 
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -3354,9 +3076,8 @@ uint32_t directory_rpc_service_persistent_store_prefix_presult::read(Protocol_* 
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_data_blocks_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_data_blocks_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -3368,15 +3089,12 @@ uint32_t directory_rpc_service_data_blocks_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -3385,8 +3103,7 @@ uint32_t directory_rpc_service_data_blocks_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -3397,8 +3114,8 @@ uint32_t directory_rpc_service_data_blocks_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_data_blocks_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_data_blocks_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_data_blocks_args");
@@ -3412,9 +3129,8 @@ uint32_t directory_rpc_service_data_blocks_args::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_data_blocks_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_data_blocks_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_data_blocks_pargs");
@@ -3428,9 +3144,8 @@ uint32_t directory_rpc_service_data_blocks_pargs::write(Protocol_* oprot) const 
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_data_blocks_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_data_blocks_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -3442,15 +3157,12 @@ uint32_t directory_rpc_service_data_blocks_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
@@ -3460,8 +3172,7 @@ uint32_t directory_rpc_service_data_blocks_result::read(Protocol_* iprot) {
             xfer += iprot->readListBegin(_etype68, _size65);
             this->success.resize(_size65);
             uint32_t _i69;
-            for (_i69 = 0; _i69 < _size65; ++_i69)
-            {
+            for (_i69 = 0; _i69 < _size65; ++_i69) {
               xfer += iprot->readString(this->success[_i69]);
             }
             xfer += iprot->readListEnd();
@@ -3479,8 +3190,7 @@ uint32_t directory_rpc_service_data_blocks_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -3491,8 +3201,8 @@ uint32_t directory_rpc_service_data_blocks_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_data_blocks_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_data_blocks_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -3502,9 +3212,8 @@ uint32_t directory_rpc_service_data_blocks_result::write(Protocol_* oprot) const
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_LIST, 0);
     {
       xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->success.size()));
-      std::vector<std::string> ::const_iterator _iter70;
-      for (_iter70 = this->success.begin(); _iter70 != this->success.end(); ++_iter70)
-      {
+      std::vector<std::string>::const_iterator _iter70;
+      for (_iter70 = this->success.begin(); _iter70 != this->success.end(); ++_iter70) {
         xfer += oprot->writeString((*_iter70));
       }
       xfer += oprot->writeListEnd();
@@ -3520,9 +3229,8 @@ uint32_t directory_rpc_service_data_blocks_result::write(Protocol_* oprot) const
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_data_blocks_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_data_blocks_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -3534,15 +3242,12 @@ uint32_t directory_rpc_service_data_blocks_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
@@ -3552,8 +3257,7 @@ uint32_t directory_rpc_service_data_blocks_presult::read(Protocol_* iprot) {
             xfer += iprot->readListBegin(_etype74, _size71);
             (*(this->success)).resize(_size71);
             uint32_t _i75;
-            for (_i75 = 0; _i75 < _size71; ++_i75)
-            {
+            for (_i75 = 0; _i75 < _size71; ++_i75) {
               xfer += iprot->readString((*(this->success))[_i75]);
             }
             xfer += iprot->readListEnd();
@@ -3571,8 +3275,7 @@ uint32_t directory_rpc_service_data_blocks_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -3583,9 +3286,8 @@ uint32_t directory_rpc_service_data_blocks_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_is_regular_file_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_is_regular_file_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -3597,15 +3299,12 @@ uint32_t directory_rpc_service_is_regular_file_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -3614,8 +3313,7 @@ uint32_t directory_rpc_service_is_regular_file_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -3626,8 +3324,8 @@ uint32_t directory_rpc_service_is_regular_file_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_is_regular_file_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_is_regular_file_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_is_regular_file_args");
@@ -3641,9 +3339,8 @@ uint32_t directory_rpc_service_is_regular_file_args::write(Protocol_* oprot) con
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_is_regular_file_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_is_regular_file_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_is_regular_file_pargs");
@@ -3657,9 +3354,8 @@ uint32_t directory_rpc_service_is_regular_file_pargs::write(Protocol_* oprot) co
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_is_regular_file_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_is_regular_file_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -3671,15 +3367,12 @@ uint32_t directory_rpc_service_is_regular_file_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_BOOL) {
           xfer += iprot->readBool(this->success);
@@ -3696,8 +3389,7 @@ uint32_t directory_rpc_service_is_regular_file_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -3708,8 +3400,8 @@ uint32_t directory_rpc_service_is_regular_file_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_is_regular_file_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_is_regular_file_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -3729,9 +3421,8 @@ uint32_t directory_rpc_service_is_regular_file_result::write(Protocol_* oprot) c
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_is_regular_file_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_is_regular_file_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -3743,15 +3434,12 @@ uint32_t directory_rpc_service_is_regular_file_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_BOOL) {
           xfer += iprot->readBool((*(this->success)));
@@ -3768,8 +3456,7 @@ uint32_t directory_rpc_service_is_regular_file_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -3780,9 +3467,8 @@ uint32_t directory_rpc_service_is_regular_file_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_is_directory_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_is_directory_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -3794,15 +3480,12 @@ uint32_t directory_rpc_service_is_directory_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->path);
@@ -3811,8 +3494,7 @@ uint32_t directory_rpc_service_is_directory_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -3823,8 +3505,8 @@ uint32_t directory_rpc_service_is_directory_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_is_directory_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_is_directory_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_is_directory_args");
@@ -3838,9 +3520,8 @@ uint32_t directory_rpc_service_is_directory_args::write(Protocol_* oprot) const 
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_is_directory_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_is_directory_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("directory_rpc_service_is_directory_pargs");
@@ -3854,9 +3535,8 @@ uint32_t directory_rpc_service_is_directory_pargs::write(Protocol_* oprot) const
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_is_directory_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_is_directory_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -3868,15 +3548,12 @@ uint32_t directory_rpc_service_is_directory_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_BOOL) {
           xfer += iprot->readBool(this->success);
@@ -3893,8 +3570,7 @@ uint32_t directory_rpc_service_is_directory_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -3905,8 +3581,8 @@ uint32_t directory_rpc_service_is_directory_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t directory_rpc_service_is_directory_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t directory_rpc_service_is_directory_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -3926,9 +3602,8 @@ uint32_t directory_rpc_service_is_directory_result::write(Protocol_* oprot) cons
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t directory_rpc_service_is_directory_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t directory_rpc_service_is_directory_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -3940,15 +3615,12 @@ uint32_t directory_rpc_service_is_directory_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_BOOL) {
           xfer += iprot->readBool((*(this->success)));
@@ -3965,8 +3637,7 @@ uint32_t directory_rpc_service_is_directory_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -3977,16 +3648,14 @@ uint32_t directory_rpc_service_is_directory_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::create_directory(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::create_directory(const std::string &path) {
   send_create_directory(path);
   recv_create_directory();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_create_directory(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_create_directory(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("create_directory", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -3999,9 +3668,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_create_directory(const std::s
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::recv_create_directory()
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::recv_create_directory() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -4036,16 +3704,14 @@ void directory_rpc_serviceClientT<Protocol_>::recv_create_directory()
   return;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::create_directories(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::create_directories(const std::string &path) {
   send_create_directories(path);
   recv_create_directories();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_create_directories(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_create_directories(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("create_directories", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -4058,9 +3724,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_create_directories(const std:
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::recv_create_directories()
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::recv_create_directories() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -4095,16 +3760,16 @@ void directory_rpc_serviceClientT<Protocol_>::recv_create_directories()
   return;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::create_file(const std::string& path, const std::string& persistent_store_prefix)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::create_file(const std::string &path,
+                                                          const std::string &persistent_store_prefix) {
   send_create_file(path, persistent_store_prefix);
   recv_create_file();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_create_file(const std::string& path, const std::string& persistent_store_prefix)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_create_file(const std::string &path,
+                                                               const std::string &persistent_store_prefix) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("create_file", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -4118,9 +3783,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_create_file(const std::string
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::recv_create_file()
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::recv_create_file() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -4155,16 +3819,14 @@ void directory_rpc_serviceClientT<Protocol_>::recv_create_file()
   return;
 }
 
-template <class Protocol_>
-bool directory_rpc_serviceClientT<Protocol_>::exists(const std::string& path)
-{
+template<class Protocol_>
+bool directory_rpc_serviceClientT<Protocol_>::exists(const std::string &path) {
   send_exists(path);
   return recv_exists();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_exists(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_exists(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("exists", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -4177,9 +3839,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_exists(const std::string& pat
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-bool directory_rpc_serviceClientT<Protocol_>::recv_exists()
-{
+template<class Protocol_>
+bool directory_rpc_serviceClientT<Protocol_>::recv_exists() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -4216,19 +3877,18 @@ bool directory_rpc_serviceClientT<Protocol_>::recv_exists()
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "exists failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                "exists failed: unknown result");
 }
 
-template <class Protocol_>
-int64_t directory_rpc_serviceClientT<Protocol_>::file_size(const std::string& path)
-{
+template<class Protocol_>
+int64_t directory_rpc_serviceClientT<Protocol_>::file_size(const std::string &path) {
   send_file_size(path);
   return recv_file_size();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_file_size(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_file_size(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("file_size", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -4241,9 +3901,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_file_size(const std::string& 
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-int64_t directory_rpc_serviceClientT<Protocol_>::recv_file_size()
-{
+template<class Protocol_>
+int64_t directory_rpc_serviceClientT<Protocol_>::recv_file_size() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -4280,19 +3939,18 @@ int64_t directory_rpc_serviceClientT<Protocol_>::recv_file_size()
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "file_size failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                "file_size failed: unknown result");
 }
 
-template <class Protocol_>
-int64_t directory_rpc_serviceClientT<Protocol_>::last_write_time(const std::string& path)
-{
+template<class Protocol_>
+int64_t directory_rpc_serviceClientT<Protocol_>::last_write_time(const std::string &path) {
   send_last_write_time(path);
   return recv_last_write_time();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_last_write_time(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_last_write_time(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("last_write_time", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -4305,9 +3963,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_last_write_time(const std::st
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-int64_t directory_rpc_serviceClientT<Protocol_>::recv_last_write_time()
-{
+template<class Protocol_>
+int64_t directory_rpc_serviceClientT<Protocol_>::recv_last_write_time() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -4344,19 +4001,22 @@ int64_t directory_rpc_serviceClientT<Protocol_>::recv_last_write_time()
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "last_write_time failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                "last_write_time failed: unknown result");
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::set_permissions(const std::string& path, const rpc_perms perms, const rpc_perm_options opts)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::set_permissions(const std::string &path,
+                                                              const rpc_perms perms,
+                                                              const rpc_perm_options opts) {
   send_set_permissions(path, perms, opts);
   recv_set_permissions();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_set_permissions(const std::string& path, const rpc_perms perms, const rpc_perm_options opts)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_set_permissions(const std::string &path,
+                                                                   const rpc_perms perms,
+                                                                   const rpc_perm_options opts) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("set_permissions", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -4371,9 +4031,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_set_permissions(const std::st
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::recv_set_permissions()
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::recv_set_permissions() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -4408,16 +4067,14 @@ void directory_rpc_serviceClientT<Protocol_>::recv_set_permissions()
   return;
 }
 
-template <class Protocol_>
-rpc_perms directory_rpc_serviceClientT<Protocol_>::get_permissions(const std::string& path)
-{
+template<class Protocol_>
+rpc_perms directory_rpc_serviceClientT<Protocol_>::get_permissions(const std::string &path) {
   send_get_permissions(path);
   return recv_get_permissions();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_get_permissions(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_get_permissions(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("get_permissions", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -4430,9 +4087,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_get_permissions(const std::st
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-rpc_perms directory_rpc_serviceClientT<Protocol_>::recv_get_permissions()
-{
+template<class Protocol_>
+rpc_perms directory_rpc_serviceClientT<Protocol_>::recv_get_permissions() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -4469,19 +4125,18 @@ rpc_perms directory_rpc_serviceClientT<Protocol_>::recv_get_permissions()
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_permissions failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                "get_permissions failed: unknown result");
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::remove(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::remove(const std::string &path) {
   send_remove(path);
   recv_remove();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_remove(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_remove(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("remove", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -4494,9 +4149,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_remove(const std::string& pat
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::recv_remove()
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::recv_remove() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -4531,16 +4185,14 @@ void directory_rpc_serviceClientT<Protocol_>::recv_remove()
   return;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::remove_all(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::remove_all(const std::string &path) {
   send_remove_all(path);
   recv_remove_all();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_remove_all(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_remove_all(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("remove_all", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -4553,9 +4205,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_remove_all(const std::string&
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::recv_remove_all()
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::recv_remove_all() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -4590,16 +4241,14 @@ void directory_rpc_serviceClientT<Protocol_>::recv_remove_all()
   return;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::rename(const std::string& old_path, const std::string& new_path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::rename(const std::string &old_path, const std::string &new_path) {
   send_rename(old_path, new_path);
   recv_rename();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_rename(const std::string& old_path, const std::string& new_path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_rename(const std::string &old_path, const std::string &new_path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("rename", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -4613,9 +4262,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_rename(const std::string& old
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::recv_rename()
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::recv_rename() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -4650,16 +4298,14 @@ void directory_rpc_serviceClientT<Protocol_>::recv_rename()
   return;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::status(rpc_file_status& _return, const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::status(rpc_file_status &_return, const std::string &path) {
   send_status(path);
   recv_status(_return);
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_status(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_status(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("status", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -4672,9 +4318,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_status(const std::string& pat
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::recv_status(rpc_file_status& _return)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::recv_status(rpc_file_status &_return) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -4711,19 +4356,19 @@ void directory_rpc_serviceClientT<Protocol_>::recv_status(rpc_file_status& _retu
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "status failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                "status failed: unknown result");
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::directory_entries(std::vector<rpc_dir_entry> &_return,
+                                                                const std::string &path) {
   send_directory_entries(path);
   recv_directory_entries(_return);
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_directory_entries(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_directory_entries(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("directory_entries", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -4736,9 +4381,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_directory_entries(const std::
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::recv_directory_entries(std::vector<rpc_dir_entry> & _return)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::recv_directory_entries(std::vector<rpc_dir_entry> &_return) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -4775,19 +4419,19 @@ void directory_rpc_serviceClientT<Protocol_>::recv_directory_entries(std::vector
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "directory_entries failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                "directory_entries failed: unknown result");
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::recursive_directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::recursive_directory_entries(std::vector<rpc_dir_entry> &_return,
+                                                                          const std::string &path) {
   send_recursive_directory_entries(path);
   recv_recursive_directory_entries(_return);
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_recursive_directory_entries(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_recursive_directory_entries(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("recursive_directory_entries", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -4800,9 +4444,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_recursive_directory_entries(c
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::recv_recursive_directory_entries(std::vector<rpc_dir_entry> & _return)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::recv_recursive_directory_entries(std::vector<rpc_dir_entry> &_return) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -4839,19 +4482,18 @@ void directory_rpc_serviceClientT<Protocol_>::recv_recursive_directory_entries(s
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "recursive_directory_entries failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                "recursive_directory_entries failed: unknown result");
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::dstatus(rpc_data_status& _return, const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::dstatus(rpc_data_status &_return, const std::string &path) {
   send_dstatus(path);
   recv_dstatus(_return);
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_dstatus(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_dstatus(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("dstatus", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -4864,9 +4506,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_dstatus(const std::string& pa
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::recv_dstatus(rpc_data_status& _return)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::recv_dstatus(rpc_data_status &_return) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -4903,19 +4544,18 @@ void directory_rpc_serviceClientT<Protocol_>::recv_dstatus(rpc_data_status& _ret
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "dstatus failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                "dstatus failed: unknown result");
 }
 
-template <class Protocol_>
-rpc_storage_mode directory_rpc_serviceClientT<Protocol_>::mode(const std::string& path)
-{
+template<class Protocol_>
+rpc_storage_mode directory_rpc_serviceClientT<Protocol_>::mode(const std::string &path) {
   send_mode(path);
   return recv_mode();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_mode(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_mode(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("mode", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -4928,9 +4568,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_mode(const std::string& path)
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-rpc_storage_mode directory_rpc_serviceClientT<Protocol_>::recv_mode()
-{
+template<class Protocol_>
+rpc_storage_mode directory_rpc_serviceClientT<Protocol_>::recv_mode() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -4967,19 +4606,18 @@ rpc_storage_mode directory_rpc_serviceClientT<Protocol_>::recv_mode()
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "mode failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                "mode failed: unknown result");
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::persistent_store_prefix(std::string& _return, const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::persistent_store_prefix(std::string &_return, const std::string &path) {
   send_persistent_store_prefix(path);
   recv_persistent_store_prefix(_return);
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_persistent_store_prefix(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_persistent_store_prefix(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("persistent_store_prefix", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -4992,9 +4630,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_persistent_store_prefix(const
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::recv_persistent_store_prefix(std::string& _return)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::recv_persistent_store_prefix(std::string &_return) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -5031,19 +4668,18 @@ void directory_rpc_serviceClientT<Protocol_>::recv_persistent_store_prefix(std::
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "persistent_store_prefix failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                "persistent_store_prefix failed: unknown result");
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::data_blocks(std::vector<std::string> & _return, const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::data_blocks(std::vector<std::string> &_return, const std::string &path) {
   send_data_blocks(path);
   recv_data_blocks(_return);
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_data_blocks(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_data_blocks(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("data_blocks", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -5056,9 +4692,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_data_blocks(const std::string
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::recv_data_blocks(std::vector<std::string> & _return)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::recv_data_blocks(std::vector<std::string> &_return) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -5095,19 +4730,18 @@ void directory_rpc_serviceClientT<Protocol_>::recv_data_blocks(std::vector<std::
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "data_blocks failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                "data_blocks failed: unknown result");
 }
 
-template <class Protocol_>
-bool directory_rpc_serviceClientT<Protocol_>::is_regular_file(const std::string& path)
-{
+template<class Protocol_>
+bool directory_rpc_serviceClientT<Protocol_>::is_regular_file(const std::string &path) {
   send_is_regular_file(path);
   return recv_is_regular_file();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_is_regular_file(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_is_regular_file(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("is_regular_file", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -5120,9 +4754,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_is_regular_file(const std::st
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-bool directory_rpc_serviceClientT<Protocol_>::recv_is_regular_file()
-{
+template<class Protocol_>
+bool directory_rpc_serviceClientT<Protocol_>::recv_is_regular_file() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -5159,19 +4792,18 @@ bool directory_rpc_serviceClientT<Protocol_>::recv_is_regular_file()
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "is_regular_file failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                "is_regular_file failed: unknown result");
 }
 
-template <class Protocol_>
-bool directory_rpc_serviceClientT<Protocol_>::is_directory(const std::string& path)
-{
+template<class Protocol_>
+bool directory_rpc_serviceClientT<Protocol_>::is_directory(const std::string &path) {
   send_is_directory(path);
   return recv_is_directory();
 }
 
-template <class Protocol_>
-void directory_rpc_serviceClientT<Protocol_>::send_is_directory(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceClientT<Protocol_>::send_is_directory(const std::string &path) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("is_directory", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -5184,9 +4816,8 @@ void directory_rpc_serviceClientT<Protocol_>::send_is_directory(const std::strin
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-bool directory_rpc_serviceClientT<Protocol_>::recv_is_directory()
-{
+template<class Protocol_>
+bool directory_rpc_serviceClientT<Protocol_>::recv_is_directory() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -5223,18 +4854,24 @@ bool directory_rpc_serviceClientT<Protocol_>::recv_is_directory()
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "is_directory failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                "is_directory failed: unknown result");
 }
 
-template <class Protocol_>
-bool directory_rpc_serviceProcessorT<Protocol_>::dispatchCall(::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, const std::string& fname, int32_t seqid, void* callContext) {
+template<class Protocol_>
+bool directory_rpc_serviceProcessorT<Protocol_>::dispatchCall(::apache::thrift::protocol::TProtocol *iprot,
+                                                              ::apache::thrift::protocol::TProtocol *oprot,
+                                                              const std::string &fname,
+                                                              int32_t seqid,
+                                                              void *callContext) {
   typename ProcessMap::iterator pfn;
   pfn = processMap_.find(fname);
   if (pfn == processMap_.end()) {
     iprot->skip(::apache::thrift::protocol::T_STRUCT);
     iprot->readMessageEnd();
     iprot->getTransport()->readEnd();
-    ::apache::thrift::TApplicationException x(::apache::thrift::TApplicationException::UNKNOWN_METHOD, "Invalid method name: '"+fname+"'");
+    ::apache::thrift::TApplicationException
+        x(::apache::thrift::TApplicationException::UNKNOWN_METHOD, "Invalid method name: '" + fname + "'");
     oprot->writeMessageBegin(fname, ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
@@ -5246,15 +4883,20 @@ bool directory_rpc_serviceProcessorT<Protocol_>::dispatchCall(::apache::thrift::
   return true;
 }
 
-template <class Protocol_>
-bool directory_rpc_serviceProcessorT<Protocol_>::dispatchCallTemplated(Protocol_* iprot, Protocol_* oprot, const std::string& fname, int32_t seqid, void* callContext) {
+template<class Protocol_>
+bool directory_rpc_serviceProcessorT<Protocol_>::dispatchCallTemplated(Protocol_ *iprot,
+                                                                       Protocol_ *oprot,
+                                                                       const std::string &fname,
+                                                                       int32_t seqid,
+                                                                       void *callContext) {
   typename ProcessMap::iterator pfn;
   pfn = processMap_.find(fname);
   if (pfn == processMap_.end()) {
     iprot->skip(::apache::thrift::protocol::T_STRUCT);
     iprot->readMessageEnd();
     iprot->getTransport()->readEnd();
-    ::apache::thrift::TApplicationException x(::apache::thrift::TApplicationException::UNKNOWN_METHOD, "Invalid method name: '"+fname+"'");
+    ::apache::thrift::TApplicationException
+        x(::apache::thrift::TApplicationException::UNKNOWN_METHOD, "Invalid method name: '" + fname + "'");
     oprot->writeMessageBegin(fname, ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
@@ -5266,14 +4908,17 @@ bool directory_rpc_serviceProcessorT<Protocol_>::dispatchCallTemplated(Protocol_
   return true;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_create_directory(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_create_directory(int32_t seqid,
+                                                                          ::apache::thrift::protocol::TProtocol *iprot,
+                                                                          ::apache::thrift::protocol::TProtocol *oprot,
+                                                                          void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.create_directory", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.create_directory");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.create_directory");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.create_directory");
@@ -5294,7 +4939,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_create_directory(int32_
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.create_directory");
     }
@@ -5323,14 +4968,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_create_directory(int32_
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_create_directory(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_create_directory(int32_t seqid,
+                                                                          Protocol_ *iprot,
+                                                                          Protocol_ *oprot,
+                                                                          void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.create_directory", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.create_directory");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.create_directory");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.create_directory");
@@ -5351,7 +4999,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_create_directory(int32_
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.create_directory");
     }
@@ -5380,14 +5028,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_create_directory(int32_
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_create_directories(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_create_directories(int32_t seqid,
+                                                                            ::apache::thrift::protocol::TProtocol *iprot,
+                                                                            ::apache::thrift::protocol::TProtocol *oprot,
+                                                                            void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.create_directories", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.create_directories");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.create_directories");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.create_directories");
@@ -5408,7 +5059,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_create_directories(int3
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.create_directories");
     }
@@ -5437,14 +5088,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_create_directories(int3
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_create_directories(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_create_directories(int32_t seqid,
+                                                                            Protocol_ *iprot,
+                                                                            Protocol_ *oprot,
+                                                                            void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.create_directories", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.create_directories");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.create_directories");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.create_directories");
@@ -5465,7 +5119,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_create_directories(int3
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.create_directories");
     }
@@ -5494,10 +5148,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_create_directories(int3
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_create_file(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_create_file(int32_t seqid,
+                                                                     ::apache::thrift::protocol::TProtocol *iprot,
+                                                                     ::apache::thrift::protocol::TProtocol *oprot,
+                                                                     void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.create_file", callContext);
   }
@@ -5522,7 +5178,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_create_file(int32_t seq
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.create_file");
     }
@@ -5551,10 +5207,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_create_file(int32_t seq
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_create_file(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_create_file(int32_t seqid,
+                                                                     Protocol_ *iprot,
+                                                                     Protocol_ *oprot,
+                                                                     void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.create_file", callContext);
   }
@@ -5579,7 +5237,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_create_file(int32_t seq
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.create_file");
     }
@@ -5608,10 +5266,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_create_file(int32_t seq
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_exists(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_exists(int32_t seqid,
+                                                                ::apache::thrift::protocol::TProtocol *iprot,
+                                                                ::apache::thrift::protocol::TProtocol *oprot,
+                                                                void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.exists", callContext);
   }
@@ -5637,7 +5297,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_exists(int32_t seqid, :
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.exists");
     }
@@ -5666,10 +5326,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_exists(int32_t seqid, :
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_exists(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_exists(int32_t seqid,
+                                                                Protocol_ *iprot,
+                                                                Protocol_ *oprot,
+                                                                void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.exists", callContext);
   }
@@ -5695,7 +5357,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_exists(int32_t seqid, P
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.exists");
     }
@@ -5724,10 +5386,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_exists(int32_t seqid, P
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_file_size(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_file_size(int32_t seqid,
+                                                                   ::apache::thrift::protocol::TProtocol *iprot,
+                                                                   ::apache::thrift::protocol::TProtocol *oprot,
+                                                                   void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.file_size", callContext);
   }
@@ -5753,7 +5417,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_file_size(int32_t seqid
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.file_size");
     }
@@ -5782,10 +5446,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_file_size(int32_t seqid
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_file_size(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_file_size(int32_t seqid,
+                                                                   Protocol_ *iprot,
+                                                                   Protocol_ *oprot,
+                                                                   void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.file_size", callContext);
   }
@@ -5811,7 +5477,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_file_size(int32_t seqid
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.file_size");
     }
@@ -5840,14 +5506,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_file_size(int32_t seqid
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_last_write_time(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_last_write_time(int32_t seqid,
+                                                                         ::apache::thrift::protocol::TProtocol *iprot,
+                                                                         ::apache::thrift::protocol::TProtocol *oprot,
+                                                                         void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.last_write_time", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.last_write_time");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.last_write_time");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.last_write_time");
@@ -5869,7 +5538,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_last_write_time(int32_t
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.last_write_time");
     }
@@ -5898,14 +5567,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_last_write_time(int32_t
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_last_write_time(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_last_write_time(int32_t seqid,
+                                                                         Protocol_ *iprot,
+                                                                         Protocol_ *oprot,
+                                                                         void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.last_write_time", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.last_write_time");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.last_write_time");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.last_write_time");
@@ -5927,7 +5599,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_last_write_time(int32_t
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.last_write_time");
     }
@@ -5956,14 +5628,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_last_write_time(int32_t
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_set_permissions(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_set_permissions(int32_t seqid,
+                                                                         ::apache::thrift::protocol::TProtocol *iprot,
+                                                                         ::apache::thrift::protocol::TProtocol *oprot,
+                                                                         void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.set_permissions", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.set_permissions");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.set_permissions");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.set_permissions");
@@ -5984,7 +5659,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_set_permissions(int32_t
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.set_permissions");
     }
@@ -6013,14 +5688,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_set_permissions(int32_t
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_set_permissions(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_set_permissions(int32_t seqid,
+                                                                         Protocol_ *iprot,
+                                                                         Protocol_ *oprot,
+                                                                         void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.set_permissions", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.set_permissions");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.set_permissions");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.set_permissions");
@@ -6041,7 +5719,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_set_permissions(int32_t
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.set_permissions");
     }
@@ -6070,14 +5748,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_set_permissions(int32_t
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_get_permissions(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_get_permissions(int32_t seqid,
+                                                                         ::apache::thrift::protocol::TProtocol *iprot,
+                                                                         ::apache::thrift::protocol::TProtocol *oprot,
+                                                                         void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.get_permissions", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.get_permissions");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.get_permissions");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.get_permissions");
@@ -6099,7 +5780,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_get_permissions(int32_t
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.get_permissions");
     }
@@ -6128,14 +5809,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_get_permissions(int32_t
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_get_permissions(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_get_permissions(int32_t seqid,
+                                                                         Protocol_ *iprot,
+                                                                         Protocol_ *oprot,
+                                                                         void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.get_permissions", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.get_permissions");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.get_permissions");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.get_permissions");
@@ -6157,7 +5841,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_get_permissions(int32_t
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.get_permissions");
     }
@@ -6186,10 +5870,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_get_permissions(int32_t
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid,
+                                                                ::apache::thrift::protocol::TProtocol *iprot,
+                                                                ::apache::thrift::protocol::TProtocol *oprot,
+                                                                void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.remove", callContext);
   }
@@ -6214,7 +5900,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, :
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.remove");
     }
@@ -6243,10 +5929,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, :
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid,
+                                                                Protocol_ *iprot,
+                                                                Protocol_ *oprot,
+                                                                void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.remove", callContext);
   }
@@ -6271,7 +5959,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, P
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.remove");
     }
@@ -6300,10 +5988,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, P
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_remove_all(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_remove_all(int32_t seqid,
+                                                                    ::apache::thrift::protocol::TProtocol *iprot,
+                                                                    ::apache::thrift::protocol::TProtocol *oprot,
+                                                                    void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.remove_all", callContext);
   }
@@ -6328,7 +6018,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_remove_all(int32_t seqi
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.remove_all");
     }
@@ -6357,10 +6047,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_remove_all(int32_t seqi
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_remove_all(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_remove_all(int32_t seqid,
+                                                                    Protocol_ *iprot,
+                                                                    Protocol_ *oprot,
+                                                                    void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.remove_all", callContext);
   }
@@ -6385,7 +6077,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_remove_all(int32_t seqi
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.remove_all");
     }
@@ -6414,10 +6106,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_remove_all(int32_t seqi
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_rename(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_rename(int32_t seqid,
+                                                                ::apache::thrift::protocol::TProtocol *iprot,
+                                                                ::apache::thrift::protocol::TProtocol *oprot,
+                                                                void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.rename", callContext);
   }
@@ -6442,7 +6136,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_rename(int32_t seqid, :
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.rename");
     }
@@ -6471,10 +6165,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_rename(int32_t seqid, :
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_rename(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_rename(int32_t seqid,
+                                                                Protocol_ *iprot,
+                                                                Protocol_ *oprot,
+                                                                void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.rename", callContext);
   }
@@ -6499,7 +6195,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_rename(int32_t seqid, P
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.rename");
     }
@@ -6528,10 +6224,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_rename(int32_t seqid, P
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_status(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_status(int32_t seqid,
+                                                                ::apache::thrift::protocol::TProtocol *iprot,
+                                                                ::apache::thrift::protocol::TProtocol *oprot,
+                                                                void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.status", callContext);
   }
@@ -6557,7 +6255,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_status(int32_t seqid, :
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.status");
     }
@@ -6586,10 +6284,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_status(int32_t seqid, :
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_status(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_status(int32_t seqid,
+                                                                Protocol_ *iprot,
+                                                                Protocol_ *oprot,
+                                                                void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.status", callContext);
   }
@@ -6615,7 +6315,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_status(int32_t seqid, P
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.status");
     }
@@ -6644,14 +6344,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_status(int32_t seqid, P
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_directory_entries(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_directory_entries(int32_t seqid,
+                                                                           ::apache::thrift::protocol::TProtocol *iprot,
+                                                                           ::apache::thrift::protocol::TProtocol *oprot,
+                                                                           void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.directory_entries", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.directory_entries");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.directory_entries");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.directory_entries");
@@ -6673,7 +6376,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_directory_entries(int32
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.directory_entries");
     }
@@ -6702,14 +6405,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_directory_entries(int32
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_directory_entries(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_directory_entries(int32_t seqid,
+                                                                           Protocol_ *iprot,
+                                                                           Protocol_ *oprot,
+                                                                           void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.directory_entries", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.directory_entries");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.directory_entries");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.directory_entries");
@@ -6731,7 +6437,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_directory_entries(int32
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.directory_entries");
     }
@@ -6760,14 +6466,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_directory_entries(int32
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_recursive_directory_entries(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_recursive_directory_entries(int32_t seqid,
+                                                                                     ::apache::thrift::protocol::TProtocol *iprot,
+                                                                                     ::apache::thrift::protocol::TProtocol *oprot,
+                                                                                     void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.recursive_directory_entries", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.recursive_directory_entries");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.recursive_directory_entries");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.recursive_directory_entries");
@@ -6789,7 +6498,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_recursive_directory_ent
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.recursive_directory_entries");
     }
@@ -6818,14 +6527,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_recursive_directory_ent
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_recursive_directory_entries(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_recursive_directory_entries(int32_t seqid,
+                                                                                     Protocol_ *iprot,
+                                                                                     Protocol_ *oprot,
+                                                                                     void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.recursive_directory_entries", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.recursive_directory_entries");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.recursive_directory_entries");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.recursive_directory_entries");
@@ -6847,7 +6559,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_recursive_directory_ent
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.recursive_directory_entries");
     }
@@ -6876,10 +6588,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_recursive_directory_ent
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_dstatus(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_dstatus(int32_t seqid,
+                                                                 ::apache::thrift::protocol::TProtocol *iprot,
+                                                                 ::apache::thrift::protocol::TProtocol *oprot,
+                                                                 void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.dstatus", callContext);
   }
@@ -6905,7 +6619,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_dstatus(int32_t seqid, 
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.dstatus");
     }
@@ -6934,10 +6648,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_dstatus(int32_t seqid, 
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_dstatus(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_dstatus(int32_t seqid,
+                                                                 Protocol_ *iprot,
+                                                                 Protocol_ *oprot,
+                                                                 void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.dstatus", callContext);
   }
@@ -6963,7 +6679,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_dstatus(int32_t seqid, 
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.dstatus");
     }
@@ -6992,10 +6708,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_dstatus(int32_t seqid, 
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_mode(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_mode(int32_t seqid,
+                                                              ::apache::thrift::protocol::TProtocol *iprot,
+                                                              ::apache::thrift::protocol::TProtocol *oprot,
+                                                              void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.mode", callContext);
   }
@@ -7021,7 +6739,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_mode(int32_t seqid, ::a
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.mode");
     }
@@ -7050,10 +6768,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_mode(int32_t seqid, ::a
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_mode(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_mode(int32_t seqid,
+                                                              Protocol_ *iprot,
+                                                              Protocol_ *oprot,
+                                                              void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.mode", callContext);
   }
@@ -7079,7 +6799,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_mode(int32_t seqid, Pro
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.mode");
     }
@@ -7108,14 +6828,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_mode(int32_t seqid, Pro
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_persistent_store_prefix(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_persistent_store_prefix(int32_t seqid,
+                                                                                 ::apache::thrift::protocol::TProtocol *iprot,
+                                                                                 ::apache::thrift::protocol::TProtocol *oprot,
+                                                                                 void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.persistent_store_prefix", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.persistent_store_prefix");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.persistent_store_prefix");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.persistent_store_prefix");
@@ -7137,7 +6860,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_persistent_store_prefix
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.persistent_store_prefix");
     }
@@ -7166,14 +6889,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_persistent_store_prefix
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_persistent_store_prefix(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_persistent_store_prefix(int32_t seqid,
+                                                                                 Protocol_ *iprot,
+                                                                                 Protocol_ *oprot,
+                                                                                 void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.persistent_store_prefix", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.persistent_store_prefix");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.persistent_store_prefix");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.persistent_store_prefix");
@@ -7195,7 +6921,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_persistent_store_prefix
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.persistent_store_prefix");
     }
@@ -7224,10 +6950,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_persistent_store_prefix
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_data_blocks(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_data_blocks(int32_t seqid,
+                                                                     ::apache::thrift::protocol::TProtocol *iprot,
+                                                                     ::apache::thrift::protocol::TProtocol *oprot,
+                                                                     void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.data_blocks", callContext);
   }
@@ -7253,7 +6981,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_data_blocks(int32_t seq
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.data_blocks");
     }
@@ -7282,10 +7010,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_data_blocks(int32_t seq
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_data_blocks(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_data_blocks(int32_t seqid,
+                                                                     Protocol_ *iprot,
+                                                                     Protocol_ *oprot,
+                                                                     void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.data_blocks", callContext);
   }
@@ -7311,7 +7041,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_data_blocks(int32_t seq
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.data_blocks");
     }
@@ -7340,14 +7070,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_data_blocks(int32_t seq
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_is_regular_file(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_is_regular_file(int32_t seqid,
+                                                                         ::apache::thrift::protocol::TProtocol *iprot,
+                                                                         ::apache::thrift::protocol::TProtocol *oprot,
+                                                                         void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.is_regular_file", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.is_regular_file");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.is_regular_file");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.is_regular_file");
@@ -7369,7 +7102,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_is_regular_file(int32_t
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.is_regular_file");
     }
@@ -7398,14 +7131,17 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_is_regular_file(int32_t
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_is_regular_file(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_is_regular_file(int32_t seqid,
+                                                                         Protocol_ *iprot,
+                                                                         Protocol_ *oprot,
+                                                                         void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.is_regular_file", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_rpc_service.is_regular_file");
+  ::apache::thrift::TProcessorContextFreer
+      freer(this->eventHandler_.get(), ctx, "directory_rpc_service.is_regular_file");
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->preRead(ctx, "directory_rpc_service.is_regular_file");
@@ -7427,7 +7163,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_is_regular_file(int32_t
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.is_regular_file");
     }
@@ -7456,10 +7192,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_is_regular_file(int32_t
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_is_directory(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_is_directory(int32_t seqid,
+                                                                      ::apache::thrift::protocol::TProtocol *iprot,
+                                                                      ::apache::thrift::protocol::TProtocol *oprot,
+                                                                      void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.is_directory", callContext);
   }
@@ -7485,7 +7223,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_is_directory(int32_t se
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.is_directory");
     }
@@ -7514,10 +7252,12 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_is_directory(int32_t se
   }
 }
 
-template <class Protocol_>
-void directory_rpc_serviceProcessorT<Protocol_>::process_is_directory(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void directory_rpc_serviceProcessorT<Protocol_>::process_is_directory(int32_t seqid,
+                                                                      Protocol_ *iprot,
+                                                                      Protocol_ *oprot,
+                                                                      void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("directory_rpc_service.is_directory", callContext);
   }
@@ -7543,7 +7283,7 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_is_directory(int32_t se
   } catch (directory_rpc_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "directory_rpc_service.is_directory");
     }
@@ -7572,24 +7312,24 @@ void directory_rpc_serviceProcessorT<Protocol_>::process_is_directory(int32_t se
   }
 }
 
-template <class Protocol_>
-::apache::thrift::stdcxx::shared_ptr< ::apache::thrift::TProcessor > directory_rpc_serviceProcessorFactoryT<Protocol_>::getProcessor(const ::apache::thrift::TConnectionInfo& connInfo) {
-  ::apache::thrift::ReleaseHandler< directory_rpc_serviceIfFactory > cleanup(handlerFactory_);
-  ::apache::thrift::stdcxx::shared_ptr< directory_rpc_serviceIf > handler(handlerFactory_->getHandler(connInfo), cleanup);
-  ::apache::thrift::stdcxx::shared_ptr< ::apache::thrift::TProcessor > processor(new directory_rpc_serviceProcessorT<Protocol_>(handler));
+template<class Protocol_>
+::apache::thrift::stdcxx::shared_ptr<::apache::thrift::TProcessor> directory_rpc_serviceProcessorFactoryT<Protocol_>::getProcessor(
+    const ::apache::thrift::TConnectionInfo &connInfo) {
+  ::apache::thrift::ReleaseHandler<directory_rpc_serviceIfFactory> cleanup(handlerFactory_);
+  ::apache::thrift::stdcxx::shared_ptr<directory_rpc_serviceIf> handler(handlerFactory_->getHandler(connInfo), cleanup);
+  ::apache::thrift::stdcxx::shared_ptr<::apache::thrift::TProcessor>
+      processor(new directory_rpc_serviceProcessorT<Protocol_>(handler));
   return processor;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::create_directory(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::create_directory(const std::string &path) {
   int32_t seqid = send_create_directory(path);
   recv_create_directory(seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_create_directory(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_create_directory(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("create_directory", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -7606,9 +7346,8 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_create_directory
   return cseqid;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_create_directory(const int32_t seqid)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_create_directory(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -7618,11 +7357,11 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_create_directory(co
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -7665,16 +7404,14 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_create_directory(co
   } // end while(true)
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::create_directories(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::create_directories(const std::string &path) {
   int32_t seqid = send_create_directories(path);
   recv_create_directories(seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_create_directories(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_create_directories(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("create_directories", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -7691,9 +7428,8 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_create_directori
   return cseqid;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_create_directories(const int32_t seqid)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_create_directories(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -7703,11 +7439,11 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_create_directories(
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -7750,16 +7486,16 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_create_directories(
   } // end while(true)
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::create_file(const std::string& path, const std::string& persistent_store_prefix)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::create_file(const std::string &path,
+                                                                    const std::string &persistent_store_prefix) {
   int32_t seqid = send_create_file(path, persistent_store_prefix);
   recv_create_file(seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_create_file(const std::string& path, const std::string& persistent_store_prefix)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_create_file(const std::string &path,
+                                                                            const std::string &persistent_store_prefix) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("create_file", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -7777,9 +7513,8 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_create_file(cons
   return cseqid;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_create_file(const int32_t seqid)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_create_file(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -7789,11 +7524,11 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_create_file(const i
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -7836,16 +7571,14 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_create_file(const i
   } // end while(true)
 }
 
-template <class Protocol_>
-bool directory_rpc_serviceConcurrentClientT<Protocol_>::exists(const std::string& path)
-{
+template<class Protocol_>
+bool directory_rpc_serviceConcurrentClientT<Protocol_>::exists(const std::string &path) {
   int32_t seqid = send_exists(path);
   return recv_exists(seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_exists(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_exists(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("exists", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -7862,9 +7595,8 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_exists(const std
   return cseqid;
 }
 
-template <class Protocol_>
-bool directory_rpc_serviceConcurrentClientT<Protocol_>::recv_exists(const int32_t seqid)
-{
+template<class Protocol_>
+bool directory_rpc_serviceConcurrentClientT<Protocol_>::recv_exists(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -7874,11 +7606,11 @@ bool directory_rpc_serviceConcurrentClientT<Protocol_>::recv_exists(const int32_
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -7917,7 +7649,8 @@ bool directory_rpc_serviceConcurrentClientT<Protocol_>::recv_exists(const int32_
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "exists failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                    "exists failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -7927,16 +7660,14 @@ bool directory_rpc_serviceConcurrentClientT<Protocol_>::recv_exists(const int32_
   } // end while(true)
 }
 
-template <class Protocol_>
-int64_t directory_rpc_serviceConcurrentClientT<Protocol_>::file_size(const std::string& path)
-{
+template<class Protocol_>
+int64_t directory_rpc_serviceConcurrentClientT<Protocol_>::file_size(const std::string &path) {
   int32_t seqid = send_file_size(path);
   return recv_file_size(seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_file_size(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_file_size(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("file_size", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -7953,9 +7684,8 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_file_size(const 
   return cseqid;
 }
 
-template <class Protocol_>
-int64_t directory_rpc_serviceConcurrentClientT<Protocol_>::recv_file_size(const int32_t seqid)
-{
+template<class Protocol_>
+int64_t directory_rpc_serviceConcurrentClientT<Protocol_>::recv_file_size(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -7965,11 +7695,11 @@ int64_t directory_rpc_serviceConcurrentClientT<Protocol_>::recv_file_size(const 
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -8008,7 +7738,8 @@ int64_t directory_rpc_serviceConcurrentClientT<Protocol_>::recv_file_size(const 
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "file_size failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                    "file_size failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -8018,16 +7749,14 @@ int64_t directory_rpc_serviceConcurrentClientT<Protocol_>::recv_file_size(const 
   } // end while(true)
 }
 
-template <class Protocol_>
-int64_t directory_rpc_serviceConcurrentClientT<Protocol_>::last_write_time(const std::string& path)
-{
+template<class Protocol_>
+int64_t directory_rpc_serviceConcurrentClientT<Protocol_>::last_write_time(const std::string &path) {
   int32_t seqid = send_last_write_time(path);
   return recv_last_write_time(seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_last_write_time(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_last_write_time(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("last_write_time", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -8044,9 +7773,8 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_last_write_time(
   return cseqid;
 }
 
-template <class Protocol_>
-int64_t directory_rpc_serviceConcurrentClientT<Protocol_>::recv_last_write_time(const int32_t seqid)
-{
+template<class Protocol_>
+int64_t directory_rpc_serviceConcurrentClientT<Protocol_>::recv_last_write_time(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -8056,11 +7784,11 @@ int64_t directory_rpc_serviceConcurrentClientT<Protocol_>::recv_last_write_time(
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -8099,7 +7827,8 @@ int64_t directory_rpc_serviceConcurrentClientT<Protocol_>::recv_last_write_time(
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "last_write_time failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                    "last_write_time failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -8109,16 +7838,18 @@ int64_t directory_rpc_serviceConcurrentClientT<Protocol_>::recv_last_write_time(
   } // end while(true)
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::set_permissions(const std::string& path, const rpc_perms perms, const rpc_perm_options opts)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::set_permissions(const std::string &path,
+                                                                        const rpc_perms perms,
+                                                                        const rpc_perm_options opts) {
   int32_t seqid = send_set_permissions(path, perms, opts);
   recv_set_permissions(seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_set_permissions(const std::string& path, const rpc_perms perms, const rpc_perm_options opts)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_set_permissions(const std::string &path,
+                                                                                const rpc_perms perms,
+                                                                                const rpc_perm_options opts) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("set_permissions", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -8137,9 +7868,8 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_set_permissions(
   return cseqid;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_set_permissions(const int32_t seqid)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_set_permissions(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -8149,11 +7879,11 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_set_permissions(con
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -8196,16 +7926,14 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_set_permissions(con
   } // end while(true)
 }
 
-template <class Protocol_>
-rpc_perms directory_rpc_serviceConcurrentClientT<Protocol_>::get_permissions(const std::string& path)
-{
+template<class Protocol_>
+rpc_perms directory_rpc_serviceConcurrentClientT<Protocol_>::get_permissions(const std::string &path) {
   int32_t seqid = send_get_permissions(path);
   return recv_get_permissions(seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_get_permissions(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_get_permissions(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("get_permissions", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -8222,9 +7950,8 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_get_permissions(
   return cseqid;
 }
 
-template <class Protocol_>
-rpc_perms directory_rpc_serviceConcurrentClientT<Protocol_>::recv_get_permissions(const int32_t seqid)
-{
+template<class Protocol_>
+rpc_perms directory_rpc_serviceConcurrentClientT<Protocol_>::recv_get_permissions(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -8234,11 +7961,11 @@ rpc_perms directory_rpc_serviceConcurrentClientT<Protocol_>::recv_get_permission
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -8277,7 +8004,8 @@ rpc_perms directory_rpc_serviceConcurrentClientT<Protocol_>::recv_get_permission
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_permissions failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                    "get_permissions failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -8287,16 +8015,14 @@ rpc_perms directory_rpc_serviceConcurrentClientT<Protocol_>::recv_get_permission
   } // end while(true)
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::remove(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::remove(const std::string &path) {
   int32_t seqid = send_remove(path);
   recv_remove(seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_remove(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_remove(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("remove", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -8313,9 +8039,8 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_remove(const std
   return cseqid;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_remove(const int32_t seqid)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_remove(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -8325,11 +8050,11 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_remove(const int32_
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -8372,16 +8097,14 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_remove(const int32_
   } // end while(true)
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::remove_all(const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::remove_all(const std::string &path) {
   int32_t seqid = send_remove_all(path);
   recv_remove_all(seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_remove_all(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_remove_all(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("remove_all", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -8398,9 +8121,8 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_remove_all(const
   return cseqid;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_remove_all(const int32_t seqid)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_remove_all(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -8410,11 +8132,11 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_remove_all(const in
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -8457,16 +8179,16 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_remove_all(const in
   } // end while(true)
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::rename(const std::string& old_path, const std::string& new_path)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::rename(const std::string &old_path,
+                                                               const std::string &new_path) {
   int32_t seqid = send_rename(old_path, new_path);
   recv_rename(seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_rename(const std::string& old_path, const std::string& new_path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_rename(const std::string &old_path,
+                                                                       const std::string &new_path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("rename", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -8484,9 +8206,8 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_rename(const std
   return cseqid;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_rename(const int32_t seqid)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_rename(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -8496,11 +8217,11 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_rename(const int32_
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -8543,16 +8264,14 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_rename(const int32_
   } // end while(true)
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::status(rpc_file_status& _return, const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::status(rpc_file_status &_return, const std::string &path) {
   int32_t seqid = send_status(path);
   recv_status(_return, seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_status(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_status(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("status", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -8569,9 +8288,8 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_status(const std
   return cseqid;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_status(rpc_file_status& _return, const int32_t seqid)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_status(rpc_file_status &_return, const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -8581,11 +8299,11 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_status(rpc_file_sta
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -8624,7 +8342,8 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_status(rpc_file_sta
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "status failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                    "status failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -8634,16 +8353,15 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_status(rpc_file_sta
   } // end while(true)
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::directory_entries(std::vector<rpc_dir_entry> &_return,
+                                                                          const std::string &path) {
   int32_t seqid = send_directory_entries(path);
   recv_directory_entries(_return, seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_directory_entries(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_directory_entries(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("directory_entries", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -8660,9 +8378,9 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_directory_entrie
   return cseqid;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_directory_entries(std::vector<rpc_dir_entry> & _return, const int32_t seqid)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_directory_entries(std::vector<rpc_dir_entry> &_return,
+                                                                               const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -8672,11 +8390,11 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_directory_entries(s
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -8715,7 +8433,8 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_directory_entries(s
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "directory_entries failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                    "directory_entries failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -8725,16 +8444,15 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_directory_entries(s
   } // end while(true)
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::recursive_directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::recursive_directory_entries(std::vector<rpc_dir_entry> &_return,
+                                                                                    const std::string &path) {
   int32_t seqid = send_recursive_directory_entries(path);
   recv_recursive_directory_entries(_return, seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_recursive_directory_entries(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_recursive_directory_entries(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("recursive_directory_entries", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -8751,9 +8469,9 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_recursive_direct
   return cseqid;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_recursive_directory_entries(std::vector<rpc_dir_entry> & _return, const int32_t seqid)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_recursive_directory_entries(std::vector<rpc_dir_entry> &_return,
+                                                                                         const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -8763,11 +8481,11 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_recursive_directory
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -8806,7 +8524,8 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_recursive_directory
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "recursive_directory_entries failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                    "recursive_directory_entries failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -8816,16 +8535,14 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_recursive_directory
   } // end while(true)
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::dstatus(rpc_data_status& _return, const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::dstatus(rpc_data_status &_return, const std::string &path) {
   int32_t seqid = send_dstatus(path);
   recv_dstatus(_return, seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_dstatus(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_dstatus(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("dstatus", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -8842,9 +8559,8 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_dstatus(const st
   return cseqid;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_dstatus(rpc_data_status& _return, const int32_t seqid)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_dstatus(rpc_data_status &_return, const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -8854,11 +8570,11 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_dstatus(rpc_data_st
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -8897,7 +8613,8 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_dstatus(rpc_data_st
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "dstatus failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                    "dstatus failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -8907,16 +8624,14 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_dstatus(rpc_data_st
   } // end while(true)
 }
 
-template <class Protocol_>
-rpc_storage_mode directory_rpc_serviceConcurrentClientT<Protocol_>::mode(const std::string& path)
-{
+template<class Protocol_>
+rpc_storage_mode directory_rpc_serviceConcurrentClientT<Protocol_>::mode(const std::string &path) {
   int32_t seqid = send_mode(path);
   return recv_mode(seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_mode(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_mode(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("mode", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -8933,9 +8648,8 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_mode(const std::
   return cseqid;
 }
 
-template <class Protocol_>
-rpc_storage_mode directory_rpc_serviceConcurrentClientT<Protocol_>::recv_mode(const int32_t seqid)
-{
+template<class Protocol_>
+rpc_storage_mode directory_rpc_serviceConcurrentClientT<Protocol_>::recv_mode(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -8945,11 +8659,11 @@ rpc_storage_mode directory_rpc_serviceConcurrentClientT<Protocol_>::recv_mode(co
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -8988,7 +8702,8 @@ rpc_storage_mode directory_rpc_serviceConcurrentClientT<Protocol_>::recv_mode(co
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "mode failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                    "mode failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -8998,16 +8713,15 @@ rpc_storage_mode directory_rpc_serviceConcurrentClientT<Protocol_>::recv_mode(co
   } // end while(true)
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::persistent_store_prefix(std::string& _return, const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::persistent_store_prefix(std::string &_return,
+                                                                                const std::string &path) {
   int32_t seqid = send_persistent_store_prefix(path);
   recv_persistent_store_prefix(_return, seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_persistent_store_prefix(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_persistent_store_prefix(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("persistent_store_prefix", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -9024,9 +8738,9 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_persistent_store
   return cseqid;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_persistent_store_prefix(std::string& _return, const int32_t seqid)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_persistent_store_prefix(std::string &_return,
+                                                                                     const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -9036,11 +8750,11 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_persistent_store_pr
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -9079,7 +8793,8 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_persistent_store_pr
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "persistent_store_prefix failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                    "persistent_store_prefix failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -9089,16 +8804,15 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_persistent_store_pr
   } // end while(true)
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::data_blocks(std::vector<std::string> & _return, const std::string& path)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::data_blocks(std::vector<std::string> &_return,
+                                                                    const std::string &path) {
   int32_t seqid = send_data_blocks(path);
   recv_data_blocks(_return, seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_data_blocks(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_data_blocks(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("data_blocks", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -9115,9 +8829,9 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_data_blocks(cons
   return cseqid;
 }
 
-template <class Protocol_>
-void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_data_blocks(std::vector<std::string> & _return, const int32_t seqid)
-{
+template<class Protocol_>
+void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_data_blocks(std::vector<std::string> &_return,
+                                                                         const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -9127,11 +8841,11 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_data_blocks(std::ve
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -9170,7 +8884,8 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_data_blocks(std::ve
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "data_blocks failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                    "data_blocks failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -9180,16 +8895,14 @@ void directory_rpc_serviceConcurrentClientT<Protocol_>::recv_data_blocks(std::ve
   } // end while(true)
 }
 
-template <class Protocol_>
-bool directory_rpc_serviceConcurrentClientT<Protocol_>::is_regular_file(const std::string& path)
-{
+template<class Protocol_>
+bool directory_rpc_serviceConcurrentClientT<Protocol_>::is_regular_file(const std::string &path) {
   int32_t seqid = send_is_regular_file(path);
   return recv_is_regular_file(seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_is_regular_file(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_is_regular_file(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("is_regular_file", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -9206,9 +8919,8 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_is_regular_file(
   return cseqid;
 }
 
-template <class Protocol_>
-bool directory_rpc_serviceConcurrentClientT<Protocol_>::recv_is_regular_file(const int32_t seqid)
-{
+template<class Protocol_>
+bool directory_rpc_serviceConcurrentClientT<Protocol_>::recv_is_regular_file(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -9218,11 +8930,11 @@ bool directory_rpc_serviceConcurrentClientT<Protocol_>::recv_is_regular_file(con
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -9261,7 +8973,8 @@ bool directory_rpc_serviceConcurrentClientT<Protocol_>::recv_is_regular_file(con
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "is_regular_file failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                    "is_regular_file failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -9271,16 +8984,14 @@ bool directory_rpc_serviceConcurrentClientT<Protocol_>::recv_is_regular_file(con
   } // end while(true)
 }
 
-template <class Protocol_>
-bool directory_rpc_serviceConcurrentClientT<Protocol_>::is_directory(const std::string& path)
-{
+template<class Protocol_>
+bool directory_rpc_serviceConcurrentClientT<Protocol_>::is_directory(const std::string &path) {
   int32_t seqid = send_is_directory(path);
   return recv_is_directory(seqid);
 }
 
-template <class Protocol_>
-int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_is_directory(const std::string& path)
-{
+template<class Protocol_>
+int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_is_directory(const std::string &path) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("is_directory", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -9297,9 +9008,8 @@ int32_t directory_rpc_serviceConcurrentClientT<Protocol_>::send_is_directory(con
   return cseqid;
 }
 
-template <class Protocol_>
-bool directory_rpc_serviceConcurrentClientT<Protocol_>::recv_is_directory(const int32_t seqid)
-{
+template<class Protocol_>
+bool directory_rpc_serviceConcurrentClientT<Protocol_>::recv_is_directory(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -9309,11 +9019,11 @@ bool directory_rpc_serviceConcurrentClientT<Protocol_>::recv_is_directory(const 
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -9352,7 +9062,8 @@ bool directory_rpc_serviceConcurrentClientT<Protocol_>::recv_is_directory(const 
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "is_directory failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                    "is_directory failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -9362,6 +9073,7 @@ bool directory_rpc_serviceConcurrentClientT<Protocol_>::recv_is_directory(const 
   } // end while(true)
 }
 
-}} // namespace
+}
+} // namespace
 
 #endif

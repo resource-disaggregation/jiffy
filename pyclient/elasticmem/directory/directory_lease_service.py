@@ -15,6 +15,7 @@ import logging
 from .ttypes import *
 from thrift.Thrift import TProcessor
 from thrift.transport import TTransport
+
 all_structs = []
 
 
@@ -115,6 +116,7 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
+
 # HELPER FUNCTIONS AND STRUCTURES
 
 
@@ -124,12 +126,12 @@ class update_leases_args(object):
      - updates
     """
 
-
-    def __init__(self, updates=None,):
+    def __init__(self, updates=None, ):
         self.updates = updates
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans,
+                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -173,10 +175,12 @@ class update_leases_args(object):
 
     def __ne__(self, other):
         return not (self == other)
+
+
 all_structs.append(update_leases_args)
 update_leases_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'updates', [lease_update, None], None, ),  # 1
+    (1, TType.STRUCT, 'updates', [lease_update, None], None,),  # 1
 )
 
 
@@ -187,13 +191,13 @@ class update_leases_result(object):
      - ex
     """
 
-
-    def __init__(self, success=None, ex=None,):
+    def __init__(self, success=None, ex=None, ):
         self.success = success
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans,
+                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -247,11 +251,12 @@ class update_leases_result(object):
 
     def __ne__(self, other):
         return not (self == other)
+
+
 all_structs.append(update_leases_result)
 update_leases_result.thrift_spec = (
-    (0, TType.STRUCT, 'success', [lease_ack, None], None, ),  # 0
-    (1, TType.STRUCT, 'ex', [directory_lease_service_exception, None], None, ),  # 1
+    (0, TType.STRUCT, 'success', [lease_ack, None], None,),  # 0
+    (1, TType.STRUCT, 'ex', [directory_lease_service_exception, None], None,),  # 1
 )
 fix_spec(all_structs)
 del all_structs
-

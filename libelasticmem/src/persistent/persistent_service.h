@@ -14,7 +14,7 @@ class persistent_service {
 
   virtual void read(const std::string &remote_path, const std::string &local_path) = 0;
 
-  virtual void remove(const std::string& remote_path) = 0;
+  virtual void remove(const std::string &remote_path) = 0;
 };
 
 }

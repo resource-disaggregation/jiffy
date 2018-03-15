@@ -17,8 +17,8 @@
 
 #include <thrift/stdcxx.h>
 
-
-namespace elasticmem { namespace kv {
+namespace elasticmem {
+namespace kv {
 
 class kv_rpc_exception;
 
@@ -32,8 +32,8 @@ typedef struct _kv_rpc_exception__isset {
 class kv_rpc_exception : public ::apache::thrift::TException {
  public:
 
-  kv_rpc_exception(const kv_rpc_exception&);
-  kv_rpc_exception& operator=(const kv_rpc_exception&);
+  kv_rpc_exception(const kv_rpc_exception &);
+  kv_rpc_exception &operator=(const kv_rpc_exception &);
   kv_rpc_exception() : msg() {
   }
 
@@ -42,33 +42,32 @@ class kv_rpc_exception : public ::apache::thrift::TException {
 
   _kv_rpc_exception__isset __isset;
 
-  void __set_msg(const std::string& val);
+  void __set_msg(const std::string &val);
 
-  bool operator == (const kv_rpc_exception & rhs) const
-  {
+  bool operator==(const kv_rpc_exception &rhs) const {
     if (!(msg == rhs.msg))
       return false;
     return true;
   }
-  bool operator != (const kv_rpc_exception &rhs) const {
+  bool operator!=(const kv_rpc_exception &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const kv_rpc_exception & ) const;
+  bool operator<(const kv_rpc_exception &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
-  virtual void printTo(std::ostream& out) const;
+  virtual void printTo(std::ostream &out) const;
   mutable std::string thriftTExceptionMessageHolder_;
-  const char* what() const throw();
+  const char *what() const throw();
 };
 
 void swap(kv_rpc_exception &a, kv_rpc_exception &b);
 
-std::ostream& operator<<(std::ostream& out, const kv_rpc_exception& obj);
+std::ostream &operator<<(std::ostream &out, const kv_rpc_exception &obj);
 
 typedef struct _kv_management_rpc_exception__isset {
   _kv_management_rpc_exception__isset() : msg(false) {}
@@ -78,8 +77,8 @@ typedef struct _kv_management_rpc_exception__isset {
 class kv_management_rpc_exception : public ::apache::thrift::TException {
  public:
 
-  kv_management_rpc_exception(const kv_management_rpc_exception&);
-  kv_management_rpc_exception& operator=(const kv_management_rpc_exception&);
+  kv_management_rpc_exception(const kv_management_rpc_exception &);
+  kv_management_rpc_exception &operator=(const kv_management_rpc_exception &);
   kv_management_rpc_exception() : msg() {
   }
 
@@ -88,35 +87,35 @@ class kv_management_rpc_exception : public ::apache::thrift::TException {
 
   _kv_management_rpc_exception__isset __isset;
 
-  void __set_msg(const std::string& val);
+  void __set_msg(const std::string &val);
 
-  bool operator == (const kv_management_rpc_exception & rhs) const
-  {
+  bool operator==(const kv_management_rpc_exception &rhs) const {
     if (!(msg == rhs.msg))
       return false;
     return true;
   }
-  bool operator != (const kv_management_rpc_exception &rhs) const {
+  bool operator!=(const kv_management_rpc_exception &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const kv_management_rpc_exception & ) const;
+  bool operator<(const kv_management_rpc_exception &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
-  virtual void printTo(std::ostream& out) const;
+  virtual void printTo(std::ostream &out) const;
   mutable std::string thriftTExceptionMessageHolder_;
-  const char* what() const throw();
+  const char *what() const throw();
 };
 
 void swap(kv_management_rpc_exception &a, kv_management_rpc_exception &b);
 
-std::ostream& operator<<(std::ostream& out, const kv_management_rpc_exception& obj);
+std::ostream &operator<<(std::ostream &out, const kv_management_rpc_exception &obj);
 
-}} // namespace
+}
+} // namespace
 
 #include "kv_service_types.tcc"
 

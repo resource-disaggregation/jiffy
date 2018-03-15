@@ -8,8 +8,8 @@ namespace kv {
 
 class block_name_parser {
  public:
-  static std::tuple<std::string, int, int> parse(const std::string& name);
-  static std::string make_block_name(const std::tuple<std::string, int, int>& t);
+  static std::tuple<std::string, int, int> parse(const std::string &name);
+  static std::string make_block_name(const std::tuple<std::string, int, int> &t);
 };
 
 }

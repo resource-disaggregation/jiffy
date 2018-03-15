@@ -17,8 +17,8 @@
 
 #include <thrift/stdcxx.h>
 
-
-namespace elasticmem { namespace directory {
+namespace elasticmem {
+namespace directory {
 
 enum rpc_perm_options {
   rpc_replace = 0,
@@ -26,9 +26,9 @@ enum rpc_perm_options {
   rpc_remove = 2
 };
 
-extern const std::map<int, const char*> _rpc_perm_options_VALUES_TO_NAMES;
+extern const std::map<int, const char *> _rpc_perm_options_VALUES_TO_NAMES;
 
-std::ostream& operator<<(std::ostream& out, const rpc_perm_options val);
+std::ostream &operator<<(std::ostream &out, const rpc_perm_options val);
 
 enum rpc_file_type {
   rpc_none = 0,
@@ -36,9 +36,9 @@ enum rpc_file_type {
   rpc_directory = 2
 };
 
-extern const std::map<int, const char*> _rpc_file_type_VALUES_TO_NAMES;
+extern const std::map<int, const char *> _rpc_file_type_VALUES_TO_NAMES;
 
-std::ostream& operator<<(std::ostream& out, const rpc_file_type val);
+std::ostream &operator<<(std::ostream &out, const rpc_file_type val);
 
 enum rpc_storage_mode {
   rpc_in_memory = 0,
@@ -47,9 +47,9 @@ enum rpc_storage_mode {
   rpc_on_disk = 3
 };
 
-extern const std::map<int, const char*> _rpc_storage_mode_VALUES_TO_NAMES;
+extern const std::map<int, const char *> _rpc_storage_mode_VALUES_TO_NAMES;
 
-std::ostream& operator<<(std::ostream& out, const rpc_storage_mode val);
+std::ostream &operator<<(std::ostream &out, const rpc_storage_mode val);
 
 typedef int32_t rpc_perms;
 
@@ -67,13 +67,12 @@ class rpc_lease_ack;
 
 class directory_lease_service_exception;
 
-
 class rpc_file_status {
  public:
 
-  rpc_file_status(const rpc_file_status&);
-  rpc_file_status& operator=(const rpc_file_status&);
-  rpc_file_status() : type((rpc_file_type)0), permissions(0), last_write_time(0) {
+  rpc_file_status(const rpc_file_status &);
+  rpc_file_status &operator=(const rpc_file_status &);
+  rpc_file_status() : type((rpc_file_type) 0), permissions(0), last_write_time(0) {
   }
 
   virtual ~rpc_file_status() throw();
@@ -87,8 +86,7 @@ class rpc_file_status {
 
   void __set_last_write_time(const int64_t val);
 
-  bool operator == (const rpc_file_status & rhs) const
-  {
+  bool operator==(const rpc_file_status &rhs) const {
     if (!(type == rhs.type))
       return false;
     if (!(permissions == rhs.permissions))
@@ -97,46 +95,44 @@ class rpc_file_status {
       return false;
     return true;
   }
-  bool operator != (const rpc_file_status &rhs) const {
+  bool operator!=(const rpc_file_status &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_file_status & ) const;
+  bool operator<(const rpc_file_status &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
-  virtual void printTo(std::ostream& out) const;
+  virtual void printTo(std::ostream &out) const;
 };
 
 void swap(rpc_file_status &a, rpc_file_status &b);
 
-std::ostream& operator<<(std::ostream& out, const rpc_file_status& obj);
-
+std::ostream &operator<<(std::ostream &out, const rpc_file_status &obj);
 
 class rpc_data_status {
  public:
 
-  rpc_data_status(const rpc_data_status&);
-  rpc_data_status& operator=(const rpc_data_status&);
-  rpc_data_status() : storage_mode((rpc_storage_mode)0), persistent_store_prefix() {
+  rpc_data_status(const rpc_data_status &);
+  rpc_data_status &operator=(const rpc_data_status &);
+  rpc_data_status() : storage_mode((rpc_storage_mode) 0), persistent_store_prefix() {
   }
 
   virtual ~rpc_data_status() throw();
   rpc_storage_mode storage_mode;
   std::string persistent_store_prefix;
-  std::vector<std::string>  data_blocks;
+  std::vector<std::string> data_blocks;
 
   void __set_storage_mode(const rpc_storage_mode val);
 
-  void __set_persistent_store_prefix(const std::string& val);
+  void __set_persistent_store_prefix(const std::string &val);
 
-  void __set_data_blocks(const std::vector<std::string> & val);
+  void __set_data_blocks(const std::vector<std::string> &val);
 
-  bool operator == (const rpc_data_status & rhs) const
-  {
+  bool operator==(const rpc_data_status &rhs) const {
     if (!(storage_mode == rhs.storage_mode))
       return false;
     if (!(persistent_store_prefix == rhs.persistent_store_prefix))
@@ -145,30 +141,29 @@ class rpc_data_status {
       return false;
     return true;
   }
-  bool operator != (const rpc_data_status &rhs) const {
+  bool operator!=(const rpc_data_status &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_data_status & ) const;
+  bool operator<(const rpc_data_status &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
-  virtual void printTo(std::ostream& out) const;
+  virtual void printTo(std::ostream &out) const;
 };
 
 void swap(rpc_data_status &a, rpc_data_status &b);
 
-std::ostream& operator<<(std::ostream& out, const rpc_data_status& obj);
-
+std::ostream &operator<<(std::ostream &out, const rpc_data_status &obj);
 
 class rpc_dir_entry {
  public:
 
-  rpc_dir_entry(const rpc_dir_entry&);
-  rpc_dir_entry& operator=(const rpc_dir_entry&);
+  rpc_dir_entry(const rpc_dir_entry &);
+  rpc_dir_entry &operator=(const rpc_dir_entry &);
   rpc_dir_entry() : name() {
   }
 
@@ -176,98 +171,93 @@ class rpc_dir_entry {
   std::string name;
   rpc_file_status status;
 
-  void __set_name(const std::string& val);
+  void __set_name(const std::string &val);
 
-  void __set_status(const rpc_file_status& val);
+  void __set_status(const rpc_file_status &val);
 
-  bool operator == (const rpc_dir_entry & rhs) const
-  {
+  bool operator==(const rpc_dir_entry &rhs) const {
     if (!(name == rhs.name))
       return false;
     if (!(status == rhs.status))
       return false;
     return true;
   }
-  bool operator != (const rpc_dir_entry &rhs) const {
+  bool operator!=(const rpc_dir_entry &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_dir_entry & ) const;
+  bool operator<(const rpc_dir_entry &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
-  virtual void printTo(std::ostream& out) const;
+  virtual void printTo(std::ostream &out) const;
 };
 
 void swap(rpc_dir_entry &a, rpc_dir_entry &b);
 
-std::ostream& operator<<(std::ostream& out, const rpc_dir_entry& obj);
-
+std::ostream &operator<<(std::ostream &out, const rpc_dir_entry &obj);
 
 class directory_rpc_service_exception : public ::apache::thrift::TException {
  public:
 
-  directory_rpc_service_exception(const directory_rpc_service_exception&);
-  directory_rpc_service_exception& operator=(const directory_rpc_service_exception&);
+  directory_rpc_service_exception(const directory_rpc_service_exception &);
+  directory_rpc_service_exception &operator=(const directory_rpc_service_exception &);
   directory_rpc_service_exception() : msg() {
   }
 
   virtual ~directory_rpc_service_exception() throw();
   std::string msg;
 
-  void __set_msg(const std::string& val);
+  void __set_msg(const std::string &val);
 
-  bool operator == (const directory_rpc_service_exception & rhs) const
-  {
+  bool operator==(const directory_rpc_service_exception &rhs) const {
     if (!(msg == rhs.msg))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_exception &rhs) const {
+  bool operator!=(const directory_rpc_service_exception &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_exception & ) const;
+  bool operator<(const directory_rpc_service_exception &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
-  virtual void printTo(std::ostream& out) const;
+  virtual void printTo(std::ostream &out) const;
   mutable std::string thriftTExceptionMessageHolder_;
-  const char* what() const throw();
+  const char *what() const throw();
 };
 
 void swap(directory_rpc_service_exception &a, directory_rpc_service_exception &b);
 
-std::ostream& operator<<(std::ostream& out, const directory_rpc_service_exception& obj);
-
+std::ostream &operator<<(std::ostream &out, const directory_rpc_service_exception &obj);
 
 class rpc_lease_update {
  public:
 
-  rpc_lease_update(const rpc_lease_update&);
-  rpc_lease_update& operator=(const rpc_lease_update&);
+  rpc_lease_update(const rpc_lease_update &);
+  rpc_lease_update &operator=(const rpc_lease_update &);
   rpc_lease_update() {
   }
 
   virtual ~rpc_lease_update() throw();
-  std::vector<std::string>  to_renew;
-  std::vector<std::string>  to_flush;
-  std::vector<std::string>  to_remove;
+  std::vector<std::string> to_renew;
+  std::vector<std::string> to_flush;
+  std::vector<std::string> to_remove;
 
-  void __set_to_renew(const std::vector<std::string> & val);
+  void __set_to_renew(const std::vector<std::string> &val);
 
-  void __set_to_flush(const std::vector<std::string> & val);
+  void __set_to_flush(const std::vector<std::string> &val);
 
-  void __set_to_remove(const std::vector<std::string> & val);
+  void __set_to_remove(const std::vector<std::string> &val);
 
-  bool operator == (const rpc_lease_update & rhs) const
-  {
+  bool operator==(const rpc_lease_update &rhs) const {
     if (!(to_renew == rhs.to_renew))
       return false;
     if (!(to_flush == rhs.to_flush))
@@ -276,30 +266,29 @@ class rpc_lease_update {
       return false;
     return true;
   }
-  bool operator != (const rpc_lease_update &rhs) const {
+  bool operator!=(const rpc_lease_update &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_lease_update & ) const;
+  bool operator<(const rpc_lease_update &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
-  virtual void printTo(std::ostream& out) const;
+  virtual void printTo(std::ostream &out) const;
 };
 
 void swap(rpc_lease_update &a, rpc_lease_update &b);
 
-std::ostream& operator<<(std::ostream& out, const rpc_lease_update& obj);
-
+std::ostream &operator<<(std::ostream &out, const rpc_lease_update &obj);
 
 class rpc_lease_ack {
  public:
 
-  rpc_lease_ack(const rpc_lease_ack&);
-  rpc_lease_ack& operator=(const rpc_lease_ack&);
+  rpc_lease_ack(const rpc_lease_ack &);
+  rpc_lease_ack &operator=(const rpc_lease_ack &);
   rpc_lease_ack() : renewed(0), flushed(0), removed(0) {
   }
 
@@ -314,8 +303,7 @@ class rpc_lease_ack {
 
   void __set_removed(const int64_t val);
 
-  bool operator == (const rpc_lease_ack & rhs) const
-  {
+  bool operator==(const rpc_lease_ack &rhs) const {
     if (!(renewed == rhs.renewed))
       return false;
     if (!(flushed == rhs.flushed))
@@ -324,23 +312,23 @@ class rpc_lease_ack {
       return false;
     return true;
   }
-  bool operator != (const rpc_lease_ack &rhs) const {
+  bool operator!=(const rpc_lease_ack &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_lease_ack & ) const;
+  bool operator<(const rpc_lease_ack &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
-  virtual void printTo(std::ostream& out) const;
+  virtual void printTo(std::ostream &out) const;
 };
 
 void swap(rpc_lease_ack &a, rpc_lease_ack &b);
 
-std::ostream& operator<<(std::ostream& out, const rpc_lease_ack& obj);
+std::ostream &operator<<(std::ostream &out, const rpc_lease_ack &obj);
 
 typedef struct _directory_lease_service_exception__isset {
   _directory_lease_service_exception__isset() : msg(false) {}
@@ -350,8 +338,8 @@ typedef struct _directory_lease_service_exception__isset {
 class directory_lease_service_exception : public ::apache::thrift::TException {
  public:
 
-  directory_lease_service_exception(const directory_lease_service_exception&);
-  directory_lease_service_exception& operator=(const directory_lease_service_exception&);
+  directory_lease_service_exception(const directory_lease_service_exception &);
+  directory_lease_service_exception &operator=(const directory_lease_service_exception &);
   directory_lease_service_exception() : msg() {
   }
 
@@ -360,35 +348,35 @@ class directory_lease_service_exception : public ::apache::thrift::TException {
 
   _directory_lease_service_exception__isset __isset;
 
-  void __set_msg(const std::string& val);
+  void __set_msg(const std::string &val);
 
-  bool operator == (const directory_lease_service_exception & rhs) const
-  {
+  bool operator==(const directory_lease_service_exception &rhs) const {
     if (!(msg == rhs.msg))
       return false;
     return true;
   }
-  bool operator != (const directory_lease_service_exception &rhs) const {
+  bool operator!=(const directory_lease_service_exception &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_lease_service_exception & ) const;
+  bool operator<(const directory_lease_service_exception &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
-  virtual void printTo(std::ostream& out) const;
+  virtual void printTo(std::ostream &out) const;
   mutable std::string thriftTExceptionMessageHolder_;
-  const char* what() const throw();
+  const char *what() const throw();
 };
 
 void swap(directory_lease_service_exception &a, directory_lease_service_exception &b);
 
-std::ostream& operator<<(std::ostream& out, const directory_lease_service_exception& obj);
+std::ostream &operator<<(std::ostream &out, const directory_lease_service_exception &obj);
 
-}} // namespace
+}
+} // namespace
 
 #include "directory_service_types.tcc"
 

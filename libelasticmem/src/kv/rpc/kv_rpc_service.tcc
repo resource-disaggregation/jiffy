@@ -8,12 +8,11 @@
 #ifndef kv_rpc_service_TCC
 #define kv_rpc_service_TCC
 
+namespace elasticmem {
+namespace kv {
 
-namespace elasticmem { namespace kv {
-
-
-template <class Protocol_>
-uint32_t kv_rpc_service_put_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_rpc_service_put_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -25,15 +24,12 @@ uint32_t kv_rpc_service_put_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I32) {
           xfer += iprot->readI32(this->block_id);
@@ -58,8 +54,7 @@ uint32_t kv_rpc_service_put_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -70,8 +65,8 @@ uint32_t kv_rpc_service_put_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t kv_rpc_service_put_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_rpc_service_put_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_put_args");
@@ -93,9 +88,8 @@ uint32_t kv_rpc_service_put_args::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_put_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_rpc_service_put_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_put_pargs");
@@ -117,9 +111,8 @@ uint32_t kv_rpc_service_put_pargs::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_put_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_rpc_service_put_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -131,15 +124,12 @@ uint32_t kv_rpc_service_put_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -148,8 +138,7 @@ uint32_t kv_rpc_service_put_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -160,8 +149,8 @@ uint32_t kv_rpc_service_put_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t kv_rpc_service_put_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_rpc_service_put_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -177,9 +166,8 @@ uint32_t kv_rpc_service_put_result::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_put_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_rpc_service_put_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -191,15 +179,12 @@ uint32_t kv_rpc_service_put_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -208,8 +193,7 @@ uint32_t kv_rpc_service_put_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -220,9 +204,8 @@ uint32_t kv_rpc_service_put_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_get_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_rpc_service_get_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -234,15 +217,12 @@ uint32_t kv_rpc_service_get_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I32) {
           xfer += iprot->readI32(this->block_id);
@@ -259,8 +239,7 @@ uint32_t kv_rpc_service_get_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -271,8 +250,8 @@ uint32_t kv_rpc_service_get_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t kv_rpc_service_get_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_rpc_service_get_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_get_args");
@@ -290,9 +269,8 @@ uint32_t kv_rpc_service_get_args::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_get_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_rpc_service_get_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_get_pargs");
@@ -310,9 +288,8 @@ uint32_t kv_rpc_service_get_pargs::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_get_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_rpc_service_get_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -324,15 +301,12 @@ uint32_t kv_rpc_service_get_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readBinary(this->success);
@@ -349,8 +323,7 @@ uint32_t kv_rpc_service_get_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -361,8 +334,8 @@ uint32_t kv_rpc_service_get_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t kv_rpc_service_get_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_rpc_service_get_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -382,9 +355,8 @@ uint32_t kv_rpc_service_get_result::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_get_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_rpc_service_get_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -396,15 +368,12 @@ uint32_t kv_rpc_service_get_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readBinary((*(this->success)));
@@ -421,8 +390,7 @@ uint32_t kv_rpc_service_get_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -433,9 +401,8 @@ uint32_t kv_rpc_service_get_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_update_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_rpc_service_update_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -447,15 +414,12 @@ uint32_t kv_rpc_service_update_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I32) {
           xfer += iprot->readI32(this->block_id);
@@ -480,8 +444,7 @@ uint32_t kv_rpc_service_update_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -492,8 +455,8 @@ uint32_t kv_rpc_service_update_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t kv_rpc_service_update_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_rpc_service_update_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_update_args");
@@ -515,9 +478,8 @@ uint32_t kv_rpc_service_update_args::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_update_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_rpc_service_update_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_update_pargs");
@@ -539,9 +501,8 @@ uint32_t kv_rpc_service_update_pargs::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_update_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_rpc_service_update_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -553,15 +514,12 @@ uint32_t kv_rpc_service_update_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -570,8 +528,7 @@ uint32_t kv_rpc_service_update_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -582,8 +539,8 @@ uint32_t kv_rpc_service_update_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t kv_rpc_service_update_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_rpc_service_update_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -599,9 +556,8 @@ uint32_t kv_rpc_service_update_result::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_update_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_rpc_service_update_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -613,15 +569,12 @@ uint32_t kv_rpc_service_update_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -630,8 +583,7 @@ uint32_t kv_rpc_service_update_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -642,9 +594,8 @@ uint32_t kv_rpc_service_update_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_remove_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_rpc_service_remove_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -656,15 +607,12 @@ uint32_t kv_rpc_service_remove_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I32) {
           xfer += iprot->readI32(this->block_id);
@@ -681,8 +629,7 @@ uint32_t kv_rpc_service_remove_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -693,8 +640,8 @@ uint32_t kv_rpc_service_remove_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t kv_rpc_service_remove_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_rpc_service_remove_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_remove_args");
@@ -712,9 +659,8 @@ uint32_t kv_rpc_service_remove_args::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_remove_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_rpc_service_remove_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_remove_pargs");
@@ -732,9 +678,8 @@ uint32_t kv_rpc_service_remove_pargs::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_remove_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_rpc_service_remove_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -746,15 +691,12 @@ uint32_t kv_rpc_service_remove_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -763,8 +705,7 @@ uint32_t kv_rpc_service_remove_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -775,8 +716,8 @@ uint32_t kv_rpc_service_remove_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t kv_rpc_service_remove_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_rpc_service_remove_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -792,9 +733,8 @@ uint32_t kv_rpc_service_remove_result::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_remove_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_rpc_service_remove_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -806,15 +746,12 @@ uint32_t kv_rpc_service_remove_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -823,8 +760,7 @@ uint32_t kv_rpc_service_remove_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -835,9 +771,8 @@ uint32_t kv_rpc_service_remove_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_size_args::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_rpc_service_size_args::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -849,15 +784,12 @@ uint32_t kv_rpc_service_size_args::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I32) {
           xfer += iprot->readI32(this->block_id);
@@ -866,8 +798,7 @@ uint32_t kv_rpc_service_size_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -878,8 +809,8 @@ uint32_t kv_rpc_service_size_args::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t kv_rpc_service_size_args::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_rpc_service_size_args::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_size_args");
@@ -893,9 +824,8 @@ uint32_t kv_rpc_service_size_args::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_size_pargs::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_rpc_service_size_pargs::write(Protocol_ *oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("kv_rpc_service_size_pargs");
@@ -909,9 +839,8 @@ uint32_t kv_rpc_service_size_pargs::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_size_result::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_rpc_service_size_result::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -923,15 +852,12 @@ uint32_t kv_rpc_service_size_result::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->success);
@@ -948,8 +874,7 @@ uint32_t kv_rpc_service_size_result::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -960,8 +885,8 @@ uint32_t kv_rpc_service_size_result::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-uint32_t kv_rpc_service_size_result::write(Protocol_* oprot) const {
+template<class Protocol_>
+uint32_t kv_rpc_service_size_result::write(Protocol_ *oprot) const {
 
   uint32_t xfer = 0;
 
@@ -981,9 +906,8 @@ uint32_t kv_rpc_service_size_result::write(Protocol_* oprot) const {
   return xfer;
 }
 
-
-template <class Protocol_>
-uint32_t kv_rpc_service_size_presult::read(Protocol_* iprot) {
+template<class Protocol_>
+uint32_t kv_rpc_service_size_presult::read(Protocol_ *iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -995,15 +919,12 @@ uint32_t kv_rpc_service_size_presult::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-
-  while (true)
-  {
+  while (true) {
     xfer += iprot->readFieldBegin(fname, ftype, fid);
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
+    switch (fid) {
       case 0:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64((*(this->success)));
@@ -1020,8 +941,7 @@ uint32_t kv_rpc_service_size_presult::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      default:
-        xfer += iprot->skip(ftype);
+      default:xfer += iprot->skip(ftype);
         break;
     }
     xfer += iprot->readFieldEnd();
@@ -1032,16 +952,16 @@ uint32_t kv_rpc_service_size_presult::read(Protocol_* iprot) {
   return xfer;
 }
 
-template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::put(const int32_t block_id, const std::string& key, const std::string& value)
-{
+template<class Protocol_>
+void kv_rpc_serviceClientT<Protocol_>::put(const int32_t block_id, const std::string &key, const std::string &value) {
   send_put(block_id, key, value);
   recv_put();
 }
 
-template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::send_put(const int32_t block_id, const std::string& key, const std::string& value)
-{
+template<class Protocol_>
+void kv_rpc_serviceClientT<Protocol_>::send_put(const int32_t block_id,
+                                                const std::string &key,
+                                                const std::string &value) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("put", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -1056,9 +976,8 @@ void kv_rpc_serviceClientT<Protocol_>::send_put(const int32_t block_id, const st
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::recv_put()
-{
+template<class Protocol_>
+void kv_rpc_serviceClientT<Protocol_>::recv_put() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -1093,16 +1012,14 @@ void kv_rpc_serviceClientT<Protocol_>::recv_put()
   return;
 }
 
-template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::get(std::string& _return, const int32_t block_id, const std::string& key)
-{
+template<class Protocol_>
+void kv_rpc_serviceClientT<Protocol_>::get(std::string &_return, const int32_t block_id, const std::string &key) {
   send_get(block_id, key);
   recv_get(_return);
 }
 
-template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::send_get(const int32_t block_id, const std::string& key)
-{
+template<class Protocol_>
+void kv_rpc_serviceClientT<Protocol_>::send_get(const int32_t block_id, const std::string &key) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("get", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -1116,9 +1033,8 @@ void kv_rpc_serviceClientT<Protocol_>::send_get(const int32_t block_id, const st
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::recv_get(std::string& _return)
-{
+template<class Protocol_>
+void kv_rpc_serviceClientT<Protocol_>::recv_get(std::string &_return) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -1155,19 +1071,22 @@ void kv_rpc_serviceClientT<Protocol_>::recv_get(std::string& _return)
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                "get failed: unknown result");
 }
 
-template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::update(const int32_t block_id, const std::string& key, const std::string& value)
-{
+template<class Protocol_>
+void kv_rpc_serviceClientT<Protocol_>::update(const int32_t block_id,
+                                              const std::string &key,
+                                              const std::string &value) {
   send_update(block_id, key, value);
   recv_update();
 }
 
-template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::send_update(const int32_t block_id, const std::string& key, const std::string& value)
-{
+template<class Protocol_>
+void kv_rpc_serviceClientT<Protocol_>::send_update(const int32_t block_id,
+                                                   const std::string &key,
+                                                   const std::string &value) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("update", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -1182,9 +1101,8 @@ void kv_rpc_serviceClientT<Protocol_>::send_update(const int32_t block_id, const
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::recv_update()
-{
+template<class Protocol_>
+void kv_rpc_serviceClientT<Protocol_>::recv_update() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -1219,16 +1137,14 @@ void kv_rpc_serviceClientT<Protocol_>::recv_update()
   return;
 }
 
-template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::remove(const int32_t block_id, const std::string& key)
-{
+template<class Protocol_>
+void kv_rpc_serviceClientT<Protocol_>::remove(const int32_t block_id, const std::string &key) {
   send_remove(block_id, key);
   recv_remove();
 }
 
-template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::send_remove(const int32_t block_id, const std::string& key)
-{
+template<class Protocol_>
+void kv_rpc_serviceClientT<Protocol_>::send_remove(const int32_t block_id, const std::string &key) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("remove", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -1242,9 +1158,8 @@ void kv_rpc_serviceClientT<Protocol_>::send_remove(const int32_t block_id, const
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::recv_remove()
-{
+template<class Protocol_>
+void kv_rpc_serviceClientT<Protocol_>::recv_remove() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -1279,16 +1194,14 @@ void kv_rpc_serviceClientT<Protocol_>::recv_remove()
   return;
 }
 
-template <class Protocol_>
-int64_t kv_rpc_serviceClientT<Protocol_>::size(const int32_t block_id)
-{
+template<class Protocol_>
+int64_t kv_rpc_serviceClientT<Protocol_>::size(const int32_t block_id) {
   send_size(block_id);
   return recv_size();
 }
 
-template <class Protocol_>
-void kv_rpc_serviceClientT<Protocol_>::send_size(const int32_t block_id)
-{
+template<class Protocol_>
+void kv_rpc_serviceClientT<Protocol_>::send_size(const int32_t block_id) {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("size", ::apache::thrift::protocol::T_CALL, cseqid);
 
@@ -1301,9 +1214,8 @@ void kv_rpc_serviceClientT<Protocol_>::send_size(const int32_t block_id)
   this->oprot_->getTransport()->flush();
 }
 
-template <class Protocol_>
-int64_t kv_rpc_serviceClientT<Protocol_>::recv_size()
-{
+template<class Protocol_>
+int64_t kv_rpc_serviceClientT<Protocol_>::recv_size() {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -1340,18 +1252,24 @@ int64_t kv_rpc_serviceClientT<Protocol_>::recv_size()
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "size failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                "size failed: unknown result");
 }
 
-template <class Protocol_>
-bool kv_rpc_serviceProcessorT<Protocol_>::dispatchCall(::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, const std::string& fname, int32_t seqid, void* callContext) {
+template<class Protocol_>
+bool kv_rpc_serviceProcessorT<Protocol_>::dispatchCall(::apache::thrift::protocol::TProtocol *iprot,
+                                                       ::apache::thrift::protocol::TProtocol *oprot,
+                                                       const std::string &fname,
+                                                       int32_t seqid,
+                                                       void *callContext) {
   typename ProcessMap::iterator pfn;
   pfn = processMap_.find(fname);
   if (pfn == processMap_.end()) {
     iprot->skip(::apache::thrift::protocol::T_STRUCT);
     iprot->readMessageEnd();
     iprot->getTransport()->readEnd();
-    ::apache::thrift::TApplicationException x(::apache::thrift::TApplicationException::UNKNOWN_METHOD, "Invalid method name: '"+fname+"'");
+    ::apache::thrift::TApplicationException
+        x(::apache::thrift::TApplicationException::UNKNOWN_METHOD, "Invalid method name: '" + fname + "'");
     oprot->writeMessageBegin(fname, ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
@@ -1363,15 +1281,20 @@ bool kv_rpc_serviceProcessorT<Protocol_>::dispatchCall(::apache::thrift::protoco
   return true;
 }
 
-template <class Protocol_>
-bool kv_rpc_serviceProcessorT<Protocol_>::dispatchCallTemplated(Protocol_* iprot, Protocol_* oprot, const std::string& fname, int32_t seqid, void* callContext) {
+template<class Protocol_>
+bool kv_rpc_serviceProcessorT<Protocol_>::dispatchCallTemplated(Protocol_ *iprot,
+                                                                Protocol_ *oprot,
+                                                                const std::string &fname,
+                                                                int32_t seqid,
+                                                                void *callContext) {
   typename ProcessMap::iterator pfn;
   pfn = processMap_.find(fname);
   if (pfn == processMap_.end()) {
     iprot->skip(::apache::thrift::protocol::T_STRUCT);
     iprot->readMessageEnd();
     iprot->getTransport()->readEnd();
-    ::apache::thrift::TApplicationException x(::apache::thrift::TApplicationException::UNKNOWN_METHOD, "Invalid method name: '"+fname+"'");
+    ::apache::thrift::TApplicationException
+        x(::apache::thrift::TApplicationException::UNKNOWN_METHOD, "Invalid method name: '" + fname + "'");
     oprot->writeMessageBegin(fname, ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
@@ -1383,10 +1306,12 @@ bool kv_rpc_serviceProcessorT<Protocol_>::dispatchCallTemplated(Protocol_* iprot
   return true;
 }
 
-template <class Protocol_>
-void kv_rpc_serviceProcessorT<Protocol_>::process_put(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void kv_rpc_serviceProcessorT<Protocol_>::process_put(int32_t seqid,
+                                                      ::apache::thrift::protocol::TProtocol *iprot,
+                                                      ::apache::thrift::protocol::TProtocol *oprot,
+                                                      void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("kv_rpc_service.put", callContext);
   }
@@ -1411,7 +1336,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_put(int32_t seqid, ::apache::t
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "kv_rpc_service.put");
     }
@@ -1440,10 +1365,12 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_put(int32_t seqid, ::apache::t
   }
 }
 
-template <class Protocol_>
-void kv_rpc_serviceProcessorT<Protocol_>::process_put(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void kv_rpc_serviceProcessorT<Protocol_>::process_put(int32_t seqid,
+                                                      Protocol_ *iprot,
+                                                      Protocol_ *oprot,
+                                                      void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("kv_rpc_service.put", callContext);
   }
@@ -1468,7 +1395,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_put(int32_t seqid, Protocol_* 
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "kv_rpc_service.put");
     }
@@ -1497,10 +1424,12 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_put(int32_t seqid, Protocol_* 
   }
 }
 
-template <class Protocol_>
-void kv_rpc_serviceProcessorT<Protocol_>::process_get(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void kv_rpc_serviceProcessorT<Protocol_>::process_get(int32_t seqid,
+                                                      ::apache::thrift::protocol::TProtocol *iprot,
+                                                      ::apache::thrift::protocol::TProtocol *oprot,
+                                                      void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("kv_rpc_service.get", callContext);
   }
@@ -1526,7 +1455,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_get(int32_t seqid, ::apache::t
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "kv_rpc_service.get");
     }
@@ -1555,10 +1484,12 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_get(int32_t seqid, ::apache::t
   }
 }
 
-template <class Protocol_>
-void kv_rpc_serviceProcessorT<Protocol_>::process_get(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void kv_rpc_serviceProcessorT<Protocol_>::process_get(int32_t seqid,
+                                                      Protocol_ *iprot,
+                                                      Protocol_ *oprot,
+                                                      void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("kv_rpc_service.get", callContext);
   }
@@ -1584,7 +1515,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_get(int32_t seqid, Protocol_* 
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "kv_rpc_service.get");
     }
@@ -1613,10 +1544,12 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_get(int32_t seqid, Protocol_* 
   }
 }
 
-template <class Protocol_>
-void kv_rpc_serviceProcessorT<Protocol_>::process_update(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void kv_rpc_serviceProcessorT<Protocol_>::process_update(int32_t seqid,
+                                                         ::apache::thrift::protocol::TProtocol *iprot,
+                                                         ::apache::thrift::protocol::TProtocol *oprot,
+                                                         void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("kv_rpc_service.update", callContext);
   }
@@ -1641,7 +1574,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_update(int32_t seqid, ::apache
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "kv_rpc_service.update");
     }
@@ -1670,10 +1603,12 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_update(int32_t seqid, ::apache
   }
 }
 
-template <class Protocol_>
-void kv_rpc_serviceProcessorT<Protocol_>::process_update(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void kv_rpc_serviceProcessorT<Protocol_>::process_update(int32_t seqid,
+                                                         Protocol_ *iprot,
+                                                         Protocol_ *oprot,
+                                                         void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("kv_rpc_service.update", callContext);
   }
@@ -1698,7 +1633,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_update(int32_t seqid, Protocol
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "kv_rpc_service.update");
     }
@@ -1727,10 +1662,12 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_update(int32_t seqid, Protocol
   }
 }
 
-template <class Protocol_>
-void kv_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void kv_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid,
+                                                         ::apache::thrift::protocol::TProtocol *iprot,
+                                                         ::apache::thrift::protocol::TProtocol *oprot,
+                                                         void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("kv_rpc_service.remove", callContext);
   }
@@ -1755,7 +1692,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, ::apache
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "kv_rpc_service.remove");
     }
@@ -1784,10 +1721,12 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, ::apache
   }
 }
 
-template <class Protocol_>
-void kv_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void kv_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid,
+                                                         Protocol_ *iprot,
+                                                         Protocol_ *oprot,
+                                                         void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("kv_rpc_service.remove", callContext);
   }
@@ -1812,7 +1751,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, Protocol
   } catch (kv_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "kv_rpc_service.remove");
     }
@@ -1841,10 +1780,12 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_remove(int32_t seqid, Protocol
   }
 }
 
-template <class Protocol_>
-void kv_rpc_serviceProcessorT<Protocol_>::process_size(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void kv_rpc_serviceProcessorT<Protocol_>::process_size(int32_t seqid,
+                                                       ::apache::thrift::protocol::TProtocol *iprot,
+                                                       ::apache::thrift::protocol::TProtocol *oprot,
+                                                       void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("kv_rpc_service.size", callContext);
   }
@@ -1870,7 +1811,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_size(int32_t seqid, ::apache::
   } catch (kv_management_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "kv_rpc_service.size");
     }
@@ -1899,10 +1840,12 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_size(int32_t seqid, ::apache::
   }
 }
 
-template <class Protocol_>
-void kv_rpc_serviceProcessorT<Protocol_>::process_size(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
-{
-  void* ctx = NULL;
+template<class Protocol_>
+void kv_rpc_serviceProcessorT<Protocol_>::process_size(int32_t seqid,
+                                                       Protocol_ *iprot,
+                                                       Protocol_ *oprot,
+                                                       void *callContext) {
+  void *ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("kv_rpc_service.size", callContext);
   }
@@ -1928,7 +1871,7 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_size(int32_t seqid, Protocol_*
   } catch (kv_management_rpc_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "kv_rpc_service.size");
     }
@@ -1957,24 +1900,28 @@ void kv_rpc_serviceProcessorT<Protocol_>::process_size(int32_t seqid, Protocol_*
   }
 }
 
-template <class Protocol_>
-::apache::thrift::stdcxx::shared_ptr< ::apache::thrift::TProcessor > kv_rpc_serviceProcessorFactoryT<Protocol_>::getProcessor(const ::apache::thrift::TConnectionInfo& connInfo) {
-  ::apache::thrift::ReleaseHandler< kv_rpc_serviceIfFactory > cleanup(handlerFactory_);
-  ::apache::thrift::stdcxx::shared_ptr< kv_rpc_serviceIf > handler(handlerFactory_->getHandler(connInfo), cleanup);
-  ::apache::thrift::stdcxx::shared_ptr< ::apache::thrift::TProcessor > processor(new kv_rpc_serviceProcessorT<Protocol_>(handler));
+template<class Protocol_>
+::apache::thrift::stdcxx::shared_ptr<::apache::thrift::TProcessor> kv_rpc_serviceProcessorFactoryT<Protocol_>::getProcessor(
+    const ::apache::thrift::TConnectionInfo &connInfo) {
+  ::apache::thrift::ReleaseHandler<kv_rpc_serviceIfFactory> cleanup(handlerFactory_);
+  ::apache::thrift::stdcxx::shared_ptr<kv_rpc_serviceIf> handler(handlerFactory_->getHandler(connInfo), cleanup);
+  ::apache::thrift::stdcxx::shared_ptr<::apache::thrift::TProcessor>
+      processor(new kv_rpc_serviceProcessorT<Protocol_>(handler));
   return processor;
 }
 
-template <class Protocol_>
-void kv_rpc_serviceConcurrentClientT<Protocol_>::put(const int32_t block_id, const std::string& key, const std::string& value)
-{
+template<class Protocol_>
+void kv_rpc_serviceConcurrentClientT<Protocol_>::put(const int32_t block_id,
+                                                     const std::string &key,
+                                                     const std::string &value) {
   int32_t seqid = send_put(block_id, key, value);
   recv_put(seqid);
 }
 
-template <class Protocol_>
-int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_put(const int32_t block_id, const std::string& key, const std::string& value)
-{
+template<class Protocol_>
+int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_put(const int32_t block_id,
+                                                             const std::string &key,
+                                                             const std::string &value) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("put", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -1993,9 +1940,8 @@ int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_put(const int32_t block
   return cseqid;
 }
 
-template <class Protocol_>
-void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_put(const int32_t seqid)
-{
+template<class Protocol_>
+void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_put(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -2005,11 +1951,11 @@ void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_put(const int32_t seqid)
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -2052,16 +1998,16 @@ void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_put(const int32_t seqid)
   } // end while(true)
 }
 
-template <class Protocol_>
-void kv_rpc_serviceConcurrentClientT<Protocol_>::get(std::string& _return, const int32_t block_id, const std::string& key)
-{
+template<class Protocol_>
+void kv_rpc_serviceConcurrentClientT<Protocol_>::get(std::string &_return,
+                                                     const int32_t block_id,
+                                                     const std::string &key) {
   int32_t seqid = send_get(block_id, key);
   recv_get(_return, seqid);
 }
 
-template <class Protocol_>
-int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_get(const int32_t block_id, const std::string& key)
-{
+template<class Protocol_>
+int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_get(const int32_t block_id, const std::string &key) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("get", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -2079,9 +2025,8 @@ int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_get(const int32_t block
   return cseqid;
 }
 
-template <class Protocol_>
-void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_get(std::string& _return, const int32_t seqid)
-{
+template<class Protocol_>
+void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_get(std::string &_return, const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -2091,11 +2036,11 @@ void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_get(std::string& _return, 
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -2134,7 +2079,8 @@ void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_get(std::string& _return, 
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                    "get failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -2144,16 +2090,18 @@ void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_get(std::string& _return, 
   } // end while(true)
 }
 
-template <class Protocol_>
-void kv_rpc_serviceConcurrentClientT<Protocol_>::update(const int32_t block_id, const std::string& key, const std::string& value)
-{
+template<class Protocol_>
+void kv_rpc_serviceConcurrentClientT<Protocol_>::update(const int32_t block_id,
+                                                        const std::string &key,
+                                                        const std::string &value) {
   int32_t seqid = send_update(block_id, key, value);
   recv_update(seqid);
 }
 
-template <class Protocol_>
-int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_update(const int32_t block_id, const std::string& key, const std::string& value)
-{
+template<class Protocol_>
+int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_update(const int32_t block_id,
+                                                                const std::string &key,
+                                                                const std::string &value) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("update", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -2172,9 +2120,8 @@ int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_update(const int32_t bl
   return cseqid;
 }
 
-template <class Protocol_>
-void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_update(const int32_t seqid)
-{
+template<class Protocol_>
+void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_update(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -2184,11 +2131,11 @@ void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_update(const int32_t seqid
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -2231,16 +2178,14 @@ void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_update(const int32_t seqid
   } // end while(true)
 }
 
-template <class Protocol_>
-void kv_rpc_serviceConcurrentClientT<Protocol_>::remove(const int32_t block_id, const std::string& key)
-{
+template<class Protocol_>
+void kv_rpc_serviceConcurrentClientT<Protocol_>::remove(const int32_t block_id, const std::string &key) {
   int32_t seqid = send_remove(block_id, key);
   recv_remove(seqid);
 }
 
-template <class Protocol_>
-int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_remove(const int32_t block_id, const std::string& key)
-{
+template<class Protocol_>
+int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_remove(const int32_t block_id, const std::string &key) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("remove", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -2258,9 +2203,8 @@ int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_remove(const int32_t bl
   return cseqid;
 }
 
-template <class Protocol_>
-void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_remove(const int32_t seqid)
-{
+template<class Protocol_>
+void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_remove(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -2270,11 +2214,11 @@ void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_remove(const int32_t seqid
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -2317,16 +2261,14 @@ void kv_rpc_serviceConcurrentClientT<Protocol_>::recv_remove(const int32_t seqid
   } // end while(true)
 }
 
-template <class Protocol_>
-int64_t kv_rpc_serviceConcurrentClientT<Protocol_>::size(const int32_t block_id)
-{
+template<class Protocol_>
+int64_t kv_rpc_serviceConcurrentClientT<Protocol_>::size(const int32_t block_id) {
   int32_t seqid = send_size(block_id);
   return recv_size(seqid);
 }
 
-template <class Protocol_>
-int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_size(const int32_t block_id)
-{
+template<class Protocol_>
+int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_size(const int32_t block_id) {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("size", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -2343,9 +2285,8 @@ int32_t kv_rpc_serviceConcurrentClientT<Protocol_>::send_size(const int32_t bloc
   return cseqid;
 }
 
-template <class Protocol_>
-int64_t kv_rpc_serviceConcurrentClientT<Protocol_>::recv_size(const int32_t seqid)
-{
+template<class Protocol_>
+int64_t kv_rpc_serviceConcurrentClientT<Protocol_>::recv_size(const int32_t seqid) {
 
   int32_t rseqid = 0;
   std::string fname;
@@ -2355,11 +2296,11 @@ int64_t kv_rpc_serviceConcurrentClientT<Protocol_>::recv_size(const int32_t seqi
   // The destructor of this sentry wakes up other clients
   ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
 
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+  while (true) {
+    if (!this->sync_.getPending(fname, mtype, rseqid)) {
       this->iprot_->readMessageBegin(fname, mtype, rseqid);
     }
-    if(seqid == rseqid) {
+    if (seqid == rseqid) {
       if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
         ::apache::thrift::TApplicationException x;
         x.read(this->iprot_);
@@ -2398,7 +2339,8 @@ int64_t kv_rpc_serviceConcurrentClientT<Protocol_>::recv_size(const int32_t seqi
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "size failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT,
+                                                    "size failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -2408,6 +2350,7 @@ int64_t kv_rpc_serviceConcurrentClientT<Protocol_>::recv_size(const int32_t seqi
   } // end while(true)
 }
 
-}} // namespace
+}
+} // namespace
 
 #endif

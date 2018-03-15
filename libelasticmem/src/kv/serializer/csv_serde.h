@@ -21,7 +21,7 @@ class csv_deserializer : public deserializer {
 
  private:
   inline std::vector<std::string> split(const std::string &s, char delim,
-                                               size_t count) {
+                                        size_t count) {
     std::stringstream ss(s);
     std::string item;
     std::vector<std::string> elems;
@@ -36,7 +36,7 @@ class csv_deserializer : public deserializer {
   }
 
   inline std::vector<std::string> split(const std::string &s,
-                                               char delim) {
+                                        char delim) {
     return split(s, delim, UINT64_MAX);
   }
 };
