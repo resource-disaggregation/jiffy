@@ -2,7 +2,7 @@
 #define ELASTICMEM_DIRECTORY_LEASE_SERVER_H
 
 #include <thrift/server/TThreadedServer.h>
-#include <kv_management_service.h>
+#include "../../kv/kv_management_service.h"
 #include "../tree/directory_tree.h"
 
 namespace elasticmem {

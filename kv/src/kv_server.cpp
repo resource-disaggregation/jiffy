@@ -1,6 +1,6 @@
 #include <iostream>
-#include <rpc/kv_rpc_server.h>
-#include <rpc/kv_management_rpc_server.h>
+#include <kv/rpc/kv_rpc_server.h>
+#include <kv/rpc/kv_management_rpc_server.h>
 
 using namespace ::elasticmem::kv;
 

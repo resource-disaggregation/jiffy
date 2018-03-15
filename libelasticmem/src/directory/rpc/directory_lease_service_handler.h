@@ -3,7 +3,7 @@
 
 #include "directory_lease_service.h"
 #include "../tree/directory_tree.h"
-#include <kv_management_service.h>
+#include "../../kv/kv_management_service.h"
 
 namespace elasticmem {
 namespace directory {

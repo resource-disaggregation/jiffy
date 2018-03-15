@@ -1,10 +1,10 @@
 #include "catch.hpp"
 
 #include <thrift/transport/TTransportException.h>
-#include "../src/rpc/kv_management_rpc_server.h"
-#include "../src/rpc/kv_management_client.h"
-#include "../src/manager/kv_manager.h"
-#include "../src/manager/block_name_parser.h"
+#include "../src/kv/rpc/kv_management_rpc_server.h"
+#include "../src/kv/rpc/kv_management_client.h"
+#include "../src/kv/manager/kv_manager.h"
+#include "../src/kv/manager/block_name_parser.h"
 
 using namespace ::elasticmem::kv;
 using namespace ::apache::thrift::transport;

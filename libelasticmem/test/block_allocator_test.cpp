@@ -1,6 +1,6 @@
 #include "catch.hpp"
-#include "../src/tree/block_allocator.h"
-#include "../src/tree/random_block_allocator.h"
+#include "../src/directory/tree/block_allocator.h"
+#include "../src/directory/tree/random_block_allocator.h"
 
 using namespace ::elasticmem::directory;
 

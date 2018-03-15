@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "../src/block/kv_block.h"
+#include "../src/kv/block/kv_block.h"
 
 using namespace ::elasticmem::kv;
 using namespace ::elasticmem::persistent;

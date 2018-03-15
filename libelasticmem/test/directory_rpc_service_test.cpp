@@ -2,9 +2,9 @@
 
 #include <thrift/transport/TTransportException.h>
 #include <thread>
-#include "../src/rpc/directory_client.h"
-#include "../src/rpc/directory_rpc_server.h"
-#include "../src/tree/random_block_allocator.h"
+#include "../src/directory/rpc/directory_client.h"
+#include "../src/directory/rpc/directory_rpc_server.h"
+#include "../src/directory/tree/random_block_allocator.h"
 
 using namespace ::elasticmem::directory;
 using namespace ::apache::thrift::transport;

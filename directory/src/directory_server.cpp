@@ -1,12 +1,12 @@
 #include <iostream>
 #include <vector>
 #include <thread>
-#include <tree/directory_tree.h>
-#include <tree/random_block_allocator.h>
-#include <rpc/directory_rpc_server.h>
-#include <manager/kv_manager.h>
-#include <lease/lease_manager.h>
-#include <rpc/directory_lease_server.h>
+#include <directory/tree/directory_tree.h>
+#include <directory/tree/random_block_allocator.h>
+#include <directory/rpc/directory_rpc_server.h>
+#include <directory/lease/lease_manager.h>
+#include <directory/rpc/directory_lease_server.h>
+#include <kv/manager/kv_manager.h>
 
 using namespace ::elasticmem::directory;
 using namespace ::elasticmem::kv;

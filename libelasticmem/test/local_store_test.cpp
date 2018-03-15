@@ -1,7 +1,7 @@
-#define CATCH_CONFIG_MAIN
 #include <experimental/filesystem>
+#include <fstream>
 #include "catch.hpp"
-#include "../src/local/local_store.h"
+#include "../src/persistent/local/local_store.h"
 
 using namespace ::elasticmem::persistent;
 TEST_CASE("write_test", "[write]") {

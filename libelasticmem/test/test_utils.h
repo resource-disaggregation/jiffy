@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "../../libkv/src/kv_management_service.h"
+#include "../src/kv/kv_management_service.h"
 
 class dummy_kv_manager : public elasticmem::kv::kv_management_service {
  public:

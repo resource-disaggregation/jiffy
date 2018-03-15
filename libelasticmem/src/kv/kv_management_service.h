@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <string>
 
-#include <persistent_service.h>
+#include "../persistent/persistent_service.h"
 
 namespace elasticmem {
 namespace kv {

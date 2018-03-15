@@ -1,6 +1,6 @@
 #include "catch.hpp"
-#include "../src/tree/directory_tree.h"
-#include "../src/tree/random_block_allocator.h"
+#include "../src/directory/tree/directory_tree.h"
+#include "../src/directory/tree/random_block_allocator.h"
 
 using namespace ::elasticmem::directory;
 
@@ -120,7 +120,7 @@ TEST_CASE("permissions_test", "[file][dir]") {
   REQUIRE(tree.permissions("/sandbox") == perms::owner_all);
 }
 
-TEST_CASE("remove_test", "[file][dir]") {
+TEST_CASE("path_remove_test", "[file][dir]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d", "e", "f", "g", "h"};
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   directory_tree tree(alloc);

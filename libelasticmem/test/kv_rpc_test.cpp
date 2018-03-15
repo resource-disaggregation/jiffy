@@ -1,8 +1,8 @@
 #include <catch.hpp>
 #include <thrift/transport/TTransportException.h>
-#include "../src/block/kv_block.h"
-#include "../src/rpc/kv_client.h"
-#include "../src/rpc/kv_rpc_server.h"
+#include "../src/kv/block/kv_block.h"
+#include "../src/kv/rpc/kv_client.h"
+#include "../src/kv/rpc/kv_rpc_server.h"
 
 using namespace ::elasticmem::kv;
 using namespace ::apache::thrift::transport;

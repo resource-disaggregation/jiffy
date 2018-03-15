@@ -1,7 +1,7 @@
 #include <iostream>
 #include <chrono>
 #include "lease_manager.h"
-#include "../utils/directory_utils.h"
+#include "../../utils/directory_utils.h"
 
 namespace elasticmem {
 namespace directory {
