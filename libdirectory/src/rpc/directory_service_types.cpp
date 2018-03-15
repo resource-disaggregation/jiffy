@@ -269,91 +269,49 @@ const char* directory_rpc_service_exception::what() const throw() {
 }
 
 
-rpc_file_metadata::~rpc_file_metadata() throw() {
+rpc_lease_update::~rpc_lease_update() throw() {
 }
 
 
-void rpc_file_metadata::__set_path(const std::string& val) {
-  this->path = val;
-}
-
-void rpc_file_metadata::__set_bytes(const int64_t val) {
-  this->bytes = val;
-}
-std::ostream& operator<<(std::ostream& out, const rpc_file_metadata& obj)
-{
-  obj.printTo(out);
-  return out;
-}
-
-
-void swap(rpc_file_metadata &a, rpc_file_metadata &b) {
-  using ::std::swap;
-  swap(a.path, b.path);
-  swap(a.bytes, b.bytes);
-}
-
-rpc_file_metadata::rpc_file_metadata(const rpc_file_metadata& other16) {
-  path = other16.path;
-  bytes = other16.bytes;
-}
-rpc_file_metadata& rpc_file_metadata::operator=(const rpc_file_metadata& other17) {
-  path = other17.path;
-  bytes = other17.bytes;
-  return *this;
-}
-void rpc_file_metadata::printTo(std::ostream& out) const {
-  using ::apache::thrift::to_string;
-  out << "rpc_file_metadata(";
-  out << "path=" << to_string(path);
-  out << ", " << "bytes=" << to_string(bytes);
-  out << ")";
-}
-
-
-lease_update::~lease_update() throw() {
-}
-
-
-void lease_update::__set_to_renew(const std::vector<rpc_file_metadata> & val) {
+void rpc_lease_update::__set_to_renew(const std::vector<std::string> & val) {
   this->to_renew = val;
 }
 
-void lease_update::__set_to_flush(const std::vector<std::string> & val) {
+void rpc_lease_update::__set_to_flush(const std::vector<std::string> & val) {
   this->to_flush = val;
 }
 
-void lease_update::__set_to_remove(const std::vector<std::string> & val) {
+void rpc_lease_update::__set_to_remove(const std::vector<std::string> & val) {
   this->to_remove = val;
 }
-std::ostream& operator<<(std::ostream& out, const lease_update& obj)
+std::ostream& operator<<(std::ostream& out, const rpc_lease_update& obj)
 {
   obj.printTo(out);
   return out;
 }
 
 
-void swap(lease_update &a, lease_update &b) {
+void swap(rpc_lease_update &a, rpc_lease_update &b) {
   using ::std::swap;
   swap(a.to_renew, b.to_renew);
   swap(a.to_flush, b.to_flush);
   swap(a.to_remove, b.to_remove);
 }
 
-lease_update::lease_update(const lease_update& other36) {
-  to_renew = other36.to_renew;
-  to_flush = other36.to_flush;
-  to_remove = other36.to_remove;
+rpc_lease_update::rpc_lease_update(const rpc_lease_update& other34) {
+  to_renew = other34.to_renew;
+  to_flush = other34.to_flush;
+  to_remove = other34.to_remove;
 }
-lease_update& lease_update::operator=(const lease_update& other37) {
-  to_renew = other37.to_renew;
-  to_flush = other37.to_flush;
-  to_remove = other37.to_remove;
+rpc_lease_update& rpc_lease_update::operator=(const rpc_lease_update& other35) {
+  to_renew = other35.to_renew;
+  to_flush = other35.to_flush;
+  to_remove = other35.to_remove;
   return *this;
 }
-void lease_update::printTo(std::ostream& out) const {
+void rpc_lease_update::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
-  out << "lease_update(";
+  out << "rpc_lease_update(";
   out << "to_renew=" << to_string(to_renew);
   out << ", " << "to_flush=" << to_string(to_flush);
   out << ", " << "to_remove=" << to_string(to_remove);
@@ -361,49 +319,49 @@ void lease_update::printTo(std::ostream& out) const {
 }
 
 
-lease_ack::~lease_ack() throw() {
+rpc_lease_ack::~rpc_lease_ack() throw() {
 }
 
 
-void lease_ack::__set_renewed(const std::vector<rpc_file_metadata> & val) {
+void rpc_lease_ack::__set_renewed(const int64_t val) {
   this->renewed = val;
 }
 
-void lease_ack::__set_flushed(const int64_t val) {
+void rpc_lease_ack::__set_flushed(const int64_t val) {
   this->flushed = val;
 }
 
-void lease_ack::__set_removed(const int64_t val) {
+void rpc_lease_ack::__set_removed(const int64_t val) {
   this->removed = val;
 }
-std::ostream& operator<<(std::ostream& out, const lease_ack& obj)
+std::ostream& operator<<(std::ostream& out, const rpc_lease_ack& obj)
 {
   obj.printTo(out);
   return out;
 }
 
 
-void swap(lease_ack &a, lease_ack &b) {
+void swap(rpc_lease_ack &a, rpc_lease_ack &b) {
   using ::std::swap;
   swap(a.renewed, b.renewed);
   swap(a.flushed, b.flushed);
   swap(a.removed, b.removed);
 }
 
-lease_ack::lease_ack(const lease_ack& other44) {
-  renewed = other44.renewed;
-  flushed = other44.flushed;
-  removed = other44.removed;
+rpc_lease_ack::rpc_lease_ack(const rpc_lease_ack& other36) {
+  renewed = other36.renewed;
+  flushed = other36.flushed;
+  removed = other36.removed;
 }
-lease_ack& lease_ack::operator=(const lease_ack& other45) {
-  renewed = other45.renewed;
-  flushed = other45.flushed;
-  removed = other45.removed;
+rpc_lease_ack& rpc_lease_ack::operator=(const rpc_lease_ack& other37) {
+  renewed = other37.renewed;
+  flushed = other37.flushed;
+  removed = other37.removed;
   return *this;
 }
-void lease_ack::printTo(std::ostream& out) const {
+void rpc_lease_ack::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
-  out << "lease_ack(";
+  out << "rpc_lease_ack(";
   out << "renewed=" << to_string(renewed);
   out << ", " << "flushed=" << to_string(flushed);
   out << ", " << "removed=" << to_string(removed);
@@ -431,13 +389,13 @@ void swap(directory_lease_service_exception &a, directory_lease_service_exceptio
   swap(a.__isset, b.__isset);
 }
 
-directory_lease_service_exception::directory_lease_service_exception(const directory_lease_service_exception& other46) : TException() {
-  msg = other46.msg;
-  __isset = other46.__isset;
+directory_lease_service_exception::directory_lease_service_exception(const directory_lease_service_exception& other38) : TException() {
+  msg = other38.msg;
+  __isset = other38.__isset;
 }
-directory_lease_service_exception& directory_lease_service_exception::operator=(const directory_lease_service_exception& other47) {
-  msg = other47.msg;
-  __isset = other47.__isset;
+directory_lease_service_exception& directory_lease_service_exception::operator=(const directory_lease_service_exception& other39) {
+  msg = other39.msg;
+  __isset = other39.__isset;
   return *this;
 }
 void directory_lease_service_exception::printTo(std::ostream& out) const {

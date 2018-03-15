@@ -25,7 +25,7 @@ TEST_CASE("lease_manager_test") {
   REQUIRE_NOTHROW(mgr.start());
   std::this_thread::sleep_for(100ms);
   REQUIRE_NOTHROW(tree->touch("/sandbox/a/b/c"));
-  std::this_thread::sleep_for(200ms);
+  std::this_thread::sleep_for(150ms);
   REQUIRE(tree->exists("/sandbox/a/b/c/file.txt"));
   REQUIRE(!tree->exists("/sandbox/a/b/file.txt"));
   REQUIRE(!tree->exists("/sandbox/a/file.txt"));

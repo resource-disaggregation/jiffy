@@ -261,7 +261,7 @@ TEST_CASE("dstatus_test", "[file]") {
   REQUIRE_THROWS_AS(tree.dstatus("/sandbox"), directory_service_exception);
   REQUIRE(tree.dstatus("/sandbox/file.txt").mode() == storage_mode::in_memory);
   REQUIRE(tree.dstatus("/sandbox/file.txt").persistent_store_prefix() == "/tmp");
-  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().empty());
+  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().size() == 1);
 
   data_status status(storage_mode::in_memory_grace, "/tmp2", {"a", "b", "c", "d"});
   REQUIRE_NOTHROW(tree.dstatus("/sandbox/file.txt", status));
@@ -300,12 +300,12 @@ TEST_CASE("blocks_test", "[file]") {
 
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file.txt", "/tmp"));
   REQUIRE_THROWS_AS(tree.data_blocks("/sandbox"), directory_service_exception);
-  REQUIRE(tree.data_blocks("/sandbox/file.txt").empty());
+  REQUIRE(tree.data_blocks("/sandbox/file.txt").size() == 1);
 
   REQUIRE_NOTHROW(tree.add_data_block("/sandbox/file.txt"));
   REQUIRE_NOTHROW(tree.add_data_block("/sandbox/file.txt"));
   REQUIRE_NOTHROW(tree.add_data_block("/sandbox/file.txt"));
-  REQUIRE_NOTHROW(tree.add_data_block("/sandbox/file.txt"));
+  REQUIRE_THROWS_AS(tree.add_data_block("/sandbox/file.txt"), std::out_of_range);
   std::vector<std::string> file_blocks;
   REQUIRE_NOTHROW(file_blocks = tree.data_blocks("/sandbox/file.txt"));
   std::sort(file_blocks.begin(), file_blocks.end());

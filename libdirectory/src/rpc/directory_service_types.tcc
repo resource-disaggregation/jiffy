@@ -351,82 +351,7 @@ uint32_t directory_rpc_service_exception::write(Protocol_* oprot) const {
 }
 
 template <class Protocol_>
-uint32_t rpc_file_metadata::read(Protocol_* iprot) {
-
-  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-  bool isset_path = false;
-  bool isset_bytes = false;
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->path);
-          isset_path = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 2:
-        if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->bytes);
-          isset_bytes = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  if (!isset_path)
-    throw TProtocolException(TProtocolException::INVALID_DATA);
-  if (!isset_bytes)
-    throw TProtocolException(TProtocolException::INVALID_DATA);
-  return xfer;
-}
-
-template <class Protocol_>
-uint32_t rpc_file_metadata::write(Protocol_* oprot) const {
-  uint32_t xfer = 0;
-  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("rpc_file_metadata");
-
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString(this->path);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("bytes", ::apache::thrift::protocol::T_I64, 2);
-  xfer += oprot->writeI64(this->bytes);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-template <class Protocol_>
-uint32_t lease_update::read(Protocol_* iprot) {
+uint32_t rpc_lease_update::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -454,14 +379,14 @@ uint32_t lease_update::read(Protocol_* iprot) {
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->to_renew.clear();
-            uint32_t _size18;
-            ::apache::thrift::protocol::TType _etype21;
-            xfer += iprot->readListBegin(_etype21, _size18);
-            this->to_renew.resize(_size18);
-            uint32_t _i22;
-            for (_i22 = 0; _i22 < _size18; ++_i22)
+            uint32_t _size16;
+            ::apache::thrift::protocol::TType _etype19;
+            xfer += iprot->readListBegin(_etype19, _size16);
+            this->to_renew.resize(_size16);
+            uint32_t _i20;
+            for (_i20 = 0; _i20 < _size16; ++_i20)
             {
-              xfer += this->to_renew[_i22].read(iprot);
+              xfer += iprot->readString(this->to_renew[_i20]);
             }
             xfer += iprot->readListEnd();
           }
@@ -474,14 +399,14 @@ uint32_t lease_update::read(Protocol_* iprot) {
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->to_flush.clear();
-            uint32_t _size23;
-            ::apache::thrift::protocol::TType _etype26;
-            xfer += iprot->readListBegin(_etype26, _size23);
-            this->to_flush.resize(_size23);
-            uint32_t _i27;
-            for (_i27 = 0; _i27 < _size23; ++_i27)
+            uint32_t _size21;
+            ::apache::thrift::protocol::TType _etype24;
+            xfer += iprot->readListBegin(_etype24, _size21);
+            this->to_flush.resize(_size21);
+            uint32_t _i25;
+            for (_i25 = 0; _i25 < _size21; ++_i25)
             {
-              xfer += iprot->readString(this->to_flush[_i27]);
+              xfer += iprot->readString(this->to_flush[_i25]);
             }
             xfer += iprot->readListEnd();
           }
@@ -494,14 +419,14 @@ uint32_t lease_update::read(Protocol_* iprot) {
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->to_remove.clear();
-            uint32_t _size28;
-            ::apache::thrift::protocol::TType _etype31;
-            xfer += iprot->readListBegin(_etype31, _size28);
-            this->to_remove.resize(_size28);
-            uint32_t _i32;
-            for (_i32 = 0; _i32 < _size28; ++_i32)
+            uint32_t _size26;
+            ::apache::thrift::protocol::TType _etype29;
+            xfer += iprot->readListBegin(_etype29, _size26);
+            this->to_remove.resize(_size26);
+            uint32_t _i30;
+            for (_i30 = 0; _i30 < _size26; ++_i30)
             {
-              xfer += iprot->readString(this->to_remove[_i32]);
+              xfer += iprot->readString(this->to_remove[_i30]);
             }
             xfer += iprot->readListEnd();
           }
@@ -529,18 +454,18 @@ uint32_t lease_update::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t lease_update::write(Protocol_* oprot) const {
+uint32_t rpc_lease_update::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("lease_update");
+  xfer += oprot->writeStructBegin("rpc_lease_update");
 
   xfer += oprot->writeFieldBegin("to_renew", ::apache::thrift::protocol::T_LIST, 1);
   {
-    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->to_renew.size()));
-    std::vector<rpc_file_metadata> ::const_iterator _iter33;
-    for (_iter33 = this->to_renew.begin(); _iter33 != this->to_renew.end(); ++_iter33)
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->to_renew.size()));
+    std::vector<std::string> ::const_iterator _iter31;
+    for (_iter31 = this->to_renew.begin(); _iter31 != this->to_renew.end(); ++_iter31)
     {
-      xfer += (*_iter33).write(oprot);
+      xfer += oprot->writeString((*_iter31));
     }
     xfer += oprot->writeListEnd();
   }
@@ -549,10 +474,10 @@ uint32_t lease_update::write(Protocol_* oprot) const {
   xfer += oprot->writeFieldBegin("to_flush", ::apache::thrift::protocol::T_LIST, 2);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->to_flush.size()));
-    std::vector<std::string> ::const_iterator _iter34;
-    for (_iter34 = this->to_flush.begin(); _iter34 != this->to_flush.end(); ++_iter34)
+    std::vector<std::string> ::const_iterator _iter32;
+    for (_iter32 = this->to_flush.begin(); _iter32 != this->to_flush.end(); ++_iter32)
     {
-      xfer += oprot->writeString((*_iter34));
+      xfer += oprot->writeString((*_iter32));
     }
     xfer += oprot->writeListEnd();
   }
@@ -561,10 +486,10 @@ uint32_t lease_update::write(Protocol_* oprot) const {
   xfer += oprot->writeFieldBegin("to_remove", ::apache::thrift::protocol::T_LIST, 3);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->to_remove.size()));
-    std::vector<std::string> ::const_iterator _iter35;
-    for (_iter35 = this->to_remove.begin(); _iter35 != this->to_remove.end(); ++_iter35)
+    std::vector<std::string> ::const_iterator _iter33;
+    for (_iter33 = this->to_remove.begin(); _iter33 != this->to_remove.end(); ++_iter33)
     {
-      xfer += oprot->writeString((*_iter35));
+      xfer += oprot->writeString((*_iter33));
     }
     xfer += oprot->writeListEnd();
   }
@@ -576,7 +501,7 @@ uint32_t lease_update::write(Protocol_* oprot) const {
 }
 
 template <class Protocol_>
-uint32_t lease_ack::read(Protocol_* iprot) {
+uint32_t rpc_lease_ack::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -601,20 +526,8 @@ uint32_t lease_ack::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
-        if (ftype == ::apache::thrift::protocol::T_LIST) {
-          {
-            this->renewed.clear();
-            uint32_t _size38;
-            ::apache::thrift::protocol::TType _etype41;
-            xfer += iprot->readListBegin(_etype41, _size38);
-            this->renewed.resize(_size38);
-            uint32_t _i42;
-            for (_i42 = 0; _i42 < _size38; ++_i42)
-            {
-              xfer += this->renewed[_i42].read(iprot);
-            }
-            xfer += iprot->readListEnd();
-          }
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->renewed);
           isset_renewed = true;
         } else {
           xfer += iprot->skip(ftype);
@@ -655,21 +568,13 @@ uint32_t lease_ack::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t lease_ack::write(Protocol_* oprot) const {
+uint32_t rpc_lease_ack::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("lease_ack");
+  xfer += oprot->writeStructBegin("rpc_lease_ack");
 
-  xfer += oprot->writeFieldBegin("renewed", ::apache::thrift::protocol::T_LIST, 1);
-  {
-    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->renewed.size()));
-    std::vector<rpc_file_metadata> ::const_iterator _iter43;
-    for (_iter43 = this->renewed.begin(); _iter43 != this->renewed.end(); ++_iter43)
-    {
-      xfer += (*_iter43).write(oprot);
-    }
-    xfer += oprot->writeListEnd();
-  }
+  xfer += oprot->writeFieldBegin("renewed", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->renewed);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("flushed", ::apache::thrift::protocol::T_I64, 2);

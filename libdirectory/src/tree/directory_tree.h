@@ -108,6 +108,14 @@ class ds_dir_node : public ds_node {
     return ret;
   }
 
+  std::vector<std::string> children() const {
+    std::vector<std::string> ret;
+    for (const auto &entry: children_) {
+      ret.push_back(entry.first);
+    }
+    return ret;
+  }
+
   std::size_t file_size() const override {
     std::size_t size = 0;
     for (const auto &entry: children_) {

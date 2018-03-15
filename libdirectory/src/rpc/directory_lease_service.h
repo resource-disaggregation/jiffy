@@ -21,7 +21,7 @@ namespace elasticmem { namespace directory {
 class directory_lease_serviceIf {
  public:
   virtual ~directory_lease_serviceIf() {}
-  virtual void update_leases(lease_ack& _return, const lease_update& updates) = 0;
+  virtual void update_leases(rpc_lease_ack& _return, const rpc_lease_update& updates) = 0;
 };
 
 class directory_lease_serviceIfFactory {
@@ -51,7 +51,7 @@ class directory_lease_serviceIfSingletonFactory : virtual public directory_lease
 class directory_lease_serviceNull : virtual public directory_lease_serviceIf {
  public:
   virtual ~directory_lease_serviceNull() {}
-  void update_leases(lease_ack& /* _return */, const lease_update& /* updates */) {
+  void update_leases(rpc_lease_ack& /* _return */, const rpc_lease_update& /* updates */) {
     return;
   }
 };
@@ -70,11 +70,11 @@ class directory_lease_service_update_leases_args {
   }
 
   virtual ~directory_lease_service_update_leases_args() throw();
-  lease_update updates;
+  rpc_lease_update updates;
 
   _directory_lease_service_update_leases_args__isset __isset;
 
-  void __set_updates(const lease_update& val);
+  void __set_updates(const rpc_lease_update& val);
 
   bool operator == (const directory_lease_service_update_leases_args & rhs) const
   {
@@ -101,7 +101,7 @@ class directory_lease_service_update_leases_pargs {
 
 
   virtual ~directory_lease_service_update_leases_pargs() throw();
-  const lease_update* updates;
+  const rpc_lease_update* updates;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -123,12 +123,12 @@ class directory_lease_service_update_leases_result {
   }
 
   virtual ~directory_lease_service_update_leases_result() throw();
-  lease_ack success;
+  rpc_lease_ack success;
   directory_lease_service_exception ex;
 
   _directory_lease_service_update_leases_result__isset __isset;
 
-  void __set_success(const lease_ack& val);
+  void __set_success(const rpc_lease_ack& val);
 
   void __set_ex(const directory_lease_service_exception& val);
 
@@ -164,7 +164,7 @@ class directory_lease_service_update_leases_presult {
 
 
   virtual ~directory_lease_service_update_leases_presult() throw();
-  lease_ack* success;
+  rpc_lease_ack* success;
   directory_lease_service_exception ex;
 
   _directory_lease_service_update_leases_presult__isset __isset;
@@ -200,9 +200,9 @@ class directory_lease_serviceClientT : virtual public directory_lease_serviceIf 
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void update_leases(lease_ack& _return, const lease_update& updates);
-  void send_update_leases(const lease_update& updates);
-  void recv_update_leases(lease_ack& _return);
+  void update_leases(rpc_lease_ack& _return, const rpc_lease_update& updates);
+  void send_update_leases(const rpc_lease_update& updates);
+  void recv_update_leases(rpc_lease_ack& _return);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
@@ -272,7 +272,7 @@ class directory_lease_serviceMultiface : virtual public directory_lease_serviceI
     ifaces_.push_back(iface);
   }
  public:
-  void update_leases(lease_ack& _return, const lease_update& updates) {
+  void update_leases(rpc_lease_ack& _return, const rpc_lease_update& updates) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -313,9 +313,9 @@ class directory_lease_serviceConcurrentClientT : virtual public directory_lease_
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void update_leases(lease_ack& _return, const lease_update& updates);
-  int32_t send_update_leases(const lease_update& updates);
-  void recv_update_leases(lease_ack& _return, const int32_t seqid);
+  void update_leases(rpc_lease_ack& _return, const rpc_lease_update& updates);
+  int32_t send_update_leases(const rpc_lease_update& updates);
+  void recv_update_leases(rpc_lease_ack& _return, const int32_t seqid);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;

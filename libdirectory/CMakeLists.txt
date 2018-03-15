@@ -32,7 +32,7 @@ add_library(directory STATIC
         src/rpc/directory_lease_service_factory.cpp
         src/rpc/directory_lease_service_factory.h
         src/rpc/directory_lease_server.cpp
-        src/rpc/directory_lease_server.h src/tree/block_allocator.h src/tree/random_block_allocator.cpp src/tree/random_block_allocator.h)
+        src/rpc/directory_lease_server.h src/tree/block_allocator.h src/tree/random_block_allocator.cpp src/tree/random_block_allocator.h src/rpc/directory_lease_client.cpp src/rpc/directory_lease_client.h)
 if (GENERATE_THRIFT)
   add_dependencies(directory thriftgen_directory)
 endif ()
@@ -48,7 +48,7 @@ if (BUILD_TESTS)
           test/directory_tree_test.cpp
           test/directory_rpc_service_test.cpp
           test/lease_manager_test.cpp
-          test/directory_tests.cpp)
+          test/directory_tests.cpp test/directory_lease_test.cpp test/test_utils.h)
   target_link_libraries(directory_tests directory)
 
   if (NOT USE_SYSTEM_CATCH)

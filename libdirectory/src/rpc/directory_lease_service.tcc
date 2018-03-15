@@ -209,14 +209,14 @@ uint32_t directory_lease_service_update_leases_presult::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::update_leases(lease_ack& _return, const lease_update& updates)
+void directory_lease_serviceClientT<Protocol_>::update_leases(rpc_lease_ack& _return, const rpc_lease_update& updates)
 {
   send_update_leases(updates);
   recv_update_leases(_return);
 }
 
 template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::send_update_leases(const lease_update& updates)
+void directory_lease_serviceClientT<Protocol_>::send_update_leases(const rpc_lease_update& updates)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("update_leases", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -231,7 +231,7 @@ void directory_lease_serviceClientT<Protocol_>::send_update_leases(const lease_u
 }
 
 template <class Protocol_>
-void directory_lease_serviceClientT<Protocol_>::recv_update_leases(lease_ack& _return)
+void directory_lease_serviceClientT<Protocol_>::recv_update_leases(rpc_lease_ack& _return)
 {
 
   int32_t rseqid = 0;
@@ -437,14 +437,14 @@ template <class Protocol_>
 }
 
 template <class Protocol_>
-void directory_lease_serviceConcurrentClientT<Protocol_>::update_leases(lease_ack& _return, const lease_update& updates)
+void directory_lease_serviceConcurrentClientT<Protocol_>::update_leases(rpc_lease_ack& _return, const rpc_lease_update& updates)
 {
   int32_t seqid = send_update_leases(updates);
   recv_update_leases(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_update_leases(const lease_update& updates)
+int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_update_leases(const rpc_lease_update& updates)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -463,7 +463,7 @@ int32_t directory_lease_serviceConcurrentClientT<Protocol_>::send_update_leases(
 }
 
 template <class Protocol_>
-void directory_lease_serviceConcurrentClientT<Protocol_>::recv_update_leases(lease_ack& _return, const int32_t seqid)
+void directory_lease_serviceConcurrentClientT<Protocol_>::recv_update_leases(rpc_lease_ack& _return, const int32_t seqid)
 {
 
   int32_t rseqid = 0;

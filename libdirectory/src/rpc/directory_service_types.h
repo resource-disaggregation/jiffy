@@ -61,11 +61,9 @@ class rpc_dir_entry;
 
 class directory_rpc_service_exception;
 
-class rpc_file_metadata;
+class rpc_lease_update;
 
-class lease_update;
-
-class lease_ack;
+class rpc_lease_ack;
 
 class directory_lease_service_exception;
 
@@ -249,69 +247,26 @@ void swap(directory_rpc_service_exception &a, directory_rpc_service_exception &b
 std::ostream& operator<<(std::ostream& out, const directory_rpc_service_exception& obj);
 
 
-class rpc_file_metadata {
+class rpc_lease_update {
  public:
 
-  rpc_file_metadata(const rpc_file_metadata&);
-  rpc_file_metadata& operator=(const rpc_file_metadata&);
-  rpc_file_metadata() : path(), bytes(0) {
+  rpc_lease_update(const rpc_lease_update&);
+  rpc_lease_update& operator=(const rpc_lease_update&);
+  rpc_lease_update() {
   }
 
-  virtual ~rpc_file_metadata() throw();
-  std::string path;
-  int64_t bytes;
-
-  void __set_path(const std::string& val);
-
-  void __set_bytes(const int64_t val);
-
-  bool operator == (const rpc_file_metadata & rhs) const
-  {
-    if (!(path == rhs.path))
-      return false;
-    if (!(bytes == rhs.bytes))
-      return false;
-    return true;
-  }
-  bool operator != (const rpc_file_metadata &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const rpc_file_metadata & ) const;
-
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
-
-  virtual void printTo(std::ostream& out) const;
-};
-
-void swap(rpc_file_metadata &a, rpc_file_metadata &b);
-
-std::ostream& operator<<(std::ostream& out, const rpc_file_metadata& obj);
-
-
-class lease_update {
- public:
-
-  lease_update(const lease_update&);
-  lease_update& operator=(const lease_update&);
-  lease_update() {
-  }
-
-  virtual ~lease_update() throw();
-  std::vector<rpc_file_metadata>  to_renew;
+  virtual ~rpc_lease_update() throw();
+  std::vector<std::string>  to_renew;
   std::vector<std::string>  to_flush;
   std::vector<std::string>  to_remove;
 
-  void __set_to_renew(const std::vector<rpc_file_metadata> & val);
+  void __set_to_renew(const std::vector<std::string> & val);
 
   void __set_to_flush(const std::vector<std::string> & val);
 
   void __set_to_remove(const std::vector<std::string> & val);
 
-  bool operator == (const lease_update & rhs) const
+  bool operator == (const rpc_lease_update & rhs) const
   {
     if (!(to_renew == rhs.to_renew))
       return false;
@@ -321,11 +276,11 @@ class lease_update {
       return false;
     return true;
   }
-  bool operator != (const lease_update &rhs) const {
+  bool operator != (const rpc_lease_update &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const lease_update & ) const;
+  bool operator < (const rpc_lease_update & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -335,31 +290,31 @@ class lease_update {
   virtual void printTo(std::ostream& out) const;
 };
 
-void swap(lease_update &a, lease_update &b);
+void swap(rpc_lease_update &a, rpc_lease_update &b);
 
-std::ostream& operator<<(std::ostream& out, const lease_update& obj);
+std::ostream& operator<<(std::ostream& out, const rpc_lease_update& obj);
 
 
-class lease_ack {
+class rpc_lease_ack {
  public:
 
-  lease_ack(const lease_ack&);
-  lease_ack& operator=(const lease_ack&);
-  lease_ack() : flushed(0), removed(0) {
+  rpc_lease_ack(const rpc_lease_ack&);
+  rpc_lease_ack& operator=(const rpc_lease_ack&);
+  rpc_lease_ack() : renewed(0), flushed(0), removed(0) {
   }
 
-  virtual ~lease_ack() throw();
-  std::vector<rpc_file_metadata>  renewed;
+  virtual ~rpc_lease_ack() throw();
+  int64_t renewed;
   int64_t flushed;
   int64_t removed;
 
-  void __set_renewed(const std::vector<rpc_file_metadata> & val);
+  void __set_renewed(const int64_t val);
 
   void __set_flushed(const int64_t val);
 
   void __set_removed(const int64_t val);
 
-  bool operator == (const lease_ack & rhs) const
+  bool operator == (const rpc_lease_ack & rhs) const
   {
     if (!(renewed == rhs.renewed))
       return false;
@@ -369,11 +324,11 @@ class lease_ack {
       return false;
     return true;
   }
-  bool operator != (const lease_ack &rhs) const {
+  bool operator != (const rpc_lease_ack &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const lease_ack & ) const;
+  bool operator < (const rpc_lease_ack & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -383,9 +338,9 @@ class lease_ack {
   virtual void printTo(std::ostream& out) const;
 };
 
-void swap(lease_ack &a, lease_ack &b);
+void swap(rpc_lease_ack &a, rpc_lease_ack &b);
 
-std::ostream& operator<<(std::ostream& out, const lease_ack& obj);
+std::ostream& operator<<(std::ostream& out, const rpc_lease_ack& obj);
 
 typedef struct _directory_lease_service_exception__isset {
   _directory_lease_service_exception__isset() : msg(false) {}

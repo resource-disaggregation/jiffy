@@ -25,7 +25,7 @@ void lease_manager::start() {
       auto start = std::chrono::steady_clock::now();
       try {
         remove_expired_leases();
-      } catch (std::exception& e) {
+      } catch (std::exception &e) {
         std::cout << "Exception: " << e.what() << std::endl;
       }
       auto end = std::chrono::steady_clock::now();
@@ -48,8 +48,8 @@ void lease_manager::remove_expired_leases() {
   auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
   auto node = std::dynamic_pointer_cast<ds_dir_node>(tree_->root_);
   std::string parent_path;
-  for (const auto &entry: *node) {
-    remove_expired_nodes(node, entry.first, parent_path, cur_epoch);
+  for (const auto &cname: node->children()) {
+    remove_expired_nodes(node, parent_path, cname, cur_epoch);
   }
 }
 
@@ -65,12 +65,18 @@ void lease_manager::remove_expired_nodes(std::shared_ptr<ds_dir_node> parent,
   auto extended_lease_duration = lease_duration + static_cast<uint64_t>(grace_period_ms_.count());
   if (time_since_last_renewal >= extended_lease_duration) {
     // Remove child since its lease has expired
-    std::cout << "[INFO] Lease expired for " << child_path << std::endl;
+    std::cout << "[INFO] Lease expired for " << child_path << "(" << parent->name() << "/" << child_name << ")\n";
     parent->remove_child(child_name);
-  } else if (child->is_directory()) {
-    auto node = std::dynamic_pointer_cast<ds_dir_node>(child);
-    for (const auto &entry: *node) {
-      remove_expired_nodes(node, entry.first, child_path, epoch);
+  } else {
+    if (time_since_last_renewal >= lease_duration && child->is_regular_file()) {
+      auto node = std::dynamic_pointer_cast<ds_file_node>(child);
+      node->mode(storage_mode::in_memory_grace);
+    }
+    if (child->is_directory()) {
+      auto node = std::dynamic_pointer_cast<ds_dir_node>(child);
+      for (const auto &cname: node->children()) {
+        remove_expired_nodes(node, child_path, cname, epoch);
+      }
     }
   }
 }

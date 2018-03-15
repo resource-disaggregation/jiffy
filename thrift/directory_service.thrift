@@ -102,19 +102,14 @@ service directory_rpc_service {
     throws (1: directory_rpc_service_exception ex),
 }
 
-struct rpc_file_metadata {
-  1: required string path,
-  2: required i64 bytes,
-}
-
-struct lease_update {
-  1: required list<rpc_file_metadata> to_renew,
+struct rpc_lease_update {
+  1: required list<string> to_renew,
   2: required list<string> to_flush,
   3: required list<string> to_remove,
 }
 
-struct lease_ack {
-  1: required list<rpc_file_metadata> renewed,
+struct rpc_lease_ack {
+  1: required i64 renewed,
   2: required i64 flushed,
   3: required i64 removed,
 }
@@ -124,6 +119,6 @@ exception directory_lease_service_exception {
 }
 
 service directory_lease_service {
-  lease_ack update_leases(1: lease_update updates)
+  rpc_lease_ack update_leases(1: rpc_lease_update updates)
     throws (1: directory_lease_service_exception ex),
 }
