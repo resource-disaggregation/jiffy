@@ -22,32 +22,32 @@ class time_utils {
     return std::string(buffer);
   }
 
-  static int64_t cur_ns() {
+  static uint64_t now_ns() {
     std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
-    return std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
+    return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count());
   }
 
-  static int64_t cur_us() {
+  static uint64_t now_us() {
     std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
-    return std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
+    return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count());
   }
 
-  static int64_t cur_ms() {
+  static uint64_t now_ms() {
     std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+    return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count());
   }
 
-  static int64_t cur_s() {
+  static uint64_t now_s() {
     std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
-    return std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
+    return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count());
   }
 
   template<typename F, typename ...Args>
-  static int64_t time_function_ns(F &&f, Args &&... args) {
+  static uint64_t time_function_ns(F &&f, Args &&... args) {
     std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
     f(std::forward<Args>(args)...);
     std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
-    return std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count());
   }
 };
 

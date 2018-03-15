@@ -9,18 +9,10 @@
 
 #include "../directory_service.h"
 #include "../block/block_allocator.h"
+#include "../../utils/time_utils.h"
 
 namespace elasticmem {
 namespace directory {
-
-namespace detail {
-
-static std::uint64_t now_ms() {
-  namespace ts = std::chrono;
-  return static_cast<uint64_t>(ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count());
-}
-
-}
 
 class lease_manager;
 
@@ -62,7 +54,7 @@ class ds_dir_node : public ds_node {
  public:
   typedef std::map<std::string, std::shared_ptr<ds_node>> child_map;
   explicit ds_dir_node(const std::string &name)
-      : ds_node(name, file_status(file_type::directory, perms(perms::all), detail::now_ms())) {}
+      : ds_node(name, file_status(file_type::directory, perms(perms::all), utils::time_utils::now_ms())) {}
 
   std::shared_ptr<ds_node> get_child(const std::string &name) const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
@@ -163,7 +155,7 @@ class ds_dir_node : public ds_node {
 class ds_file_node : public ds_node {
  public:
   explicit ds_file_node(const std::string &name)
-      : ds_node(name, file_status(file_type::regular, perms(perms::all), detail::now_ms())), dstatus_{}, size_(0) {}
+      : ds_node(name, file_status(file_type::regular, perms(perms::all), utils::time_utils::now_ms())), dstatus_{}, size_(0) {}
 
   const data_status &dstatus() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
@@ -299,7 +291,7 @@ class directory_tree : public directory_service, public directory_management_ser
 
   std::shared_ptr<ds_file_node> get_node_as_file(const std::string &path) const;
 
-  std::shared_ptr<ds_node> touch_node_path(const std::string &path, const std::uint64_t time) const;
+  std::shared_ptr<ds_node> touch_node_path(const std::string &path, std::uint64_t time) const;
 
   void touch(std::shared_ptr<ds_node> node, std::uint64_t time);
 

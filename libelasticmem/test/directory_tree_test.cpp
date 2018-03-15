@@ -3,6 +3,7 @@
 #include "../src/directory/block/random_block_allocator.h"
 
 using namespace ::elasticmem::directory;
+using namespace ::elasticmem::utils;
 
 TEST_CASE("create_directory_test", "[dir]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d", "e", "f", "g", "h"};
@@ -70,21 +71,21 @@ TEST_CASE("last_write_time_test", "[file][dir][touch]") {
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   directory_tree tree(alloc);
 
-  std::uint64_t before = detail::now_ms();
+  std::uint64_t before = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file", "/tmp"));
-  std::uint64_t after = detail::now_ms();
+  std::uint64_t after = time_utils::now_ms();
   REQUIRE(before <= tree.last_write_time("/sandbox/file"));
   REQUIRE(tree.last_write_time("/sandbox/file") <= after);
 
-  before = detail::now_ms();
+  before = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.touch("/sandbox/file"));
-  after = detail::now_ms();
+  after = time_utils::now_ms();
   REQUIRE(before <= tree.last_write_time("/sandbox/file"));
   REQUIRE(tree.last_write_time("/sandbox/file") <= after);
 
-  before = detail::now_ms();
+  before = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.touch("/sandbox"));
-  after = detail::now_ms();
+  after = time_utils::now_ms();
   REQUIRE(before <= tree.last_write_time("/sandbox"));
   REQUIRE(tree.last_write_time("/sandbox") <= after);
   REQUIRE(before <= tree.last_write_time("/sandbox/file"));
@@ -164,17 +165,17 @@ TEST_CASE("status_test", "[file][dir]") {
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   directory_tree tree(alloc);
 
-  std::uint64_t before = detail::now_ms();
+  std::uint64_t before = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file", "/tmp"));
-  std::uint64_t after = detail::now_ms();
+  std::uint64_t after = time_utils::now_ms();
   REQUIRE(tree.status("/sandbox/file").permissions() == perms::all);
   REQUIRE(tree.status("/sandbox/file").type() == file_type::regular);
   REQUIRE(before <= tree.status("/sandbox/file").last_write_time());
   REQUIRE(tree.status("/sandbox/file").last_write_time() <= after);
 
-  before = detail::now_ms();
+  before = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_directory("/sandbox/dir"));
-  after = detail::now_ms();
+  after = time_utils::now_ms();
   REQUIRE(tree.status("/sandbox/dir").permissions() == perms::all);
   REQUIRE(tree.status("/sandbox/dir").type() == file_type::directory);
   REQUIRE(before <= tree.status("/sandbox/dir").last_write_time());
@@ -186,13 +187,13 @@ TEST_CASE("directory_entries_test", "[file][dir]") {
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   directory_tree tree(alloc);
 
-  std::uint64_t t0 = detail::now_ms();
+  std::uint64_t t0 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_directories("/sandbox/a/b"));
-  std::uint64_t t1 = detail::now_ms();
+  std::uint64_t t1 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file1.txt", "/tmp"));
-  std::uint64_t t2 = detail::now_ms();
+  std::uint64_t t2 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file2.txt", "/tmp"));
-  std::uint64_t t3 = detail::now_ms();
+  std::uint64_t t3 = time_utils::now_ms();
 
   std::vector<directory_entry> entries;
   REQUIRE_NOTHROW(entries = tree.directory_entries("/sandbox"));
@@ -219,13 +220,13 @@ TEST_CASE("recursive_directory_entries_test", "[file][dir]") {
   auto alloc = std::make_shared<random_block_allocator>(blocks);
   directory_tree tree(alloc);
 
-  std::uint64_t t0 = detail::now_ms();
+  std::uint64_t t0 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_directories("/sandbox/a/b"));
-  std::uint64_t t1 = detail::now_ms();
+  std::uint64_t t1 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file1.txt", "/tmp"));
-  std::uint64_t t2 = detail::now_ms();
+  std::uint64_t t2 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file2.txt", "/tmp"));
-  std::uint64_t t3 = detail::now_ms();
+  std::uint64_t t3 = time_utils::now_ms();
 
   std::vector<directory_entry> entries;
   REQUIRE_NOTHROW(entries = tree.recursive_directory_entries("/sandbox"));

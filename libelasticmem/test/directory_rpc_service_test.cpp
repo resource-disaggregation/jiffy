@@ -8,6 +8,7 @@
 
 using namespace ::elasticmem::directory;
 using namespace ::apache::thrift::transport;
+using namespace ::elasticmem::utils;
 
 #define NUM_BLOCKS 1
 #define HOST "127.0.0.1"
@@ -134,21 +135,21 @@ TEST_CASE("rpc_last_write_time_test", "[file][dir][touch]") {
 
   directory_client tree(HOST, PORT);
 
-  std::uint64_t before = detail::now_ms();
+  std::uint64_t before = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file", "/tmp"));
-  std::uint64_t after = detail::now_ms();
+  std::uint64_t after = time_utils::now_ms();
   REQUIRE(before <= tree.last_write_time("/sandbox/file"));
   REQUIRE(tree.last_write_time("/sandbox/file") <= after);
 
-  before = detail::now_ms();
+  before = time_utils::now_ms();
   REQUIRE_NOTHROW(t->touch("/sandbox/file"));
-  after = detail::now_ms();
+  after = time_utils::now_ms();
   REQUIRE(before <= tree.last_write_time("/sandbox/file"));
   REQUIRE(tree.last_write_time("/sandbox/file") <= after);
 
-  before = detail::now_ms();
+  before = time_utils::now_ms();
   REQUIRE_NOTHROW(t->touch("/sandbox"));
-  after = detail::now_ms();
+  after = time_utils::now_ms();
   REQUIRE(before <= tree.last_write_time("/sandbox"));
   REQUIRE(tree.last_write_time("/sandbox") <= after);
   REQUIRE(before <= tree.last_write_time("/sandbox/file"));
@@ -266,17 +267,17 @@ TEST_CASE("rpc_status_test", "[file][dir]") {
   wait_till_server_ready(HOST, PORT);
 
   directory_client tree(HOST, PORT);
-  std::uint64_t before = detail::now_ms();
+  std::uint64_t before = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file", "/tmp"));
-  std::uint64_t after = detail::now_ms();
+  std::uint64_t after = time_utils::now_ms();
   REQUIRE(tree.status("/sandbox/file").permissions() == perms::all);
   REQUIRE(tree.status("/sandbox/file").type() == file_type::regular);
   REQUIRE(before <= tree.status("/sandbox/file").last_write_time());
   REQUIRE(tree.status("/sandbox/file").last_write_time() <= after);
 
-  before = detail::now_ms();
+  before = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_directory("/sandbox/dir"));
-  after = detail::now_ms();
+  after = time_utils::now_ms();
   REQUIRE(tree.status("/sandbox/dir").permissions() == perms::all);
   REQUIRE(tree.status("/sandbox/dir").type() == file_type::directory);
   REQUIRE(before <= tree.status("/sandbox/dir").last_write_time());
@@ -298,13 +299,13 @@ TEST_CASE("rpc_directory_entries_test", "[file][dir]") {
 
   directory_client tree(HOST, PORT);
 
-  std::uint64_t t0 = detail::now_ms();
+  std::uint64_t t0 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_directories("/sandbox/a/b"));
-  std::uint64_t t1 = detail::now_ms();
+  std::uint64_t t1 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file1.txt", "/tmp"));
-  std::uint64_t t2 = detail::now_ms();
+  std::uint64_t t2 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file2.txt", "/tmp"));
-  std::uint64_t t3 = detail::now_ms();
+  std::uint64_t t3 = time_utils::now_ms();
 
   std::vector<directory_entry> entries;
   REQUIRE_NOTHROW(entries = tree.directory_entries("/sandbox"));
@@ -341,13 +342,13 @@ TEST_CASE("rpc_recursive_directory_entries_test", "[file][dir]") {
 
   directory_client tree(HOST, PORT);
 
-  std::uint64_t t0 = detail::now_ms();
+  std::uint64_t t0 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_directories("/sandbox/a/b"));
-  std::uint64_t t1 = detail::now_ms();
+  std::uint64_t t1 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file1.txt", "/tmp"));
-  std::uint64_t t2 = detail::now_ms();
+  std::uint64_t t2 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file2.txt", "/tmp"));
-  std::uint64_t t3 = detail::now_ms();
+  std::uint64_t t3 = time_utils::now_ms();
 
   std::vector<directory_entry> entries;
   REQUIRE_NOTHROW(entries = tree.recursive_directory_entries("/sandbox"));

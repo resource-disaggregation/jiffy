@@ -187,7 +187,7 @@ bool directory_tree::is_directory(const std::string &path) {
 }
 
 void directory_tree::touch(const std::string &path) {
-  auto time = detail::now_ms();
+  auto time = utils::time_utils::now_ms();
   auto node = touch_node_path(path, time);
   if (node == nullptr) {
     throw directory_service_exception("Path does not exist: " + path);
