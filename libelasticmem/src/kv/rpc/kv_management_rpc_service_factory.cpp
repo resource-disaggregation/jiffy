@@ -2,12 +2,14 @@
 
 #include "kv_management_rpc_service_factory.h"
 #include "kv_management_rpc_service_handler.h"
+#include "../../utils/logger.h"
 
 namespace elasticmem {
 namespace kv {
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::transport;
+using namespace utils;
 
 kv_management_rpc_service_factory::kv_management_rpc_service_factory(std::vector<std::shared_ptr<kv_block>> &blocks)
     : blocks_(blocks) {}
@@ -15,7 +17,7 @@ kv_management_rpc_service_factory::kv_management_rpc_service_factory(std::vector
 kv_management_rpc_serviceIf *kv_management_rpc_service_factory::getHandler(const TConnectionInfo &conn_info) {
   std::shared_ptr<TSocket> sock = std::dynamic_pointer_cast<TSocket>(
       conn_info.transport);
-  std::cout << "[TRACE] Incoming connection from " << sock->getSocketInfo() << std::endl;
+  LOG(trace) << "Incoming connection from " << sock->getSocketInfo();
   return new kv_management_rpc_service_handler(blocks_);
 }
 

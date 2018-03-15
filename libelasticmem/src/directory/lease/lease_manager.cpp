@@ -2,6 +2,7 @@
 #include <chrono>
 #include "lease_manager.h"
 #include "../../utils/directory_utils.h"
+#include "../../utils/logger.h"
 
 namespace elasticmem {
 namespace directory {
@@ -23,12 +24,12 @@ lease_manager::~lease_manager() {
 void lease_manager::start() {
   worker_ = std::move(std::thread([&] {
     while (!stop_.load()) {
-      std::cout << "[INFO] Looking for expired leases..." << std::endl;
+      LOG(info) << "Looking for expired leases...";
       auto start = std::chrono::steady_clock::now();
       try {
         remove_expired_leases();
       } catch (std::exception &e) {
-        std::cout << "Exception: " << e.what() << std::endl;
+        LOG(error)  << "Exception: " << e.what();
       }
       auto end = std::chrono::steady_clock::now();
       auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -67,7 +68,7 @@ void lease_manager::remove_expired_nodes(std::shared_ptr<ds_dir_node> parent,
   auto extended_lease_duration = lease_duration + static_cast<uint64_t>(grace_period_ms_.count());
   if (time_since_last_renewal >= extended_lease_duration) {
     // Remove child since its lease has expired
-    std::cout << "[INFO] Lease expired for " << child_path << "(" << parent->name() << "/" << child_name << ")\n";
+    LOG(info) <<  "Lease expired for " << child_path;
     parent->remove_child(child_name);
   } else {
     if (time_since_last_renewal >= lease_duration && child->is_regular_file()) {

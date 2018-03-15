@@ -10,26 +10,40 @@ namespace elasticmem {
 namespace utils {
 
 enum log_level {
-  ALL = 0,
-  TRACE = 1,
-  DEBUG = 2,
-  INFO = 3,
-  WARN = 4,
-  ERROR = 5,
-  FATAL = 6,
-  OFF = 7
+  all = 0,
+  trace = 1,
+  debug = 2,
+  info = 3,
+  warn = 4,
+  error = 5,
+  fatal = 6,
+  off = 7
 };
 
-static log_level LOG_LEVEL = log_level::INFO;
+static log_level LOG_LEVEL = log_level::info;
 
-static void configure_logging(log_level level) {
-  LOG_LEVEL = level;
+#ifdef __GNUG__
+static std::string compute_method_name(const std::string &function, const std::string &pretty_function) {
+  size_t function_name_loc = pretty_function.find(function);
+  size_t begin = pretty_function.rfind(' ', function_name_loc) + 1;
+  size_t end = pretty_function.find('(', function_name_loc + function.length());
+  if (pretty_function[end + 1] == ')')
+    return (pretty_function.substr(begin, end - begin) + "()");
+  else
+    return (pretty_function.substr(begin, end - begin) + "(...)");
 }
+
+#define __COMPACT_PRETTY_FUNCTION__ compute_method_name(__FUNCTION__, __PRETTY_FUNCTION__)
+#define LOG(level) logger(level, __COMPACT_PRETTY_FUNCTION__)
+#else
+#define LOG(level) logger(level, __func__)
+#endif
 
 class logger {
  public:
-  explicit logger(log_level level) : opened_(false), msg_level_(level) {
+  explicit logger(log_level level, const std::string &fname) : opened_(false), msg_level_(level) {
     os_ << time_utils::current_date_time();
+    os_ << "  " << fname;
     os_ << " " << to_string(level) << ": ";
   }
 
@@ -54,12 +68,12 @@ class logger {
  private:
   std::string to_string(const log_level level) {
     switch (level) {
-      case log_level::TRACE:return "TRACE";
-      case log_level::DEBUG:return "DEBUG";
-      case log_level::INFO:return "INFO";
-      case log_level::WARN:return "WARN";
-      case log_level::ERROR:return "ERROR";
-      case log_level::FATAL:return "FATAL";
+      case log_level::trace:return "TRACE";
+      case log_level::debug:return "DEBUG";
+      case log_level::info:return "INFO";
+      case log_level::warn:return "WARN";
+      case log_level::error:return "ERROR";
+      case log_level::fatal:return "FATAL";
       default:return "";
     }
   }
