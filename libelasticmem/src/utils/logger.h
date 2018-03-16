@@ -43,14 +43,14 @@ class logger {
  public:
   explicit logger(log_level level, const std::string &fname) : opened_(false), msg_level_(level) {
     os_ << time_utils::current_date_time();
-    os_ << "  " << fname;
-    os_ << " " << to_string(level) << ": ";
+    os_ << " " << to_string(level);
+    os_ << " " << fname << " ";
   }
 
   virtual ~logger() {
     if (opened_) {
       os_ << std::endl;
-      fprintf(stdout, "%s", os_.str().c_str());
+      fprintf(stderr, "%s", os_.str().c_str());
       fflush(stderr);
     }
     opened_ = false;
