@@ -5,6 +5,7 @@
 #include <utils/cmd_parse.h>
 #include <directory/block/block_advertisement_client.h>
 #include <storage/manager/detail/block_name_parser.h>
+#include <utils/logger.h>
 
 using namespace ::elasticmem::directory;
 using namespace ::elasticmem::storage;
@@ -63,28 +64,17 @@ int main(int argc, char **argv) {
     kv_blocks.push_back(std::dynamic_pointer_cast<kv_block>(block));
   }
 
+  std::exception_ptr management_exception = nullptr;
   auto management_server = storage_management_rpc_server::create(block_management, address, management_port);
-  std::thread management_serve_thread([&management_server] {
+  std::thread management_serve_thread([&management_exception, &management_server] {
     try {
       management_server->serve();
-    } catch (std::exception &e) {
-      std::cerr << "KV management server error: " << e.what() << std::endl;
-      std::exit(-1);
+    } catch (...) {
+      management_exception = std::current_exception();
     }
   });
 
-  std::cout << "Management server listening on " << address << ":" << management_port << std::endl;
-
-  auto kv_server = kv_rpc_server::create(kv_blocks, address, service_port);
-  std::thread kv_serve_thread([&kv_server] {
-    try {
-      kv_server->serve();
-    } catch (std::exception &e) {
-      std::cerr << "KV server error: " << e.what() << std::endl;
-      std::exit(-1);
-    }
-  });
-  std::cout << "KV server listening on " << address << ":" << service_port << std::endl;
+  LOG(log_level::info) << "Management server listening on " << address << ":" << management_port;
 
   try {
     char hbuf[1024];
@@ -98,16 +88,43 @@ int main(int argc, char **argv) {
     client.advertise_blocks(block_names);
     client.disconnect();
   } catch (std::exception &e) {
-    std::cerr << "Failed to advertise blocks: " << e.what() << "; make sure block allocation server is running\n";
+    LOG(log_level::error) << "Failed to advertise blocks: " << e.what() << "; make sure block allocation server is running\n";
     std::exit(-1);
   }
 
+  std::exception_ptr kv_exception = nullptr;
+  auto kv_server = kv_rpc_server::create(kv_blocks, address, service_port);
+  std::thread kv_serve_thread([&kv_exception, &kv_server] {
+    try {
+      kv_server->serve();
+    } catch (...) {
+      kv_exception = std::current_exception();
+    }
+  });
+  LOG(log_level::info) << "KV server listening on " << address << ":" << service_port;
+
   if (management_serve_thread.joinable()) {
     management_serve_thread.join();
+    if (management_exception) {
+      try {
+        std::rethrow_exception(management_exception);
+      } catch (std::exception& e) {
+        LOG(log_level::error) << "Storage management server failed: " << e.what();
+        std::exit(-1);
+      }
+    }
   }
 
   if (kv_serve_thread.joinable()) {
     kv_serve_thread.join();
+    if (kv_exception) {
+      try {
+        std::rethrow_exception(kv_exception);
+      } catch (std::exception& e) {
+        LOG(log_level::error) << "KV server failed: " << e.what();
+        std::exit(-1);
+      }
+    }
   }
 
   return 0;

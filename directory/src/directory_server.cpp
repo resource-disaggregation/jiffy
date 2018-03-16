@@ -10,6 +10,7 @@
 #include <utils/signal_handling.h>
 #include <utils/cmd_parse.h>
 #include <directory/block/block_allocation_server.h>
+#include <utils/logger.h>
 
 using namespace ::elasticmem::directory;
 using namespace ::elasticmem::storage;
@@ -57,50 +58,81 @@ int main(int argc, char **argv) {
     return -1;
   }
 
+  std::exception_ptr alloc_exception = nullptr;
   auto alloc = std::make_shared<random_block_allocator>();
   auto block_allocation_server = block_allocation_server::create(alloc, address, block_port);
-  std::thread block_allocation_serve_thread([&block_allocation_server] {
+  std::thread block_allocation_serve_thread([&alloc_exception, &block_allocation_server] {
     try {
       block_allocation_server->serve();
-    } catch (std::exception &e) {
-      std::cerr << "Block allocation server error: " << e.what() << std::endl;
+    } catch (...) {
+      alloc_exception = std::current_exception();
     }
   });
-  std::cout << "Block allocation server listening on " << address << ":" << block_port << std::endl;
+  LOG(log_level::info) << "Block allocation server listening on " << address << ":" << block_port;
 
+  std::exception_ptr directory_exception = nullptr;
   auto storage = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, storage);
   auto directory_server = directory_rpc_server::create(tree, address, service_port);
-  std::thread directory_serve_thread([&directory_server] {
+  std::thread directory_serve_thread([&directory_exception, &directory_server] {
     try {
       directory_server->serve();
-    } catch (std::exception &e) {
-      std::cerr << "Directory server error: " << e.what() << std::endl;
+    } catch (...) {
+      directory_exception = std::current_exception();
     }
   });
 
-  std::cout << "Directory server listening on " << address << ":" << service_port << std::endl;
+  LOG(log_level::info) << "Directory server listening on " << address << ":" << service_port;
 
+  std::exception_ptr lease_exception = nullptr;
   auto lease_server = directory_lease_server::create(tree, address, lease_port);
-  std::thread lease_serve_thread([&lease_server] {
+  std::thread lease_serve_thread([&lease_exception, &lease_server] {
     try {
       lease_server->serve();
-    } catch (std::exception &e) {
-      std::cerr << "Lease server error: " << e.what() << std::endl;
+    } catch (...) {
+      lease_exception = std::current_exception();
     }
   });
 
-  std::cout << "Lease server listening on " << address << ":" << lease_port << std::endl;
+  LOG(log_level::info) << "Lease server listening on " << address << ":" << lease_port;
 
   lease_expiry_worker lmgr(tree, lease_period_ms, grace_period_ms);
   lmgr.start();
 
+  if (block_allocation_serve_thread.joinable()) {
+    block_allocation_serve_thread.join();
+    if (alloc_exception) {
+      try {
+        std::rethrow_exception(alloc_exception);
+      } catch (std::exception& e) {
+        LOG(log_level::error) << "Block allocation server failed: " << e.what();
+        std::exit(-1);
+      }
+    }
+  }
+
   if (directory_serve_thread.joinable()) {
     directory_serve_thread.join();
+    if (directory_exception) {
+      try {
+        std::rethrow_exception(directory_exception);
+      } catch (std::exception& e) {
+        LOG(log_level::error) << "Directory server failed: " << e.what();
+        std::exit(-1);
+      }
+    }
   }
 
   if (lease_serve_thread.joinable()) {
     lease_serve_thread.join();
+    if (lease_exception) {
+      try {
+        std::rethrow_exception(lease_exception);
+      } catch (std::exception& e) {
+        LOG(log_level::error) << "Lease server failed: " << e.what();
+        std::exit(-1);
+      }
+    }
   }
 
   return 0;
