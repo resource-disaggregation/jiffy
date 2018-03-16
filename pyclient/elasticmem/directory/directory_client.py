@@ -122,7 +122,7 @@ class DirectoryClient:
         self.client_.create_file(path, persistent_store_prefix)
 
     def exists(self, path):
-        self.client_.exists(path)
+        return self.client_.exists(path)
 
     def file_size(self, path):
         return self.client_.file_size(path)
@@ -141,6 +141,9 @@ class DirectoryClient:
 
     def remove_all(self, path):
         self.client_.remove_all(path)
+
+    def flush(self, path):
+        self.client_.flush(path)
 
     def status(self, path):
         s = self.client_.status(path)

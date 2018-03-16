@@ -15,7 +15,6 @@ import logging
 from .ttypes import *
 from thrift.Thrift import TProcessor
 from thrift.transport import TTransport
-
 all_structs = []
 
 
@@ -87,6 +86,13 @@ class Iface(object):
         pass
 
     def remove_all(self, path):
+        """
+        Parameters:
+         - path
+        """
+        pass
+
+    def flush(self, path):
         """
         Parameters:
          - path
@@ -496,6 +502,37 @@ class Client(Iface):
             raise result.ex
         return
 
+    def flush(self, path):
+        """
+        Parameters:
+         - path
+        """
+        self.send_flush(path)
+        self.recv_flush()
+
+    def send_flush(self, path):
+        self._oprot.writeMessageBegin('flush', TMessageType.CALL, self._seqid)
+        args = flush_args()
+        args.path = path
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_flush(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = flush_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
     def rename(self, old_path, new_path):
         """
         Parameters:
@@ -626,8 +663,7 @@ class Client(Iface):
             return result.success
         if result.ex is not None:
             raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT,
-                                    "recursive_directory_entries failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "recursive_directory_entries failed: unknown result")
 
     def dstatus(self, path):
         """
@@ -726,8 +762,7 @@ class Client(Iface):
             return result.success
         if result.ex is not None:
             raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT,
-                                    "persistent_store_prefix failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "persistent_store_prefix failed: unknown result")
 
     def data_blocks(self, path):
         """
@@ -843,6 +878,7 @@ class Processor(Iface, TProcessor):
         self._processMap["get_permissions"] = Processor.process_get_permissions
         self._processMap["remove"] = Processor.process_remove
         self._processMap["remove_all"] = Processor.process_remove_all
+        self._processMap["flush"] = Processor.process_flush
         self._processMap["rename"] = Processor.process_rename
         self._processMap["status"] = Processor.process_status
         self._processMap["directory_entries"] = Processor.process_directory_entries
@@ -1129,6 +1165,32 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
+    def process_flush(self, seqid, iprot, oprot):
+        args = flush_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = flush_result()
+        try:
+            self._handler.flush(args.path)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except directory_rpc_service_exception as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("flush", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
     def process_rename(self, seqid, iprot, oprot):
         args = rename_args()
         args.read(iprot)
@@ -1389,7 +1451,6 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-
 # HELPER FUNCTIONS AND STRUCTURES
 
 
@@ -1399,12 +1460,12 @@ class create_directory_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -1447,12 +1508,10 @@ class create_directory_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(create_directory_args)
 create_directory_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -1462,12 +1521,12 @@ class create_directory_result(object):
      - ex
     """
 
-    def __init__(self, ex=None, ):
+
+    def __init__(self, ex=None,):
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -1511,12 +1570,10 @@ class create_directory_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(create_directory_result)
 create_directory_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -1526,12 +1583,12 @@ class create_directories_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -1574,12 +1631,10 @@ class create_directories_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(create_directories_args)
 create_directories_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -1589,12 +1644,12 @@ class create_directories_result(object):
      - ex
     """
 
-    def __init__(self, ex=None, ):
+
+    def __init__(self, ex=None,):
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -1638,12 +1693,10 @@ class create_directories_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(create_directories_result)
 create_directories_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -1654,13 +1707,13 @@ class create_file_args(object):
      - persistent_store_prefix
     """
 
-    def __init__(self, path=None, persistent_store_prefix=None, ):
+
+    def __init__(self, path=None, persistent_store_prefix=None,):
         self.path = path
         self.persistent_store_prefix = persistent_store_prefix
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -1675,8 +1728,7 @@ class create_file_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRING:
-                    self.persistent_store_prefix = iprot.readString().decode('utf-8') if sys.version_info[
-                                                                                             0] == 2 else iprot.readString()
+                    self.persistent_store_prefix = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             else:
@@ -1695,8 +1747,7 @@ class create_file_args(object):
             oprot.writeFieldEnd()
         if self.persistent_store_prefix is not None:
             oprot.writeFieldBegin('persistent_store_prefix', TType.STRING, 2)
-            oprot.writeString(self.persistent_store_prefix.encode('utf-8') if sys.version_info[
-                                                                                  0] == 2 else self.persistent_store_prefix)
+            oprot.writeString(self.persistent_store_prefix.encode('utf-8') if sys.version_info[0] == 2 else self.persistent_store_prefix)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -1714,13 +1765,11 @@ class create_file_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(create_file_args)
 create_file_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
-    (2, TType.STRING, 'persistent_store_prefix', 'UTF8', None,),  # 2
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
+    (2, TType.STRING, 'persistent_store_prefix', 'UTF8', None, ),  # 2
 )
 
 
@@ -1730,12 +1779,12 @@ class create_file_result(object):
      - ex
     """
 
-    def __init__(self, ex=None, ):
+
+    def __init__(self, ex=None,):
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -1779,12 +1828,10 @@ class create_file_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(create_file_result)
 create_file_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -1794,12 +1841,12 @@ class exists_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -1842,12 +1889,10 @@ class exists_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(exists_args)
 exists_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -1858,13 +1903,13 @@ class exists_result(object):
      - ex
     """
 
-    def __init__(self, success=None, ex=None, ):
+
+    def __init__(self, success=None, ex=None,):
         self.success = success
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -1917,12 +1962,10 @@ class exists_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(exists_result)
 exists_result.thrift_spec = (
-    (0, TType.BOOL, 'success', None, None,),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (0, TType.BOOL, 'success', None, None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -1932,12 +1975,12 @@ class file_size_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -1980,12 +2023,10 @@ class file_size_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(file_size_args)
 file_size_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -1996,13 +2037,13 @@ class file_size_result(object):
      - ex
     """
 
-    def __init__(self, success=None, ex=None, ):
+
+    def __init__(self, success=None, ex=None,):
         self.success = success
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -2055,12 +2096,10 @@ class file_size_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(file_size_result)
 file_size_result.thrift_spec = (
-    (0, TType.I64, 'success', None, None,),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (0, TType.I64, 'success', None, None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -2070,12 +2109,12 @@ class last_write_time_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -2118,12 +2157,10 @@ class last_write_time_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(last_write_time_args)
 last_write_time_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -2134,13 +2171,13 @@ class last_write_time_result(object):
      - ex
     """
 
-    def __init__(self, success=None, ex=None, ):
+
+    def __init__(self, success=None, ex=None,):
         self.success = success
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -2193,12 +2230,10 @@ class last_write_time_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(last_write_time_result)
 last_write_time_result.thrift_spec = (
-    (0, TType.I64, 'success', None, None,),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (0, TType.I64, 'success', None, None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -2210,14 +2245,14 @@ class set_permissions_args(object):
      - opts
     """
 
-    def __init__(self, path=None, perms=None, opts=None, ):
+
+    def __init__(self, path=None, perms=None, opts=None,):
         self.path = path
         self.perms = perms
         self.opts = opts
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -2278,14 +2313,12 @@ class set_permissions_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(set_permissions_args)
 set_permissions_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
-    (2, TType.I32, 'perms', None, None,),  # 2
-    (3, TType.I32, 'opts', None, None,),  # 3
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
+    (2, TType.I32, 'perms', None, None, ),  # 2
+    (3, TType.I32, 'opts', None, None, ),  # 3
 )
 
 
@@ -2295,12 +2328,12 @@ class set_permissions_result(object):
      - ex
     """
 
-    def __init__(self, ex=None, ):
+
+    def __init__(self, ex=None,):
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -2344,12 +2377,10 @@ class set_permissions_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(set_permissions_result)
 set_permissions_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -2359,12 +2390,12 @@ class get_permissions_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -2407,12 +2438,10 @@ class get_permissions_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(get_permissions_args)
 get_permissions_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -2423,13 +2452,13 @@ class get_permissions_result(object):
      - ex
     """
 
-    def __init__(self, success=None, ex=None, ):
+
+    def __init__(self, success=None, ex=None,):
         self.success = success
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -2482,12 +2511,10 @@ class get_permissions_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(get_permissions_result)
 get_permissions_result.thrift_spec = (
-    (0, TType.I32, 'success', None, None,),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (0, TType.I32, 'success', None, None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -2497,12 +2524,12 @@ class remove_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -2545,12 +2572,10 @@ class remove_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(remove_args)
 remove_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -2560,12 +2585,12 @@ class remove_result(object):
      - ex
     """
 
-    def __init__(self, ex=None, ):
+
+    def __init__(self, ex=None,):
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -2609,12 +2634,10 @@ class remove_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(remove_result)
 remove_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -2624,12 +2647,12 @@ class remove_all_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -2672,12 +2695,10 @@ class remove_all_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(remove_all_args)
 remove_all_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -2687,12 +2708,12 @@ class remove_all_result(object):
      - ex
     """
 
-    def __init__(self, ex=None, ):
+
+    def __init__(self, ex=None,):
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -2736,12 +2757,133 @@ class remove_all_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(remove_all_result)
 remove_all_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+)
+
+
+class flush_args(object):
+    """
+    Attributes:
+     - path
+    """
+
+
+    def __init__(self, path=None,):
+        self.path = path
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.path = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('flush_args')
+        if self.path is not None:
+            oprot.writeFieldBegin('path', TType.STRING, 1)
+            oprot.writeString(self.path.encode('utf-8') if sys.version_info[0] == 2 else self.path)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(flush_args)
+flush_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
+)
+
+
+class flush_result(object):
+    """
+    Attributes:
+     - ex
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = directory_rpc_service_exception()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('flush_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(flush_result)
+flush_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -2752,13 +2894,13 @@ class rename_args(object):
      - new_path
     """
 
-    def __init__(self, old_path=None, new_path=None, ):
+
+    def __init__(self, old_path=None, new_path=None,):
         self.old_path = old_path
         self.new_path = new_path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -2768,14 +2910,12 @@ class rename_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRING:
-                    self.old_path = iprot.readString().decode('utf-8') if sys.version_info[
-                                                                              0] == 2 else iprot.readString()
+                    self.old_path = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRING:
-                    self.new_path = iprot.readString().decode('utf-8') if sys.version_info[
-                                                                              0] == 2 else iprot.readString()
+                    self.new_path = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             else:
@@ -2812,13 +2952,11 @@ class rename_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(rename_args)
 rename_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'old_path', 'UTF8', None,),  # 1
-    (2, TType.STRING, 'new_path', 'UTF8', None,),  # 2
+    (1, TType.STRING, 'old_path', 'UTF8', None, ),  # 1
+    (2, TType.STRING, 'new_path', 'UTF8', None, ),  # 2
 )
 
 
@@ -2828,12 +2966,12 @@ class rename_result(object):
      - ex
     """
 
-    def __init__(self, ex=None, ):
+
+    def __init__(self, ex=None,):
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -2877,12 +3015,10 @@ class rename_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(rename_result)
 rename_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -2892,12 +3028,12 @@ class status_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -2940,12 +3076,10 @@ class status_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(status_args)
 status_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -2956,13 +3090,13 @@ class status_result(object):
      - ex
     """
 
-    def __init__(self, success=None, ex=None, ):
+
+    def __init__(self, success=None, ex=None,):
         self.success = success
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -3016,12 +3150,10 @@ class status_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(status_result)
 status_result.thrift_spec = (
-    (0, TType.STRUCT, 'success', [rpc_file_status, None], None,),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (0, TType.STRUCT, 'success', [rpc_file_status, None], None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -3031,12 +3163,12 @@ class directory_entries_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -3079,12 +3211,10 @@ class directory_entries_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(directory_entries_args)
 directory_entries_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -3095,13 +3225,13 @@ class directory_entries_result(object):
      - ex
     """
 
-    def __init__(self, success=None, ex=None, ):
+
+    def __init__(self, success=None, ex=None,):
         self.success = success
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -3112,11 +3242,11 @@ class directory_entries_result(object):
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype38, _size35) = iprot.readListBegin()
-                    for _i39 in range(_size35):
-                        _elem40 = rpc_dir_entry()
-                        _elem40.read(iprot)
-                        self.success.append(_elem40)
+                    (_etype10, _size7) = iprot.readListBegin()
+                    for _i11 in range(_size7):
+                        _elem12 = rpc_dir_entry()
+                        _elem12.read(iprot)
+                        self.success.append(_elem12)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -3139,8 +3269,8 @@ class directory_entries_result(object):
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.LIST, 0)
             oprot.writeListBegin(TType.STRUCT, len(self.success))
-            for iter41 in self.success:
-                iter41.write(oprot)
+            for iter13 in self.success:
+                iter13.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.ex is not None:
@@ -3163,12 +3293,10 @@ class directory_entries_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(directory_entries_result)
 directory_entries_result.thrift_spec = (
-    (0, TType.LIST, 'success', (TType.STRUCT, [rpc_dir_entry, None], False), None,),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (0, TType.LIST, 'success', (TType.STRUCT, [rpc_dir_entry, None], False), None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -3178,12 +3306,12 @@ class recursive_directory_entries_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -3226,12 +3354,10 @@ class recursive_directory_entries_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(recursive_directory_entries_args)
 recursive_directory_entries_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -3242,13 +3368,13 @@ class recursive_directory_entries_result(object):
      - ex
     """
 
-    def __init__(self, success=None, ex=None, ):
+
+    def __init__(self, success=None, ex=None,):
         self.success = success
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -3259,11 +3385,11 @@ class recursive_directory_entries_result(object):
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype45, _size42) = iprot.readListBegin()
-                    for _i46 in range(_size42):
-                        _elem47 = rpc_dir_entry()
-                        _elem47.read(iprot)
-                        self.success.append(_elem47)
+                    (_etype17, _size14) = iprot.readListBegin()
+                    for _i18 in range(_size14):
+                        _elem19 = rpc_dir_entry()
+                        _elem19.read(iprot)
+                        self.success.append(_elem19)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -3286,8 +3412,8 @@ class recursive_directory_entries_result(object):
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.LIST, 0)
             oprot.writeListBegin(TType.STRUCT, len(self.success))
-            for iter48 in self.success:
-                iter48.write(oprot)
+            for iter20 in self.success:
+                iter20.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.ex is not None:
@@ -3310,12 +3436,10 @@ class recursive_directory_entries_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(recursive_directory_entries_result)
 recursive_directory_entries_result.thrift_spec = (
-    (0, TType.LIST, 'success', (TType.STRUCT, [rpc_dir_entry, None], False), None,),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (0, TType.LIST, 'success', (TType.STRUCT, [rpc_dir_entry, None], False), None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -3325,12 +3449,12 @@ class dstatus_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -3373,12 +3497,10 @@ class dstatus_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(dstatus_args)
 dstatus_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -3389,13 +3511,13 @@ class dstatus_result(object):
      - ex
     """
 
-    def __init__(self, success=None, ex=None, ):
+
+    def __init__(self, success=None, ex=None,):
         self.success = success
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -3449,12 +3571,10 @@ class dstatus_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(dstatus_result)
 dstatus_result.thrift_spec = (
-    (0, TType.STRUCT, 'success', [rpc_data_status, None], None,),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (0, TType.STRUCT, 'success', [rpc_data_status, None], None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -3464,12 +3584,12 @@ class mode_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -3512,12 +3632,10 @@ class mode_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(mode_args)
 mode_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -3528,13 +3646,13 @@ class mode_result(object):
      - ex
     """
 
-    def __init__(self, success=None, ex=None, ):
+
+    def __init__(self, success=None, ex=None,):
         self.success = success
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -3587,12 +3705,10 @@ class mode_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(mode_result)
 mode_result.thrift_spec = (
-    (0, TType.I32, 'success', None, None,),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (0, TType.I32, 'success', None, None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -3602,12 +3718,12 @@ class persistent_store_prefix_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -3650,12 +3766,10 @@ class persistent_store_prefix_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(persistent_store_prefix_args)
 persistent_store_prefix_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -3666,13 +3780,13 @@ class persistent_store_prefix_result(object):
      - ex
     """
 
-    def __init__(self, success=None, ex=None, ):
+
+    def __init__(self, success=None, ex=None,):
         self.success = success
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -3682,8 +3796,7 @@ class persistent_store_prefix_result(object):
                 break
             if fid == 0:
                 if ftype == TType.STRING:
-                    self.success = iprot.readString().decode('utf-8') if sys.version_info[
-                                                                             0] == 2 else iprot.readString()
+                    self.success = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 1:
@@ -3726,12 +3839,10 @@ class persistent_store_prefix_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(persistent_store_prefix_result)
 persistent_store_prefix_result.thrift_spec = (
-    (0, TType.STRING, 'success', 'UTF8', None,),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (0, TType.STRING, 'success', 'UTF8', None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -3741,12 +3852,12 @@ class data_blocks_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -3789,12 +3900,10 @@ class data_blocks_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(data_blocks_args)
 data_blocks_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -3805,13 +3914,13 @@ class data_blocks_result(object):
      - ex
     """
 
-    def __init__(self, success=None, ex=None, ):
+
+    def __init__(self, success=None, ex=None,):
         self.success = success
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -3822,10 +3931,10 @@ class data_blocks_result(object):
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype52, _size49) = iprot.readListBegin()
-                    for _i53 in range(_size49):
-                        _elem54 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                        self.success.append(_elem54)
+                    (_etype24, _size21) = iprot.readListBegin()
+                    for _i25 in range(_size21):
+                        _elem26 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        self.success.append(_elem26)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -3848,8 +3957,8 @@ class data_blocks_result(object):
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.LIST, 0)
             oprot.writeListBegin(TType.STRING, len(self.success))
-            for iter55 in self.success:
-                oprot.writeString(iter55.encode('utf-8') if sys.version_info[0] == 2 else iter55)
+            for iter27 in self.success:
+                oprot.writeString(iter27.encode('utf-8') if sys.version_info[0] == 2 else iter27)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.ex is not None:
@@ -3872,12 +3981,10 @@ class data_blocks_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(data_blocks_result)
 data_blocks_result.thrift_spec = (
-    (0, TType.LIST, 'success', (TType.STRING, 'UTF8', False), None,),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (0, TType.LIST, 'success', (TType.STRING, 'UTF8', False), None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -3887,12 +3994,12 @@ class is_regular_file_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -3935,12 +4042,10 @@ class is_regular_file_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(is_regular_file_args)
 is_regular_file_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -3951,13 +4056,13 @@ class is_regular_file_result(object):
      - ex
     """
 
-    def __init__(self, success=None, ex=None, ):
+
+    def __init__(self, success=None, ex=None,):
         self.success = success
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -4010,12 +4115,10 @@ class is_regular_file_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(is_regular_file_result)
 is_regular_file_result.thrift_spec = (
-    (0, TType.BOOL, 'success', None, None,),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (0, TType.BOOL, 'success', None, None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 
 
@@ -4025,12 +4128,12 @@ class is_directory_args(object):
      - path
     """
 
-    def __init__(self, path=None, ):
+
+    def __init__(self, path=None,):
         self.path = path
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -4073,12 +4176,10 @@ class is_directory_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(is_directory_args)
 is_directory_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None,),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -4089,13 +4190,13 @@ class is_directory_result(object):
      - ex
     """
 
-    def __init__(self, success=None, ex=None, ):
+
+    def __init__(self, success=None, ex=None,):
         self.success = success
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -4148,12 +4249,11 @@ class is_directory_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(is_directory_result)
 is_directory_result.thrift_spec = (
-    (0, TType.BOOL, 'success', None, None,),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None,),  # 1
+    (0, TType.BOOL, 'success', None, None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
 )
 fix_spec(all_structs)
 del all_structs
+

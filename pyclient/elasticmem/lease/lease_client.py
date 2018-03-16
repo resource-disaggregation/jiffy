@@ -27,5 +27,5 @@ class LeaseClient:
             self.transport_.close()
 
     def update_lease(self, to_renew, to_flush, to_remove):
-        ack = self.client_.update_leases(directory_lease_service.lease_update(to_renew, to_flush, to_remove))
+        ack = self.client_.update_leases(directory_lease_service.rpc_lease_update(to_renew, to_flush, to_remove))
         return LeaseAck(ack.renewed, ack.flushed, ack.removed)

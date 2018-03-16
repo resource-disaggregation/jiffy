@@ -15,7 +15,6 @@ import logging
 from .ttypes import *
 from thrift.Thrift import TProcessor
 from thrift.transport import TTransport
-
 all_structs = []
 
 
@@ -380,7 +379,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except kv_management_rpc_exception as ex:
+        except kv_rpc_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -396,7 +395,6 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-
 # HELPER FUNCTIONS AND STRUCTURES
 
 
@@ -408,14 +406,14 @@ class put_args(object):
      - value
     """
 
-    def __init__(self, block_id=None, key=None, value=None, ):
+
+    def __init__(self, block_id=None, key=None, value=None,):
         self.block_id = block_id
         self.key = key
         self.value = value
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -476,14 +474,12 @@ class put_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(put_args)
 put_args.thrift_spec = (
     None,  # 0
-    (1, TType.I32, 'block_id', None, None,),  # 1
-    (2, TType.STRING, 'key', 'BINARY', None,),  # 2
-    (3, TType.STRING, 'value', 'BINARY', None,),  # 3
+    (1, TType.I32, 'block_id', None, None, ),  # 1
+    (2, TType.STRING, 'key', 'BINARY', None, ),  # 2
+    (3, TType.STRING, 'value', 'BINARY', None, ),  # 3
 )
 
 
@@ -493,12 +489,12 @@ class put_result(object):
      - ex
     """
 
-    def __init__(self, ex=None, ):
+
+    def __init__(self, ex=None,):
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -542,12 +538,10 @@ class put_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(put_result)
 put_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [kv_rpc_exception, None], None,),  # 1
+    (1, TType.STRUCT, 'ex', [kv_rpc_exception, None], None, ),  # 1
 )
 
 
@@ -558,13 +552,13 @@ class get_args(object):
      - key
     """
 
-    def __init__(self, block_id=None, key=None, ):
+
+    def __init__(self, block_id=None, key=None,):
         self.block_id = block_id
         self.key = key
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -616,13 +610,11 @@ class get_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(get_args)
 get_args.thrift_spec = (
     None,  # 0
-    (1, TType.I32, 'block_id', None, None,),  # 1
-    (2, TType.STRING, 'key', 'BINARY', None,),  # 2
+    (1, TType.I32, 'block_id', None, None, ),  # 1
+    (2, TType.STRING, 'key', 'BINARY', None, ),  # 2
 )
 
 
@@ -633,13 +625,13 @@ class get_result(object):
      - ex
     """
 
-    def __init__(self, success=None, ex=None, ):
+
+    def __init__(self, success=None, ex=None,):
         self.success = success
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -692,12 +684,10 @@ class get_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(get_result)
 get_result.thrift_spec = (
-    (0, TType.STRING, 'success', 'BINARY', None,),  # 0
-    (1, TType.STRUCT, 'ex', [kv_rpc_exception, None], None,),  # 1
+    (0, TType.STRING, 'success', 'BINARY', None, ),  # 0
+    (1, TType.STRUCT, 'ex', [kv_rpc_exception, None], None, ),  # 1
 )
 
 
@@ -709,14 +699,14 @@ class update_args(object):
      - value
     """
 
-    def __init__(self, block_id=None, key=None, value=None, ):
+
+    def __init__(self, block_id=None, key=None, value=None,):
         self.block_id = block_id
         self.key = key
         self.value = value
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -777,14 +767,12 @@ class update_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(update_args)
 update_args.thrift_spec = (
     None,  # 0
-    (1, TType.I32, 'block_id', None, None,),  # 1
-    (2, TType.STRING, 'key', 'BINARY', None,),  # 2
-    (3, TType.STRING, 'value', 'BINARY', None,),  # 3
+    (1, TType.I32, 'block_id', None, None, ),  # 1
+    (2, TType.STRING, 'key', 'BINARY', None, ),  # 2
+    (3, TType.STRING, 'value', 'BINARY', None, ),  # 3
 )
 
 
@@ -794,12 +782,12 @@ class update_result(object):
      - ex
     """
 
-    def __init__(self, ex=None, ):
+
+    def __init__(self, ex=None,):
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -843,12 +831,10 @@ class update_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(update_result)
 update_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [kv_rpc_exception, None], None,),  # 1
+    (1, TType.STRUCT, 'ex', [kv_rpc_exception, None], None, ),  # 1
 )
 
 
@@ -859,13 +845,13 @@ class remove_args(object):
      - key
     """
 
-    def __init__(self, block_id=None, key=None, ):
+
+    def __init__(self, block_id=None, key=None,):
         self.block_id = block_id
         self.key = key
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -917,13 +903,11 @@ class remove_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(remove_args)
 remove_args.thrift_spec = (
     None,  # 0
-    (1, TType.I32, 'block_id', None, None,),  # 1
-    (2, TType.STRING, 'key', 'BINARY', None,),  # 2
+    (1, TType.I32, 'block_id', None, None, ),  # 1
+    (2, TType.STRING, 'key', 'BINARY', None, ),  # 2
 )
 
 
@@ -933,12 +917,12 @@ class remove_result(object):
      - ex
     """
 
-    def __init__(self, ex=None, ):
+
+    def __init__(self, ex=None,):
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -982,12 +966,10 @@ class remove_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(remove_result)
 remove_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [kv_rpc_exception, None], None,),  # 1
+    (1, TType.STRUCT, 'ex', [kv_rpc_exception, None], None, ),  # 1
 )
 
 
@@ -997,12 +979,12 @@ class size_args(object):
      - block_id
     """
 
-    def __init__(self, block_id=None, ):
+
+    def __init__(self, block_id=None,):
         self.block_id = block_id
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -1045,12 +1027,10 @@ class size_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(size_args)
 size_args.thrift_spec = (
     None,  # 0
-    (1, TType.I32, 'block_id', None, None,),  # 1
+    (1, TType.I32, 'block_id', None, None, ),  # 1
 )
 
 
@@ -1061,13 +1041,13 @@ class size_result(object):
      - ex
     """
 
-    def __init__(self, success=None, ex=None, ):
+
+    def __init__(self, success=None, ex=None,):
         self.success = success
         self.ex = ex
 
     def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans,
-                                                         TTransport.CReadableTransport) and self.thrift_spec is not None:
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
             iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
             return
         iprot.readStructBegin()
@@ -1082,7 +1062,7 @@ class size_result(object):
                     iprot.skip(ftype)
             elif fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = kv_management_rpc_exception()
+                    self.ex = kv_rpc_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -1120,12 +1100,11 @@ class size_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-
-
 all_structs.append(size_result)
 size_result.thrift_spec = (
-    (0, TType.I64, 'success', None, None,),  # 0
-    (1, TType.STRUCT, 'ex', [kv_management_rpc_exception, None], None,),  # 1
+    (0, TType.I64, 'success', None, None, ),  # 0
+    (1, TType.STRUCT, 'ex', [kv_rpc_exception, None], None, ),  # 1
 )
 fix_spec(all_structs)
 del all_structs
+
