@@ -53,8 +53,8 @@ add_library(elasticmem STATIC
         src/directory/lease/directory_lease_service_types.cpp
         src/directory/lease/directory_lease_service_types.h
         src/directory/lease/directory_lease_service_types.tcc
-        src/directory/lease/lease_manager.cpp
-        src/directory/lease/lease_manager.h
+        src/directory/lease/lease_expiry_worker.cpp
+        src/directory/lease/lease_expiry_worker.h
         src/directory/directory_service.h
         src/directory/directory_service.cpp
         src/storage/kv/serializer/csv_serde.cpp
@@ -122,10 +122,11 @@ if (BUILD_TESTS)
 
   add_executable(elasticmem_tests
           test/elasticmem_tests.cpp
+          test/block_allocation_service_test.cpp
           test/block_allocator_test.cpp
           test/directory_tree_test.cpp
           test/directory_rpc_service_test.cpp
-          test/lease_manager_test.cpp
+          test/lease_expiry_worker_test.cpp
           test/directory_lease_test.cpp
           test/kv_block_test.cpp
           test/storage_manager_test.cpp

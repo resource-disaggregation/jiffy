@@ -3,11 +3,13 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 #include "../src/storage/storage_management_service.h"
+#include "../src/directory/block/block_allocator.h"
 
-class dummy_kv_manager : public elasticmem::storage::storage_management_service {
+class dummy_storage_manager : public elasticmem::storage::storage_management_service {
  public:
-  dummy_kv_manager() = default;
+  dummy_storage_manager() = default;
 
   void load(const std::string &block_name,
             const std::string &persistent_path_prefix,
@@ -43,6 +45,9 @@ class dummy_block_allocator : public elasticmem::directory::block_allocator {
   explicit dummy_block_allocator(std::size_t num_blocks) : num_free_(num_blocks) {}
 
   std::string allocate(const std::string &) override {
+    if (num_free_ == 0) {
+      throw std::out_of_range("Cannot allocate since nothing is free");
+    }
     std::string ret = std::to_string(num_alloc_);
     ++num_alloc_;
     --num_free_;
@@ -50,16 +55,22 @@ class dummy_block_allocator : public elasticmem::directory::block_allocator {
   }
 
   void free(const std::string &) override {
+    if (num_alloc_ == 0) {
+      throw std::out_of_range("Cannot free since nothing is allocated");
+    }
     ++num_free_;
     --num_alloc_;
   }
 
-  void add_blocks(const std::vector<std::string> &) override {
-    throw std::out_of_range("Cannot add blocks");
+  void add_blocks(const std::vector<std::string> &blocks) override {
+    num_free_ += blocks.size();
   }
 
-  void remove_blocks(const std::vector<std::string> &) override {
-    throw std::out_of_range("Cannot remove blocks");
+  void remove_blocks(const std::vector<std::string> &blocks) override {
+    if (num_free_ < blocks.size()) {
+      throw std::out_of_range("Cannot remove: not enough blocks");
+    }
+    num_free_ -= blocks.size();
   }
 
   size_t num_free_blocks() override {

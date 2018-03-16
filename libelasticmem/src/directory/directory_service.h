@@ -252,6 +252,8 @@ class directory_service {
   virtual void remove(const std::string &path) = 0;
   virtual void remove_all(const std::string &path) = 0;
 
+  virtual void flush(const std::string &path) = 0;
+
   virtual void rename(const std::string &old_path, const std::string &new_path) = 0;
 
   virtual file_status status(const std::string &path) const = 0;

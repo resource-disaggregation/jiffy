@@ -86,6 +86,14 @@ void directory_rpc_service_handler::remove_all(const std::string &path) {
   }
 }
 
+void directory_rpc_service_handler::flush(const std::string &path) {
+  try {
+    shard_->flush(path);
+  } catch (directory_service_exception &e) {
+    throw make_exception(e);
+  }
+}
+
 void directory_rpc_service_handler::rename(const std::string &old_path, const std::string &new_path) {
   try {
     shard_->rename(old_path, new_path);

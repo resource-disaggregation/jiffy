@@ -10,15 +10,13 @@ namespace directory {
 
 class directory_lease_service_handler : public directory_lease_serviceIf {
  public:
-  explicit directory_lease_service_handler(std::shared_ptr<directory_tree> tree,
-                                           std::shared_ptr<storage::storage_management_service> storage);
+  explicit directory_lease_service_handler(std::shared_ptr<directory_tree> tree);
   void update_leases(rpc_lease_ack &_return, const rpc_lease_update &updates) override;
 
  private:
   directory_lease_service_exception make_exception(const directory_service_exception &ex);
 
   std::shared_ptr<directory_tree> tree_;
-  std::shared_ptr<storage::storage_management_service> storage_;
 };
 
 }

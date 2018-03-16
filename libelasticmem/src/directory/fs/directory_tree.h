@@ -10,11 +10,13 @@
 #include "../directory_service.h"
 #include "../block/block_allocator.h"
 #include "../../utils/time_utils.h"
+#include "../../storage/storage_management_service.h"
+#include "../../utils/directory_utils.h"
 
 namespace elasticmem {
 namespace directory {
 
-class lease_manager;
+class lease_expiry_worker;
 
 class ds_node {
  public:
@@ -45,9 +47,101 @@ class ds_node {
 
   void last_write_time(std::uint64_t time) { status_.last_write_time(time); }
 
+  virtual void flush(const std::string &path,
+                     const std::shared_ptr<storage::storage_management_service> &storage,
+                     std::shared_ptr<block_allocator> alloc) = 0;
+
  private:
   std::string name_{};
   file_status status_{};
+};
+
+class ds_file_node : public ds_node {
+ public:
+  explicit ds_file_node(const std::string &name)
+      : ds_node(name, file_status(file_type::regular, perms(perms::all), utils::time_utils::now_ms())),
+        dstatus_{},
+        size_(0) {}
+
+  const data_status &dstatus() const {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    return dstatus_;
+  }
+
+  void dstatus(const data_status &status) {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    dstatus_ = status;
+  }
+
+  const storage_mode &mode() const {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    return dstatus_.mode();
+  }
+
+  void mode(const storage_mode &m) {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    dstatus_.mode(m);
+  }
+
+  const std::string &persistent_store_prefix() const {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    return dstatus_.persistent_store_prefix();
+  }
+
+  void persistent_store_prefix(const std::string &prefix) {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    dstatus_.persistent_store_prefix(prefix);
+  }
+
+  const std::vector<std::string> &data_blocks() const {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    return dstatus_.data_blocks();
+  }
+
+  void add_data_block(const std::string &block) {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    dstatus_.add_data_block(block);
+  }
+
+  void remove_data_block(const std::string &block) {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    dstatus_.remove_data_block(block);
+  }
+
+  void remove_all_data_blocks() {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    dstatus_.remove_all_data_blocks();
+  }
+
+  std::size_t file_size() const override {
+    return std::atomic_load(&size_);
+  }
+
+  void grow(std::size_t bytes) {
+    size_.fetch_add(bytes);
+  }
+
+  void shrink(std::size_t bytes) {
+    size_.fetch_sub(bytes);
+  }
+
+  void flush(const std::string &path,
+             const std::shared_ptr<storage::storage_management_service> &storage,
+             std::shared_ptr<block_allocator> alloc) override {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    dstatus_.mode(storage_mode::flushing);
+    for (const auto &block: dstatus_.data_blocks()) {
+      storage->flush(block, dstatus_.persistent_store_prefix(), path);
+      alloc->free(block);
+    }
+    dstatus_.remove_all_data_blocks();
+    dstatus_.mode(storage_mode::on_disk);
+  }
+
+ private:
+  mutable std::shared_mutex mtx_;
+  data_status dstatus_{};
+  std::atomic<std::size_t> size_;
 };
 
 class ds_dir_node : public ds_node {
@@ -82,6 +176,17 @@ class ds_dir_node : public ds_node {
       children_.erase(ret);
     } else {
       throw directory_service_exception("Child node not found: " + name);
+    }
+  }
+
+  void flush(const std::string &path,
+             const std::shared_ptr<storage::storage_management_service> &storage,
+             std::shared_ptr<block_allocator> alloc) override {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    for (const auto &entry: children_) {
+      std::string child_path = path;
+      utils::directory_utils::push_path_element(child_path, entry.first);
+      entry.second->flush(child_path, storage, alloc);
     }
   }
 
@@ -152,82 +257,10 @@ class ds_dir_node : public ds_node {
   child_map children_{};
 };
 
-class ds_file_node : public ds_node {
- public:
-  explicit ds_file_node(const std::string &name)
-      : ds_node(name, file_status(file_type::regular, perms(perms::all), utils::time_utils::now_ms())), dstatus_{}, size_(0) {}
-
-  const data_status &dstatus() const {
-    std::shared_lock<std::shared_mutex> lock(mtx_);
-    return dstatus_;
-  }
-
-  void dstatus(const data_status &status) {
-    std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_ = status;
-  }
-
-  const storage_mode &mode() const {
-    std::shared_lock<std::shared_mutex> lock(mtx_);
-    return dstatus_.mode();
-  }
-
-  void mode(const storage_mode &m) {
-    std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.mode(m);
-  }
-
-  const std::string &persistent_store_prefix() const {
-    std::shared_lock<std::shared_mutex> lock(mtx_);
-    return dstatus_.persistent_store_prefix();
-  }
-
-  void persistent_store_prefix(const std::string &prefix) {
-    std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.persistent_store_prefix(prefix);
-  }
-
-  const std::vector<std::string> &data_blocks() const {
-    std::shared_lock<std::shared_mutex> lock(mtx_);
-    return dstatus_.data_blocks();
-  }
-
-  void add_data_block(const std::string &block) {
-    std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.add_data_block(block);
-  }
-
-  void remove_data_block(const std::string &block) {
-    std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.remove_data_block(block);
-  }
-
-  void remove_all_data_blocks() {
-    std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.remove_all_data_blocks();
-  }
-
-  std::size_t file_size() const override {
-    return std::atomic_load(&size_);
-  }
-
-  void grow(std::size_t bytes) {
-    size_.fetch_add(bytes);
-  }
-
-  void shrink(std::size_t bytes) {
-    size_.fetch_sub(bytes);
-  }
-
- private:
-  mutable std::shared_mutex mtx_;
-  data_status dstatus_{};
-  std::atomic<std::size_t> size_;
-};
-
 class directory_tree : public directory_service, public directory_management_service {
  public:
-  explicit directory_tree(std::shared_ptr<block_allocator> allocator);
+  explicit directory_tree(std::shared_ptr<block_allocator> allocator,
+                          std::shared_ptr<storage::storage_management_service> storage);
 
   void create_directory(const std::string &path) override;
   void create_directories(const std::string &path) override;
@@ -245,6 +278,8 @@ class directory_tree : public directory_service, public directory_management_ser
 
   void remove(const std::string &path) override;
   void remove_all(const std::string &path) override;
+
+  void flush(const std::string &path) override;
 
   void rename(const std::string &old_path, const std::string &new_path) override;
 
@@ -293,12 +328,15 @@ class directory_tree : public directory_service, public directory_management_ser
 
   std::shared_ptr<ds_node> touch_node_path(const std::string &path, std::uint64_t time) const;
 
+  void clear_storage(std::shared_ptr<ds_node> node);
+
   void touch(std::shared_ptr<ds_node> node, std::uint64_t time);
 
   std::shared_ptr<ds_dir_node> root_;
   std::shared_ptr<block_allocator> allocator_;
+  std::shared_ptr<storage::storage_management_service> storage_;
 
-  friend class lease_manager;
+  friend class lease_expiry_worker;
 };
 
 }

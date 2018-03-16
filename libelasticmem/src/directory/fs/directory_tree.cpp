@@ -9,9 +9,11 @@ namespace directory {
 
 using namespace utils;
 
-directory_tree::directory_tree(std::shared_ptr<block_allocator> allocator)
+directory_tree::directory_tree(std::shared_ptr<block_allocator> allocator,
+                               std::shared_ptr<storage::storage_management_service> storage)
     : root_(std::make_shared<ds_dir_node>(std::string("/"))),
-      allocator_(std::move(allocator)) {}
+      allocator_(std::move(allocator)),
+      storage_(std::move(storage)) {}
 
 void directory_tree::create_directory(const std::string &path) {
   std::string ptemp = path;
@@ -112,6 +114,7 @@ void directory_tree::remove(const std::string &path) {
     throw directory_service_exception("Directory not empty: " + path);
   }
   parent->remove_child(child_name);
+  clear_storage(child);
 }
 
 void directory_tree::remove_all(const std::string &path) {
@@ -123,6 +126,11 @@ void directory_tree::remove_all(const std::string &path) {
     throw directory_service_exception("Path does not exist: " + path);
   }
   parent->remove_child(child_name);
+  clear_storage(child);
+}
+
+void directory_tree::flush(const std::string &path) {
+  get_node(path)->flush(path, storage_, allocator_);
 }
 
 void directory_tree::rename(const std::string &old_path, const std::string &new_path) {
@@ -221,16 +229,15 @@ void directory_tree::add_data_block(const std::string &path) {
 
 void directory_tree::remove_data_block(const std::string &path, const std::string &block) {
   get_node_as_file(path)->remove_data_block(block);
+  storage_->clear(block);
   allocator_->free(block);
 }
 
 void directory_tree::remove_all_data_blocks(const std::string &path) {
   auto node = get_node_as_file(path);
+  clear_storage(node);
   auto blocks = node->data_blocks();
   node->remove_all_data_blocks();
-  for (const auto &block: blocks) {
-    allocator_->free(block);
-  }
 }
 
 std::shared_ptr<ds_node> directory_tree::get_node_unsafe(const std::string &path) const {
@@ -296,6 +303,22 @@ void directory_tree::touch(std::shared_ptr<ds_node> node, std::uint64_t time) {
   auto dir = std::dynamic_pointer_cast<ds_dir_node>(node);
   for (const auto &child: *dir) {
     touch(child.second, time);
+  }
+}
+
+void directory_tree::clear_storage(std::shared_ptr<ds_node> node) {
+  if (node->is_regular_file()) {
+    auto file = std::dynamic_pointer_cast<ds_file_node>(node);
+    auto s = file->dstatus();
+    for (const auto &block: s.data_blocks()) {
+      storage_->clear(block);
+      allocator_->free(block);
+    }
+  } else if (node->is_directory()) {
+    auto dir = std::dynamic_pointer_cast<ds_dir_node>(node);
+    for (auto entry: *dir) {
+      clear_storage(entry.second);
+    }
   }
 }
 

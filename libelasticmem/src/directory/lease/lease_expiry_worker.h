@@ -7,10 +7,10 @@
 namespace elasticmem {
 namespace directory {
 
-class lease_manager {
+class lease_expiry_worker {
  public:
-  lease_manager(std::shared_ptr<directory_tree> tree, std::uint64_t lease_period_ms, std::uint64_t grace_period_ms);
-  ~lease_manager();
+  lease_expiry_worker(std::shared_ptr<directory_tree> tree, uint64_t lease_period_ms, uint64_t grace_period_ms);
+  ~lease_expiry_worker();
 
   void start();
 

@@ -11,7 +11,6 @@ namespace directory {
 class directory_lease_server {
  public:
   static std::shared_ptr<apache::thrift::server::TThreadedServer> create(std::shared_ptr<directory_tree> tree,
-                                                                         std::shared_ptr<storage::storage_management_service> storage,
                                                                          const std::string &address,
                                                                          int port);
 };

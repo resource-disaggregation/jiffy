@@ -73,6 +73,10 @@ void directory_client::remove_all(const std::string &path) {
   client_->remove_all(path);
 }
 
+void directory_client::flush(const std::string &path) {
+  client_->flush(path);
+}
+
 void directory_client::rename(const std::string &old_path, const std::string &new_path) {
   client_->rename(old_path, new_path);
 }

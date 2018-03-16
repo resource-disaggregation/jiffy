@@ -1,14 +1,15 @@
 #include "catch.hpp"
 #include "../src/directory/fs/directory_tree.h"
 #include "../src/directory/block/random_block_allocator.h"
+#include "test_utils.h"
 
 using namespace ::elasticmem::directory;
 using namespace ::elasticmem::utils;
 
 TEST_CASE("create_directory_test", "[dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d", "e", "f", "g", "h"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  directory_tree tree(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
 
   REQUIRE_NOTHROW(tree.create_directories("/sandbox/1/2/a"));
   REQUIRE(tree.is_directory("/sandbox/1/2/a"));
@@ -23,9 +24,9 @@ TEST_CASE("create_directory_test", "[dir]") {
 }
 
 TEST_CASE("create_file_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d", "e", "f", "g", "h"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  directory_tree tree(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
 
   REQUIRE_NOTHROW(tree.create_file("/sandbox/a.txt", "/tmp"));
   REQUIRE(tree.is_regular_file("/sandbox/a.txt"));
@@ -39,9 +40,9 @@ TEST_CASE("create_file_test", "[file][dir]") {
 }
 
 TEST_CASE("exists_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d", "e", "f", "g", "h"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  directory_tree tree(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
 
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file", "/tmp"));
   REQUIRE(tree.exists("/sandbox"));
@@ -50,9 +51,9 @@ TEST_CASE("exists_test", "[file][dir]") {
 }
 
 TEST_CASE("file_size", "[file][dir][grow][shrink]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d", "e", "f", "g", "h"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  directory_tree tree(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
 
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file", "/tmp"));
   REQUIRE(tree.file_size("/sandbox/file") == 0);
@@ -67,9 +68,9 @@ TEST_CASE("file_size", "[file][dir][grow][shrink]") {
 }
 
 TEST_CASE("last_write_time_test", "[file][dir][touch]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d", "e", "f", "g", "h"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  directory_tree tree(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
 
   std::uint64_t before = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file", "/tmp"));
@@ -94,9 +95,9 @@ TEST_CASE("last_write_time_test", "[file][dir][touch]") {
 }
 
 TEST_CASE("permissions_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d", "e", "f", "g", "h"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  directory_tree tree(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
 
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file", "/tmp"));
   REQUIRE(tree.permissions("/sandbox") == perms::all);
@@ -122,11 +123,12 @@ TEST_CASE("permissions_test", "[file][dir]") {
 }
 
 TEST_CASE("path_remove_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d", "e", "f", "g", "h"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  directory_tree tree(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
 
   REQUIRE_NOTHROW(tree.create_file("/sandbox/abcdef/example/a/b", "/tmp"));
+  REQUIRE(alloc->num_free_blocks() == 3);
 
   REQUIRE_NOTHROW(tree.remove("/sandbox/abcdef/example/a/b"));
   REQUIRE(!tree.exists("/sandbox/abcdef/example/a/b"));
@@ -139,12 +141,36 @@ TEST_CASE("path_remove_test", "[file][dir]") {
 
   REQUIRE_NOTHROW(tree.remove_all("/sandbox/abcdef"));
   REQUIRE(!tree.exists("/sandbox/abcdef"));
+  REQUIRE(alloc->num_free_blocks() == 4);
+
+  REQUIRE(sm->COMMANDS.size() == 1);
+  REQUIRE(sm->COMMANDS[0] == "clear:0");
+}
+
+TEST_CASE("path_flush_test", "[file][dir]") {
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/abcdef/example/a/b", "/tmp"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/abcdef/example/c", "/tmp"));
+  REQUIRE(alloc->num_free_blocks() == 2);
+
+  REQUIRE_NOTHROW(tree.flush("/sandbox/abcdef/example/c"));
+  REQUIRE(tree.mode("/sandbox/abcdef/example/c") == storage_mode::on_disk);
+
+  REQUIRE_NOTHROW(tree.flush("/sandbox/abcdef/example/a"));
+  REQUIRE(tree.mode("/sandbox/abcdef/example/a/b") == storage_mode::on_disk);
+
+  REQUIRE(alloc->num_free_blocks() == 4);
+  REQUIRE(sm->COMMANDS.size() == 2);
+  REQUIRE(sm->COMMANDS[0] == "flush:1:/tmp:/sandbox/abcdef/example/c");
+  REQUIRE(sm->COMMANDS[1] == "flush:0:/tmp:/sandbox/abcdef/example/a/b");
 }
 
 TEST_CASE("rename_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d", "e", "f", "g", "h"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  directory_tree tree(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
 
   REQUIRE_NOTHROW(tree.create_file("/sandbox/from/file1.txt", "/tmp"));
   REQUIRE_NOTHROW(tree.create_directory("/sandbox/to"));
@@ -161,9 +187,9 @@ TEST_CASE("rename_test", "[file][dir]") {
 }
 
 TEST_CASE("status_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d", "e", "f", "g", "h"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  directory_tree tree(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
 
   std::uint64_t before = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file", "/tmp"));
@@ -183,9 +209,9 @@ TEST_CASE("status_test", "[file][dir]") {
 }
 
 TEST_CASE("directory_entries_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d", "e", "f", "g", "h"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  directory_tree tree(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
 
   std::uint64_t t0 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_directories("/sandbox/a/b"));
@@ -216,9 +242,9 @@ TEST_CASE("directory_entries_test", "[file][dir]") {
 }
 
 TEST_CASE("recursive_directory_entries_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d", "e", "f", "g", "h"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  directory_tree tree(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
 
   std::uint64_t t0 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_directories("/sandbox/a/b"));
@@ -254,9 +280,9 @@ TEST_CASE("recursive_directory_entries_test", "[file][dir]") {
 }
 
 TEST_CASE("dstatus_test", "[file]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d", "e", "f", "g", "h"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  directory_tree tree(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
 
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file.txt", "/tmp"));
   REQUIRE_THROWS_AS(tree.dstatus("/sandbox"), directory_service_exception);
@@ -276,9 +302,9 @@ TEST_CASE("dstatus_test", "[file]") {
 }
 
 TEST_CASE("storage_mode_test", "[file]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d", "e", "f", "g", "h"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  directory_tree tree(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
 
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file.txt", "/tmp"));
   REQUIRE_THROWS_AS(tree.mode("/sandbox"), directory_service_exception);
@@ -295,9 +321,9 @@ TEST_CASE("storage_mode_test", "[file]") {
 }
 
 TEST_CASE("blocks_test", "[file]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  directory_tree tree(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
 
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file.txt", "/tmp"));
   REQUIRE_THROWS_AS(tree.data_blocks("/sandbox"), directory_service_exception);
@@ -309,22 +335,21 @@ TEST_CASE("blocks_test", "[file]") {
   REQUIRE_THROWS_AS(tree.add_data_block("/sandbox/file.txt"), std::out_of_range);
   std::vector<std::string> file_blocks;
   REQUIRE_NOTHROW(file_blocks = tree.data_blocks("/sandbox/file.txt"));
-  std::sort(file_blocks.begin(), file_blocks.end());
   REQUIRE(file_blocks.size() == 4);
-  REQUIRE(file_blocks.at(0) == "a");
-  REQUIRE(file_blocks.at(1) == "b");
-  REQUIRE(file_blocks.at(2) == "c");
-  REQUIRE(file_blocks.at(3) == "d");
+  REQUIRE(file_blocks.at(0) == "0");
+  REQUIRE(file_blocks.at(1) == "1");
+  REQUIRE(file_blocks.at(2) == "2");
+  REQUIRE(file_blocks.at(3) == "3");
   REQUIRE(alloc->num_free_blocks() == 0);
   REQUIRE(alloc->num_allocated_blocks() == 4);
 
-  REQUIRE_NOTHROW(tree.remove_data_block("/sandbox/file.txt", "c"));
+  REQUIRE_NOTHROW(tree.remove_data_block("/sandbox/file.txt", "2"));
   REQUIRE_NOTHROW(file_blocks = tree.data_blocks("/sandbox/file.txt"));
   std::sort(file_blocks.begin(), file_blocks.end());
   REQUIRE(file_blocks.size() == 3);
-  REQUIRE(file_blocks.at(0) == "a");
-  REQUIRE(file_blocks.at(1) == "b");
-  REQUIRE(file_blocks.at(2) == "d");
+  REQUIRE(file_blocks.at(0) == "0");
+  REQUIRE(file_blocks.at(1) == "1");
+  REQUIRE(file_blocks.at(2) == "3");
   REQUIRE(alloc->num_free_blocks() == 1);
   REQUIRE(alloc->num_allocated_blocks() == 3);
 
@@ -332,12 +357,18 @@ TEST_CASE("blocks_test", "[file]") {
   REQUIRE(tree.data_blocks("/sandbox/file.txt").empty());
   REQUIRE(alloc->num_free_blocks() == 4);
   REQUIRE(alloc->num_allocated_blocks() == 0);
+
+  REQUIRE(sm->COMMANDS.size() == 4);
+  REQUIRE(sm->COMMANDS[0] == "clear:2");
+  REQUIRE(sm->COMMANDS[1] == "clear:0");
+  REQUIRE(sm->COMMANDS[2] == "clear:1");
+  REQUIRE(sm->COMMANDS[3] == "clear:3");
 }
 
 TEST_CASE("file_type_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d", "e", "f", "g", "h"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  directory_tree tree(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
 
   REQUIRE_NOTHROW(tree.create_file("/sandbox/file.txt", "/tmp"));
   REQUIRE(tree.is_regular_file("/sandbox/file.txt"));

@@ -5,6 +5,7 @@
 #include "../src/directory/fs/directory_client.h"
 #include "../src/directory/fs/directory_rpc_server.h"
 #include "../src/directory/block/random_block_allocator.h"
+#include "test_utils.h"
 
 using namespace ::elasticmem::directory;
 using namespace ::apache::thrift::transport;
@@ -27,9 +28,9 @@ static void wait_till_server_ready(const std::string &host, int port) {
 }
 
 TEST_CASE("rpc_create_directory_test", "[dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  auto t = std::make_shared<directory_tree>(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -53,9 +54,9 @@ TEST_CASE("rpc_create_directory_test", "[dir]") {
 }
 
 TEST_CASE("rpc_create_file_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  auto t = std::make_shared<directory_tree>(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -78,9 +79,9 @@ TEST_CASE("rpc_create_file_test", "[file][dir]") {
 }
 
 TEST_CASE("rpc_exists_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  auto t = std::make_shared<directory_tree>(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -99,9 +100,9 @@ TEST_CASE("rpc_exists_test", "[file][dir]") {
 }
 
 TEST_CASE("rpc_file_size", "[file][dir][grow][shrink]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  auto t = std::make_shared<directory_tree>(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -126,9 +127,9 @@ TEST_CASE("rpc_file_size", "[file][dir][grow][shrink]") {
 }
 
 TEST_CASE("rpc_last_write_time_test", "[file][dir][touch]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  auto t = std::make_shared<directory_tree>(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -163,9 +164,9 @@ TEST_CASE("rpc_last_write_time_test", "[file][dir][touch]") {
 }
 
 TEST_CASE("rpc_permissions_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  auto t = std::make_shared<directory_tree>(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -201,9 +202,9 @@ TEST_CASE("rpc_permissions_test", "[file][dir]") {
 }
 
 TEST_CASE("rpc_remove_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  auto t = std::make_shared<directory_tree>(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -211,6 +212,7 @@ TEST_CASE("rpc_remove_test", "[file][dir]") {
   directory_client tree(HOST, PORT);
 
   REQUIRE_NOTHROW(tree.create_file("/sandbox/abcdef/example/a/b", "/tmp"));
+  REQUIRE(alloc->num_free_blocks() == 3);
 
   REQUIRE_NOTHROW(tree.remove("/sandbox/abcdef/example/a/b"));
   REQUIRE(!tree.exists("/sandbox/abcdef/example/a/b"));
@@ -223,6 +225,40 @@ TEST_CASE("rpc_remove_test", "[file][dir]") {
 
   REQUIRE_NOTHROW(tree.remove_all("/sandbox/abcdef"));
   REQUIRE(!tree.exists("/sandbox/abcdef"));
+  REQUIRE(alloc->num_free_blocks() == 4);
+
+  REQUIRE(sm->COMMANDS.size() == 1);
+  REQUIRE(sm->COMMANDS[0] == "clear:0");
+
+  server->stop();
+  if (serve_thread.joinable()) {
+    serve_thread.join();
+  }
+}
+
+TEST_CASE("rpc_path_flush_test", "[file][dir]") {
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
+  auto server = directory_rpc_server::create(t, HOST, PORT);
+  std::thread serve_thread([&server] { server->serve(); });
+  wait_till_server_ready(HOST, PORT);
+
+  directory_client tree(HOST, PORT);
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/abcdef/example/a/b", "/tmp"));
+  REQUIRE_NOTHROW(tree.create_file("/sandbox/abcdef/example/c", "/tmp"));
+  REQUIRE(alloc->num_free_blocks() == 2);
+
+  REQUIRE_NOTHROW(tree.flush("/sandbox/abcdef/example/c"));
+  REQUIRE(tree.mode("/sandbox/abcdef/example/c") == storage_mode::on_disk);
+
+  REQUIRE_NOTHROW(tree.flush("/sandbox/abcdef/example/a"));
+  REQUIRE(tree.mode("/sandbox/abcdef/example/a/b") == storage_mode::on_disk);
+
+  REQUIRE(alloc->num_free_blocks() == 4);
+  REQUIRE(sm->COMMANDS.size() == 2);
+  REQUIRE(sm->COMMANDS[0] == "flush:1:/tmp:/sandbox/abcdef/example/c");
+  REQUIRE(sm->COMMANDS[1] == "flush:0:/tmp:/sandbox/abcdef/example/a/b");
 
   server->stop();
   if (serve_thread.joinable()) {
@@ -231,9 +267,9 @@ TEST_CASE("rpc_remove_test", "[file][dir]") {
 }
 
 TEST_CASE("rpc_rename_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  auto t = std::make_shared<directory_tree>(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -259,9 +295,9 @@ TEST_CASE("rpc_rename_test", "[file][dir]") {
 }
 
 TEST_CASE("rpc_status_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  auto t = std::make_shared<directory_tree>(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -290,9 +326,9 @@ TEST_CASE("rpc_status_test", "[file][dir]") {
 }
 
 TEST_CASE("rpc_directory_entries_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  auto t = std::make_shared<directory_tree>(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -333,9 +369,9 @@ TEST_CASE("rpc_directory_entries_test", "[file][dir]") {
 }
 
 TEST_CASE("rpc_recursive_directory_entries_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  auto t = std::make_shared<directory_tree>(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -381,9 +417,9 @@ TEST_CASE("rpc_recursive_directory_entries_test", "[file][dir]") {
 }
 
 TEST_CASE("rpc_dstatus_test", "[file]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  auto t = std::make_shared<directory_tree>(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -412,9 +448,9 @@ TEST_CASE("rpc_dstatus_test", "[file]") {
 }
 
 TEST_CASE("rpc_storage_mode_test", "[file]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  auto t = std::make_shared<directory_tree>(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -441,9 +477,9 @@ TEST_CASE("rpc_storage_mode_test", "[file]") {
 }
 
 TEST_CASE("rpc_blocks_test", "[file]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  auto t = std::make_shared<directory_tree>(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
@@ -460,22 +496,20 @@ TEST_CASE("rpc_blocks_test", "[file]") {
   REQUIRE_THROWS_AS(t->add_data_block("/sandbox/file.txt"), std::out_of_range);
   std::vector<std::string> file_blocks;
   REQUIRE_NOTHROW(file_blocks = tree.data_blocks("/sandbox/file.txt"));
-  std::sort(file_blocks.begin(), file_blocks.end());
   REQUIRE(file_blocks.size() == 4);
-  REQUIRE(file_blocks.at(0) == "a");
-  REQUIRE(file_blocks.at(1) == "b");
-  REQUIRE(file_blocks.at(2) == "c");
-  REQUIRE(file_blocks.at(3) == "d");
+  REQUIRE(file_blocks.at(0) == "0");
+  REQUIRE(file_blocks.at(1) == "1");
+  REQUIRE(file_blocks.at(2) == "2");
+  REQUIRE(file_blocks.at(3) == "3");
   REQUIRE(alloc->num_free_blocks() == 0);
   REQUIRE(alloc->num_allocated_blocks() == 4);
 
-  REQUIRE_NOTHROW(t->remove_data_block("/sandbox/file.txt", "c"));
+  REQUIRE_NOTHROW(t->remove_data_block("/sandbox/file.txt", "2"));
   REQUIRE_NOTHROW(file_blocks = tree.data_blocks("/sandbox/file.txt"));
-  std::sort(file_blocks.begin(), file_blocks.end());
   REQUIRE(file_blocks.size() == 3);
-  REQUIRE(file_blocks.at(0) == "a");
-  REQUIRE(file_blocks.at(1) == "b");
-  REQUIRE(file_blocks.at(2) == "d");
+  REQUIRE(file_blocks.at(0) == "0");
+  REQUIRE(file_blocks.at(1) == "1");
+  REQUIRE(file_blocks.at(2) == "3");
   REQUIRE(alloc->num_free_blocks() == 1);
   REQUIRE(alloc->num_allocated_blocks() == 3);
 
@@ -484,6 +518,12 @@ TEST_CASE("rpc_blocks_test", "[file]") {
   REQUIRE(alloc->num_free_blocks() == 4);
   REQUIRE(alloc->num_allocated_blocks() == 0);
 
+  REQUIRE(sm->COMMANDS.size() == 4);
+  REQUIRE(sm->COMMANDS[0] == "clear:2");
+  REQUIRE(sm->COMMANDS[1] == "clear:0");
+  REQUIRE(sm->COMMANDS[2] == "clear:1");
+  REQUIRE(sm->COMMANDS[3] == "clear:3");
+
   server->stop();
   if (serve_thread.joinable()) {
     serve_thread.join();
@@ -491,9 +531,9 @@ TEST_CASE("rpc_blocks_test", "[file]") {
 }
 
 TEST_CASE("rpc_file_type_test", "[file][dir]") {
-  std::vector<std::string> blocks = {"a", "b", "c", "d"};
-  auto alloc = std::make_shared<random_block_allocator>(blocks);
-  auto t = std::make_shared<directory_tree>(alloc);
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
   auto server = directory_rpc_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);

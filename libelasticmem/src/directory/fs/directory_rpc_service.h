@@ -31,6 +31,7 @@ class directory_rpc_serviceIf {
   virtual rpc_perms get_permissions(const std::string& path) = 0;
   virtual void remove(const std::string& path) = 0;
   virtual void remove_all(const std::string& path) = 0;
+  virtual void flush(const std::string& path) = 0;
   virtual void rename(const std::string& old_path, const std::string& new_path) = 0;
   virtual void status(rpc_file_status& _return, const std::string& path) = 0;
   virtual void directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path) = 0;
@@ -102,6 +103,9 @@ class directory_rpc_serviceNull : virtual public directory_rpc_serviceIf {
     return;
   }
   void remove_all(const std::string& /* path */) {
+    return;
+  }
+  void flush(const std::string& /* path */) {
     return;
   }
   void rename(const std::string& /* old_path */, const std::string& /* new_path */) {
@@ -1286,6 +1290,116 @@ class directory_rpc_service_remove_all_presult {
   directory_rpc_service_exception ex;
 
   _directory_rpc_service_remove_all_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
+typedef struct _directory_rpc_service_flush_args__isset {
+  _directory_rpc_service_flush_args__isset() : path(false) {}
+  bool path :1;
+} _directory_rpc_service_flush_args__isset;
+
+class directory_rpc_service_flush_args {
+ public:
+
+  directory_rpc_service_flush_args(const directory_rpc_service_flush_args&);
+  directory_rpc_service_flush_args& operator=(const directory_rpc_service_flush_args&);
+  directory_rpc_service_flush_args() : path() {
+  }
+
+  virtual ~directory_rpc_service_flush_args() throw();
+  std::string path;
+
+  _directory_rpc_service_flush_args__isset __isset;
+
+  void __set_path(const std::string& val);
+
+  bool operator == (const directory_rpc_service_flush_args & rhs) const
+  {
+    if (!(path == rhs.path))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_rpc_service_flush_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_rpc_service_flush_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class directory_rpc_service_flush_pargs {
+ public:
+
+
+  virtual ~directory_rpc_service_flush_pargs() throw();
+  const std::string* path;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_rpc_service_flush_result__isset {
+  _directory_rpc_service_flush_result__isset() : ex(false) {}
+  bool ex :1;
+} _directory_rpc_service_flush_result__isset;
+
+class directory_rpc_service_flush_result {
+ public:
+
+  directory_rpc_service_flush_result(const directory_rpc_service_flush_result&);
+  directory_rpc_service_flush_result& operator=(const directory_rpc_service_flush_result&);
+  directory_rpc_service_flush_result() {
+  }
+
+  virtual ~directory_rpc_service_flush_result() throw();
+  directory_rpc_service_exception ex;
+
+  _directory_rpc_service_flush_result__isset __isset;
+
+  void __set_ex(const directory_rpc_service_exception& val);
+
+  bool operator == (const directory_rpc_service_flush_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_rpc_service_flush_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_rpc_service_flush_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_rpc_service_flush_presult__isset {
+  _directory_rpc_service_flush_presult__isset() : ex(false) {}
+  bool ex :1;
+} _directory_rpc_service_flush_presult__isset;
+
+class directory_rpc_service_flush_presult {
+ public:
+
+
+  virtual ~directory_rpc_service_flush_presult() throw();
+  directory_rpc_service_exception ex;
+
+  _directory_rpc_service_flush_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -2527,6 +2641,9 @@ class directory_rpc_serviceClientT : virtual public directory_rpc_serviceIf {
   void remove_all(const std::string& path);
   void send_remove_all(const std::string& path);
   void recv_remove_all();
+  void flush(const std::string& path);
+  void send_flush(const std::string& path);
+  void recv_flush();
   void rename(const std::string& old_path, const std::string& new_path);
   void send_rename(const std::string& old_path, const std::string& new_path);
   void recv_rename();
@@ -2605,6 +2722,8 @@ class directory_rpc_serviceProcessorT : public ::apache::thrift::TDispatchProces
   void process_remove(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_remove_all(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_remove_all(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_flush(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_flush(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_rename(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_rename(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_status(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -2658,6 +2777,9 @@ class directory_rpc_serviceProcessorT : public ::apache::thrift::TDispatchProces
     processMap_["remove_all"] = ProcessFunctions(
       &directory_rpc_serviceProcessorT::process_remove_all,
       &directory_rpc_serviceProcessorT::process_remove_all);
+    processMap_["flush"] = ProcessFunctions(
+      &directory_rpc_serviceProcessorT::process_flush,
+      &directory_rpc_serviceProcessorT::process_flush);
     processMap_["rename"] = ProcessFunctions(
       &directory_rpc_serviceProcessorT::process_rename,
       &directory_rpc_serviceProcessorT::process_rename);
@@ -2809,6 +2931,15 @@ class directory_rpc_serviceMultiface : virtual public directory_rpc_serviceIf {
       ifaces_[i]->remove_all(path);
     }
     ifaces_[i]->remove_all(path);
+  }
+
+  void flush(const std::string& path) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->flush(path);
+    }
+    ifaces_[i]->flush(path);
   }
 
   void rename(const std::string& old_path, const std::string& new_path) {
@@ -2968,6 +3099,9 @@ class directory_rpc_serviceConcurrentClientT : virtual public directory_rpc_serv
   void remove_all(const std::string& path);
   int32_t send_remove_all(const std::string& path);
   void recv_remove_all(const int32_t seqid);
+  void flush(const std::string& path);
+  int32_t send_flush(const std::string& path);
+  void recv_flush(const int32_t seqid);
   void rename(const std::string& old_path, const std::string& new_path);
   int32_t send_rename(const std::string& old_path, const std::string& new_path);
   void recv_rename(const int32_t seqid);

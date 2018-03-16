@@ -27,6 +27,7 @@ class directory_client : public directory_service {
   void permissions(const std::string &path, const perms &prms, perm_options opts) override;
   void remove(const std::string &path) override;
   void remove_all(const std::string &path) override;
+  void flush(const std::string &path) override;
   void rename(const std::string &old_path, const std::string &new_path) override;
   file_status status(const std::string &path) const override;
   std::vector<directory_entry> directory_entries(const std::string &path) override;

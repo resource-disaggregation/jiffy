@@ -170,6 +170,22 @@ directory_rpc_service_remove_all_presult::~directory_rpc_service_remove_all_pres
 }
 
 
+directory_rpc_service_flush_args::~directory_rpc_service_flush_args() throw() {
+}
+
+
+directory_rpc_service_flush_pargs::~directory_rpc_service_flush_pargs() throw() {
+}
+
+
+directory_rpc_service_flush_result::~directory_rpc_service_flush_result() throw() {
+}
+
+
+directory_rpc_service_flush_presult::~directory_rpc_service_flush_presult() throw() {
+}
+
+
 directory_rpc_service_rename_args::~directory_rpc_service_rename_args() throw() {
 }
 

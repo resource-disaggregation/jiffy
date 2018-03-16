@@ -1,6 +1,6 @@
 #include <iostream>
 #include <chrono>
-#include "lease_manager.h"
+#include "lease_expiry_worker.h"
 #include "../../utils/directory_utils.h"
 #include "../../utils/logger.h"
 
@@ -9,19 +9,19 @@ namespace directory {
 
 using namespace utils;
 
-lease_manager::lease_manager(std::shared_ptr<directory_tree> tree,
+lease_expiry_worker::lease_expiry_worker(std::shared_ptr<directory_tree> tree,
                              std::uint64_t lease_period_ms,
                              std::uint64_t grace_period_ms)
     : lease_period_ms_(lease_period_ms), grace_period_ms_(grace_period_ms), tree_(std::move(tree)), stop_(false) {
 }
 
-lease_manager::~lease_manager() {
+lease_expiry_worker::~lease_expiry_worker() {
   stop_.store(true);
   if (worker_.joinable())
     worker_.join();
 }
 
-void lease_manager::start() {
+void lease_expiry_worker::start() {
   worker_ = std::move(std::thread([&] {
     while (!stop_.load()) {
       LOG(info) << "Looking for expired leases...";
@@ -42,11 +42,11 @@ void lease_manager::start() {
   }));
 }
 
-void lease_manager::stop() {
+void lease_expiry_worker::stop() {
   stop_.store(true);
 }
 
-void lease_manager::remove_expired_leases() {
+void lease_expiry_worker::remove_expired_leases() {
   namespace ts = std::chrono;
   auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
   auto node = std::dynamic_pointer_cast<ds_dir_node>(tree_->root_);
@@ -56,7 +56,7 @@ void lease_manager::remove_expired_leases() {
   }
 }
 
-void lease_manager::remove_expired_nodes(std::shared_ptr<ds_dir_node> parent,
+void lease_expiry_worker::remove_expired_nodes(std::shared_ptr<ds_dir_node> parent,
                                          const std::string &parent_path,
                                          const std::string &child_name,
                                          std::uint64_t epoch) {
@@ -68,10 +68,11 @@ void lease_manager::remove_expired_nodes(std::shared_ptr<ds_dir_node> parent,
   auto extended_lease_duration = lease_duration + static_cast<uint64_t>(grace_period_ms_.count());
   if (time_since_last_renewal >= extended_lease_duration) {
     // Remove child since its lease has expired
-    LOG(info) <<  "Lease expired for " << child_path;
-    parent->remove_child(child_name);
+    LOG(warn) <<  "Lease expired for " << child_path;
+    tree_->remove_all(child_path);
   } else {
     if (time_since_last_renewal >= lease_duration && child->is_regular_file()) {
+      LOG(warn) << "Lease in grace period for " << child_path;
       auto node = std::dynamic_pointer_cast<ds_file_node>(child);
       node->mode(storage_mode::in_memory_grace);
     }
