@@ -71,6 +71,9 @@ service directory_rpc_service {
   void remove_all(1: string path)
     throws (1: directory_rpc_service_exception ex),
 
+  void flush(1: string path)
+    throws (1: directory_rpc_service_exception ex),
+
   void rename(1: string old_path, 2: string new_path)
     throws (1: directory_rpc_service_exception ex),
 
