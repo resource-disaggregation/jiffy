@@ -7,13 +7,13 @@
 namespace elasticmem {
 namespace directory {
 
-class block_allocation_client {
+class block_advertisement_client {
  public:
   typedef block_allocation_serviceClient thrift_client;
 
-  block_allocation_client() = default;
-  ~block_allocation_client();
-  block_allocation_client(const std::string &hostname, int port);
+  block_advertisement_client() = default;
+  ~block_advertisement_client();
+  block_advertisement_client(const std::string &hostname, int port);
   void connect(const std::string &hostname, int port);
   void disconnect();
 

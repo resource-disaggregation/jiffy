@@ -9,6 +9,7 @@ namespace directory {
 
 class random_block_allocator : public block_allocator {
  public:
+  random_block_allocator() = default;
   explicit random_block_allocator(const std::vector<std::string> &blocks);
   std::string allocate(const std::string &hint = "") override;
   void free(const std::string &block_name) override;

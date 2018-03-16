@@ -9,6 +9,7 @@
 #include <storage/manager/storage_manager.h>
 #include <utils/signal_handling.h>
 #include <utils/cmd_parse.h>
+#include <directory/block/block_allocation_server.h>
 
 using namespace ::elasticmem::directory;
 using namespace ::elasticmem::storage;
@@ -50,7 +51,7 @@ int main(int argc, char **argv) {
     block_port = parser.get_int("block-port");
     lease_period_ms = static_cast<uint64_t>(parser.get_long("lease-period-ms"));
     grace_period_ms = static_cast<uint64_t>(parser.get_long("grace-period-ms"));
-  } catch (cmd_parse_exception& ex) {
+  } catch (cmd_parse_exception &ex) {
     std::cerr << "Could not parse command line args: " << ex.what() << std::endl;
     std::cerr << parser.help_msg() << std::endl;
     return -1;
@@ -58,12 +59,17 @@ int main(int argc, char **argv) {
 
   std::vector<std::string> blocks;
 
-  // TODO: Fix
-  for (std::size_t i = 0; i < 8; i++) {
-    blocks.push_back("127.0.0.0:9092:" + std::to_string(i));
-  }
-
   auto alloc = std::make_shared<random_block_allocator>(blocks);
+  auto block_allocation_server = block_allocation_server::create(alloc, address, block_port);
+  std::thread block_allocation_serve_thread([&block_allocation_server] {
+    try {
+      block_allocation_server->serve();
+    } catch (std::exception &e) {
+      std::cerr << "Block allocation server error: " << e.what() << std::endl;
+    }
+  });
+  std::cout << "Block allocation server listening on " << address << ":" << block_port << std::endl;
+
   auto tree = std::make_shared<directory_tree>(alloc);
   auto directory_server = directory_rpc_server::create(tree, address, service_port);
   std::thread directory_serve_thread([&directory_server] {
@@ -98,5 +104,6 @@ int main(int argc, char **argv) {
   if (lease_serve_thread.joinable()) {
     lease_serve_thread.join();
   }
+
   return 0;
 }
