@@ -3,7 +3,10 @@
 #include <storage/manager/storage_management_rpc_server.h>
 #include <utils/signal_handling.h>
 #include <utils/cmd_parse.h>
+#include <directory/block/block_advertisement_client.h>
+#include <storage/manager/detail/block_name_parser.h>
 
+using namespace ::elasticmem::directory;
 using namespace ::elasticmem::storage;
 using namespace ::elasticmem::utils;
 
@@ -16,7 +19,9 @@ int main(int argc, char **argv) {
       "Port that storage service listens on"));
   opts.add(cmd_option("management-port", 'm', false).set_default("9094").set_description(
       "Port that storage management service listens on"));
-  opts.add(cmd_option("block-port", 'b', false).set_default("9092").set_description(
+  opts.add(cmd_option("block-address", 'b', false).set_default("127.0.0.1").set_description(
+      "Host for block advertisement service"));
+  opts.add(cmd_option("block-port", 'p', false).set_default("9092").set_description(
       "Port that block advertisement interface connects to"));
   opts.add(cmd_option("num-blocks", 'n', false).set_default("64").set_description(
       "Number of blocks to advertise"));
@@ -28,6 +33,7 @@ int main(int argc, char **argv) {
   }
 
   std::string address;
+  std::string block_host;
   int block_port;
   int service_port;
   int management_port;
@@ -35,6 +41,7 @@ int main(int argc, char **argv) {
 
   try {
     address = parser.get("address");
+    block_host = parser.get("block-address");
     service_port = parser.get_int("service-port");
     management_port = parser.get_int("management-port");
     block_port = parser.get_int("block-port");
@@ -62,6 +69,7 @@ int main(int argc, char **argv) {
       management_server->serve();
     } catch (std::exception &e) {
       std::cerr << "KV management server error: " << e.what() << std::endl;
+      std::exit(-1);
     }
   });
 
@@ -73,10 +81,26 @@ int main(int argc, char **argv) {
       kv_server->serve();
     } catch (std::exception &e) {
       std::cerr << "KV server error: " << e.what() << std::endl;
+      std::exit(-1);
     }
   });
-
   std::cout << "KV server listening on " << address << ":" << service_port << std::endl;
+
+  try {
+    char hbuf[1024];
+    gethostname(hbuf, sizeof(hbuf));
+    std::string hostname(hbuf);
+    block_advertisement_client client(block_host, block_port);
+    std::vector<std::string> block_names;
+    for (int i = 0; i < static_cast<int>(num_blocks); i++) {
+      block_names.push_back(block_name_parser::make_block_name(std::make_tuple(hostname, service_port, i)));
+    }
+    client.advertise_blocks(block_names);
+    client.disconnect();
+  } catch (std::exception &e) {
+    std::cerr << "Failed to advertise blocks: " << e.what() << "; make sure block allocation server is running\n";
+    std::exit(-1);
+  }
 
   if (management_serve_thread.joinable()) {
     management_serve_thread.join();
