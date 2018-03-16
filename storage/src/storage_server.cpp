@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
     management_port = parser.get_int("management-port");
     block_port = parser.get_int("block-port");
     num_blocks = static_cast<std::size_t>(parser.get_long("num-blocks"));
-  } catch (cmd_parse_exception& ex) {
+  } catch (cmd_parse_exception &ex) {
     std::cerr << "Could not parse command line args: " << ex.what() << std::endl;
     std::cerr << parser.help_msg() << std::endl;
     return -1;
@@ -82,19 +82,21 @@ int main(int argc, char **argv) {
 
   LOG(log_level::info) << "Management server listening on " << address << ":" << management_port;
 
+  char hbuf[1024];
+  gethostname(hbuf, sizeof(hbuf));
+  std::string hostname(hbuf);
+  std::vector<std::string> block_names;
+  for (int i = 0; i < static_cast<int>(num_blocks); i++) {
+    block_names.push_back(block_name_parser::make_block_name(std::make_tuple(hostname, service_port, i)));
+  }
+
   try {
-    char hbuf[1024];
-    gethostname(hbuf, sizeof(hbuf));
-    std::string hostname(hbuf);
     block_advertisement_client client(block_host, block_port);
-    std::vector<std::string> block_names;
-    for (int i = 0; i < static_cast<int>(num_blocks); i++) {
-      block_names.push_back(block_name_parser::make_block_name(std::make_tuple(hostname, service_port, i)));
-    }
     client.advertise_blocks(block_names);
     client.disconnect();
   } catch (std::exception &e) {
-    LOG(log_level::error) << "Failed to advertise blocks: " << e.what() << "; make sure block allocation server is running\n";
+    LOG(log_level::error) << "Failed to advertise blocks: " << e.what()
+                          << "; make sure block allocation server is running\n";
     std::exit(-1);
   }
 
@@ -117,7 +119,7 @@ int main(int argc, char **argv) {
       if (management_exception) {
         try {
           std::rethrow_exception(management_exception);
-        } catch (std::exception& e) {
+        } catch (std::exception &e) {
           LOG(log_level::error) << "Storage management server failed: " << e.what();
         }
       }
@@ -126,7 +128,7 @@ int main(int argc, char **argv) {
       if (kv_exception) {
         try {
           std::rethrow_exception(kv_exception);
-        } catch (std::exception& e) {
+        } catch (std::exception &e) {
           LOG(log_level::error) << "KV server failed: " << e.what();
           std::exit(-1);
         }
@@ -134,5 +136,16 @@ int main(int argc, char **argv) {
       break;
     default:break;
   }
+
+  try {
+    block_advertisement_client client(block_host, block_port);
+    client.retract_blocks(block_names);
+    client.disconnect();
+  } catch (std::exception &e) {
+    LOG(log_level::error) << "Failed to retract blocks: " << e.what()
+                          << "; make sure block allocation server is running\n";
+    std::exit(-1);
+  }
+
   return -1;
 }
