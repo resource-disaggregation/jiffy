@@ -58,14 +58,20 @@ int main(int argc, char **argv) {
     return -1;
   }
 
+  std::mutex failure_mtx;
+  std::condition_variable failure_condition;
+  std::atomic<int> failing_thread(-1); // alloc -> 0, directory -> 1, lease -> 2
+
   std::exception_ptr alloc_exception = nullptr;
   auto alloc = std::make_shared<random_block_allocator>();
-  auto block_allocation_server = block_allocation_server::create(alloc, address, block_port);
-  std::thread block_allocation_serve_thread([&alloc_exception, &block_allocation_server] {
+  auto alloc_server = block_allocation_server::create(alloc, address, block_port);
+  std::thread alloc_serve_thread([&alloc_exception, &alloc_server, &failing_thread, &failure_condition] {
     try {
-      block_allocation_server->serve();
+      alloc_server->serve();
     } catch (...) {
       alloc_exception = std::current_exception();
+      failing_thread = 0;
+      failure_condition.notify_all();
     }
   });
   LOG(log_level::info) << "Block allocation server listening on " << address << ":" << block_port;
@@ -74,11 +80,13 @@ int main(int argc, char **argv) {
   auto storage = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, storage);
   auto directory_server = directory_rpc_server::create(tree, address, service_port);
-  std::thread directory_serve_thread([&directory_exception, &directory_server] {
+  std::thread directory_serve_thread([&directory_exception, &directory_server, &failing_thread, &failure_condition] {
     try {
       directory_server->serve();
     } catch (...) {
       directory_exception = std::current_exception();
+      failing_thread = 1;
+      failure_condition.notify_all();
     }
   });
 
@@ -86,11 +94,13 @@ int main(int argc, char **argv) {
 
   std::exception_ptr lease_exception = nullptr;
   auto lease_server = directory_lease_server::create(tree, address, lease_port);
-  std::thread lease_serve_thread([&lease_exception, &lease_server] {
+  std::thread lease_serve_thread([&lease_exception, &lease_server, &failing_thread, &failure_condition] {
     try {
       lease_server->serve();
     } catch (...) {
       lease_exception = std::current_exception();
+      failing_thread = 2;
+      failure_condition.notify_all();
     }
   });
 
@@ -99,41 +109,41 @@ int main(int argc, char **argv) {
   lease_expiry_worker lmgr(tree, lease_period_ms, grace_period_ms);
   lmgr.start();
 
-  if (block_allocation_serve_thread.joinable()) {
-    block_allocation_serve_thread.join();
-    if (alloc_exception) {
-      try {
-        std::rethrow_exception(alloc_exception);
-      } catch (std::exception& e) {
-        LOG(log_level::error) << "Block allocation server failed: " << e.what();
-        std::exit(-1);
-      }
-    }
-  }
+  std::unique_lock<std::mutex> failure_condition_lock{failure_mtx};
+  failure_condition.wait(failure_condition_lock, [&failing_thread] {
+    return failing_thread != -1;
+  });
 
-  if (directory_serve_thread.joinable()) {
-    directory_serve_thread.join();
-    if (directory_exception) {
-      try {
-        std::rethrow_exception(directory_exception);
-      } catch (std::exception& e) {
-        LOG(log_level::error) << "Directory server failed: " << e.what();
-        std::exit(-1);
+  switch (failing_thread.load()) {
+    case 0:
+      if (alloc_exception) {
+        try {
+          std::rethrow_exception(alloc_exception);
+        } catch (std::exception &e) {
+          LOG(log_level::error) << "Block allocation server failed: " << e.what();
+        }
       }
-    }
-  }
-
-  if (lease_serve_thread.joinable()) {
-    lease_serve_thread.join();
-    if (lease_exception) {
-      try {
-        std::rethrow_exception(lease_exception);
-      } catch (std::exception& e) {
-        LOG(log_level::error) << "Lease server failed: " << e.what();
-        std::exit(-1);
+      break;
+    case 1:
+      if (directory_exception) {
+        try {
+          std::rethrow_exception(directory_exception);
+        } catch (std::exception &e) {
+          LOG(log_level::error) << "Directory server failed: " << e.what();
+        }
       }
-    }
+      break;
+    case 2:
+      if (lease_exception) {
+        try {
+          std::rethrow_exception(lease_exception);
+        } catch (std::exception &e) {
+          LOG(log_level::error) << "Lease server failed: " << e.what();
+          std::exit(-1);
+        }
+      }
+      break;
+    default:break;
   }
-
-  return 0;
+  return -1;
 }

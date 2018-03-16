@@ -53,6 +53,10 @@ int main(int argc, char **argv) {
     return -1;
   }
 
+  std::mutex failure_mtx;
+  std::condition_variable failure_condition;
+  std::atomic<int> failing_thread(-1); // management -> 0, service -> 1
+
   std::vector<std::shared_ptr<block_management_ops>> block_management;
   block_management.resize(num_blocks);
   for (auto &block : block_management) {
@@ -66,11 +70,13 @@ int main(int argc, char **argv) {
 
   std::exception_ptr management_exception = nullptr;
   auto management_server = storage_management_rpc_server::create(block_management, address, management_port);
-  std::thread management_serve_thread([&management_exception, &management_server] {
+  std::thread management_serve_thread([&management_exception, &management_server, &failing_thread, &failure_condition] {
     try {
       management_server->serve();
     } catch (...) {
       management_exception = std::current_exception();
+      failing_thread = 0;
+      failure_condition.notify_all();
     }
   });
 
@@ -94,38 +100,39 @@ int main(int argc, char **argv) {
 
   std::exception_ptr kv_exception = nullptr;
   auto kv_server = kv_rpc_server::create(kv_blocks, address, service_port);
-  std::thread kv_serve_thread([&kv_exception, &kv_server] {
+  std::thread kv_serve_thread([&kv_exception, &kv_server, &failing_thread, &failure_condition] {
     try {
       kv_server->serve();
     } catch (...) {
       kv_exception = std::current_exception();
+      failing_thread = 1;
+      failure_condition.notify_all();
     }
   });
+
   LOG(log_level::info) << "KV server listening on " << address << ":" << service_port;
 
-  if (management_serve_thread.joinable()) {
-    management_serve_thread.join();
-    if (management_exception) {
-      try {
-        std::rethrow_exception(management_exception);
-      } catch (std::exception& e) {
-        LOG(log_level::error) << "Storage management server failed: " << e.what();
-        std::exit(-1);
+  switch (failing_thread.load()) {
+    case 0:
+      if (management_exception) {
+        try {
+          std::rethrow_exception(management_exception);
+        } catch (std::exception& e) {
+          LOG(log_level::error) << "Storage management server failed: " << e.what();
+        }
       }
-    }
-  }
-
-  if (kv_serve_thread.joinable()) {
-    kv_serve_thread.join();
-    if (kv_exception) {
-      try {
-        std::rethrow_exception(kv_exception);
-      } catch (std::exception& e) {
-        LOG(log_level::error) << "KV server failed: " << e.what();
-        std::exit(-1);
+      break;
+    case 1:
+      if (kv_exception) {
+        try {
+          std::rethrow_exception(kv_exception);
+        } catch (std::exception& e) {
+          LOG(log_level::error) << "KV server failed: " << e.what();
+          std::exit(-1);
+        }
       }
-    }
+      break;
+    default:break;
   }
-
-  return 0;
+  return -1;
 }
