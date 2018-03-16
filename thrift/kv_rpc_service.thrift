@@ -1,5 +1,5 @@
 namespace cpp elasticmem.storage
-namespace py elasticmem.storage
+namespace py elasticmem.kv
 
 exception kv_rpc_exception {
   1: string msg

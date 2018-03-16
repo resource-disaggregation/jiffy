@@ -1,5 +1,5 @@
 namespace cpp elasticmem.directory
-namespace py elasticmem.directory
+namespace py elasticmem.lease
 
 struct rpc_lease_update {
   1: required list<string> to_renew,
