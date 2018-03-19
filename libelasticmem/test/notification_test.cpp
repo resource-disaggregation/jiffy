@@ -1,0 +1,81 @@
+#include <catch.hpp>
+#include <thrift/transport/TBufferTransports.h>
+#include <thrift/protocol/TBinaryProtocol.h>
+#include <iostream>
+#include "../src/storage/notification/subscriber.h"
+#include "../src/storage/notification/notification_server.h"
+
+using namespace ::elasticmem::storage;
+using namespace ::apache::thrift::transport;
+using namespace ::apache::thrift::protocol;
+
+#define HOST "127.0.0.1"
+#define PORT 9090
+
+static void wait_till_server_ready(const std::string &host, int port) {
+  bool check = true;
+  while (check) {
+    try {
+      auto transport = std::shared_ptr<TTransport>(new TBufferedTransport(std::make_shared<TSocket>(host, port)));
+      transport->open();
+      transport->close();
+      check = false;
+    } catch (TTransportException &e) {
+      usleep(100000);
+    }
+  }
+}
+
+TEST_CASE("notification_test", "[subscribe][get_message]") {
+  std::vector<std::shared_ptr<subscription_map>> sub_maps = {std::make_shared<subscription_map>()};
+  auto &sub_map = sub_maps[0];
+
+  auto server = notification_server::create(sub_maps, HOST, PORT);
+  std::thread serve_thread([&server] { server->serve(); });
+  wait_till_server_ready(HOST, PORT);
+
+  subscriber sub1(HOST, PORT);
+  subscriber sub2(HOST, PORT);
+  subscriber sub3(HOST, PORT);
+
+  std::string op1 = "op1", op2 = "op2";
+  std::string msg1 = "msg1", msg2 = "msg2";
+
+  REQUIRE_NOTHROW(sub1.subscribe(0, {op1}));
+  REQUIRE_NOTHROW(sub2.subscribe(0, {op1, op2}));
+  REQUIRE_NOTHROW(sub3.subscribe(0, {op2}));
+
+  REQUIRE_NOTHROW(sub_map->notify(op1, msg1));
+  REQUIRE_NOTHROW(sub_map->notify(op2, msg2));
+
+  REQUIRE(sub1.get_message() == std::make_pair(op1, msg1));
+  REQUIRE(sub2.get_message() == std::make_pair(op1, msg1));
+  REQUIRE(sub2.get_message() == std::make_pair(op2, msg2));
+  REQUIRE(sub3.get_message() == std::make_pair(op2, msg2));
+
+  REQUIRE_THROWS_AS(sub1.get_message(100), std::out_of_range);
+  REQUIRE_THROWS_AS(sub2.get_message(100), std::out_of_range);
+  REQUIRE_THROWS_AS(sub3.get_message(100), std::out_of_range);
+
+  REQUIRE_NOTHROW(sub1.unsubscribe(0, {op1}));
+  REQUIRE_NOTHROW(sub2.unsubscribe(0, {op2}));
+
+  REQUIRE_NOTHROW(sub_map->notify(op1, msg1));
+  REQUIRE_NOTHROW(sub_map->notify(op2, msg2));
+
+  REQUIRE(sub2.get_message() == std::make_pair(op1, msg1));
+  REQUIRE(sub3.get_message() == std::make_pair(op2, msg2));
+
+  REQUIRE_THROWS_AS(sub1.get_message(100), std::out_of_range);
+  REQUIRE_THROWS_AS(sub2.get_message(100), std::out_of_range);
+  REQUIRE_THROWS_AS(sub3.get_message(100), std::out_of_range);
+
+  sub1.disconnect();
+  sub2.disconnect();
+  sub3.disconnect();
+
+  server->stop();
+  if (serve_thread.joinable()) {
+    serve_thread.join();
+  }
+}

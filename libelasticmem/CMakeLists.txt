@@ -84,6 +84,33 @@ add_library(elasticmem STATIC
         src/storage/manager/storage_management_rpc_service_types.tcc
         src/storage/manager/storage_manager.cpp
         src/storage/manager/storage_manager.h
+        src/storage/notification/blocking_queue.h
+        src/storage/notification/notification_server.cpp
+        src/storage/notification/notification_server.h
+        src/storage/notification/notification_service.cpp
+        src/storage/notification/notification_service.h
+        src/storage/notification/notification_service.tcc
+        src/storage/notification/notification_service_constants.cpp
+        src/storage/notification/notification_service_constants.h
+        src/storage/notification/notification_service_factory.cpp
+        src/storage/notification/notification_service_factory.h
+        src/storage/notification/notification_service_handler.cpp
+        src/storage/notification/notification_service_handler.h
+        src/storage/notification/notification_service_types.cpp
+        src/storage/notification/notification_service_types.h
+        src/storage/notification/notification_service_types.tcc
+        src/storage/notification/subscriber.cpp
+        src/storage/notification/subscriber.h
+        src/storage/notification/subscription_map.cpp
+        src/storage/notification/subscription_map.h
+        src/storage/notification/subscription_service.cpp
+        src/storage/notification/subscription_service.h
+        src/storage/notification/subscription_service.tcc
+        src/storage/notification/subscription_service_constants.cpp
+        src/storage/notification/subscription_service_constants.h
+        src/storage/notification/subscription_service_types.cpp
+        src/storage/notification/subscription_service_types.h
+        src/storage/notification/subscription_service_types.tcc
         src/storage/kv/kv_client.cpp
         src/storage/kv/kv_client.h
         src/storage/kv/kv_rpc_server.cpp
@@ -114,7 +141,7 @@ add_library(elasticmem STATIC
 if (GENERATE_THRIFT)
   add_dependencies(elasticmem thriftgen_directory thriftgen_kv)
 endif ()
-target_link_libraries(elasticmem ${THRIFT_LIBRARIES})
+target_link_libraries(elasticmem ${THRIFT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties(elasticmem PROPERTIES LINKER_LANGUAGE CXX)
 
 if (BUILD_TESTS)
@@ -132,7 +159,7 @@ if (BUILD_TESTS)
           test/storage_manager_test.cpp
           test/kv_rpc_test.cpp
           test/local_store_test.cpp
-          test/test_utils.h)
+          test/test_utils.h test/notification_test.cpp)
   target_link_libraries(elasticmem_tests elasticmem)
 
   if (NOT USE_SYSTEM_CATCH)
