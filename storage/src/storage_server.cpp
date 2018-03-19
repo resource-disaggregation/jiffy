@@ -6,6 +6,7 @@
 #include <directory/block/block_advertisement_client.h>
 #include <storage/manager/detail/block_name_parser.h>
 #include <utils/logger.h>
+#include <storage/notification/notification_server.h>
 
 using namespace ::elasticmem::directory;
 using namespace ::elasticmem::storage;
@@ -20,6 +21,8 @@ int main(int argc, char **argv) {
       "Port that storage service listens on"));
   opts.add(cmd_option("management-port", 'm', false).set_default("9094").set_description(
       "Port that storage management service listens on"));
+  opts.add(cmd_option("notification-port", 'n', false).set_default("9095").set_description(
+      "Port that notification service listens on"));
   opts.add(cmd_option("block-address", 'b', false).set_default("127.0.0.1").set_description(
       "Host for block advertisement service"));
   opts.add(cmd_option("block-port", 'p', false).set_default("9092").set_description(
@@ -38,6 +41,7 @@ int main(int argc, char **argv) {
   int block_port;
   int service_port;
   int management_port;
+  int notification_port;
   std::size_t num_blocks;
 
   try {
@@ -46,6 +50,7 @@ int main(int argc, char **argv) {
     service_port = parser.get_int("service-port");
     management_port = parser.get_int("management-port");
     block_port = parser.get_int("block-port");
+    notification_port = parser.get_int("notification-port");
     num_blocks = static_cast<std::size_t>(parser.get_long("num-blocks"));
   } catch (cmd_parse_exception &ex) {
     std::cerr << "Could not parse command line args: " << ex.what() << std::endl;
@@ -66,6 +71,11 @@ int main(int argc, char **argv) {
   std::vector<std::shared_ptr<kv_block>> kv_blocks;
   for (auto &block : block_management) {
     kv_blocks.push_back(std::dynamic_pointer_cast<kv_block>(block));
+  }
+
+  std::vector<std::shared_ptr<subscription_map>> sub_maps;
+  for (auto &sub_map: sub_maps) {
+    sub_map = std::make_shared<subscription_map>();
   }
 
   std::exception_ptr management_exception = nullptr;
@@ -101,7 +111,7 @@ int main(int argc, char **argv) {
   }
 
   std::exception_ptr kv_exception = nullptr;
-  auto kv_server = kv_rpc_server::create(kv_blocks, address, service_port);
+  auto kv_server = kv_rpc_server::create(kv_blocks, sub_maps, address, service_port);
   std::thread kv_serve_thread([&kv_exception, &kv_server, &failing_thread, &failure_condition] {
     try {
       kv_server->serve();
@@ -113,6 +123,19 @@ int main(int argc, char **argv) {
   });
 
   LOG(log_level::info) << "KV server listening on " << address << ":" << service_port;
+
+  std::exception_ptr notification_exception = nullptr;
+  auto notification_server = notification_server::create(sub_maps, block_host, notification_port);
+  std::thread
+      notification_serve_thread([&notification_exception, &notification_server, &failing_thread, &failure_condition] {
+    try {
+      notification_server->serve();
+    } catch (...) {
+      notification_exception = std::current_exception();
+      failing_thread = 2;
+      failure_condition.notify_all();
+    }
+  });
 
   switch (failing_thread.load()) {
     case 0:
@@ -134,6 +157,15 @@ int main(int argc, char **argv) {
         }
       }
       break;
+    case 2:
+      if (notification_exception) {
+        try {
+          std::rethrow_exception(notification_exception);
+        } catch (std::exception &e) {
+          LOG(log_level::error) << "Notification server failed: " << e.what();
+          std::exit(-1);
+        }
+      }
     default:break;
   }
 

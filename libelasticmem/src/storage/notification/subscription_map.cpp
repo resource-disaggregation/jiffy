@@ -35,5 +35,10 @@ void subscription_map::notify(const std::string &op, const std::string &msg) {
   }
 }
 
+void subscription_map::clear() {
+  std::lock_guard<std::mutex> lock{mtx_};
+  subs_.clear();
+}
+
 }
 }

@@ -3,12 +3,14 @@
 namespace elasticmem {
 namespace storage {
 
-kv_rpc_service_handler::kv_rpc_service_handler(std::vector<std::shared_ptr<kv_block>> &blocks)
-    : blocks_(blocks) {}
+kv_rpc_service_handler::kv_rpc_service_handler(std::vector<std::shared_ptr<kv_block>> &blocks,
+                                               std::vector<std::shared_ptr<subscription_map>> &sub_maps)
+    : blocks_(blocks), sub_maps_(sub_maps) {}
 
 void kv_rpc_service_handler::put(const int32_t block_id, const std::string &key, const std::string &value) {
   try {
     blocks_.at(static_cast<std::size_t>(block_id))->put(key, value);
+    sub_maps_.at(static_cast<std::size_t>(block_id))->notify("put", key);
   } catch (std::out_of_range &e) {
     throw make_exception(e);
   }
@@ -17,6 +19,7 @@ void kv_rpc_service_handler::put(const int32_t block_id, const std::string &key,
 void kv_rpc_service_handler::get(std::string &_return, const int32_t block_id, const std::string &key) {
   try {
     _return = blocks_.at(static_cast<std::size_t>(block_id))->get(key);
+    sub_maps_.at(static_cast<std::size_t>(block_id))->notify("get", key);
   } catch (std::out_of_range &e) {
     throw make_exception(e);
   }
@@ -25,6 +28,7 @@ void kv_rpc_service_handler::get(std::string &_return, const int32_t block_id, c
 void kv_rpc_service_handler::update(const int32_t block_id, const std::string &key, const std::string &value) {
   try {
     blocks_.at(static_cast<std::size_t>(block_id))->update(key, value);
+    sub_maps_.at(static_cast<std::size_t>(block_id))->notify("update", key);
   } catch (std::out_of_range &e) {
     throw make_exception(e);
   }
@@ -33,6 +37,7 @@ void kv_rpc_service_handler::update(const int32_t block_id, const std::string &k
 void kv_rpc_service_handler::remove(const int32_t block_id, const std::string &key) {
   try {
     blocks_.at(static_cast<std::size_t>(block_id))->remove(key);
+    sub_maps_.at(static_cast<std::size_t>(block_id))->notify("remove", key);
   } catch (std::out_of_range &e) {
     throw make_exception(e);
   }

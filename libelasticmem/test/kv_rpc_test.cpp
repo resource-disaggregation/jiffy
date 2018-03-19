@@ -20,6 +20,15 @@ static std::vector<std::shared_ptr<kv_block>> init_blocks() {
   return blks;
 }
 
+static std::vector<std::shared_ptr<subscription_map>> init_submaps() {
+  std::vector<std::shared_ptr<subscription_map>> sub_maps;
+  sub_maps.resize(NUM_BLOCKS);
+  for (auto &sub_map : sub_maps) {
+    sub_map = std::make_shared<subscription_map>();
+  }
+  return sub_maps;
+}
+
 static void wait_till_server_ready(const std::string &host, int port) {
   bool check = true;
   while (check) {
@@ -33,9 +42,10 @@ static void wait_till_server_ready(const std::string &host, int port) {
 }
 
 static std::vector<std::shared_ptr<kv_block>> blocks = init_blocks();
+static std::vector<std::shared_ptr<subscription_map>> sub_maps = init_submaps();
 
 TEST_CASE("rpc_put_get_test", "[put][get]") {
-  auto server = kv_rpc_server::create(blocks, HOST, PORT);
+  auto server = kv_rpc_server::create(blocks, sub_maps, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
 
@@ -52,13 +62,14 @@ TEST_CASE("rpc_put_get_test", "[put][get]") {
 
   server->stop();
   blocks[0]->clear();
+  sub_maps[0]->clear();
   if (serve_thread.joinable()) {
     serve_thread.join();
   }
 }
 
 TEST_CASE("rpc_put_update_get_test", "[put][update][get]") {
-  auto server = kv_rpc_server::create(blocks, HOST, PORT);
+  auto server = kv_rpc_server::create(blocks, sub_maps, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
 
@@ -81,13 +92,14 @@ TEST_CASE("rpc_put_update_get_test", "[put][update][get]") {
 
   server->stop();
   blocks[0]->clear();
+  sub_maps[0]->clear();
   if (serve_thread.joinable()) {
     serve_thread.join();
   }
 }
 
 TEST_CASE("rpc_put_remove_get_test", "[put][update][get]") {
-  auto server = kv_rpc_server::create(blocks, HOST, PORT);
+  auto server = kv_rpc_server::create(blocks, sub_maps, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
 
@@ -107,13 +119,14 @@ TEST_CASE("rpc_put_remove_get_test", "[put][update][get]") {
 
   server->stop();
   blocks[0]->clear();
+  sub_maps[0]->clear();
   if (serve_thread.joinable()) {
     serve_thread.join();
   }
 }
 
 TEST_CASE("rpc_storage_size_test", "[put][size][storage_size][clear]") {
-  auto server = kv_rpc_server::create(blocks, HOST, PORT);
+  auto server = kv_rpc_server::create(blocks, sub_maps, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   wait_till_server_ready(HOST, PORT);
 
@@ -126,6 +139,7 @@ TEST_CASE("rpc_storage_size_test", "[put][size][storage_size][clear]") {
 
   server->stop();
   blocks[0]->clear();
+  sub_maps[0]->clear();
   if (serve_thread.joinable()) {
     serve_thread.join();
   }

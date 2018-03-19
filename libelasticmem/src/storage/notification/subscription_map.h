@@ -21,6 +21,8 @@ class subscription_map {
 
   void notify(const std::string &op, const std::string &msg);
 
+  void clear();
+
  private:
   std::mutex mtx_{};
   std::unordered_map<std::string, std::set<std::shared_ptr<subscription_serviceClient>>> subs_{};
