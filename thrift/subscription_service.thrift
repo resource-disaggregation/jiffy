@@ -1,5 +1,5 @@
 namespace cpp elasticmem.storage
-namespace py elasticmem.notification
+namespace py elasticmem.subscription
 
 enum response_type {
   subscribe,
@@ -8,6 +8,6 @@ enum response_type {
 
 service subscription_service {
   oneway void notification(1: string op, 2: binary data),
-  oneway void success(1: response_type type, 2: list<string> op),
+  oneway void success(1: response_type type, 2: list<string> ops),
   oneway void error(1: response_type type, 2: string msg),
 }
