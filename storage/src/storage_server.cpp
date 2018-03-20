@@ -74,6 +74,7 @@ int main(int argc, char **argv) {
   }
 
   std::vector<std::shared_ptr<subscription_map>> sub_maps;
+  sub_maps.resize(num_blocks);
   for (auto &sub_map: sub_maps) {
     sub_map = std::make_shared<subscription_map>();
   }
@@ -125,7 +126,7 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "KV server listening on " << address << ":" << service_port;
 
   std::exception_ptr notification_exception = nullptr;
-  auto notification_server = notification_server::create(sub_maps, block_host, notification_port);
+  auto notification_server = notification_server::create(sub_maps, address, notification_port);
   std::thread
       notification_serve_thread([&notification_exception, &notification_server, &failing_thread, &failure_condition] {
     try {
@@ -137,35 +138,48 @@ int main(int argc, char **argv) {
     }
   });
 
+  LOG(log_level::info) << "Notification server listening on " << address << ":" << notification_port;
+
+  std::unique_lock<std::mutex> failure_condition_lock{failure_mtx};
+  failure_condition.wait(failure_condition_lock, [&failing_thread] {
+    return failing_thread != -1;
+  });
+
   switch (failing_thread.load()) {
-    case 0:
+    case 0: {
+      LOG(log_level::error) << "Storage management server failed";
       if (management_exception) {
         try {
           std::rethrow_exception(management_exception);
         } catch (std::exception &e) {
-          LOG(log_level::error) << "Storage management server failed: " << e.what();
+          LOG(log_level::error) << "ERROR: " << e.what();
         }
       }
       break;
-    case 1:
+    }
+    case 1: {
+      LOG(log_level::error) << "KV server failed";
       if (kv_exception) {
         try {
           std::rethrow_exception(kv_exception);
         } catch (std::exception &e) {
-          LOG(log_level::error) << "KV server failed: " << e.what();
+          LOG(log_level::error) << "ERROR: " << e.what();
           std::exit(-1);
         }
       }
       break;
-    case 2:
+    }
+    case 2: {
+      LOG(log_level::error) << "Notification server failed";
       if (notification_exception) {
         try {
           std::rethrow_exception(notification_exception);
         } catch (std::exception &e) {
-          LOG(log_level::error) << "Notification server failed: " << e.what();
+          LOG(log_level::error) << "ERROR: " << e.what();
           std::exit(-1);
         }
       }
+    }
     default:break;
   }
 
