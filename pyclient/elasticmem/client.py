@@ -3,6 +3,7 @@ import threading
 import time
 
 from directory.directory_client import DirectoryClient
+from elasticmem.subscription.subscriber import SubscriptionClient, Mailbox
 from lease.lease_client import LeaseClient
 from kv.kv_client import KVClient
 import logging
@@ -65,6 +66,7 @@ class ElasticMemClient:
         self.directory_port = directory_service_port
         self.fs = DirectoryClient(host, directory_service_port)
         self.kvs = {}
+        self.notifs = {}
         self.to_renew = []
         self.to_flush = []
         self.to_remove = []
@@ -109,3 +111,9 @@ class ElasticMemClient:
             self.to_remove.append(path)
         elif mode == RemoveMode.flush:
             self.to_flush.append(path)
+
+    def notifications(self, path, callback=Mailbox()):
+        blocks = self.fs.data_blocks(path)
+        if path not in self.to_renew:
+            self.to_renew.append(path)
+        return SubscriptionClient(blocks, callback)
