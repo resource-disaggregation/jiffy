@@ -16,6 +16,7 @@ class storage_management_rpc_service_handler : public storage_management_rpc_ser
   int64_t storage_capacity(int32_t block_id) override;
   int64_t storage_size(int32_t block_id) override;
  private:
+  storage_management_rpc_exception make_exception(std::exception &e);
   std::vector<std::shared_ptr<block_management_ops>> &blocks_;
 };
 

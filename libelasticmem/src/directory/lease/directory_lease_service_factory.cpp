@@ -16,13 +16,13 @@ directory_lease_service_factory::directory_lease_service_factory(std::shared_ptr
     : tree_(std::move(tree)) {}
 
 directory_lease_serviceIf *directory_lease_service_factory::getHandler(const ::apache::thrift::TConnectionInfo &conn_info) {
-  std::shared_ptr<TSocket> sock = std::dynamic_pointer_cast<TSocket>(
-      conn_info.transport);
+  std::shared_ptr<TSocket> sock = std::dynamic_pointer_cast<TSocket>(conn_info.transport);
   LOG(trace) << "Incoming connection from " << sock->getSocketInfo();
   return new directory_lease_service_handler(tree_);
 }
 
 void directory_lease_service_factory::releaseHandler(directory_lease_serviceIf *handler) {
+  LOG(trace) << "Releasing connection";
   delete handler;
 }
 

@@ -22,6 +22,7 @@ kv_rpc_serviceIf *kv_rpc_service_factory::getHandler(const TConnectionInfo &conn
 }
 
 void kv_rpc_service_factory::releaseHandler(kv_rpc_serviceIf *handler) {
+  LOG(trace) << "Releasing connection";
   delete handler;
 }
 

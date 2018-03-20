@@ -15,12 +15,12 @@ notification_service_factory::notification_service_factory(std::vector<std::shar
 
 notification_serviceIf *notification_service_factory::getHandler(const TConnectionInfo &conn_info) {
   std::shared_ptr<TSocket> sock = std::dynamic_pointer_cast<TSocket>(conn_info.transport);
-  LOG(info) << "Incoming connection from " << sock->getSocketInfo();
+  LOG(trace) << "Incoming connection from " << sock->getSocketInfo();
   return new notification_service_handler(conn_info.output, subs_);
 }
 
 void notification_service_factory::releaseHandler(notification_serviceIf *handler) {
-  LOG(info) << "Releasing connection";
+  LOG(trace) << "Releasing connection";
   handler->unsubscribe(-1, {});
   delete handler;
 }

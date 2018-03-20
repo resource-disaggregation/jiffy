@@ -17,13 +17,13 @@ directory_rpc_service_factory::directory_rpc_service_factory(std::shared_ptr<dir
 }
 
 directory_rpc_serviceIf *directory_rpc_service_factory::getHandler(const TConnectionInfo &conn_info) {
-  std::shared_ptr<TSocket> sock = std::dynamic_pointer_cast<TSocket>(
-      conn_info.transport);
+  std::shared_ptr<TSocket> sock = std::dynamic_pointer_cast<TSocket>(conn_info.transport);
   LOG(trace) <<  "Incoming connection from " << sock->getSocketInfo();
   return new directory_rpc_service_handler(shard_);
 }
 
 void directory_rpc_service_factory::releaseHandler(directory_rpc_serviceIf *handler) {
+  LOG(trace) <<  "Releasing connection";
   delete handler;
 }
 
