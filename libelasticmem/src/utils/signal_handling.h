@@ -17,7 +17,6 @@ namespace utils {
 class signal_handling {
  public:
   static const uint32_t MAX_FRAMES = 64;
-  static char exec_path[1024];
 
   static inline void install_signal_handler(const char *) {}
 
@@ -49,12 +48,12 @@ class signal_handling {
 
     // allocate string which will be filled with the demangled function name
     size_t funcnamesize = 256;
-    char *funcname = (char *) malloc(funcnamesize);
+    auto *funcname = (char *) malloc(funcnamesize);
 
     // iterate over the returned symbol lines. skip the first, it is the
     // address of this function.
     for (int i = 1; i < addrlen; i++) {
-      char *begin_name = 0, *begin_offset = 0, *end_offset = 0;
+      char *begin_name = nullptr, *begin_offset = nullptr, *end_offset = nullptr;
 
       // find parentheses and +address offset surrounding the mangled name:
       // ./module(function+0x15c) [0x8048a6d]
@@ -119,6 +118,7 @@ class signal_handling {
   static inline void sighandler_stacktrace(int sig) {
     fprintf(stderr, "ERROR: signal %d\n", sig);
     fprintf(stderr, "%s\n", stacktrace().c_str());
+    fflush(stderr);
     exit(-1);
   }
 };
