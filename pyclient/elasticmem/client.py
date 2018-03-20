@@ -2,6 +2,8 @@ import threading
 
 import time
 
+from thrift.transport.TTransport import TTransportException
+
 from directory.directory_client import DirectoryClient
 from elasticmem.subscription.subscriber import SubscriptionClient, Mailbox
 from lease.lease_client import LeaseClient
@@ -29,35 +31,46 @@ def now_ms():
 
 class LeaseRenewalWorker(threading.Thread):
     def __init__(self, renewal_duration_ms, ls, kvs, to_renew, to_flush, to_remove):
+        super(LeaseRenewalWorker, self).__init__()
         self.renewal_duration_s = float(renewal_duration_ms) / 1000.0
         self.ls = ls
         self.kvs = kvs
         self.to_renew = to_renew
         self.to_flush = to_flush
         self.to_remove = to_remove
-        super(LeaseRenewalWorker, self).__init__()
+        self._stop_event = threading.Event()
 
     def run(self):
-        while True:
-            s = now_ms()
-            # Only update lease if there is something to update
-            if self.to_renew or self.to_flush or self.to_remove:
-                ack = self.ls.update_lease(self.to_renew, self.to_flush, self.to_remove)
-                n_renew = len(self.to_renew)
-                n_flush = len(self.to_flush)
-                n_remove = len(self.to_remove)
-                if ack.renewed != n_renew:
-                    logging.warning('Asked to renew %d leases, server renewed %d leases' % (n_renew, ack.renewed))
-                if ack.flushed != n_flush:
-                    logging.warning('Asked to flush %d paths, server flushed %d paths' % (n_flush, ack.flushed))
-                if ack.removed != n_remove:
-                    logging.warning('Asked to remove %d paths, server removed %d paths' % (n_remove, ack.removed))
-                del self.to_flush[:]
-                del self.to_remove[:]
-            elapsed_s = float(now_ms() - s) / 1000.0
-            sleep_time = self.renewal_duration_s - elapsed_s
-            if sleep_time > 0.0:
-                time.sleep(sleep_time)
+        while not self.stopped():
+            try:
+                s = now_ms()
+                # Only update lease if there is something to update
+                if self.to_renew or self.to_flush or self.to_remove:
+                    ack = self.ls.update_lease(self.to_renew, self.to_flush, self.to_remove)
+                    n_renew = len(self.to_renew)
+                    n_flush = len(self.to_flush)
+                    n_remove = len(self.to_remove)
+                    if ack.renewed != n_renew:
+                        logging.warning('Asked to renew %d leases, server renewed %d leases' % (n_renew, ack.renewed))
+                    if ack.flushed != n_flush:
+                        logging.warning('Asked to flush %d paths, server flushed %d paths' % (n_flush, ack.flushed))
+                    if ack.removed != n_remove:
+                        logging.warning('Asked to remove %d paths, server removed %d paths' % (n_remove, ack.removed))
+                    del self.to_flush[:]
+                    del self.to_remove[:]
+                elapsed_s = float(now_ms() - s) / 1000.0
+                sleep_time = self.renewal_duration_s - elapsed_s
+                if sleep_time > 0.0:
+                    time.sleep(sleep_time)
+            except TTransportException as e:
+                logging.warning("Connection error: %s" % repr(e))
+                break
+
+    def stop(self):
+        self._stop_event.set()
+
+    def stopped(self):
+        return self._stop_event.is_set()
 
 
 class ElasticMemClient:
@@ -80,6 +93,7 @@ class ElasticMemClient:
         self.close()
 
     def close(self):
+        self.lease_worker.stop()
         self.fs.close()
         self.ls.close()
         for kv in self.kvs.viewvalues():

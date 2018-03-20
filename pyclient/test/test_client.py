@@ -104,6 +104,24 @@ class TestClient(TestCase):
             with self.assertRaises(KVException):
                 kv.get(str(i))
 
+    def test_lease_worker(self):
+        self.start_servers()
+        client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        try:
+            client.create_scope("/a/file.txt", "/tmp")
+            self.assertTrue(client.fs.exists("/a/file.txt"))
+            time.sleep(client.lease_worker.renewal_duration_s)
+            self.assertTrue(client.fs.exists("/a/file.txt"))
+            time.sleep(client.lease_worker.renewal_duration_s)
+            self.assertTrue(client.fs.exists("/a/file.txt"))
+        except:
+            self.stop_servers()
+            client.close()
+            raise
+
+        client.close()
+        self.stop_servers()
+
     def test_create_scope(self):
         self.start_servers()
         client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
