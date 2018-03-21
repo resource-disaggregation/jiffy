@@ -12,8 +12,12 @@ using namespace ::elasticmem::directory;
 using namespace ::elasticmem::storage;
 using namespace ::elasticmem::utils;
 
+using namespace ::apache::thrift;
+
 int main(int argc, char **argv) {
   signal_handling::install_signal_handler(argv[0], SIGSEGV, SIGKILL, SIGSTOP, SIGTRAP);
+
+  GlobalOutput.setOutputFunction(log_utils::log_thrift_msg);
 
   cmd_options opts;
   opts.add(cmd_option("address", 'a', false).set_default("0.0.0.0").set_description("Address server binds to"));

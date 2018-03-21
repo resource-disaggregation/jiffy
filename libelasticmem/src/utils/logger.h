@@ -23,17 +23,7 @@ enum log_level {
 static log_level LOG_LEVEL = log_level::info;
 
 #ifdef __GNUG__
-static std::string compute_method_name(const std::string &function, const std::string &pretty_function) {
-  size_t function_name_loc = pretty_function.find(function);
-  size_t begin = pretty_function.rfind(' ', function_name_loc) + 1;
-  size_t end = pretty_function.find('(', function_name_loc + function.length());
-  if (pretty_function[end + 1] == ')')
-    return (pretty_function.substr(begin, end - begin) + "()");
-  else
-    return (pretty_function.substr(begin, end - begin) + "(...)");
-}
-
-#define __COMPACT_PRETTY_FUNCTION__ compute_method_name(__FUNCTION__, __PRETTY_FUNCTION__)
+#define __COMPACT_PRETTY_FUNCTION__ log_utils::compute_method_name(__FUNCTION__, __PRETTY_FUNCTION__)
 #define LOG(level) logger(level, __COMPACT_PRETTY_FUNCTION__)
 #else
 #define LOG(level) logger(level, __func__)
@@ -81,6 +71,25 @@ class logger {
   bool opened_;
   std::ostringstream os_;
   log_level msg_level_;
+};
+
+class log_utils {
+ public:
+  static void log_thrift_msg(const char *msg) {
+    logger(info, "Thrift") << msg;
+  }
+
+#ifdef __GNUG__
+  static std::string compute_method_name(const std::string &function, const std::string &pretty_function) {
+    size_t function_name_loc = pretty_function.find(function);
+    size_t begin = pretty_function.rfind(' ', function_name_loc) + 1;
+    size_t end = pretty_function.find('(', function_name_loc + function.length());
+    if (pretty_function[end + 1] == ')')
+      return (pretty_function.substr(begin, end - begin) + "()");
+    else
+      return (pretty_function.substr(begin, end - begin) + "(...)");
+  }
+#endif
 };
 
 }
