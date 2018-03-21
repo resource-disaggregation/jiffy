@@ -16,6 +16,41 @@ endif ()
 set(EXTERNAL_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CMAKE_CXX_FLAGS_${UPPERCASE_BUILD_TYPE}}")
 set(EXTERNAL_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ${CMAKE_C_FLAGS_${UPPERCASE_BUILD_TYPE}}")
 
+if (USE_SYSTEM_AWS_SDK)
+  find_package(aws-sdk-cpp REQUIRED)
+else ()
+  set(AWS_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
+  set(AWS_C_FLAGS "${EXTERNAL_C_FLAGS}")
+  set(AWS_PREFIX "${PROJECT_BINARY_DIR}/external/aws")
+  set(AWS_HOME "${AWS_PREFIX}")
+  set(AWS_BUILD_PROJECTS "s3")
+  set(AWS_INCLUDE_DIR "${AWS_PREFIX}/include")
+  set(AWS_CMAKE_ARGS "-Wno-dev"
+          "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+          "-DBUILD_ONLY=${AWS_BUILD_PROJECTS}"
+          "-DCMAKE_INSTALL_PREFIX=${AWS_PREFIX}"
+          "-DENABLE_TESTING=OFF"
+          "-DBUILD_SHARED_LIBS=OFF")
+
+  set(AWS_STATIC_CORE_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-core")
+  set(AWS_STATIC_S3_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-s3")
+  set(AWS_LIBRARIES "${AWS_PREFIX}/lib/${AWS_STATIC_CORE_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+          "${AWS_PREFIX}/lib/${AWS_STATIC_S3_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+
+  ExternalProject_Add(awssdk
+          GIT_REPOSITORY https://github.com/aws/aws-sdk-cpp.git
+          CMAKE_ARGS ${AWS_CMAKE_ARGS}
+  )
+
+  include_directories(SYSTEM ${AWS_INCLUDE_DIR})
+  message(STATUS "AWS include dir: ${AWS_INCLUDE_DIR}")
+  message(STATUS "AWS static libraries: ${AWS_LIBRARIES}")
+
+  install(FILES ${THRIFT_STATIC_LIB} DESTINATION lib)
+  install(DIRECTORY ${THRIFT_INCLUDE_DIR}/thrift DESTINATION include)
+
+endif ()
+
 if (USE_SYSTEM_THRIFT)
   find_package(Thrift ${THRIFT_VERSION} REQUIRED)
 else ()
@@ -58,9 +93,9 @@ else ()
           URL "http://archive.apache.org/dist/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
           CMAKE_ARGS ${THRIFT_CMAKE_ARGS})
 
-  include_directories(SYSTEM ${THRIFT_INCLUDE_DIR} ${THRIFT_INCLUDE_DIR}/thrift)
+  include_directories(SYSTEM ${THRIFT_INCLUDE_DIR})
   message(STATUS "Thrift include dir: ${THRIFT_INCLUDE_DIR}")
-  message(STATUS "Thrift static library: ${THRIFT_LIBRARIES}")
+  message(STATUS "Thrift static libraries: ${THRIFT_LIBRARIES}")
 
   if (GENERATE_THRIFT)
     message(STATUS "Thrift compiler: ${THRIFT_COMPILER}")
@@ -68,10 +103,6 @@ else ()
     set_target_properties(thriftcompiler PROPERTIES IMPORTED_LOCATION ${THRIFT_COMPILER})
     add_dependencies(thriftcompiler thrift)
   endif ()
-
-  add_library(thriftstatic STATIC IMPORTED GLOBAL)
-  set_target_properties(thriftstatic PROPERTIES IMPORTED_LOCATION ${THRIFT_LIBRARIES})
-  add_dependencies(thriftstatic thrift)
 
   install(FILES ${THRIFT_STATIC_LIB} DESTINATION lib)
   install(DIRECTORY ${THRIFT_INCLUDE_DIR}/thrift DESTINATION include)

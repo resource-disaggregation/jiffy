@@ -1,10 +1,10 @@
 #include <experimental/filesystem>
 #include <fstream>
-#include "catch.hpp"
+#include <catch.hpp>
 #include "../src/persistent/local/local_store.h"
 
 using namespace ::elasticmem::persistent;
-TEST_CASE("write_test", "[write]") {
+TEST_CASE("local_write_test", "[write]") {
   local_store store;
   std::ofstream out("/tmp/a.txt", std::ofstream::out);
   out << "a";
@@ -21,7 +21,7 @@ TEST_CASE("write_test", "[write]") {
   fs::remove_all(b);
 }
 
-TEST_CASE("read_test", "[read]") {
+TEST_CASE("local_read_test", "[read]") {
   local_store store;
   std::ofstream out("/tmp/b.txt", std::ofstream::out);
   out << "a";
@@ -38,7 +38,7 @@ TEST_CASE("read_test", "[read]") {
   fs::remove_all(b);
 }
 
-TEST_CASE("remove_test", "[remove]") {
+TEST_CASE("local_remove_test", "[remove]") {
   local_store store;
   std::ofstream out("/tmp/a.txt", std::ofstream::out);
   out << "a";

@@ -131,6 +131,8 @@ add_library(elasticmem STATIC
         src/storage/storage_management_service.h
         src/persistent/local/local_store.cpp
         src/persistent/local/local_store.h
+        src/persistent/s3/s3_store.cpp
+        src/persistent/s3/s3_store.h
         src/persistent/persistent_service.h
         src/utils/cmd_parse.h
         src/utils/directory_utils.h
@@ -141,27 +143,35 @@ add_library(elasticmem STATIC
 if (GENERATE_THRIFT)
   add_dependencies(elasticmem thriftgen_directory thriftgen_kv)
 endif ()
-target_link_libraries(elasticmem ${THRIFT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+
+if (NOT USE_SYSTEM_THRIFT)
+  add_dependencies(elasticmem thrift)
+endif ()
+
+if (NOT USE_SYSTEM_AWS_SDK)
+  add_dependencies(elasticmem awssdk)
+endif ()
+
+target_link_libraries(elasticmem ${THRIFT_LIBRARIES} ${AWS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties(elasticmem PROPERTIES LINKER_LANGUAGE CXX)
 
 if (BUILD_TESTS)
   include_directories(${CATCH_INCLUDE_DIR})
-
   add_executable(elasticmem_tests
           test/elasticmem_tests.cpp
           test/block_allocation_service_test.cpp
           test/block_allocator_test.cpp
+          test/directory_lease_test.cpp
           test/directory_tree_test.cpp
           test/directory_rpc_service_test.cpp
           test/lease_expiry_worker_test.cpp
-          test/directory_lease_test.cpp
-          test/kv_block_test.cpp
-          test/storage_manager_test.cpp
-          test/kv_rpc_test.cpp
           test/local_store_test.cpp
-          test/test_utils.h test/notification_test.cpp)
+          test/notification_test.cpp
+          test/kv_block_test.cpp
+          test/kv_rpc_test.cpp
+          test/storage_manager_test.cpp
+          test/test_utils.h)
   target_link_libraries(elasticmem_tests elasticmem)
-
   if (NOT USE_SYSTEM_CATCH)
     add_dependencies(directory_tests catch)
   endif ()

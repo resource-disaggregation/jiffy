@@ -44,15 +44,15 @@ class kv_block : public block_management_ops {
 
   bool empty() const;
 
-  virtual void load(const std::string &remote_storage_prefix, const std::string &path) override;
+  void load(const std::string &remote_storage_prefix, const std::string &path) override;
 
-  virtual void flush(const std::string &remote_storage_prefix, const std::string &path) override;
+  void flush(const std::string &remote_storage_prefix, const std::string &path) override;
 
-  virtual std::size_t storage_capacity() override;
+  std::size_t storage_capacity() override;
 
-  virtual std::size_t storage_size() override;
+  std::size_t storage_size() override;
 
-  virtual void clear() override;
+  void clear() override;
 
  private:
   block_type block_;
