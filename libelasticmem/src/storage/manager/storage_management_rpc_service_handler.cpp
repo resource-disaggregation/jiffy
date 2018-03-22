@@ -3,8 +3,7 @@
 namespace elasticmem {
 namespace storage {
 
-storage_management_rpc_service_handler::storage_management_rpc_service_handler(std::vector<std::shared_ptr<
-    block_management_ops>> &blocks)
+storage_management_rpc_service_handler::storage_management_rpc_service_handler(std::vector<std::shared_ptr<block>> &blocks)
     : blocks_(blocks) {}
 
 void storage_management_rpc_service_handler::flush(int32_t block_id,

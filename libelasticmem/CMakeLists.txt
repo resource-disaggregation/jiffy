@@ -57,13 +57,31 @@ add_library(elasticmem STATIC
         src/directory/lease/lease_expiry_worker.h
         src/directory/directory_service.h
         src/directory/directory_service.cpp
-        src/storage/kv/serializer/csv_serde.cpp
-        src/storage/kv/serializer/csv_serde.h
-        src/storage/kv/serializer/serde.h
-        src/storage/kv/serializer/binary_serde.cpp
-        src/storage/kv/serializer/binary_serde.h
-        src/storage/kv/kv_block.cpp
-        src/storage/kv/kv_block.h
+        src/storage/block/kv/serializer/csv_serde.cpp
+        src/storage/block/kv/serializer/csv_serde.h
+        src/storage/block/kv/serializer/serde.h
+        src/storage/block/kv/serializer/binary_serde.cpp
+        src/storage/block/kv/serializer/binary_serde.h
+        src/storage/block/kv/kv_block.cpp
+        src/storage/block/kv/kv_block.h
+        src/storage/block/block.h
+        src/storage/block/block.h
+        src/storage/block/block_client.cpp
+        src/storage/block/block_client.h
+        src/storage/block/block_server.cpp
+        src/storage/block/block_server.h
+        src/storage/block/block_service.cpp
+        src/storage/block/block_service.h
+        src/storage/block/block_service.tcc
+        src/storage/block/block_service_constants.cpp
+        src/storage/block/block_service_constants.h
+        src/storage/block/block_service_factory.cpp
+        src/storage/block/block_service_factory.h
+        src/storage/block/block_service_handler.cpp
+        src/storage/block/block_service_handler.h
+        src/storage/block/block_service_types.cpp
+        src/storage/block/block_service_types.h
+        src/storage/block/block_service_types.tcc
         src/storage/manager/detail/block_name_parser.cpp
         src/storage/manager/detail/block_name_parser.h
         src/storage/manager/storage_management_client.cpp
@@ -111,23 +129,6 @@ add_library(elasticmem STATIC
         src/storage/notification/subscription_service_types.cpp
         src/storage/notification/subscription_service_types.h
         src/storage/notification/subscription_service_types.tcc
-        src/storage/kv/kv_client.cpp
-        src/storage/kv/kv_client.h
-        src/storage/kv/kv_rpc_server.cpp
-        src/storage/kv/kv_rpc_server.h
-        src/storage/kv/kv_rpc_service.cpp
-        src/storage/kv/kv_rpc_service.h
-        src/storage/kv/kv_rpc_service.tcc
-        src/storage/kv/kv_rpc_service_constants.cpp
-        src/storage/kv/kv_rpc_service_constants.h
-        src/storage/kv/kv_rpc_service_factory.cpp
-        src/storage/kv/kv_rpc_service_factory.h
-        src/storage/kv/kv_rpc_service_handler.cpp
-        src/storage/kv/kv_rpc_service_handler.h
-        src/storage/kv/kv_rpc_service_types.cpp
-        src/storage/kv/kv_rpc_service_types.h
-        src/storage/kv/kv_rpc_service_types.tcc
-        src/storage/block_management_ops.h
         src/storage/storage_management_service.h
         src/persistent/local/local_store.cpp
         src/persistent/local/local_store.h
@@ -173,6 +174,6 @@ if (BUILD_TESTS)
           test/test_utils.h)
   target_link_libraries(elasticmem_tests elasticmem)
   if (NOT USE_SYSTEM_CATCH)
-    add_dependencies(directory_tests catch)
+    add_dependencies(elasticmem_tests catch)
   endif ()
 endif ()

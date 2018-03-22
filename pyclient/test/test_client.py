@@ -8,7 +8,7 @@ from Queue import Empty
 from thrift.transport import TTransport
 
 from elasticmem import ElasticMemClient, RemoveMode
-from elasticmem import KVException
+from elasticmem import BlockException
 from elasticmem.directory import directory_client
 from elasticmem.kv import kv_client
 from elasticmem.lease import lease_client
@@ -78,7 +78,7 @@ class TestClient(TestCase):
             self.assertTrue(kv.get(str(i)) == str(i))
 
         for i in range(1000, 2000):
-            with self.assertRaises(KVException):
+            with self.assertRaises(BlockException):
                 kv.get(str(i))
 
         # Test update
@@ -86,7 +86,7 @@ class TestClient(TestCase):
             kv.update(str(i), str(i + 1000))
 
         for i in range(1000, 2000):
-            with self.assertRaises(KVException):
+            with self.assertRaises(BlockException):
                 kv.update(str(i), str(i))
 
         for i in range(0, 1000):
@@ -97,11 +97,11 @@ class TestClient(TestCase):
             kv.remove(str(i))
 
         for i in range(1000, 2000):
-            with self.assertRaises(KVException):
+            with self.assertRaises(BlockException):
                 kv.remove(str(i))
 
         for i in range(0, 1000):
-            with self.assertRaises(KVException):
+            with self.assertRaises(BlockException):
                 kv.get(str(i))
 
     def test_lease_worker(self):

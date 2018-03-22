@@ -4,8 +4,8 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-#ifndef kv_rpc_service_TYPES_H
-#define kv_rpc_service_TYPES_H
+#ifndef block_service_TYPES_H
+#define block_service_TYPES_H
 
 #include <iosfwd>
 
@@ -20,39 +20,39 @@
 
 namespace elasticmem { namespace storage {
 
-class kv_rpc_exception;
+class block_exception;
 
-typedef struct _kv_rpc_exception__isset {
-  _kv_rpc_exception__isset() : msg(false) {}
+typedef struct _block_exception__isset {
+  _block_exception__isset() : msg(false) {}
   bool msg :1;
-} _kv_rpc_exception__isset;
+} _block_exception__isset;
 
-class kv_rpc_exception : public ::apache::thrift::TException {
+class block_exception : public ::apache::thrift::TException {
  public:
 
-  kv_rpc_exception(const kv_rpc_exception&);
-  kv_rpc_exception& operator=(const kv_rpc_exception&);
-  kv_rpc_exception() : msg() {
+  block_exception(const block_exception&);
+  block_exception& operator=(const block_exception&);
+  block_exception() : msg() {
   }
 
-  virtual ~kv_rpc_exception() throw();
+  virtual ~block_exception() throw();
   std::string msg;
 
-  _kv_rpc_exception__isset __isset;
+  _block_exception__isset __isset;
 
   void __set_msg(const std::string& val);
 
-  bool operator == (const kv_rpc_exception & rhs) const
+  bool operator == (const block_exception & rhs) const
   {
     if (!(msg == rhs.msg))
       return false;
     return true;
   }
-  bool operator != (const kv_rpc_exception &rhs) const {
+  bool operator != (const block_exception &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const kv_rpc_exception & ) const;
+  bool operator < (const block_exception & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -64,12 +64,12 @@ class kv_rpc_exception : public ::apache::thrift::TException {
   const char* what() const throw();
 };
 
-void swap(kv_rpc_exception &a, kv_rpc_exception &b);
+void swap(block_exception &a, block_exception &b);
 
-std::ostream& operator<<(std::ostream& out, const kv_rpc_exception& obj);
+std::ostream& operator<<(std::ostream& out, const block_exception& obj);
 
 }} // namespace
 
-#include "kv_rpc_service_types.tcc"
+#include "block_service_types.tcc"
 
 #endif

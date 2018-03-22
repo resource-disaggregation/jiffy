@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-#include "kv_rpc_service_types.h"
+#include "block_service_types.h"
 
 #include <algorithm>
 #include <ostream>
@@ -14,50 +14,50 @@
 namespace elasticmem { namespace storage {
 
 
-kv_rpc_exception::~kv_rpc_exception() throw() {
+block_exception::~block_exception() throw() {
 }
 
 
-void kv_rpc_exception::__set_msg(const std::string& val) {
+void block_exception::__set_msg(const std::string& val) {
   this->msg = val;
 }
-std::ostream& operator<<(std::ostream& out, const kv_rpc_exception& obj)
+std::ostream& operator<<(std::ostream& out, const block_exception& obj)
 {
   obj.printTo(out);
   return out;
 }
 
 
-void swap(kv_rpc_exception &a, kv_rpc_exception &b) {
+void swap(block_exception &a, block_exception &b) {
   using ::std::swap;
   swap(a.msg, b.msg);
   swap(a.__isset, b.__isset);
 }
 
-kv_rpc_exception::kv_rpc_exception(const kv_rpc_exception& other0) : TException() {
+block_exception::block_exception(const block_exception& other0) : TException() {
   msg = other0.msg;
   __isset = other0.__isset;
 }
-kv_rpc_exception& kv_rpc_exception::operator=(const kv_rpc_exception& other1) {
+block_exception& block_exception::operator=(const block_exception& other1) {
   msg = other1.msg;
   __isset = other1.__isset;
   return *this;
 }
-void kv_rpc_exception::printTo(std::ostream& out) const {
+void block_exception::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
-  out << "kv_rpc_exception(";
+  out << "block_exception(";
   out << "msg=" << to_string(msg);
   out << ")";
 }
 
-const char* kv_rpc_exception::what() const throw() {
+const char* block_exception::what() const throw() {
   try {
     std::stringstream ss;
     ss << "TException - service has thrown: " << *this;
     this->thriftTExceptionMessageHolder_ = ss.str();
     return this->thriftTExceptionMessageHolder_.c_str();
   } catch (const std::exception&) {
-    return "TException - service has thrown: kv_rpc_exception";
+    return "TException - service has thrown: block_exception";
   }
 }
 

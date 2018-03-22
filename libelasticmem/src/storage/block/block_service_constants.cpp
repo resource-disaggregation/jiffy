@@ -4,13 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-#include "kv_rpc_service_constants.h"
+#include "block_service_constants.h"
 
 namespace elasticmem { namespace storage {
 
-const kv_rpc_serviceConstants g_kv_rpc_service_constants;
+const block_serviceConstants g_block_service_constants;
 
-kv_rpc_serviceConstants::kv_rpc_serviceConstants() {
+block_serviceConstants::block_serviceConstants() {
 }
 
 }} // namespace

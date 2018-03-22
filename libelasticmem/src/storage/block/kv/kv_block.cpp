@@ -1,15 +1,19 @@
 #include "kv_block.h"
 
-#include <utility>
-
 namespace elasticmem {
 namespace storage {
+
+std::vector<block_op> KV_OPS = {block_op{block_op_type::accessor, "get"},
+                                block_op{block_op_type::mutator, "put"},
+                                block_op{block_op_type::mutator, "remove"},
+                                block_op{block_op_type::mutator, "update"}};
 
 kv_block::kv_block(std::shared_ptr<persistent::persistent_service> persistent,
                    std::string local_storage_prefix,
                    std::shared_ptr<serializer> ser,
                    std::shared_ptr<deserializer> deser)
-    : persistent_(std::move(persistent)),
+    : block(KV_OPS),
+      persistent_(std::move(persistent)),
       local_storage_prefix_(std::move(local_storage_prefix)),
       ser_(std::move(ser)), deser_(std::move(deser)) {}
 
@@ -35,6 +39,39 @@ void kv_block::remove(const key_type &key) {
   }
 }
 
+void kv_block::run_command(std::vector<std::string> &_return, int oid, const std::vector<std::string> &args) {
+  switch (oid) {
+    case 0:
+      for (const key_type &key: args)
+        _return.push_back(get(key));
+      break;
+    case 1:
+      if (args.size() % 2 != 0) {
+        throw std::invalid_argument("Incorrect argument count for put operation: " + std::to_string(args.size()));
+      }
+      for (size_t i = 0; i < args.size(); i += 2) {
+        put(args[i], args[i + 1]);
+      }
+      _return.emplace_back("OK");
+      break;
+    case 2:
+      for (const key_type &key: args)
+        remove(key);
+      _return.emplace_back("OK");
+      break;
+    case 3:
+      if (args.size() % 2 != 0) {
+        throw std::invalid_argument("Incorrect argument count for update operation: " + std::to_string(args.size()));
+      }
+      for (size_t i = 0; i < args.size(); i += 2) {
+        update(args[i], args[i + 1]);
+      }
+      _return.emplace_back("OK");
+      break;
+    default:throw std::invalid_argument("No such operation id " + std::to_string(oid));
+  }
+}
+
 void kv_block::clear() {
   block_.clear();
 }
@@ -48,14 +85,14 @@ bool kv_block::empty() const {
 }
 
 void kv_block::load(const std::string &remote_storage_prefix, const std::string &path) {
-  locked_block_type ltable = block_.lock_table();
+  locked_hash_table_type ltable = block_.lock_table();
   persistent_->read(remote_storage_prefix + path, local_storage_prefix_ + path);
   deser_->deserialize(local_storage_prefix_ + path, ltable);
   ltable.unlock();
 }
 
 void kv_block::flush(const std::string &remote_storage_prefix, const std::string &path) {
-  locked_block_type ltable = block_.lock_table();
+  locked_hash_table_type ltable = block_.lock_table();
   ser_->serialize(ltable, local_storage_prefix_ + path);
   persistent_->write(local_storage_prefix_ + path, remote_storage_prefix + path);
   ltable.clear();

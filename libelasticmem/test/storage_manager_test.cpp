@@ -6,7 +6,7 @@
 #include "../src/storage/manager/storage_management_client.h"
 #include "../src/storage/manager/storage_manager.h"
 #include "../src/storage/manager/detail/block_name_parser.h"
-#include "../src/storage/kv/kv_block.h"
+#include "../src/storage/block/kv/kv_block.h"
 
 using namespace ::elasticmem::storage;
 using namespace ::apache::thrift::transport;
@@ -15,8 +15,8 @@ using namespace ::apache::thrift::transport;
 #define HOST "127.0.0.1"
 #define PORT 9090
 
-static std::vector<std::shared_ptr<block_management_ops>> init_blocks() {
-  std::vector<std::shared_ptr<block_management_ops>> blks;
+static std::vector<std::shared_ptr<block>> init_blocks() {
+  std::vector<std::shared_ptr<block>> blks;
   blks.resize(NUM_BLOCKS);
   for (auto &block : blks) {
     block = std::make_shared<kv_block>();
@@ -36,7 +36,7 @@ static void wait_till_server_ready(const std::string &host, int port) {
   }
 }
 
-static std::vector<std::shared_ptr<block_management_ops>> blocks = init_blocks();
+static std::vector<std::shared_ptr<block>> blocks = init_blocks();
 
 TEST_CASE("manager_storage_size_test", "[storage_size][storage_capacity][clear]") {
   auto server = storage_management_rpc_server::create(blocks, HOST, PORT);

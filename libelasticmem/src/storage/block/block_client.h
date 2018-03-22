@@ -3,19 +3,19 @@
 
 #include <thrift/transport/TSocket.h>
 #include "../storage_management_service.h"
-#include "kv_rpc_service.h"
-#include "kv_block.h"
+#include "block_service.h"
+#include "kv/kv_block.h"
 
 namespace elasticmem {
 namespace storage {
 
-class kv_client {
+class block_client {
  public:
-  typedef kv_rpc_serviceClient thrift_client;
+  typedef block_serviceClient thrift_client;
 
-  kv_client() = default;
-  ~kv_client();
-  kv_client(const std::string &hostname, int port, int block_id);
+  block_client() = default;
+  ~block_client();
+  block_client(const std::string &hostname, int port, int block_id);
   void connect(const std::string &hostname, int port);
   void disconnect();
 
@@ -27,16 +27,12 @@ class kv_client {
 
   void remove(const key_type &key);
 
-  std::size_t size() const;
-
-  bool empty() const;
-
  private:
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};
   std::shared_ptr<apache::thrift::transport::TTransport> transport_{};
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_{};
   std::shared_ptr<thrift_client> client_{};
-  int block_id_;
+  int block_id_{};
 };
 
 }

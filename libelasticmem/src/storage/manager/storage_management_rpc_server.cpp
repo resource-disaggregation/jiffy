@@ -14,9 +14,9 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
-std::shared_ptr<TThreadedServer> storage_management_rpc_server::create(std::vector<std::shared_ptr<block_management_ops>> &blocks,
-                                                                  const std::string &address,
-                                                                  int port) {
+std::shared_ptr<TThreadedServer> storage_management_rpc_server::create(std::vector<std::shared_ptr<block>> &blocks,
+                                                                       const std::string &address,
+                                                                       int port) {
   std::shared_ptr<storage_management_rpc_serviceIfFactory>
       clone_factory(new storage_management_rpc_service_factory(blocks));
   std::shared_ptr<storage_management_rpc_serviceProcessorFactory>

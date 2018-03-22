@@ -16,7 +16,7 @@ from thrift.transport import TTransport
 all_structs = []
 
 
-class kv_rpc_exception(TException):
+class block_exception(TException):
     """
     Attributes:
      - msg
@@ -49,7 +49,7 @@ class kv_rpc_exception(TException):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('kv_rpc_exception')
+        oprot.writeStructBegin('block_exception')
         if self.msg is not None:
             oprot.writeFieldBegin('msg', TType.STRING, 1)
             oprot.writeString(self.msg.encode('utf-8') if sys.version_info[0] == 2 else self.msg)
@@ -73,8 +73,8 @@ class kv_rpc_exception(TException):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(kv_rpc_exception)
-kv_rpc_exception.thrift_spec = (
+all_structs.append(block_exception)
+block_exception.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'msg', 'UTF8', None, ),  # 1
 )

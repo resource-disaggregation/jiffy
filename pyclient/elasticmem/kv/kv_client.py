@@ -1,7 +1,7 @@
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
 from thrift.transport import TTransport, TSocket
 
-import kv_rpc_service
+import block_service
 
 
 class BlockConnection:
@@ -11,7 +11,7 @@ class BlockConnection:
         self.socket_ = TSocket.TSocket(host, int(port))
         self.transport_ = TTransport.TBufferedTransport(self.socket_)
         self.protocol_ = TBinaryProtocol(self.transport_)
-        self.client_ = kv_rpc_service.Client(self.protocol_)
+        self.client_ = block_service.Client(self.protocol_)
         self.transport_.open()
 
     def __del__(self):
@@ -22,16 +22,16 @@ class BlockConnection:
             self.transport_.close()
 
     def put(self, key, value):
-        self.client_.put(self.id_, key, value)
+        self.client_.run_command(self.id_, 1, [key, value])
 
     def get(self, key):
-        return self.client_.get(self.id_, key)
+        return self.client_.run_command(self.id_, 0, [key])[0]
 
     def update(self, key, value):
-        self.client_.update(self.id_, key, value)
+        self.client_.run_command(self.id_, 3, [key, value])
 
     def remove(self, key):
-        self.client_.remove(self.id_, key)
+        self.client_.run_command(self.id_, 2, [key])
 
 
 class KVClient:

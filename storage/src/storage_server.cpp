@@ -1,5 +1,5 @@
 #include <iostream>
-#include <storage/kv/kv_rpc_server.h>
+#include <storage/block/block_server.h>
 #include <storage/manager/storage_management_rpc_server.h>
 #include <utils/signal_handling.h>
 #include <utils/cmd_parse.h>
@@ -66,14 +66,14 @@ int main(int argc, char **argv) {
   std::condition_variable failure_condition;
   std::atomic<int> failing_thread(-1); // management -> 0, service -> 1
 
-  std::vector<std::shared_ptr<block_management_ops>> block_management;
-  block_management.resize(num_blocks);
-  for (auto &block : block_management) {
+  std::vector<std::shared_ptr<block>> blocks;
+  blocks.resize(num_blocks);
+  for (auto &block : blocks) {
     block = std::make_shared<kv_block>();
   }
 
   std::vector<std::shared_ptr<kv_block>> kv_blocks;
-  for (auto &block : block_management) {
+  for (auto &block : blocks) {
     kv_blocks.push_back(std::dynamic_pointer_cast<kv_block>(block));
   }
 
@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
   }
 
   std::exception_ptr management_exception = nullptr;
-  auto management_server = storage_management_rpc_server::create(block_management, address, management_port);
+  auto management_server = storage_management_rpc_server::create(blocks, address, management_port);
   std::thread management_serve_thread([&management_exception, &management_server, &failing_thread, &failure_condition] {
     try {
       management_server->serve();
@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
   }
 
   std::exception_ptr kv_exception = nullptr;
-  auto kv_server = kv_rpc_server::create(kv_blocks, sub_maps, address, service_port);
+  auto kv_server = block_server::create(kv_blocks, sub_maps, address, service_port);
   std::thread kv_serve_thread([&kv_exception, &kv_server, &failing_thread, &failure_condition] {
     try {
       kv_server->serve();

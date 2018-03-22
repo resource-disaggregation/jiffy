@@ -3,10 +3,11 @@
 
 #include <libcuckoo/cuckoohash_map.hh>
 
-#include "../storage_management_service.h"
+#include <string>
 #include "serializer/serde.h"
 #include "serializer/binary_serde.h"
-#include "../block_management_ops.h"
+#include "../block.h"
+#include "../../../persistent/persistent_service.h"
 
 namespace elasticmem {
 namespace storage {
@@ -22,10 +23,12 @@ class noop_store : public persistent::persistent_service {
   void remove(const std::string &) override {}
 };
 
-class kv_block : public block_management_ops {
+extern std::vector<block_op> KV_OPS;
+
+class kv_block : public block {
  public:
-  typedef cuckoohash_map<key_type, value_type> block_type;
-  typedef block_type::locked_table locked_block_type;
+  typedef cuckoohash_map<key_type, value_type> hash_table_type;
+  typedef hash_table_type::locked_table locked_hash_table_type;
 
   explicit kv_block(std::shared_ptr<persistent::persistent_service> persistent = std::make_shared<noop_store>(),
                     std::string local_storage_prefix = "/tmp",
@@ -44,6 +47,8 @@ class kv_block : public block_management_ops {
 
   bool empty() const;
 
+  void run_command(std::vector<std::string>& _return, int oid, const std::vector<std::string> &args) override;
+
   void load(const std::string &remote_storage_prefix, const std::string &path) override;
 
   void flush(const std::string &remote_storage_prefix, const std::string &path) override;
@@ -55,7 +60,7 @@ class kv_block : public block_management_ops {
   void clear() override;
 
  private:
-  block_type block_;
+  hash_table_type block_;
   std::shared_ptr<persistent::persistent_service> persistent_;
   std::string local_storage_prefix_;
   std::shared_ptr<serializer> ser_;
