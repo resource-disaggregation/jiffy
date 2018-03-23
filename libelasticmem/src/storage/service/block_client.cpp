@@ -15,11 +15,12 @@ block_client::~block_client() {
     disconnect();
 }
 
-block_client::block_client(const std::string &host, int port, int block_id) : block_id_(block_id) {
-  connect(host, port);
+block_client::block_client(const std::string &host, int port, int block_id) {
+  connect(host, port, block_id);
 }
 
-void block_client::connect(const std::string &host, int port) {
+void block_client::connect(const std::string &host, int port, int block_id) {
+  block_id_ = block_id;
   socket_ = std::make_shared<TSocket>(host, port);
   transport_ = std::shared_ptr<TTransport>(new TBufferedTransport(socket_));
   protocol_ = std::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
@@ -28,9 +29,19 @@ void block_client::connect(const std::string &host, int port) {
 }
 
 void block_client::disconnect() {
-  if (transport_->isOpen()) {
+  if (is_connected()) {
     transport_->close();
   }
+  block_id_ = -1;
+}
+
+bool block_client::is_connected() {
+  if (transport_ == nullptr) return false;
+  return transport_->isOpen();
+}
+
+void block_client::run_command(std::vector<std::string> &_return, int op_id, const std::vector<std::string> &args) {
+  client_->run_command(_return, block_id_, op_id, args);
 }
 
 void block_client::put(const key_type &key, const value_type &value) {

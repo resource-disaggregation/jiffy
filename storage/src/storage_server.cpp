@@ -1,5 +1,5 @@
 #include <iostream>
-#include <storage/block/block_server.h>
+#include <storage/service/block_server.h>
 #include <storage/manager/storage_management_rpc_server.h>
 #include <utils/signal_handling.h>
 #include <utils/cmd_parse.h>

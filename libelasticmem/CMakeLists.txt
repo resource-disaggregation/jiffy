@@ -66,22 +66,22 @@ add_library(elasticmem STATIC
         src/storage/block/kv/kv_block.h
         src/storage/block/block.h
         src/storage/block/block.h
-        src/storage/block/block_client.cpp
-        src/storage/block/block_client.h
-        src/storage/block/block_server.cpp
-        src/storage/block/block_server.h
-        src/storage/block/block_service.cpp
-        src/storage/block/block_service.h
-        src/storage/block/block_service.tcc
-        src/storage/block/block_service_constants.cpp
-        src/storage/block/block_service_constants.h
-        src/storage/block/block_service_factory.cpp
-        src/storage/block/block_service_factory.h
-        src/storage/block/block_service_handler.cpp
-        src/storage/block/block_service_handler.h
-        src/storage/block/block_service_types.cpp
-        src/storage/block/block_service_types.h
-        src/storage/block/block_service_types.tcc
+        src/storage/service/block_client.cpp
+        src/storage/service/block_client.h
+        src/storage/service/block_server.cpp
+        src/storage/service/block_server.h
+        src/storage/service/block_service.cpp
+        src/storage/service/block_service.h
+        src/storage/service/block_service.tcc
+        src/storage/service/block_service_constants.cpp
+        src/storage/service/block_service_constants.h
+        src/storage/service/block_service_factory.cpp
+        src/storage/service/block_service_factory.h
+        src/storage/service/block_service_handler.cpp
+        src/storage/service/block_service_handler.h
+        src/storage/service/block_service_types.cpp
+        src/storage/service/block_service_types.h
+        src/storage/service/block_service_types.tcc
         src/storage/manager/detail/block_name_parser.cpp
         src/storage/manager/detail/block_name_parser.h
         src/storage/manager/storage_management_client.cpp
@@ -140,7 +140,7 @@ add_library(elasticmem STATIC
         src/utils/logger.h
         src/utils/rand_utils.h
         src/utils/signal_handling.h
-        src/utils/time_utils.h)
+        src/utils/time_utils.h src/storage/chain/chain_module.cpp src/storage/chain/chain_module.h)
 if (GENERATE_THRIFT)
   add_dependencies(elasticmem thriftgen_directory thriftgen_kv)
 endif ()

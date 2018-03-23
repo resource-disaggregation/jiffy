@@ -1,8 +1,8 @@
 #include <catch.hpp>
 #include <thrift/transport/TTransportException.h>
 #include "../src/storage/block/kv/kv_block.h"
-#include "../src/storage/block/block_client.h"
-#include "../src/storage/block/block_server.h"
+#include "../src/storage/service/block_client.h"
+#include "../src/storage/service/block_server.h"
 
 using namespace ::elasticmem::storage;
 using namespace ::apache::thrift::transport;

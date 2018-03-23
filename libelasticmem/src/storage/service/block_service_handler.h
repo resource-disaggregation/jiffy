@@ -1,7 +1,7 @@
 #ifndef ELASTICMEM_KV_RPC_SERVICE_HANDLER_H
 #define ELASTICMEM_KV_RPC_SERVICE_HANDLER_H
 
-#include "kv/kv_block.h"
+#include "../block/kv/kv_block.h"
 #include "block_service.h"
 #include "../notification/subscription_map.h"
 

@@ -2,7 +2,7 @@
 #define ELASTICMEM_KV_RPC_SERVER_H
 
 #include <thrift/server/TThreadedServer.h>
-#include "kv/kv_block.h"
+#include "../block/kv/kv_block.h"
 #include "../notification/subscription_map.h"
 
 namespace elasticmem {
