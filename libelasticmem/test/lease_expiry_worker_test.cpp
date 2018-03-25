@@ -31,8 +31,8 @@ TEST_CASE("lease_manager_test") {
   REQUIRE(!tree->exists("/sandbox/a/b/file.txt"));
   REQUIRE(!tree->exists("/sandbox/a/file.txt"));
   REQUIRE(sm->COMMANDS.size() == 2);
-  REQUIRE(sm->COMMANDS[0] == "clear:1");
-  REQUIRE(sm->COMMANDS[1] == "clear:2");
+  REQUIRE(sm->COMMANDS[0] == "reset:1");
+  REQUIRE(sm->COMMANDS[1] == "reset:2");
 
   REQUIRE_NOTHROW(mgr.stop());
 }

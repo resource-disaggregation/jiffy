@@ -3,7 +3,7 @@
 
 #include "directory_lease_service.h"
 #include "../fs/directory_tree.h"
-#include "../../storage/storage_management_service.h"
+#include "../../storage/storage_management_ops.h"
 
 namespace elasticmem {
 namespace directory {

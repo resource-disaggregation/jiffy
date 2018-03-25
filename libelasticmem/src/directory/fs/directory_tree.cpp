@@ -10,7 +10,7 @@ namespace directory {
 using namespace utils;
 
 directory_tree::directory_tree(std::shared_ptr<block_allocator> allocator,
-                               std::shared_ptr<storage::storage_management_service> storage)
+                               std::shared_ptr<storage::storage_management_ops> storage)
     : root_(std::make_shared<ds_dir_node>(std::string("/"))),
       allocator_(std::move(allocator)),
       storage_(std::move(storage)) {}
@@ -229,7 +229,7 @@ void directory_tree::add_data_block(const std::string &path) {
 
 void directory_tree::remove_data_block(const std::string &path, const std::string &block) {
   get_node_as_file(path)->remove_data_block(block);
-  storage_->clear(block);
+  storage_->reset(block);
   allocator_->free(block);
 }
 
@@ -311,7 +311,7 @@ void directory_tree::clear_storage(std::shared_ptr<ds_node> node) {
     auto file = std::dynamic_pointer_cast<ds_file_node>(node);
     auto s = file->dstatus();
     for (const auto &block: s.data_blocks()) {
-      storage_->clear(block);
+      storage_->reset(block);
       allocator_->free(block);
     }
   } else if (node->is_directory()) {

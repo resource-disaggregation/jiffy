@@ -4,12 +4,28 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include "../src/storage/storage_management_service.h"
+#include <thrift/transport/TBufferTransports.h>
+#include <thrift/transport/TSocket.h>
+#include "../src/storage/storage_management_ops.h"
 #include "../src/directory/block/block_allocator.h"
+#include "../src/storage/kv/kv_block.h"
+#include "../src/storage/notification/subscription_map.h"
 
-class dummy_storage_manager : public elasticmem::storage::storage_management_service {
+class dummy_storage_manager : public elasticmem::storage::storage_management_ops {
  public:
   dummy_storage_manager() = default;
+
+  void setup_block(const std::string &block_name,
+                   const std::string &path,
+                   int32_t role,
+                   const std::string &next_block_name) override {
+    COMMANDS.push_back("setup_block:" + block_name + ":" + path + ":" + std::to_string(role) + ":" + next_block_name);
+  }
+
+  std::string path(const std::string &block_name) override {
+    COMMANDS.push_back("get_path:" + block_name);
+    return "";
+  }
 
   void load(const std::string &block_name,
             const std::string &persistent_path_prefix,
@@ -23,8 +39,8 @@ class dummy_storage_manager : public elasticmem::storage::storage_management_ser
     COMMANDS.push_back("flush:" + block_name + ":" + persistent_path_prefix + ":" + path);
   }
 
-  void clear(const std::string &block_name) override {
-    COMMANDS.push_back("clear:" + block_name);
+  void reset(const std::string &block_name) override {
+    COMMANDS.push_back("reset:" + block_name);
   }
 
   size_t storage_capacity(const std::string &block_name) override {
@@ -88,6 +104,48 @@ class dummy_block_allocator : public elasticmem::directory::block_allocator {
  private:
   std::size_t num_alloc_{};
   std::size_t num_free_{};
+};
+
+class test_utils {
+ public:
+  static void wait_till_server_ready(const std::string &host, int port) {
+    bool check = true;
+    while (check) {
+      try {
+        auto transport =
+            std::shared_ptr<apache::thrift::transport::TTransport>(new apache::thrift::transport::TBufferedTransport(
+                std::make_shared<apache::thrift::transport::TSocket>(host, port)));
+        transport->open();
+        transport->close();
+        check = false;
+      } catch (apache::thrift::transport::TTransportException &e) {
+        usleep(100000);
+      }
+    }
+  }
+
+  static std::vector<std::shared_ptr<elasticmem::storage::chain_module>> init_kv_blocks(size_t num_blocks,
+                                                                                        int32_t service_port,
+                                                                                        int32_t management_port,
+                                                                                        int32_t notification_port) {
+    std::vector<std::shared_ptr<elasticmem::storage::chain_module>> blks;
+    blks.resize(num_blocks);
+    for (size_t i = 0; i < num_blocks; ++i) {
+      std::string block_name = elasticmem::storage::block_name_parser::make("127.0.0.1", service_port, management_port,
+                                                                            notification_port, static_cast<int32_t>(i));
+      blks[i] = std::make_shared<elasticmem::storage::kv_block>(block_name);
+    }
+    return blks;
+  }
+
+  static std::vector<std::shared_ptr<elasticmem::storage::subscription_map>> init_submaps(size_t num_blocks) {
+    std::vector<std::shared_ptr<elasticmem::storage::subscription_map>> sub_maps;
+    sub_maps.resize(num_blocks);
+    for (auto &sub_map : sub_maps) {
+      sub_map = std::make_shared<elasticmem::storage::subscription_map>();
+    }
+    return sub_maps;
+  }
 };
 
 #endif //ELASTICMEM_TEST_UTILS_H

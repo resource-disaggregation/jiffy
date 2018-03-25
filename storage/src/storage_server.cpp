@@ -1,12 +1,14 @@
+#include <atomic>
 #include <iostream>
+#include <directory/block/block_advertisement_client.h>
+#include <storage/kv/kv_block.h>
+#include <storage/manager/storage_management_server.h>
+#include <storage/notification/notification_server.h>
 #include <storage/service/block_server.h>
-#include <storage/manager/storage_management_rpc_server.h>
 #include <utils/signal_handling.h>
 #include <utils/cmd_parse.h>
-#include <directory/block/block_advertisement_client.h>
-#include <storage/manager/detail/block_name_parser.h>
 #include <utils/logger.h>
-#include <storage/notification/notification_server.h>
+
 
 using namespace ::elasticmem::directory;
 using namespace ::elasticmem::storage;
@@ -66,15 +68,18 @@ int main(int argc, char **argv) {
   std::condition_variable failure_condition;
   std::atomic<int> failing_thread(-1); // management -> 0, service -> 1
 
-  std::vector<std::shared_ptr<block>> blocks;
-  blocks.resize(num_blocks);
-  for (auto &block : blocks) {
-    block = std::make_shared<kv_block>();
+  char hbuf[1024];
+  gethostname(hbuf, sizeof(hbuf));
+  std::string hostname(hbuf);
+  std::vector<std::string> block_names;
+  for (int i = 0; i < static_cast<int>(num_blocks); i++) {
+    block_names.push_back(block_name_parser::make(hostname, service_port, management_port, notification_port, i));
   }
 
-  std::vector<std::shared_ptr<kv_block>> kv_blocks;
-  for (auto &block : blocks) {
-    kv_blocks.push_back(std::dynamic_pointer_cast<kv_block>(block));
+  std::vector<std::shared_ptr<chain_module>> blocks;
+  blocks.resize(num_blocks);
+  for (size_t i = 0; i < blocks.size(); ++i) {
+    blocks[i] = std::make_shared<kv_block>(block_names[i]);
   }
 
   std::vector<std::shared_ptr<subscription_map>> sub_maps;
@@ -84,7 +89,7 @@ int main(int argc, char **argv) {
   }
 
   std::exception_ptr management_exception = nullptr;
-  auto management_server = storage_management_rpc_server::create(blocks, address, management_port);
+  auto management_server = storage_management_server::create(blocks, address, management_port);
   std::thread management_serve_thread([&management_exception, &management_server, &failing_thread, &failure_condition] {
     try {
       management_server->serve();
@@ -97,14 +102,6 @@ int main(int argc, char **argv) {
 
   LOG(log_level::info) << "Management server listening on " << address << ":" << management_port;
 
-  char hbuf[1024];
-  gethostname(hbuf, sizeof(hbuf));
-  std::string hostname(hbuf);
-  std::vector<std::string> block_names;
-  for (int i = 0; i < static_cast<int>(num_blocks); i++) {
-    block_names.push_back(block_name_parser::make_block_name(std::make_tuple(hostname, service_port, i)));
-  }
-
   try {
     block_advertisement_client client(block_host, block_port);
     client.advertise_blocks(block_names);
@@ -116,7 +113,7 @@ int main(int argc, char **argv) {
   }
 
   std::exception_ptr kv_exception = nullptr;
-  auto kv_server = block_server::create(kv_blocks, sub_maps, address, service_port);
+  auto kv_server = block_server::create(blocks, sub_maps, address, service_port);
   std::thread kv_serve_thread([&kv_exception, &kv_server, &failing_thread, &failure_condition] {
     try {
       kv_server->serve();

@@ -8,14 +8,16 @@ std::vector<block_op> KV_OPS = {block_op{block_op_type::accessor, "get"},
                                 block_op{block_op_type::mutator, "remove"},
                                 block_op{block_op_type::mutator, "update"}};
 
-kv_block::kv_block(std::shared_ptr<persistent::persistent_service> persistent,
+kv_block::kv_block(const std::string& block_name,
+                   std::shared_ptr<persistent::persistent_service> persistent,
                    std::string local_storage_prefix,
                    std::shared_ptr<serializer> ser,
                    std::shared_ptr<deserializer> deser)
-    : block(KV_OPS),
+    : chain_module(block_name, KV_OPS),
       persistent_(std::move(persistent)),
       local_storage_prefix_(std::move(local_storage_prefix)),
-      ser_(std::move(ser)), deser_(std::move(deser)) {}
+      ser_(std::move(ser)),
+      deser_(std::move(deser)) {}
 
 void kv_block::put(const key_type &key, const value_type &value) {
   block_.insert(key, value);
@@ -27,7 +29,7 @@ value_type kv_block::get(const key_type &key) {
 
 void kv_block::update(const key_type &key,
                       const value_type &value) {
-  value_type ret = value;
+  const value_type &ret = value;
   if (!block_.update(key, ret)) {
     throw std::out_of_range("No such key [" + key + "]");
   }
@@ -39,7 +41,7 @@ void kv_block::remove(const key_type &key) {
   }
 }
 
-void kv_block::run_command(std::vector<std::string> &_return, int oid, const std::vector<std::string> &args) {
+void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) {
   switch (oid) {
     case 0:
       for (const key_type &key: args)
@@ -72,8 +74,10 @@ void kv_block::run_command(std::vector<std::string> &_return, int oid, const std
   }
 }
 
-void kv_block::clear() {
+void kv_block::reset() {
   block_.clear();
+  reset_next("nil");
+  path("");
 }
 
 std::size_t kv_block::size() const {

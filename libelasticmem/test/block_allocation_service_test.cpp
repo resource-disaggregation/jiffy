@@ -11,25 +11,13 @@ using namespace ::apache::thrift::transport;
 #define HOST "127.0.0.1"
 #define PORT 9090
 
-static void wait_till_server_ready(const std::string &host, int port) {
-  bool check = true;
-  while (check) {
-    try {
-      block_advertisement_client(host, port);
-      check = false;
-    } catch (TTransportException &e) {
-      usleep(100000);
-    }
-  }
-}
-
 TEST_CASE("block_allocation_service_test", "[add_blocks][remove_blocks]") {
   auto alloc = std::make_shared<dummy_block_allocator>(4);
   auto server = block_allocation_server::create(alloc, HOST, PORT);
   std::thread serve_thread([&server] {
     server->serve();
   });
-  wait_till_server_ready(HOST, PORT);
+  test_utils::wait_till_server_ready(HOST, PORT);
 
   block_advertisement_client allocator(HOST, PORT);
   REQUIRE_NOTHROW(allocator.advertise_blocks({"4", "5", "6"}));

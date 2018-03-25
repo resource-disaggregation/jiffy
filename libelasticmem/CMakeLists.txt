@@ -57,15 +57,16 @@ add_library(elasticmem STATIC
         src/directory/lease/lease_expiry_worker.h
         src/directory/directory_service.h
         src/directory/directory_service.cpp
-        src/storage/block/kv/serializer/csv_serde.cpp
-        src/storage/block/kv/serializer/csv_serde.h
-        src/storage/block/kv/serializer/serde.h
-        src/storage/block/kv/serializer/binary_serde.cpp
-        src/storage/block/kv/serializer/binary_serde.h
-        src/storage/block/kv/kv_block.cpp
-        src/storage/block/kv/kv_block.h
-        src/storage/block/block.h
-        src/storage/block/block.h
+        src/storage/kv/serializer/csv_serde.cpp
+        src/storage/kv/serializer/csv_serde.h
+        src/storage/kv/serializer/serde.h
+        src/storage/kv/serializer/binary_serde.cpp
+        src/storage/kv/serializer/binary_serde.h
+        src/storage/kv/kv_block.cpp
+        src/storage/kv/kv_block.h
+        src/storage/block.h
+        src/storage/chain_module.h
+        src/storage/chain_module.cpp
         src/storage/service/block_client.cpp
         src/storage/service/block_client.h
         src/storage/service/block_server.cpp
@@ -86,20 +87,20 @@ add_library(elasticmem STATIC
         src/storage/manager/detail/block_name_parser.h
         src/storage/manager/storage_management_client.cpp
         src/storage/manager/storage_management_client.h
-        src/storage/manager/storage_management_rpc_server.cpp
-        src/storage/manager/storage_management_rpc_server.h
-        src/storage/manager/storage_management_rpc_service.cpp
-        src/storage/manager/storage_management_rpc_service.h
-        src/storage/manager/storage_management_rpc_service.tcc
-        src/storage/manager/storage_management_rpc_service_constants.cpp
-        src/storage/manager/storage_management_rpc_service_constants.h
-        src/storage/manager/storage_management_rpc_service_factory.cpp
-        src/storage/manager/storage_management_rpc_service_factory.h
-        src/storage/manager/storage_management_rpc_service_handler.cpp
-        src/storage/manager/storage_management_rpc_service_handler.h
-        src/storage/manager/storage_management_rpc_service_types.cpp
-        src/storage/manager/storage_management_rpc_service_types.h
-        src/storage/manager/storage_management_rpc_service_types.tcc
+        src/storage/manager/storage_management_server.cpp
+        src/storage/manager/storage_management_server.h
+        src/storage/manager/storage_management_service.cpp
+        src/storage/manager/storage_management_service.h
+        src/storage/manager/storage_management_service.tcc
+        src/storage/manager/storage_management_service_constants.cpp
+        src/storage/manager/storage_management_service_constants.h
+        src/storage/manager/storage_management_service_factory.cpp
+        src/storage/manager/storage_management_service_factory.h
+        src/storage/manager/storage_management_service_handler.cpp
+        src/storage/manager/storage_management_service_handler.h
+        src/storage/manager/storage_management_service_types.cpp
+        src/storage/manager/storage_management_service_types.h
+        src/storage/manager/storage_management_service_types.tcc
         src/storage/manager/storage_manager.cpp
         src/storage/manager/storage_manager.h
         src/storage/notification/blocking_queue.h
@@ -129,7 +130,7 @@ add_library(elasticmem STATIC
         src/storage/notification/subscription_service_types.cpp
         src/storage/notification/subscription_service_types.h
         src/storage/notification/subscription_service_types.tcc
-        src/storage/storage_management_service.h
+        src/storage/storage_management_ops.h
         src/persistent/local/local_store.cpp
         src/persistent/local/local_store.h
         src/persistent/s3/s3_store.cpp
@@ -140,7 +141,7 @@ add_library(elasticmem STATIC
         src/utils/logger.h
         src/utils/rand_utils.h
         src/utils/signal_handling.h
-        src/utils/time_utils.h src/storage/chain/chain_module.cpp src/storage/chain/chain_module.h)
+        src/utils/time_utils.h)
 if (GENERATE_THRIFT)
   add_dependencies(elasticmem thriftgen_directory thriftgen_kv)
 endif ()
@@ -162,6 +163,7 @@ if (BUILD_TESTS)
           test/elasticmem_tests.cpp
           test/block_allocation_service_test.cpp
           test/block_allocator_test.cpp
+          test/chain_replication_test.cpp
           test/directory_lease_test.cpp
           test/directory_tree_test.cpp
           test/directory_rpc_service_test.cpp

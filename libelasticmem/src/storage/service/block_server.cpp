@@ -14,7 +14,7 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
-std::shared_ptr<TThreadedServer> block_server::create(std::vector<std::shared_ptr<kv_block>> &blocks,
+std::shared_ptr<TThreadedServer> block_server::create(std::vector<std::shared_ptr<chain_module>> &blocks,
                                                        std::vector<std::shared_ptr<subscription_map>> &sub_maps,
                                                        const std::string &address,
                                                        int port) {

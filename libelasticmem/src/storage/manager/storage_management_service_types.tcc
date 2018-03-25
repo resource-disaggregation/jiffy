@@ -4,15 +4,15 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-#ifndef storage_management_rpc_service_TYPES_TCC
-#define storage_management_rpc_service_TYPES_TCC
+#ifndef storage_management_service_TYPES_TCC
+#define storage_management_service_TYPES_TCC
 
-#include "storage_management_rpc_service_types.h"
+#include "storage_management_service_types.h"
 
 namespace elasticmem { namespace storage {
 
 template <class Protocol_>
-uint32_t storage_management_rpc_exception::read(Protocol_* iprot) {
+uint32_t storage_management_exception::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -54,10 +54,10 @@ uint32_t storage_management_rpc_exception::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t storage_management_rpc_exception::write(Protocol_* oprot) const {
+uint32_t storage_management_exception::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("storage_management_rpc_exception");
+  xfer += oprot->writeStructBegin("storage_management_exception");
 
   xfer += oprot->writeFieldBegin("msg", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeString(this->msg);

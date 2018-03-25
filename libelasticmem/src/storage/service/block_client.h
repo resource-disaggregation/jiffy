@@ -2,16 +2,15 @@
 #define ELASTICMEM_KV_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
-#include "../storage_management_service.h"
+#include "../storage_management_ops.h"
 #include "block_service.h"
-#include "../block/kv/kv_block.h"
 
 namespace elasticmem {
 namespace storage {
 
 class block_client {
  public:
-  typedef block_serviceClient thrift_client;
+  typedef block_serviceConcurrentClient thrift_client;
 
   block_client() = default;
   ~block_client();
@@ -22,13 +21,17 @@ class block_client {
 
   void run_command(std::vector<std::string>& _return, int op_id, const std::vector<std::string>& args);
 
-  void put(const key_type &key, const value_type &value);
+  int32_t send_command(int op_id, const std::vector<std::string>& args);
 
-  value_type get(const key_type &key);
+  void recv_command_result(int32_t seq_id, std::vector<std::string>& _return);
 
-  void update(const key_type &key, const value_type &value);
+  void put(const std::string &key, const std::string &value);
 
-  void remove(const key_type &key);
+  std::string get(const std::string &key);
+
+  void update(const std::string &key, const std::string &value);
+
+  void remove(const std::string &key);
 
  private:
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};

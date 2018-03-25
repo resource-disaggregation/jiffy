@@ -10,7 +10,7 @@
 #include "../directory_service.h"
 #include "../block/block_allocator.h"
 #include "../../utils/time_utils.h"
-#include "../../storage/storage_management_service.h"
+#include "../../storage/storage_management_ops.h"
 #include "../../utils/directory_utils.h"
 
 namespace elasticmem {
@@ -48,7 +48,7 @@ class ds_node {
   void last_write_time(std::uint64_t time) { status_.last_write_time(time); }
 
   virtual void flush(const std::string &path,
-                     const std::shared_ptr<storage::storage_management_service> &storage,
+                     const std::shared_ptr<storage::storage_management_ops> &storage,
                      std::shared_ptr<block_allocator> alloc) = 0;
 
  private:
@@ -126,7 +126,7 @@ class ds_file_node : public ds_node {
   }
 
   void flush(const std::string &path,
-             const std::shared_ptr<storage::storage_management_service> &storage,
+             const std::shared_ptr<storage::storage_management_ops> &storage,
              std::shared_ptr<block_allocator> alloc) override {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     dstatus_.mode(storage_mode::flushing);
@@ -180,7 +180,7 @@ class ds_dir_node : public ds_node {
   }
 
   void flush(const std::string &path,
-             const std::shared_ptr<storage::storage_management_service> &storage,
+             const std::shared_ptr<storage::storage_management_ops> &storage,
              std::shared_ptr<block_allocator> alloc) override {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     for (const auto &entry: children_) {
@@ -260,7 +260,7 @@ class ds_dir_node : public ds_node {
 class directory_tree : public directory_service, public directory_management_service {
  public:
   explicit directory_tree(std::shared_ptr<block_allocator> allocator,
-                          std::shared_ptr<storage::storage_management_service> storage);
+                          std::shared_ptr<storage::storage_management_ops> storage);
 
   void create_directory(const std::string &path) override;
   void create_directories(const std::string &path) override;
@@ -334,7 +334,7 @@ class directory_tree : public directory_service, public directory_management_ser
 
   std::shared_ptr<ds_dir_node> root_;
   std::shared_ptr<block_allocator> allocator_;
-  std::shared_ptr<storage::storage_management_service> storage_;
+  std::shared_ptr<storage::storage_management_ops> storage_;
 
   friend class lease_expiry_worker;
 };

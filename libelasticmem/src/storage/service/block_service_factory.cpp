@@ -11,7 +11,7 @@ using namespace ::apache::thrift;
 using namespace ::apache::thrift::transport;
 using namespace utils;
 
-block_service_factory::block_service_factory(std::vector<std::shared_ptr<kv_block>> &blocks,
+block_service_factory::block_service_factory(std::vector<std::shared_ptr<chain_module>> &blocks,
                                                std::vector<std::shared_ptr<subscription_map>> &sub_maps)
     : blocks_(blocks), sub_maps_(sub_maps) {}
 

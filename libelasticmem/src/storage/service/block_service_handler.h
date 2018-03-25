@@ -1,16 +1,16 @@
 #ifndef ELASTICMEM_KV_RPC_SERVICE_HANDLER_H
 #define ELASTICMEM_KV_RPC_SERVICE_HANDLER_H
 
-#include "../block/kv/kv_block.h"
 #include "block_service.h"
 #include "../notification/subscription_map.h"
+#include "../chain_module.h"
 
 namespace elasticmem {
 namespace storage {
 
 class block_service_handler : public block_serviceIf {
  public:
-  block_service_handler(std::vector<std::shared_ptr<kv_block>> &blocks,
+  block_service_handler(std::vector<std::shared_ptr<chain_module>> &blocks,
                         std::vector<std::shared_ptr<subscription_map>> &sub_maps);
   void run_command(std::vector<std::string> &_return,
                    int32_t block_id,
@@ -19,7 +19,7 @@ class block_service_handler : public block_serviceIf {
  private:
   block_exception make_exception(const std::exception &ex);
 
-  std::vector<std::shared_ptr<kv_block>> &blocks_;
+  std::vector<std::shared_ptr<chain_module>> &blocks_;
   std::vector<std::shared_ptr<subscription_map>> &sub_maps_;
 };
 

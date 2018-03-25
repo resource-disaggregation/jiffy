@@ -144,7 +144,7 @@ TEST_CASE("path_remove_test", "[file][dir]") {
   REQUIRE(alloc->num_free_blocks() == 4);
 
   REQUIRE(sm->COMMANDS.size() == 1);
-  REQUIRE(sm->COMMANDS[0] == "clear:0");
+  REQUIRE(sm->COMMANDS[0] == "reset:0");
 }
 
 TEST_CASE("path_flush_test", "[file][dir]") {
@@ -359,10 +359,10 @@ TEST_CASE("blocks_test", "[file]") {
   REQUIRE(alloc->num_allocated_blocks() == 0);
 
   REQUIRE(sm->COMMANDS.size() == 4);
-  REQUIRE(sm->COMMANDS[0] == "clear:2");
-  REQUIRE(sm->COMMANDS[1] == "clear:0");
-  REQUIRE(sm->COMMANDS[2] == "clear:1");
-  REQUIRE(sm->COMMANDS[3] == "clear:3");
+  REQUIRE(sm->COMMANDS[0] == "reset:2");
+  REQUIRE(sm->COMMANDS[1] == "reset:0");
+  REQUIRE(sm->COMMANDS[2] == "reset:1");
+  REQUIRE(sm->COMMANDS[3] == "reset:3");
 }
 
 TEST_CASE("file_type_test", "[file][dir]") {

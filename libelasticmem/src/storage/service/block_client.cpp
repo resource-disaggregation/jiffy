@@ -44,25 +44,33 @@ void block_client::run_command(std::vector<std::string> &_return, int op_id, con
   client_->run_command(_return, block_id_, op_id, args);
 }
 
-void block_client::put(const key_type &key, const value_type &value) {
+void block_client::put(const std::string &key, const std::string &value) {
   std::vector<std::string> _ret;
   client_->run_command(_ret, block_id_, 1, {key, value});
 }
 
-value_type block_client::get(const key_type &key) {
+std::string block_client::get(const std::string &key) {
   std::vector<std::string> _ret;
   client_->run_command(_ret, block_id_, 0, {key});
   return _ret.at(0);
 }
 
-void block_client::update(const key_type &key, const value_type &value) {
+void block_client::update(const std::string &key, const std::string &value) {
   std::vector<std::string> _ret;
   client_->run_command(_ret, block_id_, 3, {key, value});
 }
 
-void block_client::remove(const key_type &key) {
+void block_client::remove(const std::string &key) {
   std::vector<std::string> _ret;
   client_->run_command(_ret, block_id_, 2, {key});
+}
+
+int32_t block_client::send_command(int op_id, const std::vector<std::string> &args) {
+  return client_->send_run_command(block_id_, op_id, args);
+}
+
+void block_client::recv_command_result(int32_t seq_id, std::vector<std::string> &_return) {
+  client_->recv_run_command(_return, seq_id);
 }
 
 }

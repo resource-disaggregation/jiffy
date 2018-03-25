@@ -7,7 +7,8 @@
 #include "serializer/serde.h"
 #include "serializer/binary_serde.h"
 #include "../block.h"
-#include "../../../persistent/persistent_service.h"
+#include "../../persistent/persistent_service.h"
+#include "../chain_module.h"
 
 namespace elasticmem {
 namespace storage {
@@ -25,12 +26,13 @@ class noop_store : public persistent::persistent_service {
 
 extern std::vector<block_op> KV_OPS;
 
-class kv_block : public block {
+class kv_block : public chain_module {
  public:
   typedef cuckoohash_map<key_type, value_type> hash_table_type;
   typedef hash_table_type::locked_table locked_hash_table_type;
 
-  explicit kv_block(std::shared_ptr<persistent::persistent_service> persistent = std::make_shared<noop_store>(),
+  explicit kv_block(const std::string& block_name,
+                    std::shared_ptr<persistent::persistent_service> persistent = std::make_shared<noop_store>(),
                     std::string local_storage_prefix = "/tmp",
                     std::shared_ptr<serializer> ser = std::make_shared<binary_serializer>(),
                     std::shared_ptr<deserializer> deser = std::make_shared<binary_deserializer>());
@@ -57,7 +59,7 @@ class kv_block : public block {
 
   std::size_t storage_size() override;
 
-  void clear() override;
+  void reset() override;
 
  private:
   hash_table_type block_;

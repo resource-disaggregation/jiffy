@@ -1,11 +1,11 @@
 #include "catch.hpp"
-#include "../src/storage/block/kv/kv_block.h"
+#include "../src/storage/kv/kv_block.h"
 
 using namespace ::elasticmem::storage;
 using namespace ::elasticmem::persistent;
 
 TEST_CASE("put_get_test", "[put][get]") {
-  kv_block block;
+  kv_block block("nil");
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_NOTHROW(block.put(std::to_string(i), std::to_string(i)));
   }
@@ -18,7 +18,7 @@ TEST_CASE("put_get_test", "[put][get]") {
 }
 
 TEST_CASE("put_update_get_test", "[put][update][get]") {
-  kv_block block;
+  kv_block block("nil");
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_NOTHROW(block.put(std::to_string(i), std::to_string(i)));
   }
@@ -37,7 +37,7 @@ TEST_CASE("put_update_get_test", "[put][update][get]") {
 }
 
 TEST_CASE("put_remove_get_test", "[put][update][get]") {
-  kv_block block;
+  kv_block block("nil");
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_NOTHROW(block.put(std::to_string(i), std::to_string(i)));
   }
@@ -52,25 +52,25 @@ TEST_CASE("put_remove_get_test", "[put][update][get]") {
   }
 }
 
-TEST_CASE("storage_size_test", "[put][size][storage_size][clear]") {
-  kv_block block;
+TEST_CASE("storage_size_test", "[put][size][storage_size][reset]") {
+  kv_block block("nil");
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_NOTHROW(block.put(std::to_string(i), std::to_string(i)));
   }
   REQUIRE(block.size() == 1000);
   REQUIRE(block.storage_size() == 1000);
   REQUIRE(block.storage_size() <= block.storage_capacity());
-  REQUIRE_NOTHROW(block.clear());
+  REQUIRE_NOTHROW(block.reset());
   REQUIRE(block.empty());
 }
 
-TEST_CASE("flush_load_test", "[put][flush][clear][load][get]") {
-  kv_block block;
+TEST_CASE("flush_load_test", "[put][flush][reset][load][get]") {
+  kv_block block("nil");
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_NOTHROW(block.put(std::to_string(i), std::to_string(i)));
   }
   REQUIRE_NOTHROW(block.flush("/tmp", "/test"));
-  REQUIRE_NOTHROW(block.clear());
+  REQUIRE_NOTHROW(block.reset());
   REQUIRE(block.empty());
   REQUIRE_NOTHROW(block.load("/tmp", "/test"));
   for (std::size_t i = 0; i < 1000; ++i) {

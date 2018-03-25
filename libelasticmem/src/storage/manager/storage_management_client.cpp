@@ -36,20 +36,33 @@ void storage_management_client::disconnect() {
   }
 }
 
+void storage_management_client::setup_chain(int32_t block_id,
+                                            const std::string &path,
+                                            int32_t role,
+                                            const std::string &next_block_name) {
+  client_->setup_block(block_id, path, role, next_block_name);
+}
+
+std::string storage_management_client::path(int32_t block_id) {
+  std::string path;
+  client_->get_path(path, block_id);
+  return path;
+}
+
 void storage_management_client::flush(const int32_t block_id,
-                                 const std::string &persistent_store_prefix,
-                                 const std::string &path) {
+                                      const std::string &persistent_store_prefix,
+                                      const std::string &path) {
   client_->flush(block_id, persistent_store_prefix, path);
 }
 
 void storage_management_client::load(const int32_t block_id,
-                                const std::string &persistent_store_prefix,
-                                const std::string &path) {
+                                     const std::string &persistent_store_prefix,
+                                     const std::string &path) {
   client_->load(block_id, persistent_store_prefix, path);
 }
 
-void storage_management_client::clear(const int32_t block_id) {
-  client_->clear(block_id);
+void storage_management_client::reset(const int32_t block_id) {
+  client_->reset(block_id);
 }
 
 int64_t storage_management_client::storage_capacity(const int32_t block_id) {

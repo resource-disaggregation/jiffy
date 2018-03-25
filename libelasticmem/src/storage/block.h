@@ -1,6 +1,7 @@
 #ifndef ELASTICMEM_BLOCK_H
 #define ELASTICMEM_BLOCK_H
 
+#include <utility>
 #include <vector>
 #include <string>
 #include <cstring>
@@ -28,18 +29,30 @@ struct block_op {
 
 class block {
  public:
-  explicit block(const std::vector<block_op> &block_ops) : block_ops_(block_ops) {}
+  explicit block(const std::vector<block_op> &block_ops, std::string block_name)
+      : block_ops_(block_ops), block_name_(std::move(block_name)) {}
 
-  virtual void run_command(std::vector<std::string> &_return, int oid, const std::vector<std::string> &args) = 0;
+  virtual void run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) = 0;
 
   void run_command(std::vector<std::string> &_return,
                    const std::string &op_name,
                    const std::vector<std::string> &args) {
-    int oid = op_id(op_name);
-    if (oid == -1) {
+    int32_t oid = op_id(op_name);
+    if (oid == -1)
       throw std::invalid_argument("No such command " + op_name);
-    }
     run_command(_return, oid, args);
+  }
+
+  void path(const std::string& path) {
+    path_ = path;
+  }
+
+  const std::string& path() const {
+    return path_;
+  }
+
+  const std::string& name() const {
+    return block_name_;
   }
 
   bool is_accessor(int i) const {
@@ -67,12 +80,12 @@ class block {
 
   virtual std::size_t storage_size() = 0;
 
-  virtual void clear() = 0;
+  virtual void reset() = 0;
 
  private:
-  int search_op_name(int l, int r, const char *name) const {
+  int32_t search_op_name(int32_t l, int32_t r, const char *name) const {
     if (r >= l) {
-      int mid = l + (r - l) / 2;
+      int32_t mid = l + (r - l) / 2;
       if (std::strcmp(block_ops_[mid].name, name) == 0)
         return mid;
       if (std::strcmp(block_ops_[mid].name, name) > 0)
@@ -84,6 +97,7 @@ class block {
 
   const std::vector<block_op> &block_ops_;
   std::string path_;
+  std::string block_name_;
 };
 
 }

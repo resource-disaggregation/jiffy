@@ -4,6 +4,7 @@
 #include <iostream>
 #include "../src/storage/notification/subscriber.h"
 #include "../src/storage/notification/notification_server.h"
+#include "test_utils.h"
 
 using namespace ::elasticmem::storage;
 using namespace ::apache::thrift::transport;
@@ -12,27 +13,13 @@ using namespace ::apache::thrift::protocol;
 #define HOST "127.0.0.1"
 #define PORT 9090
 
-static void wait_till_server_ready(const std::string &host, int port) {
-  bool check = true;
-  while (check) {
-    try {
-      auto transport = std::shared_ptr<TTransport>(new TBufferedTransport(std::make_shared<TSocket>(host, port)));
-      transport->open();
-      transport->close();
-      check = false;
-    } catch (TTransportException &e) {
-      usleep(100000);
-    }
-  }
-}
-
 TEST_CASE("notification_test", "[subscribe][get_message]") {
   std::vector<std::shared_ptr<subscription_map>> sub_maps = {std::make_shared<subscription_map>()};
   auto &sub_map = sub_maps[0];
 
   auto server = notification_server::create(sub_maps, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
-  wait_till_server_ready(HOST, PORT);
+  test_utils::wait_till_server_ready(HOST, PORT);
 
   subscriber sub1(HOST, PORT);
   subscriber sub2(HOST, PORT);

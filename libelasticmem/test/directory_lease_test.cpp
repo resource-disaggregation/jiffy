@@ -15,18 +15,6 @@ using namespace ::apache::thrift::transport;
 #define HOST "127.0.0.1"
 #define PORT 9090
 
-static void wait_till_server_ready(const std::string &host, int port) {
-  bool check = true;
-  while (check) {
-    try {
-      directory_lease_client(host, port);
-      check = false;
-    } catch (TTransportException &e) {
-      usleep(100000);
-    }
-  }
-}
-
 TEST_CASE("update_lease_test", "[update_lease]") {
   using namespace std::chrono_literals;
 
@@ -35,7 +23,7 @@ TEST_CASE("update_lease_test", "[update_lease]") {
   auto t = std::make_shared<directory_tree>(alloc, sm);
   auto server = directory_lease_server::create(t, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
-  wait_till_server_ready(HOST, PORT);
+  test_utils::wait_till_server_ready(HOST, PORT);
 
   directory_lease_client client(HOST, PORT);
 
@@ -59,7 +47,7 @@ TEST_CASE("update_lease_test", "[update_lease]") {
   REQUIRE(!t->exists("/sandbox/a/file.txt"));
   REQUIRE(sm->COMMANDS.size() == 2);
   REQUIRE(sm->COMMANDS[0] == "flush:1:/tmp:/sandbox/a/b/file.txt");
-  REQUIRE(sm->COMMANDS[1] == "clear:2");
+  REQUIRE(sm->COMMANDS[1] == "reset:2");
 
   server->stop();
   if (serve_thread.joinable()) {
