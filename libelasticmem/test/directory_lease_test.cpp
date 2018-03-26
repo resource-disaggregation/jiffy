@@ -45,9 +45,12 @@ TEST_CASE("update_lease_test", "[update_lease]") {
   REQUIRE(t->exists("/sandbox/a/b/file.txt"));
   REQUIRE(t->dstatus("/sandbox/a/b/file.txt").mode() == storage_mode::on_disk);
   REQUIRE(!t->exists("/sandbox/a/file.txt"));
-  REQUIRE(sm->COMMANDS.size() == 2);
-  REQUIRE(sm->COMMANDS[0] == "flush:1:/tmp:/sandbox/a/b/file.txt");
-  REQUIRE(sm->COMMANDS[1] == "reset:2");
+  REQUIRE(sm->COMMANDS.size() == 5);
+  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/a/b/c/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[1] == "setup_block:1:/sandbox/a/b/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[2] == "setup_block:2:/sandbox/a/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[3] == "flush:1:/tmp:/sandbox/a/b/file.txt");
+  REQUIRE(sm->COMMANDS[4] == "reset:2");
 
   server->stop();
   if (serve_thread.joinable()) {

@@ -3,6 +3,7 @@
 #include <experimental/filesystem>
 #include <iostream>
 #include "../../utils/directory_utils.h"
+#include "../../storage/chain_module.h"
 
 namespace elasticmem {
 namespace directory {
@@ -52,6 +53,12 @@ data_status directory_tree::create(const std::string &path,
                                    const std::string &persistent_store_prefix,
                                    std::size_t num_blocks,
                                    std::size_t chain_length) {
+  if (num_blocks == 0) {
+    throw directory_ops_exception("File cannot have zero blocks");
+  }
+  if (chain_length == 0) {
+    throw directory_ops_exception("Chain length cannot be zero");
+  }
   namespace fs = std::experimental::filesystem;
   fs::path p(path);
   std::string filename = p.filename();
@@ -71,7 +78,19 @@ data_status directory_tree::create(const std::string &path,
   auto parent = std::dynamic_pointer_cast<ds_dir_node>(node);
   std::vector<block_chain> blocks;
   for (std::size_t i = 0; i < num_blocks; ++i) {
-    blocks.push_back(block_chain{allocator_->allocate(chain_length, "")});
+    block_chain chain{allocator_->allocate(chain_length, "")};
+    blocks.push_back(chain);
+    using namespace storage;
+    if (chain_length == 1) {
+      storage_->setup_block(chain.block_names[0], path, chain_role::singleton, "nil");
+    } else {
+      for (std::size_t j = 0; j < chain_length; ++j) {
+        std::string block_name = chain.block_names[j];
+        std::string next_block_name = (j == chain_length - 1) ? "nil" : chain.block_names[j + 1];
+        int32_t role = (j == 0) ? chain_role::head : (j == chain_length - 1) ? chain_role::tail : chain_role::mid;
+        storage_->setup_block(block_name, path, role, next_block_name);
+      }
+    }
   }
   auto child =
       std::make_shared<ds_file_node>(filename, storage_mode::in_memory, persistent_store_prefix, chain_length, blocks);
