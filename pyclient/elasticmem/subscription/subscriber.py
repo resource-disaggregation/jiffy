@@ -86,15 +86,14 @@ class SubscriptionWorker(threading.Thread):
 
 
 class SubscriptionClient:
-    def __init__(self, block_names, callback=Mailbox()):
-        self.hosts = [block_name.split(':')[0] for block_name in block_names]
-        self.block_ids = [int(block_name.split(':')[2]) for block_name in block_names]
-        self.transports = [TTransport.TBufferedTransport(TSocket.TSocket(host, 9095)) for host in self.hosts]  # FIXME
+    def __init__(self, data_status, callback=Mailbox()):
+        self.block_names = [block_chain.block_names[-1].split(':') for block_chain in data_status.data_blocks]
+        self.block_ids = [int(b[-1]) for b in self.block_names]
+        self.transports = [TTransport.TBufferedTransport(TSocket.TSocket(b[0], int(b[3]))) for b in self.block_names]
         self.protocols = [TBinaryProtocol.TBinaryProtocol(transport) for transport in self.transports]
         self.clients = [notification_service.Client(protocol) for protocol in self.protocols]
         for transport in self.transports:
             transport.open()
-
         self.notifications = callback
         self.controls = Mailbox()
         self.worker = SubscriptionWorker(self.protocols, self.notifications, self.controls)

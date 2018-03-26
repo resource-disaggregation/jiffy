@@ -99,20 +99,19 @@ class ElasticMemClient:
         for kv in self.kvs.viewvalues():
             kv.close()
 
-    def create_scope(self, path, persistent_store_prefix):
-        self.fs.create_file(path, persistent_store_prefix)
-        blocks = self.fs.data_blocks(path)
+    def create_scope(self, path, persistent_store_prefix, num_blocks=1, chain_length=1):
+        s = self.fs.create(path, persistent_store_prefix, num_blocks, chain_length)
         self.to_renew.append(path)
-        self.kvs[path] = KVClient(blocks)
+        self.kvs[path] = KVClient(s)
         return self.kvs[path]
 
     def get_scope(self, path):
         if path in self.kvs:
             return self.kvs[path]
-        blocks = self.fs.data_blocks(path)
+        s = self.fs.open(path)
         if path not in self.to_renew:
             self.to_renew.append(path)
-        self.kvs[path] = KVClient(blocks)
+        self.kvs[path] = KVClient(s)
         return self.kvs[path]
 
     def destroy_scope(self, path, mode):
@@ -127,7 +126,7 @@ class ElasticMemClient:
             self.to_flush.append(path)
 
     def notifications(self, path, callback=Mailbox()):
-        blocks = self.fs.data_blocks(path)
+        s = self.fs.dstatus(path)
         if path not in self.to_renew:
             self.to_renew.append(path)
-        return SubscriptionClient(blocks, callback)
+        return SubscriptionClient(s, callback)

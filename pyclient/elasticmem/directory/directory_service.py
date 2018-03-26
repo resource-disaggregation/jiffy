@@ -33,22 +33,24 @@ class Iface(object):
         """
         pass
 
-    def create_file(self, path, persistent_store_prefix):
+    def open(self, path):
+        """
+        Parameters:
+         - path
+        """
+        pass
+
+    def create(self, path, persistent_store_prefix, num_blocks, chain_length):
         """
         Parameters:
          - path
          - persistent_store_prefix
+         - num_blocks
+         - chain_length
         """
         pass
 
     def exists(self, path):
-        """
-        Parameters:
-         - path
-        """
-        pass
-
-    def file_size(self, path):
         """
         Parameters:
          - path
@@ -129,27 +131,6 @@ class Iface(object):
         pass
 
     def dstatus(self, path):
-        """
-        Parameters:
-         - path
-        """
-        pass
-
-    def mode(self, path):
-        """
-        Parameters:
-         - path
-        """
-        pass
-
-    def persistent_store_prefix(self, path):
-        """
-        Parameters:
-         - path
-        """
-        pass
-
-    def data_blocks(self, path):
         """
         Parameters:
          - path
@@ -240,25 +221,23 @@ class Client(Iface):
             raise result.ex
         return
 
-    def create_file(self, path, persistent_store_prefix):
+    def open(self, path):
         """
         Parameters:
          - path
-         - persistent_store_prefix
         """
-        self.send_create_file(path, persistent_store_prefix)
-        self.recv_create_file()
+        self.send_open(path)
+        return self.recv_open()
 
-    def send_create_file(self, path, persistent_store_prefix):
-        self._oprot.writeMessageBegin('create', TMessageType.CALL, self._seqid)
-        args = create_file_args()
+    def send_open(self, path):
+        self._oprot.writeMessageBegin('open', TMessageType.CALL, self._seqid)
+        args = open_args()
         args.path = path
-        args.persistent_store_prefix = persistent_store_prefix
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_create_file(self):
+    def recv_open(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -266,12 +245,53 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = create_file_result()
+        result = open_result()
         result.read(iprot)
         iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
         if result.ex is not None:
             raise result.ex
-        return
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "open failed: unknown result")
+
+    def create(self, path, persistent_store_prefix, num_blocks, chain_length):
+        """
+        Parameters:
+         - path
+         - persistent_store_prefix
+         - num_blocks
+         - chain_length
+        """
+        self.send_create(path, persistent_store_prefix, num_blocks, chain_length)
+        return self.recv_create()
+
+    def send_create(self, path, persistent_store_prefix, num_blocks, chain_length):
+        self._oprot.writeMessageBegin('create', TMessageType.CALL, self._seqid)
+        args = create_args()
+        args.path = path
+        args.persistent_store_prefix = persistent_store_prefix
+        args.num_blocks = num_blocks
+        args.chain_length = chain_length
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_create(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = create_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.ex is not None:
+            raise result.ex
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "create failed: unknown result")
 
     def exists(self, path):
         """
@@ -305,39 +325,6 @@ class Client(Iface):
         if result.ex is not None:
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "exists failed: unknown result")
-
-    def file_size(self, path):
-        """
-        Parameters:
-         - path
-        """
-        self.send_file_size(path)
-        return self.recv_file_size()
-
-    def send_file_size(self, path):
-        self._oprot.writeMessageBegin('file_size', TMessageType.CALL, self._seqid)
-        args = file_size_args()
-        args.path = path
-        args.write(self._oprot)
-        self._oprot.writeMessageEnd()
-        self._oprot.trans.flush()
-
-    def recv_file_size(self):
-        iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = file_size_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        if result.success is not None:
-            return result.success
-        if result.ex is not None:
-            raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "file_size failed: unknown result")
 
     def last_write_time(self, path):
         """
@@ -698,105 +685,6 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "dstatus failed: unknown result")
 
-    def mode(self, path):
-        """
-        Parameters:
-         - path
-        """
-        self.send_mode(path)
-        return self.recv_mode()
-
-    def send_mode(self, path):
-        self._oprot.writeMessageBegin('mode', TMessageType.CALL, self._seqid)
-        args = mode_args()
-        args.path = path
-        args.write(self._oprot)
-        self._oprot.writeMessageEnd()
-        self._oprot.trans.flush()
-
-    def recv_mode(self):
-        iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = mode_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        if result.success is not None:
-            return result.success
-        if result.ex is not None:
-            raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "mode failed: unknown result")
-
-    def persistent_store_prefix(self, path):
-        """
-        Parameters:
-         - path
-        """
-        self.send_persistent_store_prefix(path)
-        return self.recv_persistent_store_prefix()
-
-    def send_persistent_store_prefix(self, path):
-        self._oprot.writeMessageBegin('persistent_store_prefix', TMessageType.CALL, self._seqid)
-        args = persistent_store_prefix_args()
-        args.path = path
-        args.write(self._oprot)
-        self._oprot.writeMessageEnd()
-        self._oprot.trans.flush()
-
-    def recv_persistent_store_prefix(self):
-        iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = persistent_store_prefix_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        if result.success is not None:
-            return result.success
-        if result.ex is not None:
-            raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "persistent_store_prefix failed: unknown result")
-
-    def data_blocks(self, path):
-        """
-        Parameters:
-         - path
-        """
-        self.send_data_blocks(path)
-        return self.recv_data_blocks()
-
-    def send_data_blocks(self, path):
-        self._oprot.writeMessageBegin('data_blocks', TMessageType.CALL, self._seqid)
-        args = data_blocks_args()
-        args.path = path
-        args.write(self._oprot)
-        self._oprot.writeMessageEnd()
-        self._oprot.trans.flush()
-
-    def recv_data_blocks(self):
-        iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = data_blocks_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        if result.success is not None:
-            return result.success
-        if result.ex is not None:
-            raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "data_blocks failed: unknown result")
-
     def is_regular_file(self, path):
         """
         Parameters:
@@ -870,9 +758,9 @@ class Processor(Iface, TProcessor):
         self._processMap = {}
         self._processMap["create_directory"] = Processor.process_create_directory
         self._processMap["create_directories"] = Processor.process_create_directories
-        self._processMap["create"] = Processor.process_create_file
+        self._processMap["open"] = Processor.process_open
+        self._processMap["create"] = Processor.process_create
         self._processMap["exists"] = Processor.process_exists
-        self._processMap["file_size"] = Processor.process_file_size
         self._processMap["last_write_time"] = Processor.process_last_write_time
         self._processMap["set_permissions"] = Processor.process_set_permissions
         self._processMap["get_permissions"] = Processor.process_get_permissions
@@ -884,9 +772,6 @@ class Processor(Iface, TProcessor):
         self._processMap["directory_entries"] = Processor.process_directory_entries
         self._processMap["recursive_directory_entries"] = Processor.process_recursive_directory_entries
         self._processMap["dstatus"] = Processor.process_dstatus
-        self._processMap["mode"] = Processor.process_mode
-        self._processMap["persistent_store_prefix"] = Processor.process_persistent_store_prefix
-        self._processMap["data_blocks"] = Processor.process_data_blocks
         self._processMap["is_regular_file"] = Processor.process_is_regular_file
         self._processMap["is_directory"] = Processor.process_is_directory
 
@@ -915,7 +800,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -941,7 +826,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -957,17 +842,43 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_create_file(self, seqid, iprot, oprot):
-        args = create_file_args()
+    def process_open(self, seqid, iprot, oprot):
+        args = open_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = create_file_result()
+        result = open_result()
         try:
-            self._handler.create_file(args.path, args.persistent_store_prefix)
+            result.success = self._handler.open(args.path)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("open", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_create(self, seqid, iprot, oprot):
+        args = create_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = create_result()
+        try:
+            result.success = self._handler.create(args.path, args.persistent_store_prefix, args.num_blocks, args.chain_length)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -993,7 +904,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -1009,32 +920,6 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_file_size(self, seqid, iprot, oprot):
-        args = file_size_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        result = file_size_result()
-        try:
-            result.success = self._handler.file_size(args.path)
-            msg_type = TMessageType.REPLY
-        except TTransport.TTransportException:
-            raise
-        except directory_rpc_service_exception as ex:
-            msg_type = TMessageType.REPLY
-            result.ex = ex
-        except TApplicationException as ex:
-            logging.exception('TApplication exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = ex
-        except Exception:
-            logging.exception('Unexpected exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("file_size", msg_type, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
     def process_last_write_time(self, seqid, iprot, oprot):
         args = last_write_time_args()
         args.read(iprot)
@@ -1045,7 +930,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -1071,7 +956,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -1097,7 +982,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -1123,7 +1008,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -1149,7 +1034,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -1175,7 +1060,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -1201,7 +1086,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -1227,7 +1112,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -1253,7 +1138,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -1279,7 +1164,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -1305,7 +1190,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -1321,84 +1206,6 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_mode(self, seqid, iprot, oprot):
-        args = mode_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        result = mode_result()
-        try:
-            result.success = self._handler.mode(args.path)
-            msg_type = TMessageType.REPLY
-        except TTransport.TTransportException:
-            raise
-        except directory_rpc_service_exception as ex:
-            msg_type = TMessageType.REPLY
-            result.ex = ex
-        except TApplicationException as ex:
-            logging.exception('TApplication exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = ex
-        except Exception:
-            logging.exception('Unexpected exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("mode", msg_type, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    def process_persistent_store_prefix(self, seqid, iprot, oprot):
-        args = persistent_store_prefix_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        result = persistent_store_prefix_result()
-        try:
-            result.success = self._handler.persistent_store_prefix(args.path)
-            msg_type = TMessageType.REPLY
-        except TTransport.TTransportException:
-            raise
-        except directory_rpc_service_exception as ex:
-            msg_type = TMessageType.REPLY
-            result.ex = ex
-        except TApplicationException as ex:
-            logging.exception('TApplication exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = ex
-        except Exception:
-            logging.exception('Unexpected exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("persistent_store_prefix", msg_type, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    def process_data_blocks(self, seqid, iprot, oprot):
-        args = data_blocks_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        result = data_blocks_result()
-        try:
-            result.success = self._handler.data_blocks(args.path)
-            msg_type = TMessageType.REPLY
-        except TTransport.TTransportException:
-            raise
-        except directory_rpc_service_exception as ex:
-            msg_type = TMessageType.REPLY
-            result.ex = ex
-        except TApplicationException as ex:
-            logging.exception('TApplication exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = ex
-        except Exception:
-            logging.exception('Unexpected exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("data_blocks", msg_type, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
     def process_is_regular_file(self, seqid, iprot, oprot):
         args = is_regular_file_args()
         args.read(iprot)
@@ -1409,7 +1216,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -1435,7 +1242,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_rpc_service_exception as ex:
+        except directory_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -1536,7 +1343,7 @@ class create_directory_result(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -1573,7 +1380,7 @@ class create_directory_result(object):
 all_structs.append(create_directory_result)
 create_directory_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 
 
@@ -1659,7 +1466,7 @@ class create_directories_result(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -1696,21 +1503,19 @@ class create_directories_result(object):
 all_structs.append(create_directories_result)
 create_directories_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 
 
-class create_file_args(object):
+class open_args(object):
     """
     Attributes:
      - path
-     - persistent_store_prefix
     """
 
 
-    def __init__(self, path=None, persistent_store_prefix=None,):
+    def __init__(self, path=None,):
         self.path = path
-        self.persistent_store_prefix = persistent_store_prefix
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1726,11 +1531,6 @@ class create_file_args(object):
                     self.path = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRING:
-                    self.persistent_store_prefix = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -1740,14 +1540,10 @@ class create_file_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('create_file_args')
+        oprot.writeStructBegin('open_args')
         if self.path is not None:
             oprot.writeFieldBegin('path', TType.STRING, 1)
             oprot.writeString(self.path.encode('utf-8') if sys.version_info[0] == 2 else self.path)
-            oprot.writeFieldEnd()
-        if self.persistent_store_prefix is not None:
-            oprot.writeFieldBegin('persistent_store_prefix', TType.STRING, 2)
-            oprot.writeString(self.persistent_store_prefix.encode('utf-8') if sys.version_info[0] == 2 else self.persistent_store_prefix)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -1765,22 +1561,23 @@ class create_file_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(create_file_args)
-create_file_args.thrift_spec = (
+all_structs.append(open_args)
+open_args.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
-    (2, TType.STRING, 'persistent_store_prefix', 'UTF8', None, ),  # 2
 )
 
 
-class create_file_result(object):
+class open_result(object):
     """
     Attributes:
+     - success
      - ex
     """
 
 
-    def __init__(self, ex=None,):
+    def __init__(self, success=None, ex=None,):
+        self.success = success
         self.ex = ex
 
     def read(self, iprot):
@@ -1792,9 +1589,15 @@ class create_file_result(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
-            if fid == 1:
+            if fid == 0:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.success = rpc_data_status()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -1807,7 +1610,11 @@ class create_file_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('create_file_result')
+        oprot.writeStructBegin('open_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
             self.ex.write(oprot)
@@ -1828,10 +1635,181 @@ class create_file_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(create_file_result)
-create_file_result.thrift_spec = (
+all_structs.append(open_result)
+open_result.thrift_spec = (
+    (0, TType.STRUCT, 'success', [rpc_data_status, None], None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
+)
+
+
+class create_args(object):
+    """
+    Attributes:
+     - path
+     - persistent_store_prefix
+     - num_blocks
+     - chain_length
+    """
+
+
+    def __init__(self, path=None, persistent_store_prefix=None, num_blocks=None, chain_length=None,):
+        self.path = path
+        self.persistent_store_prefix = persistent_store_prefix
+        self.num_blocks = num_blocks
+        self.chain_length = chain_length
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.path = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.persistent_store_prefix = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.num_blocks = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I32:
+                    self.chain_length = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('create_args')
+        if self.path is not None:
+            oprot.writeFieldBegin('path', TType.STRING, 1)
+            oprot.writeString(self.path.encode('utf-8') if sys.version_info[0] == 2 else self.path)
+            oprot.writeFieldEnd()
+        if self.persistent_store_prefix is not None:
+            oprot.writeFieldBegin('persistent_store_prefix', TType.STRING, 2)
+            oprot.writeString(self.persistent_store_prefix.encode('utf-8') if sys.version_info[0] == 2 else self.persistent_store_prefix)
+            oprot.writeFieldEnd()
+        if self.num_blocks is not None:
+            oprot.writeFieldBegin('num_blocks', TType.I32, 3)
+            oprot.writeI32(self.num_blocks)
+            oprot.writeFieldEnd()
+        if self.chain_length is not None:
+            oprot.writeFieldBegin('chain_length', TType.I32, 4)
+            oprot.writeI32(self.chain_length)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(create_args)
+create_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
+    (2, TType.STRING, 'persistent_store_prefix', 'UTF8', None, ),  # 2
+    (3, TType.I32, 'num_blocks', None, None, ),  # 3
+    (4, TType.I32, 'chain_length', None, None, ),  # 4
+)
+
+
+class create_result(object):
+    """
+    Attributes:
+     - success
+     - ex
+    """
+
+
+    def __init__(self, success=None, ex=None,):
+        self.success = success
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = rpc_data_status()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = directory_service_exception()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('create_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(create_result)
+create_result.thrift_spec = (
+    (0, TType.STRUCT, 'success', [rpc_data_status, None], None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 
 
@@ -1924,7 +1902,7 @@ class exists_result(object):
                     iprot.skip(ftype)
             elif fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -1965,141 +1943,7 @@ class exists_result(object):
 all_structs.append(exists_result)
 exists_result.thrift_spec = (
     (0, TType.BOOL, 'success', None, None, ),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
-)
-
-
-class file_size_args(object):
-    """
-    Attributes:
-     - path
-    """
-
-
-    def __init__(self, path=None,):
-        self.path = path
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRING:
-                    self.path = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('file_size_args')
-        if self.path is not None:
-            oprot.writeFieldBegin('path', TType.STRING, 1)
-            oprot.writeString(self.path.encode('utf-8') if sys.version_info[0] == 2 else self.path)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(file_size_args)
-file_size_args.thrift_spec = (
-    None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
-)
-
-
-class file_size_result(object):
-    """
-    Attributes:
-     - success
-     - ex
-    """
-
-
-    def __init__(self, success=None, ex=None,):
-        self.success = success
-        self.ex = ex
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 0:
-                if ftype == TType.I64:
-                    self.success = iprot.readI64()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 1:
-                if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
-                    self.ex.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('file_size_result')
-        if self.success is not None:
-            oprot.writeFieldBegin('success', TType.I64, 0)
-            oprot.writeI64(self.success)
-            oprot.writeFieldEnd()
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(file_size_result)
-file_size_result.thrift_spec = (
-    (0, TType.I64, 'success', None, None, ),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 
 
@@ -2192,7 +2036,7 @@ class last_write_time_result(object):
                     iprot.skip(ftype)
             elif fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -2233,7 +2077,7 @@ class last_write_time_result(object):
 all_structs.append(last_write_time_result)
 last_write_time_result.thrift_spec = (
     (0, TType.I64, 'success', None, None, ),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 
 
@@ -2343,7 +2187,7 @@ class set_permissions_result(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -2380,7 +2224,7 @@ class set_permissions_result(object):
 all_structs.append(set_permissions_result)
 set_permissions_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 
 
@@ -2473,7 +2317,7 @@ class get_permissions_result(object):
                     iprot.skip(ftype)
             elif fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -2514,7 +2358,7 @@ class get_permissions_result(object):
 all_structs.append(get_permissions_result)
 get_permissions_result.thrift_spec = (
     (0, TType.I32, 'success', None, None, ),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 
 
@@ -2600,7 +2444,7 @@ class remove_result(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -2637,7 +2481,7 @@ class remove_result(object):
 all_structs.append(remove_result)
 remove_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 
 
@@ -2723,7 +2567,7 @@ class remove_all_result(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -2760,7 +2604,7 @@ class remove_all_result(object):
 all_structs.append(remove_all_result)
 remove_all_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 
 
@@ -2846,7 +2690,7 @@ class flush_result(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -2883,7 +2727,7 @@ class flush_result(object):
 all_structs.append(flush_result)
 flush_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 
 
@@ -2981,7 +2825,7 @@ class rename_result(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -3018,7 +2862,7 @@ class rename_result(object):
 all_structs.append(rename_result)
 rename_result.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 
 
@@ -3112,7 +2956,7 @@ class status_result(object):
                     iprot.skip(ftype)
             elif fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -3153,7 +2997,7 @@ class status_result(object):
 all_structs.append(status_result)
 status_result.thrift_spec = (
     (0, TType.STRUCT, 'success', [rpc_file_status, None], None, ),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 
 
@@ -3242,17 +3086,17 @@ class directory_entries_result(object):
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype10, _size7) = iprot.readListBegin()
-                    for _i11 in range(_size7):
-                        _elem12 = rpc_dir_entry()
-                        _elem12.read(iprot)
-                        self.success.append(_elem12)
+                    (_etype17, _size14) = iprot.readListBegin()
+                    for _i18 in range(_size14):
+                        _elem19 = rpc_dir_entry()
+                        _elem19.read(iprot)
+                        self.success.append(_elem19)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -3269,8 +3113,8 @@ class directory_entries_result(object):
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.LIST, 0)
             oprot.writeListBegin(TType.STRUCT, len(self.success))
-            for iter13 in self.success:
-                iter13.write(oprot)
+            for iter20 in self.success:
+                iter20.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.ex is not None:
@@ -3296,7 +3140,7 @@ class directory_entries_result(object):
 all_structs.append(directory_entries_result)
 directory_entries_result.thrift_spec = (
     (0, TType.LIST, 'success', (TType.STRUCT, [rpc_dir_entry, None], False), None, ),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 
 
@@ -3385,17 +3229,17 @@ class recursive_directory_entries_result(object):
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype17, _size14) = iprot.readListBegin()
-                    for _i18 in range(_size14):
-                        _elem19 = rpc_dir_entry()
-                        _elem19.read(iprot)
-                        self.success.append(_elem19)
+                    (_etype24, _size21) = iprot.readListBegin()
+                    for _i25 in range(_size21):
+                        _elem26 = rpc_dir_entry()
+                        _elem26.read(iprot)
+                        self.success.append(_elem26)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -3412,8 +3256,8 @@ class recursive_directory_entries_result(object):
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.LIST, 0)
             oprot.writeListBegin(TType.STRUCT, len(self.success))
-            for iter20 in self.success:
-                iter20.write(oprot)
+            for iter27 in self.success:
+                iter27.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.ex is not None:
@@ -3439,7 +3283,7 @@ class recursive_directory_entries_result(object):
 all_structs.append(recursive_directory_entries_result)
 recursive_directory_entries_result.thrift_spec = (
     (0, TType.LIST, 'success', (TType.STRUCT, [rpc_dir_entry, None], False), None, ),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 
 
@@ -3533,7 +3377,7 @@ class dstatus_result(object):
                     iprot.skip(ftype)
             elif fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -3574,417 +3418,7 @@ class dstatus_result(object):
 all_structs.append(dstatus_result)
 dstatus_result.thrift_spec = (
     (0, TType.STRUCT, 'success', [rpc_data_status, None], None, ),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
-)
-
-
-class mode_args(object):
-    """
-    Attributes:
-     - path
-    """
-
-
-    def __init__(self, path=None,):
-        self.path = path
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRING:
-                    self.path = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('mode_args')
-        if self.path is not None:
-            oprot.writeFieldBegin('path', TType.STRING, 1)
-            oprot.writeString(self.path.encode('utf-8') if sys.version_info[0] == 2 else self.path)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(mode_args)
-mode_args.thrift_spec = (
-    None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
-)
-
-
-class mode_result(object):
-    """
-    Attributes:
-     - success
-     - ex
-    """
-
-
-    def __init__(self, success=None, ex=None,):
-        self.success = success
-        self.ex = ex
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 0:
-                if ftype == TType.I32:
-                    self.success = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 1:
-                if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
-                    self.ex.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('mode_result')
-        if self.success is not None:
-            oprot.writeFieldBegin('success', TType.I32, 0)
-            oprot.writeI32(self.success)
-            oprot.writeFieldEnd()
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(mode_result)
-mode_result.thrift_spec = (
-    (0, TType.I32, 'success', None, None, ),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
-)
-
-
-class persistent_store_prefix_args(object):
-    """
-    Attributes:
-     - path
-    """
-
-
-    def __init__(self, path=None,):
-        self.path = path
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRING:
-                    self.path = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('persistent_store_prefix_args')
-        if self.path is not None:
-            oprot.writeFieldBegin('path', TType.STRING, 1)
-            oprot.writeString(self.path.encode('utf-8') if sys.version_info[0] == 2 else self.path)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(persistent_store_prefix_args)
-persistent_store_prefix_args.thrift_spec = (
-    None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
-)
-
-
-class persistent_store_prefix_result(object):
-    """
-    Attributes:
-     - success
-     - ex
-    """
-
-
-    def __init__(self, success=None, ex=None,):
-        self.success = success
-        self.ex = ex
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 0:
-                if ftype == TType.STRING:
-                    self.success = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 1:
-                if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
-                    self.ex.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('persistent_store_prefix_result')
-        if self.success is not None:
-            oprot.writeFieldBegin('success', TType.STRING, 0)
-            oprot.writeString(self.success.encode('utf-8') if sys.version_info[0] == 2 else self.success)
-            oprot.writeFieldEnd()
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(persistent_store_prefix_result)
-persistent_store_prefix_result.thrift_spec = (
-    (0, TType.STRING, 'success', 'UTF8', None, ),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
-)
-
-
-class data_blocks_args(object):
-    """
-    Attributes:
-     - path
-    """
-
-
-    def __init__(self, path=None,):
-        self.path = path
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRING:
-                    self.path = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('data_blocks_args')
-        if self.path is not None:
-            oprot.writeFieldBegin('path', TType.STRING, 1)
-            oprot.writeString(self.path.encode('utf-8') if sys.version_info[0] == 2 else self.path)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(data_blocks_args)
-data_blocks_args.thrift_spec = (
-    None,  # 0
-    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
-)
-
-
-class data_blocks_result(object):
-    """
-    Attributes:
-     - success
-     - ex
-    """
-
-
-    def __init__(self, success=None, ex=None,):
-        self.success = success
-        self.ex = ex
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 0:
-                if ftype == TType.LIST:
-                    self.success = []
-                    (_etype24, _size21) = iprot.readListBegin()
-                    for _i25 in range(_size21):
-                        _elem26 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                        self.success.append(_elem26)
-                    iprot.readListEnd()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 1:
-                if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
-                    self.ex.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('data_blocks_result')
-        if self.success is not None:
-            oprot.writeFieldBegin('success', TType.LIST, 0)
-            oprot.writeListBegin(TType.STRING, len(self.success))
-            for iter27 in self.success:
-                oprot.writeString(iter27.encode('utf-8') if sys.version_info[0] == 2 else iter27)
-            oprot.writeListEnd()
-            oprot.writeFieldEnd()
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(data_blocks_result)
-data_blocks_result.thrift_spec = (
-    (0, TType.LIST, 'success', (TType.STRING, 'UTF8', False), None, ),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 
 
@@ -4077,7 +3511,7 @@ class is_regular_file_result(object):
                     iprot.skip(ftype)
             elif fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -4118,7 +3552,7 @@ class is_regular_file_result(object):
 all_structs.append(is_regular_file_result)
 is_regular_file_result.thrift_spec = (
     (0, TType.BOOL, 'success', None, None, ),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 
 
@@ -4211,7 +3645,7 @@ class is_directory_result(object):
                     iprot.skip(ftype)
             elif fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_rpc_service_exception()
+                    self.ex = directory_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -4252,7 +3686,7 @@ class is_directory_result(object):
 all_structs.append(is_directory_result)
 is_directory_result.thrift_spec = (
     (0, TType.BOOL, 'success', None, None, ),  # 0
-    (1, TType.STRUCT, 'ex', [directory_rpc_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 fix_spec(all_structs)
 del all_structs

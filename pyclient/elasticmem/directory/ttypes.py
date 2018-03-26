@@ -73,6 +73,72 @@ class rpc_storage_mode(object):
     }
 
 
+class rpc_block_chain(object):
+    """
+    Attributes:
+     - block_names
+    """
+
+
+    def __init__(self, block_names=None,):
+        self.block_names = block_names
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.LIST:
+                    self.block_names = []
+                    (_etype3, _size0) = iprot.readListBegin()
+                    for _i4 in range(_size0):
+                        _elem5 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        self.block_names.append(_elem5)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('rpc_block_chain')
+        if self.block_names is not None:
+            oprot.writeFieldBegin('block_names', TType.LIST, 1)
+            oprot.writeListBegin(TType.STRING, len(self.block_names))
+            for iter6 in self.block_names:
+                oprot.writeString(iter6.encode('utf-8') if sys.version_info[0] == 2 else iter6)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        if self.block_names is None:
+            raise TProtocolException(message='Required field block_names is unset!')
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
 class rpc_file_status(object):
     """
     Attributes:
@@ -162,13 +228,15 @@ class rpc_data_status(object):
     Attributes:
      - storage_mode
      - persistent_store_prefix
+     - chain_length
      - data_blocks
     """
 
 
-    def __init__(self, storage_mode=None, persistent_store_prefix=None, data_blocks=None,):
+    def __init__(self, storage_mode=None, persistent_store_prefix=None, chain_length=None, data_blocks=None,):
         self.storage_mode = storage_mode
         self.persistent_store_prefix = persistent_store_prefix
+        self.chain_length = chain_length
         self.data_blocks = data_blocks
 
     def read(self, iprot):
@@ -191,12 +259,18 @@ class rpc_data_status(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
+                if ftype == TType.I32:
+                    self.chain_length = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
                 if ftype == TType.LIST:
                     self.data_blocks = []
-                    (_etype3, _size0) = iprot.readListBegin()
-                    for _i4 in range(_size0):
-                        _elem5 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                        self.data_blocks.append(_elem5)
+                    (_etype10, _size7) = iprot.readListBegin()
+                    for _i11 in range(_size7):
+                        _elem12 = rpc_block_chain()
+                        _elem12.read(iprot)
+                        self.data_blocks.append(_elem12)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -218,11 +292,15 @@ class rpc_data_status(object):
             oprot.writeFieldBegin('persistent_store_prefix', TType.STRING, 2)
             oprot.writeString(self.persistent_store_prefix.encode('utf-8') if sys.version_info[0] == 2 else self.persistent_store_prefix)
             oprot.writeFieldEnd()
+        if self.chain_length is not None:
+            oprot.writeFieldBegin('chain_length', TType.I32, 3)
+            oprot.writeI32(self.chain_length)
+            oprot.writeFieldEnd()
         if self.data_blocks is not None:
-            oprot.writeFieldBegin('data_blocks', TType.LIST, 3)
-            oprot.writeListBegin(TType.STRING, len(self.data_blocks))
-            for iter6 in self.data_blocks:
-                oprot.writeString(iter6.encode('utf-8') if sys.version_info[0] == 2 else iter6)
+            oprot.writeFieldBegin('data_blocks', TType.LIST, 4)
+            oprot.writeListBegin(TType.STRUCT, len(self.data_blocks))
+            for iter13 in self.data_blocks:
+                iter13.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -233,6 +311,8 @@ class rpc_data_status(object):
             raise TProtocolException(message='Required field storage_mode is unset!')
         if self.persistent_store_prefix is None:
             raise TProtocolException(message='Required field persistent_store_prefix is unset!')
+        if self.chain_length is None:
+            raise TProtocolException(message='Required field chain_length is unset!')
         if self.data_blocks is None:
             raise TProtocolException(message='Required field data_blocks is unset!')
         return
@@ -321,7 +401,7 @@ class rpc_dir_entry(object):
         return not (self == other)
 
 
-class directory_rpc_service_exception(TException):
+class directory_service_exception(TException):
     """
     Attributes:
      - msg
@@ -354,7 +434,7 @@ class directory_rpc_service_exception(TException):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('directory_rpc_service_exception')
+        oprot.writeStructBegin('directory_service_exception')
         if self.msg is not None:
             oprot.writeFieldBegin('msg', TType.STRING, 1)
             oprot.writeString(self.msg.encode('utf-8') if sys.version_info[0] == 2 else self.msg)
@@ -380,6 +460,11 @@ class directory_rpc_service_exception(TException):
 
     def __ne__(self, other):
         return not (self == other)
+all_structs.append(rpc_block_chain)
+rpc_block_chain.thrift_spec = (
+    None,  # 0
+    (1, TType.LIST, 'block_names', (TType.STRING, 'UTF8', False), None, ),  # 1
+)
 all_structs.append(rpc_file_status)
 rpc_file_status.thrift_spec = (
     None,  # 0
@@ -392,7 +477,8 @@ rpc_data_status.thrift_spec = (
     None,  # 0
     (1, TType.I32, 'storage_mode', None, None, ),  # 1
     (2, TType.STRING, 'persistent_store_prefix', 'UTF8', None, ),  # 2
-    (3, TType.LIST, 'data_blocks', (TType.STRING, 'UTF8', False), None, ),  # 3
+    (3, TType.I32, 'chain_length', None, None, ),  # 3
+    (4, TType.LIST, 'data_blocks', (TType.STRUCT, [rpc_block_chain, None], False), None, ),  # 4
 )
 all_structs.append(rpc_dir_entry)
 rpc_dir_entry.thrift_spec = (
@@ -400,8 +486,8 @@ rpc_dir_entry.thrift_spec = (
     (1, TType.STRING, 'name', 'UTF8', None, ),  # 1
     (2, TType.STRUCT, 'status', [rpc_file_status, None], None, ),  # 2
 )
-all_structs.append(directory_rpc_service_exception)
-directory_rpc_service_exception.thrift_spec = (
+all_structs.append(directory_service_exception)
+directory_service_exception.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'msg', 'UTF8', None, ),  # 1
 )

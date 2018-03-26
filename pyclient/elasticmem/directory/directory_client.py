@@ -1,7 +1,7 @@
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
 from thrift.transport import TTransport, TSocket
 
-import directory_rpc_service
+import directory_service
 
 
 class Perms:
@@ -81,28 +81,25 @@ class StorageMode:
     on_disk = 3
 
 
+class BlockChain:
+    def __init__(self, block_names):
+        self.block_names = block_names
+
+
 class DataStatus:
-    def __init__(self, storage_mode, persistent_store_prefix, data_blocks):
+    def __init__(self, storage_mode, persistent_store_prefix, chain_length, data_blocks):
         self.storage_mode = storage_mode
         self.persistent_store_prefix = persistent_store_prefix
-        self.data_blocks = data_blocks
-
-    def get_storage_mode(self):
-        return self.storage_mode
-
-    def get_persistent_store_prefix(self):
-        return self.persistent_store_prefix
-
-    def get_data_blocks(self):
-        return self.data_blocks
+        self.chain_length = chain_length
+        self.data_blocks = [BlockChain(block_chain.block_names) for block_chain in data_blocks]
 
 
 class DirectoryClient:
-    def __init__(self, host='localhost', port=9090):
+    def __init__(self, host='127.0.0.1', port=9090):
         self.socket_ = TSocket.TSocket(host, port)
         self.transport_ = TTransport.TBufferedTransport(self.socket_)
         self.protocol_ = TBinaryProtocol(self.transport_)
-        self.client_ = directory_rpc_service.Client(self.protocol_)
+        self.client_ = directory_service.Client(self.protocol_)
         self.transport_.open()
 
     def __del__(self):
@@ -118,14 +115,16 @@ class DirectoryClient:
     def create_directories(self, path):
         self.client_.create_directories(path)
 
-    def create_file(self, path, persistent_store_prefix):
-        self.client_.create_file(path, persistent_store_prefix)
+    def open(self, path):
+        s = self.client_.open(path)
+        return DataStatus(s.storage_mode, s.persistent_store_prefix, s.chain_length, s.data_blocks)
+
+    def create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1):
+        s = self.client_.create(path, persistent_store_prefix, num_blocks, chain_length)
+        return DataStatus(s.storage_mode, s.persistent_store_prefix, s.chain_length, s.data_blocks)
 
     def exists(self, path):
         return self.client_.exists(path)
-
-    def file_size(self, path):
-        return self.client_.file_size(path)
 
     def last_write_time(self, path):
         return self.client_.last_write_time(path)
@@ -159,16 +158,7 @@ class DirectoryClient:
 
     def dstatus(self, path):
         s = self.client_.dstatus(path)
-        return DataStatus(s.storage_mode, s.persistent_store_prefix, s.data_blocks)
-
-    def mode(self, path):
-        return self.client_.mode(path)
-
-    def persistent_store_prefix(self, path):
-        return self.client_.persistent_store_prefix(path)
-
-    def data_blocks(self, path):
-        return self.client_.data_blocks(path)
+        return DataStatus(s.storage_mode, s.persistent_store_prefix, s.chain_length, s.data_blocks)
 
     def is_regular_file(self, path):
         return self.client_.is_regular_file(path)

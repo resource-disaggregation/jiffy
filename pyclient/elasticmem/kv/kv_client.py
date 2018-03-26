@@ -6,9 +6,9 @@ import block_service
 
 class BlockConnection:
     def __init__(self, block_name):
-        host, port, block_id = block_name.split(':')
+        host, service_port, management_port, notification_port, block_id = block_name.split(':')
         self.id_ = int(block_id)
-        self.socket_ = TSocket.TSocket(host, int(port))
+        self.socket_ = TSocket.TSocket(host, int(service_port))
         self.transport_ = TTransport.TBufferedTransport(self.socket_)
         self.protocol_ = TBinaryProtocol(self.transport_)
         self.client_ = block_service.Client(self.protocol_)
@@ -35,28 +35,37 @@ class BlockConnection:
 
 
 class KVClient:
-    def __init__(self, block_names, hash_fn=hash):
-        self.connections_ = [BlockConnection(block_name) for block_name in block_names]
+    def __init__(self, data_status, hash_fn=hash):
+        self.singleton = data_status.chain_length == 1
+        if self.singleton:
+            self.heads_ = [BlockConnection(block_chain.block_names[0]) for block_chain in data_status.data_blocks]
+            self.tails_ = self.heads_
+        else:
+            self.heads_ = [BlockConnection(block_chain.block_names[0]) for block_chain in data_status.data_blocks]
+            self.tails_ = [BlockConnection(block_chain.block_names[-1]) for block_chain in data_status.data_blocks]
         self.hash_fn_ = hash_fn
 
     def __del__(self):
         self.close()
 
     def close(self):
-        for x in self.connections_:
+        for x in self.heads_:
             x.close()
+        if not self.singleton:
+            for x in self.tails_:
+                x.close()
 
     def put(self, key, value):
-        self.connections_[self.block_id(key)].put(key, value)
+        self.heads_[self.block_id(key)].put(key, value)
 
     def get(self, key):
-        return self.connections_[self.block_id(key)].get(key)
+        return self.tails_[self.block_id(key)].get(key)
 
     def update(self, key, value):
-        self.connections_[self.block_id(key)].update(key, value)
+        self.heads_[self.block_id(key)].update(key, value)
 
     def remove(self, key):
-        self.connections_[self.block_id(key)].remove(key)
+        self.heads_[self.block_id(key)].remove(key)
 
     def block_id(self, key):
-        return self.hash_fn_(key) % len(self.connections_)
+        return self.hash_fn_(key) % len(self.heads_)

@@ -7,7 +7,7 @@ from Queue import Empty
 
 from thrift.transport import TTransport
 
-from elasticmem import ElasticMemClient, RemoveMode
+from elasticmem import ElasticMemClient, RemoveMode, DataStatus, StorageMode, BlockChain
 from elasticmem import BlockException
 from elasticmem.directory import directory_client
 from elasticmem.kv import kv_client
@@ -19,9 +19,10 @@ from elasticmem.subscription.subscriber import Notification
 class TestClient(TestCase):
     DIRECTORY_SERVER_EXECUTABLE = os.getenv('DIRECTORY_SERVER_EXEC', 'directoryd')
     STORAGE_SERVER_EXECUTABLE = os.getenv('STORAGE_SERVER_EXEC', 'storaged')
-    KV_HOST = '127.0.0.1'
-    KV_PORT = 9093
-    NOTIFICATION_PORT = 9095
+    STORAGE_HOST = '127.0.0.1'
+    STORAGE_SERVICE_PORT = 9093
+    STORAGE_MANAGEMENT_PORT = 9094
+    STORAGE_NOTIFICATION_PORT = 9095
     DIRECTORY_HOST = '127.0.0.1'
     DIRECTORY_SERVICE_PORT = 9090
     DIRECTORY_LEASE_PORT = 9091
@@ -38,10 +39,12 @@ class TestClient(TestCase):
 
     def wait_till_storage_server_ready(self):
         check = True
+        block_name = "%s:%d:%d:%d:0" % (self.STORAGE_HOST, self.STORAGE_SERVICE_PORT, self.STORAGE_MANAGEMENT_PORT,
+                                        self.STORAGE_NOTIFICATION_PORT)
         while check:
             try:
-                kv_client.BlockConnection("%s:%d:0" % (self.KV_HOST, self.KV_PORT))
-                subscriber.SubscriptionClient(["%s:%d:0" % (self.KV_HOST, self.NOTIFICATION_PORT)])
+                kv_client.BlockConnection(block_name)
+                subscriber.SubscriptionClient(DataStatus(StorageMode.in_memory, "", 1, [BlockChain([block_name])]))
                 check = False
             except TTransport.TTransportException:
                 time.sleep(0.1)
@@ -175,7 +178,7 @@ class TestClient(TestCase):
         self.start_servers()
         client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
-            client.fs.create_file("/a/file.txt", "/tmp")
+            client.fs.create("/a/file.txt", "/tmp")
 
             n1 = client.notifications("/a/file.txt")
             n2 = client.notifications("/a/file.txt")
