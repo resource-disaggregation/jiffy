@@ -11,9 +11,9 @@
 namespace elasticmem {
 namespace directory {
 
-class directory_service_exception : public std::exception {
+class directory_ops_exception : public std::exception {
  public:
-  explicit directory_service_exception(std::string msg) : msg_(std::move(msg)) {}
+  explicit directory_ops_exception(std::string msg) : msg_(std::move(msg)) {}
 
   char const *what() const noexcept override {
     return msg_.c_str();
@@ -120,6 +120,18 @@ enum storage_mode {
   on_disk = 3
 };
 
+struct block_chain {
+  std::vector<std::string> block_names;
+
+  const std::string &head() const {
+    return block_names.front();
+  }
+
+  const std::string &tail() const {
+    return block_names.back();
+  }
+};
+
 class file_status {
  public:
   file_status()
@@ -189,11 +201,18 @@ class directory_entry {
 
 class data_status {
  public:
-  data_status() : mode_(storage_mode::in_memory) {}
-  data_status(storage_mode mode, std::string persistent_store_prefix, std::vector<std::string> nodes)
-      : mode_(mode), persistent_store_prefix_(std::move(persistent_store_prefix)), data_blocks_(std::move(nodes)) {}
+  data_status() : mode_(storage_mode::in_memory), chain_length_(1) {}
 
-  const std::vector<std::string> &data_blocks() const {
+  data_status(storage_mode mode,
+              std::string persistent_store_prefix,
+              std::size_t chain_length,
+              std::vector<block_chain> blocks)
+      : mode_(mode),
+        persistent_store_prefix_(std::move(persistent_store_prefix)),
+        chain_length_(chain_length),
+        data_blocks_(std::move(blocks)) {}
+
+  const std::vector<block_chain> &data_blocks() const {
     return data_blocks_;
   }
 
@@ -213,36 +232,47 @@ class data_status {
     persistent_store_prefix_ = prefix;
   }
 
+  std::size_t chain_length() const {
+    return chain_length_;
+  }
+
+  void chain_length(std::size_t chain_length) {
+    chain_length_ = chain_length;
+  }
+
   void remove_all_data_blocks() {
     data_blocks_.clear();
   }
 
-  void add_data_block(const std::string &block) {
+  void add_data_block(const block_chain &block) {
     data_blocks_.push_back(block);
   }
 
-  void remove_data_block(const std::string &block) {
-    data_blocks_.erase(std::remove(data_blocks_.begin(), data_blocks_.end(), block), data_blocks_.end());
+  void remove_data_block(std::size_t i) {
+    data_blocks_.erase(data_blocks_.begin() + i);
   }
 
  private:
   storage_mode mode_;
   std::string persistent_store_prefix_;
-  std::vector<std::string> data_blocks_;
+  std::size_t chain_length_;
+  std::vector<block_chain> data_blocks_;
 };
 
-class directory_service {
+class directory_ops {
  public:
-  virtual ~directory_service() = default;
+  virtual ~directory_ops() = default;
 
   virtual void create_directory(const std::string &path) = 0;
   virtual void create_directories(const std::string &path) = 0;
 
-  virtual void create_file(const std::string &path, const std::string &persistent_store_prefix) = 0;
+  virtual data_status open(const std::string &path) = 0;
+  virtual data_status create(const std::string &path,
+                             const std::string &persistent_store_prefix,
+                             std::size_t num_blocks,
+                             std::size_t chain_length) = 0;
 
   virtual bool exists(const std::string &path) const = 0;
-
-  virtual std::size_t file_size(const std::string &path) const = 0;
 
   virtual std::uint64_t last_write_time(const std::string &path) const = 0;
 
@@ -264,36 +294,14 @@ class directory_service {
 
   virtual data_status dstatus(const std::string &path) = 0;
 
-  virtual storage_mode mode(const std::string &path) = 0;
-
-  virtual std::string persistent_store_prefix(const std::string &path) = 0;
-
-  virtual std::vector<std::string> data_blocks(const std::string &path) = 0;
-
   // Check file type
   virtual bool is_regular_file(const std::string &path) = 0;
   virtual bool is_directory(const std::string &path) = 0;
 };
 
-class directory_management_service {
+class directory_management_ops {
  public:
   virtual void touch(const std::string &path) = 0;
-
-  virtual void grow(const std::string &path, std::size_t bytes) = 0;
-
-  virtual void shrink(const std::string &path, std::size_t bytes) = 0;
-
-  virtual void dstatus(const std::string &path, const data_status &status) = 0;
-
-  virtual void mode(const std::string &path, const storage_mode &mode) = 0;
-
-  virtual void persistent_store_prefix(const std::string &path, const std::string &prefix) = 0;
-
-  virtual void add_data_block(const std::string &path) = 0;
-
-  virtual void remove_data_block(const std::string &path, const std::string &node) = 0;
-
-  virtual void remove_all_data_blocks(const std::string &path) = 0;
 };
 
 }

@@ -16,9 +16,9 @@ TEST_CASE("lease_manager_test") {
   auto sm = std::make_shared<dummy_storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
   lease_expiry_worker mgr(tree, LEASE_PERIOD_MS, GRACE_PERIOD_MS);
-  REQUIRE_NOTHROW(tree->create_file("/sandbox/a/b/c/file.txt", "/tmp"));
-  REQUIRE_NOTHROW(tree->create_file("/sandbox/a/b/file.txt", "/tmp"));
-  REQUIRE_NOTHROW(tree->create_file("/sandbox/a/file.txt", "/tmp"));
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/c/file.txt", "/tmp", 1, 1));
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/file.txt", "/tmp", 1, 1));
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/file.txt", "/tmp", 1, 1));
   REQUIRE(tree->exists("/sandbox/a/b/c/file.txt"));
   REQUIRE(tree->exists("/sandbox/a/b/file.txt"));
   REQUIRE(tree->exists("/sandbox/a/file.txt"));

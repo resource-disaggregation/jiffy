@@ -3,7 +3,7 @@
 #include <thread>
 #include <directory/fs/directory_tree.h>
 #include <directory/block/random_block_allocator.h>
-#include <directory/fs/directory_rpc_server.h>
+#include <directory/fs/directory_server.h>
 #include <directory/lease/lease_expiry_worker.h>
 #include <directory/lease/directory_lease_server.h>
 #include <storage/manager/storage_manager.h>
@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
   std::exception_ptr directory_exception = nullptr;
   auto storage = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, storage);
-  auto directory_server = directory_rpc_server::create(tree, address, service_port);
+  auto directory_server = directory_server::create(tree, address, service_port);
   std::thread directory_serve_thread([&directory_exception, &directory_server, &failing_thread, &failure_condition] {
     try {
       directory_server->serve();

@@ -7,7 +7,7 @@
 #include <map>
 #include <shared_mutex>
 
-#include "../directory_service.h"
+#include "../directory_ops.h"
 #include "../block/block_allocator.h"
 #include "../../utils/time_utils.h"
 #include "../../storage/storage_management_ops.h"
@@ -20,7 +20,7 @@ class lease_expiry_worker;
 
 class ds_node {
  public:
-  explicit ds_node(const std::string &name, file_status status)
+  explicit ds_node(std::string name, file_status status)
       : name_(std::move(name)), status_(status) {}
 
   virtual ~ds_node() = default;
@@ -36,8 +36,6 @@ class ds_node {
   file_status status() const { return status_; }
 
   directory_entry entry() const { return directory_entry(name_, status_); }
-
-  virtual std::size_t file_size() const = 0;
 
   std::uint64_t last_write_time() const { return status_.last_write_time(); }
 
@@ -60,8 +58,15 @@ class ds_file_node : public ds_node {
  public:
   explicit ds_file_node(const std::string &name)
       : ds_node(name, file_status(file_type::regular, perms(perms::all), utils::time_utils::now_ms())),
-        dstatus_{},
-        size_(0) {}
+        dstatus_{} {}
+
+  ds_file_node(const std::string &name,
+               storage_mode mode,
+               const std::string &persistent_store_prefix,
+               std::size_t chain_length,
+               std::vector<block_chain> blocks) :
+      ds_node(name, file_status(file_type::regular, perms(perms::all), utils::time_utils::now_ms())),
+      dstatus_(mode, persistent_store_prefix, chain_length, std::move(blocks)) {}
 
   const data_status &dstatus() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
@@ -93,36 +98,17 @@ class ds_file_node : public ds_node {
     dstatus_.persistent_store_prefix(prefix);
   }
 
-  const std::vector<std::string> &data_blocks() const {
+  std::size_t chain_length() const {
+    return dstatus_.chain_length();
+  }
+
+  void chain_length(std::size_t chain_length) {
+    dstatus_.chain_length(chain_length);
+  }
+
+  const std::vector<block_chain> &data_blocks() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_.data_blocks();
-  }
-
-  void add_data_block(const std::string &block) {
-    std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.add_data_block(block);
-  }
-
-  void remove_data_block(const std::string &block) {
-    std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.remove_data_block(block);
-  }
-
-  void remove_all_data_blocks() {
-    std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.remove_all_data_blocks();
-  }
-
-  std::size_t file_size() const override {
-    return std::atomic_load(&size_);
-  }
-
-  void grow(std::size_t bytes) {
-    size_.fetch_add(bytes);
-  }
-
-  void shrink(std::size_t bytes) {
-    size_.fetch_sub(bytes);
   }
 
   void flush(const std::string &path,
@@ -131,8 +117,8 @@ class ds_file_node : public ds_node {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     dstatus_.mode(storage_mode::flushing);
     for (const auto &block: dstatus_.data_blocks()) {
-      storage->flush(block, dstatus_.persistent_store_prefix(), path);
-      alloc->free(block);
+      storage->flush(block.tail(), dstatus_.persistent_store_prefix(), path);
+      alloc->free(block.block_names);
     }
     dstatus_.remove_all_data_blocks();
     dstatus_.mode(storage_mode::on_disk);
@@ -141,7 +127,6 @@ class ds_file_node : public ds_node {
  private:
   mutable std::shared_mutex mtx_;
   data_status dstatus_{};
-  std::atomic<std::size_t> size_;
 };
 
 class ds_dir_node : public ds_node {
@@ -165,7 +150,7 @@ class ds_dir_node : public ds_node {
     if (children_.find(node->name()) == children_.end()) {
       children_.insert(std::make_pair(node->name(), node));
     } else {
-      throw directory_service_exception("Child node already exists: " + node->name());
+      throw directory_ops_exception("Child node already exists: " + node->name());
     }
   }
 
@@ -175,7 +160,7 @@ class ds_dir_node : public ds_node {
     if (ret != children_.end()) {
       children_.erase(ret);
     } else {
-      throw directory_service_exception("Child node not found: " + name);
+      throw directory_ops_exception("Child node not found: " + name);
     }
   }
 
@@ -211,14 +196,6 @@ class ds_dir_node : public ds_node {
       ret.push_back(entry.first);
     }
     return ret;
-  }
-
-  std::size_t file_size() const override {
-    std::size_t size = 0;
-    for (const auto &entry: children_) {
-      size += entry.second->file_size();
-    }
-    return size;
   }
 
   child_map::const_iterator begin() const {
@@ -257,7 +234,7 @@ class ds_dir_node : public ds_node {
   child_map children_{};
 };
 
-class directory_tree : public directory_service, public directory_management_service {
+class directory_tree : public directory_ops, public directory_management_ops {
  public:
   explicit directory_tree(std::shared_ptr<block_allocator> allocator,
                           std::shared_ptr<storage::storage_management_ops> storage);
@@ -265,11 +242,13 @@ class directory_tree : public directory_service, public directory_management_ser
   void create_directory(const std::string &path) override;
   void create_directories(const std::string &path) override;
 
-  void create_file(const std::string &path, const std::string &persistent_store_prefix) override;
+  data_status open(const std::string &path) override;
+  data_status create(const std::string &path,
+                     const std::string &persistent_store_prefix,
+                     std::size_t num_blocks,
+                     std::size_t chain_length) override;
 
   bool exists(const std::string &path) const override;
-
-  std::size_t file_size(const std::string &path) const override;
 
   std::uint64_t last_write_time(const std::string &path) const override;
 
@@ -290,32 +269,11 @@ class directory_tree : public directory_service, public directory_management_ser
   std::vector<directory_entry> recursive_directory_entries(const std::string &path) override;
 
   data_status dstatus(const std::string &path) override;
-  void dstatus(const std::string &path, const data_status &status) override;
-
-  storage_mode mode(const std::string &path) override;
-
-  std::string persistent_store_prefix(const std::string &path) override;
-
-  std::vector<std::string> data_blocks(const std::string &path) override;
 
   bool is_regular_file(const std::string &path) override;
   bool is_directory(const std::string &path) override;
 
   void touch(const std::string &path) override;
-
-  void grow(const std::string &path, std::size_t bytes) override;
-
-  void shrink(const std::string &path, std::size_t bytes) override;
-
-  void mode(const std::string &path, const storage_mode &mode) override;
-
-  void persistent_store_prefix(const std::string &path, const std::string &prefix) override;
-
-  void add_data_block(const std::string &path) override;
-
-  void remove_data_block(const std::string &path, const std::string &block) override;
-
-  void remove_all_data_blocks(const std::string &path) override;
 
  private:
   std::shared_ptr<ds_node> get_node_unsafe(const std::string &path) const;

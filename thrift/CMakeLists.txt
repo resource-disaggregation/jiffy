@@ -1,6 +1,6 @@
 set(THRIFTGEN_CXX_OPTS "templates,pure_enums,no_skeleton,include_prefix")
 
-set(DIRECTORY_INPUT_FILE directory_rpc_service.thrift)
+set(DIRECTORY_INPUT_FILE directory_service.thrift)
 set(DIRECTORY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/libdirectory/src/rpc)
 set(DIRECTORY_OUTPUT_SOURCES
         ${DIRECTORY_OUTPUT_PATH}/directory_rpc_service.cpp

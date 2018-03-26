@@ -4,8 +4,8 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-#ifndef directory_rpc_service_TYPES_H
-#define directory_rpc_service_TYPES_H
+#ifndef directory_service_TYPES_H
+#define directory_service_TYPES_H
 
 #include <iosfwd>
 
@@ -53,13 +53,53 @@ std::ostream& operator<<(std::ostream& out, const rpc_storage_mode val);
 
 typedef int32_t rpc_perms;
 
+class rpc_block_chain;
+
 class rpc_file_status;
 
 class rpc_data_status;
 
 class rpc_dir_entry;
 
-class directory_rpc_service_exception;
+class directory_service_exception;
+
+
+class rpc_block_chain {
+ public:
+
+  rpc_block_chain(const rpc_block_chain&);
+  rpc_block_chain& operator=(const rpc_block_chain&);
+  rpc_block_chain() {
+  }
+
+  virtual ~rpc_block_chain() throw();
+  std::vector<std::string>  block_names;
+
+  void __set_block_names(const std::vector<std::string> & val);
+
+  bool operator == (const rpc_block_chain & rhs) const
+  {
+    if (!(block_names == rhs.block_names))
+      return false;
+    return true;
+  }
+  bool operator != (const rpc_block_chain &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const rpc_block_chain & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+  virtual void printTo(std::ostream& out) const;
+};
+
+void swap(rpc_block_chain &a, rpc_block_chain &b);
+
+std::ostream& operator<<(std::ostream& out, const rpc_block_chain& obj);
 
 
 class rpc_file_status {
@@ -115,25 +155,30 @@ class rpc_data_status {
 
   rpc_data_status(const rpc_data_status&);
   rpc_data_status& operator=(const rpc_data_status&);
-  rpc_data_status() : storage_mode((rpc_storage_mode)0), persistent_store_prefix() {
+  rpc_data_status() : storage_mode((rpc_storage_mode)0), persistent_store_prefix(), chain_length(0) {
   }
 
   virtual ~rpc_data_status() throw();
   rpc_storage_mode storage_mode;
   std::string persistent_store_prefix;
-  std::vector<std::string>  data_blocks;
+  int32_t chain_length;
+  std::vector<rpc_block_chain>  data_blocks;
 
   void __set_storage_mode(const rpc_storage_mode val);
 
   void __set_persistent_store_prefix(const std::string& val);
 
-  void __set_data_blocks(const std::vector<std::string> & val);
+  void __set_chain_length(const int32_t val);
+
+  void __set_data_blocks(const std::vector<rpc_block_chain> & val);
 
   bool operator == (const rpc_data_status & rhs) const
   {
     if (!(storage_mode == rhs.storage_mode))
       return false;
     if (!(persistent_store_prefix == rhs.persistent_store_prefix))
+      return false;
+    if (!(chain_length == rhs.chain_length))
       return false;
     if (!(data_blocks == rhs.data_blocks))
       return false;
@@ -201,30 +246,30 @@ void swap(rpc_dir_entry &a, rpc_dir_entry &b);
 std::ostream& operator<<(std::ostream& out, const rpc_dir_entry& obj);
 
 
-class directory_rpc_service_exception : public ::apache::thrift::TException {
+class directory_service_exception : public ::apache::thrift::TException {
  public:
 
-  directory_rpc_service_exception(const directory_rpc_service_exception&);
-  directory_rpc_service_exception& operator=(const directory_rpc_service_exception&);
-  directory_rpc_service_exception() : msg() {
+  directory_service_exception(const directory_service_exception&);
+  directory_service_exception& operator=(const directory_service_exception&);
+  directory_service_exception() : msg() {
   }
 
-  virtual ~directory_rpc_service_exception() throw();
+  virtual ~directory_service_exception() throw();
   std::string msg;
 
   void __set_msg(const std::string& val);
 
-  bool operator == (const directory_rpc_service_exception & rhs) const
+  bool operator == (const directory_service_exception & rhs) const
   {
     if (!(msg == rhs.msg))
       return false;
     return true;
   }
-  bool operator != (const directory_rpc_service_exception &rhs) const {
+  bool operator != (const directory_service_exception &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_rpc_service_exception & ) const;
+  bool operator < (const directory_service_exception & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -236,12 +281,12 @@ class directory_rpc_service_exception : public ::apache::thrift::TException {
   const char* what() const throw();
 };
 
-void swap(directory_rpc_service_exception &a, directory_rpc_service_exception &b);
+void swap(directory_service_exception &a, directory_service_exception &b);
 
-std::ostream& operator<<(std::ostream& out, const directory_rpc_service_exception& obj);
+std::ostream& operator<<(std::ostream& out, const directory_service_exception& obj);
 
 }} // namespace
 
-#include "directory_rpc_service_types.tcc"
+#include "directory_service_types.tcc"
 
 #endif

@@ -1,4 +1,4 @@
-#include "directory_service.h"
+#include "directory_ops.h"
 
 namespace elasticmem {
 namespace directory {

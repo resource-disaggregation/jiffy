@@ -38,18 +38,25 @@ void directory_tree::create_directories(const std::string &path) {
       if (child->is_directory()) {
         dir_node = std::dynamic_pointer_cast<ds_dir_node>(child);
       } else {
-        throw directory_service_exception("Cannot create directory: " + p_so_far + " is a file.");
+        throw directory_ops_exception("Cannot create directory: " + p_so_far + " is a file.");
       }
     }
   }
 }
 
-void directory_tree::create_file(const std::string &path, const std::string &persistent_store_prefix) {
+data_status directory_tree::open(const std::string &path) {
+  return dstatus(path);
+}
+
+data_status directory_tree::create(const std::string &path,
+                                   const std::string &persistent_store_prefix,
+                                   std::size_t num_blocks,
+                                   std::size_t chain_length) {
   namespace fs = std::experimental::filesystem;
   fs::path p(path);
   std::string filename = p.filename();
   if (filename == "." || filename == "/") {
-    throw directory_service_exception("Path is a directory: " + path);
+    throw directory_ops_exception("Path is a directory: " + path);
   }
   std::string parent_path = p.parent_path();
   auto node = get_node_unsafe(parent_path);
@@ -57,23 +64,24 @@ void directory_tree::create_file(const std::string &path, const std::string &per
     create_directories(parent_path);
     node = get_node_unsafe(parent_path);
   } else if (node->is_regular_file()) {
-    throw directory_service_exception(
+    throw directory_ops_exception(
         "Cannot create file in dir " + parent_path + ": " + node->name() + " is a file.");
   }
 
   auto parent = std::dynamic_pointer_cast<ds_dir_node>(node);
-  auto child = std::make_shared<ds_file_node>(filename);
-  child->add_data_block(allocator_->allocate(""));
+  std::vector<block_chain> blocks;
+  for (std::size_t i = 0; i < num_blocks; ++i) {
+    blocks.push_back(block_chain{allocator_->allocate(chain_length, "")});
+  }
+  auto child =
+      std::make_shared<ds_file_node>(filename, storage_mode::in_memory, persistent_store_prefix, chain_length, blocks);
   child->persistent_store_prefix(persistent_store_prefix);
   parent->add_child(child);
+  return child->dstatus();
 }
 
 bool directory_tree::exists(const std::string &path) const {
   return get_node_unsafe(path) != nullptr;
-}
-
-std::size_t directory_tree::file_size(const std::string &path) const {
-  return get_node(path)->file_size();
 }
 
 std::uint64_t directory_tree::last_write_time(const std::string &path) const {
@@ -108,10 +116,10 @@ void directory_tree::remove(const std::string &path) {
   auto parent = get_node_as_dir(ptemp);
   auto child = parent->get_child(child_name);
   if (child == nullptr) {
-    throw directory_service_exception("Path does not exist: " + path);
+    throw directory_ops_exception("Path does not exist: " + path);
   }
   if (child->is_directory() && !std::dynamic_pointer_cast<ds_dir_node>(child)->empty()) {
-    throw directory_service_exception("Directory not empty: " + path);
+    throw directory_ops_exception("Directory not empty: " + path);
   }
   parent->remove_child(child_name);
   clear_storage(child);
@@ -123,7 +131,7 @@ void directory_tree::remove_all(const std::string &path) {
   auto parent = get_node_as_dir(ptemp);
   auto child = parent->get_child(child_name);
   if (child == nullptr) {
-    throw directory_service_exception("Path does not exist: " + path);
+    throw directory_ops_exception("Path does not exist: " + path);
   }
   parent->remove_child(child_name);
   clear_storage(child);
@@ -141,7 +149,7 @@ void directory_tree::rename(const std::string &old_path, const std::string &new_
   auto old_parent = get_node_as_dir(ptemp);
   auto old_child = old_parent->get_child(child_name);
   if (old_child == nullptr) {
-    throw directory_service_exception("Path does not exist: " + old_path);
+    throw directory_ops_exception("Path does not exist: " + old_path);
   }
 
   ptemp = new_path;
@@ -150,7 +158,7 @@ void directory_tree::rename(const std::string &old_path, const std::string &new_
   auto new_child = new_parent->get_child(child_name);
   if (new_child != nullptr) {
     if (new_child->is_directory())
-      throw directory_service_exception("New path is a non-empty directory: " + new_path);
+      throw directory_ops_exception("New path is a non-empty directory: " + new_path);
     new_parent->remove_child(child_name);
   }
   old_parent->remove_child(old_child->name());
@@ -174,18 +182,6 @@ data_status directory_tree::dstatus(const std::string &path) {
   return get_node_as_file(path)->dstatus();
 }
 
-storage_mode directory_tree::mode(const std::string &path) {
-  return get_node_as_file(path)->mode();
-}
-
-std::string directory_tree::persistent_store_prefix(const std::string &path) {
-  return get_node_as_file(path)->persistent_store_prefix();
-}
-
-std::vector<std::string> directory_tree::data_blocks(const std::string &path) {
-  return get_node_as_file(path)->data_blocks();
-}
-
 bool directory_tree::is_regular_file(const std::string &path) {
   return get_node(path)->is_regular_file();
 }
@@ -198,46 +194,9 @@ void directory_tree::touch(const std::string &path) {
   auto time = utils::time_utils::now_ms();
   auto node = touch_node_path(path, time);
   if (node == nullptr) {
-    throw directory_service_exception("Path does not exist: " + path);
+    throw directory_ops_exception("Path does not exist: " + path);
   }
   touch(node, time);
-}
-
-void directory_tree::grow(const std::string &path, std::size_t bytes) {
-  get_node_as_file(path)->grow(bytes);
-}
-
-void directory_tree::shrink(const std::string &path, std::size_t bytes) {
-  get_node_as_file(path)->shrink(bytes);
-}
-
-void directory_tree::dstatus(const std::string &path, const data_status &status) {
-  get_node_as_file(path)->dstatus(status);
-}
-
-void directory_tree::mode(const std::string &path, const storage_mode &mode) {
-  get_node_as_file(path)->mode(mode);
-}
-
-void directory_tree::persistent_store_prefix(const std::string &path, const std::string &prefix) {
-  get_node_as_file(path)->persistent_store_prefix(prefix);
-}
-
-void directory_tree::add_data_block(const std::string &path) {
-  get_node_as_file(path)->add_data_block(allocator_->allocate(""));
-}
-
-void directory_tree::remove_data_block(const std::string &path, const std::string &block) {
-  get_node_as_file(path)->remove_data_block(block);
-  storage_->reset(block);
-  allocator_->free(block);
-}
-
-void directory_tree::remove_all_data_blocks(const std::string &path) {
-  auto node = get_node_as_file(path);
-  clear_storage(node);
-  auto blocks = node->data_blocks();
-  node->remove_all_data_blocks();
 }
 
 std::shared_ptr<ds_node> directory_tree::get_node_unsafe(const std::string &path) const {
@@ -258,7 +217,7 @@ std::shared_ptr<ds_node> directory_tree::get_node_unsafe(const std::string &path
 std::shared_ptr<ds_node> directory_tree::get_node(const std::string &path) const {
   auto node = get_node_unsafe(path);
   if (node == nullptr) {
-    throw directory_service_exception("Path does not exist: " + path);
+    throw directory_ops_exception("Path does not exist: " + path);
   }
   return node;
 }
@@ -266,7 +225,7 @@ std::shared_ptr<ds_node> directory_tree::get_node(const std::string &path) const
 std::shared_ptr<ds_dir_node> directory_tree::get_node_as_dir(const std::string &path) const {
   auto node = get_node(path);
   if (node->is_regular_file()) {
-    throw directory_service_exception("Path corresponds to a file: " + path);
+    throw directory_ops_exception("Path corresponds to a file: " + path);
   }
   return std::dynamic_pointer_cast<ds_dir_node>(node);
 }
@@ -274,7 +233,7 @@ std::shared_ptr<ds_dir_node> directory_tree::get_node_as_dir(const std::string &
 std::shared_ptr<ds_file_node> directory_tree::get_node_as_file(const std::string &path) const {
   auto node = get_node(path);
   if (!node->is_regular_file()) {
-    throw directory_service_exception("Path corresponds to a directory: " + path);
+    throw directory_ops_exception("Path corresponds to a directory: " + path);
   }
   return std::dynamic_pointer_cast<ds_file_node>(node);
 }
@@ -311,8 +270,10 @@ void directory_tree::clear_storage(std::shared_ptr<ds_node> node) {
     auto file = std::dynamic_pointer_cast<ds_file_node>(node);
     auto s = file->dstatus();
     for (const auto &block: s.data_blocks()) {
-      storage_->reset(block);
-      allocator_->free(block);
+      for (const auto &block_name: block.block_names) {
+        storage_->reset(block_name);
+      }
+      allocator_->free(block.block_names);
     }
   } else if (node->is_directory()) {
     auto dir = std::dynamic_pointer_cast<ds_dir_node>(node);

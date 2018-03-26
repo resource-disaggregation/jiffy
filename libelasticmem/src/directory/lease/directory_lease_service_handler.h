@@ -14,7 +14,7 @@ class directory_lease_service_handler : public directory_lease_serviceIf {
   void update_leases(rpc_lease_ack &_return, const rpc_lease_update &updates) override;
 
  private:
-  directory_lease_service_exception make_exception(const directory_service_exception &ex);
+  directory_lease_service_exception make_exception(const directory_ops_exception &ex);
 
   std::shared_ptr<directory_tree> tree_;
 };

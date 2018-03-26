@@ -60,22 +60,25 @@ class dummy_block_allocator : public elasticmem::directory::block_allocator {
  public:
   explicit dummy_block_allocator(std::size_t num_blocks) : num_free_(num_blocks) {}
 
-  std::string allocate(const std::string &) override {
+  std::vector<std::string> allocate(std::size_t count, const std::string &) override {
     if (num_free_ == 0) {
       throw std::out_of_range("Cannot allocate since nothing is free");
     }
-    std::string ret = std::to_string(num_alloc_);
-    ++num_alloc_;
-    --num_free_;
+    std::vector<std::string> ret;
+    for (std::size_t i = 0; i < count; ++i) {
+      ret.push_back(std::to_string(num_alloc_ + i));
+    }
+    num_alloc_ += count;
+    num_free_ -= count;
     return ret;
   }
 
-  void free(const std::string &) override {
+  void free(const std::vector<std::string> &blocks) override {
     if (num_alloc_ == 0) {
       throw std::out_of_range("Cannot free since nothing is allocated");
     }
-    ++num_free_;
-    --num_alloc_;
+    num_free_ += blocks.size();
+    num_alloc_ -= blocks.size();
   }
 
   void add_blocks(const std::vector<std::string> &blocks) override {

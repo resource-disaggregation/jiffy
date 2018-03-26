@@ -250,7 +250,7 @@ class Client(Iface):
         self.recv_create_file()
 
     def send_create_file(self, path, persistent_store_prefix):
-        self._oprot.writeMessageBegin('create_file', TMessageType.CALL, self._seqid)
+        self._oprot.writeMessageBegin('create', TMessageType.CALL, self._seqid)
         args = create_file_args()
         args.path = path
         args.persistent_store_prefix = persistent_store_prefix
@@ -870,7 +870,7 @@ class Processor(Iface, TProcessor):
         self._processMap = {}
         self._processMap["create_directory"] = Processor.process_create_directory
         self._processMap["create_directories"] = Processor.process_create_directories
-        self._processMap["create_file"] = Processor.process_create_file
+        self._processMap["create"] = Processor.process_create_file
         self._processMap["exists"] = Processor.process_exists
         self._processMap["file_size"] = Processor.process_file_size
         self._processMap["last_write_time"] = Processor.process_last_write_time
@@ -978,7 +978,7 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("create_file", msg_type, seqid)
+        oprot.writeMessageBegin("create", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()

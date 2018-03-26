@@ -27,9 +27,9 @@ TEST_CASE("update_lease_test", "[update_lease]") {
 
   directory_lease_client client(HOST, PORT);
 
-  t->create_file("/sandbox/a/b/c/file.txt", "/tmp");
-  t->create_file("/sandbox/a/b/file.txt", "/tmp");
-  t->create_file("/sandbox/a/file.txt", "/tmp");
+  t->create("/sandbox/a/b/c/file.txt", "/tmp", 1, 1);
+  t->create("/sandbox/a/b/file.txt", "/tmp", 1, 1);
+  t->create("/sandbox/a/file.txt", "/tmp", 1, 1);
 
   rpc_lease_update update;
   update.to_renew = {"/sandbox/a/b/c/file.txt"};
@@ -41,9 +41,9 @@ TEST_CASE("update_lease_test", "[update_lease]") {
   REQUIRE(ack.flushed == 1);
   REQUIRE(ack.removed == 1);
   REQUIRE(t->exists("/sandbox/a/b/c/file.txt"));
-  REQUIRE(t->mode("/sandbox/a/b/c/file.txt") == storage_mode::in_memory);
+  REQUIRE(t->dstatus("/sandbox/a/b/c/file.txt").mode() == storage_mode::in_memory);
   REQUIRE(t->exists("/sandbox/a/b/file.txt"));
-  REQUIRE(t->mode("/sandbox/a/b/file.txt") == storage_mode::on_disk);
+  REQUIRE(t->dstatus("/sandbox/a/b/file.txt").mode() == storage_mode::on_disk);
   REQUIRE(!t->exists("/sandbox/a/file.txt"));
   REQUIRE(sm->COMMANDS.size() == 2);
   REQUIRE(sm->COMMANDS[0] == "flush:1:/tmp:/sandbox/a/b/file.txt");

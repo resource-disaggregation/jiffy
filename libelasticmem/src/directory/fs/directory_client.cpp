@@ -2,6 +2,7 @@
 #include <thrift/protocol/TBinaryProtocol.h>
 
 #include "directory_client.h"
+#include "directory_type_conversions.h"
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -41,16 +42,24 @@ void directory_client::create_directories(const std::string &path) {
   client_->create_directories(path);
 }
 
-void directory_client::create_file(const std::string &path, const std::string &persistent_store_prefix) {
-  client_->create_file(path, persistent_store_prefix);
+data_status directory_client::open(const std::string &path) {
+  rpc_data_status s;
+  client_->open(s, path);
+  return directory_type_conversions::from_rpc(s);
+}
+
+data_status directory_client::create(const std::string &path,
+                                     const std::string &persistent_store_prefix,
+                                     std::size_t num_blocks,
+                                     std::size_t chain_length) {
+  rpc_data_status s;
+  client_->create(s, path, persistent_store_prefix, static_cast<const int32_t>(num_blocks),
+                  static_cast<const int32_t>(chain_length));
+  return directory_type_conversions::from_rpc(s);
 }
 
 bool directory_client::exists(const std::string &path) const {
   return client_->exists(path);
-}
-
-std::size_t directory_client::file_size(const std::string &path) const {
-  return static_cast<size_t>(client_->file_size(path));
 }
 
 std::uint64_t directory_client::last_write_time(const std::string &path) const {
@@ -84,8 +93,7 @@ void directory_client::rename(const std::string &old_path, const std::string &ne
 file_status directory_client::status(const std::string &path) const {
   rpc_file_status s;
   client_->status(s, path);
-  return file_status(static_cast<file_type>(s.type), perms(static_cast<uint16_t>(s.permissions)),
-                     static_cast<uint64_t>(s.last_write_time));;
+  return directory_type_conversions::from_rpc(s);
 }
 
 std::vector<directory_entry> directory_client::directory_entries(const std::string &path) {
@@ -93,10 +101,7 @@ std::vector<directory_entry> directory_client::directory_entries(const std::stri
   client_->directory_entries(entries, path);
   std::vector<directory_entry> out;
   for (const auto &e: entries) {
-    out.emplace_back(e.name,
-                     file_status(static_cast<file_type>(e.status.type),
-                                 perms(static_cast<uint16_t>(e.status.permissions)),
-                                 static_cast<uint64_t>(e.status.last_write_time)));
+    out.push_back(directory_type_conversions::from_rpc(e));
   }
   return out;
 }
@@ -106,10 +111,7 @@ std::vector<directory_entry> directory_client::recursive_directory_entries(const
   client_->recursive_directory_entries(entries, path);
   std::vector<directory_entry> out;
   for (const auto &e: entries) {
-    out.emplace_back(e.name,
-                     file_status(static_cast<file_type>(e.status.type),
-                                 perms(static_cast<uint16_t>(e.status.permissions)),
-                                 static_cast<uint64_t>(e.status.last_write_time)));
+    out.push_back(directory_type_conversions::from_rpc(e));
   }
   return out;
 }
@@ -117,23 +119,7 @@ std::vector<directory_entry> directory_client::recursive_directory_entries(const
 data_status directory_client::dstatus(const std::string &path) {
   rpc_data_status s;
   client_->dstatus(s, path);
-  return data_status(static_cast<storage_mode>(s.storage_mode), s.persistent_store_prefix, s.data_blocks);
-}
-
-storage_mode directory_client::mode(const std::string &path) {
-  return static_cast<storage_mode>(client_->mode(path));
-}
-
-std::string directory_client::persistent_store_prefix(const std::string &path) {
-  std::string out;
-  client_->persistent_store_prefix(out, path);
-  return out;
-}
-
-std::vector<std::string> directory_client::data_blocks(const std::string &path) {
-  std::vector<std::string> out;
-  client_->data_blocks(out, path);
-  return out;
+  return directory_type_conversions::from_rpc(s);
 }
 
 bool directory_client::is_regular_file(const std::string &path) {

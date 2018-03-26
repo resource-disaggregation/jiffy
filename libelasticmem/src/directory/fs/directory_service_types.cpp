@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-#include "directory_rpc_service_types.h"
+#include "directory_service_types.h"
 
 #include <algorithm>
 #include <ostream>
@@ -82,6 +82,40 @@ std::ostream& operator<<(std::ostream& out, const rpc_storage_mode val) {
 }
 
 
+rpc_block_chain::~rpc_block_chain() throw() {
+}
+
+
+void rpc_block_chain::__set_block_names(const std::vector<std::string> & val) {
+  this->block_names = val;
+}
+std::ostream& operator<<(std::ostream& out, const rpc_block_chain& obj)
+{
+  obj.printTo(out);
+  return out;
+}
+
+
+void swap(rpc_block_chain &a, rpc_block_chain &b) {
+  using ::std::swap;
+  swap(a.block_names, b.block_names);
+}
+
+rpc_block_chain::rpc_block_chain(const rpc_block_chain& other6) {
+  block_names = other6.block_names;
+}
+rpc_block_chain& rpc_block_chain::operator=(const rpc_block_chain& other7) {
+  block_names = other7.block_names;
+  return *this;
+}
+void rpc_block_chain::printTo(std::ostream& out) const {
+  using ::apache::thrift::to_string;
+  out << "rpc_block_chain(";
+  out << "block_names=" << to_string(block_names);
+  out << ")";
+}
+
+
 rpc_file_status::~rpc_file_status() throw() {
 }
 
@@ -111,15 +145,15 @@ void swap(rpc_file_status &a, rpc_file_status &b) {
   swap(a.last_write_time, b.last_write_time);
 }
 
-rpc_file_status::rpc_file_status(const rpc_file_status& other1) {
-  type = other1.type;
-  permissions = other1.permissions;
-  last_write_time = other1.last_write_time;
+rpc_file_status::rpc_file_status(const rpc_file_status& other9) {
+  type = other9.type;
+  permissions = other9.permissions;
+  last_write_time = other9.last_write_time;
 }
-rpc_file_status& rpc_file_status::operator=(const rpc_file_status& other2) {
-  type = other2.type;
-  permissions = other2.permissions;
-  last_write_time = other2.last_write_time;
+rpc_file_status& rpc_file_status::operator=(const rpc_file_status& other10) {
+  type = other10.type;
+  permissions = other10.permissions;
+  last_write_time = other10.last_write_time;
   return *this;
 }
 void rpc_file_status::printTo(std::ostream& out) const {
@@ -144,7 +178,11 @@ void rpc_data_status::__set_persistent_store_prefix(const std::string& val) {
   this->persistent_store_prefix = val;
 }
 
-void rpc_data_status::__set_data_blocks(const std::vector<std::string> & val) {
+void rpc_data_status::__set_chain_length(const int32_t val) {
+  this->chain_length = val;
+}
+
+void rpc_data_status::__set_data_blocks(const std::vector<rpc_block_chain> & val) {
   this->data_blocks = val;
 }
 std::ostream& operator<<(std::ostream& out, const rpc_data_status& obj)
@@ -158,18 +196,21 @@ void swap(rpc_data_status &a, rpc_data_status &b) {
   using ::std::swap;
   swap(a.storage_mode, b.storage_mode);
   swap(a.persistent_store_prefix, b.persistent_store_prefix);
+  swap(a.chain_length, b.chain_length);
   swap(a.data_blocks, b.data_blocks);
 }
 
-rpc_data_status::rpc_data_status(const rpc_data_status& other10) {
-  storage_mode = other10.storage_mode;
-  persistent_store_prefix = other10.persistent_store_prefix;
-  data_blocks = other10.data_blocks;
+rpc_data_status::rpc_data_status(const rpc_data_status& other18) {
+  storage_mode = other18.storage_mode;
+  persistent_store_prefix = other18.persistent_store_prefix;
+  chain_length = other18.chain_length;
+  data_blocks = other18.data_blocks;
 }
-rpc_data_status& rpc_data_status::operator=(const rpc_data_status& other11) {
-  storage_mode = other11.storage_mode;
-  persistent_store_prefix = other11.persistent_store_prefix;
-  data_blocks = other11.data_blocks;
+rpc_data_status& rpc_data_status::operator=(const rpc_data_status& other19) {
+  storage_mode = other19.storage_mode;
+  persistent_store_prefix = other19.persistent_store_prefix;
+  chain_length = other19.chain_length;
+  data_blocks = other19.data_blocks;
   return *this;
 }
 void rpc_data_status::printTo(std::ostream& out) const {
@@ -177,6 +218,7 @@ void rpc_data_status::printTo(std::ostream& out) const {
   out << "rpc_data_status(";
   out << "storage_mode=" << to_string(storage_mode);
   out << ", " << "persistent_store_prefix=" << to_string(persistent_store_prefix);
+  out << ", " << "chain_length=" << to_string(chain_length);
   out << ", " << "data_blocks=" << to_string(data_blocks);
   out << ")";
 }
@@ -206,13 +248,13 @@ void swap(rpc_dir_entry &a, rpc_dir_entry &b) {
   swap(a.status, b.status);
 }
 
-rpc_dir_entry::rpc_dir_entry(const rpc_dir_entry& other12) {
-  name = other12.name;
-  status = other12.status;
+rpc_dir_entry::rpc_dir_entry(const rpc_dir_entry& other20) {
+  name = other20.name;
+  status = other20.status;
 }
-rpc_dir_entry& rpc_dir_entry::operator=(const rpc_dir_entry& other13) {
-  name = other13.name;
-  status = other13.status;
+rpc_dir_entry& rpc_dir_entry::operator=(const rpc_dir_entry& other21) {
+  name = other21.name;
+  status = other21.status;
   return *this;
 }
 void rpc_dir_entry::printTo(std::ostream& out) const {
@@ -224,47 +266,47 @@ void rpc_dir_entry::printTo(std::ostream& out) const {
 }
 
 
-directory_rpc_service_exception::~directory_rpc_service_exception() throw() {
+directory_service_exception::~directory_service_exception() throw() {
 }
 
 
-void directory_rpc_service_exception::__set_msg(const std::string& val) {
+void directory_service_exception::__set_msg(const std::string& val) {
   this->msg = val;
 }
-std::ostream& operator<<(std::ostream& out, const directory_rpc_service_exception& obj)
+std::ostream& operator<<(std::ostream& out, const directory_service_exception& obj)
 {
   obj.printTo(out);
   return out;
 }
 
 
-void swap(directory_rpc_service_exception &a, directory_rpc_service_exception &b) {
+void swap(directory_service_exception &a, directory_service_exception &b) {
   using ::std::swap;
   swap(a.msg, b.msg);
 }
 
-directory_rpc_service_exception::directory_rpc_service_exception(const directory_rpc_service_exception& other14) : TException() {
-  msg = other14.msg;
+directory_service_exception::directory_service_exception(const directory_service_exception& other22) : TException() {
+  msg = other22.msg;
 }
-directory_rpc_service_exception& directory_rpc_service_exception::operator=(const directory_rpc_service_exception& other15) {
-  msg = other15.msg;
+directory_service_exception& directory_service_exception::operator=(const directory_service_exception& other23) {
+  msg = other23.msg;
   return *this;
 }
-void directory_rpc_service_exception::printTo(std::ostream& out) const {
+void directory_service_exception::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
-  out << "directory_rpc_service_exception(";
+  out << "directory_service_exception(";
   out << "msg=" << to_string(msg);
   out << ")";
 }
 
-const char* directory_rpc_service_exception::what() const throw() {
+const char* directory_service_exception::what() const throw() {
   try {
     std::stringstream ss;
     ss << "TException - service has thrown: " << *this;
     this->thriftTExceptionMessageHolder_ = ss.str();
     return this->thriftTExceptionMessageHolder_.c_str();
   } catch (const std::exception&) {
-    return "TException - service has thrown: directory_rpc_service_exception";
+    return "TException - service has thrown: directory_service_exception";
   }
 }
 

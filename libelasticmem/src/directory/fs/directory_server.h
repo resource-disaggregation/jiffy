@@ -8,7 +8,7 @@
 namespace elasticmem {
 namespace directory {
 
-class directory_rpc_server {
+class directory_server {
  public:
   static std::shared_ptr<apache::thrift::server::TThreadedServer> create(std::shared_ptr<directory_tree> shard,
                                                                          const std::string &address,

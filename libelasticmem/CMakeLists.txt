@@ -21,20 +21,20 @@ add_library(elasticmem STATIC
         src/directory/block/random_block_allocator.h
         src/directory/fs/directory_client.cpp
         src/directory/fs/directory_client.h
-        src/directory/fs/directory_rpc_server.cpp
-        src/directory/fs/directory_rpc_server.h
-        src/directory/fs/directory_rpc_service.cpp
-        src/directory/fs/directory_rpc_service.h
-        src/directory/fs/directory_rpc_service.tcc
-        src/directory/fs/directory_rpc_service_constants.cpp
-        src/directory/fs/directory_rpc_service_constants.h
-        src/directory/fs/directory_rpc_service_factory.cpp
-        src/directory/fs/directory_rpc_service_factory.h
-        src/directory/fs/directory_rpc_service_handler.cpp
-        src/directory/fs/directory_rpc_service_handler.h
-        src/directory/fs/directory_rpc_service_types.cpp
-        src/directory/fs/directory_rpc_service_types.h
-        src/directory/fs/directory_rpc_service_types.tcc
+        src/directory/fs/directory_server.cpp
+        src/directory/fs/directory_server.h
+        src/directory/fs/directory_service.cpp
+        src/directory/fs/directory_service.h
+        src/directory/fs/directory_service.tcc
+        src/directory/fs/directory_service_constants.cpp
+        src/directory/fs/directory_service_constants.h
+        src/directory/fs/directory_service_factory.cpp
+        src/directory/fs/directory_service_factory.h
+        src/directory/fs/directory_service_handler.cpp
+        src/directory/fs/directory_service_handler.h
+        src/directory/fs/directory_service_types.cpp
+        src/directory/fs/directory_service_types.h
+        src/directory/fs/directory_service_types.tcc
         src/directory/fs/directory_tree.cpp
         src/directory/fs/directory_tree.h
         src/directory/lease/directory_lease_client.cpp
@@ -55,8 +55,8 @@ add_library(elasticmem STATIC
         src/directory/lease/directory_lease_service_types.tcc
         src/directory/lease/lease_expiry_worker.cpp
         src/directory/lease/lease_expiry_worker.h
-        src/directory/directory_service.h
-        src/directory/directory_service.cpp
+        src/directory/directory_ops.h
+        src/directory/directory_ops.cpp
         src/storage/kv/serializer/csv_serde.cpp
         src/storage/kv/serializer/csv_serde.h
         src/storage/kv/serializer/serde.h
@@ -141,7 +141,7 @@ add_library(elasticmem STATIC
         src/utils/logger.h
         src/utils/rand_utils.h
         src/utils/signal_handling.h
-        src/utils/time_utils.h)
+        src/utils/time_utils.h src/directory/fs/directory_type_conversions.h)
 if (GENERATE_THRIFT)
   add_dependencies(elasticmem thriftgen_directory thriftgen_kv)
 endif ()
