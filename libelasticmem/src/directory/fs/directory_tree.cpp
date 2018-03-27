@@ -1,8 +1,6 @@
 #include "directory_tree.h"
 
-#include <experimental/filesystem>
 #include <iostream>
-#include "../../utils/directory_utils.h"
 #include "../../storage/chain_module.h"
 #include "../../utils/logger.h"
 #include "../../utils/retry_utils.h"
@@ -61,14 +59,12 @@ data_status directory_tree::create(const std::string &path,
   if (chain_length == 0) {
     throw directory_ops_exception("Chain length cannot be zero");
   }
-  namespace fs = std::experimental::filesystem;
-  fs::path p(path);
-  std::string filename = p.filename();
+  std::string filename = directory_utils::get_filename(path);
 
   if (filename == "." || filename == "/") {
     throw directory_ops_exception("Path is a directory: " + path);
   }
-  std::string parent_path = p.parent_path();
+  std::string parent_path = directory_utils::get_parent_path(path);
   auto node = get_node_unsafe(parent_path);
   if (node == nullptr) {
     create_directories(parent_path);
@@ -82,7 +78,7 @@ data_status directory_tree::create(const std::string &path,
 
   std::vector<block_chain> blocks;
   for (std::size_t i = 0; i < num_blocks; ++i) {
-    block_chain chain{allocator_->allocate(chain_length, "")};
+    block_chain chain{allocator_->allocate(chain_length, {})};
     assert(chain.block_names.size() == chain_length);
     blocks.push_back(chain);
     using namespace storage;

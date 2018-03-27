@@ -9,7 +9,7 @@ namespace directory {
 
 random_block_allocator::random_block_allocator(const std::vector<std::string> &blocks) : free_blocks_(blocks) {}
 
-std::vector<std::string> random_block_allocator::allocate(std::size_t count, const std::string &) {
+std::vector<std::string> random_block_allocator::allocate(std::size_t count, const std::vector<std::string> &) {
   std::unique_lock<std::shared_mutex> lock(mtx_);
   if (count > free_blocks_.size()) {
     throw std::out_of_range("Insufficient free blocks to allocate from");

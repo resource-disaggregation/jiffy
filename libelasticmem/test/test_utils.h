@@ -64,7 +64,7 @@ class sequential_block_allocator : public elasticmem::directory::block_allocator
  public:
   sequential_block_allocator(): cur_idx_{0} {}
 
-  std::vector<std::string> allocate(std::size_t count, const std::string &) override {
+  std::vector<std::string> allocate(std::size_t count, const std::vector<std::string> &) override {
     std::vector<std::string> allocated;
     for (std::size_t i = 0; i < count; i++) {
       allocated.push_back(free_.front());
@@ -107,7 +107,7 @@ class dummy_block_allocator : public elasticmem::directory::block_allocator {
  public:
   explicit dummy_block_allocator(std::size_t num_blocks) : num_free_(num_blocks) {}
 
-  std::vector<std::string> allocate(std::size_t count, const std::string &) override {
+  std::vector<std::string> allocate(std::size_t count, const std::vector<std::string> &) override {
     if (num_free_ == 0) {
       throw std::out_of_range("Cannot allocate since nothing is free");
     }

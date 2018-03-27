@@ -13,30 +13,30 @@ TEST_CASE("random_block_allocator_test", "[allocate][free][add_blocks][remove_bl
   REQUIRE(allocator.num_total_blocks() == 4);
 
   std::vector<std::string> blk;
-  REQUIRE_NOTHROW(blk = allocator.allocate(1, ""));
+  REQUIRE_NOTHROW(blk = allocator.allocate(1, {}));
   REQUIRE(std::find(blocks.begin(), blocks.end(), blk[0]) != blocks.end());
   REQUIRE(allocator.num_free_blocks() == 3);
   REQUIRE(allocator.num_allocated_blocks() == 1);
   REQUIRE(allocator.num_total_blocks() == 4);
 
-  REQUIRE_NOTHROW(blk = allocator.allocate(1, ""));
+  REQUIRE_NOTHROW(blk = allocator.allocate(1, {}));
   REQUIRE(std::find(blocks.begin(), blocks.end(), blk[0]) != blocks.end());
   REQUIRE(allocator.num_free_blocks() == 2);
   REQUIRE(allocator.num_allocated_blocks() == 2);
   REQUIRE(allocator.num_total_blocks() == 4);
 
-  REQUIRE_NOTHROW(blk = allocator.allocate(1, ""));
+  REQUIRE_NOTHROW(blk = allocator.allocate(1, {}));
   REQUIRE(std::find(blocks.begin(), blocks.end(), blk[0]) != blocks.end());
   REQUIRE(allocator.num_free_blocks() == 1);
   REQUIRE(allocator.num_allocated_blocks() == 3);
   REQUIRE(allocator.num_total_blocks() == 4);
 
-  REQUIRE_NOTHROW(blk = allocator.allocate(1, ""));
+  REQUIRE_NOTHROW(blk = allocator.allocate(1, {}));
   REQUIRE(std::find(blocks.begin(), blocks.end(), blk[0]) != blocks.end());
   REQUIRE(allocator.num_free_blocks() == 0);
   REQUIRE(allocator.num_allocated_blocks() == 4);
   REQUIRE(allocator.num_total_blocks() == 4);
-  REQUIRE_THROWS_AS(allocator.allocate(1, ""), std::out_of_range);
+  REQUIRE_THROWS_AS(allocator.allocate(1, {}), std::out_of_range);
 
   REQUIRE_NOTHROW(allocator.free({"a"}));
   REQUIRE(allocator.num_free_blocks() == 1);

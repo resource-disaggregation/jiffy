@@ -11,7 +11,7 @@ class random_block_allocator : public block_allocator {
  public:
   random_block_allocator() = default;
   explicit random_block_allocator(const std::vector<std::string> &blocks);
-  std::vector<std::string> allocate(std::size_t count, const std::string &hint) override;
+  std::vector<std::string> allocate(std::size_t count, const std::vector<std::string> &exclude_list) override;
   void free(const std::vector<std::string> &block_name) override;
   void add_blocks(const std::vector<std::string> &block_names) override;
   void remove_blocks(const std::vector<std::string> &block_names) override;

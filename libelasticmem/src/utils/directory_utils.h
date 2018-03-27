@@ -9,6 +9,18 @@ namespace utils {
 
 class directory_utils {
  public:
+  static std::string get_filename(const std::string &path) {
+    namespace fs = std::experimental::filesystem;
+    fs::path p(path);
+    return p.filename();
+  }
+
+  static std::string get_parent_path(const std::string &path) {
+    namespace fs = std::experimental::filesystem;
+    fs::path p(path);
+    return p.parent_path();
+  }
+
   static std::string normalize_path(const std::string &path) {
     namespace fs = std::experimental::filesystem;
     std::string ret = path;
