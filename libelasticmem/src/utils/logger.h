@@ -20,8 +20,6 @@ enum log_level {
   off = 7
 };
 
-static log_level LOG_LEVEL = log_level::info;
-
 #ifdef __GNUG__
 #define __COMPACT_PRETTY_FUNCTION__ log_utils::compute_method_name(__FUNCTION__, __PRETTY_FUNCTION__)
 #define LOG(level) logger(level, __COMPACT_PRETTY_FUNCTION__)
@@ -31,6 +29,8 @@ static log_level LOG_LEVEL = log_level::info;
 
 class logger {
  public:
+  static log_level LOG_LEVEL;
+
   explicit logger(log_level level, const std::string &fname) : opened_(false), msg_level_(level) {
     os_ << time_utils::current_date_time();
     os_ << " " << to_string(level);
@@ -77,6 +77,10 @@ class log_utils {
  public:
   static void log_thrift_msg(const char *msg) {
     logger(info, "Thrift") << msg;
+  }
+
+  static void configure_log_level(log_level level) {
+    logger::LOG_LEVEL = level;
   }
 
 #ifdef __GNUG__

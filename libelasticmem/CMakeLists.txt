@@ -140,6 +140,7 @@ add_library(elasticmem STATIC
         src/utils/cmd_parse.h
         src/utils/directory_utils.h
         src/utils/logger.h
+        src/utils/logger.cpp
         src/utils/rand_utils.h
         src/utils/signal_handling.h
         src/utils/time_utils.h
