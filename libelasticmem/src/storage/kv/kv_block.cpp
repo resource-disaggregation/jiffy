@@ -8,7 +8,7 @@ std::vector<block_op> KV_OPS = {block_op{block_op_type::accessor, "get"},
                                 block_op{block_op_type::mutator, "remove"},
                                 block_op{block_op_type::mutator, "update"}};
 
-kv_block::kv_block(const std::string& block_name,
+kv_block::kv_block(const std::string &block_name,
                    std::shared_ptr<persistent::persistent_service> persistent,
                    std::string local_storage_prefix,
                    std::shared_ptr<serializer> ser,
@@ -100,6 +100,16 @@ void kv_block::flush(const std::string &remote_storage_prefix, const std::string
   ser_->serialize(ltable, local_storage_prefix_ + path);
   persistent_->write(local_storage_prefix_ + path, remote_storage_prefix + path);
   ltable.clear();
+  ltable.unlock();
+}
+
+void kv_block::forward_all() {
+  locked_hash_table_type ltable = block_.lock_table();
+  int64_t i = 0;
+  for (const auto &entry: ltable) {
+    std::vector<std::string> result;
+    next()->run_command(result, i++, 1, {entry.first, entry.second});
+  }
   ltable.unlock();
 }
 

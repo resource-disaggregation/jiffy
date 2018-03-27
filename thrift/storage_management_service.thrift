@@ -29,4 +29,7 @@ service storage_management_service {
 
   void resend_pending(1: i32 block_id)
     throws (1: storage_management_exception ex),
+
+  void forward_all(1: i32 block_id)
+    throws (1: storage_management_exception ex),
 }

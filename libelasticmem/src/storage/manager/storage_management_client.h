@@ -25,6 +25,7 @@ class storage_management_client {
   int64_t storage_capacity(int32_t block_id);
   int64_t storage_size(int32_t block_id);
   void resend_pending(int32_t block_id);
+  void forward_all(int32_t block_id);
 
  private:
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};

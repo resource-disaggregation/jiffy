@@ -117,6 +117,10 @@ class chain_module : public block {
     next_->reset(next_block);
   }
 
+  std::shared_ptr<chain_block_ctx> next() const {
+    return next_;
+  }
+
   void add_pending(int64_t sn, int op_id, const std::vector<std::string> &args) {
     pending_.insert(sn, chain_op{op_id, args});
   }
@@ -125,20 +129,9 @@ class chain_module : public block {
     pending_.erase(sn);
   }
 
-  void resend_pending() {
-    auto ops = pending_.lock_table();
-    try {
-      for (const auto &op: ops) {
-        std::vector<std::string> response;
-        next_->run_command(response, op.first, op.second.op_id, op.second.args);
-        remove_pending(op.first);
-      }
-    } catch (...) {
-      ops.unlock();
-      std::rethrow_exception(std::current_exception());
-    }
-    ops.unlock();
-  }
+  void resend_pending();
+
+  virtual void forward_all() = 0;
 
   int64_t incr_seq_no() {
     return seq_no_.fetch_add(1L);

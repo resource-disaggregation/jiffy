@@ -220,9 +220,10 @@ void directory_tree::touch(const std::string &path) {
 }
 
 block_chain directory_tree::resolve_failures(const std::string &path, const block_chain &chain) {
+  // TODO: Replace block_chain argument with chain id
   std::size_t chain_length = chain.block_names.size();
   std::vector<bool> failed(chain_length);
-  LOG(log_level::info) << "Resolving failures for block chain " << chain.to_string() << " of path " << path;
+  LOG(log_level::info) << "Resolving failures for block chain " << chain.to_string() << " @ " << path;
   bool mid_failure = false;
   std::vector<std::string> fixed_chain;
   for (std::size_t i = 0; i < chain_length; i++) {
@@ -270,6 +271,36 @@ block_chain directory_tree::resolve_failures(const std::string &path, const bloc
     }
   }
   return block_chain{fixed_chain};
+}
+
+block_chain directory_tree::add_node(const std::string &path, const block_chain &chain, std::size_t count) {
+  // TODO: Replace block_chain argument with chain id
+  if (count == 0) return chain;
+
+  using namespace storage;
+  LOG(log_level::info) << "Adding " << count << " new blocks to block chain " << chain.to_string() << " @ " << path;
+
+  auto new_blocks = allocator_->allocate(count, chain.block_names);
+  auto updated_chain = chain.block_names;
+  updated_chain.insert(updated_chain.end(), new_blocks.begin(), new_blocks.end());
+
+  // Setup forwarding path
+  LOG(log_level::info) << "Setting old tail block <" << chain.block_names.back() << ">: path=" << path << ", role="
+                       << chain_role::tail << ", next=" << new_blocks.front();
+  storage_->setup_block(chain.block_names.back(), path, chain_role::tail, new_blocks.front());
+  for (std::size_t i = chain.block_names.size(); i < updated_chain.size(); i++) {
+    std::string block_name = updated_chain[i];
+    std::string next_block_name = (i == updated_chain.size() - 1) ? "nil" : updated_chain[i + 1];
+    int32_t role = (i == 0) ? chain_role::head : (i == updated_chain.size() - 1) ? chain_role::tail : chain_role::mid;
+    LOG(log_level::info) << "Setting block <" << block_name << ">: path=" << path << ", role=" << role << ", next="
+                         << next_block_name;
+    storage_->setup_block(block_name, path, role, next_block_name);
+  }
+
+  storage_->forward_all(chain.block_names.back());
+  storage_->setup_block(chain.block_names.back(), path, chain_role::mid, new_blocks.front());
+
+  return block_chain{updated_chain};
 }
 
 std::shared_ptr<ds_node> directory_tree::get_node_unsafe(const std::string &path) const {

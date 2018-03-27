@@ -60,6 +60,7 @@ class kv_block : public chain_module {
   std::size_t storage_size() override;
 
   void reset() override;
+  void forward_all() override;
 
  private:
   hash_table_type block_;

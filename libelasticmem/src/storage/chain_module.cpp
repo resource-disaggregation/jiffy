@@ -3,6 +3,21 @@
 namespace elasticmem {
 namespace storage {
 
+void chain_module::resend_pending() {
+  auto ops = pending_.lock_table();
+  try {
+    for (const auto &op: ops) {
+      std::vector<std::string> response;
+      next_->run_command(response, op.first, op.second.op_id, op.second.args);
+      remove_pending(op.first);
+    }
+  } catch (...) {
+    ops.unlock();
+    std::rethrow_exception(std::current_exception());
+  }
+  ops.unlock();
+}
+
 void chain_module::run_command_chain(std::vector<std::string> &_return,
                                      int64_t seq_no,
                                      int32_t oid,

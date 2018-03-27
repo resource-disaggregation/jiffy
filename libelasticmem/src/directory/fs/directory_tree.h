@@ -275,6 +275,7 @@ class directory_tree : public directory_ops, public directory_management_ops {
 
   void touch(const std::string &path) override;
   block_chain resolve_failures(const std::string &path, const block_chain &chain) override;
+  block_chain add_node(const std::string &path, const block_chain &chain, std::size_t count) override;
 
  private:
   std::shared_ptr<ds_node> get_node_unsafe(const std::string &path) const;

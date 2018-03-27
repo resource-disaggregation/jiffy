@@ -57,6 +57,10 @@ class dummy_storage_manager : public elasticmem::storage::storage_management_ops
     COMMANDS.push_back("resend_pending:" + block_name);
   }
 
+  void forward_all(const std::string &block_name) override {
+    COMMANDS.push_back("forward_all:" + block_name);
+  }
+
   std::vector<std::string> COMMANDS{};
 };
 

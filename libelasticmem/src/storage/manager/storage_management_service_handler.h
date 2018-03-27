@@ -19,6 +19,7 @@ class storage_management_service_handler : public storage_management_serviceIf {
   int64_t storage_capacity(int32_t block_id) override;
   int64_t storage_size(int32_t block_id) override;
   void resend_pending(const int32_t block_id) override;
+  void forward_all(const int32_t block_id) override;
  private:
   storage_management_exception make_exception(std::exception &e);
   std::vector<std::shared_ptr<chain_module>> &blocks_;

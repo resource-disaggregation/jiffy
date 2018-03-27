@@ -137,5 +137,21 @@ storage_management_service_resend_pending_result::~storage_management_service_re
 storage_management_service_resend_pending_presult::~storage_management_service_resend_pending_presult() throw() {
 }
 
+
+storage_management_service_forward_all_args::~storage_management_service_forward_all_args() throw() {
+}
+
+
+storage_management_service_forward_all_pargs::~storage_management_service_forward_all_pargs() throw() {
+}
+
+
+storage_management_service_forward_all_result::~storage_management_service_forward_all_result() throw() {
+}
+
+
+storage_management_service_forward_all_presult::~storage_management_service_forward_all_presult() throw() {
+}
+
 }} // namespace
 

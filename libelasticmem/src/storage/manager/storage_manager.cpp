@@ -61,5 +61,11 @@ void storage_manager::resend_pending(const std::string &block_name) {
   client.resend_pending(bid.id);
 }
 
+void storage_manager::forward_all(const std::string &block_name) {
+  auto bid = block_name_parser::parse(block_name);
+  storage_management_client client(bid.host, bid.management_port);
+  client.forward_all(bid.id);
+}
+
 }
 }

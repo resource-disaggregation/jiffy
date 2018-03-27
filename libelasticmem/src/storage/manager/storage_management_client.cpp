@@ -77,5 +77,9 @@ void storage_management_client::resend_pending(int32_t block_id) {
   client_->resend_pending(block_id);
 }
 
+void storage_management_client::forward_all(int32_t block_id) {
+  client_->forward_all(block_id);
+}
+
 }
 }
