@@ -19,9 +19,12 @@ class block_client {
   void disconnect();
   bool is_connected();
 
-  void run_command(std::vector<std::string>& _return, int op_id, const std::vector<std::string>& args);
+  void run_command(std::vector<std::string> &_return,
+                     int64_t seq_no,
+                     int32_t op_id,
+                     const std::vector<std::string> &args);
 
-  int32_t send_command(int op_id, const std::vector<std::string>& args);
+  int32_t send_command(int64_t seq_no, int32_t op_id, const std::vector<std::string> &args);
 
   void recv_command_result(int32_t seq_id, std::vector<std::string>& _return);
 
@@ -33,12 +36,16 @@ class block_client {
 
   void remove(const std::string &key);
 
+  std::string endpoint() const;
+
  private:
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};
   std::shared_ptr<apache::thrift::transport::TTransport> transport_{};
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_{};
   std::shared_ptr<thrift_client> client_{};
-  int block_id_{};
+  std::string host_;
+  int port_{-1};
+  int block_id_{-1};
 };
 
 }

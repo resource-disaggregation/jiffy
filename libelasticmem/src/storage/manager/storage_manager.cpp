@@ -12,7 +12,7 @@ void storage_manager::setup_block(const std::string &block_name,
                                   const std::string &next_block_name) {
   auto bid = block_name_parser::parse(block_name);
   storage_management_client client(bid.host, bid.management_port);
-  client.setup_chain(bid.id, path, role, next_block_name);
+  client.setup_block(bid.id, path, role, next_block_name);
 }
 
 std::string storage_manager::path(const std::string &block_name) {
@@ -53,6 +53,12 @@ std::size_t storage_manager::storage_size(const std::string &block_name) {
   auto bid = block_name_parser::parse(block_name);
   storage_management_client client(bid.host, bid.management_port);
   return static_cast<std::size_t>(client.storage_size(bid.id));
+}
+
+void storage_manager::resend_pending(const std::string &block_name) {
+  auto bid = block_name_parser::parse(block_name);
+  storage_management_client client(bid.host, bid.management_port);
+  client.resend_pending(bid.id);
 }
 
 }

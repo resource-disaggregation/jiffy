@@ -20,6 +20,8 @@ block_client::block_client(const std::string &host, int port, int block_id) {
 }
 
 void block_client::connect(const std::string &host, int port, int block_id) {
+  host_ = host;
+  port_ = port;
   block_id_ = block_id;
   socket_ = std::make_shared<TSocket>(host, port);
   transport_ = std::shared_ptr<TTransport>(new TBufferedTransport(socket_));
@@ -40,37 +42,43 @@ bool block_client::is_connected() {
   return transport_->isOpen();
 }
 
-void block_client::run_command(std::vector<std::string> &_return, int op_id, const std::vector<std::string> &args) {
-  client_->run_command(_return, block_id_, op_id, args);
+void block_client::run_command(std::vector<std::string> &_return,
+                               int64_t seq_no,
+                               int32_t op_id,
+                               const std::vector<std::string> &args) {
+  client_->run_command(_return, seq_no, block_id_, op_id, args);
 }
 
 void block_client::put(const std::string &key, const std::string &value) {
   std::vector<std::string> _ret;
-  client_->run_command(_ret, block_id_, 1, {key, value});
+  client_->run_command(_ret, -1, block_id_, 1, {key, value});
 }
 
 std::string block_client::get(const std::string &key) {
   std::vector<std::string> _ret;
-  client_->run_command(_ret, block_id_, 0, {key});
+  client_->run_command(_ret, -1, block_id_, 0, {key});
   return _ret.at(0);
 }
 
 void block_client::update(const std::string &key, const std::string &value) {
   std::vector<std::string> _ret;
-  client_->run_command(_ret, block_id_, 3, {key, value});
+  client_->run_command(_ret, -1, block_id_, 3, {key, value});
 }
 
 void block_client::remove(const std::string &key) {
   std::vector<std::string> _ret;
-  client_->run_command(_ret, block_id_, 2, {key});
+  client_->run_command(_ret, -1, block_id_, 2, {key});
 }
 
-int32_t block_client::send_command(int op_id, const std::vector<std::string> &args) {
-  return client_->send_run_command(block_id_, op_id, args);
+int32_t block_client::send_command(int64_t seq_no, int32_t op_id, const std::vector<std::string> &args) {
+  return client_->send_run_command(seq_no, block_id_, op_id, args);
 }
 
 void block_client::recv_command_result(int32_t seq_id, std::vector<std::string> &_return) {
   client_->recv_run_command(_return, seq_id);
+}
+std::string block_client::endpoint() const {
+  return host_ + ":" + std::to_string(port_);
 }
 
 }

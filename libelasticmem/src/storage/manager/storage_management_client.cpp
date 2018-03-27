@@ -36,7 +36,7 @@ void storage_management_client::disconnect() {
   }
 }
 
-void storage_management_client::setup_chain(int32_t block_id,
+void storage_management_client::setup_block(int32_t block_id,
                                             const std::string &path,
                                             int32_t role,
                                             const std::string &next_block_name) {
@@ -71,6 +71,10 @@ int64_t storage_management_client::storage_capacity(const int32_t block_id) {
 
 int64_t storage_management_client::storage_size(const int32_t block_id) {
   return client_->storage_size(block_id);
+}
+
+void storage_management_client::resend_pending(int32_t block_id) {
+  client_->resend_pending(block_id);
 }
 
 }

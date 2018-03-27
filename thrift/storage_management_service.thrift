@@ -26,4 +26,7 @@ service storage_management_service {
 
   i64 storage_size(1: i32 block_id)
     throws (1: storage_management_exception ex),
+
+  void resend_pending(1: i32 block_id)
+    throws (1: storage_management_exception ex),
 }

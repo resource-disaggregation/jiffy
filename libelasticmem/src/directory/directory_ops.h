@@ -130,6 +130,17 @@ struct block_chain {
   const std::string &tail() const {
     return block_names.back();
   }
+
+  std::string to_string() const {
+    std::string out = "<";
+    for (const auto &name: block_names) {
+      out += name + ", ";
+    }
+    out.pop_back();
+    out.pop_back();
+    out += ">";
+    return out;
+  }
 };
 
 class file_status {
@@ -302,6 +313,7 @@ class directory_ops {
 class directory_management_ops {
  public:
   virtual void touch(const std::string &path) = 0;
+  virtual block_chain resolve_failures(const std::string &path, const block_chain &chain) = 0;
 };
 
 }

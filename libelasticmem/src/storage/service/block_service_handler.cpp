@@ -8,12 +8,13 @@ block_service_handler::block_service_handler(std::vector<std::shared_ptr<chain_m
     : blocks_(blocks), sub_maps_(sub_maps) {}
 
 void block_service_handler::run_command(std::vector<std::string> &_return,
+                                        int64_t seq_no,
                                         const int32_t block_id,
                                         const int32_t cmd_id,
                                         const std::vector<std::string> &arguments) {
   try {
     auto blk = blocks_.at(static_cast<std::size_t>(block_id));
-    blk->run_command_chain(_return, cmd_id, arguments);
+    blk->run_command_chain(_return, seq_no, cmd_id, arguments);
     sub_maps_.at(static_cast<std::size_t>(block_id))->notify(blk->op_name(cmd_id), arguments[0]); // FIXME
   } catch (std::exception& e) {
     throw make_exception(e);

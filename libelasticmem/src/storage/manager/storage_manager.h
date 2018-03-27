@@ -26,6 +26,7 @@ class storage_manager : public storage_management_ops {
   void reset(const std::string &block_name) override;
   size_t storage_capacity(const std::string &block_name) override;
   size_t storage_size(const std::string &block_name) override;
+  void resend_pending(const std::string &block_name) override;
 };
 
 }

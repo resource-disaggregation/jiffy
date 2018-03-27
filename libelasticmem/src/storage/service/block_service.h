@@ -21,7 +21,7 @@ namespace elasticmem { namespace storage {
 class block_serviceIf {
  public:
   virtual ~block_serviceIf() {}
-  virtual void run_command(std::vector<std::string> & _return, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments) = 0;
+  virtual void run_command(std::vector<std::string> & _return, const int64_t seq_no, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments) = 0;
 };
 
 class block_serviceIfFactory {
@@ -51,13 +51,14 @@ class block_serviceIfSingletonFactory : virtual public block_serviceIfFactory {
 class block_serviceNull : virtual public block_serviceIf {
  public:
   virtual ~block_serviceNull() {}
-  void run_command(std::vector<std::string> & /* _return */, const int32_t /* block_id */, const int32_t /* cmd_id */, const std::vector<std::string> & /* arguments */) {
+  void run_command(std::vector<std::string> & /* _return */, const int64_t /* seq_no */, const int32_t /* block_id */, const int32_t /* cmd_id */, const std::vector<std::string> & /* arguments */) {
     return;
   }
 };
 
 typedef struct _block_service_run_command_args__isset {
-  _block_service_run_command_args__isset() : block_id(false), cmd_id(false), arguments(false) {}
+  _block_service_run_command_args__isset() : seq_no(false), block_id(false), cmd_id(false), arguments(false) {}
+  bool seq_no :1;
   bool block_id :1;
   bool cmd_id :1;
   bool arguments :1;
@@ -68,15 +69,18 @@ class block_service_run_command_args {
 
   block_service_run_command_args(const block_service_run_command_args&);
   block_service_run_command_args& operator=(const block_service_run_command_args&);
-  block_service_run_command_args() : block_id(0), cmd_id(0) {
+  block_service_run_command_args() : seq_no(0), block_id(0), cmd_id(0) {
   }
 
   virtual ~block_service_run_command_args() throw();
+  int64_t seq_no;
   int32_t block_id;
   int32_t cmd_id;
   std::vector<std::string>  arguments;
 
   _block_service_run_command_args__isset __isset;
+
+  void __set_seq_no(const int64_t val);
 
   void __set_block_id(const int32_t val);
 
@@ -86,6 +90,8 @@ class block_service_run_command_args {
 
   bool operator == (const block_service_run_command_args & rhs) const
   {
+    if (!(seq_no == rhs.seq_no))
+      return false;
     if (!(block_id == rhs.block_id))
       return false;
     if (!(cmd_id == rhs.cmd_id))
@@ -113,6 +119,7 @@ class block_service_run_command_pargs {
 
 
   virtual ~block_service_run_command_pargs() throw();
+  const int64_t* seq_no;
   const int32_t* block_id;
   const int32_t* cmd_id;
   const std::vector<std::string> * arguments;
@@ -123,9 +130,10 @@ class block_service_run_command_pargs {
 };
 
 typedef struct _block_service_run_command_result__isset {
-  _block_service_run_command_result__isset() : success(false), ex(false) {}
+  _block_service_run_command_result__isset() : success(false), be(false), cfe(false) {}
   bool success :1;
-  bool ex :1;
+  bool be :1;
+  bool cfe :1;
 } _block_service_run_command_result__isset;
 
 class block_service_run_command_result {
@@ -138,19 +146,24 @@ class block_service_run_command_result {
 
   virtual ~block_service_run_command_result() throw();
   std::vector<std::string>  success;
-  block_exception ex;
+  block_exception be;
+  chain_failure_exception cfe;
 
   _block_service_run_command_result__isset __isset;
 
   void __set_success(const std::vector<std::string> & val);
 
-  void __set_ex(const block_exception& val);
+  void __set_be(const block_exception& val);
+
+  void __set_cfe(const chain_failure_exception& val);
 
   bool operator == (const block_service_run_command_result & rhs) const
   {
     if (!(success == rhs.success))
       return false;
-    if (!(ex == rhs.ex))
+    if (!(be == rhs.be))
+      return false;
+    if (!(cfe == rhs.cfe))
       return false;
     return true;
   }
@@ -168,9 +181,10 @@ class block_service_run_command_result {
 };
 
 typedef struct _block_service_run_command_presult__isset {
-  _block_service_run_command_presult__isset() : success(false), ex(false) {}
+  _block_service_run_command_presult__isset() : success(false), be(false), cfe(false) {}
   bool success :1;
-  bool ex :1;
+  bool be :1;
+  bool cfe :1;
 } _block_service_run_command_presult__isset;
 
 class block_service_run_command_presult {
@@ -179,7 +193,8 @@ class block_service_run_command_presult {
 
   virtual ~block_service_run_command_presult() throw();
   std::vector<std::string> * success;
-  block_exception ex;
+  block_exception be;
+  chain_failure_exception cfe;
 
   _block_service_run_command_presult__isset __isset;
 
@@ -214,8 +229,8 @@ class block_serviceClientT : virtual public block_serviceIf {
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void run_command(std::vector<std::string> & _return, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments);
-  void send_run_command(const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments);
+  void run_command(std::vector<std::string> & _return, const int64_t seq_no, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments);
+  void send_run_command(const int64_t seq_no, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments);
   void recv_run_command(std::vector<std::string> & _return);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
@@ -286,13 +301,13 @@ class block_serviceMultiface : virtual public block_serviceIf {
     ifaces_.push_back(iface);
   }
  public:
-  void run_command(std::vector<std::string> & _return, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments) {
+  void run_command(std::vector<std::string> & _return, const int64_t seq_no, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->run_command(_return, block_id, cmd_id, arguments);
+      ifaces_[i]->run_command(_return, seq_no, block_id, cmd_id, arguments);
     }
-    ifaces_[i]->run_command(_return, block_id, cmd_id, arguments);
+    ifaces_[i]->run_command(_return, seq_no, block_id, cmd_id, arguments);
     return;
   }
 
@@ -327,8 +342,8 @@ class block_serviceConcurrentClientT : virtual public block_serviceIf {
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void run_command(std::vector<std::string> & _return, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments);
-  int32_t send_run_command(const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments);
+  void run_command(std::vector<std::string> & _return, const int64_t seq_no, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments);
+  int32_t send_run_command(const int64_t seq_no, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments);
   void recv_run_command(std::vector<std::string> & _return, const int32_t seqid);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;

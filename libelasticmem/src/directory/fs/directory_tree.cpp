@@ -4,6 +4,8 @@
 #include <iostream>
 #include "../../utils/directory_utils.h"
 #include "../../storage/chain_module.h"
+#include "../../utils/logger.h"
+#include "../../utils/retry_utils.h"
 
 namespace elasticmem {
 namespace directory {
@@ -62,6 +64,7 @@ data_status directory_tree::create(const std::string &path,
   namespace fs = std::experimental::filesystem;
   fs::path p(path);
   std::string filename = p.filename();
+
   if (filename == "." || filename == "/") {
     throw directory_ops_exception("Path is a directory: " + path);
   }
@@ -76,9 +79,11 @@ data_status directory_tree::create(const std::string &path,
   }
 
   auto parent = std::dynamic_pointer_cast<ds_dir_node>(node);
+
   std::vector<block_chain> blocks;
   for (std::size_t i = 0; i < num_blocks; ++i) {
     block_chain chain{allocator_->allocate(chain_length, "")};
+    assert(chain.block_names.size() == chain_length);
     blocks.push_back(chain);
     using namespace storage;
     if (chain_length == 1) {
@@ -216,6 +221,59 @@ void directory_tree::touch(const std::string &path) {
     throw directory_ops_exception("Path does not exist: " + path);
   }
   touch(node, time);
+}
+
+block_chain directory_tree::resolve_failures(const std::string &path, const block_chain &chain) {
+  std::size_t chain_length = chain.block_names.size();
+  std::vector<bool> failed(chain_length);
+  LOG(log_level::info) << "Resolving failures for block chain " << chain.to_string() << " of path " << path;
+  bool mid_failure = false;
+  std::vector<std::string> fixed_chain;
+  for (std::size_t i = 0; i < chain_length; i++) {
+    std::string block_name = chain.block_names[i];
+    auto parsed = storage::block_name_parser::parse(block_name);
+    try {
+      utils::retry_utils::retry(3, [parsed]() {
+        storage::block_client c;
+        c.connect(parsed.host, parsed.service_port, parsed.id);
+        c.disconnect();
+        return true;
+      });
+      LOG(log_level::info) << "Block " << block_name << " is still live";
+      fixed_chain.push_back(block_name);
+    } catch (std::exception &) {
+      LOG(log_level::warn) << "Block " << block_name << " has failed, removing it from chain";
+      failed[i] = true;
+      if (i > 0 && i < chain_length - 1 && failed[i] && !failed[i - 1]) {
+        mid_failure = true;
+      }
+    }
+  }
+
+  // Re-organize chain as needed
+  using namespace storage;
+  if (fixed_chain.empty()) {                       // All failed
+    LOG(log_level::error) << "No blocks left in chain";
+    throw directory_ops_exception("All blocks in the chain have failed.");
+  } else if (fixed_chain.size() == 1) {            // All but one failed
+    LOG(log_level::info) << "Only one block has remained in chain; setting singleton role";
+    storage_->setup_block(fixed_chain[0], path, chain_role::singleton, "nil");
+  } else {                                         // More than one left
+    LOG(log_level::info) << fixed_chain.size() << " blocks left in chain";
+    for (std::size_t i = 0; i < fixed_chain.size(); ++i) {
+      std::string block_name = fixed_chain[i];
+      std::string next_block_name = (i == fixed_chain.size() - 1) ? "nil" : fixed_chain[i + 1];
+      int32_t role = (i == 0) ? chain_role::head : (i == fixed_chain.size() - 1) ? chain_role::tail : chain_role::mid;
+      LOG(log_level::info) << "Setting block <" << block_name << ">: path=" << path << ", role=" << role << ", next="
+                           << next_block_name;
+      storage_->setup_block(block_name, path, role, next_block_name);
+    }
+    if (mid_failure) {
+      LOG(log_level::info) << "Resending pending requests to resolve mid block failure";
+      storage_->resend_pending(fixed_chain[0]);
+    }
+  }
+  return block_chain{fixed_chain};
 }
 
 std::shared_ptr<ds_node> directory_tree::get_node_unsafe(const std::string &path) const {

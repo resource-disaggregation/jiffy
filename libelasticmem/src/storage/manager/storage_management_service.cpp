@@ -121,5 +121,21 @@ storage_management_service_storage_size_result::~storage_management_service_stor
 storage_management_service_storage_size_presult::~storage_management_service_storage_size_presult() throw() {
 }
 
+
+storage_management_service_resend_pending_args::~storage_management_service_resend_pending_args() throw() {
+}
+
+
+storage_management_service_resend_pending_pargs::~storage_management_service_resend_pending_pargs() throw() {
+}
+
+
+storage_management_service_resend_pending_result::~storage_management_service_resend_pending_result() throw() {
+}
+
+
+storage_management_service_resend_pending_presult::~storage_management_service_resend_pending_presult() throw() {
+}
+
 }} // namespace
 

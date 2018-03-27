@@ -13,6 +13,7 @@ class block_service_handler : public block_serviceIf {
   block_service_handler(std::vector<std::shared_ptr<chain_module>> &blocks,
                         std::vector<std::shared_ptr<subscription_map>> &sub_maps);
   void run_command(std::vector<std::string> &_return,
+                   int64_t seq_no,
                    int32_t block_id,
                    int32_t cmd_id,
                    const std::vector<std::string> &arguments) override;

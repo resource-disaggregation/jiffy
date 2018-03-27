@@ -61,4 +61,52 @@ const char* block_exception::what() const throw() {
   }
 }
 
+
+chain_failure_exception::~chain_failure_exception() throw() {
+}
+
+
+void chain_failure_exception::__set_msg(const std::string& val) {
+  this->msg = val;
+}
+std::ostream& operator<<(std::ostream& out, const chain_failure_exception& obj)
+{
+  obj.printTo(out);
+  return out;
+}
+
+
+void swap(chain_failure_exception &a, chain_failure_exception &b) {
+  using ::std::swap;
+  swap(a.msg, b.msg);
+  swap(a.__isset, b.__isset);
+}
+
+chain_failure_exception::chain_failure_exception(const chain_failure_exception& other2) : TException() {
+  msg = other2.msg;
+  __isset = other2.__isset;
+}
+chain_failure_exception& chain_failure_exception::operator=(const chain_failure_exception& other3) {
+  msg = other3.msg;
+  __isset = other3.__isset;
+  return *this;
+}
+void chain_failure_exception::printTo(std::ostream& out) const {
+  using ::apache::thrift::to_string;
+  out << "chain_failure_exception(";
+  out << "msg=" << to_string(msg);
+  out << ")";
+}
+
+const char* chain_failure_exception::what() const throw() {
+  try {
+    std::stringstream ss;
+    ss << "TException - service has thrown: " << *this;
+    this->thriftTExceptionMessageHolder_ = ss.str();
+    return this->thriftTExceptionMessageHolder_.c_str();
+  } catch (const std::exception&) {
+    return "TException - service has thrown: chain_failure_exception";
+  }
+}
+
 }} // namespace

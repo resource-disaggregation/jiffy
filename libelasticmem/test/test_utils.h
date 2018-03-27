@@ -53,7 +53,54 @@ class dummy_storage_manager : public elasticmem::storage::storage_management_ops
     return 0;
   }
 
+  void resend_pending(const std::string &block_name) override {
+    COMMANDS.push_back("resend_pending:" + block_name);
+  }
+
   std::vector<std::string> COMMANDS{};
+};
+
+class sequential_block_allocator : public elasticmem::directory::block_allocator {
+ public:
+  sequential_block_allocator(): cur_idx_{0} {}
+
+  std::vector<std::string> allocate(std::size_t count, const std::string &) override {
+    std::vector<std::string> allocated;
+    for (std::size_t i = 0; i < count; i++) {
+      allocated.push_back(free_.front());
+      alloc_.push_back(free_.front());
+      free_.erase(free_.begin());
+    }
+    return allocated;
+  }
+  void free(const std::vector<std::string> &block_names) override {
+    free_.insert(free_.end(), block_names.begin(), block_names.end());
+    for (const auto &block_name: block_names) {
+      alloc_.erase(std::remove(alloc_.begin(), alloc_.end(), block_name), alloc_.end());
+    }
+  }
+  void add_blocks(const std::vector<std::string> &block_names) override {
+    free_.insert(free_.end(), block_names.begin(), block_names.end());
+  }
+  void remove_blocks(const std::vector<std::string> &block_names) override {
+    for (const auto &block_name: block_names) {
+      free_.erase(std::remove(free_.begin(), free_.end(), block_name), free_.end());
+    }
+  }
+  size_t num_free_blocks() override {
+    return free_.size();
+  }
+  size_t num_allocated_blocks() override {
+    return alloc_.size();
+  }
+  size_t num_total_blocks() override {
+    return alloc_.size() + free_.size();
+  }
+
+ private:
+  std::size_t cur_idx_;
+  std::vector<std::string> free_;
+  std::vector<std::string> alloc_;
 };
 
 class dummy_block_allocator : public elasticmem::directory::block_allocator {
@@ -127,6 +174,17 @@ class test_utils {
     }
   }
 
+  static std::vector<std::string> init_block_names(size_t num_blocks, int32_t service_port, int32_t management_port,
+                                                   int32_t notification_port) {
+    std::vector<std::string> block_names;
+    for (size_t i = 0; i < num_blocks; ++i) {
+      std::string block_name = elasticmem::storage::block_name_parser::make("127.0.0.1", service_port, management_port,
+                                                                            notification_port, static_cast<int32_t>(i));
+      block_names.push_back(block_name);
+    }
+    return block_names;
+  }
+
   static std::vector<std::shared_ptr<elasticmem::storage::chain_module>> init_kv_blocks(size_t num_blocks,
                                                                                         int32_t service_port,
                                                                                         int32_t management_port,
@@ -137,6 +195,15 @@ class test_utils {
       std::string block_name = elasticmem::storage::block_name_parser::make("127.0.0.1", service_port, management_port,
                                                                             notification_port, static_cast<int32_t>(i));
       blks[i] = std::make_shared<elasticmem::storage::kv_block>(block_name);
+    }
+    return blks;
+  }
+
+  static std::vector<std::shared_ptr<elasticmem::storage::chain_module>> init_kv_blocks(const std::vector<std::string> &block_names) {
+    std::vector<std::shared_ptr<elasticmem::storage::chain_module>> blks;
+    blks.resize(block_names.size());
+    for (size_t i = 0; i < block_names.size(); ++i) {
+      blks[i] = std::make_shared<elasticmem::storage::kv_block>(block_names[i]);
     }
     return blks;
   }

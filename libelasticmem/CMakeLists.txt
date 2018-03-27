@@ -37,6 +37,7 @@ add_library(elasticmem STATIC
         src/directory/fs/directory_service_types.tcc
         src/directory/fs/directory_tree.cpp
         src/directory/fs/directory_tree.h
+        src/directory/fs/directory_type_conversions.h
         src/directory/lease/directory_lease_client.cpp
         src/directory/lease/directory_lease_client.h
         src/directory/lease/directory_lease_server.cpp
@@ -141,7 +142,8 @@ add_library(elasticmem STATIC
         src/utils/logger.h
         src/utils/rand_utils.h
         src/utils/signal_handling.h
-        src/utils/time_utils.h src/directory/fs/directory_type_conversions.h)
+        src/utils/time_utils.h
+        src/utils/retry_utils.h)
 if (GENERATE_THRIFT)
   add_dependencies(elasticmem thriftgen_directory thriftgen_kv)
 endif ()
@@ -166,7 +168,7 @@ if (BUILD_TESTS)
           test/chain_replication_test.cpp
           test/directory_lease_test.cpp
           test/directory_tree_test.cpp
-          test/directory_rpc_service_test.cpp
+          test/directory_service_test.cpp
           test/lease_expiry_worker_test.cpp
           test/local_store_test.cpp
           test/notification_test.cpp

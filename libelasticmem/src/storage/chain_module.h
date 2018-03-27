@@ -7,12 +7,24 @@
 #include <string>
 #include <vector>
 #include <libcuckoo/cuckoohash_map.hh>
+#include <shared_mutex>
 #include "service/block_client.h"
 #include "manager/detail/block_name_parser.h"
 #include "block.h"
 
 namespace elasticmem {
 namespace storage {
+
+class chain_exception : public std::exception {
+ public:
+  explicit chain_exception(std::string msg) : msg_(std::move(msg)) {}
+
+  char const *what() const noexcept override {
+    return msg_.c_str();
+  }
+ private:
+  std::string msg_;
+};
 
 enum chain_role {
   singleton = 0,
@@ -21,12 +33,8 @@ enum chain_role {
   tail = 3
 };
 
-struct chain_block_ctx {
-  std::string host;
-  int port{-1};
-  int block_id{-1};
-  block_client client{};
-
+class chain_block_ctx {
+ public:
   chain_block_ctx() = default;
 
   explicit chain_block_ctx(const std::string &block_name) {
@@ -34,27 +42,48 @@ struct chain_block_ctx {
   }
 
   void reset(const std::string &block_name) {
-    disconnect();
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    client_.disconnect();
     if (block_name != "nil") {
       auto bid = block_name_parser::parse(block_name);
-      host = bid.host;
-      port = bid.service_port;
-      block_id = bid.id;
-      connect();
+      auto host = bid.host;
+      auto port = bid.service_port;
+      auto block_id = bid.id;
+      client_.connect(host, port, block_id);
     }
   }
 
-  void connect() {
-    client.connect(host, port, block_id);
+  void run_command(std::vector<std::string> &result,
+                   int64_t seq_no,
+                   int32_t op_id,
+                   const std::vector<std::string> &args) {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    client_.run_command(result, seq_no, op_id, args);
   }
 
-  void disconnect() {
-    client.disconnect();
+  int32_t send_command(int64_t seq_no, int32_t op_id, const std::vector<std::string> &args) {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    return client_.send_command(seq_no, op_id, args);
+  }
+
+  void recv_command_result(int32_t seq_id, std::vector<std::string> &result) {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    return client_.recv_command_result(seq_id, result);
   }
 
   bool is_connected() {
-    return client.is_connected();
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    return client_.is_connected();
   }
+
+  std::string endpoint() {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    return client_.endpoint();
+  }
+
+ private:
+  std::shared_mutex mtx_;
+  block_client client_;
 };
 
 struct chain_op {
@@ -77,39 +106,54 @@ class chain_module : public block {
   }
 
   bool is_head() const {
-    return role_ == chain_role::head || role_ == chain_role::singleton;
+    return role() == chain_role::head || role() == chain_role::singleton;
   }
 
   bool is_tail() const {
-    return role_ == chain_role::tail || role_ == chain_role::singleton;
+    return role() == chain_role::tail || role() == chain_role::singleton;
   }
 
   void reset_next(const std::string &next_block) {
     next_->reset(next_block);
   }
 
-  void add_pending(int32_t sn, int op_id, const std::vector<std::string> &args) {
+  void add_pending(int64_t sn, int op_id, const std::vector<std::string> &args) {
     pending_.insert(sn, chain_op{op_id, args});
   }
 
-  void remove_pending(int32_t sn) {
+  void remove_pending(int64_t sn) {
     pending_.erase(sn);
   }
 
   void resend_pending() {
     auto ops = pending_.lock_table();
-    for (auto op: ops) {
-      std::vector<std::string> response;
-      next_->client.run_command(response, op.second.op_id, op.second.args);
+    try {
+      for (const auto &op: ops) {
+        std::vector<std::string> response;
+        next_->run_command(response, op.first, op.second.op_id, op.second.args);
+        remove_pending(op.first);
+      }
+    } catch (...) {
+      ops.unlock();
+      std::rethrow_exception(std::current_exception());
     }
+    ops.unlock();
   }
 
-  void run_command_chain(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args);
+  int64_t incr_seq_no() {
+    return seq_no_.fetch_add(1L);
+  }
+
+  void run_command_chain(std::vector<std::string> &_return,
+                         int64_t seq_no,
+                         int32_t oid,
+                         const std::vector<std::string> &args);
 
  private:
   chain_role role_{singleton};
+  std::atomic<int64_t> seq_no_{0};
   std::shared_ptr<chain_block_ctx> next_{nullptr};
-  cuckoohash_map<int32_t, chain_op> pending_{};
+  cuckoohash_map<int64_t, chain_op> pending_{};
 };
 
 }

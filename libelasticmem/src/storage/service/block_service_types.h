@@ -22,6 +22,8 @@ namespace elasticmem { namespace storage {
 
 class block_exception;
 
+class chain_failure_exception;
+
 typedef struct _block_exception__isset {
   _block_exception__isset() : msg(false) {}
   bool msg :1;
@@ -67,6 +69,52 @@ class block_exception : public ::apache::thrift::TException {
 void swap(block_exception &a, block_exception &b);
 
 std::ostream& operator<<(std::ostream& out, const block_exception& obj);
+
+typedef struct _chain_failure_exception__isset {
+  _chain_failure_exception__isset() : msg(false) {}
+  bool msg :1;
+} _chain_failure_exception__isset;
+
+class chain_failure_exception : public ::apache::thrift::TException {
+ public:
+
+  chain_failure_exception(const chain_failure_exception&);
+  chain_failure_exception& operator=(const chain_failure_exception&);
+  chain_failure_exception() : msg() {
+  }
+
+  virtual ~chain_failure_exception() throw();
+  std::string msg;
+
+  _chain_failure_exception__isset __isset;
+
+  void __set_msg(const std::string& val);
+
+  bool operator == (const chain_failure_exception & rhs) const
+  {
+    if (!(msg == rhs.msg))
+      return false;
+    return true;
+  }
+  bool operator != (const chain_failure_exception &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const chain_failure_exception & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+  virtual void printTo(std::ostream& out) const;
+  mutable std::string thriftTExceptionMessageHolder_;
+  const char* what() const throw();
+};
+
+void swap(chain_failure_exception &a, chain_failure_exception &b);
+
+std::ostream& operator<<(std::ostream& out, const chain_failure_exception& obj);
 
 }} // namespace
 

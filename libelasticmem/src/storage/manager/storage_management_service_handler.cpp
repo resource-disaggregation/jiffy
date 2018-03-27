@@ -71,6 +71,14 @@ int64_t storage_management_service_handler::storage_size(int32_t block_id) {
   }
 }
 
+void storage_management_service_handler::resend_pending(const int32_t block_id) {
+  try {
+    blocks_.at(static_cast<std::size_t>(block_id))->resend_pending();
+  } catch (std::exception &e) {
+    throw make_exception(e);
+  }
+}
+
 storage_management_exception storage_management_service_handler::make_exception(std::exception &e) {
   storage_management_exception ex;
   ex.msg = e.what();

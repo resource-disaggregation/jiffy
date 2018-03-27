@@ -31,6 +31,8 @@ class storage_management_ops {
   virtual std::size_t storage_capacity(const std::string &block_name) = 0;
 
   virtual std::size_t storage_size(const std::string &block_name) = 0;
+
+  virtual void resend_pending(const std::string &block_name) = 0;
 };
 
 }
