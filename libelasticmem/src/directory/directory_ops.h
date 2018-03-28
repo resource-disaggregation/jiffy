@@ -314,7 +314,7 @@ class directory_management_ops {
  public:
   virtual void touch(const std::string &path) = 0;
   virtual block_chain resolve_failures(const std::string &path, const block_chain &chain) = 0;
-  virtual block_chain add_node(const std::string &path, const block_chain &chain, std::size_t count) = 0;
+  virtual block_chain add_blocks_to_chain(const std::string &path, const block_chain &chain, std::size_t count) = 0;
 };
 
 }

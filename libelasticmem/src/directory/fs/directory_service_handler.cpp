@@ -163,6 +163,22 @@ bool directory_service_handler::is_directory(const std::string &path) {
   }
 }
 
+void directory_service_handler::reslove_failures(const std::string &path, const rpc_block_chain &chain) {
+  try {
+    shard_->resolve_failures(path, directory_type_conversions::from_rpc(chain));
+  } catch (directory_ops_exception &e) {
+    throw make_exception(e);
+  }
+}
+
+void directory_service_handler::add_blocks(const std::string &path, const rpc_block_chain &chain, const int32_t count) {
+  try {
+    shard_->add_blocks_to_chain(path, directory_type_conversions::from_rpc(chain), count);
+  } catch (directory_ops_exception &e) {
+    throw make_exception(e);
+  }
+}
+
 directory_service_exception directory_service_handler::make_exception(directory_ops_exception &ex) const {
   directory_service_exception e;
   e.msg = ex.what();

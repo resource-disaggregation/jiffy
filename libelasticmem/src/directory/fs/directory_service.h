@@ -39,6 +39,8 @@ class directory_serviceIf {
   virtual void dstatus(rpc_data_status& _return, const std::string& path) = 0;
   virtual bool is_regular_file(const std::string& path) = 0;
   virtual bool is_directory(const std::string& path) = 0;
+  virtual void reslove_failures(const std::string& path, const rpc_block_chain& chain) = 0;
+  virtual void add_blocks(const std::string& path, const rpc_block_chain& chain, const int32_t count) = 0;
 };
 
 class directory_serviceIfFactory {
@@ -126,6 +128,12 @@ class directory_serviceNull : virtual public directory_serviceIf {
   bool is_directory(const std::string& /* path */) {
     bool _return = false;
     return _return;
+  }
+  void reslove_failures(const std::string& /* path */, const rpc_block_chain& /* chain */) {
+    return;
+  }
+  void add_blocks(const std::string& /* path */, const rpc_block_chain& /* chain */, const int32_t /* count */) {
+    return;
   }
 };
 
@@ -2239,6 +2247,247 @@ class directory_service_is_directory_presult {
 
 };
 
+typedef struct _directory_service_reslove_failures_args__isset {
+  _directory_service_reslove_failures_args__isset() : path(false), chain(false) {}
+  bool path :1;
+  bool chain :1;
+} _directory_service_reslove_failures_args__isset;
+
+class directory_service_reslove_failures_args {
+ public:
+
+  directory_service_reslove_failures_args(const directory_service_reslove_failures_args&);
+  directory_service_reslove_failures_args& operator=(const directory_service_reslove_failures_args&);
+  directory_service_reslove_failures_args() : path() {
+  }
+
+  virtual ~directory_service_reslove_failures_args() throw();
+  std::string path;
+  rpc_block_chain chain;
+
+  _directory_service_reslove_failures_args__isset __isset;
+
+  void __set_path(const std::string& val);
+
+  void __set_chain(const rpc_block_chain& val);
+
+  bool operator == (const directory_service_reslove_failures_args & rhs) const
+  {
+    if (!(path == rhs.path))
+      return false;
+    if (!(chain == rhs.chain))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_reslove_failures_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_reslove_failures_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class directory_service_reslove_failures_pargs {
+ public:
+
+
+  virtual ~directory_service_reslove_failures_pargs() throw();
+  const std::string* path;
+  const rpc_block_chain* chain;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_reslove_failures_result__isset {
+  _directory_service_reslove_failures_result__isset() : ex(false) {}
+  bool ex :1;
+} _directory_service_reslove_failures_result__isset;
+
+class directory_service_reslove_failures_result {
+ public:
+
+  directory_service_reslove_failures_result(const directory_service_reslove_failures_result&);
+  directory_service_reslove_failures_result& operator=(const directory_service_reslove_failures_result&);
+  directory_service_reslove_failures_result() {
+  }
+
+  virtual ~directory_service_reslove_failures_result() throw();
+  directory_service_exception ex;
+
+  _directory_service_reslove_failures_result__isset __isset;
+
+  void __set_ex(const directory_service_exception& val);
+
+  bool operator == (const directory_service_reslove_failures_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_reslove_failures_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_reslove_failures_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_reslove_failures_presult__isset {
+  _directory_service_reslove_failures_presult__isset() : ex(false) {}
+  bool ex :1;
+} _directory_service_reslove_failures_presult__isset;
+
+class directory_service_reslove_failures_presult {
+ public:
+
+
+  virtual ~directory_service_reslove_failures_presult() throw();
+  directory_service_exception ex;
+
+  _directory_service_reslove_failures_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
+typedef struct _directory_service_add_blocks_args__isset {
+  _directory_service_add_blocks_args__isset() : path(false), chain(false), count(false) {}
+  bool path :1;
+  bool chain :1;
+  bool count :1;
+} _directory_service_add_blocks_args__isset;
+
+class directory_service_add_blocks_args {
+ public:
+
+  directory_service_add_blocks_args(const directory_service_add_blocks_args&);
+  directory_service_add_blocks_args& operator=(const directory_service_add_blocks_args&);
+  directory_service_add_blocks_args() : path(), count(0) {
+  }
+
+  virtual ~directory_service_add_blocks_args() throw();
+  std::string path;
+  rpc_block_chain chain;
+  int32_t count;
+
+  _directory_service_add_blocks_args__isset __isset;
+
+  void __set_path(const std::string& val);
+
+  void __set_chain(const rpc_block_chain& val);
+
+  void __set_count(const int32_t val);
+
+  bool operator == (const directory_service_add_blocks_args & rhs) const
+  {
+    if (!(path == rhs.path))
+      return false;
+    if (!(chain == rhs.chain))
+      return false;
+    if (!(count == rhs.count))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_add_blocks_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_add_blocks_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class directory_service_add_blocks_pargs {
+ public:
+
+
+  virtual ~directory_service_add_blocks_pargs() throw();
+  const std::string* path;
+  const rpc_block_chain* chain;
+  const int32_t* count;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_add_blocks_result__isset {
+  _directory_service_add_blocks_result__isset() : ex(false) {}
+  bool ex :1;
+} _directory_service_add_blocks_result__isset;
+
+class directory_service_add_blocks_result {
+ public:
+
+  directory_service_add_blocks_result(const directory_service_add_blocks_result&);
+  directory_service_add_blocks_result& operator=(const directory_service_add_blocks_result&);
+  directory_service_add_blocks_result() {
+  }
+
+  virtual ~directory_service_add_blocks_result() throw();
+  directory_service_exception ex;
+
+  _directory_service_add_blocks_result__isset __isset;
+
+  void __set_ex(const directory_service_exception& val);
+
+  bool operator == (const directory_service_add_blocks_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_add_blocks_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_add_blocks_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_add_blocks_presult__isset {
+  _directory_service_add_blocks_presult__isset() : ex(false) {}
+  bool ex :1;
+} _directory_service_add_blocks_presult__isset;
+
+class directory_service_add_blocks_presult {
+ public:
+
+
+  virtual ~directory_service_add_blocks_presult() throw();
+  directory_service_exception ex;
+
+  _directory_service_add_blocks_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
 template <class Protocol_>
 class directory_serviceClientT : virtual public directory_serviceIf {
  public:
@@ -2319,6 +2568,12 @@ class directory_serviceClientT : virtual public directory_serviceIf {
   bool is_directory(const std::string& path);
   void send_is_directory(const std::string& path);
   bool recv_is_directory();
+  void reslove_failures(const std::string& path, const rpc_block_chain& chain);
+  void send_reslove_failures(const std::string& path, const rpc_block_chain& chain);
+  void recv_reslove_failures();
+  void add_blocks(const std::string& path, const rpc_block_chain& chain, const int32_t count);
+  void send_add_blocks(const std::string& path, const rpc_block_chain& chain, const int32_t count);
+  void recv_add_blocks();
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
@@ -2383,6 +2638,10 @@ class directory_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT
   void process_is_regular_file(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_is_directory(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_is_directory(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_reslove_failures(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_reslove_failures(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_add_blocks(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_add_blocks(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
  public:
   directory_serviceProcessorT(::apache::thrift::stdcxx::shared_ptr<directory_serviceIf> iface) :
     iface_(iface) {
@@ -2440,6 +2699,12 @@ class directory_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT
     processMap_["is_directory"] = ProcessFunctions(
       &directory_serviceProcessorT::process_is_directory,
       &directory_serviceProcessorT::process_is_directory);
+    processMap_["reslove_failures"] = ProcessFunctions(
+      &directory_serviceProcessorT::process_reslove_failures,
+      &directory_serviceProcessorT::process_reslove_failures);
+    processMap_["add_blocks"] = ProcessFunctions(
+      &directory_serviceProcessorT::process_add_blocks,
+      &directory_serviceProcessorT::process_add_blocks);
   }
 
   virtual ~directory_serviceProcessorT() {}
@@ -2641,6 +2906,24 @@ class directory_serviceMultiface : virtual public directory_serviceIf {
     return ifaces_[i]->is_directory(path);
   }
 
+  void reslove_failures(const std::string& path, const rpc_block_chain& chain) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->reslove_failures(path, chain);
+    }
+    ifaces_[i]->reslove_failures(path, chain);
+  }
+
+  void add_blocks(const std::string& path, const rpc_block_chain& chain, const int32_t count) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->add_blocks(path, chain, count);
+    }
+    ifaces_[i]->add_blocks(path, chain, count);
+  }
+
 };
 
 // The 'concurrent' client is a thread safe client that correctly handles
@@ -2726,6 +3009,12 @@ class directory_serviceConcurrentClientT : virtual public directory_serviceIf {
   bool is_directory(const std::string& path);
   int32_t send_is_directory(const std::string& path);
   bool recv_is_directory(const int32_t seqid);
+  void reslove_failures(const std::string& path, const rpc_block_chain& chain);
+  int32_t send_reslove_failures(const std::string& path, const rpc_block_chain& chain);
+  void recv_reslove_failures(const int32_t seqid);
+  void add_blocks(const std::string& path, const rpc_block_chain& chain, const int32_t count);
+  int32_t send_add_blocks(const std::string& path, const rpc_block_chain& chain, const int32_t count);
+  void recv_add_blocks(const int32_t seqid);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;

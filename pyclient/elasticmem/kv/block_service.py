@@ -19,9 +19,10 @@ all_structs = []
 
 
 class Iface(object):
-    def run_command(self, block_id, cmd_id, arguments):
+    def run_command(self, seq_no, block_id, cmd_id, arguments):
         """
         Parameters:
+         - seq_no
          - block_id
          - cmd_id
          - arguments
@@ -36,19 +37,21 @@ class Client(Iface):
             self._oprot = oprot
         self._seqid = 0
 
-    def run_command(self, block_id, cmd_id, arguments):
+    def run_command(self, seq_no, block_id, cmd_id, arguments):
         """
         Parameters:
+         - seq_no
          - block_id
          - cmd_id
          - arguments
         """
-        self.send_run_command(block_id, cmd_id, arguments)
+        self.send_run_command(seq_no, block_id, cmd_id, arguments)
         return self.recv_run_command()
 
-    def send_run_command(self, block_id, cmd_id, arguments):
+    def send_run_command(self, seq_no, block_id, cmd_id, arguments):
         self._oprot.writeMessageBegin('run_command', TMessageType.CALL, self._seqid)
         args = run_command_args()
+        args.seq_no = seq_no
         args.block_id = block_id
         args.cmd_id = cmd_id
         args.arguments = arguments
@@ -69,8 +72,10 @@ class Client(Iface):
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
-        if result.ex is not None:
-            raise result.ex
+        if result.be is not None:
+            raise result.be
+        if result.cfe is not None:
+            raise result.cfe
         raise TApplicationException(TApplicationException.MISSING_RESULT, "run_command failed: unknown result")
 
 
@@ -101,13 +106,16 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = run_command_result()
         try:
-            result.success = self._handler.run_command(args.block_id, args.cmd_id, args.arguments)
+            result.success = self._handler.run_command(args.seq_no, args.block_id, args.cmd_id, args.arguments)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except block_exception as ex:
+        except block_exception as be:
             msg_type = TMessageType.REPLY
-            result.ex = ex
+            result.be = be
+        except chain_failure_exception as cfe:
+            msg_type = TMessageType.REPLY
+            result.cfe = cfe
         except TApplicationException as ex:
             logging.exception('TApplication exception in handler')
             msg_type = TMessageType.EXCEPTION
@@ -127,13 +135,15 @@ class Processor(Iface, TProcessor):
 class run_command_args(object):
     """
     Attributes:
+     - seq_no
      - block_id
      - cmd_id
      - arguments
     """
 
 
-    def __init__(self, block_id=None, cmd_id=None, arguments=None,):
+    def __init__(self, seq_no=None, block_id=None, cmd_id=None, arguments=None,):
+        self.seq_no = seq_no
         self.block_id = block_id
         self.cmd_id = cmd_id
         self.arguments = arguments
@@ -148,16 +158,21 @@ class run_command_args(object):
             if ftype == TType.STOP:
                 break
             if fid == 1:
-                if ftype == TType.I32:
-                    self.block_id = iprot.readI32()
+                if ftype == TType.I64:
+                    self.seq_no = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.I32:
-                    self.cmd_id = iprot.readI32()
+                    self.block_id = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
+                if ftype == TType.I32:
+                    self.cmd_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
                 if ftype == TType.LIST:
                     self.arguments = []
                     (_etype3, _size0) = iprot.readListBegin()
@@ -177,16 +192,20 @@ class run_command_args(object):
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
         oprot.writeStructBegin('run_command_args')
+        if self.seq_no is not None:
+            oprot.writeFieldBegin('seq_no', TType.I64, 1)
+            oprot.writeI64(self.seq_no)
+            oprot.writeFieldEnd()
         if self.block_id is not None:
-            oprot.writeFieldBegin('block_id', TType.I32, 1)
+            oprot.writeFieldBegin('block_id', TType.I32, 2)
             oprot.writeI32(self.block_id)
             oprot.writeFieldEnd()
         if self.cmd_id is not None:
-            oprot.writeFieldBegin('cmd_id', TType.I32, 2)
+            oprot.writeFieldBegin('cmd_id', TType.I32, 3)
             oprot.writeI32(self.cmd_id)
             oprot.writeFieldEnd()
         if self.arguments is not None:
-            oprot.writeFieldBegin('arguments', TType.LIST, 3)
+            oprot.writeFieldBegin('arguments', TType.LIST, 4)
             oprot.writeListBegin(TType.STRING, len(self.arguments))
             for iter6 in self.arguments:
                 oprot.writeString(iter6.encode('utf-8') if sys.version_info[0] == 2 else iter6)
@@ -211,9 +230,10 @@ class run_command_args(object):
 all_structs.append(run_command_args)
 run_command_args.thrift_spec = (
     None,  # 0
-    (1, TType.I32, 'block_id', None, None, ),  # 1
-    (2, TType.I32, 'cmd_id', None, None, ),  # 2
-    (3, TType.LIST, 'arguments', (TType.STRING, 'UTF8', False), None, ),  # 3
+    (1, TType.I64, 'seq_no', None, None, ),  # 1
+    (2, TType.I32, 'block_id', None, None, ),  # 2
+    (3, TType.I32, 'cmd_id', None, None, ),  # 3
+    (4, TType.LIST, 'arguments', (TType.STRING, 'UTF8', False), None, ),  # 4
 )
 
 
@@ -221,13 +241,15 @@ class run_command_result(object):
     """
     Attributes:
      - success
-     - ex
+     - be
+     - cfe
     """
 
 
-    def __init__(self, success=None, ex=None,):
+    def __init__(self, success=None, be=None, cfe=None,):
         self.success = success
-        self.ex = ex
+        self.be = be
+        self.cfe = cfe
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -250,8 +272,14 @@ class run_command_result(object):
                     iprot.skip(ftype)
             elif fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = block_exception()
-                    self.ex.read(iprot)
+                    self.be = block_exception()
+                    self.be.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.cfe = chain_failure_exception()
+                    self.cfe.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -271,9 +299,13 @@ class run_command_result(object):
                 oprot.writeString(iter13.encode('utf-8') if sys.version_info[0] == 2 else iter13)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
+        if self.be is not None:
+            oprot.writeFieldBegin('be', TType.STRUCT, 1)
+            self.be.write(oprot)
+            oprot.writeFieldEnd()
+        if self.cfe is not None:
+            oprot.writeFieldBegin('cfe', TType.STRUCT, 2)
+            self.cfe.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -294,7 +326,8 @@ class run_command_result(object):
 all_structs.append(run_command_result)
 run_command_result.thrift_spec = (
     (0, TType.LIST, 'success', (TType.STRING, 'UTF8', False), None, ),  # 0
-    (1, TType.STRUCT, 'ex', [block_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'be', [block_exception, None], None, ),  # 1
+    (2, TType.STRUCT, 'cfe', [chain_failure_exception, None], None, ),  # 2
 )
 fix_spec(all_structs)
 del all_structs

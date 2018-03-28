@@ -165,3 +165,9 @@ class DirectoryClient:
 
     def is_directory(self, path):
         return self.client_.is_directory(path)
+
+    def resolve_failures(self, path, chain):
+        self.client_.reslove_failures(path, chain)
+
+    def add_blocks_to_chain(self, path, chain, count):
+        self.client_.add_blocks(path, chain, count)

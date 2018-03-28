@@ -297,5 +297,37 @@ directory_service_is_directory_result::~directory_service_is_directory_result() 
 directory_service_is_directory_presult::~directory_service_is_directory_presult() throw() {
 }
 
+
+directory_service_reslove_failures_args::~directory_service_reslove_failures_args() throw() {
+}
+
+
+directory_service_reslove_failures_pargs::~directory_service_reslove_failures_pargs() throw() {
+}
+
+
+directory_service_reslove_failures_result::~directory_service_reslove_failures_result() throw() {
+}
+
+
+directory_service_reslove_failures_presult::~directory_service_reslove_failures_presult() throw() {
+}
+
+
+directory_service_add_blocks_args::~directory_service_add_blocks_args() throw() {
+}
+
+
+directory_service_add_blocks_pargs::~directory_service_add_blocks_pargs() throw() {
+}
+
+
+directory_service_add_blocks_result::~directory_service_add_blocks_result() throw() {
+}
+
+
+directory_service_add_blocks_presult::~directory_service_add_blocks_presult() throw() {
+}
+
 }} // namespace
 

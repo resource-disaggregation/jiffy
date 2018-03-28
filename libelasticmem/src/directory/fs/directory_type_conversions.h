@@ -9,15 +9,23 @@ namespace directory {
 
 class directory_type_conversions {
  public:
+  static rpc_block_chain to_rpc(const block_chain &chain) {
+    rpc_block_chain rpc;
+    rpc.block_names = chain.block_names;
+    return rpc;
+  }
+
+  static block_chain from_rpc(const rpc_block_chain &rpc) {
+    return block_chain{rpc.block_names};
+  }
+
   static rpc_data_status to_rpc(const data_status &status) {
     rpc_data_status rpc;
     rpc.storage_mode = (rpc_storage_mode) status.mode();
     rpc.persistent_store_prefix = status.persistent_store_prefix();
     rpc.chain_length = static_cast<int32_t>(status.chain_length());
-    for (auto blk: status.data_blocks()) {
-      rpc_block_chain chain;
-      chain.block_names = blk.block_names;
-      rpc.data_blocks.push_back(chain);
+    for (const auto &blk: status.data_blocks()) {
+      rpc.data_blocks.push_back(to_rpc(blk));
     }
     return rpc;
   }
@@ -41,8 +49,8 @@ class directory_type_conversions {
 
   static data_status from_rpc(const rpc_data_status &rpc) {
     std::vector<block_chain> data_blocks;
-    for (auto blk: rpc.data_blocks) {
-      data_blocks.push_back(block_chain{blk.block_names});
+    for (const auto &blk: rpc.data_blocks) {
+      data_blocks.push_back(from_rpc(blk));
     }
     return data_status(static_cast<storage_mode>(rpc.storage_mode),
                        rpc.persistent_store_prefix,

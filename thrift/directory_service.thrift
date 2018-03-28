@@ -99,4 +99,10 @@ service directory_service {
 
   bool is_directory(1: string path)
     throws (1: directory_service_exception ex),
+
+  void reslove_failures(1: string path, 2: rpc_block_chain chain) // TODO: We should pass in chain id...
+    throws (1: directory_service_exception ex),
+
+  void add_blocks(1: string path, 2: rpc_block_chain chain, 3: i32 count) // TODO: We should pass in chain id...
+      throws (1: directory_service_exception ex),
 }

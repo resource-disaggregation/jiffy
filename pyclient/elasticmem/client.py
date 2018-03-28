@@ -73,11 +73,20 @@ class LeaseRenewalWorker(threading.Thread):
         return self._stop_event.is_set()
 
 
+class ChainFailureCallback:
+    def __init__(self, fs):
+        self.fs = fs
+
+    def __call__(self, path, chain):
+        self.fs.resolve_failures(path, chain)
+
+
 class ElasticMemClient:
     def __init__(self, host="127.0.0.1", directory_service_port=9090, lease_port=9091, renewal_duration_ms=10000):
         self.directory_host = host
         self.directory_port = directory_service_port
         self.fs = DirectoryClient(host, directory_service_port)
+        self.chain_failure_cb = ChainFailureCallback(self.fs)
         self.kvs = {}
         self.notifs = {}
         self.to_renew = []
@@ -102,7 +111,7 @@ class ElasticMemClient:
     def create_scope(self, path, persistent_store_prefix, num_blocks=1, chain_length=1):
         s = self.fs.create(path, persistent_store_prefix, num_blocks, chain_length)
         self.to_renew.append(path)
-        self.kvs[path] = KVClient(s)
+        self.kvs[path] = KVClient(path, s, self.chain_failure_cb)
         return self.kvs[path]
 
     def get_scope(self, path):
@@ -111,7 +120,7 @@ class ElasticMemClient:
         s = self.fs.open(path)
         if path not in self.to_renew:
             self.to_renew.append(path)
-        self.kvs[path] = KVClient(s)
+        self.kvs[path] = KVClient(path, s, self.chain_failure_cb)
         return self.kvs[path]
 
     def destroy_scope(self, path, mode):

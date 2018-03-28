@@ -273,7 +273,7 @@ block_chain directory_tree::resolve_failures(const std::string &path, const bloc
   return block_chain{fixed_chain};
 }
 
-block_chain directory_tree::add_node(const std::string &path, const block_chain &chain, std::size_t count) {
+block_chain directory_tree::add_blocks_to_chain(const std::string &path, const block_chain &chain, std::size_t count) {
   // TODO: Replace block_chain argument with chain id
   if (count == 0) return chain;
 

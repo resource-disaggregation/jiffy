@@ -151,6 +151,23 @@ class Iface(object):
         """
         pass
 
+    def reslove_failures(self, path, chain):
+        """
+        Parameters:
+         - path
+         - chain
+        """
+        pass
+
+    def add_blocks(self, path, chain, count):
+        """
+        Parameters:
+         - path
+         - chain
+         - count
+        """
+        pass
+
 
 class Client(Iface):
     def __init__(self, iprot, oprot=None):
@@ -751,6 +768,74 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "is_directory failed: unknown result")
 
+    def reslove_failures(self, path, chain):
+        """
+        Parameters:
+         - path
+         - chain
+        """
+        self.send_reslove_failures(path, chain)
+        self.recv_reslove_failures()
+
+    def send_reslove_failures(self, path, chain):
+        self._oprot.writeMessageBegin('reslove_failures', TMessageType.CALL, self._seqid)
+        args = reslove_failures_args()
+        args.path = path
+        args.chain = chain
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_reslove_failures(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = reslove_failures_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def add_blocks(self, path, chain, count):
+        """
+        Parameters:
+         - path
+         - chain
+         - count
+        """
+        self.send_add_blocks(path, chain, count)
+        self.recv_add_blocks()
+
+    def send_add_blocks(self, path, chain, count):
+        self._oprot.writeMessageBegin('add_blocks', TMessageType.CALL, self._seqid)
+        args = add_blocks_args()
+        args.path = path
+        args.chain = chain
+        args.count = count
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_add_blocks(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = add_blocks_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
@@ -774,6 +859,8 @@ class Processor(Iface, TProcessor):
         self._processMap["dstatus"] = Processor.process_dstatus
         self._processMap["is_regular_file"] = Processor.process_is_regular_file
         self._processMap["is_directory"] = Processor.process_is_directory
+        self._processMap["reslove_failures"] = Processor.process_reslove_failures
+        self._processMap["add_blocks"] = Processor.process_add_blocks
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -1254,6 +1341,58 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("is_directory", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_reslove_failures(self, seqid, iprot, oprot):
+        args = reslove_failures_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = reslove_failures_result()
+        try:
+            self._handler.reslove_failures(args.path, args.chain)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except directory_service_exception as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("reslove_failures", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_add_blocks(self, seqid, iprot, oprot):
+        args = add_blocks_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = add_blocks_result()
+        try:
+            self._handler.add_blocks(args.path, args.chain, args.count)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except directory_service_exception as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("add_blocks", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -3686,6 +3825,290 @@ class is_directory_result(object):
 all_structs.append(is_directory_result)
 is_directory_result.thrift_spec = (
     (0, TType.BOOL, 'success', None, None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
+)
+
+
+class reslove_failures_args(object):
+    """
+    Attributes:
+     - path
+     - chain
+    """
+
+
+    def __init__(self, path=None, chain=None,):
+        self.path = path
+        self.chain = chain
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.path = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.chain = rpc_block_chain()
+                    self.chain.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('reslove_failures_args')
+        if self.path is not None:
+            oprot.writeFieldBegin('path', TType.STRING, 1)
+            oprot.writeString(self.path.encode('utf-8') if sys.version_info[0] == 2 else self.path)
+            oprot.writeFieldEnd()
+        if self.chain is not None:
+            oprot.writeFieldBegin('chain', TType.STRUCT, 2)
+            self.chain.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(reslove_failures_args)
+reslove_failures_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
+    (2, TType.STRUCT, 'chain', [rpc_block_chain, None], None, ),  # 2
+)
+
+
+class reslove_failures_result(object):
+    """
+    Attributes:
+     - ex
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = directory_service_exception()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('reslove_failures_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(reslove_failures_result)
+reslove_failures_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
+)
+
+
+class add_blocks_args(object):
+    """
+    Attributes:
+     - path
+     - chain
+     - count
+    """
+
+
+    def __init__(self, path=None, chain=None, count=None,):
+        self.path = path
+        self.chain = chain
+        self.count = count
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.path = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.chain = rpc_block_chain()
+                    self.chain.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.count = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('add_blocks_args')
+        if self.path is not None:
+            oprot.writeFieldBegin('path', TType.STRING, 1)
+            oprot.writeString(self.path.encode('utf-8') if sys.version_info[0] == 2 else self.path)
+            oprot.writeFieldEnd()
+        if self.chain is not None:
+            oprot.writeFieldBegin('chain', TType.STRUCT, 2)
+            self.chain.write(oprot)
+            oprot.writeFieldEnd()
+        if self.count is not None:
+            oprot.writeFieldBegin('count', TType.I32, 3)
+            oprot.writeI32(self.count)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(add_blocks_args)
+add_blocks_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
+    (2, TType.STRUCT, 'chain', [rpc_block_chain, None], None, ),  # 2
+    (3, TType.I32, 'count', None, None, ),  # 3
+)
+
+
+class add_blocks_result(object):
+    """
+    Attributes:
+     - ex
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = directory_service_exception()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('add_blocks_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(add_blocks_result)
+add_blocks_result.thrift_spec = (
+    None,  # 0
     (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 fix_spec(all_structs)

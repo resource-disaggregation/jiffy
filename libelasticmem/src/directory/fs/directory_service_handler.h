@@ -31,6 +31,8 @@ class directory_service_handler : public directory_serviceIf {
   void dstatus(rpc_data_status &_return, const std::string &path) override;
   bool is_regular_file(const std::string &path) override;
   bool is_directory(const std::string &path) override;
+  void reslove_failures(const std::string &path, const rpc_block_chain &chain) override;
+  void add_blocks(const std::string &path, const rpc_block_chain &chain, int32_t count) override;
  private:
   directory_service_exception make_exception(directory_ops_exception &ex) const;
   std::shared_ptr<directory_tree> shard_;

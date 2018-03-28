@@ -336,7 +336,7 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
     REQUIRE_NOTHROW(head.put(std::to_string(i), std::to_string(i)));
   }
 
-  t->add_node("/file", t->dstatus("/file").data_blocks()[0], 1);
+  t->add_blocks_to_chain("/file", t->dstatus("/file").data_blocks()[0], 1);
 
   block_client tail(HOST, STORAGE_SERVICE_PORT_N(NUM_BLOCKS - 1), 0);
   for (std::size_t i = 0; i < 1000; ++i) {
