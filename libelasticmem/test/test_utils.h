@@ -66,7 +66,7 @@ class dummy_storage_manager : public elasticmem::storage::storage_management_ops
 
 class sequential_block_allocator : public elasticmem::directory::block_allocator {
  public:
-  sequential_block_allocator(): cur_idx_{0} {}
+  sequential_block_allocator() : cur_idx_{0} {}
 
   std::vector<std::string> allocate(std::size_t count, const std::vector<std::string> &) override {
     std::vector<std::string> allocated;
@@ -178,12 +178,19 @@ class test_utils {
     }
   }
 
-  static std::vector<std::string> init_block_names(size_t num_blocks, int32_t service_port, int32_t management_port,
-                                                   int32_t notification_port) {
+  static std::vector<std::string> init_block_names(size_t num_blocks,
+                                                   int32_t service_port,
+                                                   int32_t management_port,
+                                                   int32_t notification_port,
+                                                   int32_t chain_port) {
     std::vector<std::string> block_names;
     for (size_t i = 0; i < num_blocks; ++i) {
-      std::string block_name = elasticmem::storage::block_name_parser::make("127.0.0.1", service_port, management_port,
-                                                                            notification_port, static_cast<int32_t>(i));
+      std::string block_name = elasticmem::storage::block_name_parser::make("127.0.0.1",
+                                                                            service_port,
+                                                                            management_port,
+                                                                            notification_port,
+                                                                            chain_port,
+                                                                            static_cast<int32_t>(i));
       block_names.push_back(block_name);
     }
     return block_names;
@@ -196,8 +203,12 @@ class test_utils {
     std::vector<std::shared_ptr<elasticmem::storage::chain_module>> blks;
     blks.resize(num_blocks);
     for (size_t i = 0; i < num_blocks; ++i) {
-      std::string block_name = elasticmem::storage::block_name_parser::make("127.0.0.1", service_port, management_port,
-                                                                            notification_port, static_cast<int32_t>(i));
+      std::string block_name = elasticmem::storage::block_name_parser::make("127.0.0.1",
+                                                                            service_port,
+                                                                            management_port,
+                                                                            notification_port,
+                                                                            0,
+                                                                            static_cast<int32_t>(i));
       blks[i] = std::make_shared<elasticmem::storage::kv_block>(block_name);
     }
     return blks;
@@ -210,15 +221,6 @@ class test_utils {
       blks[i] = std::make_shared<elasticmem::storage::kv_block>(block_names[i]);
     }
     return blks;
-  }
-
-  static std::vector<std::shared_ptr<elasticmem::storage::subscription_map>> init_submaps(size_t num_blocks) {
-    std::vector<std::shared_ptr<elasticmem::storage::subscription_map>> sub_maps;
-    sub_maps.resize(num_blocks);
-    for (auto &sub_map : sub_maps) {
-      sub_map = std::make_shared<elasticmem::storage::subscription_map>();
-    }
-    return sub_maps;
   }
 };
 

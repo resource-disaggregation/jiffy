@@ -1,15 +1,16 @@
 #include "chain_module.h"
+#include "../utils/logger.h"
 
 namespace elasticmem {
 namespace storage {
+
+using namespace utils;
 
 void chain_module::resend_pending() {
   auto ops = pending_.lock_table();
   try {
     for (const auto &op: ops) {
-      std::vector<std::string> response;
-      next_->run_command(response, op.first, op.second.op_id, op.second.args);
-      remove_pending(op.first);
+      next_->request(op.second.seq, op.second.op_id, op.second.args);
     }
   } catch (...) {
     ops.unlock();
@@ -18,42 +19,65 @@ void chain_module::resend_pending() {
   ops.unlock();
 }
 
-void chain_module::run_command_chain(std::vector<std::string> &_return,
-                                     int64_t seq_no,
-                                     int32_t oid,
-                                     const std::vector<std::string> &args) {
+void chain_module::ack(const sequence_id &seq) {
+  remove_pending(seq);
+  assert(prev_ != nullptr);
+  if (!is_head()) {
+    prev_->ack(seq);
+  }
+}
+
+void chain_module::reset_next(const std::string &next_block) {
+  next_->reset(next_block);
+}
+
+void chain_module::reset_next_and_listen(const std::string &next_block) {
+  auto protocol = next_->reset(next_block);
+  if (protocol) {
+    auto handler = std::make_shared<chain_response_handler>(this);
+    auto processor = std::make_shared<chain_response_serviceProcessor>(handler);
+    if (response_processor_.joinable())
+      response_processor_.join();
+    response_processor_ = std::thread([processor, protocol] {
+      while (true) {
+        try {
+          if (!processor->process(protocol, protocol, nullptr)) {
+            break;
+          }
+        } catch (std::exception &e) {
+          break;
+        }
+      }
+    });
+  }
+}
+
+void chain_module::request(sequence_id seq, int32_t oid, const std::vector<std::string> &args) {
   if (is_accessor(oid) && !is_tail()) {
-    throw std::logic_error("Called accessor operation " + op_name(oid) + " on non-tail node");
+    LOG(log_level::error) << "Called accessor operation " << op_name(oid) << " on non-tail node";
+    return;
   }
-  run_command(_return, oid, args);
-  if (is_head()) {
-    assert(seq_no == -1);
-    seq_no = incr_seq_no();
-  }
+  std::vector<std::string> result;
+  run_command(result, oid, args);
   if (is_mutator(oid)) {
     if (!is_tail()) {
       assert(next_ != nullptr);
-      if (next_->is_connected()) {
-        int32_t seq_id = next_->send_command(seq_no, oid, args);
-        add_pending(seq_no, oid, args);
-        std::vector<std::string> next_response;
-        try {
-          next_->recv_command_result(seq_id, next_response);
-        } catch (...) {
-          throw chain_exception("FAILURE " + next_->endpoint());
+      {
+        std::lock_guard<std::mutex> lock(request_mtx_); // Ensures FIFO order w.r.t. seq.server_seq_no
+        if (is_head()) {
+          seq.server_seq_no = ++chain_seq_no_;
         }
-#ifdef DEBUG
-        // Check that the responses are the same
-        if (!std::equal(_return.begin(), _return.end(), next_response.begin())) {
-          throw std::logic_error("Response from next node does not match local response");
-        }
-#endif
-        remove_pending(seq_no);
-      } else {
-        add_pending(seq_no, oid, args);
-        throw chain_exception("FAILURE " + next_->endpoint());
+        next_->request(seq, oid, args);
       }
+      add_pending(seq, oid, args);
+    } else {
+      clients().respond_client(seq, result);
+      subscriptions().notify(op_name(oid), args[0]); // TODO: Fix
+      ack(seq);
     }
+  } else {
+    clients().respond_client(seq, result);
+    subscriptions().notify(op_name(oid), args[0]); // TODO: Fix
   }
 }
 

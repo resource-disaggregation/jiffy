@@ -24,6 +24,8 @@ class block_exception;
 
 class chain_failure_exception;
 
+class sequence_id;
+
 typedef struct _block_exception__isset {
   _block_exception__isset() : msg(false) {}
   bool msg :1;
@@ -115,6 +117,54 @@ class chain_failure_exception : public ::apache::thrift::TException {
 void swap(chain_failure_exception &a, chain_failure_exception &b);
 
 std::ostream& operator<<(std::ostream& out, const chain_failure_exception& obj);
+
+
+class sequence_id {
+ public:
+
+  sequence_id(const sequence_id&);
+  sequence_id& operator=(const sequence_id&);
+  sequence_id() : client_id(0), client_seq_no(0), server_seq_no(0) {
+  }
+
+  virtual ~sequence_id() throw();
+  int64_t client_id;
+  int64_t client_seq_no;
+  int64_t server_seq_no;
+
+  void __set_client_id(const int64_t val);
+
+  void __set_client_seq_no(const int64_t val);
+
+  void __set_server_seq_no(const int64_t val);
+
+  bool operator == (const sequence_id & rhs) const
+  {
+    if (!(client_id == rhs.client_id))
+      return false;
+    if (!(client_seq_no == rhs.client_seq_no))
+      return false;
+    if (!(server_seq_no == rhs.server_seq_no))
+      return false;
+    return true;
+  }
+  bool operator != (const sequence_id &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const sequence_id & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+  virtual void printTo(std::ostream& out) const;
+};
+
+void swap(sequence_id &a, sequence_id &b);
+
+std::ostream& operator<<(std::ostream& out, const sequence_id& obj);
 
 }} // namespace
 

@@ -3,18 +3,19 @@
 
 #include "notification_service.h"
 #include "subscription_map.h"
+#include "../chain_module.h"
 
 namespace elasticmem {
 namespace storage {
 
 class notification_service_factory: public notification_serviceIfFactory {
  public:
-  explicit notification_service_factory(std::vector<std::shared_ptr<subscription_map>> &subs);
+  explicit notification_service_factory(std::vector<std::shared_ptr<chain_module>> &blocks);
   notification_serviceIf *getHandler(const ::apache::thrift::TConnectionInfo &conn_info) override;
   void releaseHandler(notification_serviceIf *anIf) override;
 
  private:
-  std::vector<std::shared_ptr<subscription_map>> &subs_;
+  std::vector<std::shared_ptr<chain_module>> &blocks_;
 };
 
 }

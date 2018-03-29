@@ -73,19 +73,13 @@ int main(int argc, char **argv) {
   std::string hostname(hbuf);
   std::vector<std::string> block_names;
   for (int i = 0; i < static_cast<int>(num_blocks); i++) {
-    block_names.push_back(block_name_parser::make(hostname, service_port, management_port, notification_port, i));
+    block_names.push_back(block_name_parser::make(hostname, service_port, management_port, notification_port, 0, i));
   }
 
   std::vector<std::shared_ptr<chain_module>> blocks;
   blocks.resize(num_blocks);
   for (size_t i = 0; i < blocks.size(); ++i) {
     blocks[i] = std::make_shared<kv_block>(block_names[i]);
-  }
-
-  std::vector<std::shared_ptr<subscription_map>> sub_maps;
-  sub_maps.resize(num_blocks);
-  for (auto &sub_map: sub_maps) {
-    sub_map = std::make_shared<subscription_map>();
   }
 
   std::exception_ptr management_exception = nullptr;
@@ -113,7 +107,7 @@ int main(int argc, char **argv) {
   }
 
   std::exception_ptr kv_exception = nullptr;
-  auto kv_server = block_server::create(blocks, sub_maps, address, service_port);
+  auto kv_server = block_server::create(blocks, address, service_port);
   std::thread kv_serve_thread([&kv_exception, &kv_server, &failing_thread, &failure_condition] {
     try {
       kv_server->serve();
@@ -127,7 +121,7 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "KV server listening on " << address << ":" << service_port;
 
   std::exception_ptr notification_exception = nullptr;
-  auto notification_server = notification_server::create(sub_maps, address, notification_port);
+  auto notification_server = notification_server::create(blocks, address, notification_port);
   std::thread
       notification_serve_thread([&notification_exception, &notification_server, &failing_thread, &failure_condition] {
     try {

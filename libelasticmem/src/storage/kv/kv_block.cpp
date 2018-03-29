@@ -19,26 +19,25 @@ kv_block::kv_block(const std::string &block_name,
       ser_(std::move(ser)),
       deser_(std::move(deser)) {}
 
-void kv_block::put(const key_type &key, const value_type &value) {
-  block_.insert(key, value);
+bool kv_block::put(const key_type &key, const value_type &value) {
+  return block_.insert(key, value);
 }
 
 value_type kv_block::get(const key_type &key) {
-  return block_.find(key);
+  value_type value;
+  if (block_.find(key, value)) {
+    return value;
+  }
+  return "key_not_found";
 }
 
-void kv_block::update(const key_type &key,
+bool kv_block::update(const key_type &key,
                       const value_type &value) {
-  const value_type &ret = value;
-  if (!block_.update(key, ret)) {
-    throw std::out_of_range("No such key [" + key + "]");
-  }
+  return block_.update(key, value);
 }
 
-void kv_block::remove(const key_type &key) {
-  if (!block_.erase(key)) {
-    throw std::out_of_range("No such key [" + key + "]");
-  }
+bool kv_block::remove(const key_type &key) {
+  return block_.erase(key);
 }
 
 void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) {
@@ -49,26 +48,37 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
       break;
     case 1:
       if (args.size() % 2 != 0) {
-        throw std::invalid_argument("Incorrect argument count for put operation: " + std::to_string(args.size()));
+        _return.emplace_back("args_error");
+      } else {
+        for (size_t i = 0; i < args.size(); i += 2) {
+          if (put(args[i], args[i + 1])) {
+            _return.emplace_back("ok");
+          } else {
+            _return.emplace_back("key_already_exists");
+          }
+        }
       }
-      for (size_t i = 0; i < args.size(); i += 2) {
-        put(args[i], args[i + 1]);
-      }
-      _return.emplace_back("OK");
       break;
     case 2:
-      for (const key_type &key: args)
-        remove(key);
-      _return.emplace_back("OK");
+      for (const key_type &key: args) {
+        if (remove(key))
+          _return.emplace_back("ok");
+        else
+          _return.emplace_back("key_not_found");
+      }
       break;
     case 3:
       if (args.size() % 2 != 0) {
-        throw std::invalid_argument("Incorrect argument count for update operation: " + std::to_string(args.size()));
+        _return.emplace_back("args_error");
+      } else {
+        for (size_t i = 0; i < args.size(); i += 2) {
+          if (update(args[i], args[i + 1])) {
+            _return.emplace_back("ok");
+          } else {
+            _return.emplace_back("key_not_found");
+          }
+        }
       }
-      for (size_t i = 0; i < args.size(); i += 2) {
-        update(args[i], args[i + 1]);
-      }
-      _return.emplace_back("OK");
       break;
     default:throw std::invalid_argument("No such operation id " + std::to_string(oid));
   }
@@ -76,8 +86,10 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
 
 void kv_block::reset() {
   block_.clear();
-  reset_next("nil");
+  reset_next_and_listen("nil");
   path("");
+  subscriptions().clear();
+  clients().clear();
 }
 
 std::size_t kv_block::size() const {
@@ -108,7 +120,8 @@ void kv_block::forward_all() {
   int64_t i = 0;
   for (const auto &entry: ltable) {
     std::vector<std::string> result;
-    next()->run_command(result, i++, 1, {entry.first, entry.second});
+    run_command_on_next(result, 1, {entry.first, entry.second});
+    ++i;
   }
   ltable.unlock();
 }

@@ -70,20 +70,37 @@ add_library(elasticmem STATIC
         src/storage/chain_module.cpp
         src/storage/service/block_client.cpp
         src/storage/service/block_client.h
-        src/storage/service/block_server.cpp
-        src/storage/service/block_server.h
-        src/storage/service/block_service.cpp
-        src/storage/service/block_service.h
-        src/storage/service/block_service.tcc
+        src/storage/service/block_request_handler.cpp
+        src/storage/service/block_request_handler.h
+        src/storage/service/block_response_client.cpp
+        src/storage/service/block_response_client.h
+        src/storage/service/chain_request_handler.cpp
+        src/storage/service/chain_request_handler.h
+        src/storage/service/chain_request_client.cpp
+        src/storage/service/chain_request_client.h
+        src/storage/service/chain_response_client.cpp
+        src/storage/service/chain_response_client.h
+        src/storage/service/block_response_client_map.cpp
+        src/storage/service/block_response_client_map.h
+        src/storage/service/block_request_handler_factory.cpp
+        src/storage/service/block_request_handler_factory.h
+        src/storage/service/block_request_service.cpp
+        src/storage/service/block_request_service.h
+        src/storage/service/block_request_service.tcc
+        src/storage/service/block_response_service.cpp
+        src/storage/service/block_response_service.h
+        src/storage/service/block_response_service.tcc
         src/storage/service/block_service_constants.cpp
         src/storage/service/block_service_constants.h
-        src/storage/service/block_service_factory.cpp
-        src/storage/service/block_service_factory.h
-        src/storage/service/block_service_handler.cpp
-        src/storage/service/block_service_handler.h
         src/storage/service/block_service_types.cpp
         src/storage/service/block_service_types.h
         src/storage/service/block_service_types.tcc
+        src/storage/service/chain_request_service.cpp
+        src/storage/service/chain_request_service.h
+        src/storage/service/chain_request_service.tcc
+        src/storage/service/chain_response_service.cpp
+        src/storage/service/chain_response_service.h
+        src/storage/service/chain_response_service.tcc
         src/storage/manager/detail/block_name_parser.cpp
         src/storage/manager/detail/block_name_parser.h
         src/storage/manager/storage_management_client.cpp
@@ -144,7 +161,7 @@ add_library(elasticmem STATIC
         src/utils/rand_utils.h
         src/utils/signal_handling.h
         src/utils/time_utils.h
-        src/utils/retry_utils.h)
+        src/utils/retry_utils.h src/utils/event.h src/storage/service/block_chain_client.cpp src/storage/service/block_chain_client.h src/storage/service/block_server.cpp src/storage/service/block_server.h src/storage/service/chain_request_handler_factory.cpp src/storage/service/chain_request_handler_factory.h src/storage/service/chain_server.cpp src/storage/service/chain_server.h)
 if (GENERATE_THRIFT)
   add_dependencies(elasticmem thriftgen_directory thriftgen_kv)
 endif ()

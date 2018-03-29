@@ -262,7 +262,7 @@ block_chain directory_tree::resolve_failures(const std::string &path, const bloc
       std::string next_block_name = (i == fixed_chain.size() - 1) ? "nil" : fixed_chain[i + 1];
       int32_t role = (i == 0) ? chain_role::head : (i == fixed_chain.size() - 1) ? chain_role::tail : chain_role::mid;
       LOG(log_level::info) << "Setting block <" << block_name << ">: path=" << path << ", role=" << role << ", next="
-                           << next_block_name;
+                           << next_block_name << ">";
       storage_->setup_block(block_name, path, role, next_block_name);
     }
     if (mid_failure) {
@@ -286,18 +286,23 @@ block_chain directory_tree::add_blocks_to_chain(const std::string &path, const b
 
   // Setup forwarding path
   LOG(log_level::info) << "Setting old tail block <" << chain.block_names.back() << ">: path=" << path << ", role="
-                       << chain_role::tail << ", next=" << new_blocks.front();
+                       << chain_role::tail << ", next=" << new_blocks.front() << ">";
   storage_->setup_block(chain.block_names.back(), path, chain_role::tail, new_blocks.front());
   for (std::size_t i = chain.block_names.size(); i < updated_chain.size(); i++) {
     std::string block_name = updated_chain[i];
     std::string next_block_name = (i == updated_chain.size() - 1) ? "nil" : updated_chain[i + 1];
     int32_t role = (i == 0) ? chain_role::head : (i == updated_chain.size() - 1) ? chain_role::tail : chain_role::mid;
     LOG(log_level::info) << "Setting block <" << block_name << ">: path=" << path << ", role=" << role << ", next="
-                         << next_block_name;
+                         << next_block_name << ">";
     storage_->setup_block(block_name, path, role, next_block_name);
   }
 
+  LOG(log_level::info) << "Forwarding data from <" << chain.block_names.back() << "> to <" << new_blocks.front() << ">";
+
   storage_->forward_all(chain.block_names.back());
+
+  LOG(log_level::info) << "Setting old tail block <" << chain.block_names.back() << ">: path=" << path << ", role="
+                       << chain_role::mid << ", next=" << new_blocks.front() << ">";
   storage_->setup_block(chain.block_names.back(), path, chain_role::mid, new_blocks.front());
 
   return block_chain{updated_chain};

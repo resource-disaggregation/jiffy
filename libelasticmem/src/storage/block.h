@@ -7,6 +7,8 @@
 #include <cstring>
 #include <algorithm>
 #include <stdexcept>
+#include "notification/subscription_map.h"
+#include "service/block_response_client_map.h"
 
 #define MAX_BLOCK_OP_NAME_SIZE 63
 
@@ -82,6 +84,14 @@ class block {
 
   virtual void reset() = 0;
 
+  subscription_map& subscriptions() {
+    return sub_map_;
+  }
+
+  block_response_client_map& clients() {
+    return client_map_;
+  }
+
  private:
   int32_t search_op_name(int32_t l, int32_t r, const char *name) const {
     if (r >= l) {
@@ -98,6 +108,8 @@ class block {
   const std::vector<block_op> &block_ops_;
   std::string path_;
   std::string block_name_;
+  subscription_map sub_map_;
+  block_response_client_map client_map_;
 };
 
 }

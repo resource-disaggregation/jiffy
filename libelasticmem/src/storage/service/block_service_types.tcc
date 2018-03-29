@@ -125,6 +125,96 @@ uint32_t chain_failure_exception::write(Protocol_* oprot) const {
   return xfer;
 }
 
+template <class Protocol_>
+uint32_t sequence_id::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+  bool isset_client_id = false;
+  bool isset_client_seq_no = false;
+  bool isset_server_seq_no = false;
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->client_id);
+          isset_client_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->client_seq_no);
+          isset_client_seq_no = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->server_seq_no);
+          isset_server_seq_no = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  if (!isset_client_id)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
+  if (!isset_client_seq_no)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
+  if (!isset_server_seq_no)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t sequence_id::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("sequence_id");
+
+  xfer += oprot->writeFieldBegin("client_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->client_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("client_seq_no", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeI64(this->client_seq_no);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("server_seq_no", ::apache::thrift::protocol::T_I64, 3);
+  xfer += oprot->writeI64(this->server_seq_no);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
 }} // namespace
 
 #endif

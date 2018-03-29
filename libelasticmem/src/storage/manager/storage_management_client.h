@@ -13,8 +13,8 @@ class storage_management_client {
   typedef storage_management_serviceClient thrift_client;
   storage_management_client() = default;
   ~storage_management_client();
-  storage_management_client(const std::string &hostname, int port);
-  void connect(const std::string &hostname, int port);
+  storage_management_client(const std::string &host, int port);
+  void connect(const std::string &host, int port);
   void disconnect();
 
   void setup_block(int32_t block_id, const std::string &path, int32_t role, const std::string &next_block_name);

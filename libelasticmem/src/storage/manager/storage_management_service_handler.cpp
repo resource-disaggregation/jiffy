@@ -13,7 +13,12 @@ void storage_management_service_handler::setup_block(int32_t block_id,
   try {
     blocks_.at(static_cast<std::size_t>(block_id))->path(path);
     blocks_.at(static_cast<std::size_t>(block_id))->role(static_cast<chain_role>(role));
-    blocks_.at(static_cast<std::size_t>(block_id))->reset_next(next_block_name);
+    if (role == chain_role::tail && next_block_name != "nil") {
+      // We're in recovery mode, forwarding requests
+      blocks_.at(static_cast<std::size_t>(block_id))->reset_next(next_block_name);
+    } else {
+      blocks_.at(static_cast<std::size_t>(block_id))->reset_next_and_listen(next_block_name);
+    }
   } catch (std::exception &e) {
     throw make_exception(e);
   }

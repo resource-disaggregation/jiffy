@@ -14,10 +14,10 @@ using namespace ::apache::thrift::protocol;
 #define PORT 9090
 
 TEST_CASE("notification_test", "[subscribe][get_message]") {
-  std::vector<std::shared_ptr<subscription_map>> sub_maps = {std::make_shared<subscription_map>()};
-  auto &sub_map = sub_maps[0];
+  std::vector<std::shared_ptr<chain_module>> blocks = {std::make_shared<kv_block>("")};
+  auto &sub_map = blocks[0]->subscriptions();
 
-  auto server = notification_server::create(sub_maps, HOST, PORT);
+  auto server = notification_server::create(blocks, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   test_utils::wait_till_server_ready(HOST, PORT);
 
@@ -32,8 +32,8 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
   REQUIRE_NOTHROW(sub2.subscribe(0, {op1, op2}));
   REQUIRE_NOTHROW(sub3.subscribe(0, {op2}));
 
-  REQUIRE_NOTHROW(sub_map->notify(op1, msg1));
-  REQUIRE_NOTHROW(sub_map->notify(op2, msg2));
+  REQUIRE_NOTHROW(sub_map.notify(op1, msg1));
+  REQUIRE_NOTHROW(sub_map.notify(op2, msg2));
 
   REQUIRE(sub1.get_message() == std::make_pair(op1, msg1));
   REQUIRE(sub2.get_message() == std::make_pair(op1, msg1));
@@ -47,8 +47,8 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
   REQUIRE_NOTHROW(sub1.unsubscribe(0, {op1}));
   REQUIRE_NOTHROW(sub2.unsubscribe(0, {op2}));
 
-  REQUIRE_NOTHROW(sub_map->notify(op1, msg1));
-  REQUIRE_NOTHROW(sub_map->notify(op2, msg2));
+  REQUIRE_NOTHROW(sub_map.notify(op1, msg1));
+  REQUIRE_NOTHROW(sub_map.notify(op2, msg2));
 
   REQUIRE(sub2.get_message() == std::make_pair(op1, msg1));
   REQUIRE(sub3.get_message() == std::make_pair(op2, msg2));

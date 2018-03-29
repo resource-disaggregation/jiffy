@@ -11,6 +11,7 @@ struct block_id {
   int32_t service_port;
   int32_t management_port;
   int32_t notification_port;
+  int32_t chain_port;
   int32_t id;
 };
 
@@ -18,10 +19,11 @@ class block_name_parser {
  public:
   static block_id parse(const std::string &name);
   static std::string make(const std::string &host,
-                          int32_t service_port,
-                          int32_t management_port,
-                          int32_t notification_port,
-                          int32_t id);
+                           int32_t service_port,
+                           int32_t management_port,
+                           int32_t notification_port,
+                           int32_t chain_port,
+                           int32_t id);
 };
 
 }

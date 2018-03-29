@@ -109,4 +109,54 @@ const char* chain_failure_exception::what() const throw() {
   }
 }
 
+
+sequence_id::~sequence_id() throw() {
+}
+
+
+void sequence_id::__set_client_id(const int64_t val) {
+  this->client_id = val;
+}
+
+void sequence_id::__set_client_seq_no(const int64_t val) {
+  this->client_seq_no = val;
+}
+
+void sequence_id::__set_server_seq_no(const int64_t val) {
+  this->server_seq_no = val;
+}
+std::ostream& operator<<(std::ostream& out, const sequence_id& obj)
+{
+  obj.printTo(out);
+  return out;
+}
+
+
+void swap(sequence_id &a, sequence_id &b) {
+  using ::std::swap;
+  swap(a.client_id, b.client_id);
+  swap(a.client_seq_no, b.client_seq_no);
+  swap(a.server_seq_no, b.server_seq_no);
+}
+
+sequence_id::sequence_id(const sequence_id& other4) {
+  client_id = other4.client_id;
+  client_seq_no = other4.client_seq_no;
+  server_seq_no = other4.server_seq_no;
+}
+sequence_id& sequence_id::operator=(const sequence_id& other5) {
+  client_id = other5.client_id;
+  client_seq_no = other5.client_seq_no;
+  server_seq_no = other5.server_seq_no;
+  return *this;
+}
+void sequence_id::printTo(std::ostream& out) const {
+  using ::apache::thrift::to_string;
+  out << "sequence_id(";
+  out << "client_id=" << to_string(client_id);
+  out << ", " << "client_seq_no=" << to_string(client_seq_no);
+  out << ", " << "server_seq_no=" << to_string(server_seq_no);
+  out << ")";
+}
+
 }} // namespace

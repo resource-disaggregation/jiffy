@@ -27,7 +27,7 @@ TEST_CASE("manager_storage_size_test", "[storage_size][storage_capacity][reset]"
   }
 
   storage_manager manager;
-  auto block_name = block_name_parser::make(HOST, 0, PORT, 0, 0);
+  auto block_name = block_name_parser::make(HOST, 0, PORT, 0, 0, 0);
   REQUIRE(manager.storage_size(block_name) == 1000);
   REQUIRE(manager.storage_size(block_name) <= manager.storage_capacity(block_name));
   REQUIRE_NOTHROW(manager.reset(block_name));
@@ -49,7 +49,7 @@ TEST_CASE("manager_flush_load_test", "[put][flush][reset][load][get]") {
   }
 
   storage_manager manager;
-  auto block_name = block_name_parser::make(HOST, 0, PORT, 0, 0);
+  auto block_name = block_name_parser::make(HOST, 0, PORT, 0, 0, 0);
   REQUIRE_NOTHROW(manager.flush(block_name, "/tmp", "/test"));
   REQUIRE_NOTHROW(manager.reset(block_name));
   REQUIRE(manager.storage_size(block_name) == 0);
