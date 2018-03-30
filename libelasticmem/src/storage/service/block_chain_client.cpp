@@ -59,12 +59,12 @@ std::string block_chain_client::run_command_sync(block_client &client,
                                                  int32_t cmd_id,
                                                  const std::vector<std::string> &args) {
   int64_t op_seq = seq_.client_seq_no;
-  event_map_.insert(op_seq, std::make_shared<utils::event<std::vector<std::string>>>());
+  auto event = std::make_shared<utils::event<std::vector<std::string>>>();
+  event_map_.insert(op_seq, event);
   client.command_request(seq_, cmd_id, args);
   ++(seq_.client_seq_no);
-  auto e = event_map_.find(op_seq);
-  e->wait();
-  return e->get()[0];
+  event->wait();
+  return event->get()[0];
 }
 
 }
