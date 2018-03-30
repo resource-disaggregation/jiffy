@@ -105,8 +105,6 @@ class ElasticMemClient:
         self.lease_worker.stop()
         self.fs.close()
         self.ls.close()
-        for kv in self.kvs.viewvalues():
-            kv.close()
 
     def create_scope(self, path, persistent_store_prefix, num_blocks=1, chain_length=1):
         s = self.fs.create(path, persistent_store_prefix, num_blocks, chain_length)
@@ -127,7 +125,6 @@ class ElasticMemClient:
         if path in self.to_renew:
             self.to_renew.remove(path)
         if path in self.kvs:
-            self.kvs[path].close()
             del self.kvs[path]
         if mode == RemoveMode.delete:
             self.to_remove.append(path)

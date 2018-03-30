@@ -2,18 +2,25 @@ import os
 import subprocess
 import sys
 import time
-from unittest import TestCase
 from Queue import Empty
+from unittest import TestCase
 
-from thrift.transport import TTransport
+from thrift.transport import TTransport, TSocket
 
-from elasticmem import ElasticMemClient, RemoveMode, DataStatus, StorageMode, BlockChain
-from elasticmem import BlockException
-from elasticmem.directory import directory_client
-from elasticmem.kv import kv_client
-from elasticmem.lease import lease_client
-from elasticmem.subscription import subscriber
+from elasticmem import ElasticMemClient, RemoveMode
 from elasticmem.subscription.subscriber import Notification
+
+
+def wait_till_server_ready(host, port):
+    check = True
+    while check:
+        try:
+            transport = TTransport.TBufferedTransport(TSocket.TSocket(host, port))
+            transport.open()
+            transport.close()
+            check = False
+        except TTransport.TTransportException:
+            time.sleep(0.1)
 
 
 class TestClient(TestCase):
@@ -23,31 +30,10 @@ class TestClient(TestCase):
     STORAGE_SERVICE_PORT = 9093
     STORAGE_MANAGEMENT_PORT = 9094
     STORAGE_NOTIFICATION_PORT = 9095
+    STORAGE_CHAIN_PORT = 9096
     DIRECTORY_HOST = '127.0.0.1'
     DIRECTORY_SERVICE_PORT = 9090
     DIRECTORY_LEASE_PORT = 9091
-
-    def wait_till_directory_server_ready(self):
-        check = True
-        while check:
-            try:
-                directory_client.DirectoryClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT)
-                lease_client.LeaseClient(self.DIRECTORY_HOST, self.DIRECTORY_LEASE_PORT)
-                check = False
-            except TTransport.TTransportException:
-                time.sleep(0.1)
-
-    def wait_till_storage_server_ready(self):
-        check = True
-        block_name = "%s:%d:%d:%d:0" % (self.STORAGE_HOST, self.STORAGE_SERVICE_PORT, self.STORAGE_MANAGEMENT_PORT,
-                                        self.STORAGE_NOTIFICATION_PORT)
-        while check:
-            try:
-                kv_client.BlockConnection(block_name)
-                subscriber.SubscriptionClient(DataStatus(StorageMode.in_memory, "", 1, [BlockChain([block_name])]))
-                check = False
-            except TTransport.TTransportException:
-                time.sleep(0.1)
 
     def start_servers(self):
         try:
@@ -56,7 +42,8 @@ class TestClient(TestCase):
             print "Error running executable %s: %s" % (self.DIRECTORY_SERVER_EXECUTABLE, e)
             sys.exit()
 
-        self.wait_till_directory_server_ready()
+        wait_till_server_ready(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT)
+        wait_till_server_ready(self.DIRECTORY_HOST, self.DIRECTORY_LEASE_PORT)
 
         try:
             self.storaged = subprocess.Popen([self.STORAGE_SERVER_EXECUTABLE])
@@ -64,7 +51,10 @@ class TestClient(TestCase):
             print "Error running executable %s: %s" % (self.STORAGE_SERVER_EXECUTABLE, e)
             sys.exit()
 
-        self.wait_till_storage_server_ready()
+        wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_SERVICE_PORT)
+        wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_MANAGEMENT_PORT)
+        wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_NOTIFICATION_PORT)
+        wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_CHAIN_PORT)
 
     def stop_servers(self):
         self.directoryd.kill()
@@ -75,37 +65,33 @@ class TestClient(TestCase):
     def kv_ops(self, kv):
         # Test get/put
         for i in range(0, 1000):
-            kv.put(str(i), str(i))
+            self.assertTrue(kv.put(str(i), str(i)) == "ok")
 
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) == str(i))
 
         for i in range(1000, 2000):
-            with self.assertRaises(BlockException):
-                kv.get(str(i))
+            self.assertTrue(kv.get(str(i)) == "key_not_found")
 
         # Test update
         for i in range(0, 1000):
-            kv.update(str(i), str(i + 1000))
+            self.assertTrue(kv.update(str(i), str(i + 1000)) == "ok")
 
         for i in range(1000, 2000):
-            with self.assertRaises(BlockException):
-                kv.update(str(i), str(i))
+            self.assertTrue(kv.update(str(i), str(i + 1000)) == "key_not_found")
 
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) == str(i + 1000))
 
         # Test remove
         for i in range(0, 1000):
-            kv.remove(str(i))
+            self.assertTrue(kv.remove(str(i)) == "ok")
 
         for i in range(1000, 2000):
-            with self.assertRaises(BlockException):
-                kv.remove(str(i))
+            self.assertTrue(kv.remove(str(i)) == "key_not_found")
 
         for i in range(0, 1000):
-            with self.assertRaises(BlockException):
-                kv.get(str(i))
+            self.assertTrue(kv.get(str(i)) == "key_not_found")
 
     def test_lease_worker(self):
         self.start_servers()
