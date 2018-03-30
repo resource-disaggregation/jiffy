@@ -8,7 +8,7 @@
 #include <utils/signal_handling.h>
 #include <utils/cmd_parse.h>
 #include <utils/logger.h>
-
+#include <storage/service/chain_server.h>
 
 using namespace ::elasticmem::directory;
 using namespace ::elasticmem::storage;
@@ -33,6 +33,8 @@ int main(int argc, char **argv) {
       "Host for block advertisement service"));
   opts.add(cmd_option("block-port", 'p', false).set_default("9092").set_description(
       "Port that block advertisement interface connects to"));
+  opts.add(cmd_option("chain-port", 'c', false).set_default("9096").set_description(
+      "Port that block server listens on for chain requests"));
   opts.add(cmd_option("num-blocks", 'n', false).set_default("64").set_description(
       "Number of blocks to advertise"));
 
@@ -44,10 +46,11 @@ int main(int argc, char **argv) {
 
   std::string address;
   std::string block_host;
-  int block_port;
-  int service_port;
-  int management_port;
-  int notification_port;
+  int32_t block_port;
+  int32_t service_port;
+  int32_t management_port;
+  int32_t notification_port;
+  int32_t chain_port;
   std::size_t num_blocks;
 
   try {
@@ -57,6 +60,7 @@ int main(int argc, char **argv) {
     management_port = parser.get_int("management-port");
     block_port = parser.get_int("block-port");
     notification_port = parser.get_int("notification-port");
+    chain_port = parser.get_int("chain-port");
     num_blocks = static_cast<std::size_t>(parser.get_long("num-blocks"));
   } catch (cmd_parse_exception &ex) {
     std::cerr << "Could not parse command line args: " << ex.what() << std::endl;
@@ -66,7 +70,7 @@ int main(int argc, char **argv) {
 
   std::mutex failure_mtx;
   std::condition_variable failure_condition;
-  std::atomic<int> failing_thread(-1); // management -> 0, service -> 1
+  std::atomic<int> failing_thread(-1); // management -> 0, service -> 1, notification -> 2, chain -> 3
 
   char hbuf[1024];
   gethostname(hbuf, sizeof(hbuf));
@@ -135,6 +139,20 @@ int main(int argc, char **argv) {
 
   LOG(log_level::info) << "Notification server listening on " << address << ":" << notification_port;
 
+  std::exception_ptr chain_exception = nullptr;
+  auto chain_server = chain_server::create(blocks, address, chain_port);
+  std::thread chain_serve_thread([&chain_exception, &chain_server, &failing_thread, &failure_condition] {
+    try {
+      chain_server->serve();
+    } catch (...) {
+      chain_exception = std::current_exception();
+      failing_thread = 2;
+      failure_condition.notify_all();
+    }
+  });
+
+  LOG(log_level::info) << "Chain server listening on " << address << ":" << chain_port;
+
   std::unique_lock<std::mutex> failure_condition_lock{failure_mtx};
   failure_condition.wait(failure_condition_lock, [&failing_thread] {
     return failing_thread != -1;
@@ -169,6 +187,17 @@ int main(int argc, char **argv) {
       if (notification_exception) {
         try {
           std::rethrow_exception(notification_exception);
+        } catch (std::exception &e) {
+          LOG(log_level::error) << "ERROR: " << e.what();
+          std::exit(-1);
+        }
+      }
+    }
+    case 3: {
+      LOG(log_level::error) << "Chain server failed";
+      if (chain_exception) {
+        try {
+          std::rethrow_exception(chain_exception);
         } catch (std::exception &e) {
           LOG(log_level::error) << "ERROR: " << e.what();
           std::exit(-1);
