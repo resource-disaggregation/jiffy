@@ -212,3 +212,12 @@ if (BUILD_TESTS)
     add_dependencies(elasticmem_tests catch)
   endif ()
 endif ()
+
+install(DIRECTORY src/
+        DESTINATION include
+        FILES_MATCHING PATTERN "*.h")
+
+install(TARGETS elasticmem
+        RUNTIME DESTINATION bin
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib)
