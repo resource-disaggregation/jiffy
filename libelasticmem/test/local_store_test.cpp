@@ -1,7 +1,8 @@
-#include <experimental/filesystem>
 #include <fstream>
 #include <catch.hpp>
+#include <iostream>
 #include "../src/persistent/local/local_store.h"
+#include "../src/utils/directory_utils.h"
 
 using namespace ::elasticmem::persistent;
 TEST_CASE("local_write_test", "[write]") {
@@ -14,11 +15,8 @@ TEST_CASE("local_write_test", "[write]") {
   std::string data;
   in >> data;
   REQUIRE(data == "a");
-  namespace fs = std::experimental::filesystem;
-  fs::path a("/tmp/a.txt");
-  fs::path b("/tmp/b.txt");
-  fs::remove_all(a);
-  fs::remove_all(b);
+  std::remove("/tmp/a.txt");
+  std::remove("/tmp/b.txt");
 }
 
 TEST_CASE("local_read_test", "[read]") {
@@ -31,11 +29,8 @@ TEST_CASE("local_read_test", "[read]") {
   std::string data;
   in >> data;
   REQUIRE(data == "a");
-  namespace fs = std::experimental::filesystem;
-  fs::path a("/tmp/a.txt");
-  fs::path b("/tmp/b.txt");
-  fs::remove_all(a);
-  fs::remove_all(b);
+  std::remove("/tmp/a.txt");
+  std::remove("/tmp/b.txt");
 }
 
 TEST_CASE("local_remove_test", "[remove]") {
@@ -44,7 +39,5 @@ TEST_CASE("local_remove_test", "[remove]") {
   out << "a";
   out.close();
   REQUIRE_NOTHROW(store.remove("/tmp/a.txt"));
-  namespace fs = std::experimental::filesystem;
-  fs::path a("/tmp/a.txt");
-  REQUIRE_FALSE(fs::exists(a));
+  REQUIRE_FALSE(std::ifstream("/tmp/a.txt"));
 }

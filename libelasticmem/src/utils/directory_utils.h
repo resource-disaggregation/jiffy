@@ -2,54 +2,70 @@
 #define ELASTICMEM_DIRECTORY_UTILS_H
 
 #include <string>
-#include <experimental/filesystem>
+#include <vector>
+#include <fstream>
 
 namespace elasticmem {
 namespace utils {
 
 class directory_utils {
  public:
+  static const char PATH_SEPARATOR = '/';
+
+  static void copy_file(const std::string &source, const std::string &dest) {
+    std::ifstream src(source, std::ios::binary);
+    std::ofstream dst(dest, std::ios::binary);
+
+    dst << src.rdbuf();
+
+    src.close();
+    dst.close();
+  }
+
   static std::string get_filename(const std::string &path) {
-    namespace fs = std::experimental::filesystem;
-    fs::path p(path);
-    return p.filename();
+    auto tmp = path;
+    return pop_path_element(tmp);
   }
 
   static std::string get_parent_path(const std::string &path) {
-    namespace fs = std::experimental::filesystem;
-    fs::path p(path);
-    return p.parent_path();
+    auto tmp = path;
+    pop_path_element(tmp);
+    return tmp;
   }
 
   static std::string normalize_path(const std::string &path) {
-    namespace fs = std::experimental::filesystem;
     std::string ret = path;
-    while (ret.rbegin() != ret.rend() && *ret.rbegin() == fs::path::preferred_separator)
+    while (ret.rbegin() != ret.rend() && *ret.rbegin() == PATH_SEPARATOR)
       ret.pop_back();
     return ret;
   }
 
   static std::vector<std::string> path_elements(const std::string &path) {
-    namespace fs = std::experimental::filesystem;
-    fs::path p(normalize_path(path));
-    std::vector<std::string> out;
-    for (auto &name: p.relative_path()) {
-      out.emplace_back(name);
-    }
-    return out;
+    std::vector<std::string> result;
+    auto tmp = path;
+    std::string elem;
+    while (!tmp.empty())
+      if (!(elem = pop_path_element(tmp)).empty())
+        result.insert(result.begin(), elem);
+    return result;
   }
 
   static void push_path_element(std::string &path, const std::string &element) {
-    namespace fs = std::experimental::filesystem;
-    path = path + fs::path::preferred_separator + element;
+    path = path + PATH_SEPARATOR + element;
   }
 
   static std::string pop_path_element(std::string &path) {
-    namespace fs = std::experimental::filesystem;
     path = normalize_path(path);
-    fs::path p(path);
-    auto element = p.filename().generic_string();
-    path = p.remove_filename().generic_string();
+
+    if (path.empty())
+      return "";
+
+    auto i = path.length() - 1;
+    while (path[i] != PATH_SEPARATOR && i > 0) {
+      --i;
+    }
+    auto element = path.substr(i + 1, path.length() - i - 1);
+    path = path.substr(0, i + 1);
     return element;
   }
 };
