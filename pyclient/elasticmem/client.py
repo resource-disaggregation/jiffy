@@ -10,7 +10,7 @@ from lease.lease_client import LeaseClient
 from kv.kv_client import KVClient
 import logging
 
-logging.basicConfig(level=logging.WARN,
+logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s %(levelname)s %(name)s %(message)s",
                     datefmt="%Y-%m-%d %X")
 

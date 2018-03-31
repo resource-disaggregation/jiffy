@@ -1,6 +1,8 @@
+import logging
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from Queue import Empty
 from unittest import TestCase
@@ -8,6 +10,7 @@ from unittest import TestCase
 from thrift.transport import TTransport, TSocket
 
 from elasticmem import ElasticMemClient, RemoveMode
+from elasticmem.benchmark.kv_benchmark import run_async_kv_benchmark
 from elasticmem.subscription.subscriber import Notification
 
 
@@ -21,6 +24,26 @@ def wait_till_server_ready(host, port):
             check = False
         except TTransport.TTransportException:
             time.sleep(0.1)
+
+
+def gen_async_kv_ops():
+    tf = tempfile.NamedTemporaryFile(delete=False)
+    with open(tf.name, "w+") as f:
+        for i in range(0, 1000):
+            f.write("%s %d %d\n" % ("put_async", i, i))
+
+        for i in range(0, 1000):
+            f.write("%s %d\n" % ("get_async", i))
+
+        for i in range(0, 1000):
+            f.write("%s %d %d\n" % ("update_async", i, i + 1000))
+
+        for i in range(0, 1000):
+            f.write("%s %d\n" % ("get_async", i))
+
+        for i in range(0, 1000):
+            f.write("%s %d\n" % ("remove_async", i))
+    return tf.name
 
 
 class TestClient(TestCase):
@@ -103,13 +126,9 @@ class TestClient(TestCase):
             self.assertTrue(client.fs.exists("/a/file.txt"))
             time.sleep(client.lease_worker.renewal_duration_s)
             self.assertTrue(client.fs.exists("/a/file.txt"))
-        except:
-            self.stop_servers()
+        finally:
             client.close()
-            raise
-
-        client.close()
-        self.stop_servers()
+            self.stop_servers()
 
     def test_create_scope(self):
         self.start_servers()
@@ -117,13 +136,9 @@ class TestClient(TestCase):
         try:
             self.kv_ops(client.create_scope("/a/file.txt", "/tmp"))
             self.assertTrue(client.fs.exists('/a/file.txt'))
-        except:
-            self.stop_servers()
+        finally:
             client.close()
-            raise
-
-        client.close()
-        self.stop_servers()
+            self.stop_servers()
 
     def test_get_scope(self):
         self.start_servers()
@@ -132,13 +147,9 @@ class TestClient(TestCase):
             client.create_scope("/a/file.txt", "/tmp")
             self.assertTrue(client.fs.exists('/a/file.txt'))
             self.kv_ops(client.get_scope('/a/file.txt'))
-        except:
-            self.stop_servers()
+        finally:
             client.close()
-            raise
-
-        client.close()
-        self.stop_servers()
+            self.stop_servers()
 
     def test_destroy_scope(self):
         self.start_servers()
@@ -152,13 +163,9 @@ class TestClient(TestCase):
             client.destroy_scope('/a/file.txt', RemoveMode.delete)
             self.assertFalse('/a/file.txt' in client.to_renew)
             self.assertTrue('/a/file.txt' in client.to_remove)
-        except:
-            self.stop_servers()
+        finally:
             client.close()
-            raise
-
-        client.close()
-        self.stop_servers()
+            self.stop_servers()
 
     def test_notifications(self):
         self.start_servers()
@@ -209,10 +216,21 @@ class TestClient(TestCase):
             n1.close()
             n2.close()
             n3.close()
-        except:
-            self.stop_servers()
+        finally:
             client.close()
-            raise
+            self.stop_servers()
 
-        client.close()
-        self.stop_servers()
+    def test_benchmark(self):
+        self.start_servers()
+
+        # Setup: create workload file
+        path = gen_async_kv_ops()
+        client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        try:
+            kv_client = client.create_scope("/a/file.txt", "/tmp")
+            throughput, counters = run_async_kv_benchmark(path, kv_client)
+            logging.info("Throughput: %s" % throughput)
+            logging.info("Operation counts: %s" % {k: int(v) for k, v in counters.iteritems()})
+        finally:
+            client.close()
+            self.stop_servers()

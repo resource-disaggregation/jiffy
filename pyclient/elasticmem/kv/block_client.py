@@ -7,12 +7,43 @@ import block_request_service
 import block_response_service
 
 
+class PendingCallbacks:
+    def __init__(self):
+        self.condition = threading.Condition()
+        self.callbacks = {}
+
+    def put(self, client_id, callback):
+        with self.condition:
+            self.callbacks[client_id] = callback
+
+    def get(self, client_id):
+        with self.condition:
+            callback = self.callbacks[client_id]
+        return callback
+
+    def remove(self, client_id):
+        with self.condition:
+            callback = self.callbacks[client_id]
+            del self.callbacks[client_id]
+            if not self.callbacks:
+                self.condition.notify_all()
+        return callback
+
+    def wait(self):
+        with self.condition:
+            while self.callbacks:
+                self.condition.wait()
+
+
 class CommandResponseHandler(block_response_service.Iface):
     def __init__(self, callbacks):
         self.callbacks = callbacks
 
     def response(self, seq, result):
-        self.callbacks[seq.client_seq_no](result)
+        cb = self.callbacks.remove(seq.client_seq_no)
+        # del self.callbacks[seq.client_seq_no]
+        # self.callbacks.remove(seq.client_seq_no)
+        cb(result)
 
 
 class ResponseProcessor(threading.Thread):
@@ -99,8 +130,8 @@ class BlockChainClient:
         else:
             t_host, t_port, _, _, _, t_bid = chain[-1].split(':')
             self.tail = BlockClient(t_host, int(t_port), int(t_bid))
-        self.events = {}
-        self.response_processor = self.tail.add_response_listener(self.seq.client_id, self.events)
+        self.callbacks = PendingCallbacks()
+        self.response_processor = self.tail.add_response_listener(self.seq.client_id, self.callbacks)
         self.response_processor.start()
 
     def __del__(self):
@@ -110,7 +141,8 @@ class BlockChainClient:
 
     def run_command_async(self, client, cmd_id, args, callback):
         op_seq = self.seq.client_seq_no
-        self.events[op_seq] = callback
+        self.callbacks.put(op_seq, callback)
+        # self.events[op_seq] = callback
         client.send_request(self.seq, cmd_id, args)
         self.seq.client_seq_no += 1
 

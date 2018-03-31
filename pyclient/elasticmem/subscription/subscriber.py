@@ -40,7 +40,7 @@ class Mailbox:
         return ret
 
 
-class SubsciptionServiceHandler(subscription_service.Iface):
+class SubscriptionServiceHandler(subscription_service.Iface):
     def __init__(self, notification_callback, success_callback, failure_callback):
         self.notification_callback = notification_callback
         self.success_callback = success_callback
@@ -63,7 +63,7 @@ class SubscriptionWorker(threading.Thread):
     def __init__(self, protocols, notification_cb, control_cb):
         super(SubscriptionWorker, self).__init__()
         self.protocols = protocols
-        self.handler = SubsciptionServiceHandler(notification_cb, control_cb, control_cb)
+        self.handler = SubscriptionServiceHandler(notification_cb, control_cb, control_cb)
         self.processor = subscription_service.Processor(self.handler)
         self._stop_event = threading.Event()
         self.daemon = True
