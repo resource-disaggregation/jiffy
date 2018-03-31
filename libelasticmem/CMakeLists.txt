@@ -68,12 +68,18 @@ add_library(elasticmem STATIC
         src/storage/block.h
         src/storage/chain_module.h
         src/storage/chain_module.cpp
+        src/storage/service/block_chain_client.cpp
+        src/storage/service/block_chain_client.h
+        src/storage/service/block_response_client.cpp
+        src/storage/service/block_response_client.h
+        src/storage/service/block_server.cpp
+        src/storage/service/block_server.h
         src/storage/service/block_client.cpp
         src/storage/service/block_client.h
         src/storage/service/block_request_handler.cpp
         src/storage/service/block_request_handler.h
-        src/storage/service/block_response_client.cpp
-        src/storage/service/block_response_client.h
+        src/storage/service/chain_request_handler_factory.cpp
+        src/storage/service/chain_request_handler_factory.h
         src/storage/service/chain_request_handler.cpp
         src/storage/service/chain_request_handler.h
         src/storage/service/chain_request_client.cpp
@@ -101,6 +107,8 @@ add_library(elasticmem STATIC
         src/storage/service/chain_response_service.cpp
         src/storage/service/chain_response_service.h
         src/storage/service/chain_response_service.tcc
+        src/storage/service/chain_server.cpp
+        src/storage/service/chain_server.h
         src/storage/manager/detail/block_name_parser.cpp
         src/storage/manager/detail/block_name_parser.h
         src/storage/manager/storage_management_client.cpp
@@ -156,12 +164,13 @@ add_library(elasticmem STATIC
         src/persistent/persistent_service.h
         src/utils/cmd_parse.h
         src/utils/directory_utils.h
+        src/utils/event.h
         src/utils/logger.h
         src/utils/logger.cpp
         src/utils/rand_utils.h
         src/utils/signal_handling.h
         src/utils/time_utils.h
-        src/utils/retry_utils.h src/utils/event.h src/storage/service/block_chain_client.cpp src/storage/service/block_chain_client.h src/storage/service/block_server.cpp src/storage/service/block_server.h src/storage/service/chain_request_handler_factory.cpp src/storage/service/chain_request_handler_factory.h src/storage/service/chain_server.cpp src/storage/service/chain_server.h)
+        src/utils/retry_utils.h)
 if (GENERATE_THRIFT)
   add_dependencies(elasticmem thriftgen_directory thriftgen_kv)
 endif ()
@@ -172,6 +181,10 @@ endif ()
 
 if (NOT USE_SYSTEM_AWS_SDK)
   add_dependencies(elasticmem awssdk)
+endif ()
+
+if (NOT USE_SYSTEM_LIBCUCKOO)
+  add_dependencies(elasticmem libcuckoo)
 endif ()
 
 target_link_libraries(elasticmem ${THRIFT_LIBRARIES} ${AWS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})

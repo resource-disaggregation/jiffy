@@ -38,9 +38,9 @@ else ()
           "${AWS_PREFIX}/lib/${AWS_STATIC_S3_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 
   ExternalProject_Add(awssdk
-          GIT_REPOSITORY https://github.com/aws/aws-sdk-cpp.git
+          URL https://github.com/aws/aws-sdk-cpp/archive/1.4.26.tar.gz
           CMAKE_ARGS ${AWS_CMAKE_ARGS}
-  )
+          )
 
   include_directories(SYSTEM ${AWS_INCLUDE_DIR})
   message(STATUS "AWS include dir: ${AWS_INCLUDE_DIR}")
@@ -108,14 +108,43 @@ else ()
   install(DIRECTORY ${THRIFT_INCLUDE_DIR}/thrift DESTINATION include)
 endif ()
 
-# Google Test framework
+if (NOT USE_SYSTEM_LIBCUCKOO)
+  set(LIBCUCKOO_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
+  set(LIBCUCKOO_C_FLAGS "${EXTERNAL_C_FLAGS}")
+  set(LIBCUCKOO_PREFIX "${PROJECT_BINARY_DIR}/external/libcuckoo")
+  set(LIBCUCKOO_HOME "${LIBCUCKOO_PREFIX}")
+  set(LIBCUCKOO_INCLUDE_DIR "${LIBCUCKOO_PREFIX}/include")
+  set(LIBCUCKOO_CMAKE_ARGS "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+          "-DCMAKE_CXX_FLAGS=${LIBCUCKOO_CXX_FLAGS}"
+          "-DCMAKE_INSTALL_PREFIX=${LIBCUCKOO_PREFIX}"
+          "-DBUILD_EXAMPLES=OFF"
+          "-DBUILD_TESTS=OFF"
+          "-DBUILD_STRESS_TESTS=OFF"
+          "-DBUILD_UNIVERSAL_BENCHMARK=OFF")
+
+  ExternalProject_Add(libcuckoo
+          URL "https://github.com/efficient/libcuckoo/archive/v0.2.tar.gz"
+          CMAKE_ARGS ${LIBCUCKOO_CMAKE_ARGS})
+
+  include_directories(SYSTEM ${LIBCUCKOO_INCLUDE_DIR})
+  message(STATUS "Thrift include dir: ${LIBCUCKOO_INCLUDE_DIR}")
+
+  if (GENERATE_THRIFT)
+    message(STATUS "Thrift compiler: ${THRIFT_COMPILER}")
+    add_executable(thriftcompiler IMPORTED GLOBAL)
+    set_target_properties(thriftcompiler PROPERTIES IMPORTED_LOCATION ${THRIFT_COMPILER})
+    add_dependencies(thriftcompiler thrift)
+  endif ()
+
+  install(FILES ${THRIFT_STATIC_LIB} DESTINATION lib)
+  install(DIRECTORY ${THRIFT_INCLUDE_DIR}/thrift DESTINATION include)
+endif ()
+
+# Catch2 Test framework
 if (BUILD_TESTS AND NOT USE_SYSTEM_CATCH)
-  find_package(Git REQUIRED)
   ExternalProject_Add(catch
           PREFIX ${CMAKE_BINARY_DIR}/catch
-          GIT_REPOSITORY https://github.com/philsquared/Catch.git
-          TIMEOUT 10
-          UPDATE_COMMAND ${GIT_EXECUTABLE} pull
+          URL https://github.com/catchorg/Catch2/archive/v2.2.1.tar.gz
           CONFIGURE_COMMAND ""
           BUILD_COMMAND ""
           INSTALL_COMMAND ""
