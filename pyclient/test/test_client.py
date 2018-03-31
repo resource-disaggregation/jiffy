@@ -31,16 +31,16 @@ def gen_async_kv_ops():
     with open(tf.name, "w+") as f:
         for i in range(0, 1000):
             f.write("%s %d %d\n" % ("put_async", i, i))
-
+        f.write("wait\n")
         for i in range(0, 1000):
             f.write("%s %d\n" % ("get_async", i))
-
+        f.write("wait\n")
         for i in range(0, 1000):
             f.write("%s %d %d\n" % ("update_async", i, i + 1000))
-
+        f.write("wait\n")
         for i in range(0, 1000):
             f.write("%s %d\n" % ("get_async", i))
-
+        f.write("wait\n")
         for i in range(0, 1000):
             f.write("%s %d\n" % ("remove_async", i))
     return tf.name

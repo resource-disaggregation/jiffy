@@ -54,3 +54,7 @@ class KVClient:
     def block_id(self, key):
         return self.hash_fn_(key) % len(self.blocks)
 
+    def wait(self):
+        for b in self.blocks:
+            b.wait()
+

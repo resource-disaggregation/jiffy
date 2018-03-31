@@ -174,3 +174,6 @@ class BlockChainClient:
 
     def update(self, key, value):
         return self.run_command(self.tail, 3, [key, value])[0]
+
+    def wait(self):
+        self.callbacks.wait()
