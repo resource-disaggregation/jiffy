@@ -192,6 +192,7 @@ int main(int argc, char **argv) {
           std::exit(-1);
         }
       }
+      break;
     }
     case 3: {
       LOG(log_level::error) << "Chain server failed";
@@ -203,6 +204,7 @@ int main(int argc, char **argv) {
           std::exit(-1);
         }
       }
+      break;
     }
     default:break;
   }
