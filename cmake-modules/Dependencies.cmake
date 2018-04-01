@@ -39,16 +39,14 @@ else ()
 
   ExternalProject_Add(awssdk
           URL https://github.com/aws/aws-sdk-cpp/archive/1.4.26.tar.gz
-          CMAKE_ARGS ${AWS_CMAKE_ARGS}
-          )
+          CMAKE_ARGS ${AWS_CMAKE_ARGS})
 
   include_directories(SYSTEM ${AWS_INCLUDE_DIR})
   message(STATUS "AWS include dir: ${AWS_INCLUDE_DIR}")
   message(STATUS "AWS static libraries: ${AWS_LIBRARIES}")
 
-  install(FILES ${THRIFT_STATIC_LIB} DESTINATION lib)
-  install(DIRECTORY ${THRIFT_INCLUDE_DIR}/thrift DESTINATION include)
-
+  install(FILES ${AWS_LIBRARIES} DESTINATION lib)
+  install(DIRECTORY ${AWS_INCLUDE_DIR}/aws DESTINATION include)
 endif ()
 
 if (USE_SYSTEM_THRIFT)
@@ -127,17 +125,9 @@ if (NOT USE_SYSTEM_LIBCUCKOO)
           CMAKE_ARGS ${LIBCUCKOO_CMAKE_ARGS})
 
   include_directories(SYSTEM ${LIBCUCKOO_INCLUDE_DIR})
-  message(STATUS "Thrift include dir: ${LIBCUCKOO_INCLUDE_DIR}")
+  message(STATUS "libcuckoo include dir: ${LIBCUCKOO_INCLUDE_DIR}")
 
-  if (GENERATE_THRIFT)
-    message(STATUS "Thrift compiler: ${THRIFT_COMPILER}")
-    add_executable(thriftcompiler IMPORTED GLOBAL)
-    set_target_properties(thriftcompiler PROPERTIES IMPORTED_LOCATION ${THRIFT_COMPILER})
-    add_dependencies(thriftcompiler thrift)
-  endif ()
-
-  install(FILES ${THRIFT_STATIC_LIB} DESTINATION lib)
-  install(DIRECTORY ${THRIFT_INCLUDE_DIR}/thrift DESTINATION include)
+  install(DIRECTORY ${LIBCUCKOO_INCLUDE_DIR}/libcuckoo DESTINATION include)
 endif ()
 
 # Catch2 Test framework
