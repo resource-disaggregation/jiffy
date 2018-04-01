@@ -12,4 +12,5 @@ if (BUILD_TESTS)
           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 endif ()
 
-install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup.py install WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})")
+set(INSTALL_CMD "${PYTHON_EXECUTABLE} setup.py install --record ${PROJECT_BINARY_DIR}/pyinstall_manifest.txt")
+install(CODE "execute_process(COMMAND ${INSTALL_CMD} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})")
