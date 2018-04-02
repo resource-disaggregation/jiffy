@@ -106,20 +106,24 @@ class ElasticMemClient:
         self.fs.close()
         self.ls.close()
 
-    def create_scope(self, path, persistent_store_prefix, num_blocks=1, chain_length=1):
+    def create_scope(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_client=True):
         s = self.fs.create(path, persistent_store_prefix, num_blocks, chain_length)
         self.to_renew.append(path)
-        self.kvs[path] = KVClient(path, s, self.chain_failure_cb)
-        return self.kvs[path]
+        k = KVClient(path, s, self.chain_failure_cb)
+        if cache_client:
+            self.kvs[path] = k
+        return k
 
-    def get_scope(self, path):
-        if path in self.kvs:
+    def get_scope(self, path, cache_client=True):
+        if cache_client and path in self.kvs:
             return self.kvs[path]
         s = self.fs.open(path)
         if path not in self.to_renew:
             self.to_renew.append(path)
-        self.kvs[path] = KVClient(path, s, self.chain_failure_cb)
-        return self.kvs[path]
+        k = KVClient(path, s, self.chain_failure_cb)
+        if cache_client:
+            self.kvs[path] = k
+        return k
 
     def destroy_scope(self, path, mode):
         if path in self.to_renew:
