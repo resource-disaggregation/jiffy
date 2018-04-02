@@ -99,14 +99,14 @@ class ElasticMemClient:
         self.lease_worker.start()
 
     def __del__(self):
-        self.close()
+        self.disconnect()
 
-    def close(self):
+    def disconnect(self):
         self.lease_worker.stop()
         self.fs.close()
         self.ls.close()
 
-    def create_scope(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_client=True):
+    def create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_client=True):
         s = self.fs.create(path, persistent_store_prefix, num_blocks, chain_length)
         self.to_renew.append(path)
         k = KVClient(path, s, self.chain_failure_cb)
@@ -114,7 +114,7 @@ class ElasticMemClient:
             self.kvs[path] = k
         return k
 
-    def get_scope(self, path, cache_client=True):
+    def open(self, path, cache_client=True):
         if cache_client and path in self.kvs:
             return self.kvs[path]
         s = self.fs.open(path)
@@ -125,7 +125,7 @@ class ElasticMemClient:
             self.kvs[path] = k
         return k
 
-    def destroy_scope(self, path, mode):
+    def close(self, path, mode):
         if path in self.to_renew:
             self.to_renew.remove(path)
         if path in self.kvs:
@@ -135,7 +135,7 @@ class ElasticMemClient:
         elif mode == RemoveMode.flush:
             self.to_flush.append(path)
 
-    def notifications(self, path, callback=Mailbox()):
+    def open_listener(self, path, callback=Mailbox()):
         s = self.fs.dstatus(path)
         if path not in self.to_renew:
             self.to_renew.append(path)

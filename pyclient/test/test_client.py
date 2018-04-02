@@ -121,51 +121,51 @@ class TestClient(TestCase):
         self.start_servers()
         client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
-            client.create_scope("/a/file.txt", "/tmp")
+            client.create("/a/file.txt", "/tmp")
             self.assertTrue(client.fs.exists("/a/file.txt"))
             time.sleep(client.lease_worker.renewal_duration_s)
             self.assertTrue(client.fs.exists("/a/file.txt"))
             time.sleep(client.lease_worker.renewal_duration_s)
             self.assertTrue(client.fs.exists("/a/file.txt"))
         finally:
-            client.close()
+            client.disconnect()
             self.stop_servers()
 
-    def test_create_scope(self):
+    def test_create(self):
         self.start_servers()
         client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
-            self.kv_ops(client.create_scope("/a/file.txt", "/tmp"))
+            self.kv_ops(client.create("/a/file.txt", "/tmp"))
             self.assertTrue(client.fs.exists('/a/file.txt'))
         finally:
-            client.close()
+            client.disconnect()
             self.stop_servers()
 
-    def test_get_scope(self):
+    def test_open(self):
         self.start_servers()
         client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
-            client.create_scope("/a/file.txt", "/tmp")
+            client.create("/a/file.txt", "/tmp")
             self.assertTrue(client.fs.exists('/a/file.txt'))
-            self.kv_ops(client.get_scope('/a/file.txt'))
+            self.kv_ops(client.open('/a/file.txt'))
         finally:
-            client.close()
+            client.disconnect()
             self.stop_servers()
 
-    def test_destroy_scope(self):
+    def test_close(self):
         self.start_servers()
         client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
-            client.create_scope("/a/file.txt", "/tmp")
+            client.create("/a/file.txt", "/tmp")
             self.assertTrue('/a/file.txt' in client.to_renew)
-            client.destroy_scope('/a/file.txt', RemoveMode.flush)
+            client.close('/a/file.txt', RemoveMode.flush)
             self.assertFalse('/a/file.txt' in client.to_renew)
             self.assertTrue('/a/file.txt' in client.to_flush)
-            client.destroy_scope('/a/file.txt', RemoveMode.delete)
+            client.close('/a/file.txt', RemoveMode.delete)
             self.assertFalse('/a/file.txt' in client.to_renew)
             self.assertTrue('/a/file.txt' in client.to_remove)
         finally:
-            client.close()
+            client.disconnect()
             self.stop_servers()
 
     def test_notifications(self):
@@ -174,15 +174,15 @@ class TestClient(TestCase):
         try:
             client.fs.create("/a/file.txt", "/tmp")
 
-            n1 = client.notifications("/a/file.txt")
-            n2 = client.notifications("/a/file.txt")
-            n3 = client.notifications("/a/file.txt")
+            n1 = client.open_listener("/a/file.txt")
+            n2 = client.open_listener("/a/file.txt")
+            n3 = client.open_listener("/a/file.txt")
 
             n1.subscribe(['put'])
             n2.subscribe(['put', 'remove'])
             n3.subscribe(['remove'])
 
-            kv = client.get_scope("/a/file.txt")
+            kv = client.open("/a/file.txt")
             kv.put('key1', 'value1')
             kv.remove('key1')
 
@@ -214,11 +214,11 @@ class TestClient(TestCase):
             with self.assertRaises(Empty):
                 n3.get_notification(block=False)
 
-            n1.close()
-            n2.close()
-            n3.close()
+            n1.disconnect()
+            n2.disconnect()
+            n3.disconnect()
         finally:
-            client.close()
+            client.disconnect()
             self.stop_servers()
 
     def test_benchmark(self):
@@ -228,13 +228,13 @@ class TestClient(TestCase):
         path = gen_async_kv_ops()
         client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
-            kv1 = client.create_scope("/a/file1.txt", "/tmp")
+            kv1 = client.create("/a/file1.txt", "/tmp")
             throughput, _ = run_async_kv_benchmark(path, kv1)
             logging.info("Async throughput: %f" % throughput)
 
-            kv2 = client.create_scope("/a/file2.txt", "/tmp")
+            kv2 = client.create("/a/file2.txt", "/tmp")
             throughput = run_sync_kv_benchmark(path, kv2)
             logging.info("Sync throughput: %f" % throughput)
         finally:
-            client.close()
+            client.disconnect()
             self.stop_servers()
