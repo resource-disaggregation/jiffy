@@ -60,14 +60,14 @@ TEST_CASE("kv_no_failure_test", "[put][get]") {
 
   block_chain_client client(chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
+    REQUIRE(client.get(std::to_string(i)).get() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == "key_not_found");
+    REQUIRE(client.get(std::to_string(i)).get() == "key_not_found");
   }
 
   // Ensure all three blocks have the data
@@ -144,14 +144,14 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
 
   block_chain_client client(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
+    REQUIRE(client.get(std::to_string(i)).get() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == "key_not_found");
+    REQUIRE(client.get(std::to_string(i)).get() == "key_not_found");
   }
 
   // Ensure all three blocks have the data
@@ -228,14 +228,14 @@ TEST_CASE("kv_mid_failure_test", "[put][get]") {
 
   block_chain_client client(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
+    REQUIRE(client.get(std::to_string(i)).get() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == "key_not_found");
+    REQUIRE(client.get(std::to_string(i)).get() == "key_not_found");
   }
 
   // Ensure all three blocks have the data
@@ -313,14 +313,14 @@ TEST_CASE("kv_tail_failure_test", "[put][get]") {
 
   block_chain_client client(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
+    REQUIRE(client.get(std::to_string(i)).get() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == "key_not_found");
+    REQUIRE(client.get(std::to_string(i)).get() == "key_not_found");
   }
 
   // Ensure all three blocks have the data
@@ -392,7 +392,7 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
   auto chain = t->dstatus("/file").data_blocks()[0].block_names;
   block_chain_client client(chain);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "ok");
   }
 
   client.disconnect();
@@ -401,10 +401,10 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
 
   block_chain_client client2(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client2.get(std::to_string(i)) == std::to_string(i));
+    REQUIRE(client2.get(std::to_string(i)).get() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client2.get(std::to_string(i)) == "key_not_found");
+    REQUIRE(client2.get(std::to_string(i)).get() == "key_not_found");
   }
 
   // Ensure all three blocks have the data

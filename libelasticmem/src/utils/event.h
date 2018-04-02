@@ -55,6 +55,10 @@ class event {
     return *(event_data_.get());
   }
 
+  void operator()(const T& val) {
+    set(val);
+  }
+
   void set(const T &val) {
     event_data_ = std::make_unique<T>(val);
     cv_.notify_all();

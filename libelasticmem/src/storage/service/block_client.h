@@ -7,22 +7,23 @@
 #include "block_response_service.h"
 #include "../../utils/event.h"
 #include <libcuckoo/cuckoohash_map.hh>
+#include <future>
 
 namespace elasticmem {
 namespace storage {
 
 class block_client {
  public:
-  typedef cuckoohash_map<int64_t, std::shared_ptr<utils::event<std::vector<std::string>>>> event_map;
+  typedef cuckoohash_map<int64_t, std::shared_ptr<std::promise<std::string>>> promise_map;
 
   class command_response_handler : public block_response_serviceIf {
    public:
-    explicit command_response_handler(event_map& emap): event_map_(emap) {}
+    explicit command_response_handler(promise_map& promises): promises_(promises) {}
     void response(const sequence_id &seq, const std::vector<std::string> &result) override {
-      event_map_.find(seq.client_seq_no)->set(result);
+      promises_.find(seq.client_seq_no)->set_value(result.at(0));
     }
    private:
-    event_map& event_map_;
+    promise_map& promises_;
   };
 
   typedef block_request_serviceClient thrift_client;
@@ -34,7 +35,7 @@ class block_client {
   void disconnect();
   bool is_connected();
 
-  std::thread add_response_listener(int64_t client_id, event_map &emap);
+  std::thread add_response_listener(int64_t client_id, promise_map &promises);
   void command_request(const sequence_id &seq,
                        int32_t cmd_id,
                        const std::vector<std::string> &arguments);

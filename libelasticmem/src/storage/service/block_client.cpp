@@ -30,9 +30,9 @@ void block_client::connect(const std::string &host, int port, int block_id) {
   transport_->open();
 }
 
-std::thread block_client::add_response_listener(int64_t client_id, event_map &emap) {
+std::thread block_client::add_response_listener(int64_t client_id, promise_map &promises) {
   client_->register_client_id(block_id_, client_id);
-  auto handler = std::make_shared<command_response_handler>(emap);
+  auto handler = std::make_shared<command_response_handler>(promises);
   auto processor = std::make_shared<block_response_serviceProcessor>(handler);
   return std::thread([=] {
     while (true) {

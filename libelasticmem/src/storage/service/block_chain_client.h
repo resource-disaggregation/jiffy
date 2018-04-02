@@ -8,20 +8,21 @@ namespace storage {
 
 class block_chain_client {
  public:
-  explicit block_chain_client(const std::vector<std::string>& chain);
+  explicit block_chain_client(const std::vector<std::string> &chain);
   ~block_chain_client();
   void disconnect();
 
-  const std::vector<std::string>& chain() const;
+  const std::vector<std::string> &chain() const;
 
-  std::string get(const std::string& key);
-  std::string put(const std::string& key, const std::string& value);
-  std::string remove(const std::string& key);
-  std::string update(const std::string& key, const std::string& value);
+  std::future<std::string> get(const std::string &key);
+  std::future<std::string> put(const std::string &key, const std::string &value);
+  std::future<std::string> remove(const std::string &key);
+  std::future<std::string> update(const std::string &key, const std::string &value);
+
+  std::future<std::string> run_command(block_client &client,
+                                       int32_t cmd_id,
+                                       const std::vector<std::string> &args);
  private:
-  std::string run_command_sync(block_client &client,
-                                 int32_t cmd_id,
-                                 const std::vector<std::string> &args);
 
   void connect(const std::vector<std::string> &chain);
 
@@ -29,7 +30,7 @@ class block_chain_client {
   std::vector<std::string> chain_;
   block_client head_;
   block_client tail_;
-  block_client::event_map event_map_;
+  block_client::promise_map promises_;
   std::thread response_processor_;
 };
 

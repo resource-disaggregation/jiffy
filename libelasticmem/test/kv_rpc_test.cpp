@@ -21,13 +21,13 @@ TEST_CASE("rpc_put_get_test", "[put][get]") {
 
   block_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "ok");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
+    REQUIRE(client.get(std::to_string(i)).get() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == "key_not_found");
+    REQUIRE(client.get(std::to_string(i)).get() == "key_not_found");
   }
 
   server->stop();
@@ -45,19 +45,19 @@ TEST_CASE("rpc_put_update_get_test", "[put][update][get]") {
 
   block_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "ok");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
+    REQUIRE(client.get(std::to_string(i)).get() == std::to_string(i));
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.update(std::to_string(i), std::to_string(i + 1000)) == "ok");
+    REQUIRE(client.update(std::to_string(i), std::to_string(i + 1000)).get() == "ok");
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.update(std::to_string(i), std::to_string(i + 1000)) == "key_not_found");
+    REQUIRE(client.update(std::to_string(i), std::to_string(i + 1000)).get() == "key_not_found");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == std::to_string(i + 1000));
+    REQUIRE(client.get(std::to_string(i)).get() == std::to_string(i + 1000));
   }
 
   server->stop();
@@ -75,16 +75,16 @@ TEST_CASE("rpc_put_remove_get_test", "[put][update][get]") {
 
   block_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "ok");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
+    REQUIRE(client.get(std::to_string(i)).get() == std::to_string(i));
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.remove(std::to_string(i)) == "ok");
+    REQUIRE(client.remove(std::to_string(i)).get() == "ok");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == "key_not_found");
+    REQUIRE(client.get(std::to_string(i)).get() == "key_not_found");
   }
 
   server->stop();
@@ -103,7 +103,7 @@ TEST_CASE("rpc_storage_size_test", "[put][size][storage_size][reset]") {
   block_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
   REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[0])->empty());
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "ok");
   }
   REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[0])->size() == 1000);
 
