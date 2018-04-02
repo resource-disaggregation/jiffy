@@ -228,13 +228,13 @@ class TestClient(TestCase):
         path = gen_async_kv_ops()
         client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
-            kv1 = client.create("/a/file1.txt", "/tmp")
-            throughput, _ = run_async_kv_benchmark(path, kv1)
-            logging.info("Async throughput: %f" % throughput)
+            client.fs.create("/a/file1.txt", "/tmp")
+            throughput = run_async_kv_benchmark(path, client, "/a/file1.txt")
+            logging.info("Async throughput: %s" % throughput)
 
-            kv2 = client.create("/a/file2.txt", "/tmp")
-            throughput = run_sync_kv_benchmark(path, kv2)
-            logging.info("Sync throughput: %f" % throughput)
+            client.fs.create("/a/file2.txt", "/tmp")
+            throughput = run_sync_kv_benchmark(path, client, "/a/file2.txt")
+            logging.info("Sync throughput: %s" % throughput)
         finally:
             client.disconnect()
             self.stop_servers()
