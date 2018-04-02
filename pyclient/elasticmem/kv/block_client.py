@@ -1,6 +1,6 @@
 import threading
 
-from thrift.protocol.TBinaryProtocol import TBinaryProtocol
+from thrift.protocol.TBinaryProtocol import TBinaryProtocol, TBinaryProtocolAccelerated
 from thrift.transport import TTransport, TSocket
 
 import block_request_service
@@ -75,7 +75,7 @@ class BlockClient:
         self.id_ = block_id
         self.socket_ = TSocket.TSocket(host, port)
         self.transport_ = TTransport.TBufferedTransport(self.socket_)
-        self.protocol_ = TBinaryProtocol(self.transport_)
+        self.protocol_ = TBinaryProtocolAccelerated(self.transport_)
         self.client_ = block_request_service.Client(self.protocol_)
         self.transport_.open()
 
