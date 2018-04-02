@@ -10,7 +10,8 @@ from unittest import TestCase
 from thrift.transport import TTransport, TSocket
 
 from elasticmem import ElasticMemClient, RemoveMode
-from elasticmem.benchmark.kv_benchmark import run_async_kv_benchmark
+from elasticmem.benchmark.kv_async_benchmark import run_async_kv_benchmark
+from elasticmem.benchmark.kv_sync_benchmark import run_sync_kv_benchmark
 from elasticmem.subscription.subscriber import Notification
 
 
@@ -30,19 +31,19 @@ def gen_async_kv_ops():
     tf = tempfile.NamedTemporaryFile(delete=False)
     with open(tf.name, "w+") as f:
         for i in range(0, 1000):
-            f.write("%s %d %d\n" % ("put_async", i, i))
+            f.write("%s %d %d\n" % ("put", i, i))
         f.write("wait\n")
         for i in range(0, 1000):
-            f.write("%s %d\n" % ("get_async", i))
+            f.write("%s %d\n" % ("get", i))
         f.write("wait\n")
         for i in range(0, 1000):
-            f.write("%s %d %d\n" % ("update_async", i, i + 1000))
+            f.write("%s %d %d\n" % ("update", i, i + 1000))
         f.write("wait\n")
         for i in range(0, 1000):
-            f.write("%s %d\n" % ("get_async", i))
+            f.write("%s %d\n" % ("get", i))
         f.write("wait\n")
         for i in range(0, 1000):
-            f.write("%s %d\n" % ("remove_async", i))
+            f.write("%s %d\n" % ("remove", i))
     return tf.name
 
 
@@ -227,10 +228,13 @@ class TestClient(TestCase):
         path = gen_async_kv_ops()
         client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
-            kv_client = client.create_scope("/a/file.txt", "/tmp")
-            throughput, counters = run_async_kv_benchmark(path, kv_client)
-            logging.info("Throughput: %s" % throughput)
-            logging.info("Operation counts: %s" % {k: int(v) for k, v in counters.iteritems()})
+            kv1 = client.create_scope("/a/file1.txt", "/tmp")
+            throughput, _ = run_async_kv_benchmark(path, kv1)
+            logging.info("Async throughput: %f" % throughput)
+
+            kv2 = client.create_scope("/a/file2.txt", "/tmp")
+            throughput = run_sync_kv_benchmark(path, kv2)
+            logging.info("Sync throughput: %f" % throughput)
         finally:
             client.close()
             self.stop_servers()
