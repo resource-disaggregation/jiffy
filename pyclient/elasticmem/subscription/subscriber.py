@@ -89,7 +89,6 @@ class SubscriptionClient:
     def __init__(self, data_status, callback=Mailbox()):
         self.block_names = [block_chain.block_names[-1].split(':') for block_chain in data_status.data_blocks]
         self.block_ids = [int(b[-1]) for b in self.block_names]
-        print self.block_ids
         self.transports = [TTransport.TBufferedTransport(TSocket.TSocket(b[0], int(b[3]))) for b in self.block_names]
         self.protocols = [TBinaryProtocol.TBinaryProtocol(transport) for transport in self.transports]
         self.clients = [notification_service.Client(protocol) for protocol in self.protocols]
@@ -101,9 +100,9 @@ class SubscriptionClient:
         self.worker.start()
 
     def __del__(self):
-        self.close()
+        self.disconnect()
 
-    def close(self):
+    def disconnect(self):
         self.worker.stop()
         for transport in self.transports:
             if transport.isOpen():
