@@ -2,8 +2,6 @@ import threading
 
 import time
 
-from elasticmem import RemoveMode
-
 
 class Counter:
     def __init__(self):
