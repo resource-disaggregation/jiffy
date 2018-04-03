@@ -158,10 +158,10 @@ class TestClient(TestCase):
         try:
             client.create("/a/file.txt", "/tmp")
             self.assertTrue('/a/file.txt' in client.to_renew)
-            client.close('/a/file.txt', RemoveMode.flush)
+            client.remove('/a/file.txt', RemoveMode.flush)
             self.assertFalse('/a/file.txt' in client.to_renew)
             self.assertTrue('/a/file.txt' in client.to_flush)
-            client.close('/a/file.txt', RemoveMode.delete)
+            client.remove('/a/file.txt', RemoveMode.delete)
             self.assertFalse('/a/file.txt' in client.to_renew)
             self.assertTrue('/a/file.txt' in client.to_remove)
         finally:

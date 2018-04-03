@@ -40,13 +40,14 @@ def make_workload(path, client):
 
 
 class WorkloadRunner(threading.Thread):
-    def __init__(self, i, workload_path, client, max_async=10000):
+    def __init__(self, i, workload_path, client, num_ops, max_async=10000):
         super(WorkloadRunner, self).__init__()
         self.id = i
         self.begin = 0.0
         self.end = 0.0
         self.client = client
         self.workload, self.counters = make_workload(workload_path, client)
+        self.num_ops = min(num_ops, len(self.workload))
         self.max_async = max_async
         self._stop_event = threading.Event()
         self.daemon = True
@@ -72,8 +73,9 @@ class WorkloadRunner(threading.Thread):
         return tot_ops / (self.end - self.begin)
 
 
-def run_async_kv_benchmark(workload_path, client, data_path, num_threads=1, max_async=10000):
-    benchmark = [WorkloadRunner(i, workload_path, client.open(data_path, False), max_async) for i in range(num_threads)]
+def run_async_kv_benchmark(workload_path, client, data_path, num_ops=100000, num_threads=1, max_async=10000):
+    benchmark = [WorkloadRunner(i, workload_path, client.open(data_path, False), int(num_ops / num_threads), max_async)
+                 for i in range(num_threads)]
     for b in benchmark:
         b.start()
     for b in benchmark:

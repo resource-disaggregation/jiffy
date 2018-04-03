@@ -125,11 +125,14 @@ class ElasticMemClient:
             self.kvs[path] = k
         return k
 
-    def close(self, path, mode):
+    def close(self, path):
         if path in self.to_renew:
             self.to_renew.remove(path)
         if path in self.kvs:
             del self.kvs[path]
+
+    def remove(self, path, mode):
+        self.close(path)
         if mode == RemoveMode.delete:
             self.to_remove.append(path)
         elif mode == RemoveMode.flush:
