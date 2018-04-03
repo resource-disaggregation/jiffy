@@ -16,8 +16,25 @@ using namespace ::elasticmem::utils;
 
 using namespace ::apache::thrift;
 
+std::string block_host;
+int block_port;
+std::vector<std::string> block_names;
+
+void retract_block_names(int) {
+  try {
+    block_advertisement_client client(block_host, block_port);
+    client.retract_blocks(block_names);
+    client.disconnect();
+  } catch (std::exception &e) {
+    LOG(log_level::error) << "Failed to retract blocks: " << e.what()
+                          << "; make sure block allocation server is running\n";
+    std::exit(-1);
+  }
+}
+
 int main(int argc, char **argv) {
-  signal_handling::install_signal_handler(argv[0], SIGSEGV, SIGKILL, SIGSTOP, SIGTRAP);
+  signal_handling::install_error_handler(SIGABRT, SIGFPE, SIGSEGV, SIGILL, SIGTRAP);
+  signal_handling::install_signal_handler(retract_block_names, SIGSTOP, SIGINT, SIGTERM);
 
   GlobalOutput.setOutputFunction(log_utils::log_thrift_msg);
 
@@ -45,8 +62,6 @@ int main(int argc, char **argv) {
   }
 
   std::string address;
-  std::string block_host;
-  int32_t block_port;
   int32_t service_port;
   int32_t management_port;
   int32_t notification_port;
@@ -75,7 +90,6 @@ int main(int argc, char **argv) {
   char hbuf[1024];
   gethostname(hbuf, sizeof(hbuf));
   std::string hostname(hbuf);
-  std::vector<std::string> block_names;
   for (int i = 0; i < static_cast<int>(num_blocks); i++) {
     block_names.push_back(block_name_parser::make(hostname, service_port, management_port, notification_port, 0, i));
   }
@@ -106,9 +120,11 @@ int main(int argc, char **argv) {
     client.disconnect();
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to advertise blocks: " << e.what()
-                          << "; make sure block allocation server is running\n";
+                          << "; make sure block allocation server is running";
     std::exit(-1);
   }
+
+  LOG(log_level::info) << "Advertised " << num_blocks << " to block allocation server";
 
   std::exception_ptr kv_exception = nullptr;
   auto kv_server = block_server::create(blocks, address, service_port);

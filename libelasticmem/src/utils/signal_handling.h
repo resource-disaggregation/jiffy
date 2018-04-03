@@ -18,13 +18,18 @@ class signal_handling {
  public:
   static const uint32_t MAX_FRAMES = 64;
 
-  static inline void install_signal_handler(const char *) {}
-
   template<typename ...args>
-  static inline void install_signal_handler(const char *exec, int sig,
-                                            args ... more) {
-    signal(sig, signal_handling::sighandler_stacktrace);
-    signal_handling::install_signal_handler(exec, std::forward<int>(more)...);
+  static inline void install_error_handler(args ...more) {
+    signal_handling::install_signal_handler(signal_handling::sighandler_stacktrace, std::forward<int>(more)...);
+  }
+
+  template<typename F>
+  static inline void install_signal_handler(F &&) {}
+
+  template<typename F, typename ...args>
+  static inline void install_signal_handler(F &&f, int sig, args ... more) {
+    signal(sig, f);
+    signal_handling::install_signal_handler(std::forward<F>(f), std::forward<int>(more)...);
   }
 
   static std::string stacktrace() {

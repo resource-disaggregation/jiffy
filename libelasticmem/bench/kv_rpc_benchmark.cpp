@@ -116,7 +116,7 @@ class latency_benchmark {
 };
 
 int main(int argc, char **argv) {
-  signal_handling::install_signal_handler(argv[0], SIGSEGV, SIGKILL, SIGSTOP, SIGTRAP);
+  signal_handling::install_error_handler(SIGABRT, SIGFPE, SIGSEGV, SIGILL, SIGTRAP);
 
   GlobalOutput.setOutputFunction(log_utils::log_thrift_msg);
 
