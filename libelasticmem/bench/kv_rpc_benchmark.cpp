@@ -47,16 +47,14 @@ class throughput_benchmark {
                        std::size_t num_ops,
                        std::size_t max_async)
       : num_ops_(num_ops), max_async_(max_async), client_(chain) {
-    begin_ = 0.0;
-    end_ = 0.0;
     load_workload(workload_path, workload_);
   }
 
   void run() {
     worker_thread_ = std::thread([&]() {
       std::size_t i = 0;
-      std::future<std::string>* buf = new std::future<std::string>[max_async_];
-      begin_ = time_utils::now_us();
+      auto *buf = new std::future<std::string>[max_async_];
+      auto begin = time_utils::now_us();
       while (i < num_ops_) {
         std::size_t async_limit = std::min(i + max_async_, num_ops_);
         for (std::size_t j = i; j < async_limit; ++j) {
@@ -67,8 +65,8 @@ class throughput_benchmark {
         }
         i += async_limit;
       }
-      end_ = time_utils::now_us();
-      fprintf(stderr, "%lf", static_cast<double>(num_ops_) * 1000000.0 / (end_ - begin_));
+      auto tot_time = time_utils::now_us() - begin;
+      fprintf(stderr, "%lf\n", static_cast<double>(num_ops_) * 1000000.0 / static_cast<double>(tot_time));
       delete[] buf;
     });
   }
@@ -81,8 +79,6 @@ class throughput_benchmark {
 
  private:
   std::thread worker_thread_;
-  double begin_;
-  double end_;
   std::size_t num_ops_;
   std::size_t max_async_;
   std::vector<std::pair<int32_t, std::vector<std::string>>> workload_;
