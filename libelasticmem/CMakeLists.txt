@@ -213,6 +213,11 @@ if (BUILD_TESTS)
   endif ()
 endif ()
 
+if (BUILD_BENCHMARKS)
+  add_executable(kv_rpc_benchmark bench/kv_rpc_benchmark.cpp)
+  target_link_libraries(kv_rpc_benchmark elasticmem)
+endif ()
+
 install(DIRECTORY src/
         DESTINATION include
         FILES_MATCHING PATTERN "*.h")

@@ -8,6 +8,7 @@ block_chain_client::block_chain_client(const std::vector<std::string> &chain) {
   seq_.client_id = -1;
   seq_.client_seq_no = 0;
   connect(chain);
+  cmd_client_ = {&tail_, &head_, &head_, &head_};
 }
 
 block_chain_client::~block_chain_client() {
@@ -40,28 +41,26 @@ void block_chain_client::connect(const std::vector<std::string> &chain) {
 }
 
 std::future<std::string> block_chain_client::get(const std::string &key) {
-  return run_command(tail_, 0, {key});
+  return run_command(0, {key});
 }
 
 std::future<std::string> block_chain_client::put(const std::string &key, const std::string &value) {
-  return run_command(head_, 1, {key, value});
+  return run_command(1, {key, value});
 }
 
 std::future<std::string> block_chain_client::remove(const std::string &key) {
-  return run_command(head_, 2, {key});
+  return run_command(2, {key});
 }
 
 std::future<std::string> block_chain_client::update(const std::string &key, const std::string &value) {
-  return run_command(head_, 3, {key, value});
+  return run_command(3, {key, value});
 }
 
-std::future<std::string> block_chain_client::run_command(block_client &client,
-                                                         int32_t cmd_id,
-                                                         const std::vector<std::string> &args) {
+std::future<std::string> block_chain_client::run_command(int32_t cmd_id, const std::vector<std::string> &args) {
   int64_t op_seq = seq_.client_seq_no;
   auto event = std::make_shared<std::promise<std::string>>();
   promises_.insert(op_seq, event);
-  client.command_request(seq_, cmd_id, args);
+  cmd_client_[cmd_id]->command_request(seq_, cmd_id, args);
   ++(seq_.client_seq_no);
   return event->get_future();
 }

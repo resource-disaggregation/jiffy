@@ -8,6 +8,8 @@ namespace storage {
 
 class block_chain_client {
  public:
+  typedef block_client *client_ref;
+
   explicit block_chain_client(const std::vector<std::string> &chain);
   ~block_chain_client();
   void disconnect();
@@ -19,11 +21,8 @@ class block_chain_client {
   std::future<std::string> remove(const std::string &key);
   std::future<std::string> update(const std::string &key, const std::string &value);
 
-  std::future<std::string> run_command(block_client &client,
-                                       int32_t cmd_id,
-                                       const std::vector<std::string> &args);
+  std::future<std::string> run_command(int32_t cmd_id, const std::vector<std::string> &args);
  private:
-
   void connect(const std::vector<std::string> &chain);
 
   sequence_id seq_;
@@ -32,6 +31,7 @@ class block_chain_client {
   block_client tail_;
   block_client::promise_map promises_;
   std::thread response_processor_;
+  std::vector<client_ref> cmd_client_;
 };
 
 }
