@@ -63,10 +63,10 @@ class throughput_benchmark {
         for (std::size_t j = i; j < async_limit; ++j) {
           buf[j - i].wait();
         }
-        i += async_limit;
+        i = async_limit;
       }
       auto tot_time = time_utils::now_us() - begin;
-      fprintf(stderr, "%lf\n", static_cast<double>(num_ops_) * 1000000.0 / static_cast<double>(tot_time));
+      fprintf(stderr, "%lf\n", static_cast<double>(num_ops_) * 1e6 / static_cast<double>(tot_time));
       delete[] buf;
     });
   }
