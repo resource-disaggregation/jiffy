@@ -55,7 +55,7 @@ class throughput_benchmark {
   void run() {
     worker_thread_ = std::thread([&]() {
       std::size_t i = 0;
-      std::future<std::string> buf[10];
+      std::future<std::string>* buf = new std::future<std::string>[max_async_];
       begin_ = time_utils::now_us();
       while (i < num_ops_) {
         std::size_t async_limit = std::min(i + max_async_, num_ops_);
@@ -69,6 +69,7 @@ class throughput_benchmark {
       }
       end_ = time_utils::now_us();
       fprintf(stderr, "%lf", static_cast<double>(num_ops_) * 1000000.0 / (end_ - begin_));
+      delete[] buf;
     });
   }
 
