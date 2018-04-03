@@ -40,9 +40,9 @@ static void load_workload(const std::string &workload_path,
 class throughput_benchmark {
  public:
   throughput_benchmark(const std::string &workload_path,
-                         const std::vector<std::string> &chain,
-                         std::size_t num_ops,
-                         std::size_t max_async)
+                       const std::vector<std::string> &chain,
+                       std::size_t num_ops,
+                       std::size_t max_async)
       : num_ops_(num_ops), max_async_(max_async), client_(chain) {
     begin_ = 0.0;
     end_ = 0.0;
@@ -53,7 +53,7 @@ class throughput_benchmark {
     worker_thread_ = std::thread([&]() {
       std::size_t i = 0;
       std::future<std::string> buf[10];
-      begin_ = time_utils::now_ms();
+      begin_ = time_utils::now_us();
       while (i < num_ops_) {
         std::size_t async_limit = std::min(i + max_async_, num_ops_);
         for (std::size_t j = i; j < async_limit; ++j) {
@@ -64,7 +64,8 @@ class throughput_benchmark {
         }
         i += async_limit;
       }
-      end_ = time_utils::now_ms();
+      end_ = time_utils::now_us();
+      fprintf(stderr, "%lf", static_cast<double>(num_ops_) * 1000000.0 / (end_ - begin_));
     });
   }
 
@@ -74,16 +75,39 @@ class throughput_benchmark {
     }
   }
 
-  double throughput() const {
-    return static_cast<double>(num_ops_) / (end_ - begin_);
-  }
-
  private:
   std::thread worker_thread_;
   double begin_;
   double end_;
   std::size_t num_ops_;
   std::size_t max_async_;
+  std::vector<std::pair<int32_t, std::vector<std::string>>> workload_;
+  block_chain_client client_;
+};
+
+class latency_benchmark {
+ public:
+  latency_benchmark(const std::string &workload_path,
+                    const std::vector<std::string> &chain,
+                    std::size_t num_ops)
+      : num_ops_(num_ops), client_(chain) {
+    load_workload(workload_path, workload_);
+  }
+
+  void run() {
+    std::size_t i = 0;
+    time_utils::now_us();
+    while (i < num_ops_) {
+      auto t0 = time_utils::now_us();
+      client_.run_command(workload_[i].first, workload_[i].second).get();
+      auto t = time_utils::now_us() - t0;
+      fprintf(stderr, "%zu %" PRId64 "\n", i, t);
+      ++i;
+    }
+  }
+
+ private:
+  std::size_t num_ops_;
   std::vector<std::pair<int32_t, std::vector<std::string>>> workload_;
   block_chain_client client_;
 };
@@ -154,7 +178,6 @@ int main(int argc, char **argv) {
     // Wait
     for (std::size_t i = 0; i < num_threads; i++) {
       benchmark[i]->wait();
-      std::cout << i << " " << benchmark[i]->throughput() << std::endl;
     }
 
     // Cleanup
@@ -162,6 +185,7 @@ int main(int argc, char **argv) {
       delete benchmark[i];
     }
   } else if (benchmark_type == "latency") {
-    throw -1;
+    latency_benchmark benchmark(workload_path, chain, num_ops);
+    benchmark.run();
   }
 }
