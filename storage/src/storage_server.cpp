@@ -30,6 +30,7 @@ void retract_block_names(int) {
                           << "; make sure block allocation server is running\n";
     std::exit(-1);
   }
+  std::exit(0);
 }
 
 int main(int argc, char **argv) {
