@@ -2,6 +2,8 @@ import threading
 
 import time
 
+from elasticmem import RemoveMode
+
 
 def make_workload(path, client):
     with open(path) as f:
@@ -42,7 +44,8 @@ class WorkloadRunner(threading.Thread):
 def run_sync_kv_benchmark(workload_path, client, data_path, num_ops=100000, num_threads=1):
     create_file = not client.fs.exists(data_path)  # Create the file if it does not exist
     if create_file:
-        client.fs.create(data_path, '/tmp')
+        print "Creating file %s" % data_path
+        client.create(data_path, '/tmp')
 
     benchmark = [WorkloadRunner(i, workload_path, client.open(data_path, False), int(num_ops / num_threads)) for i in
                  range(num_threads)]
@@ -52,6 +55,7 @@ def run_sync_kv_benchmark(workload_path, client, data_path, num_ops=100000, num_
         b.wait()
 
     if create_file:  # if we created the file, we should clean up
-        client.fs.remove_all(data_path)
+        print "Removing file %s" % data_path
+        client.remove(data_path, RemoveMode.delete)
 
     return [b.throughput() for b in benchmark]
