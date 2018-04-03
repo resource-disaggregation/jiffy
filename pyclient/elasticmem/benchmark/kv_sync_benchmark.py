@@ -26,7 +26,7 @@ class WorkloadRunner(threading.Thread):
 
     def run(self):
         self.begin = time.clock()
-        while self.ops < len(self.workload):
+        while self.ops < self.num_ops:
             self.workload[self.ops][0](*self.workload[self.ops][1])
             self.ops += 1
         self.end = time.clock()
@@ -40,10 +40,18 @@ class WorkloadRunner(threading.Thread):
 
 
 def run_sync_kv_benchmark(workload_path, client, data_path, num_ops=100000, num_threads=1):
+    create_file = not client.fs.exists(data_path)  # Create the file if it does not exist
+    if create_file:
+        client.fs.create(data_path, '/tmp')
+
     benchmark = [WorkloadRunner(i, workload_path, client.open(data_path, False), int(num_ops / num_threads)) for i in
                  range(num_threads)]
     for b in benchmark:
         b.start()
     for b in benchmark:
         b.wait()
+
+    if create_file:  # if we created the file, we should clean up
+        client.fs.remove_all(data_path)
+
     return [b.throughput() for b in benchmark]

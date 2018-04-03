@@ -55,7 +55,7 @@ class WorkloadRunner(threading.Thread):
     def run(self):
         i = 0
         self.begin = time.clock()
-        while i < len(self.workload):
+        while i < self.num_ops:
             self.workload[i][0](*self.workload[i][1])
             i += 1
             if i % self.max_async == 0:
@@ -74,10 +74,18 @@ class WorkloadRunner(threading.Thread):
 
 
 def run_async_kv_benchmark(workload_path, client, data_path, num_ops=100000, num_threads=1, max_async=10000):
+    create_file = not client.fs.exists(data_path)  # Create the file if it does not exist
+    if create_file:
+        client.fs.create(data_path, '/tmp')
+
     benchmark = [WorkloadRunner(i, workload_path, client.open(data_path, False), int(num_ops / num_threads), max_async)
                  for i in range(num_threads)]
     for b in benchmark:
         b.start()
     for b in benchmark:
         b.wait()
+
+    if create_file:  # if we created the file, we should clean up
+        client.fs.remove_all(data_path)
+
     return [b.throughput() for b in benchmark]
