@@ -56,6 +56,7 @@ def run_sync_kv_benchmark(workload_path, client, data_path, num_ops=100000, num_
 
     if create_file:  # if we created the file, we should clean up
         print "Removing file %s" % data_path
-        client.remove(data_path, RemoveMode.delete)
+        client.close(data_path)
+        client.fs.remove_all(data_path)
 
     return [b.throughput() for b in benchmark]
