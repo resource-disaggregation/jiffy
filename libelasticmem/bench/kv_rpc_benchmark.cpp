@@ -159,6 +159,7 @@ int main(int argc, char **argv) {
   while (ss.good()) {
     std::string block;
     std::getline(ss, block, ',');
+    std::cout << "Block: " << block << std::endl;
     chain.push_back(block);
   }
 

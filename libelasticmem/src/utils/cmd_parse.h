@@ -156,19 +156,35 @@ class cmd_parser {
   }
 
   int get_int(const std::string &key) const {
-    return std::stoi(values_.at(key));
+    try {
+      return std::stoi(values_.at(key));
+    } catch (std::invalid_argument &e) {
+      throw cmd_parse_exception("Could not parse \'" + key + "\' as int: " + e.what());
+    }
   }
 
   long get_long(const std::string &key) const {
-    return std::stol(values_.at(key));
+    try {
+      return std::stol(values_.at(key));
+    } catch (std::invalid_argument &e) {
+      throw cmd_parse_exception("Could not parse \'" + key + "\' as long: " + e.what());
+    }
   }
 
   float get_float(const std::string &key) const {
-    return std::stof(values_.at(key));
+    try {
+      return std::stof(values_.at(key));
+    } catch (std::invalid_argument &e) {
+      throw cmd_parse_exception("Could not parse \'" + key + "\' as float: " + e.what());
+    }
   }
 
   double get_double(const std::string &key) const {
-    return std::stod(values_.at(key));
+    try {
+      return std::stod(values_.at(key));
+    } catch (std::invalid_argument &e) {
+      throw cmd_parse_exception("Could not parse \'" + key + "\' as double: " + e.what());
+    }
   }
 
   bool get_flag(const std::string &key) const {
