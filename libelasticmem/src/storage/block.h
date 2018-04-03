@@ -31,7 +31,7 @@ struct block_op {
 
 class block {
  public:
-  explicit block(const std::vector<block_op> &block_ops, std::string block_name)
+  explicit block(const std::vector<block_op> &block_ops, const std::string &block_name)
       : block_ops_(block_ops), block_name_(std::move(block_name)) {}
 
   virtual void run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) = 0;
@@ -108,8 +108,8 @@ class block {
   const std::vector<block_op> &block_ops_;
   std::string path_;
   std::string block_name_;
-  subscription_map sub_map_;
-  block_response_client_map client_map_;
+  subscription_map sub_map_{};
+  block_response_client_map client_map_{};
 };
 
 }

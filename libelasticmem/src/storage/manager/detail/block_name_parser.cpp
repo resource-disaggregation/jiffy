@@ -8,15 +8,19 @@ namespace storage {
 
 block_id block_name_parser::parse(const std::string &name) {
   std::string host, service_port, management_port, notification_port, chain_port, block_id;
-  std::istringstream in(name);
-  std::getline(in, host, ':');
-  std::getline(in, service_port, ':');
-  std::getline(in, management_port, ':');
-  std::getline(in, notification_port, ':');
-  std::getline(in, chain_port, ':');
-  std::getline(in, block_id, ':');
-  return {host, std::stoi(service_port), std::stoi(management_port), std::stoi(notification_port),
-          std::stoi(chain_port), std::stoi(block_id)};
+  try {
+    std::istringstream in(name);
+    std::getline(in, host, ':');
+    std::getline(in, service_port, ':');
+    std::getline(in, management_port, ':');
+    std::getline(in, notification_port, ':');
+    std::getline(in, chain_port, ':');
+    std::getline(in, block_id, ':');
+    return {host, std::stoi(service_port), std::stoi(management_port), std::stoi(notification_port),
+            std::stoi(chain_port), std::stoi(block_id)};
+  } catch (std::exception &e) {
+    throw std::invalid_argument("Could not parse block name: " + name + "; " + e.what());
+  }
 }
 
 std::string block_name_parser::make(const std::string &host,

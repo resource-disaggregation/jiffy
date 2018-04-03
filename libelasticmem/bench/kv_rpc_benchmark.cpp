@@ -12,8 +12,10 @@ using namespace ::apache::thrift;
 
 static void load_workload(const std::string &workload_path,
                           std::vector<std::pair<int32_t, std::vector<std::string>>> &workload) {
+  workload.clear();
   std::ifstream in(workload_path);
   std::string line;
+  std::cerr << "Loading workload from " << workload_path << std::endl;
   while (std::getline(in, line)) {
     std::istringstream iss(line);
     std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
@@ -35,6 +37,7 @@ static void load_workload(const std::string &workload_path,
     tokens.erase(tokens.begin());
     workload.emplace_back(cmd_id, tokens);
   }
+  std::cerr << "Loaded " << workload.size() << " entries from " << workload_path << std::endl;
 }
 
 class throughput_benchmark {
@@ -159,7 +162,7 @@ int main(int argc, char **argv) {
   while (ss.good()) {
     std::string block;
     std::getline(ss, block, ',');
-    std::cout << "Block: " << block << std::endl;
+    std::cerr << "Block: " << block << std::endl;
     chain.push_back(block);
   }
 
@@ -168,7 +171,7 @@ int main(int argc, char **argv) {
 
     // Create
     for (std::size_t i = 0; i < num_threads; i++) {
-      benchmark.push_back(new throughput_benchmark(workload_path, chain, num_ops, max_async));
+      benchmark.push_back(new throughput_benchmark(workload_path, chain, num_ops / num_threads, max_async));
     }
 
     // Start
