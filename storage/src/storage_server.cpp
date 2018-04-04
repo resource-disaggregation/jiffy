@@ -32,8 +32,8 @@ void retract_block_names_and_print_stacktrace(int sig_num) {
                           << "; make sure block allocation server is running\n";
   }
 
-  fprintf(stderr, "Stack trace: %s\n", trace.c_str());
-  fprintf(stderr, "Exiting...");
+  fprintf(stderr, "%s\n", trace.c_str());
+  fprintf(stderr, "Exiting...\n");
   std::exit(0);
 }
 
