@@ -22,6 +22,7 @@ std::vector<std::string> block_names;
 
 void retract_block_names_and_print_stacktrace(int sig_num) {
   std::string trace = signal_handling::stacktrace();
+  LOG(log_level::info) << "Caught signal " << sig_num << ", cleaning up...";
   try {
     block_advertisement_client client(block_host, block_port);
     client.retract_blocks(block_names);
@@ -29,10 +30,10 @@ void retract_block_names_and_print_stacktrace(int sig_num) {
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to retract blocks: " << e.what()
                           << "; make sure block allocation server is running\n";
-    std::exit(-1);
   }
-  fprintf(stderr, "Received signal: %d\n", sig_num);
+
   fprintf(stderr, "Stack trace: %s\n", trace.c_str());
+  fprintf(stderr, "Exiting...");
   std::exit(0);
 }
 
