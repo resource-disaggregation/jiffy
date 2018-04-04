@@ -36,7 +36,6 @@ def make_workload(path, off, count, client):
             ops.append(['wait'])
 
         workload = [[getattr(client, op_name(x[0])), op_args(x[0], x[1:])] for x in ops]
-        print "Loaded %d ops from workload file" % len(workload)
 
     return workload, counters
 
