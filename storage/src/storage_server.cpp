@@ -20,7 +20,8 @@ std::string block_host;
 int block_port;
 std::vector<std::string> block_names;
 
-void retract_block_names(int) {
+void retract_block_names_and_print_stacktrace(int sig_num) {
+  std::string trace = signal_handling::stacktrace();
   try {
     block_advertisement_client client(block_host, block_port);
     client.retract_blocks(block_names);
@@ -30,13 +31,21 @@ void retract_block_names(int) {
                           << "; make sure block allocation server is running\n";
     std::exit(-1);
   }
+  fprintf(stderr, "Received signal: %d\n", sig_num);
+  fprintf(stderr, "Stack trace: %s\n", trace.c_str());
   std::exit(0);
 }
 
 int main(int argc, char **argv) {
-  signal_handling::install_error_handler(SIGABRT, SIGFPE, SIGSEGV, SIGILL, SIGTRAP);
-  signal_handling::install_signal_handler(retract_block_names, SIGSTOP, SIGINT, SIGTERM);
-
+  signal_handling::install_signal_handler(retract_block_names_and_print_stacktrace,
+                                          SIGSTOP,
+                                          SIGINT,
+                                          SIGTERM,
+                                          SIGABRT,
+                                          SIGFPE,
+                                          SIGSEGV,
+                                          SIGILL,
+                                          SIGTRAP);
   GlobalOutput.setOutputFunction(log_utils::log_thrift_msg);
 
   cmd_options opts;
