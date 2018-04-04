@@ -1,4 +1,3 @@
-import logging
 import os
 import subprocess
 import sys
@@ -11,7 +10,7 @@ from thrift.transport import TTransport, TSocket
 
 from elasticmem import ElasticMemClient, RemoveMode
 from elasticmem.benchmark.kv_async_benchmark import run_async_kv_benchmark
-from elasticmem.benchmark.kv_sync_benchmark import run_sync_kv_benchmark
+from elasticmem.benchmark.kv_sync_benchmark import run_sync_kv_throughput_benchmark, run_sync_kv_latency_benchmark
 from elasticmem.subscription.subscriber import Notification
 
 
@@ -225,16 +224,23 @@ class TestClient(TestCase):
         self.start_servers()
 
         # Setup: create workload file
-        path = gen_async_kv_ops()
+        workload_path = gen_async_kv_ops()
         client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
-            client.fs.create("/a/file1.txt", "/tmp")
-            throughput = run_async_kv_benchmark(path, client, "/a/file1.txt")
-            logging.info("Async throughput: %s" % throughput)
+            data_path1 = "/a/file1.txt"
+            client.fs.create(data_path1, "/tmp")
+            run_async_kv_benchmark(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT,
+                                   data_path1, workload_path)
 
-            client.fs.create("/a/file2.txt", "/tmp")
-            throughput = run_sync_kv_benchmark(path, client, "/a/file2.txt")
-            logging.info("Sync throughput: %s" % throughput)
+            data_path2 = "/a/file2.txt"
+            client.fs.create(data_path2, "/tmp")
+            run_sync_kv_throughput_benchmark(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT,
+                                             self.DIRECTORY_LEASE_PORT, data_path2, workload_path)
+
+            data_path3 = "/a/file3.txt"
+            client.fs.create(data_path3, "/tmp")
+            run_sync_kv_latency_benchmark(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT,
+                                          data_path3, workload_path)
         finally:
             client.disconnect()
             self.stop_servers()
