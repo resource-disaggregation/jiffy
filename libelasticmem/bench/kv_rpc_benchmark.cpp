@@ -179,10 +179,11 @@ int main(int argc, char **argv) {
 
     // Create
     for (std::size_t i = 0; i < num_threads; i++) {
+      auto thread_ops = num_ops / num_threads;
       benchmark.push_back(new throughput_benchmark(workload_path,
-                                                   workload_offset,
+                                                   workload_offset + i * thread_ops,
                                                    chain,
-                                                   num_ops / num_threads,
+                                                   thread_ops,
                                                    max_async));
     }
 
