@@ -11,12 +11,17 @@ using namespace elasticmem::utils;
 using namespace ::apache::thrift;
 
 static void load_workload(const std::string &workload_path,
+                          std::size_t workload_offset,
+                          std::size_t num_ops,
                           std::vector<std::pair<int32_t, std::vector<std::string>>> &workload) {
   workload.clear();
   std::ifstream in(workload_path);
   std::string line;
   std::cerr << "Loading workload from " << workload_path << std::endl;
-  while (std::getline(in, line)) {
+  std::size_t line_num = 0;
+  while (std::getline(in, line) && workload.size() < num_ops) {
+    if (line_num++ < workload_offset)
+      continue;
     std::istringstream iss(line);
     std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
                                     std::istream_iterator<std::string>{}};
@@ -43,11 +48,12 @@ static void load_workload(const std::string &workload_path,
 class throughput_benchmark {
  public:
   throughput_benchmark(const std::string &workload_path,
+                       std::size_t workload_offset,
                        const std::vector<std::string> &chain,
                        std::size_t num_ops,
                        std::size_t max_async)
       : num_ops_(num_ops), max_async_(max_async), client_(chain) {
-    load_workload(workload_path, workload_);
+    load_workload(workload_path, workload_offset, num_ops, workload_);
   }
 
   void run() {
@@ -66,7 +72,7 @@ class throughput_benchmark {
         i = async_limit;
       }
       auto tot_time = time_utils::now_us() - begin;
-      fprintf(stderr, "%lf\n", static_cast<double>(num_ops_) * 1e6 / static_cast<double>(tot_time));
+      fprintf(stdout, "%lf\n", static_cast<double>(num_ops_) * 1e6 / static_cast<double>(tot_time));
       delete[] buf;
     });
   }
@@ -88,10 +94,11 @@ class throughput_benchmark {
 class latency_benchmark {
  public:
   latency_benchmark(const std::string &workload_path,
+                    std::size_t workload_offset,
                     const std::vector<std::string> &chain,
                     std::size_t num_ops)
       : num_ops_(num_ops), client_(chain) {
-    load_workload(workload_path, workload_);
+    load_workload(workload_path, workload_offset, num_ops, workload_);
   }
 
   void run() {
@@ -101,7 +108,7 @@ class latency_benchmark {
       auto t0 = time_utils::now_us();
       client_.run_command(workload_[i].first, workload_[i].second).get();
       auto t = time_utils::now_us() - t0;
-      fprintf(stderr, "%zu %" PRId64 "\n", i, t);
+      fprintf(stdout, "%zu %" PRId64 "\n", i, t);
       ++i;
     }
   }
@@ -127,10 +134,12 @@ int main(int argc, char **argv) {
       "Maximum number of unacknowledged requests in flight"));
   opts.add(cmd_option("workload-path", 'w', false).set_default("data").set_description(
       "Path to read the workload from"));
+  opts.add(cmd_option("workload-offset", 'o', false).set_default("0").set_description(
+      "Offset (line-number) into the workload to start from"));
 
   cmd_parser parser(argc, argv, opts);
   if (parser.get_flag("help")) {
-    std::cout << parser.help_msg() << std::endl;
+    std::cerr << parser.help_msg() << std::endl;
     return 0;
   }
 
@@ -140,14 +149,16 @@ int main(int argc, char **argv) {
   std::size_t num_ops;
   std::size_t max_async;
   std::string workload_path;
+  std::size_t workload_offset;
 
   try {
     chain_str = parser.get("chain");
     benchmark_type = parser.get("benchmark-type");
-    num_threads = static_cast<std::size_t>(parser.get_int("num-threads"));
-    num_ops = static_cast<std::size_t>(parser.get_int("num-ops"));
-    max_async = static_cast<std::size_t>(parser.get_int("max-async"));
+    num_threads = static_cast<std::size_t>(parser.get_long("num-threads"));
+    num_ops = static_cast<std::size_t>(parser.get_long("num-ops"));
+    max_async = static_cast<std::size_t>(parser.get_long("max-async"));
     workload_path = parser.get("workload-path");
+    workload_offset = static_cast<std::size_t>(parser.get_long("workload-offset"));
   } catch (cmd_parse_exception &ex) {
     std::cerr << "Could not parse command line args: " << ex.what() << std::endl;
     std::cerr << parser.help_msg() << std::endl;
@@ -168,7 +179,11 @@ int main(int argc, char **argv) {
 
     // Create
     for (std::size_t i = 0; i < num_threads; i++) {
-      benchmark.push_back(new throughput_benchmark(workload_path, chain, num_ops / num_threads, max_async));
+      benchmark.push_back(new throughput_benchmark(workload_path,
+                                                   workload_offset,
+                                                   chain,
+                                                   num_ops / num_threads,
+                                                   max_async));
     }
 
     // Start
@@ -186,7 +201,7 @@ int main(int argc, char **argv) {
       delete benchmark[i];
     }
   } else if (benchmark_type == "latency") {
-    latency_benchmark benchmark(workload_path, chain, num_ops);
+    latency_benchmark benchmark(workload_path, workload_offset, chain, num_ops);
     benchmark.run();
   }
 }
