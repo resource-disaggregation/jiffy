@@ -1,6 +1,8 @@
 import time
 from multiprocessing import Process, Condition, Value
 
+import sys
+
 from elasticmem import ElasticMemClient
 
 
@@ -20,11 +22,16 @@ def load_and_run_workload(n_load, load_cv, start_cv, workload_path, workload_off
 
     with load_cv:
         n_load.value += 1
+        print >> sys.stderr, "[Process] Loaded data for process."
         if n_load.value == n_procs:
+            print >> sys.stderr, "[Process] All processes completed loading, notifying master..."
             load_cv.notify()
 
     with start_cv:
+        print >> sys.stderr, "[Process] Waiting for master to start..."
         start_cv.wait()
+
+    print >> sys.stderr, "[Process] Starting benchmark..."
 
     ops = 0
     begin = time.clock()
@@ -49,14 +56,17 @@ def run_sync_kv_throughput_benchmark(d_host, d_port, l_port, data_path, workload
     for b in benchmark:
         b.start()
 
+    print >> sys.stderr, "[Master] Waiting for processes to load data..."
     with load_cv:
         load_cv.wait()
 
+    print >> sys.stderr, "[Master] Notifying processes to start..."
     with start_cv:
         start_cv.notify_all()
 
     for b in benchmark:
         b.join()
+    print >> sys.stderr, "[Master] Benchmark complete."
 
 
 def run_sync_kv_latency_benchmark(d_host, d_port, l_port, data_path, workload_path, workload_off=0, n_ops=100000):
