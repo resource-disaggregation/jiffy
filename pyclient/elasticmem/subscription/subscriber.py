@@ -1,3 +1,4 @@
+import logging
 import threading
 from Queue import Queue, Empty
 from itertools import izip as zip
@@ -16,6 +17,9 @@ class Notification:
 
     def __eq__(self, other):
         return self.op == other.op and self.data == other.data
+
+    def __str__(self):
+        return "{op=%s, data=%s}" % (self.op, self.data)
 
 
 class ControlMessage:
@@ -132,6 +136,8 @@ class SubscriptionClient:
 
     def get_notification(self, block=True, timeout=None):
         if hasattr(self.notifications, 'pop'):
-            return self.notifications.pop(block, timeout)
+            n = self.notifications.pop(block, timeout)
+            logging.info("Notification %s" % n)
+            return n
         else:
             return None

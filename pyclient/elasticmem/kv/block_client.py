@@ -1,49 +1,32 @@
 import threading
-
-from thrift.protocol.TBinaryProtocol import TBinaryProtocol, TBinaryProtocolAccelerated
+from thrift.Thrift import TApplicationException, TMessageType
+from thrift.protocol.TBinaryProtocol import TBinaryProtocolAccelerated
 from thrift.transport import TTransport, TSocket
 
 import block_request_service
 import block_response_service
 
 
-class PendingCallbacks:
-    def __init__(self):
-        self.condition = threading.Condition()
-        self.callbacks = {}
+class CommandResponseReader:
+    def __init__(self, iprot):
+        self.iprot = iprot
 
-    def put(self, client_id, callback):
-        with self.condition:
-            self.callbacks[client_id] = callback
+    def recv_response(self):
+        (fname, mtype, rseqid) = self.iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(self.iprot)
+            self.iprot.readMessageEnd()
+            raise x
+        args = block_response_service.response_args()
+        args.read(self.iprot)
+        self.iprot.readMessageEnd()
+        if args.seq is not None and args.result is not None:
+            return args.seq.client_seq_no, args.result
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "Command response failure: unknown result")
 
-    def get(self, client_id):
-        with self.condition:
-            callback = self.callbacks[client_id]
-        return callback
-
-    def remove(self, client_id):
-        with self.condition:
-            callback = self.callbacks[client_id]
-            del self.callbacks[client_id]
-            if not self.callbacks:
-                self.condition.notify_all()
-        return callback
-
-    def wait(self):
-        with self.condition:
-            while self.callbacks:
-                self.condition.wait()
-
-
-class CommandResponseHandler(block_response_service.Iface):
-    def __init__(self, callbacks):
-        self.callbacks = callbacks
-
-    def response(self, seq, result):
-        cb = self.callbacks.remove(seq.client_seq_no)
-        # del self.callbacks[seq.client_seq_no]
-        # self.callbacks.remove(seq.client_seq_no)
-        cb(result)
+    def recv_responses(self, count):
+        return [self.recv_response() for _ in range(count)]
 
 
 class ResponseProcessor(threading.Thread):
@@ -86,35 +69,15 @@ class BlockClient:
         if self.transport_.isOpen():
             self.transport_.close()
 
-    def add_response_listener(self, client_id, events):
+    def get_response_reader(self, client_id):
         self.client_.register_client_id(self.id_, client_id)
-        handler = CommandResponseHandler(events)
-        processor = block_response_service.Processor(handler)
-        return ResponseProcessor(processor, self.protocol_)
+        return CommandResponseReader(self.protocol_)
 
     def get_client_id(self):
         return self.client_.get_client_id()
 
     def send_request(self, seq, cmd_id, arguments):
         self.client_.command_request(seq, self.id_, cmd_id, arguments)
-
-
-class ResultFuture:
-    def __init__(self):
-        self.condition = threading.Condition()
-        self.result = None
-
-    def __call__(self, result):
-        with self.condition:
-            self.result = result
-            self.condition.notify_all()
-
-    def get(self, timeout):
-        with self.condition:
-            while self.result is None:
-                self.condition.wait(timeout)
-            ret = self.result
-        return ret
 
 
 class BlockChainClient:
@@ -130,50 +93,62 @@ class BlockChainClient:
         else:
             t_host, t_port, _, _, _, t_bid = chain[-1].split(':')
             self.tail = BlockClient(t_host, int(t_port), int(t_bid))
-        self.callbacks = PendingCallbacks()
-        self.response_processor = self.tail.add_response_listener(self.seq.client_id, self.callbacks)
-        self.response_processor.start()
+        self.response_reader = self.tail.get_response_reader(self.seq.client_id)
+        self.response_cache = {}
 
     def __del__(self):
         self.head.disconnect()
         self.tail.disconnect()
-        self.response_processor.stop()
 
-    def run_command_async(self, client, cmd_id, args, callback):
+    def _send_cmd(self, client, cmd_id, args):
         op_seq = self.seq.client_seq_no
-        self.callbacks.put(op_seq, callback)
-        # self.events[op_seq] = callback
         client.send_request(self.seq, cmd_id, args)
         self.seq.client_seq_no += 1
+        return op_seq
 
-    def run_command(self, client, cmd_id, args):
-        future = ResultFuture()
-        self.run_command_async(client, cmd_id, args, future)
-        return future.get(self.request_timeout_s)
+    def _recv_cmd(self, op_seq):
+        if op_seq in self.response_cache:
+            result = self.response_cache[op_seq]
+            del self.response_cache[op_seq]
+            return result
 
-    def get_async(self, key, callback):
-        self.run_command_async(self.tail, 0, [key], callback)
+        while True:
+            recv_seq, result = self.response_reader.recv_response()
+            if op_seq == recv_seq:
+                return result
+            else:
+                self.response_cache[recv_seq] = result
+
+    def _run_command(self, client, cmd_id, args):
+        seq = self._send_cmd(client, cmd_id, args)
+        return self._recv_cmd(seq)
 
     def get(self, key):
-        return self.run_command(self.tail, 0, [key])[0]
+        return self._run_command(self.tail, 0, [key])[0]
 
-    def put_async(self, key, value, callback):
-        self.run_command_async(self.tail, 1, [key, value], callback)
+    def send_get(self, key):
+        return self._send_cmd(self.tail, 0, [key])
 
     def put(self, key, value):
-        return self.run_command(self.tail, 1, [key, value])[0]
+        return self._run_command(self.head, 1, [key, value])[0]
 
-    def remove_async(self, key, callback):
-        self.run_command_async(self.tail, 2, [key], callback)
+    def send_put(self, key, value):
+        return self._send_cmd(self.head, 1, [key, value])
 
     def remove(self, key):
-        return self.run_command(self.tail, 2, [key])[0]
+        return self._run_command(self.head, 2, [key])[0]
 
-    def update_async(self, key, value, callback):
-        self.run_command_async(self.tail, 3, [key, value], callback)
+    def send_remove(self, key):
+        return self._send_cmd(self.head, 2, [key])
 
     def update(self, key, value):
-        return self.run_command(self.tail, 3, [key, value])[0]
+        return self._run_command(self.head, 3, [key, value])[0]
 
-    def wait(self):
-        self.callbacks.wait()
+    def send_update(self, key, value):
+        return self._send_cmd(self.head, 3, [key, value])
+
+    def recv_response(self, op_seq):
+        return self._recv_cmd(op_seq)[0]
+
+    def recv_responses(self, op_seqs):
+        return [self._recv_cmd(op_seq) for op_seq in op_seqs]

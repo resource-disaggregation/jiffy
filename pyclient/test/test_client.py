@@ -31,16 +31,12 @@ def gen_async_kv_ops():
     with open(tf.name, "w+") as f:
         for i in range(0, 1000):
             f.write("%s %d %d\n" % ("put", i, i))
-        f.write("wait\n")
         for i in range(0, 1000):
             f.write("%s %d\n" % ("get", i))
-        f.write("wait\n")
         for i in range(0, 1000):
             f.write("%s %d %d\n" % ("update", i, i + 1000))
-        f.write("wait\n")
         for i in range(0, 1000):
             f.write("%s %d\n" % ("get", i))
-        f.write("wait\n")
         for i in range(0, 1000):
             f.write("%s %d\n" % ("remove", i))
     return tf.name
@@ -88,33 +84,33 @@ class TestClient(TestCase):
     def kv_ops(self, kv):
         # Test get/put
         for i in range(0, 1000):
-            self.assertTrue(kv.put(str(i), str(i)) == "ok")
+            self.assertTrue(kv.put(str(i), str(i)) == u"ok")
 
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) == str(i))
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.get(str(i)) == "key_not_found")
+            self.assertTrue(kv.get(str(i)) == u"key_not_found")
 
         # Test update
         for i in range(0, 1000):
-            self.assertTrue(kv.update(str(i), str(i + 1000)) == "ok")
+            self.assertTrue(kv.update(str(i), str(i + 1000)) == u"ok")
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.update(str(i), str(i + 1000)) == "key_not_found")
+            self.assertTrue(kv.update(str(i), str(i + 1000)) == u"key_not_found")
 
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) == str(i + 1000))
 
         # Test remove
         for i in range(0, 1000):
-            self.assertTrue(kv.remove(str(i)) == "ok")
+            self.assertTrue(kv.remove(str(i)) == u"ok")
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.remove(str(i)) == "key_not_found")
+            self.assertTrue(kv.remove(str(i)) == u"key_not_found")
 
         for i in range(0, 1000):
-            self.assertTrue(kv.get(str(i)) == "key_not_found")
+            self.assertTrue(kv.get(str(i)) == u"key_not_found")
 
     def test_lease_worker(self):
         self.start_servers()
