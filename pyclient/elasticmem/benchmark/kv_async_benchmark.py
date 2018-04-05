@@ -64,13 +64,13 @@ def load_and_run_workload(n_load, load_cv, start_cv, workload_path, workload_off
     logging.info("[Process] Starting benchmark...")
 
     ops = 0
-    begin = time.clock()
+    begin = time.time()
     while ops < len(workload):
         workload[ops][0](*workload[ops][1])
         ops += 1
         if ops % max_async == 0:
             kv.wait()
-    end = time.clock()
+    end = time.time()
 
     tot_ops = 0.0
     for key, value in counters.iteritems():

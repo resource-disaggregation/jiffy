@@ -34,11 +34,11 @@ def load_and_run_workload(n_load, load_cv, start_cv, workload_path, workload_off
     logging.info("[Process] Starting benchmark...")
 
     ops = 0
-    begin = time.clock()
+    begin = time.time()
     while ops < len(workload):
         workload[ops][0](*workload[ops][1])
         ops += 1
-    end = time.clock()
+    end = time.time()
 
     print float(ops) / (end - begin)
 
@@ -76,8 +76,8 @@ def run_sync_kv_latency_benchmark(d_host, d_port, l_port, data_path, workload_pa
 
     ops = 0
     while ops < len(workload):
-        begin = time.clock()
+        begin = time.time()
         workload[ops][0](*workload[ops][1])
-        tot = time.clock() - begin
+        tot = time.time() - begin
         print "%f" % (tot * 1e6)
         ops += 1
