@@ -4,10 +4,10 @@ import time
 
 from thrift.transport.TTransport import TTransportException
 
-from directory.directory_client import DirectoryClient
+from elasticmem.directory.directory_client import DirectoryClient
 from elasticmem.subscription.subscriber import SubscriptionClient, Mailbox
-from lease.lease_client import LeaseClient
-from kv.kv_client import KVClient
+from elasticmem.lease.lease_client import LeaseClient
+from elasticmem.kv.kv_client import KVClient
 import logging
 
 logging.basicConfig(level=logging.INFO,
@@ -26,7 +26,7 @@ class RemoveMode:
 
 
 def now_ms():
-    return long(round(time.time() * 1000))
+    return int(round(time.time() * 1000))
 
 
 class LeaseRenewalWorker(threading.Thread):

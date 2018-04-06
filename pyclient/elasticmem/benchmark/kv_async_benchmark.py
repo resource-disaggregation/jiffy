@@ -1,17 +1,16 @@
 import logging
-
 import time
 from multiprocessing import Process, Condition, Value
-
-import sys
 
 from elasticmem import ElasticMemClient
 
 
 def make_workload(path, off, count, client):
+    logging.info("Reading %d ops of workload from %s at offset %d" % (count, path, off))
     with open(path) as f:
-        ops = [x.strip().split() for x in f.readlines()[off:(off + count)]]
+        ops = [x.strip().split() for x in f.readlines()[int(off):int(off + count)]]
         workload = [[getattr(client, "send_" + x[0]), x[1:]] for x in ops]
+    logging.info("Read %d ops of workload from %s at offset %d" % (len(workload), path, off))
 
     return workload
 
@@ -26,7 +25,7 @@ def load_and_run_workload(n_load, load_cv, start_cv, workload_path, workload_off
         n_load.value += 1
         logging.info("[Process] Loaded data for process.")
         if n_load.value == n_procs:
-            print >> sys.stderr, "[Process] All processes completed loading, notifying master..."
+            logging.info("[Process] All processes completed loading, notifying master...")
             load_cv.notify()
 
     with start_cv:
@@ -48,7 +47,7 @@ def load_and_run_workload(n_load, load_cv, start_cv, workload_path, workload_off
     del op_seqs[:]
     end = time.time()
 
-    print float(ops) / (end - begin)
+    print(float(ops) / (end - begin))
 
 
 def run_async_kv_benchmark(d_host, d_port, l_port, data_path, workload_path, workload_off=0, n_ops=100000, n_procs=1,

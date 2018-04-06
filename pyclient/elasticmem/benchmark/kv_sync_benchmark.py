@@ -7,10 +7,12 @@ from elasticmem import ElasticMemClient
 
 
 def make_workload(path, off, count, client):
+    logging.info("Reading %d ops of workload from %s at offset %d" % (count, path, off))
     with open(path) as f:
-        ops = [x.strip().split() for x in f.readlines()[off:(off + count)]]
+        ops = [x.strip().split() for x in f.readlines()[int(off):int(off + count)]]
         workload = [[getattr(client, x[0]), x[1:]] for x in ops]
 
+    logging.info("Read %d ops of workload from %s at offset %d" % (len(workload), path, off))
     return workload
 
 
@@ -40,7 +42,7 @@ def load_and_run_workload(n_load, load_cv, start_cv, workload_path, workload_off
         ops += 1
     end = time.time()
 
-    print float(ops) / (end - begin)
+    print(float(ops) / (end - begin))
 
 
 def run_sync_kv_throughput_benchmark(d_host, d_port, l_port, data_path, workload_path, workload_off=0, n_ops=100000,
@@ -79,5 +81,5 @@ def run_sync_kv_latency_benchmark(d_host, d_port, l_port, data_path, workload_pa
         begin = time.time()
         workload[ops][0](*workload[ops][1])
         tot = time.time() - begin
-        print "%f" % (tot * 1e6)
+        print("%f" % (tot * 1e6))
         ops += 1

@@ -1,6 +1,6 @@
 import logging
 
-import block_client
+from elasticmem.kv import block_client
 
 
 class KVClient:
@@ -63,4 +63,3 @@ class KVClient:
 
     def block_id(self, key):
         return self.hash_fn_(key) % len(self.blocks)
-

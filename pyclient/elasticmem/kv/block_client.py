@@ -1,10 +1,8 @@
-import threading
 from thrift.Thrift import TApplicationException, TMessageType
 from thrift.protocol.TBinaryProtocol import TBinaryProtocolAccelerated
 from thrift.transport import TTransport, TSocket
 
-import block_request_service
-import block_response_service
+from elasticmem.kv import block_request_service, block_response_service
 
 
 class CommandResponseReader:
@@ -27,30 +25,6 @@ class CommandResponseReader:
 
     def recv_responses(self, count):
         return [self.recv_response() for _ in range(count)]
-
-
-class ResponseProcessor(threading.Thread):
-    def __init__(self, processor, protocol):
-        super(ResponseProcessor, self).__init__()
-        self.processor = processor
-        self.protocol = protocol
-        self._stop_event = threading.Event()
-        self.daemon = True
-
-    def run(self):
-        try:
-            while not self.stopped():
-                self.processor.process(self.protocol, self.protocol)
-        except TTransport.TTransportException:
-            pass
-        except Exception:
-            raise
-
-    def stop(self):
-        self._stop_event.set()
-
-    def stopped(self):
-        return self._stop_event.is_set()
 
 
 class BlockClient:

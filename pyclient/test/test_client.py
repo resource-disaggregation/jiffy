@@ -3,7 +3,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from Queue import Empty
+from queue import Empty
 from unittest import TestCase
 
 from thrift.transport import TTransport, TSocket
@@ -58,7 +58,7 @@ class TestClient(TestCase):
         try:
             self.directoryd = subprocess.Popen([self.DIRECTORY_SERVER_EXECUTABLE])
         except OSError as e:
-            print "Error running executable %s: %s" % (self.DIRECTORY_SERVER_EXECUTABLE, e)
+            print("Error running executable %s: %s" % (self.DIRECTORY_SERVER_EXECUTABLE, e))
             sys.exit()
 
         wait_till_server_ready(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT)
@@ -67,7 +67,7 @@ class TestClient(TestCase):
         try:
             self.storaged = subprocess.Popen([self.STORAGE_SERVER_EXECUTABLE])
         except OSError as e:
-            print "Error running executable %s: %s" % (self.STORAGE_SERVER_EXECUTABLE, e)
+            print("Error running executable %s: %s" % (self.STORAGE_SERVER_EXECUTABLE, e))
             sys.exit()
 
         wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_SERVICE_PORT)
@@ -181,10 +181,10 @@ class TestClient(TestCase):
             kv.put('key1', 'value1')
             kv.remove('key1')
 
-            self.assertTrue(n1.get_notification() == Notification('put', 'key1'))
-            self.assertTrue(n2.get_notification() == Notification('put', 'key1'))
-            self.assertTrue(n2.get_notification() == Notification('remove', 'key1'))
-            self.assertTrue(n3.get_notification() == Notification('remove', 'key1'))
+            self.assertTrue(n1.get_notification() == Notification('put', b'key1'))
+            self.assertTrue(n2.get_notification() == Notification('put', b'key1'))
+            self.assertTrue(n2.get_notification() == Notification('remove', b'key1'))
+            self.assertTrue(n3.get_notification() == Notification('remove', b'key1'))
 
             with self.assertRaises(Empty):
                 n1.get_notification(block=False)
@@ -199,8 +199,8 @@ class TestClient(TestCase):
             kv.put('key1', 'value1')
             kv.remove('key1')
 
-            self.assertTrue(n2.get_notification() == Notification('put', 'key1'))
-            self.assertTrue(n3.get_notification() == Notification('remove', 'key1'))
+            self.assertTrue(n2.get_notification() == Notification('put', b'key1'))
+            self.assertTrue(n3.get_notification() == Notification('remove', b'key1'))
 
             with self.assertRaises(Empty):
                 n1.get_notification(block=False)

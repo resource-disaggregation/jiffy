@@ -1,7 +1,7 @@
-from thrift.protocol.TBinaryProtocol import TBinaryProtocol
+from thrift.protocol.TBinaryProtocol import TBinaryProtocolAccelerated
 from thrift.transport import TTransport, TSocket
 
-import directory_service
+from elasticmem.directory import directory_service
 
 
 class Perms:
@@ -10,28 +10,28 @@ class Perms:
 
     none = 0
 
-    owner_read = 0400
-    owner_write = 0200
-    owner_exec = 0100
-    owner_all = 0700
+    owner_read = 0o400
+    owner_write = 0o200
+    owner_exec = 0o100
+    owner_all = 0o700
 
-    group_read = 040
-    group_write = 020
-    group_exec = 010
-    group_all = 070
+    group_read = 0o40
+    group_write = 0o20
+    group_exec = 0o10
+    group_all = 0o70
 
-    others_read = 04
-    others_write = 02
-    others_exec = 01
-    others_all = 07
+    others_read = 0o4
+    others_write = 0o2
+    others_exec = 0o1
+    others_all = 0o7
 
-    all = 0777
+    all = 0o777
 
-    set_uid = 04000
-    set_gid = 02000
-    sticky_bit = 01000
+    set_uid = 0o4000
+    set_gid = 0o2000
+    sticky_bit = 0o1000
 
-    mask = 07777
+    mask = 0o7777
 
 
 class PermOpts:
@@ -98,7 +98,7 @@ class DirectoryClient:
     def __init__(self, host='127.0.0.1', port=9090):
         self.socket_ = TSocket.TSocket(host, port)
         self.transport_ = TTransport.TBufferedTransport(self.socket_)
-        self.protocol_ = TBinaryProtocol(self.transport_)
+        self.protocol_ = TBinaryProtocolAccelerated(self.transport_)
         self.client_ = directory_service.Client(self.protocol_)
         self.transport_.open()
 
