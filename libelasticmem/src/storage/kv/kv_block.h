@@ -9,6 +9,7 @@
 #include "../block.h"
 #include "../../persistent/persistent_service.h"
 #include "../chain_module.h"
+#include "kv_hash.h"
 
 namespace elasticmem {
 namespace storage {
@@ -28,10 +29,9 @@ extern std::vector<block_op> KV_OPS;
 
 class kv_block : public chain_module {
  public:
-  typedef cuckoohash_map<key_type, value_type> hash_table_type;
-  typedef hash_table_type::locked_table locked_hash_table_type;
 
-  explicit kv_block(const std::string& block_name,
+
+  explicit kv_block(const std::string &block_name,
                     std::shared_ptr<persistent::persistent_service> persistent = std::make_shared<noop_store>(),
                     std::string local_storage_prefix = "/tmp",
                     std::shared_ptr<serializer> ser = std::make_shared<binary_serializer>(),
@@ -49,7 +49,7 @@ class kv_block : public chain_module {
 
   bool empty() const;
 
-  void run_command(std::vector<std::string>& _return, int oid, const std::vector<std::string> &args) override;
+  void run_command(std::vector<std::string> &_return, int oid, const std::vector<std::string> &args) override;
 
   void load(const std::string &remote_storage_prefix, const std::string &path) override;
 
@@ -68,6 +68,7 @@ class kv_block : public chain_module {
   std::string local_storage_prefix_;
   std::shared_ptr<serializer> ser_;
   std::shared_ptr<deserializer> deser_;
+  std::atomic<size_t> bytes_;
 };
 
 }

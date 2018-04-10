@@ -17,6 +17,8 @@ add_library(elasticmem STATIC
         src/directory/block/block_allocation_server.cpp
         src/directory/block/block_allocation_server.h
         src/directory/block/block_allocator.h
+        src/directory/block/file_size_tracker.cpp
+        src/directory/block/file_size_tracker.h
         src/directory/block/random_block_allocator.cpp
         src/directory/block/random_block_allocator.h
         src/directory/fs/directory_client.cpp
@@ -65,6 +67,7 @@ add_library(elasticmem STATIC
         src/storage/kv/serializer/binary_serde.h
         src/storage/kv/kv_block.cpp
         src/storage/kv/kv_block.h
+        src/storage/kv/kv_hash.h
         src/storage/block.h
         src/storage/chain_module.h
         src/storage/chain_module.cpp
@@ -200,11 +203,12 @@ if (BUILD_TESTS)
           test/directory_lease_test.cpp
           test/directory_tree_test.cpp
           test/directory_service_test.cpp
+          test/file_size_tracker_test.cpp
+          test/kv_block_test.cpp
+          test/kv_rpc_test.cpp
           test/lease_expiry_worker_test.cpp
           test/local_store_test.cpp
           test/notification_test.cpp
-          test/kv_block_test.cpp
-          test/kv_rpc_test.cpp
           test/storage_manager_test.cpp
           test/test_utils.h)
   target_link_libraries(elasticmem_tests elasticmem)

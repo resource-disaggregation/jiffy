@@ -1,105 +1,58 @@
 import logging
-
 import time
-from multiprocessing import Process, Condition, Value
-
-import sys
+from multiprocessing import Process, Barrier
 
 from elasticmem import ElasticMemClient
 
 
-class Counter:
-    def __init__(self):
-        self.value = 0
-
-    def __call__(self, result):
-        self.value += 1
-
-    def __int__(self):
-        return self.value
-
-    def __float__(self):
-        return float(self.value)
-
-
 def make_workload(path, off, count, client):
-    counters = {"get": Counter(),
-                "put": Counter(),
-                "remove": Counter(),
-                "update": Counter()}
-
-    def op_name(base_name):
-        return base_name if base_name == "wait" else base_name + "_async"
-
-    def op_args(base_name, args):
-        return [] if base_name == "wait" else args + [counters.get(base_name)]
-
+    logging.info("Reading %d ops of workload from %s at offset %d" % (count, path, off))
     with open(path) as f:
-        ops = [x.strip().split() for x in f.readlines()[off:(off + count)]]
-        if ops[-1][0] != 'wait':
-            ops.append(['wait'])
+        ops = [x.strip().split() for x in f.readlines()[int(off):int(off + count)]]
+        workload = [[getattr(client, "send_" + x[0]), x[1:]] for x in ops]
+    logging.info("Read %d ops of workload from %s at offset %d" % (len(workload), path, off))
 
-        workload = [[getattr(client, op_name(x[0])), op_args(x[0], x[1:])] for x in ops]
-
-    return workload, counters
+    return workload
 
 
-def load_and_run_workload(n_load, load_cv, start_cv, workload_path, workload_off, d_host, d_port, l_port, data_path,
-                          n_ops, n_procs, max_async):
+def load_and_run_workload(barrier, workload_path, workload_off, d_host, d_port, l_port, data_path,
+                          n_ops, max_async):
     client = ElasticMemClient(d_host, d_port, l_port)
     kv = client.open(data_path)
-    workload, counters = make_workload(workload_path, workload_off, n_ops, kv)
+    workload = make_workload(workload_path, workload_off, n_ops, kv)
+    logging.info("[Process] Loaded data for process.")
 
-    with load_cv:
-        n_load.value += 1
-        logging.info("[Process] Loaded data for process.")
-        if n_load.value == n_procs:
-            print >> sys.stderr, "[Process] All processes completed loading, notifying master..."
-            load_cv.notify()
-
-    with start_cv:
-        logging.info("[Process] Waiting for master to start...")
-        start_cv.wait()
-
+    barrier.wait()
     logging.info("[Process] Starting benchmark...")
 
     ops = 0
     begin = time.time()
+    op_seqs = []
     while ops < len(workload):
-        workload[ops][0](*workload[ops][1])
+        op_seqs.append(workload[ops][0](*workload[ops][1]))
         ops += 1
         if ops % max_async == 0:
-            kv.wait()
+            kv.recv_responses(op_seqs)
+            del op_seqs[:]
+    kv.recv_responses(op_seqs)
+    del op_seqs[:]
     end = time.time()
 
-    tot_ops = 0.0
-    for key, value in counters.iteritems():
-        tot_ops += float(value)
-
-    print tot_ops / (end - begin)
+    print(float(ops) / (end - begin))
 
 
 def run_async_kv_benchmark(d_host, d_port, l_port, data_path, workload_path, workload_off=0, n_ops=100000, n_procs=1,
                            max_async=10000):
-    load_cv = Condition()
-    start_cv = Condition()
-    n_load = Value('i', 0)
+    barrier = Barrier(n_procs)
     benchmark = [Process(target=load_and_run_workload,
-                         args=(n_load, load_cv, start_cv, workload_path, workload_off + i * (n_ops / n_procs), d_host,
-                               d_port, l_port, data_path, int(n_ops / n_procs), n_procs, max_async,))
+                         args=(barrier, workload_path, workload_off + i * (n_ops / n_procs), d_host, d_port, l_port,
+                               data_path, int(n_ops / n_procs), max_async,))
                  for i in range(n_procs)]
 
     for b in benchmark:
         b.start()
 
-    logging.info("[Master] Waiting for processes to load data...")
-    with load_cv:
-        load_cv.wait()
-
-    logging.info("[Master] Notifying processes to start...")
-    with start_cv:
-        start_cv.notify_all()
-
     for b in benchmark:
         b.join()
+
     logging.info("[Master] Benchmark complete.")

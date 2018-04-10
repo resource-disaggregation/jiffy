@@ -3,7 +3,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from Queue import Empty
+from queue import Empty
 from unittest import TestCase
 
 from thrift.transport import TTransport, TSocket
@@ -31,16 +31,12 @@ def gen_async_kv_ops():
     with open(tf.name, "w+") as f:
         for i in range(0, 1000):
             f.write("%s %d %d\n" % ("put", i, i))
-        f.write("wait\n")
         for i in range(0, 1000):
             f.write("%s %d\n" % ("get", i))
-        f.write("wait\n")
         for i in range(0, 1000):
             f.write("%s %d %d\n" % ("update", i, i + 1000))
-        f.write("wait\n")
         for i in range(0, 1000):
             f.write("%s %d\n" % ("get", i))
-        f.write("wait\n")
         for i in range(0, 1000):
             f.write("%s %d\n" % ("remove", i))
     return tf.name
@@ -62,7 +58,7 @@ class TestClient(TestCase):
         try:
             self.directoryd = subprocess.Popen([self.DIRECTORY_SERVER_EXECUTABLE])
         except OSError as e:
-            print "Error running executable %s: %s" % (self.DIRECTORY_SERVER_EXECUTABLE, e)
+            print("Error running executable %s: %s" % (self.DIRECTORY_SERVER_EXECUTABLE, e))
             sys.exit()
 
         wait_till_server_ready(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT)
@@ -71,7 +67,7 @@ class TestClient(TestCase):
         try:
             self.storaged = subprocess.Popen([self.STORAGE_SERVER_EXECUTABLE])
         except OSError as e:
-            print "Error running executable %s: %s" % (self.STORAGE_SERVER_EXECUTABLE, e)
+            print("Error running executable %s: %s" % (self.STORAGE_SERVER_EXECUTABLE, e))
             sys.exit()
 
         wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_SERVICE_PORT)
@@ -88,33 +84,33 @@ class TestClient(TestCase):
     def kv_ops(self, kv):
         # Test get/put
         for i in range(0, 1000):
-            self.assertTrue(kv.put(str(i), str(i)) == "ok")
+            self.assertTrue(kv.put(str(i), str(i)) == u"ok")
 
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) == str(i))
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.get(str(i)) == "key_not_found")
+            self.assertTrue(kv.get(str(i)) == u"key_not_found")
 
         # Test update
         for i in range(0, 1000):
-            self.assertTrue(kv.update(str(i), str(i + 1000)) == "ok")
+            self.assertTrue(kv.update(str(i), str(i + 1000)) == u"ok")
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.update(str(i), str(i + 1000)) == "key_not_found")
+            self.assertTrue(kv.update(str(i), str(i + 1000)) == u"key_not_found")
 
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) == str(i + 1000))
 
         # Test remove
         for i in range(0, 1000):
-            self.assertTrue(kv.remove(str(i)) == "ok")
+            self.assertTrue(kv.remove(str(i)) == u"ok")
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.remove(str(i)) == "key_not_found")
+            self.assertTrue(kv.remove(str(i)) == u"key_not_found")
 
         for i in range(0, 1000):
-            self.assertTrue(kv.get(str(i)) == "key_not_found")
+            self.assertTrue(kv.get(str(i)) == u"key_not_found")
 
     def test_lease_worker(self):
         self.start_servers()
@@ -185,10 +181,10 @@ class TestClient(TestCase):
             kv.put('key1', 'value1')
             kv.remove('key1')
 
-            self.assertTrue(n1.get_notification() == Notification('put', 'key1'))
-            self.assertTrue(n2.get_notification() == Notification('put', 'key1'))
-            self.assertTrue(n2.get_notification() == Notification('remove', 'key1'))
-            self.assertTrue(n3.get_notification() == Notification('remove', 'key1'))
+            self.assertTrue(n1.get_notification() == Notification('put', b'key1'))
+            self.assertTrue(n2.get_notification() == Notification('put', b'key1'))
+            self.assertTrue(n2.get_notification() == Notification('remove', b'key1'))
+            self.assertTrue(n3.get_notification() == Notification('remove', b'key1'))
 
             with self.assertRaises(Empty):
                 n1.get_notification(block=False)
@@ -203,8 +199,8 @@ class TestClient(TestCase):
             kv.put('key1', 'value1')
             kv.remove('key1')
 
-            self.assertTrue(n2.get_notification() == Notification('put', 'key1'))
-            self.assertTrue(n3.get_notification() == Notification('remove', 'key1'))
+            self.assertTrue(n2.get_notification() == Notification('put', b'key1'))
+            self.assertTrue(n3.get_notification() == Notification('remove', b'key1'))
 
             with self.assertRaises(Empty):
                 n1.get_notification(block=False)

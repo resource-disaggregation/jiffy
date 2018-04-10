@@ -28,7 +28,7 @@ TEST_CASE("manager_storage_size_test", "[storage_size][storage_capacity][reset]"
 
   storage_manager manager;
   auto block_name = block_name_parser::make(HOST, 0, PORT, 0, 0, 0);
-  REQUIRE(manager.storage_size(block_name) == 1000);
+  REQUIRE(manager.storage_size(block_name) == 5780);
   REQUIRE(manager.storage_size(block_name) <= manager.storage_capacity(block_name));
   REQUIRE_NOTHROW(manager.reset(block_name));
   REQUIRE(manager.storage_size(block_name) == 0);

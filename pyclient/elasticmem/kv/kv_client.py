@@ -1,6 +1,6 @@
 import logging
 
-import block_client
+from elasticmem.kv import block_client
 
 
 class KVClient:
@@ -11,8 +11,9 @@ class KVClient:
         self.chain_failure_cb_ = chain_failure_cb
         self.hash_fn_ = hash_fn
 
-    def put_async(self, key, value, callback):
-        self.blocks[self.block_id(key)].put_async(key, value, callback)
+    def send_put(self, key, value):
+        bid = self.block_id(key)
+        return bid, self.blocks[bid].send_put(key, value)
 
     def put(self, key, value):
         try:
@@ -21,8 +22,9 @@ class KVClient:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
 
-    def get_async(self, key, callback):
-        self.blocks[self.block_id(key)].get_async(key, callback)
+    def send_get(self, key):
+        bid = self.block_id(key)
+        return bid, self.blocks[bid].send_get(key)
 
     def get(self, key):
         try:
@@ -31,8 +33,9 @@ class KVClient:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
 
-    def update_async(self, key, value, callback):
-        self.blocks[self.block_id(key)].update_async(key, value, callback)
+    def send_update(self, key, value):
+        bid = self.block_id(key)
+        return bid, self.blocks[bid].send_update(key, value)
 
     def update(self, key, value):
         try:
@@ -41,8 +44,9 @@ class KVClient:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
 
-    def remove_async(self, key, callback):
-        self.blocks[self.block_id(key)].remove_async(key, callback)
+    def send_remove(self, key):
+        bid = self.block_id(key)
+        return bid, self.blocks[bid].send_remove(key)
 
     def remove(self, key):
         try:
@@ -51,10 +55,11 @@ class KVClient:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
 
+    def recv_response(self, op_seq):
+        return self.blocks[op_seq[0]].recv_response(op_seq[1])
+
+    def recv_responses(self, op_seqs):
+        return [self.recv_response(op_seq) for op_seq in op_seqs]
+
     def block_id(self, key):
         return self.hash_fn_(key) % len(self.blocks)
-
-    def wait(self):
-        for b in self.blocks:
-            b.wait()
-

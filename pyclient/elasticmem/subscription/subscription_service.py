@@ -3,7 +3,7 @@
 #
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #
-#  options string: py
+#  options string: py:slots
 #
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
@@ -27,11 +27,11 @@ class Iface(object):
         """
         pass
 
-    def success(self, type, op):
+    def success(self, type, ops):
         """
         Parameters:
          - type
-         - op
+         - ops
         """
         pass
 
@@ -68,19 +68,19 @@ class Client(Iface):
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def success(self, type, op):
+    def success(self, type, ops):
         """
         Parameters:
          - type
-         - op
+         - ops
         """
-        self.send_success(type, op)
+        self.send_success(type, ops)
 
-    def send_success(self, type, op):
+    def send_success(self, type, ops):
         self._oprot.writeMessageBegin('success', TMessageType.ONEWAY, self._seqid)
         args = success_args()
         args.type = type
-        args.op = op
+        args.ops = ops
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -142,7 +142,7 @@ class Processor(Iface, TProcessor):
         args.read(iprot)
         iprot.readMessageEnd()
         try:
-            self._handler.success(args.type, args.op)
+            self._handler.success(args.type, args.ops)
         except TTransport.TTransportException:
             raise
         except Exception:
@@ -168,6 +168,11 @@ class notification_args(object):
      - op
      - data
     """
+
+    __slots__ = (
+        'op',
+        'data',
+    )
 
 
     def __init__(self, op=None, data=None,):
@@ -218,12 +223,19 @@ class notification_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -239,13 +251,18 @@ class success_args(object):
     """
     Attributes:
      - type
-     - op
+     - ops
     """
 
+    __slots__ = (
+        'type',
+        'ops',
+    )
 
-    def __init__(self, type=None, op=None,):
+
+    def __init__(self, type=None, ops=None,):
         self.type = type
-        self.op = op
+        self.ops = ops
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -263,11 +280,11 @@ class success_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.LIST:
-                    self.op = []
+                    self.ops = []
                     (_etype3, _size0) = iprot.readListBegin()
                     for _i4 in range(_size0):
                         _elem5 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                        self.op.append(_elem5)
+                        self.ops.append(_elem5)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -285,10 +302,10 @@ class success_args(object):
             oprot.writeFieldBegin('type', TType.I32, 1)
             oprot.writeI32(self.type)
             oprot.writeFieldEnd()
-        if self.op is not None:
-            oprot.writeFieldBegin('op', TType.LIST, 2)
-            oprot.writeListBegin(TType.STRING, len(self.op))
-            for iter6 in self.op:
+        if self.ops is not None:
+            oprot.writeFieldBegin('ops', TType.LIST, 2)
+            oprot.writeListBegin(TType.STRING, len(self.ops))
+            for iter6 in self.ops:
                 oprot.writeString(iter6.encode('utf-8') if sys.version_info[0] == 2 else iter6)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
@@ -299,12 +316,19 @@ class success_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -312,7 +336,7 @@ all_structs.append(success_args)
 success_args.thrift_spec = (
     None,  # 0
     (1, TType.I32, 'type', None, None, ),  # 1
-    (2, TType.LIST, 'op', (TType.STRING, 'UTF8', False), None, ),  # 2
+    (2, TType.LIST, 'ops', (TType.STRING, 'UTF8', False), None, ),  # 2
 )
 
 
@@ -322,6 +346,11 @@ class error_args(object):
      - type
      - msg
     """
+
+    __slots__ = (
+        'type',
+        'msg',
+    )
 
 
     def __init__(self, type=None, msg=None,):
@@ -372,12 +401,19 @@ class error_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)

@@ -3,7 +3,7 @@
 #
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #
-#  options string: py
+#  options string: py:slots
 #
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
@@ -1406,6 +1406,10 @@ class create_directory_args(object):
      - path
     """
 
+    __slots__ = (
+        'path',
+    )
+
 
     def __init__(self, path=None,):
         self.path = path
@@ -1445,12 +1449,19 @@ class create_directory_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -1466,6 +1477,10 @@ class create_directory_result(object):
     Attributes:
      - ex
     """
+
+    __slots__ = (
+        'ex',
+    )
 
 
     def __init__(self, ex=None,):
@@ -1507,12 +1522,19 @@ class create_directory_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -1528,6 +1550,10 @@ class create_directories_args(object):
     Attributes:
      - path
     """
+
+    __slots__ = (
+        'path',
+    )
 
 
     def __init__(self, path=None,):
@@ -1568,12 +1594,19 @@ class create_directories_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -1589,6 +1622,10 @@ class create_directories_result(object):
     Attributes:
      - ex
     """
+
+    __slots__ = (
+        'ex',
+    )
 
 
     def __init__(self, ex=None,):
@@ -1630,12 +1667,19 @@ class create_directories_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -1651,6 +1695,10 @@ class open_args(object):
     Attributes:
      - path
     """
+
+    __slots__ = (
+        'path',
+    )
 
 
     def __init__(self, path=None,):
@@ -1691,12 +1739,19 @@ class open_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -1713,6 +1768,11 @@ class open_result(object):
      - success
      - ex
     """
+
+    __slots__ = (
+        'success',
+        'ex',
+    )
 
 
     def __init__(self, success=None, ex=None,):
@@ -1765,12 +1825,19 @@ class open_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -1789,6 +1856,13 @@ class create_args(object):
      - num_blocks
      - chain_length
     """
+
+    __slots__ = (
+        'path',
+        'persistent_store_prefix',
+        'num_blocks',
+        'chain_length',
+    )
 
 
     def __init__(self, path=None, persistent_store_prefix=None, num_blocks=None, chain_length=None,):
@@ -1859,12 +1933,19 @@ class create_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -1884,6 +1965,11 @@ class create_result(object):
      - success
      - ex
     """
+
+    __slots__ = (
+        'success',
+        'ex',
+    )
 
 
     def __init__(self, success=None, ex=None,):
@@ -1936,12 +2022,19 @@ class create_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -1957,6 +2050,10 @@ class exists_args(object):
     Attributes:
      - path
     """
+
+    __slots__ = (
+        'path',
+    )
 
 
     def __init__(self, path=None,):
@@ -1997,12 +2094,19 @@ class exists_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -2019,6 +2123,11 @@ class exists_result(object):
      - success
      - ex
     """
+
+    __slots__ = (
+        'success',
+        'ex',
+    )
 
 
     def __init__(self, success=None, ex=None,):
@@ -2070,12 +2179,19 @@ class exists_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -2091,6 +2207,10 @@ class last_write_time_args(object):
     Attributes:
      - path
     """
+
+    __slots__ = (
+        'path',
+    )
 
 
     def __init__(self, path=None,):
@@ -2131,12 +2251,19 @@ class last_write_time_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -2153,6 +2280,11 @@ class last_write_time_result(object):
      - success
      - ex
     """
+
+    __slots__ = (
+        'success',
+        'ex',
+    )
 
 
     def __init__(self, success=None, ex=None,):
@@ -2204,12 +2336,19 @@ class last_write_time_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -2227,6 +2366,12 @@ class set_permissions_args(object):
      - perms
      - opts
     """
+
+    __slots__ = (
+        'path',
+        'perms',
+        'opts',
+    )
 
 
     def __init__(self, path=None, perms=None, opts=None,):
@@ -2287,12 +2432,19 @@ class set_permissions_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -2310,6 +2462,10 @@ class set_permissions_result(object):
     Attributes:
      - ex
     """
+
+    __slots__ = (
+        'ex',
+    )
 
 
     def __init__(self, ex=None,):
@@ -2351,12 +2507,19 @@ class set_permissions_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -2372,6 +2535,10 @@ class get_permissions_args(object):
     Attributes:
      - path
     """
+
+    __slots__ = (
+        'path',
+    )
 
 
     def __init__(self, path=None,):
@@ -2412,12 +2579,19 @@ class get_permissions_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -2434,6 +2608,11 @@ class get_permissions_result(object):
      - success
      - ex
     """
+
+    __slots__ = (
+        'success',
+        'ex',
+    )
 
 
     def __init__(self, success=None, ex=None,):
@@ -2485,12 +2664,19 @@ class get_permissions_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -2506,6 +2692,10 @@ class remove_args(object):
     Attributes:
      - path
     """
+
+    __slots__ = (
+        'path',
+    )
 
 
     def __init__(self, path=None,):
@@ -2546,12 +2736,19 @@ class remove_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -2567,6 +2764,10 @@ class remove_result(object):
     Attributes:
      - ex
     """
+
+    __slots__ = (
+        'ex',
+    )
 
 
     def __init__(self, ex=None,):
@@ -2608,12 +2809,19 @@ class remove_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -2629,6 +2837,10 @@ class remove_all_args(object):
     Attributes:
      - path
     """
+
+    __slots__ = (
+        'path',
+    )
 
 
     def __init__(self, path=None,):
@@ -2669,12 +2881,19 @@ class remove_all_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -2690,6 +2909,10 @@ class remove_all_result(object):
     Attributes:
      - ex
     """
+
+    __slots__ = (
+        'ex',
+    )
 
 
     def __init__(self, ex=None,):
@@ -2731,12 +2954,19 @@ class remove_all_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -2752,6 +2982,10 @@ class flush_args(object):
     Attributes:
      - path
     """
+
+    __slots__ = (
+        'path',
+    )
 
 
     def __init__(self, path=None,):
@@ -2792,12 +3026,19 @@ class flush_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -2813,6 +3054,10 @@ class flush_result(object):
     Attributes:
      - ex
     """
+
+    __slots__ = (
+        'ex',
+    )
 
 
     def __init__(self, ex=None,):
@@ -2854,12 +3099,19 @@ class flush_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -2876,6 +3128,11 @@ class rename_args(object):
      - old_path
      - new_path
     """
+
+    __slots__ = (
+        'old_path',
+        'new_path',
+    )
 
 
     def __init__(self, old_path=None, new_path=None,):
@@ -2926,12 +3183,19 @@ class rename_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -2948,6 +3212,10 @@ class rename_result(object):
     Attributes:
      - ex
     """
+
+    __slots__ = (
+        'ex',
+    )
 
 
     def __init__(self, ex=None,):
@@ -2989,12 +3257,19 @@ class rename_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -3010,6 +3285,10 @@ class status_args(object):
     Attributes:
      - path
     """
+
+    __slots__ = (
+        'path',
+    )
 
 
     def __init__(self, path=None,):
@@ -3050,12 +3329,19 @@ class status_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -3072,6 +3358,11 @@ class status_result(object):
      - success
      - ex
     """
+
+    __slots__ = (
+        'success',
+        'ex',
+    )
 
 
     def __init__(self, success=None, ex=None,):
@@ -3124,12 +3415,19 @@ class status_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -3145,6 +3443,10 @@ class directory_entries_args(object):
     Attributes:
      - path
     """
+
+    __slots__ = (
+        'path',
+    )
 
 
     def __init__(self, path=None,):
@@ -3185,12 +3487,19 @@ class directory_entries_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -3207,6 +3516,11 @@ class directory_entries_result(object):
      - success
      - ex
     """
+
+    __slots__ = (
+        'success',
+        'ex',
+    )
 
 
     def __init__(self, success=None, ex=None,):
@@ -3267,12 +3581,19 @@ class directory_entries_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -3288,6 +3609,10 @@ class recursive_directory_entries_args(object):
     Attributes:
      - path
     """
+
+    __slots__ = (
+        'path',
+    )
 
 
     def __init__(self, path=None,):
@@ -3328,12 +3653,19 @@ class recursive_directory_entries_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -3350,6 +3682,11 @@ class recursive_directory_entries_result(object):
      - success
      - ex
     """
+
+    __slots__ = (
+        'success',
+        'ex',
+    )
 
 
     def __init__(self, success=None, ex=None,):
@@ -3410,12 +3747,19 @@ class recursive_directory_entries_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -3431,6 +3775,10 @@ class dstatus_args(object):
     Attributes:
      - path
     """
+
+    __slots__ = (
+        'path',
+    )
 
 
     def __init__(self, path=None,):
@@ -3471,12 +3819,19 @@ class dstatus_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -3493,6 +3848,11 @@ class dstatus_result(object):
      - success
      - ex
     """
+
+    __slots__ = (
+        'success',
+        'ex',
+    )
 
 
     def __init__(self, success=None, ex=None,):
@@ -3545,12 +3905,19 @@ class dstatus_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -3566,6 +3933,10 @@ class is_regular_file_args(object):
     Attributes:
      - path
     """
+
+    __slots__ = (
+        'path',
+    )
 
 
     def __init__(self, path=None,):
@@ -3606,12 +3977,19 @@ class is_regular_file_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -3628,6 +4006,11 @@ class is_regular_file_result(object):
      - success
      - ex
     """
+
+    __slots__ = (
+        'success',
+        'ex',
+    )
 
 
     def __init__(self, success=None, ex=None,):
@@ -3679,12 +4062,19 @@ class is_regular_file_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -3700,6 +4090,10 @@ class is_directory_args(object):
     Attributes:
      - path
     """
+
+    __slots__ = (
+        'path',
+    )
 
 
     def __init__(self, path=None,):
@@ -3740,12 +4134,19 @@ class is_directory_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -3762,6 +4163,11 @@ class is_directory_result(object):
      - success
      - ex
     """
+
+    __slots__ = (
+        'success',
+        'ex',
+    )
 
 
     def __init__(self, success=None, ex=None,):
@@ -3813,12 +4219,19 @@ class is_directory_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -3835,6 +4248,11 @@ class reslove_failures_args(object):
      - path
      - chain
     """
+
+    __slots__ = (
+        'path',
+        'chain',
+    )
 
 
     def __init__(self, path=None, chain=None,):
@@ -3886,12 +4304,19 @@ class reslove_failures_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -3908,6 +4333,10 @@ class reslove_failures_result(object):
     Attributes:
      - ex
     """
+
+    __slots__ = (
+        'ex',
+    )
 
 
     def __init__(self, ex=None,):
@@ -3949,12 +4378,19 @@ class reslove_failures_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -3972,6 +4408,12 @@ class add_blocks_args(object):
      - chain
      - count
     """
+
+    __slots__ = (
+        'path',
+        'chain',
+        'count',
+    )
 
 
     def __init__(self, path=None, chain=None, count=None,):
@@ -4033,12 +4475,19 @@ class add_blocks_args(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -4056,6 +4505,10 @@ class add_blocks_result(object):
     Attributes:
      - ex
     """
+
+    __slots__ = (
+        'ex',
+    )
 
 
     def __init__(self, ex=None,):
@@ -4097,12 +4550,19 @@ class add_blocks_result(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)

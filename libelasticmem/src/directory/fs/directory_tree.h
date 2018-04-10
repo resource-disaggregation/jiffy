@@ -17,6 +17,7 @@ namespace elasticmem {
 namespace directory {
 
 class lease_expiry_worker;
+class file_size_tracker;
 
 class ds_node {
  public:
@@ -297,6 +298,7 @@ class directory_tree : public directory_ops, public directory_management_ops {
   std::shared_ptr<storage::storage_management_ops> storage_;
 
   friend class lease_expiry_worker;
+  friend class file_size_tracker;
 };
 
 }

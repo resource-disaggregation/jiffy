@@ -3,7 +3,7 @@
 #
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #
-#  options string: py
+#  options string: py:slots
 #
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
@@ -79,6 +79,10 @@ class rpc_block_chain(object):
      - block_names
     """
 
+    __slots__ = (
+        'block_names',
+    )
+
 
     def __init__(self, block_names=None,):
         self.block_names = block_names
@@ -128,12 +132,19 @@ class rpc_block_chain(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -146,6 +157,12 @@ class rpc_file_status(object):
      - permissions
      - last_write_time
     """
+
+    __slots__ = (
+        'type',
+        'permissions',
+        'last_write_time',
+    )
 
 
     def __init__(self, type=None, permissions=None, last_write_time=None,):
@@ -212,12 +229,19 @@ class rpc_file_status(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -231,6 +255,13 @@ class rpc_data_status(object):
      - chain_length
      - data_blocks
     """
+
+    __slots__ = (
+        'storage_mode',
+        'persistent_store_prefix',
+        'chain_length',
+        'data_blocks',
+    )
 
 
     def __init__(self, storage_mode=None, persistent_store_prefix=None, chain_length=None, data_blocks=None,):
@@ -318,12 +349,19 @@ class rpc_data_status(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -335,6 +373,11 @@ class rpc_dir_entry(object):
      - name
      - status
     """
+
+    __slots__ = (
+        'name',
+        'status',
+    )
 
 
     def __init__(self, name=None, status=None,):
@@ -390,12 +433,19 @@ class rpc_dir_entry(object):
         return
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)
@@ -406,6 +456,10 @@ class directory_service_exception(TException):
     Attributes:
      - msg
     """
+
+    __slots__ = (
+        'msg',
+    )
 
 
     def __init__(self, msg=None,):
@@ -451,12 +505,19 @@ class directory_service_exception(TException):
         return repr(self)
 
     def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
 
     def __ne__(self, other):
         return not (self == other)

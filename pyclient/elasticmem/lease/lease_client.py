@@ -1,7 +1,7 @@
-from thrift.protocol.TBinaryProtocol import TBinaryProtocol
+from thrift.protocol.TBinaryProtocol import TBinaryProtocolAccelerated
 from thrift.transport import TTransport, TSocket
 
-import directory_lease_service
+from elasticmem.lease import directory_lease_service
 
 
 class LeaseAck:
@@ -15,7 +15,7 @@ class LeaseClient:
     def __init__(self, host, port):
         self.socket_ = TSocket.TSocket(host, port)
         self.transport_ = TTransport.TBufferedTransport(self.socket_)
-        self.protocol_ = TBinaryProtocol(self.transport_)
+        self.protocol_ = TBinaryProtocolAccelerated(self.transport_)
         self.client_ = directory_lease_service.Client(self.protocol_)
         self.transport_.open()
 

@@ -235,8 +235,7 @@ class cmd_parser {
 
     // Add default values
     for (const cmd_option &opt : copts) {
-      if (!opt.default_.empty())
-        values_[opt.lopt_] = opt.default_;
+      values_[opt.lopt_] = opt.default_;
     }
 
     while ((c = getopt_long(argc_, argv_, sopts, lopts, nullptr)) != -1) {

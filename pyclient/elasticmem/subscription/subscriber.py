@@ -1,6 +1,6 @@
+import logging
 import threading
-from Queue import Queue, Empty
-from itertools import izip as zip
+from queue import Queue, Empty
 
 from thrift.protocol import TBinaryProtocol
 from thrift.transport import TTransport, TSocket
@@ -16,6 +16,9 @@ class Notification:
 
     def __eq__(self, other):
         return self.op == other.op and self.data == other.data
+
+    def __str__(self):
+        return "{op=%s, data=%s}" % (self.op, self.data)
 
 
 class ControlMessage:
@@ -38,6 +41,9 @@ class Mailbox:
     def pop(self, block=True, timeout=None):
         ret = self.q.get(block, timeout)
         return ret
+
+    def empty(self):
+        return self.q.empty()
 
 
 class SubscriptionServiceHandler(subscription_service.Iface):
@@ -90,7 +96,7 @@ class SubscriptionClient:
         self.block_names = [block_chain.block_names[-1].split(':') for block_chain in data_status.data_blocks]
         self.block_ids = [int(b[-1]) for b in self.block_names]
         self.transports = [TTransport.TBufferedTransport(TSocket.TSocket(b[0], int(b[3]))) for b in self.block_names]
-        self.protocols = [TBinaryProtocol.TBinaryProtocol(transport) for transport in self.transports]
+        self.protocols = [TBinaryProtocol.TBinaryProtocolAccelerated(transport) for transport in self.transports]
         self.clients = [notification_service.Client(protocol) for protocol in self.protocols]
         for transport in self.transports:
             transport.open()
@@ -119,6 +125,8 @@ class SubscriptionClient:
         except Empty:
             raise RuntimeError('One or more storage servers did not respond to subscription request')
 
+        return self
+
     def unsubscribe(self, ops):
         for block_id, client in zip(self.block_ids, self.clients):
             client.unsubscribe(block_id, ops)
@@ -132,6 +140,13 @@ class SubscriptionClient:
 
     def get_notification(self, block=True, timeout=None):
         if hasattr(self.notifications, 'pop'):
-            return self.notifications.pop(block, timeout)
+            n = self.notifications.pop(block, timeout)
+            return n
         else:
             return None
+
+    def has_notification(self):
+        if hasattr(self.notifications, 'empty'):
+            return not self.notifications.empty()
+        return None
+

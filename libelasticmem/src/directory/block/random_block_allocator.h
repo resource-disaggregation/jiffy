@@ -19,6 +19,8 @@ class random_block_allocator : public block_allocator {
   std::size_t num_free_blocks() override;
   std::size_t num_allocated_blocks() override;
   std::size_t num_total_blocks() override;
+  const std::vector<std::string> free_blocks() override;
+  const std::vector<std::string> allocated_blocks() override;
  private:
   std::shared_mutex mtx_;
   std::vector<std::string> allocated_blocks_;

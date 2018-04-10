@@ -17,9 +17,11 @@ kv_block::kv_block(const std::string &block_name,
       persistent_(std::move(persistent)),
       local_storage_prefix_(std::move(local_storage_prefix)),
       ser_(std::move(ser)),
-      deser_(std::move(deser)) {}
+      deser_(std::move(deser)),
+      bytes_(0) {}
 
 bool kv_block::put(const key_type &key, const value_type &value) {
+  bytes_.fetch_add(key.size() + value.size());
   return block_.insert(key, value);
 }
 
@@ -33,11 +35,21 @@ value_type kv_block::get(const key_type &key) {
 
 bool kv_block::update(const key_type &key,
                       const value_type &value) {
-  return block_.update(key, value);
+  return block_.update_fn(key, [&](value_type &v) {
+    if (value.size() > v.size()) {
+      bytes_.fetch_add(value.size() - v.size());
+    } else {
+      bytes_.fetch_sub(v.size() - value.size());
+    }
+    v = value;
+  });
 }
 
 bool kv_block::remove(const key_type &key) {
-  return block_.erase(key);
+  return block_.erase_fn(key, [&](value_type &value) {
+    bytes_.fetch_sub(key.size() + value.size());
+    return true;
+  });
 }
 
 void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) {
@@ -80,7 +92,8 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
         }
       }
       break;
-    default:throw std::invalid_argument("No such operation id " + std::to_string(oid));
+    default:
+      throw std::invalid_argument("No such operation id " + std::to_string(oid));
   }
 }
 
@@ -90,6 +103,7 @@ void kv_block::reset() {
   path("");
   subscriptions().clear();
   clients().clear();
+  bytes_.store(0);
 }
 
 std::size_t kv_block::size() const {
@@ -131,7 +145,7 @@ std::size_t kv_block::storage_capacity() {
 }
 
 std::size_t kv_block::storage_size() {
-  return block_.size(); // TODO: This should return the storage_size in bytes...
+  return bytes_.load();
 }
 
 }
