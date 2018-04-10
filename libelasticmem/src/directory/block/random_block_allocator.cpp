@@ -77,5 +77,15 @@ std::size_t random_block_allocator::num_total_blocks() {
   return free_blocks_.size() + allocated_blocks_.size();
 }
 
+const std::vector<std::string> random_block_allocator::free_blocks() {
+  std::shared_lock<std::shared_mutex> lock(mtx_);
+  return free_blocks_;
+}
+
+const std::vector<std::string> random_block_allocator::allocated_blocks() {
+  std::shared_lock<std::shared_mutex> lock(mtx_);
+  return allocated_blocks_;
+}
+
 }
 }

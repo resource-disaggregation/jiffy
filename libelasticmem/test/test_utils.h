@@ -101,6 +101,14 @@ class sequential_block_allocator : public elasticmem::directory::block_allocator
     return alloc_.size() + free_.size();
   }
 
+  const std::vector<std::string> free_blocks() override {
+    return free_;
+  }
+
+  const std::vector<std::string> allocated_blocks() override {
+    return alloc_;
+  }
+
  private:
   std::size_t cur_idx_;
   std::vector<std::string> free_;
@@ -154,8 +162,15 @@ class dummy_block_allocator : public elasticmem::directory::block_allocator {
   size_t num_total_blocks() override {
     return num_alloc_ + num_free_;
   }
+  const std::vector<std::string> free_blocks() override {
+    return empty_;
+  }
+  const std::vector<std::string> allocated_blocks() override {
+    return empty_;
+  }
 
  private:
+  std::vector<std::string> empty_;
   std::size_t num_alloc_{};
   std::size_t num_free_{};
 };

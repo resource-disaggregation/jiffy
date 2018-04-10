@@ -52,7 +52,7 @@ void lease_expiry_worker::remove_expired_leases() {
   auto node = std::dynamic_pointer_cast<ds_dir_node>(tree_->root_);
   std::string parent_path;
   for (const auto &cname: node->children()) {
-    remove_expired_nodes(node, parent_path, cname, cur_epoch);
+    remove_expired_nodes(node, parent_path, cname, static_cast<uint64_t>(cur_epoch));
   }
 }
 

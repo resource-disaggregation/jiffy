@@ -58,7 +58,7 @@ TEST_CASE("storage_size_test", "[put][size][storage_size][reset]") {
     REQUIRE(block.put(std::to_string(i), std::to_string(i)));
   }
   REQUIRE(block.size() == 1000);
-  REQUIRE(block.storage_size() == 1000);
+  REQUIRE(block.storage_size() == 5780);
   REQUIRE(block.storage_size() <= block.storage_capacity());
   REQUIRE_NOTHROW(block.reset());
   REQUIRE(block.empty());

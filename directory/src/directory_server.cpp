@@ -11,6 +11,7 @@
 #include <utils/cmd_parse.h>
 #include <directory/block/block_allocation_server.h>
 #include <utils/logger.h>
+#include <directory/block/file_size_tracker.h>
 
 using namespace ::elasticmem::directory;
 using namespace ::elasticmem::storage;
@@ -35,6 +36,8 @@ int main(int argc, char **argv) {
       "Lease duration (in ms) that lease service advertises"));
   opts.add(cmd_option("grace-period-ms", 'g', false).set_default("10000").set_description(
       "Grace period (in ms) that lease service waits for beyond lease duration"));
+  opts.add(cmd_option("storage-trace-file", 't', false).set_required(false).set_description(
+      "Trace file for logging storage capacity over time"));
 
   cmd_parser parser(argc, argv, opts);
   if (parser.get_flag("help")) {
@@ -48,6 +51,7 @@ int main(int argc, char **argv) {
   int block_port;
   uint64_t lease_period_ms;
   uint64_t grace_period_ms;
+  std::string storage_trace;
 
   try {
     address = parser.get("address");
@@ -56,6 +60,7 @@ int main(int argc, char **argv) {
     block_port = parser.get_int("block-port");
     lease_period_ms = static_cast<uint64_t>(parser.get_long("lease-period-ms"));
     grace_period_ms = static_cast<uint64_t>(parser.get_long("grace-period-ms"));
+    storage_trace = parser.get("storage-trace-file");
   } catch (cmd_parse_exception &ex) {
     std::cerr << "Could not parse command line args: " << ex.what() << std::endl;
     std::cerr << parser.help_msg() << std::endl;
@@ -112,6 +117,11 @@ int main(int argc, char **argv) {
 
   lease_expiry_worker lmgr(tree, lease_period_ms, grace_period_ms);
   lmgr.start();
+
+  file_size_tracker tracker(tree, storage, lease_period_ms, storage_trace);
+  if (!storage_trace.empty()) {
+    tracker.start();
+  }
 
   std::unique_lock<std::mutex> failure_condition_lock{failure_mtx};
   failure_condition.wait(failure_condition_lock, [&failing_thread] {
