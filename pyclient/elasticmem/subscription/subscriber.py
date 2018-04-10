@@ -42,6 +42,9 @@ class Mailbox:
         ret = self.q.get(block, timeout)
         return ret
 
+    def empty(self):
+        return self.q.empty()
+
 
 class SubscriptionServiceHandler(subscription_service.Iface):
     def __init__(self, notification_callback, success_callback, failure_callback):
@@ -122,6 +125,8 @@ class SubscriptionClient:
         except Empty:
             raise RuntimeError('One or more storage servers did not respond to subscription request')
 
+        return self
+
     def unsubscribe(self, ops):
         for block_id, client in zip(self.block_ids, self.clients):
             client.unsubscribe(block_id, ops)
@@ -136,7 +141,12 @@ class SubscriptionClient:
     def get_notification(self, block=True, timeout=None):
         if hasattr(self.notifications, 'pop'):
             n = self.notifications.pop(block, timeout)
-            logging.info("Notification %s" % n)
             return n
         else:
             return None
+
+    def has_notification(self):
+        if hasattr(self.notifications, 'empty'):
+            return not self.notifications.empty()
+        return None
+
