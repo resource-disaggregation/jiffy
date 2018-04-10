@@ -40,6 +40,7 @@ debug
 # Idea files
 .idea
 *.iml
+venv
 
 # generic ignores
 *.deps
