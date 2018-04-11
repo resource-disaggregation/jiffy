@@ -98,9 +98,15 @@ int main(int argc, char **argv) {
   std::condition_variable failure_condition;
   std::atomic<int> failing_thread(-1); // management -> 0, service -> 1, notification -> 2, chain -> 3
 
-  char hbuf[1024];
-  gethostname(hbuf, sizeof(hbuf));
-  std::string hostname(hbuf);
+  std::string hostname;
+  if (address == "0.0.0.0") {
+    char hbuf[1024];
+    gethostname(hbuf, sizeof(hbuf));
+    hostname = hbuf;
+  } else {
+    hostname = address;
+  }
+
   for (int i = 0; i < static_cast<int>(num_blocks); i++) {
     block_names.push_back(block_name_parser::make(hostname, service_port, management_port, notification_port, 0, i));
   }
