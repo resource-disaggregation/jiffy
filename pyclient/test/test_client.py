@@ -1,9 +1,13 @@
+from __future__ import print_function
 import os
 import subprocess
 import sys
 import tempfile
 import time
-from queue import Empty
+try:
+    import Queue as queue
+except ImportError:
+    import queue
 from unittest import TestCase
 
 from thrift.transport import TTransport, TSocket
@@ -186,11 +190,11 @@ class TestClient(TestCase):
             self.assertTrue(n2.get_notification() == Notification('remove', b'key1'))
             self.assertTrue(n3.get_notification() == Notification('remove', b'key1'))
 
-            with self.assertRaises(Empty):
+            with self.assertRaises(queue.Empty):
                 n1.get_notification(block=False)
-            with self.assertRaises(Empty):
+            with self.assertRaises(queue.Empty):
                 n2.get_notification(block=False)
-            with self.assertRaises(Empty):
+            with self.assertRaises(queue.Empty):
                 n3.get_notification(block=False)
 
             n1.unsubscribe(['put'])
@@ -202,11 +206,11 @@ class TestClient(TestCase):
             self.assertTrue(n2.get_notification() == Notification('put', b'key1'))
             self.assertTrue(n3.get_notification() == Notification('remove', b'key1'))
 
-            with self.assertRaises(Empty):
+            with self.assertRaises(queue.Empty):
                 n1.get_notification(block=False)
-            with self.assertRaises(Empty):
+            with self.assertRaises(queue.Empty):
                 n2.get_notification(block=False)
-            with self.assertRaises(Empty):
+            with self.assertRaises(queue.Empty):
                 n3.get_notification(block=False)
 
             n1.disconnect()

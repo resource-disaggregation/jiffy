@@ -1,6 +1,9 @@
-import logging
 import threading
-from queue import Queue, Empty
+
+try:
+    import Queue as queue
+except ImportError:
+    import queue
 
 from thrift.protocol import TBinaryProtocol
 from thrift.transport import TTransport, TSocket
@@ -33,7 +36,7 @@ class ControlMessage:
 
 class Mailbox:
     def __init__(self):
-        self.q = Queue()
+        self.q = queue.Queue()
 
     def __call__(self, notification):
         self.q.put(notification)
@@ -122,7 +125,7 @@ class SubscriptionClient:
                 response = self.controls.pop(True, 10)
                 if response.ctype == 'error':
                     raise RuntimeError(response.data)
-        except Empty:
+        except queue.Empty:
             raise RuntimeError('One or more storage servers did not respond to subscription request')
 
         return self
@@ -135,7 +138,7 @@ class SubscriptionClient:
                 response = self.controls.pop(True, 10)
                 if response.ctype == 'error':
                     raise RuntimeError(response.data)
-        except Empty:
+        except queue.Empty:
             raise RuntimeError('One or more storage servers did not respond to subscription request')
 
     def get_notification(self, block=True, timeout=None):
@@ -149,4 +152,3 @@ class SubscriptionClient:
         if hasattr(self.notifications, 'empty'):
             return not self.notifications.empty()
         return None
-
