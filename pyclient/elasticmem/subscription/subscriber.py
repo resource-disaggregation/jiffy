@@ -1,3 +1,4 @@
+import logging
 import threading
 
 try:
@@ -83,9 +84,12 @@ class SubscriptionWorker(threading.Thread):
                 for protocol in self.protocols:
                     self.processor.process(protocol, protocol)
         except TTransport.TTransportException:
-            pass
-        except Exception:
+            logging.info("Thrift transport closed")
+        except Exception as e:
+            logging.error(e)
             raise
+        finally:
+            self.stop()
 
     def stop(self):
         self._stop_event.set()
