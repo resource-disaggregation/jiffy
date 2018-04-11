@@ -70,10 +70,6 @@ class BlockChainClient:
         self.response_reader = self.tail.get_response_reader(self.seq.client_id)
         self.response_cache = {}
 
-    def __del__(self):
-        self.head.disconnect()
-        self.tail.disconnect()
-
     def _send_cmd(self, client, cmd_id, args):
         op_seq = self.seq.client_seq_no
         client.send_request(self.seq, cmd_id, args)
