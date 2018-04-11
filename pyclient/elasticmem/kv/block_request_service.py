@@ -525,7 +525,7 @@ class command_request_args(object):
                     self.arguments = []
                     (_etype3, _size0) = iprot.readListBegin()
                     for _i4 in range(_size0):
-                        _elem5 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        _elem5 = iprot.readBinary()
                         self.arguments.append(_elem5)
                     iprot.readListEnd()
                 else:
@@ -556,7 +556,7 @@ class command_request_args(object):
             oprot.writeFieldBegin('arguments', TType.LIST, 4)
             oprot.writeListBegin(TType.STRING, len(self.arguments))
             for iter6 in self.arguments:
-                oprot.writeString(iter6.encode('utf-8') if sys.version_info[0] == 2 else iter6)
+                oprot.writeBinary(iter6)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -588,7 +588,7 @@ command_request_args.thrift_spec = (
     (1, TType.STRUCT, 'seq', [sequence_id, None], None, ),  # 1
     (2, TType.I32, 'block_id', None, None, ),  # 2
     (3, TType.I32, 'cmd_id', None, None, ),  # 3
-    (4, TType.LIST, 'arguments', (TType.STRING, 'UTF8', False), None, ),  # 4
+    (4, TType.LIST, 'arguments', (TType.STRING, 'BINARY', False), None, ),  # 4
 )
 fix_spec(all_structs)
 del all_structs

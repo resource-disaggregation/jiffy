@@ -125,7 +125,7 @@ class response_args(object):
                     self.result = []
                     (_etype10, _size7) = iprot.readListBegin()
                     for _i11 in range(_size7):
-                        _elem12 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        _elem12 = iprot.readBinary()
                         self.result.append(_elem12)
                     iprot.readListEnd()
                 else:
@@ -148,7 +148,7 @@ class response_args(object):
             oprot.writeFieldBegin('result', TType.LIST, 2)
             oprot.writeListBegin(TType.STRING, len(self.result))
             for iter13 in self.result:
-                oprot.writeString(iter13.encode('utf-8') if sys.version_info[0] == 2 else iter13)
+                oprot.writeBinary(iter13)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -178,7 +178,7 @@ all_structs.append(response_args)
 response_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'seq', [sequence_id, None], None, ),  # 1
-    (2, TType.LIST, 'result', (TType.STRING, 'UTF8', False), None, ),  # 2
+    (2, TType.LIST, 'result', (TType.STRING, 'BINARY', False), None, ),  # 2
 )
 fix_spec(all_structs)
 del all_structs
