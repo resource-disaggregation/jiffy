@@ -282,6 +282,10 @@ class directory_ops {
                              const std::string &persistent_store_prefix,
                              std::size_t num_blocks,
                              std::size_t chain_length) = 0;
+  virtual data_status open_or_create(const std::string &path,
+                                     const std::string &persistent_store_prefix,
+                                     std::size_t num_blocks,
+                                     std::size_t chain_length) = 0;
 
   virtual bool exists(const std::string &path) const = 0;
 

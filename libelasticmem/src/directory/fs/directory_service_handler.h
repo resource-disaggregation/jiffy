@@ -17,6 +17,11 @@ class directory_service_handler : public directory_serviceIf {
               const std::string &persistent_store_prefix,
               int32_t num_blocks,
               int32_t chain_length) override;
+  void open_or_create(rpc_data_status &_return,
+                      const std::string &path,
+                      const std::string &persistent_store_prefix,
+                      const int32_t num_blocks,
+                      const int32_t chain_length) override;
   bool exists(const std::string &path) override;
   int64_t last_write_time(const std::string &path) override;
   void set_permissions(const std::string &path, rpc_perms perms, rpc_perm_options opts) override;

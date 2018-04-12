@@ -39,6 +39,58 @@ TEST_CASE("create_file_test", "[file][dir]") {
                     directory_ops_exception);
 }
 
+TEST_CASE("open_file_test", "[file][dir]") {
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
+
+  REQUIRE_NOTHROW(tree.create("/sandbox/a.txt", "/tmp", 1, 1));
+  REQUIRE_NOTHROW(tree.create("/sandbox/foo/bar/baz/a", "/tmp", 1, 1));
+
+  data_status s;
+  REQUIRE_NOTHROW(s = tree.open("/sandbox/a.txt"));
+  REQUIRE(s.chain_length() == 1);
+  REQUIRE(s.mode() == storage_mode::in_memory);
+  REQUIRE(s.persistent_store_prefix() == "/tmp");
+  REQUIRE(s.data_blocks().size() == 1);
+
+  REQUIRE_NOTHROW(s = tree.open("/sandbox/foo/bar/baz/a"));
+  REQUIRE(s.chain_length() == 1);
+  REQUIRE(s.mode() == storage_mode::in_memory);
+  REQUIRE(s.persistent_store_prefix() == "/tmp");
+  REQUIRE(s.data_blocks().size() == 1);
+
+  REQUIRE_THROWS_AS(tree.open("/sandbox/b.txt"), directory_ops_exception);
+}
+
+TEST_CASE("open_or_create_file_test", "[file][dir]") {
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
+
+  REQUIRE_NOTHROW(tree.create("/sandbox/a.txt", "/tmp", 1, 1));
+  REQUIRE_NOTHROW(tree.create("/sandbox/foo/bar/baz/a", "/tmp", 1, 1));
+
+  data_status s;
+  REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/a.txt", "/tmp", 1, 1));
+  REQUIRE(s.chain_length() == 1);
+  REQUIRE(s.mode() == storage_mode::in_memory);
+  REQUIRE(s.persistent_store_prefix() == "/tmp");
+  REQUIRE(s.data_blocks().size() == 1);
+
+  REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/foo/bar/baz/a", "/tmp", 1, 1));
+  REQUIRE(s.chain_length() == 1);
+  REQUIRE(s.mode() == storage_mode::in_memory);
+  REQUIRE(s.persistent_store_prefix() == "/tmp");
+  REQUIRE(s.data_blocks().size() == 1);
+
+  REQUIRE_NOTHROW(s =  tree.open_or_create("/sandbox/b.txt", "/tmp", 1, 1));
+  REQUIRE(s.chain_length() == 1);
+  REQUIRE(s.mode() == storage_mode::in_memory);
+  REQUIRE(s.persistent_store_prefix() == "/tmp");
+  REQUIRE(s.data_blocks().size() == 1);
+}
+
 TEST_CASE("exists_test", "[file][dir]") {
   auto alloc = std::make_shared<dummy_block_allocator>(4);
   auto sm = std::make_shared<dummy_storage_manager>();

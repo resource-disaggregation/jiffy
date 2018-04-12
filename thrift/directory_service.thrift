@@ -56,8 +56,9 @@ service directory_service {
 
   rpc_data_status open(1: string path)
     throws (1: directory_service_exception ex),
-
   rpc_data_status create(1: string path, 2: string persistent_store_prefix, 3: i32 num_blocks, 4: i32 chain_length)
+    throws (1: directory_service_exception ex),
+  rpc_data_status open_or_create(1: string path, 2: string persistent_store_path, 3: i32 num_blocks, 4: i32 chain_length)
     throws (1: directory_service_exception ex),
 
   bool exists(1: string path)

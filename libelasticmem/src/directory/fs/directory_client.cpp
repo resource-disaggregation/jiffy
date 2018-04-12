@@ -58,6 +58,16 @@ data_status directory_client::create(const std::string &path,
   return directory_type_conversions::from_rpc(s);
 }
 
+data_status directory_client::open_or_create(const std::string &path,
+                                             const std::string &persistent_store_prefix,
+                                             std::size_t num_blocks,
+                                             std::size_t chain_length) {
+  rpc_data_status s;
+  client_->open_or_create(s, path, persistent_store_prefix, static_cast<const int32_t>(num_blocks),
+                          static_cast<const int32_t>(chain_length));
+  return directory_type_conversions::from_rpc(s);
+}
+
 bool directory_client::exists(const std::string &path) const {
   return client_->exists(path);
 }

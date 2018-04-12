@@ -25,6 +25,7 @@ class directory_serviceIf {
   virtual void create_directories(const std::string& path) = 0;
   virtual void open(rpc_data_status& _return, const std::string& path) = 0;
   virtual void create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_prefix, const int32_t num_blocks, const int32_t chain_length) = 0;
+  virtual void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_path, const int32_t num_blocks, const int32_t chain_length) = 0;
   virtual bool exists(const std::string& path) = 0;
   virtual int64_t last_write_time(const std::string& path) = 0;
   virtual void set_permissions(const std::string& path, const rpc_perms perms, const rpc_perm_options opts) = 0;
@@ -80,6 +81,9 @@ class directory_serviceNull : virtual public directory_serviceIf {
     return;
   }
   void create(rpc_data_status& /* _return */, const std::string& /* path */, const std::string& /* persistent_store_prefix */, const int32_t /* num_blocks */, const int32_t /* chain_length */) {
+    return;
+  }
+  void open_or_create(rpc_data_status& /* _return */, const std::string& /* path */, const std::string& /* persistent_store_path */, const int32_t /* num_blocks */, const int32_t /* chain_length */) {
     return;
   }
   bool exists(const std::string& /* path */) {
@@ -608,6 +612,145 @@ class directory_service_create_presult {
   directory_service_exception ex;
 
   _directory_service_create_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
+typedef struct _directory_service_open_or_create_args__isset {
+  _directory_service_open_or_create_args__isset() : path(false), persistent_store_path(false), num_blocks(false), chain_length(false) {}
+  bool path :1;
+  bool persistent_store_path :1;
+  bool num_blocks :1;
+  bool chain_length :1;
+} _directory_service_open_or_create_args__isset;
+
+class directory_service_open_or_create_args {
+ public:
+
+  directory_service_open_or_create_args(const directory_service_open_or_create_args&);
+  directory_service_open_or_create_args& operator=(const directory_service_open_or_create_args&);
+  directory_service_open_or_create_args() : path(), persistent_store_path(), num_blocks(0), chain_length(0) {
+  }
+
+  virtual ~directory_service_open_or_create_args() throw();
+  std::string path;
+  std::string persistent_store_path;
+  int32_t num_blocks;
+  int32_t chain_length;
+
+  _directory_service_open_or_create_args__isset __isset;
+
+  void __set_path(const std::string& val);
+
+  void __set_persistent_store_path(const std::string& val);
+
+  void __set_num_blocks(const int32_t val);
+
+  void __set_chain_length(const int32_t val);
+
+  bool operator == (const directory_service_open_or_create_args & rhs) const
+  {
+    if (!(path == rhs.path))
+      return false;
+    if (!(persistent_store_path == rhs.persistent_store_path))
+      return false;
+    if (!(num_blocks == rhs.num_blocks))
+      return false;
+    if (!(chain_length == rhs.chain_length))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_open_or_create_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_open_or_create_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class directory_service_open_or_create_pargs {
+ public:
+
+
+  virtual ~directory_service_open_or_create_pargs() throw();
+  const std::string* path;
+  const std::string* persistent_store_path;
+  const int32_t* num_blocks;
+  const int32_t* chain_length;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_open_or_create_result__isset {
+  _directory_service_open_or_create_result__isset() : success(false), ex(false) {}
+  bool success :1;
+  bool ex :1;
+} _directory_service_open_or_create_result__isset;
+
+class directory_service_open_or_create_result {
+ public:
+
+  directory_service_open_or_create_result(const directory_service_open_or_create_result&);
+  directory_service_open_or_create_result& operator=(const directory_service_open_or_create_result&);
+  directory_service_open_or_create_result() {
+  }
+
+  virtual ~directory_service_open_or_create_result() throw();
+  rpc_data_status success;
+  directory_service_exception ex;
+
+  _directory_service_open_or_create_result__isset __isset;
+
+  void __set_success(const rpc_data_status& val);
+
+  void __set_ex(const directory_service_exception& val);
+
+  bool operator == (const directory_service_open_or_create_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_open_or_create_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_open_or_create_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_open_or_create_presult__isset {
+  _directory_service_open_or_create_presult__isset() : success(false), ex(false) {}
+  bool success :1;
+  bool ex :1;
+} _directory_service_open_or_create_presult__isset;
+
+class directory_service_open_or_create_presult {
+ public:
+
+
+  virtual ~directory_service_open_or_create_presult() throw();
+  rpc_data_status* success;
+  directory_service_exception ex;
+
+  _directory_service_open_or_create_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -2526,6 +2669,9 @@ class directory_serviceClientT : virtual public directory_serviceIf {
   void create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_prefix, const int32_t num_blocks, const int32_t chain_length);
   void send_create(const std::string& path, const std::string& persistent_store_prefix, const int32_t num_blocks, const int32_t chain_length);
   void recv_create(rpc_data_status& _return);
+  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_path, const int32_t num_blocks, const int32_t chain_length);
+  void send_open_or_create(const std::string& path, const std::string& persistent_store_path, const int32_t num_blocks, const int32_t chain_length);
+  void recv_open_or_create(rpc_data_status& _return);
   bool exists(const std::string& path);
   void send_exists(const std::string& path);
   bool recv_exists();
@@ -2610,6 +2756,8 @@ class directory_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT
   void process_open(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_create(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_create(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_open_or_create(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_open_or_create(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_exists(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_exists(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_last_write_time(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -2657,6 +2805,9 @@ class directory_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT
     processMap_["create"] = ProcessFunctions(
       &directory_serviceProcessorT::process_create,
       &directory_serviceProcessorT::process_create);
+    processMap_["open_or_create"] = ProcessFunctions(
+      &directory_serviceProcessorT::process_open_or_create,
+      &directory_serviceProcessorT::process_open_or_create);
     processMap_["exists"] = ProcessFunctions(
       &directory_serviceProcessorT::process_exists,
       &directory_serviceProcessorT::process_exists);
@@ -2773,6 +2924,16 @@ class directory_serviceMultiface : virtual public directory_serviceIf {
       ifaces_[i]->create(_return, path, persistent_store_prefix, num_blocks, chain_length);
     }
     ifaces_[i]->create(_return, path, persistent_store_prefix, num_blocks, chain_length);
+    return;
+  }
+
+  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_path, const int32_t num_blocks, const int32_t chain_length) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->open_or_create(_return, path, persistent_store_path, num_blocks, chain_length);
+    }
+    ifaces_[i]->open_or_create(_return, path, persistent_store_path, num_blocks, chain_length);
     return;
   }
 
@@ -2967,6 +3128,9 @@ class directory_serviceConcurrentClientT : virtual public directory_serviceIf {
   void create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_prefix, const int32_t num_blocks, const int32_t chain_length);
   int32_t send_create(const std::string& path, const std::string& persistent_store_prefix, const int32_t num_blocks, const int32_t chain_length);
   void recv_create(rpc_data_status& _return, const int32_t seqid);
+  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_path, const int32_t num_blocks, const int32_t chain_length);
+  int32_t send_open_or_create(const std::string& path, const std::string& persistent_store_path, const int32_t num_blocks, const int32_t chain_length);
+  void recv_open_or_create(rpc_data_status& _return, const int32_t seqid);
   bool exists(const std::string& path);
   int32_t send_exists(const std::string& path);
   bool recv_exists(const int32_t seqid);

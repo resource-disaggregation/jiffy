@@ -100,6 +100,16 @@ data_status directory_tree::create(const std::string &path,
   return child->dstatus();
 }
 
+data_status directory_tree::open_or_create(const std::string &path,
+                                           const std::string &persistent_store_prefix,
+                                           std::size_t num_blocks,
+                                           std::size_t chain_length) {
+  if (exists(path)) {
+    return open(path);
+  }
+  return create(path, persistent_store_prefix, num_blocks, chain_length);
+}
+
 bool directory_tree::exists(const std::string &path) const {
   return get_node_unsafe(path) != nullptr;
 }

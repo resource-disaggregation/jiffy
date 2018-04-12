@@ -74,6 +74,22 @@ directory_service_create_presult::~directory_service_create_presult() throw() {
 }
 
 
+directory_service_open_or_create_args::~directory_service_open_or_create_args() throw() {
+}
+
+
+directory_service_open_or_create_pargs::~directory_service_open_or_create_pargs() throw() {
+}
+
+
+directory_service_open_or_create_result::~directory_service_open_or_create_result() throw() {
+}
+
+
+directory_service_open_or_create_presult::~directory_service_open_or_create_presult() throw() {
+}
+
+
 directory_service_exists_args::~directory_service_exists_args() throw() {
 }
 

@@ -248,6 +248,10 @@ class directory_tree : public directory_ops, public directory_management_ops {
                      const std::string &persistent_store_prefix,
                      std::size_t num_blocks,
                      std::size_t chain_length) override;
+  data_status open_or_create(const std::string &path,
+                             const std::string &persistent_store_prefix,
+                             std::size_t num_blocks,
+                             std::size_t chain_length) override;
 
   bool exists(const std::string &path) const override;
 

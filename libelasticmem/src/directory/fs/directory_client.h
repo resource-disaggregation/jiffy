@@ -24,6 +24,10 @@ class directory_client : public directory_ops {
                      const std::string &persistent_store_prefix,
                      std::size_t num_blocks,
                      std::size_t chain_length) override;
+  data_status open_or_create(const std::string &path,
+                             const std::string &persistent_store_prefix,
+                             std::size_t num_blocks,
+                             std::size_t chain_length) override;
   bool exists(const std::string &path) const override;
   std::uint64_t last_write_time(const std::string &path) const override;
   perms permissions(const std::string &path) override;

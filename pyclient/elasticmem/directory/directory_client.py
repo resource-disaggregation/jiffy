@@ -123,6 +123,10 @@ class DirectoryClient:
         s = self.client_.create(path, persistent_store_prefix, num_blocks, chain_length)
         return DataStatus(s.storage_mode, s.persistent_store_prefix, s.chain_length, s.data_blocks)
 
+    def open_or_create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1):
+        s = self.client_.open_or_create(path, persistent_store_prefix, num_blocks, chain_length)
+        return DataStatus(s.storage_mode, s.persistent_store_prefix, s.chain_length, s.data_blocks)
+
     def exists(self, path):
         return self.client_.exists(path)
 

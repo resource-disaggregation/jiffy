@@ -30,6 +30,7 @@ void directory_service_handler::open(rpc_data_status &_return, const std::string
     throw make_exception(e);
   }
 }
+
 void directory_service_handler::create(rpc_data_status &_return,
                                        const std::string &path,
                                        const std::string &persistent_store_prefix,
@@ -40,6 +41,21 @@ void directory_service_handler::create(rpc_data_status &_return,
                                                                 persistent_store_prefix,
                                                                 (size_t) num_blocks,
                                                                 (size_t) chain_length));
+  } catch (directory_ops_exception &e) {
+    throw make_exception(e);
+  }
+}
+
+void directory_service_handler::open_or_create(rpc_data_status &_return,
+                                               const std::string &path,
+                                               const std::string &persistent_store_prefix,
+                                               const int32_t num_blocks,
+                                               const int32_t chain_length) {
+  try {
+    _return = directory_type_conversions::to_rpc(shard_->open_or_create(path,
+                                                                        persistent_store_prefix,
+                                                                        (size_t) num_blocks,
+                                                                        (size_t) chain_length));
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
   }
