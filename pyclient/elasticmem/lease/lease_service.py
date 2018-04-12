@@ -19,10 +19,10 @@ all_structs = []
 
 
 class Iface(object):
-    def update_leases(self, updates):
+    def renew_leases(self, to_renew):
         """
         Parameters:
-         - updates
+         - to_renew
         """
         pass
 
@@ -34,23 +34,23 @@ class Client(Iface):
             self._oprot = oprot
         self._seqid = 0
 
-    def update_leases(self, updates):
+    def renew_leases(self, to_renew):
         """
         Parameters:
-         - updates
+         - to_renew
         """
-        self.send_update_leases(updates)
-        return self.recv_update_leases()
+        self.send_renew_leases(to_renew)
+        return self.recv_renew_leases()
 
-    def send_update_leases(self, updates):
-        self._oprot.writeMessageBegin('update_leases', TMessageType.CALL, self._seqid)
-        args = update_leases_args()
-        args.updates = updates
+    def send_renew_leases(self, to_renew):
+        self._oprot.writeMessageBegin('renew_leases', TMessageType.CALL, self._seqid)
+        args = renew_leases_args()
+        args.to_renew = to_renew
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_update_leases(self):
+    def recv_renew_leases(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -58,21 +58,21 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = update_leases_result()
+        result = renew_leases_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
         if result.ex is not None:
             raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "update_leases failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "renew_leases failed: unknown result")
 
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
         self._handler = handler
         self._processMap = {}
-        self._processMap["update_leases"] = Processor.process_update_leases
+        self._processMap["renew_leases"] = Processor.process_renew_leases
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -89,17 +89,17 @@ class Processor(Iface, TProcessor):
             self._processMap[name](self, seqid, iprot, oprot)
         return True
 
-    def process_update_leases(self, seqid, iprot, oprot):
-        args = update_leases_args()
+    def process_renew_leases(self, seqid, iprot, oprot):
+        args = renew_leases_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = update_leases_result()
+        result = renew_leases_result()
         try:
-            result.success = self._handler.update_leases(args.updates)
+            result.success = self._handler.renew_leases(args.to_renew)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except directory_lease_service_exception as ex:
+        except lease_service_exception as ex:
             msg_type = TMessageType.REPLY
             result.ex = ex
         except TApplicationException as ex:
@@ -110,7 +110,7 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("update_leases", msg_type, seqid)
+        oprot.writeMessageBegin("renew_leases", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -118,19 +118,19 @@ class Processor(Iface, TProcessor):
 # HELPER FUNCTIONS AND STRUCTURES
 
 
-class update_leases_args(object):
+class renew_leases_args(object):
     """
     Attributes:
-     - updates
+     - to_renew
     """
 
     __slots__ = (
-        'updates',
+        'to_renew',
     )
 
 
-    def __init__(self, updates=None,):
-        self.updates = updates
+    def __init__(self, to_renew=None,):
+        self.to_renew = to_renew
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -142,9 +142,13 @@ class update_leases_args(object):
             if ftype == TType.STOP:
                 break
             if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.updates = rpc_lease_update()
-                    self.updates.read(iprot)
+                if ftype == TType.LIST:
+                    self.to_renew = []
+                    (_etype3, _size0) = iprot.readListBegin()
+                    for _i4 in range(_size0):
+                        _elem5 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        self.to_renew.append(_elem5)
+                    iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             else:
@@ -156,10 +160,13 @@ class update_leases_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('update_leases_args')
-        if self.updates is not None:
-            oprot.writeFieldBegin('updates', TType.STRUCT, 1)
-            self.updates.write(oprot)
+        oprot.writeStructBegin('renew_leases_args')
+        if self.to_renew is not None:
+            oprot.writeFieldBegin('to_renew', TType.LIST, 1)
+            oprot.writeListBegin(TType.STRING, len(self.to_renew))
+            for iter6 in self.to_renew:
+                oprot.writeString(iter6.encode('utf-8') if sys.version_info[0] == 2 else iter6)
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -184,14 +191,14 @@ class update_leases_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(update_leases_args)
-update_leases_args.thrift_spec = (
+all_structs.append(renew_leases_args)
+renew_leases_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'updates', [rpc_lease_update, None], None, ),  # 1
+    (1, TType.LIST, 'to_renew', (TType.STRING, 'UTF8', False), None, ),  # 1
 )
 
 
-class update_leases_result(object):
+class renew_leases_result(object):
     """
     Attributes:
      - success
@@ -225,7 +232,7 @@ class update_leases_result(object):
                     iprot.skip(ftype)
             elif fid == 1:
                 if ftype == TType.STRUCT:
-                    self.ex = directory_lease_service_exception()
+                    self.ex = lease_service_exception()
                     self.ex.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -238,7 +245,7 @@ class update_leases_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('update_leases_result')
+        oprot.writeStructBegin('renew_leases_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)
@@ -270,10 +277,10 @@ class update_leases_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(update_leases_result)
-update_leases_result.thrift_spec = (
+all_structs.append(renew_leases_result)
+renew_leases_result.thrift_spec = (
     (0, TType.STRUCT, 'success', [rpc_lease_ack, None], None, ),  # 0
-    (1, TType.STRUCT, 'ex', [directory_lease_service_exception, None], None, ),  # 1
+    (1, TType.STRUCT, 'ex', [lease_service_exception, None], None, ),  # 1
 )
 fix_spec(all_structs)
 del all_structs

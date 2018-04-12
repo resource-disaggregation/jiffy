@@ -40,22 +40,22 @@ add_library(elasticmem STATIC
         src/directory/fs/directory_tree.cpp
         src/directory/fs/directory_tree.h
         src/directory/fs/directory_type_conversions.h
-        src/directory/lease/directory_lease_client.cpp
-        src/directory/lease/directory_lease_client.h
-        src/directory/lease/directory_lease_server.cpp
-        src/directory/lease/directory_lease_server.h
-        src/directory/lease/directory_lease_service.cpp
-        src/directory/lease/directory_lease_service.h
-        src/directory/lease/directory_lease_service.tcc
-        src/directory/lease/directory_lease_service_constants.cpp
-        src/directory/lease/directory_lease_service_constants.h
-        src/directory/lease/directory_lease_service_factory.cpp
-        src/directory/lease/directory_lease_service_factory.h
-        src/directory/lease/directory_lease_service_handler.cpp
-        src/directory/lease/directory_lease_service_handler.h
-        src/directory/lease/directory_lease_service_types.cpp
-        src/directory/lease/directory_lease_service_types.h
-        src/directory/lease/directory_lease_service_types.tcc
+        src/directory/lease/lease_client.cpp
+        src/directory/lease/lease_client.h
+        src/directory/lease/lease_server.cpp
+        src/directory/lease/lease_server.h
+        src/directory/lease/lease_service.cpp
+        src/directory/lease/lease_service.h
+        src/directory/lease/lease_service.tcc
+        src/directory/lease/lease_service_constants.cpp
+        src/directory/lease/lease_service_constants.h
+        src/directory/lease/lease_service_factory.cpp
+        src/directory/lease/lease_service_factory.h
+        src/directory/lease/lease_service_handler.cpp
+        src/directory/lease/lease_service_handler.h
+        src/directory/lease/lease_service_types.cpp
+        src/directory/lease/lease_service_types.h
+        src/directory/lease/lease_service_types.tcc
         src/directory/lease/lease_expiry_worker.cpp
         src/directory/lease/lease_expiry_worker.h
         src/directory/directory_ops.h

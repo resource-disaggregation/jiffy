@@ -2,22 +2,22 @@
 #define ELASTICMEM_DIRECTORY_LEASE_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
-#include "directory_lease_service.h"
+#include "lease_service.h"
 
 namespace elasticmem {
 namespace directory {
 
-class directory_lease_client {
+class lease_client {
  public:
-  typedef directory_lease_serviceClient thrift_client;
+  typedef lease_serviceClient thrift_client;
 
-  directory_lease_client() = default;
-  ~directory_lease_client();
-  directory_lease_client(const std::string &hostname, int port);
+  lease_client() = default;
+  ~lease_client();
+  lease_client(const std::string &hostname, int port);
   void connect(const std::string &hostname, int port);
   void disconnect();
 
-  rpc_lease_ack update_leases(const rpc_lease_update &updates);
+  rpc_lease_ack renew_leases(const std::vector<std::string> &to_renew);
 
  private:
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};

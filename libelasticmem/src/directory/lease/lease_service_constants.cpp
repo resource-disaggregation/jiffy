@@ -4,13 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-#include "directory_lease_service_constants.h"
+#include "lease_service_constants.h"
 
 namespace elasticmem { namespace directory {
 
-const directory_lease_serviceConstants g_directory_lease_service_constants;
+const lease_serviceConstants g_lease_service_constants;
 
-directory_lease_serviceConstants::directory_lease_serviceConstants() {
+lease_serviceConstants::lease_serviceConstants() {
 }
 
 }} // namespace

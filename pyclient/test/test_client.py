@@ -12,7 +12,7 @@ from unittest import TestCase
 
 from thrift.transport import TTransport, TSocket
 
-from elasticmem import ElasticMemClient, RemoveMode
+from elasticmem import ElasticMemClient, RemoveMode, StorageMode
 from elasticmem.benchmark.kv_async_benchmark import run_async_kv_benchmark
 from elasticmem.benchmark.kv_sync_benchmark import run_sync_kv_throughput_benchmark, run_sync_kv_latency_benchmark
 from elasticmem.subscription.subscriber import Notification
@@ -88,33 +88,33 @@ class TestClient(TestCase):
     def kv_ops(self, kv):
         # Test get/put
         for i in range(0, 1000):
-            self.assertTrue(kv.put(str(i), str(i)) == u"ok")
+            self.assertTrue(kv.put(str(i), str(i)) == b"ok")
 
         for i in range(0, 1000):
-            self.assertTrue(kv.get(str(i)) == str(i))
+            self.assertTrue(kv.get(str(i)) == bytes(str(i), 'utf-8'))
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.get(str(i)) == u"key_not_found")
+            self.assertTrue(kv.get(str(i)) == b"key_not_found")
 
         # Test update
         for i in range(0, 1000):
-            self.assertTrue(kv.update(str(i), str(i + 1000)) == u"ok")
+            self.assertTrue(kv.update(str(i), str(i + 1000)) == b"ok")
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.update(str(i), str(i + 1000)) == u"key_not_found")
+            self.assertTrue(kv.update(str(i), str(i + 1000)) == b"key_not_found")
 
         for i in range(0, 1000):
-            self.assertTrue(kv.get(str(i)) == str(i + 1000))
+            self.assertTrue(kv.get(str(i)) == bytes(str(i + 1000), 'utf-8'))
 
         # Test remove
         for i in range(0, 1000):
-            self.assertTrue(kv.remove(str(i)) == u"ok")
+            self.assertTrue(kv.remove(str(i)) == b"ok")
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.remove(str(i)) == u"key_not_found")
+            self.assertTrue(kv.remove(str(i)) == b"key_not_found")
 
         for i in range(0, 1000):
-            self.assertTrue(kv.get(str(i)) == u"key_not_found")
+            self.assertTrue(kv.get(str(i)) == b"key_not_found")
 
     def test_lease_worker(self):
         self.start_servers()
@@ -159,10 +159,10 @@ class TestClient(TestCase):
             self.assertTrue('/a/file.txt' in client.to_renew)
             client.remove('/a/file.txt', RemoveMode.flush)
             self.assertFalse('/a/file.txt' in client.to_renew)
-            self.assertTrue('/a/file.txt' in client.to_flush)
+            self.assertTrue(client.fs.dstatus('/a/file.txt').storage_mode == StorageMode.on_disk)
             client.remove('/a/file.txt', RemoveMode.delete)
             self.assertFalse('/a/file.txt' in client.to_renew)
-            self.assertTrue('/a/file.txt' in client.to_remove)
+            self.assertFalse(client.fs.exists('/a/file.txt'))
         finally:
             client.disconnect()
             self.stop_servers()

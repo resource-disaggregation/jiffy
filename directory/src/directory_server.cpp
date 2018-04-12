@@ -5,7 +5,7 @@
 #include <directory/block/random_block_allocator.h>
 #include <directory/fs/directory_server.h>
 #include <directory/lease/lease_expiry_worker.h>
-#include <directory/lease/directory_lease_server.h>
+#include <directory/lease/lease_server.h>
 #include <storage/manager/storage_manager.h>
 #include <utils/signal_handling.h>
 #include <utils/cmd_parse.h>
@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Directory server listening on " << address << ":" << service_port;
 
   std::exception_ptr lease_exception = nullptr;
-  auto lease_server = directory_lease_server::create(tree, address, lease_port);
+  auto lease_server = lease_server::create(tree, lease_period_ms, address, lease_port);
   std::thread lease_serve_thread([&lease_exception, &lease_server, &failing_thread, &failure_condition] {
     try {
       lease_server->serve();

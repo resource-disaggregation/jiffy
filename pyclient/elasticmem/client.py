@@ -30,14 +30,12 @@ def now_ms():
 
 
 class LeaseRenewalWorker(threading.Thread):
-    def __init__(self, renewal_duration_ms, ls, kvs, to_renew, to_flush, to_remove):
+    def __init__(self, ls, kvs, to_renew):
         super(LeaseRenewalWorker, self).__init__()
-        self.renewal_duration_s = float(renewal_duration_ms) / 1000.0
+        self.renewal_duration_s = 10  # TODO: Remove this; we can use semaphores to block until we have leases to renew
         self.ls = ls
         self.kvs = kvs
         self.to_renew = to_renew
-        self.to_flush = to_flush
-        self.to_remove = to_remove
         self._stop_event = threading.Event()
 
     def run(self):
@@ -45,19 +43,12 @@ class LeaseRenewalWorker(threading.Thread):
             try:
                 s = now_ms()
                 # Only update lease if there is something to update
-                if self.to_renew or self.to_flush or self.to_remove:
-                    ack = self.ls.update_lease(self.to_renew, self.to_flush, self.to_remove)
+                if self.to_renew:
+                    ack = self.ls.renew_leases(self.to_renew)
                     n_renew = len(self.to_renew)
-                    n_flush = len(self.to_flush)
-                    n_remove = len(self.to_remove)
+                    self.renewal_duration_s = float(ack.lease_period_ms / 1000.0)
                     if ack.renewed != n_renew:
                         logging.warning('Asked to renew %d leases, server renewed %d leases' % (n_renew, ack.renewed))
-                    if ack.flushed != n_flush:
-                        logging.warning('Asked to flush %d paths, server flushed %d paths' % (n_flush, ack.flushed))
-                    if ack.removed != n_remove:
-                        logging.warning('Asked to remove %d paths, server removed %d paths' % (n_remove, ack.removed))
-                    del self.to_flush[:]
-                    del self.to_remove[:]
                 elapsed_s = float(now_ms() - s) / 1000.0
                 sleep_time = self.renewal_duration_s - elapsed_s
                 if sleep_time > 0.0:
@@ -82,7 +73,7 @@ class ChainFailureCallback:
 
 
 class ElasticMemClient:
-    def __init__(self, host="127.0.0.1", directory_service_port=9090, lease_port=9091, renewal_duration_ms=10000):
+    def __init__(self, host="127.0.0.1", directory_service_port=9090, lease_port=9091):
         self.directory_host = host
         self.directory_port = directory_service_port
         self.fs = DirectoryClient(host, directory_service_port)
@@ -90,11 +81,8 @@ class ElasticMemClient:
         self.kvs = {}
         self.notifs = {}
         self.to_renew = []
-        self.to_flush = []
-        self.to_remove = []
         self.ls = LeaseClient(host, lease_port)
-        self.lease_worker = LeaseRenewalWorker(renewal_duration_ms, self.ls, self.kvs, self.to_renew,
-                                               self.to_flush, self.to_remove)
+        self.lease_worker = LeaseRenewalWorker(self.ls, self.kvs, self.to_renew)
         self.lease_worker.daemon = True
         self.lease_worker.start()
 
@@ -134,9 +122,9 @@ class ElasticMemClient:
     def remove(self, path, mode):
         self.close(path)
         if mode == RemoveMode.delete:
-            self.to_remove.append(path)
+            self.fs.remove_all(path)
         elif mode == RemoveMode.flush:
-            self.to_flush.append(path)
+            self.fs.flush(path)
 
     def open_listener(self, path, callback=Mailbox()):
         s = self.fs.dstatus(path)

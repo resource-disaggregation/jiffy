@@ -1,14 +1,7 @@
 from thrift.protocol.TBinaryProtocol import TBinaryProtocolAccelerated
 from thrift.transport import TTransport, TSocket
 
-from elasticmem.lease import directory_lease_service
-
-
-class LeaseAck:
-    def __init__(self, renewed, flushed, removed):
-        self.renewed = renewed
-        self.flushed = flushed
-        self.removed = removed
+from elasticmem.lease import lease_service
 
 
 class LeaseClient:
@@ -16,7 +9,7 @@ class LeaseClient:
         self.socket_ = TSocket.TSocket(host, port)
         self.transport_ = TTransport.TBufferedTransport(self.socket_)
         self.protocol_ = TBinaryProtocolAccelerated(self.transport_)
-        self.client_ = directory_lease_service.Client(self.protocol_)
+        self.client_ = lease_service.Client(self.protocol_)
         self.transport_.open()
 
     def __del__(self):
@@ -26,6 +19,5 @@ class LeaseClient:
         if self.transport_.isOpen():
             self.transport_.close()
 
-    def update_lease(self, to_renew, to_flush, to_remove):
-        ack = self.client_.update_leases(directory_lease_service.rpc_lease_update(to_renew, to_flush, to_remove))
-        return LeaseAck(ack.renewed, ack.flushed, ack.removed)
+    def renew_leases(self, to_renew):
+        return self.client_.renew_leases(to_renew)

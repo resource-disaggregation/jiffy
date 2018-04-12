@@ -8,9 +8,10 @@
 namespace elasticmem {
 namespace directory {
 
-class directory_lease_server {
+class lease_server {
  public:
   static std::shared_ptr<apache::thrift::server::TThreadedServer> create(std::shared_ptr<directory_tree> tree,
+                                                                         int64_t lease_period_ms,
                                                                          const std::string &address,
                                                                          int port);
 };
