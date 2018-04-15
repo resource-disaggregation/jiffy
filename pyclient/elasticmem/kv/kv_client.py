@@ -33,6 +33,9 @@ class KVClient:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
 
+    def num_keys(self):
+        return sum([int(block.num_keys()) for block in self.blocks])
+
     def send_update(self, key, value):
         bid = self.block_id(key)
         return bid, self.blocks[bid].send_update(key, value)

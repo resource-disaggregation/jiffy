@@ -96,6 +96,8 @@ class TestClient(TestCase):
         for i in range(1000, 2000):
             self.assertTrue(kv.get(str(i)) == b"key_not_found")
 
+        self.assertTrue(kv.num_keys() == 1000)
+
         # Test update
         for i in range(0, 1000):
             self.assertTrue(kv.update(str(i), str(i + 1000)) == b"ok")
@@ -106,6 +108,8 @@ class TestClient(TestCase):
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) == bytes(str(i + 1000), 'utf-8'))
 
+        self.assertTrue(kv.num_keys() == 1000)
+
         # Test remove
         for i in range(0, 1000):
             self.assertTrue(kv.remove(str(i)) == b"ok")
@@ -115,6 +119,8 @@ class TestClient(TestCase):
 
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) == b"key_not_found")
+
+        self.assertTrue(kv.num_keys() == 0)
 
     def test_lease_worker(self):
         self.start_servers()
