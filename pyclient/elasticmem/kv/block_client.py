@@ -90,8 +90,8 @@ class BlockChainClient:
                 self.response_cache[recv_seq] = result
 
     def _run_command(self, client, cmd_id, args):
-        seq = self._send_cmd(client, cmd_id, args)
-        return self._recv_cmd(seq)
+        op_seq = self._send_cmd(client, cmd_id, args)
+        return self._recv_cmd(op_seq)
 
     def get(self, key):
         return self._run_command(self.tail, 0, [key])[0]

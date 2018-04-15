@@ -30,11 +30,10 @@ def now_ms():
 
 
 class LeaseRenewalWorker(threading.Thread):
-    def __init__(self, ls, kvs, to_renew):
+    def __init__(self, ls, to_renew):
         super(LeaseRenewalWorker, self).__init__()
         self.renewal_duration_s = 10  # TODO: Remove this; we can use semaphores to block until we have leases to renew
         self.ls = ls
-        self.kvs = kvs
         self.to_renew = to_renew
         self._stop_event = threading.Event()
 
@@ -82,7 +81,7 @@ class ElasticMemClient:
         self.notifs = {}
         self.to_renew = []
         self.ls = LeaseClient(host, lease_port)
-        self.lease_worker = LeaseRenewalWorker(self.ls, self.kvs, self.to_renew)
+        self.lease_worker = LeaseRenewalWorker(self.ls, self.to_renew)
         self.lease_worker.daemon = True
         self.lease_worker.start()
 
@@ -106,6 +105,17 @@ class ElasticMemClient:
         if cache_client and path in self.kvs:
             return self.kvs[path]
         s = self.fs.open(path)
+        if path not in self.to_renew:
+            self.to_renew.append(path)
+        k = KVClient(path, s, self.chain_failure_cb)
+        if cache_client:
+            self.kvs[path] = k
+        return k
+
+    def open_or_create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_client=True):
+        if cache_client and path in self.kvs:
+            return self.kvs[path]
+        s = self.fs.open_or_create(path, persistent_store_prefix, num_blocks, chain_length)
         if path not in self.to_renew:
             self.to_renew.append(path)
         k = KVClient(path, s, self.chain_failure_cb)
