@@ -68,7 +68,7 @@ TEST_CASE("rpc_put_update_get_test", "[put][update][get]") {
   }
 }
 
-TEST_CASE("rpc_put_remove_get_test", "[put][update][get]") {
+TEST_CASE("rpc_put_remove_get_test", "[put][remove][get]") {
   auto server = block_server::create(blocks, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   test_utils::wait_till_server_ready(HOST, PORT);
@@ -95,17 +95,17 @@ TEST_CASE("rpc_put_remove_get_test", "[put][update][get]") {
   }
 }
 
-TEST_CASE("rpc_storage_size_test", "[put][size][storage_size][reset]") {
+TEST_CASE("rpc_storage_size_test", "[put][num_keys][storage_size][reset]") {
   auto server = block_server::create(blocks, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   test_utils::wait_till_server_ready(HOST, PORT);
 
   block_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
-  REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[0])->empty());
+  REQUIRE(client.num_keys().get() == std::to_string(0));
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "ok");
   }
-  REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[0])->size() == 1000);
+  REQUIRE(client.num_keys().get() == std::to_string(1000));
 
   server->stop();
   blocks[0]->reset();

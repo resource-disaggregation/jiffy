@@ -4,6 +4,7 @@ namespace elasticmem {
 namespace storage {
 
 std::vector<block_op> KV_OPS = {block_op{block_op_type::accessor, "get"},
+                                block_op{block_op_type::accessor, "num_keys"},
                                 block_op{block_op_type::mutator, "put"},
                                 block_op{block_op_type::mutator, "remove"},
                                 block_op{block_op_type::mutator, "update"}};
@@ -33,8 +34,7 @@ value_type kv_block::get(const key_type &key) {
   return "key_not_found";
 }
 
-bool kv_block::update(const key_type &key,
-                      const value_type &value) {
+bool kv_block::update(const key_type &key, const value_type &value) {
   return block_.update_fn(key, [&](value_type &v) {
     if (value.size() > v.size()) {
       bytes_.fetch_add(value.size() - v.size());
@@ -54,11 +54,18 @@ bool kv_block::remove(const key_type &key) {
 
 void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) {
   switch (oid) {
-    case 0:
+    case kv_op_id::get:
       for (const key_type &key: args)
         _return.push_back(get(key));
       break;
-    case 1:
+    case kv_op_id::num_keys:
+      if (!args.empty()) {
+        _return.emplace_back("args_error");
+      } else {
+        _return.emplace_back(std::to_string(size()));
+      }
+      break;
+    case kv_op_id::put:
       if (args.size() % 2 != 0) {
         _return.emplace_back("args_error");
       } else {
@@ -71,7 +78,7 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
         }
       }
       break;
-    case 2:
+    case kv_op_id::remove:
       for (const key_type &key: args) {
         if (remove(key))
           _return.emplace_back("ok");
@@ -79,7 +86,7 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
           _return.emplace_back("key_not_found");
       }
       break;
-    case 3:
+    case kv_op_id::update:
       if (args.size() % 2 != 0) {
         _return.emplace_back("args_error");
       } else {
@@ -92,8 +99,7 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
         }
       }
       break;
-    default:
-      throw std::invalid_argument("No such operation id " + std::to_string(oid));
+    default:throw std::invalid_argument("No such operation id " + std::to_string(oid));
   }
 }
 
@@ -134,7 +140,7 @@ void kv_block::forward_all() {
   int64_t i = 0;
   for (const auto &entry: ltable) {
     std::vector<std::string> result;
-    run_command_on_next(result, 1, {entry.first, entry.second});
+    run_command_on_next(result, kv_op_id::put, {entry.first, entry.second});
     ++i;
   }
   ltable.unlock();

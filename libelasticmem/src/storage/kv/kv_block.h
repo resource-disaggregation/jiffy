@@ -27,10 +27,16 @@ class noop_store : public persistent::persistent_service {
 
 extern std::vector<block_op> KV_OPS;
 
+enum kv_op_id : int32_t {
+  get = 0,
+  num_keys = 1,
+  put = 2,
+  remove = 3,
+  update = 4
+};
+
 class kv_block : public chain_module {
  public:
-
-
   explicit kv_block(const std::string &block_name,
                     std::shared_ptr<persistent::persistent_service> persistent = std::make_shared<noop_store>(),
                     std::string local_storage_prefix = "/tmp",

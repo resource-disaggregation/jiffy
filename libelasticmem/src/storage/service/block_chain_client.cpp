@@ -1,5 +1,6 @@
 #include "block_chain_client.h"
 #include "../manager/detail/block_name_parser.h"
+#include "../kv/kv_block.h"
 
 namespace elasticmem {
 namespace storage {
@@ -8,7 +9,9 @@ block_chain_client::block_chain_client(const std::vector<std::string> &chain) {
   seq_.client_id = -1;
   seq_.client_seq_no = 0;
   connect(chain);
-  cmd_client_ = {&tail_, &head_, &head_, &head_};
+  for (auto &op: KV_OPS) {
+    cmd_client_.push_back(op.type == block_op_type::accessor ? &tail_ : &head_);
+  }
 }
 
 block_chain_client::~block_chain_client() {
@@ -41,19 +44,23 @@ void block_chain_client::connect(const std::vector<std::string> &chain) {
 }
 
 std::future<std::string> block_chain_client::get(const std::string &key) {
-  return run_command(0, {key});
+  return run_command(kv_op_id::get, {key});
+}
+
+std::future<std::string> block_chain_client::num_keys() {
+  return run_command(kv_op_id::num_keys, {});
 }
 
 std::future<std::string> block_chain_client::put(const std::string &key, const std::string &value) {
-  return run_command(1, {key, value});
+  return run_command(kv_op_id::put, {key, value});
 }
 
 std::future<std::string> block_chain_client::remove(const std::string &key) {
-  return run_command(2, {key});
+  return run_command(kv_op_id::remove, {key});
 }
 
 std::future<std::string> block_chain_client::update(const std::string &key, const std::string &value) {
-  return run_command(3, {key, value});
+  return run_command(kv_op_id::update, {key, value});
 }
 
 std::future<std::string> block_chain_client::run_command(int32_t cmd_id, const std::vector<std::string> &args) {

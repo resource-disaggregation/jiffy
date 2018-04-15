@@ -20,6 +20,7 @@ class block_chain_client {
   std::future<std::string> put(const std::string &key, const std::string &value);
   std::future<std::string> remove(const std::string &key);
   std::future<std::string> update(const std::string &key, const std::string &value);
+  std::future<std::string> num_keys();
 
   std::future<std::string> run_command(int32_t cmd_id, const std::vector<std::string> &args);
  private:
