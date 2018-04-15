@@ -1,5 +1,4 @@
 namespace cpp elasticmem.directory
-namespace py elasticmem.directory
 
 exception block_allocation_service_exception {
   1: string msg,

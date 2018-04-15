@@ -1,5 +1,6 @@
 namespace cpp elasticmem.storage
 namespace py elasticmem.kv
+namespace java elasticmem.kv
 
 exception block_exception {
   1: string msg

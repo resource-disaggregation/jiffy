@@ -1,5 +1,4 @@
 namespace cpp elasticmem.storage
-namespace py elasticmem.storage
 
 exception storage_management_exception {
   1: string msg
