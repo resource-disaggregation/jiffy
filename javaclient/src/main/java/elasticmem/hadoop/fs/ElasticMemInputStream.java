@@ -20,12 +20,13 @@ public class ElasticMemInputStream extends FSInputStream {
 
   private KVClient client;
 
-  ElasticMemInputStream(KVClient client, Configuration conf) {
+  ElasticMemInputStream(KVClient client, Configuration conf) throws TException {
     this.key = ByteBuffer.allocate(8);
     this.client = client;
     this.blockSize = conf.getInt("emfs.block_size", 64 * 1024 * 1024);
     this.currentBlockNum = -1;
     this.currentBuf = null;
+    this.fileLength = client.numKeys() * blockSize;
   }
 
   @Override

@@ -7,7 +7,6 @@ import elasticmem.directory.rpc_dir_entry;
 import elasticmem.directory.rpc_file_status;
 import elasticmem.directory.rpc_file_type;
 import elasticmem.kv.KVClient;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -23,6 +22,9 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.util.Progressable;
 import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TTransport;
 
 public class ElasticMemFileSystem extends FileSystem {
 
@@ -33,6 +35,7 @@ public class ElasticMemFileSystem extends FileSystem {
   private directory_service.Client client;
   private List<String> toRenew;
   private LeaseWorker leaseWorker;
+  private TTransport transport;
 
   @Override
   public void initialize(URI uri, Configuration conf) throws IOException {
@@ -44,7 +47,12 @@ public class ElasticMemFileSystem extends FileSystem {
     this.toRenew = Collections.synchronizedList(new ArrayList<String>());
     this.leaseWorker = new LeaseWorker(this.dirHost, leasePort, toRenew);
     this.uri = URI.create(String.format("emfs://%s:%d", uri.getHost(), uri.getPort()));
-    this.workingDir = new Path(conf.get("emfs.app.name", "/" + RandomStringUtils.random(10)));
+    String genPath = "/" + RandomStringUtils.random(10);
+    this.workingDir = new Path(conf.get("emfs.app.name", genPath));
+    this.transport = new TSocket(dirHost, dirPort);
+    TBinaryProtocol protocol = new TBinaryProtocol(transport);
+    client = new directory_service.Client(protocol);
+    leaseWorker.run();
   }
 
   public String getHost() {
@@ -57,6 +65,13 @@ public class ElasticMemFileSystem extends FileSystem {
 
   public directory_service.Client getClient() {
     return client;
+  }
+
+  @Override
+  public void close() throws IOException {
+    leaseWorker.stop();
+    transport.close();
+    super.close();
   }
 
   @Override
@@ -110,7 +125,7 @@ public class ElasticMemFileSystem extends FileSystem {
   }
 
   @Override
-  public FSDataOutputStream append(Path path, int i, Progressable progressable) throws IOException {
+  public FSDataOutputStream append(Path path, int i, Progressable progressable) {
     throw new UnsupportedOperationException(
         "Append is not supported by " + ElasticMemFileSystem.class.getName());
   }
@@ -144,7 +159,7 @@ public class ElasticMemFileSystem extends FileSystem {
   }
 
   @Override
-  public FileStatus[] listStatus(Path path) throws FileNotFoundException, IOException {
+  public FileStatus[] listStatus(Path path) throws IOException {
     Path absolutePath = makeAbsolute(path);
     FileStatus status = getFileStatus(absolutePath);
     if (status.isDirectory()) {

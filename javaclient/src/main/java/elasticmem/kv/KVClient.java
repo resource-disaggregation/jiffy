@@ -74,4 +74,12 @@ public class KVClient implements Closeable {
     return new PipelinedRequestHandle(client, client.pipelineRemove(key));
   }
 
+  public long numKeys() throws TException {
+    long nKeys = 0;
+    for (KVChainClient client: clients) {
+      nKeys += client.numKeys();
+    }
+    return nKeys;
+  }
+
 }
