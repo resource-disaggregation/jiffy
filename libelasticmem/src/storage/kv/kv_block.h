@@ -47,9 +47,9 @@ class kv_block : public chain_module {
 
   value_type get(const key_type &key);
 
-  bool update(const key_type &key, const value_type &value);
+  std::string update(const key_type &key, const value_type &value);
 
-  bool remove(const key_type &key);
+  std::string remove(const key_type &key);
 
   std::size_t size() const;
 

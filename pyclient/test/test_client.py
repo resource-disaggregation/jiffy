@@ -100,7 +100,7 @@ class TestClient(TestCase):
 
         # Test update
         for i in range(0, 1000):
-            self.assertTrue(kv.update(str(i), str(i + 1000)) == b"ok")
+            self.assertTrue(kv.update(str(i), str(i + 1000)) == bytes(str(i), 'utf-8'))
 
         for i in range(1000, 2000):
             self.assertTrue(kv.update(str(i), str(i + 1000)) == b"key_not_found")
@@ -112,7 +112,7 @@ class TestClient(TestCase):
 
         # Test remove
         for i in range(0, 1000):
-            self.assertTrue(kv.remove(str(i)) == b"ok")
+            self.assertTrue(kv.remove(str(i)) == bytes(str(i + 1000), 'utf-8'))
 
         for i in range(1000, 2000):
             self.assertTrue(kv.remove(str(i)) == b"key_not_found")

@@ -26,10 +26,10 @@ TEST_CASE("put_update_get_test", "[put][update][get]") {
     REQUIRE(block.get(std::to_string(i)) == std::to_string(i));
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(block.update(std::to_string(i), std::to_string(i + 1000)));
+    REQUIRE(block.update(std::to_string(i), std::to_string(i + 1000)) == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(!block.update(std::to_string(i), std::to_string(i + 1000)));
+    REQUIRE(block.update(std::to_string(i), std::to_string(i + 1000)) == "key_not_found");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.get(std::to_string(i)) == std::to_string(i + 1000));
@@ -45,7 +45,7 @@ TEST_CASE("put_remove_get_test", "[put][update][get]") {
     REQUIRE(block.get(std::to_string(i)) == std::to_string(i));
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(block.remove(std::to_string(i)));
+    REQUIRE(block.remove(std::to_string(i)) == std::to_string(i));
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.get(std::to_string(i)) == "key_not_found");

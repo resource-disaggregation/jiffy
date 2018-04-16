@@ -34,22 +34,32 @@ value_type kv_block::get(const key_type &key) {
   return "key_not_found";
 }
 
-bool kv_block::update(const key_type &key, const value_type &value) {
-  return block_.update_fn(key, [&](value_type &v) {
+std::string kv_block::update(const key_type &key, const value_type &value) {
+  value_type old_val;
+  if (block_.update_fn(key, [&](value_type &v) {
     if (value.size() > v.size()) {
       bytes_.fetch_add(value.size() - v.size());
     } else {
       bytes_.fetch_sub(v.size() - value.size());
     }
+    old_val = v;
     v = value;
-  });
+  })) {
+    return old_val;
+  }
+  return "key_not_found";
 }
 
-bool kv_block::remove(const key_type &key) {
-  return block_.erase_fn(key, [&](value_type &value) {
+std::string kv_block::remove(const key_type &key) {
+  value_type old_val;
+  if (block_.erase_fn(key, [&](value_type &value) {
     bytes_.fetch_sub(key.size() + value.size());
+    old_val = value;
     return true;
-  });
+  })) {
+    return old_val;
+  }
+  return "key_not_found";
 }
 
 void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) {
@@ -80,10 +90,7 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
       break;
     case kv_op_id::remove:
       for (const key_type &key: args) {
-        if (remove(key))
-          _return.emplace_back("ok");
-        else
-          _return.emplace_back("key_not_found");
+        _return.emplace_back(remove(key));
       }
       break;
     case kv_op_id::update:
@@ -91,11 +98,7 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
         _return.emplace_back("args_error");
       } else {
         for (size_t i = 0; i < args.size(); i += 2) {
-          if (update(args[i], args[i + 1])) {
-            _return.emplace_back("ok");
-          } else {
-            _return.emplace_back("key_not_found");
-          }
+          _return.emplace_back(update(args[i], args[i + 1]));
         }
       }
       break;
