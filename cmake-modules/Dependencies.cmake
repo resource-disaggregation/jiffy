@@ -142,6 +142,7 @@ endif ()
 if (NOT USE_SYSTEM_JEMALLOC)
   set(JEMALLOC_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(JEMALLOC_C_FLAGS "${EXTERNAL_C_FLAGS}")
+  set(JEMALLOC_LD_FLAGS "-Wl,--no-as-needed")
   set(JEMALLOC_PREFIX "${PROJECT_BINARY_DIR}/external/jemalloc")
   set(JEMALLOC_HOME "${JEMALLOC_PREFIX}")
   set(JEMALLOC_INCLUDE_DIR "${JEMALLOC_PREFIX}/include")
@@ -154,7 +155,7 @@ if (NOT USE_SYSTEM_JEMALLOC)
           URL https://github.com/jemalloc/jemalloc/releases/download/5.0.1/jemalloc-5.0.1.tar.bz2
           PREFIX ${JEMALLOC_PREFIX}
           BUILD_BYPRODUCTS ${JEMALLOC_LIBRARIES}
-          CONFIGURE_COMMAND ${JEMALLOC_PREFIX}/src/jemalloc/configure --prefix=${JEMALLOC_PREFIX} --enable-autogen --enable-prof-libunwind CFLAGS=${JEMALLOC_C_FLAGS} CXXFLAGS=${JEMALLOC_CXX_FLAGS}
+          CONFIGURE_COMMAND ${JEMALLOC_PREFIX}/src/jemalloc/configure --prefix=${JEMALLOC_PREFIX} --enable-autogen --enable-prof-libunwind CFLAGS=${JEMALLOC_C_FLAGS} CXXFLAGS=${JEMALLOC_CXX_FLAGS} LDFLAGS=${JEMALLOC_LD_FLAGS}
           INSTALL_COMMAND make install_lib
           LOG_CONFIGURE ON
           LOG_BUILD ON
