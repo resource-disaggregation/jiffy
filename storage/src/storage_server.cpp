@@ -118,6 +118,7 @@ int main(int argc, char **argv) {
   for (size_t i = 0; i < blocks.size(); ++i) {
     blocks[i] = std::make_shared<kv_block>(block_names[i]);
   }
+  LOG(log_level::info) << "Created " << blocks.size() << " blocks";
 
   std::exception_ptr management_exception = nullptr;
   auto management_server = storage_management_server::create(blocks, address, management_port);
