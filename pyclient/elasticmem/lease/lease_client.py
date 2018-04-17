@@ -20,6 +20,8 @@ class LeaseClient:
                 continue
             except Exception:
                 raise
+            else:
+                break
         else:
             raise TTransportException(ex.type, "Connection failed {}:{}: {}".format(host, port, ex.message))
 
