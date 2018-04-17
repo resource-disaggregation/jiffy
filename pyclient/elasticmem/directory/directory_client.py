@@ -1,5 +1,6 @@
 from thrift.protocol.TBinaryProtocol import TBinaryProtocolAccelerated
 from thrift.transport import TTransport, TSocket
+from thrift.transport.TTransport import TTransportException
 
 from elasticmem.directory import directory_service
 
@@ -100,7 +101,19 @@ class DirectoryClient:
         self.transport_ = TTransport.TBufferedTransport(self.socket_)
         self.protocol_ = TBinaryProtocolAccelerated(self.transport_)
         self.client_ = directory_service.Client(self.protocol_)
-        self.transport_.open()
+        ex = None
+        for i in range(3):
+            try:
+                self.transport_.open()
+            except TTransportException as e:
+                ex = e
+                continue
+            except Exception:
+                raise
+        else:
+            raise TTransportException(ex.type, "Connection failed {}:{}: {}".format(host, port, ex.message))
+
+
 
     def __del__(self):
         self.close()
