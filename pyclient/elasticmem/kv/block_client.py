@@ -82,6 +82,12 @@ class BlockChainClient:
         self.seq.client_seq_no += 1
         return op_seq
 
+    def send_cmd(self, cmd_id, args):
+        if op_type(cmd_id) == KVOpType.accessor:
+            return self._send_cmd(self.tail, cmd_id, args)
+        else:
+            return self._send_cmd(self.head, cmd_id, args)
+
     def _recv_cmd(self, op_seq):
         if op_seq in self.response_cache:
             result = self.response_cache[op_seq]
@@ -94,6 +100,9 @@ class BlockChainClient:
                 return result
             else:
                 self.response_cache[recv_seq] = result
+
+    def recv_cmd(self, op_seq):
+        return self._recv_cmd(op_seq)
 
     def _run_command(self, client, cmd_id, args):
         op_seq = self._send_cmd(client, cmd_id, args)

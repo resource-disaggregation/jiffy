@@ -101,9 +101,10 @@ class PipelinedBase(object):
 
     def _execute(self, op):
         res = []
+        op_ids = [None if not self.blocks[i] else self.blocks[i].send_cmd(op, self.args[i]) for i in range(len(self.blocks))]
         for i in range(len(self.blocks)):
-            if len(self.args[i]):
-                res.extend(self.blocks[i].run_command(op, self.args[i]))
+            if op_ids[i] is not None:
+                res.extend(self.blocks[i].recv_cmd(op_ids[i]))
         self.reset()
         return res
 
