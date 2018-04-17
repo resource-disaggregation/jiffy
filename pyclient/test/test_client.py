@@ -4,6 +4,7 @@ import subprocess
 import sys
 import tempfile
 import time
+
 try:
     import Queue as queue
 except ImportError:
@@ -122,6 +123,57 @@ class TestClient(TestCase):
 
         self.assertTrue(kv.num_keys() == 0)
 
+    def pipelined_kv_ops(self, kv):
+        # Test get/put
+        puts = kv.pipeline_put()
+        gets = kv.pipeline_get()
+        removes = kv.pipeline_remove()
+        updates = kv.pipeline_update()
+
+        for i in range(0, 1000):
+            puts.put(str(i), str(i))
+        self.assertTrue(puts.execute() == [b'ok'] * 1000)
+
+        for i in range(0, 1000):
+            gets.get(str(i))
+        self.assertTrue(gets.execute() == [bytes(str(i), 'utf-8') for i in range(0, 1000)])
+
+        for i in range(1000, 2000):
+            gets.get(str(i))
+        self.assertTrue(gets.execute() == [b"key_not_found"] * 1000)
+
+        self.assertTrue(kv.num_keys() == 1000)
+
+        # Test update
+        for i in range(0, 1000):
+            updates.update(str(i), str(i + 1000))
+        self.assertTrue(updates.execute() == [bytes(str(i), 'utf-8') for i in range(0, 1000)])
+
+        for i in range(1000, 2000):
+            updates.update(str(i), str(i + 1000))
+        self.assertTrue(updates.execute() == [b"key_not_found"] * 1000)
+
+        for i in range(0, 1000):
+            gets.get(str(i))
+        self.assertTrue(gets.execute() == [bytes(str(i + 1000), 'utf-8') for i in range(0, 1000)])
+
+        self.assertTrue(kv.num_keys() == 1000)
+
+        # Test remove
+        for i in range(0, 1000):
+            removes.remove(str(i))
+        self.assertTrue(removes.execute() == [bytes(str(i + 1000), 'utf-8') for i in range(0, 1000)])
+
+        for i in range(1000, 2000):
+            removes.remove(str(i))
+        self.assertTrue(removes.execute() == [b"key_not_found"] * 1000)
+
+        for i in range(0, 1000):
+            gets.get(str(i))
+        self.assertTrue(gets.execute() == [b"key_not_found"] * 1000)
+
+        self.assertTrue(kv.num_keys() == 0)
+
     def test_lease_worker(self):
         self.start_servers()
         client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
@@ -140,7 +192,9 @@ class TestClient(TestCase):
         self.start_servers()
         client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
-            self.kv_ops(client.create("/a/file.txt", "/tmp"))
+            kv = client.create("/a/file.txt", "/tmp")
+            self.kv_ops(kv)
+            self.pipelined_kv_ops(kv)
             self.assertTrue(client.fs.exists('/a/file.txt'))
         finally:
             client.disconnect()
@@ -152,7 +206,9 @@ class TestClient(TestCase):
         try:
             client.create("/a/file.txt", "/tmp")
             self.assertTrue(client.fs.exists('/a/file.txt'))
-            self.kv_ops(client.open('/a/file.txt'))
+            kv = client.open('/a/file.txt')
+            self.kv_ops(kv)
+            self.pipelined_kv_ops(kv)
         finally:
             client.disconnect()
             self.stop_servers()

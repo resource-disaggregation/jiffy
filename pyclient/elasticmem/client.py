@@ -127,6 +127,7 @@ class ElasticMemClient:
         if path in self.to_renew:
             self.to_renew.remove(path)
         if path in self.kvs:
+            self.kvs[path].disconnect()
             del self.kvs[path]
 
     def remove(self, path, mode):

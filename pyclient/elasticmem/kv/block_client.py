@@ -3,7 +3,7 @@ from thrift.protocol.TBinaryProtocol import TBinaryProtocolAccelerated
 from thrift.transport import TTransport, TSocket
 
 from elasticmem.kv import block_request_service, block_response_service
-from elasticmem.kv.kv_ops import KVOps
+from elasticmem.kv.kv_ops import KVOps, op_type, KVOpType
 
 
 class CommandResponseReader:
@@ -71,6 +71,11 @@ class BlockChainClient:
         self.response_reader = self.tail.get_response_reader(self.seq.client_id)
         self.response_cache = {}
 
+    def disconnect(self):
+        self.head.disconnect()
+        if self.head != self.tail:
+            self.tail.disconnect()
+
     def _send_cmd(self, client, cmd_id, args):
         op_seq = self.seq.client_seq_no
         client.send_request(self.seq, cmd_id, args)
@@ -93,6 +98,12 @@ class BlockChainClient:
     def _run_command(self, client, cmd_id, args):
         op_seq = self._send_cmd(client, cmd_id, args)
         return self._recv_cmd(op_seq)
+
+    def run_command(self, cmd_id, args):
+        if op_type(cmd_id) == KVOpType.accessor:
+            return self._run_command(self.tail, cmd_id, args)
+        else:
+            return self._run_command(self.head, cmd_id, args)
 
     def get(self, key):
         return self._run_command(self.tail, KVOps.get, [key])[0]
