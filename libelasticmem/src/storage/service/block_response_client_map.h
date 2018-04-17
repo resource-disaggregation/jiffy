@@ -10,7 +10,7 @@ namespace storage {
 
 class block_response_client_map {
  public:
-  block_response_client_map() = default;
+  block_response_client_map();
 
   void add_client(int64_t client_id, std::shared_ptr<block_response_client> client);
 
