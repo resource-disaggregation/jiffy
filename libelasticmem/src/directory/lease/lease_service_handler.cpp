@@ -16,7 +16,7 @@ void lease_service_handler::renew_leases(rpc_lease_ack &_return, const std::vect
     // Handle renewals
     for (const auto &path: to_renew) {
       tree_->touch(path);
-      LOG(log_level::trace) << "Renewed lease for " << path;
+      LOG(log_level::info) << "Renewed lease for " << path;
       ++_return.renewed;
     }
     _return.lease_period_ms = lease_period_ms_;
