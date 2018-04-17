@@ -39,7 +39,10 @@ else ()
 
   ExternalProject_Add(awssdk
           URL https://github.com/aws/aws-sdk-cpp/archive/1.4.26.tar.gz
-          CMAKE_ARGS ${AWS_CMAKE_ARGS})
+          CMAKE_ARGS ${AWS_CMAKE_ARGS}
+          LOG_CONFIGURE ON
+          LOG_BUILD ON
+          LOG_INSTALL ON)
 
   include_directories(SYSTEM ${AWS_INCLUDE_DIR})
   message(STATUS "AWS include dir: ${AWS_INCLUDE_DIR}")
@@ -89,7 +92,10 @@ else ()
   endif ()
   ExternalProject_Add(thrift
           URL "http://archive.apache.org/dist/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
-          CMAKE_ARGS ${THRIFT_CMAKE_ARGS})
+          CMAKE_ARGS ${THRIFT_CMAKE_ARGS}
+          LOG_CONFIGURE ON
+          LOG_BUILD ON
+          LOG_INSTALL ON)
 
   include_directories(SYSTEM ${THRIFT_INCLUDE_DIR})
   message(STATUS "Thrift include dir: ${THRIFT_INCLUDE_DIR}")
@@ -102,7 +108,7 @@ else ()
     add_dependencies(thriftcompiler thrift)
   endif ()
 
-  install(FILES ${THRIFT_STATIC_LIB} DESTINATION lib)
+  install(FILES ${THRIFT_LIBRARIES} DESTINATION lib)
   install(DIRECTORY ${THRIFT_INCLUDE_DIR}/thrift DESTINATION include)
 endif ()
 
@@ -122,13 +128,40 @@ if (NOT USE_SYSTEM_LIBCUCKOO)
 
   ExternalProject_Add(libcuckoo
           URL "https://github.com/efficient/libcuckoo/archive/v0.2.tar.gz"
-          CMAKE_ARGS ${LIBCUCKOO_CMAKE_ARGS})
+          CMAKE_ARGS ${LIBCUCKOO_CMAKE_ARGS}
+          LOG_CONFIGURE ON
+          LOG_BUILD ON
+          LOG_INSTALL ON)
 
   include_directories(SYSTEM ${LIBCUCKOO_INCLUDE_DIR})
   message(STATUS "libcuckoo include dir: ${LIBCUCKOO_INCLUDE_DIR}")
 
   install(DIRECTORY ${LIBCUCKOO_INCLUDE_DIR}/libcuckoo DESTINATION include)
 endif ()
+
+if (NOT USE_SYSTEM_JEMALLOC)
+  set(JEMALLOC_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
+  set(JEMALLOC_C_FLAGS "${EXTERNAL_C_FLAGS}")
+  set(JEMALLOC_PREFIX "${PROJECT_BINARY_DIR}/external/jemalloc")
+  set(JEMALLOC_HOME "${JEMALLOC_PREFIX}")
+  set(JEMALLOC_INCLUDE_DIR "${JEMALLOC_PREFIX}/include")
+  set(JEMALLOC_CMAKE_ARGS "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+          "-DCMAKE_CXX_FLAGS=${JEMALLOC_CXX_FLAGS}"
+          "-DCMAKE_INSTALL_PREFIX=${JEMALLOC_PREFIX}")
+  set(JEMALLOC_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}jemalloc")
+  set(JEMALLOC_LIBRARIES "${JEMALLOC_PREFIX}/lib/${JEMALLOC_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  ExternalProject_Add(jemalloc
+          URL https://github.com/jemalloc/jemalloc/releases/download/5.0.1/jemalloc-5.0.1.tar.bz2
+          PREFIX ${JEMALLOC_PREFIX}
+          BUILD_BYPRODUCTS ${JEMALLOC_LIBRARIES}
+          CONFIGURE_COMMAND ${JEMALLOC_PREFIX}/src/jemalloc/configure --prefix=${JEMALLOC_PREFIX} --enable-autogen --enable-prof-libunwind
+          INSTALL_COMMAND make install_lib
+          LOG_CONFIGURE ON
+          LOG_BUILD ON
+          LOG_INSTALL ON)
+  message(STATUS "Jemalloc library: ${JEMALLOC_LIBRARIES}")
+  install(FILES ${JEMALLOC_LIBRARIES} DESTINATION lib)
+endif()
 
 # Catch2 Test framework
 if (BUILD_TESTS AND NOT USE_SYSTEM_CATCH)

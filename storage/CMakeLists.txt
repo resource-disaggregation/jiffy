@@ -1,6 +1,11 @@
 include_directories(../libelasticmem/src)
 add_executable(storaged src/storage_server.cpp)
-target_link_libraries(storaged elasticmem)
+
+if (NOT USE_SYSTEM_JEMALLOC)
+  add_dependencies(storaged jemalloc)
+endif ()
+
+target_link_libraries(storaged elasticmem ${JEMALLOC_LIBRARIES})
 
 install(TARGETS storaged
         RUNTIME DESTINATION bin
