@@ -1,5 +1,6 @@
 #include "block_server.h"
 #include "block_request_handler_factory.h"
+#include "../../utils/logger.h"
 
 #include <thrift/transport/TBufferTransports.h>
 #include <thrift/concurrency/ThreadManager.h>
@@ -11,6 +12,7 @@ using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
+using namespace elasticmem::utils;
 
 std::shared_ptr<TThreadedServer> block_server::create(std::vector<std::shared_ptr<chain_module>> &blocks,
                                                       const std::string &address,
@@ -22,6 +24,7 @@ std::shared_ptr<TThreadedServer> block_server::create(std::vector<std::shared_pt
   std::shared_ptr<TBufferedTransportFactory> transport_factory(new TBufferedTransportFactory());
   std::shared_ptr<TBinaryProtocolFactory> protocol_factory(new TBinaryProtocolFactory());
   std::shared_ptr<TThreadedServer> server(new TThreadedServer(proc_factory, sock, transport_factory, protocol_factory));
+  server->setConcurrentClientLimit(std::numeric_limits<int64_t>::max());
   return server;
 }
 
