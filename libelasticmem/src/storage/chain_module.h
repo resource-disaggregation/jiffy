@@ -77,7 +77,7 @@ class next_block_cxn {
     client_.request(seq, op_id, args);
   }
 
-  void run_command(std::vector<std::string>& result, int32_t cmd_id, const std::vector<std::string>& args) {
+  void run_command(std::vector<std::string> &result, int32_t cmd_id, const std::vector<std::string> &args) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     client_.run_command(result, cmd_id, args);
   }
@@ -129,9 +129,10 @@ class chain_module : public block {
                const std::vector<block_op> &block_ops)
       : block(block_ops, block_name),
         next_(std::make_unique<next_block_cxn>("nil")),
-        prev_(std::make_unique<prev_block_cxn>()) {}
+        prev_(std::make_unique<prev_block_cxn>()),
+        pending_(0) {}
 
-   ~chain_module() {
+  ~chain_module() {
     if (response_processor_.joinable())
       response_processor_.join();
   }
@@ -192,7 +193,7 @@ class chain_module : public block {
   std::unique_ptr<next_block_cxn> next_{nullptr};
   std::unique_ptr<prev_block_cxn> prev_{nullptr};
   std::thread response_processor_;
-  cuckoohash_map<int64_t, chain_op> pending_{};
+  cuckoohash_map<int64_t, chain_op> pending_;
 };
 
 }
