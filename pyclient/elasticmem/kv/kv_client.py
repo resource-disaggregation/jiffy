@@ -85,7 +85,7 @@ class KVClient:
         return self.hash_fn_(key) % len(self.blocks)
 
 
-class PipelinedBase:
+class PipelinedBase(object):
     def __init__(self, path, blocks, chain_failure_cb, hash_fn):
         self.path = path
         self.blocks = blocks
