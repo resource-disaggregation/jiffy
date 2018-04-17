@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 #include <chrono>
+#include <sstream>
 
 namespace elasticmem {
 namespace directory {
@@ -95,6 +96,23 @@ class perms {
 
   bool operator==(const perms &other) const {
     return prms_ == other.prms_;
+  }
+
+  bool operator!=(const perms &other) const {
+    return prms_ != other.prms_;
+  }
+
+  friend std::ostream &operator<<(std::ostream &out, const perms &p) {
+    out << ((p & owner_read) != none ? "r" : "-")
+        << ((p & owner_write) != none ? "w" : "-")
+        << ((p & owner_exec) != none ? "x" : "-")
+        << ((p & group_read) != none ? "r" : "-")
+        << ((p & group_write) != none ? "w" : "-")
+        << ((p & group_exec) != none ? "x" : "-")
+        << ((p & others_read) != none ? "r" : "-")
+        << ((p & others_write) != none ? "w" : "-")
+        << ((p & others_exec) != none ? "x" : "-");
+    return out;
   }
 
  private:

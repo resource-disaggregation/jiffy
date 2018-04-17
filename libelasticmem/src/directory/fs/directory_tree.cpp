@@ -17,6 +17,7 @@ directory_tree::directory_tree(std::shared_ptr<block_allocator> allocator,
       storage_(std::move(storage)) {}
 
 void directory_tree::create_directory(const std::string &path) {
+  LOG(log_level::info) << "Creating directory " << path;
   std::string ptemp = path;
   std::string directory_name = directory_utils::pop_path_element(ptemp);
   auto parent = get_node_as_dir(ptemp);
@@ -26,6 +27,7 @@ void directory_tree::create_directory(const std::string &path) {
 }
 
 void directory_tree::create_directories(const std::string &path) {
+  LOG(log_level::info) << "Creating directory " << path;
   std::string p_so_far(root_->name());
   std::shared_ptr<ds_dir_node> dir_node = root_;
   for (auto &name: directory_utils::path_elements(path)) {
@@ -46,6 +48,7 @@ void directory_tree::create_directories(const std::string &path) {
 }
 
 data_status directory_tree::open(const std::string &path) {
+  LOG(log_level::info) << "Opening file " << path;
   return dstatus(path);
 }
 
@@ -53,6 +56,8 @@ data_status directory_tree::create(const std::string &path,
                                    const std::string &persistent_store_prefix,
                                    std::size_t num_blocks,
                                    std::size_t chain_length) {
+  LOG(log_level::info) << "Creating file " << path << " with persistent_store_prefix=" << persistent_store_prefix
+                       << " num_blocks=" << num_blocks << ", chain_length=" << chain_length;
   if (num_blocks == 0) {
     throw directory_ops_exception("File cannot have zero blocks");
   }
@@ -97,6 +102,7 @@ data_status directory_tree::create(const std::string &path,
       std::make_shared<ds_file_node>(filename, storage_mode::in_memory, persistent_store_prefix, chain_length, blocks);
   child->persistent_store_prefix(persistent_store_prefix);
   parent->add_child(child);
+
   return child->dstatus();
 }
 
@@ -105,8 +111,10 @@ data_status directory_tree::open_or_create(const std::string &path,
                                            std::size_t num_blocks,
                                            std::size_t chain_length) {
   if (exists(path)) {
+    LOG(log_level::info) << "Opening file " << path;
     return open(path);
   }
+  LOG(log_level::info) << "Creating file " << path;
   return create(path, persistent_store_prefix, num_blocks, chain_length);
 }
 
@@ -124,23 +132,27 @@ perms directory_tree::permissions(const std::string &path) {
 
 void directory_tree::permissions(const std::string &path, const perms &prms, perm_options opts) {
   auto node = get_node(path);
+  perms p;
   switch (opts) {
     case perm_options::replace: {
-      node->permissions(prms & perms::mask);
+      p = (prms & perms::mask);
       break;
     }
     case perm_options::add: {
-      node->permissions(node->permissions() | (prms & perms::mask));
+      p = node->permissions() | (prms & perms::mask);
       break;
     }
     case perm_options::remove: {
-      node->permissions(node->permissions() & ~(prms & perms::mask));
+      p = node->permissions() & ~(prms & perms::mask);
       break;
     }
   }
+  LOG(log_level::info) << "Setting permissions for " << path << " to " << p;
+  node->permissions(p);
 }
 
 void directory_tree::remove(const std::string &path) {
+  LOG(log_level::info) << "Removing path " << path;
   std::string ptemp = path;
   std::string child_name = directory_utils::pop_path_element(ptemp);
   auto parent = get_node_as_dir(ptemp);
@@ -156,6 +168,7 @@ void directory_tree::remove(const std::string &path) {
 }
 
 void directory_tree::remove_all(const std::string &path) {
+  LOG(log_level::info) << "Removing path " << path;
   std::string ptemp = path;
   std::string child_name = directory_utils::pop_path_element(ptemp);
   auto parent = get_node_as_dir(ptemp);
@@ -168,10 +181,12 @@ void directory_tree::remove_all(const std::string &path) {
 }
 
 void directory_tree::flush(const std::string &path) {
+  LOG(log_level::info) << "Flushing path " << path;
   get_node(path)->flush(path, storage_, allocator_);
 }
 
 void directory_tree::rename(const std::string &old_path, const std::string &new_path) {
+  LOG(log_level::info) << "Renaming " << old_path << " to " << new_path;
   if (old_path == new_path)
     return;
   std::string ptemp = old_path;
