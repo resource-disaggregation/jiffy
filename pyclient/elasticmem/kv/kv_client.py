@@ -1,6 +1,11 @@
 import logging
 
-from elasticmem.kv import block_client
+from thrift.protocol.TBinaryProtocol import TBinaryProtocolAccelerated
+from thrift.transport import TSocket, TTransport
+from thrift.transport.TTransport import TTransportException
+
+from elasticmem.kv import block_client, block_request_service
+from elasticmem.kv.block_client import SingleBlockClient
 from elasticmem.kv.kv_ops import KVOps
 
 
@@ -101,7 +106,8 @@ class PipelinedBase(object):
 
     def _execute(self, op):
         res = []
-        op_ids = [None if not self.blocks[i] else self.blocks[i].send_cmd(op, self.args[i]) for i in range(len(self.blocks))]
+        op_ids = [None if not self.blocks[i] else self.blocks[i].send_cmd(op, self.args[i]) for i in
+                  range(len(self.blocks))]
         for i in range(len(self.blocks)):
             if op_ids[i] is not None:
                 res.extend(self.blocks[i].recv_cmd(op_ids[i]))
@@ -152,6 +158,133 @@ class PipelinedUpdate(PipelinedBase):
         bid = self.block_id(key)
         self.args[bid].append(key)
         self.args[bid].append(value)
+
+    def execute(self):
+        return self._execute(KVOps.update)
+
+
+# For Debugging only
+class SingleServerKVClient:
+    def __init__(self, data_status):
+        self.file_info = data_status
+        parts = data_status.data_blocks[0].block_names[0].split(':')
+        self.transport = TTransport.TBufferedTransport(TSocket.TSocket(parts[0], int(parts[1])))
+        self.protocol = TBinaryProtocolAccelerated(self.transport)
+        self.client = block_request_service.Client(self.protocol)
+        ex = None
+        for i in range(3):
+            try:
+                self.transport.open()
+            except TTransportException as e:
+                ex = e
+                continue
+            except Exception:
+                raise
+            else:
+                break
+        else:
+            raise TTransportException(ex.type, "Connection failed {}:{}: {}".format(parts[0], parts[1], ex.message))
+        self.block_ids = [int(chain.block_names[0].split(':')[-1]) for chain in data_status.data_blocks]
+        print(self.block_ids)
+        self.blocks = [SingleBlockClient(self.transport, self.protocol, self.client, bid) for bid in self.block_ids]
+
+    def __del__(self):
+        self.disconnect()
+
+    def disconnect(self):
+        if self.transport.isOpen():
+            self.transport.close()
+
+    def num_keys(self):
+        return sum([int(block.num_keys()) for block in self.blocks])
+
+    def pipeline_get(self, i=0):
+        return SingleBlockPipelinedGet(self.blocks[i])
+
+    def pipeline_put(self, i=0):
+        return SingleBlockPipelinedPut(self.blocks[i])
+
+    def pipeline_remove(self, i=0):
+        return SingleBlockPipelinedRemove(self.blocks[i])
+
+    def pipeline_update(self, i=0):
+        return SingleBlockPipelinedUpdate(self.blocks[i])
+
+
+class SingleBlockPipelinedBase(object):
+    def __init__(self, block):
+        self.block = block
+        self.args = []
+
+    def reset(self):
+        self.args = []
+
+    def _send_execute(self, op):
+        op_id = self.block.send_cmd(op, self.args)
+        self.reset()
+        return op_id
+
+    def recv_execute(self, op_id):
+        return self.block.recv_cmd(op_id)
+
+    def _execute(self, op):
+        op_id = self._send_execute(op)
+        return self.recv_execute(op_id)
+
+
+class SingleBlockPipelinedGet(SingleBlockPipelinedBase):
+    def __init__(self, block):
+        super(SingleBlockPipelinedGet, self).__init__(block)
+
+    def get(self, key):
+        self.args.append(key)
+
+    def send_execute(self):
+        return self._send_execute(KVOps.get)
+
+    def execute(self):
+        return self._execute(KVOps.get)
+
+
+class SingleBlockPipelinedPut(SingleBlockPipelinedBase):
+    def __init__(self, block):
+        super(SingleBlockPipelinedPut, self).__init__(block)
+
+    def put(self, key, value):
+        self.args.append(key)
+        self.args.append(value)
+
+    def send_execute(self):
+        return self._send_execute(KVOps.put)
+
+    def execute(self):
+        return self._execute(KVOps.put)
+
+
+class SingleBlockPipelinedRemove(SingleBlockPipelinedBase):
+    def __init__(self, block):
+        super(SingleBlockPipelinedRemove, self).__init__(block)
+
+    def remove(self, key):
+        self.args.append(key)
+
+    def send_execute(self):
+        return self._send_execute(KVOps.remove)
+
+    def execute(self):
+        return self._execute(KVOps.remove)
+
+
+class SingleBlockPipelinedUpdate(SingleBlockPipelinedBase):
+    def __init__(self, block):
+        super(SingleBlockPipelinedUpdate, self).__init__(block)
+
+    def update(self, key, value):
+        self.args.append(key)
+        self.args.append(value)
+
+    def send_execute(self):
+        return self._send_execute(KVOps.update)
 
     def execute(self):
         return self._execute(KVOps.update)

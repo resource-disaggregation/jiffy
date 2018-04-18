@@ -93,9 +93,13 @@ class ElasticMemClient:
         self.fs.close()
         self.ls.close()
 
+    def keep_alive(self, path):
+        if path not in self.to_renew:
+            self.to_renew.append(path)
+
     def create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_client=True):
         s = self.fs.create(path, persistent_store_prefix, num_blocks, chain_length)
-        self.to_renew.append(path)
+        self.keep_alive(path)
         k = KVClient(path, s, self.chain_failure_cb)
         if cache_client:
             self.kvs[path] = k
@@ -105,8 +109,7 @@ class ElasticMemClient:
         if cache_client and path in self.kvs:
             return self.kvs[path]
         s = self.fs.open(path)
-        if path not in self.to_renew:
-            self.to_renew.append(path)
+        self.keep_alive(path)
         k = KVClient(path, s, self.chain_failure_cb)
         if cache_client:
             self.kvs[path] = k
@@ -116,8 +119,7 @@ class ElasticMemClient:
         if cache_client and path in self.kvs:
             return self.kvs[path]
         s = self.fs.open_or_create(path, persistent_store_prefix, num_blocks, chain_length)
-        if path not in self.to_renew:
-            self.to_renew.append(path)
+        self.keep_alive(path)
         k = KVClient(path, s, self.chain_failure_cb)
         if cache_client:
             self.kvs[path] = k

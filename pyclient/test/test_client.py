@@ -13,7 +13,7 @@ from unittest import TestCase
 
 from thrift.transport import TTransport, TSocket
 
-from elasticmem import ElasticMemClient, RemoveMode, StorageMode
+from elasticmem import ElasticMemClient, RemoveMode, StorageMode, SingleServerKVClient
 from elasticmem.benchmark.kv_async_benchmark import run_async_kv_benchmark
 from elasticmem.benchmark.kv_sync_benchmark import run_sync_kv_throughput_benchmark, run_sync_kv_latency_benchmark
 from elasticmem.subscription.subscriber import Notification
@@ -208,6 +208,18 @@ class TestClient(TestCase):
             self.assertTrue(client.fs.exists('/a/file.txt'))
             kv = client.open('/a/file.txt')
             self.kv_ops(kv)
+            self.pipelined_kv_ops(kv)
+        finally:
+            client.disconnect()
+            self.stop_servers()
+
+    def test_single_server_ops(self):
+        self.start_servers()
+        client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        try:
+            kv = SingleServerKVClient(client.fs.create("/a/file.txt", "/tmp", 4))
+            self.assertTrue(client.fs.exists('/a/file.txt'))
+            client.keep_alive("/a/file.txt")
             self.pipelined_kv_ops(kv)
         finally:
             client.disconnect()

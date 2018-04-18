@@ -115,8 +115,6 @@ class DirectoryClient:
         else:
             raise TTransportException(ex.type, "Connection failed {}:{}: {}".format(host, port, ex.message))
 
-
-
     def __del__(self):
         self.close()
 
