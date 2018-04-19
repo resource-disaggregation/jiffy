@@ -39,4 +39,4 @@ fi
 
 $sbin/../build/directory/directoryd --address $BIND_ADDRESS --service-port $DIRECTORY_SERVICE_PORT \
   --lease-port $LEASE_SERVICE_PORT --block-port $BLOCK_SERVICE_PORT --storage-trace-file $STORAGE_TRACE_FILE \
-  --lease-period-ms $LEASE_PERIOD_MS --grace-period-ms $GRACE_PERIOD_MS 2>$LOG_PATH/em.stderr 1>$LOG_PATH/em.stdout &
+  --lease-period-ms $LEASE_PERIOD_MS --grace-period-ms $GRACE_PERIOD_MS 2>$LOG_PATH/directory.stderr 1>$LOG_PATH/directory.stdout &
