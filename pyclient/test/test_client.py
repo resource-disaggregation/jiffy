@@ -218,8 +218,8 @@ class TestClient(TestCase):
         client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
             kv = SingleServerKVClient(client.fs.create("/a/file.txt", "/tmp", 4))
-            self.assertTrue(client.fs.exists('/a/file.txt'))
             client.keep_alive("/a/file.txt")
+            self.assertTrue(client.fs.exists('/a/file.txt'))
             self.pipelined_kv_ops(kv)
         finally:
             client.disconnect()
