@@ -53,7 +53,7 @@ std::ostream& operator<<(std::ostream& out, const rpc_storage_mode val);
 
 typedef int32_t rpc_perms;
 
-class rpc_block_chain;
+class rpc_replica_chain;
 
 class rpc_file_status;
 
@@ -64,30 +64,40 @@ class rpc_dir_entry;
 class directory_service_exception;
 
 
-class rpc_block_chain {
+class rpc_replica_chain {
  public:
 
-  rpc_block_chain(const rpc_block_chain&);
-  rpc_block_chain& operator=(const rpc_block_chain&);
-  rpc_block_chain() {
+  rpc_replica_chain(const rpc_replica_chain&);
+  rpc_replica_chain& operator=(const rpc_replica_chain&);
+  rpc_replica_chain() : slot_begin(0), slot_end(0) {
   }
 
-  virtual ~rpc_block_chain() throw();
+  virtual ~rpc_replica_chain() throw();
   std::vector<std::string>  block_names;
+  int32_t slot_begin;
+  int32_t slot_end;
 
   void __set_block_names(const std::vector<std::string> & val);
 
-  bool operator == (const rpc_block_chain & rhs) const
+  void __set_slot_begin(const int32_t val);
+
+  void __set_slot_end(const int32_t val);
+
+  bool operator == (const rpc_replica_chain & rhs) const
   {
     if (!(block_names == rhs.block_names))
       return false;
+    if (!(slot_begin == rhs.slot_begin))
+      return false;
+    if (!(slot_end == rhs.slot_end))
+      return false;
     return true;
   }
-  bool operator != (const rpc_block_chain &rhs) const {
+  bool operator != (const rpc_replica_chain &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_block_chain & ) const;
+  bool operator < (const rpc_replica_chain & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -97,9 +107,9 @@ class rpc_block_chain {
   virtual void printTo(std::ostream& out) const;
 };
 
-void swap(rpc_block_chain &a, rpc_block_chain &b);
+void swap(rpc_replica_chain &a, rpc_replica_chain &b);
 
-std::ostream& operator<<(std::ostream& out, const rpc_block_chain& obj);
+std::ostream& operator<<(std::ostream& out, const rpc_replica_chain& obj);
 
 
 class rpc_file_status {
@@ -162,7 +172,7 @@ class rpc_data_status {
   rpc_storage_mode storage_mode;
   std::string persistent_store_prefix;
   int32_t chain_length;
-  std::vector<rpc_block_chain>  data_blocks;
+  std::vector<rpc_replica_chain>  data_blocks;
 
   void __set_storage_mode(const rpc_storage_mode val);
 
@@ -170,7 +180,7 @@ class rpc_data_status {
 
   void __set_chain_length(const int32_t val);
 
-  void __set_data_blocks(const std::vector<rpc_block_chain> & val);
+  void __set_data_blocks(const std::vector<rpc_replica_chain> & val);
 
   bool operator == (const rpc_data_status & rhs) const
   {

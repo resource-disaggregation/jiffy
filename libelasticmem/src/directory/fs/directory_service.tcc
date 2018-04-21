@@ -5618,14 +5618,14 @@ bool directory_serviceClientT<Protocol_>::recv_is_directory()
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::reslove_failures(rpc_block_chain& _return, const std::string& path, const rpc_block_chain& chain)
+void directory_serviceClientT<Protocol_>::reslove_failures(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain)
 {
   send_reslove_failures(path, chain);
   recv_reslove_failures(_return);
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::send_reslove_failures(const std::string& path, const rpc_block_chain& chain)
+void directory_serviceClientT<Protocol_>::send_reslove_failures(const std::string& path, const rpc_replica_chain& chain)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("reslove_failures", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -5641,7 +5641,7 @@ void directory_serviceClientT<Protocol_>::send_reslove_failures(const std::strin
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::recv_reslove_failures(rpc_block_chain& _return)
+void directory_serviceClientT<Protocol_>::recv_reslove_failures(rpc_replica_chain& _return)
 {
 
   int32_t rseqid = 0;
@@ -5683,14 +5683,14 @@ void directory_serviceClientT<Protocol_>::recv_reslove_failures(rpc_block_chain&
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::add_replica_to_chain(rpc_block_chain& _return, const std::string& path, const rpc_block_chain& chain)
+void directory_serviceClientT<Protocol_>::add_replica_to_chain(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain)
 {
   send_add_replica_to_chain(path, chain);
   recv_add_replica_to_chain(_return);
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::send_add_replica_to_chain(const std::string& path, const rpc_block_chain& chain)
+void directory_serviceClientT<Protocol_>::send_add_replica_to_chain(const std::string& path, const rpc_replica_chain& chain)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("add_replica_to_chain", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -5706,7 +5706,7 @@ void directory_serviceClientT<Protocol_>::send_add_replica_to_chain(const std::s
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::recv_add_replica_to_chain(rpc_block_chain& _return)
+void directory_serviceClientT<Protocol_>::recv_add_replica_to_chain(rpc_replica_chain& _return)
 {
 
   int32_t rseqid = 0;
@@ -10087,14 +10087,14 @@ bool directory_serviceConcurrentClientT<Protocol_>::recv_is_directory(const int3
 }
 
 template <class Protocol_>
-void directory_serviceConcurrentClientT<Protocol_>::reslove_failures(rpc_block_chain& _return, const std::string& path, const rpc_block_chain& chain)
+void directory_serviceConcurrentClientT<Protocol_>::reslove_failures(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain)
 {
   int32_t seqid = send_reslove_failures(path, chain);
   recv_reslove_failures(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t directory_serviceConcurrentClientT<Protocol_>::send_reslove_failures(const std::string& path, const rpc_block_chain& chain)
+int32_t directory_serviceConcurrentClientT<Protocol_>::send_reslove_failures(const std::string& path, const rpc_replica_chain& chain)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -10114,7 +10114,7 @@ int32_t directory_serviceConcurrentClientT<Protocol_>::send_reslove_failures(con
 }
 
 template <class Protocol_>
-void directory_serviceConcurrentClientT<Protocol_>::recv_reslove_failures(rpc_block_chain& _return, const int32_t seqid)
+void directory_serviceConcurrentClientT<Protocol_>::recv_reslove_failures(rpc_replica_chain& _return, const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -10179,14 +10179,14 @@ void directory_serviceConcurrentClientT<Protocol_>::recv_reslove_failures(rpc_bl
 }
 
 template <class Protocol_>
-void directory_serviceConcurrentClientT<Protocol_>::add_replica_to_chain(rpc_block_chain& _return, const std::string& path, const rpc_block_chain& chain)
+void directory_serviceConcurrentClientT<Protocol_>::add_replica_to_chain(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain)
 {
   int32_t seqid = send_add_replica_to_chain(path, chain);
   recv_add_replica_to_chain(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t directory_serviceConcurrentClientT<Protocol_>::send_add_replica_to_chain(const std::string& path, const rpc_block_chain& chain)
+int32_t directory_serviceConcurrentClientT<Protocol_>::send_add_replica_to_chain(const std::string& path, const rpc_replica_chain& chain)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -10206,7 +10206,7 @@ int32_t directory_serviceConcurrentClientT<Protocol_>::send_add_replica_to_chain
 }
 
 template <class Protocol_>
-void directory_serviceConcurrentClientT<Protocol_>::recv_add_replica_to_chain(rpc_block_chain& _return, const int32_t seqid)
+void directory_serviceConcurrentClientT<Protocol_>::recv_add_replica_to_chain(rpc_replica_chain& _return, const int32_t seqid)
 {
 
   int32_t rseqid = 0;

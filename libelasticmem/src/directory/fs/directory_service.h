@@ -40,8 +40,8 @@ class directory_serviceIf {
   virtual void dstatus(rpc_data_status& _return, const std::string& path) = 0;
   virtual bool is_regular_file(const std::string& path) = 0;
   virtual bool is_directory(const std::string& path) = 0;
-  virtual void reslove_failures(rpc_block_chain& _return, const std::string& path, const rpc_block_chain& chain) = 0;
-  virtual void add_replica_to_chain(rpc_block_chain& _return, const std::string& path, const rpc_block_chain& chain) = 0;
+  virtual void reslove_failures(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain) = 0;
+  virtual void add_replica_to_chain(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain) = 0;
   virtual void add_block_to_file(const std::string& path) = 0;
 };
 
@@ -134,10 +134,10 @@ class directory_serviceNull : virtual public directory_serviceIf {
     bool _return = false;
     return _return;
   }
-  void reslove_failures(rpc_block_chain& /* _return */, const std::string& /* path */, const rpc_block_chain& /* chain */) {
+  void reslove_failures(rpc_replica_chain& /* _return */, const std::string& /* path */, const rpc_replica_chain& /* chain */) {
     return;
   }
-  void add_replica_to_chain(rpc_block_chain& /* _return */, const std::string& /* path */, const rpc_block_chain& /* chain */) {
+  void add_replica_to_chain(rpc_replica_chain& /* _return */, const std::string& /* path */, const rpc_replica_chain& /* chain */) {
     return;
   }
   void add_block_to_file(const std::string& /* path */) {
@@ -2410,13 +2410,13 @@ class directory_service_reslove_failures_args {
 
   virtual ~directory_service_reslove_failures_args() throw();
   std::string path;
-  rpc_block_chain chain;
+  rpc_replica_chain chain;
 
   _directory_service_reslove_failures_args__isset __isset;
 
   void __set_path(const std::string& val);
 
-  void __set_chain(const rpc_block_chain& val);
+  void __set_chain(const rpc_replica_chain& val);
 
   bool operator == (const directory_service_reslove_failures_args & rhs) const
   {
@@ -2446,7 +2446,7 @@ class directory_service_reslove_failures_pargs {
 
   virtual ~directory_service_reslove_failures_pargs() throw();
   const std::string* path;
-  const rpc_block_chain* chain;
+  const rpc_replica_chain* chain;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -2468,12 +2468,12 @@ class directory_service_reslove_failures_result {
   }
 
   virtual ~directory_service_reslove_failures_result() throw();
-  rpc_block_chain success;
+  rpc_replica_chain success;
   directory_service_exception ex;
 
   _directory_service_reslove_failures_result__isset __isset;
 
-  void __set_success(const rpc_block_chain& val);
+  void __set_success(const rpc_replica_chain& val);
 
   void __set_ex(const directory_service_exception& val);
 
@@ -2509,7 +2509,7 @@ class directory_service_reslove_failures_presult {
 
 
   virtual ~directory_service_reslove_failures_presult() throw();
-  rpc_block_chain* success;
+  rpc_replica_chain* success;
   directory_service_exception ex;
 
   _directory_service_reslove_failures_presult__isset __isset;
@@ -2535,13 +2535,13 @@ class directory_service_add_replica_to_chain_args {
 
   virtual ~directory_service_add_replica_to_chain_args() throw();
   std::string path;
-  rpc_block_chain chain;
+  rpc_replica_chain chain;
 
   _directory_service_add_replica_to_chain_args__isset __isset;
 
   void __set_path(const std::string& val);
 
-  void __set_chain(const rpc_block_chain& val);
+  void __set_chain(const rpc_replica_chain& val);
 
   bool operator == (const directory_service_add_replica_to_chain_args & rhs) const
   {
@@ -2571,7 +2571,7 @@ class directory_service_add_replica_to_chain_pargs {
 
   virtual ~directory_service_add_replica_to_chain_pargs() throw();
   const std::string* path;
-  const rpc_block_chain* chain;
+  const rpc_replica_chain* chain;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -2593,12 +2593,12 @@ class directory_service_add_replica_to_chain_result {
   }
 
   virtual ~directory_service_add_replica_to_chain_result() throw();
-  rpc_block_chain success;
+  rpc_replica_chain success;
   directory_service_exception ex;
 
   _directory_service_add_replica_to_chain_result__isset __isset;
 
-  void __set_success(const rpc_block_chain& val);
+  void __set_success(const rpc_replica_chain& val);
 
   void __set_ex(const directory_service_exception& val);
 
@@ -2634,7 +2634,7 @@ class directory_service_add_replica_to_chain_presult {
 
 
   virtual ~directory_service_add_replica_to_chain_presult() throw();
-  rpc_block_chain* success;
+  rpc_replica_chain* success;
   directory_service_exception ex;
 
   _directory_service_add_replica_to_chain_presult__isset __isset;
@@ -2837,12 +2837,12 @@ class directory_serviceClientT : virtual public directory_serviceIf {
   bool is_directory(const std::string& path);
   void send_is_directory(const std::string& path);
   bool recv_is_directory();
-  void reslove_failures(rpc_block_chain& _return, const std::string& path, const rpc_block_chain& chain);
-  void send_reslove_failures(const std::string& path, const rpc_block_chain& chain);
-  void recv_reslove_failures(rpc_block_chain& _return);
-  void add_replica_to_chain(rpc_block_chain& _return, const std::string& path, const rpc_block_chain& chain);
-  void send_add_replica_to_chain(const std::string& path, const rpc_block_chain& chain);
-  void recv_add_replica_to_chain(rpc_block_chain& _return);
+  void reslove_failures(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain);
+  void send_reslove_failures(const std::string& path, const rpc_replica_chain& chain);
+  void recv_reslove_failures(rpc_replica_chain& _return);
+  void add_replica_to_chain(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain);
+  void send_add_replica_to_chain(const std::string& path, const rpc_replica_chain& chain);
+  void recv_add_replica_to_chain(rpc_replica_chain& _return);
   void add_block_to_file(const std::string& path);
   void send_add_block_to_file(const std::string& path);
   void recv_add_block_to_file();
@@ -3198,7 +3198,7 @@ class directory_serviceMultiface : virtual public directory_serviceIf {
     return ifaces_[i]->is_directory(path);
   }
 
-  void reslove_failures(rpc_block_chain& _return, const std::string& path, const rpc_block_chain& chain) {
+  void reslove_failures(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3208,7 +3208,7 @@ class directory_serviceMultiface : virtual public directory_serviceIf {
     return;
   }
 
-  void add_replica_to_chain(rpc_block_chain& _return, const std::string& path, const rpc_block_chain& chain) {
+  void add_replica_to_chain(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3315,12 +3315,12 @@ class directory_serviceConcurrentClientT : virtual public directory_serviceIf {
   bool is_directory(const std::string& path);
   int32_t send_is_directory(const std::string& path);
   bool recv_is_directory(const int32_t seqid);
-  void reslove_failures(rpc_block_chain& _return, const std::string& path, const rpc_block_chain& chain);
-  int32_t send_reslove_failures(const std::string& path, const rpc_block_chain& chain);
-  void recv_reslove_failures(rpc_block_chain& _return, const int32_t seqid);
-  void add_replica_to_chain(rpc_block_chain& _return, const std::string& path, const rpc_block_chain& chain);
-  int32_t send_add_replica_to_chain(const std::string& path, const rpc_block_chain& chain);
-  void recv_add_replica_to_chain(rpc_block_chain& _return, const int32_t seqid);
+  void reslove_failures(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain);
+  int32_t send_reslove_failures(const std::string& path, const rpc_replica_chain& chain);
+  void recv_reslove_failures(rpc_replica_chain& _return, const int32_t seqid);
+  void add_replica_to_chain(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain);
+  int32_t send_add_replica_to_chain(const std::string& path, const rpc_replica_chain& chain);
+  void recv_add_replica_to_chain(rpc_replica_chain& _return, const int32_t seqid);
   void add_block_to_file(const std::string& path);
   int32_t send_add_block_to_file(const std::string& path);
   void recv_add_block_to_file(const int32_t seqid);

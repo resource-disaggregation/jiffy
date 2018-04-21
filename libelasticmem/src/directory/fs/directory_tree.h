@@ -65,7 +65,7 @@ class ds_file_node : public ds_node {
                storage_mode mode,
                const std::string &persistent_store_prefix,
                std::size_t chain_length,
-               std::vector<block_chain> blocks) :
+               std::vector<replica_chain> blocks) :
       ds_node(name, file_status(file_type::regular, perms(perms::all), utils::time_utils::now_ms())),
       dstatus_(mode, persistent_store_prefix, chain_length, std::move(blocks)) {}
 
@@ -107,7 +107,7 @@ class ds_file_node : public ds_node {
     dstatus_.chain_length(chain_length);
   }
 
-  const std::vector<block_chain> &data_blocks() const {
+  const std::vector<replica_chain> &data_blocks() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_.data_blocks();
   }
@@ -279,8 +279,8 @@ class directory_tree : public directory_ops, public directory_management_ops {
   bool is_directory(const std::string &path) override;
 
   void touch(const std::string &path) override;
-  block_chain resolve_failures(const std::string &path, const block_chain &chain) override; // TODO: Take id as input
-  block_chain add_replica_to_chain(const std::string &path, const block_chain &chain) override;
+  replica_chain resolve_failures(const std::string &path, const replica_chain &chain) override; // TODO: Take id as input
+  replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) override;
   void add_block_to_file(const std::string &path) override;
 
  private:

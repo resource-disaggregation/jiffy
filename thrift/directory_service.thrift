@@ -23,8 +23,10 @@ enum rpc_storage_mode {
   rpc_on_disk = 3
 }
 
-struct rpc_block_chain {
+struct rpc_replica_chain {
   1: required list<string> block_names,
+  2: required i32 slot_begin,
+  3: required i32 slot_end,
 }
 
 struct rpc_file_status {
@@ -37,7 +39,7 @@ struct rpc_data_status {
   1: required rpc_storage_mode storage_mode,
   2: required string persistent_store_prefix,
   3: required i32 chain_length,
-  4: required list<rpc_block_chain> data_blocks,
+  4: required list<rpc_replica_chain> data_blocks,
 }
 
 struct rpc_dir_entry {
@@ -102,10 +104,10 @@ service directory_service {
   bool is_directory(1: string path)
     throws (1: directory_service_exception ex),
 
-  rpc_block_chain reslove_failures(1: string path, 2: rpc_block_chain chain) // TODO: We should pass in chain id...
+  rpc_replica_chain reslove_failures(1: string path, 2: rpc_replica_chain chain) // TODO: We should pass in chain id...
     throws (1: directory_service_exception ex),
 
-  rpc_block_chain add_replica_to_chain(1: string path, 2: rpc_block_chain chain) // TODO: We should pass in chain id...
+  rpc_replica_chain add_replica_to_chain(1: string path, 2: rpc_replica_chain chain) // TODO: We should pass in chain id...
     throws (1: directory_service_exception ex),
 
   void add_block_to_file(1: string path)

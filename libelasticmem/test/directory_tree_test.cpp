@@ -327,6 +327,8 @@ TEST_CASE("dstatus_test", "[file]") {
   REQUIRE(tree.dstatus("/sandbox/file.txt").mode() == storage_mode::in_memory);
   REQUIRE(tree.dstatus("/sandbox/file.txt").persistent_store_prefix() == "/tmp");
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().size() == 1);
+  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).slot_range == std::make_pair(0, 65536));
+  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).block_names[0] == "0");
 }
 
 TEST_CASE("file_type_test", "[file][dir]") {

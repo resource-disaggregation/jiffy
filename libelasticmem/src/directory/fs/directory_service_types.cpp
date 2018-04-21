@@ -82,36 +82,52 @@ std::ostream& operator<<(std::ostream& out, const rpc_storage_mode val) {
 }
 
 
-rpc_block_chain::~rpc_block_chain() throw() {
+rpc_replica_chain::~rpc_replica_chain() throw() {
 }
 
 
-void rpc_block_chain::__set_block_names(const std::vector<std::string> & val) {
+void rpc_replica_chain::__set_block_names(const std::vector<std::string> & val) {
   this->block_names = val;
 }
-std::ostream& operator<<(std::ostream& out, const rpc_block_chain& obj)
+
+void rpc_replica_chain::__set_slot_begin(const int32_t val) {
+  this->slot_begin = val;
+}
+
+void rpc_replica_chain::__set_slot_end(const int32_t val) {
+  this->slot_end = val;
+}
+std::ostream& operator<<(std::ostream& out, const rpc_replica_chain& obj)
 {
   obj.printTo(out);
   return out;
 }
 
 
-void swap(rpc_block_chain &a, rpc_block_chain &b) {
+void swap(rpc_replica_chain &a, rpc_replica_chain &b) {
   using ::std::swap;
   swap(a.block_names, b.block_names);
+  swap(a.slot_begin, b.slot_begin);
+  swap(a.slot_end, b.slot_end);
 }
 
-rpc_block_chain::rpc_block_chain(const rpc_block_chain& other6) {
+rpc_replica_chain::rpc_replica_chain(const rpc_replica_chain& other6) {
   block_names = other6.block_names;
+  slot_begin = other6.slot_begin;
+  slot_end = other6.slot_end;
 }
-rpc_block_chain& rpc_block_chain::operator=(const rpc_block_chain& other7) {
+rpc_replica_chain& rpc_replica_chain::operator=(const rpc_replica_chain& other7) {
   block_names = other7.block_names;
+  slot_begin = other7.slot_begin;
+  slot_end = other7.slot_end;
   return *this;
 }
-void rpc_block_chain::printTo(std::ostream& out) const {
+void rpc_replica_chain::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
-  out << "rpc_block_chain(";
+  out << "rpc_replica_chain(";
   out << "block_names=" << to_string(block_names);
+  out << ", " << "slot_begin=" << to_string(slot_begin);
+  out << ", " << "slot_end=" << to_string(slot_end);
   out << ")";
 }
 
@@ -182,7 +198,7 @@ void rpc_data_status::__set_chain_length(const int32_t val) {
   this->chain_length = val;
 }
 
-void rpc_data_status::__set_data_blocks(const std::vector<rpc_block_chain> & val) {
+void rpc_data_status::__set_data_blocks(const std::vector<rpc_replica_chain> & val) {
   this->data_blocks = val;
 }
 std::ostream& operator<<(std::ostream& out, const rpc_data_status& obj)

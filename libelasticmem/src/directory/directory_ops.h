@@ -138,8 +138,9 @@ enum storage_mode {
   on_disk = 3
 };
 
-struct block_chain {
+struct replica_chain {
   std::vector<std::string> block_names;
+  std::pair<int32_t, int32_t> slot_range;
 
   const std::string &head() const {
     return block_names.front();
@@ -147,6 +148,14 @@ struct block_chain {
 
   const std::string &tail() const {
     return block_names.back();
+  }
+
+  int32_t slot_begin() const {
+    return slot_range.first;
+  }
+
+  int32_t slot_end() const {
+    return slot_range.second;
   }
 
   std::string to_string() const {
@@ -235,13 +244,13 @@ class data_status {
   data_status(storage_mode mode,
               std::string persistent_store_prefix,
               std::size_t chain_length,
-              std::vector<block_chain> blocks)
+              std::vector<replica_chain> blocks)
       : mode_(mode),
         persistent_store_prefix_(std::move(persistent_store_prefix)),
         chain_length_(chain_length),
         data_blocks_(std::move(blocks)) {}
 
-  const std::vector<block_chain> &data_blocks() const {
+  const std::vector<replica_chain> &data_blocks() const {
     return data_blocks_;
   }
 
@@ -273,7 +282,7 @@ class data_status {
     data_blocks_.clear();
   }
 
-  void add_data_block(const block_chain &block, std::size_t i) {
+  void add_data_block(const replica_chain &block, std::size_t i) {
     data_blocks_.insert(data_blocks_.begin() + i, block);
   }
 
@@ -281,11 +290,16 @@ class data_status {
     data_blocks_.erase(data_blocks_.begin() + i);
   }
 
+  void update_data_block_slots(std::size_t i, int32_t slot_begin, int32_t slot_end) {
+    data_blocks_[i].slot_range.first = slot_begin;
+    data_blocks_[i].slot_range.second = slot_end;
+  }
+
  private:
   storage_mode mode_;
   std::string persistent_store_prefix_;
   std::size_t chain_length_;
-  std::vector<block_chain> data_blocks_;
+  std::vector<replica_chain> data_blocks_;
 };
 
 class directory_ops {
@@ -335,8 +349,8 @@ class directory_ops {
 class directory_management_ops {
  public:
   virtual void touch(const std::string &path) = 0;
-  virtual block_chain resolve_failures(const std::string &path, const block_chain &chain) = 0;
-  virtual block_chain add_replica_to_chain(const std::string &path, const block_chain &chain) = 0;
+  virtual replica_chain resolve_failures(const std::string &path, const replica_chain &chain) = 0;
+  virtual replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) = 0;
   virtual void add_block_to_file(const std::string &path) = 0;
 };
 

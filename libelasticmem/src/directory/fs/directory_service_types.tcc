@@ -12,7 +12,7 @@
 namespace elasticmem { namespace directory {
 
 template <class Protocol_>
-uint32_t rpc_block_chain::read(Protocol_* iprot) {
+uint32_t rpc_replica_chain::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -25,6 +25,8 @@ uint32_t rpc_block_chain::read(Protocol_* iprot) {
   using ::apache::thrift::protocol::TProtocolException;
 
   bool isset_block_names = false;
+  bool isset_slot_begin = false;
+  bool isset_slot_end = false;
 
   while (true)
   {
@@ -54,6 +56,22 @@ uint32_t rpc_block_chain::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->slot_begin);
+          isset_slot_begin = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->slot_end);
+          isset_slot_end = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -65,14 +83,18 @@ uint32_t rpc_block_chain::read(Protocol_* iprot) {
 
   if (!isset_block_names)
     throw TProtocolException(TProtocolException::INVALID_DATA);
+  if (!isset_slot_begin)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
+  if (!isset_slot_end)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
   return xfer;
 }
 
 template <class Protocol_>
-uint32_t rpc_block_chain::write(Protocol_* oprot) const {
+uint32_t rpc_replica_chain::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("rpc_block_chain");
+  xfer += oprot->writeStructBegin("rpc_replica_chain");
 
   xfer += oprot->writeFieldBegin("block_names", ::apache::thrift::protocol::T_LIST, 1);
   {
@@ -84,6 +106,14 @@ uint32_t rpc_block_chain::write(Protocol_* oprot) const {
     }
     xfer += oprot->writeListEnd();
   }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_begin", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32(this->slot_begin);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_end", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32(this->slot_end);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -296,7 +326,7 @@ uint32_t rpc_data_status::write(Protocol_* oprot) const {
   xfer += oprot->writeFieldBegin("data_blocks", ::apache::thrift::protocol::T_LIST, 4);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->data_blocks.size()));
-    std::vector<rpc_block_chain> ::const_iterator _iter17;
+    std::vector<rpc_replica_chain> ::const_iterator _iter17;
     for (_iter17 = this->data_blocks.begin(); _iter17 != this->data_blocks.end(); ++_iter17)
     {
       xfer += (*_iter17).write(oprot);

@@ -9,14 +9,16 @@ namespace directory {
 
 class directory_type_conversions {
  public:
-  static rpc_block_chain to_rpc(const block_chain &chain) {
-    rpc_block_chain rpc;
+  static rpc_replica_chain to_rpc(const replica_chain &chain) {
+    rpc_replica_chain rpc;
     rpc.block_names = chain.block_names;
+    rpc.slot_begin = chain.slot_begin();
+    rpc.slot_end = chain.slot_end();
     return rpc;
   }
 
-  static block_chain from_rpc(const rpc_block_chain &rpc) {
-    return block_chain{rpc.block_names};
+  static replica_chain from_rpc(const rpc_replica_chain &rpc) {
+    return replica_chain{rpc.block_names, std::make_pair(rpc.slot_begin, rpc.slot_end)};
   }
 
   static rpc_data_status to_rpc(const data_status &status) {
@@ -48,7 +50,7 @@ class directory_type_conversions {
   }
 
   static data_status from_rpc(const rpc_data_status &rpc) {
-    std::vector<block_chain> data_blocks;
+    std::vector<replica_chain> data_blocks;
     for (const auto &blk: rpc.data_blocks) {
       data_blocks.push_back(from_rpc(blk));
     }

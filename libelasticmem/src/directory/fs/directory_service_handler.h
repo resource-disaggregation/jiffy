@@ -36,8 +36,8 @@ class directory_service_handler : public directory_serviceIf {
   void dstatus(rpc_data_status &_return, const std::string &path) override;
   bool is_regular_file(const std::string &path) override;
   bool is_directory(const std::string &path) override;
-  void reslove_failures(rpc_block_chain& _return, const std::string& path, const rpc_block_chain& chain) override;
-  void add_replica_to_chain(rpc_block_chain &_return, const std::string &path, const rpc_block_chain &chain) override;
+  void reslove_failures(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain) override;
+  void add_replica_to_chain(rpc_replica_chain &_return, const std::string &path, const rpc_replica_chain &chain) override;
   void add_block_to_file(const std::string &path) override;
  private:
   directory_service_exception make_exception(directory_ops_exception &ex) const;

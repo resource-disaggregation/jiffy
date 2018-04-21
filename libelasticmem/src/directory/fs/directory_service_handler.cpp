@@ -179,9 +179,9 @@ bool directory_service_handler::is_directory(const std::string &path) {
   }
 }
 
-void directory_service_handler::reslove_failures(rpc_block_chain &_return,
+void directory_service_handler::reslove_failures(rpc_replica_chain &_return,
                                                  const std::string &path,
-                                                 const rpc_block_chain &chain) {
+                                                 const rpc_replica_chain &chain) {
   try {
     auto ret = shard_->resolve_failures(path, directory_type_conversions::from_rpc(chain));
     _return = directory_type_conversions::to_rpc(ret);
@@ -190,8 +190,8 @@ void directory_service_handler::reslove_failures(rpc_block_chain &_return,
   }
 }
 
-void directory_service_handler::add_replica_to_chain(rpc_block_chain &_return, const std::string &path,
-                                                     const rpc_block_chain &chain) {
+void directory_service_handler::add_replica_to_chain(rpc_replica_chain &_return, const std::string &path,
+                                                     const rpc_replica_chain &chain) {
   try {
     auto ret = shard_->add_replica_to_chain(path, directory_type_conversions::from_rpc(chain));
     _return = directory_type_conversions::to_rpc(ret);

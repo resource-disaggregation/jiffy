@@ -44,8 +44,8 @@ class directory_client : public directory_ops {
   bool is_directory(const std::string &path) override;
 
   // Management Ops
-  virtual block_chain resolve_failures(const std::string &path, const block_chain &chain);
-  virtual block_chain add_replica_to_chain(const std::string &path, const block_chain &chain);
+  virtual replica_chain resolve_failures(const std::string &path, const replica_chain &chain);
+  virtual replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain);
   virtual void add_block_to_file(const std::string &path);
 
  private:
