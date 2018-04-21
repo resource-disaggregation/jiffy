@@ -33,7 +33,7 @@ class dummy_storage_manager : public elasticmem::storage::storage_management_ops
 
   std::pair<int32_t, int32_t> slot_range(const std::string &block_name) override {
     COMMANDS.push_back("slot_range:" + block_name);
-    return std::pair<int32_t, int32_t>(0, -1);
+    return std::pair<int32_t, int32_t>(0, elasticmem::storage::block::SLOT_MAX);
   };
 
   std::string path(const std::string &block_name) override {

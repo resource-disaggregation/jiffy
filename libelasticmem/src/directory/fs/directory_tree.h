@@ -139,9 +139,12 @@ class ds_file_node : public ds_node {
   export_ctx setup_export(std::shared_ptr<storage::storage_management_ops> storage,
                           const std::shared_ptr<block_allocator> &allocator,
                           const std::string &path) {
+    using namespace storage;
+    if (dstatus_.data_blocks().size() == block::SLOT_MAX)
+      throw directory_ops_exception("Cannot expand capacity beyond " + std::to_string(block::SLOT_MAX) + " blocks");
+
     std::unique_lock<std::shared_mutex> lock(mtx_);
     // Get the block with largest size
-    using namespace storage;
     std::vector<std::future<std::size_t>> futures;
     for (const auto &block: dstatus_.data_blocks()) {
       futures.push_back(std::async([&]() -> std::size_t { return storage->storage_size(block.block_names.back()); }));
@@ -151,7 +154,7 @@ class ds_file_node : public ds_node {
     size_t max_pos = 0;
     for (auto &future: futures) {
       size_t sz = future.get();
-      if (sz > max_size && dstatus_.get_data_block_status(i) != chain_status::exporting) {
+      if (sz > max_size && dstatus_.get_data_block_status(i) != chain_status::exporting && dstatus_.num_slots(i) != 1) {
         max_size = sz;
         max_pos = i;
       }
@@ -169,7 +172,7 @@ class ds_file_node : public ds_node {
 
     // Allocate the new chain
     replica_chain new_chain
-        {allocator->allocate(dstatus_.chain_length(), {}), std::make_pair(slot_begin, slot_mid),
+        {allocator->allocate(dstatus_.chain_length(), {}), std::make_pair(slot_mid + 1, slot_end),
          chain_status::stable};
     assert(new_chain.block_names.size() == chain_length);
 

@@ -86,7 +86,8 @@ data_status directory_tree::create(const std::string &path,
   for (std::size_t i = 0; i < num_blocks; ++i) {
     auto slot_begin = static_cast<int32_t>(i * slots_per_block);
     auto slot_end = i == (num_blocks - 1) ? storage::block::SLOT_MAX : static_cast<int32_t>((i + 1) * slots_per_block);
-    replica_chain chain{allocator_->allocate(chain_length, {}), std::make_pair(slot_begin, slot_end)};
+    replica_chain
+        chain{allocator_->allocate(chain_length, {}), std::make_pair(slot_begin, slot_end), chain_status::stable};
     assert(chain.block_names.size() == chain_length);
     blocks.push_back(chain);
     using namespace storage;
@@ -373,8 +374,11 @@ void directory_tree::add_block_to_file(const std::string &path) {
   auto storage = storage_;
   auto node = get_node_as_file(path);
   auto ctx = node->setup_export(storage, allocator_, path);
-  std::thread([node, storage, ctx]{
+  std::thread([node, storage, ctx] {
+    auto start = time_utils::now_ms();
     storage->export_slots(ctx.from_block.block_names.front());
+    auto elapsed = time_utils::now_ms() - start;
+    LOG(log_level::info) << "Finished export in " << elapsed << " ms";
     node->finalize_export(storage, ctx);
   }).detach();
 }

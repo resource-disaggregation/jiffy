@@ -309,6 +309,10 @@ class data_status {
     data_blocks_[i].status = status;
   }
 
+  int32_t num_slots(std::size_t i) {
+    return data_blocks_[i].slot_range.second - data_blocks_[i].slot_range.second;
+  }
+
  private:
   storage_mode mode_;
   std::string persistent_store_prefix_;
