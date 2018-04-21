@@ -15,9 +15,8 @@ using namespace ::apache::thrift::transport;
 #define HOST "127.0.0.1"
 #define PORT 9090
 
-static auto blocks = test_utils::init_kv_blocks(NUM_BLOCKS, 0, PORT, 0);
-
 TEST_CASE("manager_storage_size_test", "[storage_size][storage_capacity][reset]") {
+  static auto blocks = test_utils::init_kv_blocks(NUM_BLOCKS, 0, PORT, 0);
   auto server = storage_management_server::create(blocks, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   test_utils::wait_till_server_ready(HOST, PORT);
@@ -40,6 +39,7 @@ TEST_CASE("manager_storage_size_test", "[storage_size][storage_capacity][reset]"
 }
 
 TEST_CASE("manager_flush_load_test", "[put][flush][reset][load][get]") {
+  static auto blocks = test_utils::init_kv_blocks(NUM_BLOCKS, 0, PORT, 0);
   auto server = storage_management_server::create(blocks, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   test_utils::wait_till_server_ready(HOST, PORT);

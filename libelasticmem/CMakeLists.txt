@@ -173,7 +173,7 @@ add_library(elasticmem STATIC
         src/utils/rand_utils.h
         src/utils/signal_handling.h
         src/utils/time_utils.h
-        src/utils/retry_utils.h)
+        src/utils/retry_utils.h src/storage/block.cc src/storage/kv/hash_slot.h src/storage/kv/hash_slot.cpp)
 if (GENERATE_THRIFT)
   add_dependencies(elasticmem thriftgen_directory thriftgen_kv)
 endif ()

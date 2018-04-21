@@ -279,8 +279,9 @@ class directory_tree : public directory_ops, public directory_management_ops {
   bool is_directory(const std::string &path) override;
 
   void touch(const std::string &path) override;
-  block_chain resolve_failures(const std::string &path, const block_chain &chain) override;
-  block_chain add_blocks_to_chain(const std::string &path, const block_chain &chain, std::size_t count) override;
+  block_chain resolve_failures(const std::string &path, const block_chain &chain) override; // TODO: Take id as input
+  block_chain add_replica_to_chain(const std::string &path, const block_chain &chain) override;
+  void add_block_to_file(const std::string &path) override;
 
  private:
   std::shared_ptr<ds_node> get_node_unsafe(const std::string &path) const;

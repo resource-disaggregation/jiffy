@@ -2,10 +2,8 @@
 #define ELASTICMEM_KV_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
-#include "../storage_management_ops.h"
 #include "block_request_service.h"
 #include "block_response_service.h"
-#include "../../utils/event.h"
 #include <libcuckoo/cuckoohash_map.hh>
 #include <future>
 

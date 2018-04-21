@@ -43,6 +43,11 @@ class directory_client : public directory_ops {
   bool is_regular_file(const std::string &path) override;
   bool is_directory(const std::string &path) override;
 
+  // Management Ops
+  virtual block_chain resolve_failures(const std::string &path, const block_chain &chain);
+  virtual block_chain add_replica_to_chain(const std::string &path, const block_chain &chain);
+  virtual void add_block_to_file(const std::string &path);
+
  private:
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};
   std::shared_ptr<apache::thrift::transport::TTransport> transport_{};

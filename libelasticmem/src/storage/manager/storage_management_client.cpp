@@ -38,9 +38,39 @@ void storage_management_client::disconnect() {
 
 void storage_management_client::setup_block(int32_t block_id,
                                             const std::string &path,
+                                            int32_t slot_begin,
+                                            int32_t slot_end,
+                                            const std::vector<std::string> &chain,
                                             int32_t role,
                                             const std::string &next_block_name) {
-  client_->setup_block(block_id, path, role, next_block_name);
+  client_->setup_block(block_id, path, slot_begin, slot_end, chain, role, next_block_name);
+}
+
+std::pair<int32_t, int32_t> storage_management_client::slot_range(int32_t block_id) {
+  rpc_slot_range range;
+  client_->slot_range(range, block_id);
+  return std::make_pair(range.slot_begin, range.slot_end);
+}
+
+void storage_management_client::set_exporting(int32_t block_id,
+                                              const std::vector<std::string> &target_block_name,
+                                              int32_t slot_begin,
+                                              int32_t slot_end) {
+  client_->set_exporting(block_id, target_block_name, slot_begin, slot_end);
+}
+
+void storage_management_client::set_importing(int32_t block_id,
+                                              const std::string &path,
+                                              int32_t slot_begin,
+                                              int32_t slot_end,
+                                              const std::vector<std::string> &chain,
+                                              int32_t role,
+                                              const std::string &next_block_name) {
+  client_->set_importing(block_id, path, slot_begin, slot_end, chain, role, next_block_name);
+}
+
+void storage_management_client::set_regular(int32_t block_id, int32_t slot_begin, int32_t slot_end) {
+  client_->set_regular(block_id, slot_begin, slot_end);
 }
 
 std::string storage_management_client::path(int32_t block_id) {
@@ -79,6 +109,10 @@ void storage_management_client::resend_pending(int32_t block_id) {
 
 void storage_management_client::forward_all(int32_t block_id) {
   client_->forward_all(block_id);
+}
+
+void storage_management_client::export_slots(int32_t block_id) {
+  client_->export_slots(block_id);
 }
 
 }

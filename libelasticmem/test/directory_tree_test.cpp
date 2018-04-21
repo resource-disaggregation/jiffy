@@ -179,7 +179,7 @@ TEST_CASE("path_remove_test", "[file][dir]") {
   REQUIRE(alloc->num_free_blocks() == 4);
 
   REQUIRE(sm->COMMANDS.size() == 2);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/abcdef/example/a/b:0:nil");
+  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/abcdef/example/a/b:0:65536:0:0:nil");
   REQUIRE(sm->COMMANDS[1] == "reset:0");
 }
 
@@ -199,8 +199,8 @@ TEST_CASE("path_flush_test", "[file][dir]") {
 
   REQUIRE(alloc->num_free_blocks() == 4);
   REQUIRE(sm->COMMANDS.size() == 4);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/abcdef/example/a/b:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "setup_block:1:/sandbox/abcdef/example/c:0:nil");
+  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/abcdef/example/a/b:0:65536:0:0:nil");
+  REQUIRE(sm->COMMANDS[1] == "setup_block:1:/sandbox/abcdef/example/c:0:65536:1:0:nil");
   REQUIRE(sm->COMMANDS[2] == "flush:1:/tmp:/sandbox/abcdef/example/c");
   REQUIRE(sm->COMMANDS[3] == "flush:0:/tmp:/sandbox/abcdef/example/a/b");
 }

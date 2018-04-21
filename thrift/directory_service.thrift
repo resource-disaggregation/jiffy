@@ -97,14 +97,17 @@ service directory_service {
     throws (1: directory_service_exception ex),
 
   bool is_regular_file(1: string path)
-      throws (1: directory_service_exception ex),
+    throws (1: directory_service_exception ex),
 
   bool is_directory(1: string path)
     throws (1: directory_service_exception ex),
 
-  void reslove_failures(1: string path, 2: rpc_block_chain chain) // TODO: We should pass in chain id...
+  rpc_block_chain reslove_failures(1: string path, 2: rpc_block_chain chain) // TODO: We should pass in chain id...
     throws (1: directory_service_exception ex),
 
-  void add_blocks(1: string path, 2: rpc_block_chain chain, 3: i32 count) // TODO: We should pass in chain id...
-      throws (1: directory_service_exception ex),
+  rpc_block_chain add_replica_to_chain(1: string path, 2: rpc_block_chain chain) // TODO: We should pass in chain id...
+    throws (1: directory_service_exception ex),
+
+  void add_block_to_file(1: string path)
+    throws (1: directory_service_exception ex),
 }

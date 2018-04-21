@@ -330,19 +330,35 @@ directory_service_reslove_failures_presult::~directory_service_reslove_failures_
 }
 
 
-directory_service_add_blocks_args::~directory_service_add_blocks_args() throw() {
+directory_service_add_replica_to_chain_args::~directory_service_add_replica_to_chain_args() throw() {
 }
 
 
-directory_service_add_blocks_pargs::~directory_service_add_blocks_pargs() throw() {
+directory_service_add_replica_to_chain_pargs::~directory_service_add_replica_to_chain_pargs() throw() {
 }
 
 
-directory_service_add_blocks_result::~directory_service_add_blocks_result() throw() {
+directory_service_add_replica_to_chain_result::~directory_service_add_replica_to_chain_result() throw() {
 }
 
 
-directory_service_add_blocks_presult::~directory_service_add_blocks_presult() throw() {
+directory_service_add_replica_to_chain_presult::~directory_service_add_replica_to_chain_presult() throw() {
+}
+
+
+directory_service_add_block_to_file_args::~directory_service_add_block_to_file_args() throw() {
+}
+
+
+directory_service_add_block_to_file_pargs::~directory_service_add_block_to_file_pargs() throw() {
+}
+
+
+directory_service_add_block_to_file_result::~directory_service_add_block_to_file_result() throw() {
+}
+
+
+directory_service_add_block_to_file_presult::~directory_service_add_block_to_file_presult() throw() {
 }
 
 }} // namespace

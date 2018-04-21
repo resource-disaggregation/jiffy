@@ -20,8 +20,8 @@ class directory_service_handler : public directory_serviceIf {
   void open_or_create(rpc_data_status &_return,
                       const std::string &path,
                       const std::string &persistent_store_prefix,
-                      const int32_t num_blocks,
-                      const int32_t chain_length) override;
+                      int32_t num_blocks,
+                      int32_t chain_length) override;
   bool exists(const std::string &path) override;
   int64_t last_write_time(const std::string &path) override;
   void set_permissions(const std::string &path, rpc_perms perms, rpc_perm_options opts) override;
@@ -36,8 +36,9 @@ class directory_service_handler : public directory_serviceIf {
   void dstatus(rpc_data_status &_return, const std::string &path) override;
   bool is_regular_file(const std::string &path) override;
   bool is_directory(const std::string &path) override;
-  void reslove_failures(const std::string &path, const rpc_block_chain &chain) override;
-  void add_blocks(const std::string &path, const rpc_block_chain &chain, int32_t count) override;
+  void reslove_failures(rpc_block_chain& _return, const std::string& path, const rpc_block_chain& chain) override;
+  void add_replica_to_chain(rpc_block_chain &_return, const std::string &path, const rpc_block_chain &chain) override;
+  void add_block_to_file(const std::string &path) override;
  private:
   directory_service_exception make_exception(directory_ops_exception &ex) const;
   std::shared_ptr<directory_tree> shard_;

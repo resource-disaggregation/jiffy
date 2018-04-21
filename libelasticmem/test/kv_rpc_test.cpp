@@ -12,26 +12,24 @@ using namespace ::apache::thrift::transport;
 #define HOST "127.0.0.1"
 #define PORT 9090
 
-static auto blocks = test_utils::init_kv_blocks(NUM_BLOCKS, PORT, 0, 0);
-
 TEST_CASE("rpc_put_get_test", "[put][get]") {
+  auto blocks = test_utils::init_kv_blocks(NUM_BLOCKS, PORT, 0, 0);
   auto server = block_server::create(blocks, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   test_utils::wait_till_server_ready(HOST, PORT);
 
   block_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "!ok");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.get(std::to_string(i)).get() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.get(std::to_string(i)).get() == "key_not_found");
+    REQUIRE(client.get(std::to_string(i)).get() == "!key_not_found");
   }
 
   server->stop();
-  blocks[0]->reset();
   
   if (serve_thread.joinable()) {
     serve_thread.join();
@@ -39,13 +37,14 @@ TEST_CASE("rpc_put_get_test", "[put][get]") {
 }
 
 TEST_CASE("rpc_put_update_get_test", "[put][update][get]") {
+  auto blocks = test_utils::init_kv_blocks(NUM_BLOCKS, PORT, 0, 0);
   auto server = block_server::create(blocks, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   test_utils::wait_till_server_ready(HOST, PORT);
 
   block_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "!ok");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.get(std::to_string(i)).get() == std::to_string(i));
@@ -54,14 +53,13 @@ TEST_CASE("rpc_put_update_get_test", "[put][update][get]") {
     REQUIRE(client.update(std::to_string(i), std::to_string(i + 1000)).get() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.update(std::to_string(i), std::to_string(i + 1000)).get() == "key_not_found");
+    REQUIRE(client.update(std::to_string(i), std::to_string(i + 1000)).get() == "!key_not_found");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.get(std::to_string(i)).get() == std::to_string(i + 1000));
   }
 
   server->stop();
-  blocks[0]->reset();
   
   if (serve_thread.joinable()) {
     serve_thread.join();
@@ -69,13 +67,14 @@ TEST_CASE("rpc_put_update_get_test", "[put][update][get]") {
 }
 
 TEST_CASE("rpc_put_remove_get_test", "[put][remove][get]") {
+  auto blocks = test_utils::init_kv_blocks(NUM_BLOCKS, PORT, 0, 0);
   auto server = block_server::create(blocks, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   test_utils::wait_till_server_ready(HOST, PORT);
 
   block_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "!ok");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.get(std::to_string(i)).get() == std::to_string(i));
@@ -84,11 +83,10 @@ TEST_CASE("rpc_put_remove_get_test", "[put][remove][get]") {
     REQUIRE(client.remove(std::to_string(i)).get() == std::to_string(i));
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)).get() == "key_not_found");
+    REQUIRE(client.get(std::to_string(i)).get() == "!key_not_found");
   }
 
   server->stop();
-  blocks[0]->reset();
   
   if (serve_thread.joinable()) {
     serve_thread.join();
@@ -96,6 +94,7 @@ TEST_CASE("rpc_put_remove_get_test", "[put][remove][get]") {
 }
 
 TEST_CASE("rpc_storage_size_test", "[put][num_keys][storage_size][reset]") {
+  auto blocks = test_utils::init_kv_blocks(NUM_BLOCKS, PORT, 0, 0);
   auto server = block_server::create(blocks, HOST, PORT);
   std::thread serve_thread([&server] { server->serve(); });
   test_utils::wait_till_server_ready(HOST, PORT);
@@ -103,12 +102,11 @@ TEST_CASE("rpc_storage_size_test", "[put][num_keys][storage_size][reset]") {
   block_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
   REQUIRE(client.num_keys().get() == std::to_string(0));
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "!ok");
   }
   REQUIRE(client.num_keys().get() == std::to_string(1000));
 
   server->stop();
-  blocks[0]->reset();
   
   if (serve_thread.joinable()) {
     serve_thread.join();

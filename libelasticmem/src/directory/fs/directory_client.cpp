@@ -140,5 +140,23 @@ bool directory_client::is_directory(const std::string &path) {
   return client_->is_directory(path);
 }
 
+block_chain directory_client::resolve_failures(const std::string &path, const block_chain &chain) {
+  rpc_block_chain in, out;
+  in = directory_type_conversions::to_rpc(chain);
+  client_->reslove_failures(out, path, in);
+  return directory_type_conversions::from_rpc(out);
+}
+
+block_chain directory_client::add_replica_to_chain(const std::string &path, const block_chain &chain) {
+  rpc_block_chain in, out;
+  in = directory_type_conversions::to_rpc(chain);
+  client_->add_replica_to_chain(out, path, in);
+  return directory_type_conversions::from_rpc(out);
+}
+
+void directory_client::add_block_to_file(const std::string &path) {
+  client_->add_block_to_file(path);
+}
+
 }
 }

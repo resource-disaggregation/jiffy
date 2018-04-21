@@ -347,7 +347,7 @@ class block_allocation_serviceProcessorT : public ::apache::thrift::TDispatchPro
  public:
   block_allocation_serviceProcessorT(::apache::thrift::stdcxx::shared_ptr<block_allocation_serviceIf> iface) :
     iface_(iface) {
-    processMap_["add_blocks"] = ProcessFunctions(
+    processMap_["add_replica_to_chain"] = ProcessFunctions(
       &block_allocation_serviceProcessorT::process_add_blocks,
       &block_allocation_serviceProcessorT::process_add_blocks);
     processMap_["remove_blocks"] = ProcessFunctions(

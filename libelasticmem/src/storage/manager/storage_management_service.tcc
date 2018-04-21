@@ -52,13 +52,49 @@ uint32_t storage_management_service_setup_block_args::read(Protocol_* iprot) {
         break;
       case 3:
         if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->slot_begin);
+          this->__isset.slot_begin = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 4:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->slot_end);
+          this->__isset.slot_end = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 5:
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            this->chain.clear();
+            uint32_t _size4;
+            ::apache::thrift::protocol::TType _etype7;
+            xfer += iprot->readListBegin(_etype7, _size4);
+            this->chain.resize(_size4);
+            uint32_t _i8;
+            for (_i8 = 0; _i8 < _size4; ++_i8)
+            {
+              xfer += iprot->readString(this->chain[_i8]);
+            }
+            xfer += iprot->readListEnd();
+          }
+          this->__isset.chain = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 6:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
           xfer += iprot->readI32(this->chain_role);
           this->__isset.chain_role = true;
         } else {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 4:
+      case 7:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->next_block_name);
           this->__isset.next_block_name = true;
@@ -92,11 +128,31 @@ uint32_t storage_management_service_setup_block_args::write(Protocol_* oprot) co
   xfer += oprot->writeString(this->path);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("chain_role", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeFieldBegin("slot_begin", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32(this->slot_begin);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_end", ::apache::thrift::protocol::T_I32, 4);
+  xfer += oprot->writeI32(this->slot_end);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("chain", ::apache::thrift::protocol::T_LIST, 5);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->chain.size()));
+    std::vector<std::string> ::const_iterator _iter9;
+    for (_iter9 = this->chain.begin(); _iter9 != this->chain.end(); ++_iter9)
+    {
+      xfer += oprot->writeString((*_iter9));
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("chain_role", ::apache::thrift::protocol::T_I32, 6);
   xfer += oprot->writeI32(this->chain_role);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("next_block_name", ::apache::thrift::protocol::T_STRING, 4);
+  xfer += oprot->writeFieldBegin("next_block_name", ::apache::thrift::protocol::T_STRING, 7);
   xfer += oprot->writeString(this->next_block_name);
   xfer += oprot->writeFieldEnd();
 
@@ -120,11 +176,31 @@ uint32_t storage_management_service_setup_block_pargs::write(Protocol_* oprot) c
   xfer += oprot->writeString((*(this->path)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("chain_role", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeFieldBegin("slot_begin", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32((*(this->slot_begin)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_end", ::apache::thrift::protocol::T_I32, 4);
+  xfer += oprot->writeI32((*(this->slot_end)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("chain", ::apache::thrift::protocol::T_LIST, 5);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->chain)).size()));
+    std::vector<std::string> ::const_iterator _iter10;
+    for (_iter10 = (*(this->chain)).begin(); _iter10 != (*(this->chain)).end(); ++_iter10)
+    {
+      xfer += oprot->writeString((*_iter10));
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("chain_role", ::apache::thrift::protocol::T_I32, 6);
   xfer += oprot->writeI32((*(this->chain_role)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("next_block_name", ::apache::thrift::protocol::T_STRING, 4);
+  xfer += oprot->writeFieldBegin("next_block_name", ::apache::thrift::protocol::T_STRING, 7);
   xfer += oprot->writeString((*(this->next_block_name)));
   xfer += oprot->writeFieldEnd();
 
@@ -196,6 +272,966 @@ uint32_t storage_management_service_setup_block_result::write(Protocol_* oprot) 
 
 template <class Protocol_>
 uint32_t storage_management_service_setup_block_presult::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_slot_range_args::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t storage_management_service_slot_range_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("storage_management_service_slot_range_args");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_slot_range_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("storage_management_service_slot_range_pargs");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_slot_range_result::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->success.read(iprot);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t storage_management_service_slot_range_result::write(Protocol_* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("storage_management_service_slot_range_result");
+
+  if (this->__isset.success) {
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_STRUCT, 0);
+    xfer += this->success.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  } else if (this->__isset.ex) {
+    xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ex.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_slot_range_presult::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += (*(this->success)).read(iprot);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_set_exporting_args::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            this->target_block.clear();
+            uint32_t _size11;
+            ::apache::thrift::protocol::TType _etype14;
+            xfer += iprot->readListBegin(_etype14, _size11);
+            this->target_block.resize(_size11);
+            uint32_t _i15;
+            for (_i15 = 0; _i15 < _size11; ++_i15)
+            {
+              xfer += iprot->readString(this->target_block[_i15]);
+            }
+            xfer += iprot->readListEnd();
+          }
+          this->__isset.target_block = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->slot_begin);
+          this->__isset.slot_begin = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 4:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->slot_end);
+          this->__isset.slot_end = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t storage_management_service_set_exporting_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("storage_management_service_set_exporting_args");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("target_block", ::apache::thrift::protocol::T_LIST, 2);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->target_block.size()));
+    std::vector<std::string> ::const_iterator _iter16;
+    for (_iter16 = this->target_block.begin(); _iter16 != this->target_block.end(); ++_iter16)
+    {
+      xfer += oprot->writeString((*_iter16));
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_begin", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32(this->slot_begin);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_end", ::apache::thrift::protocol::T_I32, 4);
+  xfer += oprot->writeI32(this->slot_end);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_set_exporting_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("storage_management_service_set_exporting_pargs");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("target_block", ::apache::thrift::protocol::T_LIST, 2);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->target_block)).size()));
+    std::vector<std::string> ::const_iterator _iter17;
+    for (_iter17 = (*(this->target_block)).begin(); _iter17 != (*(this->target_block)).end(); ++_iter17)
+    {
+      xfer += oprot->writeString((*_iter17));
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_begin", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32((*(this->slot_begin)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_end", ::apache::thrift::protocol::T_I32, 4);
+  xfer += oprot->writeI32((*(this->slot_end)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_set_exporting_result::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t storage_management_service_set_exporting_result::write(Protocol_* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("storage_management_service_set_exporting_result");
+
+  if (this->__isset.ex) {
+    xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ex.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_set_exporting_presult::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_set_importing_args::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->path);
+          this->__isset.path = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->slot_begin);
+          this->__isset.slot_begin = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 4:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->slot_end);
+          this->__isset.slot_end = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 5:
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            this->chain.clear();
+            uint32_t _size18;
+            ::apache::thrift::protocol::TType _etype21;
+            xfer += iprot->readListBegin(_etype21, _size18);
+            this->chain.resize(_size18);
+            uint32_t _i22;
+            for (_i22 = 0; _i22 < _size18; ++_i22)
+            {
+              xfer += iprot->readString(this->chain[_i22]);
+            }
+            xfer += iprot->readListEnd();
+          }
+          this->__isset.chain = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 6:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->chain_role);
+          this->__isset.chain_role = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 7:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->next_block_name);
+          this->__isset.next_block_name = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t storage_management_service_set_importing_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("storage_management_service_set_importing_args");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->path);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_begin", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32(this->slot_begin);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_end", ::apache::thrift::protocol::T_I32, 4);
+  xfer += oprot->writeI32(this->slot_end);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("chain", ::apache::thrift::protocol::T_LIST, 5);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->chain.size()));
+    std::vector<std::string> ::const_iterator _iter23;
+    for (_iter23 = this->chain.begin(); _iter23 != this->chain.end(); ++_iter23)
+    {
+      xfer += oprot->writeString((*_iter23));
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("chain_role", ::apache::thrift::protocol::T_I32, 6);
+  xfer += oprot->writeI32(this->chain_role);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("next_block_name", ::apache::thrift::protocol::T_STRING, 7);
+  xfer += oprot->writeString(this->next_block_name);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_set_importing_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("storage_management_service_set_importing_pargs");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString((*(this->path)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_begin", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32((*(this->slot_begin)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_end", ::apache::thrift::protocol::T_I32, 4);
+  xfer += oprot->writeI32((*(this->slot_end)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("chain", ::apache::thrift::protocol::T_LIST, 5);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->chain)).size()));
+    std::vector<std::string> ::const_iterator _iter24;
+    for (_iter24 = (*(this->chain)).begin(); _iter24 != (*(this->chain)).end(); ++_iter24)
+    {
+      xfer += oprot->writeString((*_iter24));
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("chain_role", ::apache::thrift::protocol::T_I32, 6);
+  xfer += oprot->writeI32((*(this->chain_role)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("next_block_name", ::apache::thrift::protocol::T_STRING, 7);
+  xfer += oprot->writeString((*(this->next_block_name)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_set_importing_result::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t storage_management_service_set_importing_result::write(Protocol_* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("storage_management_service_set_importing_result");
+
+  if (this->__isset.ex) {
+    xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ex.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_set_importing_presult::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_set_regular_args::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->slot_begin);
+          this->__isset.slot_begin = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->slot_end);
+          this->__isset.slot_end = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t storage_management_service_set_regular_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("storage_management_service_set_regular_args");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_begin", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32(this->slot_begin);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_end", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32(this->slot_end);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_set_regular_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("storage_management_service_set_regular_pargs");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_begin", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32((*(this->slot_begin)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_end", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32((*(this->slot_end)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_set_regular_result::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t storage_management_service_set_regular_result::write(Protocol_* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("storage_management_service_set_regular_result");
+
+  if (this->__isset.ex) {
+    xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ex.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_set_regular_presult::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1776,15 +2812,192 @@ uint32_t storage_management_service_forward_all_presult::read(Protocol_* iprot) 
   return xfer;
 }
 
+
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::setup_block(const int32_t block_id, const std::string& path, const int32_t chain_role, const std::string& next_block_name)
+uint32_t storage_management_service_export_slots_args::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t storage_management_service_export_slots_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("storage_management_service_export_slots_args");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_export_slots_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("storage_management_service_export_slots_pargs");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_export_slots_result::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t storage_management_service_export_slots_result::write(Protocol_* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("storage_management_service_export_slots_result");
+
+  if (this->__isset.ex) {
+    xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ex.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t storage_management_service_export_slots_presult::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+void storage_management_serviceClientT<Protocol_>::setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name)
 {
-  send_setup_block(block_id, path, chain_role, next_block_name);
+  send_setup_block(block_id, path, slot_begin, slot_end, chain, chain_role, next_block_name);
   recv_setup_block();
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::send_setup_block(const int32_t block_id, const std::string& path, const int32_t chain_role, const std::string& next_block_name)
+void storage_management_serviceClientT<Protocol_>::send_setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("setup_block", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -1792,6 +3005,9 @@ void storage_management_serviceClientT<Protocol_>::send_setup_block(const int32_
   storage_management_service_setup_block_pargs args;
   args.block_id = &block_id;
   args.path = &path;
+  args.slot_begin = &slot_begin;
+  args.slot_end = &slot_end;
+  args.chain = &chain;
   args.chain_role = &chain_role;
   args.next_block_name = &next_block_name;
   args.write(this->oprot_);
@@ -1828,6 +3044,258 @@ void storage_management_serviceClientT<Protocol_>::recv_setup_block()
     this->iprot_->getTransport()->readEnd();
   }
   storage_management_service_setup_block_presult result;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+
+  if (result.__isset.ex) {
+    throw result.ex;
+  }
+  return;
+}
+
+template <class Protocol_>
+void storage_management_serviceClientT<Protocol_>::slot_range(rpc_slot_range& _return, const int32_t block_id)
+{
+  send_slot_range(block_id);
+  recv_slot_range(_return);
+}
+
+template <class Protocol_>
+void storage_management_serviceClientT<Protocol_>::send_slot_range(const int32_t block_id)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("slot_range", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  storage_management_service_slot_range_pargs args;
+  args.block_id = &block_id;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+void storage_management_serviceClientT<Protocol_>::recv_slot_range(rpc_slot_range& _return)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("slot_range") != 0) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  storage_management_service_slot_range_presult result;
+  result.success = &_return;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+
+  if (result.__isset.success) {
+    // _return pointer has now been filled
+    return;
+  }
+  if (result.__isset.ex) {
+    throw result.ex;
+  }
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "slot_range failed: unknown result");
+}
+
+template <class Protocol_>
+void storage_management_serviceClientT<Protocol_>::set_exporting(const int32_t block_id, const std::vector<std::string> & target_block, const int32_t slot_begin, const int32_t slot_end)
+{
+  send_set_exporting(block_id, target_block, slot_begin, slot_end);
+  recv_set_exporting();
+}
+
+template <class Protocol_>
+void storage_management_serviceClientT<Protocol_>::send_set_exporting(const int32_t block_id, const std::vector<std::string> & target_block, const int32_t slot_begin, const int32_t slot_end)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("set_exporting", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  storage_management_service_set_exporting_pargs args;
+  args.block_id = &block_id;
+  args.target_block = &target_block;
+  args.slot_begin = &slot_begin;
+  args.slot_end = &slot_end;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+void storage_management_serviceClientT<Protocol_>::recv_set_exporting()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("set_exporting") != 0) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  storage_management_service_set_exporting_presult result;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+
+  if (result.__isset.ex) {
+    throw result.ex;
+  }
+  return;
+}
+
+template <class Protocol_>
+void storage_management_serviceClientT<Protocol_>::set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name)
+{
+  send_set_importing(block_id, path, slot_begin, slot_end, chain, chain_role, next_block_name);
+  recv_set_importing();
+}
+
+template <class Protocol_>
+void storage_management_serviceClientT<Protocol_>::send_set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("set_importing", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  storage_management_service_set_importing_pargs args;
+  args.block_id = &block_id;
+  args.path = &path;
+  args.slot_begin = &slot_begin;
+  args.slot_end = &slot_end;
+  args.chain = &chain;
+  args.chain_role = &chain_role;
+  args.next_block_name = &next_block_name;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+void storage_management_serviceClientT<Protocol_>::recv_set_importing()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("set_importing") != 0) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  storage_management_service_set_importing_presult result;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+
+  if (result.__isset.ex) {
+    throw result.ex;
+  }
+  return;
+}
+
+template <class Protocol_>
+void storage_management_serviceClientT<Protocol_>::set_regular(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end)
+{
+  send_set_regular(block_id, slot_begin, slot_end);
+  recv_set_regular();
+}
+
+template <class Protocol_>
+void storage_management_serviceClientT<Protocol_>::send_set_regular(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("set_regular", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  storage_management_service_set_regular_pargs args;
+  args.block_id = &block_id;
+  args.slot_begin = &slot_begin;
+  args.slot_end = &slot_end;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+void storage_management_serviceClientT<Protocol_>::recv_set_regular()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("set_regular") != 0) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  storage_management_service_set_regular_presult result;
   result.read(this->iprot_);
   this->iprot_->readMessageEnd();
   this->iprot_->getTransport()->readEnd();
@@ -2330,6 +3798,65 @@ void storage_management_serviceClientT<Protocol_>::recv_forward_all()
 }
 
 template <class Protocol_>
+void storage_management_serviceClientT<Protocol_>::export_slots(const int32_t block_id)
+{
+  send_export_slots(block_id);
+  recv_export_slots();
+}
+
+template <class Protocol_>
+void storage_management_serviceClientT<Protocol_>::send_export_slots(const int32_t block_id)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("export_slots", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  storage_management_service_export_slots_pargs args;
+  args.block_id = &block_id;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+void storage_management_serviceClientT<Protocol_>::recv_export_slots()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("export_slots") != 0) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  storage_management_service_export_slots_presult result;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+
+  if (result.__isset.ex) {
+    throw result.ex;
+  }
+  return;
+}
+
+template <class Protocol_>
 bool storage_management_serviceProcessorT<Protocol_>::dispatchCall(::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, const std::string& fname, int32_t seqid, void* callContext) {
   typename ProcessMap::iterator pfn;
   pfn = processMap_.find(fname);
@@ -2393,7 +3920,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_setup_block(int32_
 
   storage_management_service_setup_block_result result;
   try {
-    iface_->setup_block(args.block_id, args.path, args.chain_role, args.next_block_name);
+    iface_->setup_block(args.block_id, args.path, args.slot_begin, args.slot_end, args.chain, args.chain_role, args.next_block_name);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -2450,7 +3977,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_setup_block(int32_
 
   storage_management_service_setup_block_result result;
   try {
-    iface_->setup_block(args.block_id, args.path, args.chain_role, args.next_block_name);
+    iface_->setup_block(args.block_id, args.path, args.slot_begin, args.slot_end, args.chain, args.chain_role, args.next_block_name);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -2480,6 +4007,464 @@ void storage_management_serviceProcessorT<Protocol_>::process_setup_block(int32_
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->postWrite(ctx, "storage_management_service.setup_block", bytes);
+  }
+}
+
+template <class Protocol_>
+void storage_management_serviceProcessorT<Protocol_>::process_slot_range(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("storage_management_service.slot_range", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "storage_management_service.slot_range");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "storage_management_service.slot_range");
+  }
+
+  storage_management_service_slot_range_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "storage_management_service.slot_range", bytes);
+  }
+
+  storage_management_service_slot_range_result result;
+  try {
+    iface_->slot_range(result.success, args.block_id);
+    result.__isset.success = true;
+  } catch (storage_management_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "storage_management_service.slot_range");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("slot_range", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "storage_management_service.slot_range");
+  }
+
+  oprot->writeMessageBegin("slot_range", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "storage_management_service.slot_range", bytes);
+  }
+}
+
+template <class Protocol_>
+void storage_management_serviceProcessorT<Protocol_>::process_slot_range(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("storage_management_service.slot_range", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "storage_management_service.slot_range");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "storage_management_service.slot_range");
+  }
+
+  storage_management_service_slot_range_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "storage_management_service.slot_range", bytes);
+  }
+
+  storage_management_service_slot_range_result result;
+  try {
+    iface_->slot_range(result.success, args.block_id);
+    result.__isset.success = true;
+  } catch (storage_management_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "storage_management_service.slot_range");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("slot_range", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "storage_management_service.slot_range");
+  }
+
+  oprot->writeMessageBegin("slot_range", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "storage_management_service.slot_range", bytes);
+  }
+}
+
+template <class Protocol_>
+void storage_management_serviceProcessorT<Protocol_>::process_set_exporting(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("storage_management_service.set_exporting", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "storage_management_service.set_exporting");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "storage_management_service.set_exporting");
+  }
+
+  storage_management_service_set_exporting_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "storage_management_service.set_exporting", bytes);
+  }
+
+  storage_management_service_set_exporting_result result;
+  try {
+    iface_->set_exporting(args.block_id, args.target_block, args.slot_begin, args.slot_end);
+  } catch (storage_management_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "storage_management_service.set_exporting");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("set_exporting", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "storage_management_service.set_exporting");
+  }
+
+  oprot->writeMessageBegin("set_exporting", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "storage_management_service.set_exporting", bytes);
+  }
+}
+
+template <class Protocol_>
+void storage_management_serviceProcessorT<Protocol_>::process_set_exporting(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("storage_management_service.set_exporting", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "storage_management_service.set_exporting");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "storage_management_service.set_exporting");
+  }
+
+  storage_management_service_set_exporting_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "storage_management_service.set_exporting", bytes);
+  }
+
+  storage_management_service_set_exporting_result result;
+  try {
+    iface_->set_exporting(args.block_id, args.target_block, args.slot_begin, args.slot_end);
+  } catch (storage_management_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "storage_management_service.set_exporting");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("set_exporting", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "storage_management_service.set_exporting");
+  }
+
+  oprot->writeMessageBegin("set_exporting", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "storage_management_service.set_exporting", bytes);
+  }
+}
+
+template <class Protocol_>
+void storage_management_serviceProcessorT<Protocol_>::process_set_importing(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("storage_management_service.set_importing", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "storage_management_service.set_importing");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "storage_management_service.set_importing");
+  }
+
+  storage_management_service_set_importing_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "storage_management_service.set_importing", bytes);
+  }
+
+  storage_management_service_set_importing_result result;
+  try {
+    iface_->set_importing(args.block_id, args.path, args.slot_begin, args.slot_end, args.chain, args.chain_role, args.next_block_name);
+  } catch (storage_management_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "storage_management_service.set_importing");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("set_importing", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "storage_management_service.set_importing");
+  }
+
+  oprot->writeMessageBegin("set_importing", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "storage_management_service.set_importing", bytes);
+  }
+}
+
+template <class Protocol_>
+void storage_management_serviceProcessorT<Protocol_>::process_set_importing(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("storage_management_service.set_importing", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "storage_management_service.set_importing");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "storage_management_service.set_importing");
+  }
+
+  storage_management_service_set_importing_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "storage_management_service.set_importing", bytes);
+  }
+
+  storage_management_service_set_importing_result result;
+  try {
+    iface_->set_importing(args.block_id, args.path, args.slot_begin, args.slot_end, args.chain, args.chain_role, args.next_block_name);
+  } catch (storage_management_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "storage_management_service.set_importing");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("set_importing", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "storage_management_service.set_importing");
+  }
+
+  oprot->writeMessageBegin("set_importing", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "storage_management_service.set_importing", bytes);
+  }
+}
+
+template <class Protocol_>
+void storage_management_serviceProcessorT<Protocol_>::process_set_regular(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("storage_management_service.set_regular", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "storage_management_service.set_regular");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "storage_management_service.set_regular");
+  }
+
+  storage_management_service_set_regular_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "storage_management_service.set_regular", bytes);
+  }
+
+  storage_management_service_set_regular_result result;
+  try {
+    iface_->set_regular(args.block_id, args.slot_begin, args.slot_end);
+  } catch (storage_management_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "storage_management_service.set_regular");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("set_regular", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "storage_management_service.set_regular");
+  }
+
+  oprot->writeMessageBegin("set_regular", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "storage_management_service.set_regular", bytes);
+  }
+}
+
+template <class Protocol_>
+void storage_management_serviceProcessorT<Protocol_>::process_set_regular(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("storage_management_service.set_regular", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "storage_management_service.set_regular");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "storage_management_service.set_regular");
+  }
+
+  storage_management_service_set_regular_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "storage_management_service.set_regular", bytes);
+  }
+
+  storage_management_service_set_regular_result result;
+  try {
+    iface_->set_regular(args.block_id, args.slot_begin, args.slot_end);
+  } catch (storage_management_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "storage_management_service.set_regular");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("set_regular", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "storage_management_service.set_regular");
+  }
+
+  oprot->writeMessageBegin("set_regular", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "storage_management_service.set_regular", bytes);
   }
 }
 
@@ -3402,6 +5387,120 @@ void storage_management_serviceProcessorT<Protocol_>::process_forward_all(int32_
 }
 
 template <class Protocol_>
+void storage_management_serviceProcessorT<Protocol_>::process_export_slots(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("storage_management_service.export_slots", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "storage_management_service.export_slots");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "storage_management_service.export_slots");
+  }
+
+  storage_management_service_export_slots_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "storage_management_service.export_slots", bytes);
+  }
+
+  storage_management_service_export_slots_result result;
+  try {
+    iface_->export_slots(args.block_id);
+  } catch (storage_management_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "storage_management_service.export_slots");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("export_slots", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "storage_management_service.export_slots");
+  }
+
+  oprot->writeMessageBegin("export_slots", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "storage_management_service.export_slots", bytes);
+  }
+}
+
+template <class Protocol_>
+void storage_management_serviceProcessorT<Protocol_>::process_export_slots(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("storage_management_service.export_slots", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "storage_management_service.export_slots");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "storage_management_service.export_slots");
+  }
+
+  storage_management_service_export_slots_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "storage_management_service.export_slots", bytes);
+  }
+
+  storage_management_service_export_slots_result result;
+  try {
+    iface_->export_slots(args.block_id);
+  } catch (storage_management_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "storage_management_service.export_slots");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("export_slots", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "storage_management_service.export_slots");
+  }
+
+  oprot->writeMessageBegin("export_slots", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "storage_management_service.export_slots", bytes);
+  }
+}
+
+template <class Protocol_>
 ::apache::thrift::stdcxx::shared_ptr< ::apache::thrift::TProcessor > storage_management_serviceProcessorFactoryT<Protocol_>::getProcessor(const ::apache::thrift::TConnectionInfo& connInfo) {
   ::apache::thrift::ReleaseHandler< storage_management_serviceIfFactory > cleanup(handlerFactory_);
   ::apache::thrift::stdcxx::shared_ptr< storage_management_serviceIf > handler(handlerFactory_->getHandler(connInfo), cleanup);
@@ -3410,14 +5509,14 @@ template <class Protocol_>
 }
 
 template <class Protocol_>
-void storage_management_serviceConcurrentClientT<Protocol_>::setup_block(const int32_t block_id, const std::string& path, const int32_t chain_role, const std::string& next_block_name)
+void storage_management_serviceConcurrentClientT<Protocol_>::setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name)
 {
-  int32_t seqid = send_setup_block(block_id, path, chain_role, next_block_name);
+  int32_t seqid = send_setup_block(block_id, path, slot_begin, slot_end, chain, chain_role, next_block_name);
   recv_setup_block(seqid);
 }
 
 template <class Protocol_>
-int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_setup_block(const int32_t block_id, const std::string& path, const int32_t chain_role, const std::string& next_block_name)
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -3426,6 +5525,9 @@ int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_setup_block
   storage_management_service_setup_block_pargs args;
   args.block_id = &block_id;
   args.path = &path;
+  args.slot_begin = &slot_begin;
+  args.slot_end = &slot_end;
+  args.chain = &chain;
   args.chain_role = &chain_role;
   args.next_block_name = &next_block_name;
   args.write(this->oprot_);
@@ -3478,6 +5580,363 @@ void storage_management_serviceConcurrentClientT<Protocol_>::recv_setup_block(co
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
       storage_management_service_setup_block_presult result;
+      result.read(this->iprot_);
+      this->iprot_->readMessageEnd();
+      this->iprot_->getTransport()->readEnd();
+
+      if (result.__isset.ex) {
+        sentry.commit();
+        throw result.ex;
+      }
+      sentry.commit();
+      return;
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+template <class Protocol_>
+void storage_management_serviceConcurrentClientT<Protocol_>::slot_range(rpc_slot_range& _return, const int32_t block_id)
+{
+  int32_t seqid = send_slot_range(block_id);
+  recv_slot_range(_return, seqid);
+}
+
+template <class Protocol_>
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_slot_range(const int32_t block_id)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("slot_range", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  storage_management_service_slot_range_pargs args;
+  args.block_id = &block_id;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+template <class Protocol_>
+void storage_management_serviceConcurrentClientT<Protocol_>::recv_slot_range(rpc_slot_range& _return, const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      this->iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(this->iprot_);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("slot_range") != 0) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      storage_management_service_slot_range_presult result;
+      result.success = &_return;
+      result.read(this->iprot_);
+      this->iprot_->readMessageEnd();
+      this->iprot_->getTransport()->readEnd();
+
+      if (result.__isset.success) {
+        // _return pointer has now been filled
+        sentry.commit();
+        return;
+      }
+      if (result.__isset.ex) {
+        sentry.commit();
+        throw result.ex;
+      }
+      // in a bad state, don't commit
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "slot_range failed: unknown result");
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+template <class Protocol_>
+void storage_management_serviceConcurrentClientT<Protocol_>::set_exporting(const int32_t block_id, const std::vector<std::string> & target_block, const int32_t slot_begin, const int32_t slot_end)
+{
+  int32_t seqid = send_set_exporting(block_id, target_block, slot_begin, slot_end);
+  recv_set_exporting(seqid);
+}
+
+template <class Protocol_>
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_set_exporting(const int32_t block_id, const std::vector<std::string> & target_block, const int32_t slot_begin, const int32_t slot_end)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("set_exporting", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  storage_management_service_set_exporting_pargs args;
+  args.block_id = &block_id;
+  args.target_block = &target_block;
+  args.slot_begin = &slot_begin;
+  args.slot_end = &slot_end;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+template <class Protocol_>
+void storage_management_serviceConcurrentClientT<Protocol_>::recv_set_exporting(const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      this->iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(this->iprot_);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("set_exporting") != 0) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      storage_management_service_set_exporting_presult result;
+      result.read(this->iprot_);
+      this->iprot_->readMessageEnd();
+      this->iprot_->getTransport()->readEnd();
+
+      if (result.__isset.ex) {
+        sentry.commit();
+        throw result.ex;
+      }
+      sentry.commit();
+      return;
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+template <class Protocol_>
+void storage_management_serviceConcurrentClientT<Protocol_>::set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name)
+{
+  int32_t seqid = send_set_importing(block_id, path, slot_begin, slot_end, chain, chain_role, next_block_name);
+  recv_set_importing(seqid);
+}
+
+template <class Protocol_>
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("set_importing", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  storage_management_service_set_importing_pargs args;
+  args.block_id = &block_id;
+  args.path = &path;
+  args.slot_begin = &slot_begin;
+  args.slot_end = &slot_end;
+  args.chain = &chain;
+  args.chain_role = &chain_role;
+  args.next_block_name = &next_block_name;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+template <class Protocol_>
+void storage_management_serviceConcurrentClientT<Protocol_>::recv_set_importing(const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      this->iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(this->iprot_);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("set_importing") != 0) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      storage_management_service_set_importing_presult result;
+      result.read(this->iprot_);
+      this->iprot_->readMessageEnd();
+      this->iprot_->getTransport()->readEnd();
+
+      if (result.__isset.ex) {
+        sentry.commit();
+        throw result.ex;
+      }
+      sentry.commit();
+      return;
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+template <class Protocol_>
+void storage_management_serviceConcurrentClientT<Protocol_>::set_regular(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end)
+{
+  int32_t seqid = send_set_regular(block_id, slot_begin, slot_end);
+  recv_set_regular(seqid);
+}
+
+template <class Protocol_>
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_set_regular(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("set_regular", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  storage_management_service_set_regular_pargs args;
+  args.block_id = &block_id;
+  args.slot_begin = &slot_begin;
+  args.slot_end = &slot_end;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+template <class Protocol_>
+void storage_management_serviceConcurrentClientT<Protocol_>::recv_set_regular(const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      this->iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(this->iprot_);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("set_regular") != 0) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      storage_management_service_set_regular_presult result;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
       this->iprot_->getTransport()->readEnd();
@@ -4180,6 +6639,91 @@ void storage_management_serviceConcurrentClientT<Protocol_>::recv_forward_all(co
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
       storage_management_service_forward_all_presult result;
+      result.read(this->iprot_);
+      this->iprot_->readMessageEnd();
+      this->iprot_->getTransport()->readEnd();
+
+      if (result.__isset.ex) {
+        sentry.commit();
+        throw result.ex;
+      }
+      sentry.commit();
+      return;
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+template <class Protocol_>
+void storage_management_serviceConcurrentClientT<Protocol_>::export_slots(const int32_t block_id)
+{
+  int32_t seqid = send_export_slots(block_id);
+  recv_export_slots(seqid);
+}
+
+template <class Protocol_>
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_export_slots(const int32_t block_id)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("export_slots", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  storage_management_service_export_slots_pargs args;
+  args.block_id = &block_id;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+template <class Protocol_>
+void storage_management_serviceConcurrentClientT<Protocol_>::recv_export_slots(const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      this->iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(this->iprot_);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("export_slots") != 0) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      storage_management_service_export_slots_presult result;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
       this->iprot_->getTransport()->readEnd();

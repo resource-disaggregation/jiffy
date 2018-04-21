@@ -273,8 +273,8 @@ class data_status {
     data_blocks_.clear();
   }
 
-  void add_data_block(const block_chain &block) {
-    data_blocks_.push_back(block);
+  void add_data_block(const block_chain &block, std::size_t i) {
+    data_blocks_.insert(data_blocks_.begin() + i, block);
   }
 
   void remove_data_block(std::size_t i) {
@@ -336,7 +336,8 @@ class directory_management_ops {
  public:
   virtual void touch(const std::string &path) = 0;
   virtual block_chain resolve_failures(const std::string &path, const block_chain &chain) = 0;
-  virtual block_chain add_blocks_to_chain(const std::string &path, const block_chain &chain, std::size_t count) = 0;
+  virtual block_chain add_replica_to_chain(const std::string &path, const block_chain &chain) = 0;
+  virtual void add_block_to_file(const std::string &path) = 0;
 };
 
 }

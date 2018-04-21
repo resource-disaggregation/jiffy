@@ -4,8 +4,33 @@ exception storage_management_exception {
   1: string msg
 }
 
+enum rpc_block_state {
+  rpc_regular = 0,
+  rpc_importing = 1,
+  rpc_exporting = 2,
+}
+
+struct rpc_slot_range {
+  1: required i32 slot_begin,
+  2: required i32 slot_end,
+}
+
 service storage_management_service {
-  void setup_block(1: i32 block_id, 2: string path, 3: i32 chain_role, 4: string next_block_name)
+  void setup_block(1: i32 block_id, 2: string path, 3: i32 slot_begin, 4: i32 slot_end, 5: list<string> chain,
+                   6: i32 chain_role, 7: string next_block_name)
+    throws (1: storage_management_exception ex),
+
+  rpc_slot_range slot_range(1: i32 block_id)
+    throws (1: storage_management_exception ex),
+
+  void set_exporting(1: i32 block_id, 2: list<string> target_block, 3: i32 slot_begin, 4: i32 slot_end)
+    throws (1: storage_management_exception ex),
+
+  void set_importing(1: i32 block_id, 2: string path, 3: i32 slot_begin, 4: i32 slot_end, 5: list<string> chain,
+                     6: i32 chain_role, 7: string next_block_name)
+    throws (1: storage_management_exception ex),
+
+  void set_regular(1: i32 block_id, 2: i32 slot_begin, 3: i32 slot_end)
     throws (1: storage_management_exception ex),
 
   string get_path(1: i32 block_id)
@@ -30,5 +55,8 @@ service storage_management_service {
     throws (1: storage_management_exception ex),
 
   void forward_all(1: i32 block_id)
+    throws (1: storage_management_exception ex),
+
+  void export_slots(1: i32 block_id)
     throws (1: storage_management_exception ex),
 }

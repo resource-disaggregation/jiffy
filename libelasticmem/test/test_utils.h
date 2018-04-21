@@ -17,14 +17,64 @@ class dummy_storage_manager : public elasticmem::storage::storage_management_ops
 
   void setup_block(const std::string &block_name,
                    const std::string &path,
+                   int32_t slot_begin,
+                   int32_t slot_end,
+                   const std::vector<std::string> &chain,
                    int32_t role,
                    const std::string &next_block_name) override {
-    COMMANDS.push_back("setup_block:" + block_name + ":" + path + ":" + std::to_string(role) + ":" + next_block_name);
+    std::string chain_str;
+    for (const auto &block: chain) {
+      chain_str += ":" + block;
+    }
+    COMMANDS.push_back(
+        "setup_block:" + block_name + ":" + path + ":" + std::to_string(slot_begin) + ":" + std::to_string(slot_end)
+            + chain_str + ":" + std::to_string(role) + ":" + next_block_name);
   }
+
+  std::pair<int32_t, int32_t> slot_range(const std::string &block_name) override {
+    COMMANDS.push_back("slot_range:" + block_name);
+    return std::pair<int32_t, int32_t>(0, -1);
+  };
 
   std::string path(const std::string &block_name) override {
     COMMANDS.push_back("get_path:" + block_name);
     return "";
+  }
+
+  void set_exporting(const std::string &block_name,
+                     const std::vector<std::string> &target_block,
+                     int32_t slot_begin,
+                     int32_t slot_end) override {
+    std::string block_str;
+    for (const auto &block: target_block) {
+      block_str += ":" + block;
+    }
+    COMMANDS.push_back("set_exporting:" + block_name + block_str + ":" + std::to_string(slot_begin) + ":"
+                           + std::to_string(slot_end));
+  }
+
+  void set_importing(const std::string &block_name,
+                     const std::string &path,
+                     int32_t slot_begin,
+                     int32_t slot_end,
+                     const std::vector<std::string> &chain,
+                     int32_t role,
+                     const std::string &next_block_name) override {
+    std::string chain_str;
+    for (const auto &block: chain) {
+      chain_str += ":" + block;
+    }
+    COMMANDS.push_back(
+        "set_importing:" + block_name + ":" + path + ":" + std::to_string(slot_begin) + ":" + std::to_string(slot_end)
+            + chain_str + ":" + std::to_string(role) + ":" + next_block_name);
+  }
+
+  void export_slots(const std::string &block_name) override {
+    COMMANDS.push_back("export_slots:" + block_name);
+  }
+
+  void set_regular(const std::string &block_name, int32_t slot_begin, int32_t slot_end) override {
+    COMMANDS.push_back("set_regular:" + block_name + ":" + std::to_string(slot_begin) + ":" + std::to_string(slot_end));
   }
 
   void load(const std::string &block_name,
@@ -43,12 +93,12 @@ class dummy_storage_manager : public elasticmem::storage::storage_management_ops
     COMMANDS.push_back("reset:" + block_name);
   }
 
-  size_t storage_capacity(const std::string &block_name) override {
+  std::size_t storage_capacity(const std::string &block_name) override {
     COMMANDS.push_back("storage_capacity:" + block_name);
     return 0;
   }
 
-  size_t storage_size(const std::string &block_name) override {
+  std::size_t storage_size(const std::string &block_name) override {
     COMMANDS.push_back("storage_size:" + block_name);
     return 0;
   }
@@ -91,13 +141,13 @@ class sequential_block_allocator : public elasticmem::directory::block_allocator
       free_.erase(std::remove(free_.begin(), free_.end(), block_name), free_.end());
     }
   }
-  size_t num_free_blocks() override {
+  std::size_t num_free_blocks() override {
     return free_.size();
   }
-  size_t num_allocated_blocks() override {
+  std::size_t num_allocated_blocks() override {
     return alloc_.size();
   }
-  size_t num_total_blocks() override {
+  std::size_t num_total_blocks() override {
     return alloc_.size() + free_.size();
   }
 
@@ -151,15 +201,15 @@ class dummy_block_allocator : public elasticmem::directory::block_allocator {
     num_free_ -= blocks.size();
   }
 
-  size_t num_free_blocks() override {
+  std::size_t num_free_blocks() override {
     return num_free_;
   }
 
-  size_t num_allocated_blocks() override {
+  std::size_t num_allocated_blocks() override {
     return num_alloc_;
   }
 
-  size_t num_total_blocks() override {
+  std::size_t num_total_blocks() override {
     return num_alloc_ + num_free_;
   }
   const std::vector<std::string> free_blocks() override {
@@ -225,6 +275,7 @@ class test_utils {
                                                                             0,
                                                                             static_cast<int32_t>(i));
       blks[i] = std::make_shared<elasticmem::storage::kv_block>(block_name);
+      blks[i]->slot_range(0, elasticmem::storage::block::SLOT_MAX);
     }
     return blks;
   }

@@ -5,7 +5,7 @@ exception block_allocation_service_exception {
 }
 
 service block_allocation_service {
-  void add_blocks(1: list<string> block_names)
+  void add_replica_to_chain(1: list<string> block_names)
     throws (1: block_allocation_service_exception ex),
 
   void remove_blocks(1: list<string> block_names)

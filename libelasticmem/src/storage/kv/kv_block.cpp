@@ -1,4 +1,6 @@
 #include "kv_block.h"
+#include "hash_slot.h"
+#include "../service/block_chain_client.h"
 
 namespace elasticmem {
 namespace storage {
@@ -21,45 +23,77 @@ kv_block::kv_block(const std::string &block_name,
       deser_(std::move(deser)),
       bytes_(0) {}
 
-bool kv_block::put(const key_type &key, const value_type &value) {
-  bytes_.fetch_add(key.size() + value.size());
-  return block_.insert(key, value);
+std::string kv_block::put(const key_type &key, const value_type &value) {
+  auto hash = hash_slot::get(key);
+  if (in_slot_range(hash)) {
+    bytes_.fetch_add(key.size() + value.size());
+    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+      return "!exporting:" + export_target_str();
+    }
+    if (block_.insert(key, value)) {
+      return "!ok";
+    } else {
+      return "!key_not_found";
+    }
+  }
+  return "!block_moved";
 }
 
 value_type kv_block::get(const key_type &key) {
-  value_type value;
-  if (block_.find(key, value)) {
-    return value;
+  auto hash = hash_slot::get(key);
+  if (in_slot_range(hash)) {
+    value_type value;
+    if (block_.find(key, value)) {
+      return value;
+    }
+    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+      return "!exporting:" + export_target_str();
+    }
+    return "!key_not_found";
   }
-  return "key_not_found";
+  return "!block_moved";
 }
 
 std::string kv_block::update(const key_type &key, const value_type &value) {
-  value_type old_val;
-  if (block_.update_fn(key, [&](value_type &v) {
-    if (value.size() > v.size()) {
-      bytes_.fetch_add(value.size() - v.size());
-    } else {
-      bytes_.fetch_sub(v.size() - value.size());
+  auto hash = hash_slot::get(key);
+  if (in_slot_range(hash)) {
+    value_type old_val;
+    if (block_.update_fn(key, [&](value_type &v) {
+      if (value.size() > v.size()) {
+        bytes_.fetch_add(value.size() - v.size());
+      } else {
+        bytes_.fetch_sub(v.size() - value.size());
+      }
+      old_val = v;
+      v = value;
+    })) {
+      return old_val;
     }
-    old_val = v;
-    v = value;
-  })) {
-    return old_val;
+    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+      return "!exporting:" + export_target_str();
+    }
+    return "!key_not_found";
   }
-  return "key_not_found";
+  return "!block_moved";
 }
 
 std::string kv_block::remove(const key_type &key) {
-  value_type old_val;
-  if (block_.erase_fn(key, [&](value_type &value) {
-    bytes_.fetch_sub(key.size() + value.size());
-    old_val = value;
-    return true;
-  })) {
-    return old_val;
+  auto hash = hash_slot::get(key);
+  if (in_slot_range(hash)) {
+    value_type old_val;
+    if (block_.erase_fn(key, [&](value_type &value) {
+      bytes_.fetch_sub(key.size() + value.size());
+      old_val = value;
+      return true;
+    })) {
+      return old_val;
+    }
+    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+      return "!exporting:" + export_target_str();
+    }
+    return "!key_not_found";
   }
-  return "key_not_found";
+  return "!block_moved";
 }
 
 void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) {
@@ -70,21 +104,17 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
       break;
     case kv_op_id::num_keys:
       if (!args.empty()) {
-        _return.emplace_back("args_error");
+        _return.emplace_back("!args_error");
       } else {
         _return.emplace_back(std::to_string(size()));
       }
       break;
     case kv_op_id::put:
       if (args.size() % 2 != 0) {
-        _return.emplace_back("args_error");
+        _return.emplace_back("!args_error");
       } else {
         for (size_t i = 0; i < args.size(); i += 2) {
-          if (put(args[i], args[i + 1])) {
-            _return.emplace_back("ok");
-          } else {
-            _return.emplace_back("key_already_exists");
-          }
+          _return.emplace_back(put(args[i], args[i + 1]));
         }
       }
       break;
@@ -95,7 +125,7 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
       break;
     case kv_op_id::update:
       if (args.size() % 2 != 0) {
-        _return.emplace_back("args_error");
+        _return.emplace_back("!args_error");
       } else {
         for (size_t i = 0; i < args.size(); i += 2) {
           _return.emplace_back(update(args[i], args[i + 1]));
@@ -106,6 +136,7 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
   }
 }
 
+// TODO: This should be atomic...
 void kv_block::reset() {
   block_.clear();
   reset_next_and_listen("nil");
@@ -113,6 +144,10 @@ void kv_block::reset() {
   subscriptions().clear();
   clients().clear();
   bytes_.store(0);
+  slot_range(0, -1);
+  state(block_state::regular);
+  chain({});
+  role(singleton);
 }
 
 std::size_t kv_block::size() const {
@@ -147,6 +182,43 @@ void kv_block::forward_all() {
     ++i;
   }
   ltable.unlock();
+}
+
+// TODO: Exporting isn't fault tolerant...
+void kv_block::export_slots() {
+  if (state() != block_state::exporting) {
+    throw std::logic_error("Source block is not in exporting state");
+  }
+
+  // TODO: This should be obtainable without acquiring locks...
+  // Extract the data
+  std::vector<std::string> export_data;
+  locked_hash_table_type ltable = block_.lock_table();
+  for (const auto &entry: ltable) {
+    if (in_export_slot_range(hash_slot::get(entry.first))) {
+      export_data.push_back(entry.first);
+      export_data.push_back(entry.second);
+    }
+  }
+  ltable.unlock();
+
+  // Send the data
+  block_chain_client dst(export_target());
+  auto dst_fut = dst.run_command(kv_op_id::put, export_data);
+  dst_fut.wait();
+  dst.disconnect();
+
+  // Remove our data
+  std::vector<std::string> remove_keys;
+  for (std::size_t i = 0; i < export_data.size(); i++) {
+    if (i % 2) {
+      remove_keys.push_back(export_data.back());
+    }
+    remove_keys.pop_back();
+  }
+  block_chain_client src(chain());
+  auto src_fut = dst.run_command(kv_op_id::remove, remove_keys);
+  src_fut.wait();
 }
 
 std::size_t kv_block::storage_capacity() {

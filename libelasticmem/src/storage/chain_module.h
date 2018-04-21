@@ -21,17 +21,6 @@
 namespace elasticmem {
 namespace storage {
 
-class chain_exception : public std::exception {
- public:
-  explicit chain_exception(std::string msg) : msg_(std::move(msg)) {}
-
-  char const *what() const noexcept override {
-    return msg_.c_str();
-  }
- private:
-  std::string msg_;
-};
-
 enum chain_role {
   singleton = 0,
   head = 1,
@@ -145,6 +134,14 @@ class chain_module : public block {
     return role_;
   }
 
+  void chain(const std::vector<std::string>& chain) {
+    chain_ = chain;
+  }
+
+  const std::vector<std::string>& chain() {
+    return chain_;
+  }
+
   bool is_head() const {
     return role() == chain_role::head || role() == chain_role::singleton;
   }
@@ -192,6 +189,7 @@ class chain_module : public block {
   int64_t chain_seq_no_{0};
   std::unique_ptr<next_block_cxn> next_{nullptr};
   std::unique_ptr<prev_block_cxn> prev_{nullptr};
+  std::vector<std::string> chain_;
   std::thread response_processor_;
   cuckoohash_map<int64_t, chain_op> pending_;
 };

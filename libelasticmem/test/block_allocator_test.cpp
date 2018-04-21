@@ -4,7 +4,7 @@
 
 using namespace ::elasticmem::directory;
 
-TEST_CASE("random_block_allocator_test", "[allocate][free][add_blocks][remove_blocks]") {
+TEST_CASE("random_block_allocator_test", "[allocate][free][add_replica_to_chain][remove_blocks]") {
   std::vector<std::string> blocks = {"a", "b", "c", "d"};
   random_block_allocator allocator(blocks);
 

@@ -43,7 +43,7 @@ class kv_block : public chain_module {
                     std::shared_ptr<serializer> ser = std::make_shared<binary_serializer>(),
                     std::shared_ptr<deserializer> deser = std::make_shared<binary_deserializer>());
 
-  bool put(const key_type &key, const value_type &value);
+  std::string put(const key_type &key, const value_type &value);
 
   value_type get(const key_type &key);
 
@@ -67,6 +67,8 @@ class kv_block : public chain_module {
 
   void reset() override;
   void forward_all() override;
+
+  void export_slots() override;
 
  private:
   hash_table_type block_;

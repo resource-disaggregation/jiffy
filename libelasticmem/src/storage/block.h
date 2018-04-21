@@ -7,6 +7,7 @@
 #include <cstring>
 #include <algorithm>
 #include <stdexcept>
+#include <iostream>
 #include "notification/subscription_map.h"
 #include "service/block_response_client_map.h"
 
@@ -20,6 +21,12 @@ enum block_op_type : uint8_t {
   mutator = 1
 };
 
+enum block_state {
+  regular = 0,
+  importing = 1,
+  exporting = 2
+};
+
 struct block_op {
   block_op_type type;
   char name[MAX_BLOCK_OP_NAME_SIZE];
@@ -29,10 +36,20 @@ struct block_op {
   }
 };
 
+
+// TODO: Setting metadata should be atomic: e.g., reset function, or setup block function, should acquire lock before
+// setting metadata
 class block {
  public:
-  explicit block(const std::vector<block_op> &block_ops, const std::string &block_name)
-      : block_ops_(block_ops), block_name_(std::move(block_name)) {}
+  static const int32_t SLOT_MAX = 65536;
+
+  explicit block(const std::vector<block_op> &block_ops, std::string block_name)
+      : block_ops_(block_ops),
+        path_(""),
+        block_name_(std::move(block_name)),
+        state_(block_state::regular),
+        slot_range_(0, -1),
+        export_slot_range_(0, -1) {}
 
   virtual void run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) = 0;
 
@@ -45,16 +62,66 @@ class block {
     run_command(_return, oid, args);
   }
 
-  void path(const std::string& path) {
+  void path(const std::string &path) {
     path_ = path;
   }
 
-  const std::string& path() const {
+  const std::string &path() const {
     return path_;
   }
 
-  const std::string& name() const {
+  const std::string &name() const {
     return block_name_;
+  }
+
+  void slot_range(int32_t slot_begin, int32_t slot_end) {
+    slot_range_.first = slot_begin;
+    slot_range_.second = slot_end;
+  }
+
+  const std::pair<int32_t, int32_t> &slot_range() const {
+    return slot_range_;
+  }
+
+  bool in_slot_range(int32_t slot) {
+    return slot >= slot_range_.first && slot <= slot_range_.second;
+  }
+
+  void state(block_state state) {
+    state_ = state;
+  }
+
+  const block_state &state() const {
+    return state_;
+  }
+
+  void export_slot_range(int32_t slot_begin, int32_t slot_end) {
+    export_slot_range_.first = slot_begin;
+    export_slot_range_.second = slot_end;
+  }
+
+  const std::pair<int32_t, int32_t>& export_slot_range() {
+    return export_slot_range_;
+  };
+
+  bool in_export_slot_range(int32_t slot) {
+    return slot >= export_slot_range_.first && slot <= export_slot_range_.second;
+  }
+
+  void export_target(const std::vector<std::string>& target) {
+    export_target_ = target;
+    for (const auto& block: target) {
+      export_target_str_ += (block + ":");
+    }
+    export_target_str_.pop_back();
+  }
+
+  const std::vector<std::string>& export_target() const {
+    return export_target_;
+  }
+
+  const std::string export_target_str() const {
+    return export_target_str_;
   }
 
   bool is_accessor(int i) const {
@@ -84,11 +151,13 @@ class block {
 
   virtual void reset() = 0;
 
-  subscription_map& subscriptions() {
+  virtual void export_slots() = 0;
+
+  subscription_map &subscriptions() {
     return sub_map_;
   }
 
-  block_response_client_map& clients() {
+  block_response_client_map &clients() {
     return client_map_;
   }
 
@@ -108,6 +177,14 @@ class block {
   const std::vector<block_op> &block_ops_;
   std::string path_;
   std::string block_name_;
+
+  block_state state_;
+  std::pair<int32_t, int32_t> slot_range_;
+
+  std::pair<int32_t, int32_t> export_slot_range_;
+  std::vector<std::string> export_target_;
+  std::string export_target_str_;
+
   subscription_map sub_map_{};
   block_response_client_map client_map_{};
 };

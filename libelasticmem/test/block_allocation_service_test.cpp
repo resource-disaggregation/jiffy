@@ -11,7 +11,7 @@ using namespace ::apache::thrift::transport;
 #define HOST "127.0.0.1"
 #define PORT 9090
 
-TEST_CASE("block_allocation_service_test", "[add_blocks][remove_blocks]") {
+TEST_CASE("block_allocation_service_test", "[add_replica_to_chain][remove_blocks]") {
   auto alloc = std::make_shared<dummy_block_allocator>(4);
   auto server = block_allocation_server::create(alloc, HOST, PORT);
   std::thread serve_thread([&server] {

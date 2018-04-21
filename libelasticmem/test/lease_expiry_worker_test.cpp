@@ -31,9 +31,9 @@ TEST_CASE("lease_manager_test") {
   REQUIRE(!tree->exists("/sandbox/a/b/file.txt"));
   REQUIRE(!tree->exists("/sandbox/a/file.txt"));
   REQUIRE(sm->COMMANDS.size() == 5);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/a/b/c/file.txt:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "setup_block:1:/sandbox/a/b/file.txt:0:nil");
-  REQUIRE(sm->COMMANDS[2] == "setup_block:2:/sandbox/a/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/a/b/c/file.txt:0:65536:0:0:nil");
+  REQUIRE(sm->COMMANDS[1] == "setup_block:1:/sandbox/a/b/file.txt:0:65536:1:0:nil");
+  REQUIRE(sm->COMMANDS[2] == "setup_block:2:/sandbox/a/file.txt:0:65536:2:0:nil");
   REQUIRE(sm->COMMANDS[3] == "reset:1");
   REQUIRE(sm->COMMANDS[4] == "reset:2");
 

@@ -17,7 +17,26 @@ class storage_management_client {
   void connect(const std::string &host, int port);
   void disconnect();
 
-  void setup_block(int32_t block_id, const std::string &path, int32_t role, const std::string &next_block_name);
+  void setup_block(int32_t block_id,
+                     const std::string &path,
+                     int32_t slot_begin,
+                     int32_t slot_end,
+                     const std::vector<std::string> &chain,
+                     int32_t role,
+                     const std::string &next_block_name);
+  std::pair<int32_t, int32_t> slot_range(int32_t block_id);
+  void set_exporting(int32_t block_id,
+                     const std::vector<std::string> &target_block_name,
+                     int32_t slot_begin,
+                     int32_t slot_end);
+  void set_importing(int32_t block_id,
+                       const std::string &path,
+                       int32_t slot_begin,
+                       int32_t slot_end,
+                       const std::vector<std::string> &chain,
+                       int32_t role,
+                       const std::string &next_block_name);
+  void set_regular(int32_t block_id, int32_t slot_begin, int32_t slot_end);
   std::string path(int32_t block_id);
   void flush(int32_t block_id, const std::string &persistent_store_prefix, const std::string &path);
   void load(int32_t block_id, const std::string &persistent_store_prefix, const std::string &path);
@@ -26,6 +45,7 @@ class storage_management_client {
   int64_t storage_size(int32_t block_id);
   void resend_pending(int32_t block_id);
   void forward_all(int32_t block_id);
+  void export_slots(int32_t block_id);
 
  private:
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};

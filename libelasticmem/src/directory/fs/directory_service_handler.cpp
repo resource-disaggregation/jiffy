@@ -179,17 +179,30 @@ bool directory_service_handler::is_directory(const std::string &path) {
   }
 }
 
-void directory_service_handler::reslove_failures(const std::string &path, const rpc_block_chain &chain) {
+void directory_service_handler::reslove_failures(rpc_block_chain &_return,
+                                                 const std::string &path,
+                                                 const rpc_block_chain &chain) {
   try {
-    shard_->resolve_failures(path, directory_type_conversions::from_rpc(chain));
+    auto ret = shard_->resolve_failures(path, directory_type_conversions::from_rpc(chain));
+    _return = directory_type_conversions::to_rpc(ret);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
   }
 }
 
-void directory_service_handler::add_blocks(const std::string &path, const rpc_block_chain &chain, const int32_t count) {
+void directory_service_handler::add_replica_to_chain(rpc_block_chain &_return, const std::string &path,
+                                                     const rpc_block_chain &chain) {
   try {
-    shard_->add_blocks_to_chain(path, directory_type_conversions::from_rpc(chain), count);
+    auto ret = shard_->add_replica_to_chain(path, directory_type_conversions::from_rpc(chain));
+    _return = directory_type_conversions::to_rpc(ret);
+  } catch (directory_ops_exception &e) {
+    throw make_exception(e);
+  }
+}
+
+void directory_service_handler::add_block_to_file(const std::string &path) {
+  try {
+    shard_->add_block_to_file(path);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
   }
