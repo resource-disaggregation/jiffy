@@ -18,7 +18,7 @@ class directory_type_conversions {
   }
 
   static replica_chain from_rpc(const rpc_replica_chain &rpc) {
-    return replica_chain{rpc.block_names, std::make_pair(rpc.slot_begin, rpc.slot_end)};
+    return replica_chain{rpc.block_names, std::make_pair(rpc.slot_begin, rpc.slot_end), chain_status::stable};
   }
 
   static rpc_data_status to_rpc(const data_status &status) {

@@ -318,7 +318,7 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
       storage_->resend_pending(fixed_chain[0]);
     }
   }
-  return replica_chain{fixed_chain, chain.slot_range};
+  return replica_chain{fixed_chain, chain.slot_range, chain_status::stable};
 }
 
 replica_chain directory_tree::add_replica_to_chain(const std::string &path, const replica_chain &chain) {
@@ -365,77 +365,17 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
                         chain_role::mid,
                         new_blocks.front());
 
-  return replica_chain{updated_chain, chain.slot_range};
+  return replica_chain{updated_chain, chain.slot_range, chain_status::stable};
 }
 
 void directory_tree::add_block_to_file(const std::string &path) {
-  using namespace storage;
   LOG(log_level::info) << "Adding new block to file " << path;
-
-  auto status = dstatus(path);
-
-  // Get the block with largest size
-  std::vector<std::future<std::size_t>> futures;
-  for (const auto &block: status.data_blocks()) {
-    futures.push_back(std::async([&]() -> std::size_t { return storage_->storage_size(block.block_names.back()); }));
-  }
-  size_t i = 0;
-  size_t max_size = 0;
-  size_t max_pos = 0;
-  for (auto &future: futures) {
-    size_t sz = future.get();
-    if (sz > max_size) {
-      max_size = sz;
-      max_pos = i;
-    }
-    i++;
-  }
-
-  // Split the block's slot range in two
-  auto old_chain = status.data_blocks().at(max_pos);
-  auto slot_range = storage_->slot_range(old_chain.block_names.back());
-  auto slot_begin = slot_range.first;
-  auto slot_end = slot_range.second;
-  auto slot_mid = (slot_end + slot_begin) / 2; // TODO: We can get a better split...
-
-  // Allocate the new chain
-  replica_chain new_chain{allocator_->allocate(status.chain_length(), {}), std::make_pair(slot_begin, slot_mid)};
-  assert(new_chain.block_names.size() == chain_length);
-
-  // Set old chain to exporting and new chain to importing
-  if (status.chain_length() == 1) {
-    storage_->set_importing(new_chain.block_names[0],
-                            path,
-                            slot_mid + 1,
-                            slot_end,
-                            new_chain.block_names,
-                            chain_role::singleton,
-                            "nil");
-    storage_->set_exporting(old_chain.block_names[0], new_chain.block_names, slot_mid + 1, slot_end);
-  } else {
-    for (std::size_t j = 0; j < status.chain_length(); ++j) {
-      std::string block_name = new_chain.block_names[j];
-      std::string next_block_name = (j == status.chain_length() - 1) ? "nil" : new_chain.block_names[j + 1];
-      int32_t
-          role = (j == 0) ? chain_role::head : (j == status.chain_length() - 1) ? chain_role::tail : chain_role::mid;
-      storage_->set_importing(block_name, path, slot_mid + 1, slot_end, new_chain.block_names, role, next_block_name);
-    }
-    for (std::size_t j = 0; j < status.chain_length(); ++j) {
-      storage_->set_exporting(old_chain.block_names[j], new_chain.block_names, slot_mid + 1, slot_end);
-    }
-  }
-
-  // TODO: None of this is atomic...
-  std::thread([&, path, max_pos, old_chain, new_chain, status] {
-    storage_->export_slots(old_chain.block_names.front());
-    for (std::size_t j = 0; j < status.chain_length(); ++j) {
-      storage_->set_regular(old_chain.block_names[j], slot_begin, slot_mid);
-      storage_->set_regular(new_chain.block_names[j], slot_mid + 1, slot_end);
-    }
-    auto s = status;
-    s.update_data_block_slots(max_pos, slot_begin, slot_mid);
-    s.add_data_block(new_chain, max_pos + 1);
-    get_node_as_file(path)->dstatus(s);
+  auto storage = storage_;
+  auto node = get_node_as_file(path);
+  auto ctx = node->setup_export(storage, allocator_, path);
+  std::thread([node, storage, ctx]{
+    storage->export_slots(ctx.from_block.block_names.front());
+    node->finalize_export(storage, ctx);
   }).detach();
 }
 

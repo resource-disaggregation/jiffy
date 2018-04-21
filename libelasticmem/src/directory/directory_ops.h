@@ -138,9 +138,15 @@ enum storage_mode {
   on_disk = 3
 };
 
+enum chain_status {
+  stable = 0,
+  exporting = 1,
+};
+
 struct replica_chain {
   std::vector<std::string> block_names;
   std::pair<int32_t, int32_t> slot_range;
+  chain_status status;
 
   const std::string &head() const {
     return block_names.front();
@@ -293,6 +299,14 @@ class data_status {
   void update_data_block_slots(std::size_t i, int32_t slot_begin, int32_t slot_end) {
     data_blocks_[i].slot_range.first = slot_begin;
     data_blocks_[i].slot_range.second = slot_end;
+  }
+
+  chain_status get_data_block_status(std::size_t i) const {
+    return data_blocks_[i].status;
+  }
+
+  void set_data_block_status(std::size_t i, chain_status status) {
+    data_blocks_[i].status = status;
   }
 
  private:

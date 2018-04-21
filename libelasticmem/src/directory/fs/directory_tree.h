@@ -6,12 +6,14 @@
 #include <atomic>
 #include <map>
 #include <shared_mutex>
+#include <future>
 
 #include "../directory_ops.h"
 #include "../block/block_allocator.h"
 #include "../../utils/time_utils.h"
 #include "../../storage/storage_management_ops.h"
 #include "../../utils/directory_utils.h"
+#include "../../storage/chain_module.h"
 
 namespace elasticmem {
 namespace directory {
@@ -57,6 +59,15 @@ class ds_node {
 
 class ds_file_node : public ds_node {
  public:
+  struct export_ctx {
+    size_t block_idx{};
+    int32_t slot_begin{};
+    int32_t slot_mid{};
+    int32_t slot_end{};
+    replica_chain from_block;
+    replica_chain to_block;
+  };
+
   explicit ds_file_node(const std::string &name)
       : ds_node(name, file_status(file_type::regular, perms(perms::all), utils::time_utils::now_ms())),
         dstatus_{} {}
@@ -123,6 +134,87 @@ class ds_file_node : public ds_node {
     }
     dstatus_.remove_all_data_blocks();
     dstatus_.mode(storage_mode::on_disk);
+  }
+
+  export_ctx setup_export(std::shared_ptr<storage::storage_management_ops> storage,
+                          const std::shared_ptr<block_allocator> &allocator,
+                          const std::string &path) {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    // Get the block with largest size
+    using namespace storage;
+    std::vector<std::future<std::size_t>> futures;
+    for (const auto &block: dstatus_.data_blocks()) {
+      futures.push_back(std::async([&]() -> std::size_t { return storage->storage_size(block.block_names.back()); }));
+    }
+    size_t i = 0;
+    size_t max_size = 0;
+    size_t max_pos = 0;
+    for (auto &future: futures) {
+      size_t sz = future.get();
+      if (sz > max_size && dstatus_.get_data_block_status(i) != chain_status::exporting) {
+        max_size = sz;
+        max_pos = i;
+      }
+      i++;
+    }
+
+    dstatus_.set_data_block_status(max_pos, chain_status::exporting);
+
+    // Split the block's slot range in two
+    auto old_chain = dstatus_.data_blocks().at(max_pos);
+    auto slot_range = storage->slot_range(old_chain.block_names.back());
+    auto slot_begin = slot_range.first;
+    auto slot_end = slot_range.second;
+    auto slot_mid = (slot_end + slot_begin) / 2; // TODO: We can get a better split...
+
+    // Allocate the new chain
+    replica_chain new_chain
+        {allocator->allocate(dstatus_.chain_length(), {}), std::make_pair(slot_begin, slot_mid),
+         chain_status::stable};
+    assert(new_chain.block_names.size() == chain_length);
+
+    // Set old chain to exporting and new chain to importing
+    if (dstatus_.chain_length() == 1) {
+      storage->set_importing(new_chain.block_names[0],
+                             path,
+                             slot_mid + 1,
+                             slot_end,
+                             new_chain.block_names,
+                             chain_role::singleton,
+                             "nil");
+      storage->set_exporting(old_chain.block_names[0], new_chain.block_names, slot_mid + 1, slot_end);
+    } else {
+      for (std::size_t j = 0; j < dstatus_.chain_length(); ++j) {
+        std::string block_name = new_chain.block_names[j];
+        std::string next_block_name = (j == dstatus_.chain_length() - 1) ? "nil" : new_chain.block_names[j + 1];
+        int32_t
+            role =
+            (j == 0) ? chain_role::head : (j == dstatus_.chain_length() - 1) ? chain_role::tail : chain_role::mid;
+        storage->set_importing(block_name,
+                               path,
+                               slot_mid + 1,
+                               slot_end,
+                               new_chain.block_names,
+                               role,
+                               next_block_name);
+      }
+      for (std::size_t j = 0; j < dstatus_.chain_length(); ++j) {
+        storage->set_exporting(old_chain.block_names[j], new_chain.block_names, slot_mid + 1, slot_end);
+      }
+    }
+
+    return export_ctx{max_pos, slot_begin, slot_mid, slot_end, old_chain, new_chain};
+  }
+
+  void finalize_export(std::shared_ptr<storage::storage_management_ops> storage, const export_ctx &ctx) {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    for (std::size_t j = 0; j < dstatus_.chain_length(); ++j) {
+      storage->set_regular(ctx.from_block.block_names[j], ctx.slot_begin, ctx.slot_mid);
+      storage->set_regular(ctx.to_block.block_names[j], ctx.slot_mid + 1, ctx.slot_end);
+    }
+    dstatus_.update_data_block_slots(ctx.block_idx, ctx.slot_begin, ctx.slot_mid);
+    dstatus_.set_data_block_status(ctx.block_idx, chain_status::stable);
+    dstatus_.add_data_block(ctx.to_block, ctx.block_idx + 1);
   }
 
  private:
@@ -279,7 +371,8 @@ class directory_tree : public directory_ops, public directory_management_ops {
   bool is_directory(const std::string &path) override;
 
   void touch(const std::string &path) override;
-  replica_chain resolve_failures(const std::string &path, const replica_chain &chain) override; // TODO: Take id as input
+  replica_chain resolve_failures(const std::string &path,
+                                 const replica_chain &chain) override; // TODO: Take id as input
   replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) override;
   void add_block_to_file(const std::string &path) override;
 
