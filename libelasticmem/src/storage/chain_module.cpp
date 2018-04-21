@@ -59,11 +59,10 @@ void chain_module::request(sequence_id seq, int32_t oid, const std::vector<std::
   }
   std::vector<std::string> result;
   if (state() == block_state::importing) {
-    if (args.back() != "!redirected") {
-      result.emplace_back("!block_moved");
-    } else {
-      result.pop_back();
+    if (args.back() == "!redirected") {
       run_command(result, oid, args);
+    } else {
+      result.emplace_back("!block_moved");
     }
   } else {
     // Let specific block implementation handle exporting cases

@@ -32,7 +32,11 @@ enum kv_op_id : int32_t {
   num_keys = 1,
   put = 2,
   remove = 3,
-  update = 4
+  update = 4,
+  zget = 5,
+  zput = 6,
+  zremove = 7,
+  zupdate = 8
 };
 
 class kv_block : public chain_module {
