@@ -19,6 +19,7 @@ std::vector<block_op> KV_OPS = {block_op{block_op_type::accessor, "get"},
                                 block_op{block_op_type::mutator, "zupdate"}};
 
 kv_block::kv_block(const std::string &block_name,
+                   std::size_t capacity,
                    std::shared_ptr<persistent::persistent_service> persistent,
                    std::string local_storage_prefix,
                    std::shared_ptr<serializer> ser,
@@ -28,7 +29,8 @@ kv_block::kv_block(const std::string &block_name,
       local_storage_prefix_(std::move(local_storage_prefix)),
       ser_(std::move(ser)),
       deser_(std::move(deser)),
-      bytes_(0) {}
+      bytes_(0),
+      capacity_(capacity) {}
 
 std::string kv_block::put(const key_type &key, const value_type &value) {
   auto hash = hash_slot::get(key);
@@ -249,7 +251,7 @@ void kv_block::export_slots() {
 }
 
 std::size_t kv_block::storage_capacity() {
-  return block_.capacity(); // TODO: This should return the storage_capacity in bytes...
+  return capacity_;
 }
 
 std::size_t kv_block::storage_size() {

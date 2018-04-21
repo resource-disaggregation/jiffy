@@ -41,7 +41,11 @@ if [ "$NUM_BLOCKS" = "" ]; then
   NUM_BLOCKS="1"
 fi
 
+if [ "$BLOCK_CAPACITY" = "" ]; then
+  NUM_BLOCKS="134217728"
+fi
+
 $sbin/../build/storage/storaged --address $BIND_ADDRESS --service-port $SERVICE_PORT \
   --management-port $MANAGEMENT_SERVICE_PORT --block-address $BLOCK_ADDRESS --block-port $BLOCK_SERVICE_PORT \
   --notification-port $NOTIFICATION_SERVICE_PORT --chain-port $CHAIN_PORT --num-blocks $NUM_BLOCKS \
-  2>$LOG_PATH/storage.stderr 1>$LOG_PATH/storage.stdout &
+  --block-capacity $BLOCK_CAPACITY 2>$LOG_PATH/storage.stderr 1>$LOG_PATH/storage.stdout &

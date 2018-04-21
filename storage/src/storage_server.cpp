@@ -65,6 +65,8 @@ int main(int argc, char **argv) {
       "Port that block server listens on for chain requests"));
   opts.add(cmd_option("num-blocks", 'n', false).set_default("64").set_description(
       "Number of blocks to advertise"));
+  opts.add(cmd_option("block-capacity", 'd', false).set_default("134217728").set_description(
+      "Storage capacity of each block"));
 
   cmd_parser parser(argc, argv, opts);
   if (parser.get_flag("help")) {
@@ -78,7 +80,7 @@ int main(int argc, char **argv) {
   int32_t notification_port;
   int32_t chain_port;
   std::size_t num_blocks;
-
+  std::size_t block_capacity;
   try {
     address = parser.get("address");
     block_host = parser.get("block-address");
@@ -88,6 +90,7 @@ int main(int argc, char **argv) {
     notification_port = parser.get_int("notification-port");
     chain_port = parser.get_int("chain-port");
     num_blocks = static_cast<std::size_t>(parser.get_long("num-blocks"));
+    block_capacity = static_cast<std::size_t>(parser.get_long("block-capacity"));
   } catch (cmd_parse_exception &ex) {
     std::cerr << "Could not parse command line args: " << ex.what() << std::endl;
     std::cerr << parser.help_msg() << std::endl;
@@ -116,7 +119,7 @@ int main(int argc, char **argv) {
   std::vector<std::shared_ptr<chain_module>> blocks;
   blocks.resize(num_blocks);
   for (size_t i = 0; i < blocks.size(); ++i) {
-    blocks[i] = std::make_shared<kv_block>(block_names[i]);
+    blocks[i] = std::make_shared<kv_block>(block_names[i], block_capacity);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
 
