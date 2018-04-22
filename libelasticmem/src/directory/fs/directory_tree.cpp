@@ -383,6 +383,20 @@ void directory_tree::add_block_to_file(const std::string &path) {
   }).detach();
 }
 
+void directory_tree::split_block(const std::string &path, std::size_t block_idx) {
+  LOG(log_level::info) << "Splitting block " << block_idx << " @ " << path;
+  auto storage = storage_;
+  auto node = get_node_as_file(path);
+  auto ctx = node->setup_export(storage, allocator_, path, block_idx);
+  std::thread([node, storage, ctx] {
+    auto start = time_utils::now_ms();
+    storage->export_slots(ctx.from_block.block_names.front());
+    auto elapsed = time_utils::now_ms() - start;
+    LOG(log_level::info) << "Finished export in " << elapsed << " ms";
+    node->finalize_export(storage, ctx);
+  }).detach();
+}
+
 std::shared_ptr<ds_node> directory_tree::get_node_unsafe(const std::string &path) const {
   std::shared_ptr<ds_node> node = root_;
   for (auto &name: directory_utils::path_elements(path)) {

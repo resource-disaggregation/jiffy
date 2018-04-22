@@ -208,6 +208,14 @@ void directory_service_handler::add_block_to_file(const std::string &path) {
   }
 }
 
+void directory_service_handler::split_block(const std::string &path, const int32_t block_idx) {
+  try {
+    shard_->split_block(path, static_cast<size_t>(block_idx));
+  } catch (directory_ops_exception &e) {
+    throw make_exception(e);
+  }
+}
+
 directory_service_exception directory_service_handler::make_exception(directory_ops_exception &ex) const {
   directory_service_exception e;
   e.msg = ex.what();

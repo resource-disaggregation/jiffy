@@ -370,6 +370,7 @@ class directory_management_ops {
   virtual replica_chain resolve_failures(const std::string &path, const replica_chain &chain) = 0;
   virtual replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) = 0;
   virtual void add_block_to_file(const std::string &path) = 0;
+  virtual void split_block(const std::string &path, std::size_t block_idx) = 0;
 };
 
 }

@@ -43,6 +43,7 @@ class directory_serviceIf {
   virtual void reslove_failures(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain) = 0;
   virtual void add_replica_to_chain(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain) = 0;
   virtual void add_block_to_file(const std::string& path) = 0;
+  virtual void split_block(const std::string& path, const int32_t block_idx) = 0;
 };
 
 class directory_serviceIfFactory {
@@ -141,6 +142,9 @@ class directory_serviceNull : virtual public directory_serviceIf {
     return;
   }
   void add_block_to_file(const std::string& /* path */) {
+    return;
+  }
+  void split_block(const std::string& /* path */, const int32_t /* block_idx */) {
     return;
   }
 };
@@ -2754,6 +2758,123 @@ class directory_service_add_block_to_file_presult {
 
 };
 
+typedef struct _directory_service_split_block_args__isset {
+  _directory_service_split_block_args__isset() : path(false), block_idx(false) {}
+  bool path :1;
+  bool block_idx :1;
+} _directory_service_split_block_args__isset;
+
+class directory_service_split_block_args {
+ public:
+
+  directory_service_split_block_args(const directory_service_split_block_args&);
+  directory_service_split_block_args& operator=(const directory_service_split_block_args&);
+  directory_service_split_block_args() : path(), block_idx(0) {
+  }
+
+  virtual ~directory_service_split_block_args() throw();
+  std::string path;
+  int32_t block_idx;
+
+  _directory_service_split_block_args__isset __isset;
+
+  void __set_path(const std::string& val);
+
+  void __set_block_idx(const int32_t val);
+
+  bool operator == (const directory_service_split_block_args & rhs) const
+  {
+    if (!(path == rhs.path))
+      return false;
+    if (!(block_idx == rhs.block_idx))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_split_block_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_split_block_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class directory_service_split_block_pargs {
+ public:
+
+
+  virtual ~directory_service_split_block_pargs() throw();
+  const std::string* path;
+  const int32_t* block_idx;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_split_block_result__isset {
+  _directory_service_split_block_result__isset() : ex(false) {}
+  bool ex :1;
+} _directory_service_split_block_result__isset;
+
+class directory_service_split_block_result {
+ public:
+
+  directory_service_split_block_result(const directory_service_split_block_result&);
+  directory_service_split_block_result& operator=(const directory_service_split_block_result&);
+  directory_service_split_block_result() {
+  }
+
+  virtual ~directory_service_split_block_result() throw();
+  directory_service_exception ex;
+
+  _directory_service_split_block_result__isset __isset;
+
+  void __set_ex(const directory_service_exception& val);
+
+  bool operator == (const directory_service_split_block_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_split_block_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_split_block_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_split_block_presult__isset {
+  _directory_service_split_block_presult__isset() : ex(false) {}
+  bool ex :1;
+} _directory_service_split_block_presult__isset;
+
+class directory_service_split_block_presult {
+ public:
+
+
+  virtual ~directory_service_split_block_presult() throw();
+  directory_service_exception ex;
+
+  _directory_service_split_block_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
 template <class Protocol_>
 class directory_serviceClientT : virtual public directory_serviceIf {
  public:
@@ -2846,6 +2967,9 @@ class directory_serviceClientT : virtual public directory_serviceIf {
   void add_block_to_file(const std::string& path);
   void send_add_block_to_file(const std::string& path);
   void recv_add_block_to_file();
+  void split_block(const std::string& path, const int32_t block_idx);
+  void send_split_block(const std::string& path, const int32_t block_idx);
+  void recv_split_block();
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
@@ -2918,6 +3042,8 @@ class directory_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT
   void process_add_replica_to_chain(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_add_block_to_file(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_add_block_to_file(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_split_block(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_split_block(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
  public:
   directory_serviceProcessorT(::apache::thrift::stdcxx::shared_ptr<directory_serviceIf> iface) :
     iface_(iface) {
@@ -2987,6 +3113,9 @@ class directory_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT
     processMap_["add_block_to_file"] = ProcessFunctions(
       &directory_serviceProcessorT::process_add_block_to_file,
       &directory_serviceProcessorT::process_add_block_to_file);
+    processMap_["split_block"] = ProcessFunctions(
+      &directory_serviceProcessorT::process_split_block,
+      &directory_serviceProcessorT::process_split_block);
   }
 
   virtual ~directory_serviceProcessorT() {}
@@ -3227,6 +3356,15 @@ class directory_serviceMultiface : virtual public directory_serviceIf {
     ifaces_[i]->add_block_to_file(path);
   }
 
+  void split_block(const std::string& path, const int32_t block_idx) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->split_block(path, block_idx);
+    }
+    ifaces_[i]->split_block(path, block_idx);
+  }
+
 };
 
 // The 'concurrent' client is a thread safe client that correctly handles
@@ -3324,6 +3462,9 @@ class directory_serviceConcurrentClientT : virtual public directory_serviceIf {
   void add_block_to_file(const std::string& path);
   int32_t send_add_block_to_file(const std::string& path);
   void recv_add_block_to_file(const int32_t seqid);
+  void split_block(const std::string& path, const int32_t block_idx);
+  int32_t send_split_block(const std::string& path, const int32_t block_idx);
+  void recv_split_block(const int32_t seqid);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;

@@ -165,9 +165,8 @@ class ds_file_node : public ds_node {
 
     // Split the block's slot range in two
     auto old_chain = dstatus_.data_blocks().at(max_pos);
-    auto slot_range = storage->slot_range(old_chain.block_names.back());
-    auto slot_begin = slot_range.first;
-    auto slot_end = slot_range.second;
+    auto slot_begin = old_chain.slot_range.first;
+    auto slot_end = old_chain.slot_range.second;
     auto slot_mid = (slot_end + slot_begin) / 2; // TODO: We can get a better split...
 
     // Allocate the new chain
@@ -207,6 +206,64 @@ class ds_file_node : public ds_node {
     }
 
     return export_ctx{max_pos, slot_begin, slot_mid, slot_end, old_chain, new_chain};
+  }
+
+  export_ctx setup_export(std::shared_ptr<storage::storage_management_ops> storage,
+                          const std::shared_ptr<block_allocator> &allocator,
+                          const std::string &path, size_t block_idx) {
+    using namespace storage;
+    if (dstatus_.data_blocks().size() == block::SLOT_MAX)
+      throw directory_ops_exception("Cannot expand capacity beyond " + std::to_string(block::SLOT_MAX) + " blocks");
+
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    if (dstatus_.get_data_block_status(block_idx) == chain_status::exporting) {
+      throw directory_ops_exception("Block already in exporting mode");
+    }
+    dstatus_.set_data_block_status(block_idx, chain_status::exporting);
+
+    // Split the block's slot range in two
+    auto old_chain = dstatus_.data_blocks().at(block_idx);
+    auto slot_begin = old_chain.slot_range.first;
+    auto slot_end = old_chain.slot_range.second;
+    auto slot_mid = (slot_end + slot_begin) / 2; // TODO: We can get a better split...
+
+    // Allocate the new chain
+    replica_chain new_chain
+        {allocator->allocate(dstatus_.chain_length(), {}), std::make_pair(slot_mid + 1, slot_end),
+         chain_status::stable};
+    assert(new_chain.block_names.size() == chain_length);
+
+    // Set old chain to exporting and new chain to importing
+    if (dstatus_.chain_length() == 1) {
+      storage->set_importing(new_chain.block_names[0],
+                             path,
+                             slot_mid + 1,
+                             slot_end,
+                             new_chain.block_names,
+                             chain_role::singleton,
+                             "nil");
+      storage->set_exporting(old_chain.block_names[0], new_chain.block_names, slot_mid + 1, slot_end);
+    } else {
+      for (std::size_t j = 0; j < dstatus_.chain_length(); ++j) {
+        std::string block_name = new_chain.block_names[j];
+        std::string next_block_name = (j == dstatus_.chain_length() - 1) ? "nil" : new_chain.block_names[j + 1];
+        int32_t
+            role =
+            (j == 0) ? chain_role::head : (j == dstatus_.chain_length() - 1) ? chain_role::tail : chain_role::mid;
+        storage->set_importing(block_name,
+                               path,
+                               slot_mid + 1,
+                               slot_end,
+                               new_chain.block_names,
+                               role,
+                               next_block_name);
+      }
+      for (std::size_t j = 0; j < dstatus_.chain_length(); ++j) {
+        storage->set_exporting(old_chain.block_names[j], new_chain.block_names, slot_mid + 1, slot_end);
+      }
+    }
+
+    return export_ctx{block_idx, slot_begin, slot_mid, slot_end, old_chain, new_chain};
   }
 
   void finalize_export(std::shared_ptr<storage::storage_management_ops> storage, const export_ctx &ctx) {
@@ -378,6 +435,7 @@ class directory_tree : public directory_ops, public directory_management_ops {
                                  const replica_chain &chain) override; // TODO: Take id as input
   replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) override;
   void add_block_to_file(const std::string &path) override;
+  virtual void split_block(const std::string &path, std::size_t block_idx);
 
  private:
   std::shared_ptr<ds_node> get_node_unsafe(const std::string &path) const;

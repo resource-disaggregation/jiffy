@@ -44,9 +44,10 @@ class directory_client : public directory_ops {
   bool is_directory(const std::string &path) override;
 
   // Management Ops
-  virtual replica_chain resolve_failures(const std::string &path, const replica_chain &chain);
-  virtual replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain);
-  virtual void add_block_to_file(const std::string &path);
+  replica_chain resolve_failures(const std::string &path, const replica_chain &chain);
+  replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain);
+  void add_block_to_file(const std::string &path);
+  void split_block(const std::string &path, size_t block_idx);
 
  private:
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};

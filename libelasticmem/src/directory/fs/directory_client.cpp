@@ -158,5 +158,9 @@ void directory_client::add_block_to_file(const std::string &path) {
   client_->add_block_to_file(path);
 }
 
+void directory_client::split_block(const std::string &path, size_t block_idx) {
+  client_->split_block(path, static_cast<const int32_t>(block_idx));
+}
+
 }
 }
