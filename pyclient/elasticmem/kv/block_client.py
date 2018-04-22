@@ -29,46 +29,6 @@ class CommandResponseReader:
         return [self.recv_response() for _ in range(count)]
 
 
-# For Debugging only
-class SingleBlockClient:
-    def __init__(self, socket, protocol, client, block_id):
-        self.seq = block_request_service.sequence_id(-1, 0, -1)
-        self.socket = socket
-        self.protocol = protocol
-        self.client = client
-        self.block_id = block_id
-        self.seq.client_id = self.client.get_client_id()
-        self.client.register_client_id(self.block_id, self.seq.client_id)
-        self.response_reader = CommandResponseReader(self.protocol)
-        self.response_cache = {}
-
-    def send_cmd(self, cmd_id, args):
-        op_seq = self.seq.client_seq_no
-        self.client.command_request(self.seq, self.block_id, cmd_id, args)
-        self.seq.client_seq_no += 1
-        return op_seq
-
-    def recv_cmd(self, op_seq):
-        if op_seq in self.response_cache:
-            result = self.response_cache[op_seq]
-            del self.response_cache[op_seq]
-            return result
-
-        while True:
-            recv_seq, result = self.response_reader.recv_response()
-            if op_seq == recv_seq:
-                return result
-            else:
-                self.response_cache[recv_seq] = result
-
-    def run_command(self, cmd_id, args):
-        op_seq = self.send_cmd(cmd_id, args)
-        return self.recv_cmd(op_seq)
-
-    def num_keys(self):
-        return self.run_command(KVOps.num_keys, [])[0]
-
-
 class BlockClient:
     def __init__(self, host, port, block_id):
         self.id_ = block_id

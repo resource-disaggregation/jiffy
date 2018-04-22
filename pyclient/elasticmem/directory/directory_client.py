@@ -82,9 +82,10 @@ class StorageMode:
     on_disk = 3
 
 
-class BlockChain:
-    def __init__(self, block_names):
+class ReplicaChain:
+    def __init__(self, block_names, slot_begin, slot_end):
         self.block_names = block_names
+        self.slot_range = (slot_begin, slot_end)
 
 
 class DataStatus:
@@ -92,7 +93,8 @@ class DataStatus:
         self.storage_mode = storage_mode
         self.persistent_store_prefix = persistent_store_prefix
         self.chain_length = chain_length
-        self.data_blocks = [BlockChain(block_chain.block_names) for block_chain in data_blocks]
+        self.data_blocks = [ReplicaChain(replica_chain.block_names, replica_chain.slot_begin, replica_chain.slot_end)
+                            for replica_chain in data_blocks]
 
 
 class DirectoryClient:
@@ -186,5 +188,11 @@ class DirectoryClient:
     def resolve_failures(self, path, chain):
         self.client_.reslove_failures(path, chain)
 
-    def add_blocks_to_chain(self, path, chain, count):
-        self.client_.add_blocks(path, chain, count)
+    def add_replica_to_chain(self, path, chain):
+        self.client_.add_replica_to_chain(path, chain)
+
+    def add_block_to_file(self, path):
+        self.client_.add_block_to_file(path)
+
+    def split_slot_range(self, path, slot_begin, slot_end):
+        self.client_.split_slot_range(path, slot_begin, slot_end)

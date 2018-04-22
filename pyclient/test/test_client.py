@@ -13,7 +13,7 @@ from unittest import TestCase
 
 from thrift.transport import TTransport, TSocket
 
-from elasticmem import ElasticMemClient, RemoveMode, StorageMode, SingleServerKVClient
+from elasticmem import ElasticMemClient, RemoveMode, StorageMode
 from elasticmem.benchmark.kv_async_benchmark import run_async_kv_benchmark
 from elasticmem.benchmark.kv_sync_benchmark import run_sync_kv_throughput_benchmark, run_sync_kv_latency_benchmark
 from elasticmem.subscription.subscriber import Notification
@@ -89,13 +89,13 @@ class TestClient(TestCase):
     def kv_ops(self, kv):
         # Test get/put
         for i in range(0, 1000):
-            self.assertTrue(kv.put(str(i), str(i)) == b"ok")
+            self.assertTrue(kv.put(str(i), str(i)) == b"!ok")
 
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) == bytes(str(i), 'utf-8'))
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.get(str(i)) == b"key_not_found")
+            self.assertTrue(kv.get(str(i)) == b"!key_not_found")
 
         self.assertTrue(kv.num_keys() == 1000)
 
@@ -104,7 +104,7 @@ class TestClient(TestCase):
             self.assertTrue(kv.update(str(i), str(i + 1000)) == bytes(str(i), 'utf-8'))
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.update(str(i), str(i + 1000)) == b"key_not_found")
+            self.assertTrue(kv.update(str(i), str(i + 1000)) == b"!key_not_found")
 
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) == bytes(str(i + 1000), 'utf-8'))
@@ -116,10 +116,10 @@ class TestClient(TestCase):
             self.assertTrue(kv.remove(str(i)) == bytes(str(i + 1000), 'utf-8'))
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.remove(str(i)) == b"key_not_found")
+            self.assertTrue(kv.remove(str(i)) == b"!key_not_found")
 
         for i in range(0, 1000):
-            self.assertTrue(kv.get(str(i)) == b"key_not_found")
+            self.assertTrue(kv.get(str(i)) == b"!key_not_found")
 
         self.assertTrue(kv.num_keys() == 0)
 
@@ -132,7 +132,7 @@ class TestClient(TestCase):
 
         for i in range(0, 1000):
             puts.put(str(i), str(i))
-        self.assertTrue(puts.execute() == [b'ok'] * 1000)
+        self.assertTrue(puts.execute() == [b'!ok'] * 1000)
 
         for i in range(0, 1000):
             gets.get(str(i))
@@ -140,7 +140,7 @@ class TestClient(TestCase):
 
         for i in range(1000, 2000):
             gets.get(str(i))
-        self.assertTrue(gets.execute() == [b"key_not_found"] * 1000)
+        self.assertTrue(gets.execute() == [b"!key_not_found"] * 1000)
 
         self.assertTrue(kv.num_keys() == 1000)
 
@@ -151,7 +151,7 @@ class TestClient(TestCase):
 
         for i in range(1000, 2000):
             updates.update(str(i), str(i + 1000))
-        self.assertTrue(updates.execute() == [b"key_not_found"] * 1000)
+        self.assertTrue(updates.execute() == [b"!key_not_found"] * 1000)
 
         for i in range(0, 1000):
             gets.get(str(i))
@@ -166,11 +166,11 @@ class TestClient(TestCase):
 
         for i in range(1000, 2000):
             removes.remove(str(i))
-        self.assertTrue(removes.execute() == [b"key_not_found"] * 1000)
+        self.assertTrue(removes.execute() == [b"!key_not_found"] * 1000)
 
         for i in range(0, 1000):
             gets.get(str(i))
-        self.assertTrue(gets.execute() == [b"key_not_found"] * 1000)
+        self.assertTrue(gets.execute() == [b"!key_not_found"] * 1000)
 
         self.assertTrue(kv.num_keys() == 0)
 
@@ -208,18 +208,6 @@ class TestClient(TestCase):
             self.assertTrue(client.fs.exists('/a/file.txt'))
             kv = client.open('/a/file.txt')
             self.kv_ops(kv)
-            self.pipelined_kv_ops(kv)
-        finally:
-            client.disconnect()
-            self.stop_servers()
-
-    def test_single_server_ops(self):
-        self.start_servers()
-        client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
-        try:
-            kv = SingleServerKVClient(client.fs.create("/a/file.txt", "/tmp", 4))
-            client.keep_alive("/a/file.txt")
-            self.assertTrue(client.fs.exists('/a/file.txt'))
             self.pipelined_kv_ops(kv)
         finally:
             client.disconnect()

@@ -100,7 +100,7 @@ class ElasticMemClient:
     def create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_client=True):
         s = self.fs.create(path, persistent_store_prefix, num_blocks, chain_length)
         self.keep_alive(path)
-        k = KVClient(path, s, self.chain_failure_cb)
+        k = KVClient(self.fs, path, s, self.chain_failure_cb)
         if cache_client:
             self.kvs[path] = k
         return k
@@ -110,7 +110,7 @@ class ElasticMemClient:
             return self.kvs[path]
         s = self.fs.open(path)
         self.keep_alive(path)
-        k = KVClient(path, s, self.chain_failure_cb)
+        k = KVClient(self.fs, path, s, self.chain_failure_cb)
         if cache_client:
             self.kvs[path] = k
         return k
@@ -120,7 +120,7 @@ class ElasticMemClient:
             return self.kvs[path]
         s = self.fs.open_or_create(path, persistent_store_prefix, num_blocks, chain_length)
         self.keep_alive(path)
-        k = KVClient(path, s, self.chain_failure_cb)
+        k = KVClient(self.fs, path, s, self.chain_failure_cb)
         if cache_client:
             self.kvs[path] = k
         return k
