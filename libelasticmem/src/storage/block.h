@@ -119,7 +119,7 @@ class block {
   void export_target(const std::vector<std::string>& target) {
     export_target_ = target;
     for (const auto& block: target) {
-      export_target_str_ += (block + ":");
+      export_target_str_ += (block + "!");
     }
     export_target_str_.pop_back();
   }

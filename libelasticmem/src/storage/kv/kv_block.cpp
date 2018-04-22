@@ -50,7 +50,7 @@ std::string kv_block::put(const key_type &key, const value_type &value) {
     if (block_.insert(key, value)) {
       return "!ok";
     } else {
-      return "!key_not_found";
+      return "!duplicate_key";
     }
   }
   return "!block_moved";
