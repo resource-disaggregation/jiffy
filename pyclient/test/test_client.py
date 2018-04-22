@@ -238,11 +238,11 @@ class TestClient(TestCase):
         client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
             kv = client.create("/a/file.txt", "/tmp")
-            for i in range(0, 1000):
+            for i in range(0, 2000):
                 self.assertTrue(kv.put(str(i), str(i)) == 'ok')
             while len(client.fs.dstatus("/a/file.txt").data_blocks) == 1:
                 pass
-            self.assertTrue(len(client.fs.dstatus("/a/file.txt").data_blocks) == 2)
+            self.assertTrue(len(client.fs.dstatus("/a/file.txt").data_blocks) == 4)
         finally:
             client.disconnect()
             self.stop_servers()

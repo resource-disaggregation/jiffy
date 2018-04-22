@@ -87,6 +87,12 @@ class ReplicaChain:
         self.block_names = block_names
         self.slot_range = (slot_begin, slot_end)
 
+    def __str__(self):
+        return "{} : {}".format(self.block_names, self.slot_range)
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class DataStatus:
     def __init__(self, storage_mode, persistent_store_prefix, chain_length, data_blocks):

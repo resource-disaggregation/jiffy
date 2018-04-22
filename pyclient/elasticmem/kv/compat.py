@@ -72,7 +72,7 @@ else:
         return x if isinstance(x, str) else x.decode('utf-8', 'replace')
 
     def bytes_to_str(x):
-        x.decode()
+        return x.decode()
 
     def u(x):
         return x

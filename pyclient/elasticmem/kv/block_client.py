@@ -130,32 +130,26 @@ class BlockChainClient:
     def get(self, key):
         return self._run_command(self.tail, KVOps.get, [key])[0]
 
-    def send_get(self, key):
-        return self._send_cmd(self.tail, KVOps.get, [key])
-
     def put(self, key, value):
         return self._run_command(self.head, KVOps.put, [key, value])[0]
-
-    def send_put(self, key, value):
-        return self._send_cmd(self.head, KVOps.put, [key, value])
-
-    def remove(self, key):
-        return self._run_command(self.head, KVOps.remove, [key])[0]
-
-    def send_remove(self, key):
-        return self._send_cmd(self.head, KVOps.remove, [key])
 
     def update(self, key, value):
         return self._run_command(self.head, KVOps.update, [key, value])[0]
 
-    def send_update(self, key, value):
-        return self._send_cmd(self.head, KVOps.update, [key, value])
-
-    def recv_response(self, op_seq):
-        return self._recv_cmd(op_seq)[0]
-
-    def recv_responses(self, op_seqs):
-        return [self._recv_cmd(op_seq) for op_seq in op_seqs]
+    def remove(self, key):
+        return self._run_command(self.head, KVOps.remove, [key])[0]
 
     def num_keys(self):
         return self._run_command(self.tail, KVOps.num_keys, [])[0]
+
+    def redirected_get(self, key):
+        return self._run_command(self.tail, KVOps.get, [key, '!redirected'])[0]
+
+    def redirected_put(self, key, value):
+        return self._run_command(self.head, KVOps.put, [key, value, '!redirected'])[0]
+
+    def redirected_update(self, key, value):
+        return self._run_command(self.head, KVOps.update, [key, value, '!redirected'])[0]
+
+    def redirected_remove(self, key):
+        return self._run_command(self.head, KVOps.remove, [key, '!redirected'])[0]

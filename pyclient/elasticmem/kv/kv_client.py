@@ -21,6 +21,16 @@ def encode(value):
     return value
 
 
+class RedoError(Exception):
+    pass
+
+
+class RedirectError(Exception):
+    def __init__(self, message, blocks):
+        super(RedirectError, self).__init__(message)
+        self.blocks = blocks
+
+
 class KVClient:
     def __init__(self, fs, path, data_status, chain_failure_cb):
         self.fs = fs
@@ -36,11 +46,12 @@ class KVClient:
 
     def refresh(self):
         self.file_info = self.fs.dstatus(self.path)
+        logging.info("Refreshing block mappings to {}".format(self.file_info.data_blocks))
         self.blocks = [BlockChainClient(chain.block_names) for chain in self.file_info.data_blocks]
         self.slots = [chain.slot_range[0] for chain in self.file_info.data_blocks]
 
-    def _execute(self, client, client_op, *args):
-        response = b(client_op(client, *args))
+    def _parse_response(self, r):
+        response = b(r)
         if response[0] == char_to_byte('!'):  # Actionable response
             if response[1:] == b('ok'):
                 return "ok"
@@ -52,37 +63,52 @@ class KVClient:
                 raise ValueError('Incorrect arguments')
             elif response[1:] == b('block_moved'):
                 self.refresh()
-                return self._execute(client, client_op, *args)
+                raise RedoError
             elif response[1:].startswith(b('exporting')):
                 block_names = [bytes_to_str(x) for x in response[1:].split(b('!'))[1:]]
-                client = BlockChainClient(block_names)
-                return self._execute(client, client_op, *args)
-        return response
+                raise RedirectError('Redirect to {}'.format(block_names), block_names)
+        return r
 
     def put(self, key, value):
         try:
-            return self._execute(self.blocks[self.block_id(key)], BlockChainClient.put, key, value)
+            return self._parse_response(self.blocks[self.block_id(key)].put(key, value))
+        except RedoError:
+            return self._parse_response(self.blocks[self.block_id(key)].put(key, value))
+        except RedirectError as e:
+            return self._parse_response(BlockChainClient(e.blocks).redirected_put(key, value))
         except RuntimeError as e:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
 
     def get(self, key):
         try:
-            return self._execute(self.blocks[self.block_id(key)], BlockChainClient.get, key)
+            return self._parse_response(self.blocks[self.block_id(key)].get(key))
+        except RedoError:
+            return self._parse_response(self.blocks[self.block_id(key)].get(key))
+        except RedirectError as e:
+            return self._parse_response(BlockChainClient(e.blocks).redirected_get(key))
         except RuntimeError as e:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
 
     def update(self, key, value):
         try:
-            return self._execute(self.blocks[self.block_id(key)], BlockChainClient.update, key, value)
+            return self._parse_response(self.blocks[self.block_id(key)].update(key, value))
+        except RedoError:
+            return self._parse_response(self.blocks[self.block_id(key)].update(key, value))
+        except RedirectError as e:
+            return self._parse_response(BlockChainClient(e.blocks).redirected_update(key, value))
         except RuntimeError as e:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
 
     def remove(self, key):
         try:
-            return self._execute(self.blocks[self.block_id(key)], BlockChainClient.remove, key)
+            return self._parse_response(self.blocks[self.block_id(key)].remove(key))
+        except RedoError:
+            return self._parse_response(self.blocks[self.block_id(key)].remove(key))
+        except RedirectError as e:
+            return self._parse_response(BlockChainClient(e.blocks).redirected_remove(key))
         except RuntimeError as e:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
