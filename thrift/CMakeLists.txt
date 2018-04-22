@@ -1,4 +1,6 @@
 set(THRIFTGEN_CXX_OPTS "templates,pure_enums,no_skeleton,include_prefix")
+set(THRIFTGEN_PY_OPTS "no_utf8strings,slots")
+set(THRIFTGEN_JAVA_OPTS "fullcamel,handle_runtime_exceptions,generated_annotations=undated")
 
 set(DIRECTORY_INPUT_FILE directory_service.thrift)
 set(DIRECTORY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/libdirectory/src/rpc)

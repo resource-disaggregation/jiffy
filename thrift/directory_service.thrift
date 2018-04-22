@@ -113,6 +113,6 @@ service directory_service {
   void add_block_to_file(1: string path)
     throws (1: directory_service_exception ex),
 
-  void split_block(1: string path, 2: i32 block_idx)
+  void split_slot_range(1: string path, 2: i32 slot_begin, 3: i32 slot_end)
       throws (1: directory_service_exception ex),
 }
