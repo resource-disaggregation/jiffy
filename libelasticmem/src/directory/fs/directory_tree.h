@@ -209,13 +209,25 @@ class ds_file_node : public ds_node {
   }
 
   export_ctx setup_export(std::shared_ptr<storage::storage_management_ops> storage,
-                          const std::shared_ptr<block_allocator> &allocator,
-                          const std::string &path, size_t block_idx) {
+                            const std::shared_ptr<block_allocator> &allocator,
+                            const std::string &path,
+                            int32_t slot_begin,
+                            int32_t slot_end) {
     using namespace storage;
     if (dstatus_.data_blocks().size() == block::SLOT_MAX)
       throw directory_ops_exception("Cannot expand capacity beyond " + std::to_string(block::SLOT_MAX) + " blocks");
 
     std::unique_lock<std::shared_mutex> lock(mtx_);
+    size_t block_idx = 0;
+    for (const auto& block: dstatus_.data_blocks()) {
+      if (block.slot_begin() == slot_begin && block.slot_end() == slot_end) {
+        break;
+      }
+      block_idx++;
+    }
+    if (block_idx == dstatus_.data_blocks().size()) {
+      throw directory_ops_exception("No block with slot range " + std::to_string(slot_begin) + "-" + std::to_string(slot_end));
+    }
     if (dstatus_.get_data_block_status(block_idx) == chain_status::exporting) {
       throw directory_ops_exception("Block already in exporting mode");
     }
@@ -223,8 +235,6 @@ class ds_file_node : public ds_node {
 
     // Split the block's slot range in two
     auto old_chain = dstatus_.data_blocks().at(block_idx);
-    auto slot_begin = old_chain.slot_range.first;
-    auto slot_end = old_chain.slot_range.second;
     auto slot_mid = (slot_end + slot_begin) / 2; // TODO: We can get a better split...
 
     // Allocate the new chain
@@ -435,7 +445,7 @@ class directory_tree : public directory_ops, public directory_management_ops {
                                  const replica_chain &chain) override; // TODO: Take id as input
   replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) override;
   void add_block_to_file(const std::string &path) override;
-  virtual void split_block(const std::string &path, std::size_t block_idx);
+  virtual void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end);
 
  private:
   std::shared_ptr<ds_node> get_node_unsafe(const std::string &path) const;

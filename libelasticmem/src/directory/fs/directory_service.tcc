@@ -4429,7 +4429,7 @@ uint32_t directory_service_add_block_to_file_presult::read(Protocol_* iprot) {
 
 
 template <class Protocol_>
-uint32_t directory_service_split_block_args::read(Protocol_* iprot) {
+uint32_t directory_service_split_slot_range_args::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -4460,8 +4460,16 @@ uint32_t directory_service_split_block_args::read(Protocol_* iprot) {
         break;
       case 2:
         if (ftype == ::apache::thrift::protocol::T_I32) {
-          xfer += iprot->readI32(this->block_idx);
-          this->__isset.block_idx = true;
+          xfer += iprot->readI32(this->slot_begin);
+          this->__isset.slot_begin = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->slot_end);
+          this->__isset.slot_end = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -4479,17 +4487,21 @@ uint32_t directory_service_split_block_args::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t directory_service_split_block_args::write(Protocol_* oprot) const {
+uint32_t directory_service_split_slot_range_args::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("directory_service_split_block_args");
+  xfer += oprot->writeStructBegin("directory_service_split_slot_range_args");
 
   xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeString(this->path);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("block_idx", ::apache::thrift::protocol::T_I32, 2);
-  xfer += oprot->writeI32(this->block_idx);
+  xfer += oprot->writeFieldBegin("slot_begin", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32(this->slot_begin);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_end", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32(this->slot_end);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -4499,17 +4511,21 @@ uint32_t directory_service_split_block_args::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t directory_service_split_block_pargs::write(Protocol_* oprot) const {
+uint32_t directory_service_split_slot_range_pargs::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("directory_service_split_block_pargs");
+  xfer += oprot->writeStructBegin("directory_service_split_slot_range_pargs");
 
   xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeString((*(this->path)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("block_idx", ::apache::thrift::protocol::T_I32, 2);
-  xfer += oprot->writeI32((*(this->block_idx)));
+  xfer += oprot->writeFieldBegin("slot_begin", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32((*(this->slot_begin)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("slot_end", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32((*(this->slot_end)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -4519,7 +4535,7 @@ uint32_t directory_service_split_block_pargs::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t directory_service_split_block_result::read(Protocol_* iprot) {
+uint32_t directory_service_split_slot_range_result::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -4561,11 +4577,11 @@ uint32_t directory_service_split_block_result::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t directory_service_split_block_result::write(Protocol_* oprot) const {
+uint32_t directory_service_split_slot_range_result::write(Protocol_* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("directory_service_split_block_result");
+  xfer += oprot->writeStructBegin("directory_service_split_slot_range_result");
 
   if (this->__isset.ex) {
     xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
@@ -4579,7 +4595,7 @@ uint32_t directory_service_split_block_result::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t directory_service_split_block_presult::read(Protocol_* iprot) {
+uint32_t directory_service_split_slot_range_presult::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -6000,21 +6016,22 @@ void directory_serviceClientT<Protocol_>::recv_add_block_to_file()
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::split_block(const std::string& path, const int32_t block_idx)
+void directory_serviceClientT<Protocol_>::split_slot_range(const std::string& path, const int32_t slot_begin, const int32_t slot_end)
 {
-  send_split_block(path, block_idx);
-  recv_split_block();
+  send_split_slot_range(path, slot_begin, slot_end);
+  recv_split_slot_range();
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::send_split_block(const std::string& path, const int32_t block_idx)
+void directory_serviceClientT<Protocol_>::send_split_slot_range(const std::string& path, const int32_t slot_begin, const int32_t slot_end)
 {
   int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("split_block", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("split_slot_range", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  directory_service_split_block_pargs args;
+  directory_service_split_slot_range_pargs args;
   args.path = &path;
-  args.block_idx = &block_idx;
+  args.slot_begin = &slot_begin;
+  args.slot_end = &slot_end;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -6023,7 +6040,7 @@ void directory_serviceClientT<Protocol_>::send_split_block(const std::string& pa
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::recv_split_block()
+void directory_serviceClientT<Protocol_>::recv_split_slot_range()
 {
 
   int32_t rseqid = 0;
@@ -6043,12 +6060,12 @@ void directory_serviceClientT<Protocol_>::recv_split_block()
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("split_block") != 0) {
+  if (fname.compare("split_slot_range") != 0) {
     this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  directory_service_split_block_presult result;
+  directory_service_split_slot_range_presult result;
   result.read(this->iprot_);
   this->iprot_->readMessageEnd();
   this->iprot_->getTransport()->readEnd();
@@ -8636,40 +8653,40 @@ void directory_serviceProcessorT<Protocol_>::process_add_block_to_file(int32_t s
 }
 
 template <class Protocol_>
-void directory_serviceProcessorT<Protocol_>::process_split_block(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void directory_serviceProcessorT<Protocol_>::process_split_slot_range(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("directory_service.split_block", callContext);
+    ctx = this->eventHandler_->getContext("directory_service.split_slot_range", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_service.split_block");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_service.split_slot_range");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "directory_service.split_block");
+    this->eventHandler_->preRead(ctx, "directory_service.split_slot_range");
   }
 
-  directory_service_split_block_args args;
+  directory_service_split_slot_range_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "directory_service.split_block", bytes);
+    this->eventHandler_->postRead(ctx, "directory_service.split_slot_range", bytes);
   }
 
-  directory_service_split_block_result result;
+  directory_service_split_slot_range_result result;
   try {
-    iface_->split_block(args.path, args.block_idx);
+    iface_->split_slot_range(args.path, args.slot_begin, args.slot_end);
   } catch (directory_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "directory_service.split_block");
+      this->eventHandler_->handlerError(ctx, "directory_service.split_slot_range");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("split_block", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("split_slot_range", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -8678,55 +8695,55 @@ void directory_serviceProcessorT<Protocol_>::process_split_block(int32_t seqid, 
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "directory_service.split_block");
+    this->eventHandler_->preWrite(ctx, "directory_service.split_slot_range");
   }
 
-  oprot->writeMessageBegin("split_block", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("split_slot_range", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "directory_service.split_block", bytes);
+    this->eventHandler_->postWrite(ctx, "directory_service.split_slot_range", bytes);
   }
 }
 
 template <class Protocol_>
-void directory_serviceProcessorT<Protocol_>::process_split_block(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+void directory_serviceProcessorT<Protocol_>::process_split_slot_range(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("directory_service.split_block", callContext);
+    ctx = this->eventHandler_->getContext("directory_service.split_slot_range", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_service.split_block");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_service.split_slot_range");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "directory_service.split_block");
+    this->eventHandler_->preRead(ctx, "directory_service.split_slot_range");
   }
 
-  directory_service_split_block_args args;
+  directory_service_split_slot_range_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "directory_service.split_block", bytes);
+    this->eventHandler_->postRead(ctx, "directory_service.split_slot_range", bytes);
   }
 
-  directory_service_split_block_result result;
+  directory_service_split_slot_range_result result;
   try {
-    iface_->split_block(args.path, args.block_idx);
+    iface_->split_slot_range(args.path, args.slot_begin, args.slot_end);
   } catch (directory_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "directory_service.split_block");
+      this->eventHandler_->handlerError(ctx, "directory_service.split_slot_range");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("split_block", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("split_slot_range", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -8735,17 +8752,17 @@ void directory_serviceProcessorT<Protocol_>::process_split_block(int32_t seqid, 
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "directory_service.split_block");
+    this->eventHandler_->preWrite(ctx, "directory_service.split_slot_range");
   }
 
-  oprot->writeMessageBegin("split_block", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("split_slot_range", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "directory_service.split_block", bytes);
+    this->eventHandler_->postWrite(ctx, "directory_service.split_slot_range", bytes);
   }
 }
 
@@ -10723,22 +10740,23 @@ void directory_serviceConcurrentClientT<Protocol_>::recv_add_block_to_file(const
 }
 
 template <class Protocol_>
-void directory_serviceConcurrentClientT<Protocol_>::split_block(const std::string& path, const int32_t block_idx)
+void directory_serviceConcurrentClientT<Protocol_>::split_slot_range(const std::string& path, const int32_t slot_begin, const int32_t slot_end)
 {
-  int32_t seqid = send_split_block(path, block_idx);
-  recv_split_block(seqid);
+  int32_t seqid = send_split_slot_range(path, slot_begin, slot_end);
+  recv_split_slot_range(seqid);
 }
 
 template <class Protocol_>
-int32_t directory_serviceConcurrentClientT<Protocol_>::send_split_block(const std::string& path, const int32_t block_idx)
+int32_t directory_serviceConcurrentClientT<Protocol_>::send_split_slot_range(const std::string& path, const int32_t slot_begin, const int32_t slot_end)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("split_block", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("split_slot_range", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  directory_service_split_block_pargs args;
+  directory_service_split_slot_range_pargs args;
   args.path = &path;
-  args.block_idx = &block_idx;
+  args.slot_begin = &slot_begin;
+  args.slot_end = &slot_end;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -10750,7 +10768,7 @@ int32_t directory_serviceConcurrentClientT<Protocol_>::send_split_block(const st
 }
 
 template <class Protocol_>
-void directory_serviceConcurrentClientT<Protocol_>::recv_split_block(const int32_t seqid)
+void directory_serviceConcurrentClientT<Protocol_>::recv_split_slot_range(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -10779,7 +10797,7 @@ void directory_serviceConcurrentClientT<Protocol_>::recv_split_block(const int32
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
       }
-      if (fname.compare("split_block") != 0) {
+      if (fname.compare("split_slot_range") != 0) {
         this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
@@ -10788,7 +10806,7 @@ void directory_serviceConcurrentClientT<Protocol_>::recv_split_block(const int32
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
-      directory_service_split_block_presult result;
+      directory_service_split_slot_range_presult result;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
       this->iprot_->getTransport()->readEnd();

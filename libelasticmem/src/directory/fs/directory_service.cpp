@@ -362,19 +362,19 @@ directory_service_add_block_to_file_presult::~directory_service_add_block_to_fil
 }
 
 
-directory_service_split_block_args::~directory_service_split_block_args() throw() {
+directory_service_split_slot_range_args::~directory_service_split_slot_range_args() throw() {
 }
 
 
-directory_service_split_block_pargs::~directory_service_split_block_pargs() throw() {
+directory_service_split_slot_range_pargs::~directory_service_split_slot_range_pargs() throw() {
 }
 
 
-directory_service_split_block_result::~directory_service_split_block_result() throw() {
+directory_service_split_slot_range_result::~directory_service_split_slot_range_result() throw() {
 }
 
 
-directory_service_split_block_presult::~directory_service_split_block_presult() throw() {
+directory_service_split_slot_range_presult::~directory_service_split_slot_range_presult() throw() {
 }
 
 }} // namespace

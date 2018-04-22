@@ -47,7 +47,7 @@ class directory_client : public directory_ops {
   replica_chain resolve_failures(const std::string &path, const replica_chain &chain);
   replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain);
   void add_block_to_file(const std::string &path);
-  void split_block(const std::string &path, size_t block_idx);
+  void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end);
 
  private:
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};

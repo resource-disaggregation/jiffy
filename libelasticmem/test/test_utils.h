@@ -280,11 +280,14 @@ class test_utils {
     return blks;
   }
 
-  static std::vector<std::shared_ptr<elasticmem::storage::chain_module>> init_kv_blocks(const std::vector<std::string> &block_names) {
+  static std::vector<std::shared_ptr<elasticmem::storage::chain_module>> init_kv_blocks(const std::vector<std::string> &block_names,
+                                                                                        size_t block_capacity = 134217728,
+                                                                                        const std::string &dir_host = "127.0.0.1",
+                                                                                        int dir_port = 9090) {
     std::vector<std::shared_ptr<elasticmem::storage::chain_module>> blks;
     blks.resize(block_names.size());
     for (size_t i = 0; i < block_names.size(); ++i) {
-      blks[i] = std::make_shared<elasticmem::storage::kv_block>(block_names[i]);
+      blks[i] = std::make_shared<elasticmem::storage::kv_block>(block_names[i], block_capacity, dir_host, dir_port);
     }
     return blks;
   }

@@ -158,8 +158,8 @@ void directory_client::add_block_to_file(const std::string &path) {
   client_->add_block_to_file(path);
 }
 
-void directory_client::split_block(const std::string &path, size_t block_idx) {
-  client_->split_block(path, static_cast<const int32_t>(block_idx));
+void directory_client::split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) {
+  client_->split_slot_range(path, slot_begin, slot_end);
 }
 
 }

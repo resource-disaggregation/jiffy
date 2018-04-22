@@ -372,7 +372,7 @@ TEST_CASE("split_block_test", "[file]") {
   auto sm = std::make_shared<dummy_storage_manager>();
   directory_tree tree(alloc, sm);
   REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "/tmp", 1, 1));
-  REQUIRE_NOTHROW(tree.split_block("/sandbox/file.txt", 0));
+  REQUIRE_NOTHROW(tree.split_slot_range("/sandbox/file.txt", 0, 65536));
   // Busy wait until number of blocks increases
   while (tree.dstatus("/sandbox/file.txt").data_blocks().size() == 1);
 

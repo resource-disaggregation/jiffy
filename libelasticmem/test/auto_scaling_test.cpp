@@ -22,7 +22,7 @@ using namespace ::apache::thrift::transport;
 #define STORAGE_SERVICE_PORT 9091
 #define STORAGE_MANAGEMENT_PORT 9092
 
-TEST_CASE("scale_block_split_test", "[setup_block][path][slot_range]") {
+TEST_CASE("scale_block_split_test", "[directory_tree][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(2, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
   alloc->add_blocks(block_names);
@@ -46,7 +46,7 @@ TEST_CASE("scale_block_split_test", "[setup_block][path][slot_range]") {
     REQUIRE_NOTHROW(std::dynamic_pointer_cast<kv_block>(blocks[0])->put(std::to_string(i), std::to_string(i)));
   }
 
-  REQUIRE_NOTHROW(tree->split_block("/sandbox/file.txt", 0));
+  REQUIRE_NOTHROW(tree->split_slot_range("/sandbox/file.txt", 0, 65536));
   // Busy wait until number of blocks increases
   while (tree->dstatus("/sandbox/file.txt").data_blocks().size() == 1);
 
@@ -73,7 +73,7 @@ TEST_CASE("scale_block_split_test", "[setup_block][path][slot_range]") {
   }
 }
 
-TEST_CASE("scale_add_block_test", "[setup_block][path][slot_range]") {
+TEST_CASE("scale_add_block_test", "[directory_tree][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(2, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
   alloc->add_blocks(block_names);
@@ -121,5 +121,68 @@ TEST_CASE("scale_add_block_test", "[setup_block][path][slot_range]") {
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
+  }
+}
+
+TEST_CASE("auto_scaling_test", "[directory_service][storage_server][management_server]") {
+  auto alloc = std::make_shared<sequential_block_allocator>();
+  auto block_names = test_utils::init_block_names(2, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
+  alloc->add_blocks(block_names);
+  auto blocks = test_utils::init_kv_blocks(block_names, 7705);
+
+  auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
+  std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
+
+  auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
+  std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
+
+  auto sm = std::make_shared<storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
+  auto dir_server = directory_server::create(t, HOST, DIRECTORY_SERVICE_PORT);
+  std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
+
+  REQUIRE_NOTHROW(t->create("/sandbox/file.txt", "/tmp", 1, 1));
+
+  // Write data until auto scaling is triggered
+  for (std::size_t i = 0; i < 1000; ++i) {
+    std::vector<std::string> result;
+    REQUIRE_NOTHROW(std::dynamic_pointer_cast<kv_block>(blocks[0])->run_command(result,
+                                                                                kv_op_id::put,
+                                                                                {std::to_string(i),
+                                                                                 std::to_string(i)}));
+    REQUIRE(result[0] == "!ok");
+  }
+
+  // Busy wait until number of blocks increases
+  while (t->dstatus("/sandbox/file.txt").data_blocks().size() == 1);
+
+  for (std::size_t i = 0; i < 1000; i++) {
+    std::string key = std::to_string(i);
+    auto h = hash_slot::get(key);
+    if (h >= 0 && h < 32768) {
+      REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[0])->get(key) == key);
+      REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[1])->get(key) == "!block_moved");
+    } else {
+      REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[0])->get(key) == "!block_moved");
+      REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[1])->get(key) == key);
+    }
+  }
+
+  storage_server->stop();
+  if (storage_serve_thread.joinable()) {
+    storage_serve_thread.join();
+  }
+
+  mgmt_server->stop();
+  if (mgmt_serve_thread.joinable()) {
+    mgmt_serve_thread.join();
+  }
+
+  dir_server->stop();
+  if (dir_serve_thread.joinable()) {
+    dir_serve_thread.join();
   }
 }

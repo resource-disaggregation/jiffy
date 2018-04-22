@@ -39,7 +39,7 @@ class directory_service_handler : public directory_serviceIf {
   void reslove_failures(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain) override;
   void add_replica_to_chain(rpc_replica_chain &_return, const std::string &path, const rpc_replica_chain &chain) override;
   void add_block_to_file(const std::string &path) override;
-  virtual void split_block(const std::string &path, const int32_t block_idx);
+  void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end);
  private:
   directory_service_exception make_exception(directory_ops_exception &ex) const;
   std::shared_ptr<directory_tree> shard_;

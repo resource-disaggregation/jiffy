@@ -383,11 +383,11 @@ void directory_tree::add_block_to_file(const std::string &path) {
   }).detach();
 }
 
-void directory_tree::split_block(const std::string &path, std::size_t block_idx) {
-  LOG(log_level::info) << "Splitting block " << block_idx << " @ " << path;
+void directory_tree::split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) {
+  LOG(log_level::info) << "Splitting block " << slot_begin << " @ " << path;
   auto storage = storage_;
   auto node = get_node_as_file(path);
-  auto ctx = node->setup_export(storage, allocator_, path, block_idx);
+  auto ctx = node->setup_export(storage, allocator_, path, slot_begin, slot_end);
   std::thread([node, storage, ctx] {
     auto start = time_utils::now_ms();
     storage->export_slots(ctx.from_block.block_names.front());

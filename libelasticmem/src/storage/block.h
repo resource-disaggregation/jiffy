@@ -83,6 +83,14 @@ class block {
     return slot_range_;
   }
 
+  int32_t slot_begin() const {
+    return slot_range_.first;
+  }
+
+  int32_t slot_end() const {
+    return slot_range_.second;
+  }
+
   bool in_slot_range(int32_t slot) {
     return slot >= slot_range_.first && slot <= slot_range_.second;
   }

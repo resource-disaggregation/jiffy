@@ -208,9 +208,11 @@ void directory_service_handler::add_block_to_file(const std::string &path) {
   }
 }
 
-void directory_service_handler::split_block(const std::string &path, const int32_t block_idx) {
+void directory_service_handler::split_slot_range(const std::string &path,
+                                                 const int32_t slot_begin,
+                                                 const int32_t slot_end) {
   try {
-    shard_->split_block(path, static_cast<size_t>(block_idx));
+    shard_->split_slot_range(path, slot_begin, slot_end);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
   }

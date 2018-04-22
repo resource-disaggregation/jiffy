@@ -41,8 +41,11 @@ enum kv_op_id : int32_t {
 
 class kv_block : public chain_module {
  public:
+  static const double CAPACITY_THRESHOLD;
   explicit kv_block(const std::string &block_name,
                     std::size_t capacity = 134217728, // 128 MB; TODO: hardcoded default
+                    const std::string& directory_host = "127.0.0.1",
+                    int directory_port = 9090,
                     std::shared_ptr<persistent::persistent_service> persistent = std::make_shared<noop_store>(),
                     std::string local_storage_prefix = "/tmp",
                     std::shared_ptr<serializer> ser = std::make_shared<binary_serializer>(),
@@ -76,13 +79,20 @@ class kv_block : public chain_module {
   void export_slots() override;
 
  private:
+  bool overload();
+
   hash_table_type block_;
+
+  std::string directory_host_;
+  int directory_port_;
+
   std::shared_ptr<persistent::persistent_service> persistent_;
   std::string local_storage_prefix_;
   std::shared_ptr<serializer> ser_;
   std::shared_ptr<deserializer> deser_;
   std::atomic<size_t> bytes_;
   std::size_t capacity_;
+  std::atomic<bool> splitting_;
 };
 
 }

@@ -2,6 +2,7 @@
 #include "hash_slot.h"
 #include "../service/block_chain_client.h"
 #include "../../utils/logger.h"
+#include "../../directory/fs/directory_client.h"
 
 namespace elasticmem {
 namespace storage {
@@ -18,19 +19,26 @@ std::vector<block_op> KV_OPS = {block_op{block_op_type::accessor, "get"},
                                 block_op{block_op_type::mutator, "zremove"},
                                 block_op{block_op_type::mutator, "zupdate"}};
 
+const double kv_block::CAPACITY_THRESHOLD = 0.75;
+
 kv_block::kv_block(const std::string &block_name,
                    std::size_t capacity,
+                   const std::string& directory_host,
+                   int directory_port,
                    std::shared_ptr<persistent::persistent_service> persistent,
                    std::string local_storage_prefix,
                    std::shared_ptr<serializer> ser,
                    std::shared_ptr<deserializer> deser)
     : chain_module(block_name, KV_OPS),
+      directory_host_(directory_host),
+      directory_port_(directory_port),
       persistent_(std::move(persistent)),
       local_storage_prefix_(std::move(local_storage_prefix)),
       ser_(std::move(ser)),
       deser_(std::move(deser)),
       bytes_(0),
-      capacity_(capacity) {}
+      capacity_(capacity),
+      splitting_(false) {}
 
 std::string kv_block::put(const key_type &key, const value_type &value) {
   auto hash = hash_slot::get(key);
@@ -149,6 +157,13 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
       break;
     default:throw std::invalid_argument("No such operation id " + std::to_string(oid));
   }
+  bool expected = false;
+  if (overload() && splitting_.compare_exchange_strong(expected, true)) {
+    // Ask directory server to split this block
+    directory::directory_client client(directory_host_, directory_port_);
+    client.split_slot_range(path(), slot_begin(), slot_end());
+    client.disconnect();
+  }
 }
 
 // TODO: This should be atomic...
@@ -163,6 +178,7 @@ void kv_block::reset() {
   state(block_state::regular);
   chain({});
   role(singleton);
+  splitting_ = false;
 }
 
 std::size_t kv_block::size() const {
@@ -248,6 +264,10 @@ void kv_block::export_slots() {
   src.disconnect();
 
   LOG(log_level::info) << "Removed " << remove_keys.size() << " exported keys";
+  bool expected = true;
+  if (!splitting_.compare_exchange_strong(expected, false)) {
+    LOG(log_level::warn) << "splitting was not true";
+  }
 }
 
 std::size_t kv_block::storage_capacity() {
@@ -256,6 +276,10 @@ std::size_t kv_block::storage_capacity() {
 
 std::size_t kv_block::storage_size() {
   return bytes_.load();
+}
+
+bool kv_block::overload() {
+  return bytes_.load() > static_cast<size_t>(static_cast<double>(capacity_) * CAPACITY_THRESHOLD);
 }
 
 }
