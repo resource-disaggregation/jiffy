@@ -80,6 +80,8 @@ void storage_management_service_handler::set_regular(const int32_t block_id,
   try {
     blocks_.at(static_cast<std::size_t>(block_id))->state(block_state::regular);
     blocks_.at(static_cast<std::size_t>(block_id))->slot_range(slot_begin, slot_end);
+    blocks_.at(static_cast<std::size_t>(block_id))->export_target({});
+    blocks_.at(static_cast<std::size_t>(block_id))->export_slot_range(0, -1);
   } catch (std::exception& e) {
     throw make_exception(e);
   }

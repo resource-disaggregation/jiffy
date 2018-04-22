@@ -23,7 +23,7 @@ const double kv_block::CAPACITY_THRESHOLD = 0.75;
 
 kv_block::kv_block(const std::string &block_name,
                    std::size_t capacity,
-                   const std::string& directory_host,
+                   const std::string &directory_host,
                    int directory_port,
                    std::shared_ptr<persistent::persistent_service> persistent,
                    std::string local_storage_prefix,
@@ -45,7 +45,7 @@ std::string kv_block::put(const key_type &key, const value_type &value) {
   if (in_slot_range(hash)) {
     bytes_.fetch_add(key.size() + value.size());
     if (state() == block_state::exporting && in_export_slot_range(hash)) {
-      return "!exporting:" + export_target_str();
+      return "!exporting!" + export_target_str();
     }
     if (block_.insert(key, value)) {
       return "!ok";
@@ -87,7 +87,7 @@ std::string kv_block::update(const key_type &key, const value_type &value) {
       return old_val;
     }
     if (state() == block_state::exporting && in_export_slot_range(hash)) {
-      return "!exporting:" + export_target_str();
+      return "!exporting!" + export_target_str();
     }
     return "!key_not_found";
   }
@@ -106,7 +106,7 @@ std::string kv_block::remove(const key_type &key) {
       return old_val;
     }
     if (state() == block_state::exporting && in_export_slot_range(hash)) {
-      return "!exporting:" + export_target_str();
+      return "!exporting!" + export_target_str();
     }
     return "!key_not_found";
   }
@@ -160,6 +160,8 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
   bool expected = false;
   if (overload() && splitting_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this block
+    LOG(log_level::info) << "Overloaded block; storage = " << bytes_.load() << " capacity = " << capacity_ << " key = "
+                         << args[0];
     directory::directory_client client(directory_host_, directory_port_);
     client.split_slot_range(path(), slot_begin(), slot_end());
     client.disconnect();

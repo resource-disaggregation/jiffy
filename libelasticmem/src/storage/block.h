@@ -118,6 +118,7 @@ class block {
 
   void export_target(const std::vector<std::string>& target) {
     export_target_ = target;
+    export_target_str_ = "";
     for (const auto& block: target) {
       export_target_str_ += (block + "!");
     }

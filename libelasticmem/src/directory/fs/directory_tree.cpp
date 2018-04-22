@@ -384,7 +384,7 @@ void directory_tree::add_block_to_file(const std::string &path) {
 }
 
 void directory_tree::split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) {
-  LOG(log_level::info) << "Splitting block " << slot_begin << " @ " << path;
+  LOG(log_level::info) << "Splitting slot range (" << slot_begin << ", " << slot_end << ") @ " << path;
   auto storage = storage_;
   auto node = get_node_as_file(path);
   auto ctx = node->setup_export(storage, allocator_, path, slot_begin, slot_end);
