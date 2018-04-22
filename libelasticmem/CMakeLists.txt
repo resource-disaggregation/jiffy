@@ -210,7 +210,7 @@ if (BUILD_TESTS)
           test/local_store_test.cpp
           test/notification_test.cpp
           test/storage_manager_test.cpp
-          test/test_utils.h)
+          test/test_utils.h test/auto_scaling_test.cpp)
   target_link_libraries(elasticmem_tests elasticmem)
   if (NOT USE_SYSTEM_CATCH)
     add_dependencies(elasticmem_tests catch)
