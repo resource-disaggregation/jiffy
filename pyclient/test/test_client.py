@@ -248,8 +248,9 @@ class TestClient(TestCase):
             kv.remove('key1')
 
             self.assertTrue(n1.get_notification() == Notification('put', b'key1'))
-            self.assertTrue(n2.get_notification() == Notification('put', b'key1'))
-            self.assertTrue(n2.get_notification() == Notification('remove', b'key1'))
+            n2_notifs = [n2.get_notification(), n2.get_notification()]
+            self.assertTrue(Notification('put', b'key1') in n2_notifs)
+            self.assertTrue(Notification('remove', b'key1') in n2_notifs)
             self.assertTrue(n3.get_notification() == Notification('remove', b'key1'))
 
             with self.assertRaises(queue.Empty):
