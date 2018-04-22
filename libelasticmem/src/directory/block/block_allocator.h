@@ -17,8 +17,6 @@ class block_allocator {
   virtual std::size_t num_free_blocks() = 0;
   virtual std::size_t num_allocated_blocks() = 0;
   virtual std::size_t num_total_blocks() = 0;
-  virtual const std::vector<std::string> free_blocks() = 0;
-  virtual const std::vector<std::string> allocated_blocks() = 0;
 };
 
 }
