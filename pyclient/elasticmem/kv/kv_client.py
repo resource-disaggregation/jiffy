@@ -1,9 +1,10 @@
 import logging
 from bisect import bisect_right
 
-from elasticmem.kv import block_client, crc
+from elasticmem.kv import crc
+from elasticmem.kv.block_client import BlockChainClient
+from elasticmem.kv.compat import b, unicode, bytes, long, basestring, char_to_byte, bytes_to_str
 from elasticmem.kv.kv_ops import KVOps
-from elasticmem.kv.compat import b, unicode, bytes, long, basestring
 
 
 def encode(value):
@@ -25,7 +26,7 @@ class KVClient:
         self.fs = fs
         self.path = path
         self.file_info = data_status
-        self.blocks = [block_client.BlockChainClient(chain.block_names) for chain in data_status.data_blocks]
+        self.blocks = [BlockChainClient(chain.block_names) for chain in data_status.data_blocks]
         self.slots = [chain.slot_range[0] for chain in data_status.data_blocks]
         self.chain_failure_cb_ = chain_failure_cb
 
@@ -33,30 +34,55 @@ class KVClient:
         for c in self.blocks:
             c.disconnect()
 
-    def pipeline_put(self):
-        return PipelinedPut(self.path, self.blocks, self.slots, self.chain_failure_cb_)
+    def refresh(self):
+        self.file_info = self.fs.dstatus(self.path)
+        self.blocks = [BlockChainClient(chain.block_names) for chain in self.file_info.data_blocks]
+        self.slots = [chain.slot_range[0] for chain in self.file_info.data_blocks]
 
-    def send_put(self, key, value):
-        bid = self.block_id(key)
-        return bid, self.blocks[bid].send_put(key, value)
+    def _execute(self, client, client_op, *args):
+        response = b(client_op(client, *args))
+        if response[0] == char_to_byte('!'):  # Actionable response
+            if response[1:] == b('ok'):
+                return "ok"
+            elif response[1:] == b('key_not_found'):
+                return None
+            elif response[1:] == b('duplicate_key'):
+                raise ValueError('Key already exists')
+            elif response[1:] == b('args_error'):
+                raise ValueError('Incorrect arguments')
+            elif response[1:] == b('block_moved'):
+                self.refresh()
+                return self._execute(client, client_op, *args)
+            elif response[1:].startswith(b('exporting')):
+                block_names = [bytes_to_str(x) for x in response[1:].split(b('!'))[1:]]
+                client = BlockChainClient(block_names)
+                return self._execute(client, client_op, *args)
+        return response
 
     def put(self, key, value):
         try:
-            return self.blocks[self.block_id(key)].put(key, value)
+            return self._execute(self.blocks[self.block_id(key)], BlockChainClient.put, key, value)
         except RuntimeError as e:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
 
-    def pipeline_get(self):
-        return PipelinedGet(self.path, self.blocks, self.slots, self.chain_failure_cb_)
-
-    def send_get(self, key):
-        bid = self.block_id(key)
-        return bid, self.blocks[bid].send_get(key)
-
     def get(self, key):
         try:
-            return self.blocks[self.block_id(key)].get(key)
+            return self._execute(self.blocks[self.block_id(key)], BlockChainClient.get, key)
+        except RuntimeError as e:
+            logging.warning(e)
+            self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
+
+    def update(self, key, value):
+        try:
+            return self._execute(self.blocks[self.block_id(key)], BlockChainClient.update, key, value)
+        except RuntimeError as e:
+            logging.warning(e)
+            self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
+
+    def remove(self, key):
+        try:
+            return self._execute(self.blocks[self.block_id(key)], BlockChainClient.remove, key)
         except RuntimeError as e:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
@@ -64,39 +90,17 @@ class KVClient:
     def num_keys(self):
         return sum([int(block.num_keys()) for block in self.blocks])
 
+    def pipeline_get(self):
+        return PipelinedGet(self.path, self.blocks, self.slots, self.chain_failure_cb_)
+
+    def pipeline_put(self):
+        return PipelinedPut(self.path, self.blocks, self.slots, self.chain_failure_cb_)
+
     def pipeline_update(self):
         return PipelinedUpdate(self.path, self.blocks, self.slots, self.chain_failure_cb_)
 
-    def send_update(self, key, value):
-        bid = self.block_id(key)
-        return bid, self.blocks[bid].send_update(key, value)
-
-    def update(self, key, value):
-        try:
-            return self.blocks[self.block_id(key)].update(key, value)
-        except RuntimeError as e:
-            logging.warning(e)
-            self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
-
     def pipeline_remove(self):
         return PipelinedRemove(self.path, self.blocks, self.slots, self.chain_failure_cb_)
-
-    def send_remove(self, key):
-        bid = self.block_id(key)
-        return bid, self.blocks[bid].send_remove(key)
-
-    def remove(self, key):
-        try:
-            return self.blocks[self.block_id(key)].remove(key)
-        except RuntimeError as e:
-            logging.warning(e)
-            self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
-
-    def recv_response(self, op_seq):
-        return self.blocks[op_seq[0]].recv_response(op_seq[1])
-
-    def recv_responses(self, op_seqs):
-        return [self.recv_response(op_seq) for op_seq in op_seqs]
 
     def block_id(self, key):
         i = bisect_right(self.slots, crc.crc16(encode(key)))

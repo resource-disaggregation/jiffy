@@ -9,19 +9,24 @@ from elasticmem import ElasticMemClient
 
 def make_workload(path, off, count, client):
     logging.info("Reading %d ops of workload from %s at offset %d" % (count, path, off))
+    pipelines = {"get": client.pipeline_get(),
+                 "put": client.pipeline_put(),
+                 "update": client.pipeline_update(),
+                 "remove": client.pipeline_remove()}
+
     with open(path) as f:
         ops = [x.strip().split() for x in f.readlines()[int(off):int(off + count)]]
-        workload = [[getattr(client, "send_" + x[0]), x[1:]] for x in ops]
+        workload = [[getattr(pipelines[x[0]], x[0]), x[1:]] for x in ops]
     logging.info("Read %d ops of workload from %s at offset %d" % (len(workload), path, off))
 
-    return workload
+    return pipelines, workload
 
 
 def load_and_run_workload(barrier, workload_path, workload_off, d_host, d_port, l_port, data_path,
                           n_ops, max_async):
     client = ElasticMemClient(d_host, d_port, l_port)
     kv = client.open(data_path)
-    workload = make_workload(workload_path, workload_off, n_ops, kv)
+    pipelines, workload = make_workload(workload_path, workload_off, n_ops, kv)
     logging.info("[Process] Loaded data for process.")
 
     barrier.wait()
@@ -29,15 +34,13 @@ def load_and_run_workload(barrier, workload_path, workload_off, d_host, d_port, 
 
     ops = 0
     begin = time.time()
-    op_seqs = []
     while ops < len(workload):
-        op_seqs.append(workload[ops][0](*workload[ops][1]))
+        workload[ops][0](*workload[ops][1])
         ops += 1
         if ops % max_async == 0:
-            kv.recv_responses(op_seqs)
-            del op_seqs[:]
-    kv.recv_responses(op_seqs)
-    del op_seqs[:]
+            for k in pipelines:
+                pipelines[k].execute()
+
     end = time.time()
 
     print(float(ops) / (end - begin))

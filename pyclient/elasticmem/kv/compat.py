@@ -1,11 +1,6 @@
 import sys
 
 if sys.version_info[0] < 3:
-    from urllib import unquote
-    from urlparse import parse_qs, urlparse
-    from itertools import imap, izip
-    from string import letters as ascii_letters
-    from Queue import Queue
     try:
         from cStringIO import StringIO as BytesIO
     except ImportError:
@@ -45,6 +40,12 @@ if sys.version_info[0] < 3:
     def byte_to_chr(x):
         return x
 
+    def char_to_byte(x):
+        return x
+
+    def bytes_to_str(x):
+        return x
+
     unichr = unichr
     xrange = xrange
     basestring = basestring
@@ -64,8 +65,14 @@ else:
     def byte_to_chr(x):
         return chr(x)
 
+    def char_to_byte(x):
+        return ord(x)
+
     def nativestr(x):
         return x if isinstance(x, str) else x.decode('utf-8', 'replace')
+
+    def bytes_to_str(x):
+        x.decode()
 
     def u(x):
         return x

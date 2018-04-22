@@ -59,9 +59,13 @@ class TestClient(TestCase):
     DIRECTORY_SERVICE_PORT = 9090
     DIRECTORY_LEASE_PORT = 9091
 
-    def start_servers(self):
+    def start_servers(self, directoryd_args=None, storaged_args=None):
+        if storaged_args is None:
+            storaged_args = []
+        if directoryd_args is None:
+            directoryd_args = []
         try:
-            self.directoryd = subprocess.Popen([self.DIRECTORY_SERVER_EXECUTABLE])
+            self.directoryd = subprocess.Popen([self.DIRECTORY_SERVER_EXECUTABLE] + directoryd_args)
         except OSError as e:
             print("Error running executable %s: %s" % (self.DIRECTORY_SERVER_EXECUTABLE, e))
             sys.exit()
@@ -70,7 +74,7 @@ class TestClient(TestCase):
         wait_till_server_ready(self.DIRECTORY_HOST, self.DIRECTORY_LEASE_PORT)
 
         try:
-            self.storaged = subprocess.Popen([self.STORAGE_SERVER_EXECUTABLE])
+            self.storaged = subprocess.Popen([self.STORAGE_SERVER_EXECUTABLE] + storaged_args)
         except OSError as e:
             print("Error running executable %s: %s" % (self.STORAGE_SERVER_EXECUTABLE, e))
             sys.exit()
@@ -89,13 +93,13 @@ class TestClient(TestCase):
     def kv_ops(self, kv):
         # Test get/put
         for i in range(0, 1000):
-            self.assertTrue(kv.put(str(i), str(i)) == b"!ok")
+            self.assertTrue(kv.put(str(i), str(i)) == 'ok')
 
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) == bytes(str(i), 'utf-8'))
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.get(str(i)) == b"!key_not_found")
+            self.assertTrue(kv.get(str(i)) is None)
 
         self.assertTrue(kv.num_keys() == 1000)
 
@@ -104,7 +108,7 @@ class TestClient(TestCase):
             self.assertTrue(kv.update(str(i), str(i + 1000)) == bytes(str(i), 'utf-8'))
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.update(str(i), str(i + 1000)) == b"!key_not_found")
+            self.assertTrue(kv.update(str(i), str(i + 1000)) is None)
 
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) == bytes(str(i + 1000), 'utf-8'))
@@ -116,10 +120,10 @@ class TestClient(TestCase):
             self.assertTrue(kv.remove(str(i)) == bytes(str(i + 1000), 'utf-8'))
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.remove(str(i)) == b"!key_not_found")
+            self.assertTrue(kv.remove(str(i)) is None)
 
         for i in range(0, 1000):
-            self.assertTrue(kv.get(str(i)) == b"!key_not_found")
+            self.assertTrue(kv.get(str(i)) is None)
 
         self.assertTrue(kv.num_keys() == 0)
 
@@ -140,7 +144,7 @@ class TestClient(TestCase):
 
         for i in range(1000, 2000):
             gets.get(str(i))
-        self.assertTrue(gets.execute() == [b"!key_not_found"] * 1000)
+        self.assertTrue(gets.execute() == [b'!key_not_found'] * 1000)
 
         self.assertTrue(kv.num_keys() == 1000)
 
@@ -151,7 +155,7 @@ class TestClient(TestCase):
 
         for i in range(1000, 2000):
             updates.update(str(i), str(i + 1000))
-        self.assertTrue(updates.execute() == [b"!key_not_found"] * 1000)
+        self.assertTrue(updates.execute() == [b'!key_not_found'] * 1000)
 
         for i in range(0, 1000):
             gets.get(str(i))
@@ -166,11 +170,11 @@ class TestClient(TestCase):
 
         for i in range(1000, 2000):
             removes.remove(str(i))
-        self.assertTrue(removes.execute() == [b"!key_not_found"] * 1000)
+        self.assertTrue(removes.execute() == [b'!key_not_found'] * 1000)
 
         for i in range(0, 1000):
             gets.get(str(i))
-        self.assertTrue(gets.execute() == [b"!key_not_found"] * 1000)
+        self.assertTrue(gets.execute() == [b'!key_not_found'] * 1000)
 
         self.assertTrue(kv.num_keys() == 0)
 
@@ -225,6 +229,20 @@ class TestClient(TestCase):
             client.remove('/a/file.txt', RemoveMode.delete)
             self.assertFalse('/a/file.txt' in client.to_renew)
             self.assertFalse(client.fs.exists('/a/file.txt'))
+        finally:
+            client.disconnect()
+            self.stop_servers()
+
+    def test_auto_scale(self):
+        self.start_servers(None, ["--block-capacity", "7705"])
+        client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        try:
+            kv = client.create("/a/file.txt", "/tmp")
+            for i in range(0, 1000):
+                self.assertTrue(kv.put(str(i), str(i)) == 'ok')
+            while len(client.fs.dstatus("/a/file.txt").data_blocks) == 1:
+                pass
+            self.assertTrue(len(client.fs.dstatus("/a/file.txt").data_blocks) == 2)
         finally:
             client.disconnect()
             self.stop_servers()
