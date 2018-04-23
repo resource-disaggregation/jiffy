@@ -54,7 +54,7 @@ std::string kv_block::put(const key_type &key, const value_type &value) {
     }
   }
   LOG(log_level::info) << "Requested key has slot " << hash << " while my slot range is (" << slot_begin() << ", "
-                       << slot_end();
+                       << slot_end() << ")";
   return "!block_moved";
 }
 

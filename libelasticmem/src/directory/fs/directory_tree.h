@@ -282,10 +282,6 @@ class ds_file_node : public ds_node {
 
   void finalize_export(std::shared_ptr<storage::storage_management_ops> storage, const export_ctx &ctx) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
-    for (std::size_t j = 0; j < dstatus_.chain_length(); ++j) {
-      storage->set_regular(ctx.from_block.block_names[j], ctx.slot_begin, ctx.slot_mid);
-      storage->set_regular(ctx.to_block.block_names[j], ctx.slot_mid + 1, ctx.slot_end);
-    }
     dstatus_.update_data_block_slots(ctx.block_idx, ctx.slot_begin, ctx.slot_mid);
     dstatus_.set_data_block_status(ctx.block_idx, chain_status::stable);
     dstatus_.add_data_block(ctx.to_block, ctx.block_idx + 1);
@@ -294,6 +290,10 @@ class ds_file_node : public ds_node {
       throw std::logic_error("Cannot find to_block in adding list");
     }
     adding_.erase(it);
+    for (std::size_t j = 0; j < dstatus_.chain_length(); ++j) {
+      storage->set_regular(ctx.from_block.block_names[j], ctx.slot_begin, ctx.slot_mid);
+      storage->set_regular(ctx.to_block.block_names[j], ctx.slot_mid + 1, ctx.slot_end);
+    }
   }
 
   size_t num_blocks() const {
