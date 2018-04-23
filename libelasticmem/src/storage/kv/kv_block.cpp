@@ -113,6 +113,9 @@ std::string kv_block::remove(const key_type &key, bool redirect) {
     }
     return "!key_not_found";
   }
+  LOG(log_level::info) << "Received request for slot " << hash << " while my slot is " << slot_begin() << "-" << slot_end();
+  if (state() == importing)
+    LOG(log_level::info) << "I am importing " << import_slot_range().first << "-" << import_slot_range().second << " redirect: " << redirect;
   return "!block_moved";
 }
 
@@ -123,7 +126,7 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
     case kv_op_id::zget:
     case kv_op_id::get:
       for (const key_type &key: args)
-        _return.push_back(get(key));
+        _return.push_back(get(key, redirect));
       break;
     case kv_op_id::num_keys:
       if (nargs != 0) {
@@ -146,7 +149,7 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
     case kv_op_id::zremove:
     case kv_op_id::remove: {
       for (size_t i = 0; i < nargs; i++) {
-        _return.emplace_back(remove(args[i]));
+        _return.emplace_back(remove(args[i], redirect));
       }
       break;
     }
@@ -156,7 +159,7 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
         _return.emplace_back("!args_error");
       } else {
         for (size_t i = 0; i < nargs; i += 2) {
-          _return.emplace_back(update(args[i], args[i + 1]));
+          _return.emplace_back(update(args[i], args[i + 1], redirect));
         }
       }
       break;
@@ -180,7 +183,7 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
   }
   expected = false;
   if (oid == kv_op_id::remove && underload() && state() != block_state::exporting && state() != block_state::importing
-      && !(slot_begin() == 0 && slot_end() == block::SLOT_MAX) && merging_.compare_exchange_strong(expected, true)) {
+      && slot_end() != block::SLOT_MAX && merging_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
     LOG(log_level::info) << "Underloaded block; storage = " << bytes_.load() << " capacity = " << capacity_
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
@@ -202,7 +205,7 @@ void kv_block::reset() {
   reset_next_and_listen("nil");
   path("");
   subscriptions().clear();
-  clients().clear();
+  // clients().clear();
   bytes_.store(0);
   slot_range(0, -1);
   state(block_state::regular);

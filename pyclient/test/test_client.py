@@ -1,4 +1,5 @@
 from __future__ import print_function
+
 import os
 import subprocess
 import sys
@@ -240,9 +241,10 @@ class TestClient(TestCase):
             kv = client.create("/a/file.txt", "/tmp")
             for i in range(0, 2000):
                 self.assertTrue(kv.put(str(i), str(i)) == 'ok')
-            while len(client.fs.dstatus("/a/file.txt").data_blocks) == 1:
-                pass
             self.assertTrue(len(client.fs.dstatus("/a/file.txt").data_blocks) == 4)
+            for i in range(0, 2000):
+                self.assertTrue(kv.remove(str(i)) == bytes(str(i), 'utf-8'))
+            self.assertTrue(len(client.fs.dstatus("/a/file.txt").data_blocks) == 1)
         finally:
             client.disconnect()
             self.stop_servers()
