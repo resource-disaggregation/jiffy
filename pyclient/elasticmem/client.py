@@ -77,7 +77,6 @@ class ElasticMemClient:
         self.directory_port = directory_service_port
         self.fs = DirectoryClient(host, directory_service_port)
         self.chain_failure_cb = ChainFailureCallback(self.fs)
-        self.kvs = {}
         self.notifs = {}
         self.to_renew = []
         self.ls = LeaseClient(host, lease_port)
@@ -97,39 +96,24 @@ class ElasticMemClient:
         if path not in self.to_renew:
             self.to_renew.append(path)
 
-    def create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_client=True):
+    def create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1):
         s = self.fs.create(path, persistent_store_prefix, num_blocks, chain_length)
         self.keep_alive(path)
-        k = KVClient(self.fs, path, s, self.chain_failure_cb)
-        if cache_client:
-            self.kvs[path] = k
-        return k
+        return KVClient(self.fs, path, s, self.chain_failure_cb)
 
-    def open(self, path, cache_client=True):
-        if cache_client and path in self.kvs:
-            return self.kvs[path]
+    def open(self, path):
         s = self.fs.open(path)
         self.keep_alive(path)
-        k = KVClient(self.fs, path, s, self.chain_failure_cb)
-        if cache_client:
-            self.kvs[path] = k
-        return k
+        return KVClient(self.fs, path, s, self.chain_failure_cb)
 
-    def open_or_create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_client=True):
-        if cache_client and path in self.kvs:
-            return self.kvs[path]
+    def open_or_create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1):
         s = self.fs.open_or_create(path, persistent_store_prefix, num_blocks, chain_length)
         self.keep_alive(path)
-        k = KVClient(self.fs, path, s, self.chain_failure_cb)
-        if cache_client:
-            self.kvs[path] = k
-        return k
+        return KVClient(self.fs, path, s, self.chain_failure_cb)
 
     def close(self, path):
         if path in self.to_renew:
             self.to_renew.remove(path)
-        if path in self.kvs:
-            del self.kvs[path]
 
     def remove(self, path, mode):
         self.close(path)
