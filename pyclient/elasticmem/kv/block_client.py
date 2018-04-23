@@ -13,24 +13,21 @@ class ClientEntry:
         self.transport = transport
         self.protocol = protocol
         self.client = client
-        self.ref_cnt = 1
-
-    def incr_ref_cnt(self):
-        self.ref_cnt += 1
-        return self
-
-    def decr_ref_cnt(self):
-        self.ref_cnt -= 1
-        return self.ref_cnt
 
 
 class BlockClientCache:
     def __init__(self):
         self.cache = {}
 
-    def acquire(self, host, port):
+    def __del__(self):
+        for k in self.cache:
+            client_entry = self.cache[k]
+            if client_entry.transport.isOpen():
+                client_entry.transport.close()
+
+    def get(self, host, port):
         if (host, port) in self.cache:
-            entry = self.cache[(host, port)].incr_ref_cnt()
+            entry = self.cache[(host, port)]
             return entry.transport, entry.protocol, entry.client
         transport = TTransport.TBufferedTransport(TSocket.TSocket(host, port))
         protocol = TBinaryProtocolAccelerated(transport)
@@ -50,14 +47,6 @@ class BlockClientCache:
             raise TTransportException(ex.type, "Connection failed {}:{}: {}".format(host, port, ex.message))
         self.cache[(host, port)] = ClientEntry(transport, protocol, client)
         return transport, protocol, client
-
-    def release(self, host, port):
-        if (host, port) in self.cache:
-            entry = self.cache[(host, port)]
-            if entry.decr_ref_cnt() == 0:
-                if entry.transport.isOpen():
-                    entry.transport.close()
-                del self.cache[(host, port)]
 
 
 class CommandResponseReader:
@@ -84,14 +73,8 @@ class CommandResponseReader:
 
 class BlockClient:
     def __init__(self, client_cache, host, port, block_id):
-        self.client_cache = client_cache
-        self.host = host
-        self.port = port
-        self.transport_, self.protocol_, self.client_ = client_cache.acquire(host, port)
+        self.transport_, self.protocol_, self.client_ = client_cache.get(host, port)
         self.id_ = block_id
-
-    def __del__(self):
-        self.client_cache.release(self.host, self.port)
 
     def get_response_reader(self, client_id):
         self.client_.register_client_id(self.id_, client_id)
