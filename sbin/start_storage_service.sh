@@ -7,22 +7,26 @@ sbin="`cd "$sbin"; pwd`"
 . "$ELASTICMEM_PREFIX/sbin/load-em-env.sh"
 
 LOG_PATH="$sbin/../log"
-mkdir -p $LOG_PATH
+mkdir -p ${LOG_PATH}
 
-if [ "$BIND_ADDRESS" = "" ]; then
-  BIND_ADDRESS="0.0.0.0"
+if [ "$STORAGE_ADDRESS" = "" ]; then
+  STORAGE_ADDRESS="0.0.0.0"
 fi
 
-if [ "$SERVICE_PORT" = "" ]; then
-  SERVICE_PORT="9093"
+if [ "$STORAGE_SERVICE_PORT" = "" ]; then
+  STORAGE_SERVICE_PORT="9093"
 fi
 
 if [ "$MANAGEMENT_SERVICE_PORT" = "" ]; then
   MANAGEMENT_SERVICE_PORT="9094"
 fi
 
-if [ "$BLOCK_ADDRESS" = "" ]; then
-  BLOCK_ADDRESS="127.0.0.1"
+if [ "$DIRECTORY_ADDRESS" = "" ]; then
+  DIRECTORY_ADDRESS="127.0.0.1"
+fi
+
+if [ "$DIRECTORY_SERVICE_PORT" = "" ]; then
+  DIRECTORY_SERVICE_PORT="9090"
 fi
 
 if [ "$BLOCK_SERVICE_PORT" = "" ]; then
@@ -30,7 +34,7 @@ if [ "$BLOCK_SERVICE_PORT" = "" ]; then
 fi
 
 if [ "$NOTIFICATION_SERVICE_PORT" = "" ]; then
-  MANAGEMENT_PERIOD_MS="9095"
+  NOTIFICATION_SERVICE_PORT="9095"
 fi
 
 if [ "$CHAIN_PORT" = "" ]; then
@@ -42,10 +46,11 @@ if [ "$NUM_BLOCKS" = "" ]; then
 fi
 
 if [ "$BLOCK_CAPACITY" = "" ]; then
-  NUM_BLOCKS="134217728"
+  BLOCK_CAPACITY="134217728"
 fi
 
-$sbin/../build/storage/storaged --address $BIND_ADDRESS --service-port $SERVICE_PORT \
-  --management-port $MANAGEMENT_SERVICE_PORT --block-address $BLOCK_ADDRESS --block-port $BLOCK_SERVICE_PORT \
-  --notification-port $NOTIFICATION_SERVICE_PORT --chain-port $CHAIN_PORT --num-blocks $NUM_BLOCKS \
-  --block-capacity $BLOCK_CAPACITY 2>$LOG_PATH/storage.stderr 1>$LOG_PATH/storage.stdout &
+${sbin}/../build/storage/storaged --address ${STORAGE_ADDRESS} --service-port ${STORAGE_SERVICE_PORT} \
+  --management-port ${MANAGEMENT_SERVICE_PORT} --notification-port ${NOTIFICATION_SERVICE_PORT} \
+  --chain-port ${CHAIN_PORT} --dir-address ${DIRECTORY_ADDRESS} --dir-port ${DIRECTORY_SERVICE_PORT} \
+  --block-port ${BLOCK_SERVICE_PORT} --num-blocks ${NUM_BLOCKS} --block-capacity ${BLOCK_CAPACITY} \
+  2>${LOG_PATH}/storage.stderr 1>${LOG_PATH}/storage.stdout &

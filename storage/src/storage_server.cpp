@@ -16,15 +16,15 @@ using namespace ::elasticmem::utils;
 
 using namespace ::apache::thrift;
 
-std::string block_host;
-int block_port;
+std::string dir_host;
+int32_t block_port;
 std::vector<std::string> block_names;
 
 void retract_block_names_and_print_stacktrace(int sig_num) {
   std::string trace = signal_handling::stacktrace();
   LOG(log_level::info) << "Caught signal " << sig_num << ", cleaning up...";
   try {
-    block_advertisement_client client(block_host, block_port);
+    block_advertisement_client client(dir_host, block_port);
     client.retract_blocks(block_names);
     client.disconnect();
   } catch (std::exception &e) {
@@ -57,15 +57,17 @@ int main(int argc, char **argv) {
       "Port that storage management service listens on"));
   opts.add(cmd_option("notification-port", 'n', false).set_default("9095").set_description(
       "Port that notification service listens on"));
-  opts.add(cmd_option("block-address", 'b', false).set_default("127.0.0.1").set_description(
-      "Host for block advertisement service"));
-  opts.add(cmd_option("block-port", 'p', false).set_default("9092").set_description(
+  opts.add(cmd_option("dir-address", 'd', false).set_default("127.0.0.1").set_description(
+      "Host for directory service"));
+  opts.add(cmd_option("dir-port", 'p', false).set_default("9090").set_description(
+      "Port that directory service interface connects to"));
+  opts.add(cmd_option("block-port", 't', false).set_default("9092").set_description(
       "Port that block advertisement interface connects to"));
   opts.add(cmd_option("chain-port", 'c', false).set_default("9096").set_description(
       "Port that block server listens on for chain requests"));
   opts.add(cmd_option("num-blocks", 'n', false).set_default("64").set_description(
       "Number of blocks to advertise"));
-  opts.add(cmd_option("block-capacity", 'd', false).set_default("134217728").set_description(
+  opts.add(cmd_option("block-capacity", 'b', false).set_default("134217728").set_description(
       "Storage capacity of each block"));
 
   cmd_parser parser(argc, argv, opts);
@@ -79,11 +81,13 @@ int main(int argc, char **argv) {
   int32_t management_port;
   int32_t notification_port;
   int32_t chain_port;
+  int32_t dir_port;
   std::size_t num_blocks;
   std::size_t block_capacity;
   try {
     address = parser.get("address");
-    block_host = parser.get("block-address");
+    dir_host = parser.get("dir-address");
+    dir_port = parser.get_int("dir-port");
     service_port = parser.get_int("service-port");
     management_port = parser.get_int("management-port");
     block_port = parser.get_int("block-port");
@@ -119,7 +123,7 @@ int main(int argc, char **argv) {
   std::vector<std::shared_ptr<chain_module>> blocks;
   blocks.resize(num_blocks);
   for (size_t i = 0; i < blocks.size(); ++i) {
-    blocks[i] = std::make_shared<kv_block>(block_names[i], block_capacity);
+    blocks[i] = std::make_shared<kv_block>(block_names[i], block_capacity, dir_host, dir_port);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
 
@@ -138,7 +142,7 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Management server listening on " << address << ":" << management_port;
 
   try {
-    block_advertisement_client client(block_host, block_port);
+    block_advertisement_client client(dir_host, block_port);
     client.advertise_blocks(block_names);
     client.disconnect();
   } catch (std::exception &e) {
@@ -249,7 +253,7 @@ int main(int argc, char **argv) {
   }
 
   try {
-    block_advertisement_client client(block_host, block_port);
+    block_advertisement_client client(dir_host, block_port);
     client.retract_blocks(block_names);
     client.disconnect();
   } catch (std::exception &e) {
