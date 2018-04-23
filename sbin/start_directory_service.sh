@@ -7,10 +7,10 @@ sbin="`cd "$sbin"; pwd`"
 . "$ELASTICMEM_PREFIX/sbin/load-em-env.sh"
 
 LOG_PATH="$sbin/../log"
-mkdir -p $LOG_PATH
+mkdir -p ${LOG_PATH}
 
-if [ "$BIND_ADDRESS" = "" ]; then
-  BIND_ADDRESS="0.0.0.0"
+if [ "$DIRECTORY_ADDRESS" = "" ]; then
+  DIRECTORY_ADDRESS="0.0.0.0"
 fi
 
 if [ "$DIRECTORY_SERVICE_PORT" = "" ]; then
@@ -37,6 +37,7 @@ if [ "$GRACE_PERIOD_MS" = "" ]; then
   GRACE_PERIOD_MS="60000000"
 fi
 
-$sbin/../build/directory/directoryd --address $BIND_ADDRESS --service-port $DIRECTORY_SERVICE_PORT \
-  --lease-port $LEASE_SERVICE_PORT --block-port $BLOCK_SERVICE_PORT --storage-trace-file $STORAGE_TRACE_FILE \
-  --lease-period-ms $LEASE_PERIOD_MS --grace-period-ms $GRACE_PERIOD_MS 2>$LOG_PATH/directory.stderr 1>$LOG_PATH/directory.stdout &
+${sbin}/../build/directory/directoryd --address ${DIRECTORY_ADDRESS} --service-port ${DIRECTORY_SERVICE_PORT} \
+  --lease-port ${LEASE_SERVICE_PORT} --block-port ${BLOCK_SERVICE_PORT} --storage-trace-file ${STORAGE_TRACE_FILE} \
+  --lease-period-ms ${LEASE_PERIOD_MS} --grace-period-ms ${GRACE_PERIOD_MS} 2>${LOG_PATH}/directory.stderr \
+  1>${LOG_PATH}/directory.stdout &
