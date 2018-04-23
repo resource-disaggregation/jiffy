@@ -160,7 +160,9 @@ class ds_file_node : public ds_node {
     size_t max_pos = 0;
     for (auto &future: futures) {
       size_t sz = future.get();
-      if (sz > max_size && dstatus_.get_data_block_status(i) != chain_status::exporting && dstatus_.num_slots(i) != 1) {
+      auto cstatus = dstatus_.get_data_block_status(i);
+      if (sz > max_size && cstatus != chain_status::exporting && cstatus != chain_status::importing
+          && dstatus_.num_slots(i) != 1) {
         max_size = sz;
         max_pos = i;
       }
@@ -236,8 +238,9 @@ class ds_file_node : public ds_node {
       throw directory_ops_exception(
           "No block with slot range " + std::to_string(slot_begin) + "-" + std::to_string(slot_end));
     }
-    if (dstatus_.get_data_block_status(block_idx) == chain_status::exporting) {
-      throw directory_ops_exception("Block already in exporting mode");
+    auto cstatus = dstatus_.get_data_block_status(block_idx);
+    if (cstatus == chain_status::exporting || cstatus == chain_status::importing) {
+      throw directory_ops_exception("Block already involved in re-partitioning");
     }
     dstatus_.set_data_block_status(block_idx, chain_status::exporting);
 
@@ -287,13 +290,14 @@ class ds_file_node : public ds_node {
 
   void finalize_slot_range_split(std::shared_ptr<storage::storage_management_ops> storage, const export_ctx &ctx) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
-    auto block_idx = dstatus_.find_replica_chain(ctx.from_block);
     auto slot_begin = ctx.from_block.slot_begin();
     auto slot_end = ctx.from_block.slot_end();
     auto slot_mid = (slot_end + slot_begin) / 2;
-    dstatus_.update_data_block_slots(block_idx, slot_begin, slot_mid);
-    dstatus_.set_data_block_status(block_idx, chain_status::stable);
-    dstatus_.add_data_block(ctx.to_block, block_idx + 1);
+
+    auto from_idx = dstatus_.find_replica_chain(ctx.from_block);
+    dstatus_.update_data_block_slots(from_idx, slot_begin, slot_mid);
+    dstatus_.set_data_block_status(from_idx, chain_status::stable);
+    dstatus_.add_data_block(ctx.to_block, from_idx + 1);
     auto it = std::find(adding_.begin(), adding_.end(), ctx.to_block);
     if (it == adding_.end()) {
       throw std::logic_error("Cannot find to_block in adding list");
@@ -303,6 +307,75 @@ class ds_file_node : public ds_node {
       storage->set_regular(ctx.from_block.block_names[j], slot_begin, slot_mid);
       storage->set_regular(ctx.to_block.block_names[j], slot_mid + 1, slot_end);
     }
+    using namespace utils;
+    LOG(log_level::info) << "Updated file data_status: " << dstatus_.to_string();
+  }
+
+  export_ctx setup_slot_range_merge(std::shared_ptr<storage::storage_management_ops> storage,
+                                    int32_t slot_begin,
+                                    int32_t slot_end) {
+    using namespace storage;
+    if (dstatus_.data_blocks().size() == 1 || slot_end == block::SLOT_MAX) {
+      throw directory_ops_exception("Cannot find a merge partner");
+    }
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    size_t block_idx = 0;
+    for (const auto &block: dstatus_.data_blocks()) {
+      if (block.slot_begin() == slot_begin && block.slot_end() == slot_end) {
+        break;
+      }
+      block_idx++;
+    }
+    if (block_idx == dstatus_.data_blocks().size()) {
+      throw directory_ops_exception(
+          "No block with slot range " + std::to_string(slot_begin) + "-" + std::to_string(slot_end));
+    }
+    auto cstatus = dstatus_.get_data_block_status(block_idx);
+    if (cstatus == chain_status::exporting || cstatus == chain_status::importing) {
+      throw directory_ops_exception("Block already involved in re-partitioning");
+    }
+
+    auto from_chain = dstatus_.data_blocks().at(block_idx);
+    // Always merge with the right neighbor; we can find the better neighbor, but we just don't
+    auto to_chain = dstatus_.data_blocks().at(block_idx + 1);
+    if (to_chain.status == chain_status::exporting) {
+      throw directory_ops_exception("Cannot find a merge partner");
+    }
+
+    dstatus_.set_data_block_status(block_idx, chain_status::exporting);
+    dstatus_.set_data_block_status(block_idx + 1, chain_status::importing);
+
+    // Set old chain to exporting and new chain to importing
+    if (dstatus_.chain_length() == 1) {
+      storage->set_importing(to_chain.block_names[0], slot_begin, slot_end);
+      storage->set_exporting(from_chain.block_names[0], to_chain.block_names, slot_begin, slot_end);
+    } else {
+      for (std::size_t j = 0; j < dstatus_.chain_length(); ++j) {
+        storage->set_importing(to_chain.block_names[j], slot_begin, slot_end);
+      }
+      for (std::size_t j = 0; j < dstatus_.chain_length(); ++j) {
+        storage->set_exporting(from_chain.block_names[j], to_chain.block_names, slot_begin, slot_end);
+      }
+    }
+    return export_ctx{from_chain, to_chain};
+  }
+
+  void finalize_slot_range_merge(std::shared_ptr<storage::storage_management_ops> storage,
+                                 const std::shared_ptr<block_allocator> &allocator,
+                                 const export_ctx &ctx) {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    auto slot_begin = ctx.from_block.slot_begin();
+    auto slot_end = ctx.to_block.slot_end();
+    auto to_idx = dstatus_.find_replica_chain(ctx.to_block);
+    dstatus_.update_data_block_slots(to_idx, slot_begin, slot_end);
+    dstatus_.set_data_block_status(to_idx, chain_status::stable);
+    auto from_idx = dstatus_.find_replica_chain(ctx.from_block);
+    dstatus_.remove_data_block(from_idx);
+    for (std::size_t j = 0; j < dstatus_.chain_length(); ++j) {
+      storage->reset(ctx.from_block.block_names[j]);
+      storage->set_regular(ctx.to_block.block_names[j], slot_begin, slot_end);
+    }
+    allocator->free(ctx.from_block.block_names);
     using namespace utils;
     LOG(log_level::info) << "Updated file data_status: " << dstatus_.to_string();
   }
@@ -480,6 +553,7 @@ class directory_tree : public directory_ops, public directory_management_ops {
   replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) override;
   void add_block_to_file(const std::string &path) override;
   virtual void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end);
+  virtual void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end);
 
  private:
   std::shared_ptr<ds_node> get_node_unsafe(const std::string &path) const;

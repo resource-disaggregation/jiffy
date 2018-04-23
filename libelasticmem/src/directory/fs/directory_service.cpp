@@ -377,5 +377,21 @@ directory_service_split_slot_range_result::~directory_service_split_slot_range_r
 directory_service_split_slot_range_presult::~directory_service_split_slot_range_presult() throw() {
 }
 
+
+directory_service_merge_slot_range_args::~directory_service_merge_slot_range_args() throw() {
+}
+
+
+directory_service_merge_slot_range_pargs::~directory_service_merge_slot_range_pargs() throw() {
+}
+
+
+directory_service_merge_slot_range_result::~directory_service_merge_slot_range_result() throw() {
+}
+
+
+directory_service_merge_slot_range_presult::~directory_service_merge_slot_range_presult() throw() {
+}
+
 }} // namespace
 

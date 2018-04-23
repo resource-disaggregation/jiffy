@@ -95,7 +95,7 @@ TEST_CASE("manager_flush_load_test", "[put][flush][reset][load][get]") {
   }
 }
 
-TEST_CASE("manager_set_state", "[setup_and_set_importing][set_exporting][export_slots][set_regular]") {
+TEST_CASE("manager_scale_up", "[setup_and_set_importing][set_exporting][export_slots][set_regular]") {
   static auto blocks = test_utils::init_kv_blocks(2, SERVICE_PORT, MANAGEMENT_PORT, 0);
   blocks[0]->slot_range(0, -1);
   blocks[1]->slot_range(0, -1);
@@ -178,6 +178,104 @@ TEST_CASE("manager_set_state", "[setup_and_set_importing][set_exporting][export_
       REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[0])->get(key) == "!block_moved");
       REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[1])->get(key) == key);
     }
+  }
+
+  storage_server->stop();
+  if (storage_serve_thread.joinable()) {
+    storage_serve_thread.join();
+  }
+
+  mgmt_server->stop();
+  if (mgmt_serve_thread.joinable()) {
+    mgmt_serve_thread.join();
+  }
+}
+
+TEST_CASE("manager_scale_down", "[setup_and_set_importing][set_exporting][export_slots][set_regular]") {
+  static auto blocks = test_utils::init_kv_blocks(2, SERVICE_PORT, MANAGEMENT_PORT, 0);
+  blocks[0]->slot_range(0, -1);
+  blocks[1]->slot_range(0, -1);
+
+  auto storage_server = block_server::create(blocks, HOST, SERVICE_PORT);
+  std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, SERVICE_PORT);
+
+  auto mgmt_server = storage_management_server::create(blocks, HOST, MANAGEMENT_PORT);
+  std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, MANAGEMENT_PORT);
+
+  auto block_name1 = block_name_parser::make(HOST, SERVICE_PORT, MANAGEMENT_PORT, 0, 0, 0);
+  auto block_name2 = block_name_parser::make(HOST, SERVICE_PORT, MANAGEMENT_PORT, 0, 0, 1);
+
+  storage_manager manager;
+  REQUIRE_NOTHROW(manager.setup_block(block_name1,
+                                      "/path/to/data",
+                                      0,
+                                      32768,
+                                      {block_name1},
+                                      chain_role::singleton,
+                                      "nil"));
+
+  REQUIRE_NOTHROW(manager.setup_block(block_name2,
+                                      "/path/to/data",
+                                      32769,
+                                      65536,
+                                      {block_name2},
+                                      chain_role::singleton,
+                                      "nil"));
+
+  for (std::size_t i = 0; i < 1000; ++i) {
+    std::string key = std::to_string(i);
+    auto h = hash_slot::get(key);
+    if (blocks[0]->in_slot_range(h)) {
+      REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[0])->put(key, key) == "!ok");
+    } else {
+      REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[1])->put(key, key) == "!ok");
+    }
+  }
+
+  REQUIRE_NOTHROW(manager.set_exporting(block_name1, {block_name2}, 0, 32768));
+  REQUIRE(blocks[0]->export_target()[0] == block_name2);
+  REQUIRE(blocks[0]->export_slot_range() == std::make_pair(0, 32768));
+  REQUIRE(blocks[0]->state() == block_state::exporting);
+
+  REQUIRE_NOTHROW(manager.set_importing(block_name2, 0, 32768));
+  REQUIRE(blocks[1]->import_slot_range() == std::make_pair(0, 32768));
+  REQUIRE(blocks[1]->state() == block_state::importing);
+
+  for (std::size_t i = 0; i < 1000; i++) {
+    std::string key = std::to_string(i);
+    auto h = hash_slot::get(key);
+    if (blocks[0]->in_slot_range(h)) {
+      REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[0])->get(key) == key);
+    } else {
+      REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[1])->get(key) == key);
+    }
+  }
+
+  REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[0])->get(std::to_string(1008)) == "!exporting!" + block_name2);
+  REQUIRE_NOTHROW(manager.export_slots(block_name1));
+
+  for (std::size_t i = 0; i < 1000; i++) {
+    std::string key = std::to_string(i);
+    auto h = hash_slot::get(key);
+    if (blocks[0]->in_slot_range(h)) {
+      REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[0])->get(key) == "!exporting!" + block_name2);
+    } else {
+      REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[0])->get(key) == "!block_moved");
+    }
+    bool redirect = blocks[1]->in_import_slot_range(h);
+    REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[1])->get(key, redirect) == key);
+  }
+
+  REQUIRE_NOTHROW(manager.reset(block_name1));
+  REQUIRE_NOTHROW(manager.set_regular(block_name2, 0, 65536));
+
+  for (std::size_t i = 0; i < 1000; i++) {
+    std::string key = std::to_string(i);
+    auto h = hash_slot::get(key);
+    REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[0])->get(key) == "!block_moved");
+    REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[1])->get(key) == key);
   }
 
   storage_server->stop();

@@ -162,5 +162,9 @@ void directory_client::split_slot_range(const std::string &path, int32_t slot_be
   client_->split_slot_range(path, slot_begin, slot_end);
 }
 
+void directory_client::merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) {
+  client_->merge_slot_range(path, slot_begin, slot_end);
+}
+
 }
 }

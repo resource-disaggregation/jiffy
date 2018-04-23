@@ -218,6 +218,16 @@ void directory_service_handler::split_slot_range(const std::string &path,
   }
 }
 
+void directory_service_handler::merge_slot_range(const std::string &path,
+                                                 const int32_t slot_begin,
+                                                 const int32_t slot_end) {
+  try {
+    shard_->merge_slot_range(path, slot_begin, slot_end);
+  } catch (directory_ops_exception &e) {
+    throw make_exception(e);
+  }
+}
+
 directory_service_exception directory_service_handler::make_exception(directory_ops_exception &ex) const {
   directory_service_exception e;
   e.msg = ex.what();

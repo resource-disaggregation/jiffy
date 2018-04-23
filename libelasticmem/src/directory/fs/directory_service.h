@@ -44,6 +44,7 @@ class directory_serviceIf {
   virtual void add_replica_to_chain(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain) = 0;
   virtual void add_block_to_file(const std::string& path) = 0;
   virtual void split_slot_range(const std::string& path, const int32_t slot_begin, const int32_t slot_end) = 0;
+  virtual void merge_slot_range(const std::string& path, const int32_t slot_begin, const int32_t slot_end) = 0;
 };
 
 class directory_serviceIfFactory {
@@ -145,6 +146,9 @@ class directory_serviceNull : virtual public directory_serviceIf {
     return;
   }
   void split_slot_range(const std::string& /* path */, const int32_t /* slot_begin */, const int32_t /* slot_end */) {
+    return;
+  }
+  void merge_slot_range(const std::string& /* path */, const int32_t /* slot_begin */, const int32_t /* slot_end */) {
     return;
   }
 };
@@ -2882,6 +2886,130 @@ class directory_service_split_slot_range_presult {
 
 };
 
+typedef struct _directory_service_merge_slot_range_args__isset {
+  _directory_service_merge_slot_range_args__isset() : path(false), slot_begin(false), slot_end(false) {}
+  bool path :1;
+  bool slot_begin :1;
+  bool slot_end :1;
+} _directory_service_merge_slot_range_args__isset;
+
+class directory_service_merge_slot_range_args {
+ public:
+
+  directory_service_merge_slot_range_args(const directory_service_merge_slot_range_args&);
+  directory_service_merge_slot_range_args& operator=(const directory_service_merge_slot_range_args&);
+  directory_service_merge_slot_range_args() : path(), slot_begin(0), slot_end(0) {
+  }
+
+  virtual ~directory_service_merge_slot_range_args() throw();
+  std::string path;
+  int32_t slot_begin;
+  int32_t slot_end;
+
+  _directory_service_merge_slot_range_args__isset __isset;
+
+  void __set_path(const std::string& val);
+
+  void __set_slot_begin(const int32_t val);
+
+  void __set_slot_end(const int32_t val);
+
+  bool operator == (const directory_service_merge_slot_range_args & rhs) const
+  {
+    if (!(path == rhs.path))
+      return false;
+    if (!(slot_begin == rhs.slot_begin))
+      return false;
+    if (!(slot_end == rhs.slot_end))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_merge_slot_range_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_merge_slot_range_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class directory_service_merge_slot_range_pargs {
+ public:
+
+
+  virtual ~directory_service_merge_slot_range_pargs() throw();
+  const std::string* path;
+  const int32_t* slot_begin;
+  const int32_t* slot_end;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_merge_slot_range_result__isset {
+  _directory_service_merge_slot_range_result__isset() : ex(false) {}
+  bool ex :1;
+} _directory_service_merge_slot_range_result__isset;
+
+class directory_service_merge_slot_range_result {
+ public:
+
+  directory_service_merge_slot_range_result(const directory_service_merge_slot_range_result&);
+  directory_service_merge_slot_range_result& operator=(const directory_service_merge_slot_range_result&);
+  directory_service_merge_slot_range_result() {
+  }
+
+  virtual ~directory_service_merge_slot_range_result() throw();
+  directory_service_exception ex;
+
+  _directory_service_merge_slot_range_result__isset __isset;
+
+  void __set_ex(const directory_service_exception& val);
+
+  bool operator == (const directory_service_merge_slot_range_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_merge_slot_range_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_merge_slot_range_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_merge_slot_range_presult__isset {
+  _directory_service_merge_slot_range_presult__isset() : ex(false) {}
+  bool ex :1;
+} _directory_service_merge_slot_range_presult__isset;
+
+class directory_service_merge_slot_range_presult {
+ public:
+
+
+  virtual ~directory_service_merge_slot_range_presult() throw();
+  directory_service_exception ex;
+
+  _directory_service_merge_slot_range_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
 template <class Protocol_>
 class directory_serviceClientT : virtual public directory_serviceIf {
  public:
@@ -2977,6 +3105,9 @@ class directory_serviceClientT : virtual public directory_serviceIf {
   void split_slot_range(const std::string& path, const int32_t slot_begin, const int32_t slot_end);
   void send_split_slot_range(const std::string& path, const int32_t slot_begin, const int32_t slot_end);
   void recv_split_slot_range();
+  void merge_slot_range(const std::string& path, const int32_t slot_begin, const int32_t slot_end);
+  void send_merge_slot_range(const std::string& path, const int32_t slot_begin, const int32_t slot_end);
+  void recv_merge_slot_range();
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
@@ -3051,6 +3182,8 @@ class directory_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT
   void process_add_block_to_file(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_split_slot_range(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_split_slot_range(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_merge_slot_range(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_merge_slot_range(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
  public:
   directory_serviceProcessorT(::apache::thrift::stdcxx::shared_ptr<directory_serviceIf> iface) :
     iface_(iface) {
@@ -3123,6 +3256,9 @@ class directory_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT
     processMap_["split_slot_range"] = ProcessFunctions(
       &directory_serviceProcessorT::process_split_slot_range,
       &directory_serviceProcessorT::process_split_slot_range);
+    processMap_["merge_slot_range"] = ProcessFunctions(
+      &directory_serviceProcessorT::process_merge_slot_range,
+      &directory_serviceProcessorT::process_merge_slot_range);
   }
 
   virtual ~directory_serviceProcessorT() {}
@@ -3372,6 +3508,15 @@ class directory_serviceMultiface : virtual public directory_serviceIf {
     ifaces_[i]->split_slot_range(path, slot_begin, slot_end);
   }
 
+  void merge_slot_range(const std::string& path, const int32_t slot_begin, const int32_t slot_end) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->merge_slot_range(path, slot_begin, slot_end);
+    }
+    ifaces_[i]->merge_slot_range(path, slot_begin, slot_end);
+  }
+
 };
 
 // The 'concurrent' client is a thread safe client that correctly handles
@@ -3472,6 +3617,9 @@ class directory_serviceConcurrentClientT : virtual public directory_serviceIf {
   void split_slot_range(const std::string& path, const int32_t slot_begin, const int32_t slot_end);
   int32_t send_split_slot_range(const std::string& path, const int32_t slot_begin, const int32_t slot_end);
   void recv_split_slot_range(const int32_t seqid);
+  void merge_slot_range(const std::string& path, const int32_t slot_begin, const int32_t slot_end);
+  int32_t send_merge_slot_range(const std::string& path, const int32_t slot_begin, const int32_t slot_end);
+  void recv_merge_slot_range(const int32_t seqid);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;

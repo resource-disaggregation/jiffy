@@ -85,7 +85,8 @@ data_status directory_tree::create(const std::string &path,
   std::size_t slots_per_block = storage::block::SLOT_MAX / num_blocks;
   for (std::size_t i = 0; i < num_blocks; ++i) {
     auto slot_begin = static_cast<int32_t>(i * slots_per_block);
-    auto slot_end = i == (num_blocks - 1) ? storage::block::SLOT_MAX : static_cast<int32_t>((i + 1) * slots_per_block);
+    auto slot_end =
+        i == (num_blocks - 1) ? storage::block::SLOT_MAX : static_cast<int32_t>((i + 1) * slots_per_block - 1);
     replica_chain
         chain{allocator_->allocate(chain_length, {}), std::make_pair(slot_begin, slot_end), chain_status::stable};
     assert(chain.block_names.size() == chain_length);
@@ -371,29 +372,40 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
 
 void directory_tree::add_block_to_file(const std::string &path) {
   LOG(log_level::info) << "Adding new block to file " << path;
-  auto storage = storage_;
   auto node = get_node_as_file(path);
-  auto ctx = node->setup_add_block(storage, allocator_, path);
-  std::thread([node, storage, ctx] {
+  auto ctx = node->setup_add_block(storage_, allocator_, path);
+  std::thread([&, node, ctx] {
     auto start = time_utils::now_ms();
-    storage->export_slots(ctx.from_block.block_names.front());
+    storage_->export_slots(ctx.from_block.block_names.front());
     auto elapsed = time_utils::now_ms() - start;
     LOG(log_level::info) << "Finished export in " << elapsed << " ms";
-    node->finalize_slot_range_split(storage, ctx);
+    node->finalize_slot_range_split(storage_, ctx);
   }).detach();
 }
 
 void directory_tree::split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) {
   LOG(log_level::info) << "Splitting slot range (" << slot_begin << ", " << slot_end << ") @ " << path;
-  auto storage = storage_;
   auto node = get_node_as_file(path);
-  auto ctx = node->setup_slot_range_split(storage, allocator_, path, slot_begin, slot_end);
-  std::thread([node, storage, ctx] {
+  auto ctx = node->setup_slot_range_split(storage_, allocator_, path, slot_begin, slot_end);
+  std::thread([&, node, ctx] {
     auto start = time_utils::now_ms();
-    storage->export_slots(ctx.from_block.block_names.front());
+    storage_->export_slots(ctx.from_block.block_names.front());
     auto elapsed = time_utils::now_ms() - start;
     LOG(log_level::info) << "Finished export in " << elapsed << " ms";
-    node->finalize_slot_range_split(storage, ctx);
+    node->finalize_slot_range_split(storage_, ctx);
+  }).detach();
+}
+
+void directory_tree::merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) {
+  LOG(log_level::info) << "Merging slot range (" << slot_begin << ", " << slot_end << ") @ " << path;
+  auto node = get_node_as_file(path);
+  auto ctx = node->setup_slot_range_merge(storage_, slot_begin, slot_end);
+  std::thread([&, node, ctx] {
+    auto start = time_utils::now_ms();
+    storage_->export_slots(ctx.from_block.block_names.front());
+    auto elapsed = time_utils::now_ms() - start;
+    LOG(log_level::info) << "Finished export in " << elapsed << " ms";
+    node->finalize_slot_range_merge(storage_, allocator_, ctx);
   }).detach();
 }
 

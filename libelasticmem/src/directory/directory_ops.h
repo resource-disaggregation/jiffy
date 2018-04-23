@@ -8,6 +8,7 @@
 #include <vector>
 #include <chrono>
 #include <sstream>
+#include <iostream>
 
 namespace elasticmem {
 namespace directory {
@@ -141,6 +142,7 @@ enum storage_mode {
 enum chain_status {
   stable = 0,
   exporting = 1,
+  importing = 2
 };
 
 struct replica_chain {
@@ -176,7 +178,7 @@ struct replica_chain {
   }
 
   bool operator==(const replica_chain &other) {
-    return block_names == other.block_names && slot_range == other.slot_range && status == other.status;
+    return block_names == other.block_names && slot_range == other.slot_range;
   }
 
   bool operator!=(const replica_chain &other) {
@@ -399,6 +401,7 @@ class directory_management_ops {
   virtual replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) = 0;
   virtual void add_block_to_file(const std::string &path) = 0;
   virtual void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) = 0;
+  virtual void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) = 0;
 };
 
 }
