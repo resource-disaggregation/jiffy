@@ -174,6 +174,14 @@ struct replica_chain {
     out += ">";
     return out;
   }
+
+  bool operator==(const replica_chain &other) {
+    return block_names == other.block_names && slot_range == other.slot_range && status == other.status;
+  }
+
+  bool operator!=(const replica_chain &other) {
+    return *this != other;
+  }
 };
 
 class file_status {

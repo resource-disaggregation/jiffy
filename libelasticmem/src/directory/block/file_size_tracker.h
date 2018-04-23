@@ -14,9 +14,8 @@ namespace directory {
 class file_size_tracker {
  public:
   file_size_tracker(std::shared_ptr<directory_tree> tree,
-                    std::shared_ptr<storage::storage_management_ops> storage,
-                    uint64_t periodicity_ms,
-                    const std::string &output_file);
+                      uint64_t periodicity_ms,
+                      const std::string &output_file);
 
   ~file_size_tracker();
 
@@ -38,7 +37,6 @@ class file_size_tracker {
   std::string output_file_;
   std::shared_ptr<directory_tree> tree_;
   std::shared_ptr<storage::storage_management_ops> storage_;
-
 };
 
 }

@@ -17,7 +17,7 @@ TEST_CASE("file_size_tracker_test") {
   auto alloc = std::make_shared<dummy_block_allocator>(4);
   auto sm = std::make_shared<dummy_storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
-  file_size_tracker tracker(tree, sm, PERIODICITY_MS, "/tmp/file.trace");
+  file_size_tracker tracker(tree, PERIODICITY_MS, "/tmp/file.trace");
   REQUIRE_NOTHROW(tree->create("/sandbox/a/b/c/file.txt", "/tmp", 1, 1));
   REQUIRE_NOTHROW(tree->create("/sandbox/a/b/file.txt", "/tmp", 1, 1));
   REQUIRE_NOTHROW(tree->create("/sandbox/a/file.txt", "/tmp", 1, 1));
@@ -43,11 +43,12 @@ TEST_CASE("file_size_tracker_test") {
   std::size_t i = 0;
   while (std::getline(in, line)) {
     std::istringstream ss(line);
-    uint64_t ts, file_size;
+    uint64_t ts = 0, file_size = UINT64_MAX, num_blocks = 0;
     std::string path;
-    ss >> ts >> path >> file_size;
+    ss >> ts >> path >> file_size >> num_blocks;
     REQUIRE(file_size == 0);
     REQUIRE(path == paths[i % 3]);
+    REQUIRE(num_blocks == 1);
     ++i;
   }
   in.close();

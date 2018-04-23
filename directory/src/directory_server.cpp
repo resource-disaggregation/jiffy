@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
   lease_expiry_worker lmgr(tree, lease_period_ms, grace_period_ms);
   lmgr.start();
 
-  file_size_tracker tracker(tree, storage, 1000, storage_trace);
+  file_size_tracker tracker(tree, 1000, storage_trace);
   if (!storage_trace.empty()) {
     tracker.start();
   }

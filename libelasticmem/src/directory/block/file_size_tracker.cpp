@@ -10,13 +10,12 @@ namespace directory {
 using namespace utils;
 
 file_size_tracker::file_size_tracker(std::shared_ptr<directory_tree> tree,
-                                     std::shared_ptr<storage::storage_management_ops> storage,
                                      uint64_t periodicity_ms,
                                      const std::string &output_file)
     : periodicity_ms_(periodicity_ms),
       output_file_(output_file),
       tree_(std::move(tree)),
-      storage_(std::move(storage)) {}
+      storage_(tree_->get_storage_manager()) {}
 
 file_size_tracker::~file_size_tracker() {
   stop_.store(true);
@@ -72,7 +71,8 @@ void file_size_tracker::report_file_sizes(std::ofstream &out,
     for (const auto &chain: file->data_blocks()) {
       file_size += storage_->storage_size(chain.tail());
     }
-    out << epoch << "\t" << child_path << "\t" << file_size << std::endl;
+    out << epoch << "\t" << child_path << "\t" << file_size << "\t" << (file->num_blocks() * file->chain_length())
+        << std::endl;
   } else {
     auto dir = std::dynamic_pointer_cast<ds_dir_node>(node);
     for (const auto &cname: dir->children()) {

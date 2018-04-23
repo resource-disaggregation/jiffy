@@ -111,10 +111,12 @@ class ds_file_node : public ds_node {
   }
 
   std::size_t chain_length() const {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_.chain_length();
   }
 
   void chain_length(std::size_t chain_length) {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
     dstatus_.chain_length(chain_length);
   }
 
@@ -205,6 +207,7 @@ class ds_file_node : public ds_node {
       }
     }
 
+    adding_.push_back(new_chain);
     return export_ctx{max_pos, slot_begin, slot_mid, slot_end, old_chain, new_chain};
   }
 
@@ -273,6 +276,7 @@ class ds_file_node : public ds_node {
       }
     }
 
+    adding_.push_back(new_chain);
     return export_ctx{block_idx, slot_begin, slot_mid, slot_end, old_chain, new_chain};
   }
 
@@ -285,11 +289,22 @@ class ds_file_node : public ds_node {
     dstatus_.update_data_block_slots(ctx.block_idx, ctx.slot_begin, ctx.slot_mid);
     dstatus_.set_data_block_status(ctx.block_idx, chain_status::stable);
     dstatus_.add_data_block(ctx.to_block, ctx.block_idx + 1);
+    auto it = std::find(adding_.begin(), adding_.end(), ctx.to_block);
+    if (it == adding_.end()) {
+      throw std::logic_error("Cannot find to_block in adding list");
+    }
+    adding_.erase(it);
+  }
+
+  size_t num_blocks() const {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    return dstatus_.data_blocks().size() + adding_.size();
   }
 
  private:
   mutable std::shared_mutex mtx_;
   data_status dstatus_{};
+  std::vector<replica_chain> adding_{};
 };
 
 class ds_dir_node : public ds_node {
@@ -401,6 +416,14 @@ class directory_tree : public directory_ops, public directory_management_ops {
  public:
   explicit directory_tree(std::shared_ptr<block_allocator> allocator,
                           std::shared_ptr<storage::storage_management_ops> storage);
+
+  std::shared_ptr<block_allocator> get_allocator() const {
+    return allocator_;
+  }
+
+  std::shared_ptr<storage::storage_management_ops> get_storage_manager() const {
+    return storage_;
+  }
 
   void create_directory(const std::string &path) override;
   void create_directories(const std::string &path) override;
