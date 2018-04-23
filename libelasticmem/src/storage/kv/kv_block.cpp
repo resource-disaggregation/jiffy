@@ -19,7 +19,7 @@ std::vector<block_op> KV_OPS = {block_op{block_op_type::accessor, "get"},
                                 block_op{block_op_type::mutator, "zremove"},
                                 block_op{block_op_type::mutator, "zupdate"}};
 
-const double kv_block::CAPACITY_THRESHOLD = 0.75;
+const double kv_block::CAPACITY_THRESHOLD = 0.95;
 
 kv_block::kv_block(const std::string &block_name,
                    std::size_t capacity,
