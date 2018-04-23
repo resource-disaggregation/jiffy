@@ -1,5 +1,6 @@
 #include "chain_module.h"
 #include "../utils/logger.h"
+#include "kv/kv_block.h"
 
 namespace elasticmem {
 namespace storage {
@@ -59,7 +60,7 @@ void chain_module::request(sequence_id seq, int32_t oid, const std::vector<std::
   }
   std::vector<std::string> result;
   if (state() == block_state::importing) {
-    if (args.back() == "!redirected") {
+    if (args.back() == "!redirected" || oid == kv_op_id::num_keys) { // TODO: KV specific operation, remove...
       run_command(result, oid, args);
     } else {
       LOG(log_level::info) << "Received request without redirection on importing block";

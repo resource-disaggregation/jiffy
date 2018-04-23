@@ -68,7 +68,7 @@ void file_size_tracker::report_file_sizes(std::ofstream &out,
   if (node->is_regular_file()) {
     auto file = std::dynamic_pointer_cast<ds_file_node>(node);
     std::size_t file_size = 0;
-    for (const auto &chain: file->data_blocks()) {
+    for (const auto &chain: file->_all_data_blocks()) {
       file_size += storage_->storage_size(chain.tail());
     }
     out << epoch << "\t" << child_path << "\t" << file_size << "\t" << (file->num_blocks() * file->chain_length())
