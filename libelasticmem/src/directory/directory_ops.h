@@ -171,7 +171,7 @@ struct replica_chain {
     }
     out.pop_back();
     out.pop_back();
-    out += ">";
+    out += "> :: (" + std::to_string(slot_begin()) + ", " + std::to_string(slot_end()) + ")";
     return out;
   }
 
@@ -319,6 +319,18 @@ class data_status {
 
   int32_t num_slots(std::size_t i) {
     return data_blocks_[i].slot_range.second - data_blocks_[i].slot_range.second;
+  }
+
+  std::string to_string() const {
+    std::string out = "{ mode: " + std::to_string(mode_) + ", pprefix: " + persistent_store_prefix_ + ", chain_length: "
+        + std::to_string(chain_length_) + ", data_blocks: { ";
+    for (const auto& chain: data_blocks_) {
+      out += chain.to_string() + ", ";
+    }
+    out.pop_back();
+    out.pop_back();
+    out += " }}";
+    return out;
   }
 
  private:

@@ -14,6 +14,7 @@
 #include "../../storage/storage_management_ops.h"
 #include "../../utils/directory_utils.h"
 #include "../../storage/chain_module.h"
+#include "../../utils/logger.h"
 
 namespace elasticmem {
 namespace directory {
@@ -294,6 +295,8 @@ class ds_file_node : public ds_node {
       storage->set_regular(ctx.from_block.block_names[j], ctx.slot_begin, ctx.slot_mid);
       storage->set_regular(ctx.to_block.block_names[j], ctx.slot_mid + 1, ctx.slot_end);
     }
+    using namespace utils;
+    LOG(log_level::info) << "Updated file data_status: " << dstatus_.to_string();
   }
 
   size_t num_blocks() const {
