@@ -3,8 +3,61 @@ from thrift.protocol.TBinaryProtocol import TBinaryProtocolAccelerated
 from thrift.transport import TTransport, TSocket
 from thrift.transport.TTransport import TTransportException
 
-from elasticmem.kv import block_request_service, block_response_service
+from elasticmem.kv import block_request_service
+from elasticmem.kv import block_response_service
 from elasticmem.kv.kv_ops import KVOps, op_type, KVOpType
+
+
+class ClientEntry:
+    def __init__(self, transport, protocol, client):
+        self.transport = transport
+        self.protocol = protocol
+        self.client = client
+        self.ref_cnt = 1
+
+    def incr_ref_cnt(self):
+        self.ref_cnt += 1
+        return self
+
+    def decr_ref_cnt(self):
+        self.ref_cnt -= 1
+        return self.ref_cnt
+
+
+class BlockClientCache:
+    def __init__(self):
+        self.cache = {}
+
+    def acquire(self, host, port):
+        if (host, port) in self.cache:
+            entry = self.cache[(host, port)].incr_ref_cnt()
+            return entry.transport, entry.protocol, entry.client
+        transport = TTransport.TBufferedTransport(TSocket.TSocket(host, port))
+        protocol = TBinaryProtocolAccelerated(transport)
+        client = block_request_service.Client(protocol)
+        ex = None
+        for i in range(3):
+            try:
+                transport.open()
+            except TTransportException as e:
+                ex = e
+                continue
+            except Exception:
+                raise
+            else:
+                break
+        else:
+            raise TTransportException(ex.type, "Connection failed {}:{}: {}".format(host, port, ex.message))
+        self.cache[(host, port)] = ClientEntry(transport, protocol, client)
+        return transport, protocol, client
+
+    def release(self, host, port):
+        if (host, port) in self.cache:
+            entry = self.cache[(host, port)]
+            if entry.decr_ref_cnt() == 0:
+                if entry.transport.isOpen():
+                    entry.transport.close()
+                del self.cache[(host, port)]
 
 
 class CommandResponseReader:
@@ -30,32 +83,15 @@ class CommandResponseReader:
 
 
 class BlockClient:
-    def __init__(self, host, port, block_id):
+    def __init__(self, client_cache, host, port, block_id):
+        self.client_cache = client_cache
+        self.host = host
+        self.port = port
+        self.transport_, self.protocol_, self.client_ = client_cache.acquire(host, port)
         self.id_ = block_id
-        self.socket_ = TSocket.TSocket(host, port)
-        self.transport_ = TTransport.TBufferedTransport(self.socket_)
-        self.protocol_ = TBinaryProtocolAccelerated(self.transport_)
-        self.client_ = block_request_service.Client(self.protocol_)
-        ex = None
-        for i in range(3):
-            try:
-                self.transport_.open()
-            except TTransportException as e:
-                ex = e
-                continue
-            except Exception:
-                raise
-            else:
-                break
-        else:
-            raise TTransportException(ex.type, "Connection failed {}:{}: {}".format(host, port, ex.message))
 
     def __del__(self):
-        self.disconnect()
-
-    def disconnect(self):
-        if self.transport_.isOpen():
-            self.transport_.close()
+        self.client_cache.release(self.host, self.port)
 
     def get_response_reader(self, client_id):
         self.client_.register_client_id(self.id_, client_id)
@@ -69,25 +105,20 @@ class BlockClient:
 
 
 class BlockChainClient:
-    def __init__(self, chain, request_timeout_s=3.0):
+    def __init__(self, client_cache, chain, request_timeout_s=3.0):
         self.seq = block_request_service.sequence_id(-1, 0, -1)
         self.chain = chain
         self.request_timeout_s = request_timeout_s
         h_host, h_port, _, _, _, h_bid = chain[0].split(':')
-        self.head = BlockClient(h_host, int(h_port), int(h_bid))
+        self.head = BlockClient(client_cache, h_host, int(h_port), int(h_bid))
         self.seq.client_id = self.head.get_client_id()
         if len(chain) == 1:
             self.tail = self.head
         else:
             t_host, t_port, _, _, _, t_bid = chain[-1].split(':')
-            self.tail = BlockClient(t_host, int(t_port), int(t_bid))
+            self.tail = BlockClient(client_cache, h_host, int(h_port), int(t_bid))
         self.response_reader = self.tail.get_response_reader(self.seq.client_id)
         self.response_cache = {}
-
-    def disconnect(self):
-        self.head.disconnect()
-        if self.head != self.tail:
-            self.tail.disconnect()
 
     def _send_cmd(self, client, cmd_id, args):
         op_seq = self.seq.client_seq_no

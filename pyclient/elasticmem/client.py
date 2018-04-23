@@ -10,7 +10,7 @@ from elasticmem.lease.lease_client import LeaseClient
 from elasticmem.kv.kv_client import KVClient
 import logging
 
-logging.basicConfig(level=logging.INFO,
+logging.basicConfig(level=logging.WARN,
                     format="%(asctime)s %(levelname)s %(name)s %(message)s",
                     datefmt="%Y-%m-%d %X")
 
@@ -129,7 +129,6 @@ class ElasticMemClient:
         if path in self.to_renew:
             self.to_renew.remove(path)
         if path in self.kvs:
-            self.kvs[path].disconnect()
             del self.kvs[path]
 
     def remove(self, path, mode):

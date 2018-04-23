@@ -2,7 +2,7 @@ import logging
 from bisect import bisect_right
 
 from elasticmem.kv import crc
-from elasticmem.kv.block_client import BlockChainClient
+from elasticmem.kv.block_client import BlockChainClient, BlockClientCache
 from elasticmem.kv.compat import b, unicode, bytes, long, basestring, char_to_byte, bytes_to_str
 from elasticmem.kv.kv_ops import KVOps
 
@@ -35,19 +35,16 @@ class KVClient:
     def __init__(self, fs, path, data_status, chain_failure_cb):
         self.fs = fs
         self.path = path
+        self.client_cache = BlockClientCache()
         self.file_info = data_status
-        self.blocks = [BlockChainClient(chain.block_names) for chain in data_status.data_blocks]
+        self.blocks = [BlockChainClient(self.client_cache, chain.block_names) for chain in data_status.data_blocks]
         self.slots = [chain.slot_range[0] for chain in data_status.data_blocks]
         self.chain_failure_cb_ = chain_failure_cb
-
-    def disconnect(self):
-        for c in self.blocks:
-            c.disconnect()
 
     def refresh(self):
         self.file_info = self.fs.dstatus(self.path)
         logging.info("Refreshing block mappings to {}".format(self.file_info.data_blocks))
-        self.blocks = [BlockChainClient(chain.block_names) for chain in self.file_info.data_blocks]
+        self.blocks = [BlockChainClient(self.client_cache, chain.block_names) for chain in self.file_info.data_blocks]
         self.slots = [chain.slot_range[0] for chain in self.file_info.data_blocks]
 
     def _parse_response(self, r):
@@ -75,7 +72,7 @@ class KVClient:
         except RedoError:
             return self._parse_response(self.blocks[self.block_id(key)].put(key, value))
         except RedirectError as e:
-            return self._parse_response(BlockChainClient(e.blocks).redirected_put(key, value))
+            return self._parse_response(BlockChainClient(self.client_cache, e.blocks).redirected_put(key, value))
         except RuntimeError as e:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
@@ -86,7 +83,7 @@ class KVClient:
         except RedoError:
             return self._parse_response(self.blocks[self.block_id(key)].get(key))
         except RedirectError as e:
-            return self._parse_response(BlockChainClient(e.blocks).redirected_get(key))
+            return self._parse_response(BlockChainClient(self.client_cache, e.blocks).redirected_get(key))
         except RuntimeError as e:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
@@ -97,7 +94,7 @@ class KVClient:
         except RedoError:
             return self._parse_response(self.blocks[self.block_id(key)].update(key, value))
         except RedirectError as e:
-            return self._parse_response(BlockChainClient(e.blocks).redirected_update(key, value))
+            return self._parse_response(BlockChainClient(self.client_cache, e.blocks).redirected_update(key, value))
         except RuntimeError as e:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
@@ -108,7 +105,7 @@ class KVClient:
         except RedoError:
             return self._parse_response(self.blocks[self.block_id(key)].remove(key))
         except RedirectError as e:
-            return self._parse_response(BlockChainClient(e.blocks).redirected_remove(key))
+            return self._parse_response(BlockChainClient(self.client_cache, e.blocks).redirected_remove(key))
         except RuntimeError as e:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
