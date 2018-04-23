@@ -40,7 +40,8 @@ kv_block::kv_block(const std::string &block_name,
       capacity_(capacity),
       threshold_lo_(threshold_lo),
       threshold_hi_(threshold_hi),
-      splitting_(false) {}
+      splitting_(false),
+      merging_(false) {}
 
 std::string kv_block::put(const key_type &key, const value_type &value, bool redirect) {
   auto hash = hash_slot::get(key);
@@ -117,7 +118,7 @@ std::string kv_block::remove(const key_type &key, bool redirect) {
 
 void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) {
   bool redirect = !args.empty() && args.back() == "!redirected";
-  size_t nargs = redirect ? args.size() - 1: args.size();
+  size_t nargs = redirect ? args.size() - 1 : args.size();
   switch (oid) {
     case kv_op_id::zget:
     case kv_op_id::get:
@@ -162,14 +163,36 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
     default:throw std::invalid_argument("No such operation id " + std::to_string(oid));
   }
   bool expected = false;
-  if (overload() && splitting_.compare_exchange_strong(expected, true)) {
+  if (overload() && state() != block_state::exporting && state() != block_state::importing
+      && splitting_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
     LOG(log_level::info) << "Overloaded block; storage = " << bytes_.load() << " capacity = " << capacity_
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
-    directory::directory_client client(directory_host_, directory_port_);
-    client.split_slot_range(path(), slot_begin(), slot_end());
-    client.disconnect();
-    LOG(log_level::info) << "Triggered slot range split";
+    try {
+      directory::directory_client client(directory_host_, directory_port_);
+      client.split_slot_range(path(), slot_begin(), slot_end());
+      client.disconnect();
+      LOG(log_level::info) << "Triggered slot range split";
+    } catch (std::exception &e) {
+      splitting_ = false;
+      LOG(log_level::warn) << "Split slot range failed: " << e.what();
+    }
+  }
+  expected = false;
+  if (oid == kv_op_id::remove && underload() && state() != block_state::exporting && state() != block_state::importing
+      && !(slot_begin() == 0 && slot_end() == block::SLOT_MAX) && merging_.compare_exchange_strong(expected, true)) {
+    // Ask directory server to split this slot range
+    LOG(log_level::info) << "Underloaded block; storage = " << bytes_.load() << " capacity = " << capacity_
+                         << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
+    try {
+      directory::directory_client client(directory_host_, directory_port_);
+      client.merge_slot_range(path(), slot_begin(), slot_end());
+      client.disconnect();
+      LOG(log_level::info) << "Triggered slot range merge";
+    } catch (std::exception &e) {
+      merging_ = false;
+      LOG(log_level::warn) << "Merge slot range failed: " << e.what();
+    }
   }
 }
 
@@ -186,6 +209,7 @@ void kv_block::reset() {
   chain({});
   role(singleton);
   splitting_ = false;
+  merging_ = false;
 }
 
 std::size_t kv_block::size() const {
@@ -271,10 +295,8 @@ void kv_block::export_slots() {
   src.disconnect();
 
   LOG(log_level::info) << "Removed " << remove_keys.size() << " exported keys";
-  bool expected = true;
-  if (!splitting_.compare_exchange_strong(expected, false)) {
-    LOG(log_level::warn) << "splitting was not true";
-  }
+  splitting_ = false;
+  merging_ = false;
 }
 
 std::size_t kv_block::storage_capacity() {
@@ -286,11 +308,11 @@ std::size_t kv_block::storage_size() {
 }
 
 bool kv_block::overload() {
-  return bytes_.load() > static_cast<size_t>(static_cast<double>(capacity_) * threshold_hi_);
+  return bytes_.load() >= static_cast<size_t>(static_cast<double>(capacity_) * threshold_hi_);
 }
 
 bool kv_block::underload() {
-  return bytes_.load() < static_cast<size_t>(static_cast<double>(capacity_) * threshold_lo_);
+  return bytes_.load() <= static_cast<size_t>(static_cast<double>(capacity_) * threshold_lo_);
 }
 
 }

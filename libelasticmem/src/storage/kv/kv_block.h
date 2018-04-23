@@ -98,6 +98,7 @@ class kv_block : public chain_module {
   double threshold_lo_;
   double threshold_hi_;
   std::atomic<bool> splitting_;
+  std::atomic<bool> merging_;
 };
 
 }
