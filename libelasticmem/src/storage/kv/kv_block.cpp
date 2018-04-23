@@ -53,6 +53,8 @@ std::string kv_block::put(const key_type &key, const value_type &value) {
       return "!duplicate_key";
     }
   }
+  LOG(log_level::info) << "Requested key has slot " << hash << " while my slot range is (" << slot_begin() << ", "
+                       << slot_end();
   return "!block_moved";
 }
 
@@ -159,12 +161,13 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
   }
   bool expected = false;
   if (overload() && splitting_.compare_exchange_strong(expected, true)) {
-    // Ask directory server to split this block
-    LOG(log_level::info) << "Overloaded block; storage = " << bytes_.load() << " capacity = " << capacity_ << " key = "
-                         << args[0];
+    // Ask directory server to split this slot range
+    LOG(log_level::info) << "Overloaded block; storage = " << bytes_.load() << " capacity = " << capacity_
+                         << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     directory::directory_client client(directory_host_, directory_port_);
     client.split_slot_range(path(), slot_begin(), slot_end());
     client.disconnect();
+    LOG(log_level::info) << "Triggered slot range split";
   }
 }
 

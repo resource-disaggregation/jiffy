@@ -62,6 +62,7 @@ void chain_module::request(sequence_id seq, int32_t oid, const std::vector<std::
     if (args.back() == "!redirected") {
       run_command(result, oid, args);
     } else {
+      LOG(log_level::info) << "Received request without redirection on importing block";
       result.emplace_back("!block_moved");
     }
   } else {
