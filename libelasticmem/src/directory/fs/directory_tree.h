@@ -122,7 +122,7 @@ class ds_file_node : public ds_node {
     return dstatus_.data_blocks();
   }
 
-  const std::vector<replica_chain> &_all_data_blocks() const {
+  std::vector<replica_chain> _all_data_blocks() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     std::vector<replica_chain> out = dstatus_.data_blocks();
     out.insert(out.end(), adding_.begin(), adding_.end());
