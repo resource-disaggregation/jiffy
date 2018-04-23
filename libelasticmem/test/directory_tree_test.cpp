@@ -360,7 +360,7 @@ TEST_CASE("add_block_to_file_test", "[file]") {
   REQUIRE(sm->COMMANDS.size() == 7);
   REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/file.txt:0:65536:0:0:nil");
   REQUIRE(sm->COMMANDS[1] == "storage_size:0");
-  REQUIRE(sm->COMMANDS[2] == "set_importing:1:/sandbox/file.txt:32769:65536:1:0:nil");
+  REQUIRE(sm->COMMANDS[2] == "setup_and_set_importing:1:/sandbox/file.txt:32769:65536:1:0:nil");
   REQUIRE(sm->COMMANDS[3] == "set_exporting:0:1:32769:65536");
   REQUIRE(sm->COMMANDS[4] == "export_slots:0");
   REQUIRE(sm->COMMANDS[5] == "set_regular:0:0:32768");
@@ -383,7 +383,7 @@ TEST_CASE("split_block_test", "[file]") {
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(1).slot_range == std::make_pair(32769, 65536));
   REQUIRE(sm->COMMANDS.size() == 6);
   REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/file.txt:0:65536:0:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "set_importing:1:/sandbox/file.txt:32769:65536:1:0:nil");
+  REQUIRE(sm->COMMANDS[1] == "setup_and_set_importing:1:/sandbox/file.txt:32769:65536:1:0:nil");
   REQUIRE(sm->COMMANDS[2] == "set_exporting:0:1:32769:65536");
   REQUIRE(sm->COMMANDS[3] == "export_slots:0");
   REQUIRE(sm->COMMANDS[4] == "set_regular:0:0:32768");

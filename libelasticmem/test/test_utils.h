@@ -53,19 +53,25 @@ class dummy_storage_manager : public elasticmem::storage::storage_management_ops
                            + std::to_string(slot_end));
   }
 
-  void set_importing(const std::string &block_name,
-                     const std::string &path,
-                     int32_t slot_begin,
-                     int32_t slot_end,
-                     const std::vector<std::string> &chain,
-                     int32_t role,
-                     const std::string &next_block_name) override {
+  void set_importing(const std::string &block_name, int32_t slot_begin, int32_t slot_end) override {
+    COMMANDS.push_back(
+        "set_importing:" + block_name + ":" + std::to_string(slot_begin) + ":" + std::to_string(slot_end));
+  }
+
+  void setup_and_set_importing(const std::string &block_name,
+                               const std::string &path,
+                               int32_t slot_begin,
+                               int32_t slot_end,
+                               const std::vector<std::string> &chain,
+                               int32_t role,
+                               const std::string &next_block_name) override {
     std::string chain_str;
     for (const auto &block: chain) {
       chain_str += ":" + block;
     }
     COMMANDS.push_back(
-        "set_importing:" + block_name + ":" + path + ":" + std::to_string(slot_begin) + ":" + std::to_string(slot_end)
+        "setup_and_set_importing:" + block_name + ":" + path + ":" + std::to_string(slot_begin) + ":"
+            + std::to_string(slot_end)
             + chain_str + ":" + std::to_string(role) + ":" + next_block_name);
   }
 

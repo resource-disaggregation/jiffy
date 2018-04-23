@@ -39,13 +39,17 @@ class storage_management_ops {
                              int32_t slot_begin,
                              int32_t slot_end) = 0;
 
+  virtual void setup_and_set_importing(const std::string &block_name,
+                                       const std::string &path,
+                                       int32_t slot_begin,
+                                       int32_t slot_end,
+                                       const std::vector<std::string> &chain,
+                                       int32_t role,
+                                       const std::string &next_block_name) = 0;
+
   virtual void set_importing(const std::string &block_name,
-                             const std::string &path,
                              int32_t slot_begin,
-                             int32_t slot_end,
-                             const std::vector<std::string> &chain,
-                             int32_t role,
-                             const std::string &next_block_name) = 0;
+                             int32_t slot_end) = 0;
 
   virtual void export_slots(const std::string &block_name) = 0;
 

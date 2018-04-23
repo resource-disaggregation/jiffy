@@ -74,6 +74,22 @@ storage_management_service_set_importing_presult::~storage_management_service_se
 }
 
 
+storage_management_service_setup_and_set_importing_args::~storage_management_service_setup_and_set_importing_args() throw() {
+}
+
+
+storage_management_service_setup_and_set_importing_pargs::~storage_management_service_setup_and_set_importing_pargs() throw() {
+}
+
+
+storage_management_service_setup_and_set_importing_result::~storage_management_service_setup_and_set_importing_result() throw() {
+}
+
+
+storage_management_service_setup_and_set_importing_presult::~storage_management_service_setup_and_set_importing_presult() throw() {
+}
+
+
 storage_management_service_set_regular_args::~storage_management_service_set_regular_args() throw() {
 }
 

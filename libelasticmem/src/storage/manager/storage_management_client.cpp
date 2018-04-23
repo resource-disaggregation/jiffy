@@ -59,14 +59,18 @@ void storage_management_client::set_exporting(int32_t block_id,
   client_->set_exporting(block_id, target_block_name, slot_begin, slot_end);
 }
 
-void storage_management_client::set_importing(int32_t block_id,
-                                              const std::string &path,
-                                              int32_t slot_begin,
-                                              int32_t slot_end,
-                                              const std::vector<std::string> &chain,
-                                              int32_t role,
-                                              const std::string &next_block_name) {
-  client_->set_importing(block_id, path, slot_begin, slot_end, chain, role, next_block_name);
+void storage_management_client::set_importing(int32_t block_id, int32_t slot_begin, int32_t slot_end) {
+  client_->set_importing(block_id, slot_begin, slot_end);
+}
+
+void storage_management_client::setup_and_set_importing(int32_t block_id,
+                                                        const std::string &path,
+                                                        int32_t slot_begin,
+                                                        int32_t slot_end,
+                                                        const std::vector<std::string> &chain,
+                                                        int32_t role,
+                                                        const std::string &next_block_name) {
+  client_->setup_and_set_importing(block_id, path, slot_begin, slot_end, chain, role, next_block_name);
 }
 
 void storage_management_client::set_regular(int32_t block_id, int32_t slot_begin, int32_t slot_end) {

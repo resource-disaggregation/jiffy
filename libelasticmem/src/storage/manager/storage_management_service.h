@@ -24,7 +24,8 @@ class storage_management_serviceIf {
   virtual void setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name) = 0;
   virtual void slot_range(rpc_slot_range& _return, const int32_t block_id) = 0;
   virtual void set_exporting(const int32_t block_id, const std::vector<std::string> & target_block, const int32_t slot_begin, const int32_t slot_end) = 0;
-  virtual void set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name) = 0;
+  virtual void set_importing(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end) = 0;
+  virtual void setup_and_set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name) = 0;
   virtual void set_regular(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end) = 0;
   virtual void get_path(std::string& _return, const int32_t block_id) = 0;
   virtual void flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path) = 0;
@@ -73,7 +74,10 @@ class storage_management_serviceNull : virtual public storage_management_service
   void set_exporting(const int32_t /* block_id */, const std::vector<std::string> & /* target_block */, const int32_t /* slot_begin */, const int32_t /* slot_end */) {
     return;
   }
-  void set_importing(const int32_t /* block_id */, const std::string& /* path */, const int32_t /* slot_begin */, const int32_t /* slot_end */, const std::vector<std::string> & /* chain */, const int32_t /* chain_role */, const std::string& /* next_block_name */) {
+  void set_importing(const int32_t /* block_id */, const int32_t /* slot_begin */, const int32_t /* slot_end */) {
+    return;
+  }
+  void setup_and_set_importing(const int32_t /* block_id */, const std::string& /* path */, const int32_t /* slot_begin */, const int32_t /* slot_end */, const std::vector<std::string> & /* chain */, const int32_t /* chain_role */, const std::string& /* next_block_name */) {
     return;
   }
   void set_regular(const int32_t /* block_id */, const int32_t /* slot_begin */, const int32_t /* slot_end */) {
@@ -512,14 +516,10 @@ class storage_management_service_set_exporting_presult {
 };
 
 typedef struct _storage_management_service_set_importing_args__isset {
-  _storage_management_service_set_importing_args__isset() : block_id(false), path(false), slot_begin(false), slot_end(false), chain(false), chain_role(false), next_block_name(false) {}
+  _storage_management_service_set_importing_args__isset() : block_id(false), slot_begin(false), slot_end(false) {}
   bool block_id :1;
-  bool path :1;
   bool slot_begin :1;
   bool slot_end :1;
-  bool chain :1;
-  bool chain_role :1;
-  bool next_block_name :1;
 } _storage_management_service_set_importing_args__isset;
 
 class storage_management_service_set_importing_args {
@@ -527,49 +527,29 @@ class storage_management_service_set_importing_args {
 
   storage_management_service_set_importing_args(const storage_management_service_set_importing_args&);
   storage_management_service_set_importing_args& operator=(const storage_management_service_set_importing_args&);
-  storage_management_service_set_importing_args() : block_id(0), path(), slot_begin(0), slot_end(0), chain_role(0), next_block_name() {
+  storage_management_service_set_importing_args() : block_id(0), slot_begin(0), slot_end(0) {
   }
 
   virtual ~storage_management_service_set_importing_args() throw();
   int32_t block_id;
-  std::string path;
   int32_t slot_begin;
   int32_t slot_end;
-  std::vector<std::string>  chain;
-  int32_t chain_role;
-  std::string next_block_name;
 
   _storage_management_service_set_importing_args__isset __isset;
 
   void __set_block_id(const int32_t val);
 
-  void __set_path(const std::string& val);
-
   void __set_slot_begin(const int32_t val);
 
   void __set_slot_end(const int32_t val);
-
-  void __set_chain(const std::vector<std::string> & val);
-
-  void __set_chain_role(const int32_t val);
-
-  void __set_next_block_name(const std::string& val);
 
   bool operator == (const storage_management_service_set_importing_args & rhs) const
   {
     if (!(block_id == rhs.block_id))
       return false;
-    if (!(path == rhs.path))
-      return false;
     if (!(slot_begin == rhs.slot_begin))
       return false;
     if (!(slot_end == rhs.slot_end))
-      return false;
-    if (!(chain == rhs.chain))
-      return false;
-    if (!(chain_role == rhs.chain_role))
-      return false;
-    if (!(next_block_name == rhs.next_block_name))
       return false;
     return true;
   }
@@ -593,12 +573,8 @@ class storage_management_service_set_importing_pargs {
 
   virtual ~storage_management_service_set_importing_pargs() throw();
   const int32_t* block_id;
-  const std::string* path;
   const int32_t* slot_begin;
   const int32_t* slot_end;
-  const std::vector<std::string> * chain;
-  const int32_t* chain_role;
-  const std::string* next_block_name;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -657,6 +633,158 @@ class storage_management_service_set_importing_presult {
   storage_management_exception ex;
 
   _storage_management_service_set_importing_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
+typedef struct _storage_management_service_setup_and_set_importing_args__isset {
+  _storage_management_service_setup_and_set_importing_args__isset() : block_id(false), path(false), slot_begin(false), slot_end(false), chain(false), chain_role(false), next_block_name(false) {}
+  bool block_id :1;
+  bool path :1;
+  bool slot_begin :1;
+  bool slot_end :1;
+  bool chain :1;
+  bool chain_role :1;
+  bool next_block_name :1;
+} _storage_management_service_setup_and_set_importing_args__isset;
+
+class storage_management_service_setup_and_set_importing_args {
+ public:
+
+  storage_management_service_setup_and_set_importing_args(const storage_management_service_setup_and_set_importing_args&);
+  storage_management_service_setup_and_set_importing_args& operator=(const storage_management_service_setup_and_set_importing_args&);
+  storage_management_service_setup_and_set_importing_args() : block_id(0), path(), slot_begin(0), slot_end(0), chain_role(0), next_block_name() {
+  }
+
+  virtual ~storage_management_service_setup_and_set_importing_args() throw();
+  int32_t block_id;
+  std::string path;
+  int32_t slot_begin;
+  int32_t slot_end;
+  std::vector<std::string>  chain;
+  int32_t chain_role;
+  std::string next_block_name;
+
+  _storage_management_service_setup_and_set_importing_args__isset __isset;
+
+  void __set_block_id(const int32_t val);
+
+  void __set_path(const std::string& val);
+
+  void __set_slot_begin(const int32_t val);
+
+  void __set_slot_end(const int32_t val);
+
+  void __set_chain(const std::vector<std::string> & val);
+
+  void __set_chain_role(const int32_t val);
+
+  void __set_next_block_name(const std::string& val);
+
+  bool operator == (const storage_management_service_setup_and_set_importing_args & rhs) const
+  {
+    if (!(block_id == rhs.block_id))
+      return false;
+    if (!(path == rhs.path))
+      return false;
+    if (!(slot_begin == rhs.slot_begin))
+      return false;
+    if (!(slot_end == rhs.slot_end))
+      return false;
+    if (!(chain == rhs.chain))
+      return false;
+    if (!(chain_role == rhs.chain_role))
+      return false;
+    if (!(next_block_name == rhs.next_block_name))
+      return false;
+    return true;
+  }
+  bool operator != (const storage_management_service_setup_and_set_importing_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const storage_management_service_setup_and_set_importing_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class storage_management_service_setup_and_set_importing_pargs {
+ public:
+
+
+  virtual ~storage_management_service_setup_and_set_importing_pargs() throw();
+  const int32_t* block_id;
+  const std::string* path;
+  const int32_t* slot_begin;
+  const int32_t* slot_end;
+  const std::vector<std::string> * chain;
+  const int32_t* chain_role;
+  const std::string* next_block_name;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _storage_management_service_setup_and_set_importing_result__isset {
+  _storage_management_service_setup_and_set_importing_result__isset() : ex(false) {}
+  bool ex :1;
+} _storage_management_service_setup_and_set_importing_result__isset;
+
+class storage_management_service_setup_and_set_importing_result {
+ public:
+
+  storage_management_service_setup_and_set_importing_result(const storage_management_service_setup_and_set_importing_result&);
+  storage_management_service_setup_and_set_importing_result& operator=(const storage_management_service_setup_and_set_importing_result&);
+  storage_management_service_setup_and_set_importing_result() {
+  }
+
+  virtual ~storage_management_service_setup_and_set_importing_result() throw();
+  storage_management_exception ex;
+
+  _storage_management_service_setup_and_set_importing_result__isset __isset;
+
+  void __set_ex(const storage_management_exception& val);
+
+  bool operator == (const storage_management_service_setup_and_set_importing_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const storage_management_service_setup_and_set_importing_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const storage_management_service_setup_and_set_importing_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _storage_management_service_setup_and_set_importing_presult__isset {
+  _storage_management_service_setup_and_set_importing_presult__isset() : ex(false) {}
+  bool ex :1;
+} _storage_management_service_setup_and_set_importing_presult__isset;
+
+class storage_management_service_setup_and_set_importing_presult {
+ public:
+
+
+  virtual ~storage_management_service_setup_and_set_importing_presult() throw();
+  storage_management_exception ex;
+
+  _storage_management_service_setup_and_set_importing_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -1864,9 +1992,12 @@ class storage_management_serviceClientT : virtual public storage_management_serv
   void set_exporting(const int32_t block_id, const std::vector<std::string> & target_block, const int32_t slot_begin, const int32_t slot_end);
   void send_set_exporting(const int32_t block_id, const std::vector<std::string> & target_block, const int32_t slot_begin, const int32_t slot_end);
   void recv_set_exporting();
-  void set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name);
-  void send_set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name);
+  void set_importing(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end);
+  void send_set_importing(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end);
   void recv_set_importing();
+  void setup_and_set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name);
+  void send_setup_and_set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name);
+  void recv_setup_and_set_importing();
   void set_regular(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end);
   void send_set_regular(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end);
   void recv_set_regular();
@@ -1933,6 +2064,8 @@ class storage_management_serviceProcessorT : public ::apache::thrift::TDispatchP
   void process_set_exporting(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_set_importing(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_set_importing(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_setup_and_set_importing(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_setup_and_set_importing(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_set_regular(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_set_regular(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_get_path(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -1968,6 +2101,9 @@ class storage_management_serviceProcessorT : public ::apache::thrift::TDispatchP
     processMap_["set_importing"] = ProcessFunctions(
       &storage_management_serviceProcessorT::process_set_importing,
       &storage_management_serviceProcessorT::process_set_importing);
+    processMap_["setup_and_set_importing"] = ProcessFunctions(
+      &storage_management_serviceProcessorT::process_setup_and_set_importing,
+      &storage_management_serviceProcessorT::process_setup_and_set_importing);
     processMap_["set_regular"] = ProcessFunctions(
       &storage_management_serviceProcessorT::process_set_regular,
       &storage_management_serviceProcessorT::process_set_regular);
@@ -2059,13 +2195,22 @@ class storage_management_serviceMultiface : virtual public storage_management_se
     ifaces_[i]->set_exporting(block_id, target_block, slot_begin, slot_end);
   }
 
-  void set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name) {
+  void set_importing(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->set_importing(block_id, path, slot_begin, slot_end, chain, chain_role, next_block_name);
+      ifaces_[i]->set_importing(block_id, slot_begin, slot_end);
     }
-    ifaces_[i]->set_importing(block_id, path, slot_begin, slot_end, chain, chain_role, next_block_name);
+    ifaces_[i]->set_importing(block_id, slot_begin, slot_end);
+  }
+
+  void setup_and_set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->setup_and_set_importing(block_id, path, slot_begin, slot_end, chain, chain_role, next_block_name);
+    }
+    ifaces_[i]->setup_and_set_importing(block_id, path, slot_begin, slot_end, chain, chain_role, next_block_name);
   }
 
   void set_regular(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end) {
@@ -2199,9 +2344,12 @@ class storage_management_serviceConcurrentClientT : virtual public storage_manag
   void set_exporting(const int32_t block_id, const std::vector<std::string> & target_block, const int32_t slot_begin, const int32_t slot_end);
   int32_t send_set_exporting(const int32_t block_id, const std::vector<std::string> & target_block, const int32_t slot_begin, const int32_t slot_end);
   void recv_set_exporting(const int32_t seqid);
-  void set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name);
-  int32_t send_set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name);
+  void set_importing(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end);
+  int32_t send_set_importing(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end);
   void recv_set_importing(const int32_t seqid);
+  void setup_and_set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name);
+  int32_t send_setup_and_set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name);
+  void recv_setup_and_set_importing(const int32_t seqid);
   void set_regular(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end);
   int32_t send_set_regular(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end);
   void recv_set_regular(const int32_t seqid);

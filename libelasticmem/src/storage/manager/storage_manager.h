@@ -37,14 +37,15 @@ class storage_manager : public storage_management_ops {
                      const std::vector<std::string> &target_block,
                      int32_t slot_begin,
                      int32_t slot_end) override;
-  void set_importing(const std::string &block_name,
-                     const std::string &path,
-                     int32_t slot_begin,
-                     int32_t slot_end,
-                     const std::vector<std::string> &chain,
-                     int32_t role,
-                     const std::string &next_block_name) override;
+  void setup_and_set_importing(const std::string &block_name,
+                               const std::string &path,
+                               int32_t slot_begin,
+                               int32_t slot_end,
+                               const std::vector<std::string> &chain,
+                               int32_t role,
+                               const std::string &next_block_name) override;
   void set_regular(const std::string &block_name, int32_t slot_begin, int32_t slot_end) override;
+  virtual void set_importing(const std::string &block_name, int32_t slot_begin, int32_t slot_end);
 };
 
 }

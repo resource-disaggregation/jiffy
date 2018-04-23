@@ -32,12 +32,15 @@ class storage_management_service_handler : public storage_management_serviceIf {
                      int32_t slot_begin,
                      int32_t slot_end) override;
   void set_importing(int32_t block_id,
-                     const std::string &path,
                      int32_t slot_begin,
-                     int32_t slot_end,
-                     const std::vector<std::string> &chain,
-                     int32_t chain_role,
-                     const std::string &next_block_name) override;
+                     int32_t slot_end) override;
+  void setup_and_set_importing(int32_t block_id,
+                               const std::string &path,
+                               int32_t slot_begin,
+                               int32_t slot_end,
+                               const std::vector<std::string> &chain,
+                               int32_t chain_role,
+                               const std::string &next_block_name) override;
   void export_slots(int32_t block_id) override;
   void set_regular(int32_t block_id, int32_t slot_begin, int32_t slot_end) override;
  private:

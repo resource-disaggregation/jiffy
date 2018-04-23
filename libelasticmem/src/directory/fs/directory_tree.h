@@ -142,9 +142,9 @@ class ds_file_node : public ds_node {
     dstatus_.mode(storage_mode::on_disk);
   }
 
-  export_ctx setup_export(std::shared_ptr<storage::storage_management_ops> storage,
-                          const std::shared_ptr<block_allocator> &allocator,
-                          const std::string &path) {
+  export_ctx setup_add_block(std::shared_ptr<storage::storage_management_ops> storage,
+                             const std::shared_ptr<block_allocator> &allocator,
+                             const std::string &path) {
     using namespace storage;
     if (dstatus_.data_blocks().size() == block::SLOT_MAX)
       throw directory_ops_exception("Cannot expand capacity beyond " + std::to_string(block::SLOT_MAX) + " blocks");
@@ -170,70 +170,71 @@ class ds_file_node : public ds_node {
     dstatus_.set_data_block_status(max_pos, chain_status::exporting);
 
     // Split the block's slot range in two
-    auto old_chain = dstatus_.data_blocks().at(max_pos);
-    auto slot_begin = old_chain.slot_range.first;
-    auto slot_end = old_chain.slot_range.second;
+    auto from_chain = dstatus_.data_blocks().at(max_pos);
+    auto slot_begin = from_chain.slot_range.first;
+    auto slot_end = from_chain.slot_range.second;
     auto slot_mid = (slot_end + slot_begin) / 2; // TODO: We can get a better split...
 
     // Allocate the new chain
-    replica_chain new_chain
+    replica_chain to_chain
         {allocator->allocate(dstatus_.chain_length(), {}), std::make_pair(slot_mid + 1, slot_end),
          chain_status::stable};
-    assert(new_chain.block_names.size() == chain_length);
+    assert(to_chain.block_names.size() == chain_length);
 
     // Set old chain to exporting and new chain to importing
     if (dstatus_.chain_length() == 1) {
-      storage->set_importing(new_chain.block_names[0],
-                             path,
-                             slot_mid + 1,
-                             slot_end,
-                             new_chain.block_names,
-                             chain_role::singleton,
-                             "nil");
-      storage->set_exporting(old_chain.block_names[0], new_chain.block_names, slot_mid + 1, slot_end);
+      storage->setup_and_set_importing(to_chain.block_names[0],
+                                       path,
+                                       slot_mid + 1,
+                                       slot_end,
+                                       to_chain.block_names,
+                                       chain_role::singleton,
+                                       "nil");
+      storage->set_exporting(from_chain.block_names[0], to_chain.block_names, slot_mid + 1, slot_end);
     } else {
       for (std::size_t j = 0; j < dstatus_.chain_length(); ++j) {
-        std::string block_name = new_chain.block_names[j];
-        std::string next_block_name = (j == dstatus_.chain_length() - 1) ? "nil" : new_chain.block_names[j + 1];
+        std::string block_name = to_chain.block_names[j];
+        std::string next_block_name = (j == dstatus_.chain_length() - 1) ? "nil" : to_chain.block_names[j + 1];
         int32_t
             role =
             (j == 0) ? chain_role::head : (j == dstatus_.chain_length() - 1) ? chain_role::tail : chain_role::mid;
-        storage->set_importing(block_name,
-                               path,
-                               slot_mid + 1,
-                               slot_end,
-                               new_chain.block_names,
-                               role,
-                               next_block_name);
+        storage->setup_and_set_importing(block_name,
+                                         path,
+                                         slot_mid + 1,
+                                         slot_end,
+                                         to_chain.block_names,
+                                         role,
+                                         next_block_name);
       }
       for (std::size_t j = 0; j < dstatus_.chain_length(); ++j) {
-        storage->set_exporting(old_chain.block_names[j], new_chain.block_names, slot_mid + 1, slot_end);
+        storage->set_exporting(from_chain.block_names[j], to_chain.block_names, slot_mid + 1, slot_end);
       }
     }
 
-    adding_.push_back(new_chain);
-    return export_ctx{old_chain, new_chain};
+    adding_.push_back(to_chain);
+    return export_ctx{from_chain, to_chain};
   }
 
-  export_ctx setup_export(std::shared_ptr<storage::storage_management_ops> storage,
-                            const std::shared_ptr<block_allocator> &allocator,
-                            const std::string &path,
-                            int32_t slot_begin,
-                            int32_t slot_end) {
+  export_ctx setup_slot_range_split(std::shared_ptr<storage::storage_management_ops> storage,
+                                    const std::shared_ptr<block_allocator> &allocator,
+                                    const std::string &path,
+                                    int32_t slot_begin,
+                                    int32_t slot_end) {
     using namespace storage;
     if (dstatus_.data_blocks().size() == block::SLOT_MAX)
       throw directory_ops_exception("Cannot expand capacity beyond " + std::to_string(block::SLOT_MAX) + " blocks");
 
     std::unique_lock<std::shared_mutex> lock(mtx_);
     size_t block_idx = 0;
-    for (const auto& block: dstatus_.data_blocks()) {
+    for (const auto &block: dstatus_.data_blocks()) {
       if (block.slot_begin() == slot_begin && block.slot_end() == slot_end) {
         break;
       }
       block_idx++;
     }
     if (block_idx == dstatus_.data_blocks().size()) {
-      throw directory_ops_exception("No block with slot range " + std::to_string(slot_begin) + "-" + std::to_string(slot_end));
+      throw directory_ops_exception(
+          "No block with slot range " + std::to_string(slot_begin) + "-" + std::to_string(slot_end));
     }
     if (dstatus_.get_data_block_status(block_idx) == chain_status::exporting) {
       throw directory_ops_exception("Block already in exporting mode");
@@ -241,50 +242,50 @@ class ds_file_node : public ds_node {
     dstatus_.set_data_block_status(block_idx, chain_status::exporting);
 
     // Split the block's slot range in two
-    auto old_chain = dstatus_.data_blocks().at(block_idx);
+    auto from_chain = dstatus_.data_blocks().at(block_idx);
     auto slot_mid = (slot_end + slot_begin) / 2; // TODO: We can get a better split...
 
     // Allocate the new chain
-    replica_chain new_chain
+    replica_chain to_chain
         {allocator->allocate(dstatus_.chain_length(), {}), std::make_pair(slot_mid + 1, slot_end),
          chain_status::stable};
-    assert(new_chain.block_names.size() == chain_length);
+    assert(to_chain.block_names.size() == chain_length);
 
     // Set old chain to exporting and new chain to importing
     if (dstatus_.chain_length() == 1) {
-      storage->set_importing(new_chain.block_names[0],
-                             path,
-                             slot_mid + 1,
-                             slot_end,
-                             new_chain.block_names,
-                             chain_role::singleton,
-                             "nil");
-      storage->set_exporting(old_chain.block_names[0], new_chain.block_names, slot_mid + 1, slot_end);
+      storage->setup_and_set_importing(to_chain.block_names[0],
+                                       path,
+                                       slot_mid + 1,
+                                       slot_end,
+                                       to_chain.block_names,
+                                       chain_role::singleton,
+                                       "nil");
+      storage->set_exporting(from_chain.block_names[0], to_chain.block_names, slot_mid + 1, slot_end);
     } else {
       for (std::size_t j = 0; j < dstatus_.chain_length(); ++j) {
-        std::string block_name = new_chain.block_names[j];
-        std::string next_block_name = (j == dstatus_.chain_length() - 1) ? "nil" : new_chain.block_names[j + 1];
+        std::string block_name = to_chain.block_names[j];
+        std::string next_block_name = (j == dstatus_.chain_length() - 1) ? "nil" : to_chain.block_names[j + 1];
         int32_t
             role =
             (j == 0) ? chain_role::head : (j == dstatus_.chain_length() - 1) ? chain_role::tail : chain_role::mid;
-        storage->set_importing(block_name,
-                               path,
-                               slot_mid + 1,
-                               slot_end,
-                               new_chain.block_names,
-                               role,
-                               next_block_name);
+        storage->setup_and_set_importing(block_name,
+                                         path,
+                                         slot_mid + 1,
+                                         slot_end,
+                                         to_chain.block_names,
+                                         role,
+                                         next_block_name);
       }
       for (std::size_t j = 0; j < dstatus_.chain_length(); ++j) {
-        storage->set_exporting(old_chain.block_names[j], new_chain.block_names, slot_mid + 1, slot_end);
+        storage->set_exporting(from_chain.block_names[j], to_chain.block_names, slot_mid + 1, slot_end);
       }
     }
 
-    adding_.push_back(new_chain);
-    return export_ctx{old_chain, new_chain};
+    adding_.push_back(to_chain);
+    return export_ctx{from_chain, to_chain};
   }
 
-  void finalize_export(std::shared_ptr<storage::storage_management_ops> storage, const export_ctx &ctx) {
+  void finalize_slot_range_split(std::shared_ptr<storage::storage_management_ops> storage, const export_ctx &ctx) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     auto block_idx = dstatus_.find_replica_chain(ctx.from_block);
     auto slot_begin = ctx.from_block.slot_begin();

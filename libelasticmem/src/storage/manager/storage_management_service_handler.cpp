@@ -41,13 +41,25 @@ void storage_management_service_handler::set_exporting(const int32_t block_id,
     throw make_exception(e);
   }
 }
+
 void storage_management_service_handler::set_importing(const int32_t block_id,
-                                                       const std::string &path,
                                                        const int32_t slot_begin,
-                                                       const int32_t slot_end,
-                                                       const std::vector<std::string> &chain,
-                                                       const int32_t role,
-                                                       const std::string &next_block_name) { // TODO: separate importing from setup chain...
+                                                       const int32_t slot_end) {
+  try {
+    blocks_.at(static_cast<std::size_t>(block_id))->state(block_state::importing);
+    blocks_.at(static_cast<std::size_t>(block_id))->import_slot_range(slot_begin, slot_end);
+  } catch (std::exception &e) {
+    throw make_exception(e);
+  }
+}
+
+void storage_management_service_handler::setup_and_set_importing(const int32_t block_id,
+                                                                 const std::string &path,
+                                                                 const int32_t slot_begin,
+                                                                 const int32_t slot_end,
+                                                                 const std::vector<std::string> &chain,
+                                                                 const int32_t role,
+                                                                 const std::string &next_block_name) {
   try {
     blocks_.at(static_cast<std::size_t>(block_id))->path(path);
     blocks_.at(static_cast<std::size_t>(block_id))->state(block_state::importing);
@@ -69,7 +81,7 @@ void storage_management_service_handler::set_importing(const int32_t block_id,
 void storage_management_service_handler::export_slots(const int32_t block_id) {
   try {
     blocks_.at(static_cast<std::size_t>(block_id))->export_slots();
-  } catch (std::exception& e) {
+  } catch (std::exception &e) {
     throw make_exception(e);
   }
 }
@@ -83,7 +95,7 @@ void storage_management_service_handler::set_regular(const int32_t block_id,
     blocks_.at(static_cast<std::size_t>(block_id))->export_target({});
     blocks_.at(static_cast<std::size_t>(block_id))->export_slot_range(0, -1);
     blocks_.at(static_cast<std::size_t>(block_id))->import_slot_range(0, -1);
-  } catch (std::exception& e) {
+  } catch (std::exception &e) {
     throw make_exception(e);
   }
 }

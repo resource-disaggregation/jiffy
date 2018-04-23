@@ -27,16 +27,22 @@ void storage_manager::set_exporting(const std::string &block_name,
   client.set_exporting(bid.id, target_block, slot_begin, slot_end);
 }
 
-void storage_manager::set_importing(const std::string &block_name,
-                                    const std::string &path,
-                                    int32_t slot_begin,
-                                    int32_t slot_end,
-                                    const std::vector<std::string> &chain,
-                                    int32_t role,
-                                    const std::string &next_block_name) {
+void storage_manager::set_importing(const std::string &block_name, int32_t slot_begin, int32_t slot_end) {
   auto bid = block_name_parser::parse(block_name);
   storage_management_client client(bid.host, bid.management_port);
-  client.set_importing(bid.id, path, slot_begin, slot_end, chain, role, next_block_name);
+  client.set_importing(bid.id, slot_begin, slot_end);
+}
+
+void storage_manager::setup_and_set_importing(const std::string &block_name,
+                                              const std::string &path,
+                                              int32_t slot_begin,
+                                              int32_t slot_end,
+                                              const std::vector<std::string> &chain,
+                                              int32_t role,
+                                              const std::string &next_block_name) {
+  auto bid = block_name_parser::parse(block_name);
+  storage_management_client client(bid.host, bid.management_port);
+  client.setup_and_set_importing(bid.id, path, slot_begin, slot_end, chain, role, next_block_name);
 }
 
 void storage_manager::export_slots(const std::string &block_name) {

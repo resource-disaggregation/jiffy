@@ -95,7 +95,7 @@ TEST_CASE("manager_flush_load_test", "[put][flush][reset][load][get]") {
   }
 }
 
-TEST_CASE("manager_set_state", "[set_importing][set_exporting][export_slots][set_regular]") {
+TEST_CASE("manager_set_state", "[setup_and_set_importing][set_exporting][export_slots][set_regular]") {
   static auto blocks = test_utils::init_kv_blocks(2, SERVICE_PORT, MANAGEMENT_PORT, 0);
   blocks[0]->slot_range(0, -1);
   blocks[1]->slot_range(0, -1);
@@ -136,13 +136,13 @@ TEST_CASE("manager_set_state", "[set_importing][set_exporting][export_slots][set
   REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[0])->get(std::to_string(1000)) == "!exporting!" + block_name2);
   REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[0])->get(std::to_string(1008)) == "!key_not_found");
 
-  REQUIRE_NOTHROW(manager.set_importing(block_name2,
-                                        "/path/to/data",
-                                        32768,
-                                        65536,
-                                        {block_name2},
-                                        chain_role::singleton,
-                                        "nil"));
+  REQUIRE_NOTHROW(manager.setup_and_set_importing(block_name2,
+                                                  "/path/to/data",
+                                                  32768,
+                                                  65536,
+                                                  {block_name2},
+                                                  chain_role::singleton,
+                                                  "nil"));
   REQUIRE(blocks[1]->name() == block_name2);
   REQUIRE(blocks[1]->path() == "/path/to/data");
   REQUIRE(blocks[1]->slot_range() == std::make_pair(0, -1));

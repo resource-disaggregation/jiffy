@@ -373,13 +373,13 @@ void directory_tree::add_block_to_file(const std::string &path) {
   LOG(log_level::info) << "Adding new block to file " << path;
   auto storage = storage_;
   auto node = get_node_as_file(path);
-  auto ctx = node->setup_export(storage, allocator_, path);
+  auto ctx = node->setup_add_block(storage, allocator_, path);
   std::thread([node, storage, ctx] {
     auto start = time_utils::now_ms();
     storage->export_slots(ctx.from_block.block_names.front());
     auto elapsed = time_utils::now_ms() - start;
     LOG(log_level::info) << "Finished export in " << elapsed << " ms";
-    node->finalize_export(storage, ctx);
+    node->finalize_slot_range_split(storage, ctx);
   }).detach();
 }
 
@@ -387,13 +387,13 @@ void directory_tree::split_slot_range(const std::string &path, int32_t slot_begi
   LOG(log_level::info) << "Splitting slot range (" << slot_begin << ", " << slot_end << ") @ " << path;
   auto storage = storage_;
   auto node = get_node_as_file(path);
-  auto ctx = node->setup_export(storage, allocator_, path, slot_begin, slot_end);
+  auto ctx = node->setup_slot_range_split(storage, allocator_, path, slot_begin, slot_end);
   std::thread([node, storage, ctx] {
     auto start = time_utils::now_ms();
     storage->export_slots(ctx.from_block.block_names.front());
     auto elapsed = time_utils::now_ms() - start;
     LOG(log_level::info) << "Finished export in " << elapsed << " ms";
-    node->finalize_export(storage, ctx);
+    node->finalize_slot_range_split(storage, ctx);
   }).detach();
 }
 
