@@ -59,17 +59,7 @@ void chain_module::request(sequence_id seq, int32_t oid, const std::vector<std::
     return;
   }
   std::vector<std::string> result;
-  if (state() == block_state::importing) {
-    if (args.back() == "!redirected" || oid == kv_op_id::num_keys) { // TODO: KV specific operation, remove...
-      run_command(result, oid, args);
-    } else {
-      LOG(log_level::info) << "Received request without redirection on importing block";
-      result.emplace_back("!block_moved");
-    }
-  } else {
-    // Let specific block implementation handle exporting cases
-    run_command(result, oid, args);
-  }
+  run_command(result, oid, args);
   if (is_mutator(oid)) {
     if (!is_tail()) {
       assert(next_ != nullptr);

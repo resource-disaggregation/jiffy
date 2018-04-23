@@ -36,7 +36,6 @@ struct block_op {
   }
 };
 
-
 // TODO: Setting metadata should be atomic: e.g., reset function, or setup block function, should acquire lock before
 // setting metadata
 class block {
@@ -49,7 +48,8 @@ class block {
         block_name_(std::move(block_name)),
         state_(block_state::regular),
         slot_range_(0, -1),
-        export_slot_range_(0, -1) {}
+        export_slot_range_(0, -1),
+        import_slot_range_(0, -1) {}
 
   virtual void run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) = 0;
 
@@ -108,7 +108,7 @@ class block {
     export_slot_range_.second = slot_end;
   }
 
-  const std::pair<int32_t, int32_t>& export_slot_range() {
+  const std::pair<int32_t, int32_t> &export_slot_range() {
     return export_slot_range_;
   };
 
@@ -116,16 +116,29 @@ class block {
     return slot >= export_slot_range_.first && slot <= export_slot_range_.second;
   }
 
-  void export_target(const std::vector<std::string>& target) {
+  void import_slot_range(int32_t slot_begin, int32_t slot_end) {
+    import_slot_range_.first = slot_begin;
+    import_slot_range_.second = slot_end;
+  }
+
+  const std::pair<int32_t, int32_t> &import_slot_range() {
+    return import_slot_range_;
+  };
+
+  bool in_import_slot_range(int32_t slot) {
+    return slot >= import_slot_range_.first && slot <= import_slot_range_.second;
+  }
+
+  void export_target(const std::vector<std::string> &target) {
     export_target_ = target;
     export_target_str_ = "";
-    for (const auto& block: target) {
+    for (const auto &block: target) {
       export_target_str_ += (block + "!");
     }
     export_target_str_.pop_back();
   }
 
-  const std::vector<std::string>& export_target() const {
+  const std::vector<std::string> &export_target() const {
     return export_target_;
   }
 
@@ -193,6 +206,8 @@ class block {
   std::pair<int32_t, int32_t> export_slot_range_;
   std::vector<std::string> export_target_;
   std::string export_target_str_;
+
+  std::pair<int32_t, int32_t> import_slot_range_;
 
   subscription_map sub_map_{};
   block_response_client_map client_map_{};

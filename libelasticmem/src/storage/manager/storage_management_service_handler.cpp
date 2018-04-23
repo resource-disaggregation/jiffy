@@ -47,11 +47,11 @@ void storage_management_service_handler::set_importing(const int32_t block_id,
                                                        const int32_t slot_end,
                                                        const std::vector<std::string> &chain,
                                                        const int32_t role,
-                                                       const std::string &next_block_name) {
+                                                       const std::string &next_block_name) { // TODO: separate importing from setup chain...
   try {
     blocks_.at(static_cast<std::size_t>(block_id))->path(path);
     blocks_.at(static_cast<std::size_t>(block_id))->state(block_state::importing);
-    blocks_.at(static_cast<std::size_t>(block_id))->slot_range(slot_begin, slot_end);
+    blocks_.at(static_cast<std::size_t>(block_id))->import_slot_range(slot_begin, slot_end);
     blocks_.at(static_cast<std::size_t>(block_id))->chain(chain);
     blocks_.at(static_cast<std::size_t>(block_id))->role(static_cast<chain_role>(role));
     if (role == chain_role::tail && next_block_name != "nil") {
@@ -82,6 +82,7 @@ void storage_management_service_handler::set_regular(const int32_t block_id,
     blocks_.at(static_cast<std::size_t>(block_id))->slot_range(slot_begin, slot_end);
     blocks_.at(static_cast<std::size_t>(block_id))->export_target({});
     blocks_.at(static_cast<std::size_t>(block_id))->export_slot_range(0, -1);
+    blocks_.at(static_cast<std::size_t>(block_id))->import_slot_range(0, -1);
   } catch (std::exception& e) {
     throw make_exception(e);
   }

@@ -97,6 +97,8 @@ TEST_CASE("manager_flush_load_test", "[put][flush][reset][load][get]") {
 
 TEST_CASE("manager_set_state", "[set_importing][set_exporting][export_slots][set_regular]") {
   static auto blocks = test_utils::init_kv_blocks(2, SERVICE_PORT, MANAGEMENT_PORT, 0);
+  blocks[0]->slot_range(0, -1);
+  blocks[1]->slot_range(0, -1);
 
   auto storage_server = block_server::create(blocks, HOST, SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -143,7 +145,8 @@ TEST_CASE("manager_set_state", "[set_importing][set_exporting][export_slots][set
                                         "nil"));
   REQUIRE(blocks[1]->name() == block_name2);
   REQUIRE(blocks[1]->path() == "/path/to/data");
-  REQUIRE(blocks[1]->slot_range() == std::make_pair(32768, 65536));
+  REQUIRE(blocks[1]->slot_range() == std::make_pair(0, -1));
+  REQUIRE(blocks[1]->import_slot_range() == std::make_pair(32768, 65536));
   REQUIRE(blocks[1]->chain()[0] == block_name2);
   REQUIRE(blocks[1]->role() == chain_role::singleton);
   REQUIRE(blocks[1]->state() == block_state::importing);
@@ -158,7 +161,7 @@ TEST_CASE("manager_set_state", "[set_importing][set_exporting][export_slots][set
       REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[1])->get(key) == "!block_moved");
     } else {
       REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[0])->get(key) == "!exporting!" + block_name2);
-      REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[1])->get(key) == key);
+      REQUIRE(std::dynamic_pointer_cast<kv_block>(blocks[1])->get(key, true) == key);
     }
   }
 

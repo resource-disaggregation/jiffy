@@ -69,6 +69,10 @@ int main(int argc, char **argv) {
       "Number of blocks to advertise"));
   opts.add(cmd_option("block-capacity", 'b', false).set_default("134217728").set_description(
       "Storage capacity of each block"));
+  opts.add(cmd_option("capacity-threshold-lo", 'l', false).set_default("0.25").set_description(
+      "Low threshold fraction for block capacity"));
+  opts.add(cmd_option("capacity-threshold-hi", 'h', false).set_default("0.75").set_description(
+      "High threshold fraction for block capacity"));
 
   cmd_parser parser(argc, argv, opts);
   if (parser.get_flag("help")) {
@@ -84,6 +88,8 @@ int main(int argc, char **argv) {
   int32_t dir_port;
   std::size_t num_blocks;
   std::size_t block_capacity;
+  double capacity_threshold_lo;
+  double capacity_threshold_hi;
   try {
     address = parser.get("address");
     dir_host = parser.get("dir-address");
@@ -95,6 +101,8 @@ int main(int argc, char **argv) {
     chain_port = parser.get_int("chain-port");
     num_blocks = static_cast<std::size_t>(parser.get_long("num-blocks"));
     block_capacity = static_cast<std::size_t>(parser.get_long("block-capacity"));
+    capacity_threshold_lo = parser.get_double("capacity-threshold-lo");
+    capacity_threshold_hi = parser.get_double("capacity-threshold-hi");
   } catch (cmd_parse_exception &ex) {
     std::cerr << "Could not parse command line args: " << ex.what() << std::endl;
     std::cerr << parser.help_msg() << std::endl;
@@ -123,7 +131,12 @@ int main(int argc, char **argv) {
   std::vector<std::shared_ptr<chain_module>> blocks;
   blocks.resize(num_blocks);
   for (size_t i = 0; i < blocks.size(); ++i) {
-    blocks[i] = std::make_shared<kv_block>(block_names[i], block_capacity, dir_host, dir_port);
+    blocks[i] = std::make_shared<kv_block>(block_names[i],
+                                           block_capacity,
+                                           capacity_threshold_lo,
+                                           capacity_threshold_hi,
+                                           dir_host,
+                                           dir_port);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
 

@@ -49,8 +49,17 @@ if [ "$BLOCK_CAPACITY" = "" ]; then
   BLOCK_CAPACITY="134217728"
 fi
 
+if [ "$CAPACITY_THRESHOLD_LO" = "" ]; then
+  CAPACITY_THRESHOLD_LO="0.25"
+fi
+
+if [ "$CAPACITY_THRESHOLD_HI" = "" ]; then
+  CAPACITY_THRESHOLD_HI="0.75"
+fi
+
 ${sbin}/../build/storage/storaged --address ${STORAGE_ADDRESS} --service-port ${STORAGE_SERVICE_PORT} \
   --management-port ${MANAGEMENT_SERVICE_PORT} --notification-port ${NOTIFICATION_SERVICE_PORT} \
   --chain-port ${CHAIN_PORT} --dir-address ${DIRECTORY_ADDRESS} --dir-port ${DIRECTORY_SERVICE_PORT} \
   --block-port ${BLOCK_SERVICE_PORT} --num-blocks ${NUM_BLOCKS} --block-capacity ${BLOCK_CAPACITY} \
+  --capacity-threshold-lo ${CAPACITY_THRESHOLD_LO} --capacity-threshold-hi ${CAPACITY_THRESHOLD_HI} \
   2>${LOG_PATH}/storage.stderr 1>${LOG_PATH}/storage.stdout &

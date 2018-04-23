@@ -19,10 +19,10 @@ std::vector<block_op> KV_OPS = {block_op{block_op_type::accessor, "get"},
                                 block_op{block_op_type::mutator, "zremove"},
                                 block_op{block_op_type::mutator, "zupdate"}};
 
-const double kv_block::CAPACITY_THRESHOLD = 0.95;
-
 kv_block::kv_block(const std::string &block_name,
-                   std::size_t capacity,
+                   size_t capacity,
+                   double threshold_lo,
+                   double threshold_hi,
                    const std::string &directory_host,
                    int directory_port,
                    std::shared_ptr<persistent::persistent_service> persistent,
@@ -38,11 +38,13 @@ kv_block::kv_block(const std::string &block_name,
       deser_(std::move(deser)),
       bytes_(0),
       capacity_(capacity),
+      threshold_lo_(threshold_lo),
+      threshold_hi_(threshold_hi),
       splitting_(false) {}
 
-std::string kv_block::put(const key_type &key, const value_type &value) {
+std::string kv_block::put(const key_type &key, const value_type &value, bool redirect) {
   auto hash = hash_slot::get(key);
-  if (in_slot_range(hash)) {
+  if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     bytes_.fetch_add(key.size() + value.size());
     if (state() == block_state::exporting && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
@@ -53,14 +55,12 @@ std::string kv_block::put(const key_type &key, const value_type &value) {
       return "!duplicate_key";
     }
   }
-  LOG(log_level::info) << "Requested key has slot " << hash << " while my slot range is (" << slot_begin() << ", "
-                       << slot_end() << ")";
   return "!block_moved";
 }
 
-value_type kv_block::get(const key_type &key) {
+value_type kv_block::get(const key_type &key, bool redirect) {
   auto hash = hash_slot::get(key);
-  if (in_slot_range(hash)) {
+  if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     value_type value;
     if (block_.find(key, value)) {
       return value;
@@ -73,9 +73,9 @@ value_type kv_block::get(const key_type &key) {
   return "!block_moved";
 }
 
-std::string kv_block::update(const key_type &key, const value_type &value) {
+std::string kv_block::update(const key_type &key, const value_type &value, bool redirect) {
   auto hash = hash_slot::get(key);
-  if (in_slot_range(hash)) {
+  if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     value_type old_val;
     if (block_.update_fn(key, [&](value_type &v) {
       if (value.size() > v.size()) {
@@ -96,9 +96,9 @@ std::string kv_block::update(const key_type &key, const value_type &value) {
   return "!block_moved";
 }
 
-std::string kv_block::remove(const key_type &key) {
+std::string kv_block::remove(const key_type &key, bool redirect) {
   auto hash = hash_slot::get(key);
-  if (in_slot_range(hash)) {
+  if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     value_type old_val;
     if (block_.erase_fn(key, [&](value_type &value) {
       bytes_.fetch_sub(key.size() + value.size());
@@ -116,6 +116,8 @@ std::string kv_block::remove(const key_type &key) {
 }
 
 void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) {
+  bool redirect = !args.empty() && args.back() == "!redirected";
+  size_t nargs = redirect ? args.size() - 1: args.size();
   switch (oid) {
     case kv_op_id::zget:
     case kv_op_id::get:
@@ -123,35 +125,35 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
         _return.push_back(get(key));
       break;
     case kv_op_id::num_keys:
-      if (!args.empty()) {
+      if (nargs != 0) {
         _return.emplace_back("!args_error");
       } else {
         _return.emplace_back(std::to_string(size()));
       }
       break;
     case kv_op_id::zput:
-    case kv_op_id::put:
-      if (args.size() % 2 != 0 && args.back() != "!redirected") {
+    case kv_op_id::put: {
+      if (args.size() % 2 != 0 && !redirect) {
         _return.emplace_back("!args_error");
       } else {
-        size_t nargs = static_cast<size_t>(args.size() / 2) * 2;
         for (size_t i = 0; i < nargs; i += 2) {
-          _return.emplace_back(put(args[i], args[i + 1]));
+          _return.emplace_back(put(args[i], args[i + 1], redirect));
         }
       }
       break;
+    }
     case kv_op_id::zremove:
-    case kv_op_id::remove:
-      for (const key_type &key: args) {
-        _return.emplace_back(remove(key));
+    case kv_op_id::remove: {
+      for (size_t i = 0; i < nargs; i++) {
+        _return.emplace_back(remove(args[i]));
       }
       break;
+    }
     case kv_op_id::zupdate:
     case kv_op_id::update:
-      if (args.size() % 2 != 0 && args.back() != "!redirected") {
+      if (args.size() % 2 != 0 && !redirect) {
         _return.emplace_back("!args_error");
       } else {
-        size_t nargs = static_cast<size_t>(args.size() / 2) * 2;
         for (size_t i = 0; i < nargs; i += 2) {
           _return.emplace_back(update(args[i], args[i + 1]));
         }
@@ -284,7 +286,11 @@ std::size_t kv_block::storage_size() {
 }
 
 bool kv_block::overload() {
-  return bytes_.load() > static_cast<size_t>(static_cast<double>(capacity_) * CAPACITY_THRESHOLD);
+  return bytes_.load() > static_cast<size_t>(static_cast<double>(capacity_) * threshold_hi_);
+}
+
+bool kv_block::underload() {
+  return bytes_.load() < static_cast<size_t>(static_cast<double>(capacity_) * threshold_lo_);
 }
 
 }
