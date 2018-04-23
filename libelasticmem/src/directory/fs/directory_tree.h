@@ -61,10 +61,6 @@ class ds_node {
 class ds_file_node : public ds_node {
  public:
   struct export_ctx {
-    size_t block_idx{};
-    int32_t slot_begin{};
-    int32_t slot_mid{};
-    int32_t slot_end{};
     replica_chain from_block;
     replica_chain to_block;
   };
@@ -209,7 +205,7 @@ class ds_file_node : public ds_node {
     }
 
     adding_.push_back(new_chain);
-    return export_ctx{max_pos, slot_begin, slot_mid, slot_end, old_chain, new_chain};
+    return export_ctx{old_chain, new_chain};
   }
 
   export_ctx setup_export(std::shared_ptr<storage::storage_management_ops> storage,
@@ -278,22 +274,26 @@ class ds_file_node : public ds_node {
     }
 
     adding_.push_back(new_chain);
-    return export_ctx{block_idx, slot_begin, slot_mid, slot_end, old_chain, new_chain};
+    return export_ctx{old_chain, new_chain};
   }
 
   void finalize_export(std::shared_ptr<storage::storage_management_ops> storage, const export_ctx &ctx) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.update_data_block_slots(ctx.block_idx, ctx.slot_begin, ctx.slot_mid);
-    dstatus_.set_data_block_status(ctx.block_idx, chain_status::stable);
-    dstatus_.add_data_block(ctx.to_block, ctx.block_idx + 1);
+    auto block_idx = dstatus_.find_replica_chain(ctx.from_block);
+    auto slot_begin = ctx.from_block.slot_begin();
+    auto slot_end = ctx.from_block.slot_end();
+    auto slot_mid = (slot_end + slot_begin) / 2;
+    dstatus_.update_data_block_slots(block_idx, slot_begin, slot_mid);
+    dstatus_.set_data_block_status(block_idx, chain_status::stable);
+    dstatus_.add_data_block(ctx.to_block, block_idx + 1);
     auto it = std::find(adding_.begin(), adding_.end(), ctx.to_block);
     if (it == adding_.end()) {
       throw std::logic_error("Cannot find to_block in adding list");
     }
     adding_.erase(it);
     for (std::size_t j = 0; j < dstatus_.chain_length(); ++j) {
-      storage->set_regular(ctx.from_block.block_names[j], ctx.slot_begin, ctx.slot_mid);
-      storage->set_regular(ctx.to_block.block_names[j], ctx.slot_mid + 1, ctx.slot_end);
+      storage->set_regular(ctx.from_block.block_names[j], slot_begin, slot_mid);
+      storage->set_regular(ctx.to_block.block_names[j], slot_mid + 1, slot_end);
     }
     using namespace utils;
     LOG(log_level::info) << "Updated file data_status: " << dstatus_.to_string();

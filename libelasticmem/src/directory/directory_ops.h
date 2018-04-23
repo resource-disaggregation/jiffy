@@ -296,6 +296,14 @@ class data_status {
     data_blocks_.clear();
   }
 
+  std::size_t find_replica_chain(const replica_chain &chain) {
+    auto it = std::find(data_blocks_.begin(), data_blocks_.end(), chain);
+    if (it == data_blocks_.end()) {
+      throw std::logic_error("Could not find replica chain " + chain.to_string());
+    }
+    return static_cast<size_t>(it - data_blocks_.begin());
+  }
+
   void add_data_block(const replica_chain &block, std::size_t i) {
     data_blocks_.insert(data_blocks_.begin() + i, block);
   }
@@ -324,7 +332,7 @@ class data_status {
   std::string to_string() const {
     std::string out = "{ mode: " + std::to_string(mode_) + ", pprefix: " + persistent_store_prefix_ + ", chain_length: "
         + std::to_string(chain_length_) + ", data_blocks: { ";
-    for (const auto& chain: data_blocks_) {
+    for (const auto &chain: data_blocks_) {
       out += chain.to_string() + ", ";
     }
     out.pop_back();
