@@ -69,9 +69,9 @@ int main(int argc, char **argv) {
       "Number of blocks to advertise"));
   opts.add(cmd_option("block-capacity", 'b', false).set_default("134217728").set_description(
       "Storage capacity of each block"));
-  opts.add(cmd_option("capacity-threshold-lo", 'l', false).set_default("0.25").set_description(
+  opts.add(cmd_option("capacity-threshold-lo", 'L', false).set_default("0.25").set_description(
       "Low threshold fraction for block capacity"));
-  opts.add(cmd_option("capacity-threshold-hi", 'h', false).set_default("0.75").set_description(
+  opts.add(cmd_option("capacity-threshold-hi", 'H', false).set_default("0.75").set_description(
       "High threshold fraction for block capacity"));
 
   cmd_parser parser(argc, argv, opts);
