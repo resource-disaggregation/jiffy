@@ -58,6 +58,7 @@ std::string kv_block::put(const key_type &key, const value_type &value, bool red
       return "!duplicate_key";
     }
   }
+  LOG(log_level::info) << "Request for slot " << hash << "; my slot range " << slot_begin() << ", " << slot_end();
   return "!block_moved";
 }
 
