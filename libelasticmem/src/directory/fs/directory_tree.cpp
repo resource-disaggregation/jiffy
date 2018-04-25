@@ -83,6 +83,7 @@ data_status directory_tree::create(const std::string &path,
 
   std::vector<replica_chain> blocks;
   std::size_t slots_per_block = storage::block::SLOT_MAX / num_blocks;
+  std::vector<std::future<void>> futures;
   for (std::size_t i = 0; i < num_blocks; ++i) {
     auto slot_begin = static_cast<int32_t>(i * slots_per_block);
     auto slot_end =
@@ -93,21 +94,28 @@ data_status directory_tree::create(const std::string &path,
     blocks.push_back(chain);
     using namespace storage;
     if (chain_length == 1) {
-      storage_->setup_block(chain.block_names[0],
-                            path,
-                            slot_begin,
-                            slot_end,
-                            chain.block_names,
-                            chain_role::singleton,
-                            "nil");
+      futures.push_back(std::async([&, path, slot_begin, slot_end, chain]() {
+        storage_->setup_block(chain.block_names[0],
+                              path,
+                              slot_begin,
+                              slot_end,
+                              chain.block_names,
+                              chain_role::singleton,
+                              "nil");
+      }));
     } else {
       for (std::size_t j = 0; j < chain_length; ++j) {
         std::string block_name = chain.block_names[j];
         std::string next_block_name = (j == chain_length - 1) ? "nil" : chain.block_names[j + 1];
         int32_t role = (j == 0) ? chain_role::head : (j == chain_length - 1) ? chain_role::tail : chain_role::mid;
-        storage_->setup_block(block_name, path, slot_begin, slot_end, chain.block_names, role, next_block_name);
+        futures.push_back(std::async([&, path, slot_begin, slot_end, chain, role, block_name, next_block_name]() {
+          storage_->setup_block(block_name, path, slot_begin, slot_end, chain.block_names, role, next_block_name);
+        }));
       }
     }
+  }
+  for (auto &fut: futures) {
+    fut.wait();
   }
   auto child =
       std::make_shared<ds_file_node>(filename, storage_mode::in_memory, persistent_store_prefix, chain_length, blocks);
@@ -175,7 +183,11 @@ void directory_tree::remove(const std::string &path) {
     throw directory_ops_exception("Directory not empty: " + path);
   }
   parent->remove_child(child_name);
-  clear_storage(child);
+  std::vector<std::future<std::string>> futures;
+  clear_storage(futures, child);
+  for (auto& fut: futures) {
+    allocator_->free({fut.get()});
+  }
 }
 
 void directory_tree::remove_all(const std::string &path) {
@@ -188,7 +200,11 @@ void directory_tree::remove_all(const std::string &path) {
     throw directory_ops_exception("Path does not exist: " + path);
   }
   parent->remove_child(child_name);
-  clear_storage(child);
+  std::vector<std::future<std::string>> futures;
+  clear_storage(futures, child);
+  for (auto& fut: futures) {
+    allocator_->free({fut.get()});
+  }
 }
 
 void directory_tree::flush(const std::string &path) {
@@ -475,20 +491,22 @@ void directory_tree::touch(std::shared_ptr<ds_node> node, std::uint64_t time) {
   }
 }
 
-void directory_tree::clear_storage(std::shared_ptr<ds_node> node) {
+void directory_tree::clear_storage(std::vector<std::future<std::string>> &futures, std::shared_ptr<ds_node> node) {
   if (node->is_regular_file()) {
     auto file = std::dynamic_pointer_cast<ds_file_node>(node);
     auto s = file->dstatus();
     for (const auto &block: s.data_blocks()) {
       for (const auto &block_name: block.block_names) {
-        storage_->reset(block_name);
+        futures.push_back(std::async([&, block_name] {
+          storage_->reset(block_name);
+          return block_name;
+        }));
       }
-      allocator_->free(block.block_names);
     }
   } else if (node->is_directory()) {
     auto dir = std::dynamic_pointer_cast<ds_dir_node>(node);
-    for (auto entry: *dir) {
-      clear_storage(entry.second);
+    for (const auto &entry: *dir) {
+      clear_storage(futures, entry.second);
     }
   }
 }

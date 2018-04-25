@@ -403,8 +403,10 @@ TEST_CASE("merge_block_test", "[file]") {
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).status == chain_status::stable);
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).slot_range == std::make_pair(0, 65536));
   REQUIRE(sm->COMMANDS.size() == 7);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/file.txt:0:32767:0:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "setup_block:1:/sandbox/file.txt:32768:65536:1:0:nil");
+  const auto &cmd1 = std::min(sm->COMMANDS[0], sm->COMMANDS[1]);
+  const auto &cmd2 = std::max(sm->COMMANDS[0], sm->COMMANDS[1]);
+  REQUIRE(cmd1 == "setup_block:0:/sandbox/file.txt:0:32767:0:0:nil");
+  REQUIRE(cmd2 == "setup_block:1:/sandbox/file.txt:32768:65536:1:0:nil");
   REQUIRE(sm->COMMANDS[2] == "set_importing:1:0:32767");
   REQUIRE(sm->COMMANDS[3] == "set_exporting:0:1:0:32767");
   REQUIRE(sm->COMMANDS[4] == "export_slots:0");
