@@ -10,6 +10,7 @@ if (NOT USE_SYSTEM_JEMALLOC)
 endif ()
 
 target_link_libraries(directoryd elasticmem ${JEMALLOC_LIBRARIES})
+add_backward(directoryd)
 
 install(TARGETS directoryd
         RUNTIME DESTINATION bin
