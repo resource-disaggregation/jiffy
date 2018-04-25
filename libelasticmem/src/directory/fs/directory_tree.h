@@ -566,7 +566,7 @@ class directory_tree : public directory_ops, public directory_management_ops {
 
   std::shared_ptr<ds_node> touch_node_path(const std::string &path, std::uint64_t time) const;
 
-  void clear_storage(std::vector<std::future<std::string>> &futures, std::shared_ptr<ds_node> node);
+  void clear_storage(std::vector<std::string> &cleared_blocks, std::shared_ptr<ds_node> node);
 
   void touch(std::shared_ptr<ds_node> node, std::uint64_t time);
 
