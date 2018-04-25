@@ -92,17 +92,24 @@ class TestClient(TestCase):
         self.storaged.wait()
 
     def kv_ops(self, kv):
-        # Test get/put
+        # Test exists/get/put
         for i in range(0, 1000):
             self.assertTrue(kv.put(str(i), str(i)) == 'ok')
 
         for i in range(0, 1000):
+            self.assertTrue(kv.exists(str(i)))
             self.assertTrue(kv.get(str(i)) == bytes(str(i), 'utf-8'))
 
         for i in range(1000, 2000):
+            self.assertFalse(kv.exists(str(i)))
             self.assertTrue(kv.get(str(i)) is None)
 
         self.assertTrue(kv.num_keys() == 1000)
+
+        # Test keys
+        keys = sorted([int(k) for k in kv.keys()])
+        for i in range(0, 1000):
+            self.assertTrue(keys[i] == i)
 
         # Test update
         for i in range(0, 1000):

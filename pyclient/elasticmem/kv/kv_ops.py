@@ -4,12 +4,15 @@ class KVOpType:
 
 
 class KVOps:
-    get = 0
-    num_keys = 1
-    put = 2
-    remove = 3
-    update = 4
-    op_types = [KVOpType.accessor, KVOpType.accessor, KVOpType.mutator, KVOpType.mutator, KVOpType.mutator]
+    exists = 0
+    get = 1
+    keys = 2
+    num_keys = 3
+    put = 4
+    remove = 5
+    update = 6
+    op_types = [KVOpType.accessor, KVOpType.accessor, KVOpType.accessor, KVOpType.accessor, KVOpType.mutator,
+                KVOpType.mutator, KVOpType.mutator]
 
 
 def op_type(op):

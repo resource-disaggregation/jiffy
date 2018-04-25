@@ -25,18 +25,21 @@ class noop_store : public persistent::persistent_service {
   void remove(const std::string &) override {}
 };
 
+// TODO: This should really be a map... maintaining the ids is tedious!
 extern std::vector<block_op> KV_OPS;
 
 enum kv_op_id : int32_t {
-  get = 0,
-  num_keys = 1,
-  put = 2,
-  remove = 3,
-  update = 4,
-  zget = 5,
-  zput = 6,
-  zremove = 7,
-  zupdate = 8
+  exists = 0,
+  get = 1,
+  keys = 2, // TODO: We should not support multi-key operations since we do not provide any guarantees
+  num_keys = 3, // TODO: We should not support multi-key operations since we do not provide any guarantees
+  put = 4,
+  remove = 5,
+  update = 6,
+  zget = 7,
+  zput = 8,
+  zremove = 9,
+  zupdate = 10
 };
 
 class kv_block : public chain_module {
@@ -52,6 +55,8 @@ class kv_block : public chain_module {
                     std::shared_ptr<serializer> ser = std::make_shared<binary_serializer>(),
                     std::shared_ptr<deserializer> deser = std::make_shared<binary_deserializer>());
 
+  std::string exists(const key_type &key, bool redirect = false);
+
   std::string put(const key_type &key, const value_type &value, bool redirect = false);
 
   value_type get(const key_type &key, bool redirect = false);
@@ -59,6 +64,8 @@ class kv_block : public chain_module {
   std::string update(const key_type &key, const value_type &value, bool redirect = false);
 
   std::string remove(const key_type &key, bool redirect = false);
+
+  void keys(std::vector<std::string> &keys);
 
   std::size_t size() const;
 

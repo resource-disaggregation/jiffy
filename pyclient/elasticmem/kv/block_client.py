@@ -141,6 +141,9 @@ class BlockChainClient:
         else:
             return self._run_command(self.head, cmd_id, args)
 
+    def exists(self, key):
+        return self._run_command(self.tail, KVOps.exists, [key])[0]
+
     def get(self, key):
         return self._run_command(self.tail, KVOps.get, [key])[0]
 
@@ -153,8 +156,14 @@ class BlockChainClient:
     def remove(self, key):
         return self._run_command(self.head, KVOps.remove, [key])[0]
 
+    def keys(self):
+        return self._run_command(self.tail, KVOps.keys, [])
+
     def num_keys(self):
         return self._run_command(self.tail, KVOps.num_keys, [])[0]
+
+    def redirected_exists(self, key):
+        return self._run_command(self.tail, KVOps.exists, [key, '!redirected'])[0]
 
     def redirected_get(self, key):
         return self._run_command(self.tail, KVOps.get, [key, '!redirected'])[0]

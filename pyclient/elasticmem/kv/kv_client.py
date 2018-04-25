@@ -88,6 +88,17 @@ class KVClient:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
 
+    def exists(self, key):
+        try:
+            return self._parse_response(self.blocks[self.block_id(key)].exists(key)) == b'true'
+        except RedoError:
+            return self._parse_response(self.blocks[self.block_id(key)].exists(key)) == b'true'
+        except RedirectError as e:
+            return self._parse_response(BlockChainClient(self.client_cache, e.blocks).redirected_exists(key)) == b'true'
+        except RuntimeError as e:
+            logging.warning(e)
+            self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
+
     def update(self, key, value):
         try:
             return self._parse_response(self.blocks[self.block_id(key)].update(key, value))
@@ -112,6 +123,12 @@ class KVClient:
 
     def num_keys(self):
         return sum([int(block.num_keys()) for block in self.blocks])
+
+    def keys(self):
+        res = []
+        for block in self.blocks:
+            res.extend(block.keys())
+        return res
 
     def pipeline_get(self):
         return PipelinedGet(self.path, self.blocks, self.slots, self.chain_failure_cb_)

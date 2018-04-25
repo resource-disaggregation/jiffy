@@ -9,7 +9,9 @@ namespace storage {
 
 using namespace utils;
 
-std::vector<block_op> KV_OPS = {block_op{block_op_type::accessor, "get"},
+std::vector<block_op> KV_OPS = {block_op{block_op_type::accessor, "exists"},
+                                block_op{block_op_type::accessor, "get"},
+                                block_op{block_op_type::accessor, "keys"},
                                 block_op{block_op_type::accessor, "num_keys"},
                                 block_op{block_op_type::mutator, "put"},
                                 block_op{block_op_type::mutator, "remove"},
@@ -55,6 +57,20 @@ std::string kv_block::put(const key_type &key, const value_type &value, bool red
     } else {
       return "!duplicate_key";
     }
+  }
+  return "!block_moved";
+}
+
+std::string kv_block::exists(const key_type &key, bool redirect) {
+  auto hash = hash_slot::get(key);
+  if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
+    if (block_.contains(key)) {
+      return "true";
+    }
+    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+      return "!exporting!" + export_target_str();
+    }
+    return "!key_not_found";
   }
   return "!block_moved";
 }
@@ -113,16 +129,25 @@ std::string kv_block::remove(const key_type &key, bool redirect) {
     }
     return "!key_not_found";
   }
-  LOG(log_level::info) << "Received request for slot " << hash << " while my slot is " << slot_begin() << "-" << slot_end();
-  if (state() == importing)
-    LOG(log_level::info) << "I am importing " << import_slot_range().first << "-" << import_slot_range().second << " redirect: " << redirect;
   return "!block_moved";
+}
+
+void kv_block::keys(std::vector<std::string> &keys) {
+  locked_hash_table_type ltable = block_.lock_table();
+  for (const auto &entry: ltable) {
+    keys.push_back(entry.first);
+  }
+  ltable.unlock();
 }
 
 void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) {
   bool redirect = !args.empty() && args.back() == "!redirected";
   size_t nargs = redirect ? args.size() - 1 : args.size();
   switch (oid) {
+    case kv_op_id::exists:
+      for (const key_type &key: args)
+        _return.push_back(exists(key, redirect));
+      break;
     case kv_op_id::zget:
     case kv_op_id::get:
       for (const key_type &key: args)
@@ -161,6 +186,13 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
         for (size_t i = 0; i < nargs; i += 2) {
           _return.emplace_back(update(args[i], args[i + 1], redirect));
         }
+      }
+      break;
+    case kv_op_id::keys:
+      if (nargs != 0) {
+        _return.emplace_back("!args_error");
+      } else {
+        keys(_return);
       }
       break;
     default:throw std::invalid_argument("No such operation id " + std::to_string(oid));
