@@ -193,8 +193,10 @@ void directory_tree::remove_all(const std::string &path) {
     throw directory_ops_exception("Path does not exist: " + path);
   }
   parent->remove_child(child_name);
+  LOG(log_level::info) << "Removed child " << path;
   std::vector<std::string> cleared_blocks;
   clear_storage(cleared_blocks, child);
+  LOG(log_level::info) << "Cleared all blocks " << path;
   allocator_->free(cleared_blocks);
 }
 
@@ -485,6 +487,8 @@ void directory_tree::touch(std::shared_ptr<ds_node> node, std::uint64_t time) {
 }
 
 void directory_tree::clear_storage(std::vector<std::string> &cleared_blocks, std::shared_ptr<ds_node> node) {
+  if (node == nullptr)
+    return;
   if (node->is_regular_file()) {
     auto file = std::dynamic_pointer_cast<ds_file_node>(node);
     auto s = file->dstatus();
