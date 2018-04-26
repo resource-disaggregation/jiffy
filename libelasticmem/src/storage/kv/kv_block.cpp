@@ -48,11 +48,11 @@ kv_block::kv_block(const std::string &block_name,
 std::string kv_block::put(const key_type &key, const value_type &value, bool redirect) {
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
-    bytes_.fetch_add(key.size() + value.size());
     if (state() == block_state::exporting && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
     }
     if (block_.insert(key, value)) {
+      bytes_.fetch_add(key.size() + value.size());
       return "!ok";
     } else {
       return "!duplicate_key";
@@ -89,6 +89,22 @@ value_type kv_block::get(const key_type &key, bool redirect) {
     return "!key_not_found";
   }
   return "!block_moved";
+}
+
+void kv_block::get(value_type &value, const key_type &key, bool redirect) {
+  auto hash = hash_slot::get(key);
+  if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
+    if (block_.find(key, value)) {
+      return;
+    }
+    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+      value = "!exporting!" + export_target_str();
+      return;
+    }
+    value = "!key_not_found";
+    return;
+  }
+  value = "!block_moved";
 }
 
 std::string kv_block::update(const key_type &key, const value_type &value, bool redirect) {
@@ -150,9 +166,12 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
         _return.push_back(exists(key, redirect));
       break;
     case kv_op_id::zget:
-    case kv_op_id::get:
-      for (const key_type &key: args)
-        _return.push_back(get(key, redirect));
+    case kv_op_id::get:_return.resize(args.size());
+      {
+        size_t i = 0;
+        for (const key_type &key: args)
+          get(_return[i++], key, redirect);
+      }
       break;
     case kv_op_id::num_keys:
       if (nargs != 0) {

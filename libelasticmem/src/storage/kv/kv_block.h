@@ -61,6 +61,8 @@ class kv_block : public chain_module {
 
   value_type get(const key_type &key, bool redirect = false);
 
+  void get(value_type &value, const key_type &key, bool redirect = false);
+
   std::string update(const key_type &key, const value_type &value, bool redirect = false);
 
   std::string remove(const key_type &key, bool redirect = false);
