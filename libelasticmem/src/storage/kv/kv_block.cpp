@@ -361,11 +361,11 @@ std::size_t kv_block::storage_size() {
 }
 
 bool kv_block::overload() {
-  return bytes_.load() >= static_cast<size_t>(static_cast<double>(capacity_) * threshold_hi_);
+  return bytes_.load() > static_cast<size_t>(static_cast<double>(capacity_) * threshold_hi_);
 }
 
 bool kv_block::underload() {
-  return bytes_.load() <= static_cast<size_t>(static_cast<double>(capacity_) * threshold_lo_);
+  return bytes_.load() < static_cast<size_t>(static_cast<double>(capacity_) * threshold_lo_);
 }
 
 }
