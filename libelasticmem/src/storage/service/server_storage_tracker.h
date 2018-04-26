@@ -25,12 +25,11 @@ class server_storage_tracker {
  private:
   void report_file_sizes(std::ofstream &out);
 
+  std::vector<std::shared_ptr<chain_module>> &blocks_;
   std::chrono::milliseconds periodicity_ms_;
   std::atomic_bool stop_{false};
   std::thread worker_;
   std::string output_file_;
-  std::vector<std::shared_ptr<chain_module>> &blocks_;
-
 };
 }
 }
