@@ -39,7 +39,7 @@ std::shared_ptr<TServer> chain_server::create(std::vector<std::shared_ptr<chain_
     return server;
   } else {
     std::shared_ptr<TServerSocket> sock(new TServerSocket(address, port));
-    std::shared_ptr<TFramedTransportFactory> transport_factory(new TFramedTransportFactory());
+    std::shared_ptr<TBufferedTransportFactory> transport_factory(new TBufferedTransportFactory());
     std::shared_ptr<TServer> server(new TThreadedServer(proc_factory, sock, transport_factory, protocol_factory));
     return server;
   }
