@@ -307,8 +307,7 @@ void kv_block::export_slots() {
 
   // Send the data
   block_chain_client dst(export_target());
-  auto dst_fut = dst.run_command(kv_op_id::zput, export_data);
-  dst_fut.wait();
+  dst.run_command(kv_op_id::zput, export_data);
   dst.disconnect();
 
   LOG(log_level::info) << "Sent " << nexport_keys << " keys ";
@@ -326,8 +325,7 @@ void kv_block::export_slots() {
   assert(remove_keys.size() == nexport_keys);
 
   block_chain_client src(chain());
-  auto src_fut = src.run_command(kv_op_id::zremove, remove_keys);
-  src_fut.wait();
+  src.run_command(kv_op_id::zremove, remove_keys);
   src.disconnect();
 
   LOG(log_level::info) << "Removed " << remove_keys.size() << " exported keys";

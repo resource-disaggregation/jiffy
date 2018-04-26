@@ -1,6 +1,7 @@
 #ifndef ELASTICMEM_BLOCK_CHAIN_CLIENT_H
 #define ELASTICMEM_BLOCK_CHAIN_CLIENT_H
 
+#include <map>
 #include "block_client.h"
 
 namespace elasticmem {
@@ -16,13 +17,13 @@ class block_chain_client {
 
   const std::vector<std::string> &chain() const;
 
-  std::future<std::string> get(const std::string &key);
-  std::future<std::string> put(const std::string &key, const std::string &value);
-  std::future<std::string> remove(const std::string &key);
-  std::future<std::string> update(const std::string &key, const std::string &value);
-  std::future<std::string> num_keys();
+  std::string get(const std::string &key);
+  std::string put(const std::string &key, const std::string &value);
+  std::string remove(const std::string &key);
+  std::string update(const std::string &key, const std::string &value);
+  std::string num_keys();
 
-  std::future<std::string> run_command(int32_t cmd_id, const std::vector<std::string> &args);
+  std::vector<std::string> run_command(int32_t cmd_id, const std::vector<std::string> &args);
  private:
   void connect(const std::vector<std::string> &chain);
 
@@ -30,9 +31,9 @@ class block_chain_client {
   std::vector<std::string> chain_;
   block_client head_;
   block_client tail_;
-  block_client::promise_map promises_;
-  std::thread response_processor_;
+  block_client::command_response_reader response_reader_;
   std::vector<client_ref> cmd_client_;
+  std::map<int64_t, std::vector<std::string>> response_cache_;
 };
 
 }

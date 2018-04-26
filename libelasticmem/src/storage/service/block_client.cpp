@@ -25,27 +25,15 @@ void block_client::connect(const std::string &host, int port, int block_id) {
   port_ = port;
   block_id_ = block_id;
   socket_ = std::make_shared<TSocket>(host, port);
-  transport_ = std::shared_ptr<TTransport>(new TBufferedTransport(socket_));
+  transport_ = std::shared_ptr<TTransport>(new TFramedTransport(socket_));
   protocol_ = std::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
   client_ = std::make_shared<thrift_client>(protocol_);
   transport_->open();
 }
 
-std::thread block_client::add_response_listener(int64_t client_id, promise_map &promises) {
+block_client::command_response_reader block_client::get_command_response_reader(int64_t client_id) {
   client_->register_client_id(block_id_, client_id);
-  auto handler = std::make_shared<command_response_handler>(promises);
-  auto processor = std::make_shared<block_response_serviceProcessor>(handler);
-  return std::thread([=] {
-    while (true) {
-      try {
-        if (!processor->process(protocol_, protocol_, nullptr)) {
-          break;
-        }
-      } catch (std::exception &e) {
-        break;
-      }
-    }
-  });
+  return block_client::command_response_reader(protocol_);
 }
 
 void block_client::disconnect() {

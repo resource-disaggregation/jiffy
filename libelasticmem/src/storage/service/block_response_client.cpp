@@ -2,6 +2,7 @@
 
 #include <thrift/transport/TBufferTransports.h>
 #include <thrift/protocol/TBinaryProtocol.h>
+#include <iostream>
 
 using namespace ::apache::thrift::protocol;
 

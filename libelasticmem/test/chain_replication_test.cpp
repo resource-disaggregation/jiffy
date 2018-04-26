@@ -21,9 +21,9 @@ using namespace elasticmem::directory;
 TEST_CASE("kv_no_failure_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
   std::vector<std::vector<std::shared_ptr<elasticmem::storage::chain_module>>> blocks(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TThreadedServer>> management_servers(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TThreadedServer>> chain_servers(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TThreadedServer>> kv_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> kv_servers(NUM_BLOCKS);
   std::vector<std::thread> server_threads;
 
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -60,14 +60,14 @@ TEST_CASE("kv_no_failure_test", "[put][get]") {
 
   block_chain_client client(chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "!ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)).get() == std::to_string(i));
+    REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.get(std::to_string(i)).get() == "!key_not_found");
+    REQUIRE(client.get(std::to_string(i)) == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
@@ -100,9 +100,9 @@ TEST_CASE("kv_no_failure_test", "[put][get]") {
 TEST_CASE("kv_head_failure_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
   std::vector<std::vector<std::shared_ptr<elasticmem::storage::chain_module>>> blocks(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TThreadedServer>> management_servers(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TThreadedServer>> chain_servers(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TThreadedServer>> kv_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> kv_servers(NUM_BLOCKS);
   std::vector<std::thread> server_threads;
 
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -137,21 +137,28 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
   t->create("/file", "/tmp", 1, 3);
 
   kv_servers[0]->stop();
+  chain_servers[0]->stop();
   management_servers[0]->stop();
+
+  for (int32_t i = 0; i < 3; i++) {
+    if (server_threads[i].joinable()) {
+      server_threads[i].join();
+    }
+  }
 
   auto chain = t->dstatus("/file").data_blocks()[0];
   auto fixed_chain = t->resolve_failures("/file", chain);
 
   block_chain_client client(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "!ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)).get() == std::to_string(i));
+    REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.get(std::to_string(i)).get() == "!key_not_found");
+    REQUIRE(client.get(std::to_string(i)) == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
@@ -184,9 +191,9 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
 TEST_CASE("kv_mid_failure_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
   std::vector<std::vector<std::shared_ptr<elasticmem::storage::chain_module>>> blocks(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TThreadedServer>> management_servers(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TThreadedServer>> chain_servers(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TThreadedServer>> kv_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> kv_servers(NUM_BLOCKS);
   std::vector<std::thread> server_threads;
 
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -228,14 +235,14 @@ TEST_CASE("kv_mid_failure_test", "[put][get]") {
 
   block_chain_client client(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "!ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)).get() == std::to_string(i));
+    REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.get(std::to_string(i)).get() == "!key_not_found");
+    REQUIRE(client.get(std::to_string(i)) == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
@@ -269,9 +276,9 @@ TEST_CASE("kv_mid_failure_test", "[put][get]") {
 TEST_CASE("kv_tail_failure_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
   std::vector<std::vector<std::shared_ptr<elasticmem::storage::chain_module>>> blocks(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TThreadedServer>> management_servers(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TThreadedServer>> chain_servers(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TThreadedServer>> kv_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> kv_servers(NUM_BLOCKS);
   std::vector<std::thread> server_threads;
 
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -313,14 +320,14 @@ TEST_CASE("kv_tail_failure_test", "[put][get]") {
 
   block_chain_client client(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "!ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)).get() == std::to_string(i));
+    REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.get(std::to_string(i)).get() == "!key_not_found");
+    REQUIRE(client.get(std::to_string(i)) == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
@@ -353,9 +360,9 @@ TEST_CASE("kv_tail_failure_test", "[put][get]") {
 TEST_CASE("kv_add_block_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
   std::vector<std::vector<std::shared_ptr<elasticmem::storage::chain_module>>> blocks(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TThreadedServer>> management_servers(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TThreadedServer>> chain_servers(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TThreadedServer>> kv_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> kv_servers(NUM_BLOCKS);
   std::vector<std::thread> server_threads;
 
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -392,7 +399,7 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
   auto chain = t->dstatus("/file").data_blocks()[0].block_names;
   block_chain_client client(chain);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)).get() == "!ok");
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
 
   client.disconnect();
@@ -401,10 +408,10 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
 
   block_chain_client client2(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client2.get(std::to_string(i)).get() == std::to_string(i));
+    REQUIRE(client2.get(std::to_string(i)) == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client2.get(std::to_string(i)).get() == "!key_not_found");
+    REQUIRE(client2.get(std::to_string(i)) == "!key_not_found");
   }
 
   // Ensure all three blocks have the data

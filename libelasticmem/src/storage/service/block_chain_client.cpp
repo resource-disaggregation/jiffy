@@ -21,8 +21,6 @@ block_chain_client::~block_chain_client() {
 void block_chain_client::disconnect() {
   head_.disconnect();
   tail_.disconnect();
-  if (response_processor_.joinable())
-    response_processor_.join();
 }
 
 const std::vector<std::string> &block_chain_client::chain() const {
@@ -40,36 +38,48 @@ void block_chain_client::connect(const std::vector<std::string> &chain) {
     auto t = block_name_parser::parse(chain_.back());
     tail_.connect(t.host, t.service_port, t.id);
   }
-  response_processor_ = tail_.add_response_listener(seq_.client_id, promises_);
+  response_reader_ = tail_.get_command_response_reader(seq_.client_id);
 }
 
-std::future<std::string> block_chain_client::get(const std::string &key) {
-  return run_command(kv_op_id::get, {key});
+std::string block_chain_client::get(const std::string &key) {
+  return run_command(kv_op_id::get, {key}).front();
 }
 
-std::future<std::string> block_chain_client::num_keys() {
-  return run_command(kv_op_id::num_keys, {});
+std::string block_chain_client::num_keys() {
+  return run_command(kv_op_id::num_keys, {}).front();
 }
 
-std::future<std::string> block_chain_client::put(const std::string &key, const std::string &value) {
-  return run_command(kv_op_id::put, {key, value});
+std::string block_chain_client::put(const std::string &key, const std::string &value) {
+  return run_command(kv_op_id::put, {key, value}).front();
 }
 
-std::future<std::string> block_chain_client::remove(const std::string &key) {
-  return run_command(kv_op_id::remove, {key});
+std::string block_chain_client::remove(const std::string &key) {
+  return run_command(kv_op_id::remove, {key}).front();
 }
 
-std::future<std::string> block_chain_client::update(const std::string &key, const std::string &value) {
-  return run_command(kv_op_id::update, {key, value});
+std::string block_chain_client::update(const std::string &key, const std::string &value) {
+  return run_command(kv_op_id::update, {key, value}).front();
 }
 
-std::future<std::string> block_chain_client::run_command(int32_t cmd_id, const std::vector<std::string> &args) {
+std::vector<std::string> block_chain_client::run_command(int32_t cmd_id, const std::vector<std::string> &args) {
   int64_t op_seq = seq_.client_seq_no;
-  auto event = std::make_shared<std::promise<std::string>>();
-  promises_.insert(op_seq, event);
   cmd_client_[cmd_id]->command_request(seq_, cmd_id, args);
   ++(seq_.client_seq_no);
-  return event->get_future();
+  auto it = response_cache_.find(op_seq);
+  if (it != response_cache_.end()) {
+    auto res = *it;
+    response_cache_.erase(it);
+    return res.second;
+  }
+  while (true) {
+    std::vector<std::string> ret;
+    int64_t recv_seq = response_reader_.recv_response(ret);
+    if (recv_seq == op_seq) {
+      return ret;
+    } else {
+      response_cache_[op_seq] = ret;
+    }
+  }
 }
 
 }
