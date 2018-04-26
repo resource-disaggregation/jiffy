@@ -73,6 +73,11 @@ int main(int argc, char **argv) {
       "Low threshold fraction for block capacity"));
   opts.add(cmd_option("capacity-threshold-hi", 'H', false).set_default("0.75").set_description(
       "High threshold fraction for block capacity"));
+  opts.add(cmd_option("non-blocking", 'N', true).set_description("Use non-blocking thrift server"));
+  opts.add(cmd_option("io-threads", 'I', false).set_default("1").set_description(
+      "Number of IO threads. Only used for non-blocking thrift server"));
+  opts.add(cmd_option("proc-threads", 'P', false).set_default("HARDWARE_CONCURRENCY").set_description(
+      "Number of processing threads. Only used for non-blocking thrift server"));
 
   cmd_parser parser(argc, argv, opts);
   if (parser.get_flag("help")) {
@@ -90,6 +95,9 @@ int main(int argc, char **argv) {
   std::size_t block_capacity;
   double capacity_threshold_lo;
   double capacity_threshold_hi;
+  bool non_blocking;
+  int num_io_threads;
+  int num_proc_threads;
   try {
     address = parser.get("address");
     dir_host = parser.get("dir-address");
@@ -103,6 +111,13 @@ int main(int argc, char **argv) {
     block_capacity = static_cast<std::size_t>(parser.get_long("block-capacity"));
     capacity_threshold_lo = parser.get_double("capacity-threshold-lo");
     capacity_threshold_hi = parser.get_double("capacity-threshold-hi");
+    non_blocking = parser.get_flag("non-blocking");
+    num_io_threads = parser.get_int("io-threads");
+    if (parser.get("proc-threads") == "HARDWARE_CONCURRENCY") {
+      num_proc_threads = std::thread::hardware_concurrency();
+    } else {
+      num_proc_threads = parser.get_int("proc-threads");
+    }
   } catch (cmd_parse_exception &ex) {
     std::cerr << "Could not parse command line args: " << ex.what() << std::endl;
     std::cerr << parser.help_msg() << std::endl;
@@ -167,7 +182,7 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Advertised " << num_blocks << " to block allocation server";
 
   std::exception_ptr kv_exception = nullptr;
-  auto kv_server = block_server::create(blocks, address, service_port);
+  auto kv_server = block_server::create(blocks, address, service_port, non_blocking, num_io_threads, num_proc_threads);
   std::thread kv_serve_thread([&kv_exception, &kv_server, &failing_thread, &failure_condition] {
     try {
       kv_server->serve();
@@ -196,7 +211,7 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Notification server listening on " << address << ":" << notification_port;
 
   std::exception_ptr chain_exception = nullptr;
-  auto chain_server = chain_server::create(blocks, address, chain_port);
+  auto chain_server = chain_server::create(blocks, address, chain_port, non_blocking, num_io_threads, num_proc_threads);
   std::thread chain_serve_thread([&chain_exception, &chain_server, &failing_thread, &failure_condition] {
     try {
       chain_server->serve();

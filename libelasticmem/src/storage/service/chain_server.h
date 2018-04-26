@@ -11,7 +11,10 @@ class chain_server {
  public:
   static std::shared_ptr<apache::thrift::server::TServer> create(std::vector<std::shared_ptr<chain_module>> &blocks,
                                                                  const std::string &address,
-                                                                 int port, bool non_blocking = true);
+                                                                 int port,
+                                                                 bool non_blocking = true,
+                                                                 int num_io_threads = 1,
+                                                                 int num_proc_threads = std::thread::hardware_concurrency());
 };
 
 }
