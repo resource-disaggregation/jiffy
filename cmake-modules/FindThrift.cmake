@@ -1,12 +1,10 @@
 # - Find Thrift (a cross platform RPC lib/tool)
 # This module defines
-#  THRIFT_VERSION_STRING, version string of ant if found
+#  THRIFT_VERSION_STRING, version string of Thrift if found
 #  THRIFT_LIBRARIES, libraries to link
 #  THRIFT_INCLUDE_DIR, where to find THRIFT headers
 #  THRIFT_COMPILER, thrift compiler executable
-#  THRIFT_FOUND, If false, do not try to use ant
-# Function
-#  thrift_gen_cpp(<path to thrift file> <output variable with file list>)
+#  THRIFT_FOUND, If false, do not try to use Thrift
 #
 # Initial work was done by Cloudera https://github.com/cloudera/Impala
 # 2014 - modified by snikulov
@@ -18,9 +16,10 @@ find_path(THRIFT_INCLUDE_DIR
         HINTS
         ${THRIFT_HOME}
         ENV THRIFT_HOME
-        /usr
+        /usr/local/Cellar
         /usr/local
         /opt/local
+        /usr
         PATH_SUFFIXES
         include
         )
@@ -32,6 +31,21 @@ find_library(THRIFT_LIBRARIES
         HINTS
         ${THRIFT_HOME}
         ENV THRIFT_HOME
+        /usr/local/Cellar
+        /usr/local
+        /opt/local
+        /usr
+        PATH_SUFFIXES
+        lib lib64
+        )
+
+find_library(THRIFTNB_LIBRARIES
+        NAMES
+        thriftnb libthriftnb
+        HINTS
+        ${THRIFT_HOME}
+        ENV THRIFT_HOME
+        /usr/local/Cellar
         /usr/local
         /opt/local
         /usr
@@ -45,6 +59,7 @@ find_program(THRIFT_COMPILER
         HINTS
         ${THRIFT_HOME}
         ENV THRIFT_HOME
+        /usr/local/Cellar
         /usr/local
         /opt/local
         /usr
@@ -61,4 +76,4 @@ endif ()
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(THRIFT DEFAULT_MSG THRIFT_LIBRARIES THRIFT_INCLUDE_DIR THRIFT_COMPILER)
-mark_as_advanced(THRIFT_LIBRARIES THRIFT_INCLUDE_DIR THRIFT_COMPILER THRIFT_VERSION_STRING)
+mark_as_advanced(THRIFT_LIBRARIES THRIFTNB_LIBRARIES THRIFT_INCLUDE_DIR THRIFT_COMPILER THRIFT_VERSION_STRING)

@@ -178,6 +178,10 @@ if (GENERATE_THRIFT)
   add_dependencies(elasticmem thriftgen_directory thriftgen_kv)
 endif ()
 
+if (NOT USE_SYSTEM_LIBEVENT)
+  add_dependencies(elasticmem libevent)
+endif ()
+
 if (NOT USE_SYSTEM_THRIFT)
   add_dependencies(elasticmem thrift)
 endif ()
@@ -190,7 +194,7 @@ if (NOT USE_SYSTEM_LIBCUCKOO)
   add_dependencies(elasticmem libcuckoo)
 endif ()
 
-target_link_libraries(elasticmem ${THRIFT_LIBRARIES} ${AWS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(elasticmem ${LIBEVENT_LIBRARIES} ${THRIFT_LIBRARIES} ${THRIFTNB_LIBRARIES} ${AWS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties(elasticmem PROPERTIES LINKER_LANGUAGE CXX)
 
 if (BUILD_TESTS)

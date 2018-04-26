@@ -52,6 +52,41 @@ else ()
   install(DIRECTORY ${AWS_INCLUDE_DIR}/aws DESTINATION include)
 endif ()
 
+if (USE_SYSTEM_LIBEVENT)
+  find_package(Libevent REQUIRED)
+else ()
+  set(LIBEVENT_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
+  set(LIBEVENT_C_FLAGS "${EXTERNAL_C_FLAGS}")
+  set(LIBEVENT_PREFIX "${PROJECT_BINARY_DIR}/external/libevent")
+  set(LIBEVENT_HOME "${LIBEVENT_PREFIX}")
+  set(LIBEVENT_INCLUDE_DIR "${LIBEVENT_PREFIX}/include")
+  set(LIBEVENT_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}event")
+  set(LIBEVENT_CORE_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}event_core")
+  set(LIBEVENT_EXTRA_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}event_extra")
+  set(LIBEVENT_LIBRARIES "${LIBEVENT_PREFIX}/lib/${LIBEVENT_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+          "${LIBEVENT_PREFIX}/lib/${LIBEVENT_CORE_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+          "${LIBEVENT_PREFIX}/lib/${LIBEVENT_EXTRA_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(LIBEVENT_CMAKE_ARGS "-Wno-dev"
+          "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+          "-DCMAKE_INSTALL_PREFIX=${LIBEVENT_PREFIX}"
+          "-DENABLE_TESTING=OFF"
+          "-DBUILD_SHARED_LIBS=OFF"
+          "-DEVENT__DISABLE_OPENSSL=ON")
+  ExternalProject_Add(libevent
+          PREFIX ${LIBEVENT_PREFIX}
+          URL https://github.com/nmathewson/Libevent/archive/release-2.1.8-stable.tar.gz
+          CMAKE_ARGS ${LIBEVENT_CMAKE_ARGS}
+          LOG_CONFIGURE ON
+          LOG_BUILD ON
+          LOG_INSTALL ON)
+  include_directories(SYSTEM ${LIBEVENT_INCLUDE_DIR})
+  message(STATUS "Libevent include dir: ${LIBEVENT_INCLUDE_DIR}")
+  message(STATUS "Libevent static libraries: ${LIBEVENT_LIBRARIES}")
+
+  install(FILES ${LIBEVENT_LIBRARIES} DESTINATION lib)
+  install(DIRECTORY ${LIBEVENT_INCLUDE_DIR} DESTINATION include)
+endif ()
+
 if (USE_SYSTEM_THRIFT)
   find_package(Thrift ${THRIFT_VERSION} REQUIRED)
 else ()
@@ -74,7 +109,7 @@ else ()
           "-DWITH_HASKELL=OFF"
           "-DWITH_ZLIB=OFF" # For now
           "-DWITH_OPENSSL=OFF" # For now
-          "-DWITH_LIBEVENT=OFF" # For now
+          "-DWITH_LIBEVENT=ON"
           "-DWITH_JAVA=OFF"
           "-DWITH_PYTHON=OFF"
           "-DWITH_CPP=ON"
@@ -87,6 +122,11 @@ else ()
     set(THRIFT_STATIC_LIB_NAME "${THRIFT_STATIC_LIB_NAME}d")
   endif ()
   set(THRIFT_LIBRARIES "${THRIFT_PREFIX}/lib/${THRIFT_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(THRIFTNB_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}thriftnb")
+  if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    set(THRIFTNB_STATIC_LIB_NAME "${THRIFTNB_STATIC_LIB_NAME}d")
+  endif ()
+  set(THRIFTNB_LIBRARIES "${THRIFT_PREFIX}/lib/${THRIFTNB_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
   if (GENERATE_THRIFT)
     set(THRIFT_COMPILER "${THRIFT_PREFIX}/bin/thrift")
   endif ()
@@ -100,6 +140,7 @@ else ()
   include_directories(SYSTEM ${THRIFT_INCLUDE_DIR})
   message(STATUS "Thrift include dir: ${THRIFT_INCLUDE_DIR}")
   message(STATUS "Thrift static libraries: ${THRIFT_LIBRARIES}")
+  message(STATUS "Thrift non-blocking libraries: ${THRIFTNB_LIBRARIES}")
 
   if (GENERATE_THRIFT)
     message(STATUS "Thrift compiler: ${THRIFT_COMPILER}")
@@ -162,7 +203,7 @@ if (NOT USE_SYSTEM_JEMALLOC)
           LOG_INSTALL ON)
   message(STATUS "Jemalloc library: ${JEMALLOC_LIBRARIES}")
   install(FILES ${JEMALLOC_LIBRARIES} DESTINATION lib)
-endif()
+endif ()
 
 # Catch2 Test framework
 if (BUILD_TESTS AND NOT USE_SYSTEM_CATCH)
