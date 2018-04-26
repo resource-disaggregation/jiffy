@@ -1,5 +1,6 @@
 #include "chain_server.h"
 #include "chain_request_handler_factory.h"
+#include "buffered_transport_factory.h"
 
 #include <thrift/transport/TBufferTransports.h>
 #include <thrift/transport/TNonblockingServerSocket.h>
@@ -39,7 +40,7 @@ std::shared_ptr<TServer> chain_server::create(std::vector<std::shared_ptr<chain_
     return server;
   } else {
     std::shared_ptr<TServerSocket> sock(new TServerSocket(address, port));
-    std::shared_ptr<TBufferedTransportFactory> transport_factory(new TBufferedTransportFactory());
+    std::shared_ptr<BufferedTransportFactory> transport_factory(new BufferedTransportFactory(1024 * 1024));
     std::shared_ptr<TServer> server(new TThreadedServer(proc_factory, sock, transport_factory, protocol_factory));
     return server;
   }
