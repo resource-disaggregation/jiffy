@@ -1,6 +1,9 @@
 #include "directory_tree.h"
 
 #include <iostream>
+#include <thrift/transport/TSocket.h>
+#include <thrift/transport/TTransport.h>
+#include <thrift/transport/TBufferTransports.h>
 #include "../../storage/chain_module.h"
 #include "../../utils/logger.h"
 #include "../../utils/retry_utils.h"
@@ -271,9 +274,11 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
     auto parsed = storage::block_name_parser::parse(block_name);
     try {
       utils::retry_utils::retry(3, [parsed]() {
-        storage::block_client c;
-        c.connect(parsed.host, parsed.service_port, parsed.id);
-        c.disconnect();
+        using namespace ::apache::thrift::transport;
+        TSocket mgmt_sock(parsed.host, parsed.management_port);
+        mgmt_sock.open();
+        LOG(log_level::info) << mgmt_sock.getPeerHost() << ":" << mgmt_sock.getPeerPort() << " is still live";
+        mgmt_sock.close();
         return true;
       });
       LOG(log_level::info) << "Block " << block_name << " is still live";
