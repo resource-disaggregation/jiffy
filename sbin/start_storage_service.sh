@@ -57,9 +57,28 @@ if [ "$CAPACITY_THRESHOLD_HI" = "" ]; then
   CAPACITY_THRESHOLD_HI="0.75"
 fi
 
+if [ "$NON_BLOCKING" = "" ]; then
+  NON_BLOCKING="false"
+fi
+
+if [ "$NON_BLOCKING" = "true" ]; then
+  NB_FLAG="--non-blocking"
+else
+  NB_FLAG=""
+fi
+
+if [ "$NUM_IO_THREADS" = "" ]; then
+  NUM_IO_THREADS="1"
+fi
+
+if [ "$NUM_PROC_THREADS" = "" ]; then
+  NUM_PROC_THREADS="HARDWARE_CONCURRENCY"
+fi
+
 ${sbin}/../build/storage/storaged --address ${STORAGE_ADDRESS} --service-port ${STORAGE_SERVICE_PORT} \
   --management-port ${MANAGEMENT_SERVICE_PORT} --notification-port ${NOTIFICATION_SERVICE_PORT} \
   --chain-port ${CHAIN_PORT} --dir-address ${DIRECTORY_ADDRESS} --dir-port ${DIRECTORY_SERVICE_PORT} \
   --block-port ${BLOCK_SERVICE_PORT} --num-blocks ${NUM_BLOCKS} --block-capacity ${BLOCK_CAPACITY} \
   --capacity-threshold-lo ${CAPACITY_THRESHOLD_LO} --capacity-threshold-hi ${CAPACITY_THRESHOLD_HI} \
+  ${NB_FLAG} --io-threads ${NUM_IO_THREADS} --proc-threads ${NUM_PROC_THREADS} \
   2>${LOG_PATH}/storage.stderr 1>${LOG_PATH}/storage.stdout &
