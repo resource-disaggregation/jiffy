@@ -10,6 +10,7 @@
 #include "../src/directory/block/block_allocator.h"
 #include "../src/storage/kv/kv_block.h"
 #include "../src/storage/notification/subscription_map.h"
+#include "../src/utils/logger.h"
 
 class dummy_storage_manager : public elasticmem::storage::storage_management_ops {
  public:
@@ -181,7 +182,7 @@ class dummy_block_allocator : public elasticmem::directory::block_allocator {
   }
 
   void free(const std::vector<std::string> &blocks) override {
-    if (num_alloc_ == 0) {
+    if (num_alloc_ == 0 && !blocks.empty()) {
       throw std::out_of_range("Cannot free since nothing is allocated");
     }
     num_free_ += blocks.size();
@@ -222,17 +223,18 @@ class test_utils {
   static void wait_till_server_ready(const std::string &host, int port) {
     bool check = true;
     while (check) {
+      using namespace apache::thrift::transport;
       try {
-        auto transport =
-            std::shared_ptr<apache::thrift::transport::TTransport>(new apache::thrift::transport::TBufferedTransport(
-                std::make_shared<apache::thrift::transport::TSocket>(host, port)));
+        auto transport = std::shared_ptr<TTransport>(new TFramedTransport(std::make_shared<TSocket>(host, port)));
         transport->open();
         transport->close();
         check = false;
-      } catch (apache::thrift::transport::TTransportException &e) {
+      } catch (TTransportException &e) {
         usleep(100000);
       }
     }
+    using namespace elasticmem::utils;
+    LOG(log_level::info) << "Server @ " << host << ":" << port << " is live";
   }
 
   static std::vector<std::string> init_block_names(size_t num_blocks,
