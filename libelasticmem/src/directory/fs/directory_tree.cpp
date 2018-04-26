@@ -494,12 +494,15 @@ void directory_tree::clear_storage(std::vector<std::string> &cleared_blocks, std
     auto s = file->dstatus();
     for (const auto &block: s.data_blocks()) {
       for (const auto &block_name: block.block_names) {
+        LOG(log_level::info) << "Clearing block " << block_name;
         storage_->reset(block_name);
+        LOG(log_level::info) << "Cleared block " << block_name;
         cleared_blocks.push_back(block_name);
       }
     }
   } else if (node->is_directory()) {
     auto dir = std::dynamic_pointer_cast<ds_dir_node>(node);
+    LOG(log_level::info) << "Clearing directory " << dir->name();
     for (const auto &entry: *dir) {
       clear_storage(cleared_blocks, entry.second);
     }
