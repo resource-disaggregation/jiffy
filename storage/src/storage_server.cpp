@@ -9,6 +9,7 @@
 #include <utils/cmd_parse.h>
 #include <utils/logger.h>
 #include <storage/service/chain_server.h>
+#include <storage/service/server_storage_tracker.h>
 
 using namespace ::elasticmem::directory;
 using namespace ::elasticmem::storage;
@@ -61,7 +62,7 @@ int main(int argc, char **argv) {
       "Host for directory service"));
   opts.add(cmd_option("dir-port", 'p', false).set_default("9090").set_description(
       "Port that directory service interface connects to"));
-  opts.add(cmd_option("block-port", 't', false).set_default("9092").set_description(
+  opts.add(cmd_option("block-port", 'B', false).set_default("9092").set_description(
       "Port that block advertisement interface connects to"));
   opts.add(cmd_option("chain-port", 'c', false).set_default("9096").set_description(
       "Port that block server listens on for chain requests"));
@@ -78,6 +79,8 @@ int main(int argc, char **argv) {
       "Number of IO threads. Only used for non-blocking thrift server"));
   opts.add(cmd_option("proc-threads", 'P', false).set_default("HARDWARE_CONCURRENCY").set_description(
       "Number of processing threads. Only used for non-blocking thrift server"));
+  opts.add(cmd_option("storage-trace-file", 't', false).set_required(false).set_description(
+      "Trace file for storage sizes"));
 
   cmd_parser parser(argc, argv, opts);
   if (parser.get_flag("help")) {
@@ -98,6 +101,7 @@ int main(int argc, char **argv) {
   bool non_blocking;
   int num_io_threads;
   int num_proc_threads;
+  std::string storage_trace;
   try {
     address = parser.get("address");
     dir_host = parser.get("dir-address");
@@ -118,6 +122,7 @@ int main(int argc, char **argv) {
     } else {
       num_proc_threads = parser.get_int("proc-threads");
     }
+    storage_trace = parser.get("storage-trace-file");
   } catch (cmd_parse_exception &ex) {
     std::cerr << "Could not parse command line args: " << ex.what() << std::endl;
     std::cerr << parser.help_msg() << std::endl;
@@ -223,6 +228,11 @@ int main(int argc, char **argv) {
   });
 
   LOG(log_level::info) << "Chain server listening on " << address << ":" << chain_port;
+
+  server_storage_tracker tracker(blocks, 1000, storage_trace);
+  if (!storage_trace.empty()) {
+    tracker.start();
+  }
 
   std::unique_lock<std::mutex> failure_condition_lock{failure_mtx};
   failure_condition.wait(failure_condition_lock, [&failing_thread] {

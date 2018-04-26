@@ -75,10 +75,14 @@ if [ "$NUM_PROC_THREADS" = "" ]; then
   NUM_PROC_THREADS="HARDWARE_CONCURRENCY"
 fi
 
+if [ "$STORAGE_TRACE_FILE" = "" ]; then
+  STORAGE_TRACE_FILE="$sbin/../log/storage.trace"
+fi
+
 ${sbin}/../build/storage/storaged --address ${STORAGE_ADDRESS} --service-port ${STORAGE_SERVICE_PORT} \
   --management-port ${MANAGEMENT_SERVICE_PORT} --notification-port ${NOTIFICATION_SERVICE_PORT} \
   --chain-port ${CHAIN_PORT} --dir-address ${DIRECTORY_ADDRESS} --dir-port ${DIRECTORY_SERVICE_PORT} \
   --block-port ${BLOCK_SERVICE_PORT} --num-blocks ${NUM_BLOCKS} --block-capacity ${BLOCK_CAPACITY} \
-  --capacity-threshold-lo ${CAPACITY_THRESHOLD_LO} --capacity-threshold-hi ${CAPACITY_THRESHOLD_HI} \
-  ${NB_FLAG} --io-threads ${NUM_IO_THREADS} --proc-threads ${NUM_PROC_THREADS} \
+  --capacity-threshold-lo ${CAPACITY_THRESHOLD_LO} --capacity-threshold-hi ${CAPACITY_THRESHOLD_HI} ${NB_FLAG} \
+  --io-threads ${NUM_IO_THREADS} --proc-threads ${NUM_PROC_THREADS} --storage-trace-file ${STORAGE_TRACE_FILE} \
   2>${LOG_PATH}/storage.stderr 1>${LOG_PATH}/storage.stdout &
