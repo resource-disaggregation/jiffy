@@ -6,6 +6,7 @@
 #include "../src/utils/signal_handling.h"
 #include "../src/utils/logger.h"
 #include "../src/utils/cmd_parse.h"
+#include "../src/storage/kv/kv_block.h"
 
 using namespace elasticmem::storage;
 using namespace elasticmem::utils;
@@ -28,13 +29,13 @@ static void load_workload(const std::string &workload_path,
                                     std::istream_iterator<std::string>{}};
     int32_t cmd_id = -1;
     if (tokens[0] == "get") {
-      cmd_id = 0;
+      cmd_id = kv_op_id::get;
     } else if (tokens[0] == "put") {
-      cmd_id = 1;
+      cmd_id = kv_op_id::put;
     } else if (tokens[0] == "remove") {
-      cmd_id = 2;
+      cmd_id = kv_op_id::remove;
     } else if (tokens[0] == "update") {
-      cmd_id = 3;
+      cmd_id = kv_op_id::update;
     } else if (tokens[0] == "wait") {
       continue;
     } else {
@@ -60,21 +61,13 @@ class throughput_benchmark {
   void run() {
     worker_thread_ = std::thread([&]() {
       std::size_t i = 0;
-      auto *buf = new std::future<std::string>[max_async_];
       auto begin = time_utils::now_us();
       while (i < num_ops_) {
-        std::size_t async_limit = std::min(i + max_async_, num_ops_);
-        for (std::size_t j = i; j < async_limit; ++j) {
-          buf[j - i] = client_.run_command(workload_[j].first, workload_[j].second);
-        }
-        for (std::size_t j = i; j < async_limit; ++j) {
-          buf[j - i].wait();
-        }
-        i = async_limit;
+        client_.run_command(workload_[i].first, workload_[i].second);
+        i++;
       }
       auto tot_time = time_utils::now_us() - begin;
       fprintf(stdout, "%lf\n", static_cast<double>(num_ops_) * 1e6 / static_cast<double>(tot_time));
-      delete[] buf;
     });
   }
 
@@ -107,7 +100,7 @@ class latency_benchmark {
     time_utils::now_us();
     while (i < num_ops_) {
       auto t0 = time_utils::now_us();
-      client_.run_command(workload_[i].first, workload_[i].second).get();
+      client_.run_command(workload_[i].first, workload_[i].second);
       auto t = time_utils::now_us() - t0;
       fprintf(stdout, "%zu %" PRId64 "\n", i, t);
       ++i;
