@@ -29,7 +29,7 @@ class BlockClientCache:
         if (host, port) in self.cache:
             entry = self.cache[(host, port)]
             return entry.transport, entry.protocol, entry.client
-        transport = TTransport.TBufferedTransport(TSocket.TSocket(host, port))
+        transport = TTransport.TFramedTransport(TSocket.TSocket(host, port))
         protocol = TBinaryProtocolAccelerated(transport)
         client = block_request_service.Client(protocol)
         ex = None
