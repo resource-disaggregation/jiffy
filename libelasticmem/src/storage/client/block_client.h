@@ -1,13 +1,13 @@
 #ifndef ELASTICMEM_KV_CLIENT_H
 #define ELASTICMEM_KV_CLIENT_H
 
-#include <thrift/transport/TSocket.h>
-#include "block_request_service.h"
-#include "block_response_service.h"
-#include <libcuckoo/cuckoohash_map.hh>
-#include <future>
-#include <iostream>
-#include <utility>
+#include "../../../../../../../../../../usr/local/include/thrift/transport/TSocket.h"
+#include "../service/block_request_service.h"
+#include "../service/block_response_service.h"
+#include "../../../../cmake-build-debug/external/libcuckoo/include/libcuckoo/cuckoohash_map.hh"
+#include "../../../../../../../../../../usr/local/Cellar/gcc/7.3.0_1/include/c++/7.3.0/future"
+#include "../../../../../../../../../../usr/local/Cellar/gcc/7.3.0_1/include/c++/7.3.0/iostream"
+#include "../../../../../../../../../../usr/local/Cellar/gcc/7.3.0_1/include/c++/7.3.0/utility"
 namespace elasticmem {
 namespace storage {
 

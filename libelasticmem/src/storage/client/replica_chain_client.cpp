@@ -1,11 +1,11 @@
-#include "block_chain_client.h"
+#include "replica_chain_client.h"
 #include "../manager/detail/block_name_parser.h"
 #include "../kv/kv_block.h"
 
 namespace elasticmem {
 namespace storage {
 
-block_chain_client::block_chain_client(const std::vector<std::string> &chain) {
+replica_chain_client::replica_chain_client(const std::vector<std::string> &chain) {
   seq_.client_id = -1;
   seq_.client_seq_no = 0;
   connect(chain);
@@ -14,20 +14,20 @@ block_chain_client::block_chain_client(const std::vector<std::string> &chain) {
   }
 }
 
-block_chain_client::~block_chain_client() {
+replica_chain_client::~replica_chain_client() {
   disconnect();
 }
 
-void block_chain_client::disconnect() {
+void replica_chain_client::disconnect() {
   head_.disconnect();
   tail_.disconnect();
 }
 
-const std::vector<std::string> &block_chain_client::chain() const {
+const std::vector<std::string> &replica_chain_client::chain() const {
   return chain_;
 }
 
-void block_chain_client::connect(const std::vector<std::string> &chain) {
+void replica_chain_client::connect(const std::vector<std::string> &chain) {
   chain_ = chain;
   auto h = block_name_parser::parse(chain_.front());
   head_.connect(h.host, h.service_port, h.id);
@@ -41,27 +41,27 @@ void block_chain_client::connect(const std::vector<std::string> &chain) {
   response_reader_ = tail_.get_command_response_reader(seq_.client_id);
 }
 
-std::string block_chain_client::get(const std::string &key) {
+std::string replica_chain_client::get(const std::string &key) {
   return run_command(kv_op_id::get, {key}).front();
 }
 
-std::string block_chain_client::num_keys() {
+std::string replica_chain_client::num_keys() {
   return run_command(kv_op_id::num_keys, {}).front();
 }
 
-std::string block_chain_client::put(const std::string &key, const std::string &value) {
+std::string replica_chain_client::put(const std::string &key, const std::string &value) {
   return run_command(kv_op_id::put, {key, value}).front();
 }
 
-std::string block_chain_client::remove(const std::string &key) {
+std::string replica_chain_client::remove(const std::string &key) {
   return run_command(kv_op_id::remove, {key}).front();
 }
 
-std::string block_chain_client::update(const std::string &key, const std::string &value) {
+std::string replica_chain_client::update(const std::string &key, const std::string &value) {
   return run_command(kv_op_id::update, {key, value}).front();
 }
 
-std::vector<std::string> block_chain_client::run_command(int32_t cmd_id, const std::vector<std::string> &args) {
+std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const std::vector<std::string> &args) {
   int64_t op_seq = seq_.client_seq_no;
   cmd_client_[cmd_id]->command_request(seq_, cmd_id, args);
   ++(seq_.client_seq_no);

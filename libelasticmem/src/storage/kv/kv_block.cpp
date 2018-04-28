@@ -1,6 +1,6 @@
 #include "kv_block.h"
 #include "hash_slot.h"
-#include "../service/block_chain_client.h"
+#include "../client/replica_chain_client.h"
 #include "../../utils/logger.h"
 #include "../../directory/fs/directory_client.h"
 
@@ -325,7 +325,7 @@ void kv_block::export_slots() {
   export_data.emplace_back("!redirected");
 
   // Send the data
-  block_chain_client dst(export_target());
+  replica_chain_client dst(export_target());
   dst.run_command(kv_op_id::zput, export_data);
   dst.disconnect();
 
@@ -343,7 +343,7 @@ void kv_block::export_slots() {
   }
   assert(remove_keys.size() == nexport_keys);
 
-  block_chain_client src(chain());
+  replica_chain_client src(chain());
   src.run_command(kv_op_id::zremove, remove_keys);
   src.disconnect();
 

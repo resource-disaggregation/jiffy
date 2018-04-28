@@ -71,14 +71,14 @@ add_library(elasticmem STATIC
         src/storage/block.h
         src/storage/chain_module.h
         src/storage/chain_module.cpp
-        src/storage/service/block_chain_client.cpp
-        src/storage/service/block_chain_client.h
+        src/storage/client/replica_chain_client.cpp
+        src/storage/client/replica_chain_client.h
         src/storage/service/block_response_client.cpp
         src/storage/service/block_response_client.h
         src/storage/service/block_server.cpp
         src/storage/service/block_server.h
-        src/storage/service/block_client.cpp
-        src/storage/service/block_client.h
+        src/storage/client/block_client.cpp
+        src/storage/client/block_client.h
         src/storage/service/block_request_handler.cpp
         src/storage/service/block_request_handler.h
         src/storage/service/chain_request_handler_factory.cpp

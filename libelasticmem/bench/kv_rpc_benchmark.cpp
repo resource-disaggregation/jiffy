@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "../src/storage/service/block_chain_client.h"
+#include "../src/storage/client/replica_chain_client.h"
 #include "../src/utils/time_utils.h"
 #include "../src/utils/signal_handling.h"
 #include "../src/utils/logger.h"
@@ -83,7 +83,7 @@ class throughput_benchmark {
   std::size_t num_ops_;
   std::size_t max_async_;
   std::vector<std::pair<int32_t, std::vector<std::string>>> workload_;
-  block_chain_client client_;
+  replica_chain_client client_;
 };
 
 class latency_benchmark {
@@ -111,7 +111,7 @@ class latency_benchmark {
  private:
   std::size_t num_ops_;
   std::vector<std::pair<int32_t, std::vector<std::string>>> workload_;
-  block_chain_client client_;
+  replica_chain_client client_;
 };
 
 int main(int argc, char **argv) {

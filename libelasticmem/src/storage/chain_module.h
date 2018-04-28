@@ -9,7 +9,7 @@
 #include <vector>
 #include <libcuckoo/cuckoohash_map.hh>
 #include <shared_mutex>
-#include "service/block_client.h"
+#include "client/block_client.h"
 #include "manager/detail/block_name_parser.h"
 #include "block.h"
 #include "service/chain_request_service.h"

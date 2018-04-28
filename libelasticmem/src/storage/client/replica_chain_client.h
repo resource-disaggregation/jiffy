@@ -1,18 +1,18 @@
 #ifndef ELASTICMEM_BLOCK_CHAIN_CLIENT_H
 #define ELASTICMEM_BLOCK_CHAIN_CLIENT_H
 
-#include <map>
+#include "../../../../../../../../../../usr/local/Cellar/gcc/7.3.0_1/include/c++/7.3.0/map"
 #include "block_client.h"
 
 namespace elasticmem {
 namespace storage {
 
-class block_chain_client {
+class replica_chain_client {
  public:
   typedef block_client *client_ref;
 
-  explicit block_chain_client(const std::vector<std::string> &chain);
-  ~block_chain_client();
+  explicit replica_chain_client(const std::vector<std::string> &chain);
+  ~replica_chain_client();
   void disconnect();
 
   const std::vector<std::string> &chain() const;

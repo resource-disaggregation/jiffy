@@ -3,7 +3,7 @@
 #include "../src/storage/kv/kv_block.h"
 #include "../src/storage/service/block_server.h"
 #include "test_utils.h"
-#include "../src/storage/service/block_chain_client.h"
+#include "../src/storage/client/replica_chain_client.h"
 
 using namespace ::elasticmem::storage;
 using namespace ::apache::thrift::transport;
@@ -18,7 +18,7 @@ TEST_CASE("rpc_put_get_test", "[put][get]") {
   std::thread serve_thread([&server] { server->serve(); });
   test_utils::wait_till_server_ready(HOST, PORT);
 
-  block_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
+  replica_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -42,7 +42,7 @@ TEST_CASE("rpc_put_update_get_test", "[put][update][get]") {
   std::thread serve_thread([&server] { server->serve(); });
   test_utils::wait_till_server_ready(HOST, PORT);
 
-  block_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
+  replica_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -72,7 +72,7 @@ TEST_CASE("rpc_put_remove_get_test", "[put][remove][get]") {
   std::thread serve_thread([&server] { server->serve(); });
   test_utils::wait_till_server_ready(HOST, PORT);
 
-  block_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
+  replica_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -99,7 +99,7 @@ TEST_CASE("rpc_storage_size_test", "[put][num_keys][storage_size][reset]") {
   std::thread serve_thread([&server] { server->serve(); });
   test_utils::wait_till_server_ready(HOST, PORT);
 
-  block_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
+  replica_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
   REQUIRE(client.num_keys() == std::to_string(0));
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");

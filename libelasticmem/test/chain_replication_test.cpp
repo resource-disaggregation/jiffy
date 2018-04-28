@@ -5,7 +5,7 @@
 #include "../src/storage/manager/storage_manager.h"
 #include "../src/directory/fs/directory_server.h"
 #include "../src/storage/service/chain_server.h"
-#include "../src/storage/service/block_chain_client.h"
+#include "../src/storage/client/replica_chain_client.h"
 
 #define HOST "127.0.0.1"
 #define DIRECTORY_SERVICE_PORT 9090
@@ -58,7 +58,7 @@ TEST_CASE("kv_no_failure_test", "[put][get]") {
   t->create("/file", "/tmp", 1, 3);
   auto chain = t->dstatus("/file").data_blocks()[0];
 
-  block_chain_client client(chain.block_names);
+  replica_chain_client client(chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -149,7 +149,7 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
   auto chain = t->dstatus("/file").data_blocks()[0];
   auto fixed_chain = t->resolve_failures("/file", chain);
 
-  block_chain_client client(fixed_chain.block_names);
+  replica_chain_client client(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -233,7 +233,7 @@ TEST_CASE("kv_mid_failure_test", "[put][get]") {
   auto chain = t->dstatus("/file").data_blocks()[0];
   auto fixed_chain = t->resolve_failures("/file", chain);
 
-  block_chain_client client(fixed_chain.block_names);
+  replica_chain_client client(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -318,7 +318,7 @@ TEST_CASE("kv_tail_failure_test", "[put][get]") {
   auto chain = t->dstatus("/file").data_blocks()[0];
   auto fixed_chain = t->resolve_failures("/file", chain);
 
-  block_chain_client client(fixed_chain.block_names);
+  replica_chain_client client(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -397,7 +397,7 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
   t->create("/file", "/tmp", 1, 2);
 
   auto chain = t->dstatus("/file").data_blocks()[0].block_names;
-  block_chain_client client(chain);
+  replica_chain_client client(chain);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -406,7 +406,7 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
 
   auto fixed_chain = t->add_replica_to_chain("/file", t->dstatus("/file").data_blocks()[0]);
 
-  block_chain_client client2(fixed_chain.block_names);
+  replica_chain_client client2(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client2.get(std::to_string(i)) == std::to_string(i));
   }
