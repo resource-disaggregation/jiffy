@@ -7,6 +7,7 @@
 #include "../src/utils/logger.h"
 #include "../src/utils/cmd_parse.h"
 #include "../src/storage/kv/kv_block.h"
+#include "../src/directory/fs/directory_client.h"
 
 using namespace elasticmem::storage;
 using namespace elasticmem::utils;
@@ -119,8 +120,9 @@ int main(int argc, char **argv) {
   GlobalOutput.setOutputFunction(log_utils::log_thrift_msg);
 
   cmd_options opts;
-  opts.add(cmd_option("chain", 'c', false).set_default("127.0.0.1:9093:9094:9095:9096:0").set_description(
-      "Comma separated block chain to benchmark"));
+  opts.add(cmd_option("file-name", 'f', false).set_default("/benchmark").set_description("File to benchmark"));
+  opts.add(cmd_option("dir-host", 'h', false).set_default("127.0.0.1").set_description("Directory service host"));
+  opts.add(cmd_option("dir-port", 'p', false).set_default("/benchmark").set_description("Directory service port"));
   opts.add(cmd_option("benchmark-type", 'b', false).set_default("throughput").set_description("Benchmark type"));
   opts.add(cmd_option("num-threads", 't', false).set_default("1").set_description("# of benchmark threads to run"));
   opts.add(cmd_option("num-ops", 'n', false).set_default("100000").set_description("# of operations to run"));
@@ -137,7 +139,9 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  std::string chain_str;
+  std::string file;
+  std::string host;
+  int port;
   std::string benchmark_type;
   std::size_t num_threads;
   std::size_t num_ops;
@@ -146,7 +150,9 @@ int main(int argc, char **argv) {
   std::size_t workload_offset;
 
   try {
-    chain_str = parser.get("chain");
+    file = parser.get("file-name");
+    host = parser.get("dir-host");
+    port = parser.get_int("dir-port");
     benchmark_type = parser.get("benchmark-type");
     num_threads = static_cast<std::size_t>(parser.get_long("num-threads"));
     num_ops = static_cast<std::size_t>(parser.get_long("num-ops"));
@@ -159,14 +165,8 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  std::vector<std::string> chain;
-  std::stringstream ss(chain_str);
-  while (ss.good()) {
-    std::string block;
-    std::getline(ss, block, ',');
-    std::cerr << "Block: " << block << std::endl;
-    chain.push_back(block);
-  }
+  elasticmem::directory::directory_client client(host, port);
+  auto dstatus = client.open_or_create(file, "/tmp", 1, 1);
 
   if (benchmark_type == "throughput") {
     std::vector<throughput_benchmark *> benchmark;
@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
       auto thread_ops = num_ops / num_threads;
       benchmark.push_back(new throughput_benchmark(workload_path,
                                                    workload_offset + i * thread_ops,
-                                                   chain,
+                                                   dstatus.data_blocks().front().block_names,
                                                    thread_ops,
                                                    max_async));
     }
@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
       delete benchmark[i];
     }
   } else if (benchmark_type == "latency") {
-    latency_benchmark benchmark(workload_path, workload_offset, chain, num_ops);
+    latency_benchmark benchmark(workload_path, workload_offset, dstatus.data_blocks().front().block_names, num_ops);
     benchmark.run();
   }
 }

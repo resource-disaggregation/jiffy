@@ -21,5 +21,5 @@ message(STATUS "  Use system libcuckoo library:           ${USE_SYSTEM_LIBCUCKOO
 message(STATUS "  Use system AWS SDK:                     ${USE_SYSTEM_AWS_SDK}")
 message(STATUS "  Use system Jemalloc:                    ${USE_SYSTEM_JEMALLOC}")
 message(STATUS "  Generate thrift files:                  ${GENERATE_THRIFT}")
-message(STATUS "  Build benchmarks:                       ${BUILD_TESTS}")
+message(STATUS "  Build benchmarks:                       ${BUILD_BENCHMARKS}")
 message(STATUS "----------------------------------------------------------")
