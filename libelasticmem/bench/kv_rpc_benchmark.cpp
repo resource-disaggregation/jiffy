@@ -121,8 +121,8 @@ int main(int argc, char **argv) {
 
   cmd_options opts;
   opts.add(cmd_option("file-name", 'f', false).set_default("/benchmark").set_description("File to benchmark"));
-  opts.add(cmd_option("dir-host", 'h', false).set_default("127.0.0.1").set_description("Directory service host"));
-  opts.add(cmd_option("dir-port", 'p', false).set_default("/benchmark").set_description("Directory service port"));
+  opts.add(cmd_option("dir-host", 'H', false).set_default("127.0.0.1").set_description("Directory service host"));
+  opts.add(cmd_option("dir-port", 'P', false).set_default("9090").set_description("Directory service port"));
   opts.add(cmd_option("benchmark-type", 'b', false).set_default("throughput").set_description("Benchmark type"));
   opts.add(cmd_option("num-threads", 't', false).set_default("1").set_description("# of benchmark threads to run"));
   opts.add(cmd_option("num-ops", 'n', false).set_default("100000").set_description("# of operations to run"));
