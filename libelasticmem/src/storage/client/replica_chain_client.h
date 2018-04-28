@@ -1,7 +1,7 @@
 #ifndef ELASTICMEM_BLOCK_CHAIN_CLIENT_H
 #define ELASTICMEM_BLOCK_CHAIN_CLIENT_H
 
-#include "../../../../../../../../../../usr/local/Cellar/gcc/7.3.0_1/include/c++/7.3.0/map"
+#include <map>
 #include "block_client.h"
 
 namespace elasticmem {

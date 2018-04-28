@@ -1,13 +1,11 @@
 #ifndef ELASTICMEM_KV_CLIENT_H
 #define ELASTICMEM_KV_CLIENT_H
 
-#include "../../../../../../../../../../usr/local/include/thrift/transport/TSocket.h"
+#include <thrift/transport/TSocket.h>
+#include <libcuckoo/cuckoohash_map.hh>
 #include "../service/block_request_service.h"
 #include "../service/block_response_service.h"
-#include "../../../../cmake-build-debug/external/libcuckoo/include/libcuckoo/cuckoohash_map.hh"
-#include "../../../../../../../../../../usr/local/Cellar/gcc/7.3.0_1/include/c++/7.3.0/future"
-#include "../../../../../../../../../../usr/local/Cellar/gcc/7.3.0_1/include/c++/7.3.0/iostream"
-#include "../../../../../../../../../../usr/local/Cellar/gcc/7.3.0_1/include/c++/7.3.0/utility"
+
 namespace elasticmem {
 namespace storage {
 
@@ -72,8 +70,6 @@ class block_client {
   std::shared_ptr<apache::thrift::transport::TTransport> transport_{};
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_{};
   std::shared_ptr<thrift_client> client_{};
-  std::string host_;
-  int port_{-1};
   int block_id_{-1};
 };
 

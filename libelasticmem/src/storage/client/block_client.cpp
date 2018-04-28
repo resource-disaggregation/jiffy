@@ -21,8 +21,6 @@ int64_t block_client::get_client_id() {
 }
 
 void block_client::connect(const std::string &host, int port, int block_id) {
-  host_ = host;
-  port_ = port;
   block_id_ = block_id;
   socket_ = std::make_shared<TSocket>(host, port);
   transport_ = std::shared_ptr<TTransport>(new TBufferedTransport(socket_));
