@@ -55,11 +55,17 @@ class notification_listener {
   }
 
   void run() {
-    std::size_t i = 0;
-    while (i < num_ops_) {
-      sub_.get_message();
-      timestamps_[i] = time_utils::now_us();
-    }
+    worker_ = std::thread([&] {
+      std::size_t i = 0;
+      while (i < num_ops_) {
+        sub_.get_message();
+        timestamps_[i] = time_utils::now_us();
+      }
+    });
+  }
+
+  void wait() {
+    worker_.join();
   }
 
   const std::vector<std::uint64_t> &timestamps() const {
@@ -67,6 +73,7 @@ class notification_listener {
   }
 
  private:
+  std::thread worker_;
   subscriber sub_;
   std::size_t num_ops_;
   std::vector<std::uint64_t> timestamps_;
@@ -145,6 +152,7 @@ int main(int argc, char **argv) {
   std::cerr << "Finished" << std::endl;
   for (std::size_t i = 0; i < num_threads; ++i) {
     auto l = listeners[i];
+    l->wait();
     auto out_file = "listen_latency_" + std::to_string(i) + "_of_" + std::to_string(num_threads);
     benchmark_utils::vector_diff(l->timestamps(), wrunner.timestamps(), out_file);
     delete l;
