@@ -5,13 +5,13 @@
 #include <unordered_map>
 #include <mutex>
 #include "subscription_service.h"
-
+#include "../../utils/ctpl.h"
 namespace elasticmem {
 namespace storage {
 
 class subscription_map {
  public:
-  subscription_map() = default;
+  subscription_map();
 
   void add_subscriptions(const std::vector<std::string> &ops, std::shared_ptr<subscription_serviceClient> client);
 
@@ -24,6 +24,7 @@ class subscription_map {
   void clear();
 
  private:
+  ctpl::thread_pool pool_;
   std::mutex mtx_{};
   std::unordered_map<std::string, std::set<std::shared_ptr<subscription_serviceClient>>> subs_{};
 };
