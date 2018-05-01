@@ -84,8 +84,6 @@ int main(int argc, char **argv) {
   opts.add(cmd_option("chain-length", 'c', false).set_default("1").set_description("Chain length"));
   opts.add(cmd_option("num-threads", 't', false).set_default("1").set_description("# of benchmark threads to run"));
   opts.add(cmd_option("num-ops", 'n', false).set_default("100000").set_description("# of operations to run"));
-  opts.add(cmd_option("max-async", 'm', false).set_default("1000").set_description(
-      "Maximum number of unacknowledged requests in flight"));
   opts.add(cmd_option("workload-path", 'w', false).set_default("data").set_description(
       "Path to read the workload from"));
   opts.add(cmd_option("workload-offset", 'o', false).set_default("0").set_description(

@@ -225,6 +225,7 @@ if (BUILD_BENCHMARKS)
   add_executable(kv_rpc_benchmark bench/kv_rpc_benchmark.cpp bench/benchmark_utils.h)
   add_executable(kv_notification_benchmark bench/kv_notification_benchmark.cpp bench/benchmark_utils.h)
   target_link_libraries(kv_rpc_benchmark elasticmem)
+  target_link_libraries(kv_notification_benchmark elasticmem)
 endif ()
 
 install(DIRECTORY src/
