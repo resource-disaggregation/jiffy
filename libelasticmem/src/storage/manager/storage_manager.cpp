@@ -16,16 +16,10 @@ void storage_manager::setup_block(const std::string &block_name,
                                   const std::vector<std::string> &chain,
                                   int32_t role,
                                   const std::string &next_block_name) {
-  LOG(log_level::info) << "Setting up block " << block_name << " with path=" << path << ", slot_range=(" << slot_begin
-                       << ", " << slot_end << "), role=" << role << ", next_block=" << next_block_name;
   auto bid = block_name_parser::parse(block_name);
-  try {
-    storage_management_client client(bid.host, bid.management_port);
-    client.setup_block(bid.id, path, slot_begin, slot_end, chain, role, next_block_name);
-  } catch (std::exception& e) {
-    LOG(log_level::error) << "Error setting up block on " << bid.host << ":" << bid.management_port;
-    throw e;
-  }
+  storage_management_client client(bid.host, bid.management_port);
+  client.setup_block(bid.id, path, slot_begin, slot_end, chain, role, next_block_name);
+
 }
 
 void storage_manager::set_exporting(const std::string &block_name,
