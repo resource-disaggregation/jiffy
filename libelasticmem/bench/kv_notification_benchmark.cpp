@@ -100,7 +100,6 @@ int main(int argc, char **argv) {
   int port;
   std::size_t num_threads;
   std::size_t num_ops;
-  std::size_t max_async;
   std::string workload_path;
   std::size_t workload_offset;
   std::size_t chain_length;
@@ -112,7 +111,6 @@ int main(int argc, char **argv) {
     chain_length = static_cast<std::size_t>(parser.get_long("chain-length"));
     num_threads = static_cast<std::size_t>(parser.get_long("num-threads"));
     num_ops = static_cast<std::size_t>(parser.get_long("num-ops"));
-    max_async = static_cast<std::size_t>(parser.get_long("max-async"));
     workload_path = parser.get("workload-path");
     workload_offset = static_cast<std::size_t>(parser.get_long("workload-offset"));
   } catch (cmd_parse_exception &ex) {
