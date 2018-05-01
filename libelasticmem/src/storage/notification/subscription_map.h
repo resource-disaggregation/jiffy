@@ -24,7 +24,6 @@ class subscription_map {
   void clear();
 
  private:
-  ctpl::thread_pool pool_;
   std::mutex mtx_{};
   std::unordered_map<std::string, std::set<std::shared_ptr<subscription_serviceClient>>> subs_{};
 };
