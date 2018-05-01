@@ -59,7 +59,7 @@ class notification_listener {
       std::size_t i = 0;
       while (i < num_ops_) {
         sub_.get_message();
-        timestamps_[i] = time_utils::now_us();
+        timestamps_[i++] = time_utils::now_us();
       }
     });
   }
