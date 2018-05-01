@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
   }
 
   elasticmem::directory::directory_client client(host, port);
-  auto dstatus = client.open_or_create(file, "/tmp", 1, chain_length);
+  auto dstatus = client.create(file, "/tmp", 1, chain_length);
   auto chain = dstatus.data_blocks().front();
   std::cerr << "Chain: " << chain.to_string() << std::endl;
   if (benchmark_type == "throughput") {
