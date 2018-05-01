@@ -9,76 +9,67 @@
 #include "../src/storage/kv/kv_block.h"
 #include "../src/directory/fs/directory_client.h"
 #include "benchmark_utils.h"
+#include "../src/storage/notification/subscriber.h"
 
 using namespace elasticmem::storage;
 using namespace elasticmem::utils;
 using namespace elasticmem::benchmark;
 using namespace ::apache::thrift;
 
-class throughput_benchmark {
+class workload_runner {
  public:
-  throughput_benchmark(const std::string &workload_path,
-                       std::size_t workload_offset,
-                       const std::vector<std::string> &chain,
-                       std::size_t num_ops,
-                       std::size_t max_async)
-      : num_ops_(num_ops), max_async_(max_async), client_(chain) {
+  workload_runner(const std::string &workload_path,
+                  std::size_t workload_offset,
+                  const std::vector<std::string> &chain,
+                  std::size_t num_ops) : num_ops_(num_ops), client_(chain) {
     benchmark_utils::load_workload(workload_path, workload_offset, num_ops, workload_);
-  }
-
-  void run() {
-    worker_thread_ = std::thread([&]() {
-      std::size_t i = 0;
-      auto begin = time_utils::now_us();
-      while (i < num_ops_) {
-        client_.run_command(workload_[i].first, workload_[i].second);
-        i++;
-      }
-      auto tot_time = time_utils::now_us() - begin;
-      fprintf(stdout, "%lf\n", static_cast<double>(num_ops_) * 1e6 / static_cast<double>(tot_time));
-    });
-  }
-
-  void wait() {
-    if (worker_thread_.joinable()) {
-      worker_thread_.join();
-    }
-  }
-
- private:
-  std::thread worker_thread_;
-  std::size_t num_ops_;
-  std::size_t max_async_;
-  std::vector<std::pair<int32_t, std::vector<std::string>>> workload_;
-  replica_chain_client client_;
-};
-
-class latency_benchmark {
- public:
-  latency_benchmark(const std::string &workload_path,
-                    std::size_t workload_offset,
-                    const std::vector<std::string> &chain,
-                    std::size_t num_ops)
-      : num_ops_(num_ops), client_(chain) {
-    benchmark_utils::load_workload(workload_path, workload_offset, num_ops, workload_);
+    timestamps_.resize(workload_.size());
   }
 
   void run() {
     std::size_t i = 0;
-    time_utils::now_us();
     while (i < num_ops_) {
-      auto t0 = time_utils::now_us();
+      timestamps_[i] = time_utils::now_us();
       client_.run_command(workload_[i].first, workload_[i].second);
-      auto t = time_utils::now_us() - t0;
-      fprintf(stdout, "%zu %" PRId64 "\n", i, t);
       ++i;
     }
   }
 
+  const std::vector<std::uint64_t> &timestamps() const {
+    return timestamps_;
+  }
+
  private:
+  std::vector<std::uint64_t> timestamps_;
   std::size_t num_ops_;
   std::vector<std::pair<int32_t, std::vector<std::string>>> workload_;
   replica_chain_client client_;
+};
+
+class notification_listener {
+ public:
+  notification_listener(const std::string &host, int port, int block_id, std::size_t num_ops) : sub_(host, port),
+                                                                                                num_ops_(num_ops) {
+    sub_.subscribe(block_id, {kv_op_id::put});
+    timestamps_.resize(num_ops_);
+  }
+
+  void run() {
+    std::size_t i = 0;
+    while (i < num_ops_) {
+      sub_.get_message();
+      timestamps_[i] = time_utils::now_us();
+    }
+  }
+
+  const std::vector<std::uint64_t> &timestamps() const {
+    return timestamps_;
+  }
+
+ private:
+  subscriber sub_;
+  std::size_t num_ops_;
+  std::vector<std::uint64_t> timestamps_;
 };
 
 int main(int argc, char **argv) {
@@ -90,7 +81,6 @@ int main(int argc, char **argv) {
   opts.add(cmd_option("file-name", 'f', false).set_default("/benchmark").set_description("File to benchmark"));
   opts.add(cmd_option("dir-host", 'H', false).set_default("127.0.0.1").set_description("Directory service host"));
   opts.add(cmd_option("dir-port", 'P', false).set_default("9090").set_description("Directory service port"));
-  opts.add(cmd_option("benchmark-type", 'b', false).set_default("throughput").set_description("Benchmark type"));
   opts.add(cmd_option("chain-length", 'c', false).set_default("1").set_description("Chain length"));
   opts.add(cmd_option("num-threads", 't', false).set_default("1").set_description("# of benchmark threads to run"));
   opts.add(cmd_option("num-ops", 'n', false).set_default("100000").set_description("# of operations to run"));
@@ -110,7 +100,6 @@ int main(int argc, char **argv) {
   std::string file;
   std::string host;
   int port;
-  std::string benchmark_type;
   std::size_t num_threads;
   std::size_t num_ops;
   std::size_t max_async;
@@ -122,7 +111,6 @@ int main(int argc, char **argv) {
     file = parser.get("file-name");
     host = parser.get("dir-host");
     port = parser.get_int("dir-port");
-    benchmark_type = parser.get("benchmark-type");
     chain_length = static_cast<std::size_t>(parser.get_long("chain-length"));
     num_threads = static_cast<std::size_t>(parser.get_long("num-threads"));
     num_ops = static_cast<std::size_t>(parser.get_long("num-ops"));
@@ -138,35 +126,27 @@ int main(int argc, char **argv) {
   elasticmem::directory::directory_client client(host, port);
   auto dstatus = client.open_or_create(file, "/tmp", 1, chain_length);
 
-  if (benchmark_type == "throughput") {
-    std::vector<throughput_benchmark *> benchmark;
+  // Create workload runner
+  auto chain = dstatus.data_blocks().front().block_names;
+  workload_runner wrunner(workload_path, workload_offset, chain, num_ops);
 
-    // Create
-    for (std::size_t i = 0; i < num_threads; i++) {
-      auto thread_ops = num_ops / num_threads;
-      benchmark.push_back(new throughput_benchmark(workload_path,
-                                                   workload_offset + i * thread_ops,
-                                                   dstatus.data_blocks().front().block_names,
-                                                   thread_ops,
-                                                   max_async));
-    }
+  // Create all listeners and start them
+  std::vector<notification_listener*> listeners(num_threads, nullptr);
+  auto tail = chain.back();
+  auto parsed = block_name_parser::parse(tail);
+  for (std::size_t i = 0; i < num_threads; ++i) {
+    listeners[i] = new notification_listener(parsed.host, parsed.chain_port, parsed.id, num_ops);
+    listeners[i]->run();
+  }
 
-    // Start
-    for (std::size_t i = 0; i < num_threads; i++) {
-      benchmark[i]->run();
-    }
+  // Start workload runner
+  wrunner.run();
 
-    // Wait
-    for (std::size_t i = 0; i < num_threads; i++) {
-      benchmark[i]->wait();
-    }
-
-    // Cleanup
-    for (std::size_t i = 0; i < num_threads; i++) {
-      delete benchmark[i];
-    }
-  } else if (benchmark_type == "latency") {
-    latency_benchmark benchmark(workload_path, workload_offset, dstatus.data_blocks().front().block_names, num_ops);
-    benchmark.run();
+  // Do all the measurements
+  for (std::size_t i = 0; i < num_threads; ++i) {
+    auto l = listeners[i];
+    auto out_file = "listen_latency_" + std::to_string(i) + "_of_" + std::to_string(num_threads);
+    benchmark_utils::vector_diff(l->timestamps(), wrunner.timestamps(), out_file);
+    delete l;
   }
 }
