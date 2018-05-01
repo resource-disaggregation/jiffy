@@ -24,9 +24,9 @@ def wait_till_server_ready(host, port):
     check = True
     while check:
         try:
-            transport = TTransport.TBufferedTransport(TSocket.TSocket(host, port))
-            transport.open()
-            transport.close()
+            sock = TSocket.TSocket(host, port)
+            sock.open()
+            sock.close()
             check = False
         except TTransport.TTransportException:
             time.sleep(0.1)
@@ -56,11 +56,24 @@ class TestClient(TestCase):
     STORAGE_MANAGEMENT_PORT = 9094
     STORAGE_NOTIFICATION_PORT = 9095
     STORAGE_CHAIN_PORT = 9096
+
+    STORAGE_SERVICE_PORT2 = 9097
+    STORAGE_MANAGEMENT_PORT2 = 9098
+    STORAGE_NOTIFICATION_PORT2 = 9099
+    STORAGE_CHAIN_PORT2 = 9100
+
+    STORAGE_SERVICE_PORT3 = 9101
+    STORAGE_MANAGEMENT_PORT3 = 9102
+    STORAGE_NOTIFICATION_PORT3 = 9103
+    STORAGE_CHAIN_PORT3 = 9104
+
+    NUM_BLOCKS = 4
+
     DIRECTORY_HOST = '127.0.0.1'
     DIRECTORY_SERVICE_PORT = 9090
     DIRECTORY_LEASE_PORT = 9091
 
-    def start_servers(self, directoryd_args=None, storaged_args=None):
+    def start_servers(self, directoryd_args=None, storaged_args=None, chain=False):
         if storaged_args is None:
             storaged_args = []
         if directoryd_args is None:
@@ -75,7 +88,8 @@ class TestClient(TestCase):
         wait_till_server_ready(self.DIRECTORY_HOST, self.DIRECTORY_LEASE_PORT)
 
         try:
-            self.storaged = subprocess.Popen([self.STORAGE_SERVER_EXECUTABLE] + storaged_args)
+            self.storaged = subprocess.Popen(
+                [self.STORAGE_SERVER_EXECUTABLE, "--num-blocks", str(self.NUM_BLOCKS)] + storaged_args)
         except OSError as e:
             print("Error running executable %s: %s" % (self.STORAGE_SERVER_EXECUTABLE, e))
             sys.exit()
@@ -85,11 +99,51 @@ class TestClient(TestCase):
         wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_NOTIFICATION_PORT)
         wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_CHAIN_PORT)
 
+        if chain:
+            try:
+                self.storaged2 = subprocess.Popen(
+                    [self.STORAGE_SERVER_EXECUTABLE, "--num-blocks", str(self.NUM_BLOCKS), "--service-port",
+                     str(self.STORAGE_SERVICE_PORT2), "--management-port", str(self.STORAGE_MANAGEMENT_PORT2),
+                     "--notification-port", str(self.STORAGE_NOTIFICATION_PORT2), "--chain-port",
+                     str(self.STORAGE_CHAIN_PORT2)] + storaged_args)
+            except OSError as e:
+                print("Error running executable %s: %s" % (self.STORAGE_SERVER_EXECUTABLE, e))
+                sys.exit()
+
+            wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_SERVICE_PORT2)
+            wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_MANAGEMENT_PORT2)
+            wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_NOTIFICATION_PORT2)
+            wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_CHAIN_PORT2)
+
+            try:
+                self.storaged3 = subprocess.Popen(
+                    [self.STORAGE_SERVER_EXECUTABLE, "--num-blocks", str(self.NUM_BLOCKS), "--service-port",
+                     str(self.STORAGE_SERVICE_PORT3), "--management-port", str(self.STORAGE_MANAGEMENT_PORT3),
+                     "--notification-port", str(self.STORAGE_NOTIFICATION_PORT3), "--chain-port",
+                     str(self.STORAGE_CHAIN_PORT3)] + storaged_args)
+            except OSError as e:
+                print("Error running executable %s: %s" % (self.STORAGE_SERVER_EXECUTABLE, e))
+                sys.exit()
+
+            wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_SERVICE_PORT3)
+            wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_MANAGEMENT_PORT3)
+            wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_NOTIFICATION_PORT3)
+            wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_CHAIN_PORT3)
+        else:
+            self.storaged2 = None
+            self.storaged3 = None
+
     def stop_servers(self):
         self.directoryd.kill()
         self.directoryd.wait()
         self.storaged.kill()
         self.storaged.wait()
+        if self.storaged2 is not None:
+            self.storaged2.kill()
+            self.storaged2.wait()
+        if self.storaged3 is not None:
+            self.storaged3.kill()
+            self.storaged3.wait()
 
     def kv_ops(self, kv):
         # Test exists/get/put
@@ -241,8 +295,20 @@ class TestClient(TestCase):
             client.disconnect()
             self.stop_servers()
 
+    def test_chain_replication(self):  # TODO: Add failure tests
+        self.start_servers(chain=True)
+        client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        try:
+            kv = client.create("/a/file.txt", "/tmp", 1, 3)
+            self.assertTrue(kv.file_info.chain_length == 3)
+            self.kv_ops(kv)
+            self.pipelined_kv_ops(kv)
+        finally:
+            client.disconnect()
+            self.stop_servers()
+
     def test_auto_scale(self):
-        self.start_servers(None, ["--block-capacity", "7705"])
+        self.start_servers(storaged_args=["--block-capacity", "7705"])
         client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
             kv = client.create("/a/file.txt", "/tmp")

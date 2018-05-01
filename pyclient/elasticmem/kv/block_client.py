@@ -99,7 +99,7 @@ class BlockChainClient:
             self.tail = self.head
         else:
             t_host, t_port, _, _, _, t_bid = chain[-1].split(':')
-            self.tail = BlockClient(client_cache, h_host, int(h_port), int(t_bid))
+            self.tail = BlockClient(client_cache, t_host, int(t_port), int(t_bid))
         self.response_reader = self.tail.get_response_reader(self.seq.client_id)
         self.response_cache = {}
 
