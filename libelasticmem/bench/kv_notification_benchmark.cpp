@@ -123,10 +123,12 @@ int main(int argc, char **argv) {
   auto dstatus = client.open_or_create(file, "/tmp", 1, chain_length);
 
   // Create workload runner
+  std::cerr << "Creating workload runner" << std::endl;
   auto chain = dstatus.data_blocks().front().block_names;
   workload_runner wrunner(workload_path, workload_offset, chain, num_ops);
 
   // Create all listeners and start them
+  std::cerr << "Creating notification listeners" << std::endl;
   std::vector<notification_listener *> listeners(num_threads, nullptr);
   auto tail = chain.back();
   auto parsed = block_name_parser::parse(tail);
@@ -136,9 +138,11 @@ int main(int argc, char **argv) {
   }
 
   // Start workload runner
+  std::cerr << "Starting workload runner" << std::endl;
   wrunner.run();
 
   // Do all the measurements
+  std::cerr << "Finished" << std::endl;
   for (std::size_t i = 0; i < num_threads; ++i) {
     auto l = listeners[i];
     auto out_file = "listen_latency_" + std::to_string(i) + "_of_" + std::to_string(num_threads);
