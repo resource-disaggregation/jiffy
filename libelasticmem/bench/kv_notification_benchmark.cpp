@@ -128,12 +128,12 @@ int main(int argc, char **argv) {
   workload_runner wrunner(workload_path, workload_offset, chain, num_ops);
 
   // Create all listeners and start them
-  std::cerr << "Creating notification listeners" << std::endl;
   std::vector<notification_listener *> listeners(num_threads, nullptr);
   auto tail = chain.back();
   auto parsed = block_name_parser::parse(tail);
+  std::cerr << "Creating notification listeners to " << parsed.host << ":" << parsed.notification_port << std::endl;
   for (std::size_t i = 0; i < num_threads; ++i) {
-    listeners[i] = new notification_listener(parsed.host, parsed.chain_port, parsed.id, num_ops);
+    listeners[i] = new notification_listener(parsed.host, parsed.notification_port, parsed.id, num_ops);
     listeners[i]->run();
   }
 
