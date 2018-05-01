@@ -50,7 +50,7 @@ class notification_listener {
  public:
   notification_listener(const std::string &host, int port, int block_id, std::size_t num_ops) : sub_(host, port),
                                                                                                 num_ops_(num_ops) {
-    sub_.subscribe(block_id, {kv_op_id::put});
+    sub_.subscribe(block_id, {"put"});
     timestamps_.resize(num_ops_);
   }
 
@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
   workload_runner wrunner(workload_path, workload_offset, chain, num_ops);
 
   // Create all listeners and start them
-  std::vector<notification_listener*> listeners(num_threads, nullptr);
+  std::vector<notification_listener *> listeners(num_threads, nullptr);
   auto tail = chain.back();
   auto parsed = block_name_parser::parse(tail);
   for (std::size_t i = 0; i < num_threads; ++i) {
