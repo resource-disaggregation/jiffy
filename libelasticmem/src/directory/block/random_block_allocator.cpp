@@ -10,7 +10,9 @@ namespace directory {
 std::vector<std::string> random_block_allocator::allocate(std::size_t count, const std::vector<std::string> &) {
   std::unique_lock<std::shared_mutex> lock(mtx_);
   if (count > free_blocks_.size()) {
-    throw std::out_of_range("Insufficient free blocks to allocate from");
+    throw std::out_of_range(
+        "Insufficient free blocks to allocate from (requested: " + std::to_string(count) + ", have: "
+            + std::to_string(free_blocks_.size()));
   }
   std::vector<std::string> blocks;
   std::set<std::string> prefixes;
@@ -35,7 +37,7 @@ std::vector<std::string> random_block_allocator::allocate(std::size_t count, con
     throw std::out_of_range("Could not find free blocks with distinct prefixes");
   }
 
-  for (const auto& block: blocks) {
+  for (const auto &block: blocks) {
     free_blocks_.erase(block);
     allocated_blocks_.insert(block);
   }
@@ -46,7 +48,7 @@ std::vector<std::string> random_block_allocator::allocate(std::size_t count, con
 void random_block_allocator::free(const std::vector<std::string> &blocks) {
   std::unique_lock<std::shared_mutex> lock(mtx_);
   std::vector<std::string> not_freed;
-  for (auto& block_name: blocks) {
+  for (auto &block_name: blocks) {
     auto it = allocated_blocks_.find(block_name);
     if (it == allocated_blocks_.end()) {
       not_freed.push_back(block_name);
