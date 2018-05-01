@@ -145,7 +145,12 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Hostname: " << hostname;
 
   for (int i = 0; i < static_cast<int>(num_blocks); i++) {
-    block_names.push_back(block_name_parser::make(hostname, service_port, management_port, notification_port, 0, i));
+    block_names.push_back(block_name_parser::make(hostname,
+                                                  service_port,
+                                                  management_port,
+                                                  notification_port,
+                                                  chain_port,
+                                                  i));
   }
 
   std::vector<std::shared_ptr<chain_module>> blocks;

@@ -24,6 +24,7 @@ void storage_manager::setup_block(const std::string &block_name,
     client.setup_block(bid.id, path, slot_begin, slot_end, chain, role, next_block_name);
   } catch (std::exception& e) {
     LOG(log_level::error) << "Error setting up block on " << bid.host << ":" << bid.management_port;
+    throw e;
   }
 }
 
