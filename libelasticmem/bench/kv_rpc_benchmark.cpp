@@ -137,7 +137,8 @@ int main(int argc, char **argv) {
 
   elasticmem::directory::directory_client client(host, port);
   auto dstatus = client.open_or_create(file, "/tmp", 1, chain_length);
-
+  auto chain = dstatus.data_blocks().front();
+  std::cerr << "Chain: " << chain.to_string() << std::endl;
   if (benchmark_type == "throughput") {
     std::vector<throughput_benchmark *> benchmark;
 
@@ -146,7 +147,7 @@ int main(int argc, char **argv) {
       auto thread_ops = num_ops / num_threads;
       benchmark.push_back(new throughput_benchmark(workload_path,
                                                    workload_offset + i * thread_ops,
-                                                   dstatus.data_blocks().front().block_names,
+                                                   chain.block_names,
                                                    thread_ops,
                                                    max_async));
     }
@@ -166,7 +167,8 @@ int main(int argc, char **argv) {
       delete benchmark[i];
     }
   } else if (benchmark_type == "latency") {
-    latency_benchmark benchmark(workload_path, workload_offset, dstatus.data_blocks().front().block_names, num_ops);
+    latency_benchmark benchmark(workload_path, workload_offset, chain.block_names, num_ops);
     benchmark.run();
   }
+  client.remove(file);
 }
