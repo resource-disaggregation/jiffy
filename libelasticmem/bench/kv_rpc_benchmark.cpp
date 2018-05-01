@@ -124,6 +124,7 @@ int main(int argc, char **argv) {
   opts.add(cmd_option("dir-host", 'H', false).set_default("127.0.0.1").set_description("Directory service host"));
   opts.add(cmd_option("dir-port", 'P', false).set_default("9090").set_description("Directory service port"));
   opts.add(cmd_option("benchmark-type", 'b', false).set_default("throughput").set_description("Benchmark type"));
+  opts.add(cmd_option("chain-length", 'c', false).set_default("1").set_description("Chain length"));
   opts.add(cmd_option("num-threads", 't', false).set_default("1").set_description("# of benchmark threads to run"));
   opts.add(cmd_option("num-ops", 'n', false).set_default("100000").set_description("# of operations to run"));
   opts.add(cmd_option("max-async", 'm', false).set_default("1000").set_description(
@@ -148,12 +149,14 @@ int main(int argc, char **argv) {
   std::size_t max_async;
   std::string workload_path;
   std::size_t workload_offset;
+  std::size_t chain_length;
 
   try {
     file = parser.get("file-name");
     host = parser.get("dir-host");
     port = parser.get_int("dir-port");
     benchmark_type = parser.get("benchmark-type");
+    chain_length = static_cast<std::size_t>(parser.get_long("chain-length"));
     num_threads = static_cast<std::size_t>(parser.get_long("num-threads"));
     num_ops = static_cast<std::size_t>(parser.get_long("num-ops"));
     max_async = static_cast<std::size_t>(parser.get_long("max-async"));
@@ -166,7 +169,7 @@ int main(int argc, char **argv) {
   }
 
   elasticmem::directory::directory_client client(host, port);
-  auto dstatus = client.open_or_create(file, "/tmp", 1, 1);
+  auto dstatus = client.open_or_create(file, "/tmp", 1, chain_length);
 
   if (benchmark_type == "throughput") {
     std::vector<throughput_benchmark *> benchmark;
