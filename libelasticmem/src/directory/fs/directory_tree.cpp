@@ -277,10 +277,10 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
     try {
       utils::retry_utils::retry(3, [parsed]() {
         using namespace ::apache::thrift::transport;
-        TSocket mgmt_sock(parsed.host, parsed.management_port);
-        mgmt_sock.open();
-        LOG(log_level::info) << mgmt_sock.getPeerHost() << ":" << mgmt_sock.getPeerPort() << " is still live";
-        mgmt_sock.close();
+        TSocket m_sock(parsed.host, parsed.management_port);
+        m_sock.open();
+        LOG(log_level::info) << m_sock.getPeerHost() << ":" << m_sock.getPeerPort() << " is still live";
+        m_sock.close();
         return true;
       });
       LOG(log_level::info) << "Block " << block_name << " is still live";
