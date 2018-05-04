@@ -124,12 +124,12 @@ data_status directory_tree::open_or_create(const std::string &path,
                                            const std::string &persistent_store_prefix,
                                            std::size_t num_blocks,
                                            std::size_t chain_length) {
-  if (exists(path)) {
-    LOG(log_level::info) << "Opening file " << path;
+
+  try {
+    return create(path, persistent_store_prefix, num_blocks, chain_length);
+  } catch (directory_ops_exception& ex) {
     return open(path);
   }
-  LOG(log_level::info) << "Creating file " << path;
-  return create(path, persistent_store_prefix, num_blocks, chain_length);
 }
 
 bool directory_tree::exists(const std::string &path) const {
