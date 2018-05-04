@@ -17,7 +17,7 @@ void chain_request_handler::chain_request(const sequence_id &seq,
   if (!b->is_set_prev()) {
     b->reset_prev(prot_);
   }
-  b->request(seq, cmd_id, arguments);
+  b->chain_request(seq, cmd_id, arguments);
 }
 
 void chain_request_handler::run_command(std::vector<std::string> &_return,

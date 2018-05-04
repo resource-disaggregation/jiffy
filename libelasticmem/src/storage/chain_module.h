@@ -179,6 +179,7 @@ class chain_module : public block {
   virtual void forward_all() = 0;
 
   void request(sequence_id seq, int32_t oid, const std::vector<std::string> &args);
+  void chain_request(const sequence_id& seq, int32_t oid, const std::vector<std::string> &args);
   void ack(const sequence_id &seq);
 
  protected:
