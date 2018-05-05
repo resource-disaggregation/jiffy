@@ -125,11 +125,74 @@ data_status directory_tree::open_or_create(const std::string &path,
                                            std::size_t num_blocks,
                                            std::size_t chain_length) {
 
-  try {
-    return create(path, persistent_store_prefix, num_blocks, chain_length);
-  } catch (directory_ops_exception& ex) {
-    return open(path);
+  LOG(log_level::info) << "Opening or creating file " << path << " with persistent_store_prefix="
+                       << persistent_store_prefix << " num_blocks=" << num_blocks << ", chain_length=" << chain_length;
+  std::string filename = directory_utils::get_filename(path);
+  if (filename == "." || filename == "/") {
+    throw directory_ops_exception("Path is a directory: " + path);
   }
+  std::string parent_path = directory_utils::get_parent_path(path);
+  auto node = get_node_unsafe(parent_path);
+  if (node == nullptr) {
+    create_directories(parent_path);
+    node = get_node_unsafe(parent_path);
+  } else if (node->is_regular_file()) {
+    throw directory_ops_exception(
+        "Cannot create file in dir " + parent_path + ": " + node->name() + " is a file.");
+  }
+
+  auto parent = std::dynamic_pointer_cast<ds_dir_node>(node);
+  auto c = parent->get_child(filename);
+  if (c != nullptr) {
+    if (c->is_regular_file()) {
+      return std::dynamic_pointer_cast<ds_file_node>(c)->dstatus();
+    } else {
+      throw directory_ops_exception("Cannot open or create " + path + ": is a directory");
+    }
+  }
+
+  if (num_blocks == 0) {
+    throw directory_ops_exception("File cannot have zero blocks");
+  }
+  
+  if (chain_length == 0) {
+    throw directory_ops_exception("Chain length cannot be zero");
+  }
+
+  std::vector<replica_chain> blocks;
+  std::size_t slots_per_block = storage::block::SLOT_MAX / num_blocks;
+  for (std::size_t i = 0; i < num_blocks; ++i) {
+    auto slot_begin = static_cast<int32_t>(i * slots_per_block);
+    auto slot_end =
+        i == (num_blocks - 1) ? storage::block::SLOT_MAX : static_cast<int32_t>((i + 1) * slots_per_block - 1);
+    replica_chain
+        chain{allocator_->allocate(chain_length, {}), std::make_pair(slot_begin, slot_end), chain_status::stable};
+    assert(chain.block_names.size() == chain_length);
+    blocks.push_back(chain);
+    using namespace storage;
+    if (chain_length == 1) {
+      storage_->setup_block(chain.block_names[0],
+                            path,
+                            slot_begin,
+                            slot_end,
+                            chain.block_names,
+                            chain_role::singleton,
+                            "nil");
+    } else {
+      for (std::size_t j = 0; j < chain_length; ++j) {
+        std::string block_name = chain.block_names[j];
+        std::string next_block_name = (j == chain_length - 1) ? "nil" : chain.block_names[j + 1];
+        int32_t role = (j == 0) ? chain_role::head : (j == chain_length - 1) ? chain_role::tail : chain_role::mid;
+        storage_->setup_block(block_name, path, slot_begin, slot_end, chain.block_names, role, next_block_name);
+      }
+    }
+  }
+  auto child =
+      std::make_shared<ds_file_node>(filename, storage_mode::in_memory, persistent_store_prefix, chain_length, blocks);
+  child->persistent_store_prefix(persistent_store_prefix);
+  parent->add_child(child);
+
+  return child->dstatus();
 }
 
 bool directory_tree::exists(const std::string &path) const {

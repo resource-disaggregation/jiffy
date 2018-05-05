@@ -251,18 +251,19 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
   }
 }
 
-// TODO: This should be atomic...
 void kv_block::reset() {
+  std::unique_lock lock(metadata_mtx_);
   block_.clear();
-  reset_next_and_listen("nil");
-  path("");
-  subscriptions().clear();
+  next_->reset("nil");
+  path_ = "";
   // clients().clear();
+  sub_map_.clear();
   bytes_.store(0);
-  slot_range(0, -1);
-  state(block_state::regular);
-  chain({});
-  role(singleton);
+  slot_range_.first = 0;
+  slot_range_.second = -1;
+  state_ = block_state::regular;
+  chain_ = {};
+  role_ = singleton;
   splitting_ = false;
   merging_ = false;
 }

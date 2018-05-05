@@ -14,16 +14,12 @@ void storage_management_service_handler::setup_block(const int32_t block_id,
                                                      const int32_t role,
                                                      const std::string &next_block_name) {
   try {
-    blocks_.at(static_cast<std::size_t>(block_id))->path(path);
-    blocks_.at(static_cast<std::size_t>(block_id))->slot_range(slot_begin, slot_end);
-    blocks_.at(static_cast<std::size_t>(block_id))->chain(chain);
-    blocks_.at(static_cast<std::size_t>(block_id))->role(static_cast<chain_role>(role));
-    if (role == chain_role::tail && next_block_name != "nil") {
-      // We're in recovery mode, forwarding requests
-      blocks_.at(static_cast<std::size_t>(block_id))->reset_next(next_block_name);
-    } else {
-      blocks_.at(static_cast<std::size_t>(block_id))->reset_next_and_listen(next_block_name);
-    }
+    blocks_.at(static_cast<std::size_t>(block_id))->setup(path,
+                                                          slot_begin,
+                                                          slot_end,
+                                                          chain,
+                                                          static_cast<chain_role>(role),
+                                                          next_block_name);
   } catch (std::exception &e) {
     throw make_exception(e);
   }
@@ -34,9 +30,7 @@ void storage_management_service_handler::set_exporting(const int32_t block_id,
                                                        const int32_t slot_begin,
                                                        const int32_t slot_end) {
   try {
-    blocks_.at(static_cast<std::size_t>(block_id))->state(block_state::exporting);
-    blocks_.at(static_cast<std::size_t>(block_id))->export_target(target_block);
-    blocks_.at(static_cast<std::size_t>(block_id))->export_slot_range(slot_begin, slot_end);
+    blocks_.at(static_cast<std::size_t>(block_id))->set_exporting(target_block, slot_begin, slot_end);
   } catch (std::exception &e) {
     throw make_exception(e);
   }
@@ -46,8 +40,7 @@ void storage_management_service_handler::set_importing(const int32_t block_id,
                                                        const int32_t slot_begin,
                                                        const int32_t slot_end) {
   try {
-    blocks_.at(static_cast<std::size_t>(block_id))->state(block_state::importing);
-    blocks_.at(static_cast<std::size_t>(block_id))->import_slot_range(slot_begin, slot_end);
+    blocks_.at(static_cast<std::size_t>(block_id))->set_importing(slot_begin, slot_end);
   } catch (std::exception &e) {
     throw make_exception(e);
   }
@@ -61,17 +54,13 @@ void storage_management_service_handler::setup_and_set_importing(const int32_t b
                                                                  const int32_t role,
                                                                  const std::string &next_block_name) {
   try {
-    blocks_.at(static_cast<std::size_t>(block_id))->path(path);
-    blocks_.at(static_cast<std::size_t>(block_id))->state(block_state::importing);
-    blocks_.at(static_cast<std::size_t>(block_id))->import_slot_range(slot_begin, slot_end);
-    blocks_.at(static_cast<std::size_t>(block_id))->chain(chain);
-    blocks_.at(static_cast<std::size_t>(block_id))->role(static_cast<chain_role>(role));
-    if (role == chain_role::tail && next_block_name != "nil") {
-      // We're in recovery mode, forwarding requests
-      blocks_.at(static_cast<std::size_t>(block_id))->reset_next(next_block_name);
-    } else {
-      blocks_.at(static_cast<std::size_t>(block_id))->reset_next_and_listen(next_block_name);
-    }
+    blocks_.at(static_cast<std::size_t>(block_id))->setup(path,
+                                                          0,
+                                                          -1,
+                                                          chain,
+                                                          static_cast<chain_role>(role),
+                                                          next_block_name);
+    blocks_.at(static_cast<std::size_t>(block_id))->set_importing(slot_begin, slot_end);
   } catch (std::exception &e) {
     throw make_exception(e);
   }
@@ -90,11 +79,7 @@ void storage_management_service_handler::set_regular(const int32_t block_id,
                                                      const int32_t slot_begin,
                                                      const int32_t slot_end) {
   try {
-    blocks_.at(static_cast<std::size_t>(block_id))->state(block_state::regular);
-    blocks_.at(static_cast<std::size_t>(block_id))->slot_range(slot_begin, slot_end);
-    blocks_.at(static_cast<std::size_t>(block_id))->export_target({});
-    blocks_.at(static_cast<std::size_t>(block_id))->export_slot_range(0, -1);
-    blocks_.at(static_cast<std::size_t>(block_id))->import_slot_range(0, -1);
+    blocks_.at(static_cast<std::size_t>(block_id))->set_regular(slot_begin, slot_end);
   } catch (std::exception &e) {
     throw make_exception(e);
   }

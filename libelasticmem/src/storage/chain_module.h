@@ -126,36 +126,105 @@ class chain_module : public block {
       response_processor_.join();
   }
 
+  void setup(const std::string &path,
+             int32_t slot_begin,
+             int32_t slot_end,
+             const std::vector<std::string> &chain,
+             const chain_role &role,
+             const std::string &next_block_name) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    path_ = path;
+    slot_range_.first = slot_begin;
+    slot_range_.second = slot_end;
+    chain_ = chain;
+    role_ = role;
+    auto protocol = next_->reset(next_block_name);
+    if (protocol && role_ != chain_role::tail) {
+      auto handler = std::make_shared<chain_response_handler>(this);
+      auto processor = std::make_shared<chain_response_serviceProcessor>(handler);
+      if (response_processor_.joinable())
+        response_processor_.join();
+      response_processor_ = std::thread([processor, protocol] {
+        while (true) {
+          try {
+            if (!processor->process(protocol, protocol, nullptr)) {
+              break;
+            }
+          } catch (std::exception &e) {
+            break;
+          }
+        }
+      });
+    }
+  }
+
+  void set_exporting(const std::vector<std::string> &target_block, int32_t slot_begin, int32_t slot_end) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    state_ = block_state::exporting;
+    export_target_ = target_block;
+    export_target_str_ = "";
+    for (const auto &block: target_block) {
+      export_target_str_ += (block + "!");
+    }
+    export_target_str_.pop_back();
+    export_slot_range_.first = slot_begin;
+    export_slot_range_.second = slot_end;
+  }
+
+  void set_importing(int32_t slot_begin, int32_t slot_end) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    state_ = block_state::importing;
+    import_slot_range_.first = slot_begin;
+    import_slot_range_.second = slot_end;
+  }
+
+  void set_regular(int32_t slot_begin, int32_t slot_end) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    state_ = block_state::regular;
+    slot_range_.first = slot_begin;
+    slot_range_.second = slot_end;
+    export_slot_range_.first = 0;
+    export_slot_range_.second = -1;
+    import_slot_range_.first = 0;
+    import_slot_range_.second = -1;
+  }
+
   void role(chain_role role) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     role_ = role;
   }
 
   chain_role role() const {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return role_;
   }
 
-  void chain(const std::vector<std::string>& chain) {
+  void chain(const std::vector<std::string> &chain) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     chain_ = chain;
   }
 
-  const std::vector<std::string>& chain() {
+  const std::vector<std::string> &chain() {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return chain_;
   }
 
   bool is_head() const {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return role() == chain_role::head || role() == chain_role::singleton;
   }
 
   bool is_tail() const {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return role() == chain_role::tail || role() == chain_role::singleton;
   }
 
   bool is_set_prev() const {
-    return prev_->is_set();
+    return prev_->is_set(); // Does not require a lock since only one thread calls this at a time
   }
 
   void reset_prev(const std::shared_ptr<::apache::thrift::protocol::TProtocol> &prot) {
-    prev_->reset(prot);
+    prev_->reset(prot); // Does not require a lock since only one thread calls this at a time
   }
 
   void reset_next(const std::string &next_block);
@@ -179,13 +248,11 @@ class chain_module : public block {
   virtual void forward_all() = 0;
 
   void request(sequence_id seq, int32_t oid, const std::vector<std::string> &args);
-  void chain_request(const sequence_id& seq, int32_t oid, const std::vector<std::string> &args);
+  void chain_request(const sequence_id &seq, int32_t oid, const std::vector<std::string> &args);
   void ack(const sequence_id &seq);
 
  protected:
   std::mutex request_mtx_;
-
- private:
   chain_role role_{singleton};
   int64_t chain_seq_no_{0};
   std::unique_ptr<next_block_cxn> next_{nullptr};
