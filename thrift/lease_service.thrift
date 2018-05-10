@@ -1,6 +1,6 @@
-namespace cpp elasticmem.directory
-namespace py elasticmem.lease
-namespace java elasticmem.lease
+namespace cpp mmux.directory
+namespace py mmux.lease
+namespace java mmux.lease
 
 struct rpc_lease_ack {
   1: required i64 renewed,

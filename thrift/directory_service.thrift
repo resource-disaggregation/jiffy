@@ -1,6 +1,6 @@
-namespace cpp elasticmem.directory
-namespace py elasticmem.directory
-namespace java elasticmem.directory
+namespace cpp mmux.directory
+namespace py mmux.directory
+namespace java mmux.directory
 
 typedef i32 rpc_perms
 

@@ -14,10 +14,10 @@ from unittest import TestCase
 
 from thrift.transport import TTransport, TSocket
 
-from elasticmem import ElasticMemClient, RemoveMode, StorageMode
-from elasticmem.benchmark.kv_async_benchmark import run_async_kv_benchmark
-from elasticmem.benchmark.kv_sync_benchmark import run_sync_kv_throughput_benchmark, run_sync_kv_latency_benchmark
-from elasticmem.subscription.subscriber import Notification
+from mmux import MMuxClient, RemoveMode, StorageMode
+from mmux.benchmark.kv_async_benchmark import run_async_kv_benchmark
+from mmux.benchmark.kv_sync_benchmark import run_sync_kv_throughput_benchmark, run_sync_kv_latency_benchmark
+from mmux.subscription.subscriber import Notification
 
 
 def wait_till_server_ready(host, port):
@@ -242,7 +242,7 @@ class TestClient(TestCase):
 
     def test_lease_worker(self):
         self.start_servers()
-        client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        client = MMuxClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
             client.create("/a/file.txt", "/tmp")
             self.assertTrue(client.fs.exists("/a/file.txt"))
@@ -256,7 +256,7 @@ class TestClient(TestCase):
 
     def test_create(self):
         self.start_servers()
-        client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        client = MMuxClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
             kv = client.create("/a/file.txt", "/tmp")
             self.kv_ops(kv)
@@ -268,7 +268,7 @@ class TestClient(TestCase):
 
     def test_open(self):
         self.start_servers()
-        client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        client = MMuxClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
             client.create("/a/file.txt", "/tmp")
             self.assertTrue(client.fs.exists('/a/file.txt'))
@@ -281,7 +281,7 @@ class TestClient(TestCase):
 
     def test_close(self):
         self.start_servers()
-        client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        client = MMuxClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
             client.create("/a/file.txt", "/tmp")
             self.assertTrue('/a/file.txt' in client.to_renew)
@@ -297,7 +297,7 @@ class TestClient(TestCase):
 
     def test_chain_replication(self):  # TODO: Add failure tests
         self.start_servers(chain=True)
-        client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        client = MMuxClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
             kv = client.create("/a/file.txt", "/tmp", 1, 3)
             self.assertTrue(kv.file_info.chain_length == 3)
@@ -309,7 +309,7 @@ class TestClient(TestCase):
 
     def test_auto_scale(self):
         self.start_servers(storaged_args=["--block-capacity", "7705"])
-        client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        client = MMuxClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
             kv = client.create("/a/file.txt", "/tmp")
             for i in range(0, 2000):
@@ -324,7 +324,7 @@ class TestClient(TestCase):
 
     def test_notifications(self):
         self.start_servers()
-        client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        client = MMuxClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
             client.fs.create("/a/file.txt", "/tmp")
 
@@ -381,7 +381,7 @@ class TestClient(TestCase):
 
         # Setup: create workload file
         workload_path = gen_async_kv_ops()
-        client = ElasticMemClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        client = MMuxClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
         try:
             data_path1 = "/a/file1.txt"
             client.fs.create(data_path1, "/tmp")

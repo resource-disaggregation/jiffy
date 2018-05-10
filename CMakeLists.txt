@@ -30,7 +30,7 @@ if (GENERATE_THRIFT)
   add_subdirectory(thrift)
 endif ()
 
-add_subdirectory(libelasticmem)
+add_subdirectory(libmmux)
 
 add_subdirectory(directory)
 add_subdirectory(storage)

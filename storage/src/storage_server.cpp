@@ -11,9 +11,9 @@
 #include <storage/service/chain_server.h>
 #include <storage/service/server_storage_tracker.h>
 
-using namespace ::elasticmem::directory;
-using namespace ::elasticmem::storage;
-using namespace ::elasticmem::utils;
+using namespace ::mmux::directory;
+using namespace ::mmux::storage;
+using namespace ::mmux::utils;
 
 using namespace ::apache::thrift;
 

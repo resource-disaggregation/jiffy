@@ -1,6 +1,6 @@
-namespace cpp elasticmem.storage
-namespace py elasticmem.subscription
-namespace java elasticmem.notification
+namespace cpp mmux.storage
+namespace py mmux.subscription
+namespace java mmux.notification
 
 enum response_type {
   subscribe,

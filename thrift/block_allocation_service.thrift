@@ -1,4 +1,4 @@
-namespace cpp elasticmem.directory
+namespace cpp mmux.directory
 
 exception block_allocation_service_exception {
   1: string msg,
