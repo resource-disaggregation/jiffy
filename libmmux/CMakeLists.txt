@@ -234,12 +234,3 @@ if (BUILD_BENCHMARKS)
   target_link_libraries(kv_rpc_benchmark mmux)
   target_link_libraries(kv_notification_benchmark mmux)
 endif ()
-
-install(DIRECTORY src/
-        DESTINATION include
-        FILES_MATCHING PATTERN "*.h")
-
-install(TARGETS mmux
-        RUNTIME DESTINATION bin
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib)
