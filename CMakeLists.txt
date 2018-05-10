@@ -24,8 +24,6 @@ include(Functions)
 include(BuildOptions)
 include(Dependencies)
 
-add_subdirectory(external/backward-cpp-1.3)
-
 if (GENERATE_THRIFT)
   add_subdirectory(thrift)
 endif ()

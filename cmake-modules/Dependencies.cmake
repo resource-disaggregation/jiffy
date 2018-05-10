@@ -59,6 +59,7 @@ else ()
   set(LIBEVENT_C_FLAGS "${EXTERNAL_C_FLAGS}")
   set(LIBEVENT_PREFIX "${PROJECT_BINARY_DIR}/external/libevent")
   set(LIBEVENT_HOME "${LIBEVENT_PREFIX}")
+  set(LIBEVENT_ROOT "${LIBEVENT_HOME}")
   set(LIBEVENT_INCLUDE_DIR "${LIBEVENT_PREFIX}/include")
   set(LIBEVENT_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}event")
   set(LIBEVENT_CORE_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}event_core")
@@ -136,6 +137,10 @@ else ()
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
+
+  if (NOT USE_SYSTEM_LIBEVENT)
+    add_dependencies(thrift libevent)
+  endif ()
 
   include_directories(SYSTEM ${THRIFT_INCLUDE_DIR})
   message(STATUS "Thrift include dir: ${THRIFT_INCLUDE_DIR}")
