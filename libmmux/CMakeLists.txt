@@ -172,7 +172,6 @@ add_library(mmux STATIC
         src/persistent/s3/s3_store.h
         src/persistent/persistent_service.h
         src/utils/cmd_parse.h
-        src/utils/ctpl.h
         src/utils/directory_utils.h
         src/utils/event.h
         src/utils/logger.h

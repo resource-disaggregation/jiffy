@@ -8,10 +8,10 @@
 #include <directory/lease/lease_server.h>
 #include <storage/manager/storage_manager.h>
 #include <utils/signal_handling.h>
-#include <utils/cmd_parse.h>
 #include <directory/block/block_allocation_server.h>
 #include <utils/logger.h>
 #include <directory/block/file_size_tracker.h>
+#include <boost/program_options.hpp>
 
 using namespace ::mmux::directory;
 using namespace ::mmux::storage;
@@ -19,52 +19,111 @@ using namespace ::mmux::utils;
 
 using namespace ::apache::thrift;
 
+std::string mapper(const std::string& env_var) {
+  if (env_var == "MMUX_DIRECTORY_HOST") return "directory.host";
+  else if (env_var == "MMUX_DIRECTORY_SERVICE_PORT") return "directory.service_port";
+  else if (env_var == "MMUX_LEASE_PORT") return "directory.lease_port";
+  else if (env_var == "MMUX_BLOCK_PORT") return "directory.block_port";
+  else if (env_var == "MMUX_LEASE_PERIOD_MS") return "directory.lease.lease_period_ms";
+  else if (env_var == "MMUX_GRACE_PERIOD_MS") return "directory.lease.grace_period_ms";
+  return "";
+}
+
 int main(int argc, char **argv) {
-  // signal_handling::install_error_handler(SIGABRT, SIGFPE, SIGSEGV, SIGILL, SIGTRAP);
+  signal_handling::install_error_handler(SIGABRT, SIGFPE, SIGSEGV, SIGILL, SIGTRAP);
 
   GlobalOutput.setOutputFunction(log_utils::log_thrift_msg);
 
-  cmd_options opts;
-  opts.add(cmd_option("address", 'a', false).set_default("0.0.0.0").set_description("Address server binds to"));
-  opts.add(cmd_option("service-port", 's', false).set_default("9090").set_description(
-      "Port that directory service listens on"));
-  opts.add(cmd_option("lease-port", 'l', false).set_default("9091").set_description(
-      "Port that lease service listens on"));
-  opts.add(cmd_option("block-port", 'b', false).set_default("9092").set_description(
-      "Port that block advertisement service listens on"));
-  opts.add(cmd_option("lease-period-ms", 'p', false).set_default("10000").set_description(
-      "Lease duration (in ms) that lease service advertises"));
-  opts.add(cmd_option("grace-period-ms", 'g', false).set_default("10000").set_description(
-      "Grace period (in ms) that lease service waits for beyond lease duration"));
-  opts.add(cmd_option("storage-trace-file", 't', false).set_required(false).set_description(
-      "Trace file for logging storage capacity over time"));
-
-  cmd_parser parser(argc, argv, opts);
-  if (parser.get_flag("help")) {
-    std::cout << parser.help_msg() << std::endl;
-    return 0;
-  }
-
-  std::string address;
-  int service_port;
-  int lease_port;
-  int block_port;
-  uint64_t lease_period_ms;
-  uint64_t grace_period_ms;
-  std::string storage_trace;
+  // Parse configuration parameters
+  // Configuration priority order: default < env < configuration file < commandline args
+  // First set defaults
+  std::string address = "127.0.0.1";
+  int service_port = 9090;
+  int lease_port = 9091;
+  int block_port = 9092;
+  uint64_t lease_period_ms = 10000;
+  uint64_t grace_period_ms = 10000;
+  std::string storage_trace = "";
 
   try {
-    address = parser.get("address");
-    service_port = parser.get_int("service-port");
-    lease_port = parser.get_int("lease-port");
-    block_port = parser.get_int("block-port");
-    lease_period_ms = static_cast<uint64_t>(parser.get_long("lease-period-ms"));
-    grace_period_ms = static_cast<uint64_t>(parser.get_long("grace-period-ms"));
-    storage_trace = parser.get("storage-trace-file");
-  } catch (cmd_parse_exception &ex) {
-    std::cerr << "Could not parse command line args: " << ex.what() << std::endl;
-    std::cerr << parser.help_msg() << std::endl;
-    return -1;
+    namespace po = boost::program_options;
+    std::string config_file = "";
+    po::options_description generic("options");
+    generic.add_options()
+        ("version,v", "Print version string")
+        ("help,h", "Print help message")
+        ("config,c", po::value<std::string>(&config_file), "Configuration file");
+
+    po::options_description hidden("Hidden options");
+    hidden.add_options()
+        ("storage-trace,T", po::value<std::string>(&storage_trace), "Storage trace file");
+
+    // Configuration file variables are named differently
+    po::options_description config_file_options;
+    config_file_options.add_options()
+        ("directory.host", po::value<std::string>(&address)->default_value("127.0.0.1"))
+        ("directory.service_port", po::value<int>(&service_port)->default_value(9090))
+        ("directory.lease_port", po::value<int>(&lease_port)->default_value(9091))
+        ("directory.block_port", po::value<int>(&lease_port)->default_value(9092))
+        ("directory.lease.lease_period_ms", po::value<uint64_t>(&lease_period_ms)->default_value(10000))
+        ("directory.lease.grace_period_ms", po::value<uint64_t>(&grace_period_ms)->default_value(10000));
+
+    po::options_description cmdline_options, env_options;
+    cmdline_options.add(generic).add(hidden);
+    env_options.add(config_file_options);
+
+    po::options_description visible;
+    visible.add(generic);
+
+    po::variables_map vm;
+
+    // Commandline args have highest priority
+    store(po::command_line_parser(argc, argv).options(cmdline_options).run(), vm);
+    notify(vm);
+
+    if (vm.count("help")) {
+      std::cout << "Directory service daemon" << std::endl;
+      std::cout << visible << std::endl;
+      return 0;
+    }
+
+    if (vm.count("version")) {
+      std::cout << "Directory service daemon, Version 0.1.0" << std::endl; // TODO: Configure version string
+      return 0;
+    }
+
+    // Configuration files have higher priority than env vars
+    std::vector<std::string> config_files;
+    if (config_file == "") {
+      config_files = {"conf/mmux.conf", "/etc/mmux/mmux.conf"};
+    } else {
+      config_files = {config_file};
+    }
+
+    for (const auto& cfile: config_files) {
+      std::ifstream ifs(cfile.c_str());
+      if (ifs) {
+        store(parse_config_file(ifs, config_file_options, true), vm);
+        notify(vm);
+        break;
+      }
+    }
+
+    // Env vars have lowest priority
+    store(po::parse_environment(env_options, boost::function1<std::string, std::string>(mapper)), vm);
+    notify(vm);
+
+    // Output all the configuration parameters:
+    LOG(log_level::info) << "directory.host: " << address;
+    LOG(log_level::info) << "directory.service_port: " << service_port;
+    LOG(log_level::info) << "directory.lease_port: " << lease_port;
+    LOG(log_level::info) << "directory.block_port: " << block_port;
+    LOG(log_level::info) << "directory.lease.lease_period_ms: " << lease_period_ms;
+    LOG(log_level::info) << "directory.lease.grace_period_ms: " << grace_period_ms;
+
+  } catch (std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    return 1;
   }
 
   std::mutex failure_mtx;

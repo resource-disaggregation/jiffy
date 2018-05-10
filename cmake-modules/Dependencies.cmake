@@ -1,8 +1,10 @@
 include(ExternalProject)
 
 set(THRIFT_VERSION "0.11.0")
+set(BOOST_VERSION "1.40.0")
 
 find_package(Threads REQUIRED)
+find_package(Boost ${BOOST_VERSION} COMPONENTS program_options REQUIRED)
 
 include(FindPythonInterp)
 if (NOT PYTHONINTERP_FOUND)

@@ -6,10 +6,10 @@
 #include <storage/notification/notification_server.h>
 #include <storage/service/block_server.h>
 #include <utils/signal_handling.h>
-#include <utils/cmd_parse.h>
 #include <utils/logger.h>
 #include <storage/service/chain_server.h>
 #include <storage/service/server_storage_tracker.h>
+#include <boost/program_options.hpp>
 
 using namespace ::mmux::directory;
 using namespace ::mmux::storage;
@@ -17,8 +17,17 @@ using namespace ::mmux::utils;
 
 using namespace ::apache::thrift;
 
-std::string dir_host;
-int32_t block_port;
+std::string mapper(const std::string &env_var) {
+  if (env_var == "MMUX_DIRECTORY_HOST") return "directory.host";
+  else if (env_var == "MMUX_DIRECTORY_SERVICE_PORT") return "directory.service_port";
+  else if (env_var == "MMUX_BLOCK_PORT") return "directory.block_port";
+  else if (env_var == "MMUX_STORAGE_HOST") return "storage.host";
+  else if (env_var == "MMUX_STORAGE_SERVICE_PORT") return "storage.service_port";
+  return "";
+}
+
+std::string dir_host = "127.0.0.1";
+int32_t block_port = 9092;
 std::vector<std::string> block_names;
 
 void retract_block_names_and_print_stacktrace(int sig_num) {
@@ -50,83 +59,120 @@ int main(int argc, char **argv) {
                                           SIGTRAP);
   GlobalOutput.setOutputFunction(log_utils::log_thrift_msg);
 
-  cmd_options opts;
-  opts.add(cmd_option("address", 'a', false).set_default("0.0.0.0").set_description("Address server binds to"));
-  opts.add(cmd_option("service-port", 's', false).set_default("9093").set_description(
-      "Port that storage service listens on"));
-  opts.add(cmd_option("management-port", 'm', false).set_default("9094").set_description(
-      "Port that storage management service listens on"));
-  opts.add(cmd_option("notification-port", 'n', false).set_default("9095").set_description(
-      "Port that notification service listens on"));
-  opts.add(cmd_option("dir-address", 'd', false).set_default("127.0.0.1").set_description(
-      "Host for directory service"));
-  opts.add(cmd_option("dir-port", 'p', false).set_default("9090").set_description(
-      "Port that directory service interface connects to"));
-  opts.add(cmd_option("block-port", 'B', false).set_default("9092").set_description(
-      "Port that block advertisement interface connects to"));
-  opts.add(cmd_option("chain-port", 'c', false).set_default("9096").set_description(
-      "Port that block server listens on for chain requests"));
-  opts.add(cmd_option("num-blocks", 'n', false).set_default("64").set_description(
-      "Number of blocks to advertise"));
-  opts.add(cmd_option("block-capacity", 'b', false).set_default("134217728").set_description(
-      "Storage capacity of each block"));
-  opts.add(cmd_option("capacity-threshold-lo", 'L', false).set_default("0.25").set_description(
-      "Low threshold fraction for block capacity"));
-  opts.add(cmd_option("capacity-threshold-hi", 'H', false).set_default("0.75").set_description(
-      "High threshold fraction for block capacity"));
-  opts.add(cmd_option("non-blocking", 'N', true).set_description("Use non-blocking thrift server"));
-  opts.add(cmd_option("io-threads", 'I', false).set_default("1").set_description(
-      "Number of IO threads. Only used for non-blocking thrift server"));
-  opts.add(cmd_option("proc-threads", 'P', false).set_default("HARDWARE_CONCURRENCY").set_description(
-      "Number of processing threads. Only used for non-blocking thrift server"));
-  opts.add(cmd_option("storage-trace-file", 't', false).set_required(false).set_description(
-      "Trace file for storage sizes"));
-
-  cmd_parser parser(argc, argv, opts);
-  if (parser.get_flag("help")) {
-    std::cout << parser.help_msg() << std::endl;
-    return 0;
-  }
-
-  std::string address;
-  int32_t service_port;
-  int32_t management_port;
-  int32_t notification_port;
-  int32_t chain_port;
-  int32_t dir_port;
-  std::size_t num_blocks;
-  std::size_t block_capacity;
-  double capacity_threshold_lo;
-  double capacity_threshold_hi;
-  bool non_blocking;
-  int num_io_threads;
-  int num_proc_threads;
-  std::string storage_trace;
+  // Parse configuration parameters
+  // Configuration priority order: default < env < configuration file < commandline args
+  // First set defaults
+  std::string address = "127.0.0.1";
+  int32_t service_port = 9093;
+  int32_t mgmt_port = 9094;
+  int32_t notf_port = 9095;
+  int32_t chain_port = 9096;
+  int32_t dir_port = 9090;
+  std::size_t num_blocks = 64;
+  std::size_t block_capacity = 134217728;
+  double blk_thresh_lo = 0.25;
+  double blk_thresh_hi = 0.75;
+  bool non_blocking = false;
+  int io_threads = 1;
+  int work_threads = std::thread::hardware_concurrency();
+  int concurrency = std::thread::hardware_concurrency();
+  std::string storage_trace = "";
   try {
-    address = parser.get("address");
-    dir_host = parser.get("dir-address");
-    dir_port = parser.get_int("dir-port");
-    service_port = parser.get_int("service-port");
-    management_port = parser.get_int("management-port");
-    block_port = parser.get_int("block-port");
-    notification_port = parser.get_int("notification-port");
-    chain_port = parser.get_int("chain-port");
-    num_blocks = static_cast<std::size_t>(parser.get_long("num-blocks"));
-    block_capacity = static_cast<std::size_t>(parser.get_long("block-capacity"));
-    capacity_threshold_lo = parser.get_double("capacity-threshold-lo");
-    capacity_threshold_hi = parser.get_double("capacity-threshold-hi");
-    non_blocking = parser.get_flag("non-blocking");
-    num_io_threads = parser.get_int("io-threads");
-    if (parser.get("proc-threads") == "HARDWARE_CONCURRENCY") {
-      num_proc_threads = std::thread::hardware_concurrency();
-    } else {
-      num_proc_threads = parser.get_int("proc-threads");
+    namespace po = boost::program_options;
+    std::string config_file = "";
+    po::options_description generic(" options");
+    generic.add_options()
+        ("version,v", "Print version string")
+        ("help,h", "Print help message")
+        ("config", po::value<std::string>(&config_file), "Configuration file");
+
+    po::options_description hidden("Hidden options");
+    hidden.add_options()
+        ("storage-trace,T", po::value<std::string>(&storage_trace), "Storage trace file");
+
+    // Configuration file variables are named differently
+    po::options_description config_file_options;
+    config_file_options.add_options()
+        ("storage.host", po::value<std::string>(&address)->default_value("127.0.0.1"))
+        ("storage.service_port", po::value<int>(&service_port)->default_value(9093))
+        ("storage.management_port", po::value<int>(&mgmt_port)->default_value(9094))
+        ("storage.notification_port", po::value<int>(&notf_port)->default_value(9095))
+        ("storage.chain_port", po::value<int>(&chain_port)->default_value(9096))
+        ("directory.host", po::value<std::string>(&dir_host)->default_value("127.0.0.1"))
+        ("directory.service_port", po::value<int>(&dir_port)->default_value(9090))
+        ("directory.block_port", po::value<int>(&block_port)->default_value(9092))
+        ("storage.server.non_blocking", po::bool_switch(&non_blocking))
+        ("storage.server.io_threads", po::value<int>(&io_threads)->default_value(1))
+        ("storage.server.work_threads", po::value<int>(&work_threads)->default_value(concurrency))
+        ("storage.block.num_blocks", po::value<size_t>(&num_blocks)->default_value(64))
+        ("storage.block.capacity", po::value<size_t>(&block_capacity)->default_value(134217728))
+        ("storage.block.capacity_threshold_lo", po::value<double>(&blk_thresh_lo)->default_value(0.25))
+        ("storage.block.capacity_threshold_hi", po::value<double>(&blk_thresh_hi)->default_value(0.75));
+
+    po::options_description cmdline_options, env_options;
+    cmdline_options.add(generic).add(hidden);
+    env_options.add(config_file_options);
+
+    po::options_description visible;
+    visible.add(generic);
+
+    po::variables_map vm;
+
+    // Commandline args have highest priority
+    store(po::command_line_parser(argc, argv).options(cmdline_options).run(), vm);
+    notify(vm);
+
+    if (vm.count("help")) {
+      std::cout << "Storage service daemon" << std::endl;
+      std::cout << visible << std::endl;
+      return 0;
     }
-    storage_trace = parser.get("storage-trace-file");
-  } catch (cmd_parse_exception &ex) {
-    std::cerr << "Could not parse command line args: " << ex.what() << std::endl;
-    std::cerr << parser.help_msg() << std::endl;
-    return -1;
+
+    if (vm.count("version")) {
+      std::cout << "Storage service daemon, Version 0.1.0" << std::endl; // TODO: Configure version string
+      return 0;
+    }
+
+    // Configuration files have higher priority than env vars
+    std::vector<std::string> config_files;
+    if (config_file == "") {
+      config_files = {"conf/mmux.conf", "/etc/mmux/mmux.conf"};
+    } else {
+      config_files = {config_file};
+    }
+
+    for (const auto &cfile: config_files) {
+      std::ifstream ifs(cfile.c_str());
+      if (ifs) {
+        store(parse_config_file(ifs, config_file_options, true), vm);
+        notify(vm);
+        break;
+      }
+    }
+
+    // Env vars have lowest priority
+    store(po::parse_environment(env_options, boost::function1<std::string, std::string>(mapper)), vm);
+    notify(vm);
+
+    // Output all the configuration parameters:
+    LOG(log_level::info) << "storage.host: " << address;
+    LOG(log_level::info) << "storage.service_port: " << service_port;
+    LOG(log_level::info) << "storage.management_port: " << mgmt_port;
+    LOG(log_level::info) << "storage.notification_port: " << notf_port;
+    LOG(log_level::info) << "storage.chain_port: " << chain_port;
+    LOG(log_level::info) << "storage.server.non_blocking: " << non_blocking;
+    LOG(log_level::info) << "storage.server.io_threads: " << io_threads;
+    LOG(log_level::info) << "storage.server.work_threads: " << work_threads;
+    LOG(log_level::info) << "storage.block.num_blocks: " << num_blocks;
+    LOG(log_level::info) << "storage.block.capacity: " << block_capacity;
+    LOG(log_level::info) << "storage.block.capacity_threshold_lo: " << blk_thresh_lo;
+    LOG(log_level::info) << "storage.block.capacity_threshold_hi: " << blk_thresh_hi;
+    LOG(log_level::info) << "directory.host: " << dir_host;
+    LOG(log_level::info) << "directory.service_port: " << dir_port;
+    LOG(log_level::info) << "directory.block_port: " << block_port;
+  } catch (std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    return 1;
   }
 
   std::mutex failure_mtx;
@@ -147,8 +193,8 @@ int main(int argc, char **argv) {
   for (int i = 0; i < static_cast<int>(num_blocks); i++) {
     block_names.push_back(block_name_parser::make(hostname,
                                                   service_port,
-                                                  management_port,
-                                                  notification_port,
+                                                  mgmt_port,
+                                                  notf_port,
                                                   chain_port,
                                                   i));
   }
@@ -158,15 +204,15 @@ int main(int argc, char **argv) {
   for (size_t i = 0; i < blocks.size(); ++i) {
     blocks[i] = std::make_shared<kv_block>(block_names[i],
                                            block_capacity,
-                                           capacity_threshold_lo,
-                                           capacity_threshold_hi,
+                                           blk_thresh_lo,
+                                           blk_thresh_hi,
                                            dir_host,
                                            dir_port);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
 
   std::exception_ptr management_exception = nullptr;
-  auto management_server = storage_management_server::create(blocks, address, management_port);
+  auto management_server = storage_management_server::create(blocks, address, mgmt_port);
   std::thread management_serve_thread([&management_exception, &management_server, &failing_thread, &failure_condition] {
     try {
       management_server->serve();
@@ -177,7 +223,7 @@ int main(int argc, char **argv) {
     }
   });
 
-  LOG(log_level::info) << "Management server listening on " << address << ":" << management_port;
+  LOG(log_level::info) << "Management server listening on " << address << ":" << mgmt_port;
 
   try {
     block_advertisement_client client(dir_host, block_port);
@@ -192,7 +238,7 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Advertised " << num_blocks << " to block allocation server";
 
   std::exception_ptr kv_exception = nullptr;
-  auto kv_server = block_server::create(blocks, address, service_port, non_blocking, num_io_threads, num_proc_threads);
+  auto kv_server = block_server::create(blocks, address, service_port, non_blocking, io_threads, work_threads);
   std::thread kv_serve_thread([&kv_exception, &kv_server, &failing_thread, &failure_condition] {
     try {
       kv_server->serve();
@@ -206,7 +252,7 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "KV server listening on " << address << ":" << service_port;
 
   std::exception_ptr notification_exception = nullptr;
-  auto notification_server = notification_server::create(blocks, address, notification_port);
+  auto notification_server = notification_server::create(blocks, address, notf_port);
   std::thread
       notification_serve_thread([&notification_exception, &notification_server, &failing_thread, &failure_condition] {
     try {
@@ -218,10 +264,10 @@ int main(int argc, char **argv) {
     }
   });
 
-  LOG(log_level::info) << "Notification server listening on " << address << ":" << notification_port;
+  LOG(log_level::info) << "Notification server listening on " << address << ":" << notf_port;
 
   std::exception_ptr chain_exception = nullptr;
-  auto chain_server = chain_server::create(blocks, address, chain_port, non_blocking, num_io_threads, num_proc_threads);
+  auto chain_server = chain_server::create(blocks, address, chain_port, non_blocking, io_threads, work_threads);
   std::thread chain_serve_thread([&chain_exception, &chain_server, &failing_thread, &failure_condition] {
     try {
       chain_server->serve();
