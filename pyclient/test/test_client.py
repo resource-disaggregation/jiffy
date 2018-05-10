@@ -7,6 +7,10 @@ import tempfile
 import time
 
 try:
+    import ConfigParser as configparser
+except ImportError:
+    import configparser
+try:
     import Queue as queue
 except ImportError:
     import queue
@@ -49,86 +53,72 @@ def gen_async_kv_ops():
 
 
 class TestClient(TestCase):
-    DIRECTORY_SERVER_EXECUTABLE = os.getenv('DIRECTORY_SERVER_EXEC', 'directoryd')
-    STORAGE_SERVER_EXECUTABLE = os.getenv('STORAGE_SERVER_EXEC', 'storaged')
-    STORAGE_HOST = '127.0.0.1'
-    STORAGE_SERVICE_PORT = 9093
-    STORAGE_MANAGEMENT_PORT = 9094
-    STORAGE_NOTIFICATION_PORT = 9095
-    STORAGE_CHAIN_PORT = 9096
-
-    STORAGE_SERVICE_PORT2 = 9097
-    STORAGE_MANAGEMENT_PORT2 = 9098
-    STORAGE_NOTIFICATION_PORT2 = 9099
-    STORAGE_CHAIN_PORT2 = 9100
-
-    STORAGE_SERVICE_PORT3 = 9101
-    STORAGE_MANAGEMENT_PORT3 = 9102
-    STORAGE_NOTIFICATION_PORT3 = 9103
-    STORAGE_CHAIN_PORT3 = 9104
-
-    NUM_BLOCKS = 4
-
-    DIRECTORY_HOST = '127.0.0.1'
-    DIRECTORY_SERVICE_PORT = 9090
-    DIRECTORY_LEASE_PORT = 9091
-
-    def start_servers(self, directoryd_args=None, storaged_args=None, chain=False):
-        if storaged_args is None:
-            storaged_args = []
-        if directoryd_args is None:
-            directoryd_args = []
+    def start_servers(self, chain=False, auto_scale=False):
+        resource_path = os.path.join(os.path.split(__file__)[0], "resources")
+        directory_conf_file = os.path.join(resource_path, "directory.conf")
+        dir_exec = os.getenv('DIRECTORY_SERVER_EXEC', 'directoryd')
         try:
-            self.directoryd = subprocess.Popen([self.DIRECTORY_SERVER_EXECUTABLE] + directoryd_args)
+            self.directoryd = subprocess.Popen([dir_exec, '--config', directory_conf_file])
         except OSError as e:
-            print("Error running executable %s: %s" % (self.DIRECTORY_SERVER_EXECUTABLE, e))
+            print("Error running executable %s: %s" % (dir_exec, e))
             sys.exit()
 
-        wait_till_server_ready(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT)
-        wait_till_server_ready(self.DIRECTORY_HOST, self.DIRECTORY_LEASE_PORT)
+        directory_conf = configparser.ConfigParser()
+        directory_conf.read(directory_conf_file)
+        self.dconf = directory_conf['directory']
+        wait_till_server_ready(self.dconf['host'], int(self.dconf['service_port']))
+        wait_till_server_ready(self.dconf['host'], int(self.dconf['lease_port']))
+        wait_till_server_ready(self.dconf['host'], int(self.dconf['block_port']))
 
+        storage_exec = os.getenv('STORAGE_SERVER_EXEC', 'storaged')
+        if auto_scale:
+            storage1_conf_file = os.path.join(resource_path, "storage_auto_scale.conf")
+        else:
+            storage1_conf_file = os.path.join(resource_path, "storage1.conf")
         try:
-            self.storaged = subprocess.Popen(
-                [self.STORAGE_SERVER_EXECUTABLE, "--num-blocks", str(self.NUM_BLOCKS)] + storaged_args)
+            self.storaged = subprocess.Popen([storage_exec, "--config", storage1_conf_file])
         except OSError as e:
-            print("Error running executable %s: %s" % (self.STORAGE_SERVER_EXECUTABLE, e))
+            print("Error running executable %s: %s" % (storage_exec, e))
             sys.exit()
 
-        wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_SERVICE_PORT)
-        wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_MANAGEMENT_PORT)
-        wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_NOTIFICATION_PORT)
-        wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_CHAIN_PORT)
+        storage1_conf = configparser.ConfigParser()
+        storage1_conf.read(storage1_conf_file)
+        self.s1conf = storage1_conf['storage']
+        wait_till_server_ready(self.s1conf['host'], int(self.s1conf['service_port']))
+        wait_till_server_ready(self.s1conf['host'], int(self.s1conf['management_port']))
+        wait_till_server_ready(self.s1conf['host'], int(self.s1conf['notification_port']))
+        wait_till_server_ready(self.s1conf['host'], int(self.s1conf['chain_port']))
 
         if chain:
+            storage2_conf_file = os.path.join(resource_path, "storage2.conf")
             try:
-                self.storaged2 = subprocess.Popen(
-                    [self.STORAGE_SERVER_EXECUTABLE, "--num-blocks", str(self.NUM_BLOCKS), "--service-port",
-                     str(self.STORAGE_SERVICE_PORT2), "--management-port", str(self.STORAGE_MANAGEMENT_PORT2),
-                     "--notification-port", str(self.STORAGE_NOTIFICATION_PORT2), "--chain-port",
-                     str(self.STORAGE_CHAIN_PORT2)] + storaged_args)
+                self.storaged2 = subprocess.Popen([storage_exec, "--config", storage2_conf_file])
             except OSError as e:
-                print("Error running executable %s: %s" % (self.STORAGE_SERVER_EXECUTABLE, e))
+                print("Error running executable %s: %s" % (storage_exec, e))
                 sys.exit()
 
-            wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_SERVICE_PORT2)
-            wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_MANAGEMENT_PORT2)
-            wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_NOTIFICATION_PORT2)
-            wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_CHAIN_PORT2)
+            storage2_conf = configparser.ConfigParser()
+            storage2_conf.read(storage2_conf_file)
+            self.s2conf = storage2_conf['storage']
+            wait_till_server_ready(self.s2conf['host'], int(self.s2conf['service_port']))
+            wait_till_server_ready(self.s2conf['host'], int(self.s2conf['management_port']))
+            wait_till_server_ready(self.s2conf['host'], int(self.s2conf['notification_port']))
+            wait_till_server_ready(self.s2conf['host'], int(self.s2conf['chain_port']))
 
+            storage3_conf_file = os.path.join(resource_path, "storage3.conf")
             try:
-                self.storaged3 = subprocess.Popen(
-                    [self.STORAGE_SERVER_EXECUTABLE, "--num-blocks", str(self.NUM_BLOCKS), "--service-port",
-                     str(self.STORAGE_SERVICE_PORT3), "--management-port", str(self.STORAGE_MANAGEMENT_PORT3),
-                     "--notification-port", str(self.STORAGE_NOTIFICATION_PORT3), "--chain-port",
-                     str(self.STORAGE_CHAIN_PORT3)] + storaged_args)
+                self.storaged3 = subprocess.Popen([storage_exec, "--config", storage3_conf_file])
             except OSError as e:
-                print("Error running executable %s: %s" % (self.STORAGE_SERVER_EXECUTABLE, e))
+                print("Error running executable %s: %s" % (storage_exec, e))
                 sys.exit()
 
-            wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_SERVICE_PORT3)
-            wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_MANAGEMENT_PORT3)
-            wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_NOTIFICATION_PORT3)
-            wait_till_server_ready(self.STORAGE_HOST, self.STORAGE_CHAIN_PORT3)
+            storage3_conf = configparser.ConfigParser()
+            storage3_conf.read(storage3_conf_file)
+            self.s3conf = storage3_conf['storage']
+            wait_till_server_ready(self.s3conf['host'], int(self.s3conf['service_port']))
+            wait_till_server_ready(self.s3conf['host'], int(self.s3conf['management_port']))
+            wait_till_server_ready(self.s3conf['host'], int(self.s3conf['notification_port']))
+            wait_till_server_ready(self.s3conf['host'], int(self.s3conf['chain_port']))
         else:
             self.storaged2 = None
             self.storaged3 = None
@@ -242,7 +232,7 @@ class TestClient(TestCase):
 
     def test_lease_worker(self):
         self.start_servers()
-        client = MMuxClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
         try:
             client.create("/a/file.txt", "/tmp")
             self.assertTrue(client.fs.exists("/a/file.txt"))
@@ -256,7 +246,7 @@ class TestClient(TestCase):
 
     def test_create(self):
         self.start_servers()
-        client = MMuxClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
         try:
             kv = client.create("/a/file.txt", "/tmp")
             self.kv_ops(kv)
@@ -268,7 +258,7 @@ class TestClient(TestCase):
 
     def test_open(self):
         self.start_servers()
-        client = MMuxClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
         try:
             client.create("/a/file.txt", "/tmp")
             self.assertTrue(client.fs.exists('/a/file.txt'))
@@ -281,7 +271,7 @@ class TestClient(TestCase):
 
     def test_close(self):
         self.start_servers()
-        client = MMuxClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
         try:
             client.create("/a/file.txt", "/tmp")
             self.assertTrue('/a/file.txt' in client.to_renew)
@@ -297,7 +287,7 @@ class TestClient(TestCase):
 
     def test_chain_replication(self):  # TODO: Add failure tests
         self.start_servers(chain=True)
-        client = MMuxClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
         try:
             kv = client.create("/a/file.txt", "/tmp", 1, 3)
             self.assertTrue(kv.file_info.chain_length == 3)
@@ -308,8 +298,8 @@ class TestClient(TestCase):
             self.stop_servers()
 
     def test_auto_scale(self):
-        self.start_servers(storaged_args=["--block-capacity", "7705"])
-        client = MMuxClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        self.start_servers(auto_scale=True)
+        client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
         try:
             kv = client.create("/a/file.txt", "/tmp")
             for i in range(0, 2000):
@@ -324,7 +314,7 @@ class TestClient(TestCase):
 
     def test_notifications(self):
         self.start_servers()
-        client = MMuxClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
         try:
             client.fs.create("/a/file.txt", "/tmp")
 
@@ -381,22 +371,22 @@ class TestClient(TestCase):
 
         # Setup: create workload file
         workload_path = gen_async_kv_ops()
-        client = MMuxClient(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT)
+        client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
         try:
             data_path1 = "/a/file1.txt"
             client.fs.create(data_path1, "/tmp")
-            run_async_kv_benchmark(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT,
+            run_async_kv_benchmark(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']),
                                    data_path1, workload_path)
 
             data_path2 = "/a/file2.txt"
             client.fs.create(data_path2, "/tmp")
-            run_sync_kv_throughput_benchmark(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT,
-                                             self.DIRECTORY_LEASE_PORT, data_path2, workload_path)
+            run_sync_kv_throughput_benchmark(self.dconf['host'], int(self.dconf['service_port']),
+                                             int(self.dconf['lease_port']), data_path2, workload_path)
 
             data_path3 = "/a/file3.txt"
             client.fs.create(data_path3, "/tmp")
-            run_sync_kv_latency_benchmark(self.DIRECTORY_HOST, self.DIRECTORY_SERVICE_PORT, self.DIRECTORY_LEASE_PORT,
-                                          data_path3, workload_path)
+            run_sync_kv_latency_benchmark(self.dconf['host'], int(self.dconf['service_port']),
+                                          int(self.dconf['lease_port']), data_path3, workload_path)
         finally:
             client.disconnect()
             self.stop_servers()

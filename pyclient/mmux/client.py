@@ -32,13 +32,14 @@ def now_ms():
 class LeaseRenewalWorker(threading.Thread):
     def __init__(self, ls, to_renew):
         super(LeaseRenewalWorker, self).__init__()
-        self.renewal_duration_s = 10  # TODO: Remove this; we can use semaphores to block until we have leases to renew
         self.ls = ls
         self.to_renew = to_renew
+        self.renewal_duration_s = float(self.ls.renew_leases([]).lease_period_ms / 1000.0)
         self._stop_event = threading.Event()
 
     def run(self):
         while not self.stopped():
+            # TODO: We can use semaphores to block until we have leases to renew instead
             try:
                 s = now_ms()
                 # Only update lease if there is something to update
