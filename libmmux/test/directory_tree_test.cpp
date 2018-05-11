@@ -1,6 +1,6 @@
 #include "catch.hpp"
-#include "../src/directory/fs/directory_tree.h"
-#include "../src/directory/block/random_block_allocator.h"
+#include "../src/mmux/directory/fs/directory_tree.h"
+#include "../src/mmux/directory/block/random_block_allocator.h"
 #include "test_utils.h"
 
 using namespace ::mmux::directory;

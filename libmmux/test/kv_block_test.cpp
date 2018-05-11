@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "../src/storage/kv/kv_block.h"
+#include "../src/mmux/storage/kv/kv_block.h"
 
 using namespace ::mmux::storage;
 using namespace ::mmux::persistent;

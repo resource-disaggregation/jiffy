@@ -2,7 +2,7 @@
 #include <catch.hpp>
 
 #include <thrift/TOutput.h>
-#include "../src/utils/logger.h"
+#include "../src/mmux/utils/logger.h"
 
 using namespace ::apache::thrift;
 using namespace ::mmux::utils;

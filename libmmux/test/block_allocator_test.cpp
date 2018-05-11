@@ -1,6 +1,6 @@
 #include "catch.hpp"
-#include "../src/directory/block/block_allocator.h"
-#include "../src/directory/block/random_block_allocator.h"
+#include "../src/mmux/directory/block/block_allocator.h"
+#include "../src/mmux/directory/block/random_block_allocator.h"
 
 using namespace ::mmux::directory;
 

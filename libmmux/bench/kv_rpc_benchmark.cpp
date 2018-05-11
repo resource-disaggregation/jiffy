@@ -1,13 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "../src/storage/client/replica_chain_client.h"
-#include "../src/utils/time_utils.h"
-#include "../src/utils/signal_handling.h"
-#include "../src/utils/logger.h"
-#include "../src/utils/cmd_parse.h"
-#include "../src/storage/kv/kv_block.h"
-#include "../src/directory/fs/directory_client.h"
+#include "../src/mmux/storage/client/replica_chain_client.h"
+#include "../src/mmux/utils/time_utils.h"
+#include "../src/mmux/utils/signal_handling.h"
+#include "../src/mmux/utils/logger.h"
+#include "../src/mmux/utils/cmd_parse.h"
+#include "../src/mmux/storage/kv/kv_block.h"
+#include "../src/mmux/directory/fs/directory_client.h"
 #include "benchmark_utils.h"
 
 using namespace mmux::storage;

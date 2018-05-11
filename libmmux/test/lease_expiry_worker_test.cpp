@@ -1,8 +1,8 @@
 #include "catch.hpp"
 
 #include "test_utils.h"
-#include "../src/directory/lease/lease_expiry_worker.h"
-#include "../src/directory/block/random_block_allocator.h"
+#include "../src/mmux/directory/lease/lease_expiry_worker.h"
+#include "../src/mmux/directory/block/random_block_allocator.h"
 
 #define LEASE_PERIOD_MS 100
 #define GRACE_PERIOD_MS 100

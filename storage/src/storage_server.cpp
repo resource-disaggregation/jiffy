@@ -1,14 +1,14 @@
 #include <atomic>
 #include <iostream>
-#include <directory/block/block_advertisement_client.h>
-#include <storage/kv/kv_block.h>
-#include <storage/manager/storage_management_server.h>
-#include <storage/notification/notification_server.h>
-#include <storage/service/block_server.h>
-#include <utils/signal_handling.h>
-#include <utils/logger.h>
-#include <storage/service/chain_server.h>
-#include <storage/service/server_storage_tracker.h>
+#include <mmux/directory/block/block_advertisement_client.h>
+#include <mmux/storage/kv/kv_block.h>
+#include <mmux/storage/manager/storage_management_server.h>
+#include <mmux/storage/notification/notification_server.h>
+#include <mmux/storage/service/block_server.h>
+#include <mmux/utils/signal_handling.h>
+#include <mmux/utils/logger.h>
+#include <mmux/storage/service/chain_server.h>
+#include <mmux/storage/service/server_storage_tracker.h>
 #include <boost/program_options.hpp>
 
 using namespace ::mmux::directory;

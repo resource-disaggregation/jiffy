@@ -1,16 +1,16 @@
 #include <iostream>
 #include <vector>
 #include <thread>
-#include <directory/fs/directory_tree.h>
-#include <directory/block/random_block_allocator.h>
-#include <directory/fs/directory_server.h>
-#include <directory/lease/lease_expiry_worker.h>
-#include <directory/lease/lease_server.h>
-#include <storage/manager/storage_manager.h>
-#include <utils/signal_handling.h>
-#include <directory/block/block_allocation_server.h>
-#include <utils/logger.h>
-#include <directory/block/file_size_tracker.h>
+#include <mmux/directory/fs/directory_tree.h>
+#include <mmux/directory/block/random_block_allocator.h>
+#include <mmux/directory/fs/directory_server.h>
+#include <mmux/directory/lease/lease_expiry_worker.h>
+#include <mmux/directory/lease/lease_server.h>
+#include <mmux/storage/manager/storage_manager.h>
+#include <mmux/utils/signal_handling.h>
+#include <mmux/directory/block/block_allocation_server.h>
+#include <mmux/utils/logger.h>
+#include <mmux/directory/block/file_size_tracker.h>
 #include <boost/program_options.hpp>
 
 using namespace ::mmux::directory;

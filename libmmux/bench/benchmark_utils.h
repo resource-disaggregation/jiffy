@@ -6,7 +6,7 @@
 #include <iostream>
 #include <cstdint>
 
-#include "../../libmmux/src/storage/kv/kv_block.h"
+#include "../../libmmux/src/mmux/storage/kv/kv_block.h"
 
 namespace mmux {
 namespace benchmark {

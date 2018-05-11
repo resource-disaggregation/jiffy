@@ -2,13 +2,13 @@
 
 #include <thrift/transport/TTransportException.h>
 #include <thread>
-#include "../src/storage/manager/storage_management_server.h"
-#include "../src/storage/manager/storage_management_client.h"
-#include "../src/storage/manager/storage_manager.h"
-#include "../src/storage/kv/kv_block.h"
+#include "../src/mmux/storage/manager/storage_management_server.h"
+#include "../src/mmux/storage/manager/storage_management_client.h"
+#include "../src/mmux/storage/manager/storage_manager.h"
+#include "../src/mmux/storage/kv/kv_block.h"
 #include "test_utils.h"
-#include "../src/storage/service/block_server.h"
-#include "../src/storage/kv/hash_slot.h"
+#include "../src/mmux/storage/service/block_server.h"
+#include "../src/mmux/storage/kv/hash_slot.h"
 
 using namespace ::mmux::storage;
 using namespace ::apache::thrift::transport;

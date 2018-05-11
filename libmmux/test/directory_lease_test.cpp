@@ -2,9 +2,9 @@
 
 #include <thrift/transport/TTransportException.h>
 #include <thread>
-#include "../src/directory/lease/lease_client.h"
-#include "../src/directory/lease/lease_server.h"
-#include "../src/directory/block/random_block_allocator.h"
+#include "../src/mmux/directory/lease/lease_client.h"
+#include "../src/mmux/directory/lease/lease_server.h"
+#include "../src/mmux/directory/block/random_block_allocator.h"
 #include "test_utils.h"
 
 using namespace ::mmux::storage;

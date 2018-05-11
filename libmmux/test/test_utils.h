@@ -6,11 +6,11 @@
 #include <iostream>
 #include <thrift/transport/TBufferTransports.h>
 #include <thrift/transport/TSocket.h>
-#include "../src/storage/storage_management_ops.h"
-#include "../src/directory/block/block_allocator.h"
-#include "../src/storage/kv/kv_block.h"
-#include "../src/storage/notification/subscription_map.h"
-#include "../src/utils/logger.h"
+#include "../src/mmux/storage/storage_management_ops.h"
+#include "../src/mmux/directory/block/block_allocator.h"
+#include "../src/mmux/storage/kv/kv_block.h"
+#include "../src/mmux/storage/notification/subscription_map.h"
+#include "../src/mmux/utils/logger.h"
 
 class dummy_storage_manager : public mmux::storage::storage_management_ops {
  public:

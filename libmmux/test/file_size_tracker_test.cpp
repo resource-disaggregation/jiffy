@@ -2,9 +2,9 @@
 #include "catch.hpp"
 
 #include "test_utils.h"
-#include "../src/directory/lease/lease_expiry_worker.h"
-#include "../src/directory/block/random_block_allocator.h"
-#include "../src/directory/block/file_size_tracker.h"
+#include "../src/mmux/directory/lease/lease_expiry_worker.h"
+#include "../src/mmux/directory/block/random_block_allocator.h"
+#include "../src/mmux/directory/block/file_size_tracker.h"
 
 #define PERIODICITY_MS 100
 

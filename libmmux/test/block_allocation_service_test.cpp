@@ -1,8 +1,8 @@
 #include <catch.hpp>
 #include <thread>
-#include "../src/directory/block/block_allocator.h"
-#include "../src/directory/block/block_advertisement_client.h"
-#include "../src/directory/block/block_allocation_server.h"
+#include "../src/mmux/directory/block/block_allocator.h"
+#include "../src/mmux/directory/block/block_advertisement_client.h"
+#include "../src/mmux/directory/block/block_allocation_server.h"
 #include "test_utils.h"
 
 using namespace ::mmux::directory;

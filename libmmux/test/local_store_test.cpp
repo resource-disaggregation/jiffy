@@ -1,8 +1,8 @@
 #include <fstream>
 #include <catch.hpp>
 #include <iostream>
-#include "../src/persistent/local/local_store.h"
-#include "../src/utils/directory_utils.h"
+#include "../src/mmux/persistent/local/local_store.h"
+#include "../src/mmux/utils/directory_utils.h"
 
 using namespace ::mmux::persistent;
 TEST_CASE("local_write_test", "[write]") {

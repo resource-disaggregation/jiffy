@@ -1,9 +1,9 @@
 #include <catch.hpp>
 #include <thrift/transport/TTransportException.h>
-#include "../src/storage/kv/kv_block.h"
-#include "../src/storage/service/block_server.h"
+#include "../src/mmux/storage/kv/kv_block.h"
+#include "../src/mmux/storage/service/block_server.h"
 #include "test_utils.h"
-#include "../src/storage/client/replica_chain_client.h"
+#include "../src/mmux/storage/client/replica_chain_client.h"
 
 using namespace ::mmux::storage;
 using namespace ::apache::thrift::transport;

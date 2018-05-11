@@ -2,8 +2,8 @@
 #include <thrift/transport/TBufferTransports.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <iostream>
-#include "../src/storage/notification/subscriber.h"
-#include "../src/storage/notification/notification_server.h"
+#include "../src/mmux/storage/notification/subscriber.h"
+#include "../src/mmux/storage/notification/notification_server.h"
 #include "test_utils.h"
 
 using namespace ::mmux::storage;

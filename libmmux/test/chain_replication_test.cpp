@@ -1,11 +1,11 @@
 #include <catch.hpp>
 #include "test_utils.h"
-#include "../src/storage/manager/storage_management_server.h"
-#include "../src/storage/service/block_server.h"
-#include "../src/storage/manager/storage_manager.h"
-#include "../src/directory/fs/directory_server.h"
-#include "../src/storage/service/chain_server.h"
-#include "../src/storage/client/replica_chain_client.h"
+#include "../src/mmux/storage/manager/storage_management_server.h"
+#include "../src/mmux/storage/service/block_server.h"
+#include "../src/mmux/storage/manager/storage_manager.h"
+#include "../src/mmux/directory/fs/directory_server.h"
+#include "../src/mmux/storage/service/chain_server.h"
+#include "../src/mmux/storage/client/replica_chain_client.h"
 
 #define HOST "127.0.0.1"
 #define DIRECTORY_SERVICE_PORT 9090
