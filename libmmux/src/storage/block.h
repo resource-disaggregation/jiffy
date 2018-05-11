@@ -54,15 +54,6 @@ class block {
 
   virtual void run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) = 0;
 
-  void run_command(std::vector<std::string> &_return,
-                   const std::string &op_name,
-                   const std::vector<std::string> &args) {
-    int32_t oid = op_id(op_name);
-    if (oid == -1)
-      throw std::invalid_argument("No such command " + op_name);
-    run_command(_return, oid, args);
-  }
-
   void path(const std::string &path) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     path_ = path;
@@ -172,10 +163,6 @@ class block {
     return block_ops_.at(static_cast<size_t>(i)).type == mutator; // Does not require lock since block_ops don't change
   }
 
-  int op_id(const std::string &op_name) const {
-    return search_op_name(0, static_cast<int>(block_ops_.size() - 1), op_name.c_str());
-  }
-
   std::string op_name(int op_id) {
     return block_ops_[op_id].name;  // Does not require lock since block_ops don't change
   }
@@ -204,18 +191,6 @@ class block {
   }
 
  protected:
-  int32_t search_op_name(int32_t l, int32_t r, const char *name) const {
-    if (r >= l) {
-      int32_t mid = l + (r - l) / 2;
-      if (std::strcmp(block_ops_[mid].name, name) == 0)
-        return mid;
-      if (std::strcmp(block_ops_[mid].name, name) > 0)
-        return search_op_name(l, mid - 1, name);
-      return search_op_name(mid + 1, r, name);
-    }
-    return -1;
-  }
-
   mutable std::shared_mutex metadata_mtx_;
 
   const std::vector<block_op> &block_ops_;

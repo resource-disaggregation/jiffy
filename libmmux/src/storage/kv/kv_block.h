@@ -25,7 +25,6 @@ class noop_store : public persistent::persistent_service {
   void remove(const std::string &) override {}
 };
 
-// TODO: This should really be a map... maintaining the ids is tedious!
 extern std::vector<block_op> KV_OPS;
 
 enum kv_op_id : int32_t {
@@ -36,10 +35,13 @@ enum kv_op_id : int32_t {
   put = 4,
   remove = 5,
   update = 6,
-  zget = 7,
-  zput = 8,
-  zremove = 9,
-  zupdate = 10
+  locked_data_in_slot_range = 7,
+  lock = 8,
+  unlock = 9,
+  locked_get = 10,
+  locked_put = 11,
+  locked_remove = 12,
+  locked_update = 13,
 };
 
 class kv_block : public chain_module {
@@ -59,15 +61,30 @@ class kv_block : public chain_module {
 
   std::string put(const key_type &key, const value_type &value, bool redirect = false);
 
+  std::string locked_put(const key_type &key, const value_type &value, bool redirect = false);
+
   value_type get(const key_type &key, bool redirect = false);
 
-  void get(value_type &value, const key_type &key, bool redirect = false);
+  std::string locked_get(const key_type &key, bool redirect = false);
 
   std::string update(const key_type &key, const value_type &value, bool redirect = false);
 
+  std::string locked_update(const key_type &key, const value_type &value, bool redirect = false);
+
   std::string remove(const key_type &key, bool redirect = false);
 
+  std::string locked_remove(const key_type &key, bool redirect = false);
+
   void keys(std::vector<std::string> &keys);
+
+  void locked_data_in_slot_range(std::vector<std::string> &data,
+                                 int32_t slot_begin,
+                                 int32_t slot_end,
+                                 int32_t num_keys);
+
+  std::string lock();
+
+  std::string unlock();
 
   std::size_t size() const;
 
@@ -94,6 +111,7 @@ class kv_block : public chain_module {
   bool underload();
 
   hash_table_type block_;
+  locked_hash_table_type locked_block_;
 
   std::string directory_host_;
   int directory_port_;

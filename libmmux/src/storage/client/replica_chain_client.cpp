@@ -5,7 +5,7 @@
 namespace mmux {
 namespace storage {
 
-replica_chain_client::replica_chain_client(const std::vector<std::string> &chain) {
+replica_chain_client::replica_chain_client(const std::vector<std::string> &chain): in_flight_(false) {
   seq_.client_id = -1;
   seq_.client_seq_no = 0;
   connect(chain);
@@ -61,25 +61,29 @@ std::string replica_chain_client::update(const std::string &key, const std::stri
   return run_command(kv_op_id::update, {key, value}).front();
 }
 
-std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const std::vector<std::string> &args) {
-  int64_t op_seq = seq_.client_seq_no;
+void replica_chain_client::send_command(int32_t cmd_id, const std::vector<std::string> &args) {
+  if (in_flight_) {
+    throw std::length_error("Cannot have more than one request in-flight");
+  }
   cmd_client_[cmd_id]->command_request(seq_, cmd_id, args);
-  ++(seq_.client_seq_no);
-  auto it = response_cache_.find(op_seq);
-  if (it != response_cache_.end()) {
-    auto res = *it;
-    response_cache_.erase(it);
-    return res.second;
+  in_flight_ = true;
+}
+
+std::vector<std::string> replica_chain_client::recv_response() {
+  std::vector<std::string> ret;
+  int64_t r_seq = response_reader_.recv_response(ret);
+  if (r_seq != seq_.client_seq_no) {
+    throw std::logic_error("Invalid sequence number: "
+                           "Expected=" + std::to_string(seq_.client_seq_no) + ", Received=" + std::to_string(r_seq));
   }
-  while (true) {
-    std::vector<std::string> ret;
-    int64_t recv_seq = response_reader_.recv_response(ret);
-    if (recv_seq == op_seq) {
-      return ret;
-    } else {
-      response_cache_[op_seq] = ret;
-    }
-  }
+  seq_.client_seq_no++;
+  in_flight_ = false;
+  return ret;
+}
+
+std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const std::vector<std::string> &args) {
+  send_command(cmd_id, args);
+  return recv_response();
 }
 
 }

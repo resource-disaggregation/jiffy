@@ -23,6 +23,8 @@ class replica_chain_client {
   std::string update(const std::string &key, const std::string &value);
   std::string num_keys();
 
+  void send_command(int32_t cmd_id, const std::vector<std::string> &args);
+  std::vector<std::string> recv_response();
   std::vector<std::string> run_command(int32_t cmd_id, const std::vector<std::string> &args);
  private:
   void connect(const std::vector<std::string> &chain);
@@ -33,7 +35,7 @@ class replica_chain_client {
   block_client tail_;
   block_client::command_response_reader response_reader_;
   std::vector<client_ref> cmd_client_;
-  std::map<int64_t, std::vector<std::string>> response_cache_;
+  bool in_flight_;
 };
 
 }
