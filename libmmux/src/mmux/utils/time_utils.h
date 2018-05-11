@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_TIME_UTILS_H
-#define ELASTICMEM_TIME_UTILS_H
+#ifndef MMUX_TIME_UTILS_H
+#define MMUX_TIME_UTILS_H
 
 #include <cstdio>
 #include <ctime>
@@ -54,4 +54,4 @@ class time_utils {
 }
 }
 
-#endif //ELASTICMEM_TIME_UTILS_H
+#endif //MMUX_TIME_UTILS_H

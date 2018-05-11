@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_LEASE_MANAGER_H
-#define ELASTICMEM_LEASE_MANAGER_H
+#ifndef MMUX_LEASE_MANAGER_H
+#define MMUX_LEASE_MANAGER_H
 
 #include <thread>
 #include "../fs/directory_tree.h"
@@ -34,4 +34,4 @@ class lease_expiry_worker {
 }
 }
 
-#endif //ELASTICMEM_LEASE_MANAGER_H
+#endif //MMUX_LEASE_MANAGER_H

@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_CMD_PARSE_H
-#define ELASTICMEM_CMD_PARSE_H
+#ifndef MMUX_CMD_PARSE_H
+#define MMUX_CMD_PARSE_H
 
 #include <cassert>
 #include <exception>
@@ -274,4 +274,4 @@ class cmd_parser {
 }
 }
 
-#endif //ELASTICMEM_CMD_PARSE_H
+#endif //MMUX_CMD_PARSE_H

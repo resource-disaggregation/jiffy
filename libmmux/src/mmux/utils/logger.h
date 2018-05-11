@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_LOGGER_H
-#define ELASTICMEM_LOGGER_H
+#ifndef MMUX_LOGGER_H
+#define MMUX_LOGGER_H
 
 #include <sstream>
 #include <string>
@@ -99,4 +99,4 @@ class log_utils {
 }
 }
 
-#endif //ELASTICMEM_LOGGER_H
+#endif //MMUX_LOGGER_H

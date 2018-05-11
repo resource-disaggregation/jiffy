@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_KV_MANAGEMENT_RPC_CLIENT_H
-#define ELASTICMEM_KV_MANAGEMENT_RPC_CLIENT_H
+#ifndef MMUX_KV_MANAGEMENT_RPC_CLIENT_H
+#define MMUX_KV_MANAGEMENT_RPC_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
 #include "storage_management_service.h"
@@ -58,4 +58,4 @@ class storage_management_client {
 }
 }
 
-#endif //ELASTICMEM_KV_MANAGEMENT_RPC_CLIENT_H
+#endif //MMUX_KV_MANAGEMENT_RPC_CLIENT_H

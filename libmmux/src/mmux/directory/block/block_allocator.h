@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BLOCK_ALLOCATOR_H
-#define ELASTICMEM_BLOCK_ALLOCATOR_H
+#ifndef MMUX_BLOCK_ALLOCATOR_H
+#define MMUX_BLOCK_ALLOCATOR_H
 
 #include <string>
 #include <vector>
@@ -22,4 +22,4 @@ class block_allocator {
 }
 }
 
-#endif //ELASTICMEM_BLOCK_ALLOCATOR_H
+#endif //MMUX_BLOCK_ALLOCATOR_H

@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_LOCAL_STORE_H
-#define ELASTICMEM_LOCAL_STORE_H
+#ifndef MMUX_LOCAL_STORE_H
+#define MMUX_LOCAL_STORE_H
 
 #include "../persistent_service.h"
 
@@ -18,4 +18,4 @@ class local_store : public persistent_service {
 }
 }
 
-#endif //ELASTICMEM_LOCAL_STORE_H
+#endif //MMUX_LOCAL_STORE_H

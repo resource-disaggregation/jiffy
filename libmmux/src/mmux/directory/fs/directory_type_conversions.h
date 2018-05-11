@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_DIRECTORY_TYPE_CONVERSIONS_H
-#define ELASTICMEM_DIRECTORY_TYPE_CONVERSIONS_H
+#ifndef MMUX_DIRECTORY_TYPE_CONVERSIONS_H
+#define MMUX_DIRECTORY_TYPE_CONVERSIONS_H
 
 #include "directory_service_types.h"
 #include "../directory_ops.h"
@@ -74,4 +74,4 @@ class directory_type_conversions {
 }
 }
 
-#endif //ELASTICMEM_DIRECTORY_TYPE_CONVERSIONS_H
+#endif //MMUX_DIRECTORY_TYPE_CONVERSIONS_H

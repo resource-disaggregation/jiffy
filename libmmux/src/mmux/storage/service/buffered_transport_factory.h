@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BUFFERED_TRANSPORT_H
-#define ELASTICMEM_BUFFERED_TRANSPORT_H
+#ifndef MMUX_BUFFERED_TRANSPORT_H
+#define MMUX_BUFFERED_TRANSPORT_H
 
 #include <thrift/transport/TTransport.h>
 #include <thrift/transport/TBufferTransports.h>
@@ -28,4 +28,4 @@ class BufferedTransportFactory : public apache::thrift::transport::TTransportFac
 }
 }
 
-#endif //ELASTICMEM_BUFFERED_TRANSPORT_H
+#endif //MMUX_BUFFERED_TRANSPORT_H

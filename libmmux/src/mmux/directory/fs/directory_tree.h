@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_DIRECTORY_SERVICE_SHARD_H
-#define ELASTICMEM_DIRECTORY_SERVICE_SHARD_H
+#ifndef MMUX_DIRECTORY_SERVICE_SHARD_H
+#define MMUX_DIRECTORY_SERVICE_SHARD_H
 
 #include <utility>
 #include <memory>
@@ -581,4 +581,4 @@ class directory_tree : public directory_ops, public directory_management_ops {
 }
 }
 
-#endif //ELASTICMEM_DIRECTORY_SERVICE_SHARD_H
+#endif //MMUX_DIRECTORY_SERVICE_SHARD_H

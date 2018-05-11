@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_CHAIN_SERVER_H
-#define ELASTICMEM_CHAIN_SERVER_H
+#ifndef MMUX_CHAIN_SERVER_H
+#define MMUX_CHAIN_SERVER_H
 
 #include <thrift/server/TThreadedServer.h>
 #include "../chain_module.h"
@@ -20,4 +20,4 @@ class chain_server {
 }
 }
 
-#endif //ELASTICMEM_CHAIN_SERVER_H
+#endif //MMUX_CHAIN_SERVER_H

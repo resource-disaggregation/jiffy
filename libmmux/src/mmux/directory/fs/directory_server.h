@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_DIRECTORY_RPC_SERVER_H
-#define ELASTICMEM_DIRECTORY_RPC_SERVER_H
+#ifndef MMUX_DIRECTORY_RPC_SERVER_H
+#define MMUX_DIRECTORY_RPC_SERVER_H
 
 #include <string>
 #include <thrift/server/TThreadedServer.h>
@@ -18,4 +18,4 @@ class directory_server {
 }
 }
 
-#endif //ELASTICMEM_DIRECTORY_RPC_SERVER_H
+#endif //MMUX_DIRECTORY_RPC_SERVER_H

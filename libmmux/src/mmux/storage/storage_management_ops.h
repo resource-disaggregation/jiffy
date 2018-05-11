@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_KV_SERVICE_H
-#define ELASTICMEM_KV_SERVICE_H
+#ifndef MMUX_KV_SERVICE_H
+#define MMUX_KV_SERVICE_H
 
 #include <cstddef>
 #include <string>
@@ -68,4 +68,4 @@ class storage_management_ops {
 }
 }
 
-#endif //ELASTICMEM_KV_SERVICE_H
+#endif //MMUX_KV_SERVICE_H

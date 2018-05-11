@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BLOCK_REQUEST_HANDLER_FACTORY_H
-#define ELASTICMEM_BLOCK_REQUEST_HANDLER_FACTORY_H
+#ifndef MMUX_BLOCK_REQUEST_HANDLER_FACTORY_H
+#define MMUX_BLOCK_REQUEST_HANDLER_FACTORY_H
 
 #include "block_request_service.h"
 #include "../chain_module.h"
@@ -20,4 +20,4 @@ class block_request_handler_factory: public block_request_serviceIfFactory {
 }
 }
 
-#endif //ELASTICMEM_BLOCK_REQUEST_HANDLER_FACTORY_H
+#endif //MMUX_BLOCK_REQUEST_HANDLER_FACTORY_H

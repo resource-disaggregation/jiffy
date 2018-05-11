@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_DIRECTORY_RPC_SERVICE_FACTORY_H
-#define ELASTICMEM_DIRECTORY_RPC_SERVICE_FACTORY_H
+#ifndef MMUX_DIRECTORY_RPC_SERVICE_FACTORY_H
+#define MMUX_DIRECTORY_RPC_SERVICE_FACTORY_H
 
 #include "directory_service.h"
 #include "directory_tree.h"
@@ -19,4 +19,4 @@ class directory_service_factory : public directory_serviceIfFactory {
 }
 }
 
-#endif //ELASTICMEM_DIRECTORY_RPC_SERVICE_FACTORY_H
+#endif //MMUX_DIRECTORY_RPC_SERVICE_FACTORY_H

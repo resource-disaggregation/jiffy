@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_DIRECTORY_LEASE_CLIENT_H
-#define ELASTICMEM_DIRECTORY_LEASE_CLIENT_H
+#ifndef MMUX_DIRECTORY_LEASE_CLIENT_H
+#define MMUX_DIRECTORY_LEASE_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
 #include "lease_service.h"
@@ -29,4 +29,4 @@ class lease_client {
 }
 }
 
-#endif //ELASTICMEM_DIRECTORY_LEASE_CLIENT_H
+#endif //MMUX_DIRECTORY_LEASE_CLIENT_H

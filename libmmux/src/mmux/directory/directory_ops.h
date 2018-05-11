@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_DIRECTORY_SERVICE_H
-#define ELASTICMEM_DIRECTORY_SERVICE_H
+#ifndef MMUX_DIRECTORY_SERVICE_H
+#define MMUX_DIRECTORY_SERVICE_H
 
 #include <exception>
 #include <string>
@@ -407,4 +407,4 @@ class directory_management_ops {
 }
 }
 
-#endif //ELASTICMEM_DIRECTORY_SERVICE_H
+#endif //MMUX_DIRECTORY_SERVICE_H

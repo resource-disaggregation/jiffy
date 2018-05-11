@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BLOCK_ALLOCATION_SERVER_H
-#define ELASTICMEM_BLOCK_ALLOCATION_SERVER_H
+#ifndef MMUX_BLOCK_ALLOCATION_SERVER_H
+#define MMUX_BLOCK_ALLOCATION_SERVER_H
 
 #include <thrift/server/TThreadedServer.h>
 #include "block_allocator.h"
@@ -18,4 +18,4 @@ class block_allocation_server {
 }
 }
 
-#endif //ELASTICMEM_BLOCK_ALLOCATION_SERVER_H
+#endif //MMUX_BLOCK_ALLOCATION_SERVER_H

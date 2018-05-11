@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BLOCK_SERVER_H
-#define ELASTICMEM_BLOCK_SERVER_H
+#ifndef MMUX_BLOCK_SERVER_H
+#define MMUX_BLOCK_SERVER_H
 
 #include <thrift/server/TThreadedServer.h>
 #include "../chain_module.h"
@@ -20,4 +20,4 @@ class block_server {
 }
 }
 
-#endif //ELASTICMEM_BLOCK_SERVER_H
+#endif //MMUX_BLOCK_SERVER_H

@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_S3_STORE_H
-#define ELASTICMEM_S3_STORE_H
+#ifndef MMUX_S3_STORE_H
+#define MMUX_S3_STORE_H
 
 #include <aws/core/Aws.h>
 #include "../persistent_service.h"
@@ -24,4 +24,4 @@ class s3_store : public persistent_service {
 }
 }
 
-#endif //ELASTICMEM_S3_STORE_H
+#endif //MMUX_S3_STORE_H

@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_KV_SERVICE_SHARD_H
-#define ELASTICMEM_KV_SERVICE_SHARD_H
+#ifndef MMUX_KV_SERVICE_SHARD_H
+#define MMUX_KV_SERVICE_SHARD_H
 
 #include <libcuckoo/cuckoohash_map.hh>
 
@@ -131,4 +131,4 @@ class kv_block : public chain_module {
 }
 }
 
-#endif //ELASTICMEM_KV_SERVICE_SHARD_H
+#endif //MMUX_KV_SERVICE_SHARD_H

@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_TEST_UTILS_H
-#define ELASTICMEM_TEST_UTILS_H
+#ifndef MMUX_TEST_UTILS_H
+#define MMUX_TEST_UTILS_H
 
 #include <string>
 #include <vector>
@@ -294,4 +294,4 @@ class test_utils {
   }
 };
 
-#endif //ELASTICMEM_TEST_UTILS_H
+#endif //MMUX_TEST_UTILS_H

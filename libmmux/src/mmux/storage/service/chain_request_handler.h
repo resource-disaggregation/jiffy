@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_CHAIN_REQUEST_HANDLER_H
-#define ELASTICMEM_CHAIN_REQUEST_HANDLER_H
+#ifndef MMUX_CHAIN_REQUEST_HANDLER_H
+#define MMUX_CHAIN_REQUEST_HANDLER_H
 
 #include "chain_request_service.h"
 #include "../chain_module.h"
@@ -29,4 +29,4 @@ class chain_request_handler : public chain_request_serviceIf {
 }
 }
 
-#endif //ELASTICMEM_CHAIN_REQUEST_HANDLER_H
+#endif //MMUX_CHAIN_REQUEST_HANDLER_H

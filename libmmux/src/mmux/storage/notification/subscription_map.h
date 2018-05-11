@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_SUBSCRIPTION_MAP_H
-#define ELASTICMEM_SUBSCRIPTION_MAP_H
+#ifndef MMUX_SUBSCRIPTION_MAP_H
+#define MMUX_SUBSCRIPTION_MAP_H
 
 #include <string>
 #include <unordered_map>
@@ -30,4 +30,4 @@ class subscription_map {
 }
 }
 
-#endif //ELASTICMEM_SUBSCRIPTION_MAP_H
+#endif //MMUX_SUBSCRIPTION_MAP_H

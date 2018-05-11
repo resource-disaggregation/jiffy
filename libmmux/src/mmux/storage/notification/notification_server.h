@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BROKER_SERVER_H
-#define ELASTICMEM_BROKER_SERVER_H
+#ifndef MMUX_BROKER_SERVER_H
+#define MMUX_BROKER_SERVER_H
 
 #include "subscription_map.h"
 #include "../chain_module.h"
@@ -19,4 +19,4 @@ class notification_server {
 }
 }
 
-#endif //ELASTICMEM_BROKER_SERVER_H
+#endif //MMUX_BROKER_SERVER_H

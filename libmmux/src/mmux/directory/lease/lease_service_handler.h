@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_DIRECTORY_LEASE_SERVICE_HANDLER_H
-#define ELASTICMEM_DIRECTORY_LEASE_SERVICE_HANDLER_H
+#ifndef MMUX_DIRECTORY_LEASE_SERVICE_HANDLER_H
+#define MMUX_DIRECTORY_LEASE_SERVICE_HANDLER_H
 
 #include "lease_service.h"
 #include "../fs/directory_tree.h"
@@ -23,4 +23,4 @@ class lease_service_handler : public lease_serviceIf {
 }
 }
 
-#endif //ELASTICMEM_DIRECTORY_LEASE_SERVICE_HANDLER_H
+#endif //MMUX_DIRECTORY_LEASE_SERVICE_HANDLER_H

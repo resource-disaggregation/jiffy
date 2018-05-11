@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BLOCK_ALLOCATION_SERVICE_FACTORY_H
-#define ELASTICMEM_BLOCK_ALLOCATION_SERVICE_FACTORY_H
+#ifndef MMUX_BLOCK_ALLOCATION_SERVICE_FACTORY_H
+#define MMUX_BLOCK_ALLOCATION_SERVICE_FACTORY_H
 
 #include "block_allocation_service.h"
 #include "block_allocator.h"
@@ -21,4 +21,4 @@ class block_allocation_service_factory : public block_allocation_serviceIfFactor
 }
 }
 
-#endif //ELASTICMEM_BLOCK_ALLOCATION_SERVICE_FACTORY_H
+#endif //MMUX_BLOCK_ALLOCATION_SERVICE_FACTORY_H

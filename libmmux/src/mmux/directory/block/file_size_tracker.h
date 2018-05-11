@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BLOCK_SIZE_TRACKER_H
-#define ELASTICMEM_BLOCK_SIZE_TRACKER_H
+#ifndef MMUX_BLOCK_SIZE_TRACKER_H
+#define MMUX_BLOCK_SIZE_TRACKER_H
 
 #include <memory>
 #include <thread>
@@ -42,4 +42,4 @@ class file_size_tracker {
 }
 }
 
-#endif //ELASTICMEM_BLOCK_SIZE_TRACKER_H
+#endif //MMUX_BLOCK_SIZE_TRACKER_H

@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BLOCK_H
-#define ELASTICMEM_BLOCK_H
+#ifndef MMUX_BLOCK_H
+#define MMUX_BLOCK_H
 
 #include <utility>
 #include <vector>
@@ -212,4 +212,4 @@ class block {
 
 }
 }
-#endif //ELASTICMEM_BLOCK_H
+#endif //MMUX_BLOCK_H

@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_KV_MANAGEMENT_RPC_SERVICE_FACTORY_H
-#define ELASTICMEM_KV_MANAGEMENT_RPC_SERVICE_FACTORY_H
+#ifndef MMUX_KV_MANAGEMENT_RPC_SERVICE_FACTORY_H
+#define MMUX_KV_MANAGEMENT_RPC_SERVICE_FACTORY_H
 
 #include "storage_management_service.h"
 #include "../block.h"
@@ -20,4 +20,4 @@ class storage_management_service_factory : public storage_management_serviceIfFa
 }
 }
 
-#endif //ELASTICMEM_KV_MANAGEMENT_RPC_SERVICE_FACTORY_H
+#endif //MMUX_KV_MANAGEMENT_RPC_SERVICE_FACTORY_H

@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BLOCK_RESPONSE_CLIENT_H
-#define ELASTICMEM_BLOCK_RESPONSE_CLIENT_H
+#ifndef MMUX_BLOCK_RESPONSE_CLIENT_H
+#define MMUX_BLOCK_RESPONSE_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
 #include "block_response_service.h"
@@ -20,4 +20,4 @@ class block_response_client {
 }
 }
 
-#endif //ELASTICMEM_BLOCK_RESPONSE_CLIENT_H
+#endif //MMUX_BLOCK_RESPONSE_CLIENT_H

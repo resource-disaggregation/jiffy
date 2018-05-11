@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_DIRECTORY_RPC_SERVICE_HANDLER_H
-#define ELASTICMEM_DIRECTORY_RPC_SERVICE_HANDLER_H
+#ifndef MMUX_DIRECTORY_RPC_SERVICE_HANDLER_H
+#define MMUX_DIRECTORY_RPC_SERVICE_HANDLER_H
 
 #include "directory_service.h"
 #include "directory_tree.h"
@@ -48,4 +48,4 @@ class directory_service_handler : public directory_serviceIf {
 }
 }
 
-#endif //ELASTICMEM_DIRECTORY_RPC_SERVICE_HANDLER_H
+#endif //MMUX_DIRECTORY_RPC_SERVICE_HANDLER_H

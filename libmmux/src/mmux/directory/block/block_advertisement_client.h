@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BLOCK_ALLOCATION_CLIENT_H
-#define ELASTICMEM_BLOCK_ALLOCATION_CLIENT_H
+#ifndef MMUX_BLOCK_ALLOCATION_CLIENT_H
+#define MMUX_BLOCK_ALLOCATION_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
 #include "block_allocation_service.h"
@@ -30,4 +30,4 @@ class block_advertisement_client {
 }
 }
 
-#endif //ELASTICMEM_BLOCK_ALLOCATION_CLIENT_H
+#endif //MMUX_BLOCK_ALLOCATION_CLIENT_H

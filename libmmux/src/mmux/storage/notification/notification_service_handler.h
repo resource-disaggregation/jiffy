@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_NOTIFICATION_SERVICE_HANDLER_H
-#define ELASTICMEM_NOTIFICATION_SERVICE_HANDLER_H
+#ifndef MMUX_NOTIFICATION_SERVICE_HANDLER_H
+#define MMUX_NOTIFICATION_SERVICE_HANDLER_H
 
 #include "notification_service.h"
 #include "subscription_service.h"
@@ -27,4 +27,4 @@ class notification_service_handler : public notification_serviceIf {
 }
 }
 
-#endif //ELASTICMEM_NOTIFICATION_SERVICE_HANDLER_H
+#endif //MMUX_NOTIFICATION_SERVICE_HANDLER_H

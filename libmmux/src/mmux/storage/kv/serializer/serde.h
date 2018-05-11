@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_SERDE_H
-#define ELASTICMEM_SERDE_H
+#ifndef MMUX_SERDE_H
+#define MMUX_SERDE_H
 
 #include "../kv_hash.h"
 
@@ -21,4 +21,4 @@ class deserializer {
 }
 }
 
-#endif //ELASTICMEM_SERDE_H
+#endif //MMUX_SERDE_H

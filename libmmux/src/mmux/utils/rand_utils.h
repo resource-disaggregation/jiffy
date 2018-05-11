@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_RAND_UTILS_H
-#define ELASTICMEM_RAND_UTILS_H
+#ifndef MMUX_RAND_UTILS_H
+#define MMUX_RAND_UTILS_H
 
 #include <cstdint>
 #include <random>
@@ -56,4 +56,4 @@ class rand_utils {
 
 }
 
-#endif //ELASTICMEM_RAND_UTILS_H
+#endif //MMUX_RAND_UTILS_H

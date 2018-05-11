@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_SERVER_STORAGE_TRACKER_H
-#define ELASTICMEM_SERVER_STORAGE_TRACKER_H
+#ifndef MMUX_SERVER_STORAGE_TRACKER_H
+#define MMUX_SERVER_STORAGE_TRACKER_H
 
 #include <fstream>
 #include <atomic>
@@ -34,4 +34,4 @@ class server_storage_tracker {
 }
 }
 
-#endif //ELASTICMEM_SERVER_STORAGE_TRACKER_H
+#endif //MMUX_SERVER_STORAGE_TRACKER_H

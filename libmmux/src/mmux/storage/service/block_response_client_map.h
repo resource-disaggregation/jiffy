@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BLOCK_RESPONSE_CLIENT_MAP_H
-#define ELASTICMEM_BLOCK_RESPONSE_CLIENT_MAP_H
+#ifndef MMUX_BLOCK_RESPONSE_CLIENT_MAP_H
+#define MMUX_BLOCK_RESPONSE_CLIENT_MAP_H
 
 #include <cstdint>
 #include <libcuckoo/cuckoohash_map.hh>
@@ -27,4 +27,4 @@ class block_response_client_map {
 }
 }
 
-#endif //ELASTICMEM_BLOCK_RESPONSE_CLIENT_MAP_H
+#endif //MMUX_BLOCK_RESPONSE_CLIENT_MAP_H

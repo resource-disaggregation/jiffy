@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_EVENT_H
-#define ELASTICMEM_EVENT_H
+#ifndef MMUX_EVENT_H
+#define MMUX_EVENT_H
 
 #include <iostream>
 #include <atomic>
@@ -88,4 +88,4 @@ class event {
 }
 }
 
-#endif //ELASTICMEM_EVENT_H
+#endif //MMUX_EVENT_H

@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_CHAIN_REQUEST_CLIENT_H
-#define ELASTICMEM_CHAIN_REQUEST_CLIENT_H
+#ifndef MMUX_CHAIN_REQUEST_CLIENT_H
+#define MMUX_CHAIN_REQUEST_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
 #include "chain_request_service.h"
@@ -38,4 +38,4 @@ class chain_request_client {
 }
 }
 
-#endif //ELASTICMEM_CHAIN_REQUEST_CLIENT_H
+#endif //MMUX_CHAIN_REQUEST_CLIENT_H

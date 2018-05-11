@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_PERSISTENT_STORE_H
-#define ELASTICMEM_PERSISTENT_STORE_H
+#ifndef MMUX_PERSISTENT_STORE_H
+#define MMUX_PERSISTENT_STORE_H
 
 #include <string>
 
@@ -20,4 +20,4 @@ class persistent_service {
 }
 }
 
-#endif //ELASTICMEM_PERSISTENT_STORE_H
+#endif //MMUX_PERSISTENT_STORE_H

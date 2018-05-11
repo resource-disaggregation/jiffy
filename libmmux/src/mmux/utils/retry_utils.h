@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_RETRY_UTILS_H
-#define ELASTICMEM_RETRY_UTILS_H
+#ifndef MMUX_RETRY_UTILS_H
+#define MMUX_RETRY_UTILS_H
 
 #include <type_traits>
 #include <utility>
@@ -31,4 +31,4 @@ class retry_utils {
 }
 }
 
-#endif //ELASTICMEM_RETRY_UTILS_H
+#endif //MMUX_RETRY_UTILS_H

@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_DIRECTORY_CLIENT_H
-#define ELASTICMEM_DIRECTORY_CLIENT_H
+#ifndef MMUX_DIRECTORY_CLIENT_H
+#define MMUX_DIRECTORY_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
 #include "../directory_ops.h"
@@ -60,4 +60,4 @@ class directory_client : public directory_ops {
 }
 }
 
-#endif //ELASTICMEM_DIRECTORY_CLIENT_H
+#endif //MMUX_DIRECTORY_CLIENT_H

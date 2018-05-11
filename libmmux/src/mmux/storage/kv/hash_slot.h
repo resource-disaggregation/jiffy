@@ -41,8 +41,8 @@
  * Output for "123456789"     : 31C3
  */
 
-#ifndef ELASTICMEM_HASH_SLOT_H
-#define ELASTICMEM_HASH_SLOT_H
+#ifndef MMUX_HASH_SLOT_H
+#define MMUX_HASH_SLOT_H
 
 #include <string>
 
@@ -71,4 +71,4 @@ class hash_slot {
 }
 }
 
-#endif //ELASTICMEM_HASH_SLOT_H
+#endif //MMUX_HASH_SLOT_H

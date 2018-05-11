@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BLOCK_REQUEST_HANDLER_H
-#define ELASTICMEM_BLOCK_REQUEST_HANDLER_H
+#ifndef MMUX_BLOCK_REQUEST_HANDLER_H
+#define MMUX_BLOCK_REQUEST_HANDLER_H
 
 #include <atomic>
 
@@ -37,4 +37,4 @@ class block_request_handler : public block_request_serviceIf {
 }
 }
 
-#endif //ELASTICMEM_BLOCK_REQUEST_HANDLER_H
+#endif //MMUX_BLOCK_REQUEST_HANDLER_H

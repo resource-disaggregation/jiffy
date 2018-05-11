@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BENCHMARK_UTILS_H
-#define ELASTICMEM_BENCHMARK_UTILS_H
+#ifndef MMUX_BENCHMARK_UTILS_H
+#define MMUX_BENCHMARK_UTILS_H
 
 #include <string>
 #include <vector>
@@ -67,4 +67,4 @@ class benchmark_utils {
 }
 }
 
-#endif //ELASTICMEM_BENCHMARK_UTILS_H
+#endif //MMUX_BENCHMARK_UTILS_H

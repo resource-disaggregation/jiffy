@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_CHAIN_RESPONSE_CLIENT_H
-#define ELASTICMEM_CHAIN_RESPONSE_CLIENT_H
+#ifndef MMUX_CHAIN_RESPONSE_CLIENT_H
+#define MMUX_CHAIN_RESPONSE_CLIENT_H
 
 #include "chain_response_service.h"
 
@@ -24,4 +24,4 @@ class chain_response_client {
 }
 }
 
-#endif //ELASTICMEM_CHAIN_RESPONSE_CLIENT_H
+#endif //MMUX_CHAIN_RESPONSE_CLIENT_H

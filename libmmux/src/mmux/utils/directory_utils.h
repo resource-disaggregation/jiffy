@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_DIRECTORY_UTILS_H
-#define ELASTICMEM_DIRECTORY_UTILS_H
+#ifndef MMUX_DIRECTORY_UTILS_H
+#define MMUX_DIRECTORY_UTILS_H
 
 #include <string>
 #include <vector>
@@ -73,4 +73,4 @@ class directory_utils {
 }
 }
 
-#endif //ELASTICMEM_DIRECTORY_UTILS_H
+#endif //MMUX_DIRECTORY_UTILS_H

@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_KV_MANAGER_H
-#define ELASTICMEM_KV_MANAGER_H
+#ifndef MMUX_KV_MANAGER_H
+#define MMUX_KV_MANAGER_H
 
 #include <vector>
 #include <string>
@@ -51,4 +51,4 @@ class storage_manager : public storage_management_ops {
 }
 }
 
-#endif //ELASTICMEM_KV_MANAGER_H
+#endif //MMUX_KV_MANAGER_H

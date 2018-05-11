@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_NOTIFICATION_SERVICE_FACTORY_H
-#define ELASTICMEM_NOTIFICATION_SERVICE_FACTORY_H
+#ifndef MMUX_NOTIFICATION_SERVICE_FACTORY_H
+#define MMUX_NOTIFICATION_SERVICE_FACTORY_H
 
 #include "notification_service.h"
 #include "subscription_map.h"
@@ -21,4 +21,4 @@ class notification_service_factory: public notification_serviceIfFactory {
 }
 }
 
-#endif //ELASTICMEM_NOTIFICATION_SERVICE_FACTORY_H
+#endif //MMUX_NOTIFICATION_SERVICE_FACTORY_H

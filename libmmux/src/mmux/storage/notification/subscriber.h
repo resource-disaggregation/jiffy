@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BROKER_CLIENT_H
-#define ELASTICMEM_BROKER_CLIENT_H
+#ifndef MMUX_BROKER_CLIENT_H
+#define MMUX_BROKER_CLIENT_H
 
 #include <string>
 #include <queue>
@@ -63,4 +63,4 @@ class notification_handler : public subscription_serviceIf {
 }
 }
 
-#endif //ELASTICMEM_BROKER_CLIENT_H
+#endif //MMUX_BROKER_CLIENT_H

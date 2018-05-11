@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_SIGNAL_HANDLING_H
-#define ELASTICMEM_SIGNAL_HANDLING_H
+#ifndef MMUX_SIGNAL_HANDLING_H
+#define MMUX_SIGNAL_HANDLING_H
 
 #include <cstdio>
 #include <cstdlib>
@@ -131,4 +131,4 @@ class signal_handling {
 }
 }
 
-#endif //ELASTICMEM_SIGNAL_HANDLING_H
+#endif //MMUX_SIGNAL_HANDLING_H

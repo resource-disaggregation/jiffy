@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_RANDOM_BLOCK_ALLOCATOR_H
-#define ELASTICMEM_RANDOM_BLOCK_ALLOCATOR_H
+#ifndef MMUX_RANDOM_BLOCK_ALLOCATOR_H
+#define MMUX_RANDOM_BLOCK_ALLOCATOR_H
 
 #include <iostream>
 #include <shared_mutex>
@@ -40,4 +40,4 @@ class random_block_allocator : public block_allocator {
 }
 }
 
-#endif //ELASTICMEM_RANDOM_BLOCK_ALLOCATOR_H
+#endif //MMUX_RANDOM_BLOCK_ALLOCATOR_H

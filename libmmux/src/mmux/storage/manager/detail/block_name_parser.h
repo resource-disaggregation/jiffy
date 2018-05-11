@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BLOCK_NAME_PARSER_H
-#define ELASTICMEM_BLOCK_NAME_PARSER_H
+#ifndef MMUX_BLOCK_NAME_PARSER_H
+#define MMUX_BLOCK_NAME_PARSER_H
 
 #include <string>
 
@@ -29,4 +29,4 @@ class block_name_parser {
 }
 }
 
-#endif //ELASTICMEM_BLOCK_NAME_PARSER_H
+#endif //MMUX_BLOCK_NAME_PARSER_H

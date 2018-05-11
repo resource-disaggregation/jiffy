@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_CSV_SERIALIZER_H
-#define ELASTICMEM_CSV_SERIALIZER_H
+#ifndef MMUX_CSV_SERIALIZER_H
+#define MMUX_CSV_SERIALIZER_H
 
 #include <sstream>
 #include "serde.h"
@@ -44,4 +44,4 @@ class csv_deserializer : public deserializer {
 }
 }
 
-#endif //ELASTICMEM_CSV_SERIALIZER_H
+#endif //MMUX_CSV_SERIALIZER_H

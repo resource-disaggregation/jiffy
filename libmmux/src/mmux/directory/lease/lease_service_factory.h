@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_DIRECTORY_LEASE_SERVICE_FACTORY_H
-#define ELASTICMEM_DIRECTORY_LEASE_SERVICE_FACTORY_H
+#ifndef MMUX_DIRECTORY_LEASE_SERVICE_FACTORY_H
+#define MMUX_DIRECTORY_LEASE_SERVICE_FACTORY_H
 
 #include "lease_service.h"
 #include "../fs/directory_tree.h"
@@ -22,4 +22,4 @@ class lease_service_factory : public lease_serviceIfFactory {
 }
 }
 
-#endif //ELASTICMEM_DIRECTORY_LEASE_SERVICE_FACTORY_H
+#endif //MMUX_DIRECTORY_LEASE_SERVICE_FACTORY_H

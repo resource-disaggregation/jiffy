@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_KV_MANAGEMENT_RPC_SERVICE_HANDLER_H
-#define ELASTICMEM_KV_MANAGEMENT_RPC_SERVICE_HANDLER_H
+#ifndef MMUX_KV_MANAGEMENT_RPC_SERVICE_HANDLER_H
+#define MMUX_KV_MANAGEMENT_RPC_SERVICE_HANDLER_H
 
 #include "storage_management_service.h"
 #include "../block.h"
@@ -52,4 +52,4 @@ class storage_management_service_handler : public storage_management_serviceIf {
 }
 }
 
-#endif //ELASTICMEM_KV_MANAGEMENT_RPC_SERVICE_HANDLER_H
+#endif //MMUX_KV_MANAGEMENT_RPC_SERVICE_HANDLER_H

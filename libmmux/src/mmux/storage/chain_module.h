@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_CHAIN_MODULE_H
-#define ELASTICMEM_CHAIN_MODULE_H
+#ifndef MMUX_CHAIN_MODULE_H
+#define MMUX_CHAIN_MODULE_H
 
 #include <atomic>
 #include <memory>
@@ -265,4 +265,4 @@ class chain_module : public block {
 }
 }
 
-#endif //ELASTICMEM_CHAIN_MODULE_H
+#endif //MMUX_CHAIN_MODULE_H

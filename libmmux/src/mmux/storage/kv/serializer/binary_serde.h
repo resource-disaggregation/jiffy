@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BINARY_SERIALIZER_H
-#define ELASTICMEM_BINARY_SERIALIZER_H
+#ifndef MMUX_BINARY_SERIALIZER_H
+#define MMUX_BINARY_SERIALIZER_H
 
 #include "serde.h"
 namespace mmux {
@@ -20,4 +20,4 @@ class binary_deserializer : public deserializer {
 }
 }
 
-#endif //ELASTICMEM_BINARY_SERIALIZER_H
+#endif //MMUX_BINARY_SERIALIZER_H

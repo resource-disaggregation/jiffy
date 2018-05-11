@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BLOCK_CHAIN_CLIENT_H
-#define ELASTICMEM_BLOCK_CHAIN_CLIENT_H
+#ifndef MMUX_BLOCK_CHAIN_CLIENT_H
+#define MMUX_BLOCK_CHAIN_CLIENT_H
 
 #include <map>
 #include "block_client.h"
@@ -41,4 +41,4 @@ class replica_chain_client {
 }
 }
 
-#endif //ELASTICMEM_BLOCK_CHAIN_CLIENT_H
+#endif //MMUX_BLOCK_CHAIN_CLIENT_H

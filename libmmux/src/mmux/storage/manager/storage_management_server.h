@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_KV_MANAGEMENT_RPC_SERVER_H
-#define ELASTICMEM_KV_MANAGEMENT_RPC_SERVER_H
+#ifndef MMUX_KV_MANAGEMENT_RPC_SERVER_H
+#define MMUX_KV_MANAGEMENT_RPC_SERVER_H
 
 #include <thrift/server/TThreadedServer.h>
 #include "../block.h"
@@ -19,4 +19,4 @@ class storage_management_server {
 }
 }
 
-#endif //ELASTICMEM_KV_MANAGEMENT_RPC_SERVER_H
+#endif //MMUX_KV_MANAGEMENT_RPC_SERVER_H

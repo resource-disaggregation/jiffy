@@ -1,5 +1,5 @@
-#ifndef ELASTICMEM_BLOCKING_QUEUE_H
-#define ELASTICMEM_BLOCKING_QUEUE_H
+#ifndef MMUX_BLOCKING_QUEUE_H
+#define MMUX_BLOCKING_QUEUE_H
 
 #include <chrono>
 #include <queue>
@@ -54,4 +54,4 @@ class blocking_queue {
 }
 }
 
-#endif //ELASTICMEM_BLOCKING_QUEUE_H
+#endif //MMUX_BLOCKING_QUEUE_H
