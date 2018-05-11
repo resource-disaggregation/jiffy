@@ -1,6 +1,0 @@
-#ifndef MMUX_VERSION_H
-#define MMUX_VERSION_H
-
-#define PROJECT_VERSION @PROJECT_VERSION@
-
-#endif //MMUX_VERSION_H

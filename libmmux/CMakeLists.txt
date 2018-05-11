@@ -1,7 +1,3 @@
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/mmux/version.h.in
-        ${CMAKE_CURRENT_BINARY_DIR}/src/mmux/version.h)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${THRIFT_INCLUDE_DIR})
 add_library(mmux STATIC
         src/mmux/directory/block/block_advertisement_client.cpp
@@ -184,6 +180,7 @@ add_library(mmux STATIC
         src/mmux/utils/signal_handling.h
         src/mmux/utils/time_utils.h
         src/mmux/utils/retry_utils.h)
+
 if (GENERATE_THRIFT)
   add_dependencies(mmux thriftgen_directory thriftgen_kv)
 endif ()
