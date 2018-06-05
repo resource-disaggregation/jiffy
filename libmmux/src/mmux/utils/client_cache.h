@@ -12,15 +12,17 @@ template<typename C>
 class client_cache {
  public:
   typedef std::pair<std::string, int> key_type;
-  typedef std::pair<std::shared_ptr<apache::thrift::transport::TTransport>, std::shared_ptr<C>> value_type;
+  typedef std::tuple<std::shared_ptr<apache::thrift::transport::TTransport>,
+                     std::shared_ptr<apache::thrift::protocol::TProtocol>,
+                     std::shared_ptr<C>> value_type;
   typedef std::map<key_type, value_type> cache_type;
 
   client_cache() {}
 
   ~client_cache() {
     for (auto const &entry: cache_) {
-      if (entry.second.first->isOpen()) {
-        entry.second.first->close();
+      if (std::get<0>(entry.second)->isOpen()) {
+        std::get<0>(entry.second)->close();
       }
     }
   }
@@ -42,7 +44,7 @@ class client_cache {
       try {
         transport->open();
         break;
-      } catch (transport::TTransportException& e) {
+      } catch (transport::TTransportException &e) {
         ex = e;
         n_attempts--;
         continue;
@@ -50,7 +52,7 @@ class client_cache {
     }
     if (n_attempts == 0)
       throw ex;
-    value_type value(transport, client);
+    value_type value = std::make_tuple(transport, prot, client);
     cache_.insert(std::make_pair(key, value));
     return value;
   }
