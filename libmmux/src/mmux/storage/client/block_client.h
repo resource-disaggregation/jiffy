@@ -1,10 +1,11 @@
-#ifndef MMUX_KV_CLIENT_H
-#define MMUX_KV_CLIENT_H
+#ifndef MMUX_BLOCK_CLIENT_H
+#define MMUX_BLOCK_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
 #include <libcuckoo/cuckoohash_map.hh>
 #include "../service/block_request_service.h"
 #include "../service/block_response_service.h"
+#include "../../utils/client_cache.h"
 
 namespace mmux {
 namespace storage {
@@ -52,11 +53,13 @@ class block_client {
   };
 
   typedef block_request_serviceClient thrift_client;
+  typedef utils::client_cache<thrift_client> client_cache;
 
   block_client() = default;
   ~block_client();
   int64_t get_client_id();
   void connect(const std::string &hostname, int port, int block_id);
+  void connect(block_client::client_cache &cache, const std::string &host, int port, int block_id);
   void disconnect();
   bool is_connected();
 
@@ -76,4 +79,4 @@ class block_client {
 }
 }
 
-#endif //MMUX_KV_CLIENT_H
+#endif //MMUX_BLOCK_CLIENT_H

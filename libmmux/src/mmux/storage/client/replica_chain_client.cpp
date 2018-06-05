@@ -5,10 +5,19 @@
 namespace mmux {
 namespace storage {
 
-replica_chain_client::replica_chain_client(const std::vector<std::string> &chain): in_flight_(false) {
+replica_chain_client::replica_chain_client(const std::vector<std::string> &chain) : in_flight_(false) {
   seq_.client_id = -1;
   seq_.client_seq_no = 0;
   connect(chain);
+  for (auto &op: KV_OPS) {
+    cmd_client_.push_back(op.type == block_op_type::accessor ? &tail_ : &head_);
+  }
+}
+
+replica_chain_client::replica_chain_client(block_client::client_cache &cache, const std::vector<std::string> &chain) {
+  seq_.client_id = -1;
+  seq_.client_seq_no = 0;
+  connect(cache, chain);
   for (auto &op: KV_OPS) {
     cmd_client_.push_back(op.type == block_op_type::accessor ? &tail_ : &head_);
   }
@@ -25,6 +34,20 @@ void replica_chain_client::disconnect() {
 
 const std::vector<std::string> &replica_chain_client::chain() const {
   return chain_;
+}
+
+void replica_chain_client::connect(block_client::client_cache &cache, const std::vector<std::string> &chain) {
+  chain_ = chain;
+  auto h = block_name_parser::parse(chain_.front());
+  head_.connect(cache, h.host, h.service_port, h.id);
+  seq_.client_id = head_.get_client_id();
+  if (chain.size() == 1) {
+    tail_ = head_;
+  } else {
+    auto t = block_name_parser::parse(chain_.back());
+    tail_.connect(cache, t.host, t.service_port, t.id);
+  }
+  response_reader_ = tail_.get_command_response_reader(seq_.client_id);
 }
 
 void replica_chain_client::connect(const std::vector<std::string> &chain) {

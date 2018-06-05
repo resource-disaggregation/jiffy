@@ -81,6 +81,8 @@ add_library(mmux STATIC
         src/mmux/storage/service/block_server.h
         src/mmux/storage/client/block_client.cpp
         src/mmux/storage/client/block_client.h
+        src/mmux/storage/client/kv_client.cpp
+        src/mmux/storage/client/kv_client.h
         src/mmux/storage/service/block_request_handler.cpp
         src/mmux/storage/service/block_request_handler.h
         src/mmux/storage/service/chain_request_handler_factory.cpp
@@ -171,6 +173,7 @@ add_library(mmux STATIC
         src/mmux/persistent/s3/s3_store.cpp
         src/mmux/persistent/s3/s3_store.h
         src/mmux/persistent/persistent_service.h
+        src/mmux/utils/client_cache.h
         src/mmux/utils/cmd_parse.h
         src/mmux/utils/directory_utils.h
         src/mmux/utils/event.h
@@ -179,7 +182,8 @@ add_library(mmux STATIC
         src/mmux/utils/rand_utils.h
         src/mmux/utils/signal_handling.h
         src/mmux/utils/time_utils.h
-        src/mmux/utils/retry_utils.h)
+        src/mmux/utils/retry_utils.h
+        src/mmux/utils/string_utils.h)
 
 if (GENERATE_THRIFT)
   add_dependencies(mmux thriftgen_directory thriftgen_kv)
@@ -208,6 +212,7 @@ if (BUILD_TESTS)
   include_directories(${CATCH_INCLUDE_DIR})
   add_executable(mmux_tests
           test/mmux_tests.cpp
+          test/auto_scaling_test.cpp
           test/block_allocation_service_test.cpp
           test/block_allocator_test.cpp
           test/chain_replication_test.cpp
@@ -221,7 +226,7 @@ if (BUILD_TESTS)
           test/local_store_test.cpp
           test/notification_test.cpp
           test/storage_manager_test.cpp
-          test/test_utils.h test/auto_scaling_test.cpp)
+          test/test_utils.h)
   target_link_libraries(mmux_tests mmux)
   if (NOT USE_SYSTEM_CATCH)
     add_dependencies(mmux_tests catch)
@@ -229,8 +234,12 @@ if (BUILD_TESTS)
 endif ()
 
 if (BUILD_BENCHMARKS)
-  add_executable(kv_rpc_benchmark bench/kv_rpc_benchmark.cpp bench/benchmark_utils.h)
-  add_executable(kv_notification_benchmark bench/kv_notification_benchmark.cpp bench/benchmark_utils.h)
+  add_executable(kv_rpc_benchmark
+          bench/kv_rpc_benchmark.cpp
+          bench/benchmark_utils.h)
+  add_executable(kv_notification_benchmark
+          bench/kv_notification_benchmark.cpp
+          bench/benchmark_utils.h)
   target_link_libraries(kv_rpc_benchmark mmux)
   target_link_libraries(kv_notification_benchmark mmux)
 endif ()
