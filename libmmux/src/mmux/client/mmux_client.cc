@@ -8,6 +8,7 @@ using namespace directory;
 mmux_client::mmux_client(const std::string &host, int dir_port, int lease_port)
     : fs_(std::make_shared<directory_client>(host, dir_port)),
       lease_worker_(host, lease_port) {
+  lease_worker_.start();
 }
 
 std::shared_ptr<directory::directory_ops> mmux_client::fs() {

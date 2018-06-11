@@ -1,7 +1,6 @@
 #include <catch.hpp>
 #include <thrift/transport/TTransportException.h>
 #include <thread>
-#include <unistd.h>
 #include "../src/mmux/storage/manager/storage_management_server.h"
 #include "../src/mmux/storage/manager/storage_management_client.h"
 #include "../src/mmux/storage/manager/storage_manager.h"
@@ -100,13 +99,15 @@ TEST_CASE("mmux_client_lease_worker_test", "[put][get][update][remove]") {
   std::thread lease_serve_thread([&lease_server] { lease_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_LEASE_PORT);
 
-  mmux_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-  REQUIRE_NOTHROW(client.create("/a/file.txt", "/tmp"));
-  REQUIRE(client.fs()->exists("/a/file.txt"));
-  REQUIRE_NOTHROW(sleep(1));
-  REQUIRE(client.fs()->exists("/a/file.txt"));
-  REQUIRE_NOTHROW(sleep(1));
-  REQUIRE(client.fs()->exists("/a/file.txt"));
+  {
+    mmux_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
+    REQUIRE_NOTHROW(client.create("/a/file.txt", "/tmp"));
+    REQUIRE(client.fs()->exists("/a/file.txt"));
+    sleep(1);
+    REQUIRE(client.fs()->exists("/a/file.txt"));
+    sleep(1);
+    REQUIRE(client.fs()->exists("/a/file.txt"));
+  }
 
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
@@ -121,6 +122,11 @@ TEST_CASE("mmux_client_lease_worker_test", "[put][get][update][remove]") {
   notif_server->stop();
   if (notif_serve_thread.joinable()) {
     notif_serve_thread.join();
+  }
+
+  chain_server->stop();
+  if (chain_serve_thread.joinable()) {
+    chain_serve_thread.join();
   }
 
   dir_server->stop();
@@ -170,10 +176,12 @@ TEST_CASE("mmux_client_create_test", "[put][get][update][remove]") {
   std::thread lease_serve_thread([&lease_server] { lease_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_LEASE_PORT);
 
-  mmux_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-  auto kv = client.create("/a/file.txt", "/tmp");
-  REQUIRE(client.fs()->exists("/a/file.txt"));
-  test_kv_ops(kv);
+  {
+    mmux_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
+    auto kv = client.create("/a/file.txt", "/tmp");
+    REQUIRE(client.fs()->exists("/a/file.txt"));
+    test_kv_ops(kv);
+  }
 
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
@@ -188,6 +196,11 @@ TEST_CASE("mmux_client_create_test", "[put][get][update][remove]") {
   notif_server->stop();
   if (notif_serve_thread.joinable()) {
     notif_serve_thread.join();
+  }
+
+  chain_server->stop();
+  if (chain_serve_thread.joinable()) {
+    chain_serve_thread.join();
   }
 
   dir_server->stop();
@@ -237,11 +250,13 @@ TEST_CASE("mmux_client_open_test", "[put][get][update][remove]") {
   std::thread lease_serve_thread([&lease_server] { lease_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_LEASE_PORT);
 
-  mmux_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-  client.create("/a/file.txt", "/tmp");
-  REQUIRE(client.fs()->exists("/a/file.txt"));
-  auto kv = client.open("/a/file.txt");
-  test_kv_ops(kv);
+  {
+    mmux_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
+    client.create("/a/file.txt", "/tmp");
+    REQUIRE(client.fs()->exists("/a/file.txt"));
+    auto kv = client.open("/a/file.txt");
+    test_kv_ops(kv);
+  }
 
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
@@ -256,6 +271,11 @@ TEST_CASE("mmux_client_open_test", "[put][get][update][remove]") {
   notif_server->stop();
   if (notif_serve_thread.joinable()) {
     notif_serve_thread.join();
+  }
+
+  chain_server->stop();
+  if (chain_serve_thread.joinable()) {
+    chain_serve_thread.join();
   }
 
   dir_server->stop();
@@ -305,15 +325,17 @@ TEST_CASE("mmux_client_flush_remove_test", "[put][get][update][remove]") {
   std::thread lease_serve_thread([&lease_server] { lease_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_LEASE_PORT);
 
-  mmux_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-  client.create("/a/file.txt", "/tmp");
-  REQUIRE(client.lease_worker().has_path("/a/file.txt"));
-  REQUIRE_NOTHROW(client.flush("/a/file.txt"));
-  REQUIRE_FALSE(client.lease_worker().has_path("/a/file.txt"));
-  REQUIRE(client.fs()->dstatus("/a/file.txt").mode() == storage_mode::on_disk);
-  REQUIRE_NOTHROW(client.remove("/a/file.txt"));
-  REQUIRE_FALSE(client.lease_worker().has_path("/a/file.txt"));
-  REQUIRE_FALSE(client.fs()->exists("/a/file.txt"));
+  {
+    mmux_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
+    client.create("/a/file.txt", "/tmp");
+    REQUIRE(client.lease_worker().has_path("/a/file.txt"));
+    REQUIRE_NOTHROW(client.flush("/a/file.txt"));
+    REQUIRE_FALSE(client.lease_worker().has_path("/a/file.txt"));
+    REQUIRE(client.fs()->dstatus("/a/file.txt").mode() == storage_mode::on_disk);
+    REQUIRE_NOTHROW(client.remove("/a/file.txt"));
+    REQUIRE_FALSE(client.lease_worker().has_path("/a/file.txt"));
+    REQUIRE_FALSE(client.fs()->exists("/a/file.txt"));
+  }
 
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
@@ -328,6 +350,11 @@ TEST_CASE("mmux_client_flush_remove_test", "[put][get][update][remove]") {
   notif_server->stop();
   if (notif_serve_thread.joinable()) {
     notif_serve_thread.join();
+  }
+
+  chain_server->stop();
+  if (chain_serve_thread.joinable()) {
+    chain_serve_thread.join();
   }
 
   dir_server->stop();
@@ -377,44 +404,46 @@ TEST_CASE("mmux_client_notification_test", "[put][get][update][remove]") {
   std::thread lease_serve_thread([&lease_server] { lease_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_LEASE_PORT);
 
-  mmux_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-  std::string op1 = "put", op2 = "remove";
-  std::string key = "key1", value = "value1";
+  {
+    mmux_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
+    std::string op1 = "put", op2 = "remove";
+    std::string key = "key1", value = "value1";
 
-  client.fs()->create("/a/file.txt", "/tmp", 1, 1);
-  auto n1 = client.listen("/a/file.txt");
-  auto n2 = client.listen("/a/file.txt");
-  auto n3 = client.listen("/a/file.txt");
+    client.fs()->create("/a/file.txt", "/tmp", 1, 1);
+    auto n1 = client.listen("/a/file.txt");
+    auto n2 = client.listen("/a/file.txt");
+    auto n3 = client.listen("/a/file.txt");
 
-  n1.subscribe({op1});
-  n2.subscribe({op1, op2});
-  n3.subscribe({op2});
+    n1.subscribe({op1});
+    n2.subscribe({op1, op2});
+    n3.subscribe({op2});
 
-  auto kv = client.open("/a/file.txt");
-  kv.put(key, value);
-  kv.remove(key);
+    auto kv = client.open("/a/file.txt");
+    kv.put(key, value);
+    kv.remove(key);
 
-  REQUIRE(n1.get_notification() == std::make_pair(op1, key));
-  REQUIRE(n2.get_notification() == std::make_pair(op1, key));
-  REQUIRE(n2.get_notification() == std::make_pair(op2, key));
-  REQUIRE(n3.get_notification() == std::make_pair(op2, key));
+    REQUIRE(n1.get_notification() == std::make_pair(op1, key));
+    REQUIRE(n2.get_notification() == std::make_pair(op1, key));
+    REQUIRE(n2.get_notification() == std::make_pair(op2, key));
+    REQUIRE(n3.get_notification() == std::make_pair(op2, key));
 
-  REQUIRE_THROWS_AS(n1.get_notification(100), std::out_of_range);
-  REQUIRE_THROWS_AS(n2.get_notification(100), std::out_of_range);
-  REQUIRE_THROWS_AS(n3.get_notification(100), std::out_of_range);
+    REQUIRE_THROWS_AS(n1.get_notification(100), std::out_of_range);
+    REQUIRE_THROWS_AS(n2.get_notification(100), std::out_of_range);
+    REQUIRE_THROWS_AS(n3.get_notification(100), std::out_of_range);
 
-  n1.unsubscribe({op1});
-  n2.unsubscribe({op2});
+    n1.unsubscribe({op1});
+    n2.unsubscribe({op2});
 
-  kv.put(key, value);
-  kv.remove(key);
+    kv.put(key, value);
+    kv.remove(key);
 
-  REQUIRE(n2.get_notification() == std::make_pair(op1, key));
-  REQUIRE(n3.get_notification() == std::make_pair(op2, key));
+    REQUIRE(n2.get_notification() == std::make_pair(op1, key));
+    REQUIRE(n3.get_notification() == std::make_pair(op2, key));
 
-  REQUIRE_THROWS_AS(n1.get_notification(100), std::out_of_range);
-  REQUIRE_THROWS_AS(n2.get_notification(100), std::out_of_range);
-  REQUIRE_THROWS_AS(n3.get_notification(100), std::out_of_range);
+    REQUIRE_THROWS_AS(n1.get_notification(100), std::out_of_range);
+    REQUIRE_THROWS_AS(n2.get_notification(100), std::out_of_range);
+    REQUIRE_THROWS_AS(n3.get_notification(100), std::out_of_range);
+  }
 
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
@@ -429,6 +458,11 @@ TEST_CASE("mmux_client_notification_test", "[put][get][update][remove]") {
   notif_server->stop();
   if (notif_serve_thread.joinable()) {
     notif_serve_thread.join();
+  }
+
+  chain_server->stop();
+  if (chain_serve_thread.joinable()) {
+    chain_serve_thread.join();
   }
 
   dir_server->stop();
@@ -478,10 +512,12 @@ TEST_CASE("mmux_client_chain_replication_test", "[put][get][update][remove]") {
   std::thread lease_serve_thread([&lease_server] { lease_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_LEASE_PORT);
 
-  mmux_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-  auto kv = client.create("/a/file.txt", "/tmp", 1, NUM_BLOCKS);
-  REQUIRE(kv.status().chain_length() == 3);
-  test_kv_ops(kv);
+  {
+    mmux_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
+    auto kv = client.create("/a/file.txt", "/tmp", 1, NUM_BLOCKS);
+    REQUIRE(kv.status().chain_length() == 3);
+    test_kv_ops(kv);
+  }
 
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
@@ -496,6 +532,11 @@ TEST_CASE("mmux_client_chain_replication_test", "[put][get][update][remove]") {
   notif_server->stop();
   if (notif_serve_thread.joinable()) {
     notif_serve_thread.join();
+  }
+
+  chain_server->stop();
+  if (chain_serve_thread.joinable()) {
+    chain_serve_thread.join();
   }
 
   dir_server->stop();

@@ -8,17 +8,12 @@ using namespace mmux::utils;
 
 lease_renewal_worker::lease_renewal_worker(const std::string &host, int port)
     : stop_(false), ls_(host, port) {
-  renewal_duration_ms_ = std::chrono::milliseconds(ls_.renew_leases(to_renew_).lease_period_ms);
 }
 
 lease_renewal_worker::~lease_renewal_worker() {
   stop_.store(true);
   if (worker_.joinable())
     worker_.join();
-}
-
-uint64_t lease_renewal_worker::lease_duration_ms() {
-  return static_cast<uint64_t>(renewal_duration_ms_.count());
 }
 
 void lease_renewal_worker::stop() {
@@ -35,14 +30,14 @@ void lease_renewal_worker::start() {
         std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
         if (!to_renew_.empty()) {
           ack = ls_.renew_leases(to_renew_);
-          renewal_duration_ms_ = std::chrono::milliseconds(ack.lease_period_ms);
         }
       } catch (std::exception &e) {
         LOG(error) << "Exception: " << e.what();
       }
       auto end = std::chrono::steady_clock::now();
       auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-      auto time_to_wait = std::chrono::duration_cast<std::chrono::milliseconds>(renewal_duration_ms_ - elapsed);
+      auto time_to_wait = std::chrono::duration_cast<std::chrono::milliseconds>(
+          std::chrono::milliseconds(ack.lease_period_ms) - elapsed);
       if (time_to_wait > std::chrono::milliseconds::zero()) {
         std::this_thread::sleep_for(time_to_wait);
       }

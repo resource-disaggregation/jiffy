@@ -17,8 +17,6 @@ class lease_renewal_worker {
   lease_renewal_worker(const std::string &host, int port);
   ~lease_renewal_worker();
 
-  uint64_t lease_duration_ms();
-
   void start();
   void stop();
 
@@ -32,7 +30,6 @@ class lease_renewal_worker {
   std::atomic_bool stop_;
   lease_client ls_;
   std::vector<std::string> to_renew_;
-  std::chrono::milliseconds renewal_duration_ms_;
 };
 
 }
