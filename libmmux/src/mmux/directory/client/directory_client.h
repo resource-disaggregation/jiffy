@@ -1,7 +1,7 @@
 #ifndef MMUX_DIRECTORY_CLIENT_H
 #define MMUX_DIRECTORY_CLIENT_H
 
-#include "../../../../../../../../../../../usr/local/include/thrift/transport/TSocket.h"
+#include <thrift/transport/TSocket.h>
 #include "../directory_ops.h"
 #include "../fs/directory_service.h"
 
