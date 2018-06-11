@@ -19,6 +19,10 @@ kv_client::kv_client(std::shared_ptr<directory::directory_ops> fs,
   }
 }
 
+directory::data_status &kv_client::status() {
+  return status_;
+}
+
 void kv_client::refresh() {
   status_ = fs_->dstatus(path_);
   LOG(log_level::info) << "Refreshing block mappings to " << status_.to_string();

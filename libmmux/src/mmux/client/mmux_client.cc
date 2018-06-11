@@ -10,6 +10,14 @@ mmux_client::mmux_client(const std::string &host, int dir_port, int lease_port)
       lease_worker_(host, lease_port) {
 }
 
+std::shared_ptr<directory::directory_ops> mmux_client::fs() {
+  return fs_;
+}
+
+directory::lease_renewal_worker &mmux_client::lease_worker() {
+  return lease_worker_;
+}
+
 void mmux_client::begin_scope(const std::string &path) {
   lease_worker_.add_path(path);
 }
@@ -40,6 +48,12 @@ storage::kv_client mmux_client::open_or_create(const std::string &path,
   auto s = fs_->open_or_create(path, persistent_store_prefix, num_blocks, chain_length);
   begin_scope(path);
   return storage::kv_client(fs_, path, s);
+}
+
+storage::kv_listener mmux_client::listen(const std::string &path) {
+  auto s = fs_->open(path);
+  begin_scope(path);
+  return storage::kv_listener(path, s);
 }
 
 void mmux_client::remove(const std::string &path) {

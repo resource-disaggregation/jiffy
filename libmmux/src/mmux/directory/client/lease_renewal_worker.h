@@ -17,11 +17,14 @@ class lease_renewal_worker {
   lease_renewal_worker(const std::string &host, int port);
   ~lease_renewal_worker();
 
+  uint64_t lease_duration_ms();
+
   void start();
   void stop();
 
   void add_path(const std::string &path);
   void remove_path(const std::string &path);
+  bool has_path(const std::string &path);
  private:
   mutable std::shared_mutex metadata_mtx_;
 

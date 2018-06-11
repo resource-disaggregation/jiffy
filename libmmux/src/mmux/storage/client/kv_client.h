@@ -30,6 +30,8 @@ class kv_client {
 
   void refresh();
 
+  directory::data_status &status();
+
   void put(const std::string &key, const std::string &value);
   std::string get(const std::string &key);
   std::string update(const std::string &key, const std::string &value);

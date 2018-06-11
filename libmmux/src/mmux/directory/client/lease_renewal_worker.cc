@@ -17,6 +17,10 @@ lease_renewal_worker::~lease_renewal_worker() {
     worker_.join();
 }
 
+uint64_t lease_renewal_worker::lease_duration_ms() {
+  return static_cast<uint64_t>(renewal_duration_ms_.count());
+}
+
 void lease_renewal_worker::stop() {
   stop_.store(true);
 }
@@ -59,6 +63,11 @@ void lease_renewal_worker::remove_path(const std::string &path) {
   if ((it = std::find(to_renew_.begin(), to_renew_.end(), path)) != to_renew_.end()) {
     to_renew_.erase(it);
   }
+}
+
+bool lease_renewal_worker::has_path(const std::string &path) {
+  std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+  return std::find(to_renew_.begin(), to_renew_.end(), path) != to_renew_.end();
 }
 
 }
