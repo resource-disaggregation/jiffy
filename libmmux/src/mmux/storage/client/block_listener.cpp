@@ -40,8 +40,6 @@ void block_listener::disconnect() {
     if (transport_->isOpen()) {
       transport_->close();
     }
-    sleep(5);
-    std::cout << "Closed transport" << std::endl;
   } catch (TTransportException &e) {
     LOG(log_level::warn) << "Could not close connection: " << e.what();
   }

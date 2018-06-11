@@ -21,6 +21,7 @@ void notification_service_handler::subscribe(const int32_t block_id, const std::
 
 void notification_service_handler::unsubscribe(int32_t block_id, const std::vector<std::string> &ops) {
   std::vector<std::string> removed;
+  bool inform = block_id != -1;
   if (ops.empty()) {
     for (const auto &sub: local_subs_) {
       if (block_id == -1)
@@ -39,9 +40,8 @@ void notification_service_handler::unsubscribe(int32_t block_id, const std::vect
       }
     }
   }
-  if (block_id != -1) {
-    blocks_[block_id]->subscriptions().remove_subscriptions(removed, client_);
-  }
+  if (!removed.empty())
+    blocks_[block_id]->subscriptions().remove_subscriptions(removed, client_, inform);
 }
 
 }
