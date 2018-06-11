@@ -21,6 +21,37 @@ set(EXTERNAL_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ${CMAKE_C_FLAGS_${UPPERCASE_BUILD_T
 if (USE_SYSTEM_AWS_SDK)
   find_package(aws-sdk-cpp REQUIRED)
 else ()
+  set(CURL_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
+  set(CURL_C_FLAGS "${EXTERNAL_C_FLAGS}")
+  set(CURL_PREFIX "${PROJECT_BINARY_DIR}/external/curl")
+  set(CURL_HOME "${CURL_PREFIX}")
+  set(CURL_INCLUDE_DIR "${CURL_PREFIX}/include")
+  set(CURL_CMAKE_ARGS "-Wno-dev"
+          "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+          "-DCMAKE_INSTALL_PREFIX=${CURL_PREFIX}"
+          "-DCURL_STATICLIB=ON"
+          "-DBUILD_CURL_EXE=OFF"
+          "-DCMAKE_USE_OPENSSL=OFF"
+          "-DHTTP_ONLY=ON"
+          "-DCURL_CA_PATH=none")
+
+  set(CURL_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}curl")
+  set(CURL_LIBRARY "${CURL_PREFIX}/lib/${CURL_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+
+  ExternalProject_Add(curl
+          URL https://github.com/curl/curl/releases/download/curl-7_60_0/curl-7.60.0.tar.gz
+          CMAKE_ARGS ${CURL_CMAKE_ARGS}
+          LOG_CONFIGURE ON
+          LOG_BUILD ON
+          LOG_INSTALL ON)
+
+  include_directories(SYSTEM ${CURL_INCLUDE_DIR})
+  message(STATUS "Curl include dir: ${CURL_INCLUDE_DIR}")
+  message(STATUS "Curl static library: ${CURL_LIBRARY}")
+
+  install(FILES ${CURL_LIBRARY} DESTINATION lib)
+  install(DIRECTORY ${CURL_INCLUDE_DIR}/curl DESTINATION include)
+
   set(AWS_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(AWS_C_FLAGS "${EXTERNAL_C_FLAGS}")
   set(AWS_PREFIX "${PROJECT_BINARY_DIR}/external/aws")
@@ -33,7 +64,7 @@ else ()
           "-DCMAKE_INSTALL_PREFIX=${AWS_PREFIX}"
           "-DENABLE_TESTING=OFF"
           "-DBUILD_SHARED_LIBS=OFF"
-          "-DBUILD_CURL=ON")
+          "-DCMAKE_PREFIX_PATH=${CURL_PREFIX}")
 
   set(AWS_STATIC_CORE_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-core")
   set(AWS_STATIC_S3_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-s3")
@@ -53,16 +84,17 @@ else ()
 
   install(FILES ${AWS_LIBRARIES} DESTINATION lib)
   install(DIRECTORY ${AWS_INCLUDE_DIR}/aws DESTINATION include)
+
+  add_dependencies(awssdk curl)
 endif ()
 
-if (USE_SYSTEM_LIBEVENT)
-  find_package(Libevent REQUIRED)
+if (USE_SYSTEM_THRIFT)
+  find_package(Thrift ${THRIFT_VERSION} REQUIRED)
 else ()
   set(LIBEVENT_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(LIBEVENT_C_FLAGS "${EXTERNAL_C_FLAGS}")
   set(LIBEVENT_PREFIX "${PROJECT_BINARY_DIR}/external/libevent")
   set(LIBEVENT_HOME "${LIBEVENT_PREFIX}")
-  set(LIBEVENT_ROOT "${LIBEVENT_HOME}")
   set(LIBEVENT_INCLUDE_DIR "${LIBEVENT_PREFIX}/include")
   set(LIBEVENT_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}event")
   set(LIBEVENT_CORE_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}event_core")
@@ -89,11 +121,7 @@ else ()
 
   install(FILES ${LIBEVENT_LIBRARIES} DESTINATION lib)
   install(DIRECTORY ${LIBEVENT_INCLUDE_DIR} DESTINATION include)
-endif ()
 
-if (USE_SYSTEM_THRIFT)
-  find_package(Thrift ${THRIFT_VERSION} REQUIRED)
-else ()
   set(THRIFT_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(THRIFT_C_FLAGS "${EXTERNAL_C_FLAGS}")
   set(THRIFT_PREFIX "${PROJECT_BINARY_DIR}/external/thrift")
@@ -119,7 +147,8 @@ else ()
           "-DWITH_CPP=ON"
           "-DWITH_STDTHREADS=OFF"
           "-DWITH_BOOSTTHREADS=OFF"
-          "-DWITH_STATIC_LIB=ON")
+          "-DWITH_STATIC_LIB=ON"
+          "-DCMAKE_PREFIX_PATH=${LIBEVENT_PREFIX}")
 
   set(THRIFT_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}thrift")
   if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
