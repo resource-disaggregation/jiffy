@@ -21,9 +21,6 @@ void notification_service_handler::subscribe(const int32_t block_id, const std::
 
 void notification_service_handler::unsubscribe(int32_t block_id, const std::vector<std::string> &ops) {
   std::vector<std::string> removed;
-  bool inform = true;
-  if (block_id == -1)
-    inform = false;
   if (ops.empty()) {
     for (const auto &sub: local_subs_) {
       if (block_id == -1)
