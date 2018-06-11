@@ -1,7 +1,12 @@
 include(ExternalProject)
 
+set(LIBEVENT_VERSION "2.1.8")
 set(THRIFT_VERSION "0.11.0")
+set(CURL_VERSION "7.60.0")
+set(AWSSDK_VERSION "1.4.26")
 set(BOOST_VERSION "1.40.0")
+set(CATCH_VERSION "2.2.1")
+set(LIBCUCKOO_VERSION "0.2")
 
 find_package(Threads REQUIRED)
 find_package(Boost ${BOOST_VERSION} COMPONENTS program_options REQUIRED)
@@ -72,7 +77,8 @@ else ()
           "${AWS_PREFIX}/lib/${AWS_STATIC_S3_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 
   ExternalProject_Add(awssdk
-          URL https://github.com/aws/aws-sdk-cpp/archive/1.4.26.tar.gz
+          DEPENDS curl
+          URL https://github.com/aws/aws-sdk-cpp/archive/${AWSSDK_VERSION}.tar.gz
           CMAKE_ARGS ${AWS_CMAKE_ARGS}
           LOG_CONFIGURE ON
           LOG_BUILD ON
@@ -84,8 +90,6 @@ else ()
 
   install(FILES ${AWS_LIBRARIES} DESTINATION lib)
   install(DIRECTORY ${AWS_INCLUDE_DIR}/aws DESTINATION include)
-
-  add_dependencies(awssdk curl)
 endif ()
 
 if (USE_SYSTEM_THRIFT)
@@ -99,17 +103,17 @@ else ()
   set(LIBEVENT_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}event")
   set(LIBEVENT_CORE_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}event_core")
   set(LIBEVENT_EXTRA_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}event_extra")
-  set(LIBEVENT_LIBRARIES "${LIBEVENT_PREFIX}/lib/${LIBEVENT_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-          "${LIBEVENT_PREFIX}/lib/${LIBEVENT_CORE_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-          "${LIBEVENT_PREFIX}/lib/${LIBEVENT_EXTRA_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(LIBEVENT_LIBRARIES "${LIBEVENT_PREFIX}/lib/${LIBEVENT_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
   set(LIBEVENT_CMAKE_ARGS "-Wno-dev"
           "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
           "-DCMAKE_INSTALL_PREFIX=${LIBEVENT_PREFIX}"
           "-DENABLE_TESTING=OFF"
           "-DBUILD_SHARED_LIBS=OFF"
-          "-DEVENT__DISABLE_OPENSSL=ON")
+          "-DEVENT__DISABLE_OPENSSL=ON"
+          "-DEVENT__DISABLE_BENCHMARK=ON"
+          "-DEVENT__DISABLE_TESTS=ON")
   ExternalProject_Add(libevent
-          URL https://github.com/nmathewson/Libevent/archive/release-2.1.8-stable.tar.gz
+          URL https://github.com/nmathewson/Libevent/archive/release-${LIBEVENT_VERSION}-stable.tar.gz
           CMAKE_ARGS ${LIBEVENT_CMAKE_ARGS}
           LOG_CONFIGURE ON
           LOG_BUILD ON
@@ -163,13 +167,12 @@ else ()
     set(THRIFT_COMPILER "${THRIFT_PREFIX}/bin/thrift")
   endif ()
   ExternalProject_Add(thrift
+          DEPENDS libevent
           URL "http://archive.apache.org/dist/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
           CMAKE_ARGS ${THRIFT_CMAKE_ARGS}
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
-
-  add_dependencies(thrift libevent)
 
   include_directories(SYSTEM ${THRIFT_INCLUDE_DIR})
   message(STATUS "Thrift include dir: ${THRIFT_INCLUDE_DIR}")
@@ -202,7 +205,7 @@ if (NOT USE_SYSTEM_LIBCUCKOO)
           "-DBUILD_UNIVERSAL_BENCHMARK=OFF")
 
   ExternalProject_Add(libcuckoo
-          URL "https://github.com/efficient/libcuckoo/archive/v0.2.tar.gz"
+          URL "https://github.com/efficient/libcuckoo/archive/v${LIBCUCKOO_VERSION}.tar.gz"
           CMAKE_ARGS ${LIBCUCKOO_CMAKE_ARGS}
           LOG_CONFIGURE ON
           LOG_BUILD ON
@@ -243,7 +246,7 @@ endif ()
 if (BUILD_TESTS AND NOT USE_SYSTEM_CATCH)
   ExternalProject_Add(catch
           PREFIX ${CMAKE_BINARY_DIR}/catch
-          URL https://github.com/catchorg/Catch2/archive/v2.2.1.tar.gz
+          URL https://github.com/catchorg/Catch2/archive/v${CATCH_VERSION}.tar.gz
           CONFIGURE_COMMAND ""
           BUILD_COMMAND ""
           INSTALL_COMMAND ""
