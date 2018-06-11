@@ -148,7 +148,7 @@ else ()
           "-DWITH_STDTHREADS=OFF"
           "-DWITH_BOOSTTHREADS=OFF"
           "-DWITH_STATIC_LIB=ON"
-          "-DCMAKE_PREFIX_PATH=${LIBEVENT_PREFIX}")
+          "-DLIBEVENT_ROOT=${LIBEVENT_PREFIX}")
 
   set(THRIFT_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}thrift")
   if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
@@ -170,9 +170,7 @@ else ()
           LOG_BUILD ON
           LOG_INSTALL ON)
 
-  if (NOT USE_SYSTEM_LIBEVENT)
-    add_dependencies(thrift libevent)
-  endif ()
+  add_dependencies(thrift libevent)
 
   include_directories(SYSTEM ${THRIFT_INCLUDE_DIR})
   message(STATUS "Thrift include dir: ${THRIFT_INCLUDE_DIR}")
