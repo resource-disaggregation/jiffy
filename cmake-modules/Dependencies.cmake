@@ -109,7 +109,6 @@ else ()
           "-DBUILD_SHARED_LIBS=OFF"
           "-DEVENT__DISABLE_OPENSSL=ON")
   ExternalProject_Add(libevent
-          PREFIX ${LIBEVENT_PREFIX}
           URL https://github.com/nmathewson/Libevent/archive/release-2.1.8-stable.tar.gz
           CMAKE_ARGS ${LIBEVENT_CMAKE_ARGS}
           LOG_CONFIGURE ON
@@ -148,7 +147,7 @@ else ()
           "-DWITH_STDTHREADS=OFF"
           "-DWITH_BOOSTTHREADS=OFF"
           "-DWITH_STATIC_LIB=ON"
-          "-DLIBEVENT_ROOT=${LIBEVENT_PREFIX}")
+          "-DCMAKE_PREFIX_PATH=${LIBEVENT_PREFIX}")
 
   set(THRIFT_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}thrift")
   if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
