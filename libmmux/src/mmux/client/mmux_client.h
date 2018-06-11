@@ -2,7 +2,7 @@
 #define MMUX_MMUX_CLIENT_H
 
 #include <string>
-#include "../directory/client/directory_client.h"
+#include "../directory/directory_ops.h"
 #include "../directory/client/lease_renewal_worker.h"
 #include "../storage/client/kv_client.h"
 
@@ -29,7 +29,7 @@ class mmux_client {
   void flush(const std::string &path);
 
  private:
-  directory::directory_client fs_;
+  std::shared_ptr<directory::directory_ops> fs_;
   directory::lease_renewal_worker lease_worker_;
 };
 

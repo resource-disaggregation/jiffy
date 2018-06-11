@@ -1,5 +1,7 @@
 include_directories(${THRIFT_INCLUDE_DIR})
 add_library(mmux STATIC
+        src/mmux/client/mmux_client.cc
+        src/mmux/client/mmux_client.h
         src/mmux/directory/block/block_advertisement_client.cpp
         src/mmux/directory/block/block_advertisement_client.h
         src/mmux/directory/block/block_allocation_service.cpp
@@ -247,7 +249,7 @@ if (BUILD_BENCHMARKS)
           bench/benchmark_utils.h)
   add_executable(kv_notification_benchmark
           bench/kv_notification_benchmark.cpp
-          bench/benchmark_utils.h src/mmux/client/mmux_client.cc src/mmux/client/mmux_client.h)
+          bench/benchmark_utils.h)
   target_link_libraries(kv_rpc_benchmark mmux)
   target_link_libraries(kv_notification_benchmark mmux)
 endif ()
