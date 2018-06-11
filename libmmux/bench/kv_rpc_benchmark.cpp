@@ -7,7 +7,7 @@
 #include "../src/mmux/utils/logger.h"
 #include "../src/mmux/utils/cmd_parse.h"
 #include "../src/mmux/storage/kv/kv_block.h"
-#include "../src/mmux/directory/fs/directory_client.h"
+#include "../src/mmux/directory/client/directory_client.h"
 #include "benchmark_utils.h"
 
 using namespace mmux::storage;

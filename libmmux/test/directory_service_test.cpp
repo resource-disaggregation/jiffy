@@ -2,7 +2,7 @@
 
 #include <thrift/transport/TTransportException.h>
 #include <thread>
-#include "../src/mmux/directory/fs/directory_client.h"
+#include "../src/mmux/directory/client/directory_client.h"
 #include "../src/mmux/directory/fs/directory_server.h"
 #include "../src/mmux/directory/block/random_block_allocator.h"
 #include "test_utils.h"

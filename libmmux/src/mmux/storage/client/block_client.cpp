@@ -28,14 +28,6 @@ void block_client::connect(const std::string &host, int port, int block_id) {
   transport_->open();
 }
 
-void block_client::connect(block_client::client_cache &cache, const std::string &host, int port, int block_id) {
-  block_id_ = block_id;
-  auto ret = cache.get(host, port);
-  transport_ = std::get<0>(ret);
-  protocol_ = std::get<1>(ret);
-  client_ = std::get<2>(ret);
-}
-
 block_client::command_response_reader block_client::get_command_response_reader(int64_t client_id) {
   client_->register_client_id(block_id_, client_id);
   return block_client::command_response_reader(protocol_);
@@ -53,10 +45,8 @@ bool block_client::is_connected() {
   return transport_->isOpen();
 }
 
-void block_client::command_request(const sequence_id &seq,
-                                   const int32_t cmd_id,
-                                   const std::vector<std::string> &arguments) {
-  client_->command_request(seq, block_id_, cmd_id, arguments);
+void block_client::command_request(const sequence_id &seq, const int32_t cmd_id, const std::vector<std::string> &args) {
+  client_->command_request(seq, block_id_, cmd_id, args);
 }
 
 }

@@ -2,7 +2,7 @@
 #include "hash_slot.h"
 #include "../client/replica_chain_client.h"
 #include "../../utils/logger.h"
-#include "../../directory/fs/directory_client.h"
+#include "../../directory/client/directory_client.h"
 
 namespace mmux {
 namespace storage {

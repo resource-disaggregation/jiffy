@@ -14,15 +14,6 @@ replica_chain_client::replica_chain_client(const std::vector<std::string> &chain
   }
 }
 
-replica_chain_client::replica_chain_client(block_client::client_cache &cache, const std::vector<std::string> &chain) {
-  seq_.client_id = -1;
-  seq_.client_seq_no = 0;
-  connect(cache, chain);
-  for (auto &op: KV_OPS) {
-    cmd_client_.push_back(op.type == block_op_type::accessor ? &tail_ : &head_);
-  }
-}
-
 replica_chain_client::~replica_chain_client() {
   disconnect();
 }
@@ -34,20 +25,6 @@ void replica_chain_client::disconnect() {
 
 const std::vector<std::string> &replica_chain_client::chain() const {
   return chain_;
-}
-
-void replica_chain_client::connect(block_client::client_cache &cache, const std::vector<std::string> &chain) {
-  chain_ = chain;
-  auto h = block_name_parser::parse(chain_.front());
-  head_.connect(cache, h.host, h.service_port, h.id);
-  seq_.client_id = head_.get_client_id();
-  if (chain.size() == 1) {
-    tail_ = head_;
-  } else {
-    auto t = block_name_parser::parse(chain_.back());
-    tail_.connect(cache, t.host, t.service_port, t.id);
-  }
-  response_reader_ = tail_.get_command_response_reader(seq_.client_id);
 }
 
 void replica_chain_client::connect(const std::vector<std::string> &chain) {
@@ -88,16 +65,15 @@ void replica_chain_client::send_command(int32_t cmd_id, const std::vector<std::s
   if (in_flight_) {
     throw std::length_error("Cannot have more than one request in-flight");
   }
-  cmd_client_[cmd_id]->command_request(seq_, cmd_id, args);
+  cmd_client_.at(static_cast<unsigned long>(cmd_id))->command_request(seq_, cmd_id, args);
   in_flight_ = true;
 }
 
 std::vector<std::string> replica_chain_client::recv_response() {
   std::vector<std::string> ret;
-  int64_t r_seq = response_reader_.recv_response(ret);
-  if (r_seq != seq_.client_seq_no) {
-    throw std::logic_error("Invalid sequence number: "
-                           "Expected=" + std::to_string(seq_.client_seq_no) + ", Received=" + std::to_string(r_seq));
+  int64_t rseq = response_reader_.recv_response(ret);
+  if (rseq != seq_.client_seq_no) {
+    throw std::logic_error("SEQ: Expected=" + std::to_string(seq_.client_seq_no) + " Received=" + std::to_string(rseq));
   }
   seq_.client_seq_no++;
   in_flight_ = false;

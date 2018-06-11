@@ -1,6 +1,7 @@
 #ifndef MMUX_CLIENT_CACHE_H
 #define MMUX_CLIENT_CACHE_H
 
+#include <iostream>
 #include <string>
 #include <thrift/transport/TBufferTransports.h>
 #include <thrift/protocol/TBinaryProtocol.h>
@@ -52,9 +53,8 @@ class client_cache {
     }
     if (n_attempts == 0)
       throw ex;
-    value_type value = std::make_tuple(transport, prot, client);
-    cache_.insert(std::make_pair(key, value));
-    return value;
+    cache_.insert(std::make_pair(key, std::make_tuple(transport, prot, client)));
+    return cache_.at(key);
   }
 
  private:

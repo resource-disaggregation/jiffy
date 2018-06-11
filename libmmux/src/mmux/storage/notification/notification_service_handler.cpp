@@ -43,7 +43,7 @@ void notification_service_handler::unsubscribe(int32_t block_id, const std::vect
     }
   }
   if (block_id != -1) {
-    blocks_[block_id]->subscriptions().remove_subscriptions(removed, client_, inform);
+    blocks_[block_id]->subscriptions().remove_subscriptions(removed, client_);
   }
 }
 

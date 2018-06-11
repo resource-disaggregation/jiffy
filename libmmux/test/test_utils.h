@@ -11,6 +11,7 @@
 #include "../src/mmux/storage/kv/kv_block.h"
 #include "../src/mmux/storage/notification/subscription_map.h"
 #include "../src/mmux/utils/logger.h"
+#include "../src/mmux/directory/directory_ops.h"
 
 class dummy_storage_manager : public mmux::storage::storage_management_ops {
  public:
@@ -245,29 +246,29 @@ class test_utils {
     std::vector<std::string> block_names;
     for (size_t i = 0; i < num_blocks; ++i) {
       std::string block_name = mmux::storage::block_name_parser::make("127.0.0.1",
-                                                                            service_port,
-                                                                            management_port,
-                                                                            notification_port,
-                                                                            chain_port,
-                                                                            static_cast<int32_t>(i));
+                                                                      service_port,
+                                                                      management_port,
+                                                                      notification_port,
+                                                                      chain_port,
+                                                                      static_cast<int32_t>(i));
       block_names.push_back(block_name);
     }
     return block_names;
   }
 
   static std::vector<std::shared_ptr<mmux::storage::chain_module>> init_kv_blocks(size_t num_blocks,
-                                                                                        int32_t service_port,
-                                                                                        int32_t management_port,
-                                                                                        int32_t notification_port) {
+                                                                                  int32_t service_port,
+                                                                                  int32_t management_port,
+                                                                                  int32_t notification_port) {
     std::vector<std::shared_ptr<mmux::storage::chain_module>> blks;
     blks.resize(num_blocks);
     for (size_t i = 0; i < num_blocks; ++i) {
       std::string block_name = mmux::storage::block_name_parser::make("127.0.0.1",
-                                                                            service_port,
-                                                                            management_port,
-                                                                            notification_port,
-                                                                            0,
-                                                                            static_cast<int32_t>(i));
+                                                                      service_port,
+                                                                      management_port,
+                                                                      notification_port,
+                                                                      0,
+                                                                      static_cast<int32_t>(i));
       blks[i] = std::make_shared<mmux::storage::kv_block>(block_name);
       blks[i]->slot_range(0, mmux::storage::block::SLOT_MAX);
     }
@@ -275,20 +276,20 @@ class test_utils {
   }
 
   static std::vector<std::shared_ptr<mmux::storage::chain_module>> init_kv_blocks(const std::vector<std::string> &block_names,
-                                                                                        size_t block_capacity = 134217728,
-                                                                                        double threshold_lo = 0.25,
-                                                                                        double threshold_hi = 0.75,
-                                                                                        const std::string &dir_host = "127.0.0.1",
-                                                                                        int dir_port = 9090) {
+                                                                                  size_t block_capacity = 134217728,
+                                                                                  double threshold_lo = 0.25,
+                                                                                  double threshold_hi = 0.75,
+                                                                                  const std::string &dir_host = "127.0.0.1",
+                                                                                  int dir_port = 9090) {
     std::vector<std::shared_ptr<mmux::storage::chain_module>> blks;
     blks.resize(block_names.size());
     for (size_t i = 0; i < block_names.size(); ++i) {
       blks[i] = std::make_shared<mmux::storage::kv_block>(block_names[i],
-                                                                block_capacity,
-                                                                threshold_lo,
-                                                                threshold_hi,
-                                                                dir_host,
-                                                                dir_port);
+                                                          block_capacity,
+                                                          threshold_lo,
+                                                          threshold_hi,
+                                                          dir_host,
+                                                          dir_port);
     }
     return blks;
   }

@@ -14,9 +14,7 @@ class subscription_map {
 
   void add_subscriptions(const std::vector<std::string> &ops, std::shared_ptr<subscription_serviceClient> client);
 
-  void remove_subscriptions(const std::vector<std::string> &ops,
-                            std::shared_ptr<subscription_serviceClient> client,
-                            bool inform = true);
+  void remove_subscriptions(const std::vector<std::string> &ops, std::shared_ptr<subscription_serviceClient> client);
 
   void notify(const std::string &op, const std::string &msg);
 
@@ -24,7 +22,7 @@ class subscription_map {
 
  private:
   std::mutex mtx_{};
-  std::unordered_map<std::string, std::set<std::shared_ptr<subscription_serviceClient>>> subs_{};
+  std::map<std::string, std::set<std::shared_ptr<subscription_serviceClient>>> subs_{};
 };
 
 }

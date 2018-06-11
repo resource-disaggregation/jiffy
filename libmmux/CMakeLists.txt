@@ -21,8 +21,8 @@ add_library(mmux STATIC
         src/mmux/directory/block/file_size_tracker.h
         src/mmux/directory/block/random_block_allocator.cpp
         src/mmux/directory/block/random_block_allocator.h
-        src/mmux/directory/fs/directory_client.cpp
-        src/mmux/directory/fs/directory_client.h
+        src/mmux/directory/client/directory_client.cpp
+        src/mmux/directory/client/directory_client.h
         src/mmux/directory/fs/directory_server.cpp
         src/mmux/directory/fs/directory_server.h
         src/mmux/directory/fs/directory_service.cpp
@@ -40,8 +40,10 @@ add_library(mmux STATIC
         src/mmux/directory/fs/directory_tree.cpp
         src/mmux/directory/fs/directory_tree.h
         src/mmux/directory/fs/directory_type_conversions.h
-        src/mmux/directory/lease/lease_client.cpp
-        src/mmux/directory/lease/lease_client.h
+        src/mmux/directory/client/lease_client.cpp
+        src/mmux/directory/client/lease_client.h
+        src/mmux/directory/client/lease_renewal_worker.cc
+        src/mmux/directory/client/lease_renewal_worker.h
         src/mmux/directory/lease/lease_server.cpp
         src/mmux/directory/lease/lease_server.h
         src/mmux/directory/lease/lease_service.cpp
@@ -81,8 +83,12 @@ add_library(mmux STATIC
         src/mmux/storage/service/block_server.h
         src/mmux/storage/client/block_client.cpp
         src/mmux/storage/client/block_client.h
+        src/mmux/storage/client/block_listener.cpp
+        src/mmux/storage/client/block_listener.h
         src/mmux/storage/client/kv_client.cpp
         src/mmux/storage/client/kv_client.h
+        src/mmux/storage/client/kv_listener.cpp
+        src/mmux/storage/client/kv_listener.h
         src/mmux/storage/service/block_request_handler.cpp
         src/mmux/storage/service/block_request_handler.h
         src/mmux/storage/service/chain_request_handler_factory.cpp
@@ -141,6 +147,8 @@ add_library(mmux STATIC
         src/mmux/storage/manager/storage_manager.cpp
         src/mmux/storage/manager/storage_manager.h
         src/mmux/storage/notification/blocking_queue.h
+        src/mmux/storage/notification/notification_handler.cpp
+        src/mmux/storage/notification/notification_handler.h
         src/mmux/storage/notification/notification_server.cpp
         src/mmux/storage/notification/notification_server.h
         src/mmux/storage/notification/notification_service.cpp
@@ -155,8 +163,8 @@ add_library(mmux STATIC
         src/mmux/storage/notification/notification_service_types.cpp
         src/mmux/storage/notification/notification_service_types.h
         src/mmux/storage/notification/notification_service_types.tcc
-        src/mmux/storage/notification/subscriber.cpp
-        src/mmux/storage/notification/subscriber.h
+        src/mmux/storage/notification/notification_worker.cpp
+        src/mmux/storage/notification/notification_worker.h
         src/mmux/storage/notification/subscription_map.cpp
         src/mmux/storage/notification/subscription_map.h
         src/mmux/storage/notification/subscription_service.cpp
@@ -226,7 +234,7 @@ if (BUILD_TESTS)
           test/local_store_test.cpp
           test/notification_test.cpp
           test/storage_manager_test.cpp
-          test/test_utils.h)
+          test/test_utils.h test/kv_client_test.cc)
   target_link_libraries(mmux_tests mmux)
   if (NOT USE_SYSTEM_CATCH)
     add_dependencies(mmux_tests catch)
@@ -239,7 +247,7 @@ if (BUILD_BENCHMARKS)
           bench/benchmark_utils.h)
   add_executable(kv_notification_benchmark
           bench/kv_notification_benchmark.cpp
-          bench/benchmark_utils.h)
+          bench/benchmark_utils.h src/mmux/client/mmux_client.cc src/mmux/client/mmux_client.h)
   target_link_libraries(kv_rpc_benchmark mmux)
   target_link_libraries(kv_notification_benchmark mmux)
 endif ()

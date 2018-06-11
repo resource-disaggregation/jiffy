@@ -9,6 +9,5 @@ enum response_type {
 
 service subscription_service {
   oneway void notification(1: string op, 2: binary data),
-  oneway void success(1: response_type type, 2: list<string> ops),
-  oneway void error(1: response_type type, 2: string msg),
+  oneway void control(1: response_type type, 2: list<string> ops, 3: string error),
 }

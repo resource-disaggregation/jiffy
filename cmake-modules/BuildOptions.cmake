@@ -8,7 +8,7 @@ option(USE_SYSTEM_THRIFT "Use system thrift library" OFF)
 option(USE_SYSTEM_LIBCUCKOO "Use system libcuckoo library" OFF)
 option(USE_SYSTEM_AWS_SDK "Use system AWS SDK" OFF)
 option(USE_SYSTEM_JEMALLOC "Use system Jemalloc" OFF)
-option(BUILD_BENCHMARKS "Build benchmarks" ON)
+option(BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(GENERATE_THRIFT "Generate thrift files" OFF)
 
 message(STATUS "----------------------------------------------------------")

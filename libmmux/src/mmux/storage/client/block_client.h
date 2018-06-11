@@ -59,17 +59,13 @@ class block_client {
   ~block_client();
   int64_t get_client_id();
   void connect(const std::string &hostname, int port, int block_id);
-  void connect(block_client::client_cache &cache, const std::string &host, int port, int block_id);
   void disconnect();
   bool is_connected();
 
   command_response_reader get_command_response_reader(int64_t client_id);
-  void command_request(const sequence_id &seq,
-                       int32_t cmd_id,
-                       const std::vector<std::string> &arguments);
+  void command_request(const sequence_id &seq, int32_t cmd_id, const std::vector<std::string> &args);
 
  private:
-  std::shared_ptr<apache::thrift::transport::TSocket> socket_{};
   std::shared_ptr<apache::thrift::transport::TTransport> transport_{};
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_{};
   std::shared_ptr<thrift_client> client_{};

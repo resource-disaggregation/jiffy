@@ -11,11 +11,11 @@ void subscription_map::add_subscriptions(const std::vector<std::string> &ops,
   std::lock_guard<std::mutex> lock{mtx_};
   for (const auto &op: ops)
     subs_[op].insert(client);
-  client->success(response_type::subscribe, ops);
+  client->control(response_type::subscribe, ops, "");
 }
 
 void subscription_map::remove_subscriptions(const std::vector<std::string> &ops,
-                                            std::shared_ptr<subscription_serviceClient> client, bool inform) {
+                                            std::shared_ptr<subscription_serviceClient> client) {
   std::lock_guard<std::mutex> lock{mtx_};
   for (const auto &op: ops) {
     auto &clients = subs_[op];
@@ -26,8 +26,7 @@ void subscription_map::remove_subscriptions(const std::vector<std::string> &ops,
         subs_.erase(op);
     }
   }
-  if (inform)
-    client->success(response_type::unsubscribe, ops);
+  client->control(response_type::unsubscribe, ops, "");
 }
 
 void subscription_map::notify(const std::string &op, const std::string &msg) {

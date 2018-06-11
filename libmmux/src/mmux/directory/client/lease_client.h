@@ -2,7 +2,7 @@
 #define MMUX_DIRECTORY_LEASE_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
-#include "lease_service.h"
+#include "../lease/lease_service.h"
 
 namespace mmux {
 namespace directory {
