@@ -102,9 +102,10 @@ class signal_handling {
         FILE *cmd = popen(syscom, "r");
         if (cmd) {
           char buf[256];
-          fscanf(cmd, "%256s", buf);
+          int n = fscanf(cmd, "%256s", buf);
           pclose(cmd);
-          out << "(" << buf << ")\n";
+          if (n != EOF)
+            out << "(" << buf << ")\n";
         } else {
           out << "\n";
         }
