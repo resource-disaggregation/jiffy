@@ -1,10 +1,11 @@
-#ifndef MMUX_KV_CLIENT_H
-#define MMUX_KV_CLIENT_H
+#ifndef MMUX_BLOCK_CLIENT_H
+#define MMUX_BLOCK_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
 #include <libcuckoo/cuckoohash_map.hh>
 #include "../service/block_request_service.h"
 #include "../service/block_response_service.h"
+#include "../../utils/client_cache.h"
 
 namespace mmux {
 namespace storage {
@@ -52,6 +53,7 @@ class block_client {
   };
 
   typedef block_request_serviceClient thrift_client;
+  typedef utils::client_cache<thrift_client> client_cache;
 
   block_client() = default;
   ~block_client();
@@ -61,12 +63,9 @@ class block_client {
   bool is_connected();
 
   command_response_reader get_command_response_reader(int64_t client_id);
-  void command_request(const sequence_id &seq,
-                       int32_t cmd_id,
-                       const std::vector<std::string> &arguments);
+  void command_request(const sequence_id &seq, int32_t cmd_id, const std::vector<std::string> &args);
 
  private:
-  std::shared_ptr<apache::thrift::transport::TSocket> socket_{};
   std::shared_ptr<apache::thrift::transport::TTransport> transport_{};
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_{};
   std::shared_ptr<thrift_client> client_{};
@@ -76,4 +75,4 @@ class block_client {
 }
 }
 
-#endif //MMUX_KV_CLIENT_H
+#endif //MMUX_BLOCK_CLIENT_H

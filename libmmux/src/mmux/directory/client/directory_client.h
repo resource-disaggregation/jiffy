@@ -3,7 +3,7 @@
 
 #include <thrift/transport/TSocket.h>
 #include "../directory_ops.h"
-#include "directory_service.h"
+#include "../fs/directory_service.h"
 
 namespace mmux {
 namespace directory {

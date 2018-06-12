@@ -7,9 +7,9 @@
 #include "../src/mmux/utils/logger.h"
 #include "../src/mmux/utils/cmd_parse.h"
 #include "../src/mmux/storage/kv/kv_block.h"
-#include "../src/mmux/directory/fs/directory_client.h"
+#include "../src/mmux/directory/client/directory_client.h"
 #include "benchmark_utils.h"
-#include "../src/mmux/storage/notification/subscriber.h"
+#include "../src/mmux/storage/client/block_listener.h"
 
 using namespace mmux::storage;
 using namespace mmux::utils;
@@ -74,7 +74,7 @@ class notification_listener {
 
  private:
   std::thread worker_;
-  subscriber sub_;
+  block_listener sub_;
   std::size_t num_ops_;
   std::vector<std::uint64_t> timestamps_{};
 };

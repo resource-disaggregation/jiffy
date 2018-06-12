@@ -1,7 +1,12 @@
 include(ExternalProject)
 
+set(LIBEVENT_VERSION "2.1.8")
 set(THRIFT_VERSION "0.11.0")
+set(CURL_VERSION "7.60.0")
+set(AWSSDK_VERSION "1.4.26")
 set(BOOST_VERSION "1.40.0")
+set(CATCH_VERSION "2.2.1")
+set(LIBCUCKOO_VERSION "0.2")
 
 find_package(Threads REQUIRED)
 find_package(Boost ${BOOST_VERSION} COMPONENTS program_options REQUIRED)
@@ -21,6 +26,37 @@ set(EXTERNAL_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ${CMAKE_C_FLAGS_${UPPERCASE_BUILD_T
 if (USE_SYSTEM_AWS_SDK)
   find_package(aws-sdk-cpp REQUIRED)
 else ()
+  set(CURL_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
+  set(CURL_C_FLAGS "${EXTERNAL_C_FLAGS}")
+  set(CURL_PREFIX "${PROJECT_BINARY_DIR}/external/curl")
+  set(CURL_HOME "${CURL_PREFIX}")
+  set(CURL_INCLUDE_DIR "${CURL_PREFIX}/include")
+  set(CURL_CMAKE_ARGS "-Wno-dev"
+          "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+          "-DCMAKE_INSTALL_PREFIX=${CURL_PREFIX}"
+          "-DCURL_STATICLIB=ON"
+          "-DBUILD_CURL_EXE=OFF"
+          "-DCMAKE_USE_OPENSSL=OFF"
+          "-DHTTP_ONLY=ON"
+          "-DCURL_CA_PATH=none")
+
+  set(CURL_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}curl")
+  set(CURL_LIBRARY "${CURL_PREFIX}/lib/${CURL_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+
+  ExternalProject_Add(curl
+          URL https://github.com/curl/curl/releases/download/curl-7_60_0/curl-7.60.0.tar.gz
+          CMAKE_ARGS ${CURL_CMAKE_ARGS}
+          LOG_CONFIGURE ON
+          LOG_BUILD ON
+          LOG_INSTALL ON)
+
+  include_directories(SYSTEM ${CURL_INCLUDE_DIR})
+  message(STATUS "Curl include dir: ${CURL_INCLUDE_DIR}")
+  message(STATUS "Curl static library: ${CURL_LIBRARY}")
+
+  install(FILES ${CURL_LIBRARY} DESTINATION lib)
+  install(DIRECTORY ${CURL_INCLUDE_DIR}/curl DESTINATION include)
+
   set(AWS_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(AWS_C_FLAGS "${EXTERNAL_C_FLAGS}")
   set(AWS_PREFIX "${PROJECT_BINARY_DIR}/external/aws")
@@ -32,7 +68,8 @@ else ()
           "-DBUILD_ONLY=${AWS_BUILD_PROJECTS}"
           "-DCMAKE_INSTALL_PREFIX=${AWS_PREFIX}"
           "-DENABLE_TESTING=OFF"
-          "-DBUILD_SHARED_LIBS=OFF")
+          "-DBUILD_SHARED_LIBS=OFF"
+          "-DCMAKE_PREFIX_PATH=${CURL_PREFIX}")
 
   set(AWS_STATIC_CORE_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-core")
   set(AWS_STATIC_S3_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-s3")
@@ -40,7 +77,8 @@ else ()
           "${AWS_PREFIX}/lib/${AWS_STATIC_S3_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 
   ExternalProject_Add(awssdk
-          URL https://github.com/aws/aws-sdk-cpp/archive/1.4.26.tar.gz
+          DEPENDS curl
+          URL https://github.com/aws/aws-sdk-cpp/archive/${AWSSDK_VERSION}.tar.gz
           CMAKE_ARGS ${AWS_CMAKE_ARGS}
           LOG_CONFIGURE ON
           LOG_BUILD ON
@@ -54,30 +92,28 @@ else ()
   install(DIRECTORY ${AWS_INCLUDE_DIR}/aws DESTINATION include)
 endif ()
 
-if (USE_SYSTEM_LIBEVENT)
-  find_package(Libevent REQUIRED)
+if (USE_SYSTEM_THRIFT)
+  find_package(Thrift ${THRIFT_VERSION} REQUIRED)
 else ()
   set(LIBEVENT_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(LIBEVENT_C_FLAGS "${EXTERNAL_C_FLAGS}")
   set(LIBEVENT_PREFIX "${PROJECT_BINARY_DIR}/external/libevent")
   set(LIBEVENT_HOME "${LIBEVENT_PREFIX}")
-  set(LIBEVENT_ROOT "${LIBEVENT_HOME}")
   set(LIBEVENT_INCLUDE_DIR "${LIBEVENT_PREFIX}/include")
   set(LIBEVENT_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}event")
   set(LIBEVENT_CORE_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}event_core")
   set(LIBEVENT_EXTRA_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}event_extra")
-  set(LIBEVENT_LIBRARIES "${LIBEVENT_PREFIX}/lib/${LIBEVENT_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-          "${LIBEVENT_PREFIX}/lib/${LIBEVENT_CORE_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-          "${LIBEVENT_PREFIX}/lib/${LIBEVENT_EXTRA_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(LIBEVENT_LIBRARIES "${LIBEVENT_PREFIX}/lib/${LIBEVENT_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
   set(LIBEVENT_CMAKE_ARGS "-Wno-dev"
           "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
           "-DCMAKE_INSTALL_PREFIX=${LIBEVENT_PREFIX}"
           "-DENABLE_TESTING=OFF"
           "-DBUILD_SHARED_LIBS=OFF"
-          "-DEVENT__DISABLE_OPENSSL=ON")
+          "-DEVENT__DISABLE_OPENSSL=ON"
+          "-DEVENT__DISABLE_BENCHMARK=ON"
+          "-DEVENT__DISABLE_TESTS=ON")
   ExternalProject_Add(libevent
-          PREFIX ${LIBEVENT_PREFIX}
-          URL https://github.com/nmathewson/Libevent/archive/release-2.1.8-stable.tar.gz
+          URL https://github.com/nmathewson/Libevent/archive/release-${LIBEVENT_VERSION}-stable.tar.gz
           CMAKE_ARGS ${LIBEVENT_CMAKE_ARGS}
           LOG_CONFIGURE ON
           LOG_BUILD ON
@@ -88,11 +124,7 @@ else ()
 
   install(FILES ${LIBEVENT_LIBRARIES} DESTINATION lib)
   install(DIRECTORY ${LIBEVENT_INCLUDE_DIR} DESTINATION include)
-endif ()
 
-if (USE_SYSTEM_THRIFT)
-  find_package(Thrift ${THRIFT_VERSION} REQUIRED)
-else ()
   set(THRIFT_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(THRIFT_C_FLAGS "${EXTERNAL_C_FLAGS}")
   set(THRIFT_PREFIX "${PROJECT_BINARY_DIR}/external/thrift")
@@ -118,7 +150,8 @@ else ()
           "-DWITH_CPP=ON"
           "-DWITH_STDTHREADS=OFF"
           "-DWITH_BOOSTTHREADS=OFF"
-          "-DWITH_STATIC_LIB=ON")
+          "-DWITH_STATIC_LIB=ON"
+          "-DCMAKE_PREFIX_PATH=${LIBEVENT_PREFIX}")
 
   set(THRIFT_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}thrift")
   if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
@@ -134,15 +167,12 @@ else ()
     set(THRIFT_COMPILER "${THRIFT_PREFIX}/bin/thrift")
   endif ()
   ExternalProject_Add(thrift
+          DEPENDS libevent
           URL "http://archive.apache.org/dist/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
           CMAKE_ARGS ${THRIFT_CMAKE_ARGS}
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
-
-  if (NOT USE_SYSTEM_LIBEVENT)
-    add_dependencies(thrift libevent)
-  endif ()
 
   include_directories(SYSTEM ${THRIFT_INCLUDE_DIR})
   message(STATUS "Thrift include dir: ${THRIFT_INCLUDE_DIR}")
@@ -175,7 +205,7 @@ if (NOT USE_SYSTEM_LIBCUCKOO)
           "-DBUILD_UNIVERSAL_BENCHMARK=OFF")
 
   ExternalProject_Add(libcuckoo
-          URL "https://github.com/efficient/libcuckoo/archive/v0.2.tar.gz"
+          URL "https://github.com/efficient/libcuckoo/archive/v${LIBCUCKOO_VERSION}.tar.gz"
           CMAKE_ARGS ${LIBCUCKOO_CMAKE_ARGS}
           LOG_CONFIGURE ON
           LOG_BUILD ON
@@ -216,7 +246,7 @@ endif ()
 if (BUILD_TESTS AND NOT USE_SYSTEM_CATCH)
   ExternalProject_Add(catch
           PREFIX ${CMAKE_BINARY_DIR}/catch
-          URL https://github.com/catchorg/Catch2/archive/v2.2.1.tar.gz
+          URL https://github.com/catchorg/Catch2/archive/v${CATCH_VERSION}.tar.gz
           CONFIGURE_COMMAND ""
           BUILD_COMMAND ""
           INSTALL_COMMAND ""

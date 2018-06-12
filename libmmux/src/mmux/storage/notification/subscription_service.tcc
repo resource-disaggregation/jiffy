@@ -103,7 +103,7 @@ uint32_t subscription_service_notification_pargs::write(Protocol_* oprot) const 
 
 
 template <class Protocol_>
-uint32_t subscription_service_success_args::read(Protocol_* iprot) {
+uint32_t subscription_service_control_args::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -137,19 +137,27 @@ uint32_t subscription_service_success_args::read(Protocol_* iprot) {
       case 2:
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
-            this->op.clear();
+            this->ops.clear();
             uint32_t _size1;
             ::apache::thrift::protocol::TType _etype4;
             xfer += iprot->readListBegin(_etype4, _size1);
-            this->op.resize(_size1);
+            this->ops.resize(_size1);
             uint32_t _i5;
             for (_i5 = 0; _i5 < _size1; ++_i5)
             {
-              xfer += iprot->readString(this->op[_i5]);
+              xfer += iprot->readString(this->ops[_i5]);
             }
             xfer += iprot->readListEnd();
           }
-          this->__isset.op = true;
+          this->__isset.ops = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->error);
+          this->__isset.error = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -167,20 +175,20 @@ uint32_t subscription_service_success_args::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t subscription_service_success_args::write(Protocol_* oprot) const {
+uint32_t subscription_service_control_args::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("subscription_service_success_args");
+  xfer += oprot->writeStructBegin("subscription_service_control_args");
 
   xfer += oprot->writeFieldBegin("type", ::apache::thrift::protocol::T_I32, 1);
   xfer += oprot->writeI32((int32_t)this->type);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("op", ::apache::thrift::protocol::T_LIST, 2);
+  xfer += oprot->writeFieldBegin("ops", ::apache::thrift::protocol::T_LIST, 2);
   {
-    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->op.size()));
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->ops.size()));
     std::vector<std::string> ::const_iterator _iter6;
-    for (_iter6 = this->op.begin(); _iter6 != this->op.end(); ++_iter6)
+    for (_iter6 = this->ops.begin(); _iter6 != this->ops.end(); ++_iter6)
     {
       xfer += oprot->writeString((*_iter6));
     }
@@ -188,6 +196,10 @@ uint32_t subscription_service_success_args::write(Protocol_* oprot) const {
   }
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("error", ::apache::thrift::protocol::T_STRING, 3);
+  xfer += oprot->writeString(this->error);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -195,20 +207,20 @@ uint32_t subscription_service_success_args::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t subscription_service_success_pargs::write(Protocol_* oprot) const {
+uint32_t subscription_service_control_pargs::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("subscription_service_success_pargs");
+  xfer += oprot->writeStructBegin("subscription_service_control_pargs");
 
   xfer += oprot->writeFieldBegin("type", ::apache::thrift::protocol::T_I32, 1);
   xfer += oprot->writeI32((int32_t)(*(this->type)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("op", ::apache::thrift::protocol::T_LIST, 2);
+  xfer += oprot->writeFieldBegin("ops", ::apache::thrift::protocol::T_LIST, 2);
   {
-    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->op)).size()));
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->ops)).size()));
     std::vector<std::string> ::const_iterator _iter7;
-    for (_iter7 = (*(this->op)).begin(); _iter7 != (*(this->op)).end(); ++_iter7)
+    for (_iter7 = (*(this->ops)).begin(); _iter7 != (*(this->ops)).end(); ++_iter7)
     {
       xfer += oprot->writeString((*_iter7));
     }
@@ -216,96 +228,8 @@ uint32_t subscription_service_success_pargs::write(Protocol_* oprot) const {
   }
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t subscription_service_error_args::read(Protocol_* iprot) {
-
-  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_I32) {
-          int32_t ecast8;
-          xfer += iprot->readI32(ecast8);
-          this->type = (response_type)ecast8;
-          this->__isset.type = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 2:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->msg);
-          this->__isset.msg = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-template <class Protocol_>
-uint32_t subscription_service_error_args::write(Protocol_* oprot) const {
-  uint32_t xfer = 0;
-  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("subscription_service_error_args");
-
-  xfer += oprot->writeFieldBegin("type", ::apache::thrift::protocol::T_I32, 1);
-  xfer += oprot->writeI32((int32_t)this->type);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("msg", ::apache::thrift::protocol::T_STRING, 2);
-  xfer += oprot->writeString(this->msg);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-template <class Protocol_>
-uint32_t subscription_service_error_pargs::write(Protocol_* oprot) const {
-  uint32_t xfer = 0;
-  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("subscription_service_error_pargs");
-
-  xfer += oprot->writeFieldBegin("type", ::apache::thrift::protocol::T_I32, 1);
-  xfer += oprot->writeI32((int32_t)(*(this->type)));
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("msg", ::apache::thrift::protocol::T_STRING, 2);
-  xfer += oprot->writeString((*(this->msg)));
+  xfer += oprot->writeFieldBegin("error", ::apache::thrift::protocol::T_STRING, 3);
+  xfer += oprot->writeString((*(this->error)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -336,42 +260,21 @@ void subscription_serviceClientT<Protocol_>::send_notification(const std::string
 }
 
 template <class Protocol_>
-void subscription_serviceClientT<Protocol_>::success(const response_type type, const std::vector<std::string> & op)
+void subscription_serviceClientT<Protocol_>::control(const response_type type, const std::vector<std::string> & ops, const std::string& error)
 {
-  send_success(type, op);
+  send_control(type, ops, error);
 }
 
 template <class Protocol_>
-void subscription_serviceClientT<Protocol_>::send_success(const response_type type, const std::vector<std::string> & op)
+void subscription_serviceClientT<Protocol_>::send_control(const response_type type, const std::vector<std::string> & ops, const std::string& error)
 {
   int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("success", ::apache::thrift::protocol::T_ONEWAY, cseqid);
+  this->oprot_->writeMessageBegin("control", ::apache::thrift::protocol::T_ONEWAY, cseqid);
 
-  subscription_service_success_pargs args;
+  subscription_service_control_pargs args;
   args.type = &type;
-  args.op = &op;
-  args.write(this->oprot_);
-
-  this->oprot_->writeMessageEnd();
-  this->oprot_->getTransport()->writeEnd();
-  this->oprot_->getTransport()->flush();
-}
-
-template <class Protocol_>
-void subscription_serviceClientT<Protocol_>::error(const response_type type, const std::string& msg)
-{
-  send_error(type, msg);
-}
-
-template <class Protocol_>
-void subscription_serviceClientT<Protocol_>::send_error(const response_type type, const std::string& msg)
-{
-  int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("error", ::apache::thrift::protocol::T_ONEWAY, cseqid);
-
-  subscription_service_error_pargs args;
-  args.type = &type;
-  args.msg = &msg;
+  args.ops = &ops;
+  args.error = &error;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -498,156 +401,78 @@ void subscription_serviceProcessorT<Protocol_>::process_notification(int32_t, Pr
 }
 
 template <class Protocol_>
-void subscription_serviceProcessorT<Protocol_>::process_success(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void subscription_serviceProcessorT<Protocol_>::process_control(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   (void) seqid;
   (void) oprot;
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("subscription_service.success", callContext);
+    ctx = this->eventHandler_->getContext("subscription_service.control", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "subscription_service.success");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "subscription_service.control");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "subscription_service.success");
+    this->eventHandler_->preRead(ctx, "subscription_service.control");
   }
 
-  subscription_service_success_args args;
+  subscription_service_control_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "subscription_service.success", bytes);
+    this->eventHandler_->postRead(ctx, "subscription_service.control", bytes);
   }
 
   try {
-    iface_->success(args.type, args.op);
+    iface_->control(args.type, args.ops, args.error);
   } catch (const std::exception&) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "subscription_service.success");
+      this->eventHandler_->handlerError(ctx, "subscription_service.control");
     }
     return;
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->asyncComplete(ctx, "subscription_service.success");
+    this->eventHandler_->asyncComplete(ctx, "subscription_service.control");
   }
 
   return;
 }
 
 template <class Protocol_>
-void subscription_serviceProcessorT<Protocol_>::process_success(int32_t, Protocol_* iprot, Protocol_*, void* callContext)
+void subscription_serviceProcessorT<Protocol_>::process_control(int32_t, Protocol_* iprot, Protocol_*, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("subscription_service.success", callContext);
+    ctx = this->eventHandler_->getContext("subscription_service.control", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "subscription_service.success");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "subscription_service.control");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "subscription_service.success");
+    this->eventHandler_->preRead(ctx, "subscription_service.control");
   }
 
-  subscription_service_success_args args;
+  subscription_service_control_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "subscription_service.success", bytes);
+    this->eventHandler_->postRead(ctx, "subscription_service.control", bytes);
   }
 
   try {
-    iface_->success(args.type, args.op);
+    iface_->control(args.type, args.ops, args.error);
   } catch (const std::exception&) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "subscription_service.success");
+      this->eventHandler_->handlerError(ctx, "subscription_service.control");
     }
     return;
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->asyncComplete(ctx, "subscription_service.success");
-  }
-
-  return;
-}
-
-template <class Protocol_>
-void subscription_serviceProcessorT<Protocol_>::process_error(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  (void) seqid;
-  (void) oprot;
-  void* ctx = NULL;
-  if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("subscription_service.error", callContext);
-  }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "subscription_service.error");
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "subscription_service.error");
-  }
-
-  subscription_service_error_args args;
-  args.read(iprot);
-  iprot->readMessageEnd();
-  uint32_t bytes = iprot->getTransport()->readEnd();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "subscription_service.error", bytes);
-  }
-
-  try {
-    iface_->error(args.type, args.msg);
-  } catch (const std::exception&) {
-    if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "subscription_service.error");
-    }
-    return;
-  }
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->asyncComplete(ctx, "subscription_service.error");
-  }
-
-  return;
-}
-
-template <class Protocol_>
-void subscription_serviceProcessorT<Protocol_>::process_error(int32_t, Protocol_* iprot, Protocol_*, void* callContext)
-{
-  void* ctx = NULL;
-  if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("subscription_service.error", callContext);
-  }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "subscription_service.error");
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "subscription_service.error");
-  }
-
-  subscription_service_error_args args;
-  args.read(iprot);
-  iprot->readMessageEnd();
-  uint32_t bytes = iprot->getTransport()->readEnd();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "subscription_service.error", bytes);
-  }
-
-  try {
-    iface_->error(args.type, args.msg);
-  } catch (const std::exception&) {
-    if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "subscription_service.error");
-    }
-    return;
-  }
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->asyncComplete(ctx, "subscription_service.error");
+    this->eventHandler_->asyncComplete(ctx, "subscription_service.control");
   }
 
   return;
@@ -687,46 +512,22 @@ void subscription_serviceConcurrentClientT<Protocol_>::send_notification(const s
 }
 
 template <class Protocol_>
-void subscription_serviceConcurrentClientT<Protocol_>::success(const response_type type, const std::vector<std::string> & op)
+void subscription_serviceConcurrentClientT<Protocol_>::control(const response_type type, const std::vector<std::string> & ops, const std::string& error)
 {
-  send_success(type, op);
+  send_control(type, ops, error);
 }
 
 template <class Protocol_>
-void subscription_serviceConcurrentClientT<Protocol_>::send_success(const response_type type, const std::vector<std::string> & op)
+void subscription_serviceConcurrentClientT<Protocol_>::send_control(const response_type type, const std::vector<std::string> & ops, const std::string& error)
 {
   int32_t cseqid = 0;
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("success", ::apache::thrift::protocol::T_ONEWAY, cseqid);
+  this->oprot_->writeMessageBegin("control", ::apache::thrift::protocol::T_ONEWAY, cseqid);
 
-  subscription_service_success_pargs args;
+  subscription_service_control_pargs args;
   args.type = &type;
-  args.op = &op;
-  args.write(this->oprot_);
-
-  this->oprot_->writeMessageEnd();
-  this->oprot_->getTransport()->writeEnd();
-  this->oprot_->getTransport()->flush();
-
-  sentry.commit();
-}
-
-template <class Protocol_>
-void subscription_serviceConcurrentClientT<Protocol_>::error(const response_type type, const std::string& msg)
-{
-  send_error(type, msg);
-}
-
-template <class Protocol_>
-void subscription_serviceConcurrentClientT<Protocol_>::send_error(const response_type type, const std::string& msg)
-{
-  int32_t cseqid = 0;
-  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("error", ::apache::thrift::protocol::T_ONEWAY, cseqid);
-
-  subscription_service_error_pargs args;
-  args.type = &type;
-  args.msg = &msg;
+  args.ops = &ops;
+  args.error = &error;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();

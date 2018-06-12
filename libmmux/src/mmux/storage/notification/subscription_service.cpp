@@ -18,19 +18,11 @@ subscription_service_notification_pargs::~subscription_service_notification_parg
 }
 
 
-subscription_service_success_args::~subscription_service_success_args() throw() {
+subscription_service_control_args::~subscription_service_control_args() throw() {
 }
 
 
-subscription_service_success_pargs::~subscription_service_success_pargs() throw() {
-}
-
-
-subscription_service_error_args::~subscription_service_error_args() throw() {
-}
-
-
-subscription_service_error_pargs::~subscription_service_error_pargs() throw() {
+subscription_service_control_pargs::~subscription_service_control_pargs() throw() {
 }
 
 }} // namespace

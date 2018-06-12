@@ -5,7 +5,7 @@
 namespace mmux {
 namespace storage {
 
-replica_chain_client::replica_chain_client(const std::vector<std::string> &chain): in_flight_(false) {
+replica_chain_client::replica_chain_client(const std::vector<std::string> &chain) : in_flight_(false) {
   seq_.client_id = -1;
   seq_.client_seq_no = 0;
   connect(chain);
@@ -65,16 +65,15 @@ void replica_chain_client::send_command(int32_t cmd_id, const std::vector<std::s
   if (in_flight_) {
     throw std::length_error("Cannot have more than one request in-flight");
   }
-  cmd_client_[cmd_id]->command_request(seq_, cmd_id, args);
+  cmd_client_.at(static_cast<unsigned long>(cmd_id))->command_request(seq_, cmd_id, args);
   in_flight_ = true;
 }
 
 std::vector<std::string> replica_chain_client::recv_response() {
   std::vector<std::string> ret;
-  int64_t r_seq = response_reader_.recv_response(ret);
-  if (r_seq != seq_.client_seq_no) {
-    throw std::logic_error("Invalid sequence number: "
-                           "Expected=" + std::to_string(seq_.client_seq_no) + ", Received=" + std::to_string(r_seq));
+  int64_t rseq = response_reader_.recv_response(ret);
+  if (rseq != seq_.client_seq_no) {
+    throw std::logic_error("SEQ: Expected=" + std::to_string(seq_.client_seq_no) + " Received=" + std::to_string(rseq));
   }
   seq_.client_seq_no++;
   in_flight_ = false;

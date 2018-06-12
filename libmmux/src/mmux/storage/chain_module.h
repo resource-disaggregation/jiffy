@@ -122,6 +122,7 @@ class chain_module : public block {
         pending_(0) {}
 
   ~chain_module() {
+    next_->reset("nil");
     if (response_processor_.joinable())
       response_processor_.join();
   }

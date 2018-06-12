@@ -1,5 +1,5 @@
-#ifndef MMUX_BLOCK_CHAIN_CLIENT_H
-#define MMUX_BLOCK_CHAIN_CLIENT_H
+#ifndef MMUX_REPLICA_CHAIN_CLIENT_H
+#define MMUX_REPLICA_CHAIN_CLIENT_H
 
 #include <map>
 #include "block_client.h"
@@ -12,6 +12,7 @@ class replica_chain_client {
   typedef block_client *client_ref;
 
   explicit replica_chain_client(const std::vector<std::string> &chain);
+
   ~replica_chain_client();
   void disconnect();
 
@@ -41,4 +42,4 @@ class replica_chain_client {
 }
 }
 
-#endif //MMUX_BLOCK_CHAIN_CLIENT_H
+#endif //MMUX_REPLICA_CHAIN_CLIENT_H

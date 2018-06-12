@@ -22,8 +22,7 @@ int64_t block_client::get_client_id() {
 
 void block_client::connect(const std::string &host, int port, int block_id) {
   block_id_ = block_id;
-  socket_ = std::make_shared<TSocket>(host, port);
-  transport_ = std::shared_ptr<TTransport>(new TBufferedTransport(socket_));
+  transport_ = std::shared_ptr<TTransport>(new TBufferedTransport(std::make_shared<TSocket>(host, port)));
   protocol_ = std::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
   client_ = std::make_shared<thrift_client>(protocol_);
   transport_->open();
@@ -46,10 +45,8 @@ bool block_client::is_connected() {
   return transport_->isOpen();
 }
 
-void block_client::command_request(const sequence_id &seq,
-                                   const int32_t cmd_id,
-                                   const std::vector<std::string> &arguments) {
-  client_->command_request(seq, block_id_, cmd_id, arguments);
+void block_client::command_request(const sequence_id &seq, const int32_t cmd_id, const std::vector<std::string> &args) {
+  client_->command_request(seq, block_id_, cmd_id, args);
 }
 
 }

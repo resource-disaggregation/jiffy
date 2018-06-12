@@ -21,6 +21,7 @@ void lease_service_handler::renew_leases(rpc_lease_ack &_return, const std::vect
     }
     _return.lease_period_ms = lease_period_ms_;
   } catch (directory_ops_exception &ex) {
+    LOG(log_level::error) << "Error renewing lease: " << ex.what();
     throw make_exception(ex);
   }
 }

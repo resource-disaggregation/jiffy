@@ -2,67 +2,112 @@
 #include <thrift/transport/TBufferTransports.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <iostream>
-#include "../src/mmux/storage/notification/subscriber.h"
-#include "../src/mmux/storage/notification/notification_server.h"
+#include "../src/mmux/storage/manager/storage_management_server.h"
+#include "../src/mmux/storage/manager/storage_management_client.h"
+#include "../src/mmux/storage/manager/storage_manager.h"
+#include "../src/mmux/storage/kv/kv_block.h"
 #include "test_utils.h"
+#include "../src/mmux/storage/service/block_server.h"
+#include "../src/mmux/storage/kv/hash_slot.h"
+#include "../src/mmux/directory/fs/directory_tree.h"
+#include "../src/mmux/directory/fs/directory_server.h"
+#include "../src/mmux/storage/client/kv_client.h"
+#include "../src/mmux/storage/client/kv_listener.h"
+#include "../src/mmux/storage/notification/notification_server.h"
 
 using namespace ::mmux::storage;
+using namespace ::mmux::directory;
+using namespace ::mmux::utils;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::protocol;
 
+#define NUM_BLOCKS 1
 #define HOST "127.0.0.1"
-#define PORT 9090
+#define DIRECTORY_SERVICE_PORT 9090
+#define STORAGE_SERVICE_PORT 9091
+#define STORAGE_MANAGEMENT_PORT 9092
+#define STORAGE_NOTIFICATION_PORT 9093
 
 TEST_CASE("notification_test", "[subscribe][get_message]") {
-  std::vector<std::shared_ptr<chain_module>> blocks = {std::make_shared<kv_block>("")};
-  auto &sub_map = blocks[0]->subscriptions();
 
-  auto server = notification_server::create(blocks, HOST, PORT);
-  std::thread serve_thread([&server] { server->serve(); });
-  test_utils::wait_till_server_ready(HOST, PORT);
+  auto alloc = std::make_shared<sequential_block_allocator>();
+  auto block_names = test_utils::init_block_names(NUM_BLOCKS,
+                                                  STORAGE_SERVICE_PORT,
+                                                  STORAGE_MANAGEMENT_PORT,
+                                                  STORAGE_NOTIFICATION_PORT,
+                                                  0);
+  alloc->add_blocks(block_names);
+  auto blocks = test_utils::init_kv_blocks(block_names);
 
-  subscriber sub1(HOST, PORT);
-  subscriber sub2(HOST, PORT);
-  subscriber sub3(HOST, PORT);
+  auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
+  std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
 
-  std::string op1 = "op1", op2 = "op2";
-  std::string msg1 = "msg1", msg2 = "msg2";
+  auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
+  std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
 
-  REQUIRE_NOTHROW(sub1.subscribe(0, {op1}));
-  REQUIRE_NOTHROW(sub2.subscribe(0, {op1, op2}));
-  REQUIRE_NOTHROW(sub3.subscribe(0, {op2}));
+  auto notif_server = notification_server::create(blocks, HOST, STORAGE_NOTIFICATION_PORT);
+  std::thread notif_serve_thread([&notif_server] { notif_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, STORAGE_NOTIFICATION_PORT);
 
-  REQUIRE_NOTHROW(sub_map.notify(op1, msg1));
-  REQUIRE_NOTHROW(sub_map.notify(op2, msg2));
+  auto sm = std::make_shared<storage_manager>();
+  auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  REQUIRE(sub1.get_message() == std::make_pair(op1, msg1));
-  REQUIRE(sub2.get_message() == std::make_pair(op1, msg1));
-  REQUIRE(sub2.get_message() == std::make_pair(op2, msg2));
-  REQUIRE(sub3.get_message() == std::make_pair(op2, msg2));
+  data_status status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1);
+  kv_client kv(tree, "/sandbox/file.txt", status);
 
-  REQUIRE_THROWS_AS(sub1.get_message(100), std::out_of_range);
-  REQUIRE_THROWS_AS(sub2.get_message(100), std::out_of_range);
-  REQUIRE_THROWS_AS(sub3.get_message(100), std::out_of_range);
+  std::string op1 = "put", op2 = "get";
+  std::string key = "msg1";
 
-  REQUIRE_NOTHROW(sub1.unsubscribe(0, {op1}));
-  REQUIRE_NOTHROW(sub2.unsubscribe(0, {op2}));
+  {
+    kv_listener sub1("/sandbox/file.txt", status);
+    kv_listener sub2("/sandbox/file.txt", status);
+    kv_listener sub3("/sandbox/file.txt", status);
 
-  REQUIRE_NOTHROW(sub_map.notify(op1, msg1));
-  REQUIRE_NOTHROW(sub_map.notify(op2, msg2));
+    REQUIRE_NOTHROW(sub1.subscribe({op1}));
+    REQUIRE_NOTHROW(sub2.subscribe({op1, op2}));
+    REQUIRE_NOTHROW(sub3.subscribe({op2}));
 
-  REQUIRE(sub2.get_message() == std::make_pair(op1, msg1));
-  REQUIRE(sub3.get_message() == std::make_pair(op2, msg2));
+    REQUIRE_NOTHROW(kv.put(key, "random data"));
+    REQUIRE_NOTHROW(kv.get(key));
 
-  REQUIRE_THROWS_AS(sub1.get_message(100), std::out_of_range);
-  REQUIRE_THROWS_AS(sub2.get_message(100), std::out_of_range);
-  REQUIRE_THROWS_AS(sub3.get_message(100), std::out_of_range);
+    REQUIRE(sub1.get_notification() == std::make_pair(op1, key));
+    REQUIRE(sub2.get_notification() == std::make_pair(op1, key));
+    REQUIRE(sub2.get_notification() == std::make_pair(op2, key));
+    REQUIRE(sub3.get_notification() == std::make_pair(op2, key));
 
-  sub1.disconnect();
-  sub2.disconnect();
-  sub3.disconnect();
+    REQUIRE_THROWS_AS(sub1.get_notification(100), std::out_of_range);
+    REQUIRE_THROWS_AS(sub2.get_notification(100), std::out_of_range);
+    REQUIRE_THROWS_AS(sub3.get_notification(100), std::out_of_range);
 
-  server->stop();
-  if (serve_thread.joinable()) {
-    serve_thread.join();
+    REQUIRE_NOTHROW(sub1.unsubscribe({op1}));
+    REQUIRE_NOTHROW(sub2.unsubscribe({op2}));
+
+    REQUIRE_NOTHROW(kv.remove(key));
+    REQUIRE_NOTHROW(kv.put(key, "random data"));
+    REQUIRE_NOTHROW(kv.get(key));
+
+    REQUIRE(sub2.get_notification() == std::make_pair(op1, key));
+    REQUIRE(sub3.get_notification() == std::make_pair(op2, key));
+
+    REQUIRE_THROWS_AS(sub1.get_notification(100), std::out_of_range);
+    REQUIRE_THROWS_AS(sub2.get_notification(100), std::out_of_range);
+    REQUIRE_THROWS_AS(sub3.get_notification(100), std::out_of_range);
+  }
+
+  storage_server->stop();
+  if (storage_serve_thread.joinable()) {
+    storage_serve_thread.join();
+  }
+
+  mgmt_server->stop();
+  if (mgmt_serve_thread.joinable()) {
+    mgmt_serve_thread.join();
+  }
+
+  notif_server->stop();
+  if (notif_serve_thread.joinable()) {
+    notif_serve_thread.join();
   }
 }

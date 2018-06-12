@@ -2,7 +2,7 @@
 #include <thrift/protocol/TBinaryProtocol.h>
 
 #include "directory_client.h"
-#include "directory_type_conversions.h"
+#include "../fs/directory_type_conversions.h"
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
