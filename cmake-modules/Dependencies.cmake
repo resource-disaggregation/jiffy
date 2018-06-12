@@ -41,7 +41,7 @@ else ()
   string(REGEX REPLACE "\\." "_" CURL_VERSION_STR ${CURL_VERSION})
   ExternalProject_Add(zlib
           URL http://zlib.net/zlib-1.2.11.tar.gz
-          CMAKE_ARGS ${CURL_CMAKE_ARGS}
+          CMAKE_ARGS ${ZLIB_CMAKE_ARGS}
           LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON
