@@ -26,6 +26,60 @@ set(EXTERNAL_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ${CMAKE_C_FLAGS_${UPPERCASE_BUILD_T
 if (USE_SYSTEM_AWS_SDK)
   find_package(aws-sdk-cpp REQUIRED)
 else ()
+  set(ZLIB_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
+  set(ZLIB_C_FLAGS "${EXTERNAL_C_FLAGS}")
+  set(ZLIB_PREFIX "${PROJECT_BINARY_DIR}/external/zlib")
+  set(ZLIB_INCLUDE_DIR "${ZLIB_PREFIX}/include")
+  set(ZLIB_CMAKE_ARGS "-Wno-dev"
+          "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+          "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
+          "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+          "-DCMAKE_INSTALL_PREFIX=${ZLIB_PREFIX}")
+
+  set(ZLIB_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}zlib")
+  set(ZLIB_LIBRARY "${ZLIB_PREFIX}/lib/${ZLIB_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  string(REGEX REPLACE "\\." "_" CURL_VERSION_STR ${CURL_VERSION})
+  ExternalProject_Add(zlib
+          URL http://zlib.net/zlib-1.2.11.tar.gz
+          CMAKE_ARGS ${CURL_CMAKE_ARGS}
+          LOG_DOWNLOAD ON
+          LOG_CONFIGURE ON
+          LOG_BUILD ON
+          LOG_INSTALL ON)
+
+  include_directories(SYSTEM ${ZLIB_INCLUDE_DIR})
+  message(STATUS "ZLib include dir: ${ZLIB_INCLUDE_DIR}")
+  message(STATUS "ZLib static library: ${ZLIB_LIBRARY}")
+
+  install(FILES ${CURL_LIBRARY} DESTINATION lib)
+  install(DIRECTORY ${CURL_INCLUDE_DIR}/curl DESTINATION include)
+
+  set(OPENSSL_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
+  set(OPENSSL_C_FLAGS "${EXTERNAL_C_FLAGS}")
+  set(OPENSSL_PREFIX "${PROJECT_BINARY_DIR}/external/openssl")
+  set(OPENSSL_INCLUDE_DIR "${OPENSSL_PREFIX}/include")
+  set(OPENSSL_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}openssl")
+  set(CRYPTO_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}crypto")
+  set(OPENSSL_LIBRARIES "${OPENSSL_PREFIX}/lib/${OPENSSL_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+          "${OPENSSL_PREFIX}/lib/${CRYPTO_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  ExternalProject_Add(openssl
+          URL https://www.openssl.org/source/openssl-1.1.1-pre7.tar.gz
+          BUILD_IN_SOURCE 1
+          CONFIGURE_COMMAND ./config --prefix=${OPENSSL_PREFIX} no-shared no-idea no-mdc2 no-rc5 no-tests CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER} CFLAGS=${OPENSSL_C_FLAGS} CXXFLAGS=${OPENSSL_CXX_FLAGS}
+          BUILD_COMMAND make
+          INSTALL_COMMAND make install
+          LOG_DOWNLOAD ON
+          LOG_CONFIGURE ON
+          LOG_BUILD ON
+          LOG_INSTALL ON)
+
+  include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR})
+  message(STATUS "OpenSSL include dir: ${OPENSSL_INCLUDE_DIR}")
+  message(STATUS "OpenSSL static libraries: ${OPENSSL_LIBRARIES}")
+
+  install(FILES ${OPENSSL_LIBRARIES} DESTINATION lib)
+  install(DIRECTORY ${OPENSSL_INCLUDE_DIR}/openssl DESTINATION include)
+
   set(CURL_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(CURL_C_FLAGS "${EXTERNAL_C_FLAGS}")
   set(CURL_PREFIX "${PROJECT_BINARY_DIR}/external/curl")
@@ -77,7 +131,7 @@ else ()
           "-DCMAKE_INSTALL_PREFIX=${AWS_PREFIX}"
           "-DENABLE_TESTING=OFF"
           "-DBUILD_SHARED_LIBS=OFF"
-          "-DCMAKE_PREFIX_PATH=${CURL_PREFIX}")
+          "-DCMAKE_PREFIX_PATH=${CURL_PREFIX};${OPENSSL_PREFIX};${ZLIB_PREFIX}")
 
   set(AWS_STATIC_CORE_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-core")
   set(AWS_STATIC_S3_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-s3")
@@ -85,7 +139,7 @@ else ()
           "${AWS_PREFIX}/lib/${AWS_STATIC_CORE_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 
   ExternalProject_Add(awssdk
-          DEPENDS curl
+          DEPENDS curl openssl zlib
           URL https://github.com/aws/aws-sdk-cpp/archive/${AWSSDK_VERSION}.tar.gz
           CMAKE_ARGS ${AWS_CMAKE_ARGS}
           LOG_DOWNLOAD ON

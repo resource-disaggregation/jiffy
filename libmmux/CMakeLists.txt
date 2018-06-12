@@ -217,7 +217,12 @@ if (NOT USE_SYSTEM_LIBCUCKOO)
   add_dependencies(mmux libcuckoo)
 endif ()
 
-target_link_libraries(mmux ${THRIFT_LIBRARIES} ${THRIFTNB_LIBRARIES} ${LIBEVENT_LIBRARIES} ${AWS_LIBRARIES} ${CURL_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(mmux ${THRIFT_LIBRARIES}
+        ${THRIFTNB_LIBRARIES}
+        ${LIBEVENT_LIBRARIES}
+        ${AWS_LIBRARIES}
+        ${CURL_LIBRARY}
+        ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties(mmux PROPERTIES LINKER_LANGUAGE CXX)
 
 if (BUILD_TESTS)
