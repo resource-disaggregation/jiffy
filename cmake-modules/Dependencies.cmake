@@ -51,6 +51,7 @@ else ()
   ExternalProject_Add(curl
           URL https://github.com/curl/curl/releases/download/curl-${CURL_VERSION_STR}/curl-${CURL_VERSION}.tar.gz
           CMAKE_ARGS ${CURL_CMAKE_ARGS}
+          LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
@@ -87,6 +88,7 @@ else ()
           DEPENDS curl
           URL https://github.com/aws/aws-sdk-cpp/archive/${AWSSDK_VERSION}.tar.gz
           CMAKE_ARGS ${AWS_CMAKE_ARGS}
+          LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
@@ -124,6 +126,7 @@ else ()
   ExternalProject_Add(libevent
           URL https://github.com/nmathewson/Libevent/archive/release-${LIBEVENT_VERSION}-stable.tar.gz
           CMAKE_ARGS ${LIBEVENT_CMAKE_ARGS}
+          LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
@@ -182,6 +185,7 @@ else ()
           DEPENDS libevent
           URL "http://archive.apache.org/dist/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
           CMAKE_ARGS ${THRIFT_CMAKE_ARGS}
+          LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
@@ -222,6 +226,7 @@ if (NOT USE_SYSTEM_LIBCUCKOO)
   ExternalProject_Add(libcuckoo
           URL "https://github.com/efficient/libcuckoo/archive/v${LIBCUCKOO_VERSION}.tar.gz"
           CMAKE_ARGS ${LIBCUCKOO_CMAKE_ARGS}
+          LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
@@ -253,6 +258,7 @@ if (NOT USE_SYSTEM_JEMALLOC)
           BUILD_BYPRODUCTS ${JEMALLOC_LIBRARIES}
           CONFIGURE_COMMAND ${JEMALLOC_PREFIX}/src/jemalloc/configure --prefix=${JEMALLOC_PREFIX} --enable-autogen --enable-prof-libunwind CFLAGS=${JEMALLOC_C_FLAGS} CXXFLAGS=${JEMALLOC_CXX_FLAGS}
           INSTALL_COMMAND make install_lib
+          LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
@@ -268,7 +274,10 @@ if (BUILD_TESTS AND NOT USE_SYSTEM_CATCH)
           CONFIGURE_COMMAND ""
           BUILD_COMMAND ""
           INSTALL_COMMAND ""
-          LOG_DOWNLOAD ON)
+          LOG_DOWNLOAD ON
+          LOG_CONFIGURE ON
+          LOG_BUILD ON
+          LOG_INSTALL ON)
 
   ExternalProject_Get_Property(catch source_dir)
   set(CATCH_INCLUDE_DIR ${source_dir}/single_include CACHE INTERNAL "Path to include folder for Catch")
