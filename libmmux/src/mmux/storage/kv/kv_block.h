@@ -4,8 +4,8 @@
 #include <libcuckoo/cuckoohash_map.hh>
 
 #include <string>
-#include "serializer/serde.h"
-#include "serializer/binary_serde.h"
+#include "serde/serde.h"
+#include "serde/binary_serde.h"
 #include "../block.h"
 #include "../../persistent/persistent_service.h"
 #include "../chain_module.h"
@@ -17,13 +17,6 @@ namespace storage {
 typedef std::string binary; // Since thrift translates binary to string
 typedef binary key_type;
 typedef binary value_type;
-
-class noop_store : public persistent::persistent_service {
- public:
-  void write(const std::string &, const std::string &) override {}
-  void read(const std::string &, const std::string &) override {}
-  void remove(const std::string &) override {}
-};
 
 extern std::vector<block_op> KV_OPS;
 
@@ -52,10 +45,7 @@ class kv_block : public chain_module {
                     double threshold_hi = 0.95,
                     const std::string &directory_host = "127.0.0.1",
                     int directory_port = 9090,
-                    std::shared_ptr<persistent::persistent_service> persistent = std::make_shared<noop_store>(),
-                    std::string local_storage_prefix = "/tmp",
-                    std::shared_ptr<serializer> ser = std::make_shared<binary_serializer>(),
-                    std::shared_ptr<deserializer> deser = std::make_shared<binary_deserializer>());
+                    std::shared_ptr<serde> ser = std::make_shared<binary_serde>());
 
   std::string exists(const key_type &key, bool redirect = false);
 
@@ -116,10 +106,7 @@ class kv_block : public chain_module {
   std::string directory_host_;
   int directory_port_;
 
-  std::shared_ptr<persistent::persistent_service> persistent_;
-  std::string local_storage_prefix_;
-  std::shared_ptr<serializer> ser_;
-  std::shared_ptr<deserializer> deser_;
+  std::shared_ptr<serde> ser_;
   std::atomic<size_t> bytes_;
   std::size_t capacity_;
   double threshold_lo_;

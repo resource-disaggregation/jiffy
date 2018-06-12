@@ -74,11 +74,11 @@ TEST_CASE("flush_load_test", "[put][flush][reset][load][get]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
-  REQUIRE_NOTHROW(block.flush("/tmp", "/test"));
+  REQUIRE_NOTHROW(block.flush("local://tmp", "/test"));
   REQUIRE_NOTHROW(block.reset());
   REQUIRE_NOTHROW(block.slot_range(0, block::SLOT_MAX));
   REQUIRE(block.empty());
-  REQUIRE_NOTHROW(block.load("/tmp", "/test"));
+  REQUIRE_NOTHROW(block.load("local://tmp", "/test"));
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.get(std::to_string(i)) == std::to_string(i));
   }

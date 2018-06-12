@@ -5,6 +5,7 @@
 #include <aws/s3/model/PutObjectRequest.h>
 #include <aws/s3/model/GetObjectRequest.h>
 #include <aws/s3/model/DeleteObjectRequest.h>
+#include <aws/core/utils/stream/SimpleStreamBuf.h>
 #include <fstream>
 
 namespace mmux {
@@ -12,7 +13,7 @@ namespace persistent {
 
 using namespace utils;
 
-s3_store::s3_store() : options_{} {
+s3_store::s3_store(std::shared_ptr<storage::serde> ser) : persistent_service(ser), options_{} {
   Aws::InitAPI(options_);
 }
 
@@ -20,8 +21,8 @@ s3_store::~s3_store() {
   Aws::ShutdownAPI(options_);
 }
 
-void s3_store::write(const std::string &local_path, const std::string &remote_path) {
-  auto path_components = extract_s3_path_elements(remote_path);
+void s3_store::write(const storage::locked_hash_table_type &table, const std::string &out_path) {
+  auto path_components = extract_s3_path_elements(out_path);
   auto bucket_name = path_components.first.c_str();
   auto key = path_components.second.c_str();
 
@@ -31,14 +32,15 @@ void s3_store::write(const std::string &local_path, const std::string &remote_pa
   Aws::S3::Model::PutObjectRequest object_request;
   object_request.WithBucket(bucket_name).WithKey(key);
 
-  // Binary files must also have the std::ios_base::bin flag or'ed in
-  auto input_data = Aws::MakeShared<Aws::FStream>("PutObjectInputStream", local_path.c_str(),
-                                                  std::ios_base::in | std::ios_base::binary);
+  Aws::Utils::Stream::SimpleStreamBuf sbuf;
+  auto out = Aws::MakeShared<Aws::IOStream>("StreamBuf", &sbuf);
+  serde()->serialize(table, out);
+  out->seekg(0, std::ios_base::beg);
 
-  object_request.SetBody(input_data);
+  object_request.SetBody(out);
   auto put_object_outcome = s3_client.PutObject(object_request);
   if (put_object_outcome.IsSuccess()) {
-    LOG(log_level::info) << "Successfully wrote " << local_path << " to " << remote_path;
+    LOG(log_level::info) << "Successfully wrote table to " << out_path;
   } else {
     LOG(log_level::error) << "S3 PutObject error: " << put_object_outcome.GetError().GetExceptionName() << " " <<
                           put_object_outcome.GetError().GetMessage();
@@ -46,8 +48,8 @@ void s3_store::write(const std::string &local_path, const std::string &remote_pa
   }
 }
 
-void s3_store::read(const std::string &remote_path, const std::string &local_path) {
-  auto path_components = extract_s3_path_elements(remote_path);
+void s3_store::read(const std::string &in_path, storage::locked_hash_table_type &table) {
+  auto path_components = extract_s3_path_elements(in_path);
   auto bucket_name = path_components.first.c_str();
   auto key = path_components.second.c_str();
 
@@ -60,34 +62,13 @@ void s3_store::read(const std::string &remote_path, const std::string &local_pat
 
   if (get_object_outcome.IsSuccess()) {
     Aws::OFStream local_file;
-    local_file.open(local_path.c_str(), std::ios::out | std::ios::binary);
-    local_file << get_object_outcome.GetResult().GetBody().rdbuf();
-    LOG(log_level::info) << "Successfully read " << remote_path << " to " << local_path;
+    auto in = std::make_shared<Aws::IOStream>(get_object_outcome.GetResult().GetBody().rdbuf());
+    serde()->deserialize(in, table);
+    LOG(log_level::info) << "Successfully read table from " << in_path;
   } else {
     LOG(log_level::error) << "S3 GetObject error: " << get_object_outcome.GetError().GetExceptionName() << " " <<
                           get_object_outcome.GetError().GetMessage();
     throw std::runtime_error("Error in reading data from S3");
-  }
-}
-
-void s3_store::remove(const std::string &remote_path) {
-  auto path_components = extract_s3_path_elements(remote_path);
-  auto bucket_name = path_components.first.c_str();
-  auto key = path_components.second.c_str();
-
-  Aws::S3::S3Client s3_client;
-
-  Aws::S3::Model::DeleteObjectRequest object_request;
-  object_request.WithBucket(bucket_name).WithKey(key);
-
-  auto delete_object_outcome = s3_client.DeleteObject(object_request);
-
-  if (delete_object_outcome.IsSuccess()) {
-    LOG(log_level::info) << "Successfully removed " << remote_path;
-  } else {
-    LOG(log_level::error) << "DeleteObject error: " << delete_object_outcome.GetError().GetExceptionName() << " " <<
-                          delete_object_outcome.GetError().GetMessage();
-    throw std::runtime_error("Error in removing data from S3");
   }
 }
 
@@ -104,6 +85,10 @@ std::pair<std::string, std::string> s3_store::extract_s3_path_elements(const std
   std::string bucket_name = std::string(it1, it2);
   std::string key_prefix = (it2 == s3_path.end()) ? std::string() : std::string(it2 + 1, s3_path.end());
   return std::make_pair(bucket_name, key_prefix);
+}
+
+std::string s3_store::URI() {
+  return "s3";
 }
 
 }
