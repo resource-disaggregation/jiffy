@@ -47,10 +47,9 @@ else ()
 
   set(CURL_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}curl")
   set(CURL_LIBRARY "${CURL_PREFIX}/lib/${CURL_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  string(REGEX REPLACE "." "_" CURL_VERSION_STR ${CURL_VERSION})
-  message(STATUS "Version String ${CURL_VERSION_STR} ${CURL_VERSION}")
+  string(REGEX REPLACE "\\." "_" CURL_VERSION_STR ${CURL_VERSION})
   ExternalProject_Add(curl
-          URL https://github.com/curl/curl/releases/download/curl-7_60_0/curl-7.60.0.tar.gz
+          URL https://github.com/curl/curl/releases/download/curl-${CURL_VERSION_STR}/curl-${CURL_VERSION}.tar.gz
           CMAKE_ARGS ${CURL_CMAKE_ARGS}
           LOG_CONFIGURE ON
           LOG_BUILD ON
