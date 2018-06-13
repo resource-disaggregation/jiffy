@@ -66,7 +66,7 @@ else ()
   ExternalProject_Add(openssl
           URL https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
           BUILD_IN_SOURCE 1
-          CONFIGURE_COMMAND ./config --prefix=${OPENSSL_PREFIX} no-shared no-idea no-mdc2 no-rc5 no-tests CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER} CFLAGS=${OPENSSL_C_FLAGS} CXXFLAGS=${OPENSSL_CXX_FLAGS}
+          CONFIGURE_COMMAND ./config --prefix=${OPENSSL_PREFIX} no-shared no-tests CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER} CFLAGS=${OPENSSL_C_FLAGS} CXXFLAGS=${OPENSSL_CXX_FLAGS}
           BUILD_COMMAND "$(MAKE)"
           INSTALL_COMMAND "$(MAKE)" install
           LOG_DOWNLOAD ON
