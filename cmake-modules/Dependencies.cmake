@@ -124,6 +124,7 @@ else ()
   set(AWS_HOME "${AWS_PREFIX}")
   set(AWS_BUILD_PROJECTS "s3")
   set(AWS_INCLUDE_DIR "${AWS_PREFIX}/include")
+  set(AWS_PREFIX_PATH "${ZLIB_PREFIX}|${OPENSSL_PREFIX}|${CURL_PREFIX}")
   set(AWS_CMAKE_ARGS "-Wno-dev"
           "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
           "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
@@ -132,7 +133,7 @@ else ()
           "-DCMAKE_INSTALL_PREFIX=${AWS_PREFIX}"
           "-DENABLE_TESTING=OFF"
           "-DBUILD_SHARED_LIBS=OFF"
-          "-DCMAKE_PREFIX_PATH=${CURL_PREFIX};${OPENSSL_PREFIX};${ZLIB_PREFIX}")
+          "-DCMAKE_PREFIX_PATH=${AWS_PREFIX_PATH}")
 
   set(AWS_STATIC_CORE_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-core")
   set(AWS_STATIC_S3_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-s3")
@@ -142,6 +143,7 @@ else ()
   ExternalProject_Add(awssdk
           DEPENDS curl openssl zlib
           URL https://github.com/aws/aws-sdk-cpp/archive/${AWSSDK_VERSION}.tar.gz
+          LIST_SEPARATOR |
           CMAKE_ARGS ${AWS_CMAKE_ARGS}
           LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
