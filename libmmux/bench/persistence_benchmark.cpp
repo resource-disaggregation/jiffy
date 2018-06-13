@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
   std::string mode;
   try {
     num_keys = static_cast<size_t>(parser.get_long("num-keys"));
-    path = parser.get("persistent-path");
+    path = parser.get("path");
     format = parser.get("format");
     mode = parser.get("mode");
   } catch (cmd_parse_exception &ex) {
