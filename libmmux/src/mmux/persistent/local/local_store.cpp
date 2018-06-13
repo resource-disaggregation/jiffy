@@ -24,7 +24,7 @@ void local_store::read(const std::string &in_path, storage::locked_hash_table_ty
 }
 
 std::string local_store::URI() {
-  return "lfs";
+  return "local";
 }
 
 }

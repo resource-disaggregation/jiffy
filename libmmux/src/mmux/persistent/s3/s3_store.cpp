@@ -1,11 +1,14 @@
 #include "s3_store.h"
 #include "../../utils/logger.h"
+#include "../../utils/directory_utils.h"
 
 #include <aws/s3/S3Client.h>
 #include <aws/s3/model/PutObjectRequest.h>
 #include <aws/s3/model/GetObjectRequest.h>
 #include <aws/s3/model/DeleteObjectRequest.h>
 #include <aws/core/utils/stream/SimpleStreamBuf.h>
+#include <aws/core/utils/logging/DefaultLogSystem.h>
+#include <aws/core/utils/logging/AWSLogging.h>
 #include <fstream>
 
 namespace mmux {
@@ -14,6 +17,7 @@ namespace persistent {
 using namespace utils;
 
 s3_store::s3_store(std::shared_ptr<storage::serde> ser) : persistent_service(std::move(ser)), options_{} {
+  options_.loggingOptions.logLevel = Aws::Utils::Logging::LogLevel::Warn;
   Aws::InitAPI(options_);
 }
 
@@ -22,9 +26,9 @@ s3_store::~s3_store() {
 }
 
 void s3_store::write(const storage::locked_hash_table_type &table, const std::string &out_path) {
-  auto path_components = extract_s3_path_elements(out_path);
-  auto bucket_name = path_components.first.c_str();
-  auto key = path_components.second.c_str();
+  auto path_elements = extract_path_elements(out_path);
+  auto bucket_name = path_elements.first.c_str();
+  auto key = path_elements.second.c_str();
 
   Aws::Client::ClientConfiguration client_config;
   Aws::S3::S3Client s3_client(client_config);
@@ -49,9 +53,9 @@ void s3_store::write(const storage::locked_hash_table_type &table, const std::st
 }
 
 void s3_store::read(const std::string &in_path, storage::locked_hash_table_type &table) {
-  auto path_components = extract_s3_path_elements(in_path);
-  auto bucket_name = path_components.first.c_str();
-  auto key = path_components.second.c_str();
+  auto path_elements = extract_path_elements(in_path);
+  auto bucket_name = path_elements.first.c_str();
+  auto key = path_elements.second.c_str();
 
   Aws::S3::S3Client s3_client;
 
@@ -72,19 +76,13 @@ void s3_store::read(const std::string &in_path, storage::locked_hash_table_type 
   }
 }
 
-std::pair<std::string, std::string> s3_store::extract_s3_path_elements(const std::string &s3_path) {
-  std::string pfix = "s3://";
-  auto it1 = std::search(s3_path.begin(), s3_path.end(), std::begin(pfix), std::end(pfix), [](char c1, char c2) {
-    return std::tolower(c1) == std::tolower(c2);
-  });
-  if (it1 == s3_path.end()) {
-    throw std::invalid_argument("Path is not a valid S3 URI: " + s3_path);
-  }
-  it1 += pfix.length();
-  auto it2 = std::find(it1, s3_path.end(), '/');
-  std::string bucket_name = std::string(it1, it2);
-  std::string key_prefix = (it2 == s3_path.end()) ? std::string() : std::string(it2 + 1, s3_path.end());
-  return std::make_pair(bucket_name, key_prefix);
+std::pair<std::string, std::string> s3_store::extract_path_elements(const std::string &s3_path) {
+  utils::directory_utils::check_path(s3_path);
+
+  auto bucket_end = std::find(s3_path.begin() + 1, s3_path.end(), '/');
+  std::string bucket_name = std::string(s3_path.begin() + 1, bucket_end);
+  std::string key = (bucket_end == s3_path.end()) ? std::string() : std::string(bucket_end + 1, s3_path.end());
+  return std::make_pair(bucket_name, key);
 }
 
 std::string s3_store::URI() {

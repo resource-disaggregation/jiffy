@@ -64,9 +64,10 @@ else ()
   set(OPENSSL_LIBRARIES "${OPENSSL_PREFIX}/lib/${OPENSSL_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
           "${OPENSSL_PREFIX}/lib/${CRYPTO_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
   ExternalProject_Add(openssl
+          DEPENDS zlib
           URL https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
           BUILD_IN_SOURCE 1
-          CONFIGURE_COMMAND ./config --prefix=${OPENSSL_PREFIX} no-shared no-tests CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER} CFLAGS=${OPENSSL_C_FLAGS} CXXFLAGS=${OPENSSL_CXX_FLAGS}
+          CONFIGURE_COMMAND ./config --prefix=${OPENSSL_PREFIX} --with-zlib-include=${ZLIB_INCLUDE_DIR} --with-zlib-lib=${ZLIB_PREFIX}/lib no-shared no-tests CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER} CFLAGS=${OPENSSL_C_FLAGS} CXXFLAGS=${OPENSSL_CXX_FLAGS}
           BUILD_COMMAND "$(MAKE)"
           INSTALL_COMMAND "$(MAKE)" install
           LOG_DOWNLOAD ON
@@ -86,25 +87,27 @@ else ()
   set(CURL_PREFIX "${PROJECT_BINARY_DIR}/external/curl")
   set(CURL_HOME "${CURL_PREFIX}")
   set(CURL_INCLUDE_DIR "${CURL_PREFIX}/include")
+  set(CURL_PREFIX_PATH "${ZLIB_PREFIX}|${OPENSSL_PREFIX}")
   set(CURL_CMAKE_ARGS "-Wno-dev"
           "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
           "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
           "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
           "-DCMAKE_INSTALL_PREFIX=${CURL_PREFIX}"
+          "-DCMAKE_PREFIX_PATH=${CURL_PREFIX_PATH}"
           "-DCURL_STATICLIB=ON"
           "-DBUILD_CURL_EXE=OFF"
-          "-DCMAKE_USE_OPENSSL=OFF"
           "-DBUILD_TESTING=OFF"
           "-DENABLE_MANUAL=OFF"
           "-DHTTP_ONLY=ON"
-          "-DCURL_ZLIB=OFF"
           "-DCURL_CA_PATH=none")
 
   set(CURL_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}curl")
   set(CURL_LIBRARY "${CURL_PREFIX}/lib/${CURL_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
   string(REGEX REPLACE "\\." "_" CURL_VERSION_STR ${CURL_VERSION})
   ExternalProject_Add(curl
+          DEPENDS zlib openssl
           URL https://github.com/curl/curl/releases/download/curl-${CURL_VERSION_STR}/curl-${CURL_VERSION}.tar.gz
+          LIST_SEPARATOR |
           CMAKE_ARGS ${CURL_CMAKE_ARGS}
           LOG_DOWNLOAD ON
           LOG_CONFIGURE ON

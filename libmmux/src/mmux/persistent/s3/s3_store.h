@@ -15,7 +15,7 @@ class s3_store : public persistent_service {
   void read(const std::string &in_path, storage::locked_hash_table_type &table) override;
   std::string URI() override;
  private:
-  std::pair<std::string, std::string> extract_s3_path_elements(const std::string& s3_path);
+  std::pair<std::string, std::string> extract_path_elements(const std::string &s3_path);
 
   Aws::SDKOptions options_;
 };
