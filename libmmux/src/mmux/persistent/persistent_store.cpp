@@ -7,9 +7,9 @@ std::shared_ptr<persistent_service> persistent_store::instance(const std::string
                                                                std::shared_ptr<storage::serde> ser) {
   auto uri = decompose_path(path).first;
   if (uri == "local") {
-    return std::make_shared<local_store>(ser);
+    return std::make_shared<local_store>(std::move(ser));
   } else if (uri == "s3") {
-    return std::make_shared<s3_store>(ser);
+    return std::make_shared<s3_store>(std::move(ser));
   }
   return nullptr;
 }

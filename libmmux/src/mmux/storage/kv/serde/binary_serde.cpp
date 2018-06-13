@@ -14,6 +14,7 @@ std::size_t binary_serde::serialize(const block_type &table, std::shared_ptr<std
         .write(reinterpret_cast<const char *>(&value_size), sizeof(size_t))
         .write(e.second.data(), value_size);
   }
+  out->flush();
   auto sz = out->tellp();
   return static_cast<std::size_t>(sz);
 }

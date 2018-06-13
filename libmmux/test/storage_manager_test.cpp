@@ -84,10 +84,10 @@ TEST_CASE("manager_flush_load_test", "[put][flush][reset][load][get]") {
 
   storage_manager manager;
   auto block_name = block_name_parser::make(HOST, SERVICE_PORT, MANAGEMENT_PORT, 0, 0, 0);
-  REQUIRE_NOTHROW(manager.flush(block_name, "/tmp", "/test"));
+  REQUIRE_NOTHROW(manager.flush(block_name, "local://tmp", "/test"));
   REQUIRE_NOTHROW(manager.reset(block_name));
   REQUIRE(manager.storage_size(block_name) == 0);
-  REQUIRE_NOTHROW(manager.load(block_name, "/tmp", "/test"));
+  REQUIRE_NOTHROW(manager.load(block_name, "local://tmp", "/test"));
 
   server->stop();
   if (serve_thread.joinable()) {

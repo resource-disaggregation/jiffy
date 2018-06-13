@@ -421,14 +421,16 @@ bool kv_block::empty() const {
 void kv_block::load(const std::string &path) {
   locked_hash_table_type ltable = block_.lock_table();
   auto remote = persistent::persistent_store::instance(path, ser_);
-  remote->read(path, ltable);
+  auto decomposed = persistent::persistent_store::decompose_path(path);
+  remote->read(decomposed.second, ltable);
   ltable.unlock();
 }
 
 void kv_block::flush(const std::string &path) {
   locked_hash_table_type ltable = block_.lock_table();
   auto remote = persistent::persistent_store::instance(path, ser_);
-  remote->write(ltable, path);
+  auto decomposed = persistent::persistent_store::decompose_path(path);
+  remote->write(ltable, decomposed.second);
   ltable.unlock();
 }
 

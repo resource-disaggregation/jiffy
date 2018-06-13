@@ -9,7 +9,7 @@ namespace persistent {
 
 class local_store : public persistent_service {
  public:
-  local_store(const std::shared_ptr<storage::serde> &ser);
+  local_store(std::shared_ptr<storage::serde> ser);
 
   void write(const storage::locked_hash_table_type &table, const std::string &out_path) override;
 

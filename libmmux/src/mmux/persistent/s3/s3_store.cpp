@@ -13,7 +13,7 @@ namespace persistent {
 
 using namespace utils;
 
-s3_store::s3_store(std::shared_ptr<storage::serde> ser) : persistent_service(ser), options_{} {
+s3_store::s3_store(std::shared_ptr<storage::serde> ser) : persistent_service(std::move(ser)), options_{} {
   Aws::InitAPI(options_);
 }
 

@@ -2239,6 +2239,14 @@ uint32_t directory_service_flush_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->dest);
+          this->__isset.dest = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -2261,6 +2269,10 @@ uint32_t directory_service_flush_args::write(Protocol_* oprot) const {
   xfer += oprot->writeString(this->path);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("dest", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->dest);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -2275,6 +2287,10 @@ uint32_t directory_service_flush_pargs::write(Protocol_* oprot) const {
 
   xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeString((*(this->path)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("dest", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString((*(this->dest)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -5533,20 +5549,21 @@ void directory_serviceClientT<Protocol_>::recv_remove_all()
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::flush(const std::string& path)
+void directory_serviceClientT<Protocol_>::flush(const std::string& path, const std::string& dest)
 {
-  send_flush(path);
+  send_flush(path, dest);
   recv_flush();
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::send_flush(const std::string& path)
+void directory_serviceClientT<Protocol_>::send_flush(const std::string& path, const std::string& dest)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("flush", ::apache::thrift::protocol::T_CALL, cseqid);
 
   directory_service_flush_pargs args;
   args.path = &path;
+  args.dest = &dest;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -7676,7 +7693,7 @@ void directory_serviceProcessorT<Protocol_>::process_flush(int32_t seqid, ::apac
 
   directory_service_flush_result result;
   try {
-    iface_->flush(args.path);
+    iface_->flush(args.path, args.dest);
   } catch (directory_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -7733,7 +7750,7 @@ void directory_serviceProcessorT<Protocol_>::process_flush(int32_t seqid, Protoc
 
   directory_service_flush_result result;
   try {
-    iface_->flush(args.path);
+    iface_->flush(args.path, args.dest);
   } catch (directory_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -10138,14 +10155,14 @@ void directory_serviceConcurrentClientT<Protocol_>::recv_remove_all(const int32_
 }
 
 template <class Protocol_>
-void directory_serviceConcurrentClientT<Protocol_>::flush(const std::string& path)
+void directory_serviceConcurrentClientT<Protocol_>::flush(const std::string& path, const std::string& dest)
 {
-  int32_t seqid = send_flush(path);
+  int32_t seqid = send_flush(path, dest);
   recv_flush(seqid);
 }
 
 template <class Protocol_>
-int32_t directory_serviceConcurrentClientT<Protocol_>::send_flush(const std::string& path)
+int32_t directory_serviceConcurrentClientT<Protocol_>::send_flush(const std::string& path, const std::string& dest)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -10153,6 +10170,7 @@ int32_t directory_serviceConcurrentClientT<Protocol_>::send_flush(const std::str
 
   directory_service_flush_pargs args;
   args.path = &path;
+  args.dest = &dest;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();

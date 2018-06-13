@@ -31,7 +31,7 @@ class mmux_client {
                                     size_t chain_length = 1);
   storage::kv_listener listen(const std::string &path);
   void remove(const std::string &path);
-  void flush(const std::string &path);
+  void flush(const std::string &path, const std::string &dest);
 
  private:
   std::shared_ptr<directory::directory_ops> fs_;

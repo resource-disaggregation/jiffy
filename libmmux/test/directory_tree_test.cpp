@@ -191,18 +191,18 @@ TEST_CASE("path_flush_test", "[file][dir]") {
   REQUIRE_NOTHROW(tree.create("/sandbox/abcdef/example/c", "/tmp", 1, 1));
   REQUIRE(alloc->num_free_blocks() == 2);
 
-  REQUIRE_NOTHROW(tree.flush("/sandbox/abcdef/example/c"));
+  REQUIRE_NOTHROW(tree.flush("/sandbox/abcdef/example/c", "local://tmp"));
   REQUIRE(tree.dstatus("/sandbox/abcdef/example/c").mode() == storage_mode::on_disk);
 
-  REQUIRE_NOTHROW(tree.flush("/sandbox/abcdef/example/a"));
+  REQUIRE_NOTHROW(tree.flush("/sandbox/abcdef/example/a", "local://tmp"));
   REQUIRE(tree.dstatus("/sandbox/abcdef/example/a/b").mode() == storage_mode::on_disk);
 
   REQUIRE(alloc->num_free_blocks() == 4);
   REQUIRE(sm->COMMANDS.size() == 4);
   REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/abcdef/example/a/b:0:65536:0:0:nil");
   REQUIRE(sm->COMMANDS[1] == "setup_block:1:/sandbox/abcdef/example/c:0:65536:1:0:nil");
-  REQUIRE(sm->COMMANDS[2] == "flush:1:/tmp:/sandbox/abcdef/example/c");
-  REQUIRE(sm->COMMANDS[3] == "flush:0:/tmp:/sandbox/abcdef/example/a/b");
+  REQUIRE(sm->COMMANDS[2] == "flush:1:local://tmp/0_65536:/sandbox/abcdef/example/c");
+  REQUIRE(sm->COMMANDS[3] == "flush:0:local://tmp/0_65536:/sandbox/abcdef/example/a/b");
 }
 
 TEST_CASE("rename_test", "[file][dir]") {
