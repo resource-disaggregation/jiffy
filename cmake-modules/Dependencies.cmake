@@ -2,6 +2,8 @@ include(ExternalProject)
 
 set(LIBEVENT_VERSION "2.1.8")
 set(THRIFT_VERSION "0.11.0")
+set(ZLIB_VERSION "1.2.11")
+set(OPENSSL_VERSION "1.1.1-pre7")
 set(CURL_VERSION "7.60.0")
 set(AWSSDK_VERSION "1.4.26")
 set(BOOST_VERSION "1.40.0")
@@ -36,11 +38,10 @@ else ()
           "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
           "-DCMAKE_INSTALL_PREFIX=${ZLIB_PREFIX}")
 
-  set(ZLIB_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}zlib")
+  set(ZLIB_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}z")
   set(ZLIB_LIBRARY "${ZLIB_PREFIX}/lib/${ZLIB_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  string(REGEX REPLACE "\\." "_" CURL_VERSION_STR ${CURL_VERSION})
   ExternalProject_Add(zlib
-          URL http://zlib.net/zlib-1.2.11.tar.gz
+          URL http://zlib.net/zlib-${ZLIB_VERSION}.tar.gz
           CMAKE_ARGS ${ZLIB_CMAKE_ARGS}
           LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
@@ -58,12 +59,12 @@ else ()
   set(OPENSSL_C_FLAGS "${EXTERNAL_C_FLAGS}")
   set(OPENSSL_PREFIX "${PROJECT_BINARY_DIR}/external/openssl")
   set(OPENSSL_INCLUDE_DIR "${OPENSSL_PREFIX}/include")
-  set(OPENSSL_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}openssl")
+  set(OPENSSL_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}ssl")
   set(CRYPTO_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}crypto")
   set(OPENSSL_LIBRARIES "${OPENSSL_PREFIX}/lib/${OPENSSL_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
           "${OPENSSL_PREFIX}/lib/${CRYPTO_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
   ExternalProject_Add(openssl
-          URL https://www.openssl.org/source/openssl-1.1.1-pre7.tar.gz
+          URL https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
           BUILD_IN_SOURCE 1
           CONFIGURE_COMMAND ./config --prefix=${OPENSSL_PREFIX} no-shared no-idea no-mdc2 no-rc5 no-tests CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER} CFLAGS=${OPENSSL_C_FLAGS} CXXFLAGS=${OPENSSL_CXX_FLAGS}
           BUILD_COMMAND "$(MAKE)"
