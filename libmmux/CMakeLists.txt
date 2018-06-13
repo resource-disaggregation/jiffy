@@ -224,6 +224,7 @@ target_link_libraries(mmux ${THRIFT_LIBRARIES}
         ${CURL_LIBRARY}
         ${OPENSSL_LIBRARIES}
         ${ZLIB_LIBRARY}
+        ${CMAKE_DL_LIBS}
         ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties(mmux PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -248,7 +249,7 @@ if (BUILD_TESTS)
           test/notification_test.cpp
           test/storage_manager_test.cpp
           test/test_utils.h)
-  target_link_libraries(mmux_tests ${CMAKE_DL_LIBS} mmux)
+  target_link_libraries(mmux_tests mmux)
   if (NOT USE_SYSTEM_CATCH)
     add_dependencies(mmux_tests catch)
   endif ()
