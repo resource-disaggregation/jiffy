@@ -220,10 +220,10 @@ endif ()
 target_link_libraries(mmux ${THRIFT_LIBRARIES}
         ${THRIFTNB_LIBRARIES}
         ${LIBEVENT_LIBRARIES}
+        ${OPENSSL_LIBRARIES}
         ${AWS_LIBRARIES}
         ${CURL_LIBRARY}
         ${ZLIB_LIBRARY}
-        ${OPENSSL_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties(mmux PROPERTIES LINKER_LANGUAGE CXX)
 
