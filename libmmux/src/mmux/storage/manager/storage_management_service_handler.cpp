@@ -103,7 +103,7 @@ void storage_management_service_handler::flush(int32_t block_id,
                                                const std::string &persistent_store_prefix,
                                                const std::string &path) {
   try {
-    blocks_.at(static_cast<std::size_t>(block_id))->flush(persistent_store_prefix, path);
+    blocks_.at(static_cast<std::size_t>(block_id))->flush(persistent_store_prefix + path);
   } catch (std::exception &e) {
     throw make_exception(e);
   }
@@ -113,7 +113,7 @@ void storage_management_service_handler::load(int32_t block_id,
                                               const std::string &persistent_store_prefix,
                                               const std::string &path) {
   try {
-    blocks_.at(static_cast<std::size_t>(block_id))->load(persistent_store_prefix, path);
+    blocks_.at(static_cast<std::size_t>(block_id))->load(persistent_store_prefix + path);
   } catch (std::exception &e) {
     throw make_exception(e);
   }

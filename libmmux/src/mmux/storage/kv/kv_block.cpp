@@ -3,6 +3,7 @@
 #include "../client/replica_chain_client.h"
 #include "../../utils/logger.h"
 #include "../../directory/client/directory_client.h"
+#include "../../persistent/persistent_store.h"
 
 namespace mmux {
 namespace storage {
@@ -30,18 +31,12 @@ kv_block::kv_block(const std::string &block_name,
                    double threshold_hi,
                    const std::string &directory_host,
                    int directory_port,
-                   std::shared_ptr<persistent::persistent_service> persistent,
-                   std::string local_storage_prefix,
-                   std::shared_ptr<serializer> ser,
-                   std::shared_ptr<deserializer> deser)
+                   std::shared_ptr<serde> ser)
     : chain_module(block_name, KV_OPS),
       locked_block_(std::move(block_.lock_table())),
       directory_host_(directory_host),
       directory_port_(directory_port),
-      persistent_(std::move(persistent)),
-      local_storage_prefix_(std::move(local_storage_prefix)),
       ser_(std::move(ser)),
-      deser_(std::move(deser)),
       bytes_(0),
       capacity_(capacity),
       threshold_lo_(threshold_lo),
@@ -423,18 +418,19 @@ bool kv_block::empty() const {
   return block_.empty();
 }
 
-void kv_block::load(const std::string &remote_storage_prefix, const std::string &path) {
+void kv_block::load(const std::string &path) {
   locked_hash_table_type ltable = block_.lock_table();
-  persistent_->read(remote_storage_prefix + path, local_storage_prefix_ + path);
-  deser_->deserialize(local_storage_prefix_ + path, ltable);
+  auto remote = persistent::persistent_store::instance(path, ser_);
+  auto decomposed = persistent::persistent_store::decompose_path(path);
+  remote->read(decomposed.second, ltable);
   ltable.unlock();
 }
 
-void kv_block::flush(const std::string &remote_storage_prefix, const std::string &path) {
+void kv_block::flush(const std::string &path) {
   locked_hash_table_type ltable = block_.lock_table();
-  ser_->serialize(ltable, local_storage_prefix_ + path);
-  persistent_->write(local_storage_prefix_ + path, remote_storage_prefix + path);
-  ltable.clear();
+  auto remote = persistent::persistent_store::instance(path, ser_);
+  auto decomposed = persistent::persistent_store::decompose_path(path);
+  remote->write(ltable, decomposed.second);
   ltable.unlock();
 }
 

@@ -32,7 +32,7 @@ class directory_serviceIf {
   virtual rpc_perms get_permissions(const std::string& path) = 0;
   virtual void remove(const std::string& path) = 0;
   virtual void remove_all(const std::string& path) = 0;
-  virtual void flush(const std::string& path) = 0;
+  virtual void flush(const std::string& path, const std::string& dest) = 0;
   virtual void rename(const std::string& old_path, const std::string& new_path) = 0;
   virtual void status(rpc_file_status& _return, const std::string& path) = 0;
   virtual void directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path) = 0;
@@ -110,7 +110,7 @@ class directory_serviceNull : virtual public directory_serviceIf {
   void remove_all(const std::string& /* path */) {
     return;
   }
-  void flush(const std::string& /* path */) {
+  void flush(const std::string& /* path */, const std::string& /* dest */) {
     return;
   }
   void rename(const std::string& /* old_path */, const std::string& /* new_path */) {
@@ -1468,8 +1468,9 @@ class directory_service_remove_all_presult {
 };
 
 typedef struct _directory_service_flush_args__isset {
-  _directory_service_flush_args__isset() : path(false) {}
+  _directory_service_flush_args__isset() : path(false), dest(false) {}
   bool path :1;
+  bool dest :1;
 } _directory_service_flush_args__isset;
 
 class directory_service_flush_args {
@@ -1477,19 +1478,24 @@ class directory_service_flush_args {
 
   directory_service_flush_args(const directory_service_flush_args&);
   directory_service_flush_args& operator=(const directory_service_flush_args&);
-  directory_service_flush_args() : path() {
+  directory_service_flush_args() : path(), dest() {
   }
 
   virtual ~directory_service_flush_args() throw();
   std::string path;
+  std::string dest;
 
   _directory_service_flush_args__isset __isset;
 
   void __set_path(const std::string& val);
 
+  void __set_dest(const std::string& val);
+
   bool operator == (const directory_service_flush_args & rhs) const
   {
     if (!(path == rhs.path))
+      return false;
+    if (!(dest == rhs.dest))
       return false;
     return true;
   }
@@ -1513,6 +1519,7 @@ class directory_service_flush_pargs {
 
   virtual ~directory_service_flush_pargs() throw();
   const std::string* path;
+  const std::string* dest;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -3069,8 +3076,8 @@ class directory_serviceClientT : virtual public directory_serviceIf {
   void remove_all(const std::string& path);
   void send_remove_all(const std::string& path);
   void recv_remove_all();
-  void flush(const std::string& path);
-  void send_flush(const std::string& path);
+  void flush(const std::string& path, const std::string& dest);
+  void send_flush(const std::string& path, const std::string& dest);
   void recv_flush();
   void rename(const std::string& old_path, const std::string& new_path);
   void send_rename(const std::string& old_path, const std::string& new_path);
@@ -3394,13 +3401,13 @@ class directory_serviceMultiface : virtual public directory_serviceIf {
     ifaces_[i]->remove_all(path);
   }
 
-  void flush(const std::string& path) {
+  void flush(const std::string& path, const std::string& dest) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->flush(path);
+      ifaces_[i]->flush(path, dest);
     }
-    ifaces_[i]->flush(path);
+    ifaces_[i]->flush(path, dest);
   }
 
   void rename(const std::string& old_path, const std::string& new_path) {
@@ -3581,8 +3588,8 @@ class directory_serviceConcurrentClientT : virtual public directory_serviceIf {
   void remove_all(const std::string& path);
   int32_t send_remove_all(const std::string& path);
   void recv_remove_all(const int32_t seqid);
-  void flush(const std::string& path);
-  int32_t send_flush(const std::string& path);
+  void flush(const std::string& path, const std::string& dest);
+  int32_t send_flush(const std::string& path, const std::string& dest);
   void recv_flush(const int32_t seqid);
   void rename(const std::string& old_path, const std::string& new_path);
   int32_t send_rename(const std::string& old_path, const std::string& new_path);

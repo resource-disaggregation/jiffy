@@ -10,6 +10,9 @@
 #include "../src/mmux/directory/client/directory_client.h"
 #include "benchmark_utils.h"
 #include "../src/mmux/storage/client/block_listener.h"
+#include "../src/mmux/storage/client/kv_listener.h"
+#include "../src/mmux/storage/client/kv_client.h"
+#include "../src/mmux/client/mmux_client.h"
 
 using namespace mmux::storage;
 using namespace mmux::utils;
@@ -20,8 +23,8 @@ class workload_runner {
  public:
   workload_runner(const std::string &workload_path,
                   std::size_t workload_offset,
-                  const std::vector<std::string> &chain,
-                  std::size_t num_ops) : num_ops_(num_ops), client_(chain) {
+                  kv_client &kv,
+                  std::size_t num_ops) : num_ops_(num_ops), kv_(kv) {
     benchmark_utils::load_workload(workload_path, workload_offset, num_ops, workload_);
     timestamps_.resize(workload_.size());
   }
@@ -30,7 +33,7 @@ class workload_runner {
     std::size_t i = 0;
     while (i < num_ops_) {
       timestamps_[i] = time_utils::now_us();
-      client_.run_command(workload_[i].first, workload_[i].second);
+      kv_.put(workload_[i].second[0], workload_[i].second[1]);
       ++i;
     }
   }
@@ -43,14 +46,15 @@ class workload_runner {
   std::vector<std::uint64_t> timestamps_{};
   std::size_t num_ops_;
   std::vector<std::pair<int32_t, std::vector<std::string>>> workload_{};
-  replica_chain_client client_;
+  kv_client &kv_;
 };
 
 class notification_listener {
  public:
-  notification_listener(const std::string &host, int port, int block_id, std::size_t num_ops) : sub_(host, port),
-                                                                                                num_ops_(num_ops) {
-    sub_.subscribe(block_id, {"put"});
+  notification_listener(mmux::client::mmux_client &client, const std::string &file, std::size_t num_ops)
+      : listener_(client.listen(file)),
+        num_ops_(num_ops) {
+    listener_.subscribe({"put"});
     timestamps_.resize(num_ops_);
   }
 
@@ -58,7 +62,7 @@ class notification_listener {
     worker_ = std::thread([&] {
       std::size_t i = 0;
       while (i < num_ops_) {
-        sub_.get_message();
+        listener_.get_notification();
         timestamps_[i++] = time_utils::now_us();
       }
     });
@@ -74,7 +78,7 @@ class notification_listener {
 
  private:
   std::thread worker_;
-  block_listener sub_;
+  kv_listener listener_;
   std::size_t num_ops_;
   std::vector<std::uint64_t> timestamps_{};
 };
@@ -88,6 +92,7 @@ int main(int argc, char **argv) {
   opts.add(cmd_option("file-name", 'f', false).set_default("/benchmark").set_description("File to benchmark"));
   opts.add(cmd_option("dir-host", 'H', false).set_default("127.0.0.1").set_description("Directory service host"));
   opts.add(cmd_option("dir-port", 'P', false).set_default("9090").set_description("Directory service port"));
+  opts.add(cmd_option("lease-port", 'L', false).set_default("9091").set_description("Lease service port"));
   opts.add(cmd_option("chain-length", 'c', false).set_default("1").set_description("Chain length"));
   opts.add(cmd_option("num-threads", 't', false).set_default("1").set_description("# of benchmark threads to run"));
   opts.add(cmd_option("num-ops", 'n', false).set_default("100000").set_description("# of operations to run"));
@@ -105,6 +110,7 @@ int main(int argc, char **argv) {
   std::string file;
   std::string host;
   int port;
+  int lease_port;
   std::size_t num_threads;
   std::size_t num_ops;
   std::string workload_path;
@@ -115,6 +121,7 @@ int main(int argc, char **argv) {
     file = parser.get("file-name");
     host = parser.get("dir-host");
     port = parser.get_int("dir-port");
+    lease_port = parser.get_int("lease-port");
     chain_length = static_cast<std::size_t>(parser.get_long("chain-length"));
     num_threads = static_cast<std::size_t>(parser.get_long("num-threads"));
     num_ops = static_cast<std::size_t>(parser.get_long("num-ops"));
@@ -126,21 +133,17 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  mmux::directory::directory_client client(host, port);
-  auto dstatus = client.open_or_create(file, "/tmp", 1, chain_length);
+  mmux::client::mmux_client client(host, port, lease_port);
+  auto kv = client.open_or_create(file, "/tmp", 1, chain_length);
 
   // Create workload runner
   std::cerr << "Creating workload runner" << std::endl;
-  auto chain = dstatus.data_blocks().front().block_names;
-  workload_runner wrunner(workload_path, workload_offset, chain, num_ops);
+  workload_runner wrunner(workload_path, workload_offset, kv, num_ops);
 
   // Create all listeners and start them
   std::vector<notification_listener *> listeners(num_threads, nullptr);
-  auto tail = chain.back();
-  auto parsed = block_name_parser::parse(tail);
-  std::cerr << "Creating notification listeners to " << parsed.host << ":" << parsed.notification_port << std::endl;
   for (std::size_t i = 0; i < num_threads; ++i) {
-    listeners[i] = new notification_listener(parsed.host, parsed.notification_port, parsed.id, num_ops);
+    listeners[i] = new notification_listener(client, file, num_ops);
     listeners[i]->run();
   }
 

@@ -50,8 +50,9 @@ class ds_node {
   void last_write_time(std::uint64_t time) { status_.last_write_time(time); }
 
   virtual void flush(const std::string &path,
-                     const std::shared_ptr<storage::storage_management_ops> &storage,
-                     std::shared_ptr<block_allocator> alloc) = 0;
+                     const std::string &dest,
+                     std::shared_ptr<block_allocator> alloc,
+                     const std::shared_ptr<storage::storage_management_ops> &storage) = 0;
 
  private:
   std::string name_{};
@@ -130,12 +131,15 @@ class ds_file_node : public ds_node {
   }
 
   void flush(const std::string &path,
-             const std::shared_ptr<storage::storage_management_ops> &storage,
-             std::shared_ptr<block_allocator> alloc) override {
+             const std::string &dest,
+             std::shared_ptr<block_allocator> alloc,
+             const std::shared_ptr<storage::storage_management_ops> &storage) override {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     dstatus_.mode(storage_mode::flushing);
     for (const auto &block: dstatus_.data_blocks()) {
-      storage->flush(block.tail(), dstatus_.persistent_store_prefix(), path);
+      std::string block_dest = dest;
+      utils::directory_utils::push_path_element(block_dest, block.slot_range_string());
+      storage->flush(block.tail(), block_dest, path);
       alloc->free(block.block_names);
     }
     dstatus_.remove_all_data_blocks();
@@ -168,7 +172,6 @@ class ds_file_node : public ds_node {
       }
       i++;
     }
-
     dstatus_.set_data_block_status(max_pos, chain_status::exporting);
 
     // Split the block's slot range in two
@@ -427,13 +430,14 @@ class ds_dir_node : public ds_node {
   }
 
   void flush(const std::string &path,
-             const std::shared_ptr<storage::storage_management_ops> &storage,
-             std::shared_ptr<block_allocator> alloc) override {
+             const std::string &dest,
+             std::shared_ptr<block_allocator> alloc,
+             const std::shared_ptr<storage::storage_management_ops> &storage) override {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     for (const auto &entry: children_) {
       std::string child_path = path;
       utils::directory_utils::push_path_element(child_path, entry.first);
-      entry.second->flush(child_path, storage, alloc);
+      entry.second->flush(child_path, dest, alloc, storage);
     }
   }
 
@@ -532,7 +536,7 @@ class directory_tree : public directory_ops, public directory_management_ops {
   void remove(const std::string &path) override;
   void remove_all(const std::string &path) override;
 
-  void flush(const std::string &path) override;
+  void flush(const std::string &path, const std::string &dest) override;
 
   void rename(const std::string &old_path, const std::string &new_path) override;
 

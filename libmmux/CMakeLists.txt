@@ -64,11 +64,11 @@ add_library(mmux STATIC
         src/mmux/directory/lease/lease_expiry_worker.h
         src/mmux/directory/directory_ops.h
         src/mmux/directory/directory_ops.cpp
-        src/mmux/storage/kv/serializer/csv_serde.cpp
-        src/mmux/storage/kv/serializer/csv_serde.h
-        src/mmux/storage/kv/serializer/serde.h
-        src/mmux/storage/kv/serializer/binary_serde.cpp
-        src/mmux/storage/kv/serializer/binary_serde.h
+        src/mmux/storage/kv/serde/csv_serde.cpp
+        src/mmux/storage/kv/serde/csv_serde.h
+        src/mmux/storage/kv/serde/serde.h
+        src/mmux/storage/kv/serde/binary_serde.cpp
+        src/mmux/storage/kv/serde/binary_serde.h
         src/mmux/storage/kv/hash_slot.h
         src/mmux/storage/kv/hash_slot.cpp
         src/mmux/storage/kv/kv_block.cpp
@@ -183,6 +183,8 @@ add_library(mmux STATIC
         src/mmux/persistent/s3/s3_store.cpp
         src/mmux/persistent/s3/s3_store.h
         src/mmux/persistent/persistent_service.h
+        src/mmux/persistent/persistent_store.cpp
+        src/mmux/persistent/persistent_store.h
         src/mmux/utils/client_cache.h
         src/mmux/utils/cmd_parse.h
         src/mmux/utils/directory_utils.h
@@ -215,7 +217,15 @@ if (NOT USE_SYSTEM_LIBCUCKOO)
   add_dependencies(mmux libcuckoo)
 endif ()
 
-target_link_libraries(mmux ${THRIFT_LIBRARIES} ${THRIFTNB_LIBRARIES} ${LIBEVENT_LIBRARIES} ${AWS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(mmux ${THRIFT_LIBRARIES}
+        ${THRIFTNB_LIBRARIES}
+        ${LIBEVENT_LIBRARIES}
+        ${AWS_LIBRARIES}
+        ${CURL_LIBRARY}
+        ${OPENSSL_LIBRARIES}
+        ${ZLIB_LIBRARY}
+        ${CMAKE_DL_LIBS}
+        ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties(mmux PROPERTIES LINKER_LANGUAGE CXX)
 
 if (BUILD_TESTS)
@@ -231,12 +241,14 @@ if (BUILD_TESTS)
           test/directory_service_test.cpp
           test/file_size_tracker_test.cpp
           test/kv_block_test.cpp
+          test/kv_client_test.cc
           test/kv_rpc_test.cpp
           test/lease_expiry_worker_test.cpp
           test/local_store_test.cpp
+          test/mmux_client_test.cpp
           test/notification_test.cpp
           test/storage_manager_test.cpp
-          test/test_utils.h test/kv_client_test.cc test/mmux_client_test.cpp)
+          test/test_utils.h)
   target_link_libraries(mmux_tests mmux)
   if (NOT USE_SYSTEM_CATCH)
     add_dependencies(mmux_tests catch)
@@ -250,6 +262,10 @@ if (BUILD_BENCHMARKS)
   add_executable(kv_notification_benchmark
           bench/kv_notification_benchmark.cpp
           bench/benchmark_utils.h)
+  add_executable(persistence_benchmark
+          bench/persistence_benchmark.cpp
+          bench/benchmark_utils.h)
   target_link_libraries(kv_rpc_benchmark mmux)
   target_link_libraries(kv_notification_benchmark mmux)
+  target_link_libraries(persistence_benchmark mmux)
 endif ()
