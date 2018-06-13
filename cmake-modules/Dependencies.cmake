@@ -2,6 +2,8 @@ include(ExternalProject)
 
 set(LIBEVENT_VERSION "2.1.8")
 set(THRIFT_VERSION "0.11.0")
+set(ZLIB_VERSION "1.2.11")
+set(OPENSSL_VERSION "1.1.1-pre7")
 set(CURL_VERSION "7.60.0")
 set(AWSSDK_VERSION "1.4.26")
 set(BOOST_VERSION "1.40.0")
@@ -26,26 +28,85 @@ set(EXTERNAL_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ${CMAKE_C_FLAGS_${UPPERCASE_BUILD_T
 if (USE_SYSTEM_AWS_SDK)
   find_package(aws-sdk-cpp REQUIRED)
 else ()
+  set(ZLIB_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
+  set(ZLIB_C_FLAGS "${EXTERNAL_C_FLAGS}")
+  set(ZLIB_PREFIX "${PROJECT_BINARY_DIR}/external/zlib")
+  set(ZLIB_INCLUDE_DIR "${ZLIB_PREFIX}/include")
+  set(ZLIB_CMAKE_ARGS "-Wno-dev"
+          "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+          "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
+          "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+          "-DCMAKE_INSTALL_PREFIX=${ZLIB_PREFIX}")
+
+  set(ZLIB_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}z")
+  set(ZLIB_LIBRARY "${ZLIB_PREFIX}/lib/${ZLIB_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  ExternalProject_Add(zlib
+          URL http://zlib.net/zlib-${ZLIB_VERSION}.tar.gz
+          CMAKE_ARGS ${ZLIB_CMAKE_ARGS}
+          LOG_DOWNLOAD ON
+          LOG_CONFIGURE ON
+          LOG_BUILD ON
+          LOG_INSTALL ON)
+
+  include_directories(SYSTEM ${ZLIB_INCLUDE_DIR})
+  message(STATUS "ZLib include dir: ${ZLIB_INCLUDE_DIR}")
+  message(STATUS "ZLib static library: ${ZLIB_LIBRARY}")
+
+  install(FILES ${CURL_LIBRARY} DESTINATION lib)
+  install(DIRECTORY ${CURL_INCLUDE_DIR}/curl DESTINATION include)
+
+  set(OPENSSL_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
+  set(OPENSSL_C_FLAGS "${EXTERNAL_C_FLAGS}")
+  set(OPENSSL_PREFIX "${PROJECT_BINARY_DIR}/external/openssl")
+  set(OPENSSL_INCLUDE_DIR "${OPENSSL_PREFIX}/include")
+  set(OPENSSL_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}ssl")
+  set(CRYPTO_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}crypto")
+  set(OPENSSL_LIBRARIES "${OPENSSL_PREFIX}/lib/${OPENSSL_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+          "${OPENSSL_PREFIX}/lib/${CRYPTO_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  ExternalProject_Add(openssl
+          URL https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
+          BUILD_IN_SOURCE 1
+          CONFIGURE_COMMAND ./config --prefix=${OPENSSL_PREFIX} no-shared no-tests CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER} CFLAGS=${OPENSSL_C_FLAGS} CXXFLAGS=${OPENSSL_CXX_FLAGS}
+          BUILD_COMMAND "$(MAKE)"
+          INSTALL_COMMAND "$(MAKE)" install
+          LOG_DOWNLOAD ON
+          LOG_CONFIGURE ON
+          LOG_BUILD ON
+          LOG_INSTALL ON)
+
+  include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR})
+  message(STATUS "OpenSSL include dir: ${OPENSSL_INCLUDE_DIR}")
+  message(STATUS "OpenSSL static libraries: ${OPENSSL_LIBRARIES}")
+
+  install(FILES ${OPENSSL_LIBRARIES} DESTINATION lib)
+  install(DIRECTORY ${OPENSSL_INCLUDE_DIR}/openssl DESTINATION include)
+
   set(CURL_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(CURL_C_FLAGS "${EXTERNAL_C_FLAGS}")
   set(CURL_PREFIX "${PROJECT_BINARY_DIR}/external/curl")
   set(CURL_HOME "${CURL_PREFIX}")
   set(CURL_INCLUDE_DIR "${CURL_PREFIX}/include")
   set(CURL_CMAKE_ARGS "-Wno-dev"
+          "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+          "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
           "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
           "-DCMAKE_INSTALL_PREFIX=${CURL_PREFIX}"
           "-DCURL_STATICLIB=ON"
           "-DBUILD_CURL_EXE=OFF"
           "-DCMAKE_USE_OPENSSL=OFF"
+          "-DBUILD_TESTING=OFF"
+          "-DENABLE_MANUAL=OFF"
           "-DHTTP_ONLY=ON"
+          "-DCURL_ZLIB=OFF"
           "-DCURL_CA_PATH=none")
 
   set(CURL_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}curl")
   set(CURL_LIBRARY "${CURL_PREFIX}/lib/${CURL_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-
+  string(REGEX REPLACE "\\." "_" CURL_VERSION_STR ${CURL_VERSION})
   ExternalProject_Add(curl
-          URL https://github.com/curl/curl/releases/download/curl-7_60_0/curl-7.60.0.tar.gz
+          URL https://github.com/curl/curl/releases/download/curl-${CURL_VERSION_STR}/curl-${CURL_VERSION}.tar.gz
           CMAKE_ARGS ${CURL_CMAKE_ARGS}
+          LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
@@ -63,23 +124,28 @@ else ()
   set(AWS_HOME "${AWS_PREFIX}")
   set(AWS_BUILD_PROJECTS "s3")
   set(AWS_INCLUDE_DIR "${AWS_PREFIX}/include")
+  set(AWS_PREFIX_PATH "${ZLIB_PREFIX}|${OPENSSL_PREFIX}|${CURL_PREFIX}")
   set(AWS_CMAKE_ARGS "-Wno-dev"
+          "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+          "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
           "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
           "-DBUILD_ONLY=${AWS_BUILD_PROJECTS}"
           "-DCMAKE_INSTALL_PREFIX=${AWS_PREFIX}"
           "-DENABLE_TESTING=OFF"
           "-DBUILD_SHARED_LIBS=OFF"
-          "-DCMAKE_PREFIX_PATH=${CURL_PREFIX}")
+          "-DCMAKE_PREFIX_PATH=${AWS_PREFIX_PATH}")
 
   set(AWS_STATIC_CORE_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-core")
   set(AWS_STATIC_S3_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-s3")
-  set(AWS_LIBRARIES "${AWS_PREFIX}/lib/${AWS_STATIC_CORE_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-          "${AWS_PREFIX}/lib/${AWS_STATIC_S3_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(AWS_LIBRARIES "${AWS_PREFIX}/lib/${AWS_STATIC_S3_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+          "${AWS_PREFIX}/lib/${AWS_STATIC_CORE_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 
   ExternalProject_Add(awssdk
-          DEPENDS curl
+          DEPENDS curl openssl zlib
           URL https://github.com/aws/aws-sdk-cpp/archive/${AWSSDK_VERSION}.tar.gz
+          LIST_SEPARATOR |
           CMAKE_ARGS ${AWS_CMAKE_ARGS}
+          LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
@@ -105,6 +171,8 @@ else ()
   set(LIBEVENT_EXTRA_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}event_extra")
   set(LIBEVENT_LIBRARIES "${LIBEVENT_PREFIX}/lib/${LIBEVENT_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
   set(LIBEVENT_CMAKE_ARGS "-Wno-dev"
+          "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+          "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
           "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
           "-DCMAKE_INSTALL_PREFIX=${LIBEVENT_PREFIX}"
           "-DENABLE_TESTING=OFF"
@@ -115,6 +183,7 @@ else ()
   ExternalProject_Add(libevent
           URL https://github.com/nmathewson/Libevent/archive/release-${LIBEVENT_VERSION}-stable.tar.gz
           CMAKE_ARGS ${LIBEVENT_CMAKE_ARGS}
+          LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
@@ -130,7 +199,10 @@ else ()
   set(THRIFT_PREFIX "${PROJECT_BINARY_DIR}/external/thrift")
   set(THRIFT_HOME "${THRIFT_PREFIX}")
   set(THRIFT_INCLUDE_DIR "${THRIFT_PREFIX}/include")
-  set(THRIFT_CMAKE_ARGS "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+  set(THRIFT_CMAKE_ARGS "-Wno-dev"
+          "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+          "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
+          "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
           "-DCMAKE_CXX_FLAGS=${THRIFT_CXX_FLAGS}"
           "-DCMAKE_C_FLAGS=${THRIFT_C_FLAGS}"
           "-DCMAKE_INSTALL_PREFIX=${THRIFT_PREFIX}"
@@ -170,6 +242,7 @@ else ()
           DEPENDS libevent
           URL "http://archive.apache.org/dist/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
           CMAKE_ARGS ${THRIFT_CMAKE_ARGS}
+          LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
@@ -196,7 +269,10 @@ if (NOT USE_SYSTEM_LIBCUCKOO)
   set(LIBCUCKOO_PREFIX "${PROJECT_BINARY_DIR}/external/libcuckoo")
   set(LIBCUCKOO_HOME "${LIBCUCKOO_PREFIX}")
   set(LIBCUCKOO_INCLUDE_DIR "${LIBCUCKOO_PREFIX}/include")
-  set(LIBCUCKOO_CMAKE_ARGS "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+  set(LIBCUCKOO_CMAKE_ARGS "-Wno-dev"
+          "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+          "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
+          "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
           "-DCMAKE_CXX_FLAGS=${LIBCUCKOO_CXX_FLAGS}"
           "-DCMAKE_INSTALL_PREFIX=${LIBCUCKOO_PREFIX}"
           "-DBUILD_EXAMPLES=OFF"
@@ -207,6 +283,7 @@ if (NOT USE_SYSTEM_LIBCUCKOO)
   ExternalProject_Add(libcuckoo
           URL "https://github.com/efficient/libcuckoo/archive/v${LIBCUCKOO_VERSION}.tar.gz"
           CMAKE_ARGS ${LIBCUCKOO_CMAKE_ARGS}
+          LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
@@ -224,7 +301,10 @@ if (NOT USE_SYSTEM_JEMALLOC)
   set(JEMALLOC_PREFIX "${PROJECT_BINARY_DIR}/external/jemalloc")
   set(JEMALLOC_HOME "${JEMALLOC_PREFIX}")
   set(JEMALLOC_INCLUDE_DIR "${JEMALLOC_PREFIX}/include")
-  set(JEMALLOC_CMAKE_ARGS "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+  set(JEMALLOC_CMAKE_ARGS "-Wno-dev"
+          "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+          "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
+          "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
           "-DCMAKE_CXX_FLAGS=${JEMALLOC_CXX_FLAGS}"
           "-DCMAKE_INSTALL_PREFIX=${JEMALLOC_PREFIX}")
   set(JEMALLOC_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}jemalloc")
@@ -235,6 +315,7 @@ if (NOT USE_SYSTEM_JEMALLOC)
           BUILD_BYPRODUCTS ${JEMALLOC_LIBRARIES}
           CONFIGURE_COMMAND ${JEMALLOC_PREFIX}/src/jemalloc/configure --prefix=${JEMALLOC_PREFIX} --enable-autogen --enable-prof-libunwind CFLAGS=${JEMALLOC_C_FLAGS} CXXFLAGS=${JEMALLOC_CXX_FLAGS}
           INSTALL_COMMAND make install_lib
+          LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
@@ -250,7 +331,10 @@ if (BUILD_TESTS AND NOT USE_SYSTEM_CATCH)
           CONFIGURE_COMMAND ""
           BUILD_COMMAND ""
           INSTALL_COMMAND ""
-          LOG_DOWNLOAD ON)
+          LOG_DOWNLOAD ON
+          LOG_CONFIGURE ON
+          LOG_BUILD ON
+          LOG_INSTALL ON)
 
   ExternalProject_Get_Property(catch source_dir)
   set(CATCH_INCLUDE_DIR ${source_dir}/single_include CACHE INTERNAL "Path to include folder for Catch")

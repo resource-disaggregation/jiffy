@@ -5,16 +5,26 @@ namespace mmux {
 namespace persistent {
 
 using namespace utils;
-void local_store::write(const std::string &local_path, const std::string &remote_path) {
-  directory_utils::copy_file(local_path, remote_path);
+
+local_store::local_store(std::shared_ptr<storage::serde> ser) : persistent_service(std::move(ser)) {}
+
+void local_store::write(const storage::locked_hash_table_type &table, const std::string &out_path) {
+  size_t found = out_path.find_last_of("/\\");
+  auto dir = out_path.substr(0,found);
+  directory_utils::create_directory(dir);
+  std::shared_ptr<std::ofstream> out(new std::ofstream(out_path));
+  serde()->serialize(table, out);
+  out->close();
 }
 
-void local_store::read(const std::string &remote_path, const std::string &local_path) {
-  directory_utils::copy_file(remote_path, local_path);
+void local_store::read(const std::string &in_path, storage::locked_hash_table_type &table) {
+  auto in = std::make_shared<std::ifstream>(in_path.c_str(), std::fstream::in);
+  serde()->deserialize(in, table);
+  in->close();
 }
 
-void local_store::remove(const std::string &remote_path) {
-  std::remove(remote_path.c_str());
+std::string local_store::URI() {
+  return "lfs";
 }
 
 }

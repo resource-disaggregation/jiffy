@@ -27,7 +27,7 @@ class directory_service_handler : public directory_serviceIf {
   void set_permissions(const std::string &path, rpc_perms perms, rpc_perm_options opts) override;
   rpc_perms get_permissions(const std::string &path) override;
   void remove(const std::string &path) override;
-  void flush(const std::string &path) override;
+  void flush(const std::string &path, const std::string &dest) override;
   void remove_all(const std::string &path) override;
   void rename(const std::string &old_path, const std::string &new_path) override;
   void status(rpc_file_status &_return, const std::string &path) override;

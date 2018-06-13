@@ -150,6 +150,10 @@ struct replica_chain {
   std::pair<int32_t, int32_t> slot_range;
   chain_status status;
 
+  const std::string slot_range_string() const {
+    return std::to_string(slot_range.first) + "_" + std::to_string(slot_range.second);
+  }
+
   const std::string &head() const {
     return block_names.front();
   }
@@ -377,7 +381,7 @@ class directory_ops {
   virtual void remove(const std::string &path) = 0;
   virtual void remove_all(const std::string &path) = 0;
 
-  virtual void flush(const std::string &path) = 0;
+  virtual void flush(const std::string &path, const std::string &dest) = 0;
 
   virtual void rename(const std::string &old_path, const std::string &new_path) = 0;
 

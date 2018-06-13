@@ -9,12 +9,11 @@ namespace persistent {
 
 class s3_store : public persistent_service {
  public:
-  s3_store();
+  s3_store(std::shared_ptr<storage::serde> ser);
   ~s3_store();
-  void write(const std::string &local_path, const std::string &remote_path) override;
-  void read(const std::string &remote_path, const std::string &local_path) override;
-  void remove(const std::string &remote_path) override;
-
+  void write(const storage::locked_hash_table_type &table, const std::string &out_path) override;
+  void read(const std::string &in_path, storage::locked_hash_table_type &table) override;
+  std::string URI() override;
  private:
   std::pair<std::string, std::string> extract_s3_path_elements(const std::string& s3_path);
 

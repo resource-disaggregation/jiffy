@@ -110,9 +110,9 @@ void directory_service_handler::remove_all(const std::string &path) {
   }
 }
 
-void directory_service_handler::flush(const std::string &path) {
+void directory_service_handler::flush(const std::string &path, const std::string &dest) {
   try {
-    shard_->flush(path);
+    shard_->flush(path, dest);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
   }

@@ -263,9 +263,9 @@ void directory_tree::remove_all(const std::string &path) {
   allocator_->free(cleared_blocks);
 }
 
-void directory_tree::flush(const std::string &path) {
+void directory_tree::flush(const std::string &path, const std::string &dest) {
   LOG(log_level::info) << "Flushing path " << path;
-  get_node(path)->flush(path, storage_, allocator_);
+  get_node(path)->flush(path, dest, allocator_, storage_);
 }
 
 void directory_tree::rename(const std::string &old_path, const std::string &new_path) {
