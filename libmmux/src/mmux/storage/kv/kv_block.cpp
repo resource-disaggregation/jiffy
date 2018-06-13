@@ -418,17 +418,17 @@ bool kv_block::empty() const {
   return block_.empty();
 }
 
-void kv_block::load(const std::string &remote_storage_prefix, const std::string &path) {
+void kv_block::load(const std::string &path) {
   locked_hash_table_type ltable = block_.lock_table();
-  auto remote = persistent::persistent_store::instance(remote_storage_prefix, ser_);
-  remote->read(remote_storage_prefix + path, ltable);
+  auto remote = persistent::persistent_store::instance(path, ser_);
+  remote->read(path, ltable);
   ltable.unlock();
 }
 
-void kv_block::flush(const std::string &remote_storage_prefix, const std::string &path) {
+void kv_block::flush(const std::string &path) {
   locked_hash_table_type ltable = block_.lock_table();
-  auto remote = persistent::persistent_store::instance(remote_storage_prefix, ser_);
-  remote->write(ltable, remote_storage_prefix + path);
+  auto remote = persistent::persistent_store::instance(path, ser_);
+  remote->write(ltable, path);
   ltable.unlock();
 }
 

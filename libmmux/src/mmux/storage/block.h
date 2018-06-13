@@ -168,9 +168,9 @@ class block {
   }
 
   /** Management Operations **/
-  virtual void load(const std::string &remote_storage_prefix, const std::string &path) = 0;
+  virtual void load(const std::string &path) = 0;
 
-  virtual void flush(const std::string &remote_storage_prefix, const std::string &path) = 0;
+  virtual void flush(const std::string &path) = 0;
 
   virtual std::size_t storage_capacity() = 0;
 

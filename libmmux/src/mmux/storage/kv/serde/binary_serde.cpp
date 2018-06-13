@@ -10,9 +10,9 @@ std::size_t binary_serde::serialize(const block_type &table, std::shared_ptr<std
     std::size_t key_size = e.first.size();
     std::size_t value_size = e.second.size();
     out->write(reinterpret_cast<const char *>(&key_size), sizeof(size_t))
-        .write(e.first.c_str(), key_size)
+        .write(e.first.data(), key_size)
         .write(reinterpret_cast<const char *>(&value_size), sizeof(size_t))
-        .write(e.second.c_str(), value_size);
+        .write(e.second.data(), value_size);
   }
   auto sz = out->tellp();
   return static_cast<std::size_t>(sz);

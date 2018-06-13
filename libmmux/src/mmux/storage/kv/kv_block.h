@@ -10,6 +10,7 @@
 #include "../../persistent/persistent_service.h"
 #include "../chain_module.h"
 #include "kv_hash.h"
+#include "serde/csv_serde.h"
 
 namespace mmux {
 namespace storage {
@@ -45,7 +46,7 @@ class kv_block : public chain_module {
                     double threshold_hi = 0.95,
                     const std::string &directory_host = "127.0.0.1",
                     int directory_port = 9090,
-                    std::shared_ptr<serde> ser = std::make_shared<binary_serde>());
+                    std::shared_ptr<serde> ser = std::make_shared<csv_serde>());
 
   std::string exists(const key_type &key, bool redirect = false);
 
@@ -82,9 +83,9 @@ class kv_block : public chain_module {
 
   void run_command(std::vector<std::string> &_return, int oid, const std::vector<std::string> &args) override;
 
-  void load(const std::string &remote_storage_prefix, const std::string &path) override;
+  void load(const std::string &path) override;
 
-  void flush(const std::string &remote_storage_prefix, const std::string &path) override;
+  void flush(const std::string &path) override;
 
   std::size_t storage_capacity() override;
 
