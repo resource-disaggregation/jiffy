@@ -262,6 +262,10 @@ if (BUILD_BENCHMARKS)
   add_executable(kv_notification_benchmark
           bench/kv_notification_benchmark.cpp
           bench/benchmark_utils.h)
+  add_executable(persistence_benchmark
+          bench/persistence_benchmark.cpp
+          bench/benchmark_utils.h)
   target_link_libraries(kv_rpc_benchmark mmux)
   target_link_libraries(kv_notification_benchmark mmux)
+  target_link_libraries(persistence_benchmark mmux)
 endif ()
