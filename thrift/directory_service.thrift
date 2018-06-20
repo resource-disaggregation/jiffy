@@ -80,7 +80,7 @@ service directory_service {
   void remove_all(1: string path)
     throws (1: directory_service_exception ex),
 
-  void flush(1: string path)
+  void flush(1: string path, 2: string dest)
     throws (1: directory_service_exception ex),
 
   void rename(1: string old_path, 2: string new_path)
