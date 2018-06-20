@@ -93,37 +93,41 @@ class MMuxClient:
         self.fs.close()
         self.ls.close()
 
-    def keep_alive(self, path):
+    def begin_scope(self, path):
         if path not in self.to_renew:
             self.to_renew.append(path)
 
+    def end_scope(self, path):
+        if path in self.to_renew:
+            self.to_renew.remove(path)
+
     def create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1):
         s = self.fs.create(path, persistent_store_prefix, num_blocks, chain_length)
-        self.keep_alive(path)
+        self.begin_scope(path)
         return KVClient(self.fs, path, s, self.chain_failure_cb)
 
     def open(self, path):
         s = self.fs.open(path)
-        self.keep_alive(path)
+        self.begin_scope(path)
         return KVClient(self.fs, path, s, self.chain_failure_cb)
 
     def open_or_create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1):
         s = self.fs.open_or_create(path, persistent_store_prefix, num_blocks, chain_length)
-        self.keep_alive(path)
+        self.begin_scope(path)
         return KVClient(self.fs, path, s, self.chain_failure_cb)
 
     def close(self, path):
-        if path in self.to_renew:
-            self.to_renew.remove(path)
+        self.end_scope(path)
 
-    def remove(self, path, mode):
-        self.close(path)
-        if mode == RemoveMode.delete:
-            self.fs.remove_all(path)
-        elif mode == RemoveMode.flush:
-            self.fs.flush(path)
+    def remove(self, path):
+        self.end_scope(path)
+        self.fs.remove_all(path)
 
-    def open_listener(self, path, callback=Mailbox()):
+    def flush(self, path, dest):
+        self.end_scope(path)
+        self.fs.flush(path, dest)
+
+    def listen(self, path, callback=Mailbox()):
         s = self.fs.dstatus(path)
         if path not in self.to_renew:
             self.to_renew.append(path)

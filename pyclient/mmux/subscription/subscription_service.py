@@ -3,14 +3,13 @@
 #
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #
-#  options string: py:slots
+#  options string: py:no_utf8strings,slots
 #
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol.TProtocol import TProtocolException
 from thrift.TRecursive import fix_spec
 
-import sys
 import logging
 from .ttypes import *
 from thrift.Thrift import TProcessor
@@ -27,19 +26,12 @@ class Iface(object):
         """
         pass
 
-    def success(self, type, ops):
+    def control(self, type, ops, error):
         """
         Parameters:
          - type
          - ops
-        """
-        pass
-
-    def error(self, type, msg):
-        """
-        Parameters:
-         - type
-         - msg
+         - error
         """
         pass
 
@@ -68,36 +60,21 @@ class Client(Iface):
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def success(self, type, ops):
+    def control(self, type, ops, error):
         """
         Parameters:
          - type
          - ops
+         - error
         """
-        self.send_success(type, ops)
+        self.send_control(type, ops, error)
 
-    def send_success(self, type, ops):
-        self._oprot.writeMessageBegin('success', TMessageType.ONEWAY, self._seqid)
-        args = success_args()
+    def send_control(self, type, ops, error):
+        self._oprot.writeMessageBegin('control', TMessageType.ONEWAY, self._seqid)
+        args = control_args()
         args.type = type
         args.ops = ops
-        args.write(self._oprot)
-        self._oprot.writeMessageEnd()
-        self._oprot.trans.flush()
-
-    def error(self, type, msg):
-        """
-        Parameters:
-         - type
-         - msg
-        """
-        self.send_error(type, msg)
-
-    def send_error(self, type, msg):
-        self._oprot.writeMessageBegin('error', TMessageType.ONEWAY, self._seqid)
-        args = error_args()
-        args.type = type
-        args.msg = msg
+        args.error = error
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -108,8 +85,7 @@ class Processor(Iface, TProcessor):
         self._handler = handler
         self._processMap = {}
         self._processMap["notification"] = Processor.process_notification
-        self._processMap["success"] = Processor.process_success
-        self._processMap["error"] = Processor.process_error
+        self._processMap["control"] = Processor.process_control
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -137,23 +113,12 @@ class Processor(Iface, TProcessor):
         except Exception:
             logging.exception('Exception in oneway handler')
 
-    def process_success(self, seqid, iprot, oprot):
-        args = success_args()
+    def process_control(self, seqid, iprot, oprot):
+        args = control_args()
         args.read(iprot)
         iprot.readMessageEnd()
         try:
-            self._handler.success(args.type, args.ops)
-        except TTransport.TTransportException:
-            raise
-        except Exception:
-            logging.exception('Exception in oneway handler')
-
-    def process_error(self, seqid, iprot, oprot):
-        args = error_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        try:
-            self._handler.error(args.type, args.msg)
+            self._handler.control(args.type, args.ops, args.error)
         except TTransport.TTransportException:
             raise
         except Exception:
@@ -190,7 +155,7 @@ class notification_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRING:
-                    self.op = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                    self.op = iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -210,7 +175,7 @@ class notification_args(object):
         oprot.writeStructBegin('notification_args')
         if self.op is not None:
             oprot.writeFieldBegin('op', TType.STRING, 1)
-            oprot.writeString(self.op.encode('utf-8') if sys.version_info[0] == 2 else self.op)
+            oprot.writeString(self.op)
             oprot.writeFieldEnd()
         if self.data is not None:
             oprot.writeFieldBegin('data', TType.STRING, 2)
@@ -242,27 +207,30 @@ class notification_args(object):
 all_structs.append(notification_args)
 notification_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'op', 'UTF8', None, ),  # 1
+    (1, TType.STRING, 'op', None, None, ),  # 1
     (2, TType.STRING, 'data', 'BINARY', None, ),  # 2
 )
 
 
-class success_args(object):
+class control_args(object):
     """
     Attributes:
      - type
      - ops
+     - error
     """
 
     __slots__ = (
         'type',
         'ops',
+        'error',
     )
 
 
-    def __init__(self, type=None, ops=None,):
+    def __init__(self, type=None, ops=None, error=None,):
         self.type = type
         self.ops = ops
+        self.error = error
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -283,9 +251,14 @@ class success_args(object):
                     self.ops = []
                     (_etype3, _size0) = iprot.readListBegin()
                     for _i4 in range(_size0):
-                        _elem5 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        _elem5 = iprot.readString()
                         self.ops.append(_elem5)
                     iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.error = iprot.readString()
                 else:
                     iprot.skip(ftype)
             else:
@@ -297,7 +270,7 @@ class success_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('success_args')
+        oprot.writeStructBegin('control_args')
         if self.type is not None:
             oprot.writeFieldBegin('type', TType.I32, 1)
             oprot.writeI32(self.type)
@@ -306,93 +279,12 @@ class success_args(object):
             oprot.writeFieldBegin('ops', TType.LIST, 2)
             oprot.writeListBegin(TType.STRING, len(self.ops))
             for iter6 in self.ops:
-                oprot.writeString(iter6.encode('utf-8') if sys.version_info[0] == 2 else iter6)
+                oprot.writeString(iter6)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, getattr(self, key))
-             for key in self.__slots__]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return False
-        for attr in self.__slots__:
-            my_val = getattr(self, attr)
-            other_val = getattr(other, attr)
-            if my_val != other_val:
-                return False
-        return True
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(success_args)
-success_args.thrift_spec = (
-    None,  # 0
-    (1, TType.I32, 'type', None, None, ),  # 1
-    (2, TType.LIST, 'ops', (TType.STRING, 'UTF8', False), None, ),  # 2
-)
-
-
-class error_args(object):
-    """
-    Attributes:
-     - type
-     - msg
-    """
-
-    __slots__ = (
-        'type',
-        'msg',
-    )
-
-
-    def __init__(self, type=None, msg=None,):
-        self.type = type
-        self.msg = msg
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.I32:
-                    self.type = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRING:
-                    self.msg = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('error_args')
-        if self.type is not None:
-            oprot.writeFieldBegin('type', TType.I32, 1)
-            oprot.writeI32(self.type)
-            oprot.writeFieldEnd()
-        if self.msg is not None:
-            oprot.writeFieldBegin('msg', TType.STRING, 2)
-            oprot.writeString(self.msg.encode('utf-8') if sys.version_info[0] == 2 else self.msg)
+        if self.error is not None:
+            oprot.writeFieldBegin('error', TType.STRING, 3)
+            oprot.writeString(self.error)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -417,11 +309,12 @@ class error_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(error_args)
-error_args.thrift_spec = (
+all_structs.append(control_args)
+control_args.thrift_spec = (
     None,  # 0
     (1, TType.I32, 'type', None, None, ),  # 1
-    (2, TType.STRING, 'msg', 'UTF8', None, ),  # 2
+    (2, TType.LIST, 'ops', (TType.STRING, None, False), None, ),  # 2
+    (3, TType.STRING, 'error', None, None, ),  # 3
 )
 fix_spec(all_structs)
 del all_structs

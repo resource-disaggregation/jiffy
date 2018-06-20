@@ -166,8 +166,8 @@ class DirectoryClient:
     def remove_all(self, path):
         self.client_.remove_all(path)
 
-    def flush(self, path):
-        self.client_.flush(path)
+    def flush(self, path, dest):
+        self.client_.flush(path, dest)
 
     def status(self, path):
         s = self.client_.status(path)

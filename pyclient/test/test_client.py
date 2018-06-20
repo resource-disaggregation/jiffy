@@ -148,13 +148,6 @@ class TestClient(TestCase):
             self.assertFalse(kv.exists(str(i)))
             self.assertTrue(kv.get(str(i)) is None)
 
-        self.assertTrue(kv.num_keys() == 1000)
-
-        # Test keys
-        keys = sorted([int(k) for k in kv.keys()])
-        for i in range(0, 1000):
-            self.assertTrue(keys[i] == i)
-
         # Test update
         for i in range(0, 1000):
             self.assertTrue(kv.update(str(i), str(i + 1000)) == bytes(str(i), 'utf-8'))
@@ -165,8 +158,6 @@ class TestClient(TestCase):
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) == bytes(str(i + 1000), 'utf-8'))
 
-        self.assertTrue(kv.num_keys() == 1000)
-
         # Test remove
         for i in range(0, 1000):
             self.assertTrue(kv.remove(str(i)) == bytes(str(i + 1000), 'utf-8'))
@@ -176,8 +167,6 @@ class TestClient(TestCase):
 
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) is None)
-
-        self.assertTrue(kv.num_keys() == 0)
 
     def pipelined_kv_ops(self, kv):
         # Test get/put
@@ -198,8 +187,6 @@ class TestClient(TestCase):
             gets.get(str(i))
         self.assertTrue(gets.execute() == [b'!key_not_found'] * 1000)
 
-        self.assertTrue(kv.num_keys() == 1000)
-
         # Test update
         for i in range(0, 1000):
             updates.update(str(i), str(i + 1000))
@@ -213,8 +200,6 @@ class TestClient(TestCase):
             gets.get(str(i))
         self.assertTrue(gets.execute() == [bytes(str(i + 1000), 'utf-8') for i in range(0, 1000)])
 
-        self.assertTrue(kv.num_keys() == 1000)
-
         # Test remove
         for i in range(0, 1000):
             removes.remove(str(i))
@@ -227,8 +212,6 @@ class TestClient(TestCase):
         for i in range(0, 1000):
             gets.get(str(i))
         self.assertTrue(gets.execute() == [b'!key_not_found'] * 1000)
-
-        self.assertTrue(kv.num_keys() == 0)
 
     def test_lease_worker(self):
         self.start_servers()
@@ -275,10 +258,10 @@ class TestClient(TestCase):
         try:
             client.create("/a/file.txt", "/tmp")
             self.assertTrue('/a/file.txt' in client.to_renew)
-            client.remove('/a/file.txt', RemoveMode.flush)
+            client.flush('/a/file.txt', 'local://tmp')
             self.assertFalse('/a/file.txt' in client.to_renew)
             self.assertTrue(client.fs.dstatus('/a/file.txt').storage_mode == StorageMode.on_disk)
-            client.remove('/a/file.txt', RemoveMode.delete)
+            client.remove('/a/file.txt')
             self.assertFalse('/a/file.txt' in client.to_renew)
             self.assertFalse(client.fs.exists('/a/file.txt'))
         finally:
@@ -318,9 +301,9 @@ class TestClient(TestCase):
         try:
             client.fs.create("/a/file.txt", "/tmp")
 
-            n1 = client.open_listener("/a/file.txt")
-            n2 = client.open_listener("/a/file.txt")
-            n3 = client.open_listener("/a/file.txt")
+            n1 = client.listen("/a/file.txt")
+            n2 = client.listen("/a/file.txt")
+            n3 = client.listen("/a/file.txt")
 
             n1.subscribe(['put'])
             n2.subscribe(['put', 'remove'])

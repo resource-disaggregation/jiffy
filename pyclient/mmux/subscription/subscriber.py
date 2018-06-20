@@ -62,11 +62,11 @@ class SubscriptionServiceHandler(subscription_service.Iface):
     def notification(self, op, data):
         self.notification_callback(Notification(op, data))
 
-    def success(self, rtype, ops):
-        self.success_callback(ControlMessage('success', rtype, ops))
-
-    def error(self, rtype, msg):
-        self.error_callback(ControlMessage('error', rtype, msg))
+    def control(self, rtype, ops, error):
+        if error == "":
+            self.success_callback(ControlMessage('success', rtype, ops))
+        else:
+            self.error_callback(ControlMessage('error', rtype, ops))
 
 
 class SubscriptionWorker(threading.Thread):

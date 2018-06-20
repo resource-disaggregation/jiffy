@@ -121,15 +121,6 @@ class KVClient:
             logging.warning(e)
             self.chain_failure_cb_(self.path, self.file_info.data_blocks[self.block_id(key)])
 
-    def num_keys(self):
-        return sum([int(block.num_keys()) for block in self.blocks])
-
-    def keys(self):
-        res = []
-        for block in self.blocks:
-            res.extend(block.keys())
-        return res
-
     def pipeline_get(self):
         return PipelinedGet(self.path, self.blocks, self.slots, self.chain_failure_cb_)
 

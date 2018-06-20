@@ -103,10 +103,11 @@ class Iface(object):
         """
         pass
 
-    def flush(self, path):
+    def flush(self, path, dest):
         """
         Parameters:
          - path
+         - dest
         """
         pass
 
@@ -184,6 +185,15 @@ class Iface(object):
         pass
 
     def split_slot_range(self, path, slot_begin, slot_end):
+        """
+        Parameters:
+         - path
+         - slot_begin
+         - slot_end
+        """
+        pass
+
+    def merge_slot_range(self, path, slot_begin, slot_end):
         """
         Parameters:
          - path
@@ -569,18 +579,20 @@ class Client(Iface):
             raise result.ex
         return
 
-    def flush(self, path):
+    def flush(self, path, dest):
         """
         Parameters:
          - path
+         - dest
         """
-        self.send_flush(path)
+        self.send_flush(path, dest)
         self.recv_flush()
 
-    def send_flush(self, path):
+    def send_flush(self, path, dest):
         self._oprot.writeMessageBegin('flush', TMessageType.CALL, self._seqid)
         args = flush_args()
         args.path = path
+        args.dest = dest
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -967,6 +979,41 @@ class Client(Iface):
             raise result.ex
         return
 
+    def merge_slot_range(self, path, slot_begin, slot_end):
+        """
+        Parameters:
+         - path
+         - slot_begin
+         - slot_end
+        """
+        self.send_merge_slot_range(path, slot_begin, slot_end)
+        self.recv_merge_slot_range()
+
+    def send_merge_slot_range(self, path, slot_begin, slot_end):
+        self._oprot.writeMessageBegin('merge_slot_range', TMessageType.CALL, self._seqid)
+        args = merge_slot_range_args()
+        args.path = path
+        args.slot_begin = slot_begin
+        args.slot_end = slot_end
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_merge_slot_range(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = merge_slot_range_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
@@ -995,6 +1042,7 @@ class Processor(Iface, TProcessor):
         self._processMap["add_replica_to_chain"] = Processor.process_add_replica_to_chain
         self._processMap["add_block_to_file"] = Processor.process_add_block_to_file
         self._processMap["split_slot_range"] = Processor.process_split_slot_range
+        self._processMap["merge_slot_range"] = Processor.process_merge_slot_range
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -1303,7 +1351,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = flush_result()
         try:
-            self._handler.flush(args.path)
+            self._handler.flush(args.path, args.dest)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1605,6 +1653,32 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("split_slot_range", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_merge_slot_range(self, seqid, iprot, oprot):
+        args = merge_slot_range_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = merge_slot_range_result()
+        try:
+            self._handler.merge_slot_range(args.path, args.slot_begin, args.slot_end)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except directory_service_exception as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("merge_slot_range", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -3390,15 +3464,18 @@ class flush_args(object):
     """
     Attributes:
      - path
+     - dest
     """
 
     __slots__ = (
         'path',
+        'dest',
     )
 
 
-    def __init__(self, path=None,):
+    def __init__(self, path=None, dest=None,):
         self.path = path
+        self.dest = dest
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -3414,6 +3491,11 @@ class flush_args(object):
                     self.path = iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.dest = iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -3427,6 +3509,10 @@ class flush_args(object):
         if self.path is not None:
             oprot.writeFieldBegin('path', TType.STRING, 1)
             oprot.writeString(self.path)
+            oprot.writeFieldEnd()
+        if self.dest is not None:
+            oprot.writeFieldBegin('dest', TType.STRING, 2)
+            oprot.writeString(self.dest)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -3455,6 +3541,7 @@ all_structs.append(flush_args)
 flush_args.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'path', None, None, ),  # 1
+    (2, TType.STRING, 'dest', None, None, ),  # 2
 )
 
 
@@ -5306,6 +5393,177 @@ class split_slot_range_result(object):
         return not (self == other)
 all_structs.append(split_slot_range_result)
 split_slot_range_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
+)
+
+
+class merge_slot_range_args(object):
+    """
+    Attributes:
+     - path
+     - slot_begin
+     - slot_end
+    """
+
+    __slots__ = (
+        'path',
+        'slot_begin',
+        'slot_end',
+    )
+
+
+    def __init__(self, path=None, slot_begin=None, slot_end=None,):
+        self.path = path
+        self.slot_begin = slot_begin
+        self.slot_end = slot_end
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.path = iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.slot_begin = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.slot_end = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('merge_slot_range_args')
+        if self.path is not None:
+            oprot.writeFieldBegin('path', TType.STRING, 1)
+            oprot.writeString(self.path)
+            oprot.writeFieldEnd()
+        if self.slot_begin is not None:
+            oprot.writeFieldBegin('slot_begin', TType.I32, 2)
+            oprot.writeI32(self.slot_begin)
+            oprot.writeFieldEnd()
+        if self.slot_end is not None:
+            oprot.writeFieldBegin('slot_end', TType.I32, 3)
+            oprot.writeI32(self.slot_end)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(merge_slot_range_args)
+merge_slot_range_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'path', None, None, ),  # 1
+    (2, TType.I32, 'slot_begin', None, None, ),  # 2
+    (3, TType.I32, 'slot_end', None, None, ),  # 3
+)
+
+
+class merge_slot_range_result(object):
+    """
+    Attributes:
+     - ex
+    """
+
+    __slots__ = (
+        'ex',
+    )
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = directory_service_exception()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('merge_slot_range_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(merge_slot_range_result)
+merge_slot_range_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
