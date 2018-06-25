@@ -61,6 +61,22 @@ std::string replica_chain_client::update(const std::string &key, const std::stri
   return run_command(kv_op_id::update, {key, value}).front();
 }
 
+std::string replica_chain_client::redirected_get(const std::string &key) {
+  return run_command(kv_op_id::get, {key, "!redirected"}).front();
+}
+
+std::string replica_chain_client::redirected_put(const std::string &key, const std::string &value) {
+  return run_command(kv_op_id::put, {key, value, "!redirected"}).front();
+}
+
+std::string replica_chain_client::redirected_remove(const std::string &key) {
+  return run_command(kv_op_id::remove, {key, "!redirected"}).front();
+}
+
+std::string replica_chain_client::redirected_update(const std::string &key, const std::string &value) {
+  return run_command(kv_op_id::update, {key, value, "!redirected"}).front();
+}
+
 void replica_chain_client::send_command(int32_t cmd_id, const std::vector<std::string> &args) {
   if (in_flight_) {
     throw std::length_error("Cannot have more than one request in-flight");

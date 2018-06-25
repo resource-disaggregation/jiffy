@@ -24,6 +24,11 @@ class replica_chain_client {
   std::string update(const std::string &key, const std::string &value);
   std::string num_keys();
 
+  std::string redirected_put(const std::string &key, const std::string &value);
+  std::string redirected_get(const std::string &key);
+  std::string redirected_update(const std::string &key, const std::string &value);
+  std::string redirected_remove(const std::string &key);
+
   void send_command(int32_t cmd_id, const std::vector<std::string> &args);
   std::vector<std::string> recv_response();
   std::vector<std::string> run_command(int32_t cmd_id, const std::vector<std::string> &args);

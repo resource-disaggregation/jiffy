@@ -40,7 +40,7 @@ void kv_client::put(const std::string &key, const std::string &value) {
   } catch (redo_error &e) {
     parse_response(blocks_[block_id(key)]->put(key, value));
   } catch (redirect_error &e) {
-    parse_response(replica_chain_client(e.blocks()).put(key, value));
+    parse_response(replica_chain_client(e.blocks()).redirected_put(key, value));
   }
 }
 
@@ -50,7 +50,7 @@ std::string kv_client::get(const std::string &key) {
   } catch (redo_error &e) {
     return parse_response(blocks_[block_id(key)]->get(key));
   } catch (redirect_error &e) {
-    return parse_response(replica_chain_client(e.blocks()).get(key));
+    return parse_response(replica_chain_client(e.blocks()).redirected_get(key));
   }
 }
 
@@ -60,7 +60,7 @@ std::string kv_client::update(const std::string &key, const std::string &value) 
   } catch (redo_error &e) {
     return parse_response(blocks_[block_id(key)]->update(key, value));
   } catch (redirect_error &e) {
-    return parse_response(replica_chain_client(e.blocks()).update(key, value));
+    return parse_response(replica_chain_client(e.blocks()).redirected_update(key, value));
   }
 }
 
@@ -70,7 +70,7 @@ std::string kv_client::remove(const std::string &key) {
   } catch (redo_error &e) {
     return parse_response(blocks_[block_id(key)]->remove(key));
   } catch (redirect_error &e) {
-    return parse_response(replica_chain_client(e.blocks()).remove(key));
+    return parse_response(replica_chain_client(e.blocks()).redirected_remove(key));
   }
 }
 
