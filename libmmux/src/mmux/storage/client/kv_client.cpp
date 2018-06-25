@@ -10,12 +10,14 @@ using namespace mmux::utils;
 
 kv_client::kv_client(std::shared_ptr<directory::directory_ops> fs,
                      const std::string &path,
-                     const directory::data_status &status) : fs_(std::move(fs)), path_(path), status_(status) {
+                     const directory::data_status &status,
+                     int timeout_ms)
+    : fs_(std::move(fs)), path_(path), status_(status) {
   slots_.clear();
   blocks_.clear();
   for (const auto &block: status.data_blocks()) {
     slots_.push_back(block.slot_begin());
-    blocks_.push_back(std::make_shared<replica_chain_client>(block.block_names));
+    blocks_.push_back(std::make_shared<replica_chain_client>(block.block_names, timeout_ms));
   }
 }
 

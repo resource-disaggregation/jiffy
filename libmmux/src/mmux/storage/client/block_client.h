@@ -58,7 +58,7 @@ class block_client {
   block_client() = default;
   ~block_client();
   int64_t get_client_id();
-  void connect(const std::string &hostname, int port, int block_id);
+  void connect(const std::string &hostname, int port, int block_id, int timeout_ms = 0);
   void disconnect();
   bool is_connected();
 
@@ -70,6 +70,7 @@ class block_client {
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_{};
   std::shared_ptr<thrift_client> client_{};
   int block_id_{-1};
+  int timeout_ms_;
 };
 
 }

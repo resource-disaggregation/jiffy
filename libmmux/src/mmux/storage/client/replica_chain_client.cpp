@@ -5,10 +5,10 @@
 namespace mmux {
 namespace storage {
 
-replica_chain_client::replica_chain_client(const std::vector<std::string> &chain) : in_flight_(false) {
+replica_chain_client::replica_chain_client(const std::vector<std::string> &chain, int timeout_ms) : in_flight_(false) {
   seq_.client_id = -1;
   seq_.client_seq_no = 0;
-  connect(chain);
+  connect(chain, timeout_ms);
   for (auto &op: KV_OPS) {
     cmd_client_.push_back(op.type == block_op_type::accessor ? &tail_ : &head_);
   }
@@ -27,16 +27,16 @@ const std::vector<std::string> &replica_chain_client::chain() const {
   return chain_;
 }
 
-void replica_chain_client::connect(const std::vector<std::string> &chain) {
+void replica_chain_client::connect(const std::vector<std::string> &chain, int timeout_ms) {
   chain_ = chain;
   auto h = block_name_parser::parse(chain_.front());
-  head_.connect(h.host, h.service_port, h.id);
+  head_.connect(h.host, h.service_port, h.id, timeout_ms);
   seq_.client_id = head_.get_client_id();
   if (chain.size() == 1) {
     tail_ = head_;
   } else {
     auto t = block_name_parser::parse(chain_.back());
-    tail_.connect(t.host, t.service_port, t.id);
+    tail_.connect(t.host, t.service_port, t.id, timeout_ms);
   }
   response_reader_ = tail_.get_command_response_reader(seq_.client_id);
 }

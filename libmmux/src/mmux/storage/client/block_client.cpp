@@ -20,9 +20,11 @@ int64_t block_client::get_client_id() {
   return client_->get_client_id();
 }
 
-void block_client::connect(const std::string &host, int port, int block_id) {
+void block_client::connect(const std::string &host, int port, int block_id, int timeout_ms) {
   block_id_ = block_id;
-  transport_ = std::shared_ptr<TTransport>(new TBufferedTransport(std::make_shared<TSocket>(host, port)));
+  auto sock = std::make_shared<TSocket>(host, port);
+  sock->setRecvTimeout(timeout_ms);
+  transport_ = std::shared_ptr<TTransport>(new TBufferedTransport(sock));
   protocol_ = std::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
   client_ = std::make_shared<thrift_client>(protocol_);
   transport_->open();

@@ -11,7 +11,7 @@ class replica_chain_client {
  public:
   typedef block_client *client_ref;
 
-  explicit replica_chain_client(const std::vector<std::string> &chain);
+  explicit replica_chain_client(const std::vector<std::string> &chain, int timeout_ms = 0);
 
   ~replica_chain_client();
   void disconnect();
@@ -33,7 +33,7 @@ class replica_chain_client {
   std::vector<std::string> recv_response();
   std::vector<std::string> run_command(int32_t cmd_id, const std::vector<std::string> &args);
  private:
-  void connect(const std::vector<std::string> &chain);
+  void connect(const std::vector<std::string> &chain, int timeout_ms = 0);
 
   sequence_id seq_;
   std::vector<std::string> chain_;

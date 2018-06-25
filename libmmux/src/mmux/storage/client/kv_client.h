@@ -26,7 +26,10 @@ class redirect_error : public std::exception {
 
 class kv_client {
  public:
-  kv_client(std::shared_ptr<directory::directory_ops> fs, const std::string &path, const directory::data_status &status);
+  kv_client(std::shared_ptr<directory::directory_ops> fs,
+            const std::string &path,
+            const directory::data_status &status,
+            int timeout_ms = 0);
 
   void refresh();
 
@@ -37,7 +40,7 @@ class kv_client {
   std::string update(const std::string &key, const std::string &value);
   std::string remove(const std::string &key);
  private:
-  size_t block_id(const std::string& key);
+  size_t block_id(const std::string &key);
   std::string parse_response(const std::string &raw_response);
 
   std::shared_ptr<directory::directory_ops> fs_;

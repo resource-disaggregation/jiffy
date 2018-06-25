@@ -360,8 +360,8 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
     default:throw std::invalid_argument("No such operation id " + std::to_string(oid));
   }
   bool expected = false;
-  if (overload() && state() != block_state::exporting && state() != block_state::importing
-      && splitting_.compare_exchange_strong(expected, true)) {
+  if (is_mutator(oid) && overload() && state() != block_state::exporting && state() != block_state::importing
+      && is_tail() && splitting_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
     LOG(log_level::info) << "Overloaded block; storage = " << bytes_.load() << " capacity = " << capacity_
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
@@ -377,7 +377,7 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
   }
   expected = false;
   if (oid == kv_op_id::remove && underload() && state() != block_state::exporting && state() != block_state::importing
-      && slot_end() != block::SLOT_MAX && merging_.compare_exchange_strong(expected, true)) {
+      && slot_end() != block::SLOT_MAX && is_tail() && merging_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
     LOG(log_level::info) << "Underloaded block; storage = " << bytes_.load() << " capacity = " << capacity_
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
