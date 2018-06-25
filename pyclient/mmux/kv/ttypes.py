@@ -3,14 +3,13 @@
 #
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #
-#  options string: py:slots
+#  options string: py:no_utf8strings,slots
 #
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol.TProtocol import TProtocolException
 from thrift.TRecursive import fix_spec
 
-import sys
 
 from thrift.transport import TTransport
 all_structs = []
@@ -41,7 +40,7 @@ class block_exception(TException):
                 break
             if fid == 1:
                 if ftype == TType.STRING:
-                    self.msg = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                    self.msg = iprot.readString()
                 else:
                     iprot.skip(ftype)
             else:
@@ -56,7 +55,7 @@ class block_exception(TException):
         oprot.writeStructBegin('block_exception')
         if self.msg is not None:
             oprot.writeFieldBegin('msg', TType.STRING, 1)
-            oprot.writeString(self.msg.encode('utf-8') if sys.version_info[0] == 2 else self.msg)
+            oprot.writeString(self.msg)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -111,7 +110,7 @@ class chain_failure_exception(TException):
                 break
             if fid == 1:
                 if ftype == TType.STRING:
-                    self.msg = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                    self.msg = iprot.readString()
                 else:
                     iprot.skip(ftype)
             else:
@@ -126,7 +125,7 @@ class chain_failure_exception(TException):
         oprot.writeStructBegin('chain_failure_exception')
         if self.msg is not None:
             oprot.writeFieldBegin('msg', TType.STRING, 1)
-            oprot.writeString(self.msg.encode('utf-8') if sys.version_info[0] == 2 else self.msg)
+            oprot.writeString(self.msg)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -254,12 +253,12 @@ class sequence_id(object):
 all_structs.append(block_exception)
 block_exception.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'msg', 'UTF8', None, ),  # 1
+    (1, TType.STRING, 'msg', None, None, ),  # 1
 )
 all_structs.append(chain_failure_exception)
 chain_failure_exception.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'msg', 'UTF8', None, ),  # 1
+    (1, TType.STRING, 'msg', None, None, ),  # 1
 )
 all_structs.append(sequence_id)
 sequence_id.thrift_spec = (

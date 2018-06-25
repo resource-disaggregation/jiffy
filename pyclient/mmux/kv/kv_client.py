@@ -4,7 +4,7 @@ from bisect import bisect_right
 from mmux.kv import crc
 from mmux.kv.block_client import BlockChainClient, BlockClientCache
 from mmux.kv.compat import b, unicode, bytes, long, basestring, char_to_byte, bytes_to_str
-from mmux.kv.kv_ops import KVOps
+from mmux.kv.kv_ops import KVOps, op_type, KVOpType
 
 
 def encode(value):
@@ -159,11 +159,15 @@ class PipelinedBase(object):
 
     def _execute(self, op):
         res = []
-        op_ids = [None if not self.blocks[i] else self.blocks[i].send_cmd(op, self.args[i]) for i in
-                  range(len(self.blocks))]
+        if op_type(op) == KVOpType.accessor:
+            op_ids = [None if not self.blocks[i] else self.blocks[i].send_cmd_tail([op], [self.args[i]]) for i in
+                      range(len(self.blocks))]
+        else:
+            op_ids = [None if not self.blocks[i] else self.blocks[i].send_cmd_head([op], [self.args[i]]) for i in
+                      range(len(self.blocks))]
         for i in range(len(self.blocks)):
             if op_ids[i] is not None:
-                res.extend(self.blocks[i].recv_cmd(op_ids[i]))
+                res.extend(self.blocks[i].recv_cmd(op_ids[i])[0])
         self.reset()
         return res
 
