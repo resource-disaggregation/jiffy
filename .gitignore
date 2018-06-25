@@ -32,6 +32,7 @@ bin/*
 # Directories
 cmake-build-debug
 cmake-build-release
+javaclient/target
 
 # Eclipse files
 .settings

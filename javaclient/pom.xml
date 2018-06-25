@@ -4,11 +4,11 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>elasticmem</groupId>
-  <artifactId>elasticmem-client</artifactId>
+  <groupId>memorymux</groupId>
+  <artifactId>mmux-client</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>ElasticMem Client</name>
+  <name>MemoryMUX Client</name>
 
   <developers>
     <developer>
@@ -34,6 +34,7 @@
     <thrift.version>0.11.0</thrift.version>
     <junit.version>4.12</junit.version>
     <hadoop.version>3.1.0</hadoop.version>
+    <ini4j.version>0.5.4</ini4j.version>
   </properties>
 
   <dependencies>
@@ -53,6 +54,11 @@
       <version>${hadoop.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.ini4j</groupId>
+      <artifactId>ini4j</artifactId>
+      <version>${ini4j.version}</version>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>${junit.version}</version>
@@ -62,6 +68,11 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.0</version>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
