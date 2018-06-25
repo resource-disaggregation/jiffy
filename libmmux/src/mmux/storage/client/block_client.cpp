@@ -47,8 +47,10 @@ bool block_client::is_connected() {
   return transport_->isOpen();
 }
 
-void block_client::command_request(const sequence_id &seq, const int32_t cmd_id, const std::vector<std::string> &args) {
-  client_->command_request(seq, block_id_, cmd_id, args);
+void block_client::command_request(const sequence_id &seq,
+                                   std::vector<int32_t> cmd_ids,
+                                   const std::vector<std::vector<std::string>> &args) {
+  client_->command_request(seq, block_id_, cmd_ids, args);
 }
 
 }

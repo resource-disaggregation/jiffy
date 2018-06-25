@@ -54,6 +54,18 @@ class block {
 
   virtual void run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) = 0;
 
+  void run_commands(std::vector<std::vector<std::string>> &_returns,
+                    const std::vector<int32_t>& oids,
+                    const std::vector<std::vector<std::string>> &args) {
+    if (oids.size() != args.size()) {
+      throw std::logic_error("#Command ids not equal to #arg-lists");
+    }
+    _returns.resize(oids.size());
+    for (size_t i = 0; i < oids.size(); i++) {
+      run_command(_returns[i], oids[i], args[i]);
+    }
+  }
+
   void path(const std::string &path) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     path_ = path;

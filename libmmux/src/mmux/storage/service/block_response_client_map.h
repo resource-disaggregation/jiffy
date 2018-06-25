@@ -16,7 +16,7 @@ class block_response_client_map {
 
   void remove_client(int64_t client_id);
 
-  void respond_client(const sequence_id &seq, const std::vector<std::string> &result);
+  void respond_client(const sequence_id &seq, const std::vector<std::vector<std::string>> &results);
 
   void clear();
 

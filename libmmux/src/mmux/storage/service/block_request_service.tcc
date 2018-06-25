@@ -369,9 +369,21 @@ uint32_t block_request_service_command_request_args::read(Protocol_* iprot) {
         }
         break;
       case 3:
-        if (ftype == ::apache::thrift::protocol::T_I32) {
-          xfer += iprot->readI32(this->cmd_id);
-          this->__isset.cmd_id = true;
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            this->cmd_ids.clear();
+            uint32_t _size6;
+            ::apache::thrift::protocol::TType _etype9;
+            xfer += iprot->readListBegin(_etype9, _size6);
+            this->cmd_ids.resize(_size6);
+            uint32_t _i10;
+            for (_i10 = 0; _i10 < _size6; ++_i10)
+            {
+              xfer += iprot->readI32(this->cmd_ids[_i10]);
+            }
+            xfer += iprot->readListEnd();
+          }
+          this->__isset.cmd_ids = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -380,14 +392,26 @@ uint32_t block_request_service_command_request_args::read(Protocol_* iprot) {
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->arguments.clear();
-            uint32_t _size6;
-            ::apache::thrift::protocol::TType _etype9;
-            xfer += iprot->readListBegin(_etype9, _size6);
-            this->arguments.resize(_size6);
-            uint32_t _i10;
-            for (_i10 = 0; _i10 < _size6; ++_i10)
+            uint32_t _size11;
+            ::apache::thrift::protocol::TType _etype14;
+            xfer += iprot->readListBegin(_etype14, _size11);
+            this->arguments.resize(_size11);
+            uint32_t _i15;
+            for (_i15 = 0; _i15 < _size11; ++_i15)
             {
-              xfer += iprot->readString(this->arguments[_i10]);
+              {
+                this->arguments[_i15].clear();
+                uint32_t _size16;
+                ::apache::thrift::protocol::TType _etype19;
+                xfer += iprot->readListBegin(_etype19, _size16);
+                this->arguments[_i15].resize(_size16);
+                uint32_t _i20;
+                for (_i20 = 0; _i20 < _size16; ++_i20)
+                {
+                  xfer += iprot->readBinary(this->arguments[_i15][_i20]);
+                }
+                xfer += iprot->readListEnd();
+              }
             }
             xfer += iprot->readListEnd();
           }
@@ -422,17 +446,33 @@ uint32_t block_request_service_command_request_args::write(Protocol_* oprot) con
   xfer += oprot->writeI32(this->block_id);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("cmd_id", ::apache::thrift::protocol::T_I32, 3);
-  xfer += oprot->writeI32(this->cmd_id);
+  xfer += oprot->writeFieldBegin("cmd_ids", ::apache::thrift::protocol::T_LIST, 3);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_I32, static_cast<uint32_t>(this->cmd_ids.size()));
+    std::vector<int32_t> ::const_iterator _iter21;
+    for (_iter21 = this->cmd_ids.begin(); _iter21 != this->cmd_ids.end(); ++_iter21)
+    {
+      xfer += oprot->writeI32((*_iter21));
+    }
+    xfer += oprot->writeListEnd();
+  }
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("arguments", ::apache::thrift::protocol::T_LIST, 4);
   {
-    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->arguments.size()));
-    std::vector<std::string> ::const_iterator _iter11;
-    for (_iter11 = this->arguments.begin(); _iter11 != this->arguments.end(); ++_iter11)
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_LIST, static_cast<uint32_t>(this->arguments.size()));
+    std::vector<std::vector<std::string> > ::const_iterator _iter22;
+    for (_iter22 = this->arguments.begin(); _iter22 != this->arguments.end(); ++_iter22)
     {
-      xfer += oprot->writeString((*_iter11));
+      {
+        xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*_iter22).size()));
+        std::vector<std::string> ::const_iterator _iter23;
+        for (_iter23 = (*_iter22).begin(); _iter23 != (*_iter22).end(); ++_iter23)
+        {
+          xfer += oprot->writeBinary((*_iter23));
+        }
+        xfer += oprot->writeListEnd();
+      }
     }
     xfer += oprot->writeListEnd();
   }
@@ -458,17 +498,33 @@ uint32_t block_request_service_command_request_pargs::write(Protocol_* oprot) co
   xfer += oprot->writeI32((*(this->block_id)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("cmd_id", ::apache::thrift::protocol::T_I32, 3);
-  xfer += oprot->writeI32((*(this->cmd_id)));
+  xfer += oprot->writeFieldBegin("cmd_ids", ::apache::thrift::protocol::T_LIST, 3);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_I32, static_cast<uint32_t>((*(this->cmd_ids)).size()));
+    std::vector<int32_t> ::const_iterator _iter24;
+    for (_iter24 = (*(this->cmd_ids)).begin(); _iter24 != (*(this->cmd_ids)).end(); ++_iter24)
+    {
+      xfer += oprot->writeI32((*_iter24));
+    }
+    xfer += oprot->writeListEnd();
+  }
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("arguments", ::apache::thrift::protocol::T_LIST, 4);
   {
-    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->arguments)).size()));
-    std::vector<std::string> ::const_iterator _iter12;
-    for (_iter12 = (*(this->arguments)).begin(); _iter12 != (*(this->arguments)).end(); ++_iter12)
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_LIST, static_cast<uint32_t>((*(this->arguments)).size()));
+    std::vector<std::vector<std::string> > ::const_iterator _iter25;
+    for (_iter25 = (*(this->arguments)).begin(); _iter25 != (*(this->arguments)).end(); ++_iter25)
     {
-      xfer += oprot->writeString((*_iter12));
+      {
+        xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*_iter25).size()));
+        std::vector<std::string> ::const_iterator _iter26;
+        for (_iter26 = (*_iter25).begin(); _iter26 != (*_iter25).end(); ++_iter26)
+        {
+          xfer += oprot->writeBinary((*_iter26));
+        }
+        xfer += oprot->writeListEnd();
+      }
     }
     xfer += oprot->writeListEnd();
   }
@@ -597,13 +653,13 @@ void block_request_serviceClientT<Protocol_>::recv_register_client_id()
 }
 
 template <class Protocol_>
-void block_request_serviceClientT<Protocol_>::command_request(const sequence_id& seq, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments)
+void block_request_serviceClientT<Protocol_>::command_request(const sequence_id& seq, const int32_t block_id, const std::vector<int32_t> & cmd_ids, const std::vector<std::vector<std::string> > & arguments)
 {
-  send_command_request(seq, block_id, cmd_id, arguments);
+  send_command_request(seq, block_id, cmd_ids, arguments);
 }
 
 template <class Protocol_>
-void block_request_serviceClientT<Protocol_>::send_command_request(const sequence_id& seq, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments)
+void block_request_serviceClientT<Protocol_>::send_command_request(const sequence_id& seq, const int32_t block_id, const std::vector<int32_t> & cmd_ids, const std::vector<std::vector<std::string> > & arguments)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("command_request", ::apache::thrift::protocol::T_ONEWAY, cseqid);
@@ -611,7 +667,7 @@ void block_request_serviceClientT<Protocol_>::send_command_request(const sequenc
   block_request_service_command_request_pargs args;
   args.seq = &seq;
   args.block_id = &block_id;
-  args.cmd_id = &cmd_id;
+  args.cmd_ids = &cmd_ids;
   args.arguments = &arguments;
   args.write(this->oprot_);
 
@@ -903,7 +959,7 @@ void block_request_serviceProcessorT<Protocol_>::process_command_request(int32_t
   }
 
   try {
-    iface_->command_request(args.seq, args.block_id, args.cmd_id, args.arguments);
+    iface_->command_request(args.seq, args.block_id, args.cmd_ids, args.arguments);
   } catch (const std::exception&) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "block_request_service.command_request");
@@ -941,7 +997,7 @@ void block_request_serviceProcessorT<Protocol_>::process_command_request(int32_t
   }
 
   try {
-    iface_->command_request(args.seq, args.block_id, args.cmd_id, args.arguments);
+    iface_->command_request(args.seq, args.block_id, args.cmd_ids, args.arguments);
   } catch (const std::exception&) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "block_request_service.command_request");
@@ -1133,13 +1189,13 @@ void block_request_serviceConcurrentClientT<Protocol_>::recv_register_client_id(
 }
 
 template <class Protocol_>
-void block_request_serviceConcurrentClientT<Protocol_>::command_request(const sequence_id& seq, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments)
+void block_request_serviceConcurrentClientT<Protocol_>::command_request(const sequence_id& seq, const int32_t block_id, const std::vector<int32_t> & cmd_ids, const std::vector<std::vector<std::string> > & arguments)
 {
-  send_command_request(seq, block_id, cmd_id, arguments);
+  send_command_request(seq, block_id, cmd_ids, arguments);
 }
 
 template <class Protocol_>
-void block_request_serviceConcurrentClientT<Protocol_>::send_command_request(const sequence_id& seq, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments)
+void block_request_serviceConcurrentClientT<Protocol_>::send_command_request(const sequence_id& seq, const int32_t block_id, const std::vector<int32_t> & cmd_ids, const std::vector<std::vector<std::string> > & arguments)
 {
   int32_t cseqid = 0;
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -1148,7 +1204,7 @@ void block_request_serviceConcurrentClientT<Protocol_>::send_command_request(con
   block_request_service_command_request_pargs args;
   args.seq = &seq;
   args.block_id = &block_id;
-  args.cmd_id = &cmd_id;
+  args.cmd_ids = &cmd_ids;
   args.arguments = &arguments;
   args.write(this->oprot_);
 

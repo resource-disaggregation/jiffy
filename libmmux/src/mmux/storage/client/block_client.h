@@ -21,7 +21,7 @@ class block_client {
       iprot_ = prot_.get();
     }
 
-    int64_t recv_response(std::vector<std::string> &out) {
+    int64_t recv_response(std::vector<std::vector<std::string>> &out) {
       using namespace ::apache::thrift::protocol;
       using namespace ::apache::thrift;
       int32_t rseqid = 0;
@@ -63,7 +63,9 @@ class block_client {
   bool is_connected();
 
   command_response_reader get_command_response_reader(int64_t client_id);
-  void command_request(const sequence_id &seq, int32_t cmd_id, const std::vector<std::string> &args);
+  void command_request(const sequence_id &seq,
+                       std::vector<int32_t> cmd_ids,
+                       const std::vector<std::vector<std::string>> &args);
 
  private:
   std::shared_ptr<apache::thrift::transport::TTransport> transport_{};

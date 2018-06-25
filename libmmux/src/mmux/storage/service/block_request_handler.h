@@ -20,8 +20,8 @@ class block_request_handler : public block_request_serviceIf {
   void register_client_id(int32_t block_id, int64_t client_id) override;
   void command_request(const sequence_id &seq,
                        int32_t block_id,
-                       int32_t cmd_id,
-                       const std::vector<std::string> &arguments) override;
+                       const std::vector<int32_t>& cmd_ids,
+                       const std::vector<std::vector<std::string>> &arguments) override;
 
   int32_t registered_block_id() const;
   int64_t registered_client_id() const;

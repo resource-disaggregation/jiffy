@@ -15,12 +15,12 @@ class chain_request_handler : public chain_request_serviceIf {
 
   void chain_request(const sequence_id &seq,
                      int32_t block_id,
-                     int32_t cmd_id,
-                     const std::vector<std::string> &arguments) override;
-  void run_command(std::vector<std::string> &_return,
+                     const std::vector<int32_t> &cmd_ids,
+                     const std::vector<std::vector<std::string>> &arguments) override;
+  void run_command(std::vector<std::vector<std::string>> &_return,
                    const int32_t block_id,
-                   const int32_t cmd_id,
-                   const std::vector<std::string> &arguments) override;
+                   const std::vector<int32_t> &cmd_ids,
+                   const std::vector<std::vector<std::string>> &arguments) override;
  private:
   std::vector<std::shared_ptr<chain_module>> &blocks_;
   std::shared_ptr<::apache::thrift::protocol::TProtocol> prot_;

@@ -24,9 +24,9 @@ void block_request_handler::register_client_id(const int32_t block_id, const int
 
 void block_request_handler::command_request(const sequence_id &seq,
                                             const int32_t block_id,
-                                            const int32_t cmd_id,
-                                            const std::vector<std::string> &arguments) {
-  blocks_.at(static_cast<std::size_t>(block_id))->request(seq, cmd_id, arguments);
+                                            const std::vector<int32_t>& cmd_ids,
+                                            const std::vector<std::vector<std::string>> &arguments) {
+  blocks_.at(static_cast<std::size_t>(block_id))->request(seq, cmd_ids, arguments);
 }
 
 int32_t block_request_handler::registered_block_id() const {

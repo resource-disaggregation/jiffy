@@ -21,8 +21,12 @@ class chain_request_client {
   std::string endpoint();
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol() const;
 
-  void request(const sequence_id &seq, int32_t cmd_id, const std::vector<std::string> &arguments);
-  void run_command(std::vector<std::string>& _return, int32_t cmd_id, const std::vector<std::string>& arguments);
+  void request(const sequence_id &seq,
+               const std::vector<int32_t> &cmd_ids,
+               const std::vector<std::vector<std::string>> &args);
+  void run_command(std::vector<std::vector<std::string>> &_returns,
+                   const std::vector<int32_t> &cmd_ids,
+                   const std::vector<std::vector<std::string>> &args);
 
  private:
   std::string host_;

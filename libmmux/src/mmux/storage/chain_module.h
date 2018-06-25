@@ -30,8 +30,8 @@ enum chain_role {
 
 struct chain_op {
   sequence_id seq;
-  int32_t op_id;
-  std::vector<std::string> args;
+  std::vector<int32_t> op_ids;
+  std::vector<std::vector<std::string>> args;
 };
 
 class next_block_cxn {
@@ -60,13 +60,15 @@ class next_block_cxn {
   }
 
   void request(const sequence_id &seq,
-               int32_t op_id,
-               const std::vector<std::string> &args) {
+               const std::vector<int32_t> &oids,
+               const std::vector<std::vector<std::string>> &args) {
     std::shared_lock<std::shared_mutex> lock(mtx_);
-    client_.request(seq, op_id, args);
+    client_.request(seq, oids, args);
   }
 
-  void run_command(std::vector<std::string> &result, int32_t cmd_id, const std::vector<std::string> &args) {
+  void run_command(std::vector<std::vector<std::string>> &result,
+                   const std::vector<int32_t> &cmd_id,
+                   const std::vector<std::vector<std::string>> &args) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     client_.run_command(result, cmd_id, args);
   }
@@ -232,11 +234,15 @@ class chain_module : public block {
 
   void reset_next_and_listen(const std::string &next_block);
 
-  void run_command_on_next(std::vector<std::string> &result, int32_t oid, const std::vector<std::string> &args) {
+  void run_command_on_next(std::vector<std::vector<std::string>> &result,
+                           const std::vector<int32_t> &oid,
+                           const std::vector<std::vector<std::string>> &args) {
     next_->run_command(result, oid, args);
   }
 
-  void add_pending(const sequence_id &seq, int op_id, const std::vector<std::string> &args) {
+  void add_pending(const sequence_id &seq,
+                   const std::vector<int32_t> &op_id,
+                   const std::vector<std::vector<std::string>> &args) {
     pending_.insert(seq.server_seq_no, chain_op{seq, op_id, args});
   }
 
@@ -248,8 +254,10 @@ class chain_module : public block {
 
   virtual void forward_all() = 0;
 
-  void request(sequence_id seq, int32_t oid, const std::vector<std::string> &args);
-  void chain_request(const sequence_id &seq, int32_t oid, const std::vector<std::string> &args);
+  void request(sequence_id seq, const std::vector<int32_t> &oids, const std::vector<std::vector<std::string>> &args);
+  void chain_request(const sequence_id &seq,
+                     const std::vector<int32_t> &oids,
+                     const std::vector<std::vector<std::string>> &args);
   void ack(const sequence_id &seq);
 
  protected:

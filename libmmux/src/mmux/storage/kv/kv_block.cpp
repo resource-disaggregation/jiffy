@@ -436,12 +436,14 @@ void kv_block::flush(const std::string &path) {
 
 void kv_block::forward_all() {
   locked_hash_table_type ltable = block_.lock_table();
-  int64_t i = 0;
+  std::vector<std::string> args;
+  args.reserve(ltable.size() * 2);
   for (const auto &entry: ltable) {
-    std::vector<std::string> result;
-    run_command_on_next(result, kv_op_id::put, {entry.first, entry.second});
-    ++i;
+    args.push_back(entry.first);
+    args.push_back(entry.second);
   }
+  std::vector<std::vector<std::string>> result;
+  run_command_on_next(result, {kv_op_id::put}, {args});
   ltable.unlock();
 }
 
@@ -460,12 +462,12 @@ void kv_block::export_slots() {
   while (has_more) {
     // Lock source and destination blocks
     if (role() == chain_role::singleton) {
-      dst.send_command(kv_op_id::lock, {});
+      dst.send_lock();
       lock();
       dst.recv_response();
     } else {
-      src.send_command(kv_op_id::lock, {});
-      dst.send_command(kv_op_id::lock, {});
+      src.send_lock();
+      dst.send_lock();
       src.recv_response();
       dst.recv_response();
     }
@@ -476,12 +478,12 @@ void kv_block::export_slots() {
     if (export_data.size() == 0) {  // No more data to export
       // Unlock source and destination blocks
       if (role() == chain_role::singleton) {
-        dst.send_command(kv_op_id::unlock, {});
+        dst.send_unlock();
         unlock();
         dst.recv_response();
       } else {
-        src.send_command(kv_op_id::unlock, {});
-        dst.send_command(kv_op_id::unlock, {});
+        src.send_unlock();
+        dst.send_unlock();
         src.recv_response();
         dst.recv_response();
       }
@@ -497,7 +499,7 @@ void kv_block::export_slots() {
     export_data.emplace_back("!redirected");
 
     // Write data to dst block
-    dst.run_command(kv_op_id::locked_put, export_data);
+    dst.lput(export_data);
     LOG(log_level::info) << "Sent " << nexport_keys << " keys";
 
     // Remove data from src block
@@ -511,17 +513,17 @@ void kv_block::export_slots() {
       export_data.pop_back();
     }
     assert(remove_keys.size() == nexport_keys);
-    src.run_command(kv_op_id::locked_remove, remove_keys);
+    src.lremove(remove_keys);
     LOG(log_level::info) << "Removed " << remove_keys.size() << " exported keys";
 
     // Unlock source and destination blocks
     if (role() == chain_role::singleton) {
-      dst.send_command(kv_op_id::unlock, {});
+      dst.send_unlock();
       unlock();
       dst.recv_response();
     } else {
-      src.send_command(kv_op_id::unlock, {});
-      dst.send_command(kv_op_id::unlock, {});
+      src.send_unlock();
+      dst.send_unlock();
       src.recv_response();
       dst.recv_response();
     }
