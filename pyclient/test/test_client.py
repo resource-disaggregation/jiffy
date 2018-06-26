@@ -18,7 +18,7 @@ from unittest import TestCase
 
 from thrift.transport import TTransport, TSocket
 
-from mmux import MMuxClient, RemoveMode, StorageMode
+from mmux import MMuxClient, StorageMode
 from mmux.benchmark.kv_async_benchmark import run_async_kv_benchmark
 from mmux.benchmark.kv_sync_benchmark import run_sync_kv_throughput_benchmark, run_sync_kv_latency_benchmark
 from mmux.subscription.subscriber import Notification
@@ -170,14 +170,16 @@ class TestClient(TestCase):
 
     def pipelined_kv_ops(self, kv):
         # Test get/put
-        puts = kv.pipeline_put()
-        gets = kv.pipeline_get()
-        removes = kv.pipeline_remove()
-        updates = kv.pipeline_update()
+        puts = kv.pipeline()
+        gets = kv.pipeline()
+        removes = kv.pipeline()
+        updates = kv.pipeline()
 
         for i in range(0, 1000):
             puts.put(str(i), str(i))
-        self.assertTrue(puts.execute() == [b'!ok'] * 1000)
+        out = puts.execute()
+        print("Output: {}".format(out))
+        self.assertTrue(out == [b'!ok'] * 1000)
 
         for i in range(0, 1000):
             gets.get(str(i))
