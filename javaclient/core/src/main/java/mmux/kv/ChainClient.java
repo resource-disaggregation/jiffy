@@ -40,7 +40,8 @@ public class ChainClient implements Closeable {
     return chain;
   }
 
-  private void sendCommandRequest(BlockClient client, int cmdId, List<ByteBuffer> args)
+  private void sendCommandRequest(BlockClient client, List<Integer> cmdId,
+      List<List<ByteBuffer>> args)
       throws TException {
     if (inFlight) {
       throw new IllegalStateException("Cannot have more than one request in-flight");
@@ -49,7 +50,7 @@ public class ChainClient implements Closeable {
     inFlight = true;
   }
 
-  private List<ByteBuffer> receiveCommandResponse() throws TException {
+  private List<List<ByteBuffer>> receiveCommandResponse() throws TException {
     CommandResponse response = responseReader.recieveResponse();
 
     if (response.clientSeqNo != seq.getClientSeqNo()) {
@@ -61,15 +62,8 @@ public class ChainClient implements Closeable {
     return response.result;
   }
 
-  public List<ByteBuffer> runMutatorCommand(int cmdId, List<ByteBuffer> args) throws TException {
-    return runCommand(head, cmdId, args);
-  }
-
-  public List<ByteBuffer> runAccessorCommand(int cmdId, List<ByteBuffer> args) throws TException {
-    return runCommand(tail, cmdId, args);
-  }
-
-  List<ByteBuffer> runCommand(BlockClient client, int cmdId, List<ByteBuffer> args)
+  List<List<ByteBuffer>> runCommand(BlockClient client, List<Integer> cmdId,
+      List<List<ByteBuffer>> args)
       throws TException {
     sendCommandRequest(client, cmdId, args);
     return receiveCommandResponse();

@@ -12,13 +12,13 @@ public class block_response_service {
 
   public interface Iface {
 
-    public void response(sequence_id seq, java.util.List<java.nio.ByteBuffer> result) throws org.apache.thrift.TException;
+    public void response(sequence_id seq, java.util.List<java.util.List<java.nio.ByteBuffer>> result) throws org.apache.thrift.TException;
 
   }
 
   public interface AsyncIface {
 
-    public void response(sequence_id seq, java.util.List<java.nio.ByteBuffer> result, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException;
+    public void response(sequence_id seq, java.util.List<java.util.List<java.nio.ByteBuffer>> result, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -42,12 +42,12 @@ public class block_response_service {
       super(iprot, oprot);
     }
 
-    public void response(sequence_id seq, java.util.List<java.nio.ByteBuffer> result) throws org.apache.thrift.TException
+    public void response(sequence_id seq, java.util.List<java.util.List<java.nio.ByteBuffer>> result) throws org.apache.thrift.TException
     {
       sendResponse(seq, result);
     }
 
-    public void sendResponse(sequence_id seq, java.util.List<java.nio.ByteBuffer> result) throws org.apache.thrift.TException
+    public void sendResponse(sequence_id seq, java.util.List<java.util.List<java.nio.ByteBuffer>> result) throws org.apache.thrift.TException
     {
       response_args args = new response_args();
       args.setSeq(seq);
@@ -73,7 +73,7 @@ public class block_response_service {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void response(sequence_id seq, java.util.List<java.nio.ByteBuffer> result, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
+    public void response(sequence_id seq, java.util.List<java.util.List<java.nio.ByteBuffer>> result, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
       checkReady();
       response_call method_call = new response_call(seq, result, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
@@ -82,8 +82,8 @@ public class block_response_service {
 
     public static class response_call extends org.apache.thrift.async.TAsyncMethodCall<Void> {
       private sequence_id seq;
-      private java.util.List<java.nio.ByteBuffer> result;
-      public response_call(sequence_id seq, java.util.List<java.nio.ByteBuffer> result, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private java.util.List<java.util.List<java.nio.ByteBuffer>> result;
+      public response_call(sequence_id seq, java.util.List<java.util.List<java.nio.ByteBuffer>> result, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, true);
         this.seq = seq;
         this.result = result;
@@ -212,7 +212,7 @@ public class block_response_service {
     private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new response_argsTupleSchemeFactory();
 
     public sequence_id seq; // required
-    public java.util.List<java.nio.ByteBuffer> result; // required
+    public java.util.List<java.util.List<java.nio.ByteBuffer>> result; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -283,7 +283,8 @@ public class block_response_service {
           new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, sequence_id.class)));
       tmpMap.put(_Fields.RESULT, new org.apache.thrift.meta_data.FieldMetaData("result", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
-              new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING              , true))));
+              new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
+                  new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING                  , true)))));
       metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(response_args.class, metaDataMap);
     }
@@ -293,7 +294,7 @@ public class block_response_service {
 
     public response_args(
       sequence_id seq,
-      java.util.List<java.nio.ByteBuffer> result)
+      java.util.List<java.util.List<java.nio.ByteBuffer>> result)
     {
       this();
       this.seq = seq;
@@ -308,7 +309,11 @@ public class block_response_service {
         this.seq = new sequence_id(other.seq);
       }
       if (other.isSetResult()) {
-        java.util.List<java.nio.ByteBuffer> __this__result = new java.util.ArrayList<java.nio.ByteBuffer>(other.result);
+        java.util.List<java.util.List<java.nio.ByteBuffer>> __this__result = new java.util.ArrayList<java.util.List<java.nio.ByteBuffer>>(other.result.size());
+        for (java.util.List<java.nio.ByteBuffer> other_element : other.result) {
+          java.util.List<java.nio.ByteBuffer> __this__result_copy = new java.util.ArrayList<java.nio.ByteBuffer>(other_element);
+          __this__result.add(__this__result_copy);
+        }
         this.result = __this__result;
       }
     }
@@ -351,22 +356,22 @@ public class block_response_service {
       return (this.result == null) ? 0 : this.result.size();
     }
 
-    public java.util.Iterator<java.nio.ByteBuffer> getResultIterator() {
+    public java.util.Iterator<java.util.List<java.nio.ByteBuffer>> getResultIterator() {
       return (this.result == null) ? null : this.result.iterator();
     }
 
-    public void addToResult(java.nio.ByteBuffer elem) {
+    public void addToResult(java.util.List<java.nio.ByteBuffer> elem) {
       if (this.result == null) {
-        this.result = new java.util.ArrayList<java.nio.ByteBuffer>();
+        this.result = new java.util.ArrayList<java.util.List<java.nio.ByteBuffer>>();
       }
       this.result.add(elem);
     }
 
-    public java.util.List<java.nio.ByteBuffer> getResult() {
+    public java.util.List<java.util.List<java.nio.ByteBuffer>> getResult() {
       return this.result;
     }
 
-    public response_args setResult(java.util.List<java.nio.ByteBuffer> result) {
+    public response_args setResult(java.util.List<java.util.List<java.nio.ByteBuffer>> result) {
       this.result = result;
       return this;
     }
@@ -400,7 +405,7 @@ public class block_response_service {
         if (value == null) {
           unsetResult();
         } else {
-          setResult((java.util.List<java.nio.ByteBuffer>)value);
+          setResult((java.util.List<java.util.List<java.nio.ByteBuffer>>)value);
         }
         break;
 
@@ -545,7 +550,7 @@ public class block_response_service {
       if (this.result == null) {
         sb.append("null");
       } else {
-        org.apache.thrift.TBaseHelper.toString(this.result, sb);
+        sb.append(this.result);
       }
       first = false;
       sb.append(")");
@@ -606,13 +611,23 @@ public class block_response_service {
             case 2: // RESULT
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list8 = iprot.readListBegin();
-                  struct.result = new java.util.ArrayList<java.nio.ByteBuffer>(_list8.size);
-                  java.nio.ByteBuffer _elem9;
-                  for (int _i10 = 0; _i10 < _list8.size; ++_i10)
+                  org.apache.thrift.protocol.TList _list24 = iprot.readListBegin();
+                  struct.result = new java.util.ArrayList<java.util.List<java.nio.ByteBuffer>>(_list24.size);
+                  java.util.List<java.nio.ByteBuffer> _elem25;
+                  for (int _i26 = 0; _i26 < _list24.size; ++_i26)
                   {
-                    _elem9 = iprot.readBinary();
-                    struct.result.add(_elem9);
+                    {
+                      org.apache.thrift.protocol.TList _list27 = iprot.readListBegin();
+                      _elem25 = new java.util.ArrayList<java.nio.ByteBuffer>(_list27.size);
+                      java.nio.ByteBuffer _elem28;
+                      for (int _i29 = 0; _i29 < _list27.size; ++_i29)
+                      {
+                        _elem28 = iprot.readBinary();
+                        _elem25.add(_elem28);
+                      }
+                      iprot.readListEnd();
+                    }
+                    struct.result.add(_elem25);
                   }
                   iprot.readListEnd();
                 }
@@ -644,10 +659,17 @@ public class block_response_service {
         if (struct.result != null) {
           oprot.writeFieldBegin(RESULT_FIELD_DESC);
           {
-            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.result.size()));
-            for (java.nio.ByteBuffer _iter11 : struct.result)
+            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.LIST, struct.result.size()));
+            for (java.util.List<java.nio.ByteBuffer> _iter30 : struct.result)
             {
-              oprot.writeBinary(_iter11);
+              {
+                oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, _iter30.size()));
+                for (java.nio.ByteBuffer _iter31 : _iter30)
+                {
+                  oprot.writeBinary(_iter31);
+                }
+                oprot.writeListEnd();
+              }
             }
             oprot.writeListEnd();
           }
@@ -684,9 +706,15 @@ public class block_response_service {
         if (struct.isSetResult()) {
           {
             oprot.writeI32(struct.result.size());
-            for (java.nio.ByteBuffer _iter12 : struct.result)
+            for (java.util.List<java.nio.ByteBuffer> _iter32 : struct.result)
             {
-              oprot.writeBinary(_iter12);
+              {
+                oprot.writeI32(_iter32.size());
+                for (java.nio.ByteBuffer _iter33 : _iter32)
+                {
+                  oprot.writeBinary(_iter33);
+                }
+              }
             }
           }
         }
@@ -703,13 +731,22 @@ public class block_response_service {
         }
         if (incoming.get(1)) {
           {
-            org.apache.thrift.protocol.TList _list13 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
-            struct.result = new java.util.ArrayList<java.nio.ByteBuffer>(_list13.size);
-            java.nio.ByteBuffer _elem14;
-            for (int _i15 = 0; _i15 < _list13.size; ++_i15)
+            org.apache.thrift.protocol.TList _list34 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.LIST, iprot.readI32());
+            struct.result = new java.util.ArrayList<java.util.List<java.nio.ByteBuffer>>(_list34.size);
+            java.util.List<java.nio.ByteBuffer> _elem35;
+            for (int _i36 = 0; _i36 < _list34.size; ++_i36)
             {
-              _elem14 = iprot.readBinary();
-              struct.result.add(_elem14);
+              {
+                org.apache.thrift.protocol.TList _list37 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+                _elem35 = new java.util.ArrayList<java.nio.ByteBuffer>(_list37.size);
+                java.nio.ByteBuffer _elem38;
+                for (int _i39 = 0; _i39 < _list37.size; ++_i39)
+                {
+                  _elem38 = iprot.readBinary();
+                  _elem35.add(_elem38);
+                }
+              }
+              struct.result.add(_elem35);
             }
           }
           struct.setResultIsSet(true);

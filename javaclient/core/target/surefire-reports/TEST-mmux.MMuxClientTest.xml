@@ -18,7 +18,7 @@
     <property name="user.country" value="US"/>
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home/jre/lib"/>
-    <property name="sun.java.command" value="/Users/anuragk/Work/Projects/MemoryMUX/memorymux/javaclient/core/target/surefire/surefirebooter550753696167323952.jar /Users/anuragk/Work/Projects/MemoryMUX/memorymux/javaclient/core/target/surefire 2018-06-25T12-34-08_273-jvmRun1 surefire5734232900606708348tmp surefire_0707248477469048095tmp"/>
+    <property name="sun.java.command" value="/Users/anuragk/Work/Projects/MemoryMUX/memorymux/javaclient/core/target/surefire/surefirebooter5333480731427939543.jar /Users/anuragk/Work/Projects/MemoryMUX/memorymux/javaclient/core/target/surefire 2018-06-25T16-59-22_740-jvmRun1 surefire1013527846604434421tmp surefire_04421949281280638257tmp"/>
     <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="surefire.test.class.path" value="/Users/anuragk/Work/Projects/MemoryMUX/memorymux/javaclient/core/target/test-classes:/Users/anuragk/Work/Projects/MemoryMUX/memorymux/javaclient/core/target/classes:/Users/anuragk/.m2/repository/org/apache/thrift/libthrift/0.11.0/libthrift-0.11.0.jar:/Users/anuragk/.m2/repository/org/slf4j/slf4j-api/1.7.12/slf4j-api-1.7.12.jar:/Users/anuragk/.m2/repository/org/apache/httpcomponents/httpclient/4.4.1/httpclient-4.4.1.jar:/Users/anuragk/.m2/repository/commons-logging/commons-logging/1.2/commons-logging-1.2.jar:/Users/anuragk/.m2/repository/commons-codec/commons-codec/1.9/commons-codec-1.9.jar:/Users/anuragk/.m2/repository/org/apache/httpcomponents/httpcore/4.4.1/httpcore-4.4.1.jar:/Users/anuragk/.m2/repository/org/ini4j/ini4j/0.5.4/ini4j-0.5.4.jar:/Users/anuragk/.m2/repository/junit/junit/4.12/junit-4.12.jar:/Users/anuragk/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/Users/anuragk/.m2/repository/org/slf4j/slf4j-log4j12/1.7.25/slf4j-log4j12-1.7.25.jar:/Users/anuragk/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar:"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -32,7 +32,7 @@
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="java.awt.graphicsenv" value="sun.awt.CGraphicsEnvironment"/>
-    <property name="surefire.real.class.path" value="/Users/anuragk/Work/Projects/MemoryMUX/memorymux/javaclient/core/target/surefire/surefirebooter550753696167323952.jar"/>
+    <property name="surefire.real.class.path" value="/Users/anuragk/Work/Projects/MemoryMUX/memorymux/javaclient/core/target/surefire/surefirebooter5333480731427939543.jar"/>
     <property name="sun.boot.class.path" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home/jre/lib/sunrsasign.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home/jre/classes"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
@@ -63,11 +63,11 @@
     <property name="java.class.version" value="52.0"/>
     <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
   </properties>
-  <testcase name="testAutoScale" classname="mmux.MMuxClientTest" time="1.2"/>
-  <testcase name="testFlushRemove" classname="mmux.MMuxClientTest" time="1.237"/>
-  <testcase name="testOpen" classname="mmux.MMuxClientTest" time="1.244"/>
-  <testcase name="testNotifications" classname="mmux.MMuxClientTest" time="1.245"/>
-  <testcase name="testCreate" classname="mmux.MMuxClientTest" time="1.242"/>
-  <testcase name="testChainReplication" classname="mmux.MMuxClientTest" time="1.482"/>
-  <testcase name="testLeaseWorker" classname="mmux.MMuxClientTest" time="3.244"/>
+  <testcase name="testAutoScale" classname="mmux.MMuxClientTest" time="1.224"/>
+  <testcase name="testFlushRemove" classname="mmux.MMuxClientTest" time="1.236"/>
+  <testcase name="testOpen" classname="mmux.MMuxClientTest" time="1.232"/>
+  <testcase name="testNotifications" classname="mmux.MMuxClientTest" time="1.237"/>
+  <testcase name="testCreate" classname="mmux.MMuxClientTest" time="1.239"/>
+  <testcase name="testChainReplication" classname="mmux.MMuxClientTest" time="1.48"/>
+  <testcase name="testLeaseWorker" classname="mmux.MMuxClientTest" time="3.242"/>
 </testsuite>

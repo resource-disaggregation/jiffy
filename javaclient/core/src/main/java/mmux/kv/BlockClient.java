@@ -15,9 +15,9 @@ public class BlockClient {
 
   class CommandResponse {
     long clientSeqNo;
-    public List<ByteBuffer> result;
+    public List<List<ByteBuffer>> result;
 
-    CommandResponse(long clientSeqNo, List<ByteBuffer> result) {
+    CommandResponse(long clientSeqNo, List<List<ByteBuffer>> result) {
       this.clientSeqNo = clientSeqNo;
       this.result = result;
     }
@@ -55,7 +55,7 @@ public class BlockClient {
   private TProtocol protocol;
   private block_request_service.Client client;
 
-  public BlockClient(BlockClientCache cache, String host, int port, int blockId)
+  BlockClient(BlockClientCache cache, String host, int port, int blockId)
       throws TTransportException {
     BlockClientCache.Value value = cache.get(host, port);
     this.transport = value.getTransport();
@@ -77,7 +77,7 @@ public class BlockClient {
     return client.getClientId();
   }
 
-  public void sendCommandRequest(sequence_id seq, int cmdId, List<ByteBuffer> args)
+  public void sendCommandRequest(sequence_id seq, List<Integer> cmdId, List<List<ByteBuffer>> args)
       throws TException {
     client.commandRequest(seq, id, cmdId, args);
   }
