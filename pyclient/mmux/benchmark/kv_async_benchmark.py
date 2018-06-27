@@ -9,11 +9,14 @@ from mmux import MMuxClient
 
 def make_workload(path, off, count, client):
     logging.info("Reading %d ops of workload from %s at offset %d" % (count, path, off))
-    pipelines = client.pipeline()
+    pipelines = {"get": client.pipeline_get(),
+                 "put": client.pipeline_put(),
+                 "update": client.pipeline_update(),
+                 "remove": client.pipeline_remove()}
 
     with open(path) as f:
         ops = [x.strip().split() for x in f.readlines()[int(off):int(off + count)]]
-        workload = [[getattr(pipelines, x[0]), x[1:]] for x in ops]
+        workload = [[getattr(pipelines[x[0]], x[0]), x[1:]] for x in ops]
     logging.info("Read %d ops of workload from %s at offset %d" % (len(workload), path, off))
 
     return pipelines, workload
@@ -35,7 +38,8 @@ def load_and_run_workload(barrier, workload_path, workload_off, d_host, d_port, 
         workload[ops][0](*workload[ops][1])
         ops += 1
         if ops % max_async == 0:
-            pipelines.execute()
+            for k in pipelines:
+                pipelines[k].execute()
 
     end = time.time()
 

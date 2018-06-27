@@ -16,7 +16,7 @@ public class block_request_service {
 
     public void registerClientId(int block_id, long client_id) throws org.apache.thrift.TException;
 
-    public void commandRequest(sequence_id seq, int block_id, java.util.List<java.lang.Integer> cmd_ids, java.util.List<java.util.List<java.nio.ByteBuffer>> arguments) throws org.apache.thrift.TException;
+    public void commandRequest(sequence_id seq, int block_id, int cmd_id, java.util.List<java.nio.ByteBuffer> arguments) throws org.apache.thrift.TException;
 
   }
 
@@ -26,7 +26,7 @@ public class block_request_service {
 
     public void registerClientId(int block_id, long client_id, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException;
 
-    public void commandRequest(sequence_id seq, int block_id, java.util.List<java.lang.Integer> cmd_ids, java.util.List<java.util.List<java.nio.ByteBuffer>> arguments, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException;
+    public void commandRequest(sequence_id seq, int block_id, int cmd_id, java.util.List<java.nio.ByteBuffer> arguments, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -93,17 +93,17 @@ public class block_request_service {
       return;
     }
 
-    public void commandRequest(sequence_id seq, int block_id, java.util.List<java.lang.Integer> cmd_ids, java.util.List<java.util.List<java.nio.ByteBuffer>> arguments) throws org.apache.thrift.TException
+    public void commandRequest(sequence_id seq, int block_id, int cmd_id, java.util.List<java.nio.ByteBuffer> arguments) throws org.apache.thrift.TException
     {
-      sendCommandRequest(seq, block_id, cmd_ids, arguments);
+      sendCommandRequest(seq, block_id, cmd_id, arguments);
     }
 
-    public void sendCommandRequest(sequence_id seq, int block_id, java.util.List<java.lang.Integer> cmd_ids, java.util.List<java.util.List<java.nio.ByteBuffer>> arguments) throws org.apache.thrift.TException
+    public void sendCommandRequest(sequence_id seq, int block_id, int cmd_id, java.util.List<java.nio.ByteBuffer> arguments) throws org.apache.thrift.TException
     {
       command_request_args args = new command_request_args();
       args.setSeq(seq);
       args.setBlockId(block_id);
-      args.setCmdIds(cmd_ids);
+      args.setCmdId(cmd_id);
       args.setArguments(arguments);
       sendBaseOneway("command_request", args);
     }
@@ -190,9 +190,9 @@ public class block_request_service {
       }
     }
 
-    public void commandRequest(sequence_id seq, int block_id, java.util.List<java.lang.Integer> cmd_ids, java.util.List<java.util.List<java.nio.ByteBuffer>> arguments, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
+    public void commandRequest(sequence_id seq, int block_id, int cmd_id, java.util.List<java.nio.ByteBuffer> arguments, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      command_request_call method_call = new command_request_call(seq, block_id, cmd_ids, arguments, resultHandler, this, ___protocolFactory, ___transport);
+      command_request_call method_call = new command_request_call(seq, block_id, cmd_id, arguments, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -200,13 +200,13 @@ public class block_request_service {
     public static class command_request_call extends org.apache.thrift.async.TAsyncMethodCall<Void> {
       private sequence_id seq;
       private int block_id;
-      private java.util.List<java.lang.Integer> cmd_ids;
-      private java.util.List<java.util.List<java.nio.ByteBuffer>> arguments;
-      public command_request_call(sequence_id seq, int block_id, java.util.List<java.lang.Integer> cmd_ids, java.util.List<java.util.List<java.nio.ByteBuffer>> arguments, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private int cmd_id;
+      private java.util.List<java.nio.ByteBuffer> arguments;
+      public command_request_call(sequence_id seq, int block_id, int cmd_id, java.util.List<java.nio.ByteBuffer> arguments, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, true);
         this.seq = seq;
         this.block_id = block_id;
-        this.cmd_ids = cmd_ids;
+        this.cmd_id = cmd_id;
         this.arguments = arguments;
       }
 
@@ -215,7 +215,7 @@ public class block_request_service {
         command_request_args args = new command_request_args();
         args.setSeq(seq);
         args.setBlockId(block_id);
-        args.setCmdIds(cmd_ids);
+        args.setCmdId(cmd_id);
         args.setArguments(arguments);
         args.write(prot);
         prot.writeMessageEnd();
@@ -320,7 +320,7 @@ public class block_request_service {
       }
 
       public org.apache.thrift.TBase getResult(I iface, command_request_args args) throws org.apache.thrift.TException {
-        iface.commandRequest(args.seq, args.block_id, args.cmd_ids, args.arguments);
+        iface.commandRequest(args.seq, args.block_id, args.cmd_id, args.arguments);
         return null;
       }
     }
@@ -496,7 +496,7 @@ public class block_request_service {
       }
 
       public void start(I iface, command_request_args args, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
-        iface.commandRequest(args.seq, args.block_id, args.cmd_ids, args.arguments,resultHandler);
+        iface.commandRequest(args.seq, args.block_id, args.cmd_id, args.arguments,resultHandler);
       }
     }
 
@@ -1821,7 +1821,7 @@ public class block_request_service {
 
     private static final org.apache.thrift.protocol.TField SEQ_FIELD_DESC = new org.apache.thrift.protocol.TField("seq", org.apache.thrift.protocol.TType.STRUCT, (short)1);
     private static final org.apache.thrift.protocol.TField BLOCK_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("block_id", org.apache.thrift.protocol.TType.I32, (short)2);
-    private static final org.apache.thrift.protocol.TField CMD_IDS_FIELD_DESC = new org.apache.thrift.protocol.TField("cmd_ids", org.apache.thrift.protocol.TType.LIST, (short)3);
+    private static final org.apache.thrift.protocol.TField CMD_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("cmd_id", org.apache.thrift.protocol.TType.I32, (short)3);
     private static final org.apache.thrift.protocol.TField ARGUMENTS_FIELD_DESC = new org.apache.thrift.protocol.TField("arguments", org.apache.thrift.protocol.TType.LIST, (short)4);
 
     private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new command_request_argsStandardSchemeFactory();
@@ -1829,14 +1829,14 @@ public class block_request_service {
 
     public sequence_id seq; // required
     public int block_id; // required
-    public java.util.List<java.lang.Integer> cmd_ids; // required
-    public java.util.List<java.util.List<java.nio.ByteBuffer>> arguments; // required
+    public int cmd_id; // required
+    public java.util.List<java.nio.ByteBuffer> arguments; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
       SEQ((short)1, "seq"),
       BLOCK_ID((short)2, "block_id"),
-      CMD_IDS((short)3, "cmd_ids"),
+      CMD_ID((short)3, "cmd_id"),
       ARGUMENTS((short)4, "arguments");
 
       private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
@@ -1856,8 +1856,8 @@ public class block_request_service {
             return SEQ;
           case 2: // BLOCK_ID
             return BLOCK_ID;
-          case 3: // CMD_IDS
-            return CMD_IDS;
+          case 3: // CMD_ID
+            return CMD_ID;
           case 4: // ARGUMENTS
             return ARGUMENTS;
           default:
@@ -1901,6 +1901,7 @@ public class block_request_service {
 
     // isset id assignments
     private static final int __BLOCK_ID_ISSET_ID = 0;
+    private static final int __CMD_ID_ISSET_ID = 1;
     private byte __isset_bitfield = 0;
     public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
@@ -1909,13 +1910,11 @@ public class block_request_service {
           new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, sequence_id.class)));
       tmpMap.put(_Fields.BLOCK_ID, new org.apache.thrift.meta_data.FieldMetaData("block_id", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
-      tmpMap.put(_Fields.CMD_IDS, new org.apache.thrift.meta_data.FieldMetaData("cmd_ids", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
-              new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32))));
+      tmpMap.put(_Fields.CMD_ID, new org.apache.thrift.meta_data.FieldMetaData("cmd_id", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       tmpMap.put(_Fields.ARGUMENTS, new org.apache.thrift.meta_data.FieldMetaData("arguments", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
-              new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
-                  new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING                  , true)))));
+              new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING              , true))));
       metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(command_request_args.class, metaDataMap);
     }
@@ -1926,14 +1925,15 @@ public class block_request_service {
     public command_request_args(
       sequence_id seq,
       int block_id,
-      java.util.List<java.lang.Integer> cmd_ids,
-      java.util.List<java.util.List<java.nio.ByteBuffer>> arguments)
+      int cmd_id,
+      java.util.List<java.nio.ByteBuffer> arguments)
     {
       this();
       this.seq = seq;
       this.block_id = block_id;
       setBlockIdIsSet(true);
-      this.cmd_ids = cmd_ids;
+      this.cmd_id = cmd_id;
+      setCmdIdIsSet(true);
       this.arguments = arguments;
     }
 
@@ -1946,16 +1946,9 @@ public class block_request_service {
         this.seq = new sequence_id(other.seq);
       }
       this.block_id = other.block_id;
-      if (other.isSetCmdIds()) {
-        java.util.List<java.lang.Integer> __this__cmd_ids = new java.util.ArrayList<java.lang.Integer>(other.cmd_ids);
-        this.cmd_ids = __this__cmd_ids;
-      }
+      this.cmd_id = other.cmd_id;
       if (other.isSetArguments()) {
-        java.util.List<java.util.List<java.nio.ByteBuffer>> __this__arguments = new java.util.ArrayList<java.util.List<java.nio.ByteBuffer>>(other.arguments.size());
-        for (java.util.List<java.nio.ByteBuffer> other_element : other.arguments) {
-          java.util.List<java.nio.ByteBuffer> __this__arguments_copy = new java.util.ArrayList<java.nio.ByteBuffer>(other_element);
-          __this__arguments.add(__this__arguments_copy);
-        }
+        java.util.List<java.nio.ByteBuffer> __this__arguments = new java.util.ArrayList<java.nio.ByteBuffer>(other.arguments);
         this.arguments = __this__arguments;
       }
     }
@@ -1969,7 +1962,8 @@ public class block_request_service {
       this.seq = null;
       setBlockIdIsSet(false);
       this.block_id = 0;
-      this.cmd_ids = null;
+      setCmdIdIsSet(false);
+      this.cmd_id = 0;
       this.arguments = null;
     }
 
@@ -2020,65 +2014,49 @@ public class block_request_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __BLOCK_ID_ISSET_ID, value);
     }
 
-    public int getCmdIdsSize() {
-      return (this.cmd_ids == null) ? 0 : this.cmd_ids.size();
+    public int getCmdId() {
+      return this.cmd_id;
     }
 
-    public java.util.Iterator<java.lang.Integer> getCmdIdsIterator() {
-      return (this.cmd_ids == null) ? null : this.cmd_ids.iterator();
-    }
-
-    public void addToCmdIds(int elem) {
-      if (this.cmd_ids == null) {
-        this.cmd_ids = new java.util.ArrayList<java.lang.Integer>();
-      }
-      this.cmd_ids.add(elem);
-    }
-
-    public java.util.List<java.lang.Integer> getCmdIds() {
-      return this.cmd_ids;
-    }
-
-    public command_request_args setCmdIds(java.util.List<java.lang.Integer> cmd_ids) {
-      this.cmd_ids = cmd_ids;
+    public command_request_args setCmdId(int cmd_id) {
+      this.cmd_id = cmd_id;
+      setCmdIdIsSet(true);
       return this;
     }
 
-    public void unsetCmdIds() {
-      this.cmd_ids = null;
+    public void unsetCmdId() {
+      __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __CMD_ID_ISSET_ID);
     }
 
-    /** Returns true if field cmd_ids is set (has been assigned a value) and false otherwise */
-    public boolean isSetCmdIds() {
-      return this.cmd_ids != null;
+    /** Returns true if field cmd_id is set (has been assigned a value) and false otherwise */
+    public boolean isSetCmdId() {
+      return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __CMD_ID_ISSET_ID);
     }
 
-    public void setCmdIdsIsSet(boolean value) {
-      if (!value) {
-        this.cmd_ids = null;
-      }
+    public void setCmdIdIsSet(boolean value) {
+      __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __CMD_ID_ISSET_ID, value);
     }
 
     public int getArgumentsSize() {
       return (this.arguments == null) ? 0 : this.arguments.size();
     }
 
-    public java.util.Iterator<java.util.List<java.nio.ByteBuffer>> getArgumentsIterator() {
+    public java.util.Iterator<java.nio.ByteBuffer> getArgumentsIterator() {
       return (this.arguments == null) ? null : this.arguments.iterator();
     }
 
-    public void addToArguments(java.util.List<java.nio.ByteBuffer> elem) {
+    public void addToArguments(java.nio.ByteBuffer elem) {
       if (this.arguments == null) {
-        this.arguments = new java.util.ArrayList<java.util.List<java.nio.ByteBuffer>>();
+        this.arguments = new java.util.ArrayList<java.nio.ByteBuffer>();
       }
       this.arguments.add(elem);
     }
 
-    public java.util.List<java.util.List<java.nio.ByteBuffer>> getArguments() {
+    public java.util.List<java.nio.ByteBuffer> getArguments() {
       return this.arguments;
     }
 
-    public command_request_args setArguments(java.util.List<java.util.List<java.nio.ByteBuffer>> arguments) {
+    public command_request_args setArguments(java.util.List<java.nio.ByteBuffer> arguments) {
       this.arguments = arguments;
       return this;
     }
@@ -2116,11 +2094,11 @@ public class block_request_service {
         }
         break;
 
-      case CMD_IDS:
+      case CMD_ID:
         if (value == null) {
-          unsetCmdIds();
+          unsetCmdId();
         } else {
-          setCmdIds((java.util.List<java.lang.Integer>)value);
+          setCmdId((java.lang.Integer)value);
         }
         break;
 
@@ -2128,7 +2106,7 @@ public class block_request_service {
         if (value == null) {
           unsetArguments();
         } else {
-          setArguments((java.util.List<java.util.List<java.nio.ByteBuffer>>)value);
+          setArguments((java.util.List<java.nio.ByteBuffer>)value);
         }
         break;
 
@@ -2143,8 +2121,8 @@ public class block_request_service {
       case BLOCK_ID:
         return getBlockId();
 
-      case CMD_IDS:
-        return getCmdIds();
+      case CMD_ID:
+        return getCmdId();
 
       case ARGUMENTS:
         return getArguments();
@@ -2164,8 +2142,8 @@ public class block_request_service {
         return isSetSeq();
       case BLOCK_ID:
         return isSetBlockId();
-      case CMD_IDS:
-        return isSetCmdIds();
+      case CMD_ID:
+        return isSetCmdId();
       case ARGUMENTS:
         return isSetArguments();
       }
@@ -2205,12 +2183,12 @@ public class block_request_service {
           return false;
       }
 
-      boolean this_present_cmd_ids = true && this.isSetCmdIds();
-      boolean that_present_cmd_ids = true && that.isSetCmdIds();
-      if (this_present_cmd_ids || that_present_cmd_ids) {
-        if (!(this_present_cmd_ids && that_present_cmd_ids))
+      boolean this_present_cmd_id = true;
+      boolean that_present_cmd_id = true;
+      if (this_present_cmd_id || that_present_cmd_id) {
+        if (!(this_present_cmd_id && that_present_cmd_id))
           return false;
-        if (!this.cmd_ids.equals(that.cmd_ids))
+        if (this.cmd_id != that.cmd_id)
           return false;
       }
 
@@ -2236,9 +2214,7 @@ public class block_request_service {
 
       hashCode = hashCode * 8191 + block_id;
 
-      hashCode = hashCode * 8191 + ((isSetCmdIds()) ? 131071 : 524287);
-      if (isSetCmdIds())
-        hashCode = hashCode * 8191 + cmd_ids.hashCode();
+      hashCode = hashCode * 8191 + cmd_id;
 
       hashCode = hashCode * 8191 + ((isSetArguments()) ? 131071 : 524287);
       if (isSetArguments())
@@ -2275,12 +2251,12 @@ public class block_request_service {
           return lastComparison;
         }
       }
-      lastComparison = java.lang.Boolean.valueOf(isSetCmdIds()).compareTo(other.isSetCmdIds());
+      lastComparison = java.lang.Boolean.valueOf(isSetCmdId()).compareTo(other.isSetCmdId());
       if (lastComparison != 0) {
         return lastComparison;
       }
-      if (isSetCmdIds()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.cmd_ids, other.cmd_ids);
+      if (isSetCmdId()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.cmd_id, other.cmd_id);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -2327,19 +2303,15 @@ public class block_request_service {
       sb.append(this.block_id);
       first = false;
       if (!first) sb.append(", ");
-      sb.append("cmd_ids:");
-      if (this.cmd_ids == null) {
-        sb.append("null");
-      } else {
-        sb.append(this.cmd_ids);
-      }
+      sb.append("cmd_id:");
+      sb.append(this.cmd_id);
       first = false;
       if (!first) sb.append(", ");
       sb.append("arguments:");
       if (this.arguments == null) {
         sb.append("null");
       } else {
-        sb.append(this.arguments);
+        org.apache.thrift.TBaseHelper.toString(this.arguments, sb);
       }
       first = false;
       sb.append(")");
@@ -2407,20 +2379,10 @@ public class block_request_service {
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
               break;
-            case 3: // CMD_IDS
-              if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
-                {
-                  org.apache.thrift.protocol.TList _list0 = iprot.readListBegin();
-                  struct.cmd_ids = new java.util.ArrayList<java.lang.Integer>(_list0.size);
-                  int _elem1;
-                  for (int _i2 = 0; _i2 < _list0.size; ++_i2)
-                  {
-                    _elem1 = iprot.readI32();
-                    struct.cmd_ids.add(_elem1);
-                  }
-                  iprot.readListEnd();
-                }
-                struct.setCmdIdsIsSet(true);
+            case 3: // CMD_ID
+              if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+                struct.cmd_id = iprot.readI32();
+                struct.setCmdIdIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
@@ -2428,23 +2390,13 @@ public class block_request_service {
             case 4: // ARGUMENTS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list3 = iprot.readListBegin();
-                  struct.arguments = new java.util.ArrayList<java.util.List<java.nio.ByteBuffer>>(_list3.size);
-                  java.util.List<java.nio.ByteBuffer> _elem4;
-                  for (int _i5 = 0; _i5 < _list3.size; ++_i5)
+                  org.apache.thrift.protocol.TList _list0 = iprot.readListBegin();
+                  struct.arguments = new java.util.ArrayList<java.nio.ByteBuffer>(_list0.size);
+                  java.nio.ByteBuffer _elem1;
+                  for (int _i2 = 0; _i2 < _list0.size; ++_i2)
                   {
-                    {
-                      org.apache.thrift.protocol.TList _list6 = iprot.readListBegin();
-                      _elem4 = new java.util.ArrayList<java.nio.ByteBuffer>(_list6.size);
-                      java.nio.ByteBuffer _elem7;
-                      for (int _i8 = 0; _i8 < _list6.size; ++_i8)
-                      {
-                        _elem7 = iprot.readBinary();
-                        _elem4.add(_elem7);
-                      }
-                      iprot.readListEnd();
-                    }
-                    struct.arguments.add(_elem4);
+                    _elem1 = iprot.readBinary();
+                    struct.arguments.add(_elem1);
                   }
                   iprot.readListEnd();
                 }
@@ -2476,32 +2428,16 @@ public class block_request_service {
         oprot.writeFieldBegin(BLOCK_ID_FIELD_DESC);
         oprot.writeI32(struct.block_id);
         oprot.writeFieldEnd();
-        if (struct.cmd_ids != null) {
-          oprot.writeFieldBegin(CMD_IDS_FIELD_DESC);
-          {
-            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, struct.cmd_ids.size()));
-            for (int _iter9 : struct.cmd_ids)
-            {
-              oprot.writeI32(_iter9);
-            }
-            oprot.writeListEnd();
-          }
-          oprot.writeFieldEnd();
-        }
+        oprot.writeFieldBegin(CMD_ID_FIELD_DESC);
+        oprot.writeI32(struct.cmd_id);
+        oprot.writeFieldEnd();
         if (struct.arguments != null) {
           oprot.writeFieldBegin(ARGUMENTS_FIELD_DESC);
           {
-            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.LIST, struct.arguments.size()));
-            for (java.util.List<java.nio.ByteBuffer> _iter10 : struct.arguments)
+            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.arguments.size()));
+            for (java.nio.ByteBuffer _iter3 : struct.arguments)
             {
-              {
-                oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, _iter10.size()));
-                for (java.nio.ByteBuffer _iter11 : _iter10)
-                {
-                  oprot.writeBinary(_iter11);
-                }
-                oprot.writeListEnd();
-              }
+              oprot.writeBinary(_iter3);
             }
             oprot.writeListEnd();
           }
@@ -2531,7 +2467,7 @@ public class block_request_service {
         if (struct.isSetBlockId()) {
           optionals.set(1);
         }
-        if (struct.isSetCmdIds()) {
+        if (struct.isSetCmdId()) {
           optionals.set(2);
         }
         if (struct.isSetArguments()) {
@@ -2544,27 +2480,15 @@ public class block_request_service {
         if (struct.isSetBlockId()) {
           oprot.writeI32(struct.block_id);
         }
-        if (struct.isSetCmdIds()) {
-          {
-            oprot.writeI32(struct.cmd_ids.size());
-            for (int _iter12 : struct.cmd_ids)
-            {
-              oprot.writeI32(_iter12);
-            }
-          }
+        if (struct.isSetCmdId()) {
+          oprot.writeI32(struct.cmd_id);
         }
         if (struct.isSetArguments()) {
           {
             oprot.writeI32(struct.arguments.size());
-            for (java.util.List<java.nio.ByteBuffer> _iter13 : struct.arguments)
+            for (java.nio.ByteBuffer _iter4 : struct.arguments)
             {
-              {
-                oprot.writeI32(_iter13.size());
-                for (java.nio.ByteBuffer _iter14 : _iter13)
-                {
-                  oprot.writeBinary(_iter14);
-                }
-              }
+              oprot.writeBinary(_iter4);
             }
           }
         }
@@ -2584,36 +2508,18 @@ public class block_request_service {
           struct.setBlockIdIsSet(true);
         }
         if (incoming.get(2)) {
-          {
-            org.apache.thrift.protocol.TList _list15 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, iprot.readI32());
-            struct.cmd_ids = new java.util.ArrayList<java.lang.Integer>(_list15.size);
-            int _elem16;
-            for (int _i17 = 0; _i17 < _list15.size; ++_i17)
-            {
-              _elem16 = iprot.readI32();
-              struct.cmd_ids.add(_elem16);
-            }
-          }
-          struct.setCmdIdsIsSet(true);
+          struct.cmd_id = iprot.readI32();
+          struct.setCmdIdIsSet(true);
         }
         if (incoming.get(3)) {
           {
-            org.apache.thrift.protocol.TList _list18 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.LIST, iprot.readI32());
-            struct.arguments = new java.util.ArrayList<java.util.List<java.nio.ByteBuffer>>(_list18.size);
-            java.util.List<java.nio.ByteBuffer> _elem19;
-            for (int _i20 = 0; _i20 < _list18.size; ++_i20)
+            org.apache.thrift.protocol.TList _list5 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+            struct.arguments = new java.util.ArrayList<java.nio.ByteBuffer>(_list5.size);
+            java.nio.ByteBuffer _elem6;
+            for (int _i7 = 0; _i7 < _list5.size; ++_i7)
             {
-              {
-                org.apache.thrift.protocol.TList _list21 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
-                _elem19 = new java.util.ArrayList<java.nio.ByteBuffer>(_list21.size);
-                java.nio.ByteBuffer _elem22;
-                for (int _i23 = 0; _i23 < _list21.size; ++_i23)
-                {
-                  _elem22 = iprot.readBinary();
-                  _elem19.add(_elem22);
-                }
-              }
-              struct.arguments.add(_elem19);
+              _elem6 = iprot.readBinary();
+              struct.arguments.add(_elem6);
             }
           }
           struct.setArgumentsIsSet(true);

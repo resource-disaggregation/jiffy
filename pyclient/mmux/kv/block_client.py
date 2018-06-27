@@ -5,7 +5,7 @@ from thrift.transport.TTransport import TTransportException
 
 from mmux.kv import block_request_service
 from mmux.kv import block_response_service
-from mmux.kv.kv_ops import KVOps
+from mmux.kv.kv_ops import KVOps, op_type, KVOpType
 
 
 class ClientEntry:
@@ -109,11 +109,11 @@ class BlockChainClient:
         self.seq.client_seq_no += 1
         return op_seq
 
-    def send_cmd_head(self, cmd_id, args):
-        return self._send_cmd(self.head, cmd_id, args)
-
-    def send_cmd_tail(self, cmd_id, args):
-        return self._send_cmd(self.tail, cmd_id, args)
+    def send_cmd(self, cmd_id, args):
+        if op_type(cmd_id) == KVOpType.accessor:
+            return self._send_cmd(self.tail, cmd_id, args)
+        else:
+            return self._send_cmd(self.head, cmd_id, args)
 
     def _recv_cmd(self, op_seq):
         if op_seq in self.response_cache:
@@ -135,44 +135,44 @@ class BlockChainClient:
         op_seq = self._send_cmd(client, cmd_id, args)
         return self._recv_cmd(op_seq)
 
-    def run_command_head(self, cmd_id, args):
-        return self._run_command(self.head, cmd_id, args)
-
-    def run_command_tail(self, cmd_id, args):
-        return self._run_command(self.tail, cmd_id, args)
+    def run_command(self, cmd_id, args):
+        if op_type(cmd_id) == KVOpType.accessor:
+            return self._run_command(self.tail, cmd_id, args)
+        else:
+            return self._run_command(self.head, cmd_id, args)
 
     def exists(self, key):
-        return self._run_command(self.tail, [KVOps.exists], [[key]])[0][0]
+        return self._run_command(self.tail, KVOps.exists, [key])[0]
 
     def get(self, key):
-        return self._run_command(self.tail, [KVOps.get], [[key]])[0][0]
+        return self._run_command(self.tail, KVOps.get, [key])[0]
 
     def put(self, key, value):
-        return self._run_command(self.head, [KVOps.put], [[key, value]])[0][0]
+        return self._run_command(self.head, KVOps.put, [key, value])[0]
 
     def update(self, key, value):
-        return self._run_command(self.head, [KVOps.update], [[key, value]])[0][0]
+        return self._run_command(self.head, KVOps.update, [key, value])[0]
 
     def remove(self, key):
-        return self._run_command(self.head, [KVOps.remove], [[key]])[0][0]
+        return self._run_command(self.head, KVOps.remove, [key])[0]
 
     def keys(self):
-        return self._run_command(self.tail, [KVOps.keys], [[]])[0]
+        return self._run_command(self.tail, KVOps.keys, [])
 
     def num_keys(self):
-        return self._run_command(self.tail, [KVOps.num_keys], [[]])[0][0]
+        return self._run_command(self.tail, KVOps.num_keys, [])[0]
 
     def redirected_exists(self, key):
-        return self._run_command(self.tail, [KVOps.exists], [[key, '!redirected']])[0][0]
+        return self._run_command(self.tail, KVOps.exists, [key, '!redirected'])[0]
 
     def redirected_get(self, key):
-        return self._run_command(self.tail, [KVOps.get], [[key, '!redirected']])[0][0]
+        return self._run_command(self.tail, KVOps.get, [key, '!redirected'])[0]
 
     def redirected_put(self, key, value):
-        return self._run_command(self.head, [KVOps.put], [[key, value, '!redirected']])[0][0]
+        return self._run_command(self.head, KVOps.put, [key, value, '!redirected'])[0]
 
     def redirected_update(self, key, value):
-        return self._run_command(self.head, [KVOps.update], [[key, value, '!redirected']])[0][0]
+        return self._run_command(self.head, KVOps.update, [key, value, '!redirected'])[0]
 
     def redirected_remove(self, key):
-        return self._run_command(self.head, [KVOps.remove], [[key, '!redirected']])[0][0]
+        return self._run_command(self.head, KVOps.remove, [key, '!redirected'])[0]

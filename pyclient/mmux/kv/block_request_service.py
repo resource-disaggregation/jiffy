@@ -3,13 +3,14 @@
 #
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #
-#  options string: py:no_utf8strings,slots
+#  options string: py:slots
 #
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol.TProtocol import TProtocolException
 from thrift.TRecursive import fix_spec
 
+import sys
 import logging
 from .ttypes import *
 from thrift.Thrift import TProcessor
@@ -29,12 +30,12 @@ class Iface(object):
         """
         pass
 
-    def command_request(self, seq, block_id, cmd_ids, arguments):
+    def command_request(self, seq, block_id, cmd_id, arguments):
         """
         Parameters:
          - seq
          - block_id
-         - cmd_ids
+         - cmd_id
          - arguments
         """
         pass
@@ -104,22 +105,22 @@ class Client(Iface):
         iprot.readMessageEnd()
         return
 
-    def command_request(self, seq, block_id, cmd_ids, arguments):
+    def command_request(self, seq, block_id, cmd_id, arguments):
         """
         Parameters:
          - seq
          - block_id
-         - cmd_ids
+         - cmd_id
          - arguments
         """
-        self.send_command_request(seq, block_id, cmd_ids, arguments)
+        self.send_command_request(seq, block_id, cmd_id, arguments)
 
-    def send_command_request(self, seq, block_id, cmd_ids, arguments):
+    def send_command_request(self, seq, block_id, cmd_id, arguments):
         self._oprot.writeMessageBegin('command_request', TMessageType.ONEWAY, self._seqid)
         args = command_request_args()
         args.seq = seq
         args.block_id = block_id
-        args.cmd_ids = cmd_ids
+        args.cmd_id = cmd_id
         args.arguments = arguments
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -200,7 +201,7 @@ class Processor(Iface, TProcessor):
         args.read(iprot)
         iprot.readMessageEnd()
         try:
-            self._handler.command_request(args.seq, args.block_id, args.cmd_ids, args.arguments)
+            self._handler.command_request(args.seq, args.block_id, args.cmd_id, args.arguments)
         except TTransport.TTransportException:
             raise
         except Exception:
@@ -476,22 +477,22 @@ class command_request_args(object):
     Attributes:
      - seq
      - block_id
-     - cmd_ids
+     - cmd_id
      - arguments
     """
 
     __slots__ = (
         'seq',
         'block_id',
-        'cmd_ids',
+        'cmd_id',
         'arguments',
     )
 
 
-    def __init__(self, seq=None, block_id=None, cmd_ids=None, arguments=None,):
+    def __init__(self, seq=None, block_id=None, cmd_id=None, arguments=None,):
         self.seq = seq
         self.block_id = block_id
-        self.cmd_ids = cmd_ids
+        self.cmd_id = cmd_id
         self.arguments = arguments
 
     def read(self, iprot):
@@ -515,27 +516,17 @@ class command_request_args(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
-                if ftype == TType.LIST:
-                    self.cmd_ids = []
-                    (_etype3, _size0) = iprot.readListBegin()
-                    for _i4 in range(_size0):
-                        _elem5 = iprot.readI32()
-                        self.cmd_ids.append(_elem5)
-                    iprot.readListEnd()
+                if ftype == TType.I32:
+                    self.cmd_id = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             elif fid == 4:
                 if ftype == TType.LIST:
                     self.arguments = []
-                    (_etype9, _size6) = iprot.readListBegin()
-                    for _i10 in range(_size6):
-                        _elem11 = []
-                        (_etype15, _size12) = iprot.readListBegin()
-                        for _i16 in range(_size12):
-                            _elem17 = iprot.readBinary()
-                            _elem11.append(_elem17)
-                        iprot.readListEnd()
-                        self.arguments.append(_elem11)
+                    (_etype3, _size0) = iprot.readListBegin()
+                    for _i4 in range(_size0):
+                        _elem5 = iprot.readBinary()
+                        self.arguments.append(_elem5)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -557,21 +548,15 @@ class command_request_args(object):
             oprot.writeFieldBegin('block_id', TType.I32, 2)
             oprot.writeI32(self.block_id)
             oprot.writeFieldEnd()
-        if self.cmd_ids is not None:
-            oprot.writeFieldBegin('cmd_ids', TType.LIST, 3)
-            oprot.writeListBegin(TType.I32, len(self.cmd_ids))
-            for iter18 in self.cmd_ids:
-                oprot.writeI32(iter18)
-            oprot.writeListEnd()
+        if self.cmd_id is not None:
+            oprot.writeFieldBegin('cmd_id', TType.I32, 3)
+            oprot.writeI32(self.cmd_id)
             oprot.writeFieldEnd()
         if self.arguments is not None:
             oprot.writeFieldBegin('arguments', TType.LIST, 4)
-            oprot.writeListBegin(TType.LIST, len(self.arguments))
-            for iter19 in self.arguments:
-                oprot.writeListBegin(TType.STRING, len(iter19))
-                for iter20 in iter19:
-                    oprot.writeBinary(iter20)
-                oprot.writeListEnd()
+            oprot.writeListBegin(TType.STRING, len(self.arguments))
+            for iter6 in self.arguments:
+                oprot.writeBinary(iter6)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -602,8 +587,8 @@ command_request_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'seq', [sequence_id, None], None, ),  # 1
     (2, TType.I32, 'block_id', None, None, ),  # 2
-    (3, TType.LIST, 'cmd_ids', (TType.I32, None, False), None, ),  # 3
-    (4, TType.LIST, 'arguments', (TType.LIST, (TType.STRING, 'BINARY', False), False), None, ),  # 4
+    (3, TType.I32, 'cmd_id', None, None, ),  # 3
+    (4, TType.LIST, 'arguments', (TType.STRING, 'BINARY', False), None, ),  # 4
 )
 fix_spec(all_structs)
 del all_structs

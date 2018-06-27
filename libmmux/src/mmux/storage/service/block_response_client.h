@@ -12,7 +12,7 @@ class block_response_client {
   typedef block_response_serviceClient thrift_client;
   explicit block_response_client(std::shared_ptr<apache::thrift::protocol::TProtocol> protocol);
 
-  void response(const sequence_id& seq, const std::vector<std::vector<std::string>> &results);
+  void response(const sequence_id& seq, const std::vector<std::string>& result);
  private:
   std::shared_ptr<thrift_client> client_{};
 };

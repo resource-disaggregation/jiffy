@@ -23,7 +23,7 @@ class block_request_serviceIf {
   virtual ~block_request_serviceIf() {}
   virtual int64_t get_client_id() = 0;
   virtual void register_client_id(const int32_t block_id, const int64_t client_id) = 0;
-  virtual void command_request(const sequence_id& seq, const int32_t block_id, const std::vector<int32_t> & cmd_ids, const std::vector<std::vector<std::string> > & arguments) = 0;
+  virtual void command_request(const sequence_id& seq, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments) = 0;
 };
 
 class block_request_serviceIfFactory {
@@ -60,7 +60,7 @@ class block_request_serviceNull : virtual public block_request_serviceIf {
   void register_client_id(const int32_t /* block_id */, const int64_t /* client_id */) {
     return;
   }
-  void command_request(const sequence_id& /* seq */, const int32_t /* block_id */, const std::vector<int32_t> & /* cmd_ids */, const std::vector<std::vector<std::string> > & /* arguments */) {
+  void command_request(const sequence_id& /* seq */, const int32_t /* block_id */, const int32_t /* cmd_id */, const std::vector<std::string> & /* arguments */) {
     return;
   }
 };
@@ -263,10 +263,10 @@ class block_request_service_register_client_id_presult {
 };
 
 typedef struct _block_request_service_command_request_args__isset {
-  _block_request_service_command_request_args__isset() : seq(false), block_id(false), cmd_ids(false), arguments(false) {}
+  _block_request_service_command_request_args__isset() : seq(false), block_id(false), cmd_id(false), arguments(false) {}
   bool seq :1;
   bool block_id :1;
-  bool cmd_ids :1;
+  bool cmd_id :1;
   bool arguments :1;
 } _block_request_service_command_request_args__isset;
 
@@ -275,14 +275,14 @@ class block_request_service_command_request_args {
 
   block_request_service_command_request_args(const block_request_service_command_request_args&);
   block_request_service_command_request_args& operator=(const block_request_service_command_request_args&);
-  block_request_service_command_request_args() : block_id(0) {
+  block_request_service_command_request_args() : block_id(0), cmd_id(0) {
   }
 
   virtual ~block_request_service_command_request_args() throw();
   sequence_id seq;
   int32_t block_id;
-  std::vector<int32_t>  cmd_ids;
-  std::vector<std::vector<std::string> >  arguments;
+  int32_t cmd_id;
+  std::vector<std::string>  arguments;
 
   _block_request_service_command_request_args__isset __isset;
 
@@ -290,9 +290,9 @@ class block_request_service_command_request_args {
 
   void __set_block_id(const int32_t val);
 
-  void __set_cmd_ids(const std::vector<int32_t> & val);
+  void __set_cmd_id(const int32_t val);
 
-  void __set_arguments(const std::vector<std::vector<std::string> > & val);
+  void __set_arguments(const std::vector<std::string> & val);
 
   bool operator == (const block_request_service_command_request_args & rhs) const
   {
@@ -300,7 +300,7 @@ class block_request_service_command_request_args {
       return false;
     if (!(block_id == rhs.block_id))
       return false;
-    if (!(cmd_ids == rhs.cmd_ids))
+    if (!(cmd_id == rhs.cmd_id))
       return false;
     if (!(arguments == rhs.arguments))
       return false;
@@ -327,8 +327,8 @@ class block_request_service_command_request_pargs {
   virtual ~block_request_service_command_request_pargs() throw();
   const sequence_id* seq;
   const int32_t* block_id;
-  const std::vector<int32_t> * cmd_ids;
-  const std::vector<std::vector<std::string> > * arguments;
+  const int32_t* cmd_id;
+  const std::vector<std::string> * arguments;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -367,8 +367,8 @@ class block_request_serviceClientT : virtual public block_request_serviceIf {
   void register_client_id(const int32_t block_id, const int64_t client_id);
   void send_register_client_id(const int32_t block_id, const int64_t client_id);
   void recv_register_client_id();
-  void command_request(const sequence_id& seq, const int32_t block_id, const std::vector<int32_t> & cmd_ids, const std::vector<std::vector<std::string> > & arguments);
-  void send_command_request(const sequence_id& seq, const int32_t block_id, const std::vector<int32_t> & cmd_ids, const std::vector<std::vector<std::string> > & arguments);
+  void command_request(const sequence_id& seq, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments);
+  void send_command_request(const sequence_id& seq, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
@@ -466,13 +466,13 @@ class block_request_serviceMultiface : virtual public block_request_serviceIf {
     ifaces_[i]->register_client_id(block_id, client_id);
   }
 
-  void command_request(const sequence_id& seq, const int32_t block_id, const std::vector<int32_t> & cmd_ids, const std::vector<std::vector<std::string> > & arguments) {
+  void command_request(const sequence_id& seq, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->command_request(seq, block_id, cmd_ids, arguments);
+      ifaces_[i]->command_request(seq, block_id, cmd_id, arguments);
     }
-    ifaces_[i]->command_request(seq, block_id, cmd_ids, arguments);
+    ifaces_[i]->command_request(seq, block_id, cmd_id, arguments);
   }
 
 };
@@ -512,8 +512,8 @@ class block_request_serviceConcurrentClientT : virtual public block_request_serv
   void register_client_id(const int32_t block_id, const int64_t client_id);
   int32_t send_register_client_id(const int32_t block_id, const int64_t client_id);
   void recv_register_client_id(const int32_t seqid);
-  void command_request(const sequence_id& seq, const int32_t block_id, const std::vector<int32_t> & cmd_ids, const std::vector<std::vector<std::string> > & arguments);
-  void send_command_request(const sequence_id& seq, const int32_t block_id, const std::vector<int32_t> & cmd_ids, const std::vector<std::vector<std::string> > & arguments);
+  void command_request(const sequence_id& seq, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments);
+  void send_command_request(const sequence_id& seq, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;

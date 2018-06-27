@@ -46,26 +46,14 @@ uint32_t block_response_service_response_args::read(Protocol_* iprot) {
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->result.clear();
-            uint32_t _size27;
-            ::apache::thrift::protocol::TType _etype30;
-            xfer += iprot->readListBegin(_etype30, _size27);
-            this->result.resize(_size27);
-            uint32_t _i31;
-            for (_i31 = 0; _i31 < _size27; ++_i31)
+            uint32_t _size13;
+            ::apache::thrift::protocol::TType _etype16;
+            xfer += iprot->readListBegin(_etype16, _size13);
+            this->result.resize(_size13);
+            uint32_t _i17;
+            for (_i17 = 0; _i17 < _size13; ++_i17)
             {
-              {
-                this->result[_i31].clear();
-                uint32_t _size32;
-                ::apache::thrift::protocol::TType _etype35;
-                xfer += iprot->readListBegin(_etype35, _size32);
-                this->result[_i31].resize(_size32);
-                uint32_t _i36;
-                for (_i36 = 0; _i36 < _size32; ++_i36)
-                {
-                  xfer += iprot->readBinary(this->result[_i31][_i36]);
-                }
-                xfer += iprot->readListEnd();
-              }
+              xfer += iprot->readString(this->result[_i17]);
             }
             xfer += iprot->readListEnd();
           }
@@ -98,19 +86,11 @@ uint32_t block_response_service_response_args::write(Protocol_* oprot) const {
 
   xfer += oprot->writeFieldBegin("result", ::apache::thrift::protocol::T_LIST, 2);
   {
-    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_LIST, static_cast<uint32_t>(this->result.size()));
-    std::vector<std::vector<std::string> > ::const_iterator _iter37;
-    for (_iter37 = this->result.begin(); _iter37 != this->result.end(); ++_iter37)
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->result.size()));
+    std::vector<std::string> ::const_iterator _iter18;
+    for (_iter18 = this->result.begin(); _iter18 != this->result.end(); ++_iter18)
     {
-      {
-        xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*_iter37).size()));
-        std::vector<std::string> ::const_iterator _iter38;
-        for (_iter38 = (*_iter37).begin(); _iter38 != (*_iter37).end(); ++_iter38)
-        {
-          xfer += oprot->writeBinary((*_iter38));
-        }
-        xfer += oprot->writeListEnd();
-      }
+      xfer += oprot->writeString((*_iter18));
     }
     xfer += oprot->writeListEnd();
   }
@@ -134,19 +114,11 @@ uint32_t block_response_service_response_pargs::write(Protocol_* oprot) const {
 
   xfer += oprot->writeFieldBegin("result", ::apache::thrift::protocol::T_LIST, 2);
   {
-    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_LIST, static_cast<uint32_t>((*(this->result)).size()));
-    std::vector<std::vector<std::string> > ::const_iterator _iter39;
-    for (_iter39 = (*(this->result)).begin(); _iter39 != (*(this->result)).end(); ++_iter39)
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->result)).size()));
+    std::vector<std::string> ::const_iterator _iter19;
+    for (_iter19 = (*(this->result)).begin(); _iter19 != (*(this->result)).end(); ++_iter19)
     {
-      {
-        xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*_iter39).size()));
-        std::vector<std::string> ::const_iterator _iter40;
-        for (_iter40 = (*_iter39).begin(); _iter40 != (*_iter39).end(); ++_iter40)
-        {
-          xfer += oprot->writeBinary((*_iter40));
-        }
-        xfer += oprot->writeListEnd();
-      }
+      xfer += oprot->writeString((*_iter19));
     }
     xfer += oprot->writeListEnd();
   }
@@ -158,13 +130,13 @@ uint32_t block_response_service_response_pargs::write(Protocol_* oprot) const {
 }
 
 template <class Protocol_>
-void block_response_serviceClientT<Protocol_>::response(const sequence_id& seq, const std::vector<std::vector<std::string> > & result)
+void block_response_serviceClientT<Protocol_>::response(const sequence_id& seq, const std::vector<std::string> & result)
 {
   send_response(seq, result);
 }
 
 template <class Protocol_>
-void block_response_serviceClientT<Protocol_>::send_response(const sequence_id& seq, const std::vector<std::vector<std::string> > & result)
+void block_response_serviceClientT<Protocol_>::send_response(const sequence_id& seq, const std::vector<std::string> & result)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("response", ::apache::thrift::protocol::T_ONEWAY, cseqid);
@@ -306,13 +278,13 @@ template <class Protocol_>
 }
 
 template <class Protocol_>
-void block_response_serviceConcurrentClientT<Protocol_>::response(const sequence_id& seq, const std::vector<std::vector<std::string> > & result)
+void block_response_serviceConcurrentClientT<Protocol_>::response(const sequence_id& seq, const std::vector<std::string> & result)
 {
   send_response(seq, result);
 }
 
 template <class Protocol_>
-void block_response_serviceConcurrentClientT<Protocol_>::send_response(const sequence_id& seq, const std::vector<std::vector<std::string> > & result)
+void block_response_serviceConcurrentClientT<Protocol_>::send_response(const sequence_id& seq, const std::vector<std::string> & result)
 {
   int32_t cseqid = 0;
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);

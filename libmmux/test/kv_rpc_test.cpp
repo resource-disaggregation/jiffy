@@ -100,9 +100,11 @@ TEST_CASE("rpc_storage_size_test", "[put][num_keys][storage_size][reset]") {
   test_utils::wait_till_server_ready(HOST, PORT);
 
   replica_chain_client client({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
+  REQUIRE(client.num_keys() == std::to_string(0));
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
+  REQUIRE(client.num_keys() == std::to_string(1000));
 
   server->stop();
   

@@ -19,16 +19,16 @@ struct sequence_id {
 service block_request_service {
   i64 get_client_id(),
   void register_client_id(1: i32 block_id, 2: i64 client_id),
-  oneway void command_request(1: sequence_id seq, 2: i32 block_id, 3: list<i32> cmd_ids, 4: list<list<binary>> arguments),
+  oneway void command_request(1: sequence_id seq, 2: i32 block_id, 3: i32 cmd_id, 4: list<binary> arguments),
 }
 
 service block_response_service {
-  oneway void response(1: sequence_id seq, 2: list<list<binary>> result),
+  oneway void response(1: sequence_id seq, 2: list<binary> result),
 }
 
 service chain_request_service {
-  list<list<binary>> run_command(1: i32 block_id, 2: list<i32> cmd_id, 3: list<list<binary>> arguments),
-  oneway void chain_request(1: sequence_id seq, 2: i32 block_id, 3: list<i32> cmd_ids, 4: list<list<binary>> arguments),
+  list<binary> run_command(1: i32 block_id, 2: i32 cmd_id, 3: list<binary> arguments),
+  oneway void chain_request(1: sequence_id seq, 2: i32 block_id, 3: i32 cmd_id, 4: list<binary> arguments),
 }
 
 service chain_response_service {

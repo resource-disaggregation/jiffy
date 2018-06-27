@@ -12,8 +12,8 @@ namespace storage {
 block_response_client::block_response_client(std::shared_ptr<TProtocol> protocol)
     : client_(std::make_shared<thrift_client>(protocol)) {}
 
-void block_response_client::response(const sequence_id &seq, const std::vector<std::vector<std::string>> &results) {
-  client_->response(seq, results);
+void block_response_client::response(const sequence_id &seq, const std::vector<std::string> &result) {
+  client_->response(seq, result);
 }
 
 }

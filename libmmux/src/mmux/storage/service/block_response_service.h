@@ -21,7 +21,7 @@ namespace mmux { namespace storage {
 class block_response_serviceIf {
  public:
   virtual ~block_response_serviceIf() {}
-  virtual void response(const sequence_id& seq, const std::vector<std::vector<std::string> > & result) = 0;
+  virtual void response(const sequence_id& seq, const std::vector<std::string> & result) = 0;
 };
 
 class block_response_serviceIfFactory {
@@ -51,7 +51,7 @@ class block_response_serviceIfSingletonFactory : virtual public block_response_s
 class block_response_serviceNull : virtual public block_response_serviceIf {
  public:
   virtual ~block_response_serviceNull() {}
-  void response(const sequence_id& /* seq */, const std::vector<std::vector<std::string> > & /* result */) {
+  void response(const sequence_id& /* seq */, const std::vector<std::string> & /* result */) {
     return;
   }
 };
@@ -72,13 +72,13 @@ class block_response_service_response_args {
 
   virtual ~block_response_service_response_args() throw();
   sequence_id seq;
-  std::vector<std::vector<std::string> >  result;
+  std::vector<std::string>  result;
 
   _block_response_service_response_args__isset __isset;
 
   void __set_seq(const sequence_id& val);
 
-  void __set_result(const std::vector<std::vector<std::string> > & val);
+  void __set_result(const std::vector<std::string> & val);
 
   bool operator == (const block_response_service_response_args & rhs) const
   {
@@ -108,7 +108,7 @@ class block_response_service_response_pargs {
 
   virtual ~block_response_service_response_pargs() throw();
   const sequence_id* seq;
-  const std::vector<std::vector<std::string> > * result;
+  const std::vector<std::string> * result;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -141,8 +141,8 @@ class block_response_serviceClientT : virtual public block_response_serviceIf {
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void response(const sequence_id& seq, const std::vector<std::vector<std::string> > & result);
-  void send_response(const sequence_id& seq, const std::vector<std::vector<std::string> > & result);
+  void response(const sequence_id& seq, const std::vector<std::string> & result);
+  void send_response(const sequence_id& seq, const std::vector<std::string> & result);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
@@ -212,7 +212,7 @@ class block_response_serviceMultiface : virtual public block_response_serviceIf 
     ifaces_.push_back(iface);
   }
  public:
-  void response(const sequence_id& seq, const std::vector<std::vector<std::string> > & result) {
+  void response(const sequence_id& seq, const std::vector<std::string> & result) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -252,8 +252,8 @@ class block_response_serviceConcurrentClientT : virtual public block_response_se
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void response(const sequence_id& seq, const std::vector<std::vector<std::string> > & result);
-  void send_response(const sequence_id& seq, const std::vector<std::vector<std::string> > & result);
+  void response(const sequence_id& seq, const std::vector<std::string> & result);
+  void send_response(const sequence_id& seq, const std::vector<std::string> & result);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;

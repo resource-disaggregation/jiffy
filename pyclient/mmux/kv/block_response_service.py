@@ -3,13 +3,14 @@
 #
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #
-#  options string: py:no_utf8strings,slots
+#  options string: py:slots
 #
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol.TProtocol import TProtocolException
 from thrift.TRecursive import fix_spec
 
+import sys
 import logging
 from .ttypes import *
 from thrift.Thrift import TProcessor
@@ -122,15 +123,10 @@ class response_args(object):
             elif fid == 2:
                 if ftype == TType.LIST:
                     self.result = []
-                    (_etype24, _size21) = iprot.readListBegin()
-                    for _i25 in range(_size21):
-                        _elem26 = []
-                        (_etype30, _size27) = iprot.readListBegin()
-                        for _i31 in range(_size27):
-                            _elem32 = iprot.readBinary()
-                            _elem26.append(_elem32)
-                        iprot.readListEnd()
-                        self.result.append(_elem26)
+                    (_etype10, _size7) = iprot.readListBegin()
+                    for _i11 in range(_size7):
+                        _elem12 = iprot.readBinary()
+                        self.result.append(_elem12)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -150,12 +146,9 @@ class response_args(object):
             oprot.writeFieldEnd()
         if self.result is not None:
             oprot.writeFieldBegin('result', TType.LIST, 2)
-            oprot.writeListBegin(TType.LIST, len(self.result))
-            for iter33 in self.result:
-                oprot.writeListBegin(TType.STRING, len(iter33))
-                for iter34 in iter33:
-                    oprot.writeBinary(iter34)
-                oprot.writeListEnd()
+            oprot.writeListBegin(TType.STRING, len(self.result))
+            for iter13 in self.result:
+                oprot.writeBinary(iter13)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -185,7 +178,7 @@ all_structs.append(response_args)
 response_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'seq', [sequence_id, None], None, ),  # 1
-    (2, TType.LIST, 'result', (TType.LIST, (TType.STRING, 'BINARY', False), False), None, ),  # 2
+    (2, TType.LIST, 'result', (TType.STRING, 'BINARY', False), None, ),  # 2
 )
 fix_spec(all_structs)
 del all_structs
