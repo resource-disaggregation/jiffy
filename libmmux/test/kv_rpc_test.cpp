@@ -102,13 +102,13 @@ TEST_CASE("rpc_locked_put_get_test", "[put][get]") {
   replica_chain_client rcc({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
   auto client = rcc.lock();
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::locked_put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+    REQUIRE(client->run_command(kv_op_id::locked_put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::locked_get, {std::to_string(i)}).front() == std::to_string(i));
+    REQUIRE(client->run_command(kv_op_id::locked_get, {std::to_string(i)}).front() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::locked_get, {std::to_string(i)}).front() == "!key_not_found");
+    REQUIRE(client->run_command(kv_op_id::locked_get, {std::to_string(i)}).front() == "!key_not_found");
   }
 
   server->stop();
@@ -127,19 +127,19 @@ TEST_CASE("rpc_locked_put_update_get_test", "[put][update][get]") {
   replica_chain_client rcc({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
   auto client = rcc.lock();
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::locked_put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+    REQUIRE(client->run_command(kv_op_id::locked_put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::locked_get, {std::to_string(i)}).front() == std::to_string(i));
+    REQUIRE(client->run_command(kv_op_id::locked_get, {std::to_string(i)}).front() == std::to_string(i));
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::locked_update, {std::to_string(i), std::to_string(i + 1000)}).front() == std::to_string(i));
+    REQUIRE(client->run_command(kv_op_id::locked_update, {std::to_string(i), std::to_string(i + 1000)}).front() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::locked_update, {std::to_string(i), std::to_string(i + 1000)}).front() == "!key_not_found");
+    REQUIRE(client->run_command(kv_op_id::locked_update, {std::to_string(i), std::to_string(i + 1000)}).front() == "!key_not_found");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::locked_get, {std::to_string(i)}).front() == std::to_string(i + 1000));
+    REQUIRE(client->run_command(kv_op_id::locked_get, {std::to_string(i)}).front() == std::to_string(i + 1000));
   }
 
   server->stop();
@@ -158,16 +158,16 @@ TEST_CASE("rpc_locked_put_remove_get_test", "[put][remove][get]") {
   replica_chain_client rcc({block_name_parser::make(HOST, PORT, 0, 0, 0, 0)});
   auto client = rcc.lock();
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::locked_put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+    REQUIRE(client->run_command(kv_op_id::locked_put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::locked_get, {std::to_string(i)}).front() == std::to_string(i));
+    REQUIRE(client->run_command(kv_op_id::locked_get, {std::to_string(i)}).front() == std::to_string(i));
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::locked_remove, {std::to_string(i)}).front() == std::to_string(i));
+    REQUIRE(client->run_command(kv_op_id::locked_remove, {std::to_string(i)}).front() == std::to_string(i));
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::locked_get, {std::to_string(i)}).front() == "!key_not_found");
+    REQUIRE(client->run_command(kv_op_id::locked_get, {std::to_string(i)}).front() == "!key_not_found");
   }
 
   server->stop();

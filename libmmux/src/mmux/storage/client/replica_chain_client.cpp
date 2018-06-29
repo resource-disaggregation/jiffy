@@ -72,8 +72,8 @@ std::vector<std::string> replica_chain_client::run_command_redirected(int32_t cm
   return recv_response();
 }
 
-replica_chain_client::locked_client replica_chain_client::lock() {
-  return replica_chain_client::locked_client(*this);
+std::shared_ptr<replica_chain_client::locked_client> replica_chain_client::lock() {
+  return std::make_shared<replica_chain_client::locked_client>(*this);
 }
 
 replica_chain_client::locked_client::locked_client(replica_chain_client &parent) : parent_(parent) {

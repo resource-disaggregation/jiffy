@@ -228,7 +228,7 @@ void kv_client::handle_redirects(int32_t cmd_id,
 kv_client::locked_client::locked_client(kv_client &parent) : parent_(parent) {
   blocks_.resize(parent_.blocks_.size());
   for (size_t i = 0; i < blocks_.size(); i++) {
-    blocks_[i] = std::make_shared<block_t>(std::move(parent_.blocks_[i]->lock()));
+    blocks_[i] = parent_.blocks_[i]->lock();
   }
 }
 
