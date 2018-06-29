@@ -183,14 +183,18 @@ std::vector<std::string> kv_client::batch_command(const kv_op_id &op,
     positions[id].push_back(i);
   }
 
-  for (size_t i = 0; i < blocks_.size(); i++)
-    blocks_[i]->send_command(op, block_args[i]);
+  for (size_t i = 0; i < blocks_.size(); i++) {
+    if (!block_args[i].empty())
+      blocks_[i]->send_command(op, block_args[i]);
+  }
 
   std::vector<std::string> results(num_ops);
   for (size_t i = 0; i < blocks_.size(); i++) {
-    auto res = blocks_[i]->recv_response();
-    for (size_t j = 0; j < res.size(); j++) {
-      results[positions[i][j]] = res[j];
+    if (!block_args[i].empty()) {
+      auto res = blocks_[i]->recv_response();
+      for (size_t j = 0; j < res.size(); j++) {
+        results[positions[i][j]] = res[j];
+      }
     }
   }
 
@@ -269,6 +273,8 @@ kv_client::locked_client::locked_client(kv_client &parent) : parent_(parent) {
 void kv_client::locked_client::unlock() {
   for (size_t i = 0; i < blocks_.size(); i++) {
     blocks_[i]->unlock();
+    if (locked_redirect_blocks_[i] != nullptr)
+      locked_redirect_blocks_[i]->unlock();
   }
 }
 
@@ -349,13 +355,17 @@ void kv_client::locked_client::handle_redirect(int32_t cmd_id,
     do {
       auto parts = string_utils::split(response, '!');
       auto chain = list_t(parts.begin() + 1, parts.end());
+      bool found = false;
       for (size_t i = 0; i < blocks_.size(); i++) {
         const auto &client_chain = parent_.blocks_[i]->chain();
         if (client_chain == chain) {
+          found = true;
           response = blocks_[i]->run_command_redirected(cmd_id, args).front();
+          break;
         }
       }
-      response = replica_chain_client(std::move(chain)).run_command_redirected(cmd_id, args).front();
+      if (!found)
+        response = replica_chain_client(std::move(chain)).run_command_redirected(cmd_id, args).front();
     } while (response.substr(0, 9) == "!exporting");
   }
   // There can be !block_moved response, since:
@@ -376,13 +386,17 @@ void kv_client::locked_client::handle_redirects(int32_t cmd_id,
       do {
         auto parts = string_utils::split(response, '!');
         auto chain = list_t(parts.begin() + 1, parts.end());
+        bool found = false;
         for (size_t j = 0; j < blocks_.size(); j++) {
           const auto &client_chain = parent_.blocks_[j]->chain();
           if (client_chain == chain) {
+            found = true;
             response = blocks_[j]->run_command_redirected(cmd_id, args).front();
+            break;
           }
         }
-        response = replica_chain_client(std::move(chain)).run_command_redirected(cmd_id, op_args).front();
+        if (!found)
+          response = replica_chain_client(std::move(chain)).run_command_redirected(cmd_id, op_args).front();
       } while (response.substr(0, 9) == "!exporting");
     }
   }
