@@ -43,13 +43,13 @@ TEST_CASE("kv_client_put_get_test", "[put][get]") {
 
   kv_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE_NOTHROW(client.put(std::to_string(i), std::to_string(i)));
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE_THROWS_AS(client.get(std::to_string(i)), std::out_of_range);
+    REQUIRE(client.get(std::to_string(i)) == "!key_not_found");
   }
 
   storage_server->stop();
@@ -85,7 +85,7 @@ TEST_CASE("kv_client_put_update_get_test", "[put][update][get]") {
 
   kv_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE_NOTHROW(client.put(std::to_string(i), std::to_string(i)));
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
@@ -94,7 +94,7 @@ TEST_CASE("kv_client_put_update_get_test", "[put][update][get]") {
     REQUIRE(client.update(std::to_string(i), std::to_string(i + 1000)) == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE_THROWS_AS(client.update(std::to_string(i), std::to_string(i + 1000)), std::out_of_range);
+    REQUIRE(client.update(std::to_string(i), std::to_string(i + 1000)) == "!key_not_found");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.get(std::to_string(i)) == std::to_string(i + 1000));
@@ -133,7 +133,7 @@ TEST_CASE("kv_client_put_remove_get_test", "[put][remove][get]") {
 
   kv_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE_NOTHROW(client.put(std::to_string(i), std::to_string(i)));
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
@@ -142,7 +142,7 @@ TEST_CASE("kv_client_put_remove_get_test", "[put][remove][get]") {
     REQUIRE(client.remove(std::to_string(i)) == std::to_string(i));
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE_THROWS_AS(client.get(std::to_string(i)), std::out_of_range);
+    REQUIRE(client.get(std::to_string(i)) == "!key_not_found");
   }
 
   storage_server->stop();

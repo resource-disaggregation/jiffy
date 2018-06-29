@@ -60,14 +60,14 @@ TEST_CASE("kv_no_failure_test", "[put][get]") {
 
   replica_chain_client client(chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
+    REQUIRE(client.run_command(kv_op_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
+    REQUIRE(client.run_command(kv_op_id::get, {std::to_string(i)}).front() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == "!key_not_found");
+    REQUIRE(client.run_command(kv_op_id::get, {std::to_string(i)}).front() == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
@@ -151,14 +151,14 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
 
   replica_chain_client client(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
+    REQUIRE(client.run_command(kv_op_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
+    REQUIRE(client.run_command(kv_op_id::get, {std::to_string(i)}).front() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == "!key_not_found");
+    REQUIRE(client.run_command(kv_op_id::get, {std::to_string(i)}).front() == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
@@ -235,14 +235,14 @@ TEST_CASE("kv_mid_failure_test", "[put][get]") {
 
   replica_chain_client client(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
+    REQUIRE(client.run_command(kv_op_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
+    REQUIRE(client.run_command(kv_op_id::get, {std::to_string(i)}).front() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == "!key_not_found");
+    REQUIRE(client.run_command(kv_op_id::get, {std::to_string(i)}).front() == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
@@ -320,14 +320,14 @@ TEST_CASE("kv_tail_failure_test", "[put][get]") {
 
   replica_chain_client client(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
+    REQUIRE(client.run_command(kv_op_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
+    REQUIRE(client.run_command(kv_op_id::get, {std::to_string(i)}).front() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == "!key_not_found");
+    REQUIRE(client.run_command(kv_op_id::get, {std::to_string(i)}).front() == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
@@ -397,21 +397,23 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
   t->create("/file", "/tmp", 1, 2);
 
   auto chain = t->dstatus("/file").data_blocks()[0].block_names;
-  replica_chain_client client(chain);
-  for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
+  {
+    replica_chain_client client(chain);
+    for (std::size_t i = 0; i < 1000; ++i) {
+      REQUIRE(client.run_command(kv_op_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+    }
   }
-
-  client.disconnect();
 
   auto fixed_chain = t->add_replica_to_chain("/file", t->dstatus("/file").data_blocks()[0]);
 
-  replica_chain_client client2(fixed_chain.block_names);
-  for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client2.get(std::to_string(i)) == std::to_string(i));
-  }
-  for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client2.get(std::to_string(i)) == "!key_not_found");
+  {
+    replica_chain_client client2(fixed_chain.block_names);
+    for (std::size_t i = 0; i < 1000; ++i) {
+      REQUIRE(client2.run_command(kv_op_id::get, {std::to_string(i)}).front() == std::to_string(i));
+    }
+    for (std::size_t i = 1000; i < 2000; ++i) {
+      REQUIRE(client2.run_command(kv_op_id::get, {std::to_string(i)}).front() == "!key_not_found");
+    }
   }
 
   // Ensure all three blocks have the data

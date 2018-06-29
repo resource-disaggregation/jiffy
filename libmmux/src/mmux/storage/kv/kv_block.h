@@ -68,14 +68,16 @@ class kv_block : public chain_module {
 
   void keys(std::vector<std::string> &keys);
 
-  void locked_data_in_slot_range(std::vector<std::string> &data,
-                                 int32_t slot_begin,
-                                 int32_t slot_end,
-                                 int32_t num_keys);
+  void locked_get_data_in_slot_range(std::vector<std::string> &data,
+                                     int32_t slot_begin,
+                                     int32_t slot_end,
+                                     int32_t num_keys);
 
   std::string lock();
 
   std::string unlock();
+
+  bool is_locked();
 
   std::size_t size() const;
 

@@ -1,6 +1,5 @@
 #include "replica_chain_client.h"
-#include "../manager/detail/block_name_parser.h"
-#include "../kv/kv_block.h"
+#include "../../utils/string_utils.h"
 
 namespace mmux {
 namespace storage {
@@ -41,42 +40,6 @@ void replica_chain_client::connect(const std::vector<std::string> &chain, int ti
   response_reader_ = tail_.get_command_response_reader(seq_.client_id);
 }
 
-std::string replica_chain_client::get(const std::string &key) {
-  return run_command(kv_op_id::get, {key}).front();
-}
-
-std::string replica_chain_client::num_keys() {
-  return run_command(kv_op_id::num_keys, {}).front();
-}
-
-std::string replica_chain_client::put(const std::string &key, const std::string &value) {
-  return run_command(kv_op_id::put, {key, value}).front();
-}
-
-std::string replica_chain_client::remove(const std::string &key) {
-  return run_command(kv_op_id::remove, {key}).front();
-}
-
-std::string replica_chain_client::update(const std::string &key, const std::string &value) {
-  return run_command(kv_op_id::update, {key, value}).front();
-}
-
-std::string replica_chain_client::redirected_get(const std::string &key) {
-  return run_command(kv_op_id::get, {key, "!redirected"}).front();
-}
-
-std::string replica_chain_client::redirected_put(const std::string &key, const std::string &value) {
-  return run_command(kv_op_id::put, {key, value, "!redirected"}).front();
-}
-
-std::string replica_chain_client::redirected_remove(const std::string &key) {
-  return run_command(kv_op_id::remove, {key, "!redirected"}).front();
-}
-
-std::string replica_chain_client::redirected_update(const std::string &key, const std::string &value) {
-  return run_command(kv_op_id::update, {key, value, "!redirected"}).front();
-}
-
 void replica_chain_client::send_command(int32_t cmd_id, const std::vector<std::string> &args) {
   if (in_flight_) {
     throw std::length_error("Cannot have more than one request in-flight");
@@ -99,6 +62,51 @@ std::vector<std::string> replica_chain_client::recv_response() {
 std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const std::vector<std::string> &args) {
   send_command(cmd_id, args);
   return recv_response();
+}
+
+std::vector<std::string> replica_chain_client::run_command_redirected(int32_t cmd_id,
+                                                                      const std::vector<std::string> &args) {
+  auto args_copy = args;
+  args_copy.push_back("!redirected");
+  send_command(cmd_id, args);
+  return recv_response();
+}
+
+replica_chain_client::locked_client replica_chain_client::lock() {
+  return replica_chain_client::locked_client(*this);
+}
+
+replica_chain_client::locked_client::locked_client(replica_chain_client &parent) : parent_(parent) {
+  auto res = parent_.run_command(kv_op_id::lock, {});
+  if (res[0] != "!ok") {
+    auto chain = utils::string_utils::split(res[0], '!');
+  }
+}
+
+replica_chain_client::locked_client::~locked_client() {
+  unlock();
+}
+
+void replica_chain_client::locked_client::unlock() {
+  parent_.run_command(kv_op_id::unlock, {});
+}
+
+void replica_chain_client::locked_client::send_command(int32_t cmd_id, const std::vector<std::string> &args) {
+  parent_.send_command(cmd_id, args);
+}
+
+std::vector<std::string> replica_chain_client::locked_client::recv_response() {
+  return parent_.recv_response();
+}
+
+std::vector<std::string> replica_chain_client::locked_client::run_command(int32_t cmd_id,
+                                                                          const std::vector<std::string> &args) {
+  return parent_.run_command(cmd_id, args);
+}
+
+std::vector<std::string> replica_chain_client::locked_client::run_command_redirected(int32_t cmd_id,
+                                                                                     const std::vector<std::string> &args) {
+  return parent_.run_command_redirected(cmd_id, args);
 }
 
 }
