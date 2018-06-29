@@ -33,6 +33,8 @@ bin/*
 cmake-build-debug
 cmake-build-release
 javaclient/target
+javaclient/core/target
+javaclient/hadoop/target
 
 # Eclipse files
 .settings
