@@ -286,9 +286,11 @@ TEST_CASE("kv_client_locked_ops_test", "[put][update][remove][get]") {
   kv_client kv(tree, "/sandbox/file.txt", status);
   {
     auto client = kv.lock();
+    REQUIRE(client.num_keys() == 0);
     for (std::size_t i = 0; i < 1000; ++i) {
       REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
     }
+    REQUIRE(client.num_keys() == 1000);
     for (std::size_t i = 0; i < 1000; ++i) {
       REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
     }
@@ -304,6 +306,7 @@ TEST_CASE("kv_client_locked_ops_test", "[put][update][remove][get]") {
     for (std::size_t i = 0; i < 1000; ++i) {
       REQUIRE(client.remove(std::to_string(i)) == std::to_string(i + 1000));
     }
+    REQUIRE(client.num_keys() == 0);
     for (std::size_t i = 1000; i < 2000; ++i) {
       REQUIRE(client.remove(std::to_string(i)) == "!key_not_found");
     }

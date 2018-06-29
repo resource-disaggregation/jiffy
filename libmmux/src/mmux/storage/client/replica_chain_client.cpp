@@ -82,7 +82,10 @@ bool replica_chain_client::is_connected() const {
 replica_chain_client::locked_client::locked_client(replica_chain_client &parent) : parent_(parent) {
   auto res = parent_.run_command(kv_op_id::lock, {});
   if (res[0] != "!ok") {
-    auto chain = utils::string_utils::split(res[0], '!');
+    redirecting_ = true;
+    redirect_chain_ = utils::string_utils::split(res[0], '!');
+  } else {
+    redirecting_ = false;
   }
 }
 
@@ -92,6 +95,18 @@ replica_chain_client::locked_client::~locked_client() {
 
 void replica_chain_client::locked_client::unlock() {
   parent_.run_command(kv_op_id::unlock, {});
+}
+
+const std::vector<std::string> &replica_chain_client::locked_client::chain() {
+  return parent_.chain();
+}
+
+bool replica_chain_client::locked_client::redirecting() const {
+  return redirecting_;
+}
+
+const std::vector<std::string> &replica_chain_client::locked_client::redirect_chain() {
+  return redirect_chain_;
 }
 
 void replica_chain_client::locked_client::send_command(int32_t cmd_id, const std::vector<std::string> &args) {

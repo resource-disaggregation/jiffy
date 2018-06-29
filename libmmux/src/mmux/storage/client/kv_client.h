@@ -18,7 +18,10 @@ class kv_client {
 
   class locked_client {
    public:
-    typedef replica_chain_client::locked_client block_t;
+    typedef replica_chain_client::locked_client locked_block_t;
+    typedef std::shared_ptr<locked_block_t> locked_block_ptr_t;
+
+    typedef replica_chain_client block_t;
     typedef std::shared_ptr<block_t> block_ptr_t;
 
     locked_client(kv_client &parent);
@@ -34,12 +37,17 @@ class kv_client {
     std::vector<std::string> get(const std::vector<std::string> &keys);
     std::vector<std::string> update(const std::vector<std::string> &kvs);
     std::vector<std::string> remove(const std::vector<std::string> &keys);
+
+    size_t num_keys();
    private:
     void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response);
     void handle_redirects(int32_t cmd_id, const std::vector<std::string> &args, std::vector<std::string> &responses);
 
     kv_client &parent_;
-    std::vector<block_ptr_t> blocks_;
+    std::vector<locked_block_ptr_t> blocks_;
+    std::vector<block_ptr_t> redirect_blocks_;
+    std::vector<locked_block_ptr_t> locked_redirect_blocks_;
+    std::vector<locked_block_ptr_t> new_blocks_;
   };
 
   kv_client(std::shared_ptr<directory::directory_ops> fs,

@@ -19,6 +19,10 @@ class replica_chain_client {
     ~locked_client();
 
     void unlock();
+    const std::vector<std::string> &chain();
+
+    bool redirecting() const;
+    const std::vector<std::string> &redirect_chain();
 
     void send_command(int32_t cmd_id, const std::vector<std::string> &args);
     std::vector<std::string> recv_response();
@@ -27,6 +31,9 @@ class replica_chain_client {
 
    private:
     replica_chain_client &parent_;
+
+    bool redirecting_;
+    std::vector<std::string> redirect_chain_;
   };
 
   explicit replica_chain_client(const std::vector<std::string> &chain, int timeout_ms = 0);

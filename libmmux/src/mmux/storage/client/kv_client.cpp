@@ -237,8 +237,32 @@ void kv_client::handle_redirects(int32_t cmd_id,
 
 kv_client::locked_client::locked_client(kv_client &parent) : parent_(parent) {
   blocks_.resize(parent_.blocks_.size());
+  redirect_blocks_.resize(parent_.blocks_.size());
+  locked_redirect_blocks_.resize(parent_.blocks_.size());
+  new_blocks_.resize(parent_.blocks_.size());
   for (size_t i = 0; i < blocks_.size(); i++) {
     blocks_[i] = parent_.blocks_[i]->lock();
+  }
+  for (size_t i = 0; i < blocks_.size(); i++) {
+    if (blocks_[i]->redirecting()) {
+      bool new_block = true;
+      for (size_t j = 0; j < blocks_.size(); j++) {
+        if (blocks_[i]->redirect_chain() == blocks_[j]->chain()) {
+          new_block = false;
+          redirect_blocks_[i] = parent_.blocks_[j];
+          locked_redirect_blocks_[i] = blocks_[j];
+          new_blocks_[i] = nullptr;
+        }
+      }
+      if (new_block) {
+        redirect_blocks_[i] = std::make_shared<replica_chain_client>(blocks_[i]->chain());
+        locked_redirect_blocks_[i] = redirect_blocks_[i]->lock();
+        new_blocks_[i] = locked_redirect_blocks_[i];
+      }
+    } else {
+      new_blocks_[i] = nullptr;
+      redirect_blocks_[i] = nullptr;
+    }
   }
 }
 
@@ -246,6 +270,23 @@ void kv_client::locked_client::unlock() {
   for (size_t i = 0; i < blocks_.size(); i++) {
     blocks_[i]->unlock();
   }
+}
+
+size_t kv_client::locked_client::num_keys() {
+  for (size_t i = 0; i < blocks_.size(); i++) {
+    blocks_[i]->send_command(kv_op_id::num_keys, {});
+    if (new_blocks_[i] != nullptr) {
+      new_blocks_[i]->send_command(kv_op_id::num_keys, {});
+    }
+  }
+  size_t n = 0;
+  for (size_t i = 0; i < blocks_.size(); i++) {
+    n += std::stoll(blocks_[i]->recv_response().front());
+    if (new_blocks_[i] != nullptr) {
+      n += std::stoll(new_blocks_[i]->recv_response().front());
+    }
+  }
+  return n;
 }
 
 std::string kv_client::locked_client::put(const std::string &key, const std::string &value) {
@@ -299,6 +340,7 @@ std::vector<std::string> kv_client::locked_client::remove(const std::vector<std:
   handle_redirects(kv_op_id::locked_remove, keys, _return);
   return _return;
 }
+
 void kv_client::locked_client::handle_redirect(int32_t cmd_id,
                                                const std::vector<std::string> &args,
                                                std::string &response) {
@@ -320,6 +362,7 @@ void kv_client::locked_client::handle_redirect(int32_t cmd_id,
   // (1) No new exports can start while the kv is locked
   // (2) Ongoing exports cannot finish while the kv is locked
 }
+
 void kv_client::locked_client::handle_redirects(int32_t cmd_id,
                                                 const std::vector<std::string> &args,
                                                 std::vector<std::string> &responses) {
