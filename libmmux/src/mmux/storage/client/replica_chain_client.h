@@ -37,6 +37,8 @@ class replica_chain_client {
 
   std::shared_ptr<locked_client> lock();
 
+  bool is_connected() const;
+
   void send_command(int32_t cmd_id, const std::vector<std::string> &args);
   std::vector<std::string> recv_response();
   std::vector<std::string> run_command(int32_t cmd_id, const std::vector<std::string> &args);

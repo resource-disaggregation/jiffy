@@ -75,6 +75,9 @@ std::vector<std::string> replica_chain_client::run_command_redirected(int32_t cm
 std::shared_ptr<replica_chain_client::locked_client> replica_chain_client::lock() {
   return std::make_shared<replica_chain_client::locked_client>(*this);
 }
+bool replica_chain_client::is_connected() const {
+  return head_.is_connected() && tail_.is_connected();
+}
 
 replica_chain_client::locked_client::locked_client(replica_chain_client &parent) : parent_(parent) {
   auto res = parent_.run_command(kv_op_id::lock, {});

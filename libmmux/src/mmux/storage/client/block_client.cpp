@@ -42,7 +42,7 @@ void block_client::disconnect() {
   block_id_ = -1;
 }
 
-bool block_client::is_connected() {
+bool block_client::is_connected() const {
   if (transport_ == nullptr) return false;
   return transport_->isOpen();
 }

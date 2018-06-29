@@ -13,17 +13,6 @@ class redo_error : public std::exception {
   redo_error() {}
 };
 
-class redirect_error : public std::exception {
- public:
-  redirect_error(const std::vector<std::string> &blocks) : blocks_(blocks) {}
-
-  std::vector<std::string> blocks() const {
-    return blocks_;
-  }
- private:
-  std::vector<std::string> blocks_;
-};
-
 class kv_client {
  public:
 
@@ -61,6 +50,8 @@ class kv_client {
   void refresh();
 
   directory::data_status &status();
+
+  locked_client lock();
 
   std::string put(const std::string &key, const std::string &value);
   std::string get(const std::string &key);

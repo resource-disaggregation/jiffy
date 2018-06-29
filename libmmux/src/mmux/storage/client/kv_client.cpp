@@ -25,6 +25,10 @@ directory::data_status &kv_client::status() {
   return status_;
 }
 
+kv_client::locked_client kv_client::lock() {
+  return kv_client::locked_client(*this);
+}
+
 void kv_client::refresh() {
   status_ = fs_->dstatus(path_);
   LOG(log_level::info) << "Refreshing block mappings to " << status_.to_string();
@@ -97,6 +101,9 @@ std::string kv_client::remove(const std::string &key) {
 }
 
 std::vector<std::string> kv_client::put(const std::vector<std::string> &kvs) {
+  if (kvs.size() % 2 != 0) {
+    throw std::invalid_argument("Incorrect number of arguments");
+  }
   std::vector<std::string> _return;
   bool redo = false;
   do {
@@ -115,7 +122,7 @@ std::vector<std::string> kv_client::get(const std::vector<std::string> &keys) {
   bool redo = false;
   do {
     try {
-      _return = batch_command(kv_op_id::get, keys, 2);
+      _return = batch_command(kv_op_id::get, keys, 1);
       handle_redirects(kv_op_id::get, keys, _return);
     } catch (redo_error &e) {
       redo = true;
@@ -125,6 +132,9 @@ std::vector<std::string> kv_client::get(const std::vector<std::string> &keys) {
 }
 
 std::vector<std::string> kv_client::update(const std::vector<std::string> &kvs) {
+  if (kvs.size() % 2 != 0) {
+    throw std::invalid_argument("Incorrect number of arguments");
+  }
   std::vector<std::string> _return;
   bool redo = false;
   do {
@@ -143,7 +153,7 @@ std::vector<std::string> kv_client::remove(const std::vector<std::string> &keys)
   bool redo = false;
   do {
     try {
-      _return = batch_command(kv_op_id::remove, keys, 2);
+      _return = batch_command(kv_op_id::remove, keys, 1);
       handle_redirects(kv_op_id::remove, keys, _return);
     } catch (redo_error &e) {
       redo = true;
@@ -167,9 +177,9 @@ std::vector<std::string> kv_client::batch_command(const kv_op_id &op,
   std::vector<std::vector<size_t>> positions(blocks_.size());
   size_t num_ops = args.size() / args_per_op;
   for (size_t i = 0; i < num_ops; i++) {
-    auto id = block_id(args[i * num_ops]);
-    for (size_t j = 0; j < num_ops; j++)
-      block_args[id].push_back(args[i * num_ops + j]);
+    auto id = block_id(args[i * args_per_op]);
+    for (size_t j = 0; j < args_per_op; j++)
+      block_args[id].push_back(args[i * args_per_op + j]);
     positions[id].push_back(i);
   }
 
@@ -273,7 +283,7 @@ std::vector<std::string> kv_client::locked_client::put(const std::vector<std::st
 }
 
 std::vector<std::string> kv_client::locked_client::get(const std::vector<std::string> &keys) {
-  auto _return = parent_.batch_command(kv_op_id::locked_get, keys, 2);
+  auto _return = parent_.batch_command(kv_op_id::locked_get, keys, 1);
   handle_redirects(kv_op_id::locked_get, keys, _return);
   return _return;
 }
@@ -285,7 +295,7 @@ std::vector<std::string> kv_client::locked_client::update(const std::vector<std:
 }
 
 std::vector<std::string> kv_client::locked_client::remove(const std::vector<std::string> &keys) {
-  auto _return = parent_.batch_command(kv_op_id::locked_remove, keys, 2);
+  auto _return = parent_.batch_command(kv_op_id::locked_remove, keys, 1);
   handle_redirects(kv_op_id::locked_remove, keys, _return);
   return _return;
 }
