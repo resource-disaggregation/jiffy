@@ -18,7 +18,7 @@ from unittest import TestCase
 
 from thrift.transport import TTransport, TSocket
 
-from mmux import MMuxClient, RemoveMode, StorageMode
+from mmux import MMuxClient, StorageMode
 from mmux.benchmark.kv_async_benchmark import run_async_kv_benchmark
 from mmux.benchmark.kv_sync_benchmark import run_sync_kv_throughput_benchmark, run_sync_kv_latency_benchmark
 from mmux.subscription.subscriber import Notification
@@ -138,7 +138,7 @@ class TestClient(TestCase):
     def kv_ops(self, kv):
         # Test exists/get/put
         for i in range(0, 1000):
-            self.assertTrue(kv.put(str(i), str(i)) == 'ok')
+            self.assertTrue(kv.put(str(i), str(i)) == b'!ok')
 
         for i in range(0, 1000):
             self.assertTrue(kv.exists(str(i)))
@@ -146,14 +146,14 @@ class TestClient(TestCase):
 
         for i in range(1000, 2000):
             self.assertFalse(kv.exists(str(i)))
-            self.assertTrue(kv.get(str(i)) is None)
+            self.assertTrue(kv.get(str(i)) == b'!key_not_found')
 
         # Test update
         for i in range(0, 1000):
             self.assertTrue(kv.update(str(i), str(i + 1000)) == bytes(str(i), 'utf-8'))
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.update(str(i), str(i + 1000)) is None)
+            self.assertTrue(kv.update(str(i), str(i + 1000)) == b'!key_not_found')
 
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) == bytes(str(i + 1000), 'utf-8'))
@@ -163,55 +163,10 @@ class TestClient(TestCase):
             self.assertTrue(kv.remove(str(i)) == bytes(str(i + 1000), 'utf-8'))
 
         for i in range(1000, 2000):
-            self.assertTrue(kv.remove(str(i)) is None)
+            self.assertTrue(kv.remove(str(i)) == b'!key_not_found')
 
         for i in range(0, 1000):
-            self.assertTrue(kv.get(str(i)) is None)
-
-    def pipelined_kv_ops(self, kv):
-        # Test get/put
-        puts = kv.pipeline_put()
-        gets = kv.pipeline_get()
-        removes = kv.pipeline_remove()
-        updates = kv.pipeline_update()
-
-        for i in range(0, 1000):
-            puts.put(str(i), str(i))
-        self.assertTrue(puts.execute() == [b'!ok'] * 1000)
-
-        for i in range(0, 1000):
-            gets.get(str(i))
-        self.assertTrue(gets.execute() == [bytes(str(i), 'utf-8') for i in range(0, 1000)])
-
-        for i in range(1000, 2000):
-            gets.get(str(i))
-        self.assertTrue(gets.execute() == [b'!key_not_found'] * 1000)
-
-        # Test update
-        for i in range(0, 1000):
-            updates.update(str(i), str(i + 1000))
-        self.assertTrue(updates.execute() == [bytes(str(i), 'utf-8') for i in range(0, 1000)])
-
-        for i in range(1000, 2000):
-            updates.update(str(i), str(i + 1000))
-        self.assertTrue(updates.execute() == [b'!key_not_found'] * 1000)
-
-        for i in range(0, 1000):
-            gets.get(str(i))
-        self.assertTrue(gets.execute() == [bytes(str(i + 1000), 'utf-8') for i in range(0, 1000)])
-
-        # Test remove
-        for i in range(0, 1000):
-            removes.remove(str(i))
-        self.assertTrue(removes.execute() == [bytes(str(i + 1000), 'utf-8') for i in range(0, 1000)])
-
-        for i in range(1000, 2000):
-            removes.remove(str(i))
-        self.assertTrue(removes.execute() == [b'!key_not_found'] * 1000)
-
-        for i in range(0, 1000):
-            gets.get(str(i))
-        self.assertTrue(gets.execute() == [b'!key_not_found'] * 1000)
+            self.assertTrue(kv.get(str(i)) == b'!key_not_found')
 
     def test_lease_worker(self):
         self.start_servers()
@@ -233,7 +188,6 @@ class TestClient(TestCase):
         try:
             kv = client.create("/a/file.txt", "/tmp")
             self.kv_ops(kv)
-            self.pipelined_kv_ops(kv)
             self.assertTrue(client.fs.exists('/a/file.txt'))
         finally:
             client.disconnect()
@@ -247,7 +201,6 @@ class TestClient(TestCase):
             self.assertTrue(client.fs.exists('/a/file.txt'))
             kv = client.open('/a/file.txt')
             self.kv_ops(kv)
-            self.pipelined_kv_ops(kv)
         finally:
             client.disconnect()
             self.stop_servers()
@@ -275,7 +228,6 @@ class TestClient(TestCase):
             kv = client.create("/a/file.txt", "/tmp", 1, 3)
             self.assertTrue(kv.file_info.chain_length == 3)
             self.kv_ops(kv)
-            self.pipelined_kv_ops(kv)
         finally:
             client.disconnect()
             self.stop_servers()
@@ -286,7 +238,7 @@ class TestClient(TestCase):
         try:
             kv = client.create("/a/file.txt", "/tmp")
             for i in range(0, 2000):
-                self.assertTrue(kv.put(str(i), str(i)) == 'ok')
+                self.assertTrue(kv.put(str(i), str(i)) == b'!ok')
             self.assertTrue(len(client.fs.dstatus("/a/file.txt").data_blocks) == 4)
             for i in range(0, 2000):
                 self.assertTrue(kv.remove(str(i)) == bytes(str(i), 'utf-8'))
