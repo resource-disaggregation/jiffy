@@ -75,6 +75,9 @@ class BlockClient:
         self.transport_, self.protocol_, self.client_ = client_cache.get(host, port)
         self.id_ = block_id
 
+    def is_open(self):
+        return self.transport_.isOpen()
+
     def get_response_reader(self, client_id):
         self.client_.register_client_id(self.id_, client_id)
         return CommandResponseReader(self.protocol_)

@@ -17,7 +17,8 @@ class ReplicaChainClient:
                 self.redirect_chain = []
 
         def __del__(self):
-            self.unlock()
+            if self.parent.is_open():
+                self.unlock()
 
         def unlock(self):
             self.run_command(KVOps.unlock, [])
@@ -31,11 +32,11 @@ class ReplicaChainClient:
         def get_redirect_chain(self):
             return self.redirect_chain
 
-        def send_cmd(self, cmd_id, args):
-            self.parent.send_cmd(cmd_id, args)
+        def send_command(self, cmd_id, args):
+            self.parent.send_command(cmd_id, args)
 
-        def recv_cmd(self):
-            return self.parent.recv_cmd()
+        def recv_response(self):
+            return self.parent.recv_response()
 
         def run_command(self, cmd_id, args):
             return self.parent.run_command(cmd_id, args)
@@ -59,22 +60,28 @@ class ReplicaChainClient:
         self.response_cache = {}
         self.in_flight = False
 
+    def lock(self):
+        return self.LockedClient(self)
+
     def get_chain(self):
         return self.chain
 
-    def _send_cmd(self, client, cmd_id, args):
+    def is_open(self):
+        return self.head.is_open() and self.tail.is_open()
+
+    def _send_command(self, client, cmd_id, args):
         if self.in_flight:
             raise RuntimeError("Cannot have more than one request in-flight")
         client.send_request(self.seq, cmd_id, args)
         self.in_flight = True
 
-    def send_cmd(self, cmd_id, args):
+    def send_command(self, cmd_id, args):
         if op_type(cmd_id) == KVOpType.accessor:
-            self._send_cmd(self.tail, cmd_id, args)
+            self._send_command(self.tail, cmd_id, args)
         else:
-            self._send_cmd(self.head, cmd_id, args)
+            self._send_command(self.head, cmd_id, args)
 
-    def _recv_cmd(self):
+    def _recv_response(self):
         rseq, result = self.response_reader.recv_response()
         if self.seq.client_seq_no != rseq:
             raise RuntimeError("SEQ: Expected={} Received={}".format(self.seq.client_seq_no, rseq))
@@ -82,12 +89,12 @@ class ReplicaChainClient:
         self.in_flight = False
         return result
 
-    def recv_cmd(self):
-        return self._recv_cmd()
+    def recv_response(self):
+        return self._recv_response()
 
     def _run_command(self, client, cmd_id, args):
-        self._send_cmd(client, cmd_id, args)
-        return self._recv_cmd()
+        self._send_command(client, cmd_id, args)
+        return self._recv_response()
 
     def run_command(self, cmd_id, args):
         if op_type(cmd_id) == KVOpType.accessor:
@@ -97,8 +104,8 @@ class ReplicaChainClient:
 
     def _run_command_redirected(self, client, cmd_id, args):
         args.append("!redirected")
-        self._send_cmd(client, cmd_id, args)
-        return self._recv_cmd()
+        self._send_command(client, cmd_id, args)
+        return self._recv_response()
 
     def run_command_redirected(self, cmd_id, args):
         if op_type(cmd_id) == KVOpType.accessor:

@@ -18,7 +18,7 @@ from unittest import TestCase
 
 from thrift.transport import TTransport, TSocket
 
-from mmux import MMuxClient, StorageMode
+from mmux import MMuxClient, StorageMode, b
 from mmux.benchmark.kv_async_benchmark import run_async_kv_benchmark
 from mmux.benchmark.kv_sync_benchmark import run_sync_kv_throughput_benchmark, run_sync_kv_latency_benchmark
 from mmux.subscription.subscriber import Notification
@@ -136,17 +136,25 @@ class TestClient(TestCase):
             self.storaged3.wait()
 
     def kv_ops(self, kv):
+        if getattr(kv, "num_keys", None) is not None:
+            self.assertTrue(kv.num_keys() == 0)
+
         # Test exists/get/put
         for i in range(0, 1000):
             self.assertTrue(kv.put(str(i), str(i)) == b'!ok')
 
         for i in range(0, 1000):
-            self.assertTrue(kv.exists(str(i)))
+            if getattr(kv, "exists", None) is not None:
+                self.assertTrue(kv.exists(str(i)))
             self.assertTrue(kv.get(str(i)) == bytes(str(i), 'utf-8'))
 
         for i in range(1000, 2000):
-            self.assertFalse(kv.exists(str(i)))
+            if getattr(kv, "exists", None) is not None:
+                self.assertFalse(kv.exists(str(i)))
             self.assertTrue(kv.get(str(i)) == b'!key_not_found')
+
+        if getattr(kv, "num_keys", None) is not None:
+            self.assertTrue(kv.num_keys() == 1000)
 
         # Test update
         for i in range(0, 1000):
@@ -158,6 +166,9 @@ class TestClient(TestCase):
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) == bytes(str(i + 1000), 'utf-8'))
 
+        if getattr(kv, "num_keys", None) is not None:
+            self.assertTrue(kv.num_keys() == 1000)
+
         # Test remove
         for i in range(0, 1000):
             self.assertTrue(kv.remove(str(i)) == bytes(str(i + 1000), 'utf-8'))
@@ -167,6 +178,53 @@ class TestClient(TestCase):
 
         for i in range(0, 1000):
             self.assertTrue(kv.get(str(i)) == b'!key_not_found')
+
+        if getattr(kv, "num_keys", None) is not None:
+            self.assertTrue(kv.num_keys() == 0)
+
+        # Batched Ops
+        valid_keys = [b(str(i)) for i in range(1000)]
+        invalid_keys = [b(str(i)) for i in range(1000, 2000)]
+        original_values = [b(str(i)) for i in range(1000)]
+        updated_values = [b(str(i)) for i in range(1000, 2000)]
+        original_kvs = [b(str(j)) for i in range(1000) for j in [i, i]]
+        updated_kvs = [b(str(j)) for i in range(1000) for j in [i, i + 1000]]
+        invalid_kvs = [b(str(j)) for i in range(1000, 2000) for j in [i, i + 1000]]
+
+        # Test exists/get/put
+        self.assertTrue(kv.multi_put(original_kvs) == [b'!ok'] * 1000)
+        self.assertTrue(kv.multi_get(valid_keys) == original_values)
+        if getattr(kv, "multi_exists", None) is not None:
+            self.assertTrue(kv.multi_exists(valid_keys) == [True] * 1000)
+        self.assertTrue(kv.multi_get(invalid_keys) == [b'!key_not_found'] * 1000)
+        if getattr(kv, "multi_exists", None) is not None:
+            self.assertTrue(kv.multi_exists(invalid_keys) == [False] * 1000)
+
+        if getattr(kv, "num_keys", None) is not None:
+            self.assertTrue(kv.num_keys() == 1000)
+
+        # Test update
+        self.assertTrue(kv.multi_update(updated_kvs) == original_values)
+        self.assertTrue(kv.multi_update(invalid_kvs) == [b'!key_not_found'] * 1000)
+        self.assertTrue(kv.multi_get(valid_keys) == updated_values)
+
+        if getattr(kv, "num_keys", None) is not None:
+            self.assertTrue(kv.num_keys() == 1000)
+
+        # Test remove
+        self.assertTrue(kv.multi_remove(valid_keys) == updated_values)
+        self.assertTrue(kv.multi_remove(invalid_keys) == [b'!key_not_found'] * 1000)
+        self.assertTrue(kv.multi_get(valid_keys) == [b'!key_not_found'] * 1000)
+
+        if getattr(kv, "num_keys", None) is not None:
+            print("testing num_keys")
+            self.assertTrue(kv.num_keys() == 0)
+
+        if getattr(kv, "lock", None) is not None:
+            print("Testing locked ops")
+            locked_kv = kv.lock()
+            self.kv_ops(locked_kv)
+            locked_kv.unlock()
 
     def test_lease_worker(self):
         self.start_servers()

@@ -71,7 +71,7 @@ class KVClient:
 
         def _handle_redirects(self, cmd_id, args, responses):
             n_ops = len(responses)
-            n_op_args = len(args) / n_ops
+            n_op_args = int(len(args) / n_ops)
             for i in range(n_ops):
                 response = b(responses[i])
                 while response.startswith(b('!exporting')):
@@ -139,9 +139,9 @@ class KVClient:
 
             n = 0
             for i in range(len(self.blocks)):
-                n += int(self.blocks[i].recv_response())
+                n += int(self.blocks[i].recv_response()[0])
                 if self.new_blocks[i] is not None:
-                    n += int(self.new_blocks[i].recv_response())
+                    n += int(self.new_blocks[i].recv_response()[0])
             return n
 
     def __init__(self, fs, path, data_status, chain_failure_cb):
@@ -159,6 +159,9 @@ class KVClient:
         self.blocks = [ReplicaChainClient(self.client_cache, chain.block_names) for chain in self.file_info.data_blocks]
         self.slots = [chain.slot_range[0] for chain in self.file_info.data_blocks]
 
+    def lock(self):
+        return self.LockedClient(self)
+
     def _handle_redirect(self, cmd_id, args, response):
         response = b(response)
         while response.startswith(b('!exporting')):
@@ -171,7 +174,7 @@ class KVClient:
 
     def _handle_redirects(self, cmd_id, args, responses):
         n_ops = len(responses)
-        n_op_args = len(args) / n_ops
+        n_op_args = int(len(args) / n_ops)
         for i in range(n_ops):
             response = b(responses[i])
             while response.startswith(b('!exporting')):
@@ -188,23 +191,23 @@ class KVClient:
         if len(args) % args_per_op != 0:
             raise RuntimeError("Incorrect number of arguments")
 
-        num_ops = len(args) / args_per_op
+        num_ops = int(len(args) / args_per_op)
         block_args = [[] for _ in self.blocks]
         positions = [[] for _ in self.blocks]
 
         for i in range(num_ops):
             bid = self.block_id(args[i * args_per_op])
-            block_args[bid].extend(args[i * args_per_op: (i + 1) * args])
+            block_args[bid].extend(args[i * args_per_op: (i + 1) * args_per_op])
             positions[bid].append(i)
 
         for i in range(len(self.blocks)):
             if block_args[i]:
-                self.blocks[i].send_cmd(op, block_args[i])
+                self.blocks[i].send_command(op, block_args[i])
 
         responses = [None for _ in range(num_ops)]
         for i in range(len(self.blocks)):
             if block_args[i]:
-                response = self.blocks[i].recv_cmd()
+                response = self.blocks[i].recv_response()
                 for j in range(len(response)):
                     responses[positions[i][j]] = response[j]
 
