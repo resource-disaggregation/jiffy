@@ -43,8 +43,7 @@ std::ostream& operator<<(std::ostream& out, const rpc_file_type val);
 enum rpc_storage_mode {
   rpc_in_memory = 0,
   rpc_in_memory_grace = 1,
-  rpc_flushing = 2,
-  rpc_on_disk = 3
+  rpc_on_disk = 2
 };
 
 extern const std::map<int, const char*> _rpc_storage_mode_VALUES_TO_NAMES;
@@ -170,19 +169,22 @@ class rpc_data_status {
 
   rpc_data_status(const rpc_data_status&);
   rpc_data_status& operator=(const rpc_data_status&);
-  rpc_data_status() : persistent_store_prefix(), chain_length(0) {
+  rpc_data_status() : persistent_store_prefix(), chain_length(0), flags(0) {
   }
 
   virtual ~rpc_data_status() throw();
   std::string persistent_store_prefix;
   int32_t chain_length;
   std::vector<rpc_replica_chain>  data_blocks;
+  int32_t flags;
 
   void __set_persistent_store_prefix(const std::string& val);
 
   void __set_chain_length(const int32_t val);
 
   void __set_data_blocks(const std::vector<rpc_replica_chain> & val);
+
+  void __set_flags(const int32_t val);
 
   bool operator == (const rpc_data_status & rhs) const
   {
@@ -191,6 +193,8 @@ class rpc_data_status {
     if (!(chain_length == rhs.chain_length))
       return false;
     if (!(data_blocks == rhs.data_blocks))
+      return false;
+    if (!(flags == rhs.flags))
       return false;
     return true;
   }

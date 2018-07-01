@@ -19,8 +19,7 @@ enum rpc_file_type {
 enum rpc_storage_mode {
   rpc_in_memory = 0,
   rpc_in_memory_grace = 1,
-  rpc_flushing = 2,
-  rpc_on_disk = 3
+  rpc_on_disk = 2
 }
 
 struct rpc_replica_chain {
@@ -40,6 +39,7 @@ struct rpc_data_status {
   1: required string persistent_store_prefix,
   2: required i32 chain_length,
   3: required list<rpc_replica_chain> data_blocks,
+  4: required i32 flags,
 }
 
 struct rpc_dir_entry {

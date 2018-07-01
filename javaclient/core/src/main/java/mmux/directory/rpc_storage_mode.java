@@ -10,8 +10,7 @@ package mmux.directory;
 public enum rpc_storage_mode implements org.apache.thrift.TEnum {
   rpc_in_memory(0),
   rpc_in_memory_grace(1),
-  rpc_flushing(2),
-  rpc_on_disk(3);
+  rpc_on_disk(2);
 
   private final int value;
 
@@ -37,8 +36,6 @@ public enum rpc_storage_mode implements org.apache.thrift.TEnum {
       case 1:
         return rpc_in_memory_grace;
       case 2:
-        return rpc_flushing;
-      case 3:
         return rpc_on_disk;
       default:
         return null;

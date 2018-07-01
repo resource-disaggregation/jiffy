@@ -135,8 +135,7 @@ enum file_type {
 enum storage_mode {
   in_memory = 0,
   in_memory_grace = 1,
-  flushing = 2,
-  on_disk = 3
+  on_disk = 2
 };
 
 enum chain_status {
@@ -275,14 +274,20 @@ class directory_entry {
 
 class data_status {
  public:
-  data_status() : chain_length_(1) {}
+  static const std::int32_t PINNED = 0x01;
+  static const std::int32_t STATIC_PROVISIONED = 0x02;
+  static const std::int32_t MAPPED = 0x04;
+
+  data_status() : chain_length_(1), flags_(0) {}
 
   data_status(std::string persistent_store_prefix,
               std::size_t chain_length,
-              std::vector<replica_chain> blocks)
+              std::vector<replica_chain> blocks,
+              int32_t flags = 0)
       : persistent_store_prefix_(std::move(persistent_store_prefix)),
         chain_length_(chain_length),
-        data_blocks_(std::move(blocks)) {}
+        data_blocks_(std::move(blocks)),
+        flags_(flags) {}
 
   const std::vector<replica_chain> &data_blocks() const {
     return data_blocks_;
@@ -372,10 +377,43 @@ class data_status {
     return out;
   }
 
+  std::int32_t flags() const {
+    return flags_;
+  }
+
+  void set_pinned() {
+    flags_ |= PINNED;
+  }
+
+  void set_static_provisioned() {
+    flags_ |= STATIC_PROVISIONED;
+  }
+
+  void set_mapped() {
+    flags_ |= MAPPED;
+  }
+
+  void clear_flags() {
+    flags_ = 0;
+  }
+
+  bool is_pinned() const {
+    return (flags_ & PINNED) == PINNED;
+  }
+
+  bool is_static_provisioned() const {
+    return (flags_ & STATIC_PROVISIONED) == STATIC_PROVISIONED;
+  }
+
+  bool is_mapped() const {
+    return (flags_ & MAPPED) == MAPPED;
+  }
+
  private:
   std::string persistent_store_prefix_;
   std::size_t chain_length_;
   std::vector<replica_chain> data_blocks_;
+  std::int32_t flags_;
 };
 
 class directory_ops {
