@@ -60,7 +60,7 @@ class block_client {
   int64_t get_client_id();
   void connect(const std::string &hostname, int port, int block_id, int timeout_ms = 0);
   void disconnect();
-  bool is_connected();
+  bool is_connected() const;
 
   command_response_reader get_command_response_reader(int64_t client_id);
   void command_request(const sequence_id &seq, int32_t cmd_id, const std::vector<std::string> &args);

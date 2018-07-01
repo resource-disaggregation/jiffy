@@ -2,9 +2,9 @@ package mmux.hadoop.fs;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import mmux.kv.KVClient;
-import mmux.kv.KVClient.RedirectException;
-import mmux.kv.KVClient.RedoException;
+import mmux.util.ByteBufferUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.thrift.TException;
 
@@ -17,16 +17,18 @@ public class MMuxOutputStream extends OutputStream {
   private byte[] block;
   private long blockNum;
   private KVClient client;
+  private ByteBuffer lastBlockKey;
 
-  MMuxOutputStream(KVClient client, Configuration conf)
-      throws TException, RedoException, RedirectException {
+  MMuxOutputStream(KVClient client, Configuration conf) throws TException {
     this.pos = 0;
     this.blockNum = 0;
     this.client = client;
     this.blockSize = conf.getInt("mmfs.block.size", 64 * 1024);
     this.block = new byte[this.blockSize];
-    if (client.put("LastBlock", String.valueOf(blockNum)) == null) {
-      client.update("LastBlock", String.valueOf(blockNum));
+    this.lastBlockKey = ByteBufferUtils.fromString("LastBlock");
+    ByteBuffer lastBlockValue = ByteBufferUtils.fromString(String.valueOf(blockNum));
+    if (client.put(lastBlockKey, lastBlockValue) == ByteBufferUtils.fromString("!key_already_exists")) {
+      client.update(lastBlockKey, lastBlockValue);
     }
   }
 
@@ -73,17 +75,17 @@ public class MMuxOutputStream extends OutputStream {
       throw new IOException("Stream closed");
     }
     try {
-      String key = String.valueOf(blockNum);
-      String value = new String(block);
-      if (client.put(key, value) == null) {
+      ByteBuffer key = ByteBufferUtils.fromString(String.valueOf(blockNum));
+      ByteBuffer value = ByteBuffer.wrap(block);
+      if (client.put(key, value) == ByteBufferUtils.fromString("!key_already_exists")) {
         client.update(key, value);
       }
       if (pos == blockSize) {
         pos = 0;
         blockNum++;
-        client.update("LastBlock", String.valueOf(blockNum));
+        client.update(lastBlockKey, ByteBufferUtils.fromString(String.valueOf(blockNum)));
       }
-    } catch (TException | RedirectException | RedoException e) {
+    } catch (TException e) {
       throw new IOException(e);
     }
   }

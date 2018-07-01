@@ -3,6 +3,7 @@
 
 #include <map>
 #include "block_client.h"
+#include "../kv/kv_block.h"
 
 namespace mmux {
 namespace storage {
@@ -11,29 +12,47 @@ class replica_chain_client {
  public:
   typedef block_client *client_ref;
 
+  class locked_client {
+   public:
+    locked_client(replica_chain_client &parent);
+
+    ~locked_client();
+
+    void unlock();
+    const std::vector<std::string> &chain();
+
+    bool redirecting() const;
+    const std::vector<std::string> &redirect_chain();
+
+    void send_command(int32_t cmd_id, const std::vector<std::string> &args);
+    std::vector<std::string> recv_response();
+    std::vector<std::string> run_command(int32_t cmd_id, const std::vector<std::string> &args);
+    std::vector<std::string> run_command_redirected(int32_t cmd_id, const std::vector<std::string> &args);
+
+   private:
+    replica_chain_client &parent_;
+
+    bool redirecting_;
+    std::vector<std::string> redirect_chain_;
+  };
+
   explicit replica_chain_client(const std::vector<std::string> &chain, int timeout_ms = 0);
 
   ~replica_chain_client();
-  void disconnect();
 
   const std::vector<std::string> &chain() const;
 
-  std::string get(const std::string &key);
-  std::string put(const std::string &key, const std::string &value);
-  std::string remove(const std::string &key);
-  std::string update(const std::string &key, const std::string &value);
-  std::string num_keys();
+  std::shared_ptr<locked_client> lock();
 
-  std::string redirected_put(const std::string &key, const std::string &value);
-  std::string redirected_get(const std::string &key);
-  std::string redirected_update(const std::string &key, const std::string &value);
-  std::string redirected_remove(const std::string &key);
+  bool is_connected() const;
 
   void send_command(int32_t cmd_id, const std::vector<std::string> &args);
   std::vector<std::string> recv_response();
   std::vector<std::string> run_command(int32_t cmd_id, const std::vector<std::string> &args);
+  std::vector<std::string> run_command_redirected(int32_t cmd_id, const std::vector<std::string> &args);
  private:
   void connect(const std::vector<std::string> &chain, int timeout_ms = 0);
+  void disconnect();
 
   sequence_id seq_;
   std::vector<std::string> chain_;

@@ -31,7 +31,7 @@ using namespace mmux::utils;
 
 void test_kv_ops(kv_client &kv) {
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE_NOTHROW(kv.put(std::to_string(i), std::to_string(i)));
+    REQUIRE(kv.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
 
   for (size_t i = 0; i < 1000; i++) {
@@ -39,7 +39,7 @@ void test_kv_ops(kv_client &kv) {
   }
 
   for (size_t i = 1000; i < 2000; i++) {
-    REQUIRE_THROWS_AS(kv.get(std::to_string(i)), std::out_of_range);
+    REQUIRE(kv.get(std::to_string(i)) == "!key_not_found");
   }
 
   for (size_t i = 0; i < 1000; i++) {
@@ -47,7 +47,7 @@ void test_kv_ops(kv_client &kv) {
   }
 
   for (size_t i = 1000; i < 2000; i++) {
-    REQUIRE_THROWS_AS(kv.update(std::to_string(i), std::to_string(i + 1000)), std::out_of_range);
+    REQUIRE(kv.update(std::to_string(i), std::to_string(i + 1000)) == "!key_not_found");
   }
 
   for (size_t i = 0; i < 1000; i++) {
@@ -55,11 +55,11 @@ void test_kv_ops(kv_client &kv) {
   }
 
   for (size_t i = 1000; i < 2000; i++) {
-    REQUIRE_THROWS_AS(kv.remove(std::to_string(i)), std::out_of_range);
+    REQUIRE(kv.remove(std::to_string(i)) == "!key_not_found");
   }
 
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE_THROWS_AS(kv.get(std::to_string(i)), std::out_of_range);
+    REQUIRE(kv.get(std::to_string(i)) == "!key_not_found");
   }
 }
 

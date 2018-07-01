@@ -3,15 +3,16 @@ package mmux;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import mmux.directory.rpc_storage_mode;
 import mmux.kv.KVClient;
-import mmux.kv.KVClient.RedirectException;
-import mmux.kv.KVClient.RedoException;
+import mmux.kv.KVClient.LockedClient;
 import mmux.notification.KVListener;
 import mmux.notification.event.Notification;
+import mmux.util.ByteBufferUtils;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransportException;
@@ -67,7 +68,7 @@ public class MMuxClientTest {
     dirHost = directoryConf.get("directory", "host");
     dirPort = Integer.parseInt(directoryConf.get("directory", "service_port"));
     leasePort = Integer.parseInt(directoryConf.get("directory", "lease_port"));
-    System.out.println("Running " + testName.getMethodName());
+    System.out.println("=> Running " + testName.getMethodName());
   }
 
   @After
@@ -170,42 +171,162 @@ public class MMuxClientTest {
     stopProcess(storaged3);
   }
 
-  private void kvOps(KVClient kv) throws TException, RedoException, RedirectException {
+  private ByteBuffer makeBB(int i) {
+    return ByteBufferUtils.fromString(String.valueOf(i));
+  }
+
+  private ByteBuffer makeBB(String str) {
+    return ByteBufferUtils.fromString(str);
+  }
+
+  private void assertBBEquals(ByteBuffer bb1, ByteBuffer bb2) {
+    Assert.assertEquals(ByteBufferUtils.toString(bb1), ByteBufferUtils.toString(bb2));
+  }
+
+  private void kvOps(KVClient kv) throws TException {
+    System.out.println("==> Testing KV ops");
     for (int i = 0; i < 1000; i++) {
-      Assert.assertEquals("ok", kv.put(String.valueOf(i), String.valueOf(i)));
+      Assert.assertEquals(makeBB("!ok"), kv.put(makeBB(i), makeBB(i)));
     }
 
     for (int i = 0; i < 1000; i++) {
-      Assert.assertEquals(String.valueOf(i), kv.get(String.valueOf(i)));
+      Assert.assertEquals(makeBB(i), kv.get(makeBB(i)));
     }
 
     for (int i = 1000; i < 2000; i++) {
-      Assert.assertEquals(null, kv.get(String.valueOf(i)));
+      Assert.assertEquals(makeBB("!key_not_found"), kv.get(makeBB(i)));
     }
 
     for (int i = 0; i < 1000; i++) {
-      Assert
-          .assertEquals(String.valueOf(i), kv.update(String.valueOf(i), String.valueOf(i + 1000)));
+      Assert.assertEquals(makeBB(i), kv.update(makeBB(i), makeBB(i + 1000)));
     }
 
     for (int i = 1000; i < 2000; i++) {
-      Assert.assertEquals(null, kv.update(String.valueOf(i), String.valueOf(i + 1000)));
+      Assert.assertEquals(makeBB("!key_not_found"), kv.update(makeBB(i), makeBB(i + 1000)));
     }
 
     for (int i = 0; i < 1000; i++) {
-      Assert.assertEquals(String.valueOf(i + 1000), kv.get(String.valueOf(i)));
+      Assert.assertEquals(makeBB(i + 1000), kv.get(makeBB(i)));
     }
 
     for (int i = 0; i < 1000; i++) {
-      Assert.assertEquals(String.valueOf(i + 1000), kv.remove(String.valueOf(i)));
+      Assert.assertEquals(makeBB(i + 1000), kv.remove(makeBB(i)));
     }
 
     for (int i = 1000; i < 2000; i++) {
-      Assert.assertEquals(null, kv.remove(String.valueOf(i)));
+      Assert.assertEquals(makeBB("!key_not_found"), kv.remove(makeBB(i)));
     }
 
     for (int i = 0; i < 1000; i++) {
-      Assert.assertEquals(null, kv.remove(String.valueOf(i)));
+      Assert.assertEquals(makeBB("!key_not_found"), kv.get(makeBB(i)));
+    }
+
+    List<ByteBuffer> validKeys = new ArrayList<>(1000);
+    List<ByteBuffer> invalidKeys = new ArrayList<>(1000);
+    List<ByteBuffer> originalValues = new ArrayList<>(1000);
+    List<ByteBuffer> updatedValues = new ArrayList<>(1000);
+    List<ByteBuffer> originalKVs = new ArrayList<>(2000);
+    List<ByteBuffer> updatedKVs = new ArrayList<>(2000);
+    List<ByteBuffer> invalidKVs = new ArrayList<>(2000);
+    initBatchOps(validKeys, invalidKeys, originalValues, updatedValues, originalKVs, updatedKVs,
+        invalidKVs);
+    Assert.assertEquals(Collections.nCopies(1000, makeBB("!ok")), kv.put(originalKVs));
+    Assert.assertEquals(originalValues, kv.get(validKeys));
+    Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.get(invalidKeys));
+    Assert.assertEquals(originalValues, kv.update(updatedKVs));
+    Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.update(invalidKVs));
+    Assert.assertEquals(updatedValues, kv.get(validKeys));
+    Assert.assertEquals(updatedValues, kv.remove(validKeys));
+    Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.remove(invalidKeys));
+    Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.get(validKeys));
+
+    LockedClient lkv = kv.lock();
+    lockedKVOps(lkv);
+    lkv.close();
+  }
+
+  private void lockedKVOps(KVClient.LockedClient kv) throws TException {
+    System.out.println("==> Testing locked KV ops");
+    Assert.assertEquals(0, kv.numKeys());
+    for (int i = 0; i < 1000; i++) {
+      Assert.assertEquals(makeBB("!ok"), kv.put(makeBB(i), makeBB(i)));
+    }
+    Assert.assertEquals(1000, kv.numKeys());
+
+    for (int i = 0; i < 1000; i++) {
+      Assert.assertEquals(makeBB(i), kv.get(makeBB(i)));
+    }
+
+    for (int i = 1000; i < 2000; i++) {
+      Assert.assertEquals(makeBB("!key_not_found"), kv.get(makeBB(i)));
+    }
+
+    for (int i = 0; i < 1000; i++) {
+      Assert.assertEquals(makeBB(i), kv.update(makeBB(i), makeBB(i + 1000)));
+    }
+
+    Assert.assertEquals(1000, kv.numKeys());
+
+    for (int i = 1000; i < 2000; i++) {
+      Assert.assertEquals(makeBB("!key_not_found"), kv.update(makeBB(i), makeBB(i + 1000)));
+    }
+
+    for (int i = 0; i < 1000; i++) {
+      Assert.assertEquals(makeBB(i + 1000), kv.get(makeBB(i)));
+    }
+
+    for (int i = 0; i < 1000; i++) {
+      Assert.assertEquals(makeBB(i + 1000), kv.remove(makeBB(i)));
+    }
+
+    Assert.assertEquals(0, kv.numKeys());
+
+    for (int i = 1000; i < 2000; i++) {
+      Assert.assertEquals(makeBB("!key_not_found"), kv.remove(makeBB(i)));
+    }
+
+    for (int i = 0; i < 1000; i++) {
+      Assert.assertEquals(makeBB("!key_not_found"), kv.get(makeBB(i)));
+    }
+
+    List<ByteBuffer> validKeys = new ArrayList<>(1000);
+    List<ByteBuffer> invalidKeys = new ArrayList<>(1000);
+    List<ByteBuffer> originalValues = new ArrayList<>(1000);
+    List<ByteBuffer> updatedValues = new ArrayList<>(1000);
+    List<ByteBuffer> originalKVs = new ArrayList<>(2000);
+    List<ByteBuffer> updatedKVs = new ArrayList<>(2000);
+    List<ByteBuffer> invalidKVs = new ArrayList<>(2000);
+    initBatchOps(validKeys, invalidKeys, originalValues, updatedValues, originalKVs, updatedKVs,
+        invalidKVs);
+
+    Assert.assertEquals(Collections.nCopies(1000, makeBB("!ok")), kv.put(originalKVs));
+    Assert.assertEquals(1000, kv.numKeys());
+    Assert.assertEquals(originalValues, kv.get(validKeys));
+    Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.get(invalidKeys));
+    Assert.assertEquals(originalValues, kv.update(updatedKVs));
+    Assert.assertEquals(1000, kv.numKeys());
+    Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.update(invalidKVs));
+    Assert.assertEquals(updatedValues, kv.get(validKeys));
+    Assert.assertEquals(updatedValues, kv.remove(validKeys));
+    Assert.assertEquals(0, kv.numKeys());
+    Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.remove(invalidKeys));
+    Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.get(validKeys));
+  }
+
+  private void initBatchOps(List<ByteBuffer> validKeys, List<ByteBuffer> invalidKeys,
+      List<ByteBuffer> originalValues, List<ByteBuffer> updatedValues, List<ByteBuffer> originalKVs,
+      List<ByteBuffer> updatedKVs, List<ByteBuffer> invalidKVs) {
+    for (int i = 0; i < 1000; i++) {
+      validKeys.add(makeBB(i));
+      originalValues.add(makeBB(i));
+      originalKVs.add(makeBB(i));
+      originalKVs.add(makeBB(i));
+      updatedKVs.add(makeBB(i));
+      updatedKVs.add(makeBB(i + 1000));
+      invalidKeys.add(makeBB(i + 1000));
+      updatedValues.add(makeBB(i + 1000));
+      invalidKVs.add(makeBB(i + 1000));
+      invalidKVs.add(makeBB(i + 2000));
     }
   }
 
@@ -225,8 +346,7 @@ public class MMuxClientTest {
   }
 
   @Test
-  public void testCreate()
-      throws InterruptedException, TException, IOException, RedoException, RedirectException {
+  public void testCreate() throws InterruptedException, TException, IOException {
     startServers(false, false);
     try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
       KVClient kv = client.create("/a/file.txt", "local://tmp", 1, 1);
@@ -256,8 +376,7 @@ public class MMuxClientTest {
   }
 
   @Test
-  public void testOpen()
-      throws InterruptedException, TException, IOException, RedoException, RedirectException {
+  public void testOpen() throws InterruptedException, TException, IOException {
     startServers(false, false);
     try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
       client.create("/a/file.txt", "local://tmp", 1, 1);
@@ -270,8 +389,7 @@ public class MMuxClientTest {
   }
 
   @Test
-  public void testChainReplication()
-      throws InterruptedException, TException, IOException, RedoException, RedirectException {
+  public void testChainReplication() throws InterruptedException, TException, IOException {
     startServers(true, false);
     try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
       KVClient kv = client.create("/a/file.txt", "local://tmp", 1, 3);
@@ -283,17 +401,16 @@ public class MMuxClientTest {
   }
 
   @Test
-  public void testAutoScale()
-      throws InterruptedException, TException, IOException, RedoException, RedirectException {
+  public void testAutoScale() throws InterruptedException, TException, IOException {
     startServers(false, true);
     try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
       KVClient kv = client.create("/a/file.txt", "local://tmp", 1, 1);
       for (int i = 0; i < 2000; i++) {
-        Assert.assertEquals("ok", kv.put(String.valueOf(i), String.valueOf(i)));
+        Assert.assertEquals(makeBB("!ok"), kv.put(makeBB(i), makeBB(i)));
       }
       Assert.assertEquals(4, client.fs().dstatus("/a/file.txt").data_blocks.size());
       for (int i = 0; i < 2000; i++) {
-        Assert.assertEquals(String.valueOf(i), kv.remove(String.valueOf(i)));
+        Assert.assertEquals(makeBB(i), kv.remove(makeBB(i)));
       }
       Assert.assertEquals(1, client.fs().dstatus("/a/file.txt").data_blocks.size());
     } finally {
@@ -302,12 +419,12 @@ public class MMuxClientTest {
   }
 
   @Test
-  public void testNotifications()
-      throws InterruptedException, IOException, TException, RedoException, RedirectException {
+  public void testNotifications() throws InterruptedException, IOException, TException {
     startServers(false, false);
     try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
       String op1 = "put", op2 = "remove";
-      String key = "key1", value = "value1";
+      ByteBuffer key = ByteBufferUtils.fromString("key1");
+      ByteBuffer value = ByteBufferUtils.fromString("value1");
 
       client.create("/a/file.txt", "local://tmp", 1, 1);
       KVListener n1 = client.listen("/a/file.txt");
@@ -323,19 +440,19 @@ public class MMuxClientTest {
       kv.remove(key);
 
       Notification N1 = n1.getNotification();
-      Assert.assertEquals(ByteBuffer.wrap(key.getBytes(StandardCharsets.UTF_8)), N1.getData());
+      Assert.assertEquals(key, N1.getData());
       Assert.assertEquals(op1, N1.kind().name());
 
       Notification N2 = n2.getNotification();
-      Assert.assertEquals(ByteBuffer.wrap(key.getBytes(StandardCharsets.UTF_8)), N2.getData());
+      Assert.assertEquals(key, N2.getData());
       Assert.assertEquals(op1, N2.kind().name());
 
       Notification N3 = n2.getNotification();
-      Assert.assertEquals(ByteBuffer.wrap(key.getBytes(StandardCharsets.UTF_8)), N3.getData());
+      Assert.assertEquals(key, N3.getData());
       Assert.assertEquals(op2, N3.kind().name());
 
       Notification N4 = n3.getNotification();
-      Assert.assertEquals(ByteBuffer.wrap(key.getBytes(StandardCharsets.UTF_8)), N4.getData());
+      Assert.assertEquals(key, N4.getData());
       Assert.assertEquals(op2, N4.kind().name());
 
       n1.unsubscribe(Collections.singletonList(op1));
@@ -345,11 +462,11 @@ public class MMuxClientTest {
       kv.remove(key);
 
       Notification N5 = n2.getNotification();
-      Assert.assertEquals(ByteBuffer.wrap(key.getBytes(StandardCharsets.UTF_8)), N5.getData());
+      Assert.assertEquals(key, N5.getData());
       Assert.assertEquals(op1, N5.kind().name());
 
       Notification N6 = n3.getNotification();
-      Assert.assertEquals(ByteBuffer.wrap(key.getBytes(StandardCharsets.UTF_8)), N6.getData());
+      Assert.assertEquals(key, N6.getData());
       Assert.assertEquals(op2, N6.kind().name());
     } finally {
       stopServers();

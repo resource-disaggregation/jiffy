@@ -3,8 +3,7 @@ package mmux.hadoop.fs;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import mmux.kv.KVClient;
-import mmux.kv.KVClient.RedirectException;
-import mmux.kv.KVClient.RedoException;
+import mmux.util.ByteBufferUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSInputStream;
 import org.apache.thrift.TException;
@@ -20,21 +19,26 @@ public class MMuxInputStream extends FSInputStream {
   private ByteBuffer currentBuf;
 
   private KVClient client;
+  private ByteBuffer lastBlockKey;
 
-  MMuxInputStream(KVClient client, Configuration conf)
-      throws TException, RedoException, RedirectException {
+  MMuxInputStream(KVClient client, Configuration conf) throws TException {
     this.filePos = 0;
     this.client = client;
     this.blockSize = conf.getInt("emfs.block_size", 64 * 1024 * 1024);
     this.currentBlockNum = -1;
     this.currentBuf = null;
-    String lastBlock = client.get("LastBlock");
-    long lastBlockNum = Long.parseLong(lastBlock);
+    this.lastBlockKey = ByteBufferUtils.fromString("LastBlock");
+    ByteBuffer lastBlock = client.get(lastBlockKey);
+    long lastBlockNum = Long.parseLong(ByteBufferUtils.toString(lastBlock));
     this.fileLength = lastBlockNum * blockSize;
-    String value;
-    if ((value = client.get(lastBlock)) != null) {
-       this.fileLength += value.length();
+    ByteBuffer value;
+    if ((value = client.get(lastBlock)) != ByteBufferUtils.fromString("!key_not_found")) {
+       this.fileLength += value.array().length;
     }
+  }
+
+  private ByteBuffer getLastBlockNum() throws TException {
+    return client.get(lastBlockKey);
   }
 
   @Override
@@ -129,12 +133,12 @@ public class MMuxInputStream extends FSInputStream {
     if (currentBlockNum != currentBlockNum()) {
       try {
         currentBlockNum = currentBlockNum();
-        String value = client.get(String.valueOf(currentBlockNum));
-        if (value == null) {
+        ByteBuffer value = client.get(ByteBufferUtils.fromString(String.valueOf(currentBlockNum)));
+        if (value == ByteBufferUtils.fromString("!key_not_found")) {
           throw new IOException("EOF");
         }
-        currentBuf = ByteBuffer.wrap(value.getBytes());
-      } catch (TException | RedoException | RedirectException e) {
+        currentBuf = value;
+      } catch (TException e) {
         throw new IOException(e);
       }
     }

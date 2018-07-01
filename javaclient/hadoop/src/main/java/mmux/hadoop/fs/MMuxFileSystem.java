@@ -9,8 +9,6 @@ import mmux.directory.rpc_dir_entry;
 import mmux.directory.rpc_file_status;
 import mmux.directory.rpc_file_type;
 import mmux.kv.KVClient;
-import mmux.kv.KVClient.RedirectException;
-import mmux.kv.KVClient.RedoException;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -21,7 +19,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.util.Progressable;
 import org.apache.thrift.TException;
-import org.apache.thrift.transport.TTransportException;
 
 public class MMuxFileSystem extends FileSystem {
 
@@ -92,7 +89,7 @@ public class MMuxFileSystem extends FileSystem {
     try {
       KVClient kv = client.open(pathStr);
       return new FSDataInputStream(new MMuxInputStream(kv, getConf()));
-    } catch (TException | RedoException | RedirectException e) {
+    } catch (TException e) {
       throw new IOException(e);
     }
   }
@@ -110,7 +107,7 @@ public class MMuxFileSystem extends FileSystem {
         kv = client.create(pathStr, persistentPath, 1, replication);
       }
       return new FSDataOutputStream(new MMuxOutputStream(kv, getConf()), statistics);
-    } catch (TException | RedoException | RedirectException e) {
+    } catch (TException e) {
       throw new IOException(e);
     }
   }

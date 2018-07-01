@@ -29,9 +29,9 @@ enum kv_op_id : int32_t {
   put = 4,
   remove = 5,
   update = 6,
-  locked_data_in_slot_range = 7,
-  lock = 8,
-  unlock = 9,
+  lock = 7,
+  unlock = 8,
+  locked_data_in_slot_range = 9,
   locked_get = 10,
   locked_put = 11,
   locked_remove = 12,
@@ -68,14 +68,16 @@ class kv_block : public chain_module {
 
   void keys(std::vector<std::string> &keys);
 
-  void locked_data_in_slot_range(std::vector<std::string> &data,
-                                 int32_t slot_begin,
-                                 int32_t slot_end,
-                                 int32_t num_keys);
+  void locked_get_data_in_slot_range(std::vector<std::string> &data,
+                                     int32_t slot_begin,
+                                     int32_t slot_end,
+                                     int32_t num_keys);
 
   std::string lock();
 
   std::string unlock();
+
+  bool is_locked();
 
   std::size_t size() const;
 

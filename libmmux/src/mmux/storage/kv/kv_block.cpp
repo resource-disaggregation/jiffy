@@ -17,13 +17,13 @@ std::vector<block_op> KV_OPS = {block_op{block_op_type::accessor, "exists"},
                                 block_op{block_op_type::mutator, "put"},
                                 block_op{block_op_type::mutator, "remove"},
                                 block_op{block_op_type::mutator, "update"},
-                                block_op{block_op_type::accessor, "locked_data_in_slot_range"},
+                                block_op{block_op_type::mutator, "lock"},
+                                block_op{block_op_type::mutator, "unlock"},
+                                block_op{block_op_type::accessor, "locked_get_data_in_slot_range"},
                                 block_op{block_op_type::accessor, "locked_get"},
                                 block_op{block_op_type::mutator, "locked_put"},
                                 block_op{block_op_type::mutator, "locked_remove"},
-                                block_op{block_op_type::mutator, "locked_update"},
-                                block_op{block_op_type::mutator, "lock"},
-                                block_op{block_op_type::mutator, "unlock"}};
+                                block_op{block_op_type::mutator, "locked_update"}};
 
 kv_block::kv_block(const std::string &block_name,
                    size_t capacity,
@@ -228,10 +228,10 @@ void kv_block::keys(std::vector<std::string> &keys) { // Remove this operation
   }
 }
 
-void kv_block::locked_data_in_slot_range(std::vector<std::string> &data,
-                                         int32_t slot_begin,
-                                         int32_t slot_end,
-                                         int32_t num_keys) {
+void kv_block::locked_get_data_in_slot_range(std::vector<std::string> &data,
+                                             int32_t slot_begin,
+                                             int32_t slot_end,
+                                             int32_t num_keys) {
   if (!locked_block_.is_active()) {
     data.push_back("!block_not_locked");
     return;
@@ -257,7 +257,14 @@ std::string kv_block::unlock() {
 
 std::string kv_block::lock() {
   locked_block_ = std::move(block_.lock_table());
+  if (state() == block_state::exporting) {
+    return "!" + export_target_str();
+  }
   return "!ok";
+}
+
+bool kv_block::is_locked() {
+  return locked_block_.is_active();
 }
 
 void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) {
@@ -354,14 +361,14 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
       if (nargs != 3) {
         _return.emplace_back("!args_error");
       } else {
-        locked_data_in_slot_range(_return, std::stoi(args[0]), std::stoi(args[1]), std::stoi(args[2]));
+        locked_get_data_in_slot_range(_return, std::stoi(args[0]), std::stoi(args[1]), std::stoi(args[2]));
       }
       break;
     default:throw std::invalid_argument("No such operation id " + std::to_string(oid));
   }
   bool expected = false;
   if (is_mutator(oid) && overload() && state() != block_state::exporting && state() != block_state::importing
-      && is_tail() && splitting_.compare_exchange_strong(expected, true)) {
+      && is_tail() && !locked_block_.is_active() && splitting_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
     LOG(log_level::info) << "Overloaded block; storage = " << bytes_.load() << " capacity = " << capacity_
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
@@ -377,7 +384,8 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
   }
   expected = false;
   if (oid == kv_op_id::remove && underload() && state() != block_state::exporting && state() != block_state::importing
-      && slot_end() != block::SLOT_MAX && is_tail() && merging_.compare_exchange_strong(expected, true)) {
+      && slot_end() != block::SLOT_MAX && is_tail() && !locked_block_.is_active() &&
+      merging_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
     LOG(log_level::info) << "Underloaded block; storage = " << bytes_.load() << " capacity = " << capacity_
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
@@ -472,7 +480,10 @@ void kv_block::export_slots() {
 
     // Read data to export
     std::vector<std::string> export_data;
-    locked_data_in_slot_range(export_data, exp_range.first, exp_range.second, static_cast<int32_t>(export_batch_size));
+    locked_get_data_in_slot_range(export_data,
+                                  exp_range.first,
+                                  exp_range.second,
+                                  static_cast<int32_t>(export_batch_size));
     if (export_data.size() == 0) {  // No more data to export
       // Unlock source and destination blocks
       if (role() == chain_role::singleton) {
@@ -503,8 +514,8 @@ void kv_block::export_slots() {
     // Remove data from src block
     std::vector<std::string> remove_keys;
     export_data.pop_back(); // Remove !redirected argument
-    std::size_t nexport_items = export_data.size();
-    for (std::size_t i = 0; i < nexport_items; i++) {
+    std::size_t n_export_items = export_data.size();
+    for (std::size_t i = 0; i < n_export_items; i++) {
       if (i % 2) {
         remove_keys.push_back(export_data.back());
       }
@@ -526,8 +537,6 @@ void kv_block::export_slots() {
       dst.recv_response();
     }
   }
-  src.disconnect();
-  dst.disconnect();
 
   LOG(log_level::info) << "Completed export for slot range (" << exp_range.first << ", " << exp_range.second << ")";
 
