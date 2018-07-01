@@ -256,6 +256,7 @@ kv_client::locked_client::locked_client(kv_client &parent) : parent_(parent) {
           redirect_blocks_[i] = parent_.blocks_[j];
           locked_redirect_blocks_[i] = blocks_[j];
           new_blocks_[i] = nullptr;
+          break;
         }
       }
       if (new_block) {
@@ -266,6 +267,7 @@ kv_client::locked_client::locked_client(kv_client &parent) : parent_(parent) {
     } else {
       new_blocks_[i] = nullptr;
       redirect_blocks_[i] = nullptr;
+      locked_redirect_blocks_[i] = nullptr;
     }
   }
 }
@@ -273,8 +275,8 @@ kv_client::locked_client::locked_client(kv_client &parent) : parent_(parent) {
 void kv_client::locked_client::unlock() {
   for (size_t i = 0; i < blocks_.size(); i++) {
     blocks_[i]->unlock();
-    if (locked_redirect_blocks_[i] != nullptr)
-      locked_redirect_blocks_[i]->unlock();
+    if (new_blocks_[i] != nullptr)
+      new_blocks_[i]->unlock();
   }
 }
 

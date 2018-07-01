@@ -48,9 +48,10 @@ class KVClient:
                             new_block = False
                             self.redirect_blocks[i] = self.parent.blocks[j]
                             self.locked_redirect_blocks[i] = self.blocks[j]
+                            break
 
                     if new_block:
-                        self.redirect_blocks[i] = ReplicaChainClient(self.parent.client_cache, self.blocks[i].get_chain())
+                        self.redirect_blocks[i] = ReplicaChainClient(self.parent.client_cache, self.blocks[i].get_redirect_chain())
                         self.locked_redirect_blocks[i] = self.redirect_blocks[i].lock()
                         self.new_blocks[i] = self.locked_redirect_blocks[i]
 
@@ -60,7 +61,7 @@ class KVClient:
                 chain = [bytes_to_str(x) for x in response[1:].split(b('!'))[1:]]
                 found = False
                 for i in range(len(self.blocks)):
-                    client_chain = self.parent.blocks[i].chain()
+                    client_chain = self.blocks[i].get_chain()
                     if client_chain == chain:
                         found = True
                         response = self.blocks[i].run_command_redirected(cmd_id, args)[0]
@@ -92,8 +93,8 @@ class KVClient:
         def unlock(self):
             for i in range(len(self.blocks)):
                 self.blocks[i].unlock()
-                if self.locked_redirect_blocks[i] is not None:
-                    self.locked_redirect_blocks[i].unlock()
+                if self.new_blocks[i] is not None:
+                    self.new_blocks[i].unlock()
 
         def put(self, key, value):
             args = [key, value]
