@@ -246,6 +246,7 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
   bool isset_persistent_store_prefix = false;
   bool isset_chain_length = false;
   bool isset_data_blocks = false;
+  bool isset_flags = false;
 
   while (true)
   {
@@ -291,6 +292,14 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 4:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->flags);
+          isset_flags = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -305,6 +314,8 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
   if (!isset_chain_length)
     throw TProtocolException(TProtocolException::INVALID_DATA);
   if (!isset_data_blocks)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
+  if (!isset_flags)
     throw TProtocolException(TProtocolException::INVALID_DATA);
   return xfer;
 }
@@ -333,6 +344,10 @@ uint32_t rpc_data_status::write(Protocol_* oprot) const {
     }
     xfer += oprot->writeListEnd();
   }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("flags", ::apache::thrift::protocol::T_I32, 4);
+  xfer += oprot->writeI32(this->flags);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();

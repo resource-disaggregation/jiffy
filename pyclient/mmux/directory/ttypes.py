@@ -54,21 +54,18 @@ class rpc_file_type(object):
 class rpc_storage_mode(object):
     rpc_in_memory = 0
     rpc_in_memory_grace = 1
-    rpc_flushing = 2
-    rpc_on_disk = 3
+    rpc_on_disk = 2
 
     _VALUES_TO_NAMES = {
         0: "rpc_in_memory",
         1: "rpc_in_memory_grace",
-        2: "rpc_flushing",
-        3: "rpc_on_disk",
+        2: "rpc_on_disk",
     }
 
     _NAMES_TO_VALUES = {
         "rpc_in_memory": 0,
         "rpc_in_memory_grace": 1,
-        "rpc_flushing": 2,
-        "rpc_on_disk": 3,
+        "rpc_on_disk": 2,
     }
 
 
@@ -294,19 +291,22 @@ class rpc_data_status(object):
      - persistent_store_prefix
      - chain_length
      - data_blocks
+     - flags
     """
 
     __slots__ = (
         'persistent_store_prefix',
         'chain_length',
         'data_blocks',
+        'flags',
     )
 
 
-    def __init__(self, persistent_store_prefix=None, chain_length=None, data_blocks=None,):
+    def __init__(self, persistent_store_prefix=None, chain_length=None, data_blocks=None, flags=None,):
         self.persistent_store_prefix = persistent_store_prefix
         self.chain_length = chain_length
         self.data_blocks = data_blocks
+        self.flags = flags
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -338,6 +338,11 @@ class rpc_data_status(object):
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I32:
+                    self.flags = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -363,6 +368,10 @@ class rpc_data_status(object):
                 iter13.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
+        if self.flags is not None:
+            oprot.writeFieldBegin('flags', TType.I32, 4)
+            oprot.writeI32(self.flags)
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -373,6 +382,8 @@ class rpc_data_status(object):
             raise TProtocolException(message='Required field chain_length is unset!')
         if self.data_blocks is None:
             raise TProtocolException(message='Required field data_blocks is unset!')
+        if self.flags is None:
+            raise TProtocolException(message='Required field flags is unset!')
         return
 
     def __repr__(self):
@@ -569,6 +580,7 @@ rpc_data_status.thrift_spec = (
     (1, TType.STRING, 'persistent_store_prefix', None, None, ),  # 1
     (2, TType.I32, 'chain_length', None, None, ),  # 2
     (3, TType.LIST, 'data_blocks', (TType.STRUCT, [rpc_replica_chain, None], False), None, ),  # 3
+    (4, TType.I32, 'flags', None, None, ),  # 4
 )
 all_structs.append(rpc_dir_entry)
 rpc_dir_entry.thrift_spec = (
