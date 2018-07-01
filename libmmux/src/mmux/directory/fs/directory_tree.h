@@ -51,7 +51,6 @@ class ds_node {
 
   virtual void flush(const std::string &path,
                      const std::string &dest,
-                     std::shared_ptr<block_allocator> alloc,
                      const std::shared_ptr<storage::storage_management_ops> &storage) = 0;
 
  private:
@@ -71,12 +70,11 @@ class ds_file_node : public ds_node {
         dstatus_{} {}
 
   ds_file_node(const std::string &name,
-               storage_mode mode,
                const std::string &persistent_store_prefix,
                std::size_t chain_length,
                std::vector<replica_chain> blocks) :
       ds_node(name, file_status(file_type::regular, perms(perms::all), utils::time_utils::now_ms())),
-      dstatus_(mode, persistent_store_prefix, chain_length, std::move(blocks)) {}
+      dstatus_(persistent_store_prefix, chain_length, std::move(blocks)) {}
 
   const data_status &dstatus() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
@@ -88,9 +86,14 @@ class ds_file_node : public ds_node {
     dstatus_ = status;
   }
 
-  const storage_mode &mode() const {
+  std::vector<storage_mode> mode() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_.mode();
+  }
+
+  void mode(size_t i, const storage_mode &m) {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    dstatus_.mode(i, m);
   }
 
   void mode(const storage_mode &m) {
@@ -132,18 +135,13 @@ class ds_file_node : public ds_node {
 
   void flush(const std::string &path,
              const std::string &dest,
-             std::shared_ptr<block_allocator> alloc,
              const std::shared_ptr<storage::storage_management_ops> &storage) override {
     std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.mode(storage_mode::flushing);
     for (const auto &block: dstatus_.data_blocks()) {
       std::string block_dest = dest;
       utils::directory_utils::push_path_element(block_dest, block.slot_range_string());
       storage->flush(block.tail(), block_dest, path);
-      alloc->free(block.block_names);
     }
-    dstatus_.remove_all_data_blocks();
-    dstatus_.mode(storage_mode::on_disk);
   }
 
   export_ctx setup_add_block(std::shared_ptr<storage::storage_management_ops> storage,
@@ -181,9 +179,11 @@ class ds_file_node : public ds_node {
     auto slot_mid = (slot_end + slot_begin) / 2; // TODO: We can get a better split...
 
     // Allocate the new chain
-    replica_chain to_chain
-        {allocator->allocate(dstatus_.chain_length(), {}), std::make_pair(slot_mid + 1, slot_end),
-         chain_status::stable};
+    replica_chain to_chain(allocator->allocate(dstatus_.chain_length(), {}),
+                           slot_mid + 1,
+                           slot_end,
+                           chain_status::stable,
+                           storage_mode::in_memory);
     assert(to_chain.block_names.size() == chain_length);
 
     // Set old chain to exporting and new chain to importing
@@ -252,9 +252,11 @@ class ds_file_node : public ds_node {
     auto slot_mid = (slot_end + slot_begin) / 2; // TODO: We can get a better split...
 
     // Allocate the new chain
-    replica_chain to_chain
-        {allocator->allocate(dstatus_.chain_length(), {}), std::make_pair(slot_mid + 1, slot_end),
-         chain_status::stable};
+    replica_chain to_chain(allocator->allocate(dstatus_.chain_length(), {}),
+                           slot_mid + 1,
+                           slot_end,
+                           chain_status::stable,
+                           storage_mode::in_memory);
     assert(to_chain.block_names.size() == chain_length);
 
     // Set old chain to exporting and new chain to importing
@@ -431,13 +433,12 @@ class ds_dir_node : public ds_node {
 
   void flush(const std::string &path,
              const std::string &dest,
-             std::shared_ptr<block_allocator> alloc,
              const std::shared_ptr<storage::storage_management_ops> &storage) override {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     for (const auto &entry: children_) {
       std::string child_path = path;
       utils::directory_utils::push_path_element(child_path, entry.first);
-      entry.second->flush(child_path, dest, alloc, storage);
+      entry.second->flush(child_path, dest, storage);
     }
   }
 

@@ -97,6 +97,10 @@ void rpc_replica_chain::__set_slot_begin(const int32_t val) {
 void rpc_replica_chain::__set_slot_end(const int32_t val) {
   this->slot_end = val;
 }
+
+void rpc_replica_chain::__set_storage_mode(const rpc_storage_mode val) {
+  this->storage_mode = val;
+}
 std::ostream& operator<<(std::ostream& out, const rpc_replica_chain& obj)
 {
   obj.printTo(out);
@@ -109,17 +113,20 @@ void swap(rpc_replica_chain &a, rpc_replica_chain &b) {
   swap(a.block_names, b.block_names);
   swap(a.slot_begin, b.slot_begin);
   swap(a.slot_end, b.slot_end);
+  swap(a.storage_mode, b.storage_mode);
 }
 
-rpc_replica_chain::rpc_replica_chain(const rpc_replica_chain& other6) {
-  block_names = other6.block_names;
-  slot_begin = other6.slot_begin;
-  slot_end = other6.slot_end;
-}
-rpc_replica_chain& rpc_replica_chain::operator=(const rpc_replica_chain& other7) {
+rpc_replica_chain::rpc_replica_chain(const rpc_replica_chain& other7) {
   block_names = other7.block_names;
   slot_begin = other7.slot_begin;
   slot_end = other7.slot_end;
+  storage_mode = other7.storage_mode;
+}
+rpc_replica_chain& rpc_replica_chain::operator=(const rpc_replica_chain& other8) {
+  block_names = other8.block_names;
+  slot_begin = other8.slot_begin;
+  slot_end = other8.slot_end;
+  storage_mode = other8.storage_mode;
   return *this;
 }
 void rpc_replica_chain::printTo(std::ostream& out) const {
@@ -128,6 +135,7 @@ void rpc_replica_chain::printTo(std::ostream& out) const {
   out << "block_names=" << to_string(block_names);
   out << ", " << "slot_begin=" << to_string(slot_begin);
   out << ", " << "slot_end=" << to_string(slot_end);
+  out << ", " << "storage_mode=" << to_string(storage_mode);
   out << ")";
 }
 
@@ -161,15 +169,15 @@ void swap(rpc_file_status &a, rpc_file_status &b) {
   swap(a.last_write_time, b.last_write_time);
 }
 
-rpc_file_status::rpc_file_status(const rpc_file_status& other9) {
-  type = other9.type;
-  permissions = other9.permissions;
-  last_write_time = other9.last_write_time;
-}
-rpc_file_status& rpc_file_status::operator=(const rpc_file_status& other10) {
+rpc_file_status::rpc_file_status(const rpc_file_status& other10) {
   type = other10.type;
   permissions = other10.permissions;
   last_write_time = other10.last_write_time;
+}
+rpc_file_status& rpc_file_status::operator=(const rpc_file_status& other11) {
+  type = other11.type;
+  permissions = other11.permissions;
+  last_write_time = other11.last_write_time;
   return *this;
 }
 void rpc_file_status::printTo(std::ostream& out) const {
@@ -185,10 +193,6 @@ void rpc_file_status::printTo(std::ostream& out) const {
 rpc_data_status::~rpc_data_status() throw() {
 }
 
-
-void rpc_data_status::__set_storage_mode(const rpc_storage_mode val) {
-  this->storage_mode = val;
-}
 
 void rpc_data_status::__set_persistent_store_prefix(const std::string& val) {
   this->persistent_store_prefix = val;
@@ -210,20 +214,17 @@ std::ostream& operator<<(std::ostream& out, const rpc_data_status& obj)
 
 void swap(rpc_data_status &a, rpc_data_status &b) {
   using ::std::swap;
-  swap(a.storage_mode, b.storage_mode);
   swap(a.persistent_store_prefix, b.persistent_store_prefix);
   swap(a.chain_length, b.chain_length);
   swap(a.data_blocks, b.data_blocks);
 }
 
 rpc_data_status::rpc_data_status(const rpc_data_status& other18) {
-  storage_mode = other18.storage_mode;
   persistent_store_prefix = other18.persistent_store_prefix;
   chain_length = other18.chain_length;
   data_blocks = other18.data_blocks;
 }
 rpc_data_status& rpc_data_status::operator=(const rpc_data_status& other19) {
-  storage_mode = other19.storage_mode;
   persistent_store_prefix = other19.persistent_store_prefix;
   chain_length = other19.chain_length;
   data_blocks = other19.data_blocks;
@@ -232,8 +233,7 @@ rpc_data_status& rpc_data_status::operator=(const rpc_data_status& other19) {
 void rpc_data_status::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
   out << "rpc_data_status(";
-  out << "storage_mode=" << to_string(storage_mode);
-  out << ", " << "persistent_store_prefix=" << to_string(persistent_store_prefix);
+  out << "persistent_store_prefix=" << to_string(persistent_store_prefix);
   out << ", " << "chain_length=" << to_string(chain_length);
   out << ", " << "data_blocks=" << to_string(data_blocks);
   out << ")";

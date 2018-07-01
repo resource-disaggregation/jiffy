@@ -69,19 +69,22 @@ class rpc_replica_chain {
 
   rpc_replica_chain(const rpc_replica_chain&);
   rpc_replica_chain& operator=(const rpc_replica_chain&);
-  rpc_replica_chain() : slot_begin(0), slot_end(0) {
+  rpc_replica_chain() : slot_begin(0), slot_end(0), storage_mode((rpc_storage_mode)0) {
   }
 
   virtual ~rpc_replica_chain() throw();
   std::vector<std::string>  block_names;
   int32_t slot_begin;
   int32_t slot_end;
+  rpc_storage_mode storage_mode;
 
   void __set_block_names(const std::vector<std::string> & val);
 
   void __set_slot_begin(const int32_t val);
 
   void __set_slot_end(const int32_t val);
+
+  void __set_storage_mode(const rpc_storage_mode val);
 
   bool operator == (const rpc_replica_chain & rhs) const
   {
@@ -90,6 +93,8 @@ class rpc_replica_chain {
     if (!(slot_begin == rhs.slot_begin))
       return false;
     if (!(slot_end == rhs.slot_end))
+      return false;
+    if (!(storage_mode == rhs.storage_mode))
       return false;
     return true;
   }
@@ -165,16 +170,13 @@ class rpc_data_status {
 
   rpc_data_status(const rpc_data_status&);
   rpc_data_status& operator=(const rpc_data_status&);
-  rpc_data_status() : storage_mode((rpc_storage_mode)0), persistent_store_prefix(), chain_length(0) {
+  rpc_data_status() : persistent_store_prefix(), chain_length(0) {
   }
 
   virtual ~rpc_data_status() throw();
-  rpc_storage_mode storage_mode;
   std::string persistent_store_prefix;
   int32_t chain_length;
   std::vector<rpc_replica_chain>  data_blocks;
-
-  void __set_storage_mode(const rpc_storage_mode val);
 
   void __set_persistent_store_prefix(const std::string& val);
 
@@ -184,8 +186,6 @@ class rpc_data_status {
 
   bool operator == (const rpc_data_status & rhs) const
   {
-    if (!(storage_mode == rhs.storage_mode))
-      return false;
     if (!(persistent_store_prefix == rhs.persistent_store_prefix))
       return false;
     if (!(chain_length == rhs.chain_length))

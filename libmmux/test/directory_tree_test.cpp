@@ -50,13 +50,13 @@ TEST_CASE("open_file_test", "[file][dir]") {
   data_status s;
   REQUIRE_NOTHROW(s = tree.open("/sandbox/a.txt"));
   REQUIRE(s.chain_length() == 1);
-  REQUIRE(s.mode() == storage_mode::in_memory);
+  REQUIRE(s.mode() == std::vector<storage_mode>{storage_mode::in_memory});
   REQUIRE(s.persistent_store_prefix() == "/tmp");
   REQUIRE(s.data_blocks().size() == 1);
 
   REQUIRE_NOTHROW(s = tree.open("/sandbox/foo/bar/baz/a"));
   REQUIRE(s.chain_length() == 1);
-  REQUIRE(s.mode() == storage_mode::in_memory);
+  REQUIRE(s.mode() == std::vector<storage_mode>{storage_mode::in_memory});
   REQUIRE(s.persistent_store_prefix() == "/tmp");
   REQUIRE(s.data_blocks().size() == 1);
 
@@ -74,19 +74,19 @@ TEST_CASE("open_or_create_file_test", "[file][dir]") {
   data_status s;
   REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/a.txt", "/tmp", 1, 1));
   REQUIRE(s.chain_length() == 1);
-  REQUIRE(s.mode() == storage_mode::in_memory);
+  REQUIRE(s.mode() == std::vector<storage_mode>{storage_mode::in_memory});
   REQUIRE(s.persistent_store_prefix() == "/tmp");
   REQUIRE(s.data_blocks().size() == 1);
 
   REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/foo/bar/baz/a", "/tmp", 1, 1));
   REQUIRE(s.chain_length() == 1);
-  REQUIRE(s.mode() == storage_mode::in_memory);
+  REQUIRE(s.mode() == std::vector<storage_mode>{storage_mode::in_memory});
   REQUIRE(s.persistent_store_prefix() == "/tmp");
   REQUIRE(s.data_blocks().size() == 1);
 
   REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/b.txt", "/tmp", 1, 1));
   REQUIRE(s.chain_length() == 1);
-  REQUIRE(s.mode() == storage_mode::in_memory);
+  REQUIRE(s.mode() == std::vector<storage_mode>{storage_mode::in_memory});
   REQUIRE(s.persistent_store_prefix() == "/tmp");
   REQUIRE(s.data_blocks().size() == 1);
 }
@@ -192,12 +192,12 @@ TEST_CASE("path_flush_test", "[file][dir]") {
   REQUIRE(alloc->num_free_blocks() == 2);
 
   REQUIRE_NOTHROW(tree.flush("/sandbox/abcdef/example/c", "local://tmp"));
-  REQUIRE(tree.dstatus("/sandbox/abcdef/example/c").mode() == storage_mode::on_disk);
+  REQUIRE(tree.dstatus("/sandbox/abcdef/example/c").mode() == std::vector<storage_mode>{storage_mode::in_memory});
 
   REQUIRE_NOTHROW(tree.flush("/sandbox/abcdef/example/a", "local://tmp"));
-  REQUIRE(tree.dstatus("/sandbox/abcdef/example/a/b").mode() == storage_mode::on_disk);
+  REQUIRE(tree.dstatus("/sandbox/abcdef/example/a/b").mode() == std::vector<storage_mode>{storage_mode::in_memory});
 
-  REQUIRE(alloc->num_free_blocks() == 4);
+  REQUIRE(alloc->num_free_blocks() == 2);
   REQUIRE(sm->COMMANDS.size() == 4);
   REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/abcdef/example/a/b:0:65536:0:0:nil");
   REQUIRE(sm->COMMANDS[1] == "setup_block:1:/sandbox/abcdef/example/c:0:65536:1:0:nil");
@@ -324,7 +324,7 @@ TEST_CASE("dstatus_test", "[file]") {
 
   REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "/tmp", 1, 1));
   REQUIRE_THROWS_AS(tree.dstatus("/sandbox"), directory_ops_exception);
-  REQUIRE(tree.dstatus("/sandbox/file.txt").mode() == storage_mode::in_memory);
+  REQUIRE(tree.dstatus("/sandbox/file.txt").mode() == std::vector<storage_mode>{storage_mode::in_memory});
   REQUIRE(tree.dstatus("/sandbox/file.txt").persistent_store_prefix() == "/tmp");
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().size() == 1);
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).slot_range == std::make_pair(0, 65536));

@@ -330,8 +330,7 @@ TEST_CASE("mmux_client_flush_remove_test", "[put][get][update][remove]") {
     client.create("/file.txt", "/tmp");
     REQUIRE(client.lease_worker().has_path("/file.txt"));
     REQUIRE_NOTHROW(client.flush("/file.txt", "local://tmp"));
-    REQUIRE_FALSE(client.lease_worker().has_path("/file.txt"));
-    REQUIRE(client.fs()->dstatus("/file.txt").mode() == storage_mode::on_disk);
+    REQUIRE(client.lease_worker().has_path("/file.txt"));
     REQUIRE_NOTHROW(client.remove("/file.txt"));
     REQUIRE_FALSE(client.lease_worker().has_path("/file.txt"));
     REQUIRE_FALSE(client.fs()->exists("/file.txt"));

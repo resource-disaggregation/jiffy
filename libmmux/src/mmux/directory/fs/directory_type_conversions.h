@@ -14,16 +14,20 @@ class directory_type_conversions {
     rpc.block_names = chain.block_names;
     rpc.slot_begin = chain.slot_begin();
     rpc.slot_end = chain.slot_end();
+    rpc.storage_mode = (rpc_storage_mode) chain.mode;
     return rpc;
   }
 
   static replica_chain from_rpc(const rpc_replica_chain &rpc) {
-    return replica_chain{rpc.block_names, std::make_pair(rpc.slot_begin, rpc.slot_end), chain_status::stable};
+    return replica_chain(rpc.block_names,
+                         rpc.slot_begin,
+                         rpc.slot_end,
+                         chain_status::stable,
+                         static_cast<storage_mode>(rpc.storage_mode));
   }
 
   static rpc_data_status to_rpc(const data_status &status) {
     rpc_data_status rpc;
-    rpc.storage_mode = (rpc_storage_mode) status.mode();
     rpc.persistent_store_prefix = status.persistent_store_prefix();
     rpc.chain_length = static_cast<int32_t>(status.chain_length());
     for (const auto &blk: status.data_blocks()) {
@@ -54,8 +58,7 @@ class directory_type_conversions {
     for (const auto &blk: rpc.data_blocks) {
       data_blocks.push_back(from_rpc(blk));
     }
-    return data_status(static_cast<storage_mode>(rpc.storage_mode),
-                       rpc.persistent_store_prefix,
+    return data_status(rpc.persistent_store_prefix,
                        static_cast<size_t>(rpc.chain_length),
                        data_blocks);
   }
