@@ -27,6 +27,7 @@ struct rpc_replica_chain {
   1: required list<string> block_names,
   2: required i32 slot_begin,
   3: required i32 slot_end,
+  4: required rpc_storage_mode storage_mode
 }
 
 struct rpc_file_status {
@@ -36,10 +37,9 @@ struct rpc_file_status {
 }
 
 struct rpc_data_status {
-  1: required rpc_storage_mode storage_mode,
-  2: required string persistent_store_prefix,
-  3: required i32 chain_length,
-  4: required list<rpc_replica_chain> data_blocks,
+  1: required string persistent_store_prefix,
+  2: required i32 chain_length,
+  3: required list<rpc_replica_chain> data_blocks,
 }
 
 struct rpc_dir_entry {
