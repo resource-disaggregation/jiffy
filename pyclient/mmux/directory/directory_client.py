@@ -83,9 +83,10 @@ class StorageMode:
 
 
 class ReplicaChain:
-    def __init__(self, block_names, slot_begin, slot_end):
+    def __init__(self, block_names, slot_begin, slot_end, storage_mode):
         self.block_names = block_names
         self.slot_range = (slot_begin, slot_end)
+        self.storage_mode = storage_mode
 
     def __str__(self):
         return "{} : {}".format(self.block_names, self.slot_range)
@@ -95,11 +96,11 @@ class ReplicaChain:
 
 
 class DataStatus:
-    def __init__(self, storage_mode, persistent_store_prefix, chain_length, data_blocks):
-        self.storage_mode = storage_mode
+    def __init__(self, persistent_store_prefix, chain_length, data_blocks):
         self.persistent_store_prefix = persistent_store_prefix
         self.chain_length = chain_length
-        self.data_blocks = [ReplicaChain(replica_chain.block_names, replica_chain.slot_begin, replica_chain.slot_end)
+        self.data_blocks = [ReplicaChain(replica_chain.block_names, replica_chain.slot_begin, replica_chain.slot_end,
+                                         replica_chain.storage_mode)
                             for replica_chain in data_blocks]
 
 
@@ -138,15 +139,15 @@ class DirectoryClient:
 
     def open(self, path):
         s = self.client_.open(path)
-        return DataStatus(s.storage_mode, s.persistent_store_prefix, s.chain_length, s.data_blocks)
+        return DataStatus(s.persistent_store_prefix, s.chain_length, s.data_blocks)
 
     def create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1):
         s = self.client_.create(path, persistent_store_prefix, num_blocks, chain_length)
-        return DataStatus(s.storage_mode, s.persistent_store_prefix, s.chain_length, s.data_blocks)
+        return DataStatus(s.persistent_store_prefix, s.chain_length, s.data_blocks)
 
     def open_or_create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1):
         s = self.client_.open_or_create(path, persistent_store_prefix, num_blocks, chain_length)
-        return DataStatus(s.storage_mode, s.persistent_store_prefix, s.chain_length, s.data_blocks)
+        return DataStatus(s.persistent_store_prefix, s.chain_length, s.data_blocks)
 
     def exists(self, path):
         return self.client_.exists(path)
@@ -183,7 +184,7 @@ class DirectoryClient:
 
     def dstatus(self, path):
         s = self.client_.dstatus(path)
-        return DataStatus(s.storage_mode, s.persistent_store_prefix, s.chain_length, s.data_blocks)
+        return DataStatus(s.persistent_store_prefix, s.chain_length, s.data_blocks)
 
     def is_regular_file(self, path):
         return self.client_.is_regular_file(path)
