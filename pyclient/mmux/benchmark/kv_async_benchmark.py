@@ -7,12 +7,26 @@ from multiprocessing import Process, Barrier
 from mmux import MMuxClient
 
 
+class Pipeline(object):
+    def __init__(self, client, op_name):
+        self.client = client
+        self.client_op = getattr(self.client, "multi_{}".format(op_name))
+        self.args = []
+        setattr(self, op_name, self.op)
+
+    def op(self, *args):
+        self.args.extend(args)
+
+    def execute(self):
+        self.client_op(self.args)
+
+
 def make_workload(path, off, count, client):
     logging.info("Reading %d ops of workload from %s at offset %d" % (count, path, off))
-    pipelines = {"get": client.pipeline_get(),
-                 "put": client.pipeline_put(),
-                 "update": client.pipeline_update(),
-                 "remove": client.pipeline_remove()}
+    pipelines = {"get": Pipeline(client, "get"),
+                 "put": Pipeline(client, "put"),
+                 "update": Pipeline(client, "update"),
+                 "remove": Pipeline(client, "remove")}
 
     with open(path) as f:
         ops = [x.strip().split() for x in f.readlines()[int(off):int(off + count)]]
