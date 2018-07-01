@@ -76,7 +76,6 @@ public class MMuxClient implements Closeable {
   }
 
   public void flush(String path, String dest) throws TException {
-    endScope(path);
     fs.flush(path, dest);
   }
 

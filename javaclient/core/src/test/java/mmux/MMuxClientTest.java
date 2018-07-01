@@ -364,9 +364,7 @@ public class MMuxClientTest {
       client.create("/a/file.txt", "local://tmp", 1, 1);
       Assert.assertTrue(client.getWorker().hasPath("/a/file.txt"));
       client.flush("/a/file.txt", "local://tmp");
-      Assert.assertFalse(client.getWorker().hasPath("/a/file.txt"));
-      Assert.assertEquals(rpc_storage_mode.rpc_on_disk,
-          client.fs().dstatus("/a/file.txt").storage_mode);
+      Assert.assertTrue(client.getWorker().hasPath("/a/file.txt"));
       client.remove("/a/file.txt");
       Assert.assertFalse(client.getWorker().hasPath("/a/file.txt"));
       Assert.assertFalse(client.fs().exists("/a/file.txt"));
