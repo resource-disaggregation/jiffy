@@ -85,9 +85,11 @@ class kv_block : public chain_module {
 
   void run_command(std::vector<std::string> &_return, int oid, const std::vector<std::string> &args) override;
 
+  bool is_dirty() const;
+
   void load(const std::string &path) override;
 
-  void flush(const std::string &path) override;
+  bool flush(const std::string &path) override;
 
   std::size_t storage_capacity() override;
 
@@ -116,6 +118,8 @@ class kv_block : public chain_module {
   double threshold_hi_;
   std::atomic<bool> splitting_;
   std::atomic<bool> merging_;
+
+  std::atomic<bool> dirty_;
 };
 
 }
