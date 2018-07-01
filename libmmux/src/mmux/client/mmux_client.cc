@@ -63,7 +63,6 @@ void mmux_client::remove(const std::string &path) {
 }
 
 void mmux_client::flush(const std::string &path, const std::string &dest) {
-  end_scope(path);
   fs_->flush(path, dest);
 }
 

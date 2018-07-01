@@ -149,6 +149,21 @@ struct replica_chain {
   std::vector<std::string> block_names;
   std::pair<int32_t, int32_t> slot_range;
   chain_status status;
+  storage_mode mode;
+
+  replica_chain() : mode(storage_mode::in_memory) {}
+
+  replica_chain(const std::vector<std::string> &block_names,
+                int32_t slot_begin,
+                int32_t slot_end,
+                chain_status status,
+                storage_mode mode) {
+    this->block_names = block_names;
+    this->slot_range.first = slot_begin;
+    this->slot_range.second = slot_end;
+    this->status = status;
+    this->mode = mode;
+  }
 
   const std::string slot_range_string() const {
     return std::to_string(slot_range.first) + "_" + std::to_string(slot_range.second);
@@ -177,7 +192,8 @@ struct replica_chain {
     }
     out.pop_back();
     out.pop_back();
-    out += "> :: (" + std::to_string(slot_begin()) + ", " + std::to_string(slot_end()) + ")";
+    out += "> :: (" + std::to_string(slot_begin()) + ", " + std::to_string(slot_end()) + ") :: { mode : "
+        + std::to_string(mode) + " }";
     return out;
   }
 
@@ -259,14 +275,12 @@ class directory_entry {
 
 class data_status {
  public:
-  data_status() : mode_(storage_mode::in_memory), chain_length_(1) {}
+  data_status() : chain_length_(1) {}
 
-  data_status(storage_mode mode,
-              std::string persistent_store_prefix,
+  data_status(std::string persistent_store_prefix,
               std::size_t chain_length,
               std::vector<replica_chain> blocks)
-      : mode_(mode),
-        persistent_store_prefix_(std::move(persistent_store_prefix)),
+      : persistent_store_prefix_(std::move(persistent_store_prefix)),
         chain_length_(chain_length),
         data_blocks_(std::move(blocks)) {}
 
@@ -274,12 +288,23 @@ class data_status {
     return data_blocks_;
   }
 
-  const storage_mode &mode() const {
-    return mode_;
+  std::vector<storage_mode> mode() const {
+    std::vector<storage_mode> modes(data_blocks_.size());
+    for (size_t i = 0; i < data_blocks_.size(); i++) {
+      modes[i] = data_blocks_[i].mode;
+    }
+
+    return modes;
+  }
+
+  void mode(size_t block_id, storage_mode mode) {
+    data_blocks_.at(block_id).mode = mode;
   }
 
   void mode(storage_mode mode) {
-    mode_ = mode;
+    for (size_t i = 0; i < data_blocks_.size(); i++) {
+      data_blocks_[i].mode = mode;
+    }
   }
 
   const std::string &persistent_store_prefix() const {
@@ -336,7 +361,7 @@ class data_status {
   }
 
   std::string to_string() const {
-    std::string out = "{ mode: " + std::to_string(mode_) + ", pprefix: " + persistent_store_prefix_ + ", chain_length: "
+    std::string out = "{ persistent_store_prefix: " + persistent_store_prefix_ + ", chain_length: "
         + std::to_string(chain_length_) + ", data_blocks: { ";
     for (const auto &chain: data_blocks_) {
       out += chain.to_string() + ", ";
@@ -348,7 +373,6 @@ class data_status {
   }
 
  private:
-  storage_mode mode_;
   std::string persistent_store_prefix_;
   std::size_t chain_length_;
   std::vector<replica_chain> data_blocks_;

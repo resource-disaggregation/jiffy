@@ -1,11 +1,5 @@
 #include "directory_tree.h"
 
-#include <iostream>
-#include <thrift/transport/TSocket.h>
-#include <thrift/transport/TTransport.h>
-#include <thrift/transport/TBufferTransports.h>
-#include "../../storage/chain_module.h"
-#include "../../utils/logger.h"
 #include "../../utils/retry_utils.h"
 
 namespace mmux {
@@ -90,8 +84,11 @@ data_status directory_tree::create(const std::string &path,
     auto slot_begin = static_cast<int32_t>(i * slots_per_block);
     auto slot_end =
         i == (num_blocks - 1) ? storage::block::SLOT_MAX : static_cast<int32_t>((i + 1) * slots_per_block - 1);
-    replica_chain
-        chain{allocator_->allocate(chain_length, {}), std::make_pair(slot_begin, slot_end), chain_status::stable};
+    replica_chain chain(allocator_->allocate(chain_length, {}),
+                        slot_begin,
+                        slot_end,
+                        chain_status::stable,
+                        storage_mode::in_memory);
     assert(chain.block_names.size() == chain_length);
     blocks.push_back(chain);
     using namespace storage;
@@ -112,8 +109,7 @@ data_status directory_tree::create(const std::string &path,
       }
     }
   }
-  auto child =
-      std::make_shared<ds_file_node>(filename, storage_mode::in_memory, persistent_store_prefix, chain_length, blocks);
+  auto child = std::make_shared<ds_file_node>(filename, persistent_store_prefix, chain_length, blocks);
   child->persistent_store_prefix(persistent_store_prefix);
   parent->add_child(child);
 
@@ -154,7 +150,7 @@ data_status directory_tree::open_or_create(const std::string &path,
   if (num_blocks == 0) {
     throw directory_ops_exception("File cannot have zero blocks");
   }
-  
+
   if (chain_length == 0) {
     throw directory_ops_exception("Chain length cannot be zero");
   }
@@ -165,8 +161,11 @@ data_status directory_tree::open_or_create(const std::string &path,
     auto slot_begin = static_cast<int32_t>(i * slots_per_block);
     auto slot_end =
         i == (num_blocks - 1) ? storage::block::SLOT_MAX : static_cast<int32_t>((i + 1) * slots_per_block - 1);
-    replica_chain
-        chain{allocator_->allocate(chain_length, {}), std::make_pair(slot_begin, slot_end), chain_status::stable};
+    replica_chain chain(allocator_->allocate(chain_length, {}),
+                        slot_begin,
+                        slot_end,
+                        chain_status::stable,
+                        storage_mode::in_memory);
     assert(chain.block_names.size() == chain_length);
     blocks.push_back(chain);
     using namespace storage;
@@ -187,8 +186,7 @@ data_status directory_tree::open_or_create(const std::string &path,
       }
     }
   }
-  auto child =
-      std::make_shared<ds_file_node>(filename, storage_mode::in_memory, persistent_store_prefix, chain_length, blocks);
+  auto child = std::make_shared<ds_file_node>(filename, persistent_store_prefix, chain_length, blocks);
   child->persistent_store_prefix(persistent_store_prefix);
   parent->add_child(child);
 
@@ -265,7 +263,7 @@ void directory_tree::remove_all(const std::string &path) {
 
 void directory_tree::flush(const std::string &path, const std::string &dest) {
   LOG(log_level::info) << "Flushing path " << path;
-  get_node(path)->flush(path, dest, allocator_, storage_);
+  get_node(path)->flush(path, dest, storage_);
 }
 
 void directory_tree::rename(const std::string &old_path, const std::string &new_path) {
@@ -394,7 +392,11 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
       storage_->resend_pending(fixed_chain[0]);
     }
   }
-  return replica_chain{fixed_chain, chain.slot_range, chain_status::stable};
+  return replica_chain(fixed_chain,
+                       chain.slot_range.first,
+                       chain.slot_range.second,
+                       chain_status::stable,
+                       storage_mode::in_memory);
 }
 
 replica_chain directory_tree::add_replica_to_chain(const std::string &path, const replica_chain &chain) {
@@ -441,7 +443,11 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
                         chain_role::mid,
                         new_blocks.front());
 
-  return replica_chain{updated_chain, chain.slot_range, chain_status::stable};
+  return replica_chain(updated_chain,
+                       chain.slot_range.first,
+                       chain.slot_range.second,
+                       chain_status::stable,
+                       storage_mode::in_memory);
 }
 
 void directory_tree::add_block_to_file(const std::string &path) {
