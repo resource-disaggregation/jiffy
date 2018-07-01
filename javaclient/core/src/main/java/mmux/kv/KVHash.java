@@ -1,5 +1,6 @@
 package mmux.kv;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class KVHash {
@@ -31,6 +32,10 @@ public class KVHash {
 
   public static int get(String key) {
     return crc16(key.getBytes(StandardCharsets.UTF_8));
+  }
+
+  public static int get(ByteBuffer key) {
+    return crc16(key.array());
   }
 
   private static int crc16(byte[] bytes) {
