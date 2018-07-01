@@ -11,33 +11,22 @@ package mmux.directory;
 public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status, rpc_data_status._Fields>, java.io.Serializable, Cloneable, Comparable<rpc_data_status> {
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("rpc_data_status");
 
-  private static final org.apache.thrift.protocol.TField STORAGE_MODE_FIELD_DESC = new org.apache.thrift.protocol.TField("storage_mode", org.apache.thrift.protocol.TType.I32, (short)1);
-  private static final org.apache.thrift.protocol.TField PERSISTENT_STORE_PREFIX_FIELD_DESC = new org.apache.thrift.protocol.TField("persistent_store_prefix", org.apache.thrift.protocol.TType.STRING, (short)2);
-  private static final org.apache.thrift.protocol.TField CHAIN_LENGTH_FIELD_DESC = new org.apache.thrift.protocol.TField("chain_length", org.apache.thrift.protocol.TType.I32, (short)3);
-  private static final org.apache.thrift.protocol.TField DATA_BLOCKS_FIELD_DESC = new org.apache.thrift.protocol.TField("data_blocks", org.apache.thrift.protocol.TType.LIST, (short)4);
+  private static final org.apache.thrift.protocol.TField PERSISTENT_STORE_PREFIX_FIELD_DESC = new org.apache.thrift.protocol.TField("persistent_store_prefix", org.apache.thrift.protocol.TType.STRING, (short)1);
+  private static final org.apache.thrift.protocol.TField CHAIN_LENGTH_FIELD_DESC = new org.apache.thrift.protocol.TField("chain_length", org.apache.thrift.protocol.TType.I32, (short)2);
+  private static final org.apache.thrift.protocol.TField DATA_BLOCKS_FIELD_DESC = new org.apache.thrift.protocol.TField("data_blocks", org.apache.thrift.protocol.TType.LIST, (short)3);
 
   private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new rpc_data_statusStandardSchemeFactory();
   private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new rpc_data_statusTupleSchemeFactory();
 
-  /**
-   * 
-   * @see rpc_storage_mode
-   */
-  public rpc_storage_mode storage_mode; // required
   public java.lang.String persistent_store_prefix; // required
   public int chain_length; // required
   public java.util.List<rpc_replica_chain> data_blocks; // required
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-    /**
-     * 
-     * @see rpc_storage_mode
-     */
-    STORAGE_MODE((short)1, "storage_mode"),
-    PERSISTENT_STORE_PREFIX((short)2, "persistent_store_prefix"),
-    CHAIN_LENGTH((short)3, "chain_length"),
-    DATA_BLOCKS((short)4, "data_blocks");
+    PERSISTENT_STORE_PREFIX((short)1, "persistent_store_prefix"),
+    CHAIN_LENGTH((short)2, "chain_length"),
+    DATA_BLOCKS((short)3, "data_blocks");
 
     private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
 
@@ -52,13 +41,11 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
      */
     public static _Fields findByThriftId(int fieldId) {
       switch(fieldId) {
-        case 1: // STORAGE_MODE
-          return STORAGE_MODE;
-        case 2: // PERSISTENT_STORE_PREFIX
+        case 1: // PERSISTENT_STORE_PREFIX
           return PERSISTENT_STORE_PREFIX;
-        case 3: // CHAIN_LENGTH
+        case 2: // CHAIN_LENGTH
           return CHAIN_LENGTH;
-        case 4: // DATA_BLOCKS
+        case 3: // DATA_BLOCKS
           return DATA_BLOCKS;
         default:
           return null;
@@ -105,8 +92,6 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
   public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
-    tmpMap.put(_Fields.STORAGE_MODE, new org.apache.thrift.meta_data.FieldMetaData("storage_mode", org.apache.thrift.TFieldRequirementType.REQUIRED, 
-        new org.apache.thrift.meta_data.EnumMetaData(org.apache.thrift.protocol.TType.ENUM, rpc_storage_mode.class)));
     tmpMap.put(_Fields.PERSISTENT_STORE_PREFIX, new org.apache.thrift.meta_data.FieldMetaData("persistent_store_prefix", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.CHAIN_LENGTH, new org.apache.thrift.meta_data.FieldMetaData("chain_length", org.apache.thrift.TFieldRequirementType.REQUIRED, 
@@ -122,13 +107,11 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
   }
 
   public rpc_data_status(
-    rpc_storage_mode storage_mode,
     java.lang.String persistent_store_prefix,
     int chain_length,
     java.util.List<rpc_replica_chain> data_blocks)
   {
     this();
-    this.storage_mode = storage_mode;
     this.persistent_store_prefix = persistent_store_prefix;
     this.chain_length = chain_length;
     setChainLengthIsSet(true);
@@ -140,9 +123,6 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
    */
   public rpc_data_status(rpc_data_status other) {
     __isset_bitfield = other.__isset_bitfield;
-    if (other.isSetStorageMode()) {
-      this.storage_mode = other.storage_mode;
-    }
     if (other.isSetPersistentStorePrefix()) {
       this.persistent_store_prefix = other.persistent_store_prefix;
     }
@@ -162,43 +142,10 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
 
   @Override
   public void clear() {
-    this.storage_mode = null;
     this.persistent_store_prefix = null;
     setChainLengthIsSet(false);
     this.chain_length = 0;
     this.data_blocks = null;
-  }
-
-  /**
-   * 
-   * @see rpc_storage_mode
-   */
-  public rpc_storage_mode getStorageMode() {
-    return this.storage_mode;
-  }
-
-  /**
-   * 
-   * @see rpc_storage_mode
-   */
-  public rpc_data_status setStorageMode(rpc_storage_mode storage_mode) {
-    this.storage_mode = storage_mode;
-    return this;
-  }
-
-  public void unsetStorageMode() {
-    this.storage_mode = null;
-  }
-
-  /** Returns true if field storage_mode is set (has been assigned a value) and false otherwise */
-  public boolean isSetStorageMode() {
-    return this.storage_mode != null;
-  }
-
-  public void setStorageModeIsSet(boolean value) {
-    if (!value) {
-      this.storage_mode = null;
-    }
   }
 
   public java.lang.String getPersistentStorePrefix() {
@@ -289,14 +236,6 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
 
   public void setFieldValue(_Fields field, java.lang.Object value) {
     switch (field) {
-    case STORAGE_MODE:
-      if (value == null) {
-        unsetStorageMode();
-      } else {
-        setStorageMode((rpc_storage_mode)value);
-      }
-      break;
-
     case PERSISTENT_STORE_PREFIX:
       if (value == null) {
         unsetPersistentStorePrefix();
@@ -326,9 +265,6 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
 
   public java.lang.Object getFieldValue(_Fields field) {
     switch (field) {
-    case STORAGE_MODE:
-      return getStorageMode();
-
     case PERSISTENT_STORE_PREFIX:
       return getPersistentStorePrefix();
 
@@ -349,8 +285,6 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
     }
 
     switch (field) {
-    case STORAGE_MODE:
-      return isSetStorageMode();
     case PERSISTENT_STORE_PREFIX:
       return isSetPersistentStorePrefix();
     case CHAIN_LENGTH:
@@ -375,15 +309,6 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
       return false;
     if (this == that)
       return true;
-
-    boolean this_present_storage_mode = true && this.isSetStorageMode();
-    boolean that_present_storage_mode = true && that.isSetStorageMode();
-    if (this_present_storage_mode || that_present_storage_mode) {
-      if (!(this_present_storage_mode && that_present_storage_mode))
-        return false;
-      if (!this.storage_mode.equals(that.storage_mode))
-        return false;
-    }
 
     boolean this_present_persistent_store_prefix = true && this.isSetPersistentStorePrefix();
     boolean that_present_persistent_store_prefix = true && that.isSetPersistentStorePrefix();
@@ -419,10 +344,6 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
   public int hashCode() {
     int hashCode = 1;
 
-    hashCode = hashCode * 8191 + ((isSetStorageMode()) ? 131071 : 524287);
-    if (isSetStorageMode())
-      hashCode = hashCode * 8191 + storage_mode.getValue();
-
     hashCode = hashCode * 8191 + ((isSetPersistentStorePrefix()) ? 131071 : 524287);
     if (isSetPersistentStorePrefix())
       hashCode = hashCode * 8191 + persistent_store_prefix.hashCode();
@@ -444,16 +365,6 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
 
     int lastComparison = 0;
 
-    lastComparison = java.lang.Boolean.valueOf(isSetStorageMode()).compareTo(other.isSetStorageMode());
-    if (lastComparison != 0) {
-      return lastComparison;
-    }
-    if (isSetStorageMode()) {
-      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.storage_mode, other.storage_mode);
-      if (lastComparison != 0) {
-        return lastComparison;
-      }
-    }
     lastComparison = java.lang.Boolean.valueOf(isSetPersistentStorePrefix()).compareTo(other.isSetPersistentStorePrefix());
     if (lastComparison != 0) {
       return lastComparison;
@@ -504,14 +415,6 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
     java.lang.StringBuilder sb = new java.lang.StringBuilder("rpc_data_status(");
     boolean first = true;
 
-    sb.append("storage_mode:");
-    if (this.storage_mode == null) {
-      sb.append("null");
-    } else {
-      sb.append(this.storage_mode);
-    }
-    first = false;
-    if (!first) sb.append(", ");
     sb.append("persistent_store_prefix:");
     if (this.persistent_store_prefix == null) {
       sb.append("null");
@@ -537,9 +440,6 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
 
   public void validate() throws org.apache.thrift.TException {
     // check for required fields
-    if (storage_mode == null) {
-      throw new org.apache.thrift.protocol.TProtocolException("Required field 'storage_mode' was not present! Struct: " + toString());
-    }
     if (persistent_store_prefix == null) {
       throw new org.apache.thrift.protocol.TProtocolException("Required field 'persistent_store_prefix' was not present! Struct: " + toString());
     }
@@ -586,15 +486,7 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
           break;
         }
         switch (schemeField.id) {
-          case 1: // STORAGE_MODE
-            if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
-              struct.storage_mode = mmux.directory.rpc_storage_mode.findByValue(iprot.readI32());
-              struct.setStorageModeIsSet(true);
-            } else { 
-              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-            }
-            break;
-          case 2: // PERSISTENT_STORE_PREFIX
+          case 1: // PERSISTENT_STORE_PREFIX
             if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
               struct.persistent_store_prefix = iprot.readString();
               struct.setPersistentStorePrefixIsSet(true);
@@ -602,7 +494,7 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 3: // CHAIN_LENGTH
+          case 2: // CHAIN_LENGTH
             if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
               struct.chain_length = iprot.readI32();
               struct.setChainLengthIsSet(true);
@@ -610,7 +502,7 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 4: // DATA_BLOCKS
+          case 3: // DATA_BLOCKS
             if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
               {
                 org.apache.thrift.protocol.TList _list8 = iprot.readListBegin();
@@ -647,11 +539,6 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
       struct.validate();
 
       oprot.writeStructBegin(STRUCT_DESC);
-      if (struct.storage_mode != null) {
-        oprot.writeFieldBegin(STORAGE_MODE_FIELD_DESC);
-        oprot.writeI32(struct.storage_mode.getValue());
-        oprot.writeFieldEnd();
-      }
       if (struct.persistent_store_prefix != null) {
         oprot.writeFieldBegin(PERSISTENT_STORE_PREFIX_FIELD_DESC);
         oprot.writeString(struct.persistent_store_prefix);
@@ -689,7 +576,6 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
     @Override
     public void write(org.apache.thrift.protocol.TProtocol prot, rpc_data_status struct) throws org.apache.thrift.TException {
       org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
-      oprot.writeI32(struct.storage_mode.getValue());
       oprot.writeString(struct.persistent_store_prefix);
       oprot.writeI32(struct.chain_length);
       {
@@ -704,8 +590,6 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
     @Override
     public void read(org.apache.thrift.protocol.TProtocol prot, rpc_data_status struct) throws org.apache.thrift.TException {
       org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
-      struct.storage_mode = mmux.directory.rpc_storage_mode.findByValue(iprot.readI32());
-      struct.setStorageModeIsSet(true);
       struct.persistent_store_prefix = iprot.readString();
       struct.setPersistentStorePrefixIsSet(true);
       struct.chain_length = iprot.readI32();

@@ -14,6 +14,7 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
   private static final org.apache.thrift.protocol.TField BLOCK_NAMES_FIELD_DESC = new org.apache.thrift.protocol.TField("block_names", org.apache.thrift.protocol.TType.LIST, (short)1);
   private static final org.apache.thrift.protocol.TField SLOT_BEGIN_FIELD_DESC = new org.apache.thrift.protocol.TField("slot_begin", org.apache.thrift.protocol.TType.I32, (short)2);
   private static final org.apache.thrift.protocol.TField SLOT_END_FIELD_DESC = new org.apache.thrift.protocol.TField("slot_end", org.apache.thrift.protocol.TType.I32, (short)3);
+  private static final org.apache.thrift.protocol.TField STORAGE_MODE_FIELD_DESC = new org.apache.thrift.protocol.TField("storage_mode", org.apache.thrift.protocol.TType.I32, (short)4);
 
   private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new rpc_replica_chainStandardSchemeFactory();
   private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new rpc_replica_chainTupleSchemeFactory();
@@ -21,12 +22,22 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
   public java.util.List<java.lang.String> block_names; // required
   public int slot_begin; // required
   public int slot_end; // required
+  /**
+   * 
+   * @see rpc_storage_mode
+   */
+  public rpc_storage_mode storage_mode; // required
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
     BLOCK_NAMES((short)1, "block_names"),
     SLOT_BEGIN((short)2, "slot_begin"),
-    SLOT_END((short)3, "slot_end");
+    SLOT_END((short)3, "slot_end"),
+    /**
+     * 
+     * @see rpc_storage_mode
+     */
+    STORAGE_MODE((short)4, "storage_mode");
 
     private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
 
@@ -47,6 +58,8 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
           return SLOT_BEGIN;
         case 3: // SLOT_END
           return SLOT_END;
+        case 4: // STORAGE_MODE
+          return STORAGE_MODE;
         default:
           return null;
       }
@@ -100,6 +113,8 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
     tmpMap.put(_Fields.SLOT_END, new org.apache.thrift.meta_data.FieldMetaData("slot_end", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+    tmpMap.put(_Fields.STORAGE_MODE, new org.apache.thrift.meta_data.FieldMetaData("storage_mode", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+        new org.apache.thrift.meta_data.EnumMetaData(org.apache.thrift.protocol.TType.ENUM, rpc_storage_mode.class)));
     metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(rpc_replica_chain.class, metaDataMap);
   }
@@ -110,7 +125,8 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
   public rpc_replica_chain(
     java.util.List<java.lang.String> block_names,
     int slot_begin,
-    int slot_end)
+    int slot_end,
+    rpc_storage_mode storage_mode)
   {
     this();
     this.block_names = block_names;
@@ -118,6 +134,7 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     setSlotBeginIsSet(true);
     this.slot_end = slot_end;
     setSlotEndIsSet(true);
+    this.storage_mode = storage_mode;
   }
 
   /**
@@ -131,6 +148,9 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     }
     this.slot_begin = other.slot_begin;
     this.slot_end = other.slot_end;
+    if (other.isSetStorageMode()) {
+      this.storage_mode = other.storage_mode;
+    }
   }
 
   public rpc_replica_chain deepCopy() {
@@ -144,6 +164,7 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     this.slot_begin = 0;
     setSlotEndIsSet(false);
     this.slot_end = 0;
+    this.storage_mode = null;
   }
 
   public int getBlockNamesSize() {
@@ -231,6 +252,38 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __SLOT_END_ISSET_ID, value);
   }
 
+  /**
+   * 
+   * @see rpc_storage_mode
+   */
+  public rpc_storage_mode getStorageMode() {
+    return this.storage_mode;
+  }
+
+  /**
+   * 
+   * @see rpc_storage_mode
+   */
+  public rpc_replica_chain setStorageMode(rpc_storage_mode storage_mode) {
+    this.storage_mode = storage_mode;
+    return this;
+  }
+
+  public void unsetStorageMode() {
+    this.storage_mode = null;
+  }
+
+  /** Returns true if field storage_mode is set (has been assigned a value) and false otherwise */
+  public boolean isSetStorageMode() {
+    return this.storage_mode != null;
+  }
+
+  public void setStorageModeIsSet(boolean value) {
+    if (!value) {
+      this.storage_mode = null;
+    }
+  }
+
   public void setFieldValue(_Fields field, java.lang.Object value) {
     switch (field) {
     case BLOCK_NAMES:
@@ -257,6 +310,14 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
       }
       break;
 
+    case STORAGE_MODE:
+      if (value == null) {
+        unsetStorageMode();
+      } else {
+        setStorageMode((rpc_storage_mode)value);
+      }
+      break;
+
     }
   }
 
@@ -270,6 +331,9 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
 
     case SLOT_END:
       return getSlotEnd();
+
+    case STORAGE_MODE:
+      return getStorageMode();
 
     }
     throw new java.lang.IllegalStateException();
@@ -288,6 +352,8 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
       return isSetSlotBegin();
     case SLOT_END:
       return isSetSlotEnd();
+    case STORAGE_MODE:
+      return isSetStorageMode();
     }
     throw new java.lang.IllegalStateException();
   }
@@ -334,6 +400,15 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
         return false;
     }
 
+    boolean this_present_storage_mode = true && this.isSetStorageMode();
+    boolean that_present_storage_mode = true && that.isSetStorageMode();
+    if (this_present_storage_mode || that_present_storage_mode) {
+      if (!(this_present_storage_mode && that_present_storage_mode))
+        return false;
+      if (!this.storage_mode.equals(that.storage_mode))
+        return false;
+    }
+
     return true;
   }
 
@@ -348,6 +423,10 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     hashCode = hashCode * 8191 + slot_begin;
 
     hashCode = hashCode * 8191 + slot_end;
+
+    hashCode = hashCode * 8191 + ((isSetStorageMode()) ? 131071 : 524287);
+    if (isSetStorageMode())
+      hashCode = hashCode * 8191 + storage_mode.getValue();
 
     return hashCode;
   }
@@ -390,6 +469,16 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
         return lastComparison;
       }
     }
+    lastComparison = java.lang.Boolean.valueOf(isSetStorageMode()).compareTo(other.isSetStorageMode());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetStorageMode()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.storage_mode, other.storage_mode);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     return 0;
   }
 
@@ -425,6 +514,14 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     sb.append("slot_end:");
     sb.append(this.slot_end);
     first = false;
+    if (!first) sb.append(", ");
+    sb.append("storage_mode:");
+    if (this.storage_mode == null) {
+      sb.append("null");
+    } else {
+      sb.append(this.storage_mode);
+    }
+    first = false;
     sb.append(")");
     return sb.toString();
   }
@@ -436,6 +533,9 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     }
     // alas, we cannot check 'slot_begin' because it's a primitive and you chose the non-beans generator.
     // alas, we cannot check 'slot_end' because it's a primitive and you chose the non-beans generator.
+    if (storage_mode == null) {
+      throw new org.apache.thrift.protocol.TProtocolException("Required field 'storage_mode' was not present! Struct: " + toString());
+    }
     // check for sub-struct validity
   }
 
@@ -509,6 +609,14 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
+          case 4: // STORAGE_MODE
+            if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+              struct.storage_mode = mmux.directory.rpc_storage_mode.findByValue(iprot.readI32());
+              struct.setStorageModeIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
         }
@@ -548,6 +656,11 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
       oprot.writeFieldBegin(SLOT_END_FIELD_DESC);
       oprot.writeI32(struct.slot_end);
       oprot.writeFieldEnd();
+      if (struct.storage_mode != null) {
+        oprot.writeFieldBegin(STORAGE_MODE_FIELD_DESC);
+        oprot.writeI32(struct.storage_mode.getValue());
+        oprot.writeFieldEnd();
+      }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -574,6 +687,7 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
       }
       oprot.writeI32(struct.slot_begin);
       oprot.writeI32(struct.slot_end);
+      oprot.writeI32(struct.storage_mode.getValue());
     }
 
     @Override
@@ -594,6 +708,8 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
       struct.setSlotBeginIsSet(true);
       struct.slot_end = iprot.readI32();
       struct.setSlotEndIsSet(true);
+      struct.storage_mode = mmux.directory.rpc_storage_mode.findByValue(iprot.readI32());
+      struct.setStorageModeIsSet(true);
     }
   }
 
