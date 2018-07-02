@@ -96,8 +96,8 @@ class ReplicaChain:
 
 
 class DataStatus:
-    def __init__(self, persistent_store_prefix, chain_length, data_blocks):
-        self.persistent_store_prefix = persistent_store_prefix
+    def __init__(self, backing_path, chain_length, data_blocks):
+        self.backing_path = backing_path
         self.chain_length = chain_length
         self.data_blocks = [ReplicaChain(replica_chain.block_names, replica_chain.slot_begin, replica_chain.slot_end,
                                          replica_chain.storage_mode)
@@ -139,15 +139,15 @@ class DirectoryClient:
 
     def open(self, path):
         s = self.client_.open(path)
-        return DataStatus(s.persistent_store_prefix, s.chain_length, s.data_blocks)
+        return DataStatus(s.backing_path, s.chain_length, s.data_blocks)
 
-    def create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1):
-        s = self.client_.create(path, persistent_store_prefix, num_blocks, chain_length)
-        return DataStatus(s.persistent_store_prefix, s.chain_length, s.data_blocks)
+    def create(self, path, backing_path, num_blocks=1, chain_length=1, flags=0):
+        s = self.client_.create(path, backing_path, num_blocks, chain_length, flags)
+        return DataStatus(s.backing_path, s.chain_length, s.data_blocks)
 
-    def open_or_create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1):
-        s = self.client_.open_or_create(path, persistent_store_prefix, num_blocks, chain_length)
-        return DataStatus(s.persistent_store_prefix, s.chain_length, s.data_blocks)
+    def open_or_create(self, path, backing_path, num_blocks=1, chain_length=1, flags=0):
+        s = self.client_.open_or_create(path, backing_path, num_blocks, chain_length, flags)
+        return DataStatus(s.backing_path, s.chain_length, s.data_blocks)
 
     def exists(self, path):
         return self.client_.exists(path)
@@ -167,8 +167,14 @@ class DirectoryClient:
     def remove_all(self, path):
         self.client_.remove_all(path)
 
-    def flush(self, path, dest):
-        self.client_.flush(path, dest)
+    def sync(self, path, backing_path):
+        self.client_.sync(path, backing_path)
+
+    def dump(self, path, backing_path):
+        self.client_.dump(path, backing_path)
+
+    def load(self, path, backing_path):
+        self.client_.load(path, backing_path)
 
     def status(self, path):
         s = self.client_.status(path)
@@ -184,7 +190,7 @@ class DirectoryClient:
 
     def dstatus(self, path):
         s = self.client_.dstatus(path)
-        return DataStatus(s.persistent_store_prefix, s.chain_length, s.data_blocks)
+        return DataStatus(s.backing_path, s.chain_length, s.data_blocks)
 
     def is_regular_file(self, path):
         return self.client_.is_regular_file(path)
