@@ -179,10 +179,6 @@ public class MMuxClientTest {
     return ByteBufferUtils.fromString(str);
   }
 
-  private void assertBBEquals(ByteBuffer bb1, ByteBuffer bb2) {
-    Assert.assertEquals(ByteBufferUtils.toString(bb1), ByteBufferUtils.toString(bb2));
-  }
-
   private void kvOps(KVClient kv) throws TException {
     System.out.println("==> Testing KV ops");
     for (int i = 0; i < 1000; i++) {
@@ -363,7 +359,7 @@ public class MMuxClientTest {
     try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
       client.create("/a/file.txt", "local://tmp", 1, 1);
       Assert.assertTrue(client.getWorker().hasPath("/a/file.txt"));
-      client.flush("/a/file.txt", "local://tmp");
+      client.sync("/a/file.txt", "local://tmp");
       Assert.assertTrue(client.getWorker().hasPath("/a/file.txt"));
       client.remove("/a/file.txt");
       Assert.assertFalse(client.getWorker().hasPath("/a/file.txt"));

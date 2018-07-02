@@ -12,9 +12,9 @@ import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
-import org.apache.thrift.transport.TTransportException;
 
 public class MMuxClient implements Closeable {
+
   private TTransport transport;
   private directory_service.Client fs;
   private LeaseWorker worker;
@@ -45,9 +45,22 @@ public class MMuxClient implements Closeable {
     worker.removePath(path);
   }
 
-  public KVClient create(String path, String persistentStorePrefix, int numBlocks, int chainLength)
+  public KVClient create(String path) throws TException {
+    return create(path, "", 1, 1, 0);
+  }
+
+  public KVClient create(String path, String backingPath) throws TException {
+    return create(path, backingPath, 1, 1, 0);
+  }
+
+  public KVClient create(String path, String backingPath, int numBlocks, int chainLength)
       throws TException {
-    rpc_data_status status = fs.create(path, persistentStorePrefix, numBlocks, chainLength);
+    return create(path, backingPath, numBlocks, chainLength, 0);
+  }
+
+  public KVClient create(String path, String backingPath, int numBlocks, int chainLength, int flags)
+      throws TException {
+    rpc_data_status status = fs.create(path, backingPath, numBlocks, chainLength, flags);
     beginScope(path);
     return new KVClient(fs, path, status);
   }
@@ -58,8 +71,23 @@ public class MMuxClient implements Closeable {
     return new KVClient(fs, path, status);
   }
 
-  public KVClient openOrCreate(String path, String persistentStorePrefix, int numBlocks, int chainLength) throws TException {
-    rpc_data_status status = fs.openOrCreate(path, persistentStorePrefix, numBlocks, chainLength);
+  public KVClient openOrCreate(String path) throws TException {
+    return openOrCreate(path, "", 1, 1, 0);
+  }
+
+  public KVClient openOrCreate(String path, String backingPath) throws TException {
+    return openOrCreate(path, backingPath, 1, 1, 0);
+  }
+
+  public KVClient openOrCreate(String path, String backingPath, int numBlocks, int chainLength)
+      throws TException {
+    return openOrCreate(path, backingPath, numBlocks, chainLength, 0);
+  }
+
+  public KVClient openOrCreate(String path, String backingPath, int numBlocks,
+      int chainLength, int flags) throws TException {
+    rpc_data_status status = fs
+        .openOrCreate(path, backingPath, numBlocks, chainLength, flags);
     beginScope(path);
     return new KVClient(fs, path, status);
   }
@@ -75,8 +103,16 @@ public class MMuxClient implements Closeable {
     fs.remove(path);
   }
 
-  public void flush(String path, String dest) throws TException {
-    fs.flush(path, dest);
+  public void sync(String path, String backingPath) throws TException {
+    fs.sync(path, backingPath);
+  }
+
+  public void dump(String path, String backingPath) throws TException {
+    fs.dump(path, backingPath);
+  }
+
+  public void load(String path, String backingPath) throws TException {
+    fs.load(path, backingPath);
   }
 
   @Override
