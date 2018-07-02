@@ -387,7 +387,7 @@ uint32_t block_request_service_command_request_args::read(Protocol_* iprot) {
             uint32_t _i10;
             for (_i10 = 0; _i10 < _size6; ++_i10)
             {
-              xfer += iprot->readString(this->arguments[_i10]);
+              xfer += iprot->readBinary(this->arguments[_i10]);
             }
             xfer += iprot->readListEnd();
           }
@@ -432,7 +432,7 @@ uint32_t block_request_service_command_request_args::write(Protocol_* oprot) con
     std::vector<std::string> ::const_iterator _iter11;
     for (_iter11 = this->arguments.begin(); _iter11 != this->arguments.end(); ++_iter11)
     {
-      xfer += oprot->writeString((*_iter11));
+      xfer += oprot->writeBinary((*_iter11));
     }
     xfer += oprot->writeListEnd();
   }
@@ -468,7 +468,7 @@ uint32_t block_request_service_command_request_pargs::write(Protocol_* oprot) co
     std::vector<std::string> ::const_iterator _iter12;
     for (_iter12 = (*(this->arguments)).begin(); _iter12 != (*(this->arguments)).end(); ++_iter12)
     {
-      xfer += oprot->writeString((*_iter12));
+      xfer += oprot->writeBinary((*_iter12));
     }
     xfer += oprot->writeListEnd();
   }
