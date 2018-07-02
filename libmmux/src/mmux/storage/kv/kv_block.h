@@ -89,7 +89,9 @@ class kv_block : public chain_module {
 
   void load(const std::string &path) override;
 
-  bool flush(const std::string &path) override;
+  bool sync(const std::string &path) override;
+
+  bool dump(const std::string &path) override;
 
   std::size_t storage_capacity() override;
 

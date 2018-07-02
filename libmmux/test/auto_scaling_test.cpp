@@ -39,7 +39,7 @@ TEST_CASE("scale_add_block_test", "[directory_tree][storage_server][management_s
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  REQUIRE_NOTHROW(tree->create("/sandbox/file.txt", "/tmp", 1, 1));
+  REQUIRE_NOTHROW(tree->create("/sandbox/file.txt", "/tmp", 1, 1, 0));
 
   // Write some data into it
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -90,7 +90,7 @@ TEST_CASE("scale_block_split_test", "[directory_tree][storage_server][management
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  REQUIRE_NOTHROW(tree->create("/sandbox/file.txt", "/tmp", 1, 1));
+  REQUIRE_NOTHROW(tree->create("/sandbox/file.txt", "/tmp", 1, 1, 0));
 
   // Write some data into it
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -141,7 +141,7 @@ TEST_CASE("scale_block_merge_test", "[directory_tree][storage_server][management
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  REQUIRE_NOTHROW(tree->create("/sandbox/file.txt", "/tmp", 2, 1));
+  REQUIRE_NOTHROW(tree->create("/sandbox/file.txt", "/tmp", 2, 1, 0));
 
   // Write some data into it
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -195,7 +195,7 @@ TEST_CASE("auto_scale_up_test", "[directory_service][storage_server][management_
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  REQUIRE_NOTHROW(t->create("/sandbox/file.txt", "/tmp", 1, 1));
+  REQUIRE_NOTHROW(t->create("/sandbox/file.txt", "/tmp", 1, 1, 0));
 
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -258,7 +258,7 @@ TEST_CASE("auto_scale_down_test", "[directory_service][storage_server][managemen
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  REQUIRE_NOTHROW(t->create("/sandbox/file.txt", "/tmp", 2, 1));
+  REQUIRE_NOTHROW(t->create("/sandbox/file.txt", "/tmp", 2, 1, 0));
 
   // Write some initial data
   for (std::size_t i = 0; i < 1000; ++i) {

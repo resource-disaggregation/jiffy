@@ -169,16 +169,16 @@ class rpc_data_status {
 
   rpc_data_status(const rpc_data_status&);
   rpc_data_status& operator=(const rpc_data_status&);
-  rpc_data_status() : persistent_store_prefix(), chain_length(0), flags(0) {
+  rpc_data_status() : backing_path(), chain_length(0), flags(0) {
   }
 
   virtual ~rpc_data_status() throw();
-  std::string persistent_store_prefix;
+  std::string backing_path;
   int32_t chain_length;
   std::vector<rpc_replica_chain>  data_blocks;
   int32_t flags;
 
-  void __set_persistent_store_prefix(const std::string& val);
+  void __set_backing_path(const std::string& val);
 
   void __set_chain_length(const int32_t val);
 
@@ -188,7 +188,7 @@ class rpc_data_status {
 
   bool operator == (const rpc_data_status & rhs) const
   {
-    if (!(persistent_store_prefix == rhs.persistent_store_prefix))
+    if (!(backing_path == rhs.backing_path))
       return false;
     if (!(chain_length == rhs.chain_length))
       return false;

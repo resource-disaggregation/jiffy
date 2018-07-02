@@ -443,7 +443,7 @@ void kv_block::load(const std::string &path) {
   ltable.unlock();
 }
 
-bool kv_block::flush(const std::string &path) {
+bool kv_block::sync(const std::string &path) {
   bool expected = true;
   if (dirty_.compare_exchange_strong(expected, false)) {
     locked_hash_table_type ltable = block_.lock_table();
@@ -454,6 +454,35 @@ bool kv_block::flush(const std::string &path) {
     return true;
   }
   return false;
+}
+
+bool kv_block::dump(const std::string &path) {
+  std::unique_lock lock(metadata_mtx_);
+  bool expected = true;
+  bool flushed = false;
+  if (dirty_.compare_exchange_strong(expected, false)) {
+    locked_hash_table_type ltable = block_.lock_table();
+    auto remote = persistent::persistent_store::instance(path, ser_);
+    auto decomposed = persistent::persistent_store::decompose_path(path);
+    remote->write(ltable, decomposed.second);
+    ltable.unlock();
+    flushed = true;
+  }
+  block_.clear();
+  next_->reset("nil");
+  path_ = "";
+  // clients().clear();
+  sub_map_.clear();
+  bytes_.store(0);
+  slot_range_.first = 0;
+  slot_range_.second = -1;
+  state_ = block_state::regular;
+  chain_ = {};
+  role_ = singleton;
+  splitting_ = false;
+  merging_ = false;
+  dirty_ = false;
+  return flushed;
 }
 
 void kv_block::forward_all() {

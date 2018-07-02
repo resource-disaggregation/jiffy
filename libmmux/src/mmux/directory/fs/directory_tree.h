@@ -21,6 +21,7 @@ namespace directory {
 
 class lease_expiry_worker;
 class file_size_tracker;
+class sync_worker;
 
 class ds_node {
  public:
@@ -49,9 +50,12 @@ class ds_node {
 
   void last_write_time(std::uint64_t time) { status_.last_write_time(time); }
 
-  virtual void flush(const std::string &path,
-                     const std::string &dest,
-                     const std::shared_ptr<storage::storage_management_ops> &storage) = 0;
+  virtual void sync(const std::string &backing_path,
+                    const std::shared_ptr<storage::storage_management_ops> &storage) = 0;
+  virtual void dump(const std::string &backing_path,
+                    const std::shared_ptr<storage::storage_management_ops> &storage) = 0;
+  virtual void load(const std::string &backing_path,
+                    const std::shared_ptr<storage::storage_management_ops> &storage) = 0;
 
  private:
   std::string name_{};
@@ -70,11 +74,11 @@ class ds_file_node : public ds_node {
         dstatus_{} {}
 
   ds_file_node(const std::string &name,
-               const std::string &persistent_store_prefix,
+               const std::string &backing_path,
                std::size_t chain_length,
                std::vector<replica_chain> blocks) :
       ds_node(name, file_status(file_type::regular, perms(perms::all), utils::time_utils::now_ms())),
-      dstatus_(persistent_store_prefix, chain_length, std::move(blocks)) {}
+      dstatus_(backing_path, chain_length, std::move(blocks)) {}
 
   const data_status &dstatus() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
@@ -101,14 +105,14 @@ class ds_file_node : public ds_node {
     dstatus_.mode(m);
   }
 
-  const std::string &persistent_store_prefix() const {
+  const std::string &backing_path() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
-    return dstatus_.persistent_store_prefix();
+    return dstatus_.backing_path();
   }
 
-  void persistent_store_prefix(const std::string &prefix) {
+  void backing_path(const std::string &prefix) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
-    dstatus_.persistent_store_prefix(prefix);
+    dstatus_.backing_path(prefix);
   }
 
   std::size_t chain_length() const {
@@ -119,6 +123,31 @@ class ds_file_node : public ds_node {
   void chain_length(std::size_t chain_length) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     dstatus_.chain_length(chain_length);
+  }
+
+  std::int32_t flags() const {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    return dstatus_.flags();
+  }
+
+  void flags(std::int32_t flags) {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    dstatus_.flags(flags);
+  }
+
+  bool is_pinned() const {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    return dstatus_.is_pinned();
+  }
+
+  bool is_mapped() const {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    return dstatus_.is_mapped();
+  }
+
+  bool is_static_provisioned() const {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    return dstatus_.is_static_provisioned();
   }
 
   const std::vector<replica_chain> &data_blocks() const {
@@ -133,15 +162,48 @@ class ds_file_node : public ds_node {
     return out;
   }
 
-  void flush(const std::string &path,
-             const std::string &dest,
-             const std::shared_ptr<storage::storage_management_ops> &storage) override {
+  void sync(const std::string &backing_path, const std::shared_ptr<storage::storage_management_ops> &storage) override {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     for (const auto &block: dstatus_.data_blocks()) {
-      std::string block_dest = dest;
-      utils::directory_utils::push_path_element(block_dest, block.slot_range_string());
-      storage->flush(block.tail(), block_dest, path);
+      std::string block_backing_path = backing_path;
+      utils::directory_utils::push_path_element(block_backing_path, block.slot_range_string());
+      storage->sync(block.tail(), block_backing_path);
     }
+  }
+
+  void dump(const std::string &backing_path, const std::shared_ptr<storage::storage_management_ops> &storage) override {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    for (const auto &block: dstatus_.data_blocks()) {
+      std::string block_backing_path = backing_path;
+      utils::directory_utils::push_path_element(block_backing_path, block.slot_range_string());
+      storage->dump(block.tail(), block_backing_path);
+    }
+  }
+
+  void load(const std::string &backing_path, const std::shared_ptr<storage::storage_management_ops> &storage) override {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    for (const auto &block: dstatus_.data_blocks()) {
+      std::string block_backing_path = backing_path;
+      utils::directory_utils::push_path_element(block_backing_path, block.slot_range_string());
+      storage->load(block.tail(), block_backing_path);
+    }
+  }
+
+  bool handle_lease_expiry(std::vector<std::string> &cleared_blocks,
+                           std::shared_ptr<storage::storage_management_ops> storage) {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    if (!dstatus_.is_pinned()) {
+      using namespace utils;
+      LOG(log_level::info) << "Clearing storage for " << name();
+      for (const auto &block: dstatus_.data_blocks()) {
+        for (const auto &block_name: block.block_names) {
+          storage->reset(block_name);
+          cleared_blocks.push_back(block_name);
+        }
+      }
+      return true;
+    }
+    return false;
   }
 
   export_ctx setup_add_block(std::shared_ptr<storage::storage_management_ops> storage,
@@ -431,14 +493,55 @@ class ds_dir_node : public ds_node {
     }
   }
 
-  void flush(const std::string &path,
-             const std::string &dest,
-             const std::shared_ptr<storage::storage_management_ops> &storage) override {
+  bool handle_lease_expiry(std::vector<std::string> &cleared_blocks,
+                           const std::string &child_name,
+                           std::shared_ptr<storage::storage_management_ops> storage) {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    auto ret = children_.find(child_name);
+    if (ret != children_.end()) {
+      if (ret->second->is_regular_file()) {
+        auto file = std::dynamic_pointer_cast<ds_file_node>(ret->second);
+        if (file->handle_lease_expiry(cleared_blocks, storage)) {
+          children_.erase(ret);
+          return true;
+        }
+        return false;
+      } else if (ret->second->is_directory()) {
+        auto dir = std::dynamic_pointer_cast<ds_dir_node>(ret->second);
+        bool cleared = true;
+        for (auto &entry: *dir) {
+          if (!dir->handle_lease_expiry(cleared_blocks, entry.first, storage)) {
+            cleared = false;
+          }
+        }
+        if (cleared)
+          children_.erase(ret);
+        return cleared;
+      }
+    } else {
+      throw directory_ops_exception("Child node not found: " + child_name);
+    }
+    return false;
+  }
+
+  void sync(const std::string &backing_path, const std::shared_ptr<storage::storage_management_ops> &storage) override {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     for (const auto &entry: children_) {
-      std::string child_path = path;
-      utils::directory_utils::push_path_element(child_path, entry.first);
-      entry.second->flush(child_path, dest, storage);
+      entry.second->sync(backing_path, storage);
+    }
+  }
+
+  void dump(const std::string &backing_path, const std::shared_ptr<storage::storage_management_ops> &storage) override {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    for (const auto &entry: children_) {
+      entry.second->dump(backing_path, storage);
+    }
+  }
+
+  void load(const std::string &backing_path, const std::shared_ptr<storage::storage_management_ops> &storage) override {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    for (const auto &entry: children_) {
+      entry.second->load(backing_path, storage);
     }
   }
 
@@ -519,13 +622,15 @@ class directory_tree : public directory_ops, public directory_management_ops {
 
   data_status open(const std::string &path) override;
   data_status create(const std::string &path,
-                     const std::string &persistent_store_prefix,
-                     std::size_t num_blocks,
-                     std::size_t chain_length) override;
+                     const std::string &backing_path = "",
+                     std::size_t num_blocks = 1,
+                     std::size_t chain_length = 1,
+                     std::int32_t flags = 0) override;
   data_status open_or_create(const std::string &path,
-                             const std::string &persistent_store_prefix,
-                             std::size_t num_blocks,
-                             std::size_t chain_length) override;
+                             const std::string &backing_path = "",
+                             std::size_t num_blocks = 1,
+                             std::size_t chain_length = 1,
+                             std::int32_t flags = 0) override;
 
   bool exists(const std::string &path) const override;
 
@@ -537,7 +642,9 @@ class directory_tree : public directory_ops, public directory_management_ops {
   void remove(const std::string &path) override;
   void remove_all(const std::string &path) override;
 
-  void flush(const std::string &path, const std::string &dest) override;
+  void sync(const std::string &path, const std::string &backing_path) override;
+  void dump(const std::string &path, const std::string &backing_path) override;
+  void load(const std::string &path, const std::string &backing_path) override;
 
   void rename(const std::string &old_path, const std::string &new_path) override;
 
@@ -559,6 +666,7 @@ class directory_tree : public directory_ops, public directory_management_ops {
   void add_block_to_file(const std::string &path) override;
   virtual void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end);
   virtual void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end);
+  virtual void handle_lease_expiry(const std::string &path);
 
  private:
   std::shared_ptr<ds_node> get_node_unsafe(const std::string &path) const;
@@ -581,6 +689,7 @@ class directory_tree : public directory_ops, public directory_management_ops {
 
   friend class lease_expiry_worker;
   friend class file_size_tracker;
+  friend class sync_worker;
 };
 
 }

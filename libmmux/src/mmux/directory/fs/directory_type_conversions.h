@@ -28,7 +28,7 @@ class directory_type_conversions {
 
   static rpc_data_status to_rpc(const data_status &status) {
     rpc_data_status rpc;
-    rpc.persistent_store_prefix = status.persistent_store_prefix();
+    rpc.backing_path = status.backing_path();
     rpc.chain_length = static_cast<int32_t>(status.chain_length());
     rpc.flags = status.flags();
     for (const auto &blk: status.data_blocks()) {
@@ -59,10 +59,7 @@ class directory_type_conversions {
     for (const auto &blk: rpc.data_blocks) {
       data_blocks.push_back(from_rpc(blk));
     }
-    return data_status(rpc.persistent_store_prefix,
-                       static_cast<size_t>(rpc.chain_length),
-                       data_blocks,
-                       rpc.flags);
+    return data_status(rpc.backing_path, static_cast<size_t>(rpc.chain_length), data_blocks, rpc.flags);
   }
 
   static file_status from_rpc(const rpc_file_status &rpc) {

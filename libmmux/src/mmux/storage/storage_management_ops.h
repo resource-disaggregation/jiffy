@@ -24,13 +24,11 @@ class storage_management_ops {
 
   virtual std::string path(const std::string &block_name) = 0;
 
-  virtual void load(const std::string &block_name,
-                    const std::string &persistent_path_prefix,
-                    const std::string &path) = 0;
+  virtual void load(const std::string &block_name, const std::string &backing_path) = 0;
 
-  virtual void flush(const std::string &block_name,
-                     const std::string &persistent_path_prefix,
-                     const std::string &path) = 0;
+  virtual void sync(const std::string &block_name, const std::string &backing_path) = 0;
+
+  virtual void dump(const std::string &block_name, const std::string &backing_path) = 0;
 
   virtual void reset(const std::string &block_name) = 0;
 

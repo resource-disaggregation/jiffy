@@ -21,20 +21,22 @@ class directory_client : public directory_ops {
   void create_directories(const std::string &path) override;
   data_status open(const std::string &path) override;
   data_status create(const std::string &path,
-                     const std::string &persistent_store_prefix,
+                     const std::string &backing_path,
                      std::size_t num_blocks,
-                     std::size_t chain_length) override;
+                     std::size_t chain_length,
+                     std::int32_t flags) override;
   data_status open_or_create(const std::string &path,
-                             const std::string &persistent_store_prefix,
+                             const std::string &backing_path,
                              std::size_t num_blocks,
-                             std::size_t chain_length) override;
+                             std::size_t chain_length,
+                             std::int32_t flags) override;
   bool exists(const std::string &path) const override;
   std::uint64_t last_write_time(const std::string &path) const override;
   perms permissions(const std::string &path) override;
   void permissions(const std::string &path, const perms &prms, perm_options opts) override;
   void remove(const std::string &path) override;
   void remove_all(const std::string &path) override;
-  void flush(const std::string &path, const std::string &dest) override;
+  void sync(const std::string &path, const std::string &backing_path) override;
   void rename(const std::string &old_path, const std::string &new_path) override;
   file_status status(const std::string &path) const override;
   std::vector<directory_entry> directory_entries(const std::string &path) override;
@@ -49,6 +51,8 @@ class directory_client : public directory_ops {
   void add_block_to_file(const std::string &path);
   void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end);
   void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end);
+  void dump(const std::string &path, const std::string &backing_path);
+  void load(const std::string &path, const std::string &backing_path);
 
  private:
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};

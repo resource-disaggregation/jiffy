@@ -42,6 +42,8 @@ add_library(mmux STATIC
         src/mmux/directory/fs/directory_tree.cpp
         src/mmux/directory/fs/directory_tree.h
         src/mmux/directory/fs/directory_type_conversions.h
+        src/mmux/directory/fs/sync_worker.cpp
+        src/mmux/directory/fs/sync_worker.h
         src/mmux/directory/client/lease_client.cpp
         src/mmux/directory/client/lease_client.h
         src/mmux/directory/client/lease_renewal_worker.cc
@@ -248,6 +250,7 @@ if (BUILD_TESTS)
           test/mmux_client_test.cpp
           test/notification_test.cpp
           test/storage_manager_test.cpp
+          test/sync_worker_test.cpp
           test/test_utils.h)
   target_link_libraries(mmux_tests mmux)
   if (NOT USE_SYSTEM_CATCH)

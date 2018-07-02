@@ -21,12 +21,9 @@ class storage_manager : public storage_management_ops {
                    const std::string &next_block_name) override;
   std::string path(const std::string &block_name) override;
   std::pair<int32_t, int32_t> slot_range(const std::string &block_name) override;
-  void load(const std::string &block_name,
-            const std::string &persistent_path_prefix,
-            const std::string &path) override;
-  void flush(const std::string &block_name,
-             const std::string &persistent_path_prefix,
-             const std::string &path) override;
+  void load(const std::string &block_name, const std::string &backing_path) override;
+  void sync(const std::string &block_name, const std::string &backing_path) override;
+  void dump(const std::string &block_name, const std::string &backing_path) override;
   void reset(const std::string &block_name) override;
   size_t storage_capacity(const std::string &block_name) override;
   size_t storage_size(const std::string &block_name) override;

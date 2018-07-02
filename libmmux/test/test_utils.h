@@ -85,16 +85,16 @@ class dummy_storage_manager : public mmux::storage::storage_management_ops {
     COMMANDS.push_back("set_regular:" + block_name + ":" + std::to_string(slot_begin) + ":" + std::to_string(slot_end));
   }
 
-  void load(const std::string &block_name,
-            const std::string &persistent_path_prefix,
-            const std::string &path) override {
-    COMMANDS.push_back("load:" + block_name + ":" + persistent_path_prefix + ":" + path);
+  void load(const std::string &block_name, const std::string &backing_path) override {
+    COMMANDS.push_back("load:" + block_name + ":" + backing_path);
   }
 
-  void flush(const std::string &block_name,
-             const std::string &persistent_path_prefix,
-             const std::string &path) override {
-    COMMANDS.push_back("flush:" + block_name + ":" + persistent_path_prefix + ":" + path);
+  void sync(const std::string &block_name, const std::string &backing_path) override {
+    COMMANDS.push_back("sync:" + block_name + ":" + backing_path);
+  }
+
+  void dump(const std::string &block_name, const std::string &backing_path) override {
+    COMMANDS.push_back("dump:" + block_name + ":" + backing_path);
   }
 
   void reset(const std::string &block_name) override {

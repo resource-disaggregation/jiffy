@@ -243,7 +243,7 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-  bool isset_persistent_store_prefix = false;
+  bool isset_backing_path = false;
   bool isset_chain_length = false;
   bool isset_data_blocks = false;
   bool isset_flags = false;
@@ -258,8 +258,8 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->persistent_store_prefix);
-          isset_persistent_store_prefix = true;
+          xfer += iprot->readString(this->backing_path);
+          isset_backing_path = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -309,7 +309,7 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
 
   xfer += iprot->readStructEnd();
 
-  if (!isset_persistent_store_prefix)
+  if (!isset_backing_path)
     throw TProtocolException(TProtocolException::INVALID_DATA);
   if (!isset_chain_length)
     throw TProtocolException(TProtocolException::INVALID_DATA);
@@ -326,8 +326,8 @@ uint32_t rpc_data_status::write(Protocol_* oprot) const {
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_data_status");
 
-  xfer += oprot->writeFieldBegin("persistent_store_prefix", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString(this->persistent_store_prefix);
+  xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString(this->backing_path);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("chain_length", ::apache::thrift::protocol::T_I32, 2);
