@@ -199,10 +199,6 @@ add_library(mmux STATIC
         src/mmux/utils/retry_utils.h
         src/mmux/utils/string_utils.h)
 
-if (GENERATE_THRIFT)
-  add_dependencies(mmux thriftgen_directory thriftgen_kv)
-endif ()
-
 if (NOT USE_SYSTEM_LIBEVENT)
   add_dependencies(mmux libevent)
 endif ()

@@ -432,7 +432,7 @@ template <class Protocol_>
 void block_allocation_serviceClientT<Protocol_>::send_add_blocks(const std::vector<std::string> & block_names)
 {
   int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("add_replica_to_chain", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("add_blocks", ::apache::thrift::protocol::T_CALL, cseqid);
 
   block_allocation_service_add_blocks_pargs args;
   args.block_names = &block_names;
@@ -464,7 +464,7 @@ void block_allocation_serviceClientT<Protocol_>::recv_add_blocks()
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("add_replica_to_chain") != 0) {
+  if (fname.compare("add_blocks") != 0) {
     this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
@@ -584,12 +584,12 @@ void block_allocation_serviceProcessorT<Protocol_>::process_add_blocks(int32_t s
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("block_allocation_service.add_replica_to_chain", callContext);
+    ctx = this->eventHandler_->getContext("block_allocation_service.add_blocks", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_allocation_service.add_replica_to_chain");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_allocation_service.add_blocks");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "block_allocation_service.add_replica_to_chain");
+    this->eventHandler_->preRead(ctx, "block_allocation_service.add_blocks");
   }
 
   block_allocation_service_add_blocks_args args;
@@ -598,7 +598,7 @@ void block_allocation_serviceProcessorT<Protocol_>::process_add_blocks(int32_t s
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "block_allocation_service.add_replica_to_chain", bytes);
+    this->eventHandler_->postRead(ctx, "block_allocation_service.add_blocks", bytes);
   }
 
   block_allocation_service_add_blocks_result result;
@@ -609,11 +609,11 @@ void block_allocation_serviceProcessorT<Protocol_>::process_add_blocks(int32_t s
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "block_allocation_service.add_replica_to_chain");
+      this->eventHandler_->handlerError(ctx, "block_allocation_service.add_blocks");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("add_replica_to_chain", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("add_blocks", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -622,17 +622,17 @@ void block_allocation_serviceProcessorT<Protocol_>::process_add_blocks(int32_t s
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "block_allocation_service.add_replica_to_chain");
+    this->eventHandler_->preWrite(ctx, "block_allocation_service.add_blocks");
   }
 
-  oprot->writeMessageBegin("add_replica_to_chain", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("add_blocks", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "block_allocation_service.add_replica_to_chain", bytes);
+    this->eventHandler_->postWrite(ctx, "block_allocation_service.add_blocks", bytes);
   }
 }
 
@@ -641,12 +641,12 @@ void block_allocation_serviceProcessorT<Protocol_>::process_add_blocks(int32_t s
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("block_allocation_service.add_replica_to_chain", callContext);
+    ctx = this->eventHandler_->getContext("block_allocation_service.add_blocks", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_allocation_service.add_replica_to_chain");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_allocation_service.add_blocks");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "block_allocation_service.add_replica_to_chain");
+    this->eventHandler_->preRead(ctx, "block_allocation_service.add_blocks");
   }
 
   block_allocation_service_add_blocks_args args;
@@ -655,7 +655,7 @@ void block_allocation_serviceProcessorT<Protocol_>::process_add_blocks(int32_t s
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "block_allocation_service.add_replica_to_chain", bytes);
+    this->eventHandler_->postRead(ctx, "block_allocation_service.add_blocks", bytes);
   }
 
   block_allocation_service_add_blocks_result result;
@@ -666,11 +666,11 @@ void block_allocation_serviceProcessorT<Protocol_>::process_add_blocks(int32_t s
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "block_allocation_service.add_replica_to_chain");
+      this->eventHandler_->handlerError(ctx, "block_allocation_service.add_blocks");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("add_replica_to_chain", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("add_blocks", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -679,17 +679,17 @@ void block_allocation_serviceProcessorT<Protocol_>::process_add_blocks(int32_t s
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "block_allocation_service.add_replica_to_chain");
+    this->eventHandler_->preWrite(ctx, "block_allocation_service.add_blocks");
   }
 
-  oprot->writeMessageBegin("add_replica_to_chain", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("add_blocks", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "block_allocation_service.add_replica_to_chain", bytes);
+    this->eventHandler_->postWrite(ctx, "block_allocation_service.add_blocks", bytes);
   }
 }
 
@@ -827,7 +827,7 @@ int32_t block_allocation_serviceConcurrentClientT<Protocol_>::send_add_blocks(co
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("add_replica_to_chain", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("add_blocks", ::apache::thrift::protocol::T_CALL, cseqid);
 
   block_allocation_service_add_blocks_pargs args;
   args.block_names = &block_names;
@@ -871,7 +871,7 @@ void block_allocation_serviceConcurrentClientT<Protocol_>::recv_add_blocks(const
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
       }
-      if (fname.compare("add_replica_to_chain") != 0) {
+      if (fname.compare("add_blocks") != 0) {
         this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
