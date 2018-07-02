@@ -3,14 +3,13 @@
 #
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #
-#  options string: py:slots
+#  options string: py:no_utf8strings,slots
 #
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol.TProtocol import TProtocolException
 from thrift.TRecursive import fix_spec
 
-import sys
 
 from thrift.transport import TTransport
 all_structs = []
@@ -124,7 +123,7 @@ class lease_service_exception(TException):
                 break
             if fid == 1:
                 if ftype == TType.STRING:
-                    self.msg = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                    self.msg = iprot.readString()
                 else:
                     iprot.skip(ftype)
             else:
@@ -139,7 +138,7 @@ class lease_service_exception(TException):
         oprot.writeStructBegin('lease_service_exception')
         if self.msg is not None:
             oprot.writeFieldBegin('msg', TType.STRING, 1)
-            oprot.writeString(self.msg.encode('utf-8') if sys.version_info[0] == 2 else self.msg)
+            oprot.writeString(self.msg)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -176,7 +175,7 @@ rpc_lease_ack.thrift_spec = (
 all_structs.append(lease_service_exception)
 lease_service_exception.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'msg', 'UTF8', None, ),  # 1
+    (1, TType.STRING, 'msg', None, None, ),  # 1
 )
 fix_spec(all_structs)
 del all_structs
