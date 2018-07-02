@@ -288,22 +288,22 @@ class rpc_file_status(object):
 class rpc_data_status(object):
     """
     Attributes:
-     - persistent_store_prefix
+     - backing_path
      - chain_length
      - data_blocks
      - flags
     """
 
     __slots__ = (
-        'persistent_store_prefix',
+        'backing_path',
         'chain_length',
         'data_blocks',
         'flags',
     )
 
 
-    def __init__(self, persistent_store_prefix=None, chain_length=None, data_blocks=None, flags=None,):
-        self.persistent_store_prefix = persistent_store_prefix
+    def __init__(self, backing_path=None, chain_length=None, data_blocks=None, flags=None,):
+        self.backing_path = backing_path
         self.chain_length = chain_length
         self.data_blocks = data_blocks
         self.flags = flags
@@ -319,7 +319,7 @@ class rpc_data_status(object):
                 break
             if fid == 1:
                 if ftype == TType.STRING:
-                    self.persistent_store_prefix = iprot.readString()
+                    self.backing_path = iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -353,9 +353,9 @@ class rpc_data_status(object):
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
         oprot.writeStructBegin('rpc_data_status')
-        if self.persistent_store_prefix is not None:
-            oprot.writeFieldBegin('persistent_store_prefix', TType.STRING, 1)
-            oprot.writeString(self.persistent_store_prefix)
+        if self.backing_path is not None:
+            oprot.writeFieldBegin('backing_path', TType.STRING, 1)
+            oprot.writeString(self.backing_path)
             oprot.writeFieldEnd()
         if self.chain_length is not None:
             oprot.writeFieldBegin('chain_length', TType.I32, 2)
@@ -376,8 +376,8 @@ class rpc_data_status(object):
         oprot.writeStructEnd()
 
     def validate(self):
-        if self.persistent_store_prefix is None:
-            raise TProtocolException(message='Required field persistent_store_prefix is unset!')
+        if self.backing_path is None:
+            raise TProtocolException(message='Required field backing_path is unset!')
         if self.chain_length is None:
             raise TProtocolException(message='Required field chain_length is unset!')
         if self.data_blocks is None:
@@ -577,7 +577,7 @@ rpc_file_status.thrift_spec = (
 all_structs.append(rpc_data_status)
 rpc_data_status.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'persistent_store_prefix', None, None, ),  # 1
+    (1, TType.STRING, 'backing_path', None, None, ),  # 1
     (2, TType.I32, 'chain_length', None, None, ),  # 2
     (3, TType.LIST, 'data_blocks', (TType.STRUCT, [rpc_replica_chain, None], False), None, ),  # 3
     (4, TType.I32, 'flags', None, None, ),  # 4

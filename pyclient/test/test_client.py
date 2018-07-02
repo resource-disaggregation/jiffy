@@ -269,7 +269,7 @@ class TestClient(TestCase):
         try:
             client.create("/a/file.txt", "/tmp")
             self.assertTrue('/a/file.txt' in client.to_renew)
-            client.flush('/a/file.txt', 'local://tmp')
+            client.sync('/a/file.txt', 'local://tmp')
             self.assertTrue('/a/file.txt' in client.to_renew)
             client.remove('/a/file.txt')
             self.assertFalse('/a/file.txt' in client.to_renew)

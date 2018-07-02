@@ -123,8 +123,14 @@ class MMuxClient:
         self.end_scope(path)
         self.fs.remove_all(path)
 
-    def flush(self, path, dest):
-        self.fs.flush(path, dest)
+    def sync(self, path, backing_path):
+        self.fs.sync(path, backing_path)
+
+    def dump(self, path, backing_path):
+        self.fs.dump(path, backing_path)
+
+    def load(self, path, backing_path):
+        self.fs.load(path, backing_path)
 
     def listen(self, path, callback=Mailbox()):
         s = self.fs.dstatus(path)
