@@ -280,11 +280,8 @@ class data_status {
 
   data_status() : chain_length_(1), flags_(0) {}
 
-  data_status(std::string persistent_store_prefix,
-              std::size_t chain_length,
-              std::vector<replica_chain> blocks,
-              int32_t flags = 0)
-      : persistent_store_prefix_(std::move(persistent_store_prefix)),
+  data_status(std::string backing_path, std::size_t chain_length, std::vector<replica_chain> blocks, int32_t flags = 0)
+      : backing_path_(std::move(backing_path)),
         chain_length_(chain_length),
         data_blocks_(std::move(blocks)),
         flags_(flags) {}
@@ -312,12 +309,12 @@ class data_status {
     }
   }
 
-  const std::string &persistent_store_prefix() const {
-    return persistent_store_prefix_;
+  const std::string &backing_path() const {
+    return backing_path_;
   }
 
-  void persistent_store_prefix(const std::string &prefix) {
-    persistent_store_prefix_ = prefix;
+  void backing_path(const std::string &backing_path) {
+    backing_path_ = backing_path;
   }
 
   std::size_t chain_length() const {
@@ -366,7 +363,7 @@ class data_status {
   }
 
   std::string to_string() const {
-    std::string out = "{ persistent_store_prefix: " + persistent_store_prefix_ + ", chain_length: "
+    std::string out = "{ backing_path: " + backing_path_ + ", chain_length: "
         + std::to_string(chain_length_) + ", data_blocks: { ";
     for (const auto &chain: data_blocks_) {
       out += chain.to_string() + ", ";
@@ -379,6 +376,10 @@ class data_status {
 
   std::int32_t flags() const {
     return flags_;
+  }
+
+  void flags(std::int32_t flags) {
+    flags_ = flags;
   }
 
   void set_pinned() {
@@ -410,7 +411,7 @@ class data_status {
   }
 
  private:
-  std::string persistent_store_prefix_;
+  std::string backing_path_;
   std::size_t chain_length_;
   std::vector<replica_chain> data_blocks_;
   std::int32_t flags_;
@@ -425,25 +426,29 @@ class directory_ops {
 
   virtual data_status open(const std::string &path) = 0;
   virtual data_status create(const std::string &path,
-                             const std::string &persistent_store_prefix,
+                             const std::string &backing_path,
                              std::size_t num_blocks,
-                             std::size_t chain_length) = 0;
+                             std::size_t chain_length,
+                             std::int32_t flags) = 0;
   virtual data_status open_or_create(const std::string &path,
-                                     const std::string &persistent_store_prefix,
+                                     const std::string &backing_path,
                                      std::size_t num_blocks,
-                                     std::size_t chain_length) = 0;
+                                     std::size_t chain_length,
+                                     std::int32_t flags) = 0;
 
   virtual bool exists(const std::string &path) const = 0;
 
   virtual std::uint64_t last_write_time(const std::string &path) const = 0;
 
   virtual perms permissions(const std::string &path) = 0;
-  virtual void permissions(const std::string &path, const perms &permsissions, perm_options opts) = 0;
+  virtual void permissions(const std::string &path, const perms &permissions, perm_options opts) = 0;
 
   virtual void remove(const std::string &path) = 0;
   virtual void remove_all(const std::string &path) = 0;
 
-  virtual void flush(const std::string &path, const std::string &dest) = 0;
+  virtual void sync(const std::string &path, const std::string &backing_path) = 0;
+  virtual void dump(const std::string &path, const std::string &backing_path) = 0;
+  virtual void load(const std::string &path, const std::string &backing_path) = 0;
 
   virtual void rename(const std::string &old_path, const std::string &new_path) = 0;
 
@@ -468,6 +473,7 @@ class directory_management_ops {
   virtual void add_block_to_file(const std::string &path) = 0;
   virtual void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) = 0;
   virtual void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) = 0;
+  virtual void handle_lease_expiry(const std::string &path) = 0;
 };
 
 }

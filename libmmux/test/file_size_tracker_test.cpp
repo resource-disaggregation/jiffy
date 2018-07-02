@@ -18,9 +18,9 @@ TEST_CASE("file_size_tracker_test") {
   auto sm = std::make_shared<dummy_storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
   file_size_tracker tracker(tree, PERIODICITY_MS, "/tmp/file.trace");
-  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/c/file.txt", "/tmp", 1, 1));
-  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/file.txt", "/tmp", 1, 1));
-  REQUIRE_NOTHROW(tree->create("/sandbox/a/file.txt", "/tmp", 1, 1));
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/c/file.txt", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/file.txt", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/file.txt", "/tmp", 1, 1, 0));
 
   REQUIRE_NOTHROW(tracker.start());
   std::this_thread::sleep_for(150ms);

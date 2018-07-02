@@ -595,8 +595,8 @@ uint32_t directory_service_create_args::read(Protocol_* iprot) {
         break;
       case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->persistent_store_prefix);
-          this->__isset.persistent_store_prefix = true;
+          xfer += iprot->readString(this->backing_path);
+          this->__isset.backing_path = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -613,6 +613,14 @@ uint32_t directory_service_create_args::read(Protocol_* iprot) {
         if (ftype == ::apache::thrift::protocol::T_I32) {
           xfer += iprot->readI32(this->chain_length);
           this->__isset.chain_length = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 5:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->flags);
+          this->__isset.flags = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -639,8 +647,8 @@ uint32_t directory_service_create_args::write(Protocol_* oprot) const {
   xfer += oprot->writeString(this->path);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("persistent_store_prefix", ::apache::thrift::protocol::T_STRING, 2);
-  xfer += oprot->writeString(this->persistent_store_prefix);
+  xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->backing_path);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("num_blocks", ::apache::thrift::protocol::T_I32, 3);
@@ -649,6 +657,10 @@ uint32_t directory_service_create_args::write(Protocol_* oprot) const {
 
   xfer += oprot->writeFieldBegin("chain_length", ::apache::thrift::protocol::T_I32, 4);
   xfer += oprot->writeI32(this->chain_length);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("flags", ::apache::thrift::protocol::T_I32, 5);
+  xfer += oprot->writeI32(this->flags);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -667,8 +679,8 @@ uint32_t directory_service_create_pargs::write(Protocol_* oprot) const {
   xfer += oprot->writeString((*(this->path)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("persistent_store_prefix", ::apache::thrift::protocol::T_STRING, 2);
-  xfer += oprot->writeString((*(this->persistent_store_prefix)));
+  xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString((*(this->backing_path)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("num_blocks", ::apache::thrift::protocol::T_I32, 3);
@@ -677,6 +689,10 @@ uint32_t directory_service_create_pargs::write(Protocol_* oprot) const {
 
   xfer += oprot->writeFieldBegin("chain_length", ::apache::thrift::protocol::T_I32, 4);
   xfer += oprot->writeI32((*(this->chain_length)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("flags", ::apache::thrift::protocol::T_I32, 5);
+  xfer += oprot->writeI32((*(this->flags)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -840,8 +856,8 @@ uint32_t directory_service_open_or_create_args::read(Protocol_* iprot) {
         break;
       case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->persistent_store_path);
-          this->__isset.persistent_store_path = true;
+          xfer += iprot->readString(this->backing_path);
+          this->__isset.backing_path = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -858,6 +874,14 @@ uint32_t directory_service_open_or_create_args::read(Protocol_* iprot) {
         if (ftype == ::apache::thrift::protocol::T_I32) {
           xfer += iprot->readI32(this->chain_length);
           this->__isset.chain_length = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 5:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->flags);
+          this->__isset.flags = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -884,8 +908,8 @@ uint32_t directory_service_open_or_create_args::write(Protocol_* oprot) const {
   xfer += oprot->writeString(this->path);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("persistent_store_path", ::apache::thrift::protocol::T_STRING, 2);
-  xfer += oprot->writeString(this->persistent_store_path);
+  xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->backing_path);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("num_blocks", ::apache::thrift::protocol::T_I32, 3);
@@ -894,6 +918,10 @@ uint32_t directory_service_open_or_create_args::write(Protocol_* oprot) const {
 
   xfer += oprot->writeFieldBegin("chain_length", ::apache::thrift::protocol::T_I32, 4);
   xfer += oprot->writeI32(this->chain_length);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("flags", ::apache::thrift::protocol::T_I32, 5);
+  xfer += oprot->writeI32(this->flags);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -912,8 +940,8 @@ uint32_t directory_service_open_or_create_pargs::write(Protocol_* oprot) const {
   xfer += oprot->writeString((*(this->path)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("persistent_store_path", ::apache::thrift::protocol::T_STRING, 2);
-  xfer += oprot->writeString((*(this->persistent_store_path)));
+  xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString((*(this->backing_path)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("num_blocks", ::apache::thrift::protocol::T_I32, 3);
@@ -922,6 +950,10 @@ uint32_t directory_service_open_or_create_pargs::write(Protocol_* oprot) const {
 
   xfer += oprot->writeFieldBegin("chain_length", ::apache::thrift::protocol::T_I32, 4);
   xfer += oprot->writeI32((*(this->chain_length)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("flags", ::apache::thrift::protocol::T_I32, 5);
+  xfer += oprot->writeI32((*(this->flags)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -2210,7 +2242,7 @@ uint32_t directory_service_remove_all_presult::read(Protocol_* iprot) {
 
 
 template <class Protocol_>
-uint32_t directory_service_flush_args::read(Protocol_* iprot) {
+uint32_t directory_service_sync_args::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2241,8 +2273,8 @@ uint32_t directory_service_flush_args::read(Protocol_* iprot) {
         break;
       case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->dest);
-          this->__isset.dest = true;
+          xfer += iprot->readString(this->backing_path);
+          this->__isset.backing_path = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -2260,17 +2292,17 @@ uint32_t directory_service_flush_args::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t directory_service_flush_args::write(Protocol_* oprot) const {
+uint32_t directory_service_sync_args::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("directory_service_flush_args");
+  xfer += oprot->writeStructBegin("directory_service_sync_args");
 
   xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeString(this->path);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("dest", ::apache::thrift::protocol::T_STRING, 2);
-  xfer += oprot->writeString(this->dest);
+  xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->backing_path);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -2280,17 +2312,17 @@ uint32_t directory_service_flush_args::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t directory_service_flush_pargs::write(Protocol_* oprot) const {
+uint32_t directory_service_sync_pargs::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("directory_service_flush_pargs");
+  xfer += oprot->writeStructBegin("directory_service_sync_pargs");
 
   xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeString((*(this->path)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("dest", ::apache::thrift::protocol::T_STRING, 2);
-  xfer += oprot->writeString((*(this->dest)));
+  xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString((*(this->backing_path)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -2300,7 +2332,7 @@ uint32_t directory_service_flush_pargs::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t directory_service_flush_result::read(Protocol_* iprot) {
+uint32_t directory_service_sync_result::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -2342,11 +2374,11 @@ uint32_t directory_service_flush_result::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t directory_service_flush_result::write(Protocol_* oprot) const {
+uint32_t directory_service_sync_result::write(Protocol_* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("directory_service_flush_result");
+  xfer += oprot->writeStructBegin("directory_service_sync_result");
 
   if (this->__isset.ex) {
     xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
@@ -2360,7 +2392,393 @@ uint32_t directory_service_flush_result::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t directory_service_flush_presult::read(Protocol_* iprot) {
+uint32_t directory_service_sync_presult::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t directory_service_dump_args::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->path);
+          this->__isset.path = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->backing_path);
+          this->__isset.backing_path = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t directory_service_dump_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("directory_service_dump_args");
+
+  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString(this->path);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->backing_path);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t directory_service_dump_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("directory_service_dump_pargs");
+
+  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString((*(this->path)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString((*(this->backing_path)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t directory_service_dump_result::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t directory_service_dump_result::write(Protocol_* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("directory_service_dump_result");
+
+  if (this->__isset.ex) {
+    xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ex.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t directory_service_dump_presult::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t directory_service_load_args::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->path);
+          this->__isset.path = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->backing_path);
+          this->__isset.backing_path = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t directory_service_load_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("directory_service_load_args");
+
+  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString(this->path);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->backing_path);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t directory_service_load_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("directory_service_load_pargs");
+
+  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString((*(this->path)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString((*(this->backing_path)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t directory_service_load_result::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t directory_service_load_result::write(Protocol_* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("directory_service_load_result");
+
+  if (this->__isset.ex) {
+    xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ex.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t directory_service_load_presult::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -5044,23 +5462,24 @@ void directory_serviceClientT<Protocol_>::recv_open(rpc_data_status& _return)
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_prefix, const int32_t num_blocks, const int32_t chain_length)
+void directory_serviceClientT<Protocol_>::create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags)
 {
-  send_create(path, persistent_store_prefix, num_blocks, chain_length);
+  send_create(path, backing_path, num_blocks, chain_length, flags);
   recv_create(_return);
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::send_create(const std::string& path, const std::string& persistent_store_prefix, const int32_t num_blocks, const int32_t chain_length)
+void directory_serviceClientT<Protocol_>::send_create(const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("create", ::apache::thrift::protocol::T_CALL, cseqid);
 
   directory_service_create_pargs args;
   args.path = &path;
-  args.persistent_store_prefix = &persistent_store_prefix;
+  args.backing_path = &backing_path;
   args.num_blocks = &num_blocks;
   args.chain_length = &chain_length;
+  args.flags = &flags;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -5111,23 +5530,24 @@ void directory_serviceClientT<Protocol_>::recv_create(rpc_data_status& _return)
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::open_or_create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_path, const int32_t num_blocks, const int32_t chain_length)
+void directory_serviceClientT<Protocol_>::open_or_create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags)
 {
-  send_open_or_create(path, persistent_store_path, num_blocks, chain_length);
+  send_open_or_create(path, backing_path, num_blocks, chain_length, flags);
   recv_open_or_create(_return);
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::send_open_or_create(const std::string& path, const std::string& persistent_store_path, const int32_t num_blocks, const int32_t chain_length)
+void directory_serviceClientT<Protocol_>::send_open_or_create(const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("open_or_create", ::apache::thrift::protocol::T_CALL, cseqid);
 
   directory_service_open_or_create_pargs args;
   args.path = &path;
-  args.persistent_store_path = &persistent_store_path;
+  args.backing_path = &backing_path;
   args.num_blocks = &num_blocks;
   args.chain_length = &chain_length;
+  args.flags = &flags;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -5549,21 +5969,21 @@ void directory_serviceClientT<Protocol_>::recv_remove_all()
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::flush(const std::string& path, const std::string& dest)
+void directory_serviceClientT<Protocol_>::sync(const std::string& path, const std::string& backing_path)
 {
-  send_flush(path, dest);
-  recv_flush();
+  send_sync(path, backing_path);
+  recv_sync();
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::send_flush(const std::string& path, const std::string& dest)
+void directory_serviceClientT<Protocol_>::send_sync(const std::string& path, const std::string& backing_path)
 {
   int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("flush", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("sync", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  directory_service_flush_pargs args;
+  directory_service_sync_pargs args;
   args.path = &path;
-  args.dest = &dest;
+  args.backing_path = &backing_path;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -5572,7 +5992,7 @@ void directory_serviceClientT<Protocol_>::send_flush(const std::string& path, co
 }
 
 template <class Protocol_>
-void directory_serviceClientT<Protocol_>::recv_flush()
+void directory_serviceClientT<Protocol_>::recv_sync()
 {
 
   int32_t rseqid = 0;
@@ -5592,12 +6012,132 @@ void directory_serviceClientT<Protocol_>::recv_flush()
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("flush") != 0) {
+  if (fname.compare("sync") != 0) {
     this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  directory_service_flush_presult result;
+  directory_service_sync_presult result;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+
+  if (result.__isset.ex) {
+    throw result.ex;
+  }
+  return;
+}
+
+template <class Protocol_>
+void directory_serviceClientT<Protocol_>::dump(const std::string& path, const std::string& backing_path)
+{
+  send_dump(path, backing_path);
+  recv_dump();
+}
+
+template <class Protocol_>
+void directory_serviceClientT<Protocol_>::send_dump(const std::string& path, const std::string& backing_path)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("dump", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  directory_service_dump_pargs args;
+  args.path = &path;
+  args.backing_path = &backing_path;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+void directory_serviceClientT<Protocol_>::recv_dump()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("dump") != 0) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  directory_service_dump_presult result;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+
+  if (result.__isset.ex) {
+    throw result.ex;
+  }
+  return;
+}
+
+template <class Protocol_>
+void directory_serviceClientT<Protocol_>::load(const std::string& path, const std::string& backing_path)
+{
+  send_load(path, backing_path);
+  recv_load();
+}
+
+template <class Protocol_>
+void directory_serviceClientT<Protocol_>::send_load(const std::string& path, const std::string& backing_path)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("load", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  directory_service_load_pargs args;
+  args.path = &path;
+  args.backing_path = &backing_path;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+void directory_serviceClientT<Protocol_>::recv_load()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("load") != 0) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  directory_service_load_presult result;
   result.read(this->iprot_);
   this->iprot_->readMessageEnd();
   this->iprot_->getTransport()->readEnd();
@@ -6771,7 +7311,7 @@ void directory_serviceProcessorT<Protocol_>::process_create(int32_t seqid, ::apa
 
   directory_service_create_result result;
   try {
-    iface_->create(result.success, args.path, args.persistent_store_prefix, args.num_blocks, args.chain_length);
+    iface_->create(result.success, args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags);
     result.__isset.success = true;
   } catch (directory_service_exception &ex) {
     result.ex = ex;
@@ -6829,7 +7369,7 @@ void directory_serviceProcessorT<Protocol_>::process_create(int32_t seqid, Proto
 
   directory_service_create_result result;
   try {
-    iface_->create(result.success, args.path, args.persistent_store_prefix, args.num_blocks, args.chain_length);
+    iface_->create(result.success, args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags);
     result.__isset.success = true;
   } catch (directory_service_exception &ex) {
     result.ex = ex;
@@ -6887,7 +7427,7 @@ void directory_serviceProcessorT<Protocol_>::process_open_or_create(int32_t seqi
 
   directory_service_open_or_create_result result;
   try {
-    iface_->open_or_create(result.success, args.path, args.persistent_store_path, args.num_blocks, args.chain_length);
+    iface_->open_or_create(result.success, args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags);
     result.__isset.success = true;
   } catch (directory_service_exception &ex) {
     result.ex = ex;
@@ -6945,7 +7485,7 @@ void directory_serviceProcessorT<Protocol_>::process_open_or_create(int32_t seqi
 
   directory_service_open_or_create_result result;
   try {
-    iface_->open_or_create(result.success, args.path, args.persistent_store_path, args.num_blocks, args.chain_length);
+    iface_->open_or_create(result.success, args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags);
     result.__isset.success = true;
   } catch (directory_service_exception &ex) {
     result.ex = ex;
@@ -7670,40 +8210,40 @@ void directory_serviceProcessorT<Protocol_>::process_remove_all(int32_t seqid, P
 }
 
 template <class Protocol_>
-void directory_serviceProcessorT<Protocol_>::process_flush(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void directory_serviceProcessorT<Protocol_>::process_sync(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("directory_service.flush", callContext);
+    ctx = this->eventHandler_->getContext("directory_service.sync", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_service.flush");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_service.sync");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "directory_service.flush");
+    this->eventHandler_->preRead(ctx, "directory_service.sync");
   }
 
-  directory_service_flush_args args;
+  directory_service_sync_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "directory_service.flush", bytes);
+    this->eventHandler_->postRead(ctx, "directory_service.sync", bytes);
   }
 
-  directory_service_flush_result result;
+  directory_service_sync_result result;
   try {
-    iface_->flush(args.path, args.dest);
+    iface_->sync(args.path, args.backing_path);
   } catch (directory_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "directory_service.flush");
+      this->eventHandler_->handlerError(ctx, "directory_service.sync");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("flush", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("sync", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -7712,55 +8252,55 @@ void directory_serviceProcessorT<Protocol_>::process_flush(int32_t seqid, ::apac
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "directory_service.flush");
+    this->eventHandler_->preWrite(ctx, "directory_service.sync");
   }
 
-  oprot->writeMessageBegin("flush", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("sync", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "directory_service.flush", bytes);
+    this->eventHandler_->postWrite(ctx, "directory_service.sync", bytes);
   }
 }
 
 template <class Protocol_>
-void directory_serviceProcessorT<Protocol_>::process_flush(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+void directory_serviceProcessorT<Protocol_>::process_sync(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("directory_service.flush", callContext);
+    ctx = this->eventHandler_->getContext("directory_service.sync", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_service.flush");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_service.sync");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "directory_service.flush");
+    this->eventHandler_->preRead(ctx, "directory_service.sync");
   }
 
-  directory_service_flush_args args;
+  directory_service_sync_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "directory_service.flush", bytes);
+    this->eventHandler_->postRead(ctx, "directory_service.sync", bytes);
   }
 
-  directory_service_flush_result result;
+  directory_service_sync_result result;
   try {
-    iface_->flush(args.path, args.dest);
+    iface_->sync(args.path, args.backing_path);
   } catch (directory_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "directory_service.flush");
+      this->eventHandler_->handlerError(ctx, "directory_service.sync");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("flush", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("sync", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -7769,17 +8309,245 @@ void directory_serviceProcessorT<Protocol_>::process_flush(int32_t seqid, Protoc
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "directory_service.flush");
+    this->eventHandler_->preWrite(ctx, "directory_service.sync");
   }
 
-  oprot->writeMessageBegin("flush", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("sync", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "directory_service.flush", bytes);
+    this->eventHandler_->postWrite(ctx, "directory_service.sync", bytes);
+  }
+}
+
+template <class Protocol_>
+void directory_serviceProcessorT<Protocol_>::process_dump(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("directory_service.dump", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_service.dump");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "directory_service.dump");
+  }
+
+  directory_service_dump_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "directory_service.dump", bytes);
+  }
+
+  directory_service_dump_result result;
+  try {
+    iface_->dump(args.path, args.backing_path);
+  } catch (directory_service_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "directory_service.dump");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("dump", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "directory_service.dump");
+  }
+
+  oprot->writeMessageBegin("dump", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "directory_service.dump", bytes);
+  }
+}
+
+template <class Protocol_>
+void directory_serviceProcessorT<Protocol_>::process_dump(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("directory_service.dump", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_service.dump");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "directory_service.dump");
+  }
+
+  directory_service_dump_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "directory_service.dump", bytes);
+  }
+
+  directory_service_dump_result result;
+  try {
+    iface_->dump(args.path, args.backing_path);
+  } catch (directory_service_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "directory_service.dump");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("dump", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "directory_service.dump");
+  }
+
+  oprot->writeMessageBegin("dump", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "directory_service.dump", bytes);
+  }
+}
+
+template <class Protocol_>
+void directory_serviceProcessorT<Protocol_>::process_load(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("directory_service.load", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_service.load");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "directory_service.load");
+  }
+
+  directory_service_load_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "directory_service.load", bytes);
+  }
+
+  directory_service_load_result result;
+  try {
+    iface_->load(args.path, args.backing_path);
+  } catch (directory_service_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "directory_service.load");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("load", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "directory_service.load");
+  }
+
+  oprot->writeMessageBegin("load", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "directory_service.load", bytes);
+  }
+}
+
+template <class Protocol_>
+void directory_serviceProcessorT<Protocol_>::process_load(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("directory_service.load", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "directory_service.load");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "directory_service.load");
+  }
+
+  directory_service_load_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "directory_service.load", bytes);
+  }
+
+  directory_service_load_result result;
+  try {
+    iface_->load(args.path, args.backing_path);
+  } catch (directory_service_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "directory_service.load");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("load", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "directory_service.load");
+  }
+
+  oprot->writeMessageBegin("load", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "directory_service.load", bytes);
   }
 }
 
@@ -9437,14 +10205,14 @@ void directory_serviceConcurrentClientT<Protocol_>::recv_open(rpc_data_status& _
 }
 
 template <class Protocol_>
-void directory_serviceConcurrentClientT<Protocol_>::create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_prefix, const int32_t num_blocks, const int32_t chain_length)
+void directory_serviceConcurrentClientT<Protocol_>::create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags)
 {
-  int32_t seqid = send_create(path, persistent_store_prefix, num_blocks, chain_length);
+  int32_t seqid = send_create(path, backing_path, num_blocks, chain_length, flags);
   recv_create(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t directory_serviceConcurrentClientT<Protocol_>::send_create(const std::string& path, const std::string& persistent_store_prefix, const int32_t num_blocks, const int32_t chain_length)
+int32_t directory_serviceConcurrentClientT<Protocol_>::send_create(const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -9452,9 +10220,10 @@ int32_t directory_serviceConcurrentClientT<Protocol_>::send_create(const std::st
 
   directory_service_create_pargs args;
   args.path = &path;
-  args.persistent_store_prefix = &persistent_store_prefix;
+  args.backing_path = &backing_path;
   args.num_blocks = &num_blocks;
   args.chain_length = &chain_length;
+  args.flags = &flags;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -9531,14 +10300,14 @@ void directory_serviceConcurrentClientT<Protocol_>::recv_create(rpc_data_status&
 }
 
 template <class Protocol_>
-void directory_serviceConcurrentClientT<Protocol_>::open_or_create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_path, const int32_t num_blocks, const int32_t chain_length)
+void directory_serviceConcurrentClientT<Protocol_>::open_or_create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags)
 {
-  int32_t seqid = send_open_or_create(path, persistent_store_path, num_blocks, chain_length);
+  int32_t seqid = send_open_or_create(path, backing_path, num_blocks, chain_length, flags);
   recv_open_or_create(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t directory_serviceConcurrentClientT<Protocol_>::send_open_or_create(const std::string& path, const std::string& persistent_store_path, const int32_t num_blocks, const int32_t chain_length)
+int32_t directory_serviceConcurrentClientT<Protocol_>::send_open_or_create(const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -9546,9 +10315,10 @@ int32_t directory_serviceConcurrentClientT<Protocol_>::send_open_or_create(const
 
   directory_service_open_or_create_pargs args;
   args.path = &path;
-  args.persistent_store_path = &persistent_store_path;
+  args.backing_path = &backing_path;
   args.num_blocks = &num_blocks;
   args.chain_length = &chain_length;
+  args.flags = &flags;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -10155,22 +10925,22 @@ void directory_serviceConcurrentClientT<Protocol_>::recv_remove_all(const int32_
 }
 
 template <class Protocol_>
-void directory_serviceConcurrentClientT<Protocol_>::flush(const std::string& path, const std::string& dest)
+void directory_serviceConcurrentClientT<Protocol_>::sync(const std::string& path, const std::string& backing_path)
 {
-  int32_t seqid = send_flush(path, dest);
-  recv_flush(seqid);
+  int32_t seqid = send_sync(path, backing_path);
+  recv_sync(seqid);
 }
 
 template <class Protocol_>
-int32_t directory_serviceConcurrentClientT<Protocol_>::send_flush(const std::string& path, const std::string& dest)
+int32_t directory_serviceConcurrentClientT<Protocol_>::send_sync(const std::string& path, const std::string& backing_path)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("flush", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("sync", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  directory_service_flush_pargs args;
+  directory_service_sync_pargs args;
   args.path = &path;
-  args.dest = &dest;
+  args.backing_path = &backing_path;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -10182,7 +10952,7 @@ int32_t directory_serviceConcurrentClientT<Protocol_>::send_flush(const std::str
 }
 
 template <class Protocol_>
-void directory_serviceConcurrentClientT<Protocol_>::recv_flush(const int32_t seqid)
+void directory_serviceConcurrentClientT<Protocol_>::recv_sync(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -10211,7 +10981,7 @@ void directory_serviceConcurrentClientT<Protocol_>::recv_flush(const int32_t seq
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
       }
-      if (fname.compare("flush") != 0) {
+      if (fname.compare("sync") != 0) {
         this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
@@ -10220,7 +10990,179 @@ void directory_serviceConcurrentClientT<Protocol_>::recv_flush(const int32_t seq
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
-      directory_service_flush_presult result;
+      directory_service_sync_presult result;
+      result.read(this->iprot_);
+      this->iprot_->readMessageEnd();
+      this->iprot_->getTransport()->readEnd();
+
+      if (result.__isset.ex) {
+        sentry.commit();
+        throw result.ex;
+      }
+      sentry.commit();
+      return;
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+template <class Protocol_>
+void directory_serviceConcurrentClientT<Protocol_>::dump(const std::string& path, const std::string& backing_path)
+{
+  int32_t seqid = send_dump(path, backing_path);
+  recv_dump(seqid);
+}
+
+template <class Protocol_>
+int32_t directory_serviceConcurrentClientT<Protocol_>::send_dump(const std::string& path, const std::string& backing_path)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("dump", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  directory_service_dump_pargs args;
+  args.path = &path;
+  args.backing_path = &backing_path;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+template <class Protocol_>
+void directory_serviceConcurrentClientT<Protocol_>::recv_dump(const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      this->iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(this->iprot_);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("dump") != 0) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      directory_service_dump_presult result;
+      result.read(this->iprot_);
+      this->iprot_->readMessageEnd();
+      this->iprot_->getTransport()->readEnd();
+
+      if (result.__isset.ex) {
+        sentry.commit();
+        throw result.ex;
+      }
+      sentry.commit();
+      return;
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+template <class Protocol_>
+void directory_serviceConcurrentClientT<Protocol_>::load(const std::string& path, const std::string& backing_path)
+{
+  int32_t seqid = send_load(path, backing_path);
+  recv_load(seqid);
+}
+
+template <class Protocol_>
+int32_t directory_serviceConcurrentClientT<Protocol_>::send_load(const std::string& path, const std::string& backing_path)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("load", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  directory_service_load_pargs args;
+  args.path = &path;
+  args.backing_path = &backing_path;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+template <class Protocol_>
+void directory_serviceConcurrentClientT<Protocol_>::recv_load(const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      this->iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(this->iprot_);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("load") != 0) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      directory_service_load_presult result;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
       this->iprot_->getTransport()->readEnd();

@@ -28,7 +28,7 @@ TEST_CASE("update_lease_test", "[update_lease]") {
 
   lease_client client(HOST, PORT);
 
-  t->create("/sandbox/a/b/c/file.txt", "/tmp", 1, 1);
+  t->create("/sandbox/a/b/c/file.txt", "/tmp", 1, 1, 0);
 
 
   std::vector<std::string> to_renew = {"/sandbox/a/b/c/file.txt"};

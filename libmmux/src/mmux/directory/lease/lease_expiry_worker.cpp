@@ -1,8 +1,6 @@
 #include <iostream>
 #include <chrono>
 #include "lease_expiry_worker.h"
-#include "../../utils/directory_utils.h"
-#include "../../utils/logger.h"
 
 namespace mmux {
 namespace directory {
@@ -10,8 +8,8 @@ namespace directory {
 using namespace utils;
 
 lease_expiry_worker::lease_expiry_worker(std::shared_ptr<directory_tree> tree,
-                             std::uint64_t lease_period_ms,
-                             std::uint64_t grace_period_ms)
+                                         std::uint64_t lease_period_ms,
+                                         std::uint64_t grace_period_ms)
     : lease_period_ms_(lease_period_ms), grace_period_ms_(grace_period_ms), tree_(std::move(tree)), stop_(false) {
 }
 
@@ -29,7 +27,7 @@ void lease_expiry_worker::start() {
       try {
         remove_expired_leases();
       } catch (std::exception &e) {
-        LOG(error)  << "Exception: " << e.what();
+        LOG(error) << "Exception: " << e.what();
       }
       auto end = std::chrono::steady_clock::now();
       auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -57,9 +55,9 @@ void lease_expiry_worker::remove_expired_leases() {
 }
 
 void lease_expiry_worker::remove_expired_nodes(std::shared_ptr<ds_dir_node> parent,
-                                         const std::string &parent_path,
-                                         const std::string &child_name,
-                                         std::uint64_t epoch) {
+                                               const std::string &parent_path,
+                                               const std::string &child_name,
+                                               std::uint64_t epoch) {
   auto child_path = parent_path;
   directory_utils::push_path_element(child_path, child_name);
   auto child = parent->get_child(child_name);
@@ -68,8 +66,8 @@ void lease_expiry_worker::remove_expired_nodes(std::shared_ptr<ds_dir_node> pare
   auto extended_lease_duration = lease_duration + static_cast<uint64_t>(grace_period_ms_.count());
   if (time_since_last_renewal >= extended_lease_duration) {
     // Remove child since its lease has expired
-    LOG(warn) <<  "Lease expired for " << child_path << "; removing file.";
-    tree_->remove_all(child_path);
+    LOG(warn) << "Lease expired for " << child_path << "; removing file.";
+    tree_->handle_lease_expiry(child_path);
   } else {
     if (time_since_last_renewal >= lease_duration && child->is_regular_file()) {
       LOG(warn) << "Lease in grace period for " << child_path;

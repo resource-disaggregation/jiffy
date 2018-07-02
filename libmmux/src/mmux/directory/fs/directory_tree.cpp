@@ -50,11 +50,12 @@ data_status directory_tree::open(const std::string &path) {
 }
 
 data_status directory_tree::create(const std::string &path,
-                                   const std::string &persistent_store_prefix,
+                                   const std::string &backing_path,
                                    std::size_t num_blocks,
-                                   std::size_t chain_length) {
-  LOG(log_level::info) << "Creating file " << path << " with persistent_store_prefix=" << persistent_store_prefix
-                       << " num_blocks=" << num_blocks << ", chain_length=" << chain_length;
+                                   std::size_t chain_length,
+                                   std::int32_t flags) {
+  LOG(log_level::info) << "Creating file " << path << " with backing_path=" << backing_path << " num_blocks="
+                       << num_blocks << ", chain_length=" << chain_length;
   if (num_blocks == 0) {
     throw directory_ops_exception("File cannot have zero blocks");
   }
@@ -109,20 +110,22 @@ data_status directory_tree::create(const std::string &path,
       }
     }
   }
-  auto child = std::make_shared<ds_file_node>(filename, persistent_store_prefix, chain_length, blocks);
-  child->persistent_store_prefix(persistent_store_prefix);
+  auto child = std::make_shared<ds_file_node>(filename, backing_path, chain_length, blocks);
+  child->backing_path(backing_path);
+  child->flags(flags);
   parent->add_child(child);
 
   return child->dstatus();
 }
 
 data_status directory_tree::open_or_create(const std::string &path,
-                                           const std::string &persistent_store_prefix,
+                                           const std::string &backing_path,
                                            std::size_t num_blocks,
-                                           std::size_t chain_length) {
+                                           std::size_t chain_length,
+                                           std::int32_t flags) {
 
-  LOG(log_level::info) << "Opening or creating file " << path << " with persistent_store_prefix="
-                       << persistent_store_prefix << " num_blocks=" << num_blocks << ", chain_length=" << chain_length;
+  LOG(log_level::info) << "Opening or creating file " << path << " with backing_path=" << backing_path << " num_blocks="
+                       << num_blocks << ", chain_length=" << chain_length;
   std::string filename = directory_utils::get_filename(path);
   if (filename == "." || filename == "/") {
     throw directory_ops_exception("Path is a directory: " + path);
@@ -186,8 +189,9 @@ data_status directory_tree::open_or_create(const std::string &path,
       }
     }
   }
-  auto child = std::make_shared<ds_file_node>(filename, persistent_store_prefix, chain_length, blocks);
-  child->persistent_store_prefix(persistent_store_prefix);
+  auto child = std::make_shared<ds_file_node>(filename, backing_path, chain_length, blocks);
+  child->backing_path(backing_path);
+  child->flags(flags);
   parent->add_child(child);
 
   return child->dstatus();
@@ -261,9 +265,19 @@ void directory_tree::remove_all(const std::string &path) {
   allocator_->free(cleared_blocks);
 }
 
-void directory_tree::flush(const std::string &path, const std::string &dest) {
-  LOG(log_level::info) << "Flushing path " << path;
-  get_node(path)->flush(path, dest, storage_);
+void directory_tree::sync(const std::string &path, const std::string &backing_path) {
+  LOG(log_level::info) << "Syncing path " << path;
+  get_node(path)->sync(backing_path, storage_);
+}
+
+void directory_tree::dump(const std::string &path, const std::string &backing_path) {
+  LOG(log_level::info) << "Dumping path " << path;
+  get_node(path)->dump(backing_path, storage_);
+}
+
+void directory_tree::load(const std::string &path, const std::string &backing_path) {
+  LOG(log_level::info) << "Loading path " << path;
+  get_node(path)->load(backing_path, storage_);
 }
 
 void directory_tree::rename(const std::string &old_path, const std::string &new_path) {
@@ -487,6 +501,17 @@ void directory_tree::merge_slot_range(const std::string &path, int32_t slot_begi
     LOG(log_level::info) << "Finished export in " << elapsed << " ms";
     node->finalize_slot_range_merge(storage_, allocator_, ctx);
   }).detach();
+}
+
+void directory_tree::handle_lease_expiry(const std::string &path) {
+  LOG(log_level::info) << "Handling expiry for " << path;
+  std::string ptemp = path;
+  std::string child_name = directory_utils::pop_path_element(ptemp);
+  auto parent = get_node_as_dir(ptemp);
+  std::vector<std::string> cleared_blocks;
+  parent->handle_lease_expiry(cleared_blocks, child_name, storage_);
+  LOG(log_level::info) << "Handled lease expiry, clearing freeing blocks for " << path;
+  allocator_->free(cleared_blocks);
 }
 
 std::shared_ptr<ds_node> directory_tree::get_node_unsafe(const std::string &path) const {

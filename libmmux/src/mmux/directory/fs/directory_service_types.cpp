@@ -192,8 +192,8 @@ rpc_data_status::~rpc_data_status() throw() {
 }
 
 
-void rpc_data_status::__set_persistent_store_prefix(const std::string& val) {
-  this->persistent_store_prefix = val;
+void rpc_data_status::__set_backing_path(const std::string& val) {
+  this->backing_path = val;
 }
 
 void rpc_data_status::__set_chain_length(const int32_t val) {
@@ -216,20 +216,20 @@ std::ostream& operator<<(std::ostream& out, const rpc_data_status& obj)
 
 void swap(rpc_data_status &a, rpc_data_status &b) {
   using ::std::swap;
-  swap(a.persistent_store_prefix, b.persistent_store_prefix);
+  swap(a.backing_path, b.backing_path);
   swap(a.chain_length, b.chain_length);
   swap(a.data_blocks, b.data_blocks);
   swap(a.flags, b.flags);
 }
 
 rpc_data_status::rpc_data_status(const rpc_data_status& other18) {
-  persistent_store_prefix = other18.persistent_store_prefix;
+  backing_path = other18.backing_path;
   chain_length = other18.chain_length;
   data_blocks = other18.data_blocks;
   flags = other18.flags;
 }
 rpc_data_status& rpc_data_status::operator=(const rpc_data_status& other19) {
-  persistent_store_prefix = other19.persistent_store_prefix;
+  backing_path = other19.backing_path;
   chain_length = other19.chain_length;
   data_blocks = other19.data_blocks;
   flags = other19.flags;
@@ -238,7 +238,7 @@ rpc_data_status& rpc_data_status::operator=(const rpc_data_status& other19) {
 void rpc_data_status::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
   out << "rpc_data_status(";
-  out << "persistent_store_prefix=" << to_string(persistent_store_prefix);
+  out << "backing_path=" << to_string(backing_path);
   out << ", " << "chain_length=" << to_string(chain_length);
   out << ", " << "data_blocks=" << to_string(data_blocks);
   out << ", " << "flags=" << to_string(flags);

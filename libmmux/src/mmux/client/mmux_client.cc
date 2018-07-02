@@ -31,7 +31,7 @@ storage::kv_client mmux_client::create(const std::string &path,
                                        const std::string &persistent_store_prefix,
                                        size_t num_blocks,
                                        size_t chain_length) {
-  auto s = fs_->create(path, persistent_store_prefix, num_blocks, chain_length);
+  auto s = fs_->create(path, persistent_store_prefix, num_blocks, chain_length, 0);
   begin_scope(path);
   return storage::kv_client(fs_, path, s);
 }
@@ -46,7 +46,7 @@ storage::kv_client mmux_client::open_or_create(const std::string &path,
                                                const std::string &persistent_store_prefix,
                                                size_t num_blocks,
                                                size_t chain_length) {
-  auto s = fs_->open_or_create(path, persistent_store_prefix, num_blocks, chain_length);
+  auto s = fs_->open_or_create(path, persistent_store_prefix, num_blocks, chain_length, 0);
   begin_scope(path);
   return storage::kv_client(fs_, path, s);
 }
@@ -63,7 +63,7 @@ void mmux_client::remove(const std::string &path) {
 }
 
 void mmux_client::flush(const std::string &path, const std::string &dest) {
-  fs_->flush(path, dest);
+  fs_->sync(path, dest);
 }
 
 }

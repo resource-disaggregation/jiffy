@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
 
     LOG(log_level::info) << "Persisting to " << path;
     auto t0 = time_utils::now_ms();
-    block.flush(path);
+    block.sync(path);
     auto t1 = time_utils::now_ms();
     LOG(log_level::info) << "Persisted to " << path << " in " << (t1 - t0) << " ms";
   } else if (mode == "read") {

@@ -122,19 +122,35 @@ storage_management_service_get_path_presult::~storage_management_service_get_pat
 }
 
 
-storage_management_service_flush_args::~storage_management_service_flush_args() throw() {
+storage_management_service_sync_args::~storage_management_service_sync_args() throw() {
 }
 
 
-storage_management_service_flush_pargs::~storage_management_service_flush_pargs() throw() {
+storage_management_service_sync_pargs::~storage_management_service_sync_pargs() throw() {
 }
 
 
-storage_management_service_flush_result::~storage_management_service_flush_result() throw() {
+storage_management_service_sync_result::~storage_management_service_sync_result() throw() {
 }
 
 
-storage_management_service_flush_presult::~storage_management_service_flush_presult() throw() {
+storage_management_service_sync_presult::~storage_management_service_sync_presult() throw() {
+}
+
+
+storage_management_service_dump_args::~storage_management_service_dump_args() throw() {
+}
+
+
+storage_management_service_dump_pargs::~storage_management_service_dump_pargs() throw() {
+}
+
+
+storage_management_service_dump_result::~storage_management_service_dump_result() throw() {
+}
+
+
+storage_management_service_dump_presult::~storage_management_service_dump_presult() throw() {
 }
 
 

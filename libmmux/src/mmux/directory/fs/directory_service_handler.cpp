@@ -33,14 +33,16 @@ void directory_service_handler::open(rpc_data_status &_return, const std::string
 
 void directory_service_handler::create(rpc_data_status &_return,
                                        const std::string &path,
-                                       const std::string &persistent_store_prefix,
-                                       const int32_t num_blocks,
-                                       const int32_t chain_length) {
+                                       const std::string &backing_path,
+                                       int32_t num_blocks,
+                                       int32_t chain_length,
+                                       int32_t flags) {
   try {
     _return = directory_type_conversions::to_rpc(shard_->create(path,
-                                                                persistent_store_prefix,
+                                                                backing_path,
                                                                 (size_t) num_blocks,
-                                                                (size_t) chain_length));
+                                                                (size_t) chain_length,
+                                                                flags));
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
   }
@@ -48,14 +50,16 @@ void directory_service_handler::create(rpc_data_status &_return,
 
 void directory_service_handler::open_or_create(rpc_data_status &_return,
                                                const std::string &path,
-                                               const std::string &persistent_store_prefix,
-                                               const int32_t num_blocks,
-                                               const int32_t chain_length) {
+                                               const std::string &backing_path,
+                                               int32_t num_blocks,
+                                               int32_t chain_length,
+                                               int32_t flags) {
   try {
     _return = directory_type_conversions::to_rpc(shard_->open_or_create(path,
-                                                                        persistent_store_prefix,
+                                                                        backing_path,
                                                                         (size_t) num_blocks,
-                                                                        (size_t) chain_length));
+                                                                        (size_t) chain_length,
+                                                                        flags));
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
   }
@@ -110,9 +114,25 @@ void directory_service_handler::remove_all(const std::string &path) {
   }
 }
 
-void directory_service_handler::flush(const std::string &path, const std::string &dest) {
+void directory_service_handler::sync(const std::string &path, const std::string &backing_path) {
   try {
-    shard_->flush(path, dest);
+    shard_->sync(path, backing_path);
+  } catch (directory_ops_exception &e) {
+    throw make_exception(e);
+  }
+}
+
+void directory_service_handler::dump(const std::string &path, const std::string &backing_path) {
+  try {
+    shard_->dump(path, backing_path);
+  } catch (directory_ops_exception &e) {
+    throw make_exception(e);
+  }
+}
+
+void directory_service_handler::load(const std::string &path, const std::string &backing_path) {
+  try {
+    shard_->load(path, backing_path);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
   }
