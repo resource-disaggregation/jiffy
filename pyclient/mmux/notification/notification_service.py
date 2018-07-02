@@ -3,14 +3,13 @@
 #
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #
-#  options string: py:slots
+#  options string: py:no_utf8strings,slots
 #
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol.TProtocol import TProtocolException
 from thrift.TRecursive import fix_spec
 
-import sys
 import logging
 from .ttypes import *
 from thrift.Thrift import TProcessor
@@ -161,7 +160,7 @@ class subscribe_args(object):
                     self.ops = []
                     (_etype3, _size0) = iprot.readListBegin()
                     for _i4 in range(_size0):
-                        _elem5 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        _elem5 = iprot.readString()
                         self.ops.append(_elem5)
                     iprot.readListEnd()
                 else:
@@ -184,7 +183,7 @@ class subscribe_args(object):
             oprot.writeFieldBegin('ops', TType.LIST, 2)
             oprot.writeListBegin(TType.STRING, len(self.ops))
             for iter6 in self.ops:
-                oprot.writeString(iter6.encode('utf-8') if sys.version_info[0] == 2 else iter6)
+                oprot.writeString(iter6)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -214,7 +213,7 @@ all_structs.append(subscribe_args)
 subscribe_args.thrift_spec = (
     None,  # 0
     (1, TType.I32, 'block_id', None, None, ),  # 1
-    (2, TType.LIST, 'ops', (TType.STRING, 'UTF8', False), None, ),  # 2
+    (2, TType.LIST, 'ops', (TType.STRING, None, False), None, ),  # 2
 )
 
 
@@ -254,7 +253,7 @@ class unsubscribe_args(object):
                     self.ops = []
                     (_etype10, _size7) = iprot.readListBegin()
                     for _i11 in range(_size7):
-                        _elem12 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        _elem12 = iprot.readString()
                         self.ops.append(_elem12)
                     iprot.readListEnd()
                 else:
@@ -277,7 +276,7 @@ class unsubscribe_args(object):
             oprot.writeFieldBegin('ops', TType.LIST, 2)
             oprot.writeListBegin(TType.STRING, len(self.ops))
             for iter13 in self.ops:
-                oprot.writeString(iter13.encode('utf-8') if sys.version_info[0] == 2 else iter13)
+                oprot.writeString(iter13)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -307,7 +306,7 @@ all_structs.append(unsubscribe_args)
 unsubscribe_args.thrift_spec = (
     None,  # 0
     (1, TType.I32, 'block_id', None, None, ),  # 1
-    (2, TType.LIST, 'ops', (TType.STRING, 'UTF8', False), None, ),  # 2
+    (2, TType.LIST, 'ops', (TType.STRING, None, False), None, ),  # 2
 )
 fix_spec(all_structs)
 del all_structs
