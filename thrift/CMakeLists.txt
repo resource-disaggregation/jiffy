@@ -1,50 +1,43 @@
-set(THRIFTGEN_CXX_OPTS "templates,pure_enums,no_skeleton,include_prefix")
-set(THRIFTGEN_PY_OPTS "no_utf8strings,slots")
-set(THRIFTGEN_JAVA_OPTS "fullcamel,handle_runtime_exceptions,generated_annotations=undated")
+function(thrift_gen lang thrift_file output_dir)
+  set(thrift_file_abs "${CMAKE_CURRENT_SOURCE_DIR}/${thrift_file}")
+  set(output_dir_abs "${CMAKE_CURRENT_SOURCE_DIR}/${output_dir}")
+  if(EXISTS ${thrift_file_abs})
+    if(NOT EXISTS ${output_dir_abs})
+      message(FATAL_ERROR "Error: Output directory ${output_dir_abs} does not exist for thrift generated files")
+    endif()
+    message(STATUS "Generating sources using ${thrift_file_abs} to ${output_dir_abs}")
+    exec_program(${THRIFT_COMPILER}
+            ARGS -out "${output_dir_abs}" --gen ${lang} ${thrift_file_abs}
+            OUTPUT_VARIABLE __thrift_OUT
+            RETURN_VALUE THRIFT_RETURN)
+  else()
+    message(FATAL_ERROR "Error: Cannot generate files from ${thrift_file_abs} since it does not exist")
+  endif()
+endfunction()
 
-set(DIRECTORY_INPUT_FILE directory_service.thrift)
-set(DIRECTORY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/libdirectory/src/rpc)
-set(DIRECTORY_OUTPUT_SOURCES
-        ${DIRECTORY_OUTPUT_PATH}/directory_rpc_service.cpp
-        ${DIRECTORY_OUTPUT_PATH}/directory_rpc_service.h
-        ${DIRECTORY_OUTPUT_PATH}/directory_rpc_service.tcc
-        ${DIRECTORY_OUTPUT_PATH}/directory_service_constants.cpp
-        ${DIRECTORY_OUTPUT_PATH}/directory_service_constants.h
-        ${DIRECTORY_OUTPUT_PATH}/directory_service_types.cpp
-        ${DIRECTORY_OUTPUT_PATH}/directory_service_types.h
-        ${DIRECTORY_OUTPUT_PATH}/directory_service_types.tcc)
-add_custom_command(
-        OUTPUT ${DIRECTORY_OUTPUT_SOURCES}
-        DEPENDS thriftcompiler ${DIRECTORY_INPUT_FILE}
-        COMMAND thriftcompiler --gen cpp:${THRIFTGEN_CXX_OPTS} ${DIRECTORY_INPUT_FILE}
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Generating Thrift files for libdirectory"
-        VERBATIM
-)
-add_custom_target(thriftgen_directory ALL
-        DEPENDS ${DIRECTORY_OUTPUT_SOURCES})
+set(THRIFT_GEN_CXX "cpp:templates,pure_enums,no_skeleton,include_prefix")
+set(THRIFT_GEN_PY "py:no_utf8strings,slots")
+set(THRIFT_GEN_JAVA "java:fullcamel,handle_runtime_exceptions,generated_annotations=undated")
 
-set(KV_INPUT_FILE kv_service.thrift)
-set(KV_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/libkv/src/rpc)
-set(KV_OUTPUT_SOURCES
-        ${KV_OUTPUT_PATH}/kv_management_rpc_service.cpp
-        ${KV_OUTPUT_PATH}/kv_management_rpc_service.h
-        ${KV_OUTPUT_PATH}/kv_management_rpc_service.tcc
-        ${KV_OUTPUT_PATH}/kv_rpc_service.cpp
-        ${KV_OUTPUT_PATH}/kv_rpc_service.h
-        ${KV_OUTPUT_PATH}/kv_rpc_service.tcc
-        ${KV_OUTPUT_PATH}/kv_service_constants.cpp
-        ${KV_OUTPUT_PATH}/kv_service_constants.h
-        ${KV_OUTPUT_PATH}/kv_service_types.cpp
-        ${KV_OUTPUT_PATH}/kv_service_types.h
-        ${KV_OUTPUT_PATH}/kv_service_types.tcc)
-add_custom_command(
-        OUTPUT ${KV_OUTPUT_SOURCES}
-        DEPENDS thriftcompiler ${KV_INPUT_FILE}
-        COMMAND thriftcompiler --gen cpp:${THRIFTGEN_CXX_OPTS} ${KV_INPUT_FILE}
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Generating Thrift files for libkv"
-        VERBATIM
-)
-add_custom_target(thriftgen_kv ALL
-        DEPENDS ${KV_OUTPUT_SOURCES})
+# Generate cpp sources
+thrift_gen(${THRIFT_GEN_CXX} src/block_allocation_service.thrift ../libmmux/src/mmux/directory/block/)
+thrift_gen(${THRIFT_GEN_CXX} src/block_service.thrift ../libmmux/src/mmux/storage/service/)
+thrift_gen(${THRIFT_GEN_CXX} src/directory_service.thrift ../libmmux/src/mmux/directory/fs/)
+thrift_gen(${THRIFT_GEN_CXX} src/lease_service.thrift ../libmmux/src/mmux/directory/lease/)
+thrift_gen(${THRIFT_GEN_CXX} src/notification_service.thrift ../libmmux/src/mmux/storage/notification/)
+thrift_gen(${THRIFT_GEN_CXX} src/storage_management_service.thrift ../libmmux/src/mmux/storage/manager/)
+thrift_gen(${THRIFT_GEN_CXX} src/subscription_service.thrift ../libmmux/src/mmux/storage/notification/)
+
+# Generate py sources
+thrift_gen(${THRIFT_GEN_PY} src/block_service.thrift ../pyclient/)
+thrift_gen(${THRIFT_GEN_PY} src/directory_service.thrift ../pyclient/)
+thrift_gen(${THRIFT_GEN_PY} src/lease_service.thrift ../pyclient/)
+thrift_gen(${THRIFT_GEN_PY} src/notification_service.thrift ../pyclient/)
+thrift_gen(${THRIFT_GEN_PY} src/subscription_service.thrift ../pyclient/)
+
+# Generate java sources
+thrift_gen(${THRIFT_GEN_JAVA} src/block_service.thrift ../javaclient/core/src/main/java/)
+thrift_gen(${THRIFT_GEN_JAVA} src/directory_service.thrift ../javaclient/core/src/main/java/)
+thrift_gen(${THRIFT_GEN_JAVA} src/lease_service.thrift ../javaclient/core/src/main/java/)
+thrift_gen(${THRIFT_GEN_JAVA} src/notification_service.thrift ../javaclient/core/src/main/java/)
+thrift_gen(${THRIFT_GEN_JAVA} src/subscription_service.thrift ../javaclient/core/src/main/java/)
