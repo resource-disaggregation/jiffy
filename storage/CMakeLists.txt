@@ -5,6 +5,10 @@ endif ()
 include_directories(../libmmux/src ${Boost_INCLUDE_DIRS})
 add_executable(storaged src/storage_server.cpp)
 
+if (NOT USE_SYSTEM_BOOST)
+  add_dependencies(directoryd boost)
+endif ()
+
 if (NOT USE_SYSTEM_JEMALLOC)
   add_dependencies(storaged jemalloc)
 endif ()

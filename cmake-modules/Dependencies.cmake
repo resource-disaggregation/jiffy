@@ -6,24 +6,56 @@ set(ZLIB_VERSION "1.2.11")
 set(OPENSSL_VERSION "1.1.1-pre7")
 set(CURL_VERSION "7.60.0")
 set(AWSSDK_VERSION "1.4.26")
-set(BOOST_VERSION "1.40.0")
+set(BOOST_VERSION "1.54.0")
 set(CATCH_VERSION "2.2.1")
 set(LIBCUCKOO_VERSION "0.2")
 
-find_package(Threads REQUIRED)
-find_package(Boost ${BOOST_VERSION} COMPONENTS program_options REQUIRED)
+set(BOOST_COMPONENTS "program_options")
 
-include(FindPythonInterp)
-if (NOT PYTHONINTERP_FOUND)
-  message(FATAL_ERROR "Cannot build python client without python interpretor")
-endif ()
-find_python_module(setuptools REQUIRED)
-if (NOT PY_SETUPTOOLS)
-  message(FATAL_ERROR "Python setuptools is required for python client")
-endif ()
+find_package(Threads REQUIRED)
 
 set(EXTERNAL_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CMAKE_CXX_FLAGS_${UPPERCASE_BUILD_TYPE}}")
 set(EXTERNAL_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ${CMAKE_C_FLAGS_${UPPERCASE_BUILD_TYPE}}")
+
+if (USE_SYSTEM_BOOST)
+  find_package(Boost ${BOOST_VERSION} COMPONENTS program_options REQUIRED)
+else ()
+  foreach(component ${BOOST_COMPONENTS})
+    list(APPEND BOOST_COMPONENTS_FOR_BUILD --with-${component})
+  endforeach()
+
+  string(REGEX REPLACE "\\." "_" BOOST_VERSION_STR ${BOOST_VERSION})
+  set(BOOST_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
+  set(BOOST_C_FLAGS "${EXTERNAL_C_FLAGS}")
+  set(BOOST_PREFIX "${PROJECT_BINARY_DIR}/external/boost")
+  set(BOOST_INCLUDE_DIR "${BOOST_PREFIX}/include")
+  ExternalProject_Add(boost
+          URL https://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION}/boost_${BOOST_VERSION_STR}.zip
+          UPDATE_COMMAND ""
+          CONFIGURE_COMMAND ./bootstrap.sh --prefix=${BOOST_PREFIX}
+          BUILD_COMMAND ./b2 link=static --prefix=${BOOST_PREFIX} ${BOOST_COMPONENTS_FOR_BUILD} install
+          BUILD_IN_SOURCE true
+          INSTALL_COMMAND ""
+          INSTALL_DIR ${BOOST_PREFIX}
+          LOG_DOWNLOAD ON
+          LOG_CONFIGURE ON
+          LOG_BUILD ON
+          LOG_INSTALL ON)
+
+  macro(libraries_to_fullpath out)
+    set(${out})
+    foreach(comp ${BOOST_COMPONENTS})
+      list(APPEND ${out} ${BOOST_PREFIX}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}boost_${comp}${CMAKE_STATIC_LIBRARY_SUFFIX})
+    endforeach()
+  endmacro()
+  libraries_to_fullpath(BOOST_LIBRARIES)
+  set(Boost_INCLUDE_DIRS ${BOOST_INCLUDE_DIR})
+  set(Boost_LIBRARIES ${BOOST_LIBRARIES})
+
+  include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+  message(STATUS "Boost include dirs: ${Boost_INCLUDE_DIRS}")
+  message(STATUS "Boost static libraries: ${Boost_LIBRARIES}")
+endif ()
 
 if (USE_SYSTEM_AWS_SDK)
   find_package(aws-sdk-cpp REQUIRED)

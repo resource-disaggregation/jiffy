@@ -29,11 +29,8 @@ if (GENERATE_THRIFT)
 endif ()
 
 add_subdirectory(libmmux)
-
 add_subdirectory(directory)
 add_subdirectory(storage)
-
-add_subdirectory(pyclient)
 
 if (BUILD_TESTS)
   enable_testing(true)
