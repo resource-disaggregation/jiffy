@@ -286,7 +286,7 @@ else ()
     set(THRIFT_COMPILER "${THRIFT_PREFIX}/bin/thrift")
   endif ()
   ExternalProject_Add(thrift
-          DEPENDS libevent openssl zlib
+          DEPENDS boost libevent openssl zlib
           URL "http://archive.apache.org/dist/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
           LIST_SEPARATOR |
           CMAKE_ARGS ${THRIFT_CMAKE_ARGS}
