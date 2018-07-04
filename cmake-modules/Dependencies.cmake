@@ -6,7 +6,7 @@ set(ZLIB_VERSION "1.2.11")
 set(OPENSSL_VERSION "1.1.1-pre7")
 set(CURL_VERSION "7.60.0")
 set(AWSSDK_VERSION "1.4.26")
-set(BOOST_VERSION "1.54.0")
+set(BOOST_VERSION "1.63.0")
 set(CATCH_VERSION "2.2.1")
 set(LIBCUCKOO_VERSION "0.2")
 
@@ -286,7 +286,7 @@ else ()
     set(THRIFT_COMPILER "${THRIFT_PREFIX}/bin/thrift")
   endif ()
   ExternalProject_Add(thrift
-          DEPENDS libevent openssl zlib
+          DEPENDS boost libevent openssl zlib
           URL "http://archive.apache.org/dist/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
           LIST_SEPARATOR |
           CMAKE_ARGS ${THRIFT_CMAKE_ARGS}
