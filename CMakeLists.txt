@@ -36,6 +36,8 @@ if (BUILD_TESTS)
   enable_testing(true)
 endif ()
 
+install(FILES conf/mmux.conf DESTINATION conf)
+
 # uninstall target
 if (NOT TARGET uninstall)
   configure_file(

@@ -58,6 +58,9 @@ else ()
   include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
   message(STATUS "Boost include dirs: ${Boost_INCLUDE_DIRS}")
   message(STATUS "Boost static libraries: ${Boost_LIBRARIES}")
+
+  install(FILES ${Boost_LIBRARIES} DESTINATION lib)
+  install(DIRECTORY ${Boost_INCLUDE_DIRS}/boost DESTINATION include)
 endif ()
 
 if ((NOT USE_SYSTEM_AWS_SDK) OR (NOT USE_SYSTEM_THRIFT))
@@ -86,8 +89,8 @@ if ((NOT USE_SYSTEM_AWS_SDK) OR (NOT USE_SYSTEM_THRIFT))
   message(STATUS "ZLib include dir: ${ZLIB_INCLUDE_DIR}")
   message(STATUS "ZLib static library: ${ZLIB_LIBRARY}")
 
-  install(FILES ${CURL_LIBRARY} DESTINATION lib)
-  install(DIRECTORY ${CURL_INCLUDE_DIR}/curl DESTINATION include)
+  install(FILES ${ZLIB_LIBRARY} DESTINATION lib)
+  install(DIRECTORY ${ZLIB_INCLUDE_DIR}/zlib DESTINATION include)
 
   set(OPENSSL_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(OPENSSL_C_FLAGS "${EXTERNAL_C_FLAGS}")
