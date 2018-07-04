@@ -330,8 +330,7 @@ TEST_CASE("mmux_client_flush_remove_test", "[put][get][update][remove]") {
     client.create("/file.txt", "/tmp");
     REQUIRE(client.lease_worker().has_path("/file.txt"));
     REQUIRE_NOTHROW(client.flush("/file.txt", "local://tmp"));
-    REQUIRE_FALSE(client.lease_worker().has_path("/file.txt"));
-    REQUIRE(client.fs()->dstatus("/file.txt").mode() == storage_mode::on_disk);
+    REQUIRE(client.lease_worker().has_path("/file.txt"));
     REQUIRE_NOTHROW(client.remove("/file.txt"));
     REQUIRE_FALSE(client.lease_worker().has_path("/file.txt"));
     REQUIRE_FALSE(client.fs()->exists("/file.txt"));
@@ -409,7 +408,7 @@ TEST_CASE("mmux_client_notification_test", "[put][get][update][remove]") {
     std::string op1 = "put", op2 = "remove";
     std::string key = "key1", value = "value1";
 
-    client.fs()->create("/a/file.txt", "/tmp", 1, 1);
+    client.fs()->create("/a/file.txt", "/tmp", 1, 1, 0);
     auto n1 = client.listen("/a/file.txt");
     auto n2 = client.listen("/a/file.txt");
     auto n3 = client.listen("/a/file.txt");

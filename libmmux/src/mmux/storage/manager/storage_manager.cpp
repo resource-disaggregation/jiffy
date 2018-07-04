@@ -73,20 +73,22 @@ std::pair<int32_t, int32_t> storage_manager::slot_range(const std::string &block
   return client.slot_range(bid.id);
 }
 
-void storage_manager::load(const std::string &block_name,
-                           const std::string &persistent_path_prefix,
-                           const std::string &path) {
+void storage_manager::load(const std::string &block_name, const std::string &backing_path) {
   auto bid = block_name_parser::parse(block_name);
   storage_management_client client(bid.host, bid.management_port);
-  client.load(bid.id, persistent_path_prefix, path);
+  client.load(bid.id, backing_path);
 }
 
-void storage_manager::flush(const std::string &block_name,
-                            const std::string &persistent_path_prefix,
-                            const std::string &path) {
+void storage_manager::sync(const std::string &block_name, const std::string &backing_path) {
   auto bid = block_name_parser::parse(block_name);
   storage_management_client client(bid.host, bid.management_port);
-  client.flush(bid.id, persistent_path_prefix, path);
+  client.sync(bid.id, backing_path);
+}
+
+void storage_manager::dump(const std::string &block_name, const std::string &backing_path) {
+  auto bid = block_name_parser::parse(block_name);
+  storage_management_client client(bid.host, bid.management_port);
+  client.dump(bid.id, backing_path);
 }
 
 void storage_manager::reset(const std::string &block_name) {

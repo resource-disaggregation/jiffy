@@ -42,7 +42,8 @@ kv_block::kv_block(const std::string &block_name,
       threshold_lo_(threshold_lo),
       threshold_hi_(threshold_hi),
       splitting_(false),
-      merging_(false) {
+      merging_(false),
+      dirty_(false) {
   locked_block_.unlock();
 }
 
@@ -366,6 +367,9 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
       break;
     default:throw std::invalid_argument("No such operation id " + std::to_string(oid));
   }
+  if (is_mutator(oid)) {
+    dirty_ = true;
+  }
   bool expected = false;
   if (is_mutator(oid) && overload() && state() != block_state::exporting && state() != block_state::importing
       && is_tail() && !locked_block_.is_active() && splitting_.compare_exchange_strong(expected, true)) {
@@ -416,6 +420,7 @@ void kv_block::reset() {
   role_ = singleton;
   splitting_ = false;
   merging_ = false;
+  dirty_ = false;
 }
 
 std::size_t kv_block::size() const {
@@ -426,6 +431,10 @@ bool kv_block::empty() const {
   return block_.empty();
 }
 
+bool kv_block::is_dirty() const {
+  return dirty_.load();
+}
+
 void kv_block::load(const std::string &path) {
   locked_hash_table_type ltable = block_.lock_table();
   auto remote = persistent::persistent_store::instance(path, ser_);
@@ -434,12 +443,46 @@ void kv_block::load(const std::string &path) {
   ltable.unlock();
 }
 
-void kv_block::flush(const std::string &path) {
-  locked_hash_table_type ltable = block_.lock_table();
-  auto remote = persistent::persistent_store::instance(path, ser_);
-  auto decomposed = persistent::persistent_store::decompose_path(path);
-  remote->write(ltable, decomposed.second);
-  ltable.unlock();
+bool kv_block::sync(const std::string &path) {
+  bool expected = true;
+  if (dirty_.compare_exchange_strong(expected, false)) {
+    locked_hash_table_type ltable = block_.lock_table();
+    auto remote = persistent::persistent_store::instance(path, ser_);
+    auto decomposed = persistent::persistent_store::decompose_path(path);
+    remote->write(ltable, decomposed.second);
+    ltable.unlock();
+    return true;
+  }
+  return false;
+}
+
+bool kv_block::dump(const std::string &path) {
+  std::unique_lock lock(metadata_mtx_);
+  bool expected = true;
+  bool flushed = false;
+  if (dirty_.compare_exchange_strong(expected, false)) {
+    locked_hash_table_type ltable = block_.lock_table();
+    auto remote = persistent::persistent_store::instance(path, ser_);
+    auto decomposed = persistent::persistent_store::decompose_path(path);
+    remote->write(ltable, decomposed.second);
+    ltable.unlock();
+    flushed = true;
+  }
+  block_.clear();
+  next_->reset("nil");
+  path_ = "";
+  // clients().clear();
+  sub_map_.clear();
+  bytes_.store(0);
+  slot_range_.first = 0;
+  slot_range_.second = -1;
+  state_ = block_state::regular;
+  chain_ = {};
+  role_ = singleton;
+  splitting_ = false;
+  merging_ = false;
+  dirty_ = false;
+  return flushed;
 }
 
 void kv_block::forward_all() {

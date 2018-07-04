@@ -68,13 +68,18 @@ TEST_CASE("storage_size_test", "[put][size][storage_size][reset]") {
   REQUIRE(block.empty());
 }
 
-TEST_CASE("flush_load_test", "[put][flush][reset][load][get]") {
+TEST_CASE("flush_load_test", "[put][sync][reset][load][get]") {
   kv_block block("nil");
   block.slot_range(0, block::SLOT_MAX);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(block.put(std::to_string(i), std::to_string(i)) == "!ok");
+    std::vector<std::string> res;
+    block.run_command(res, kv_op_id::put, {std::to_string(i), std::to_string(i)});
+    REQUIRE(res.front() == "!ok");
   }
-  REQUIRE_NOTHROW(block.flush("local://tmp/test"));
+  REQUIRE(block.is_dirty());
+  REQUIRE(block.sync("local://tmp/test"));
+  REQUIRE(!block.is_dirty());
+  REQUIRE_FALSE(block.sync("local://tmp/test"));
   REQUIRE_NOTHROW(block.reset());
   REQUIRE_NOTHROW(block.slot_range(0, block::SLOT_MAX));
   REQUIRE(block.empty());

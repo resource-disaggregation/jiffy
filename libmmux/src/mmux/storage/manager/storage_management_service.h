@@ -28,8 +28,9 @@ class storage_management_serviceIf {
   virtual void setup_and_set_importing(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name) = 0;
   virtual void set_regular(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end) = 0;
   virtual void get_path(std::string& _return, const int32_t block_id) = 0;
-  virtual void flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path) = 0;
-  virtual void load(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path) = 0;
+  virtual void sync(const int32_t block_id, const std::string& backing_path) = 0;
+  virtual void dump(const int32_t block_id, const std::string& backing_path) = 0;
+  virtual void load(const int32_t block_id, const std::string& backing_path) = 0;
   virtual void reset(const int32_t block_id) = 0;
   virtual int64_t storage_capacity(const int32_t block_id) = 0;
   virtual int64_t storage_size(const int32_t block_id) = 0;
@@ -86,10 +87,13 @@ class storage_management_serviceNull : virtual public storage_management_service
   void get_path(std::string& /* _return */, const int32_t /* block_id */) {
     return;
   }
-  void flush(const int32_t /* block_id */, const std::string& /* persistent_store_prefix */, const std::string& /* path */) {
+  void sync(const int32_t /* block_id */, const std::string& /* backing_path */) {
     return;
   }
-  void load(const int32_t /* block_id */, const std::string& /* persistent_store_prefix */, const std::string& /* path */) {
+  void dump(const int32_t /* block_id */, const std::string& /* backing_path */) {
+    return;
+  }
+  void load(const int32_t /* block_id */, const std::string& /* backing_path */) {
     return;
   }
   void reset(const int32_t /* block_id */) {
@@ -1033,49 +1037,43 @@ class storage_management_service_get_path_presult {
 
 };
 
-typedef struct _storage_management_service_flush_args__isset {
-  _storage_management_service_flush_args__isset() : block_id(false), persistent_store_prefix(false), path(false) {}
+typedef struct _storage_management_service_sync_args__isset {
+  _storage_management_service_sync_args__isset() : block_id(false), backing_path(false) {}
   bool block_id :1;
-  bool persistent_store_prefix :1;
-  bool path :1;
-} _storage_management_service_flush_args__isset;
+  bool backing_path :1;
+} _storage_management_service_sync_args__isset;
 
-class storage_management_service_flush_args {
+class storage_management_service_sync_args {
  public:
 
-  storage_management_service_flush_args(const storage_management_service_flush_args&);
-  storage_management_service_flush_args& operator=(const storage_management_service_flush_args&);
-  storage_management_service_flush_args() : block_id(0), persistent_store_prefix(), path() {
+  storage_management_service_sync_args(const storage_management_service_sync_args&);
+  storage_management_service_sync_args& operator=(const storage_management_service_sync_args&);
+  storage_management_service_sync_args() : block_id(0), backing_path() {
   }
 
-  virtual ~storage_management_service_flush_args() throw();
+  virtual ~storage_management_service_sync_args() throw();
   int32_t block_id;
-  std::string persistent_store_prefix;
-  std::string path;
+  std::string backing_path;
 
-  _storage_management_service_flush_args__isset __isset;
+  _storage_management_service_sync_args__isset __isset;
 
   void __set_block_id(const int32_t val);
 
-  void __set_persistent_store_prefix(const std::string& val);
+  void __set_backing_path(const std::string& val);
 
-  void __set_path(const std::string& val);
-
-  bool operator == (const storage_management_service_flush_args & rhs) const
+  bool operator == (const storage_management_service_sync_args & rhs) const
   {
     if (!(block_id == rhs.block_id))
       return false;
-    if (!(persistent_store_prefix == rhs.persistent_store_prefix))
-      return false;
-    if (!(path == rhs.path))
+    if (!(backing_path == rhs.backing_path))
       return false;
     return true;
   }
-  bool operator != (const storage_management_service_flush_args &rhs) const {
+  bool operator != (const storage_management_service_sync_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const storage_management_service_flush_args & ) const;
+  bool operator < (const storage_management_service_sync_args & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -1085,51 +1083,50 @@ class storage_management_service_flush_args {
 };
 
 
-class storage_management_service_flush_pargs {
+class storage_management_service_sync_pargs {
  public:
 
 
-  virtual ~storage_management_service_flush_pargs() throw();
+  virtual ~storage_management_service_sync_pargs() throw();
   const int32_t* block_id;
-  const std::string* persistent_store_prefix;
-  const std::string* path;
+  const std::string* backing_path;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
 
 };
 
-typedef struct _storage_management_service_flush_result__isset {
-  _storage_management_service_flush_result__isset() : ex(false) {}
+typedef struct _storage_management_service_sync_result__isset {
+  _storage_management_service_sync_result__isset() : ex(false) {}
   bool ex :1;
-} _storage_management_service_flush_result__isset;
+} _storage_management_service_sync_result__isset;
 
-class storage_management_service_flush_result {
+class storage_management_service_sync_result {
  public:
 
-  storage_management_service_flush_result(const storage_management_service_flush_result&);
-  storage_management_service_flush_result& operator=(const storage_management_service_flush_result&);
-  storage_management_service_flush_result() {
+  storage_management_service_sync_result(const storage_management_service_sync_result&);
+  storage_management_service_sync_result& operator=(const storage_management_service_sync_result&);
+  storage_management_service_sync_result() {
   }
 
-  virtual ~storage_management_service_flush_result() throw();
+  virtual ~storage_management_service_sync_result() throw();
   storage_management_exception ex;
 
-  _storage_management_service_flush_result__isset __isset;
+  _storage_management_service_sync_result__isset __isset;
 
   void __set_ex(const storage_management_exception& val);
 
-  bool operator == (const storage_management_service_flush_result & rhs) const
+  bool operator == (const storage_management_service_sync_result & rhs) const
   {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const storage_management_service_flush_result &rhs) const {
+  bool operator != (const storage_management_service_sync_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const storage_management_service_flush_result & ) const;
+  bool operator < (const storage_management_service_sync_result & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -1138,19 +1135,136 @@ class storage_management_service_flush_result {
 
 };
 
-typedef struct _storage_management_service_flush_presult__isset {
-  _storage_management_service_flush_presult__isset() : ex(false) {}
+typedef struct _storage_management_service_sync_presult__isset {
+  _storage_management_service_sync_presult__isset() : ex(false) {}
   bool ex :1;
-} _storage_management_service_flush_presult__isset;
+} _storage_management_service_sync_presult__isset;
 
-class storage_management_service_flush_presult {
+class storage_management_service_sync_presult {
  public:
 
 
-  virtual ~storage_management_service_flush_presult() throw();
+  virtual ~storage_management_service_sync_presult() throw();
   storage_management_exception ex;
 
-  _storage_management_service_flush_presult__isset __isset;
+  _storage_management_service_sync_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
+typedef struct _storage_management_service_dump_args__isset {
+  _storage_management_service_dump_args__isset() : block_id(false), backing_path(false) {}
+  bool block_id :1;
+  bool backing_path :1;
+} _storage_management_service_dump_args__isset;
+
+class storage_management_service_dump_args {
+ public:
+
+  storage_management_service_dump_args(const storage_management_service_dump_args&);
+  storage_management_service_dump_args& operator=(const storage_management_service_dump_args&);
+  storage_management_service_dump_args() : block_id(0), backing_path() {
+  }
+
+  virtual ~storage_management_service_dump_args() throw();
+  int32_t block_id;
+  std::string backing_path;
+
+  _storage_management_service_dump_args__isset __isset;
+
+  void __set_block_id(const int32_t val);
+
+  void __set_backing_path(const std::string& val);
+
+  bool operator == (const storage_management_service_dump_args & rhs) const
+  {
+    if (!(block_id == rhs.block_id))
+      return false;
+    if (!(backing_path == rhs.backing_path))
+      return false;
+    return true;
+  }
+  bool operator != (const storage_management_service_dump_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const storage_management_service_dump_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class storage_management_service_dump_pargs {
+ public:
+
+
+  virtual ~storage_management_service_dump_pargs() throw();
+  const int32_t* block_id;
+  const std::string* backing_path;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _storage_management_service_dump_result__isset {
+  _storage_management_service_dump_result__isset() : ex(false) {}
+  bool ex :1;
+} _storage_management_service_dump_result__isset;
+
+class storage_management_service_dump_result {
+ public:
+
+  storage_management_service_dump_result(const storage_management_service_dump_result&);
+  storage_management_service_dump_result& operator=(const storage_management_service_dump_result&);
+  storage_management_service_dump_result() {
+  }
+
+  virtual ~storage_management_service_dump_result() throw();
+  storage_management_exception ex;
+
+  _storage_management_service_dump_result__isset __isset;
+
+  void __set_ex(const storage_management_exception& val);
+
+  bool operator == (const storage_management_service_dump_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const storage_management_service_dump_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const storage_management_service_dump_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _storage_management_service_dump_presult__isset {
+  _storage_management_service_dump_presult__isset() : ex(false) {}
+  bool ex :1;
+} _storage_management_service_dump_presult__isset;
+
+class storage_management_service_dump_presult {
+ public:
+
+
+  virtual ~storage_management_service_dump_presult() throw();
+  storage_management_exception ex;
+
+  _storage_management_service_dump_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -1158,10 +1272,9 @@ class storage_management_service_flush_presult {
 };
 
 typedef struct _storage_management_service_load_args__isset {
-  _storage_management_service_load_args__isset() : block_id(false), persistent_store_prefix(false), path(false) {}
+  _storage_management_service_load_args__isset() : block_id(false), backing_path(false) {}
   bool block_id :1;
-  bool persistent_store_prefix :1;
-  bool path :1;
+  bool backing_path :1;
 } _storage_management_service_load_args__isset;
 
 class storage_management_service_load_args {
@@ -1169,29 +1282,24 @@ class storage_management_service_load_args {
 
   storage_management_service_load_args(const storage_management_service_load_args&);
   storage_management_service_load_args& operator=(const storage_management_service_load_args&);
-  storage_management_service_load_args() : block_id(0), persistent_store_prefix(), path() {
+  storage_management_service_load_args() : block_id(0), backing_path() {
   }
 
   virtual ~storage_management_service_load_args() throw();
   int32_t block_id;
-  std::string persistent_store_prefix;
-  std::string path;
+  std::string backing_path;
 
   _storage_management_service_load_args__isset __isset;
 
   void __set_block_id(const int32_t val);
 
-  void __set_persistent_store_prefix(const std::string& val);
-
-  void __set_path(const std::string& val);
+  void __set_backing_path(const std::string& val);
 
   bool operator == (const storage_management_service_load_args & rhs) const
   {
     if (!(block_id == rhs.block_id))
       return false;
-    if (!(persistent_store_prefix == rhs.persistent_store_prefix))
-      return false;
-    if (!(path == rhs.path))
+    if (!(backing_path == rhs.backing_path))
       return false;
     return true;
   }
@@ -1215,8 +1323,7 @@ class storage_management_service_load_pargs {
 
   virtual ~storage_management_service_load_pargs() throw();
   const int32_t* block_id;
-  const std::string* persistent_store_prefix;
-  const std::string* path;
+  const std::string* backing_path;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -2004,11 +2111,14 @@ class storage_management_serviceClientT : virtual public storage_management_serv
   void get_path(std::string& _return, const int32_t block_id);
   void send_get_path(const int32_t block_id);
   void recv_get_path(std::string& _return);
-  void flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path);
-  void send_flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path);
-  void recv_flush();
-  void load(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path);
-  void send_load(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path);
+  void sync(const int32_t block_id, const std::string& backing_path);
+  void send_sync(const int32_t block_id, const std::string& backing_path);
+  void recv_sync();
+  void dump(const int32_t block_id, const std::string& backing_path);
+  void send_dump(const int32_t block_id, const std::string& backing_path);
+  void recv_dump();
+  void load(const int32_t block_id, const std::string& backing_path);
+  void send_load(const int32_t block_id, const std::string& backing_path);
   void recv_load();
   void reset(const int32_t block_id);
   void send_reset(const int32_t block_id);
@@ -2070,8 +2180,10 @@ class storage_management_serviceProcessorT : public ::apache::thrift::TDispatchP
   void process_set_regular(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_get_path(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get_path(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_flush(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_flush(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_sync(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_sync(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_dump(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_dump(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_load(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_load(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_reset(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -2110,9 +2222,12 @@ class storage_management_serviceProcessorT : public ::apache::thrift::TDispatchP
     processMap_["get_path"] = ProcessFunctions(
       &storage_management_serviceProcessorT::process_get_path,
       &storage_management_serviceProcessorT::process_get_path);
-    processMap_["flush"] = ProcessFunctions(
-      &storage_management_serviceProcessorT::process_flush,
-      &storage_management_serviceProcessorT::process_flush);
+    processMap_["sync"] = ProcessFunctions(
+      &storage_management_serviceProcessorT::process_sync,
+      &storage_management_serviceProcessorT::process_sync);
+    processMap_["dump"] = ProcessFunctions(
+      &storage_management_serviceProcessorT::process_dump,
+      &storage_management_serviceProcessorT::process_dump);
     processMap_["load"] = ProcessFunctions(
       &storage_management_serviceProcessorT::process_load,
       &storage_management_serviceProcessorT::process_load);
@@ -2232,22 +2347,31 @@ class storage_management_serviceMultiface : virtual public storage_management_se
     return;
   }
 
-  void flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path) {
+  void sync(const int32_t block_id, const std::string& backing_path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->flush(block_id, persistent_store_prefix, path);
+      ifaces_[i]->sync(block_id, backing_path);
     }
-    ifaces_[i]->flush(block_id, persistent_store_prefix, path);
+    ifaces_[i]->sync(block_id, backing_path);
   }
 
-  void load(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path) {
+  void dump(const int32_t block_id, const std::string& backing_path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->load(block_id, persistent_store_prefix, path);
+      ifaces_[i]->dump(block_id, backing_path);
     }
-    ifaces_[i]->load(block_id, persistent_store_prefix, path);
+    ifaces_[i]->dump(block_id, backing_path);
+  }
+
+  void load(const int32_t block_id, const std::string& backing_path) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->load(block_id, backing_path);
+    }
+    ifaces_[i]->load(block_id, backing_path);
   }
 
   void reset(const int32_t block_id) {
@@ -2356,11 +2480,14 @@ class storage_management_serviceConcurrentClientT : virtual public storage_manag
   void get_path(std::string& _return, const int32_t block_id);
   int32_t send_get_path(const int32_t block_id);
   void recv_get_path(std::string& _return, const int32_t seqid);
-  void flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path);
-  int32_t send_flush(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path);
-  void recv_flush(const int32_t seqid);
-  void load(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path);
-  int32_t send_load(const int32_t block_id, const std::string& persistent_store_prefix, const std::string& path);
+  void sync(const int32_t block_id, const std::string& backing_path);
+  int32_t send_sync(const int32_t block_id, const std::string& backing_path);
+  void recv_sync(const int32_t seqid);
+  void dump(const int32_t block_id, const std::string& backing_path);
+  int32_t send_dump(const int32_t block_id, const std::string& backing_path);
+  void recv_dump(const int32_t seqid);
+  void load(const int32_t block_id, const std::string& backing_path);
+  int32_t send_load(const int32_t block_id, const std::string& backing_path);
   void recv_load(const int32_t seqid);
   void reset(const int32_t block_id);
   int32_t send_reset(const int32_t block_id);

@@ -39,23 +39,25 @@ class Iface(object):
         """
         pass
 
-    def create(self, path, persistent_store_prefix, num_blocks, chain_length):
+    def create(self, path, backing_path, num_blocks, chain_length, flags):
         """
         Parameters:
          - path
-         - persistent_store_prefix
+         - backing_path
          - num_blocks
          - chain_length
+         - flags
         """
         pass
 
-    def open_or_create(self, path, persistent_store_path, num_blocks, chain_length):
+    def open_or_create(self, path, backing_path, num_blocks, chain_length, flags):
         """
         Parameters:
          - path
-         - persistent_store_path
+         - backing_path
          - num_blocks
          - chain_length
+         - flags
         """
         pass
 
@@ -103,11 +105,27 @@ class Iface(object):
         """
         pass
 
-    def flush(self, path, dest):
+    def sync(self, path, backing_path):
         """
         Parameters:
          - path
-         - dest
+         - backing_path
+        """
+        pass
+
+    def dump(self, path, backing_path):
+        """
+        Parameters:
+         - path
+         - backing_path
+        """
+        pass
+
+    def load(self, path, backing_path):
+        """
+        Parameters:
+         - path
+         - backing_path
         """
         pass
 
@@ -305,24 +323,26 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "open failed: unknown result")
 
-    def create(self, path, persistent_store_prefix, num_blocks, chain_length):
+    def create(self, path, backing_path, num_blocks, chain_length, flags):
         """
         Parameters:
          - path
-         - persistent_store_prefix
+         - backing_path
          - num_blocks
          - chain_length
+         - flags
         """
-        self.send_create(path, persistent_store_prefix, num_blocks, chain_length)
+        self.send_create(path, backing_path, num_blocks, chain_length, flags)
         return self.recv_create()
 
-    def send_create(self, path, persistent_store_prefix, num_blocks, chain_length):
+    def send_create(self, path, backing_path, num_blocks, chain_length, flags):
         self._oprot.writeMessageBegin('create', TMessageType.CALL, self._seqid)
         args = create_args()
         args.path = path
-        args.persistent_store_prefix = persistent_store_prefix
+        args.backing_path = backing_path
         args.num_blocks = num_blocks
         args.chain_length = chain_length
+        args.flags = flags
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -344,24 +364,26 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "create failed: unknown result")
 
-    def open_or_create(self, path, persistent_store_path, num_blocks, chain_length):
+    def open_or_create(self, path, backing_path, num_blocks, chain_length, flags):
         """
         Parameters:
          - path
-         - persistent_store_path
+         - backing_path
          - num_blocks
          - chain_length
+         - flags
         """
-        self.send_open_or_create(path, persistent_store_path, num_blocks, chain_length)
+        self.send_open_or_create(path, backing_path, num_blocks, chain_length, flags)
         return self.recv_open_or_create()
 
-    def send_open_or_create(self, path, persistent_store_path, num_blocks, chain_length):
+    def send_open_or_create(self, path, backing_path, num_blocks, chain_length, flags):
         self._oprot.writeMessageBegin('open_or_create', TMessageType.CALL, self._seqid)
         args = open_or_create_args()
         args.path = path
-        args.persistent_store_path = persistent_store_path
+        args.backing_path = backing_path
         args.num_blocks = num_blocks
         args.chain_length = chain_length
+        args.flags = flags
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -579,25 +601,25 @@ class Client(Iface):
             raise result.ex
         return
 
-    def flush(self, path, dest):
+    def sync(self, path, backing_path):
         """
         Parameters:
          - path
-         - dest
+         - backing_path
         """
-        self.send_flush(path, dest)
-        self.recv_flush()
+        self.send_sync(path, backing_path)
+        self.recv_sync()
 
-    def send_flush(self, path, dest):
-        self._oprot.writeMessageBegin('flush', TMessageType.CALL, self._seqid)
-        args = flush_args()
+    def send_sync(self, path, backing_path):
+        self._oprot.writeMessageBegin('sync', TMessageType.CALL, self._seqid)
+        args = sync_args()
         args.path = path
-        args.dest = dest
+        args.backing_path = backing_path
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_flush(self):
+    def recv_sync(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -605,7 +627,73 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = flush_result()
+        result = sync_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def dump(self, path, backing_path):
+        """
+        Parameters:
+         - path
+         - backing_path
+        """
+        self.send_dump(path, backing_path)
+        self.recv_dump()
+
+    def send_dump(self, path, backing_path):
+        self._oprot.writeMessageBegin('dump', TMessageType.CALL, self._seqid)
+        args = dump_args()
+        args.path = path
+        args.backing_path = backing_path
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_dump(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = dump_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def load(self, path, backing_path):
+        """
+        Parameters:
+         - path
+         - backing_path
+        """
+        self.send_load(path, backing_path)
+        self.recv_load()
+
+    def send_load(self, path, backing_path):
+        self._oprot.writeMessageBegin('load', TMessageType.CALL, self._seqid)
+        args = load_args()
+        args.path = path
+        args.backing_path = backing_path
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_load(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = load_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.ex is not None:
@@ -1030,7 +1118,9 @@ class Processor(Iface, TProcessor):
         self._processMap["get_permissions"] = Processor.process_get_permissions
         self._processMap["remove"] = Processor.process_remove
         self._processMap["remove_all"] = Processor.process_remove_all
-        self._processMap["flush"] = Processor.process_flush
+        self._processMap["sync"] = Processor.process_sync
+        self._processMap["dump"] = Processor.process_dump
+        self._processMap["load"] = Processor.process_load
         self._processMap["rename"] = Processor.process_rename
         self._processMap["status"] = Processor.process_status
         self._processMap["directory_entries"] = Processor.process_directory_entries
@@ -1143,7 +1233,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = create_result()
         try:
-            result.success = self._handler.create(args.path, args.persistent_store_prefix, args.num_blocks, args.chain_length)
+            result.success = self._handler.create(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1169,7 +1259,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = open_or_create_result()
         try:
-            result.success = self._handler.open_or_create(args.path, args.persistent_store_path, args.num_blocks, args.chain_length)
+            result.success = self._handler.open_or_create(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1345,13 +1435,13 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_flush(self, seqid, iprot, oprot):
-        args = flush_args()
+    def process_sync(self, seqid, iprot, oprot):
+        args = sync_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = flush_result()
+        result = sync_result()
         try:
-            self._handler.flush(args.path, args.dest)
+            self._handler.sync(args.path, args.backing_path)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1366,7 +1456,59 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("flush", msg_type, seqid)
+        oprot.writeMessageBegin("sync", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_dump(self, seqid, iprot, oprot):
+        args = dump_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = dump_result()
+        try:
+            self._handler.dump(args.path, args.backing_path)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except directory_service_exception as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("dump", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_load(self, seqid, iprot, oprot):
+        args = load_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = load_result()
+        try:
+            self._handler.load(args.path, args.backing_path)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except directory_service_exception as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("load", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -2138,24 +2280,27 @@ class create_args(object):
     """
     Attributes:
      - path
-     - persistent_store_prefix
+     - backing_path
      - num_blocks
      - chain_length
+     - flags
     """
 
     __slots__ = (
         'path',
-        'persistent_store_prefix',
+        'backing_path',
         'num_blocks',
         'chain_length',
+        'flags',
     )
 
 
-    def __init__(self, path=None, persistent_store_prefix=None, num_blocks=None, chain_length=None,):
+    def __init__(self, path=None, backing_path=None, num_blocks=None, chain_length=None, flags=None,):
         self.path = path
-        self.persistent_store_prefix = persistent_store_prefix
+        self.backing_path = backing_path
         self.num_blocks = num_blocks
         self.chain_length = chain_length
+        self.flags = flags
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -2173,7 +2318,7 @@ class create_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRING:
-                    self.persistent_store_prefix = iprot.readString()
+                    self.backing_path = iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
@@ -2184,6 +2329,11 @@ class create_args(object):
             elif fid == 4:
                 if ftype == TType.I32:
                     self.chain_length = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.I32:
+                    self.flags = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             else:
@@ -2200,9 +2350,9 @@ class create_args(object):
             oprot.writeFieldBegin('path', TType.STRING, 1)
             oprot.writeString(self.path)
             oprot.writeFieldEnd()
-        if self.persistent_store_prefix is not None:
-            oprot.writeFieldBegin('persistent_store_prefix', TType.STRING, 2)
-            oprot.writeString(self.persistent_store_prefix)
+        if self.backing_path is not None:
+            oprot.writeFieldBegin('backing_path', TType.STRING, 2)
+            oprot.writeString(self.backing_path)
             oprot.writeFieldEnd()
         if self.num_blocks is not None:
             oprot.writeFieldBegin('num_blocks', TType.I32, 3)
@@ -2211,6 +2361,10 @@ class create_args(object):
         if self.chain_length is not None:
             oprot.writeFieldBegin('chain_length', TType.I32, 4)
             oprot.writeI32(self.chain_length)
+            oprot.writeFieldEnd()
+        if self.flags is not None:
+            oprot.writeFieldBegin('flags', TType.I32, 5)
+            oprot.writeI32(self.flags)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -2239,9 +2393,10 @@ all_structs.append(create_args)
 create_args.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'path', None, None, ),  # 1
-    (2, TType.STRING, 'persistent_store_prefix', None, None, ),  # 2
+    (2, TType.STRING, 'backing_path', None, None, ),  # 2
     (3, TType.I32, 'num_blocks', None, None, ),  # 3
     (4, TType.I32, 'chain_length', None, None, ),  # 4
+    (5, TType.I32, 'flags', None, None, ),  # 5
 )
 
 
@@ -2335,24 +2490,27 @@ class open_or_create_args(object):
     """
     Attributes:
      - path
-     - persistent_store_path
+     - backing_path
      - num_blocks
      - chain_length
+     - flags
     """
 
     __slots__ = (
         'path',
-        'persistent_store_path',
+        'backing_path',
         'num_blocks',
         'chain_length',
+        'flags',
     )
 
 
-    def __init__(self, path=None, persistent_store_path=None, num_blocks=None, chain_length=None,):
+    def __init__(self, path=None, backing_path=None, num_blocks=None, chain_length=None, flags=None,):
         self.path = path
-        self.persistent_store_path = persistent_store_path
+        self.backing_path = backing_path
         self.num_blocks = num_blocks
         self.chain_length = chain_length
+        self.flags = flags
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -2370,7 +2528,7 @@ class open_or_create_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRING:
-                    self.persistent_store_path = iprot.readString()
+                    self.backing_path = iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
@@ -2381,6 +2539,11 @@ class open_or_create_args(object):
             elif fid == 4:
                 if ftype == TType.I32:
                     self.chain_length = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.I32:
+                    self.flags = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             else:
@@ -2397,9 +2560,9 @@ class open_or_create_args(object):
             oprot.writeFieldBegin('path', TType.STRING, 1)
             oprot.writeString(self.path)
             oprot.writeFieldEnd()
-        if self.persistent_store_path is not None:
-            oprot.writeFieldBegin('persistent_store_path', TType.STRING, 2)
-            oprot.writeString(self.persistent_store_path)
+        if self.backing_path is not None:
+            oprot.writeFieldBegin('backing_path', TType.STRING, 2)
+            oprot.writeString(self.backing_path)
             oprot.writeFieldEnd()
         if self.num_blocks is not None:
             oprot.writeFieldBegin('num_blocks', TType.I32, 3)
@@ -2408,6 +2571,10 @@ class open_or_create_args(object):
         if self.chain_length is not None:
             oprot.writeFieldBegin('chain_length', TType.I32, 4)
             oprot.writeI32(self.chain_length)
+            oprot.writeFieldEnd()
+        if self.flags is not None:
+            oprot.writeFieldBegin('flags', TType.I32, 5)
+            oprot.writeI32(self.flags)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -2436,9 +2603,10 @@ all_structs.append(open_or_create_args)
 open_or_create_args.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'path', None, None, ),  # 1
-    (2, TType.STRING, 'persistent_store_path', None, None, ),  # 2
+    (2, TType.STRING, 'backing_path', None, None, ),  # 2
     (3, TType.I32, 'num_blocks', None, None, ),  # 3
     (4, TType.I32, 'chain_length', None, None, ),  # 4
+    (5, TType.I32, 'flags', None, None, ),  # 5
 )
 
 
@@ -3460,22 +3628,22 @@ remove_all_result.thrift_spec = (
 )
 
 
-class flush_args(object):
+class sync_args(object):
     """
     Attributes:
      - path
-     - dest
+     - backing_path
     """
 
     __slots__ = (
         'path',
-        'dest',
+        'backing_path',
     )
 
 
-    def __init__(self, path=None, dest=None,):
+    def __init__(self, path=None, backing_path=None,):
         self.path = path
-        self.dest = dest
+        self.backing_path = backing_path
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -3493,7 +3661,7 @@ class flush_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRING:
-                    self.dest = iprot.readString()
+                    self.backing_path = iprot.readString()
                 else:
                     iprot.skip(ftype)
             else:
@@ -3505,14 +3673,14 @@ class flush_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('flush_args')
+        oprot.writeStructBegin('sync_args')
         if self.path is not None:
             oprot.writeFieldBegin('path', TType.STRING, 1)
             oprot.writeString(self.path)
             oprot.writeFieldEnd()
-        if self.dest is not None:
-            oprot.writeFieldBegin('dest', TType.STRING, 2)
-            oprot.writeString(self.dest)
+        if self.backing_path is not None:
+            oprot.writeFieldBegin('backing_path', TType.STRING, 2)
+            oprot.writeString(self.backing_path)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -3537,15 +3705,15 @@ class flush_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(flush_args)
-flush_args.thrift_spec = (
+all_structs.append(sync_args)
+sync_args.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'path', None, None, ),  # 1
-    (2, TType.STRING, 'dest', None, None, ),  # 2
+    (2, TType.STRING, 'backing_path', None, None, ),  # 2
 )
 
 
-class flush_result(object):
+class sync_result(object):
     """
     Attributes:
      - ex
@@ -3583,7 +3751,7 @@ class flush_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('flush_result')
+        oprot.writeStructBegin('sync_result')
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
             self.ex.write(oprot)
@@ -3611,8 +3779,324 @@ class flush_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(flush_result)
-flush_result.thrift_spec = (
+all_structs.append(sync_result)
+sync_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
+)
+
+
+class dump_args(object):
+    """
+    Attributes:
+     - path
+     - backing_path
+    """
+
+    __slots__ = (
+        'path',
+        'backing_path',
+    )
+
+
+    def __init__(self, path=None, backing_path=None,):
+        self.path = path
+        self.backing_path = backing_path
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.path = iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.backing_path = iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('dump_args')
+        if self.path is not None:
+            oprot.writeFieldBegin('path', TType.STRING, 1)
+            oprot.writeString(self.path)
+            oprot.writeFieldEnd()
+        if self.backing_path is not None:
+            oprot.writeFieldBegin('backing_path', TType.STRING, 2)
+            oprot.writeString(self.backing_path)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(dump_args)
+dump_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'path', None, None, ),  # 1
+    (2, TType.STRING, 'backing_path', None, None, ),  # 2
+)
+
+
+class dump_result(object):
+    """
+    Attributes:
+     - ex
+    """
+
+    __slots__ = (
+        'ex',
+    )
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = directory_service_exception()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('dump_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(dump_result)
+dump_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
+)
+
+
+class load_args(object):
+    """
+    Attributes:
+     - path
+     - backing_path
+    """
+
+    __slots__ = (
+        'path',
+        'backing_path',
+    )
+
+
+    def __init__(self, path=None, backing_path=None,):
+        self.path = path
+        self.backing_path = backing_path
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.path = iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.backing_path = iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('load_args')
+        if self.path is not None:
+            oprot.writeFieldBegin('path', TType.STRING, 1)
+            oprot.writeString(self.path)
+            oprot.writeFieldEnd()
+        if self.backing_path is not None:
+            oprot.writeFieldBegin('backing_path', TType.STRING, 2)
+            oprot.writeString(self.backing_path)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(load_args)
+load_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'path', None, None, ),  # 1
+    (2, TType.STRING, 'backing_path', None, None, ),  # 2
+)
+
+
+class load_result(object):
+    """
+    Attributes:
+     - ex
+    """
+
+    __slots__ = (
+        'ex',
+    )
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = directory_service_exception()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('load_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(load_result)
+load_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )

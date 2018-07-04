@@ -170,7 +170,9 @@ class block {
   /** Management Operations **/
   virtual void load(const std::string &path) = 0;
 
-  virtual void flush(const std::string &path) = 0;
+  virtual bool sync(const std::string &path) = 0;
+
+  virtual bool dump(const std::string &path) = 0;
 
   virtual std::size_t storage_capacity() = 0;
 

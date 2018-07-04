@@ -269,9 +269,8 @@ class TestClient(TestCase):
         try:
             client.create("/a/file.txt", "/tmp")
             self.assertTrue('/a/file.txt' in client.to_renew)
-            client.flush('/a/file.txt', 'local://tmp')
-            self.assertFalse('/a/file.txt' in client.to_renew)
-            self.assertTrue(client.fs.dstatus('/a/file.txt').storage_mode == StorageMode.on_disk)
+            client.sync('/a/file.txt', 'local://tmp')
+            self.assertTrue('/a/file.txt' in client.to_renew)
             client.remove('/a/file.txt')
             self.assertFalse('/a/file.txt' in client.to_renew)
             self.assertFalse(client.fs.exists('/a/file.txt'))

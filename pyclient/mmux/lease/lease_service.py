@@ -3,14 +3,13 @@
 #
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #
-#  options string: py:slots
+#  options string: py:no_utf8strings,slots
 #
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol.TProtocol import TProtocolException
 from thrift.TRecursive import fix_spec
 
-import sys
 import logging
 from .ttypes import *
 from thrift.Thrift import TProcessor
@@ -146,7 +145,7 @@ class renew_leases_args(object):
                     self.to_renew = []
                     (_etype3, _size0) = iprot.readListBegin()
                     for _i4 in range(_size0):
-                        _elem5 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        _elem5 = iprot.readString()
                         self.to_renew.append(_elem5)
                     iprot.readListEnd()
                 else:
@@ -165,7 +164,7 @@ class renew_leases_args(object):
             oprot.writeFieldBegin('to_renew', TType.LIST, 1)
             oprot.writeListBegin(TType.STRING, len(self.to_renew))
             for iter6 in self.to_renew:
-                oprot.writeString(iter6.encode('utf-8') if sys.version_info[0] == 2 else iter6)
+                oprot.writeString(iter6)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -194,7 +193,7 @@ class renew_leases_args(object):
 all_structs.append(renew_leases_args)
 renew_leases_args.thrift_spec = (
     None,  # 0
-    (1, TType.LIST, 'to_renew', (TType.STRING, 'UTF8', False), None, ),  # 1
+    (1, TType.LIST, 'to_renew', (TType.STRING, None, False), None, ),  # 1
 )
 
 

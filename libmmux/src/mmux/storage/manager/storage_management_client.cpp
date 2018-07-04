@@ -83,16 +83,16 @@ std::string storage_management_client::path(int32_t block_id) {
   return path;
 }
 
-void storage_management_client::flush(const int32_t block_id,
-                                      const std::string &persistent_store_prefix,
-                                      const std::string &path) {
-  client_->flush(block_id, persistent_store_prefix, path);
+void storage_management_client::sync(int32_t block_id, const std::string &backing_path) {
+  client_->sync(block_id, backing_path);
 }
 
-void storage_management_client::load(const int32_t block_id,
-                                     const std::string &persistent_store_prefix,
-                                     const std::string &path) {
-  client_->load(block_id, persistent_store_prefix, path);
+void storage_management_client::load(int32_t block_id, const std::string &backing_path) {
+  client_->load(block_id, backing_path);
+}
+
+void storage_management_client::dump(int32_t block_id, const std::string &backing_path) {
+  client_->dump(block_id, backing_path);
 }
 
 void storage_management_client::reset(const int32_t block_id) {

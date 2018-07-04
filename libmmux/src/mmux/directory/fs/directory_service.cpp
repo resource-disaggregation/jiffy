@@ -186,19 +186,51 @@ directory_service_remove_all_presult::~directory_service_remove_all_presult() th
 }
 
 
-directory_service_flush_args::~directory_service_flush_args() throw() {
+directory_service_sync_args::~directory_service_sync_args() throw() {
 }
 
 
-directory_service_flush_pargs::~directory_service_flush_pargs() throw() {
+directory_service_sync_pargs::~directory_service_sync_pargs() throw() {
 }
 
 
-directory_service_flush_result::~directory_service_flush_result() throw() {
+directory_service_sync_result::~directory_service_sync_result() throw() {
 }
 
 
-directory_service_flush_presult::~directory_service_flush_presult() throw() {
+directory_service_sync_presult::~directory_service_sync_presult() throw() {
+}
+
+
+directory_service_dump_args::~directory_service_dump_args() throw() {
+}
+
+
+directory_service_dump_pargs::~directory_service_dump_pargs() throw() {
+}
+
+
+directory_service_dump_result::~directory_service_dump_result() throw() {
+}
+
+
+directory_service_dump_presult::~directory_service_dump_presult() throw() {
+}
+
+
+directory_service_load_args::~directory_service_load_args() throw() {
+}
+
+
+directory_service_load_pargs::~directory_service_load_pargs() throw() {
+}
+
+
+directory_service_load_result::~directory_service_load_result() throw() {
+}
+
+
+directory_service_load_presult::~directory_service_load_presult() throw() {
 }
 
 

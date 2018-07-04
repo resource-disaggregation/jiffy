@@ -24,15 +24,17 @@ class directory_serviceIf {
   virtual void create_directory(const std::string& path) = 0;
   virtual void create_directories(const std::string& path) = 0;
   virtual void open(rpc_data_status& _return, const std::string& path) = 0;
-  virtual void create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_prefix, const int32_t num_blocks, const int32_t chain_length) = 0;
-  virtual void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_path, const int32_t num_blocks, const int32_t chain_length) = 0;
+  virtual void create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags) = 0;
+  virtual void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags) = 0;
   virtual bool exists(const std::string& path) = 0;
   virtual int64_t last_write_time(const std::string& path) = 0;
   virtual void set_permissions(const std::string& path, const rpc_perms perms, const rpc_perm_options opts) = 0;
   virtual rpc_perms get_permissions(const std::string& path) = 0;
   virtual void remove(const std::string& path) = 0;
   virtual void remove_all(const std::string& path) = 0;
-  virtual void flush(const std::string& path, const std::string& dest) = 0;
+  virtual void sync(const std::string& path, const std::string& backing_path) = 0;
+  virtual void dump(const std::string& path, const std::string& backing_path) = 0;
+  virtual void load(const std::string& path, const std::string& backing_path) = 0;
   virtual void rename(const std::string& old_path, const std::string& new_path) = 0;
   virtual void status(rpc_file_status& _return, const std::string& path) = 0;
   virtual void directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path) = 0;
@@ -83,10 +85,10 @@ class directory_serviceNull : virtual public directory_serviceIf {
   void open(rpc_data_status& /* _return */, const std::string& /* path */) {
     return;
   }
-  void create(rpc_data_status& /* _return */, const std::string& /* path */, const std::string& /* persistent_store_prefix */, const int32_t /* num_blocks */, const int32_t /* chain_length */) {
+  void create(rpc_data_status& /* _return */, const std::string& /* path */, const std::string& /* backing_path */, const int32_t /* num_blocks */, const int32_t /* chain_length */, const int32_t /* flags */) {
     return;
   }
-  void open_or_create(rpc_data_status& /* _return */, const std::string& /* path */, const std::string& /* persistent_store_path */, const int32_t /* num_blocks */, const int32_t /* chain_length */) {
+  void open_or_create(rpc_data_status& /* _return */, const std::string& /* path */, const std::string& /* backing_path */, const int32_t /* num_blocks */, const int32_t /* chain_length */, const int32_t /* flags */) {
     return;
   }
   bool exists(const std::string& /* path */) {
@@ -110,7 +112,13 @@ class directory_serviceNull : virtual public directory_serviceIf {
   void remove_all(const std::string& /* path */) {
     return;
   }
-  void flush(const std::string& /* path */, const std::string& /* dest */) {
+  void sync(const std::string& /* path */, const std::string& /* backing_path */) {
+    return;
+  }
+  void dump(const std::string& /* path */, const std::string& /* backing_path */) {
+    return;
+  }
+  void load(const std::string& /* path */, const std::string& /* backing_path */) {
     return;
   }
   void rename(const std::string& /* old_path */, const std::string& /* new_path */) {
@@ -492,11 +500,12 @@ class directory_service_open_presult {
 };
 
 typedef struct _directory_service_create_args__isset {
-  _directory_service_create_args__isset() : path(false), persistent_store_prefix(false), num_blocks(false), chain_length(false) {}
+  _directory_service_create_args__isset() : path(false), backing_path(false), num_blocks(false), chain_length(false), flags(false) {}
   bool path :1;
-  bool persistent_store_prefix :1;
+  bool backing_path :1;
   bool num_blocks :1;
   bool chain_length :1;
+  bool flags :1;
 } _directory_service_create_args__isset;
 
 class directory_service_create_args {
@@ -504,34 +513,39 @@ class directory_service_create_args {
 
   directory_service_create_args(const directory_service_create_args&);
   directory_service_create_args& operator=(const directory_service_create_args&);
-  directory_service_create_args() : path(), persistent_store_prefix(), num_blocks(0), chain_length(0) {
+  directory_service_create_args() : path(), backing_path(), num_blocks(0), chain_length(0), flags(0) {
   }
 
   virtual ~directory_service_create_args() throw();
   std::string path;
-  std::string persistent_store_prefix;
+  std::string backing_path;
   int32_t num_blocks;
   int32_t chain_length;
+  int32_t flags;
 
   _directory_service_create_args__isset __isset;
 
   void __set_path(const std::string& val);
 
-  void __set_persistent_store_prefix(const std::string& val);
+  void __set_backing_path(const std::string& val);
 
   void __set_num_blocks(const int32_t val);
 
   void __set_chain_length(const int32_t val);
 
+  void __set_flags(const int32_t val);
+
   bool operator == (const directory_service_create_args & rhs) const
   {
     if (!(path == rhs.path))
       return false;
-    if (!(persistent_store_prefix == rhs.persistent_store_prefix))
+    if (!(backing_path == rhs.backing_path))
       return false;
     if (!(num_blocks == rhs.num_blocks))
       return false;
     if (!(chain_length == rhs.chain_length))
+      return false;
+    if (!(flags == rhs.flags))
       return false;
     return true;
   }
@@ -555,9 +569,10 @@ class directory_service_create_pargs {
 
   virtual ~directory_service_create_pargs() throw();
   const std::string* path;
-  const std::string* persistent_store_prefix;
+  const std::string* backing_path;
   const int32_t* num_blocks;
   const int32_t* chain_length;
+  const int32_t* flags;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -631,11 +646,12 @@ class directory_service_create_presult {
 };
 
 typedef struct _directory_service_open_or_create_args__isset {
-  _directory_service_open_or_create_args__isset() : path(false), persistent_store_path(false), num_blocks(false), chain_length(false) {}
+  _directory_service_open_or_create_args__isset() : path(false), backing_path(false), num_blocks(false), chain_length(false), flags(false) {}
   bool path :1;
-  bool persistent_store_path :1;
+  bool backing_path :1;
   bool num_blocks :1;
   bool chain_length :1;
+  bool flags :1;
 } _directory_service_open_or_create_args__isset;
 
 class directory_service_open_or_create_args {
@@ -643,34 +659,39 @@ class directory_service_open_or_create_args {
 
   directory_service_open_or_create_args(const directory_service_open_or_create_args&);
   directory_service_open_or_create_args& operator=(const directory_service_open_or_create_args&);
-  directory_service_open_or_create_args() : path(), persistent_store_path(), num_blocks(0), chain_length(0) {
+  directory_service_open_or_create_args() : path(), backing_path(), num_blocks(0), chain_length(0), flags(0) {
   }
 
   virtual ~directory_service_open_or_create_args() throw();
   std::string path;
-  std::string persistent_store_path;
+  std::string backing_path;
   int32_t num_blocks;
   int32_t chain_length;
+  int32_t flags;
 
   _directory_service_open_or_create_args__isset __isset;
 
   void __set_path(const std::string& val);
 
-  void __set_persistent_store_path(const std::string& val);
+  void __set_backing_path(const std::string& val);
 
   void __set_num_blocks(const int32_t val);
 
   void __set_chain_length(const int32_t val);
 
+  void __set_flags(const int32_t val);
+
   bool operator == (const directory_service_open_or_create_args & rhs) const
   {
     if (!(path == rhs.path))
       return false;
-    if (!(persistent_store_path == rhs.persistent_store_path))
+    if (!(backing_path == rhs.backing_path))
       return false;
     if (!(num_blocks == rhs.num_blocks))
       return false;
     if (!(chain_length == rhs.chain_length))
+      return false;
+    if (!(flags == rhs.flags))
       return false;
     return true;
   }
@@ -694,9 +715,10 @@ class directory_service_open_or_create_pargs {
 
   virtual ~directory_service_open_or_create_pargs() throw();
   const std::string* path;
-  const std::string* persistent_store_path;
+  const std::string* backing_path;
   const int32_t* num_blocks;
   const int32_t* chain_length;
+  const int32_t* flags;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -1467,43 +1489,43 @@ class directory_service_remove_all_presult {
 
 };
 
-typedef struct _directory_service_flush_args__isset {
-  _directory_service_flush_args__isset() : path(false), dest(false) {}
+typedef struct _directory_service_sync_args__isset {
+  _directory_service_sync_args__isset() : path(false), backing_path(false) {}
   bool path :1;
-  bool dest :1;
-} _directory_service_flush_args__isset;
+  bool backing_path :1;
+} _directory_service_sync_args__isset;
 
-class directory_service_flush_args {
+class directory_service_sync_args {
  public:
 
-  directory_service_flush_args(const directory_service_flush_args&);
-  directory_service_flush_args& operator=(const directory_service_flush_args&);
-  directory_service_flush_args() : path(), dest() {
+  directory_service_sync_args(const directory_service_sync_args&);
+  directory_service_sync_args& operator=(const directory_service_sync_args&);
+  directory_service_sync_args() : path(), backing_path() {
   }
 
-  virtual ~directory_service_flush_args() throw();
+  virtual ~directory_service_sync_args() throw();
   std::string path;
-  std::string dest;
+  std::string backing_path;
 
-  _directory_service_flush_args__isset __isset;
+  _directory_service_sync_args__isset __isset;
 
   void __set_path(const std::string& val);
 
-  void __set_dest(const std::string& val);
+  void __set_backing_path(const std::string& val);
 
-  bool operator == (const directory_service_flush_args & rhs) const
+  bool operator == (const directory_service_sync_args & rhs) const
   {
     if (!(path == rhs.path))
       return false;
-    if (!(dest == rhs.dest))
+    if (!(backing_path == rhs.backing_path))
       return false;
     return true;
   }
-  bool operator != (const directory_service_flush_args &rhs) const {
+  bool operator != (const directory_service_sync_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_service_flush_args & ) const;
+  bool operator < (const directory_service_sync_args & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -1513,50 +1535,50 @@ class directory_service_flush_args {
 };
 
 
-class directory_service_flush_pargs {
+class directory_service_sync_pargs {
  public:
 
 
-  virtual ~directory_service_flush_pargs() throw();
+  virtual ~directory_service_sync_pargs() throw();
   const std::string* path;
-  const std::string* dest;
+  const std::string* backing_path;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
 
 };
 
-typedef struct _directory_service_flush_result__isset {
-  _directory_service_flush_result__isset() : ex(false) {}
+typedef struct _directory_service_sync_result__isset {
+  _directory_service_sync_result__isset() : ex(false) {}
   bool ex :1;
-} _directory_service_flush_result__isset;
+} _directory_service_sync_result__isset;
 
-class directory_service_flush_result {
+class directory_service_sync_result {
  public:
 
-  directory_service_flush_result(const directory_service_flush_result&);
-  directory_service_flush_result& operator=(const directory_service_flush_result&);
-  directory_service_flush_result() {
+  directory_service_sync_result(const directory_service_sync_result&);
+  directory_service_sync_result& operator=(const directory_service_sync_result&);
+  directory_service_sync_result() {
   }
 
-  virtual ~directory_service_flush_result() throw();
+  virtual ~directory_service_sync_result() throw();
   directory_service_exception ex;
 
-  _directory_service_flush_result__isset __isset;
+  _directory_service_sync_result__isset __isset;
 
   void __set_ex(const directory_service_exception& val);
 
-  bool operator == (const directory_service_flush_result & rhs) const
+  bool operator == (const directory_service_sync_result & rhs) const
   {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const directory_service_flush_result &rhs) const {
+  bool operator != (const directory_service_sync_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const directory_service_flush_result & ) const;
+  bool operator < (const directory_service_sync_result & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -1565,19 +1587,253 @@ class directory_service_flush_result {
 
 };
 
-typedef struct _directory_service_flush_presult__isset {
-  _directory_service_flush_presult__isset() : ex(false) {}
+typedef struct _directory_service_sync_presult__isset {
+  _directory_service_sync_presult__isset() : ex(false) {}
   bool ex :1;
-} _directory_service_flush_presult__isset;
+} _directory_service_sync_presult__isset;
 
-class directory_service_flush_presult {
+class directory_service_sync_presult {
  public:
 
 
-  virtual ~directory_service_flush_presult() throw();
+  virtual ~directory_service_sync_presult() throw();
   directory_service_exception ex;
 
-  _directory_service_flush_presult__isset __isset;
+  _directory_service_sync_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
+typedef struct _directory_service_dump_args__isset {
+  _directory_service_dump_args__isset() : path(false), backing_path(false) {}
+  bool path :1;
+  bool backing_path :1;
+} _directory_service_dump_args__isset;
+
+class directory_service_dump_args {
+ public:
+
+  directory_service_dump_args(const directory_service_dump_args&);
+  directory_service_dump_args& operator=(const directory_service_dump_args&);
+  directory_service_dump_args() : path(), backing_path() {
+  }
+
+  virtual ~directory_service_dump_args() throw();
+  std::string path;
+  std::string backing_path;
+
+  _directory_service_dump_args__isset __isset;
+
+  void __set_path(const std::string& val);
+
+  void __set_backing_path(const std::string& val);
+
+  bool operator == (const directory_service_dump_args & rhs) const
+  {
+    if (!(path == rhs.path))
+      return false;
+    if (!(backing_path == rhs.backing_path))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_dump_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_dump_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class directory_service_dump_pargs {
+ public:
+
+
+  virtual ~directory_service_dump_pargs() throw();
+  const std::string* path;
+  const std::string* backing_path;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_dump_result__isset {
+  _directory_service_dump_result__isset() : ex(false) {}
+  bool ex :1;
+} _directory_service_dump_result__isset;
+
+class directory_service_dump_result {
+ public:
+
+  directory_service_dump_result(const directory_service_dump_result&);
+  directory_service_dump_result& operator=(const directory_service_dump_result&);
+  directory_service_dump_result() {
+  }
+
+  virtual ~directory_service_dump_result() throw();
+  directory_service_exception ex;
+
+  _directory_service_dump_result__isset __isset;
+
+  void __set_ex(const directory_service_exception& val);
+
+  bool operator == (const directory_service_dump_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_dump_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_dump_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_dump_presult__isset {
+  _directory_service_dump_presult__isset() : ex(false) {}
+  bool ex :1;
+} _directory_service_dump_presult__isset;
+
+class directory_service_dump_presult {
+ public:
+
+
+  virtual ~directory_service_dump_presult() throw();
+  directory_service_exception ex;
+
+  _directory_service_dump_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
+typedef struct _directory_service_load_args__isset {
+  _directory_service_load_args__isset() : path(false), backing_path(false) {}
+  bool path :1;
+  bool backing_path :1;
+} _directory_service_load_args__isset;
+
+class directory_service_load_args {
+ public:
+
+  directory_service_load_args(const directory_service_load_args&);
+  directory_service_load_args& operator=(const directory_service_load_args&);
+  directory_service_load_args() : path(), backing_path() {
+  }
+
+  virtual ~directory_service_load_args() throw();
+  std::string path;
+  std::string backing_path;
+
+  _directory_service_load_args__isset __isset;
+
+  void __set_path(const std::string& val);
+
+  void __set_backing_path(const std::string& val);
+
+  bool operator == (const directory_service_load_args & rhs) const
+  {
+    if (!(path == rhs.path))
+      return false;
+    if (!(backing_path == rhs.backing_path))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_load_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_load_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class directory_service_load_pargs {
+ public:
+
+
+  virtual ~directory_service_load_pargs() throw();
+  const std::string* path;
+  const std::string* backing_path;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_load_result__isset {
+  _directory_service_load_result__isset() : ex(false) {}
+  bool ex :1;
+} _directory_service_load_result__isset;
+
+class directory_service_load_result {
+ public:
+
+  directory_service_load_result(const directory_service_load_result&);
+  directory_service_load_result& operator=(const directory_service_load_result&);
+  directory_service_load_result() {
+  }
+
+  virtual ~directory_service_load_result() throw();
+  directory_service_exception ex;
+
+  _directory_service_load_result__isset __isset;
+
+  void __set_ex(const directory_service_exception& val);
+
+  bool operator == (const directory_service_load_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_load_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_load_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_load_presult__isset {
+  _directory_service_load_presult__isset() : ex(false) {}
+  bool ex :1;
+} _directory_service_load_presult__isset;
+
+class directory_service_load_presult {
+ public:
+
+
+  virtual ~directory_service_load_presult() throw();
+  directory_service_exception ex;
+
+  _directory_service_load_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -3052,11 +3308,11 @@ class directory_serviceClientT : virtual public directory_serviceIf {
   void open(rpc_data_status& _return, const std::string& path);
   void send_open(const std::string& path);
   void recv_open(rpc_data_status& _return);
-  void create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_prefix, const int32_t num_blocks, const int32_t chain_length);
-  void send_create(const std::string& path, const std::string& persistent_store_prefix, const int32_t num_blocks, const int32_t chain_length);
+  void create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags);
+  void send_create(const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags);
   void recv_create(rpc_data_status& _return);
-  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_path, const int32_t num_blocks, const int32_t chain_length);
-  void send_open_or_create(const std::string& path, const std::string& persistent_store_path, const int32_t num_blocks, const int32_t chain_length);
+  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags);
+  void send_open_or_create(const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags);
   void recv_open_or_create(rpc_data_status& _return);
   bool exists(const std::string& path);
   void send_exists(const std::string& path);
@@ -3076,9 +3332,15 @@ class directory_serviceClientT : virtual public directory_serviceIf {
   void remove_all(const std::string& path);
   void send_remove_all(const std::string& path);
   void recv_remove_all();
-  void flush(const std::string& path, const std::string& dest);
-  void send_flush(const std::string& path, const std::string& dest);
-  void recv_flush();
+  void sync(const std::string& path, const std::string& backing_path);
+  void send_sync(const std::string& path, const std::string& backing_path);
+  void recv_sync();
+  void dump(const std::string& path, const std::string& backing_path);
+  void send_dump(const std::string& path, const std::string& backing_path);
+  void recv_dump();
+  void load(const std::string& path, const std::string& backing_path);
+  void send_load(const std::string& path, const std::string& backing_path);
+  void recv_load();
   void rename(const std::string& old_path, const std::string& new_path);
   void send_rename(const std::string& old_path, const std::string& new_path);
   void recv_rename();
@@ -3165,8 +3427,12 @@ class directory_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT
   void process_remove(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_remove_all(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_remove_all(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_flush(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_flush(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_sync(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_sync(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_dump(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_dump(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_load(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_load(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_rename(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_rename(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_status(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -3227,9 +3493,15 @@ class directory_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT
     processMap_["remove_all"] = ProcessFunctions(
       &directory_serviceProcessorT::process_remove_all,
       &directory_serviceProcessorT::process_remove_all);
-    processMap_["flush"] = ProcessFunctions(
-      &directory_serviceProcessorT::process_flush,
-      &directory_serviceProcessorT::process_flush);
+    processMap_["sync"] = ProcessFunctions(
+      &directory_serviceProcessorT::process_sync,
+      &directory_serviceProcessorT::process_sync);
+    processMap_["dump"] = ProcessFunctions(
+      &directory_serviceProcessorT::process_dump,
+      &directory_serviceProcessorT::process_dump);
+    processMap_["load"] = ProcessFunctions(
+      &directory_serviceProcessorT::process_load,
+      &directory_serviceProcessorT::process_load);
     processMap_["rename"] = ProcessFunctions(
       &directory_serviceProcessorT::process_rename,
       &directory_serviceProcessorT::process_rename);
@@ -3327,23 +3599,23 @@ class directory_serviceMultiface : virtual public directory_serviceIf {
     return;
   }
 
-  void create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_prefix, const int32_t num_blocks, const int32_t chain_length) {
+  void create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->create(_return, path, persistent_store_prefix, num_blocks, chain_length);
+      ifaces_[i]->create(_return, path, backing_path, num_blocks, chain_length, flags);
     }
-    ifaces_[i]->create(_return, path, persistent_store_prefix, num_blocks, chain_length);
+    ifaces_[i]->create(_return, path, backing_path, num_blocks, chain_length, flags);
     return;
   }
 
-  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_path, const int32_t num_blocks, const int32_t chain_length) {
+  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->open_or_create(_return, path, persistent_store_path, num_blocks, chain_length);
+      ifaces_[i]->open_or_create(_return, path, backing_path, num_blocks, chain_length, flags);
     }
-    ifaces_[i]->open_or_create(_return, path, persistent_store_path, num_blocks, chain_length);
+    ifaces_[i]->open_or_create(_return, path, backing_path, num_blocks, chain_length, flags);
     return;
   }
 
@@ -3401,13 +3673,31 @@ class directory_serviceMultiface : virtual public directory_serviceIf {
     ifaces_[i]->remove_all(path);
   }
 
-  void flush(const std::string& path, const std::string& dest) {
+  void sync(const std::string& path, const std::string& backing_path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->flush(path, dest);
+      ifaces_[i]->sync(path, backing_path);
     }
-    ifaces_[i]->flush(path, dest);
+    ifaces_[i]->sync(path, backing_path);
+  }
+
+  void dump(const std::string& path, const std::string& backing_path) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->dump(path, backing_path);
+    }
+    ifaces_[i]->dump(path, backing_path);
+  }
+
+  void load(const std::string& path, const std::string& backing_path) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->load(path, backing_path);
+    }
+    ifaces_[i]->load(path, backing_path);
   }
 
   void rename(const std::string& old_path, const std::string& new_path) {
@@ -3564,11 +3854,11 @@ class directory_serviceConcurrentClientT : virtual public directory_serviceIf {
   void open(rpc_data_status& _return, const std::string& path);
   int32_t send_open(const std::string& path);
   void recv_open(rpc_data_status& _return, const int32_t seqid);
-  void create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_prefix, const int32_t num_blocks, const int32_t chain_length);
-  int32_t send_create(const std::string& path, const std::string& persistent_store_prefix, const int32_t num_blocks, const int32_t chain_length);
+  void create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags);
+  int32_t send_create(const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags);
   void recv_create(rpc_data_status& _return, const int32_t seqid);
-  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& persistent_store_path, const int32_t num_blocks, const int32_t chain_length);
-  int32_t send_open_or_create(const std::string& path, const std::string& persistent_store_path, const int32_t num_blocks, const int32_t chain_length);
+  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags);
+  int32_t send_open_or_create(const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags);
   void recv_open_or_create(rpc_data_status& _return, const int32_t seqid);
   bool exists(const std::string& path);
   int32_t send_exists(const std::string& path);
@@ -3588,9 +3878,15 @@ class directory_serviceConcurrentClientT : virtual public directory_serviceIf {
   void remove_all(const std::string& path);
   int32_t send_remove_all(const std::string& path);
   void recv_remove_all(const int32_t seqid);
-  void flush(const std::string& path, const std::string& dest);
-  int32_t send_flush(const std::string& path, const std::string& dest);
-  void recv_flush(const int32_t seqid);
+  void sync(const std::string& path, const std::string& backing_path);
+  int32_t send_sync(const std::string& path, const std::string& backing_path);
+  void recv_sync(const int32_t seqid);
+  void dump(const std::string& path, const std::string& backing_path);
+  int32_t send_dump(const std::string& path, const std::string& backing_path);
+  void recv_dump(const int32_t seqid);
+  void load(const std::string& path, const std::string& backing_path);
+  int32_t send_load(const std::string& path, const std::string& backing_path);
+  void recv_load(const int32_t seqid);
   void rename(const std::string& old_path, const std::string& new_path);
   int32_t send_rename(const std::string& old_path, const std::string& new_path);
   void recv_rename(const int32_t seqid);

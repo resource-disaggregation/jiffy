@@ -61,7 +61,7 @@ uint32_t chain_request_service_run_command_args::read(Protocol_* iprot) {
             uint32_t _i24;
             for (_i24 = 0; _i24 < _size20; ++_i24)
             {
-              xfer += iprot->readString(this->arguments[_i24]);
+              xfer += iprot->readBinary(this->arguments[_i24]);
             }
             xfer += iprot->readListEnd();
           }
@@ -102,7 +102,7 @@ uint32_t chain_request_service_run_command_args::write(Protocol_* oprot) const {
     std::vector<std::string> ::const_iterator _iter25;
     for (_iter25 = this->arguments.begin(); _iter25 != this->arguments.end(); ++_iter25)
     {
-      xfer += oprot->writeString((*_iter25));
+      xfer += oprot->writeBinary((*_iter25));
     }
     xfer += oprot->writeListEnd();
   }
@@ -134,7 +134,7 @@ uint32_t chain_request_service_run_command_pargs::write(Protocol_* oprot) const 
     std::vector<std::string> ::const_iterator _iter26;
     for (_iter26 = (*(this->arguments)).begin(); _iter26 != (*(this->arguments)).end(); ++_iter26)
     {
-      xfer += oprot->writeString((*_iter26));
+      xfer += oprot->writeBinary((*_iter26));
     }
     xfer += oprot->writeListEnd();
   }
@@ -179,7 +179,7 @@ uint32_t chain_request_service_run_command_result::read(Protocol_* iprot) {
             uint32_t _i31;
             for (_i31 = 0; _i31 < _size27; ++_i31)
             {
-              xfer += iprot->readString(this->success[_i31]);
+              xfer += iprot->readBinary(this->success[_i31]);
             }
             xfer += iprot->readListEnd();
           }
@@ -214,7 +214,7 @@ uint32_t chain_request_service_run_command_result::write(Protocol_* oprot) const
       std::vector<std::string> ::const_iterator _iter32;
       for (_iter32 = this->success.begin(); _iter32 != this->success.end(); ++_iter32)
       {
-        xfer += oprot->writeString((*_iter32));
+        xfer += oprot->writeBinary((*_iter32));
       }
       xfer += oprot->writeListEnd();
     }
@@ -259,7 +259,7 @@ uint32_t chain_request_service_run_command_presult::read(Protocol_* iprot) {
             uint32_t _i37;
             for (_i37 = 0; _i37 < _size33; ++_i37)
             {
-              xfer += iprot->readString((*(this->success))[_i37]);
+              xfer += iprot->readBinary((*(this->success))[_i37]);
             }
             xfer += iprot->readListEnd();
           }
@@ -338,7 +338,7 @@ uint32_t chain_request_service_chain_request_args::read(Protocol_* iprot) {
             uint32_t _i42;
             for (_i42 = 0; _i42 < _size38; ++_i42)
             {
-              xfer += iprot->readString(this->arguments[_i42]);
+              xfer += iprot->readBinary(this->arguments[_i42]);
             }
             xfer += iprot->readListEnd();
           }
@@ -383,7 +383,7 @@ uint32_t chain_request_service_chain_request_args::write(Protocol_* oprot) const
     std::vector<std::string> ::const_iterator _iter43;
     for (_iter43 = this->arguments.begin(); _iter43 != this->arguments.end(); ++_iter43)
     {
-      xfer += oprot->writeString((*_iter43));
+      xfer += oprot->writeBinary((*_iter43));
     }
     xfer += oprot->writeListEnd();
   }
@@ -419,7 +419,7 @@ uint32_t chain_request_service_chain_request_pargs::write(Protocol_* oprot) cons
     std::vector<std::string> ::const_iterator _iter44;
     for (_iter44 = (*(this->arguments)).begin(); _iter44 != (*(this->arguments)).end(); ++_iter44)
     {
-      xfer += oprot->writeString((*_iter44));
+      xfer += oprot->writeBinary((*_iter44));
     }
     xfer += oprot->writeListEnd();
   }

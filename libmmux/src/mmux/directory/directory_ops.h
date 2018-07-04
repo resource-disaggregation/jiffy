@@ -135,8 +135,7 @@ enum file_type {
 enum storage_mode {
   in_memory = 0,
   in_memory_grace = 1,
-  flushing = 2,
-  on_disk = 3
+  on_disk = 2
 };
 
 enum chain_status {
@@ -149,6 +148,21 @@ struct replica_chain {
   std::vector<std::string> block_names;
   std::pair<int32_t, int32_t> slot_range;
   chain_status status;
+  storage_mode mode;
+
+  replica_chain() : mode(storage_mode::in_memory) {}
+
+  replica_chain(const std::vector<std::string> &block_names,
+                int32_t slot_begin,
+                int32_t slot_end,
+                chain_status status,
+                storage_mode mode) {
+    this->block_names = block_names;
+    this->slot_range.first = slot_begin;
+    this->slot_range.second = slot_end;
+    this->status = status;
+    this->mode = mode;
+  }
 
   const std::string slot_range_string() const {
     return std::to_string(slot_range.first) + "_" + std::to_string(slot_range.second);
@@ -177,7 +191,8 @@ struct replica_chain {
     }
     out.pop_back();
     out.pop_back();
-    out += "> :: (" + std::to_string(slot_begin()) + ", " + std::to_string(slot_end()) + ")";
+    out += "> :: (" + std::to_string(slot_begin()) + ", " + std::to_string(slot_end()) + ") :: { mode : "
+        + std::to_string(mode) + " }";
     return out;
   }
 
@@ -259,35 +274,59 @@ class directory_entry {
 
 class data_status {
  public:
-  data_status() : mode_(storage_mode::in_memory), chain_length_(1) {}
+  static const std::int32_t PINNED = 0x01;
+  static const std::int32_t STATIC_PROVISIONED = 0x02;
+  static const std::int32_t MAPPED = 0x04;
 
-  data_status(storage_mode mode,
-              std::string persistent_store_prefix,
-              std::size_t chain_length,
-              std::vector<replica_chain> blocks)
-      : mode_(mode),
-        persistent_store_prefix_(std::move(persistent_store_prefix)),
+  data_status() : chain_length_(1), flags_(0) {}
+
+  data_status(std::string backing_path, std::size_t chain_length, std::vector<replica_chain> blocks, int32_t flags = 0)
+      : backing_path_(std::move(backing_path)),
         chain_length_(chain_length),
-        data_blocks_(std::move(blocks)) {}
+        data_blocks_(std::move(blocks)),
+        flags_(flags) {}
 
   const std::vector<replica_chain> &data_blocks() const {
     return data_blocks_;
   }
 
-  const storage_mode &mode() const {
-    return mode_;
+  std::vector<storage_mode> mode() const {
+    std::vector<storage_mode> modes(data_blocks_.size());
+    for (size_t i = 0; i < data_blocks_.size(); i++) {
+      modes[i] = data_blocks_[i].mode;
+    }
+
+    return modes;
+  }
+
+  void mode(size_t block_id, storage_mode mode) {
+    data_blocks_.at(block_id).mode = mode;
   }
 
   void mode(storage_mode mode) {
-    mode_ = mode;
+    for (size_t i = 0; i < data_blocks_.size(); i++) {
+      data_blocks_[i].mode = mode;
+    }
   }
 
-  const std::string &persistent_store_prefix() const {
-    return persistent_store_prefix_;
+  std::vector<std::string> mark_dumped(size_t block_id) {
+    data_blocks_.at(block_id).mode = storage_mode::on_disk;
+    std::vector<std::string> chain = data_blocks_.at(block_id).block_names;
+    data_blocks_.at(block_id).block_names.clear();
+    return chain;
   }
 
-  void persistent_store_prefix(const std::string &prefix) {
-    persistent_store_prefix_ = prefix;
+  void mark_loaded(size_t block_id, const std::vector<std::string> chain) {
+    data_blocks_.at(block_id).mode = storage_mode::in_memory;
+    data_blocks_.at(block_id).block_names = chain;
+  }
+
+  const std::string &backing_path() const {
+    return backing_path_;
+  }
+
+  void backing_path(const std::string &backing_path) {
+    backing_path_ = backing_path;
   }
 
   std::size_t chain_length() const {
@@ -336,7 +375,7 @@ class data_status {
   }
 
   std::string to_string() const {
-    std::string out = "{ mode: " + std::to_string(mode_) + ", pprefix: " + persistent_store_prefix_ + ", chain_length: "
+    std::string out = "{ backing_path: " + backing_path_ + ", chain_length: "
         + std::to_string(chain_length_) + ", data_blocks: { ";
     for (const auto &chain: data_blocks_) {
       out += chain.to_string() + ", ";
@@ -347,11 +386,47 @@ class data_status {
     return out;
   }
 
+  std::int32_t flags() const {
+    return flags_;
+  }
+
+  void flags(std::int32_t flags) {
+    flags_ = flags;
+  }
+
+  void set_pinned() {
+    flags_ |= PINNED;
+  }
+
+  void set_static_provisioned() {
+    flags_ |= STATIC_PROVISIONED;
+  }
+
+  void set_mapped() {
+    flags_ |= MAPPED;
+  }
+
+  void clear_flags() {
+    flags_ = 0;
+  }
+
+  bool is_pinned() const {
+    return (flags_ & PINNED) == PINNED;
+  }
+
+  bool is_static_provisioned() const {
+    return (flags_ & STATIC_PROVISIONED) == STATIC_PROVISIONED;
+  }
+
+  bool is_mapped() const {
+    return (flags_ & MAPPED) == MAPPED;
+  }
+
  private:
-  storage_mode mode_;
-  std::string persistent_store_prefix_;
+  std::string backing_path_;
   std::size_t chain_length_;
   std::vector<replica_chain> data_blocks_;
+  std::int32_t flags_;
 };
 
 class directory_ops {
@@ -363,25 +438,29 @@ class directory_ops {
 
   virtual data_status open(const std::string &path) = 0;
   virtual data_status create(const std::string &path,
-                             const std::string &persistent_store_prefix,
+                             const std::string &backing_path,
                              std::size_t num_blocks,
-                             std::size_t chain_length) = 0;
+                             std::size_t chain_length,
+                             std::int32_t flags) = 0;
   virtual data_status open_or_create(const std::string &path,
-                                     const std::string &persistent_store_prefix,
+                                     const std::string &backing_path,
                                      std::size_t num_blocks,
-                                     std::size_t chain_length) = 0;
+                                     std::size_t chain_length,
+                                     std::int32_t flags) = 0;
 
   virtual bool exists(const std::string &path) const = 0;
 
   virtual std::uint64_t last_write_time(const std::string &path) const = 0;
 
   virtual perms permissions(const std::string &path) = 0;
-  virtual void permissions(const std::string &path, const perms &permsissions, perm_options opts) = 0;
+  virtual void permissions(const std::string &path, const perms &permissions, perm_options opts) = 0;
 
   virtual void remove(const std::string &path) = 0;
   virtual void remove_all(const std::string &path) = 0;
 
-  virtual void flush(const std::string &path, const std::string &dest) = 0;
+  virtual void sync(const std::string &path, const std::string &backing_path) = 0;
+  virtual void dump(const std::string &path, const std::string &backing_path) = 0;
+  virtual void load(const std::string &path, const std::string &backing_path) = 0;
 
   virtual void rename(const std::string &old_path, const std::string &new_path) = 0;
 
@@ -406,6 +485,7 @@ class directory_management_ops {
   virtual void add_block_to_file(const std::string &path) = 0;
   virtual void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) = 0;
   virtual void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) = 0;
+  virtual void handle_lease_expiry(const std::string &path) = 0;
 };
 
 }

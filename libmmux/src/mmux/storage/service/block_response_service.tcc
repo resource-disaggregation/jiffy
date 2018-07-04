@@ -53,7 +53,7 @@ uint32_t block_response_service_response_args::read(Protocol_* iprot) {
             uint32_t _i17;
             for (_i17 = 0; _i17 < _size13; ++_i17)
             {
-              xfer += iprot->readString(this->result[_i17]);
+              xfer += iprot->readBinary(this->result[_i17]);
             }
             xfer += iprot->readListEnd();
           }
@@ -90,7 +90,7 @@ uint32_t block_response_service_response_args::write(Protocol_* oprot) const {
     std::vector<std::string> ::const_iterator _iter18;
     for (_iter18 = this->result.begin(); _iter18 != this->result.end(); ++_iter18)
     {
-      xfer += oprot->writeString((*_iter18));
+      xfer += oprot->writeBinary((*_iter18));
     }
     xfer += oprot->writeListEnd();
   }
@@ -118,7 +118,7 @@ uint32_t block_response_service_response_pargs::write(Protocol_* oprot) const {
     std::vector<std::string> ::const_iterator _iter19;
     for (_iter19 = (*(this->result)).begin(); _iter19 != (*(this->result)).end(); ++_iter19)
     {
-      xfer += oprot->writeString((*_iter19));
+      xfer += oprot->writeBinary((*_iter19));
     }
     xfer += oprot->writeListEnd();
   }

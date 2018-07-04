@@ -19,14 +19,14 @@ enum rpc_file_type {
 enum rpc_storage_mode {
   rpc_in_memory = 0,
   rpc_in_memory_grace = 1,
-  rpc_flushing = 2,
-  rpc_on_disk = 3
+  rpc_on_disk = 2
 }
 
 struct rpc_replica_chain {
   1: required list<string> block_names,
   2: required i32 slot_begin,
   3: required i32 slot_end,
+  4: required rpc_storage_mode storage_mode
 }
 
 struct rpc_file_status {
@@ -36,10 +36,10 @@ struct rpc_file_status {
 }
 
 struct rpc_data_status {
-  1: required rpc_storage_mode storage_mode,
-  2: required string persistent_store_prefix,
-  3: required i32 chain_length,
-  4: required list<rpc_replica_chain> data_blocks,
+  1: required string backing_path,
+  2: required i32 chain_length,
+  3: required list<rpc_replica_chain> data_blocks,
+  4: required i32 flags,
 }
 
 struct rpc_dir_entry {
@@ -59,9 +59,9 @@ service directory_service {
 
   rpc_data_status open(1: string path)
     throws (1: directory_service_exception ex),
-  rpc_data_status create(1: string path, 2: string persistent_store_prefix, 3: i32 num_blocks, 4: i32 chain_length)
+  rpc_data_status create(1: string path, 2: string backing_path, 3: i32 num_blocks, 4: i32 chain_length, 5: i32 flags)
     throws (1: directory_service_exception ex),
-  rpc_data_status open_or_create(1: string path, 2: string persistent_store_path, 3: i32 num_blocks, 4: i32 chain_length)
+  rpc_data_status open_or_create(1: string path, 2: string backing_path, 3: i32 num_blocks, 4: i32 chain_length, 5: i32 flags)
     throws (1: directory_service_exception ex),
 
   bool exists(1: string path)
@@ -80,8 +80,12 @@ service directory_service {
   void remove_all(1: string path)
     throws (1: directory_service_exception ex),
 
-  void flush(1: string path, 2: string dest)
+  void sync(1: string path, 2: string backing_path)
     throws (1: directory_service_exception ex),
+  void dump(1: string path, 2: string backing_path)
+      throws (1: directory_service_exception ex),
+  void load(1: string path, 2: string backing_path)
+      throws (1: directory_service_exception ex),
 
   void rename(1: string old_path, 2: string new_path)
     throws (1: directory_service_exception ex),

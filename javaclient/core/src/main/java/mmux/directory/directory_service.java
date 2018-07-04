@@ -18,9 +18,9 @@ public class directory_service {
 
     public rpc_data_status open(java.lang.String path) throws directory_service_exception, org.apache.thrift.TException;
 
-    public rpc_data_status create(java.lang.String path, java.lang.String persistent_store_prefix, int num_blocks, int chain_length) throws directory_service_exception, org.apache.thrift.TException;
+    public rpc_data_status create(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags) throws directory_service_exception, org.apache.thrift.TException;
 
-    public rpc_data_status openOrCreate(java.lang.String path, java.lang.String persistent_store_path, int num_blocks, int chain_length) throws directory_service_exception, org.apache.thrift.TException;
+    public rpc_data_status openOrCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags) throws directory_service_exception, org.apache.thrift.TException;
 
     public boolean exists(java.lang.String path) throws directory_service_exception, org.apache.thrift.TException;
 
@@ -34,7 +34,11 @@ public class directory_service {
 
     public void removeAll(java.lang.String path) throws directory_service_exception, org.apache.thrift.TException;
 
-    public void flush(java.lang.String path, java.lang.String dest) throws directory_service_exception, org.apache.thrift.TException;
+    public void sync(java.lang.String path, java.lang.String backing_path) throws directory_service_exception, org.apache.thrift.TException;
+
+    public void dump(java.lang.String path, java.lang.String backing_path) throws directory_service_exception, org.apache.thrift.TException;
+
+    public void load(java.lang.String path, java.lang.String backing_path) throws directory_service_exception, org.apache.thrift.TException;
 
     public void rename(java.lang.String old_path, java.lang.String new_path) throws directory_service_exception, org.apache.thrift.TException;
 
@@ -70,9 +74,9 @@ public class directory_service {
 
     public void open(java.lang.String path, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException;
 
-    public void create(java.lang.String path, java.lang.String persistent_store_prefix, int num_blocks, int chain_length, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException;
+    public void create(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException;
 
-    public void openOrCreate(java.lang.String path, java.lang.String persistent_store_path, int num_blocks, int chain_length, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException;
+    public void openOrCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException;
 
     public void exists(java.lang.String path, org.apache.thrift.async.AsyncMethodCallback<java.lang.Boolean> resultHandler) throws org.apache.thrift.TException;
 
@@ -86,7 +90,11 @@ public class directory_service {
 
     public void removeAll(java.lang.String path, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException;
 
-    public void flush(java.lang.String path, java.lang.String dest, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException;
+    public void sync(java.lang.String path, java.lang.String backing_path, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException;
+
+    public void dump(java.lang.String path, java.lang.String backing_path, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException;
+
+    public void load(java.lang.String path, java.lang.String backing_path, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException;
 
     public void rename(java.lang.String old_path, java.lang.String new_path, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException;
 
@@ -206,19 +214,20 @@ public class directory_service {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "open failed: unknown result");
     }
 
-    public rpc_data_status create(java.lang.String path, java.lang.String persistent_store_prefix, int num_blocks, int chain_length) throws directory_service_exception, org.apache.thrift.TException
+    public rpc_data_status create(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags) throws directory_service_exception, org.apache.thrift.TException
     {
-      sendCreate(path, persistent_store_prefix, num_blocks, chain_length);
+      sendCreate(path, backing_path, num_blocks, chain_length, flags);
       return recvCreate();
     }
 
-    public void sendCreate(java.lang.String path, java.lang.String persistent_store_prefix, int num_blocks, int chain_length) throws org.apache.thrift.TException
+    public void sendCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags) throws org.apache.thrift.TException
     {
       create_args args = new create_args();
       args.setPath(path);
-      args.setPersistentStorePrefix(persistent_store_prefix);
+      args.setBackingPath(backing_path);
       args.setNumBlocks(num_blocks);
       args.setChainLength(chain_length);
+      args.setFlags(flags);
       sendBase("create", args);
     }
 
@@ -235,19 +244,20 @@ public class directory_service {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "create failed: unknown result");
     }
 
-    public rpc_data_status openOrCreate(java.lang.String path, java.lang.String persistent_store_path, int num_blocks, int chain_length) throws directory_service_exception, org.apache.thrift.TException
+    public rpc_data_status openOrCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags) throws directory_service_exception, org.apache.thrift.TException
     {
-      sendOpenOrCreate(path, persistent_store_path, num_blocks, chain_length);
+      sendOpenOrCreate(path, backing_path, num_blocks, chain_length, flags);
       return recvOpenOrCreate();
     }
 
-    public void sendOpenOrCreate(java.lang.String path, java.lang.String persistent_store_path, int num_blocks, int chain_length) throws org.apache.thrift.TException
+    public void sendOpenOrCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags) throws org.apache.thrift.TException
     {
       open_or_create_args args = new open_or_create_args();
       args.setPath(path);
-      args.setPersistentStorePath(persistent_store_path);
+      args.setBackingPath(backing_path);
       args.setNumBlocks(num_blocks);
       args.setChainLength(chain_length);
+      args.setFlags(flags);
       sendBase("open_or_create", args);
     }
 
@@ -413,24 +423,72 @@ public class directory_service {
       return;
     }
 
-    public void flush(java.lang.String path, java.lang.String dest) throws directory_service_exception, org.apache.thrift.TException
+    public void sync(java.lang.String path, java.lang.String backing_path) throws directory_service_exception, org.apache.thrift.TException
     {
-      sendFlush(path, dest);
-      recvFlush();
+      sendSync(path, backing_path);
+      recvSync();
     }
 
-    public void sendFlush(java.lang.String path, java.lang.String dest) throws org.apache.thrift.TException
+    public void sendSync(java.lang.String path, java.lang.String backing_path) throws org.apache.thrift.TException
     {
-      flush_args args = new flush_args();
+      sync_args args = new sync_args();
       args.setPath(path);
-      args.setDest(dest);
-      sendBase("flush", args);
+      args.setBackingPath(backing_path);
+      sendBase("sync", args);
     }
 
-    public void recvFlush() throws directory_service_exception, org.apache.thrift.TException
+    public void recvSync() throws directory_service_exception, org.apache.thrift.TException
     {
-      flush_result result = new flush_result();
-      receiveBase(result, "flush");
+      sync_result result = new sync_result();
+      receiveBase(result, "sync");
+      if (result.ex != null) {
+        throw result.ex;
+      }
+      return;
+    }
+
+    public void dump(java.lang.String path, java.lang.String backing_path) throws directory_service_exception, org.apache.thrift.TException
+    {
+      sendDump(path, backing_path);
+      recvDump();
+    }
+
+    public void sendDump(java.lang.String path, java.lang.String backing_path) throws org.apache.thrift.TException
+    {
+      dump_args args = new dump_args();
+      args.setPath(path);
+      args.setBackingPath(backing_path);
+      sendBase("dump", args);
+    }
+
+    public void recvDump() throws directory_service_exception, org.apache.thrift.TException
+    {
+      dump_result result = new dump_result();
+      receiveBase(result, "dump");
+      if (result.ex != null) {
+        throw result.ex;
+      }
+      return;
+    }
+
+    public void load(java.lang.String path, java.lang.String backing_path) throws directory_service_exception, org.apache.thrift.TException
+    {
+      sendLoad(path, backing_path);
+      recvLoad();
+    }
+
+    public void sendLoad(java.lang.String path, java.lang.String backing_path) throws org.apache.thrift.TException
+    {
+      load_args args = new load_args();
+      args.setPath(path);
+      args.setBackingPath(backing_path);
+      sendBase("load", args);
+    }
+
+    public void recvLoad() throws directory_service_exception, org.apache.thrift.TException
+    {
+      load_result result = new load_result();
+      receiveBase(result, "load");
       if (result.ex != null) {
         throw result.ex;
       }
@@ -858,33 +916,36 @@ public class directory_service {
       }
     }
 
-    public void create(java.lang.String path, java.lang.String persistent_store_prefix, int num_blocks, int chain_length, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
+    public void create(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      create_call method_call = new create_call(path, persistent_store_prefix, num_blocks, chain_length, resultHandler, this, ___protocolFactory, ___transport);
+      create_call method_call = new create_call(path, backing_path, num_blocks, chain_length, flags, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class create_call extends org.apache.thrift.async.TAsyncMethodCall<rpc_data_status> {
       private java.lang.String path;
-      private java.lang.String persistent_store_prefix;
+      private java.lang.String backing_path;
       private int num_blocks;
       private int chain_length;
-      public create_call(java.lang.String path, java.lang.String persistent_store_prefix, int num_blocks, int chain_length, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private int flags;
+      public create_call(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.path = path;
-        this.persistent_store_prefix = persistent_store_prefix;
+        this.backing_path = backing_path;
         this.num_blocks = num_blocks;
         this.chain_length = chain_length;
+        this.flags = flags;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
         prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("create", org.apache.thrift.protocol.TMessageType.CALL, 0));
         create_args args = new create_args();
         args.setPath(path);
-        args.setPersistentStorePrefix(persistent_store_prefix);
+        args.setBackingPath(backing_path);
         args.setNumBlocks(num_blocks);
         args.setChainLength(chain_length);
+        args.setFlags(flags);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -899,33 +960,36 @@ public class directory_service {
       }
     }
 
-    public void openOrCreate(java.lang.String path, java.lang.String persistent_store_path, int num_blocks, int chain_length, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
+    public void openOrCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      open_or_create_call method_call = new open_or_create_call(path, persistent_store_path, num_blocks, chain_length, resultHandler, this, ___protocolFactory, ___transport);
+      open_or_create_call method_call = new open_or_create_call(path, backing_path, num_blocks, chain_length, flags, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class open_or_create_call extends org.apache.thrift.async.TAsyncMethodCall<rpc_data_status> {
       private java.lang.String path;
-      private java.lang.String persistent_store_path;
+      private java.lang.String backing_path;
       private int num_blocks;
       private int chain_length;
-      public open_or_create_call(java.lang.String path, java.lang.String persistent_store_path, int num_blocks, int chain_length, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private int flags;
+      public open_or_create_call(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.path = path;
-        this.persistent_store_path = persistent_store_path;
+        this.backing_path = backing_path;
         this.num_blocks = num_blocks;
         this.chain_length = chain_length;
+        this.flags = flags;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
         prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("open_or_create", org.apache.thrift.protocol.TMessageType.CALL, 0));
         open_or_create_args args = new open_or_create_args();
         args.setPath(path);
-        args.setPersistentStorePath(persistent_store_path);
+        args.setBackingPath(backing_path);
         args.setNumBlocks(num_blocks);
         args.setChainLength(chain_length);
+        args.setFlags(flags);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -1138,27 +1202,97 @@ public class directory_service {
       }
     }
 
-    public void flush(java.lang.String path, java.lang.String dest, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
+    public void sync(java.lang.String path, java.lang.String backing_path, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      flush_call method_call = new flush_call(path, dest, resultHandler, this, ___protocolFactory, ___transport);
+      sync_call method_call = new sync_call(path, backing_path, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
-    public static class flush_call extends org.apache.thrift.async.TAsyncMethodCall<Void> {
+    public static class sync_call extends org.apache.thrift.async.TAsyncMethodCall<Void> {
       private java.lang.String path;
-      private java.lang.String dest;
-      public flush_call(java.lang.String path, java.lang.String dest, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private java.lang.String backing_path;
+      public sync_call(java.lang.String path, java.lang.String backing_path, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.path = path;
-        this.dest = dest;
+        this.backing_path = backing_path;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("flush", org.apache.thrift.protocol.TMessageType.CALL, 0));
-        flush_args args = new flush_args();
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("sync", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        sync_args args = new sync_args();
         args.setPath(path);
-        args.setDest(dest);
+        args.setBackingPath(backing_path);
+        args.write(prot);
+        prot.writeMessageEnd();
+      }
+
+      public Void getResult() throws directory_service_exception, org.apache.thrift.TException {
+        if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
+          throw new java.lang.IllegalStateException("Method call not finished!");
+        }
+        org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
+        org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
+        return null;
+      }
+    }
+
+    public void dump(java.lang.String path, java.lang.String backing_path, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
+      checkReady();
+      dump_call method_call = new dump_call(path, backing_path, resultHandler, this, ___protocolFactory, ___transport);
+      this.___currentMethod = method_call;
+      ___manager.call(method_call);
+    }
+
+    public static class dump_call extends org.apache.thrift.async.TAsyncMethodCall<Void> {
+      private java.lang.String path;
+      private java.lang.String backing_path;
+      public dump_call(java.lang.String path, java.lang.String backing_path, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+        super(client, protocolFactory, transport, resultHandler, false);
+        this.path = path;
+        this.backing_path = backing_path;
+      }
+
+      public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("dump", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        dump_args args = new dump_args();
+        args.setPath(path);
+        args.setBackingPath(backing_path);
+        args.write(prot);
+        prot.writeMessageEnd();
+      }
+
+      public Void getResult() throws directory_service_exception, org.apache.thrift.TException {
+        if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
+          throw new java.lang.IllegalStateException("Method call not finished!");
+        }
+        org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
+        org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
+        return null;
+      }
+    }
+
+    public void load(java.lang.String path, java.lang.String backing_path, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
+      checkReady();
+      load_call method_call = new load_call(path, backing_path, resultHandler, this, ___protocolFactory, ___transport);
+      this.___currentMethod = method_call;
+      ___manager.call(method_call);
+    }
+
+    public static class load_call extends org.apache.thrift.async.TAsyncMethodCall<Void> {
+      private java.lang.String path;
+      private java.lang.String backing_path;
+      public load_call(java.lang.String path, java.lang.String backing_path, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+        super(client, protocolFactory, transport, resultHandler, false);
+        this.path = path;
+        this.backing_path = backing_path;
+      }
+
+      public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("load", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        load_args args = new load_args();
+        args.setPath(path);
+        args.setBackingPath(backing_path);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -1602,7 +1736,9 @@ public class directory_service {
       processMap.put("get_permissions", new get_permissions());
       processMap.put("remove", new remove());
       processMap.put("remove_all", new remove_all());
-      processMap.put("flush", new flush());
+      processMap.put("sync", new sync());
+      processMap.put("dump", new dump());
+      processMap.put("load", new load());
       processMap.put("rename", new rename());
       processMap.put("status", new status());
       processMap.put("directory_entries", new directory_entries());
@@ -1726,7 +1862,7 @@ public class directory_service {
       public create_result getResult(I iface, create_args args) throws org.apache.thrift.TException {
         create_result result = new create_result();
         try {
-          result.success = iface.create(args.path, args.persistent_store_prefix, args.num_blocks, args.chain_length);
+          result.success = iface.create(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags);
         } catch (directory_service_exception ex) {
           result.ex = ex;
         }
@@ -1755,7 +1891,7 @@ public class directory_service {
       public open_or_create_result getResult(I iface, open_or_create_args args) throws org.apache.thrift.TException {
         open_or_create_result result = new open_or_create_result();
         try {
-          result.success = iface.openOrCreate(args.path, args.persistent_store_path, args.num_blocks, args.chain_length);
+          result.success = iface.openOrCreate(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags);
         } catch (directory_service_exception ex) {
           result.ex = ex;
         }
@@ -1940,13 +2076,13 @@ public class directory_service {
       }
     }
 
-    public static class flush<I extends Iface> extends org.apache.thrift.ProcessFunction<I, flush_args> {
-      public flush() {
-        super("flush");
+    public static class sync<I extends Iface> extends org.apache.thrift.ProcessFunction<I, sync_args> {
+      public sync() {
+        super("sync");
       }
 
-      public flush_args getEmptyArgsInstance() {
-        return new flush_args();
+      public sync_args getEmptyArgsInstance() {
+        return new sync_args();
       }
 
       protected boolean isOneway() {
@@ -1958,10 +2094,68 @@ public class directory_service {
         return true;
       }
 
-      public flush_result getResult(I iface, flush_args args) throws org.apache.thrift.TException {
-        flush_result result = new flush_result();
+      public sync_result getResult(I iface, sync_args args) throws org.apache.thrift.TException {
+        sync_result result = new sync_result();
         try {
-          iface.flush(args.path, args.dest);
+          iface.sync(args.path, args.backing_path);
+        } catch (directory_service_exception ex) {
+          result.ex = ex;
+        }
+        return result;
+      }
+    }
+
+    public static class dump<I extends Iface> extends org.apache.thrift.ProcessFunction<I, dump_args> {
+      public dump() {
+        super("dump");
+      }
+
+      public dump_args getEmptyArgsInstance() {
+        return new dump_args();
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      @Override
+      protected boolean handleRuntimeExceptions() {
+        return true;
+      }
+
+      public dump_result getResult(I iface, dump_args args) throws org.apache.thrift.TException {
+        dump_result result = new dump_result();
+        try {
+          iface.dump(args.path, args.backing_path);
+        } catch (directory_service_exception ex) {
+          result.ex = ex;
+        }
+        return result;
+      }
+    }
+
+    public static class load<I extends Iface> extends org.apache.thrift.ProcessFunction<I, load_args> {
+      public load() {
+        super("load");
+      }
+
+      public load_args getEmptyArgsInstance() {
+        return new load_args();
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      @Override
+      protected boolean handleRuntimeExceptions() {
+        return true;
+      }
+
+      public load_result getResult(I iface, load_args args) throws org.apache.thrift.TException {
+        load_result result = new load_result();
+        try {
+          iface.load(args.path, args.backing_path);
         } catch (directory_service_exception ex) {
           result.ex = ex;
         }
@@ -2343,7 +2537,9 @@ public class directory_service {
       processMap.put("get_permissions", new get_permissions());
       processMap.put("remove", new remove());
       processMap.put("remove_all", new remove_all());
-      processMap.put("flush", new flush());
+      processMap.put("sync", new sync());
+      processMap.put("dump", new dump());
+      processMap.put("load", new load());
       processMap.put("rename", new rename());
       processMap.put("status", new status());
       processMap.put("directory_entries", new directory_entries());
@@ -2613,7 +2809,7 @@ public class directory_service {
       }
 
       public void start(I iface, create_args args, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
-        iface.create(args.path, args.persistent_store_prefix, args.num_blocks, args.chain_length,resultHandler);
+        iface.create(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags,resultHandler);
       }
     }
 
@@ -2678,7 +2874,7 @@ public class directory_service {
       }
 
       public void start(I iface, open_or_create_args args, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
-        iface.openOrCreate(args.path, args.persistent_store_path, args.num_blocks, args.chain_length,resultHandler);
+        iface.openOrCreate(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags,resultHandler);
       }
     }
 
@@ -3072,20 +3268,20 @@ public class directory_service {
       }
     }
 
-    public static class flush<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, flush_args, Void> {
-      public flush() {
-        super("flush");
+    public static class sync<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, sync_args, Void> {
+      public sync() {
+        super("sync");
       }
 
-      public flush_args getEmptyArgsInstance() {
-        return new flush_args();
+      public sync_args getEmptyArgsInstance() {
+        return new sync_args();
       }
 
       public org.apache.thrift.async.AsyncMethodCallback<Void> getResultHandler(final org.apache.thrift.server.AbstractNonblockingServer.AsyncFrameBuffer fb, final int seqid) {
         final org.apache.thrift.AsyncProcessFunction fcall = this;
         return new org.apache.thrift.async.AsyncMethodCallback<Void>() { 
           public void onComplete(Void o) {
-            flush_result result = new flush_result();
+            sync_result result = new sync_result();
             try {
               fcall.sendResponse(fb, result, org.apache.thrift.protocol.TMessageType.REPLY,seqid);
             } catch (org.apache.thrift.transport.TTransportException e) {
@@ -3099,7 +3295,7 @@ public class directory_service {
           public void onError(java.lang.Exception e) {
             byte msgType = org.apache.thrift.protocol.TMessageType.REPLY;
             org.apache.thrift.TSerializable msg;
-            flush_result result = new flush_result();
+            sync_result result = new sync_result();
             if (e instanceof directory_service_exception) {
               result.ex = (directory_service_exception) e;
               result.setExIsSet(true);
@@ -3131,8 +3327,136 @@ public class directory_service {
         return false;
       }
 
-      public void start(I iface, flush_args args, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
-        iface.flush(args.path, args.dest,resultHandler);
+      public void start(I iface, sync_args args, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
+        iface.sync(args.path, args.backing_path,resultHandler);
+      }
+    }
+
+    public static class dump<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, dump_args, Void> {
+      public dump() {
+        super("dump");
+      }
+
+      public dump_args getEmptyArgsInstance() {
+        return new dump_args();
+      }
+
+      public org.apache.thrift.async.AsyncMethodCallback<Void> getResultHandler(final org.apache.thrift.server.AbstractNonblockingServer.AsyncFrameBuffer fb, final int seqid) {
+        final org.apache.thrift.AsyncProcessFunction fcall = this;
+        return new org.apache.thrift.async.AsyncMethodCallback<Void>() { 
+          public void onComplete(Void o) {
+            dump_result result = new dump_result();
+            try {
+              fcall.sendResponse(fb, result, org.apache.thrift.protocol.TMessageType.REPLY,seqid);
+            } catch (org.apache.thrift.transport.TTransportException e) {
+              _LOGGER.error("TTransportException writing to internal frame buffer", e);
+              fb.close();
+            } catch (java.lang.Exception e) {
+              _LOGGER.error("Exception writing to internal frame buffer", e);
+              onError(e);
+            }
+          }
+          public void onError(java.lang.Exception e) {
+            byte msgType = org.apache.thrift.protocol.TMessageType.REPLY;
+            org.apache.thrift.TSerializable msg;
+            dump_result result = new dump_result();
+            if (e instanceof directory_service_exception) {
+              result.ex = (directory_service_exception) e;
+              result.setExIsSet(true);
+              msg = result;
+            } else if (e instanceof org.apache.thrift.transport.TTransportException) {
+              _LOGGER.error("TTransportException inside handler", e);
+              fb.close();
+              return;
+            } else if (e instanceof org.apache.thrift.TApplicationException) {
+              _LOGGER.error("TApplicationException inside handler", e);
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = (org.apache.thrift.TApplicationException)e;
+            } else {
+              _LOGGER.error("Exception inside handler", e);
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.INTERNAL_ERROR, e.getMessage());
+            }
+            try {
+              fcall.sendResponse(fb,msg,msgType,seqid);
+            } catch (java.lang.Exception ex) {
+              _LOGGER.error("Exception writing to internal frame buffer", ex);
+              fb.close();
+            }
+          }
+        };
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      public void start(I iface, dump_args args, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
+        iface.dump(args.path, args.backing_path,resultHandler);
+      }
+    }
+
+    public static class load<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, load_args, Void> {
+      public load() {
+        super("load");
+      }
+
+      public load_args getEmptyArgsInstance() {
+        return new load_args();
+      }
+
+      public org.apache.thrift.async.AsyncMethodCallback<Void> getResultHandler(final org.apache.thrift.server.AbstractNonblockingServer.AsyncFrameBuffer fb, final int seqid) {
+        final org.apache.thrift.AsyncProcessFunction fcall = this;
+        return new org.apache.thrift.async.AsyncMethodCallback<Void>() { 
+          public void onComplete(Void o) {
+            load_result result = new load_result();
+            try {
+              fcall.sendResponse(fb, result, org.apache.thrift.protocol.TMessageType.REPLY,seqid);
+            } catch (org.apache.thrift.transport.TTransportException e) {
+              _LOGGER.error("TTransportException writing to internal frame buffer", e);
+              fb.close();
+            } catch (java.lang.Exception e) {
+              _LOGGER.error("Exception writing to internal frame buffer", e);
+              onError(e);
+            }
+          }
+          public void onError(java.lang.Exception e) {
+            byte msgType = org.apache.thrift.protocol.TMessageType.REPLY;
+            org.apache.thrift.TSerializable msg;
+            load_result result = new load_result();
+            if (e instanceof directory_service_exception) {
+              result.ex = (directory_service_exception) e;
+              result.setExIsSet(true);
+              msg = result;
+            } else if (e instanceof org.apache.thrift.transport.TTransportException) {
+              _LOGGER.error("TTransportException inside handler", e);
+              fb.close();
+              return;
+            } else if (e instanceof org.apache.thrift.TApplicationException) {
+              _LOGGER.error("TApplicationException inside handler", e);
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = (org.apache.thrift.TApplicationException)e;
+            } else {
+              _LOGGER.error("Exception inside handler", e);
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.INTERNAL_ERROR, e.getMessage());
+            }
+            try {
+              fcall.sendResponse(fb,msg,msgType,seqid);
+            } catch (java.lang.Exception ex) {
+              _LOGGER.error("Exception writing to internal frame buffer", ex);
+              fb.close();
+            }
+          }
+        };
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      public void start(I iface, load_args args, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
+        iface.load(args.path, args.backing_path,resultHandler);
       }
     }
 
@@ -6207,24 +6531,27 @@ public class directory_service {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("create_args");
 
     private static final org.apache.thrift.protocol.TField PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("path", org.apache.thrift.protocol.TType.STRING, (short)1);
-    private static final org.apache.thrift.protocol.TField PERSISTENT_STORE_PREFIX_FIELD_DESC = new org.apache.thrift.protocol.TField("persistent_store_prefix", org.apache.thrift.protocol.TType.STRING, (short)2);
+    private static final org.apache.thrift.protocol.TField BACKING_PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("backing_path", org.apache.thrift.protocol.TType.STRING, (short)2);
     private static final org.apache.thrift.protocol.TField NUM_BLOCKS_FIELD_DESC = new org.apache.thrift.protocol.TField("num_blocks", org.apache.thrift.protocol.TType.I32, (short)3);
     private static final org.apache.thrift.protocol.TField CHAIN_LENGTH_FIELD_DESC = new org.apache.thrift.protocol.TField("chain_length", org.apache.thrift.protocol.TType.I32, (short)4);
+    private static final org.apache.thrift.protocol.TField FLAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("flags", org.apache.thrift.protocol.TType.I32, (short)5);
 
     private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new create_argsStandardSchemeFactory();
     private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new create_argsTupleSchemeFactory();
 
     public java.lang.String path; // required
-    public java.lang.String persistent_store_prefix; // required
+    public java.lang.String backing_path; // required
     public int num_blocks; // required
     public int chain_length; // required
+    public int flags; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
       PATH((short)1, "path"),
-      PERSISTENT_STORE_PREFIX((short)2, "persistent_store_prefix"),
+      BACKING_PATH((short)2, "backing_path"),
       NUM_BLOCKS((short)3, "num_blocks"),
-      CHAIN_LENGTH((short)4, "chain_length");
+      CHAIN_LENGTH((short)4, "chain_length"),
+      FLAGS((short)5, "flags");
 
       private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
 
@@ -6241,12 +6568,14 @@ public class directory_service {
         switch(fieldId) {
           case 1: // PATH
             return PATH;
-          case 2: // PERSISTENT_STORE_PREFIX
-            return PERSISTENT_STORE_PREFIX;
+          case 2: // BACKING_PATH
+            return BACKING_PATH;
           case 3: // NUM_BLOCKS
             return NUM_BLOCKS;
           case 4: // CHAIN_LENGTH
             return CHAIN_LENGTH;
+          case 5: // FLAGS
+            return FLAGS;
           default:
             return null;
         }
@@ -6289,17 +6618,20 @@ public class directory_service {
     // isset id assignments
     private static final int __NUM_BLOCKS_ISSET_ID = 0;
     private static final int __CHAIN_LENGTH_ISSET_ID = 1;
+    private static final int __FLAGS_ISSET_ID = 2;
     private byte __isset_bitfield = 0;
     public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
       java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.PATH, new org.apache.thrift.meta_data.FieldMetaData("path", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
-      tmpMap.put(_Fields.PERSISTENT_STORE_PREFIX, new org.apache.thrift.meta_data.FieldMetaData("persistent_store_prefix", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+      tmpMap.put(_Fields.BACKING_PATH, new org.apache.thrift.meta_data.FieldMetaData("backing_path", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
       tmpMap.put(_Fields.NUM_BLOCKS, new org.apache.thrift.meta_data.FieldMetaData("num_blocks", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       tmpMap.put(_Fields.CHAIN_LENGTH, new org.apache.thrift.meta_data.FieldMetaData("chain_length", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      tmpMap.put(_Fields.FLAGS, new org.apache.thrift.meta_data.FieldMetaData("flags", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(create_args.class, metaDataMap);
@@ -6310,17 +6642,20 @@ public class directory_service {
 
     public create_args(
       java.lang.String path,
-      java.lang.String persistent_store_prefix,
+      java.lang.String backing_path,
       int num_blocks,
-      int chain_length)
+      int chain_length,
+      int flags)
     {
       this();
       this.path = path;
-      this.persistent_store_prefix = persistent_store_prefix;
+      this.backing_path = backing_path;
       this.num_blocks = num_blocks;
       setNumBlocksIsSet(true);
       this.chain_length = chain_length;
       setChainLengthIsSet(true);
+      this.flags = flags;
+      setFlagsIsSet(true);
     }
 
     /**
@@ -6331,11 +6666,12 @@ public class directory_service {
       if (other.isSetPath()) {
         this.path = other.path;
       }
-      if (other.isSetPersistentStorePrefix()) {
-        this.persistent_store_prefix = other.persistent_store_prefix;
+      if (other.isSetBackingPath()) {
+        this.backing_path = other.backing_path;
       }
       this.num_blocks = other.num_blocks;
       this.chain_length = other.chain_length;
+      this.flags = other.flags;
     }
 
     public create_args deepCopy() {
@@ -6345,11 +6681,13 @@ public class directory_service {
     @Override
     public void clear() {
       this.path = null;
-      this.persistent_store_prefix = null;
+      this.backing_path = null;
       setNumBlocksIsSet(false);
       this.num_blocks = 0;
       setChainLengthIsSet(false);
       this.chain_length = 0;
+      setFlagsIsSet(false);
+      this.flags = 0;
     }
 
     public java.lang.String getPath() {
@@ -6376,27 +6714,27 @@ public class directory_service {
       }
     }
 
-    public java.lang.String getPersistentStorePrefix() {
-      return this.persistent_store_prefix;
+    public java.lang.String getBackingPath() {
+      return this.backing_path;
     }
 
-    public create_args setPersistentStorePrefix(java.lang.String persistent_store_prefix) {
-      this.persistent_store_prefix = persistent_store_prefix;
+    public create_args setBackingPath(java.lang.String backing_path) {
+      this.backing_path = backing_path;
       return this;
     }
 
-    public void unsetPersistentStorePrefix() {
-      this.persistent_store_prefix = null;
+    public void unsetBackingPath() {
+      this.backing_path = null;
     }
 
-    /** Returns true if field persistent_store_prefix is set (has been assigned a value) and false otherwise */
-    public boolean isSetPersistentStorePrefix() {
-      return this.persistent_store_prefix != null;
+    /** Returns true if field backing_path is set (has been assigned a value) and false otherwise */
+    public boolean isSetBackingPath() {
+      return this.backing_path != null;
     }
 
-    public void setPersistentStorePrefixIsSet(boolean value) {
+    public void setBackingPathIsSet(boolean value) {
       if (!value) {
-        this.persistent_store_prefix = null;
+        this.backing_path = null;
       }
     }
 
@@ -6446,6 +6784,29 @@ public class directory_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __CHAIN_LENGTH_ISSET_ID, value);
     }
 
+    public int getFlags() {
+      return this.flags;
+    }
+
+    public create_args setFlags(int flags) {
+      this.flags = flags;
+      setFlagsIsSet(true);
+      return this;
+    }
+
+    public void unsetFlags() {
+      __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __FLAGS_ISSET_ID);
+    }
+
+    /** Returns true if field flags is set (has been assigned a value) and false otherwise */
+    public boolean isSetFlags() {
+      return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __FLAGS_ISSET_ID);
+    }
+
+    public void setFlagsIsSet(boolean value) {
+      __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __FLAGS_ISSET_ID, value);
+    }
+
     public void setFieldValue(_Fields field, java.lang.Object value) {
       switch (field) {
       case PATH:
@@ -6456,11 +6817,11 @@ public class directory_service {
         }
         break;
 
-      case PERSISTENT_STORE_PREFIX:
+      case BACKING_PATH:
         if (value == null) {
-          unsetPersistentStorePrefix();
+          unsetBackingPath();
         } else {
-          setPersistentStorePrefix((java.lang.String)value);
+          setBackingPath((java.lang.String)value);
         }
         break;
 
@@ -6480,6 +6841,14 @@ public class directory_service {
         }
         break;
 
+      case FLAGS:
+        if (value == null) {
+          unsetFlags();
+        } else {
+          setFlags((java.lang.Integer)value);
+        }
+        break;
+
       }
     }
 
@@ -6488,14 +6857,17 @@ public class directory_service {
       case PATH:
         return getPath();
 
-      case PERSISTENT_STORE_PREFIX:
-        return getPersistentStorePrefix();
+      case BACKING_PATH:
+        return getBackingPath();
 
       case NUM_BLOCKS:
         return getNumBlocks();
 
       case CHAIN_LENGTH:
         return getChainLength();
+
+      case FLAGS:
+        return getFlags();
 
       }
       throw new java.lang.IllegalStateException();
@@ -6510,12 +6882,14 @@ public class directory_service {
       switch (field) {
       case PATH:
         return isSetPath();
-      case PERSISTENT_STORE_PREFIX:
-        return isSetPersistentStorePrefix();
+      case BACKING_PATH:
+        return isSetBackingPath();
       case NUM_BLOCKS:
         return isSetNumBlocks();
       case CHAIN_LENGTH:
         return isSetChainLength();
+      case FLAGS:
+        return isSetFlags();
       }
       throw new java.lang.IllegalStateException();
     }
@@ -6544,12 +6918,12 @@ public class directory_service {
           return false;
       }
 
-      boolean this_present_persistent_store_prefix = true && this.isSetPersistentStorePrefix();
-      boolean that_present_persistent_store_prefix = true && that.isSetPersistentStorePrefix();
-      if (this_present_persistent_store_prefix || that_present_persistent_store_prefix) {
-        if (!(this_present_persistent_store_prefix && that_present_persistent_store_prefix))
+      boolean this_present_backing_path = true && this.isSetBackingPath();
+      boolean that_present_backing_path = true && that.isSetBackingPath();
+      if (this_present_backing_path || that_present_backing_path) {
+        if (!(this_present_backing_path && that_present_backing_path))
           return false;
-        if (!this.persistent_store_prefix.equals(that.persistent_store_prefix))
+        if (!this.backing_path.equals(that.backing_path))
           return false;
       }
 
@@ -6571,6 +6945,15 @@ public class directory_service {
           return false;
       }
 
+      boolean this_present_flags = true;
+      boolean that_present_flags = true;
+      if (this_present_flags || that_present_flags) {
+        if (!(this_present_flags && that_present_flags))
+          return false;
+        if (this.flags != that.flags)
+          return false;
+      }
+
       return true;
     }
 
@@ -6582,13 +6965,15 @@ public class directory_service {
       if (isSetPath())
         hashCode = hashCode * 8191 + path.hashCode();
 
-      hashCode = hashCode * 8191 + ((isSetPersistentStorePrefix()) ? 131071 : 524287);
-      if (isSetPersistentStorePrefix())
-        hashCode = hashCode * 8191 + persistent_store_prefix.hashCode();
+      hashCode = hashCode * 8191 + ((isSetBackingPath()) ? 131071 : 524287);
+      if (isSetBackingPath())
+        hashCode = hashCode * 8191 + backing_path.hashCode();
 
       hashCode = hashCode * 8191 + num_blocks;
 
       hashCode = hashCode * 8191 + chain_length;
+
+      hashCode = hashCode * 8191 + flags;
 
       return hashCode;
     }
@@ -6611,12 +6996,12 @@ public class directory_service {
           return lastComparison;
         }
       }
-      lastComparison = java.lang.Boolean.valueOf(isSetPersistentStorePrefix()).compareTo(other.isSetPersistentStorePrefix());
+      lastComparison = java.lang.Boolean.valueOf(isSetBackingPath()).compareTo(other.isSetBackingPath());
       if (lastComparison != 0) {
         return lastComparison;
       }
-      if (isSetPersistentStorePrefix()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.persistent_store_prefix, other.persistent_store_prefix);
+      if (isSetBackingPath()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.backing_path, other.backing_path);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -6637,6 +7022,16 @@ public class directory_service {
       }
       if (isSetChainLength()) {
         lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.chain_length, other.chain_length);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = java.lang.Boolean.valueOf(isSetFlags()).compareTo(other.isSetFlags());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetFlags()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.flags, other.flags);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -6669,11 +7064,11 @@ public class directory_service {
       }
       first = false;
       if (!first) sb.append(", ");
-      sb.append("persistent_store_prefix:");
-      if (this.persistent_store_prefix == null) {
+      sb.append("backing_path:");
+      if (this.backing_path == null) {
         sb.append("null");
       } else {
-        sb.append(this.persistent_store_prefix);
+        sb.append(this.backing_path);
       }
       first = false;
       if (!first) sb.append(", ");
@@ -6683,6 +7078,10 @@ public class directory_service {
       if (!first) sb.append(", ");
       sb.append("chain_length:");
       sb.append(this.chain_length);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("flags:");
+      sb.append(this.flags);
       first = false;
       sb.append(")");
       return sb.toString();
@@ -6737,10 +7136,10 @@ public class directory_service {
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
               break;
-            case 2: // PERSISTENT_STORE_PREFIX
+            case 2: // BACKING_PATH
               if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-                struct.persistent_store_prefix = iprot.readString();
-                struct.setPersistentStorePrefixIsSet(true);
+                struct.backing_path = iprot.readString();
+                struct.setBackingPathIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
@@ -6757,6 +7156,14 @@ public class directory_service {
               if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
                 struct.chain_length = iprot.readI32();
                 struct.setChainLengthIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 5: // FLAGS
+              if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+                struct.flags = iprot.readI32();
+                struct.setFlagsIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
@@ -6781,9 +7188,9 @@ public class directory_service {
           oprot.writeString(struct.path);
           oprot.writeFieldEnd();
         }
-        if (struct.persistent_store_prefix != null) {
-          oprot.writeFieldBegin(PERSISTENT_STORE_PREFIX_FIELD_DESC);
-          oprot.writeString(struct.persistent_store_prefix);
+        if (struct.backing_path != null) {
+          oprot.writeFieldBegin(BACKING_PATH_FIELD_DESC);
+          oprot.writeString(struct.backing_path);
           oprot.writeFieldEnd();
         }
         oprot.writeFieldBegin(NUM_BLOCKS_FIELD_DESC);
@@ -6791,6 +7198,9 @@ public class directory_service {
         oprot.writeFieldEnd();
         oprot.writeFieldBegin(CHAIN_LENGTH_FIELD_DESC);
         oprot.writeI32(struct.chain_length);
+        oprot.writeFieldEnd();
+        oprot.writeFieldBegin(FLAGS_FIELD_DESC);
+        oprot.writeI32(struct.flags);
         oprot.writeFieldEnd();
         oprot.writeFieldStop();
         oprot.writeStructEnd();
@@ -6813,7 +7223,7 @@ public class directory_service {
         if (struct.isSetPath()) {
           optionals.set(0);
         }
-        if (struct.isSetPersistentStorePrefix()) {
+        if (struct.isSetBackingPath()) {
           optionals.set(1);
         }
         if (struct.isSetNumBlocks()) {
@@ -6822,12 +7232,15 @@ public class directory_service {
         if (struct.isSetChainLength()) {
           optionals.set(3);
         }
-        oprot.writeBitSet(optionals, 4);
+        if (struct.isSetFlags()) {
+          optionals.set(4);
+        }
+        oprot.writeBitSet(optionals, 5);
         if (struct.isSetPath()) {
           oprot.writeString(struct.path);
         }
-        if (struct.isSetPersistentStorePrefix()) {
-          oprot.writeString(struct.persistent_store_prefix);
+        if (struct.isSetBackingPath()) {
+          oprot.writeString(struct.backing_path);
         }
         if (struct.isSetNumBlocks()) {
           oprot.writeI32(struct.num_blocks);
@@ -6835,19 +7248,22 @@ public class directory_service {
         if (struct.isSetChainLength()) {
           oprot.writeI32(struct.chain_length);
         }
+        if (struct.isSetFlags()) {
+          oprot.writeI32(struct.flags);
+        }
       }
 
       @Override
       public void read(org.apache.thrift.protocol.TProtocol prot, create_args struct) throws org.apache.thrift.TException {
         org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
-        java.util.BitSet incoming = iprot.readBitSet(4);
+        java.util.BitSet incoming = iprot.readBitSet(5);
         if (incoming.get(0)) {
           struct.path = iprot.readString();
           struct.setPathIsSet(true);
         }
         if (incoming.get(1)) {
-          struct.persistent_store_prefix = iprot.readString();
-          struct.setPersistentStorePrefixIsSet(true);
+          struct.backing_path = iprot.readString();
+          struct.setBackingPathIsSet(true);
         }
         if (incoming.get(2)) {
           struct.num_blocks = iprot.readI32();
@@ -6856,6 +7272,10 @@ public class directory_service {
         if (incoming.get(3)) {
           struct.chain_length = iprot.readI32();
           struct.setChainLengthIsSet(true);
+        }
+        if (incoming.get(4)) {
+          struct.flags = iprot.readI32();
+          struct.setFlagsIsSet(true);
         }
       }
     }
@@ -7342,24 +7762,27 @@ public class directory_service {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("open_or_create_args");
 
     private static final org.apache.thrift.protocol.TField PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("path", org.apache.thrift.protocol.TType.STRING, (short)1);
-    private static final org.apache.thrift.protocol.TField PERSISTENT_STORE_PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("persistent_store_path", org.apache.thrift.protocol.TType.STRING, (short)2);
+    private static final org.apache.thrift.protocol.TField BACKING_PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("backing_path", org.apache.thrift.protocol.TType.STRING, (short)2);
     private static final org.apache.thrift.protocol.TField NUM_BLOCKS_FIELD_DESC = new org.apache.thrift.protocol.TField("num_blocks", org.apache.thrift.protocol.TType.I32, (short)3);
     private static final org.apache.thrift.protocol.TField CHAIN_LENGTH_FIELD_DESC = new org.apache.thrift.protocol.TField("chain_length", org.apache.thrift.protocol.TType.I32, (short)4);
+    private static final org.apache.thrift.protocol.TField FLAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("flags", org.apache.thrift.protocol.TType.I32, (short)5);
 
     private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new open_or_create_argsStandardSchemeFactory();
     private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new open_or_create_argsTupleSchemeFactory();
 
     public java.lang.String path; // required
-    public java.lang.String persistent_store_path; // required
+    public java.lang.String backing_path; // required
     public int num_blocks; // required
     public int chain_length; // required
+    public int flags; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
       PATH((short)1, "path"),
-      PERSISTENT_STORE_PATH((short)2, "persistent_store_path"),
+      BACKING_PATH((short)2, "backing_path"),
       NUM_BLOCKS((short)3, "num_blocks"),
-      CHAIN_LENGTH((short)4, "chain_length");
+      CHAIN_LENGTH((short)4, "chain_length"),
+      FLAGS((short)5, "flags");
 
       private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
 
@@ -7376,12 +7799,14 @@ public class directory_service {
         switch(fieldId) {
           case 1: // PATH
             return PATH;
-          case 2: // PERSISTENT_STORE_PATH
-            return PERSISTENT_STORE_PATH;
+          case 2: // BACKING_PATH
+            return BACKING_PATH;
           case 3: // NUM_BLOCKS
             return NUM_BLOCKS;
           case 4: // CHAIN_LENGTH
             return CHAIN_LENGTH;
+          case 5: // FLAGS
+            return FLAGS;
           default:
             return null;
         }
@@ -7424,17 +7849,20 @@ public class directory_service {
     // isset id assignments
     private static final int __NUM_BLOCKS_ISSET_ID = 0;
     private static final int __CHAIN_LENGTH_ISSET_ID = 1;
+    private static final int __FLAGS_ISSET_ID = 2;
     private byte __isset_bitfield = 0;
     public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
       java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.PATH, new org.apache.thrift.meta_data.FieldMetaData("path", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
-      tmpMap.put(_Fields.PERSISTENT_STORE_PATH, new org.apache.thrift.meta_data.FieldMetaData("persistent_store_path", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+      tmpMap.put(_Fields.BACKING_PATH, new org.apache.thrift.meta_data.FieldMetaData("backing_path", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
       tmpMap.put(_Fields.NUM_BLOCKS, new org.apache.thrift.meta_data.FieldMetaData("num_blocks", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       tmpMap.put(_Fields.CHAIN_LENGTH, new org.apache.thrift.meta_data.FieldMetaData("chain_length", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      tmpMap.put(_Fields.FLAGS, new org.apache.thrift.meta_data.FieldMetaData("flags", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(open_or_create_args.class, metaDataMap);
@@ -7445,17 +7873,20 @@ public class directory_service {
 
     public open_or_create_args(
       java.lang.String path,
-      java.lang.String persistent_store_path,
+      java.lang.String backing_path,
       int num_blocks,
-      int chain_length)
+      int chain_length,
+      int flags)
     {
       this();
       this.path = path;
-      this.persistent_store_path = persistent_store_path;
+      this.backing_path = backing_path;
       this.num_blocks = num_blocks;
       setNumBlocksIsSet(true);
       this.chain_length = chain_length;
       setChainLengthIsSet(true);
+      this.flags = flags;
+      setFlagsIsSet(true);
     }
 
     /**
@@ -7466,11 +7897,12 @@ public class directory_service {
       if (other.isSetPath()) {
         this.path = other.path;
       }
-      if (other.isSetPersistentStorePath()) {
-        this.persistent_store_path = other.persistent_store_path;
+      if (other.isSetBackingPath()) {
+        this.backing_path = other.backing_path;
       }
       this.num_blocks = other.num_blocks;
       this.chain_length = other.chain_length;
+      this.flags = other.flags;
     }
 
     public open_or_create_args deepCopy() {
@@ -7480,11 +7912,13 @@ public class directory_service {
     @Override
     public void clear() {
       this.path = null;
-      this.persistent_store_path = null;
+      this.backing_path = null;
       setNumBlocksIsSet(false);
       this.num_blocks = 0;
       setChainLengthIsSet(false);
       this.chain_length = 0;
+      setFlagsIsSet(false);
+      this.flags = 0;
     }
 
     public java.lang.String getPath() {
@@ -7511,27 +7945,27 @@ public class directory_service {
       }
     }
 
-    public java.lang.String getPersistentStorePath() {
-      return this.persistent_store_path;
+    public java.lang.String getBackingPath() {
+      return this.backing_path;
     }
 
-    public open_or_create_args setPersistentStorePath(java.lang.String persistent_store_path) {
-      this.persistent_store_path = persistent_store_path;
+    public open_or_create_args setBackingPath(java.lang.String backing_path) {
+      this.backing_path = backing_path;
       return this;
     }
 
-    public void unsetPersistentStorePath() {
-      this.persistent_store_path = null;
+    public void unsetBackingPath() {
+      this.backing_path = null;
     }
 
-    /** Returns true if field persistent_store_path is set (has been assigned a value) and false otherwise */
-    public boolean isSetPersistentStorePath() {
-      return this.persistent_store_path != null;
+    /** Returns true if field backing_path is set (has been assigned a value) and false otherwise */
+    public boolean isSetBackingPath() {
+      return this.backing_path != null;
     }
 
-    public void setPersistentStorePathIsSet(boolean value) {
+    public void setBackingPathIsSet(boolean value) {
       if (!value) {
-        this.persistent_store_path = null;
+        this.backing_path = null;
       }
     }
 
@@ -7581,6 +8015,29 @@ public class directory_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __CHAIN_LENGTH_ISSET_ID, value);
     }
 
+    public int getFlags() {
+      return this.flags;
+    }
+
+    public open_or_create_args setFlags(int flags) {
+      this.flags = flags;
+      setFlagsIsSet(true);
+      return this;
+    }
+
+    public void unsetFlags() {
+      __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __FLAGS_ISSET_ID);
+    }
+
+    /** Returns true if field flags is set (has been assigned a value) and false otherwise */
+    public boolean isSetFlags() {
+      return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __FLAGS_ISSET_ID);
+    }
+
+    public void setFlagsIsSet(boolean value) {
+      __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __FLAGS_ISSET_ID, value);
+    }
+
     public void setFieldValue(_Fields field, java.lang.Object value) {
       switch (field) {
       case PATH:
@@ -7591,11 +8048,11 @@ public class directory_service {
         }
         break;
 
-      case PERSISTENT_STORE_PATH:
+      case BACKING_PATH:
         if (value == null) {
-          unsetPersistentStorePath();
+          unsetBackingPath();
         } else {
-          setPersistentStorePath((java.lang.String)value);
+          setBackingPath((java.lang.String)value);
         }
         break;
 
@@ -7615,6 +8072,14 @@ public class directory_service {
         }
         break;
 
+      case FLAGS:
+        if (value == null) {
+          unsetFlags();
+        } else {
+          setFlags((java.lang.Integer)value);
+        }
+        break;
+
       }
     }
 
@@ -7623,14 +8088,17 @@ public class directory_service {
       case PATH:
         return getPath();
 
-      case PERSISTENT_STORE_PATH:
-        return getPersistentStorePath();
+      case BACKING_PATH:
+        return getBackingPath();
 
       case NUM_BLOCKS:
         return getNumBlocks();
 
       case CHAIN_LENGTH:
         return getChainLength();
+
+      case FLAGS:
+        return getFlags();
 
       }
       throw new java.lang.IllegalStateException();
@@ -7645,12 +8113,14 @@ public class directory_service {
       switch (field) {
       case PATH:
         return isSetPath();
-      case PERSISTENT_STORE_PATH:
-        return isSetPersistentStorePath();
+      case BACKING_PATH:
+        return isSetBackingPath();
       case NUM_BLOCKS:
         return isSetNumBlocks();
       case CHAIN_LENGTH:
         return isSetChainLength();
+      case FLAGS:
+        return isSetFlags();
       }
       throw new java.lang.IllegalStateException();
     }
@@ -7679,12 +8149,12 @@ public class directory_service {
           return false;
       }
 
-      boolean this_present_persistent_store_path = true && this.isSetPersistentStorePath();
-      boolean that_present_persistent_store_path = true && that.isSetPersistentStorePath();
-      if (this_present_persistent_store_path || that_present_persistent_store_path) {
-        if (!(this_present_persistent_store_path && that_present_persistent_store_path))
+      boolean this_present_backing_path = true && this.isSetBackingPath();
+      boolean that_present_backing_path = true && that.isSetBackingPath();
+      if (this_present_backing_path || that_present_backing_path) {
+        if (!(this_present_backing_path && that_present_backing_path))
           return false;
-        if (!this.persistent_store_path.equals(that.persistent_store_path))
+        if (!this.backing_path.equals(that.backing_path))
           return false;
       }
 
@@ -7706,6 +8176,15 @@ public class directory_service {
           return false;
       }
 
+      boolean this_present_flags = true;
+      boolean that_present_flags = true;
+      if (this_present_flags || that_present_flags) {
+        if (!(this_present_flags && that_present_flags))
+          return false;
+        if (this.flags != that.flags)
+          return false;
+      }
+
       return true;
     }
 
@@ -7717,13 +8196,15 @@ public class directory_service {
       if (isSetPath())
         hashCode = hashCode * 8191 + path.hashCode();
 
-      hashCode = hashCode * 8191 + ((isSetPersistentStorePath()) ? 131071 : 524287);
-      if (isSetPersistentStorePath())
-        hashCode = hashCode * 8191 + persistent_store_path.hashCode();
+      hashCode = hashCode * 8191 + ((isSetBackingPath()) ? 131071 : 524287);
+      if (isSetBackingPath())
+        hashCode = hashCode * 8191 + backing_path.hashCode();
 
       hashCode = hashCode * 8191 + num_blocks;
 
       hashCode = hashCode * 8191 + chain_length;
+
+      hashCode = hashCode * 8191 + flags;
 
       return hashCode;
     }
@@ -7746,12 +8227,12 @@ public class directory_service {
           return lastComparison;
         }
       }
-      lastComparison = java.lang.Boolean.valueOf(isSetPersistentStorePath()).compareTo(other.isSetPersistentStorePath());
+      lastComparison = java.lang.Boolean.valueOf(isSetBackingPath()).compareTo(other.isSetBackingPath());
       if (lastComparison != 0) {
         return lastComparison;
       }
-      if (isSetPersistentStorePath()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.persistent_store_path, other.persistent_store_path);
+      if (isSetBackingPath()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.backing_path, other.backing_path);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -7772,6 +8253,16 @@ public class directory_service {
       }
       if (isSetChainLength()) {
         lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.chain_length, other.chain_length);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = java.lang.Boolean.valueOf(isSetFlags()).compareTo(other.isSetFlags());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetFlags()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.flags, other.flags);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -7804,11 +8295,11 @@ public class directory_service {
       }
       first = false;
       if (!first) sb.append(", ");
-      sb.append("persistent_store_path:");
-      if (this.persistent_store_path == null) {
+      sb.append("backing_path:");
+      if (this.backing_path == null) {
         sb.append("null");
       } else {
-        sb.append(this.persistent_store_path);
+        sb.append(this.backing_path);
       }
       first = false;
       if (!first) sb.append(", ");
@@ -7818,6 +8309,10 @@ public class directory_service {
       if (!first) sb.append(", ");
       sb.append("chain_length:");
       sb.append(this.chain_length);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("flags:");
+      sb.append(this.flags);
       first = false;
       sb.append(")");
       return sb.toString();
@@ -7872,10 +8367,10 @@ public class directory_service {
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
               break;
-            case 2: // PERSISTENT_STORE_PATH
+            case 2: // BACKING_PATH
               if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-                struct.persistent_store_path = iprot.readString();
-                struct.setPersistentStorePathIsSet(true);
+                struct.backing_path = iprot.readString();
+                struct.setBackingPathIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
@@ -7892,6 +8387,14 @@ public class directory_service {
               if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
                 struct.chain_length = iprot.readI32();
                 struct.setChainLengthIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 5: // FLAGS
+              if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+                struct.flags = iprot.readI32();
+                struct.setFlagsIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
@@ -7916,9 +8419,9 @@ public class directory_service {
           oprot.writeString(struct.path);
           oprot.writeFieldEnd();
         }
-        if (struct.persistent_store_path != null) {
-          oprot.writeFieldBegin(PERSISTENT_STORE_PATH_FIELD_DESC);
-          oprot.writeString(struct.persistent_store_path);
+        if (struct.backing_path != null) {
+          oprot.writeFieldBegin(BACKING_PATH_FIELD_DESC);
+          oprot.writeString(struct.backing_path);
           oprot.writeFieldEnd();
         }
         oprot.writeFieldBegin(NUM_BLOCKS_FIELD_DESC);
@@ -7926,6 +8429,9 @@ public class directory_service {
         oprot.writeFieldEnd();
         oprot.writeFieldBegin(CHAIN_LENGTH_FIELD_DESC);
         oprot.writeI32(struct.chain_length);
+        oprot.writeFieldEnd();
+        oprot.writeFieldBegin(FLAGS_FIELD_DESC);
+        oprot.writeI32(struct.flags);
         oprot.writeFieldEnd();
         oprot.writeFieldStop();
         oprot.writeStructEnd();
@@ -7948,7 +8454,7 @@ public class directory_service {
         if (struct.isSetPath()) {
           optionals.set(0);
         }
-        if (struct.isSetPersistentStorePath()) {
+        if (struct.isSetBackingPath()) {
           optionals.set(1);
         }
         if (struct.isSetNumBlocks()) {
@@ -7957,12 +8463,15 @@ public class directory_service {
         if (struct.isSetChainLength()) {
           optionals.set(3);
         }
-        oprot.writeBitSet(optionals, 4);
+        if (struct.isSetFlags()) {
+          optionals.set(4);
+        }
+        oprot.writeBitSet(optionals, 5);
         if (struct.isSetPath()) {
           oprot.writeString(struct.path);
         }
-        if (struct.isSetPersistentStorePath()) {
-          oprot.writeString(struct.persistent_store_path);
+        if (struct.isSetBackingPath()) {
+          oprot.writeString(struct.backing_path);
         }
         if (struct.isSetNumBlocks()) {
           oprot.writeI32(struct.num_blocks);
@@ -7970,19 +8479,22 @@ public class directory_service {
         if (struct.isSetChainLength()) {
           oprot.writeI32(struct.chain_length);
         }
+        if (struct.isSetFlags()) {
+          oprot.writeI32(struct.flags);
+        }
       }
 
       @Override
       public void read(org.apache.thrift.protocol.TProtocol prot, open_or_create_args struct) throws org.apache.thrift.TException {
         org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
-        java.util.BitSet incoming = iprot.readBitSet(4);
+        java.util.BitSet incoming = iprot.readBitSet(5);
         if (incoming.get(0)) {
           struct.path = iprot.readString();
           struct.setPathIsSet(true);
         }
         if (incoming.get(1)) {
-          struct.persistent_store_path = iprot.readString();
-          struct.setPersistentStorePathIsSet(true);
+          struct.backing_path = iprot.readString();
+          struct.setBackingPathIsSet(true);
         }
         if (incoming.get(2)) {
           struct.num_blocks = iprot.readI32();
@@ -7991,6 +8503,10 @@ public class directory_service {
         if (incoming.get(3)) {
           struct.chain_length = iprot.readI32();
           struct.setChainLengthIsSet(true);
+        }
+        if (incoming.get(4)) {
+          struct.flags = iprot.readI32();
+          struct.setFlagsIsSet(true);
         }
       }
     }
@@ -13355,22 +13871,22 @@ public class directory_service {
     }
   }
 
-  public static class flush_args implements org.apache.thrift.TBase<flush_args, flush_args._Fields>, java.io.Serializable, Cloneable, Comparable<flush_args>   {
-    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("flush_args");
+  public static class sync_args implements org.apache.thrift.TBase<sync_args, sync_args._Fields>, java.io.Serializable, Cloneable, Comparable<sync_args>   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("sync_args");
 
     private static final org.apache.thrift.protocol.TField PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("path", org.apache.thrift.protocol.TType.STRING, (short)1);
-    private static final org.apache.thrift.protocol.TField DEST_FIELD_DESC = new org.apache.thrift.protocol.TField("dest", org.apache.thrift.protocol.TType.STRING, (short)2);
+    private static final org.apache.thrift.protocol.TField BACKING_PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("backing_path", org.apache.thrift.protocol.TType.STRING, (short)2);
 
-    private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new flush_argsStandardSchemeFactory();
-    private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new flush_argsTupleSchemeFactory();
+    private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new sync_argsStandardSchemeFactory();
+    private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new sync_argsTupleSchemeFactory();
 
     public java.lang.String path; // required
-    public java.lang.String dest; // required
+    public java.lang.String backing_path; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
       PATH((short)1, "path"),
-      DEST((short)2, "dest");
+      BACKING_PATH((short)2, "backing_path");
 
       private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
 
@@ -13387,8 +13903,8 @@ public class directory_service {
         switch(fieldId) {
           case 1: // PATH
             return PATH;
-          case 2: // DEST
-            return DEST;
+          case 2: // BACKING_PATH
+            return BACKING_PATH;
           default:
             return null;
         }
@@ -13434,51 +13950,51 @@ public class directory_service {
       java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.PATH, new org.apache.thrift.meta_data.FieldMetaData("path", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
-      tmpMap.put(_Fields.DEST, new org.apache.thrift.meta_data.FieldMetaData("dest", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+      tmpMap.put(_Fields.BACKING_PATH, new org.apache.thrift.meta_data.FieldMetaData("backing_path", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
       metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
-      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(flush_args.class, metaDataMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(sync_args.class, metaDataMap);
     }
 
-    public flush_args() {
+    public sync_args() {
     }
 
-    public flush_args(
+    public sync_args(
       java.lang.String path,
-      java.lang.String dest)
+      java.lang.String backing_path)
     {
       this();
       this.path = path;
-      this.dest = dest;
+      this.backing_path = backing_path;
     }
 
     /**
      * Performs a deep copy on <i>other</i>.
      */
-    public flush_args(flush_args other) {
+    public sync_args(sync_args other) {
       if (other.isSetPath()) {
         this.path = other.path;
       }
-      if (other.isSetDest()) {
-        this.dest = other.dest;
+      if (other.isSetBackingPath()) {
+        this.backing_path = other.backing_path;
       }
     }
 
-    public flush_args deepCopy() {
-      return new flush_args(this);
+    public sync_args deepCopy() {
+      return new sync_args(this);
     }
 
     @Override
     public void clear() {
       this.path = null;
-      this.dest = null;
+      this.backing_path = null;
     }
 
     public java.lang.String getPath() {
       return this.path;
     }
 
-    public flush_args setPath(java.lang.String path) {
+    public sync_args setPath(java.lang.String path) {
       this.path = path;
       return this;
     }
@@ -13498,27 +14014,27 @@ public class directory_service {
       }
     }
 
-    public java.lang.String getDest() {
-      return this.dest;
+    public java.lang.String getBackingPath() {
+      return this.backing_path;
     }
 
-    public flush_args setDest(java.lang.String dest) {
-      this.dest = dest;
+    public sync_args setBackingPath(java.lang.String backing_path) {
+      this.backing_path = backing_path;
       return this;
     }
 
-    public void unsetDest() {
-      this.dest = null;
+    public void unsetBackingPath() {
+      this.backing_path = null;
     }
 
-    /** Returns true if field dest is set (has been assigned a value) and false otherwise */
-    public boolean isSetDest() {
-      return this.dest != null;
+    /** Returns true if field backing_path is set (has been assigned a value) and false otherwise */
+    public boolean isSetBackingPath() {
+      return this.backing_path != null;
     }
 
-    public void setDestIsSet(boolean value) {
+    public void setBackingPathIsSet(boolean value) {
       if (!value) {
-        this.dest = null;
+        this.backing_path = null;
       }
     }
 
@@ -13532,11 +14048,11 @@ public class directory_service {
         }
         break;
 
-      case DEST:
+      case BACKING_PATH:
         if (value == null) {
-          unsetDest();
+          unsetBackingPath();
         } else {
-          setDest((java.lang.String)value);
+          setBackingPath((java.lang.String)value);
         }
         break;
 
@@ -13548,8 +14064,8 @@ public class directory_service {
       case PATH:
         return getPath();
 
-      case DEST:
-        return getDest();
+      case BACKING_PATH:
+        return getBackingPath();
 
       }
       throw new java.lang.IllegalStateException();
@@ -13564,8 +14080,8 @@ public class directory_service {
       switch (field) {
       case PATH:
         return isSetPath();
-      case DEST:
-        return isSetDest();
+      case BACKING_PATH:
+        return isSetBackingPath();
       }
       throw new java.lang.IllegalStateException();
     }
@@ -13574,12 +14090,12 @@ public class directory_service {
     public boolean equals(java.lang.Object that) {
       if (that == null)
         return false;
-      if (that instanceof flush_args)
-        return this.equals((flush_args)that);
+      if (that instanceof sync_args)
+        return this.equals((sync_args)that);
       return false;
     }
 
-    public boolean equals(flush_args that) {
+    public boolean equals(sync_args that) {
       if (that == null)
         return false;
       if (this == that)
@@ -13594,12 +14110,12 @@ public class directory_service {
           return false;
       }
 
-      boolean this_present_dest = true && this.isSetDest();
-      boolean that_present_dest = true && that.isSetDest();
-      if (this_present_dest || that_present_dest) {
-        if (!(this_present_dest && that_present_dest))
+      boolean this_present_backing_path = true && this.isSetBackingPath();
+      boolean that_present_backing_path = true && that.isSetBackingPath();
+      if (this_present_backing_path || that_present_backing_path) {
+        if (!(this_present_backing_path && that_present_backing_path))
           return false;
-        if (!this.dest.equals(that.dest))
+        if (!this.backing_path.equals(that.backing_path))
           return false;
       }
 
@@ -13614,15 +14130,15 @@ public class directory_service {
       if (isSetPath())
         hashCode = hashCode * 8191 + path.hashCode();
 
-      hashCode = hashCode * 8191 + ((isSetDest()) ? 131071 : 524287);
-      if (isSetDest())
-        hashCode = hashCode * 8191 + dest.hashCode();
+      hashCode = hashCode * 8191 + ((isSetBackingPath()) ? 131071 : 524287);
+      if (isSetBackingPath())
+        hashCode = hashCode * 8191 + backing_path.hashCode();
 
       return hashCode;
     }
 
     @Override
-    public int compareTo(flush_args other) {
+    public int compareTo(sync_args other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
@@ -13639,12 +14155,12 @@ public class directory_service {
           return lastComparison;
         }
       }
-      lastComparison = java.lang.Boolean.valueOf(isSetDest()).compareTo(other.isSetDest());
+      lastComparison = java.lang.Boolean.valueOf(isSetBackingPath()).compareTo(other.isSetBackingPath());
       if (lastComparison != 0) {
         return lastComparison;
       }
-      if (isSetDest()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.dest, other.dest);
+      if (isSetBackingPath()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.backing_path, other.backing_path);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -13666,7 +14182,7 @@ public class directory_service {
 
     @Override
     public java.lang.String toString() {
-      java.lang.StringBuilder sb = new java.lang.StringBuilder("flush_args(");
+      java.lang.StringBuilder sb = new java.lang.StringBuilder("sync_args(");
       boolean first = true;
 
       sb.append("path:");
@@ -13677,11 +14193,11 @@ public class directory_service {
       }
       first = false;
       if (!first) sb.append(", ");
-      sb.append("dest:");
-      if (this.dest == null) {
+      sb.append("backing_path:");
+      if (this.backing_path == null) {
         sb.append("null");
       } else {
-        sb.append(this.dest);
+        sb.append(this.backing_path);
       }
       first = false;
       sb.append(")");
@@ -13709,15 +14225,15 @@ public class directory_service {
       }
     }
 
-    private static class flush_argsStandardSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
-      public flush_argsStandardScheme getScheme() {
-        return new flush_argsStandardScheme();
+    private static class sync_argsStandardSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public sync_argsStandardScheme getScheme() {
+        return new sync_argsStandardScheme();
       }
     }
 
-    private static class flush_argsStandardScheme extends org.apache.thrift.scheme.StandardScheme<flush_args> {
+    private static class sync_argsStandardScheme extends org.apache.thrift.scheme.StandardScheme<sync_args> {
 
-      public void read(org.apache.thrift.protocol.TProtocol iprot, flush_args struct) throws org.apache.thrift.TException {
+      public void read(org.apache.thrift.protocol.TProtocol iprot, sync_args struct) throws org.apache.thrift.TException {
         org.apache.thrift.protocol.TField schemeField;
         iprot.readStructBegin();
         while (true)
@@ -13735,10 +14251,10 @@ public class directory_service {
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
               break;
-            case 2: // DEST
+            case 2: // BACKING_PATH
               if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-                struct.dest = iprot.readString();
-                struct.setDestIsSet(true);
+                struct.backing_path = iprot.readString();
+                struct.setBackingPathIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
@@ -13754,7 +14270,7 @@ public class directory_service {
         struct.validate();
       }
 
-      public void write(org.apache.thrift.protocol.TProtocol oprot, flush_args struct) throws org.apache.thrift.TException {
+      public void write(org.apache.thrift.protocol.TProtocol oprot, sync_args struct) throws org.apache.thrift.TException {
         struct.validate();
 
         oprot.writeStructBegin(STRUCT_DESC);
@@ -13763,9 +14279,9 @@ public class directory_service {
           oprot.writeString(struct.path);
           oprot.writeFieldEnd();
         }
-        if (struct.dest != null) {
-          oprot.writeFieldBegin(DEST_FIELD_DESC);
-          oprot.writeString(struct.dest);
+        if (struct.backing_path != null) {
+          oprot.writeFieldBegin(BACKING_PATH_FIELD_DESC);
+          oprot.writeString(struct.backing_path);
           oprot.writeFieldEnd();
         }
         oprot.writeFieldStop();
@@ -13774,35 +14290,35 @@ public class directory_service {
 
     }
 
-    private static class flush_argsTupleSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
-      public flush_argsTupleScheme getScheme() {
-        return new flush_argsTupleScheme();
+    private static class sync_argsTupleSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public sync_argsTupleScheme getScheme() {
+        return new sync_argsTupleScheme();
       }
     }
 
-    private static class flush_argsTupleScheme extends org.apache.thrift.scheme.TupleScheme<flush_args> {
+    private static class sync_argsTupleScheme extends org.apache.thrift.scheme.TupleScheme<sync_args> {
 
       @Override
-      public void write(org.apache.thrift.protocol.TProtocol prot, flush_args struct) throws org.apache.thrift.TException {
+      public void write(org.apache.thrift.protocol.TProtocol prot, sync_args struct) throws org.apache.thrift.TException {
         org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
         java.util.BitSet optionals = new java.util.BitSet();
         if (struct.isSetPath()) {
           optionals.set(0);
         }
-        if (struct.isSetDest()) {
+        if (struct.isSetBackingPath()) {
           optionals.set(1);
         }
         oprot.writeBitSet(optionals, 2);
         if (struct.isSetPath()) {
           oprot.writeString(struct.path);
         }
-        if (struct.isSetDest()) {
-          oprot.writeString(struct.dest);
+        if (struct.isSetBackingPath()) {
+          oprot.writeString(struct.backing_path);
         }
       }
 
       @Override
-      public void read(org.apache.thrift.protocol.TProtocol prot, flush_args struct) throws org.apache.thrift.TException {
+      public void read(org.apache.thrift.protocol.TProtocol prot, sync_args struct) throws org.apache.thrift.TException {
         org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
         java.util.BitSet incoming = iprot.readBitSet(2);
         if (incoming.get(0)) {
@@ -13810,8 +14326,8 @@ public class directory_service {
           struct.setPathIsSet(true);
         }
         if (incoming.get(1)) {
-          struct.dest = iprot.readString();
-          struct.setDestIsSet(true);
+          struct.backing_path = iprot.readString();
+          struct.setBackingPathIsSet(true);
         }
       }
     }
@@ -13821,13 +14337,13 @@ public class directory_service {
     }
   }
 
-  public static class flush_result implements org.apache.thrift.TBase<flush_result, flush_result._Fields>, java.io.Serializable, Cloneable, Comparable<flush_result>   {
-    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("flush_result");
+  public static class sync_result implements org.apache.thrift.TBase<sync_result, sync_result._Fields>, java.io.Serializable, Cloneable, Comparable<sync_result>   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("sync_result");
 
     private static final org.apache.thrift.protocol.TField EX_FIELD_DESC = new org.apache.thrift.protocol.TField("ex", org.apache.thrift.protocol.TType.STRUCT, (short)1);
 
-    private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new flush_resultStandardSchemeFactory();
-    private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new flush_resultTupleSchemeFactory();
+    private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new sync_resultStandardSchemeFactory();
+    private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new sync_resultTupleSchemeFactory();
 
     public directory_service_exception ex; // required
 
@@ -13896,13 +14412,13 @@ public class directory_service {
       tmpMap.put(_Fields.EX, new org.apache.thrift.meta_data.FieldMetaData("ex", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, directory_service_exception.class)));
       metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
-      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(flush_result.class, metaDataMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(sync_result.class, metaDataMap);
     }
 
-    public flush_result() {
+    public sync_result() {
     }
 
-    public flush_result(
+    public sync_result(
       directory_service_exception ex)
     {
       this();
@@ -13912,14 +14428,14 @@ public class directory_service {
     /**
      * Performs a deep copy on <i>other</i>.
      */
-    public flush_result(flush_result other) {
+    public sync_result(sync_result other) {
       if (other.isSetEx()) {
         this.ex = new directory_service_exception(other.ex);
       }
     }
 
-    public flush_result deepCopy() {
-      return new flush_result(this);
+    public sync_result deepCopy() {
+      return new sync_result(this);
     }
 
     @Override
@@ -13931,7 +14447,7 @@ public class directory_service {
       return this.ex;
     }
 
-    public flush_result setEx(directory_service_exception ex) {
+    public sync_result setEx(directory_service_exception ex) {
       this.ex = ex;
       return this;
     }
@@ -13990,12 +14506,12 @@ public class directory_service {
     public boolean equals(java.lang.Object that) {
       if (that == null)
         return false;
-      if (that instanceof flush_result)
-        return this.equals((flush_result)that);
+      if (that instanceof sync_result)
+        return this.equals((sync_result)that);
       return false;
     }
 
-    public boolean equals(flush_result that) {
+    public boolean equals(sync_result that) {
       if (that == null)
         return false;
       if (this == that)
@@ -14025,7 +14541,7 @@ public class directory_service {
     }
 
     @Override
-    public int compareTo(flush_result other) {
+    public int compareTo(sync_result other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
@@ -14059,7 +14575,7 @@ public class directory_service {
 
     @Override
     public java.lang.String toString() {
-      java.lang.StringBuilder sb = new java.lang.StringBuilder("flush_result(");
+      java.lang.StringBuilder sb = new java.lang.StringBuilder("sync_result(");
       boolean first = true;
 
       sb.append("ex:");
@@ -14094,15 +14610,15 @@ public class directory_service {
       }
     }
 
-    private static class flush_resultStandardSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
-      public flush_resultStandardScheme getScheme() {
-        return new flush_resultStandardScheme();
+    private static class sync_resultStandardSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public sync_resultStandardScheme getScheme() {
+        return new sync_resultStandardScheme();
       }
     }
 
-    private static class flush_resultStandardScheme extends org.apache.thrift.scheme.StandardScheme<flush_result> {
+    private static class sync_resultStandardScheme extends org.apache.thrift.scheme.StandardScheme<sync_result> {
 
-      public void read(org.apache.thrift.protocol.TProtocol iprot, flush_result struct) throws org.apache.thrift.TException {
+      public void read(org.apache.thrift.protocol.TProtocol iprot, sync_result struct) throws org.apache.thrift.TException {
         org.apache.thrift.protocol.TField schemeField;
         iprot.readStructBegin();
         while (true)
@@ -14132,7 +14648,7 @@ public class directory_service {
         struct.validate();
       }
 
-      public void write(org.apache.thrift.protocol.TProtocol oprot, flush_result struct) throws org.apache.thrift.TException {
+      public void write(org.apache.thrift.protocol.TProtocol oprot, sync_result struct) throws org.apache.thrift.TException {
         struct.validate();
 
         oprot.writeStructBegin(STRUCT_DESC);
@@ -14147,16 +14663,16 @@ public class directory_service {
 
     }
 
-    private static class flush_resultTupleSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
-      public flush_resultTupleScheme getScheme() {
-        return new flush_resultTupleScheme();
+    private static class sync_resultTupleSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public sync_resultTupleScheme getScheme() {
+        return new sync_resultTupleScheme();
       }
     }
 
-    private static class flush_resultTupleScheme extends org.apache.thrift.scheme.TupleScheme<flush_result> {
+    private static class sync_resultTupleScheme extends org.apache.thrift.scheme.TupleScheme<sync_result> {
 
       @Override
-      public void write(org.apache.thrift.protocol.TProtocol prot, flush_result struct) throws org.apache.thrift.TException {
+      public void write(org.apache.thrift.protocol.TProtocol prot, sync_result struct) throws org.apache.thrift.TException {
         org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
         java.util.BitSet optionals = new java.util.BitSet();
         if (struct.isSetEx()) {
@@ -14169,7 +14685,1667 @@ public class directory_service {
       }
 
       @Override
-      public void read(org.apache.thrift.protocol.TProtocol prot, flush_result struct) throws org.apache.thrift.TException {
+      public void read(org.apache.thrift.protocol.TProtocol prot, sync_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet incoming = iprot.readBitSet(1);
+        if (incoming.get(0)) {
+          struct.ex = new directory_service_exception();
+          struct.ex.read(iprot);
+          struct.setExIsSet(true);
+        }
+      }
+    }
+
+    private static <S extends org.apache.thrift.scheme.IScheme> S scheme(org.apache.thrift.protocol.TProtocol proto) {
+      return (org.apache.thrift.scheme.StandardScheme.class.equals(proto.getScheme()) ? STANDARD_SCHEME_FACTORY : TUPLE_SCHEME_FACTORY).getScheme();
+    }
+  }
+
+  public static class dump_args implements org.apache.thrift.TBase<dump_args, dump_args._Fields>, java.io.Serializable, Cloneable, Comparable<dump_args>   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("dump_args");
+
+    private static final org.apache.thrift.protocol.TField PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("path", org.apache.thrift.protocol.TType.STRING, (short)1);
+    private static final org.apache.thrift.protocol.TField BACKING_PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("backing_path", org.apache.thrift.protocol.TType.STRING, (short)2);
+
+    private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new dump_argsStandardSchemeFactory();
+    private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new dump_argsTupleSchemeFactory();
+
+    public java.lang.String path; // required
+    public java.lang.String backing_path; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      PATH((short)1, "path"),
+      BACKING_PATH((short)2, "backing_path");
+
+      private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
+
+      static {
+        for (_Fields field : java.util.EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // PATH
+            return PATH;
+          case 2: // BACKING_PATH
+            return BACKING_PATH;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new java.lang.IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(java.lang.String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final java.lang.String _fieldName;
+
+      _Fields(short thriftId, java.lang.String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public java.lang.String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.PATH, new org.apache.thrift.meta_data.FieldMetaData("path", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      tmpMap.put(_Fields.BACKING_PATH, new org.apache.thrift.meta_data.FieldMetaData("backing_path", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(dump_args.class, metaDataMap);
+    }
+
+    public dump_args() {
+    }
+
+    public dump_args(
+      java.lang.String path,
+      java.lang.String backing_path)
+    {
+      this();
+      this.path = path;
+      this.backing_path = backing_path;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public dump_args(dump_args other) {
+      if (other.isSetPath()) {
+        this.path = other.path;
+      }
+      if (other.isSetBackingPath()) {
+        this.backing_path = other.backing_path;
+      }
+    }
+
+    public dump_args deepCopy() {
+      return new dump_args(this);
+    }
+
+    @Override
+    public void clear() {
+      this.path = null;
+      this.backing_path = null;
+    }
+
+    public java.lang.String getPath() {
+      return this.path;
+    }
+
+    public dump_args setPath(java.lang.String path) {
+      this.path = path;
+      return this;
+    }
+
+    public void unsetPath() {
+      this.path = null;
+    }
+
+    /** Returns true if field path is set (has been assigned a value) and false otherwise */
+    public boolean isSetPath() {
+      return this.path != null;
+    }
+
+    public void setPathIsSet(boolean value) {
+      if (!value) {
+        this.path = null;
+      }
+    }
+
+    public java.lang.String getBackingPath() {
+      return this.backing_path;
+    }
+
+    public dump_args setBackingPath(java.lang.String backing_path) {
+      this.backing_path = backing_path;
+      return this;
+    }
+
+    public void unsetBackingPath() {
+      this.backing_path = null;
+    }
+
+    /** Returns true if field backing_path is set (has been assigned a value) and false otherwise */
+    public boolean isSetBackingPath() {
+      return this.backing_path != null;
+    }
+
+    public void setBackingPathIsSet(boolean value) {
+      if (!value) {
+        this.backing_path = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, java.lang.Object value) {
+      switch (field) {
+      case PATH:
+        if (value == null) {
+          unsetPath();
+        } else {
+          setPath((java.lang.String)value);
+        }
+        break;
+
+      case BACKING_PATH:
+        if (value == null) {
+          unsetBackingPath();
+        } else {
+          setBackingPath((java.lang.String)value);
+        }
+        break;
+
+      }
+    }
+
+    public java.lang.Object getFieldValue(_Fields field) {
+      switch (field) {
+      case PATH:
+        return getPath();
+
+      case BACKING_PATH:
+        return getBackingPath();
+
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new java.lang.IllegalArgumentException();
+      }
+
+      switch (field) {
+      case PATH:
+        return isSetPath();
+      case BACKING_PATH:
+        return isSetBackingPath();
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(java.lang.Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof dump_args)
+        return this.equals((dump_args)that);
+      return false;
+    }
+
+    public boolean equals(dump_args that) {
+      if (that == null)
+        return false;
+      if (this == that)
+        return true;
+
+      boolean this_present_path = true && this.isSetPath();
+      boolean that_present_path = true && that.isSetPath();
+      if (this_present_path || that_present_path) {
+        if (!(this_present_path && that_present_path))
+          return false;
+        if (!this.path.equals(that.path))
+          return false;
+      }
+
+      boolean this_present_backing_path = true && this.isSetBackingPath();
+      boolean that_present_backing_path = true && that.isSetBackingPath();
+      if (this_present_backing_path || that_present_backing_path) {
+        if (!(this_present_backing_path && that_present_backing_path))
+          return false;
+        if (!this.backing_path.equals(that.backing_path))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int hashCode = 1;
+
+      hashCode = hashCode * 8191 + ((isSetPath()) ? 131071 : 524287);
+      if (isSetPath())
+        hashCode = hashCode * 8191 + path.hashCode();
+
+      hashCode = hashCode * 8191 + ((isSetBackingPath()) ? 131071 : 524287);
+      if (isSetBackingPath())
+        hashCode = hashCode * 8191 + backing_path.hashCode();
+
+      return hashCode;
+    }
+
+    @Override
+    public int compareTo(dump_args other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+
+      lastComparison = java.lang.Boolean.valueOf(isSetPath()).compareTo(other.isSetPath());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetPath()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.path, other.path);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = java.lang.Boolean.valueOf(isSetBackingPath()).compareTo(other.isSetBackingPath());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetBackingPath()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.backing_path, other.backing_path);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      scheme(iprot).read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      scheme(oprot).write(oprot, this);
+    }
+
+    @Override
+    public java.lang.String toString() {
+      java.lang.StringBuilder sb = new java.lang.StringBuilder("dump_args(");
+      boolean first = true;
+
+      sb.append("path:");
+      if (this.path == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.path);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("backing_path:");
+      if (this.backing_path == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.backing_path);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, java.lang.ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class dump_argsStandardSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public dump_argsStandardScheme getScheme() {
+        return new dump_argsStandardScheme();
+      }
+    }
+
+    private static class dump_argsStandardScheme extends org.apache.thrift.scheme.StandardScheme<dump_args> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, dump_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // PATH
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.path = iprot.readString();
+                struct.setPathIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 2: // BACKING_PATH
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.backing_path = iprot.readString();
+                struct.setBackingPathIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, dump_args struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.path != null) {
+          oprot.writeFieldBegin(PATH_FIELD_DESC);
+          oprot.writeString(struct.path);
+          oprot.writeFieldEnd();
+        }
+        if (struct.backing_path != null) {
+          oprot.writeFieldBegin(BACKING_PATH_FIELD_DESC);
+          oprot.writeString(struct.backing_path);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class dump_argsTupleSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public dump_argsTupleScheme getScheme() {
+        return new dump_argsTupleScheme();
+      }
+    }
+
+    private static class dump_argsTupleScheme extends org.apache.thrift.scheme.TupleScheme<dump_args> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, dump_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet optionals = new java.util.BitSet();
+        if (struct.isSetPath()) {
+          optionals.set(0);
+        }
+        if (struct.isSetBackingPath()) {
+          optionals.set(1);
+        }
+        oprot.writeBitSet(optionals, 2);
+        if (struct.isSetPath()) {
+          oprot.writeString(struct.path);
+        }
+        if (struct.isSetBackingPath()) {
+          oprot.writeString(struct.backing_path);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, dump_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet incoming = iprot.readBitSet(2);
+        if (incoming.get(0)) {
+          struct.path = iprot.readString();
+          struct.setPathIsSet(true);
+        }
+        if (incoming.get(1)) {
+          struct.backing_path = iprot.readString();
+          struct.setBackingPathIsSet(true);
+        }
+      }
+    }
+
+    private static <S extends org.apache.thrift.scheme.IScheme> S scheme(org.apache.thrift.protocol.TProtocol proto) {
+      return (org.apache.thrift.scheme.StandardScheme.class.equals(proto.getScheme()) ? STANDARD_SCHEME_FACTORY : TUPLE_SCHEME_FACTORY).getScheme();
+    }
+  }
+
+  public static class dump_result implements org.apache.thrift.TBase<dump_result, dump_result._Fields>, java.io.Serializable, Cloneable, Comparable<dump_result>   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("dump_result");
+
+    private static final org.apache.thrift.protocol.TField EX_FIELD_DESC = new org.apache.thrift.protocol.TField("ex", org.apache.thrift.protocol.TType.STRUCT, (short)1);
+
+    private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new dump_resultStandardSchemeFactory();
+    private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new dump_resultTupleSchemeFactory();
+
+    public directory_service_exception ex; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      EX((short)1, "ex");
+
+      private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
+
+      static {
+        for (_Fields field : java.util.EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // EX
+            return EX;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new java.lang.IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(java.lang.String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final java.lang.String _fieldName;
+
+      _Fields(short thriftId, java.lang.String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public java.lang.String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.EX, new org.apache.thrift.meta_data.FieldMetaData("ex", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, directory_service_exception.class)));
+      metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(dump_result.class, metaDataMap);
+    }
+
+    public dump_result() {
+    }
+
+    public dump_result(
+      directory_service_exception ex)
+    {
+      this();
+      this.ex = ex;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public dump_result(dump_result other) {
+      if (other.isSetEx()) {
+        this.ex = new directory_service_exception(other.ex);
+      }
+    }
+
+    public dump_result deepCopy() {
+      return new dump_result(this);
+    }
+
+    @Override
+    public void clear() {
+      this.ex = null;
+    }
+
+    public directory_service_exception getEx() {
+      return this.ex;
+    }
+
+    public dump_result setEx(directory_service_exception ex) {
+      this.ex = ex;
+      return this;
+    }
+
+    public void unsetEx() {
+      this.ex = null;
+    }
+
+    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    public boolean isSetEx() {
+      return this.ex != null;
+    }
+
+    public void setExIsSet(boolean value) {
+      if (!value) {
+        this.ex = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, java.lang.Object value) {
+      switch (field) {
+      case EX:
+        if (value == null) {
+          unsetEx();
+        } else {
+          setEx((directory_service_exception)value);
+        }
+        break;
+
+      }
+    }
+
+    public java.lang.Object getFieldValue(_Fields field) {
+      switch (field) {
+      case EX:
+        return getEx();
+
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new java.lang.IllegalArgumentException();
+      }
+
+      switch (field) {
+      case EX:
+        return isSetEx();
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(java.lang.Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof dump_result)
+        return this.equals((dump_result)that);
+      return false;
+    }
+
+    public boolean equals(dump_result that) {
+      if (that == null)
+        return false;
+      if (this == that)
+        return true;
+
+      boolean this_present_ex = true && this.isSetEx();
+      boolean that_present_ex = true && that.isSetEx();
+      if (this_present_ex || that_present_ex) {
+        if (!(this_present_ex && that_present_ex))
+          return false;
+        if (!this.ex.equals(that.ex))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int hashCode = 1;
+
+      hashCode = hashCode * 8191 + ((isSetEx()) ? 131071 : 524287);
+      if (isSetEx())
+        hashCode = hashCode * 8191 + ex.hashCode();
+
+      return hashCode;
+    }
+
+    @Override
+    public int compareTo(dump_result other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+
+      lastComparison = java.lang.Boolean.valueOf(isSetEx()).compareTo(other.isSetEx());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetEx()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.ex, other.ex);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      scheme(iprot).read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      scheme(oprot).write(oprot, this);
+      }
+
+    @Override
+    public java.lang.String toString() {
+      java.lang.StringBuilder sb = new java.lang.StringBuilder("dump_result(");
+      boolean first = true;
+
+      sb.append("ex:");
+      if (this.ex == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.ex);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, java.lang.ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class dump_resultStandardSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public dump_resultStandardScheme getScheme() {
+        return new dump_resultStandardScheme();
+      }
+    }
+
+    private static class dump_resultStandardScheme extends org.apache.thrift.scheme.StandardScheme<dump_result> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, dump_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // EX
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
+                struct.ex = new directory_service_exception();
+                struct.ex.read(iprot);
+                struct.setExIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, dump_result struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.ex != null) {
+          oprot.writeFieldBegin(EX_FIELD_DESC);
+          struct.ex.write(oprot);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class dump_resultTupleSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public dump_resultTupleScheme getScheme() {
+        return new dump_resultTupleScheme();
+      }
+    }
+
+    private static class dump_resultTupleScheme extends org.apache.thrift.scheme.TupleScheme<dump_result> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, dump_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet optionals = new java.util.BitSet();
+        if (struct.isSetEx()) {
+          optionals.set(0);
+        }
+        oprot.writeBitSet(optionals, 1);
+        if (struct.isSetEx()) {
+          struct.ex.write(oprot);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, dump_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet incoming = iprot.readBitSet(1);
+        if (incoming.get(0)) {
+          struct.ex = new directory_service_exception();
+          struct.ex.read(iprot);
+          struct.setExIsSet(true);
+        }
+      }
+    }
+
+    private static <S extends org.apache.thrift.scheme.IScheme> S scheme(org.apache.thrift.protocol.TProtocol proto) {
+      return (org.apache.thrift.scheme.StandardScheme.class.equals(proto.getScheme()) ? STANDARD_SCHEME_FACTORY : TUPLE_SCHEME_FACTORY).getScheme();
+    }
+  }
+
+  public static class load_args implements org.apache.thrift.TBase<load_args, load_args._Fields>, java.io.Serializable, Cloneable, Comparable<load_args>   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("load_args");
+
+    private static final org.apache.thrift.protocol.TField PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("path", org.apache.thrift.protocol.TType.STRING, (short)1);
+    private static final org.apache.thrift.protocol.TField BACKING_PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("backing_path", org.apache.thrift.protocol.TType.STRING, (short)2);
+
+    private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new load_argsStandardSchemeFactory();
+    private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new load_argsTupleSchemeFactory();
+
+    public java.lang.String path; // required
+    public java.lang.String backing_path; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      PATH((short)1, "path"),
+      BACKING_PATH((short)2, "backing_path");
+
+      private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
+
+      static {
+        for (_Fields field : java.util.EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // PATH
+            return PATH;
+          case 2: // BACKING_PATH
+            return BACKING_PATH;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new java.lang.IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(java.lang.String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final java.lang.String _fieldName;
+
+      _Fields(short thriftId, java.lang.String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public java.lang.String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.PATH, new org.apache.thrift.meta_data.FieldMetaData("path", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      tmpMap.put(_Fields.BACKING_PATH, new org.apache.thrift.meta_data.FieldMetaData("backing_path", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(load_args.class, metaDataMap);
+    }
+
+    public load_args() {
+    }
+
+    public load_args(
+      java.lang.String path,
+      java.lang.String backing_path)
+    {
+      this();
+      this.path = path;
+      this.backing_path = backing_path;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public load_args(load_args other) {
+      if (other.isSetPath()) {
+        this.path = other.path;
+      }
+      if (other.isSetBackingPath()) {
+        this.backing_path = other.backing_path;
+      }
+    }
+
+    public load_args deepCopy() {
+      return new load_args(this);
+    }
+
+    @Override
+    public void clear() {
+      this.path = null;
+      this.backing_path = null;
+    }
+
+    public java.lang.String getPath() {
+      return this.path;
+    }
+
+    public load_args setPath(java.lang.String path) {
+      this.path = path;
+      return this;
+    }
+
+    public void unsetPath() {
+      this.path = null;
+    }
+
+    /** Returns true if field path is set (has been assigned a value) and false otherwise */
+    public boolean isSetPath() {
+      return this.path != null;
+    }
+
+    public void setPathIsSet(boolean value) {
+      if (!value) {
+        this.path = null;
+      }
+    }
+
+    public java.lang.String getBackingPath() {
+      return this.backing_path;
+    }
+
+    public load_args setBackingPath(java.lang.String backing_path) {
+      this.backing_path = backing_path;
+      return this;
+    }
+
+    public void unsetBackingPath() {
+      this.backing_path = null;
+    }
+
+    /** Returns true if field backing_path is set (has been assigned a value) and false otherwise */
+    public boolean isSetBackingPath() {
+      return this.backing_path != null;
+    }
+
+    public void setBackingPathIsSet(boolean value) {
+      if (!value) {
+        this.backing_path = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, java.lang.Object value) {
+      switch (field) {
+      case PATH:
+        if (value == null) {
+          unsetPath();
+        } else {
+          setPath((java.lang.String)value);
+        }
+        break;
+
+      case BACKING_PATH:
+        if (value == null) {
+          unsetBackingPath();
+        } else {
+          setBackingPath((java.lang.String)value);
+        }
+        break;
+
+      }
+    }
+
+    public java.lang.Object getFieldValue(_Fields field) {
+      switch (field) {
+      case PATH:
+        return getPath();
+
+      case BACKING_PATH:
+        return getBackingPath();
+
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new java.lang.IllegalArgumentException();
+      }
+
+      switch (field) {
+      case PATH:
+        return isSetPath();
+      case BACKING_PATH:
+        return isSetBackingPath();
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(java.lang.Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof load_args)
+        return this.equals((load_args)that);
+      return false;
+    }
+
+    public boolean equals(load_args that) {
+      if (that == null)
+        return false;
+      if (this == that)
+        return true;
+
+      boolean this_present_path = true && this.isSetPath();
+      boolean that_present_path = true && that.isSetPath();
+      if (this_present_path || that_present_path) {
+        if (!(this_present_path && that_present_path))
+          return false;
+        if (!this.path.equals(that.path))
+          return false;
+      }
+
+      boolean this_present_backing_path = true && this.isSetBackingPath();
+      boolean that_present_backing_path = true && that.isSetBackingPath();
+      if (this_present_backing_path || that_present_backing_path) {
+        if (!(this_present_backing_path && that_present_backing_path))
+          return false;
+        if (!this.backing_path.equals(that.backing_path))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int hashCode = 1;
+
+      hashCode = hashCode * 8191 + ((isSetPath()) ? 131071 : 524287);
+      if (isSetPath())
+        hashCode = hashCode * 8191 + path.hashCode();
+
+      hashCode = hashCode * 8191 + ((isSetBackingPath()) ? 131071 : 524287);
+      if (isSetBackingPath())
+        hashCode = hashCode * 8191 + backing_path.hashCode();
+
+      return hashCode;
+    }
+
+    @Override
+    public int compareTo(load_args other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+
+      lastComparison = java.lang.Boolean.valueOf(isSetPath()).compareTo(other.isSetPath());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetPath()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.path, other.path);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = java.lang.Boolean.valueOf(isSetBackingPath()).compareTo(other.isSetBackingPath());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetBackingPath()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.backing_path, other.backing_path);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      scheme(iprot).read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      scheme(oprot).write(oprot, this);
+    }
+
+    @Override
+    public java.lang.String toString() {
+      java.lang.StringBuilder sb = new java.lang.StringBuilder("load_args(");
+      boolean first = true;
+
+      sb.append("path:");
+      if (this.path == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.path);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("backing_path:");
+      if (this.backing_path == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.backing_path);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, java.lang.ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class load_argsStandardSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public load_argsStandardScheme getScheme() {
+        return new load_argsStandardScheme();
+      }
+    }
+
+    private static class load_argsStandardScheme extends org.apache.thrift.scheme.StandardScheme<load_args> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, load_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // PATH
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.path = iprot.readString();
+                struct.setPathIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 2: // BACKING_PATH
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.backing_path = iprot.readString();
+                struct.setBackingPathIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, load_args struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.path != null) {
+          oprot.writeFieldBegin(PATH_FIELD_DESC);
+          oprot.writeString(struct.path);
+          oprot.writeFieldEnd();
+        }
+        if (struct.backing_path != null) {
+          oprot.writeFieldBegin(BACKING_PATH_FIELD_DESC);
+          oprot.writeString(struct.backing_path);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class load_argsTupleSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public load_argsTupleScheme getScheme() {
+        return new load_argsTupleScheme();
+      }
+    }
+
+    private static class load_argsTupleScheme extends org.apache.thrift.scheme.TupleScheme<load_args> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, load_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet optionals = new java.util.BitSet();
+        if (struct.isSetPath()) {
+          optionals.set(0);
+        }
+        if (struct.isSetBackingPath()) {
+          optionals.set(1);
+        }
+        oprot.writeBitSet(optionals, 2);
+        if (struct.isSetPath()) {
+          oprot.writeString(struct.path);
+        }
+        if (struct.isSetBackingPath()) {
+          oprot.writeString(struct.backing_path);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, load_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet incoming = iprot.readBitSet(2);
+        if (incoming.get(0)) {
+          struct.path = iprot.readString();
+          struct.setPathIsSet(true);
+        }
+        if (incoming.get(1)) {
+          struct.backing_path = iprot.readString();
+          struct.setBackingPathIsSet(true);
+        }
+      }
+    }
+
+    private static <S extends org.apache.thrift.scheme.IScheme> S scheme(org.apache.thrift.protocol.TProtocol proto) {
+      return (org.apache.thrift.scheme.StandardScheme.class.equals(proto.getScheme()) ? STANDARD_SCHEME_FACTORY : TUPLE_SCHEME_FACTORY).getScheme();
+    }
+  }
+
+  public static class load_result implements org.apache.thrift.TBase<load_result, load_result._Fields>, java.io.Serializable, Cloneable, Comparable<load_result>   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("load_result");
+
+    private static final org.apache.thrift.protocol.TField EX_FIELD_DESC = new org.apache.thrift.protocol.TField("ex", org.apache.thrift.protocol.TType.STRUCT, (short)1);
+
+    private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new load_resultStandardSchemeFactory();
+    private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new load_resultTupleSchemeFactory();
+
+    public directory_service_exception ex; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      EX((short)1, "ex");
+
+      private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
+
+      static {
+        for (_Fields field : java.util.EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // EX
+            return EX;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new java.lang.IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(java.lang.String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final java.lang.String _fieldName;
+
+      _Fields(short thriftId, java.lang.String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public java.lang.String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.EX, new org.apache.thrift.meta_data.FieldMetaData("ex", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, directory_service_exception.class)));
+      metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(load_result.class, metaDataMap);
+    }
+
+    public load_result() {
+    }
+
+    public load_result(
+      directory_service_exception ex)
+    {
+      this();
+      this.ex = ex;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public load_result(load_result other) {
+      if (other.isSetEx()) {
+        this.ex = new directory_service_exception(other.ex);
+      }
+    }
+
+    public load_result deepCopy() {
+      return new load_result(this);
+    }
+
+    @Override
+    public void clear() {
+      this.ex = null;
+    }
+
+    public directory_service_exception getEx() {
+      return this.ex;
+    }
+
+    public load_result setEx(directory_service_exception ex) {
+      this.ex = ex;
+      return this;
+    }
+
+    public void unsetEx() {
+      this.ex = null;
+    }
+
+    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    public boolean isSetEx() {
+      return this.ex != null;
+    }
+
+    public void setExIsSet(boolean value) {
+      if (!value) {
+        this.ex = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, java.lang.Object value) {
+      switch (field) {
+      case EX:
+        if (value == null) {
+          unsetEx();
+        } else {
+          setEx((directory_service_exception)value);
+        }
+        break;
+
+      }
+    }
+
+    public java.lang.Object getFieldValue(_Fields field) {
+      switch (field) {
+      case EX:
+        return getEx();
+
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new java.lang.IllegalArgumentException();
+      }
+
+      switch (field) {
+      case EX:
+        return isSetEx();
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(java.lang.Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof load_result)
+        return this.equals((load_result)that);
+      return false;
+    }
+
+    public boolean equals(load_result that) {
+      if (that == null)
+        return false;
+      if (this == that)
+        return true;
+
+      boolean this_present_ex = true && this.isSetEx();
+      boolean that_present_ex = true && that.isSetEx();
+      if (this_present_ex || that_present_ex) {
+        if (!(this_present_ex && that_present_ex))
+          return false;
+        if (!this.ex.equals(that.ex))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int hashCode = 1;
+
+      hashCode = hashCode * 8191 + ((isSetEx()) ? 131071 : 524287);
+      if (isSetEx())
+        hashCode = hashCode * 8191 + ex.hashCode();
+
+      return hashCode;
+    }
+
+    @Override
+    public int compareTo(load_result other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+
+      lastComparison = java.lang.Boolean.valueOf(isSetEx()).compareTo(other.isSetEx());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetEx()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.ex, other.ex);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      scheme(iprot).read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      scheme(oprot).write(oprot, this);
+      }
+
+    @Override
+    public java.lang.String toString() {
+      java.lang.StringBuilder sb = new java.lang.StringBuilder("load_result(");
+      boolean first = true;
+
+      sb.append("ex:");
+      if (this.ex == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.ex);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, java.lang.ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class load_resultStandardSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public load_resultStandardScheme getScheme() {
+        return new load_resultStandardScheme();
+      }
+    }
+
+    private static class load_resultStandardScheme extends org.apache.thrift.scheme.StandardScheme<load_result> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, load_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // EX
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
+                struct.ex = new directory_service_exception();
+                struct.ex.read(iprot);
+                struct.setExIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, load_result struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.ex != null) {
+          oprot.writeFieldBegin(EX_FIELD_DESC);
+          struct.ex.write(oprot);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class load_resultTupleSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public load_resultTupleScheme getScheme() {
+        return new load_resultTupleScheme();
+      }
+    }
+
+    private static class load_resultTupleScheme extends org.apache.thrift.scheme.TupleScheme<load_result> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, load_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet optionals = new java.util.BitSet();
+        if (struct.isSetEx()) {
+          optionals.set(0);
+        }
+        oprot.writeBitSet(optionals, 1);
+        if (struct.isSetEx()) {
+          struct.ex.write(oprot);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, load_result struct) throws org.apache.thrift.TException {
         org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
         java.util.BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {

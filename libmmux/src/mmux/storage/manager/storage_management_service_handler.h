@@ -12,8 +12,9 @@ class storage_management_service_handler : public storage_management_serviceIf {
  public:
   explicit storage_management_service_handler(std::vector<std::shared_ptr<chain_module>> &blocks);
   void get_path(std::string &_return, int32_t block_id) override;
-  void flush(int32_t block_id, const std::string &persistent_store_prefix, const std::string &path) override;
-  void load(int32_t block_id, const std::string &persistent_store_prefix, const std::string &path) override;
+  void sync(int32_t block_id, const std::string &backing_path) override;
+  void dump(int32_t block_id, const std::string &backing_path) override;
+  void load(int32_t block_id, const std::string &backing_path) override;
   void reset(int32_t block_id) override;
   int64_t storage_capacity(int32_t block_id) override;
   int64_t storage_size(int32_t block_id) override;

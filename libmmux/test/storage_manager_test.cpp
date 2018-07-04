@@ -72,7 +72,7 @@ TEST_CASE("manager_storage_size_test", "[storage_size][storage_size][storage_cap
   }
 }
 
-TEST_CASE("manager_flush_load_test", "[put][flush][reset][load][get]") {
+TEST_CASE("manager_sync_load_test", "[put][sync][reset][load][get]") {
   static auto blocks = test_utils::init_kv_blocks(NUM_BLOCKS, SERVICE_PORT, MANAGEMENT_PORT, 0);
   auto server = storage_management_server::create(blocks, HOST, MANAGEMENT_PORT);
   std::thread serve_thread([&server] { server->serve(); });
@@ -84,10 +84,10 @@ TEST_CASE("manager_flush_load_test", "[put][flush][reset][load][get]") {
 
   storage_manager manager;
   auto block_name = block_name_parser::make(HOST, SERVICE_PORT, MANAGEMENT_PORT, 0, 0, 0);
-  REQUIRE_NOTHROW(manager.flush(block_name, "local://tmp", "/test"));
+  REQUIRE_NOTHROW(manager.sync(block_name, "local://tmp"));
   REQUIRE_NOTHROW(manager.reset(block_name));
   REQUIRE(manager.storage_size(block_name) == 0);
-  REQUIRE_NOTHROW(manager.load(block_name, "local://tmp", "/test"));
+  REQUIRE_NOTHROW(manager.load(block_name, "local://tmp"));
 
   server->stop();
   if (serve_thread.joinable()) {

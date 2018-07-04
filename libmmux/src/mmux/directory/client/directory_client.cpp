@@ -49,22 +49,32 @@ data_status directory_client::open(const std::string &path) {
 }
 
 data_status directory_client::create(const std::string &path,
-                                     const std::string &persistent_store_prefix,
+                                     const std::string &backing_path,
                                      std::size_t num_blocks,
-                                     std::size_t chain_length) {
+                                     std::size_t chain_length,
+                                     std::int32_t flags) {
   rpc_data_status s;
-  client_->create(s, path, persistent_store_prefix, static_cast<const int32_t>(num_blocks),
-                  static_cast<const int32_t>(chain_length));
+  client_->create(s,
+                  path,
+                  backing_path,
+                  static_cast<const int32_t>(num_blocks),
+                  static_cast<const int32_t>(chain_length),
+                  flags);
   return directory_type_conversions::from_rpc(s);
 }
 
 data_status directory_client::open_or_create(const std::string &path,
-                                             const std::string &persistent_store_prefix,
+                                             const std::string &backing_path,
                                              std::size_t num_blocks,
-                                             std::size_t chain_length) {
+                                             std::size_t chain_length,
+                                             std::int32_t flags) {
   rpc_data_status s;
-  client_->open_or_create(s, path, persistent_store_prefix, static_cast<const int32_t>(num_blocks),
-                          static_cast<const int32_t>(chain_length));
+  client_->open_or_create(s,
+                          path,
+                          backing_path,
+                          static_cast<const int32_t>(num_blocks),
+                          static_cast<const int32_t>(chain_length),
+                          flags);
   return directory_type_conversions::from_rpc(s);
 }
 
@@ -92,8 +102,16 @@ void directory_client::remove_all(const std::string &path) {
   client_->remove_all(path);
 }
 
-void directory_client::flush(const std::string &path, const std::string &dest) {
-  client_->flush(path, dest);
+void directory_client::sync(const std::string &path, const std::string &backing_path) {
+  client_->sync(path, backing_path);
+}
+
+void directory_client::dump(const std::string &path, const std::string &backing_path) {
+  client_->dump(path, backing_path);
+}
+
+void directory_client::load(const std::string &path, const std::string &backing_path) {
+  client_->load(path, backing_path);
 }
 
 void directory_client::rename(const std::string &old_path, const std::string &new_path) {

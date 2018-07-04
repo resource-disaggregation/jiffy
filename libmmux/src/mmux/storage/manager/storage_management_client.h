@@ -39,8 +39,9 @@ class storage_management_client {
                                const std::string &next_block_name);
   void set_regular(int32_t block_id, int32_t slot_begin, int32_t slot_end);
   std::string path(int32_t block_id);
-  void flush(int32_t block_id, const std::string &persistent_store_prefix, const std::string &path);
-  void load(int32_t block_id, const std::string &persistent_store_prefix, const std::string &path);
+  void sync(int32_t block_id, const std::string &backing_path);
+  void load(int32_t block_id, const std::string &backing_path);
+  void dump(int32_t block_id, const std::string &backing_path);
   void reset(int32_t block_id);
   int64_t storage_capacity(int32_t block_id);
   int64_t storage_size(int32_t block_id);

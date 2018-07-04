@@ -39,7 +39,7 @@ TEST_CASE("kv_client_put_get_test", "[put][get]") {
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  data_status status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1);
+  data_status status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1, 0);
 
   kv_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -81,7 +81,7 @@ TEST_CASE("kv_client_put_update_get_test", "[put][update][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1));
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1, 0));
 
   kv_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -129,7 +129,7 @@ TEST_CASE("kv_client_put_remove_get_test", "[put][remove][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1));
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1, 0));
 
   kv_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -174,7 +174,7 @@ TEST_CASE("kv_client_pipelined_ops_test", "[put][update][remove][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1));
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1, 0));
 
   kv_client client(tree, "/sandbox/file.txt", status);
   std::vector<std::string> kvs;
@@ -281,7 +281,7 @@ TEST_CASE("kv_client_locked_ops_test", "[put][update][remove][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1));
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1, 0));
 
   kv_client kv(tree, "/sandbox/file.txt", status);
   {
@@ -344,7 +344,7 @@ TEST_CASE("kv_client_locked_pipelined_ops_test", "[put][update][remove][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1));
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1, 0));
 
   kv_client kv(tree, "/sandbox/file.txt", status);
   {

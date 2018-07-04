@@ -12,6 +12,7 @@
 #include <mmux/utils/logger.h>
 #include <mmux/directory/block/file_size_tracker.h>
 #include <boost/program_options.hpp>
+#include <mmux/directory/fs/sync_worker.h>
 
 using namespace ::mmux::directory;
 using namespace ::mmux::storage;
@@ -176,6 +177,9 @@ int main(int argc, char **argv) {
 
   lease_expiry_worker lmgr(tree, lease_period_ms, grace_period_ms);
   lmgr.start();
+
+  sync_worker syncer(tree, 1000);
+  syncer.start();
 
   file_size_tracker tracker(tree, 1000, storage_trace);
   if (!storage_trace.empty()) {

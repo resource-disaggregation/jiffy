@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
   }
 
   mmux::directory::directory_client client(host, port);
-  auto dstatus = client.create(file, "/tmp", 1, chain_length);
+  auto dstatus = client.create(file, "/tmp", 1, chain_length, 0);
   auto chain = dstatus.data_blocks().front();
   std::cerr << "Chain: " << chain.to_string() << std::endl;
   if (benchmark_type == "throughput") {

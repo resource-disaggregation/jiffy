@@ -39,10 +39,13 @@ service storage_management_service {
   string get_path(1: i32 block_id)
     throws (1: storage_management_exception ex),
 
-  void flush(1: i32 block_id, 2: string persistent_store_prefix, 3: string path)
+  void sync(1: i32 block_id, 2: string backing_path)
     throws (1: storage_management_exception ex),
 
-  void load(1: i32 block_id, 2: string persistent_store_prefix, 3: string path)
+  void dump(1: i32 block_id, 2: string backing_path)
+    throws (1: storage_management_exception ex),
+
+  void load(1: i32 block_id, 2: string backing_path)
     throws (1: storage_management_exception ex),
 
   void reset(1: i32 block_id)

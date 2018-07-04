@@ -55,7 +55,7 @@ TEST_CASE("kv_no_failure_test", "[put][get]") {
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  t->create("/file", "/tmp", 1, 3);
+  t->create("/file", "/tmp", 1, 3, 0);
   auto chain = t->dstatus("/file").data_blocks()[0];
 
   replica_chain_client client(chain.block_names);
@@ -134,7 +134,7 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  t->create("/file", "/tmp", 1, 3);
+  t->create("/file", "/tmp", 1, 3, 0);
 
   kv_servers[0]->stop();
   chain_servers[0]->stop();
@@ -225,7 +225,7 @@ TEST_CASE("kv_mid_failure_test", "[put][get]") {
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  t->create("/file", "/tmp", 1, 3);
+  t->create("/file", "/tmp", 1, 3, 0);
 
   kv_servers[1]->stop();
   management_servers[1]->stop();
@@ -310,7 +310,7 @@ TEST_CASE("kv_tail_failure_test", "[put][get]") {
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  t->create("/file", "/tmp", 1, 3);
+  t->create("/file", "/tmp", 1, 3, 0);
 
   kv_servers[2]->stop();
   management_servers[2]->stop();
@@ -394,7 +394,7 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  t->create("/file", "/tmp", 1, 2);
+  t->create("/file", "/tmp", 1, 2, 0);
 
   auto chain = t->dstatus("/file").data_blocks()[0].block_names;
   {
