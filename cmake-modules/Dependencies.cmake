@@ -12,6 +12,9 @@ set(LIBCUCKOO_VERSION "0.2")
 
 set(BOOST_COMPONENTS "program_options")
 
+## Prefer static to dynamic libraries
+set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+
 find_package(Threads REQUIRED)
 
 set(EXTERNAL_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CMAKE_CXX_FLAGS_${UPPERCASE_BUILD_TYPE}}")
@@ -20,9 +23,9 @@ set(EXTERNAL_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ${CMAKE_C_FLAGS_${UPPERCASE_BUILD_T
 if (USE_SYSTEM_BOOST)
   find_package(Boost ${BOOST_VERSION} COMPONENTS program_options REQUIRED)
 else ()
-  foreach(component ${BOOST_COMPONENTS})
+  foreach (component ${BOOST_COMPONENTS})
     list(APPEND BOOST_COMPONENTS_FOR_BUILD --with-${component})
-  endforeach()
+  endforeach ()
 
   string(REGEX REPLACE "\\." "_" BOOST_VERSION_STR ${BOOST_VERSION})
   set(BOOST_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
@@ -44,9 +47,9 @@ else ()
 
   macro(libraries_to_fullpath out)
     set(${out})
-    foreach(comp ${BOOST_COMPONENTS})
+    foreach (comp ${BOOST_COMPONENTS})
       list(APPEND ${out} ${BOOST_PREFIX}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}boost_${comp}${CMAKE_STATIC_LIBRARY_SUFFIX})
-    endforeach()
+    endforeach ()
   endmacro()
   libraries_to_fullpath(BOOST_LIBRARIES)
   set(Boost_INCLUDE_DIRS ${BOOST_INCLUDE_DIR})
@@ -57,9 +60,7 @@ else ()
   message(STATUS "Boost static libraries: ${Boost_LIBRARIES}")
 endif ()
 
-if (USE_SYSTEM_AWS_SDK)
-  find_package(aws-sdk-cpp REQUIRED)
-else ()
+if ((NOT USE_SYSTEM_AWS_SDK) OR (NOT USE_SYSTEM_THRIFT))
   set(ZLIB_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(ZLIB_C_FLAGS "${EXTERNAL_C_FLAGS}")
   set(ZLIB_PREFIX "${PROJECT_BINARY_DIR}/external/zlib")
@@ -68,7 +69,8 @@ else ()
           "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
           "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
           "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-          "-DCMAKE_INSTALL_PREFIX=${ZLIB_PREFIX}")
+          "-DCMAKE_INSTALL_PREFIX=${ZLIB_PREFIX}"
+          "-DBUILD_SHARED_LIBS=OFF")
 
   set(ZLIB_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}z")
   set(ZLIB_LIBRARY "${ZLIB_PREFIX}/lib/${ZLIB_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
@@ -113,7 +115,11 @@ else ()
 
   install(FILES ${OPENSSL_LIBRARIES} DESTINATION lib)
   install(DIRECTORY ${OPENSSL_INCLUDE_DIR}/openssl DESTINATION include)
+endif ()
 
+if (USE_SYSTEM_AWS_SDK)
+  find_package(aws-sdk-cpp REQUIRED)
+else ()
   set(CURL_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(CURL_C_FLAGS "${EXTERNAL_C_FLAGS}")
   set(CURL_PREFIX "${PROJECT_BINARY_DIR}/external/curl")
@@ -131,7 +137,8 @@ else ()
           "-DBUILD_TESTING=OFF"
           "-DENABLE_MANUAL=OFF"
           "-DHTTP_ONLY=ON"
-          "-DCURL_CA_PATH=none")
+          "-DCURL_CA_PATH=none"
+          "-DZLIB_LIBRARY=${ZLIB_LIBRARY}") # Force usage of static library
 
   set(CURL_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}curl")
   set(CURL_LIBRARY "${CURL_PREFIX}/lib/${CURL_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
@@ -168,7 +175,8 @@ else ()
           "-DCMAKE_INSTALL_PREFIX=${AWS_PREFIX}"
           "-DENABLE_TESTING=OFF"
           "-DBUILD_SHARED_LIBS=OFF"
-          "-DCMAKE_PREFIX_PATH=${AWS_PREFIX_PATH}")
+          "-DCMAKE_PREFIX_PATH=${AWS_PREFIX_PATH}"
+          "-DZLIB_LIBRARY=${ZLIB_LIBRARY}") # Force usage of static library
 
   set(AWS_STATIC_CORE_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-core")
   set(AWS_STATIC_S3_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-s3")
@@ -234,6 +242,11 @@ else ()
   set(THRIFT_PREFIX "${PROJECT_BINARY_DIR}/external/thrift")
   set(THRIFT_HOME "${THRIFT_PREFIX}")
   set(THRIFT_INCLUDE_DIR "${THRIFT_PREFIX}/include")
+  if (USE_SYSTEM_BOOST)
+    set(THRIFT_PREFIX_PATH "${LIBEVENT_PREFIX}|${ZLIB_PREFIX}|${OPENSSL_PREFIX}")
+  else ()
+    set(THRIFT_PREFIX_PATH "${LIBEVENT_PREFIX}|${ZLIB_PREFIX}|${OPENSSL_PREFIX}|${BOOST_PREFIX}")
+  endif ()
   set(THRIFT_CMAKE_ARGS "-Wno-dev"
           "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
           "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
@@ -249,8 +262,6 @@ else ()
           "-DWITH_QT5=OFF"
           "-DWITH_C_GLIB=OFF"
           "-DWITH_HASKELL=OFF"
-          "-DWITH_ZLIB=OFF" # For now
-          "-DWITH_OPENSSL=OFF" # For now
           "-DWITH_LIBEVENT=ON"
           "-DWITH_JAVA=OFF"
           "-DWITH_PYTHON=OFF"
@@ -258,7 +269,8 @@ else ()
           "-DWITH_STDTHREADS=OFF"
           "-DWITH_BOOSTTHREADS=OFF"
           "-DWITH_STATIC_LIB=ON"
-          "-DCMAKE_PREFIX_PATH=${LIBEVENT_PREFIX}")
+          "-DCMAKE_PREFIX_PATH=${THRIFT_PREFIX_PATH}"
+          "-DZLIB_LIBRARY=${ZLIB_LIBRARY}") # Force usage of static library
 
   set(THRIFT_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}thrift")
   if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
@@ -274,8 +286,9 @@ else ()
     set(THRIFT_COMPILER "${THRIFT_PREFIX}/bin/thrift")
   endif ()
   ExternalProject_Add(thrift
-          DEPENDS libevent
+          DEPENDS libevent openssl zlib
           URL "http://archive.apache.org/dist/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
+          LIST_SEPARATOR |
           CMAKE_ARGS ${THRIFT_CMAKE_ARGS}
           LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
