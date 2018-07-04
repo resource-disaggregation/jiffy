@@ -226,6 +226,14 @@ target_link_libraries(mmux ${THRIFT_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties(mmux PROPERTIES LINKER_LANGUAGE CXX)
 
+install(TARGETS mmux
+        RUNTIME DESTINATION bin
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib)
+install(DIRECTORY src/mmux
+        DESTINATION include
+        FILES_MATCHING PATTERN "*.h")
+
 if (BUILD_TESTS)
   include_directories(${CATCH_INCLUDE_DIR})
   add_executable(mmux_tests
