@@ -5,8 +5,8 @@ namespace directory {
 
 using namespace utils;
 
-sync_worker::sync_worker(std::shared_ptr<directory_tree> tree, const std::string &sync_path, uint64_t sync_period_ms)
-    : tree_(tree), sync_path_(sync_path), sync_period_(sync_period_ms) {}
+sync_worker::sync_worker(std::shared_ptr<directory_tree> tree, uint64_t sync_period_ms)
+    : tree_(tree), sync_period_(sync_period_ms) {}
 
 sync_worker::~sync_worker() {
   stop_.store(true);
@@ -60,8 +60,8 @@ void sync_worker::sync_nodes(std::shared_ptr<ds_dir_node> parent,
     // Remove child since its lease has expired
     auto s = tree_->dstatus(child_path);
     if (s.is_mapped()) {
-      LOG(info) << "Syncing file " << child_path << " with " << sync_path_ << "...";
-      tree_->sync(child_path, sync_path_);
+      LOG(info) << "Syncing file " << child_path << " with " << s.backing_path() << "...";
+      tree_->sync(child_path, s.backing_path());
     }
   } else if (child->is_directory()) {
     auto node = std::dynamic_pointer_cast<ds_dir_node>(child);

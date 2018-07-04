@@ -309,6 +309,18 @@ class data_status {
     }
   }
 
+  std::vector<std::string> mark_dumped(size_t block_id) {
+    data_blocks_.at(block_id).mode = storage_mode::on_disk;
+    std::vector<std::string> chain = data_blocks_.at(block_id).block_names;
+    data_blocks_.at(block_id).block_names.clear();
+    return chain;
+  }
+
+  void mark_loaded(size_t block_id, const std::vector<std::string> chain) {
+    data_blocks_.at(block_id).mode = storage_mode::in_memory;
+    data_blocks_.at(block_id).block_names = chain;
+  }
+
   const std::string &backing_path() const {
     return backing_path_;
   }

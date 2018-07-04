@@ -14,8 +14,8 @@ TEST_CASE("sync_worker_test") {
   auto sm = std::make_shared<dummy_storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  sync_worker worker(tree, "local://tmp", SYNC_PERIOD_MS);
-  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/c/file.txt", "/tmp", 1, 1, data_status::MAPPED));
+  sync_worker worker(tree, SYNC_PERIOD_MS);
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/c/file.txt", "local://tmp", 1, 1, data_status::MAPPED));
   REQUIRE(tree->exists("/sandbox/a/b/c/file.txt"));
 
   REQUIRE_NOTHROW(worker.start());

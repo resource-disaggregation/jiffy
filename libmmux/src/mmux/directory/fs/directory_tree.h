@@ -52,10 +52,13 @@ class ds_node {
 
   virtual void sync(const std::string &backing_path,
                     const std::shared_ptr<storage::storage_management_ops> &storage) = 0;
-  virtual void dump(const std::string &backing_path,
+  virtual void dump(std::vector<std::string> &cleared_blocks,
+                    const std::string &backing_path,
                     const std::shared_ptr<storage::storage_management_ops> &storage) = 0;
-  virtual void load(const std::string &backing_path,
-                    const std::shared_ptr<storage::storage_management_ops> &storage) = 0;
+  virtual void load(const std::string &path,
+                    const std::string &backing_path,
+                    const std::shared_ptr<storage::storage_management_ops> &storage,
+                    const std::shared_ptr<block_allocator> &allocator) = 0;
 
  private:
   std::string name_{};
@@ -167,25 +170,74 @@ class ds_file_node : public ds_node {
     for (const auto &block: dstatus_.data_blocks()) {
       std::string block_backing_path = backing_path;
       utils::directory_utils::push_path_element(block_backing_path, block.slot_range_string());
-      storage->sync(block.tail(), block_backing_path);
+      if (block.mode == storage_mode::in_memory || block.mode == storage_mode::in_memory_grace)
+        storage->sync(block.tail(), block_backing_path);
     }
   }
 
-  void dump(const std::string &backing_path, const std::shared_ptr<storage::storage_management_ops> &storage) override {
+  void dump(std::vector<std::string> &cleared_blocks,
+            const std::string &backing_path,
+            const std::shared_ptr<storage::storage_management_ops> &storage) override {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     for (const auto &block: dstatus_.data_blocks()) {
-      std::string block_backing_path = backing_path;
-      utils::directory_utils::push_path_element(block_backing_path, block.slot_range_string());
-      storage->dump(block.tail(), block_backing_path);
+      for (size_t i = 0; i < dstatus_.chain_length(); i++) {
+        if (i == dstatus_.chain_length() - 1) {
+          std::string block_backing_path = backing_path;
+          utils::directory_utils::push_path_element(block_backing_path, block.slot_range_string());
+          storage->dump(block.tail(), block_backing_path);
+          dstatus_.mark_dumped(i);
+        } else {
+          storage->reset(block.block_names[i]);
+        }
+        cleared_blocks.push_back(block.block_names[i]);
+      }
     }
   }
 
-  void load(const std::string &backing_path, const std::shared_ptr<storage::storage_management_ops> &storage) override {
+  void load(const std::string &path,
+            const std::string &backing_path,
+            const std::shared_ptr<storage::storage_management_ops> &storage,
+            const std::shared_ptr<block_allocator> &allocator) override {
     std::unique_lock<std::shared_mutex> lock(mtx_);
-    for (const auto &block: dstatus_.data_blocks()) {
-      std::string block_backing_path = backing_path;
-      utils::directory_utils::push_path_element(block_backing_path, block.slot_range_string());
-      storage->load(block.tail(), block_backing_path);
+
+    auto num_blocks = dstatus_.data_blocks().size();
+    auto chain_length = dstatus_.chain_length();
+    std::size_t slots_per_block = storage::block::SLOT_MAX / num_blocks;
+    for (std::size_t i = 0; i < num_blocks; ++i) {
+      auto slot_begin = static_cast<int32_t>(i * slots_per_block);
+      auto slot_end =
+          i == (num_blocks - 1) ? storage::block::SLOT_MAX : static_cast<int32_t>((i + 1) * slots_per_block - 1);
+      replica_chain chain(allocator->allocate(chain_length, {}),
+                          slot_begin,
+                          slot_end,
+                          chain_status::stable,
+                          storage_mode::in_memory);
+      assert(chain.block_names.size() == chain_length);
+      using namespace storage;
+      if (chain_length == 1) {
+        std::string block_backing_path = backing_path;
+        utils::directory_utils::push_path_element(block_backing_path, chain.slot_range_string());
+        storage->setup_block(chain.block_names[0],
+                             path,
+                             slot_begin,
+                             slot_end,
+                             chain.block_names,
+                             chain_role::singleton,
+                             "nil");
+        storage->load(chain.block_names[0], block_backing_path);
+        dstatus_.mark_loaded(i, chain.block_names);
+      } else {
+        std::string block_backing_path = backing_path;
+        utils::directory_utils::push_path_element(block_backing_path, chain.slot_range_string());
+        for (std::size_t j = 0; j < chain_length; ++j) {
+          std::string block_name = chain.block_names[j];
+          std::string next_block_name = (j == chain_length - 1) ? "nil" : chain.block_names[j + 1];
+          int32_t role = (j == 0) ? chain_role::head : (j == chain_length - 1) ? chain_role::tail : chain_role::mid;
+          storage->setup_block(block_name, path, slot_begin, slot_end, chain.block_names, role, next_block_name);
+          storage->load(block_name, block_backing_path);
+        }
+        dstatus_.mark_loaded(i, chain.block_names);
+      }
     }
   }
 
@@ -195,15 +247,32 @@ class ds_file_node : public ds_node {
     if (!dstatus_.is_pinned()) {
       using namespace utils;
       LOG(log_level::info) << "Clearing storage for " << name();
-      for (const auto &block: dstatus_.data_blocks()) {
-        for (const auto &block_name: block.block_names) {
-          storage->reset(block_name);
-          cleared_blocks.push_back(block_name);
+      if (dstatus_.is_mapped()) {
+        for (const auto &block: dstatus_.data_blocks()) {
+          for (size_t i = 0; i < dstatus_.chain_length(); i++) {
+            if (i == dstatus_.chain_length() - 1) {
+              std::string block_backing_path = dstatus_.backing_path();
+              utils::directory_utils::push_path_element(block_backing_path, block.slot_range_string());
+              storage->dump(block.tail(), block_backing_path);
+              dstatus_.mode(i, storage_mode::on_disk);
+            } else {
+              storage->reset(block.block_names[i]);
+            }
+            cleared_blocks.push_back(block.block_names[i]);
+          }
+        }
+        return false; // Clear the blocks, but don't delete the path
+      } else {
+        for (const auto &block: dstatus_.data_blocks()) {
+          for (const auto &block_name: block.block_names) {
+            storage->reset(block_name);
+            cleared_blocks.push_back(block_name);
+          }
         }
       }
-      return true;
+      return true; // Clear the blocks and delete the path
     }
-    return false;
+    return false; // Don't clear the blocks or delete the path
   }
 
   export_ctx setup_add_block(std::shared_ptr<storage::storage_management_ops> storage,
@@ -531,17 +600,22 @@ class ds_dir_node : public ds_node {
     }
   }
 
-  void dump(const std::string &backing_path, const std::shared_ptr<storage::storage_management_ops> &storage) override {
+  void dump(std::vector<std::string> &cleared_blocks,
+            const std::string &backing_path,
+            const std::shared_ptr<storage::storage_management_ops> &storage) override {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     for (const auto &entry: children_) {
-      entry.second->dump(backing_path, storage);
+      entry.second->dump(cleared_blocks, backing_path, storage);
     }
   }
 
-  void load(const std::string &backing_path, const std::shared_ptr<storage::storage_management_ops> &storage) override {
+  void load(const std::string &path,
+            const std::string &backing_path,
+            const std::shared_ptr<storage::storage_management_ops> &storage,
+            const std::shared_ptr<block_allocator> &allocator) override {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     for (const auto &entry: children_) {
-      entry.second->load(backing_path, storage);
+      entry.second->load(path, backing_path, storage, allocator);
     }
   }
 

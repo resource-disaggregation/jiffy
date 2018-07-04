@@ -9,7 +9,7 @@ namespace directory {
 
 class sync_worker {
  public:
-  sync_worker(std::shared_ptr<directory_tree> tree, const std::string &sync_path, uint64_t sync_period_ms);
+  sync_worker(std::shared_ptr<directory_tree> tree, uint64_t sync_period_ms);
   ~sync_worker();
 
   void start();
@@ -24,7 +24,6 @@ class sync_worker {
                   std::uint64_t epoch);
 
   std::shared_ptr<directory_tree> tree_;
-  std::string sync_path_;
   std::chrono::milliseconds sync_period_;
 
   std::thread worker_;

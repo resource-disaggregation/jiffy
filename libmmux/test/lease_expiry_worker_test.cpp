@@ -12,7 +12,7 @@ using namespace ::mmux::directory;
 TEST_CASE("lease_manager_test") {
   using namespace std::chrono_literals;
 
-  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto alloc = std::make_shared<dummy_block_allocator>(5);
   auto sm = std::make_shared<dummy_storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
   lease_expiry_worker mgr(tree, LEASE_PERIOD_MS, GRACE_PERIOD_MS);
@@ -20,6 +20,7 @@ TEST_CASE("lease_manager_test") {
   REQUIRE_NOTHROW(tree->create("/sandbox/a/b/file.txt", "local://tmp", 1, 1, 0));
   REQUIRE_NOTHROW(tree->create("/sandbox/a/file.txt", "local://tmp", 1, 1, 0));
   REQUIRE_NOTHROW(tree->create("/sandbox/a/c/file.txt", "local://tmp", 1, 1, data_status::PINNED));
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/d/file.txt", "local://tmp", 1, 1, data_status::MAPPED));
   REQUIRE(tree->exists("/sandbox/a/b/c/file.txt"));
   REQUIRE(tree->exists("/sandbox/a/b/file.txt"));
   REQUIRE(tree->exists("/sandbox/a/file.txt"));
@@ -33,13 +34,24 @@ TEST_CASE("lease_manager_test") {
   REQUIRE(!tree->exists("/sandbox/a/b/file.txt"));
   REQUIRE(!tree->exists("/sandbox/a/file.txt"));
   REQUIRE(tree->exists("/sandbox/a/c/file.txt"));
-  REQUIRE(sm->COMMANDS.size() == 6);
+  REQUIRE(tree->exists("/sandbox/a/d/file.txt"));
+  auto s1 = tree->dstatus("/sandbox/a/c/file.txt");
+  for (const auto& blk: s1.data_blocks()) {
+    REQUIRE(blk.mode == storage_mode::in_memory_grace);
+  }
+  auto s2 = tree->dstatus("/sandbox/a/d/file.txt");
+  for (const auto& blk: s2.data_blocks()) {
+    REQUIRE(blk.mode == storage_mode::on_disk);
+  }
+  REQUIRE(sm->COMMANDS.size() == 8);
   REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/a/b/c/file.txt:0:65536:0:0:nil");
   REQUIRE(sm->COMMANDS[1] == "setup_block:1:/sandbox/a/b/file.txt:0:65536:1:0:nil");
   REQUIRE(sm->COMMANDS[2] == "setup_block:2:/sandbox/a/file.txt:0:65536:2:0:nil");
   REQUIRE(sm->COMMANDS[3] == "setup_block:3:/sandbox/a/c/file.txt:0:65536:3:0:nil");
-  REQUIRE(sm->COMMANDS[4] == "reset:1");
-  REQUIRE(sm->COMMANDS[5] == "reset:2");
+  REQUIRE(sm->COMMANDS[4] == "setup_block:4:/sandbox/a/d/file.txt:0:65536:4:0:nil");
+  REQUIRE(sm->COMMANDS[5] == "reset:1");
+  REQUIRE(sm->COMMANDS[6] == "dump:4:local://tmp/0_65536");
+  REQUIRE(sm->COMMANDS[7] == "reset:2");
 
   REQUIRE_NOTHROW(mgr.stop());
 }

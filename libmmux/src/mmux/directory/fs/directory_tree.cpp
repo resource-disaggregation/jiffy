@@ -272,12 +272,14 @@ void directory_tree::sync(const std::string &path, const std::string &backing_pa
 
 void directory_tree::dump(const std::string &path, const std::string &backing_path) {
   LOG(log_level::info) << "Dumping path " << path;
-  get_node(path)->dump(backing_path, storage_);
+  std::vector<std::string> cleared_blocks;
+  get_node(path)->dump(cleared_blocks, backing_path, storage_);
+  allocator_->free(cleared_blocks);
 }
 
 void directory_tree::load(const std::string &path, const std::string &backing_path) {
   LOG(log_level::info) << "Loading path " << path;
-  get_node(path)->load(backing_path, storage_);
+  get_node(path)->load(path, backing_path, storage_, allocator_);
 }
 
 void directory_tree::rename(const std::string &old_path, const std::string &new_path) {
