@@ -188,7 +188,10 @@ else ()
 
   ExternalProject_Add(awssdk
           DEPENDS curl openssl zlib
-          URL https://github.com/aws/aws-sdk-cpp/archive/${AWSSDK_VERSION}.tar.gz
+          GIT_REPOSITORY "https://github.com/awslabs/aws-sdk-cpp.git"
+          GIT_TAG "${AWSSDK_VERSION}"
+          GIT_SHALLOW 1
+          BUILD_IN_SOURCE true
           LIST_SEPARATOR |
           CMAKE_ARGS ${AWS_CMAKE_ARGS}
           LOG_DOWNLOAD ON
