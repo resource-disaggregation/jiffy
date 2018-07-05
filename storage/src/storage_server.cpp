@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
     generic.add_options()
         ("version,v", "Print version string")
         ("help,h", "Print help message")
-        ("config", po::value<std::string>(&config_file), "Configuration file");
+        ("config,c", po::value<std::string>(&config_file), "Configuration file");
 
     po::options_description hidden("Hidden options");
     hidden.add_options()
@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
     // Configuration files have higher priority than env vars
     std::vector<std::string> config_files;
     if (config_file == "") {
-      config_files = {"conf/mmux.conf", "/etc/mmux/mmux.conf"};
+      config_files = {"conf/mmux.conf", "/etc/mmux/mmux.conf", "/usr/conf/mmux.conf", "/usr/local/conf/mmux.conf"};
     } else {
       config_files = {config_file};
     }

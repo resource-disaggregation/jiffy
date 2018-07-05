@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
     // Configuration files have higher priority than env vars
     std::vector<std::string> config_files;
     if (config_file == "") {
-      config_files = {"conf/mmux.conf", "/etc/mmux/mmux.conf"};
+      config_files = {"conf/mmux.conf", "/etc/mmux/mmux.conf", "/usr/conf/mmux.conf", "/usr/local/conf/mmux.conf"};
     } else {
       config_files = {config_file};
     }
