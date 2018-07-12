@@ -101,8 +101,8 @@ class MMuxClient:
         if path in self.to_renew:
             self.to_renew.remove(path)
 
-    def create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1):
-        s = self.fs.create(path, persistent_store_prefix, num_blocks, chain_length)
+    def create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+        s = self.fs.create(path, persistent_store_prefix, num_blocks, chain_length, flags)
         self.begin_scope(path)
         return KVClient(self.fs, path, s, self.chain_failure_cb)
 
@@ -111,8 +111,8 @@ class MMuxClient:
         self.begin_scope(path)
         return KVClient(self.fs, path, s, self.chain_failure_cb)
 
-    def open_or_create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1):
-        s = self.fs.open_or_create(path, persistent_store_prefix, num_blocks, chain_length)
+    def open_or_create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+        s = self.fs.open_or_create(path, persistent_store_prefix, num_blocks, chain_length, flags)
         self.begin_scope(path)
         return KVClient(self.fs, path, s, self.chain_failure_cb)
 

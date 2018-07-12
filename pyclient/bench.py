@@ -1,6 +1,6 @@
 import sys
 
-from mmux import MMuxClient, RemoveMode
+from mmux import MMuxClient
 from mmux.benchmark.kv_async_benchmark import run_async_kv_benchmark
 from mmux.benchmark.kv_sync_benchmark import run_sync_kv_latency_benchmark, run_sync_kv_throughput_benchmark
 
@@ -34,7 +34,7 @@ def benchmark_sync():
                 sys.stdout = f
                 run_sync_kv_throughput_benchmark(d_host, 9090, 9091, path, w_path + '/' + workload, 0, 100000, i)
             sys.stdout = stdout_backup
-    em.remove(path, RemoveMode.delete)
+    em.remove(path)
 
 
 def benchmark_async():
@@ -59,7 +59,7 @@ def benchmark_async():
                 sys.stdout = f
                 run_async_kv_benchmark(d_host, 9090, 9091, path, w_path + '/' + workload, 0, 100000, 1, i)
             sys.stdout = stdout_backup
-    em.remove(path, RemoveMode.delete)
+    em.remove(path)
 
 
 def benchmark_chain():
@@ -97,7 +97,7 @@ def benchmark_chain():
             sys.stdout = f
             run_sync_kv_throughput_benchmark(d_host, 9090, 9091, path, w_path + '/workloadc', off, 10000, i)
         sys.stdout = stdout_backup
-    em.remove(path, RemoveMode.delete)
+    em.remove(path)
 
     print("Read latency")
     stdout_backup = sys.stdout
