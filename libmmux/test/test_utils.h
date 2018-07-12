@@ -22,15 +22,16 @@ class dummy_storage_manager : public mmux::storage::storage_management_ops {
                    int32_t slot_begin,
                    int32_t slot_end,
                    const std::vector<std::string> &chain,
+                   bool auto_scale,
                    int32_t role,
                    const std::string &next_block_name) override {
     std::string chain_str;
     for (const auto &block: chain) {
       chain_str += ":" + block;
     }
-    COMMANDS.push_back(
-        "setup_block:" + block_name + ":" + path + ":" + std::to_string(slot_begin) + ":" + std::to_string(slot_end)
-            + chain_str + ":" + std::to_string(role) + ":" + next_block_name);
+    COMMANDS.push_back("setup_block:" + block_name + ":" + path + ":" + std::to_string(slot_begin) + ":" +
+        std::to_string(slot_end) + chain_str + ":" + std::to_string(auto_scale) + ":" + std::to_string(role) + ":" +
+        next_block_name);
   }
 
   std::pair<int32_t, int32_t> slot_range(const std::string &block_name) override {

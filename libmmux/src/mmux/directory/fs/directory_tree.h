@@ -200,6 +200,7 @@ class ds_file_node : public ds_node {
             const std::shared_ptr<block_allocator> &allocator) override {
     std::unique_lock<std::shared_mutex> lock(mtx_);
 
+    auto auto_scale = !dstatus_.is_static_provisioned();
     auto num_blocks = dstatus_.data_blocks().size();
     auto chain_length = dstatus_.chain_length();
     std::size_t slots_per_block = storage::block::SLOT_MAX / num_blocks;
@@ -222,6 +223,7 @@ class ds_file_node : public ds_node {
                              slot_begin,
                              slot_end,
                              chain.block_names,
+                             auto_scale,
                              chain_role::singleton,
                              "nil");
         storage->load(chain.block_names[0], block_backing_path);
@@ -233,7 +235,14 @@ class ds_file_node : public ds_node {
           std::string block_name = chain.block_names[j];
           std::string next_block_name = (j == chain_length - 1) ? "nil" : chain.block_names[j + 1];
           int32_t role = (j == 0) ? chain_role::head : (j == chain_length - 1) ? chain_role::tail : chain_role::mid;
-          storage->setup_block(block_name, path, slot_begin, slot_end, chain.block_names, role, next_block_name);
+          storage->setup_block(block_name,
+                               path,
+                               slot_begin,
+                               slot_end,
+                               chain.block_names,
+                               auto_scale,
+                               role,
+                               next_block_name);
           storage->load(block_name, block_backing_path);
         }
         dstatus_.mark_loaded(i, chain.block_names);

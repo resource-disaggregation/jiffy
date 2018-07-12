@@ -196,11 +196,11 @@ struct replica_chain {
     return out;
   }
 
-  bool operator==(const replica_chain &other) {
+  bool operator==(const replica_chain &other) const {
     return block_names == other.block_names && slot_range == other.slot_range;
   }
 
-  bool operator!=(const replica_chain &other) {
+  bool operator!=(const replica_chain &other) const {
     return *this != other;
   }
 };
@@ -355,6 +355,14 @@ class data_status {
 
   void remove_data_block(std::size_t i) {
     data_blocks_.erase(data_blocks_.begin() + i);
+  }
+
+  void set_data_block(std::size_t i, replica_chain&& chain) {
+    data_blocks_[i] = std::move(chain);
+  }
+
+  const replica_chain& get_data_block(std::size_t i) const {
+    return data_blocks_[i];
   }
 
   void update_data_block_slots(std::size_t i, int32_t slot_begin, int32_t slot_end) {

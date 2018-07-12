@@ -11,6 +11,7 @@ void storage_management_service_handler::setup_block(const int32_t block_id,
                                                      const int32_t slot_begin,
                                                      const int32_t slot_end,
                                                      const std::vector<std::string> &chain,
+                                                     bool auto_scale,
                                                      const int32_t role,
                                                      const std::string &next_block_name) {
   try {
@@ -18,6 +19,7 @@ void storage_management_service_handler::setup_block(const int32_t block_id,
                                                           slot_begin,
                                                           slot_end,
                                                           chain,
+                                                          auto_scale,
                                                           static_cast<chain_role>(role),
                                                           next_block_name);
   } catch (std::exception &e) {
@@ -58,6 +60,7 @@ void storage_management_service_handler::setup_and_set_importing(const int32_t b
                                                           0,
                                                           -1,
                                                           chain,
+                                                          true,
                                                           static_cast<chain_role>(role),
                                                           next_block_name);
     blocks_.at(static_cast<std::size_t>(block_id))->set_importing(slot_begin, slot_end);

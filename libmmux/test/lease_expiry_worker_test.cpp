@@ -44,11 +44,11 @@ TEST_CASE("lease_manager_test") {
     REQUIRE(blk.mode == storage_mode::on_disk);
   }
   REQUIRE(sm->COMMANDS.size() == 8);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/a/b/c/file.txt:0:65536:0:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "setup_block:1:/sandbox/a/b/file.txt:0:65536:1:0:nil");
-  REQUIRE(sm->COMMANDS[2] == "setup_block:2:/sandbox/a/file.txt:0:65536:2:0:nil");
-  REQUIRE(sm->COMMANDS[3] == "setup_block:3:/sandbox/a/c/file.txt:0:65536:3:0:nil");
-  REQUIRE(sm->COMMANDS[4] == "setup_block:4:/sandbox/a/d/file.txt:0:65536:4:0:nil");
+  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/a/b/c/file.txt:0:65536:0:1:0:nil");
+  REQUIRE(sm->COMMANDS[1] == "setup_block:1:/sandbox/a/b/file.txt:0:65536:1:1:0:nil");
+  REQUIRE(sm->COMMANDS[2] == "setup_block:2:/sandbox/a/file.txt:0:65536:2:1:0:nil");
+  REQUIRE(sm->COMMANDS[3] == "setup_block:3:/sandbox/a/c/file.txt:0:65536:3:1:0:nil");
+  REQUIRE(sm->COMMANDS[4] == "setup_block:4:/sandbox/a/d/file.txt:0:65536:4:1:0:nil");
   REQUIRE(sm->COMMANDS[5] == "reset:1");
   REQUIRE(sm->COMMANDS[6] == "dump:4:local://tmp/0_65536");
   REQUIRE(sm->COMMANDS[7] == "reset:2");

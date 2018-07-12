@@ -17,6 +17,7 @@ class storage_manager : public storage_management_ops {
                    int32_t slot_begin,
                    int32_t slot_end,
                    const std::vector<std::string> &chain,
+                   bool auto_scale,
                    int32_t role,
                    const std::string &next_block_name) override;
   std::string path(const std::string &block_name) override;
