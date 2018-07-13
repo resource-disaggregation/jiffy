@@ -371,8 +371,9 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
     dirty_ = true;
   }
   bool expected = false;
-  if (is_mutator(oid) && overload() && state() != block_state::exporting && state() != block_state::importing
-      && is_tail() && !locked_block_.is_active() && splitting_.compare_exchange_strong(expected, true)) {
+  if (auto_scale_.load() && is_mutator(oid) && overload() && state() != block_state::exporting
+      && state() != block_state::importing && is_tail() && !locked_block_.is_active()
+      && splitting_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
     LOG(log_level::info) << "Overloaded block; storage = " << bytes_.load() << " capacity = " << capacity_
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
@@ -387,9 +388,9 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
     }
   }
   expected = false;
-  if (oid == kv_op_id::remove && underload() && state() != block_state::exporting && state() != block_state::importing
-      && slot_end() != block::SLOT_MAX && is_tail() && !locked_block_.is_active() &&
-      merging_.compare_exchange_strong(expected, true)) {
+  if (auto_scale_.load() && oid == kv_op_id::remove && underload() && state() != block_state::exporting
+      && state() != block_state::importing && slot_end() != block::SLOT_MAX && is_tail() && !locked_block_.is_active()
+      && merging_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
     LOG(log_level::info) << "Underloaded block; storage = " << bytes_.load() << " capacity = " << capacity_
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
