@@ -25,6 +25,10 @@ add_library(mmux STATIC
         src/mmux/directory/block/random_block_allocator.h
         src/mmux/directory/client/directory_client.cpp
         src/mmux/directory/client/directory_client.h
+        src/mmux/directory/client/lease_client.cpp
+        src/mmux/directory/client/lease_client.h
+        src/mmux/directory/client/lease_renewal_worker.cc
+        src/mmux/directory/client/lease_renewal_worker.h
         src/mmux/directory/fs/directory_server.cpp
         src/mmux/directory/fs/directory_server.h
         src/mmux/directory/fs/directory_service.cpp
@@ -44,10 +48,20 @@ add_library(mmux STATIC
         src/mmux/directory/fs/directory_type_conversions.h
         src/mmux/directory/fs/sync_worker.cpp
         src/mmux/directory/fs/sync_worker.h
-        src/mmux/directory/client/lease_client.cpp
-        src/mmux/directory/client/lease_client.h
-        src/mmux/directory/client/lease_renewal_worker.cc
-        src/mmux/directory/client/lease_renewal_worker.h
+        src/mmux/directory/heartbeat/health_metadata.h
+        src/mmux/directory/heartbeat/health_metadata.cpp
+        src/mmux/directory/heartbeat/heartbeat_service_constants.h
+        src/mmux/directory/heartbeat/heartbeat_service_constants.cpp
+        src/mmux/directory/heartbeat/heartbeat_service_types.h
+        src/mmux/directory/heartbeat/heartbeat_service_types.cpp
+        src/mmux/directory/heartbeat/heartbeat_service_types.tcc
+        src/mmux/directory/heartbeat/heartbeat_service.h
+        src/mmux/directory/heartbeat/heartbeat_service.tcc
+        src/mmux/directory/heartbeat/heartbeat_service.cpp
+        src/mmux/directory/heartbeat/heartbeat_service_handler.h
+        src/mmux/directory/heartbeat/heartbeat_service_handler.cpp
+        src/mmux/directory/heartbeat/heartbeat_worker.h
+        src/mmux/directory/heartbeat/heartbeat_worker.cpp
         src/mmux/directory/lease/lease_server.cpp
         src/mmux/directory/lease/lease_server.h
         src/mmux/directory/lease/lease_service.cpp
@@ -197,7 +211,7 @@ add_library(mmux STATIC
         src/mmux/utils/signal_handling.h
         src/mmux/utils/time_utils.h
         src/mmux/utils/retry_utils.h
-        src/mmux/utils/string_utils.h)
+        src/mmux/utils/string_utils.h src/mmux/directory/heartbeat/heartbeat_service_factory.cpp src/mmux/directory/heartbeat/heartbeat_service_factory.h src/mmux/directory/heartbeat/heartbeat_server.cpp src/mmux/directory/heartbeat/heartbeat_server.h src/mmux/storage/service/heartbeat_sender.cpp src/mmux/storage/service/heartbeat_sender.h)
 
 if (NOT USE_SYSTEM_LIBEVENT)
   add_dependencies(mmux libevent)
