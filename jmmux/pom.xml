@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>memorymux</groupId>
-  <artifactId>memorymux-client</artifactId>
+  <artifactId>jmmux</artifactId>
   <version>0.1.0</version>
   <packaging>pom</packaging>
   <name>MemoryMUX Client Libraries</name>

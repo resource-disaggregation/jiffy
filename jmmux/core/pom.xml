@@ -6,11 +6,11 @@
 
   <parent>
     <groupId>memorymux</groupId>
-    <artifactId>memorymux-client</artifactId>
+    <artifactId>jmmux</artifactId>
     <version>0.1.0</version>
   </parent>
 
-  <artifactId>memorymux-core</artifactId>
+  <artifactId>jmmux-core</artifactId>
   <version>0.1.0</version>
   <packaging>jar</packaging>
   <name>MemoryMUX Client Core</name>
