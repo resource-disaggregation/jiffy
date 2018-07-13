@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import mmux.directory.rpc_storage_mode;
+import mmux.directory.Flags;
 import mmux.kv.KVClient;
 import mmux.kv.KVClient.LockedClient;
 import mmux.notification.KVListener;
@@ -233,7 +233,8 @@ public class MMuxClientTest {
     Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.update(invalidKVs));
     Assert.assertEquals(updatedValues, kv.get(validKeys));
     Assert.assertEquals(updatedValues, kv.remove(validKeys));
-    Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.remove(invalidKeys));
+    Assert
+        .assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.remove(invalidKeys));
     Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.get(validKeys));
 
     LockedClient lkv = kv.lock();
@@ -305,7 +306,8 @@ public class MMuxClientTest {
     Assert.assertEquals(updatedValues, kv.get(validKeys));
     Assert.assertEquals(updatedValues, kv.remove(validKeys));
     Assert.assertEquals(0, kv.numKeys());
-    Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.remove(invalidKeys));
+    Assert
+        .assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.remove(invalidKeys));
     Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.get(validKeys));
   }
 
@@ -354,6 +356,19 @@ public class MMuxClientTest {
   }
 
   @Test
+  public void testOpen() throws InterruptedException, TException, IOException {
+    startServers(false, false);
+    try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
+      client.create("/a/file.txt", "local://tmp", 1, 1);
+      Assert.assertTrue(client.fs().exists("/a/file.txt"));
+      KVClient kv = client.open("/a/file.txt");
+      kvOps(kv);
+    } finally {
+      stopServers();
+    }
+  }
+
+  @Test
   public void testFlushRemove() throws InterruptedException, TException, IOException {
     startServers(false, false);
     try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
@@ -370,13 +385,29 @@ public class MMuxClientTest {
   }
 
   @Test
-  public void testOpen() throws InterruptedException, TException, IOException {
+  public void testClose() throws InterruptedException, TException, IOException {
     startServers(false, false);
     try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
       client.create("/a/file.txt", "local://tmp", 1, 1);
+      client.create("/a/file1.txt", "local://tmp", 1, 1, Flags.PINNED);
+      client.create("/a/file2.txt", "local://tmp", 1, 1, Flags.MAPPED);
+      Assert.assertTrue(client.getWorker().hasPath("/a/file.txt"));
+      Assert.assertTrue(client.getWorker().hasPath("/a/file1.txt"));
+      Assert.assertTrue(client.getWorker().hasPath("/a/file2.txt"));
+      client.close("/a/file.txt");
+      client.close("/a/file1.txt");
+      client.close("/a/file2.txt");
+      Assert.assertFalse(client.getWorker().hasPath("/a/file.txt"));
+      Assert.assertFalse(client.getWorker().hasPath("/a/file1.txt"));
+      Assert.assertFalse(client.getWorker().hasPath("/a/file2.txt"));
+      Thread.sleep(client.getWorker().getRenewalDurationMs());
       Assert.assertTrue(client.fs().exists("/a/file.txt"));
-      KVClient kv = client.open("/a/file.txt");
-      kvOps(kv);
+      Assert.assertTrue(client.fs().exists("/a/file1.txt"));
+      Assert.assertTrue(client.fs().exists("/a/file2.txt"));
+      Thread.sleep(client.getWorker().getRenewalDurationMs() * 2);
+      Assert.assertFalse(client.fs().exists("/a/file.txt"));
+      Assert.assertTrue(client.fs().exists("/a/file1.txt"));
+      Assert.assertTrue(client.fs().exists("/a/file2.txt"));
     } finally {
       stopServers();
     }
