@@ -6,10 +6,10 @@ function(thrift_gen lang thrift_file output_dir)
       message(FATAL_ERROR "Error: Output directory ${output_dir_abs} does not exist for thrift generated files")
     endif ()
     message(STATUS "Generating sources using ${thrift_file_abs} to ${output_dir_abs}")
-    exec_program(${THRIFT_COMPILER}
-            ARGS -out "${output_dir_abs}" --gen ${lang} ${thrift_file_abs}
+    execute_process(
+            COMMAND ${THRIFT_COMPILER} -out "${output_dir_abs}" --gen ${lang} ${thrift_file_abs}
             OUTPUT_VARIABLE __thrift_OUT
-            RETURN_VALUE THRIFT_RETURN)
+            RESULT_VARIABLE THRIFT_RETURN)
   else ()
     message(FATAL_ERROR "Error: Cannot generate files from ${thrift_file_abs} since it does not exist")
   endif ()
@@ -23,6 +23,7 @@ set(THRIFT_GEN_JAVA "java:fullcamel,handle_runtime_exceptions,generated_annotati
 thrift_gen(${THRIFT_GEN_CXX} src/block_allocation_service.thrift ../libmmux/src/mmux/directory/block/)
 thrift_gen(${THRIFT_GEN_CXX} src/block_service.thrift ../libmmux/src/mmux/storage/service/)
 thrift_gen(${THRIFT_GEN_CXX} src/directory_service.thrift ../libmmux/src/mmux/directory/fs/)
+thrift_gen(${THRIFT_GEN_CXX} src/heartbeat_service.thrift ../libmmux/src/mmux/directory/heartbeat/)
 thrift_gen(${THRIFT_GEN_CXX} src/lease_service.thrift ../libmmux/src/mmux/directory/lease/)
 thrift_gen(${THRIFT_GEN_CXX} src/notification_service.thrift ../libmmux/src/mmux/storage/notification/)
 thrift_gen(${THRIFT_GEN_CXX} src/storage_management_service.thrift ../libmmux/src/mmux/storage/manager/)
