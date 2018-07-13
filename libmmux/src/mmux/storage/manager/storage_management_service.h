@@ -21,7 +21,7 @@ namespace mmux { namespace storage {
 class storage_management_serviceIf {
  public:
   virtual ~storage_management_serviceIf() {}
-  virtual void setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name) = 0;
+  virtual void setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const bool auto_scale, const int32_t chain_role, const std::string& next_block_name) = 0;
   virtual void slot_range(rpc_slot_range& _return, const int32_t block_id) = 0;
   virtual void set_exporting(const int32_t block_id, const std::vector<std::string> & target_block, const int32_t slot_begin, const int32_t slot_end) = 0;
   virtual void set_importing(const int32_t block_id, const int32_t slot_begin, const int32_t slot_end) = 0;
@@ -66,7 +66,7 @@ class storage_management_serviceIfSingletonFactory : virtual public storage_mana
 class storage_management_serviceNull : virtual public storage_management_serviceIf {
  public:
   virtual ~storage_management_serviceNull() {}
-  void setup_block(const int32_t /* block_id */, const std::string& /* path */, const int32_t /* slot_begin */, const int32_t /* slot_end */, const std::vector<std::string> & /* chain */, const int32_t /* chain_role */, const std::string& /* next_block_name */) {
+  void setup_block(const int32_t /* block_id */, const std::string& /* path */, const int32_t /* slot_begin */, const int32_t /* slot_end */, const std::vector<std::string> & /* chain */, const bool /* auto_scale */, const int32_t /* chain_role */, const std::string& /* next_block_name */) {
     return;
   }
   void slot_range(rpc_slot_range& /* _return */, const int32_t /* block_id */) {
@@ -119,12 +119,13 @@ class storage_management_serviceNull : virtual public storage_management_service
 };
 
 typedef struct _storage_management_service_setup_block_args__isset {
-  _storage_management_service_setup_block_args__isset() : block_id(false), path(false), slot_begin(false), slot_end(false), chain(false), chain_role(false), next_block_name(false) {}
+  _storage_management_service_setup_block_args__isset() : block_id(false), path(false), slot_begin(false), slot_end(false), chain(false), auto_scale(false), chain_role(false), next_block_name(false) {}
   bool block_id :1;
   bool path :1;
   bool slot_begin :1;
   bool slot_end :1;
   bool chain :1;
+  bool auto_scale :1;
   bool chain_role :1;
   bool next_block_name :1;
 } _storage_management_service_setup_block_args__isset;
@@ -134,7 +135,7 @@ class storage_management_service_setup_block_args {
 
   storage_management_service_setup_block_args(const storage_management_service_setup_block_args&);
   storage_management_service_setup_block_args& operator=(const storage_management_service_setup_block_args&);
-  storage_management_service_setup_block_args() : block_id(0), path(), slot_begin(0), slot_end(0), chain_role(0), next_block_name() {
+  storage_management_service_setup_block_args() : block_id(0), path(), slot_begin(0), slot_end(0), auto_scale(0), chain_role(0), next_block_name() {
   }
 
   virtual ~storage_management_service_setup_block_args() throw();
@@ -143,6 +144,7 @@ class storage_management_service_setup_block_args {
   int32_t slot_begin;
   int32_t slot_end;
   std::vector<std::string>  chain;
+  bool auto_scale;
   int32_t chain_role;
   std::string next_block_name;
 
@@ -157,6 +159,8 @@ class storage_management_service_setup_block_args {
   void __set_slot_end(const int32_t val);
 
   void __set_chain(const std::vector<std::string> & val);
+
+  void __set_auto_scale(const bool val);
 
   void __set_chain_role(const int32_t val);
 
@@ -173,6 +177,8 @@ class storage_management_service_setup_block_args {
     if (!(slot_end == rhs.slot_end))
       return false;
     if (!(chain == rhs.chain))
+      return false;
+    if (!(auto_scale == rhs.auto_scale))
       return false;
     if (!(chain_role == rhs.chain_role))
       return false;
@@ -204,6 +210,7 @@ class storage_management_service_setup_block_pargs {
   const int32_t* slot_begin;
   const int32_t* slot_end;
   const std::vector<std::string> * chain;
+  const bool* auto_scale;
   const int32_t* chain_role;
   const std::string* next_block_name;
 
@@ -2090,8 +2097,8 @@ class storage_management_serviceClientT : virtual public storage_management_serv
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name);
-  void send_setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name);
+  void setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const bool auto_scale, const int32_t chain_role, const std::string& next_block_name);
+  void send_setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const bool auto_scale, const int32_t chain_role, const std::string& next_block_name);
   void recv_setup_block();
   void slot_range(rpc_slot_range& _return, const int32_t block_id);
   void send_slot_range(const int32_t block_id);
@@ -2282,13 +2289,13 @@ class storage_management_serviceMultiface : virtual public storage_management_se
     ifaces_.push_back(iface);
   }
  public:
-  void setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name) {
+  void setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const bool auto_scale, const int32_t chain_role, const std::string& next_block_name) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->setup_block(block_id, path, slot_begin, slot_end, chain, chain_role, next_block_name);
+      ifaces_[i]->setup_block(block_id, path, slot_begin, slot_end, chain, auto_scale, chain_role, next_block_name);
     }
-    ifaces_[i]->setup_block(block_id, path, slot_begin, slot_end, chain, chain_role, next_block_name);
+    ifaces_[i]->setup_block(block_id, path, slot_begin, slot_end, chain, auto_scale, chain_role, next_block_name);
   }
 
   void slot_range(rpc_slot_range& _return, const int32_t block_id) {
@@ -2459,8 +2466,8 @@ class storage_management_serviceConcurrentClientT : virtual public storage_manag
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name);
-  int32_t send_setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name);
+  void setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const bool auto_scale, const int32_t chain_role, const std::string& next_block_name);
+  int32_t send_setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const bool auto_scale, const int32_t chain_role, const std::string& next_block_name);
   void recv_setup_block(const int32_t seqid);
   void slot_range(rpc_slot_range& _return, const int32_t block_id);
   int32_t send_slot_range(const int32_t block_id);

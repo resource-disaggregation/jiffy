@@ -17,7 +17,7 @@ struct rpc_slot_range {
 
 service storage_management_service {
   void setup_block(1: i32 block_id, 2: string path, 3: i32 slot_begin, 4: i32 slot_end, 5: list<string> chain,
-                   6: i32 chain_role, 7: string next_block_name)
+                   6: bool auto_scale, 7: i32 chain_role, 8: string next_block_name)
     throws (1: storage_management_exception ex),
 
   rpc_slot_range slot_range(1: i32 block_id)
@@ -29,8 +29,8 @@ service storage_management_service {
   void set_importing(1: i32 block_id, 3: i32 slot_begin, 4: i32 slot_end)
     throws (1: storage_management_exception ex),
 
-  void setup_and_set_importing(1: i32 block_id, 2: string path, 3: i32 slot_begin, 4: i32 slot_end, 5: list<string> chain,
-                               6: i32 chain_role, 7: string next_block_name)
+  void setup_and_set_importing(1: i32 block_id, 2: string path, 3: i32 slot_begin, 4: i32 slot_end,
+                               5: list<string> chain, 6: i32 chain_role, 7: string next_block_name)
     throws (1: storage_management_exception ex),
 
   void set_regular(1: i32 block_id, 2: i32 slot_begin, 3: i32 slot_end)

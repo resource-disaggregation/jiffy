@@ -49,6 +49,7 @@ class block {
         block_name_(std::move(block_name)),
         state_(block_state::regular),
         slot_range_(0, -1),
+        auto_scale_(true),
         export_slot_range_(0, -1),
         import_slot_range_(0, -1) {}
 
@@ -201,6 +202,7 @@ class block {
 
   block_state state_;
   std::pair<int32_t, int32_t> slot_range_;
+  std::atomic_bool auto_scale_;
 
   std::pair<int32_t, int32_t> export_slot_range_;
   std::vector<std::string> export_target_;

@@ -25,6 +25,7 @@ class storage_management_service_handler : public storage_management_serviceIf {
                    int32_t slot_begin,
                    int32_t slot_end,
                    const std::vector<std::string> &chain,
+                   bool auto_scale,
                    int32_t chain_role,
                    const std::string &next_block_name) override;
   void slot_range(rpc_slot_range &_return, int32_t block_id) override;

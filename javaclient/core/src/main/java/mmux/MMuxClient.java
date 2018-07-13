@@ -115,6 +115,10 @@ public class MMuxClient implements Closeable {
     fs.load(path, backingPath);
   }
 
+  public void close(String path) {
+    endScope(path);
+  }
+
   @Override
   public void close() throws IOException {
     worker.stop();

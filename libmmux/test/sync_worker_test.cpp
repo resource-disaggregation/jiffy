@@ -20,7 +20,7 @@ TEST_CASE("sync_worker_test") {
 
   REQUIRE_NOTHROW(worker.start());
   std::this_thread::sleep_for(210ms);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/a/b/c/file.txt:0:65536:0:0:nil");
+  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/a/b/c/file.txt:0:65536:0:1:0:nil");
   REQUIRE(sm->COMMANDS[1] == "sync:0:local://tmp/0_65536");
   REQUIRE(sm->COMMANDS[2] == "sync:0:local://tmp/0_65536");
   REQUIRE(sm->COMMANDS[3] == "sync:0:local://tmp/0_65536");

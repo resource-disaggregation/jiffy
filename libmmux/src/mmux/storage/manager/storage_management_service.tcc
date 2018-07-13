@@ -87,6 +87,14 @@ uint32_t storage_management_service_setup_block_args::read(Protocol_* iprot) {
         }
         break;
       case 6:
+        if (ftype == ::apache::thrift::protocol::T_BOOL) {
+          xfer += iprot->readBool(this->auto_scale);
+          this->__isset.auto_scale = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 7:
         if (ftype == ::apache::thrift::protocol::T_I32) {
           xfer += iprot->readI32(this->chain_role);
           this->__isset.chain_role = true;
@@ -94,7 +102,7 @@ uint32_t storage_management_service_setup_block_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 7:
+      case 8:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->next_block_name);
           this->__isset.next_block_name = true;
@@ -148,11 +156,15 @@ uint32_t storage_management_service_setup_block_args::write(Protocol_* oprot) co
   }
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("chain_role", ::apache::thrift::protocol::T_I32, 6);
+  xfer += oprot->writeFieldBegin("auto_scale", ::apache::thrift::protocol::T_BOOL, 6);
+  xfer += oprot->writeBool(this->auto_scale);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("chain_role", ::apache::thrift::protocol::T_I32, 7);
   xfer += oprot->writeI32(this->chain_role);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("next_block_name", ::apache::thrift::protocol::T_STRING, 7);
+  xfer += oprot->writeFieldBegin("next_block_name", ::apache::thrift::protocol::T_STRING, 8);
   xfer += oprot->writeString(this->next_block_name);
   xfer += oprot->writeFieldEnd();
 
@@ -196,11 +208,15 @@ uint32_t storage_management_service_setup_block_pargs::write(Protocol_* oprot) c
   }
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("chain_role", ::apache::thrift::protocol::T_I32, 6);
+  xfer += oprot->writeFieldBegin("auto_scale", ::apache::thrift::protocol::T_BOOL, 6);
+  xfer += oprot->writeBool((*(this->auto_scale)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("chain_role", ::apache::thrift::protocol::T_I32, 7);
   xfer += oprot->writeI32((*(this->chain_role)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("next_block_name", ::apache::thrift::protocol::T_STRING, 7);
+  xfer += oprot->writeFieldBegin("next_block_name", ::apache::thrift::protocol::T_STRING, 8);
   xfer += oprot->writeString((*(this->next_block_name)));
   xfer += oprot->writeFieldEnd();
 
@@ -3360,14 +3376,14 @@ uint32_t storage_management_service_export_slots_presult::read(Protocol_* iprot)
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name)
+void storage_management_serviceClientT<Protocol_>::setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const bool auto_scale, const int32_t chain_role, const std::string& next_block_name)
 {
-  send_setup_block(block_id, path, slot_begin, slot_end, chain, chain_role, next_block_name);
+  send_setup_block(block_id, path, slot_begin, slot_end, chain, auto_scale, chain_role, next_block_name);
   recv_setup_block();
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::send_setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name)
+void storage_management_serviceClientT<Protocol_>::send_setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const bool auto_scale, const int32_t chain_role, const std::string& next_block_name)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("setup_block", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -3378,6 +3394,7 @@ void storage_management_serviceClientT<Protocol_>::send_setup_block(const int32_
   args.slot_begin = &slot_begin;
   args.slot_end = &slot_end;
   args.chain = &chain;
+  args.auto_scale = &auto_scale;
   args.chain_role = &chain_role;
   args.next_block_name = &next_block_name;
   args.write(this->oprot_);
@@ -4409,7 +4426,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_setup_block(int32_
 
   storage_management_service_setup_block_result result;
   try {
-    iface_->setup_block(args.block_id, args.path, args.slot_begin, args.slot_end, args.chain, args.chain_role, args.next_block_name);
+    iface_->setup_block(args.block_id, args.path, args.slot_begin, args.slot_end, args.chain, args.auto_scale, args.chain_role, args.next_block_name);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -4466,7 +4483,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_setup_block(int32_
 
   storage_management_service_setup_block_result result;
   try {
-    iface_->setup_block(args.block_id, args.path, args.slot_begin, args.slot_end, args.chain, args.chain_role, args.next_block_name);
+    iface_->setup_block(args.block_id, args.path, args.slot_begin, args.slot_end, args.chain, args.auto_scale, args.chain_role, args.next_block_name);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -6226,14 +6243,14 @@ template <class Protocol_>
 }
 
 template <class Protocol_>
-void storage_management_serviceConcurrentClientT<Protocol_>::setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name)
+void storage_management_serviceConcurrentClientT<Protocol_>::setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const bool auto_scale, const int32_t chain_role, const std::string& next_block_name)
 {
-  int32_t seqid = send_setup_block(block_id, path, slot_begin, slot_end, chain, chain_role, next_block_name);
+  int32_t seqid = send_setup_block(block_id, path, slot_begin, slot_end, chain, auto_scale, chain_role, next_block_name);
   recv_setup_block(seqid);
 }
 
 template <class Protocol_>
-int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name)
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_setup_block(const int32_t block_id, const std::string& path, const int32_t slot_begin, const int32_t slot_end, const std::vector<std::string> & chain, const bool auto_scale, const int32_t chain_role, const std::string& next_block_name)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -6245,6 +6262,7 @@ int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_setup_block
   args.slot_begin = &slot_begin;
   args.slot_end = &slot_end;
   args.chain = &chain;
+  args.auto_scale = &auto_scale;
   args.chain_role = &chain_role;
   args.next_block_name = &next_block_name;
   args.write(this->oprot_);

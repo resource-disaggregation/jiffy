@@ -41,9 +41,10 @@ void storage_management_client::setup_block(int32_t block_id,
                                             int32_t slot_begin,
                                             int32_t slot_end,
                                             const std::vector<std::string> &chain,
+                                            bool auto_scale,
                                             int32_t role,
                                             const std::string &next_block_name) {
-  client_->setup_block(block_id, path, slot_begin, slot_end, chain, role, next_block_name);
+  client_->setup_block(block_id, path, slot_begin, slot_end, chain, auto_scale, role, next_block_name);
 }
 
 std::pair<int32_t, int32_t> storage_management_client::slot_range(int32_t block_id) {

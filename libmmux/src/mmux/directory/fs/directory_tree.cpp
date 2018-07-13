@@ -81,6 +81,7 @@ data_status directory_tree::create(const std::string &path,
 
   std::vector<replica_chain> blocks;
   std::size_t slots_per_block = storage::block::SLOT_MAX / num_blocks;
+  bool auto_scale = (flags & data_status::STATIC_PROVISIONED) != data_status::STATIC_PROVISIONED;
   for (std::size_t i = 0; i < num_blocks; ++i) {
     auto slot_begin = static_cast<int32_t>(i * slots_per_block);
     auto slot_end =
@@ -99,6 +100,7 @@ data_status directory_tree::create(const std::string &path,
                             slot_begin,
                             slot_end,
                             chain.block_names,
+                            auto_scale,
                             chain_role::singleton,
                             "nil");
     } else {
@@ -106,7 +108,14 @@ data_status directory_tree::create(const std::string &path,
         std::string block_name = chain.block_names[j];
         std::string next_block_name = (j == chain_length - 1) ? "nil" : chain.block_names[j + 1];
         int32_t role = (j == 0) ? chain_role::head : (j == chain_length - 1) ? chain_role::tail : chain_role::mid;
-        storage_->setup_block(block_name, path, slot_begin, slot_end, chain.block_names, role, next_block_name);
+        storage_->setup_block(block_name,
+                              path,
+                              slot_begin,
+                              slot_end,
+                              chain.block_names,
+                              auto_scale,
+                              role,
+                              next_block_name);
       }
     }
   }
@@ -160,6 +169,7 @@ data_status directory_tree::open_or_create(const std::string &path,
 
   std::vector<replica_chain> blocks;
   std::size_t slots_per_block = storage::block::SLOT_MAX / num_blocks;
+  bool auto_scale = (flags & data_status::STATIC_PROVISIONED) != data_status::STATIC_PROVISIONED;
   for (std::size_t i = 0; i < num_blocks; ++i) {
     auto slot_begin = static_cast<int32_t>(i * slots_per_block);
     auto slot_end =
@@ -178,6 +188,7 @@ data_status directory_tree::open_or_create(const std::string &path,
                             slot_begin,
                             slot_end,
                             chain.block_names,
+                            auto_scale,
                             chain_role::singleton,
                             "nil");
     } else {
@@ -185,7 +196,14 @@ data_status directory_tree::open_or_create(const std::string &path,
         std::string block_name = chain.block_names[j];
         std::string next_block_name = (j == chain_length - 1) ? "nil" : chain.block_names[j + 1];
         int32_t role = (j == 0) ? chain_role::head : (j == chain_length - 1) ? chain_role::tail : chain_role::mid;
-        storage_->setup_block(block_name, path, slot_begin, slot_end, chain.block_names, role, next_block_name);
+        storage_->setup_block(block_name,
+                              path,
+                              slot_begin,
+                              slot_end,
+                              chain.block_names,
+                              auto_scale,
+                              role,
+                              next_block_name);
       }
     }
   }
@@ -347,6 +365,18 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
   std::vector<bool> failed(chain_length);
   LOG(log_level::info) << "Resolving failures for block chain " << chain.to_string() << " @ " << path;
   bool mid_failure = false;
+  auto node = get_node_as_file(path);
+  auto dstatus = node->dstatus();
+  auto blocks = dstatus.data_blocks();
+  size_t chain_pos = blocks.size();
+  for (size_t i = 0; i < blocks.size(); i++) {
+    if (chain == blocks.at(i)) {
+      chain_pos = i;
+    }
+  }
+  if (chain_pos == blocks.size()) {
+    throw directory_ops_exception("No such chain for path " + path);
+  }
   std::vector<std::string> fixed_chain;
   for (std::size_t i = 0; i < chain_length; i++) {
     std::string block_name = chain.block_names[i];
@@ -370,9 +400,9 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
       }
     }
   }
-
   // Re-organize chain as needed
   using namespace storage;
+  bool auto_scale = !dstatus.is_static_provisioned();
   if (fixed_chain.empty()) {                       // All failed
     LOG(log_level::error) << "No blocks left in chain";
     throw directory_ops_exception("All blocks in the chain have failed.");
@@ -384,6 +414,7 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
                           slot_range.first,
                           slot_range.second,
                           fixed_chain,
+                          auto_scale,
                           chain_role::singleton,
                           "nil");
   } else {                                         // More than one left
@@ -400,6 +431,7 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
                             slot_range.first,
                             slot_range.second,
                             fixed_chain,
+                            auto_scale,
                             role,
                             next_block_name);
     }
@@ -408,17 +440,33 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
       storage_->resend_pending(fixed_chain[0]);
     }
   }
-  return replica_chain(fixed_chain,
-                       chain.slot_range.first,
-                       chain.slot_range.second,
-                       chain_status::stable,
-                       storage_mode::in_memory);
+  dstatus.set_data_block(chain_pos, replica_chain(fixed_chain,
+                                                  chain.slot_range.first,
+                                                  chain.slot_range.second,
+                                                  chain_status::stable,
+                                                  storage_mode::in_memory));
+  node->dstatus(dstatus);
+  return dstatus.get_data_block(chain_pos);
 }
 
 replica_chain directory_tree::add_replica_to_chain(const std::string &path, const replica_chain &chain) {
   // TODO: Replace replica_chain argument with chain id
   using namespace storage;
   LOG(log_level::info) << "Adding new replica to chain " << chain.to_string() << " @ " << path;
+
+  auto node = get_node_as_file(path);
+  auto dstatus = node->dstatus();
+  auto blocks = dstatus.data_blocks();
+  size_t chain_pos = blocks.size();
+  for (size_t i = 0; i < blocks.size(); i++) {
+    if (chain == blocks.at(i)) {
+      chain_pos = i;
+    }
+  }
+  if (chain_pos == blocks.size()) {
+    throw directory_ops_exception("No such chain for path " + path);
+  }
+  bool auto_scale = !dstatus.is_static_provisioned();
 
   auto new_blocks = allocator_->allocate(1, chain.block_names);
   auto updated_chain = chain.block_names;
@@ -433,6 +481,7 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
                         slot_range.first,
                         slot_range.second,
                         updated_chain,
+                        auto_scale,
                         chain_role::tail,
                         new_blocks.front());
   for (std::size_t i = chain.block_names.size(); i < updated_chain.size(); i++) {
@@ -442,7 +491,14 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
     LOG(log_level::info) << "Setting block <" << block_name << ">: path=" << path << ", role=" << role << ", next="
                          << next_block_name << ">";
     // TODO: this is incorrect -- we shouldn't be setting the chain to updated_chain right now...
-    storage_->setup_block(block_name, path, slot_range.first, slot_range.second, updated_chain, role, next_block_name);
+    storage_->setup_block(block_name,
+                          path,
+                          slot_range.first,
+                          slot_range.second,
+                          updated_chain,
+                          auto_scale,
+                          role,
+                          next_block_name);
   }
 
   LOG(log_level::info) << "Forwarding data from <" << chain.block_names.back() << "> to <" << new_blocks.front() << ">";
@@ -456,14 +512,17 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
                         slot_range.first,
                         slot_range.second,
                         updated_chain,
+                        auto_scale,
                         chain_role::mid,
                         new_blocks.front());
 
-  return replica_chain(updated_chain,
-                       chain.slot_range.first,
-                       chain.slot_range.second,
-                       chain_status::stable,
-                       storage_mode::in_memory);
+  dstatus.set_data_block(chain_pos, replica_chain(updated_chain,
+                                                  chain.slot_range.first,
+                                                  chain.slot_range.second,
+                                                  chain_status::stable,
+                                                  storage_mode::in_memory));
+  node->dstatus(dstatus);
+  return dstatus.get_data_block(chain_pos);
 }
 
 void directory_tree::add_block_to_file(const std::string &path) {

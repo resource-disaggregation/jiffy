@@ -131,6 +131,7 @@ class chain_module : public block {
              int32_t slot_begin,
              int32_t slot_end,
              const std::vector<std::string> &chain,
+             bool auto_scale,
              const chain_role &role,
              const std::string &next_block_name) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
@@ -139,6 +140,7 @@ class chain_module : public block {
     slot_range_.second = slot_end;
     chain_ = chain;
     role_ = role;
+    auto_scale_ = auto_scale;
     auto protocol = next_->reset(next_block_name);
     if (protocol && role_ != chain_role::tail) {
       auto handler = std::make_shared<chain_response_handler>(this);

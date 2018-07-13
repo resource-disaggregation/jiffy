@@ -103,6 +103,11 @@ class DataStatus:
                                          replica_chain.storage_mode)
                             for replica_chain in data_blocks]
 
+class Flags:
+    pinned = 0x01
+    static_provisioned = 0x02
+    mapped = 0x04
+
 
 class DirectoryClient:
     def __init__(self, host='127.0.0.1', port=9090):

@@ -23,12 +23,15 @@ class mmux_client {
   storage::kv_client create(const std::string &path,
                             const std::string &persistent_store_prefix,
                             size_t num_blocks = 1,
-                            size_t chain_length = 1);
+                            size_t chain_length = 1,
+                            int32_t flags = 0);
   storage::kv_client open(const std::string &path);
   storage::kv_client open_or_create(const std::string &path,
                                     const std::string &persistent_store_prefix,
                                     size_t num_blocks = 1,
-                                    size_t chain_length = 1);
+                                    size_t chain_length = 1,
+                                    int32_t flags = 0);
+  void close(const std::string &path);
   storage::kv_listener listen(const std::string &path);
   void remove(const std::string &path);
   void flush(const std::string &path, const std::string &dest);

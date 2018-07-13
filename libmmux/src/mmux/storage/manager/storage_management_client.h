@@ -22,6 +22,7 @@ class storage_management_client {
                    int32_t slot_begin,
                    int32_t slot_end,
                    const std::vector<std::string> &chain,
+                   bool auto_scale,
                    int32_t role,
                    const std::string &next_block_name);
   std::pair<int32_t, int32_t> slot_range(int32_t block_id);

@@ -31,6 +31,7 @@ TEST_CASE("manager_setup_block_test", "[setup_block][path][slot_range]") {
                                       0,
                                       128,
                                       {block_name},
+                                      false,
                                       chain_role::singleton,
                                       "nil"));
   auto block = blocks.front();
@@ -117,6 +118,7 @@ TEST_CASE("manager_scale_up", "[setup_and_set_importing][set_exporting][export_s
                                       0,
                                       65536,
                                       {block_name1},
+                                      false,
                                       chain_role::singleton,
                                       "nil"));
 
@@ -213,6 +215,7 @@ TEST_CASE("manager_scale_down", "[setup_and_set_importing][set_exporting][export
                                       0,
                                       32768,
                                       {block_name1},
+                                      false,
                                       chain_role::singleton,
                                       "nil"));
 
@@ -221,6 +224,7 @@ TEST_CASE("manager_scale_down", "[setup_and_set_importing][set_exporting][export
                                       32769,
                                       65536,
                                       {block_name2},
+                                      false,
                                       chain_role::singleton,
                                       "nil"));
 

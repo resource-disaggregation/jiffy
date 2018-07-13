@@ -18,7 +18,7 @@ from unittest import TestCase
 
 from thrift.transport import TTransport, TSocket
 
-from mmux import MMuxClient, StorageMode, b
+from mmux import MMuxClient, b, Flags
 from mmux.benchmark.kv_async_benchmark import run_async_kv_benchmark
 from mmux.benchmark.kv_sync_benchmark import run_sync_kv_throughput_benchmark, run_sync_kv_latency_benchmark
 from mmux.subscription.subscriber import Notification
@@ -230,7 +230,7 @@ class TestClient(TestCase):
         self.start_servers()
         client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
         try:
-            client.create("/a/file.txt", "/tmp")
+            client.create("/a/file.txt", "local://tmp")
             self.assertTrue(client.fs.exists("/a/file.txt"))
             time.sleep(client.lease_worker.renewal_duration_s)
             self.assertTrue(client.fs.exists("/a/file.txt"))
@@ -244,7 +244,7 @@ class TestClient(TestCase):
         self.start_servers()
         client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
         try:
-            kv = client.create("/a/file.txt", "/tmp")
+            kv = client.create("/a/file.txt", "local://tmp")
             self.kv_ops(kv)
             self.assertTrue(client.fs.exists('/a/file.txt'))
         finally:
@@ -255,7 +255,7 @@ class TestClient(TestCase):
         self.start_servers()
         client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
         try:
-            client.create("/a/file.txt", "/tmp")
+            client.create("/a/file.txt", "local://tmp")
             self.assertTrue(client.fs.exists('/a/file.txt'))
             kv = client.open('/a/file.txt')
             self.kv_ops(kv)
@@ -263,11 +263,11 @@ class TestClient(TestCase):
             client.disconnect()
             self.stop_servers()
 
-    def test_close(self):
+    def test_sync_remove(self):
         self.start_servers()
         client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
         try:
-            client.create("/a/file.txt", "/tmp")
+            client.create("/a/file.txt", "local://tmp")
             self.assertTrue('/a/file.txt' in client.to_renew)
             client.sync('/a/file.txt', 'local://tmp')
             self.assertTrue('/a/file.txt' in client.to_renew)
@@ -278,11 +278,39 @@ class TestClient(TestCase):
             client.disconnect()
             self.stop_servers()
 
+    def test_close(self):
+        self.start_servers()
+        client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
+        try:
+            client.create("/a/file.txt", "local://tmp")
+            client.create("/a/file1.txt", "local://tmp", 1, 1, Flags.pinned)
+            client.create("/a/file2.txt", "local://tmp", 1, 1, Flags.mapped)
+            self.assertTrue('/a/file.txt' in client.to_renew)
+            self.assertTrue('/a/file1.txt' in client.to_renew)
+            self.assertTrue('/a/file2.txt' in client.to_renew)
+            client.close('/a/file.txt')
+            client.close('/a/file1.txt')
+            client.close('/a/file2.txt')
+            self.assertFalse('/a/file.txt' in client.to_renew)
+            self.assertFalse('/a/file1.txt' in client.to_renew)
+            self.assertFalse('/a/file2.txt' in client.to_renew)
+            time.sleep(client.lease_worker.renewal_duration_s)
+            self.assertTrue(client.fs.exists('/a/file.txt'))
+            self.assertTrue(client.fs.exists('/a/file1.txt'))
+            self.assertTrue(client.fs.exists('/a/file2.txt'))
+            time.sleep(client.lease_worker.renewal_duration_s * 2)
+            self.assertFalse(client.fs.exists('/a/file.txt'))
+            self.assertTrue(client.fs.exists('/a/file1.txt'))
+            self.assertTrue(client.fs.exists('/a/file2.txt'))
+        finally:
+            client.disconnect()
+            self.stop_servers()
+
     def test_chain_replication(self):  # TODO: Add failure tests
         self.start_servers(chain=True)
         client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
         try:
-            kv = client.create("/a/file.txt", "/tmp", 1, 3)
+            kv = client.create("/a/file.txt", "local://tmp", 1, 3)
             self.assertTrue(kv.file_info.chain_length == 3)
             self.kv_ops(kv)
         finally:
@@ -293,7 +321,7 @@ class TestClient(TestCase):
         self.start_servers(auto_scale=True)
         client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
         try:
-            kv = client.create("/a/file.txt", "/tmp")
+            kv = client.create("/a/file.txt", "local://tmp")
             for i in range(0, 2000):
                 self.assertTrue(kv.put(str(i), str(i)) == b'!ok')
             self.assertTrue(len(client.fs.dstatus("/a/file.txt").data_blocks) == 4)
@@ -308,7 +336,7 @@ class TestClient(TestCase):
         self.start_servers()
         client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
         try:
-            client.fs.create("/a/file.txt", "/tmp")
+            client.fs.create("/a/file.txt", "local://tmp")
 
             n1 = client.listen("/a/file.txt")
             n2 = client.listen("/a/file.txt")
@@ -366,17 +394,17 @@ class TestClient(TestCase):
         client = MMuxClient(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']))
         try:
             data_path1 = "/a/file1.txt"
-            client.fs.create(data_path1, "/tmp")
+            client.fs.create(data_path1, "local://tmp")
             run_async_kv_benchmark(self.dconf['host'], int(self.dconf['service_port']), int(self.dconf['lease_port']),
                                    data_path1, workload_path)
 
             data_path2 = "/a/file2.txt"
-            client.fs.create(data_path2, "/tmp")
+            client.fs.create(data_path2, "local://tmp")
             run_sync_kv_throughput_benchmark(self.dconf['host'], int(self.dconf['service_port']),
                                              int(self.dconf['lease_port']), data_path2, workload_path)
 
             data_path3 = "/a/file3.txt"
-            client.fs.create(data_path3, "/tmp")
+            client.fs.create(data_path3, "local://tmp")
             run_sync_kv_latency_benchmark(self.dconf['host'], int(self.dconf['service_port']),
                                           int(self.dconf['lease_port']), data_path3, workload_path)
         finally:

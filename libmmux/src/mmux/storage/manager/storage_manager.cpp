@@ -14,12 +14,12 @@ void storage_manager::setup_block(const std::string &block_name,
                                   int32_t slot_begin,
                                   int32_t slot_end,
                                   const std::vector<std::string> &chain,
+                                  bool auto_scale,
                                   int32_t role,
                                   const std::string &next_block_name) {
   auto bid = block_name_parser::parse(block_name);
   storage_management_client client(bid.host, bid.management_port);
-  client.setup_block(bid.id, path, slot_begin, slot_end, chain, role, next_block_name);
-
+  client.setup_block(bid.id, path, slot_begin, slot_end, chain, auto_scale, role, next_block_name);
 }
 
 void storage_manager::set_exporting(const std::string &block_name,
