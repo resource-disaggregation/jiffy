@@ -144,6 +144,7 @@ int main(int argc, char **argv) {
     for (const auto &cfile: config_files) {
       std::ifstream ifs(cfile.c_str());
       if (ifs) {
+        LOG(log_level::info) << "config: " << cfile;
         store(parse_config_file(ifs, config_file_options, true), vm);
         notify(vm);
         break;
