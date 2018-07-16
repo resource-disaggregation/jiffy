@@ -17,10 +17,10 @@ extern "C" {
 typedef void mmux_client;
 
 mmux_client *create_mmux_client(const char *host, int32_t dir_port, int32_t lease_port);
-void destroy_mmux_client(mmux_client *client);
+int destroy_mmux_client(mmux_client *client);
 
-void mmux_begin_scope(mmux_client *client, const char *path);
-void mmux_end_scope(mmux_client *client, const char *path);
+int mmux_begin_scope(mmux_client *client, const char *path);
+int mmux_end_scope(mmux_client *client, const char *path);
 
 directory_client *mmux_get_fs(mmux_client *client);
 
@@ -38,11 +38,11 @@ kv_client *mmux_open_or_create(mmux_client *client,
                                size_t chain_length,
                                int32_t flags);
 kv_listener *mmux_listen(mmux_client *client, const char *path);
-void mmux_close(mmux_client *client, const char *path);
-void mmux_remove(mmux_client *client, const char *path);
-void mmux_sync(mmux_client *client, const char *path, const char *backing_path);
-void mmux_dump(mmux_client *client, const char *path, const char *backing_path);
-void mmux_load(mmux_client *client, const char *path, const char *backing_path);
+int mmux_close(mmux_client *client, const char *path);
+int mmux_remove(mmux_client *client, const char *path);
+int mmux_sync(mmux_client *client, const char *path, const char *backing_path);
+int mmux_dump(mmux_client *client, const char *path, const char *backing_path);
+int mmux_load(mmux_client *client, const char *path, const char *backing_path);
 
 #ifdef __cplusplus
 }

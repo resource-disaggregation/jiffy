@@ -47,123 +47,232 @@ directory_entry *from_cxx(const std::vector<mmux::directory::directory_entry> &e
   return ret;
 }
 
-void destroy_fs(directory_client *client) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  delete c;
+int destroy_fs(directory_client *client) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    delete c;
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
-void fs_create_directory(directory_client *client, const char *path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  c->create_directory(std::string(path));
+int fs_create_directory(directory_client *client, const char *path) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    c->create_directory(std::string(path));
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
-void fs_create_directories(directory_client *client, const char *path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  c->create_directories(std::string(path));
+int fs_create_directories(directory_client *client, const char *path) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    c->create_directories(std::string(path));
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
-struct data_status fs_open(directory_client *client, const char *path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  return from_cxx(c->open(std::string(path)));
+int fs_open(directory_client *client, const char *path, struct data_status *status) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    if (status)
+      *status = from_cxx(c->open(std::string(path)));
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
-struct data_status fs_create(directory_client *client,
-                             const char *path,
-                             const char *backing_path,
-                             size_t num_blocks,
-                             size_t chain_length,
-                             int32_t flags) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  return from_cxx(c->create(std::string(path), std::string(backing_path), num_blocks, chain_length, flags));
+int fs_create(directory_client *client,
+              const char *path,
+              const char *backing_path,
+              size_t num_blocks,
+              size_t chain_length,
+              int32_t flags,
+              struct data_status *status) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    if (status)
+      *status = from_cxx(c->create(std::string(path), std::string(backing_path), num_blocks, chain_length, flags));
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
-struct data_status fs_open_or_create(directory_client *client,
-                                     const char *path,
-                                     const char *backing_path,
-                                     size_t num_blocks,
-                                     size_t chain_length,
-                                     int32_t flags) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  return from_cxx(c->open_or_create(std::string(path), std::string(backing_path), num_blocks, chain_length, flags));
+int fs_open_or_create(directory_client *client,
+                      const char *path,
+                      const char *backing_path,
+                      size_t num_blocks,
+                      size_t chain_length,
+                      int32_t flags,
+                      struct data_status *status) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    if (status)
+      *status =
+          from_cxx(c->open_or_create(std::string(path), std::string(backing_path), num_blocks, chain_length, flags));
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
 int fs_exists(directory_client *client, const char *path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  return c->exists(std::string(path));
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    return c->exists(std::string(path));
+  } catch (std::exception &e) {
+    return -1;
+  }
 }
 
-uint64_t fs_last_write_time(directory_client *client, const char *path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  return c->last_write_time(std::string(path));
+int64_t fs_last_write_time(directory_client *client, const char *path) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    return c->last_write_time(std::string(path));
+  } catch (std::exception &e) {
+    return -1;
+  }
 }
 
-uint16_t fs_get_permissions(directory_client *client, const char *path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  return c->permissions(std::string(path))();
+int fs_get_permissions(directory_client *client, const char *path) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    return c->permissions(std::string(path))();
+  } catch (std::exception &e) {
+    return -1;
+  }
 }
 
-void fs_set_permissions(directory_client *client, const char *path, uint16_t perms, int32_t opts) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  c->permissions(std::string(path), mmux::directory::perms(perms), static_cast<mmux::directory::perm_options>(opts));
+int fs_set_permissions(directory_client *client, const char *path, uint16_t perms, int32_t opts) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    c->permissions(std::string(path), mmux::directory::perms(perms), static_cast<mmux::directory::perm_options>(opts));
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
-void fs_remove(directory_client *client, const char *path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  c->remove(std::string(path));
+int fs_remove(directory_client *client, const char *path) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    c->remove(std::string(path));
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
-void fs_remove_all(directory_client *client, const char *path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  c->remove_all(std::string(path));
+int fs_remove_all(directory_client *client, const char *path) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    c->remove_all(std::string(path));
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
-void fs_rename(directory_client *client, const char *old_path, const char *new_path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  c->rename(std::string(old_path), std::string(new_path));
+int fs_rename(directory_client *client, const char *old_path, const char *new_path) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    c->rename(std::string(old_path), std::string(new_path));
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
-struct file_status fs_status(directory_client *client, const char *path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  return from_cxx(c->status(std::string(path)));
+int fs_status(directory_client *client, const char *path, struct file_status *status) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    *status = from_cxx(c->status(std::string(path)));
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
 struct directory_entry *fs_directory_entries(directory_client *client, const char *path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  return from_cxx(c->directory_entries(std::string(path)));
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    return from_cxx(c->directory_entries(std::string(path)));
+  } catch (std::exception &e) {
+    return NULL;
+  }
 }
 
 struct directory_entry *fs_recursive_directory_entries(directory_client *client, const char *path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  return from_cxx(c->recursive_directory_entries(std::string(path)));
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    return from_cxx(c->recursive_directory_entries(std::string(path)));
+  } catch (std::exception &e) {
+    return NULL;
+  }
 }
 
-struct data_status fs_dstatus(directory_client *client, const char *path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  return from_cxx(c->dstatus(std::string(path)));
+int fs_dstatus(directory_client *client, const char *path, struct data_status *status) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    *status = from_cxx(c->dstatus(std::string(path)));
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
 int fs_is_regular_file(directory_client *client, const char *path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  return c->is_regular_file(std::string(path));
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    return c->is_regular_file(std::string(path));
+  } catch (std::exception &e) {
+    return -1;
+  }
 }
 
 int fs_is_directory(directory_client *client, const char *path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  return c->is_directory(std::string(path));
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    return c->is_directory(std::string(path));
+  } catch (std::exception &e) {
+    return -1;
+  }
 }
 
-void fs_sync(directory_client *client, const char *path, const char *backing_path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  return c->sync(std::string(path), std::string(backing_path));
+int fs_sync(directory_client *client, const char *path, const char *backing_path) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    c->sync(std::string(path), std::string(backing_path));
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
-void fs_dump(directory_client *client, const char *path, const char *backing_path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  return c->dump(std::string(path), std::string(backing_path));
+int fs_dump(directory_client *client, const char *path, const char *backing_path) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    c->dump(std::string(path), std::string(backing_path));
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
-void fs_load(directory_client *client, const char *path, const char *backing_path) {
-  mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
-  return c->load(std::string(path), std::string(backing_path));
+int fs_load(directory_client *client, const char *path, const char *backing_path) {
+  try {
+    mmux::directory::directory_client *c = static_cast<mmux::directory::directory_client *>(client);
+    c->load(std::string(path), std::string(backing_path));
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 

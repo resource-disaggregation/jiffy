@@ -21,37 +21,68 @@ data_status __from_cxx(const mmux::directory::data_status &s) {
   return ret;
 }
 
-void destroy_kv(kv_client *client) {
-  mmux::storage::kv_client *c = static_cast<mmux::storage::kv_client *>(client);
-  delete c;
+int destroy_kv(kv_client *client) {
+  try {
+    mmux::storage::kv_client *c = static_cast<mmux::storage::kv_client *>(client);
+    delete c;
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
-void kv_refresh(kv_client *client) {
-  mmux::storage::kv_client *c = static_cast<mmux::storage::kv_client *>(client);
-  c->refresh();
+int kv_refresh(kv_client *client) {
+  try {
+    mmux::storage::kv_client *c = static_cast<mmux::storage::kv_client *>(client);
+    c->refresh();
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
-data_status kv_get_status(kv_client *client) {
-  mmux::storage::kv_client *c = static_cast<mmux::storage::kv_client *>(client);
-  return __from_cxx(c->status());
+int kv_get_status(kv_client *client, struct data_status *status) {
+  try {
+    mmux::storage::kv_client *c = static_cast<mmux::storage::kv_client *>(client);
+    *status = __from_cxx(c->status());
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
 char *kv_put(kv_client *client, const char *key, const char *value) {
-  mmux::storage::kv_client *c = static_cast<mmux::storage::kv_client *>(client);
-  return strdup(c->put(std::string(key), std::string(value)).c_str());
+  try {
+    mmux::storage::kv_client *c = static_cast<mmux::storage::kv_client *>(client);
+    return strdup(c->put(std::string(key), std::string(value)).c_str());
+  } catch (std::exception &e) {
+    return NULL;
+  }
 }
 
 char *kv_get(kv_client *client, const char *key) {
-  mmux::storage::kv_client *c = static_cast<mmux::storage::kv_client *>(client);
-  return strdup(c->get(std::string(key)).c_str());
+  try {
+    mmux::storage::kv_client *c = static_cast<mmux::storage::kv_client *>(client);
+    return strdup(c->get(std::string(key)).c_str());
+  } catch (std::exception &e) {
+    return NULL;
+  }
 }
 
 char *kv_update(kv_client *client, const char *key, const char *value) {
-  mmux::storage::kv_client *c = static_cast<mmux::storage::kv_client *>(client);
-  return strdup(c->update(std::string(key), std::string(value)).c_str());
+  try {
+    mmux::storage::kv_client *c = static_cast<mmux::storage::kv_client *>(client);
+    return strdup(c->update(std::string(key), std::string(value)).c_str());
+  } catch (std::exception &e) {
+    return NULL;
+  }
 }
 
 char *kv_remove(kv_client *client, const char *key) {
-  mmux::storage::kv_client *c = static_cast<mmux::storage::kv_client *>(client);
-  return strdup(c->remove(std::string(key)).c_str());
+  try {
+    mmux::storage::kv_client *c = static_cast<mmux::storage::kv_client *>(client);
+    return strdup(c->remove(std::string(key)).c_str());
+  } catch (std::exception &e) {
+    return NULL;
+  }
 }

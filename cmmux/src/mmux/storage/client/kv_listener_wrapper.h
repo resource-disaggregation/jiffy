@@ -14,10 +14,10 @@ struct notification_t {
   char* arg;
 };
 
-void destroy_listener(kv_listener *listener);
-void kv_subscribe(kv_listener* listener, const char** ops, size_t n_ops);
-void kv_unsubscribe(kv_listener* listener, const char** ops, size_t n_ops);
-struct notification_t kv_get_notification(kv_listener* listener, int64_t timeout_ms);
+int destroy_listener(kv_listener *listener);
+int kv_subscribe(kv_listener *listener, const char **ops, size_t n_ops);
+int kv_unsubscribe(kv_listener *listener, const char **ops, size_t n_ops);
+int kv_get_notification(kv_listener *listener, int64_t timeout_ms, struct notification_t *n);
 
 #ifdef __cplusplus
 }

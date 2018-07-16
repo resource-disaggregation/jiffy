@@ -9,11 +9,11 @@ extern "C" {
 typedef void kv_client;
 typedef void locked_kv_client;
 
-void destroy_kv(kv_client *client);
+int destroy_kv(kv_client *client);
 
-void kv_refresh(kv_client *client);
+int kv_refresh(kv_client *client);
 
-struct data_status kv_get_status(kv_client *client);
+int kv_get_status(kv_client *client, struct data_status *status);
 
 char *kv_put(kv_client *client, const char *key, const char *value);
 char *kv_get(kv_client *client, const char *key);

@@ -278,7 +278,8 @@ void test_chain_replication() {
   struct test_ctx ctx = start_servers(1, 0);
   mmux_client *client = create_mmux_client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
   kv_client *kv = mmux_create(client, "/a/file.txt", "local://tmp", 1, 3, 0);
-  struct data_status s = kv_get_status(kv);
+  struct data_status s;
+  kv_get_status(kv, &s);
   ASSERT_EQ(3, s.chain_length);
   kv_ops(kv);
   stop_servers(ctx);
@@ -301,10 +302,11 @@ void test_notifications() {
   kv_put(kv, "key1", "value1");
   kv_remove(kv, "key1");
 
-  struct notification_t N1 = kv_get_notification(n1, -1);
-  struct notification_t N2 = kv_get_notification(n2, -1);
-  struct notification_t N3 = kv_get_notification(n2, -1);
-  struct notification_t N4 = kv_get_notification(n3, -1);
+  struct notification_t N1, N2, N3, N4;
+  ASSERT_TRUE(kv_get_notification(n1, -1, &N1) == 0);
+  ASSERT_TRUE(kv_get_notification(n2, -1, &N2) == 0);
+  ASSERT_TRUE(kv_get_notification(n2, -1, &N3) == 0);
+  ASSERT_TRUE(kv_get_notification(n3, -1, &N4) == 0);
 
   ASSERT_STREQ("put", N1.op);
   ASSERT_STREQ("key1", N1.arg);
@@ -321,8 +323,8 @@ void test_notifications() {
   kv_put(kv, "key1", "value1");
   kv_remove(kv, "key1");
 
-  N1 = kv_get_notification(n2, -1);
-  N2 = kv_get_notification(n3, -1);
+  ASSERT_TRUE(kv_get_notification(n2, -1, &N1) == 0);
+  ASSERT_TRUE(kv_get_notification(n3, -1, &N2) == 0);
 
   ASSERT_STREQ("put", N1.op);
   ASSERT_STREQ("key1", N1.arg);
