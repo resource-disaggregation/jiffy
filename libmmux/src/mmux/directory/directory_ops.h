@@ -267,6 +267,10 @@ class directory_entry {
     return status_.last_write_time();
   }
 
+  const file_status& status() const {
+    return status_;
+  }
+
  private:
   std::string name_;
   file_status status_;

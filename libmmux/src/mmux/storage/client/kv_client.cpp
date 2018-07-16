@@ -25,8 +25,8 @@ directory::data_status &kv_client::status() {
   return status_;
 }
 
-kv_client::locked_client kv_client::lock() {
-  return kv_client::locked_client(*this);
+std::shared_ptr<kv_client::locked_client> kv_client::lock() {
+  return std::make_shared<kv_client::locked_client>(*this);
 }
 
 void kv_client::refresh() {
@@ -202,13 +202,13 @@ std::vector<std::string> kv_client::batch_command(const kv_op_id &op,
 }
 
 void kv_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
-  if (response.substr(0, 9) == "!exporting") {
+  if (response.substr(0, 10) == "!exporting") {
     typedef std::vector<std::string> list_t;
     do {
       auto parts = string_utils::split(response, '!');
-      auto chain = list_t(parts.begin() + 1, parts.end());
+      auto chain = list_t(parts.begin() + 2, parts.end());
       response = replica_chain_client(std::move(chain)).run_command_redirected(cmd_id, args).front();
-    } while (response.substr(0, 9) == "!exporting");
+    } while (response.substr(0, 10) == "!exporting");
   }
   if (response == "!block_moved") {
     refresh();
@@ -223,14 +223,14 @@ void kv_client::handle_redirects(int32_t cmd_id,
   size_t n_op_args = args.size() / n_ops;
   for (size_t i = 0; i < responses.size(); i++) {
     auto &response = responses[i];
-    if (response.substr(0, 9) == "!exporting") {
+    if (response.substr(0, 10) == "!exporting") {
       typedef std::vector<std::string> list_t;
       list_t op_args(args.begin() + i * n_op_args, args.begin() + (i + 1) * n_op_args);
       do {
         auto parts = string_utils::split(response, '!');
-        auto chain = list_t(parts.begin() + 1, parts.end());
+        auto chain = list_t(parts.begin() + 2, parts.end());
         response = replica_chain_client(std::move(chain)).run_command_redirected(cmd_id, op_args).front();
-      } while (response.substr(0, 9) == "!exporting");
+      } while (response.substr(0, 10) == "!exporting");
     }
     if (response == "!block_moved") {
       refresh();
@@ -352,11 +352,11 @@ std::vector<std::string> kv_client::locked_client::remove(const std::vector<std:
 void kv_client::locked_client::handle_redirect(int32_t cmd_id,
                                                const std::vector<std::string> &args,
                                                std::string &response) {
-  if (response.substr(0, 9) == "!exporting") {
+  if (response.substr(0, 10) == "!exporting") {
     typedef std::vector<std::string> list_t;
     do {
       auto parts = string_utils::split(response, '!');
-      auto chain = list_t(parts.begin() + 1, parts.end());
+      auto chain = list_t(parts.begin() + 2, parts.end());
       bool found = false;
       for (size_t i = 0; i < blocks_.size(); i++) {
         const auto &client_chain = parent_.blocks_[i]->chain();
@@ -368,7 +368,7 @@ void kv_client::locked_client::handle_redirect(int32_t cmd_id,
       }
       if (!found)
         response = replica_chain_client(std::move(chain)).run_command_redirected(cmd_id, args).front();
-    } while (response.substr(0, 9) == "!exporting");
+    } while (response.substr(0, 10) == "!exporting");
   }
   // There can be !block_moved response, since:
   // (1) No new exports can start while the kv is locked
@@ -382,12 +382,12 @@ void kv_client::locked_client::handle_redirects(int32_t cmd_id,
   size_t n_op_args = args.size() / n_ops;
   for (size_t i = 0; i < responses.size(); i++) {
     auto &response = responses[i];
-    if (response.substr(0, 9) == "!exporting") {
+    if (response.substr(0, 10) == "!exporting") {
       typedef std::vector<std::string> list_t;
       list_t op_args(args.begin() + i * n_op_args, args.begin() + (i + 1) * n_op_args);
       do {
         auto parts = string_utils::split(response, '!');
-        auto chain = list_t(parts.begin() + 1, parts.end());
+        auto chain = list_t(parts.begin() + 2, parts.end());
         bool found = false;
         for (size_t j = 0; j < blocks_.size(); j++) {
           const auto &client_chain = parent_.blocks_[j]->chain();
@@ -399,7 +399,7 @@ void kv_client::locked_client::handle_redirects(int32_t cmd_id,
         }
         if (!found)
           response = replica_chain_client(std::move(chain)).run_command_redirected(cmd_id, op_args).front();
-      } while (response.substr(0, 9) == "!exporting");
+      } while (response.substr(0, 10) == "!exporting");
     }
   }
   // There can be !block_moved response, since:

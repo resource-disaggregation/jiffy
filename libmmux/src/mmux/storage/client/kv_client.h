@@ -59,7 +59,7 @@ class kv_client {
 
   directory::data_status &status();
 
-  locked_client lock();
+  std::shared_ptr<locked_client> lock();
 
   std::string put(const std::string &key, const std::string &value);
   std::string get(const std::string &key);
