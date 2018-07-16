@@ -43,11 +43,12 @@ void kv_client::refresh() {
 std::string kv_client::put(const std::string &key, const std::string &value) {
   std::string _return;
   std::vector<std::string> args{key, value};
-  bool redo = false;
+  bool redo;
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(kv_op_id::put, args).front();
       handle_redirect(kv_op_id::put, args, _return);
+      redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -58,11 +59,12 @@ std::string kv_client::put(const std::string &key, const std::string &value) {
 std::string kv_client::get(const std::string &key) {
   std::string _return;
   std::vector<std::string> args{key};
-  bool redo = false;
+  bool redo;
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(kv_op_id::get, args).front();
       handle_redirect(kv_op_id::get, args, _return);
+      redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -73,11 +75,12 @@ std::string kv_client::get(const std::string &key) {
 std::string kv_client::update(const std::string &key, const std::string &value) {
   std::string _return;
   std::vector<std::string> args{key, value};
-  bool redo = false;
+  bool redo;
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(kv_op_id::update, args).front();
       handle_redirect(kv_op_id::update, args, _return);
+      redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -88,11 +91,12 @@ std::string kv_client::update(const std::string &key, const std::string &value) 
 std::string kv_client::remove(const std::string &key) {
   std::string _return;
   std::vector<std::string> args{key};
-  bool redo = false;
+  bool redo;
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(kv_op_id::remove, args).front();
       handle_redirect(kv_op_id::remove, args, _return);
+      redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -105,11 +109,12 @@ std::vector<std::string> kv_client::put(const std::vector<std::string> &kvs) {
     throw std::invalid_argument("Incorrect number of arguments");
   }
   std::vector<std::string> _return;
-  bool redo = false;
+  bool redo;
   do {
     try {
       _return = batch_command(kv_op_id::put, kvs, 2);
       handle_redirects(kv_op_id::put, kvs, _return);
+      redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -119,11 +124,12 @@ std::vector<std::string> kv_client::put(const std::vector<std::string> &kvs) {
 
 std::vector<std::string> kv_client::get(const std::vector<std::string> &keys) {
   std::vector<std::string> _return;
-  bool redo = false;
+  bool redo;
   do {
     try {
       _return = batch_command(kv_op_id::get, keys, 1);
       handle_redirects(kv_op_id::get, keys, _return);
+      redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -136,11 +142,12 @@ std::vector<std::string> kv_client::update(const std::vector<std::string> &kvs) 
     throw std::invalid_argument("Incorrect number of arguments");
   }
   std::vector<std::string> _return;
-  bool redo = false;
+  bool redo;
   do {
     try {
       _return = batch_command(kv_op_id::update, kvs, 2);
       handle_redirects(kv_op_id::update, kvs, _return);
+      redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -150,11 +157,12 @@ std::vector<std::string> kv_client::update(const std::vector<std::string> &kvs) 
 
 std::vector<std::string> kv_client::remove(const std::vector<std::string> &keys) {
   std::vector<std::string> _return;
-  bool redo = false;
+  bool redo;
   do {
     try {
       _return = batch_command(kv_op_id::remove, keys, 1);
       handle_redirects(kv_op_id::remove, keys, _return);
+      redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
