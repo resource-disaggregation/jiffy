@@ -32,6 +32,8 @@ add_subdirectory(libmmux)
 add_subdirectory(directory)
 add_subdirectory(storage)
 
+add_subdirectory(cmmux)
+
 if (BUILD_TESTS)
   enable_testing(true)
 endif ()
