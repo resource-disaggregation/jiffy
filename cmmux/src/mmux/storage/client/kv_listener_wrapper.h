@@ -8,6 +8,7 @@ extern "C" {
 #endif
 
 typedef void kv_listener;
+typedef kv_listener* kv_listener_ptr;
 
 struct notification_t {
   char* op;

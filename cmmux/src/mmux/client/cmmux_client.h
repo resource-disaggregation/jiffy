@@ -15,6 +15,7 @@ extern "C" {
 #define MAPPED 0x04
 
 typedef void mmux_client;
+typedef mmux_client* mmux_client_ptr;
 
 mmux_client *create_mmux_client(const char *host, int32_t dir_port, int32_t lease_port);
 int destroy_mmux_client(mmux_client *client);

@@ -7,6 +7,7 @@
 #include "../src/mmux/utils/connection_utils.h"
 #include "test.h"
 #include "../src/mmux/client/cmmux_client.h"
+#include "../src/mmux/utils/logging.h"
 
 #define NUM_BLOCKS 3
 #define HOST "127.0.0.1"
@@ -58,26 +59,18 @@ const char *read_env(const char *var, const char *def) {
 struct test_ctx init_test_ctx() {
   struct test_ctx ctx;
   ctx.directoryd = read_env("DIRECTORY_SERVER_EXEC", "directoryd");
-  fprintf(stderr, "directoryd: %s\n", ctx.directoryd);
   ctx.storaged = read_env("STORAGE_SERVER_EXEC", "storaged");
-  fprintf(stderr, "storaged: %s\n", ctx.storaged);
   ctx.resources_prefix = read_env("TEST_RESOURCES_PREFIX", ".");
-  fprintf(stderr, "resources_prefix: %s\n", ctx.resources_prefix);
   strcpy(ctx.storage1_conf, ctx.resources_prefix);
   strcat(ctx.storage1_conf, "/storage1.conf");
-  fprintf(stderr, "storage1_conf: %s\n", ctx.storage1_conf);
   strcpy(ctx.storage2_conf, ctx.resources_prefix);
   strcat(ctx.storage2_conf, "/storage2.conf");
-  fprintf(stderr, "storage2_conf: %s\n", ctx.storage2_conf);
   strcpy(ctx.storage3_conf, ctx.resources_prefix);
   strcat(ctx.storage3_conf, "/storage3.conf");
-  fprintf(stderr, "storage3_conf: %s\n", ctx.storage3_conf);
   strcpy(ctx.storage_auto_conf, ctx.resources_prefix);
   strcat(ctx.storage_auto_conf, "/storage_auto_scale.conf");
-  fprintf(stderr, "storage_auto_conf: %s\n", ctx.storage_auto_conf);
   strcpy(ctx.directory_conf, ctx.resources_prefix);
   strcat(ctx.directory_conf, "/directory.conf");
-  fprintf(stderr, "directory_conf: %s\n", ctx.directory_conf);
   ctx.directory_pid = -1;
   ctx.storage1_pid = -1;
   ctx.storage2_pid = -1;
@@ -223,6 +216,8 @@ void test_create() {
   kv_ops(kv);
   directory_client *fs = mmux_get_fs(client);
   ASSERT_TRUE(fs_exists(fs, "/a/file.txt"));
+  destroy_kv(kv);
+  destroy_mmux_client(client);
   stop_servers(ctx);
 }
 
@@ -234,6 +229,8 @@ void test_open() {
   ASSERT_TRUE(fs_exists(fs, "/a/file.txt"));
   kv_client *kv = mmux_open(client, "/a/file.txt");
   kv_ops(kv);
+  destroy_kv(kv);
+  destroy_mmux_client(client);
   stop_servers(ctx);
 }
 
@@ -247,6 +244,7 @@ void test_sync_remove() {
   ASSERT_TRUE(fs_exists(fs, "/a/file.txt"));
   mmux_remove(client, "/a/file.txt");
   ASSERT_FALSE(fs_exists(fs, "/a/file.txt"));
+  destroy_mmux_client(client);
   stop_servers(ctx);
 }
 
@@ -271,6 +269,30 @@ void test_close() {
   ASSERT_FALSE(fs_exists(fs, "/a/file1.txt"));
   ASSERT_TRUE(fs_exists(fs, "/a/file2.txt"));
   ASSERT_TRUE(fs_exists(fs, "/a/file3.txt"));
+  destroy_mmux_client(client);
+  stop_servers(ctx);
+}
+
+void test_auto_scaling() {
+  struct test_ctx ctx = start_servers(0, 1);
+  char buf[100];
+  mmux_client *client = create_mmux_client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
+  kv_client *kv = mmux_create(client, "/a/file.txt", "local://tmp", 1, 1, 0);
+  for (size_t i = 0; i < 2000; i++) {
+    sprintf(buf, "%zu", i);
+    ASSERT_STREQ("!ok", kv_put(kv, buf, buf));
+  }
+  struct data_status s;
+  kv_get_status(kv, &s);
+  ASSERT_EQ(4, s.num_blocks);
+  for (size_t i = 0; i < 2000; i++) {
+    sprintf(buf, "%zu", i);
+    ASSERT_STREQ(buf, kv_remove(kv, buf));
+  }
+  kv_get_status(kv, &s);
+  ASSERT_EQ(1, s.num_blocks);
+  destroy_kv(kv);
+  destroy_mmux_client(client);
   stop_servers(ctx);
 }
 
@@ -282,6 +304,8 @@ void test_chain_replication() {
   kv_get_status(kv, &s);
   ASSERT_EQ(3, s.chain_length);
   kv_ops(kv);
+  destroy_kv(kv);
+  destroy_mmux_client(client);
   stop_servers(ctx);
 }
 
@@ -330,15 +354,18 @@ void test_notifications() {
   ASSERT_STREQ("key1", N1.arg);
   ASSERT_STREQ("remove", N2.op);
   ASSERT_STREQ("key1", N2.arg);
-
+  destroy_kv(kv);
+  destroy_mmux_client(client);
   stop_servers(ctx);
 }
 
 int main(int argc, const char **argv) {
+  configure_logging(INFO);
   ADD_TEST(test_create);
   ADD_TEST(test_open);
   ADD_TEST(test_sync_remove);
   ADD_TEST(test_close);
+  ADD_TEST(test_auto_scaling);
   ADD_TEST(test_chain_replication);
   ADD_TEST(test_notifications);
   RUN_TESTS;

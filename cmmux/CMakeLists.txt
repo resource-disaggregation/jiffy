@@ -9,7 +9,9 @@ add_library(cmmux STATIC
         src/mmux/storage/client/kv_listener_wrapper.cpp
         src/mmux/storage/client/kv_listener_wrapper.h
         src/mmux/utils/connection_utils.h
-        src/mmux/utils/connection_utils.cpp)
+        src/mmux/utils/connection_utils.cpp
+        src/mmux/utils/logging.h
+        src/mmux/utils/logging.cpp)
 
 target_link_libraries(cmmux mmux)
 set_target_properties(cmmux PROPERTIES LINKER_LANGUAGE CXX)

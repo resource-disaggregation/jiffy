@@ -3,8 +3,13 @@
 #include "kv_listener_wrapper.h"
 
 int destroy_listener(kv_listener *listener) {
-  mmux::storage::kv_listener *l = static_cast<mmux::storage::kv_listener *>(listener);
-  delete l;
+  try {
+    mmux::storage::kv_listener *l = static_cast<mmux::storage::kv_listener *>(listener);
+    delete l;
+  } catch (std::exception &e) {
+    return -1;
+  }
+  return 0;
 }
 
 int kv_subscribe(kv_listener *listener, const char **ops, size_t n_ops) {

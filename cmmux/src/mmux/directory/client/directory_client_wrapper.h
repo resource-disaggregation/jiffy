@@ -3,13 +3,13 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include "../../storage/client/kv_client_wrapper.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef void directory_client;
+typedef directory_client* directory_client_ptr;
 
 struct file_status {
   int32_t type;

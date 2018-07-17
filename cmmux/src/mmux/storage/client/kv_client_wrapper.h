@@ -1,13 +1,14 @@
 #ifndef MEMORYMUX_KV_CLIENT_WRAPPER_H
 #define MEMORYMUX_KV_CLIENT_WRAPPER_H
 
-#include "../../directory/client/directory_client_wrapper.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include "../../directory/client/directory_client_wrapper.h"
+
 typedef void kv_client;
-typedef void locked_kv_client;
+typedef kv_client* kv_client_ptr;
 
 int destroy_kv(kv_client *client);
 
