@@ -189,12 +189,6 @@ void kv_ops(kv_client *kv) {
   for (size_t i = 0; i < 1000; i++) {
     sprintf(buf1, "%zu", i);
     sprintf(buf2, "%zu", i + 1000);
-    ASSERT_STREQ(buf2, kv_get(kv, buf1));
-  }
-
-  for (size_t i = 0; i < 1000; i++) {
-    sprintf(buf1, "%zu", i);
-    sprintf(buf2, "%zu", i + 1000);
     ASSERT_STREQ(buf2, kv_remove(kv, buf1));
   }
 
