@@ -745,11 +745,12 @@ class directory_tree : public directory_ops, public directory_management_ops {
   void touch(const std::string &path) override;
   replica_chain resolve_failures(const std::string &path,
                                  const replica_chain &chain) override; // TODO: Take id as input
+  virtual void resolve_failures_on_endpoint(const std::string &endpoint);
   replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) override;
   void add_block_to_file(const std::string &path) override;
-  virtual void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end);
-  virtual void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end);
-  virtual void handle_lease_expiry(const std::string &path);
+  void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) override;
+  void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) override;
+  void handle_lease_expiry(const std::string &path) override;
 
  private:
   std::shared_ptr<ds_node> get_node_unsafe(const std::string &path) const;
@@ -765,6 +766,10 @@ class directory_tree : public directory_ops, public directory_management_ops {
   void clear_storage(std::vector<std::string> &cleared_blocks, std::shared_ptr<ds_node> node);
 
   void touch(std::shared_ptr<ds_node> node, std::uint64_t time);
+
+  void resolve_failures_on_endpoint(std::shared_ptr<ds_node> node,
+                                    const std::string &endpoint,
+                                    const std::string &node_path);
 
   std::shared_ptr<ds_dir_node> root_;
   std::shared_ptr<block_allocator> allocator_;

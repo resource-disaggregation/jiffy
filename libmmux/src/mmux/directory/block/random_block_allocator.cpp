@@ -22,7 +22,7 @@ std::vector<std::string> random_block_allocator::allocate(std::size_t count, con
   auto idx = static_cast<int64_t>(free_blocks_.size() - 1);
   auto it = std::next(free_blocks_.begin(), utils::rand_utils::rand_int64(idx));
   while (blocks_considered < free_blocks_.size() && blocks.size() < count) {
-    auto block_prefix = prefix(*it);
+    auto block_prefix = block_allocator::prefix(*it);
     if (prefixes.find(block_prefix) == prefixes.end()) {
       blocks.push_back(*it);
       prefixes.insert(block_prefix);

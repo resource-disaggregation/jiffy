@@ -24,14 +24,6 @@ class random_block_allocator : public block_allocator {
   std::size_t num_allocated_blocks() override;
   std::size_t num_total_blocks() override;
  private:
-  std::string prefix(const std::string &block_name) const {
-    auto pos = block_name.find_last_of(':');
-    if (pos == std::string::npos) {
-      throw std::logic_error("Malformed block name [" + block_name + "]");
-    }
-    return block_name.substr(0, pos);
-  }
-
   std::shared_mutex mtx_;
   std::set<std::string> allocated_blocks_;
   std::set<std::string> free_blocks_;

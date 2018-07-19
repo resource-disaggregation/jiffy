@@ -17,6 +17,14 @@ class block_allocator {
   virtual std::size_t num_free_blocks() = 0;
   virtual std::size_t num_allocated_blocks() = 0;
   virtual std::size_t num_total_blocks() = 0;
+
+  static std::string prefix(const std::string &block_name) const {
+    auto pos = block_name.find_last_of(':');
+    if (pos == std::string::npos) {
+      throw std::logic_error("Malformed block name [" + block_name + "]");
+    }
+    return block_name.substr(0, pos);
+  }
 };
 
 }

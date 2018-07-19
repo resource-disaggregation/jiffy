@@ -449,6 +449,10 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
   return dstatus.get_data_block(chain_pos);
 }
 
+void directory_tree::resolve_failures_on_endpoint(const std::string &endpoint) {
+  resolve_failures_on_endpoint(root_, endpoint, root_->name());
+}
+
 replica_chain directory_tree::add_replica_to_chain(const std::string &path, const replica_chain &chain) {
   // TODO: Replace replica_chain argument with chain id
   using namespace storage;
@@ -638,6 +642,40 @@ void directory_tree::touch(std::shared_ptr<ds_node> node, std::uint64_t time) {
   auto dir = std::dynamic_pointer_cast<ds_dir_node>(node);
   for (const auto &child: *dir) {
     touch(child.second, time);
+  }
+}
+
+void directory_tree::resolve_failures_on_endpoint(std::shared_ptr<ds_node> node,
+                                                  const std::string &endpoint,
+                                                  const std::string &node_path) {
+  if (node->is_regular_file()) {
+    auto file = std::dynamic_pointer_cast<ds_file_node>(node);
+    for (const auto &chain : file->data_blocks()) {
+      bool failed = false;
+      for (const auto &replica : chain.block_names) {
+        if (block_allocator::prefix(replica) == endpoint) {
+          failed = true;
+          break;
+        }
+      }
+      if (failed) {
+        LOG(log_level::info) << "Resolving failures for " << node_path;
+        auto fixed_chain = resolve_failures(node_path, chain);
+        size_t num_failed = 0;
+        if ((num_failed = chain.block_names.size() - fixed_chain.block_names.size()) > 0) {
+          for (size_t i = 0; i < num_failed; ++i) {
+            fixed_chain = add_replica_to_chain(node_path, fixed_chain);
+          }
+        }
+      }
+    }
+    return;
+  }
+  auto dir = std::dynamic_pointer_cast<ds_dir_node>(node);
+  for (const auto &child: *dir) {
+    auto child_path = node_path;
+    directory_utils::push_path_element(child_path, child.first);
+    resolve_failures_on_endpoint(child.second, endpoint, child_path);
   }
 }
 

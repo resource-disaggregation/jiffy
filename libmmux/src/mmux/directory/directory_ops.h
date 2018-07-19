@@ -492,6 +492,7 @@ class directory_ops {
 class directory_management_ops {
  public:
   virtual void touch(const std::string &path) = 0;
+  virtual void resolve_failures_on_endpoint(const std::string& endpoint) = 0;
   virtual replica_chain resolve_failures(const std::string &path, const replica_chain &chain) = 0;
   virtual replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) = 0;
   virtual void add_block_to_file(const std::string &path) = 0;

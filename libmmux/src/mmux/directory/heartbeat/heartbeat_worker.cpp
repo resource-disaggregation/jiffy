@@ -46,7 +46,7 @@ void heartbeat_worker::update_health() {
     entry.second.update_health(std::time(nullptr));
     if (entry.second.health() < 0.3) {
       LOG(log_level::warn) << "Health for " << entry.first << " is low (" << entry.second.health() << ")!";
-      // TODO: resolve failures for all files whose blocks are on this endpoint
+      mgmt_->resolve_failures_on_endpoint(entry.first);
     } else {
       LOG(log_level::trace) << "Health for " << entry.first << " is ok (" << entry.second.health() << ").";
     }
