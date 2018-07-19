@@ -286,32 +286,32 @@ TEST_CASE("kv_client_locked_ops_test", "[put][update][remove][get]") {
   kv_client kv(tree, "/sandbox/file.txt", status);
   {
     auto client = kv.lock();
-    REQUIRE(client.num_keys() == 0);
+    REQUIRE(client->num_keys() == 0);
     for (std::size_t i = 0; i < 1000; ++i) {
-      REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
+      REQUIRE(client->put(std::to_string(i), std::to_string(i)) == "!ok");
     }
-    REQUIRE(client.num_keys() == 1000);
+    REQUIRE(client->num_keys() == 1000);
     for (std::size_t i = 0; i < 1000; ++i) {
-      REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
+      REQUIRE(client->get(std::to_string(i)) == std::to_string(i));
     }
     for (std::size_t i = 1000; i < 2000; ++i) {
-      REQUIRE(client.get(std::to_string(i)) == "!key_not_found");
+      REQUIRE(client->get(std::to_string(i)) == "!key_not_found");
     }
     for (std::size_t i = 0; i < 1000; ++i) {
-      REQUIRE(client.update(std::to_string(i), std::to_string(i + 1000)) == std::to_string(i));
+      REQUIRE(client->update(std::to_string(i), std::to_string(i + 1000)) == std::to_string(i));
     }
     for (std::size_t i = 1000; i < 2000; ++i) {
-      REQUIRE(client.update(std::to_string(i), std::to_string(i + 1000)) == "!key_not_found");
+      REQUIRE(client->update(std::to_string(i), std::to_string(i + 1000)) == "!key_not_found");
     }
     for (std::size_t i = 0; i < 1000; ++i) {
-      REQUIRE(client.remove(std::to_string(i)) == std::to_string(i + 1000));
+      REQUIRE(client->remove(std::to_string(i)) == std::to_string(i + 1000));
     }
-    REQUIRE(client.num_keys() == 0);
+    REQUIRE(client->num_keys() == 0);
     for (std::size_t i = 1000; i < 2000; ++i) {
-      REQUIRE(client.remove(std::to_string(i)) == "!key_not_found");
+      REQUIRE(client->remove(std::to_string(i)) == "!key_not_found");
     }
     for (std::size_t i = 0; i < 1000; ++i) {
-      REQUIRE(client.get(std::to_string(i)) == "!key_not_found");
+      REQUIRE(client->get(std::to_string(i)) == "!key_not_found");
     }
   }
 
@@ -355,7 +355,7 @@ TEST_CASE("kv_client_locked_pipelined_ops_test", "[put][update][remove][get]") {
       kvs.push_back(std::to_string(i));
     }
 
-    auto res = client.put(kvs);
+    auto res = client->put(kvs);
     for (size_t i = 0; i < 1000; i++) {
       REQUIRE(res[i] == "!ok");
     }
@@ -364,7 +364,7 @@ TEST_CASE("kv_client_locked_pipelined_ops_test", "[put][update][remove][get]") {
     for (size_t i = 0; i < 1000; i++) {
       keys.push_back(std::to_string(i));
     }
-    auto res2 = client.get(keys);
+    auto res2 = client->get(keys);
     for (size_t i = 0; i < 1000; i++) {
       REQUIRE(res2[i] == std::to_string(i));
     }
@@ -373,7 +373,7 @@ TEST_CASE("kv_client_locked_pipelined_ops_test", "[put][update][remove][get]") {
     for (size_t i = 1000; i < 2000; i++) {
       keys2.push_back(std::to_string(i));
     }
-    auto res3 = client.get(keys2);
+    auto res3 = client->get(keys2);
     for (size_t i = 0; i < 1000; i++) {
       REQUIRE(res3[i] == "!key_not_found");
     }
@@ -383,7 +383,7 @@ TEST_CASE("kv_client_locked_pipelined_ops_test", "[put][update][remove][get]") {
       kvs2.push_back(std::to_string(i));
       kvs2.push_back(std::to_string(i + 1000));
     }
-    auto res4 = client.update(kvs2);
+    auto res4 = client->update(kvs2);
     for (size_t i = 0; i < 1000; i++) {
       REQUIRE(res4[i] == std::to_string(i));
     }
@@ -393,7 +393,7 @@ TEST_CASE("kv_client_locked_pipelined_ops_test", "[put][update][remove][get]") {
       kvs3.push_back(std::to_string(i));
       kvs3.push_back(std::to_string(i + 1000));
     }
-    auto res5 = client.update(kvs3);
+    auto res5 = client->update(kvs3);
     for (size_t i = 0; i < 1000; i++) {
       REQUIRE(res5[i] == "!key_not_found");
     }
@@ -402,7 +402,7 @@ TEST_CASE("kv_client_locked_pipelined_ops_test", "[put][update][remove][get]") {
     for (size_t i = 0; i < 1000; i++) {
       keys3.push_back(std::to_string(i));
     }
-    auto res6 = client.remove(keys3);
+    auto res6 = client->remove(keys3);
     for (size_t i = 0; i < 1000; i++) {
       REQUIRE(res6[i] == std::to_string(i + 1000));
     }
@@ -411,7 +411,7 @@ TEST_CASE("kv_client_locked_pipelined_ops_test", "[put][update][remove][get]") {
     for (size_t i = 1000; i < 2000; i++) {
       keys4.push_back(std::to_string(i));
     }
-    auto res7 = client.remove(keys4);
+    auto res7 = client->remove(keys4);
     for (size_t i = 0; i < 1000; i++) {
       REQUIRE(res7[i] == "!key_not_found");
     }
@@ -420,7 +420,7 @@ TEST_CASE("kv_client_locked_pipelined_ops_test", "[put][update][remove][get]") {
     for (size_t i = 1000; i < 2000; i++) {
       keys5.push_back(std::to_string(i));
     }
-    auto res8 = client.get(keys5);
+    auto res8 = client->get(keys5);
     for (size_t i = 0; i < 1000; i++) {
       REQUIRE(res8[i] == "!key_not_found");
     }

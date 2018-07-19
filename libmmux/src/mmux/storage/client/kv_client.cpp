@@ -25,8 +25,8 @@ directory::data_status &kv_client::status() {
   return status_;
 }
 
-kv_client::locked_client kv_client::lock() {
-  return kv_client::locked_client(*this);
+std::shared_ptr<kv_client::locked_client> kv_client::lock() {
+  return std::make_shared<kv_client::locked_client>(*this);
 }
 
 void kv_client::refresh() {
@@ -43,11 +43,12 @@ void kv_client::refresh() {
 std::string kv_client::put(const std::string &key, const std::string &value) {
   std::string _return;
   std::vector<std::string> args{key, value};
-  bool redo = false;
+  bool redo;
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(kv_op_id::put, args).front();
       handle_redirect(kv_op_id::put, args, _return);
+      redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -58,11 +59,12 @@ std::string kv_client::put(const std::string &key, const std::string &value) {
 std::string kv_client::get(const std::string &key) {
   std::string _return;
   std::vector<std::string> args{key};
-  bool redo = false;
+  bool redo;
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(kv_op_id::get, args).front();
       handle_redirect(kv_op_id::get, args, _return);
+      redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -73,11 +75,12 @@ std::string kv_client::get(const std::string &key) {
 std::string kv_client::update(const std::string &key, const std::string &value) {
   std::string _return;
   std::vector<std::string> args{key, value};
-  bool redo = false;
+  bool redo;
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(kv_op_id::update, args).front();
       handle_redirect(kv_op_id::update, args, _return);
+      redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -88,11 +91,12 @@ std::string kv_client::update(const std::string &key, const std::string &value) 
 std::string kv_client::remove(const std::string &key) {
   std::string _return;
   std::vector<std::string> args{key};
-  bool redo = false;
+  bool redo;
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(kv_op_id::remove, args).front();
       handle_redirect(kv_op_id::remove, args, _return);
+      redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -105,11 +109,12 @@ std::vector<std::string> kv_client::put(const std::vector<std::string> &kvs) {
     throw std::invalid_argument("Incorrect number of arguments");
   }
   std::vector<std::string> _return;
-  bool redo = false;
+  bool redo;
   do {
     try {
       _return = batch_command(kv_op_id::put, kvs, 2);
       handle_redirects(kv_op_id::put, kvs, _return);
+      redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -119,11 +124,12 @@ std::vector<std::string> kv_client::put(const std::vector<std::string> &kvs) {
 
 std::vector<std::string> kv_client::get(const std::vector<std::string> &keys) {
   std::vector<std::string> _return;
-  bool redo = false;
+  bool redo;
   do {
     try {
       _return = batch_command(kv_op_id::get, keys, 1);
       handle_redirects(kv_op_id::get, keys, _return);
+      redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -136,11 +142,12 @@ std::vector<std::string> kv_client::update(const std::vector<std::string> &kvs) 
     throw std::invalid_argument("Incorrect number of arguments");
   }
   std::vector<std::string> _return;
-  bool redo = false;
+  bool redo;
   do {
     try {
       _return = batch_command(kv_op_id::update, kvs, 2);
       handle_redirects(kv_op_id::update, kvs, _return);
+      redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -150,11 +157,12 @@ std::vector<std::string> kv_client::update(const std::vector<std::string> &kvs) 
 
 std::vector<std::string> kv_client::remove(const std::vector<std::string> &keys) {
   std::vector<std::string> _return;
-  bool redo = false;
+  bool redo;
   do {
     try {
       _return = batch_command(kv_op_id::remove, keys, 1);
       handle_redirects(kv_op_id::remove, keys, _return);
+      redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -202,13 +210,13 @@ std::vector<std::string> kv_client::batch_command(const kv_op_id &op,
 }
 
 void kv_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
-  if (response.substr(0, 9) == "!exporting") {
+  if (response.substr(0, 10) == "!exporting") {
     typedef std::vector<std::string> list_t;
     do {
       auto parts = string_utils::split(response, '!');
-      auto chain = list_t(parts.begin() + 1, parts.end());
+      auto chain = list_t(parts.begin() + 2, parts.end());
       response = replica_chain_client(std::move(chain)).run_command_redirected(cmd_id, args).front();
-    } while (response.substr(0, 9) == "!exporting");
+    } while (response.substr(0, 10) == "!exporting");
   }
   if (response == "!block_moved") {
     refresh();
@@ -223,14 +231,14 @@ void kv_client::handle_redirects(int32_t cmd_id,
   size_t n_op_args = args.size() / n_ops;
   for (size_t i = 0; i < responses.size(); i++) {
     auto &response = responses[i];
-    if (response.substr(0, 9) == "!exporting") {
+    if (response.substr(0, 10) == "!exporting") {
       typedef std::vector<std::string> list_t;
       list_t op_args(args.begin() + i * n_op_args, args.begin() + (i + 1) * n_op_args);
       do {
         auto parts = string_utils::split(response, '!');
-        auto chain = list_t(parts.begin() + 1, parts.end());
+        auto chain = list_t(parts.begin() + 2, parts.end());
         response = replica_chain_client(std::move(chain)).run_command_redirected(cmd_id, op_args).front();
-      } while (response.substr(0, 9) == "!exporting");
+      } while (response.substr(0, 10) == "!exporting");
     }
     if (response == "!block_moved") {
       refresh();
@@ -352,11 +360,11 @@ std::vector<std::string> kv_client::locked_client::remove(const std::vector<std:
 void kv_client::locked_client::handle_redirect(int32_t cmd_id,
                                                const std::vector<std::string> &args,
                                                std::string &response) {
-  if (response.substr(0, 9) == "!exporting") {
+  if (response.substr(0, 10) == "!exporting") {
     typedef std::vector<std::string> list_t;
     do {
       auto parts = string_utils::split(response, '!');
-      auto chain = list_t(parts.begin() + 1, parts.end());
+      auto chain = list_t(parts.begin() + 2, parts.end());
       bool found = false;
       for (size_t i = 0; i < blocks_.size(); i++) {
         const auto &client_chain = parent_.blocks_[i]->chain();
@@ -368,7 +376,7 @@ void kv_client::locked_client::handle_redirect(int32_t cmd_id,
       }
       if (!found)
         response = replica_chain_client(std::move(chain)).run_command_redirected(cmd_id, args).front();
-    } while (response.substr(0, 9) == "!exporting");
+    } while (response.substr(0, 10) == "!exporting");
   }
   // There can be !block_moved response, since:
   // (1) No new exports can start while the kv is locked
@@ -382,12 +390,12 @@ void kv_client::locked_client::handle_redirects(int32_t cmd_id,
   size_t n_op_args = args.size() / n_ops;
   for (size_t i = 0; i < responses.size(); i++) {
     auto &response = responses[i];
-    if (response.substr(0, 9) == "!exporting") {
+    if (response.substr(0, 10) == "!exporting") {
       typedef std::vector<std::string> list_t;
       list_t op_args(args.begin() + i * n_op_args, args.begin() + (i + 1) * n_op_args);
       do {
         auto parts = string_utils::split(response, '!');
-        auto chain = list_t(parts.begin() + 1, parts.end());
+        auto chain = list_t(parts.begin() + 2, parts.end());
         bool found = false;
         for (size_t j = 0; j < blocks_.size(); j++) {
           const auto &client_chain = parent_.blocks_[j]->chain();
@@ -399,7 +407,7 @@ void kv_client::locked_client::handle_redirects(int32_t cmd_id,
         }
         if (!found)
           response = replica_chain_client(std::move(chain)).run_command_redirected(cmd_id, op_args).front();
-      } while (response.substr(0, 9) == "!exporting");
+      } while (response.substr(0, 10) == "!exporting");
     }
   }
   // There can be !block_moved response, since:

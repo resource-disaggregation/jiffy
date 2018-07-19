@@ -33,37 +33,37 @@ using namespace mmux::utils;
 #define LEASE_PERIOD_MS 100
 #define LEASE_PERIOD_US (LEASE_PERIOD_MS * 1000)
 
-void test_kv_ops(kv_client &kv) {
+void test_kv_ops(std::shared_ptr<kv_client> kv) {
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(kv.put(std::to_string(i), std::to_string(i)) == "!ok");
+    REQUIRE(kv->put(std::to_string(i), std::to_string(i)) == "!ok");
   }
 
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(kv.get(std::to_string(i)) == std::to_string(i));
+    REQUIRE(kv->get(std::to_string(i)) == std::to_string(i));
   }
 
   for (size_t i = 1000; i < 2000; i++) {
-    REQUIRE(kv.get(std::to_string(i)) == "!key_not_found");
+    REQUIRE(kv->get(std::to_string(i)) == "!key_not_found");
   }
 
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(kv.update(std::to_string(i), std::to_string(i + 1000)) == std::to_string(i));
+    REQUIRE(kv->update(std::to_string(i), std::to_string(i + 1000)) == std::to_string(i));
   }
 
   for (size_t i = 1000; i < 2000; i++) {
-    REQUIRE(kv.update(std::to_string(i), std::to_string(i + 1000)) == "!key_not_found");
+    REQUIRE(kv->update(std::to_string(i), std::to_string(i + 1000)) == "!key_not_found");
   }
 
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(kv.remove(std::to_string(i)) == std::to_string(i + 1000));
+    REQUIRE(kv->remove(std::to_string(i)) == std::to_string(i + 1000));
   }
 
   for (size_t i = 1000; i < 2000; i++) {
-    REQUIRE(kv.remove(std::to_string(i)) == "!key_not_found");
+    REQUIRE(kv->remove(std::to_string(i)) == "!key_not_found");
   }
 
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(kv.get(std::to_string(i)) == "!key_not_found");
+    REQUIRE(kv->get(std::to_string(i)) == "!key_not_found");
   }
 }
 
@@ -357,7 +357,7 @@ TEST_CASE("mmux_client_flush_remove_test", "[put][get][update][remove]") {
     mmux_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
     client.create("/file.txt", "local://tmp");
     REQUIRE(client.lease_worker().has_path("/file.txt"));
-    REQUIRE_NOTHROW(client.flush("/file.txt", "local://tmp"));
+    REQUIRE_NOTHROW(client.sync("/file.txt", "local://tmp"));
     REQUIRE(client.lease_worker().has_path("/file.txt"));
     REQUIRE_NOTHROW(client.remove("/file.txt"));
     REQUIRE_FALSE(client.lease_worker().has_path("/file.txt"));
@@ -544,35 +544,35 @@ TEST_CASE("mmux_client_notification_test", "[put][get][update][remove]") {
     auto n2 = client.listen("/a/file.txt");
     auto n3 = client.listen("/a/file.txt");
 
-    n1.subscribe({op1});
-    n2.subscribe({op1, op2});
-    n3.subscribe({op2});
+    n1->subscribe({op1});
+    n2->subscribe({op1, op2});
+    n3->subscribe({op2});
 
     auto kv = client.open("/a/file.txt");
-    kv.put(key, value);
-    kv.remove(key);
+    kv->put(key, value);
+    kv->remove(key);
 
-    REQUIRE(n1.get_notification() == std::make_pair(op1, key));
-    REQUIRE(n2.get_notification() == std::make_pair(op1, key));
-    REQUIRE(n2.get_notification() == std::make_pair(op2, key));
-    REQUIRE(n3.get_notification() == std::make_pair(op2, key));
+    REQUIRE(n1->get_notification() == std::make_pair(op1, key));
+    REQUIRE(n2->get_notification() == std::make_pair(op1, key));
+    REQUIRE(n2->get_notification() == std::make_pair(op2, key));
+    REQUIRE(n3->get_notification() == std::make_pair(op2, key));
 
-    REQUIRE_THROWS_AS(n1.get_notification(100), std::out_of_range);
-    REQUIRE_THROWS_AS(n2.get_notification(100), std::out_of_range);
-    REQUIRE_THROWS_AS(n3.get_notification(100), std::out_of_range);
+    REQUIRE_THROWS_AS(n1->get_notification(100), std::out_of_range);
+    REQUIRE_THROWS_AS(n2->get_notification(100), std::out_of_range);
+    REQUIRE_THROWS_AS(n3->get_notification(100), std::out_of_range);
 
-    n1.unsubscribe({op1});
-    n2.unsubscribe({op2});
+    n1->unsubscribe({op1});
+    n2->unsubscribe({op2});
 
-    kv.put(key, value);
-    kv.remove(key);
+    kv->put(key, value);
+    kv->remove(key);
 
-    REQUIRE(n2.get_notification() == std::make_pair(op1, key));
-    REQUIRE(n3.get_notification() == std::make_pair(op2, key));
+    REQUIRE(n2->get_notification() == std::make_pair(op1, key));
+    REQUIRE(n3->get_notification() == std::make_pair(op2, key));
 
-    REQUIRE_THROWS_AS(n1.get_notification(100), std::out_of_range);
-    REQUIRE_THROWS_AS(n2.get_notification(100), std::out_of_range);
-    REQUIRE_THROWS_AS(n3.get_notification(100), std::out_of_range);
+    REQUIRE_THROWS_AS(n1->get_notification(100), std::out_of_range);
+    REQUIRE_THROWS_AS(n2->get_notification(100), std::out_of_range);
+    REQUIRE_THROWS_AS(n3->get_notification(100), std::out_of_range);
   }
 
   storage_server->stop();
@@ -651,7 +651,7 @@ TEST_CASE("mmux_client_chain_replication_test", "[put][get][update][remove]") {
   {
     mmux_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
     auto kv = client.create("/a/file.txt", "/tmp", 1, NUM_BLOCKS);
-    REQUIRE(kv.status().chain_length() == 3);
+    REQUIRE(kv->status().chain_length() == 3);
     test_kv_ops(kv);
   }
 

@@ -27,36 +27,36 @@ void mmux_client::end_scope(const std::string &path) {
   lease_worker_.remove_path(path);
 }
 
-storage::kv_client mmux_client::create(const std::string &path,
-                                       const std::string &persistent_store_prefix,
-                                       size_t num_blocks,
-                                       size_t chain_length,
-                                       int32_t flags) {
-  auto s = fs_->create(path, persistent_store_prefix, num_blocks, chain_length, flags);
+std::shared_ptr<storage::kv_client> mmux_client::create(const std::string &path,
+                                                        const std::string &backing_path,
+                                                        size_t num_blocks,
+                                                        size_t chain_length,
+                                                        int32_t flags) {
+  auto s = fs_->create(path, backing_path, num_blocks, chain_length, flags);
   begin_scope(path);
-  return storage::kv_client(fs_, path, s);
+  return std::make_shared<storage::kv_client>(fs_, path, s);
 }
 
-storage::kv_client mmux_client::open(const std::string &path) {
+std::shared_ptr<storage::kv_client> mmux_client::open(const std::string &path) {
   auto s = fs_->open(path);
   begin_scope(path);
-  return storage::kv_client(fs_, path, s);
+  return std::make_shared<storage::kv_client>(fs_, path, s);
 }
 
-storage::kv_client mmux_client::open_or_create(const std::string &path,
-                                               const std::string &persistent_store_prefix,
-                                               size_t num_blocks,
-                                               size_t chain_length,
-                                               int32_t flags) {
-  auto s = fs_->open_or_create(path, persistent_store_prefix, num_blocks, chain_length, flags);
+std::shared_ptr<storage::kv_client> mmux_client::open_or_create(const std::string &path,
+                                                                const std::string &backing_path,
+                                                                size_t num_blocks,
+                                                                size_t chain_length,
+                                                                int32_t flags) {
+  auto s = fs_->open_or_create(path, backing_path, num_blocks, chain_length, flags);
   begin_scope(path);
-  return storage::kv_client(fs_, path, s);
+  return std::make_shared<storage::kv_client>(fs_, path, s);
 }
 
-storage::kv_listener mmux_client::listen(const std::string &path) {
+std::shared_ptr<storage::kv_listener> mmux_client::listen(const std::string &path) {
   auto s = fs_->open(path);
   begin_scope(path);
-  return storage::kv_listener(path, s);
+  return std::make_shared<storage::kv_listener>(path, s);
 }
 
 void mmux_client::remove(const std::string &path) {
@@ -64,8 +64,16 @@ void mmux_client::remove(const std::string &path) {
   fs_->remove(path);
 }
 
-void mmux_client::flush(const std::string &path, const std::string &dest) {
+void mmux_client::sync(const std::string &path, const std::string &dest) {
   fs_->sync(path, dest);
+}
+
+void mmux_client::dump(const std::string &path, const std::string &dest) {
+  fs_->dump(path, dest);
+}
+
+void mmux_client::load(const std::string &path, const std::string &dest) {
+  fs_->load(path, dest);
 }
 
 void mmux_client::close(const std::string &path) {

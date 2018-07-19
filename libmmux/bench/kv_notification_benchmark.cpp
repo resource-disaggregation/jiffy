@@ -6,7 +6,6 @@
 #include "../src/mmux/utils/signal_handling.h"
 #include "../src/mmux/utils/logger.h"
 #include "../src/mmux/utils/cmd_parse.h"
-#include "../src/mmux/storage/kv/kv_block.h"
 #include "../src/mmux/directory/client/directory_client.h"
 #include "benchmark_utils.h"
 #include "../src/mmux/storage/client/block_listener.h"
@@ -23,7 +22,7 @@ class workload_runner {
  public:
   workload_runner(const std::string &workload_path,
                   std::size_t workload_offset,
-                  kv_client &kv,
+                  std::shared_ptr<kv_client> kv,
                   std::size_t num_ops) : num_ops_(num_ops), kv_(kv) {
     benchmark_utils::load_workload(workload_path, workload_offset, num_ops, workload_);
     timestamps_.resize(workload_.size());
@@ -33,7 +32,7 @@ class workload_runner {
     std::size_t i = 0;
     while (i < num_ops_) {
       timestamps_[i] = time_utils::now_us();
-      kv_.put(workload_[i].second[0], workload_[i].second[1]);
+      kv_->put(workload_[i].second[0], workload_[i].second[1]);
       ++i;
     }
   }
@@ -46,7 +45,7 @@ class workload_runner {
   std::vector<std::uint64_t> timestamps_{};
   std::size_t num_ops_;
   std::vector<std::pair<int32_t, std::vector<std::string>>> workload_{};
-  kv_client &kv_;
+  std::shared_ptr<kv_client> kv_;
 };
 
 class notification_listener {
@@ -54,7 +53,7 @@ class notification_listener {
   notification_listener(mmux::client::mmux_client &client, const std::string &file, std::size_t num_ops)
       : listener_(client.listen(file)),
         num_ops_(num_ops) {
-    listener_.subscribe({"put"});
+    listener_->subscribe({"put"});
     timestamps_.resize(num_ops_);
   }
 
@@ -62,7 +61,7 @@ class notification_listener {
     worker_ = std::thread([&] {
       std::size_t i = 0;
       while (i < num_ops_) {
-        listener_.get_notification();
+        listener_->get_notification();
         timestamps_[i++] = time_utils::now_us();
       }
     });
@@ -78,7 +77,7 @@ class notification_listener {
 
  private:
   std::thread worker_;
-  kv_listener listener_;
+  std::shared_ptr<kv_listener> listener_;
   std::size_t num_ops_;
   std::vector<std::uint64_t> timestamps_{};
 };
