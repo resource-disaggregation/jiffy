@@ -1,3 +1,5 @@
+import logging
+
 from thrift.Thrift import TApplicationException, TMessageType
 from thrift.protocol.TBinaryProtocol import TBinaryProtocolAccelerated
 from thrift.transport import TTransport, TSocket
@@ -15,8 +17,9 @@ class ClientEntry:
 
 
 class BlockClientCache:
-    def __init__(self):
+    def __init__(self, timeout_ms):
         self.cache = {}
+        self.timeout_ms = timeout_ms
 
     def __del__(self):
         for k in self.cache:
@@ -24,13 +27,23 @@ class BlockClientCache:
             if client_entry.transport.isOpen():
                 client_entry.transport.close()
 
+    def remove(self, host, port):
+        if (host, port) in self.cache:
+            if self.cache[(host, port)].transport.isOpen():
+                self.cache[(host, port)].transport.close()
+            del self.cache[(host, port)]
+
     def get(self, host, port):
         if (host, port) in self.cache:
             entry = self.cache[(host, port)]
             return entry.transport, entry.protocol, entry.client
-        transport = TTransport.TBufferedTransport(TSocket.TSocket(host, port), 1024 * 1024)  # Increase buffersize
+
+        socket = TSocket.TSocket(host, port)
+        socket.setTimeout(self.timeout_ms)
+        transport = TTransport.TBufferedTransport(socket, 1024 * 1024)  # Increase buffer-size
         protocol = TBinaryProtocolAccelerated(transport)
         client = block_request_service.Client(protocol)
+
         ex = None
         for i in range(3):
             try:

@@ -204,10 +204,10 @@ class DirectoryClient:
         return self.client_.is_directory(path)
 
     def resolve_failures(self, path, chain):
-        self.client_.reslove_failures(path, chain)
+        return self.client_.reslove_failures(path, chain)
 
     def add_replica_to_chain(self, path, chain):
-        self.client_.add_replica_to_chain(path, chain)
+        return self.client_.add_replica_to_chain(path, chain)
 
     def add_block_to_file(self, path):
         self.client_.add_block_to_file(path)

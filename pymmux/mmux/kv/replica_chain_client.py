@@ -1,3 +1,10 @@
+import logging
+import socket
+
+from thrift.transport.TTransport import TTransportException
+
+from mmux.directory.directory_client import ReplicaChain
+from mmux.directory.ttypes import rpc_replica_chain
 from mmux.kv import block_request_service
 from mmux.kv.block_client import BlockClient
 from mmux.kv.compat import b, bytes_to_str
@@ -44,21 +51,31 @@ class ReplicaChainClient:
         def run_command_redirected(self, cmd_id, args):
             return self.parent.run_command_redirected(cmd_id, args)
 
-    def __init__(self, client_cache, chain, request_timeout_s=3.0):
-        self.seq = block_request_service.sequence_id(-1, 0, -1)
+    def __init__(self, fs, path, client_cache, chain):
+        self.fs = fs
+        self.path = path
+        self.client_cache = client_cache
         self.chain = chain
-        self.request_timeout_s = request_timeout_s
-        h_host, h_port, _, _, _, h_bid = chain[0].split(':')
-        self.head = BlockClient(client_cache, h_host, int(h_port), int(h_bid))
+        self._init()
+
+    def _init(self):
+        self.seq = block_request_service.sequence_id(-1, 0, -1)
+        h_host, h_port, _, _, _, h_bid = self.chain.block_names[0].split(':')
+        self.head = BlockClient(self.client_cache, h_host, int(h_port), int(h_bid))
         self.seq.client_id = self.head.get_client_id()
-        if len(chain) == 1:
+        if len(self.chain.block_names) == 1:
             self.tail = self.head
         else:
-            t_host, t_port, _, _, _, t_bid = chain[-1].split(':')
-            self.tail = BlockClient(client_cache, t_host, int(t_port), int(t_bid))
+            t_host, t_port, _, _, _, t_bid = self.chain.block_names[-1].split(':')
+            self.tail = BlockClient(self.client_cache, t_host, int(t_port), int(t_bid))
         self.response_reader = self.tail.get_response_reader(self.seq.client_id)
         self.response_cache = {}
         self.in_flight = False
+
+    def _invalidate_cache(self):
+        for block in self.chain.block_names:
+            host, port, _, _, _, _ = block.split(':')
+            self.client_cache.remove(host, int(port))
 
     def lock(self):
         return self.LockedClient(self)
@@ -97,10 +114,29 @@ class ReplicaChainClient:
         return self._recv_response()
 
     def run_command(self, cmd_id, args):
-        if op_type(cmd_id) == KVOpType.accessor:
-            return self._run_command(self.tail, cmd_id, args)
-        else:
-            return self._run_command(self.head, cmd_id, args)
+        resp = None
+        retry = False
+        while resp is None:
+            try:
+                if op_type(cmd_id) == KVOpType.accessor:
+                    resp = self._run_command(self.tail, cmd_id, args)
+                else:
+                    resp = self._run_command(self.head, cmd_id, args)
+                    if retry and resp[0] == b('!duplicate_key'):
+                        resp[0] = b('!ok')
+            except (TTransportException, socket.timeout) as e:
+                logging.warning("Error in connection to chain {}: {}".format(self.chain.block_names, e))
+                rchain = self.fs.resolve_failures(self.path, rpc_replica_chain(self.chain.block_names,
+                                                                               self.chain.slot_range[0],
+                                                                               self.chain.slot_range[1],
+                                                                               self.chain.storage_mode))
+                self.chain = ReplicaChain(rchain.block_names, rchain.slot_begin, rchain.slot_end, rchain.storage_mode)
+                logging.warning("Updated chain: {}".format(self.chain.block_names))
+                # invalidate the client cache for the failed connection(s)
+                self._invalidate_cache()
+                self._init()
+                retry = True
+        return resp
 
     def _run_command_redirected(self, client, cmd_id, args):
         args.append("!redirected")
