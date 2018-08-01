@@ -8,7 +8,7 @@
 namespace mmux {
 namespace directory {
 
-class directory_client : public directory_ops {
+class directory_client : public directory_interface {
  public:
   typedef directory_serviceClient thrift_client;
 
@@ -53,6 +53,8 @@ class directory_client : public directory_ops {
   void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end);
   void dump(const std::string &path, const std::string &backing_path);
   void load(const std::string &path, const std::string &backing_path);
+  virtual void touch(const std::string &path);
+  virtual void handle_lease_expiry(const std::string &path);
 
  private:
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};

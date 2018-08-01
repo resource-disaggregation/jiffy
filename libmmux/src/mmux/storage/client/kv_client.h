@@ -50,10 +50,10 @@ class kv_client {
     std::vector<locked_block_ptr_t> new_blocks_;
   };
 
-  kv_client(std::shared_ptr<directory::directory_ops> fs,
+  kv_client(std::shared_ptr<directory::directory_interface> fs,
             const std::string &path,
             const directory::data_status &status,
-            int timeout_ms = 0);
+            int timeout_ms = 1000);
 
   void refresh();
 
@@ -76,11 +76,12 @@ class kv_client {
   void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response);
   void handle_redirects(int32_t cmd_id, const std::vector<std::string> &args, std::vector<std::string> &responses);
 
-  std::shared_ptr<directory::directory_ops> fs_;
+  std::shared_ptr<directory::directory_interface> fs_;
   std::string path_;
   directory::data_status status_;
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
   std::vector<int32_t> slots_;
+  int timeout_ms_;
 };
 
 }

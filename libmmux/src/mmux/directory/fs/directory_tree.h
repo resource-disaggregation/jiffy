@@ -687,7 +687,7 @@ class ds_dir_node : public ds_node {
   child_map children_{};
 };
 
-class directory_tree : public directory_ops, public directory_management_ops {
+class directory_tree : public directory_interface {
  public:
   explicit directory_tree(std::shared_ptr<block_allocator> allocator,
                           std::shared_ptr<storage::storage_management_ops> storage);

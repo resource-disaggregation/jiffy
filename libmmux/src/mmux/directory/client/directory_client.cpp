@@ -184,5 +184,13 @@ void directory_client::merge_slot_range(const std::string &path, int32_t slot_be
   client_->merge_slot_range(path, slot_begin, slot_end);
 }
 
+void directory_client::touch(const std::string &) {
+  throw directory_ops_exception("Unsupported operation");
+}
+
+void directory_client::handle_lease_expiry(const std::string &) {
+  throw directory_ops_exception("Unsupported operation");
+}
+
 }
 }

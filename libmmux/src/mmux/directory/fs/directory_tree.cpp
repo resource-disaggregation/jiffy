@@ -400,6 +400,10 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
       }
     }
   }
+
+  if (fixed_chain.size() == chain_length) { // Nothing has failed, really
+    return fixed_chain;
+  }
   // Re-organize chain as needed
   using namespace storage;
   bool auto_scale = !dstatus.is_static_provisioned();
@@ -529,6 +533,7 @@ void directory_tree::add_block_to_file(const std::string &path) {
   LOG(log_level::info) << "Adding new block to file " << path;
   auto node = get_node_as_file(path);
   auto ctx = node->setup_add_block(storage_, allocator_, path);
+  LOG(log_level::info) << "Setup add block complete for file " << path;
   std::thread([&, node, ctx] {
     auto start = time_utils::now_ms();
     storage_->export_slots(ctx.from_block.block_names.front());
