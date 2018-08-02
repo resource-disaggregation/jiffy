@@ -96,7 +96,7 @@ void print_summary() {
 
 #define PRINT_SUMMARY print_summary()
 
-#define ASSERT_TRUE(condition) if(!condition) {\
+#define ASSERT_TRUE(condition) if(!(condition)) {\
   t_stats.a_failures++;\
   set_console_yellow();\
   printf("\n=== Assertion failure at %s:%d (%s) ===\n", __FILE__, __LINE__, __func__);\

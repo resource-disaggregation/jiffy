@@ -4,6 +4,8 @@
 #include <string.h>
 #include <signal.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include "../src/mmux/utils/connection_utils.h"
 #include "test.h"
 #include "../src/mmux/client/cmmux_client.h"
