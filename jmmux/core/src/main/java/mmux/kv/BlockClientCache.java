@@ -13,10 +13,12 @@ public class BlockClientCache {
   class Key {
     private String host;
     private int port;
+    private String endpoint;
 
     Key(String host, int port) {
       this.host = host;
       this.port = port;
+      this.endpoint = host + ":" + port;
     }
 
     public int getPort() {
@@ -25,6 +27,23 @@ public class BlockClientCache {
 
     public String getHost() {
       return host;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (o == this)
+        return true;
+
+      if (!(o instanceof Key))
+        return false;
+
+      Key k = (Key) o;
+      return host.equals(k.host) && port == k.port;
+    }
+
+    @Override
+    public int hashCode() {
+      return endpoint.hashCode();
     }
   }
 
@@ -53,9 +72,11 @@ public class BlockClientCache {
   }
 
   private HashMap<Key, Value> cache;
+  private int timeoutMs;
 
-  public BlockClientCache() {
-    cache = new HashMap<>();
+  BlockClientCache(int timeoutMs) {
+    this.cache = new HashMap<>();
+    this.timeoutMs = timeoutMs;
   }
 
   public Value get(String host, int port) throws TTransportException {
@@ -63,7 +84,8 @@ public class BlockClientCache {
     if (cache.containsKey(key)) {
       return cache.get(key);
     }
-    TTransport transport = new TSocket(host, port);
+    TSocket transport = new TSocket(host, port);
+    transport.setTimeout(timeoutMs);
     TProtocol protocol = new TBinaryProtocol(transport);
     Client client = new Client(protocol);
     TTransportException ex = null;
@@ -83,5 +105,15 @@ public class BlockClientCache {
     Value value = new Value(transport, protocol, client);
     cache.put(key, value);
     return value;
+  }
+
+  public void remove(String host, int port) {
+    Key k = new Key(host, port);
+    if (cache.containsKey(k)) {
+      Value value = cache.remove(k);
+      if (value.getTransport().isOpen()) {
+        value.getTransport().close();
+      }
+    }
   }
 }

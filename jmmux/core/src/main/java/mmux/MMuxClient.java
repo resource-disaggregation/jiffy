@@ -62,13 +62,13 @@ public class MMuxClient implements Closeable {
       throws TException {
     rpc_data_status status = fs.create(path, backingPath, numBlocks, chainLength, flags);
     beginScope(path);
-    return new KVClient(fs, path, status);
+    return new KVClient(fs, path, status, 1000);
   }
 
   public KVClient open(String path) throws TException {
     rpc_data_status status = fs.open(path);
     beginScope(path);
-    return new KVClient(fs, path, status);
+    return new KVClient(fs, path, status, 1000);
   }
 
   public KVClient openOrCreate(String path) throws TException {
@@ -89,7 +89,7 @@ public class MMuxClient implements Closeable {
     rpc_data_status status = fs
         .openOrCreate(path, backingPath, numBlocks, chainLength, flags);
     beginScope(path);
-    return new KVClient(fs, path, status);
+    return new KVClient(fs, path, status, 1000);
   }
 
   public KVListener listen(String path) throws TException {

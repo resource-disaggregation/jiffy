@@ -1,16 +1,22 @@
 package mmux.kv;
 
 import java.io.Closeable;
+import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import mmux.directory.directory_service.Client;
+import mmux.directory.rpc_replica_chain;
+import mmux.directory.rpc_storage_mode;
 import mmux.kv.BlockClient.CommandResponse;
 import mmux.kv.BlockClient.CommandResponseReader;
 import mmux.kv.BlockNameParser.BlockMetadata;
+import mmux.util.ByteBufferUtils;
 import org.apache.thrift.TException;
+import org.apache.thrift.transport.TTransportException;
 
 public class ReplicaChainClient implements Closeable {
 
@@ -18,7 +24,7 @@ public class ReplicaChainClient implements Closeable {
 
     private ReplicaChainClient parent;
     private boolean redirecting;
-    private List<String> redirectChain;
+    private rpc_replica_chain redirectChain;
 
     LockedClient(ReplicaChainClient parent) throws TException {
       this.parent = parent;
@@ -27,8 +33,9 @@ public class ReplicaChainClient implements Closeable {
       if (!response.equals("!ok")) {
         this.redirecting = true;
         String[] parts = response.split("!");
-        this.redirectChain = new ArrayList<>(parts.length - 1);
-        this.redirectChain.addAll(Arrays.asList(parts).subList(2, parts.length));
+        this.redirectChain = new rpc_replica_chain(new ArrayList<>(parts.length - 1), 0, 0,
+            rpc_storage_mode.rpc_in_memory);
+        this.redirectChain.block_names.addAll(Arrays.asList(parts).subList(2, parts.length));
       } else {
         this.redirecting = false;
         this.redirectChain = null;
@@ -55,15 +62,15 @@ public class ReplicaChainClient implements Closeable {
       return parent.runCommandRedirected(cmdId, args);
     }
 
-    public boolean isRedirecting() {
+    boolean isRedirecting() {
       return redirecting;
     }
 
-    public List<String> getRedirectChain() {
+    rpc_replica_chain getRedirectChain() {
       return redirectChain;
     }
 
-    public List<String> getChain() {
+    public rpc_replica_chain getChain() {
       return parent.getChain();
     }
 
@@ -76,22 +83,25 @@ public class ReplicaChainClient implements Closeable {
     }
   }
 
+  private Client fs;
+  private String path;
   private sequence_id seq;
-  private List<String> chain;
+  private rpc_replica_chain chain;
   private BlockClient head;
   private BlockClient tail;
   private CommandResponseReader responseReader;
   private BlockClientCache cache;
   private boolean inFlight;
 
-  ReplicaChainClient(BlockClientCache cache, List<String> chain) throws TException {
-    if (chain == null || chain.size() == 0) {
+  ReplicaChainClient(Client fs, String path, BlockClientCache cache, rpc_replica_chain chain)
+      throws TException {
+    if (chain == null || chain.block_names.size() == 0) {
       throw new IllegalArgumentException("Chain length must be >= 1");
     }
+    this.fs = fs;
+    this.path = path;
     this.cache = cache;
     this.chain = chain;
-    this.inFlight = false;
-    this.seq = new sequence_id(-1, 0, -1);
     connect();
   }
 
@@ -101,7 +111,7 @@ public class ReplicaChainClient implements Closeable {
     tail.close();
   }
 
-  public List<String> getChain() {
+  public rpc_replica_chain getChain() {
     return chain;
   }
 
@@ -138,25 +148,40 @@ public class ReplicaChainClient implements Closeable {
     return response.result;
   }
 
-  List<ByteBuffer> runCommand(BlockClient client, int cmdId, List<ByteBuffer> args)
+  private List<ByteBuffer> runCommand(BlockClient client, int cmdId, List<ByteBuffer> args)
       throws TException {
     sendCommandRequest(client, cmdId, args);
     return receiveCommandResponse();
   }
 
   List<ByteBuffer> runCommand(int cmdId, List<ByteBuffer> args) throws TException {
-    if (KVOpType.opType(cmdId) == KVOpType.accessor) {
-      return runCommand(tail, cmdId, args);
-    } else {
-      return runCommand(head, cmdId, args);
+    List<ByteBuffer> response = null;
+    boolean retry = false;
+    while (response == null) {
+      try {
+        if (KVOpType.opType(cmdId) == KVOpType.accessor) {
+          response = runCommand(tail, cmdId, args);
+        } else {
+          response = runCommand(head, cmdId, args);
+          if (retry && ByteBufferUtils.toString(response.get(0)).equals("!duplicate_key")) {
+            response.set(0, ByteBufferUtils.fromString("!ok"));
+          }
+        }
+      } catch (TTransportException e) {
+        chain = fs.resloveFailures(path, chain);
+        invalidateCache();
+        connect();
+        retry = true;
+      }
     }
+    return response;
   }
 
   private List<ByteBuffer> runCommandRedirected(BlockClient client, int cmdId,
       List<ByteBuffer> args)
       throws TException {
     List<ByteBuffer> newArgs = new ArrayList<>(args);
-    newArgs.add(ByteBuffer.wrap("!redirected".getBytes()));
+    newArgs.add(ByteBufferUtils.fromString("!redirected"));
     return runCommand(client, cmdId, newArgs);
   }
 
@@ -168,24 +193,25 @@ public class ReplicaChainClient implements Closeable {
     }
   }
 
-  BlockClient getHead() {
-    return head;
-  }
-
-  BlockClient getTail() {
-    return tail;
-  }
-
   private void connect() throws TException {
-    BlockMetadata h = BlockNameParser.parse(chain.get(0));
+    this.seq = new sequence_id(-1, 0, -1);
+    BlockMetadata h = BlockNameParser.parse(chain.block_names.get(0));
     this.head = new BlockClient(cache, h.getHost(), h.getServicePort(), h.getBlockId());
     this.seq.setClientId(this.head.getClientId());
-    if (chain.size() == 1) {
+    if (chain.block_names.size() == 1) {
       this.tail = this.head;
     } else {
-      BlockMetadata t = BlockNameParser.parse(chain.get(chain.size() - 1));
+      BlockMetadata t = BlockNameParser.parse(chain.block_names.get(chain.block_names.size() - 1));
       this.tail = new BlockClient(cache, t.getHost(), t.getServicePort(), t.getBlockId());
     }
     this.responseReader = this.tail.newCommandResponseReader(seq.getClientId());
+    this.inFlight = false;
+  }
+
+  private void invalidateCache() {
+    for (String block : chain.block_names) {
+      BlockMetadata m = BlockNameParser.parse(block);
+      cache.remove(m.getHost(), m.getServicePort());
+    }
   }
 }

@@ -6,7 +6,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import mmux.directory.directory_service;
+import mmux.directory.directory_service.Client;
 import mmux.directory.rpc_data_status;
+import mmux.directory.rpc_replica_chain;
+import mmux.directory.rpc_storage_mode;
 import mmux.util.ByteBufferUtils;
 import org.apache.thrift.TException;
 
@@ -43,7 +46,8 @@ public class KVClient implements Closeable {
             }
           }
           if (newBlock) {
-            redirectBlocks[i] = new ReplicaChainClient(parent.cache, blocks[i].getRedirectChain());
+            redirectBlocks[i] = new ReplicaChainClient(fs, path, parent.cache,
+                blocks[i].getRedirectChain());
             lockedRedirectBlocks[i] = redirectBlocks[i].lock();
             newBlocks[i] = lockedRedirectBlocks[i];
           }
@@ -59,17 +63,19 @@ public class KVClient implements Closeable {
         throws TException {
       String resp;
       while ((resp = ByteBufferUtils.toString(response)).startsWith("!exporting")) {
-        List<String> chain = parent.extractChain(resp);
+        rpc_replica_chain chain = parent.extractChain(resp);
         boolean found = false;
         for (ReplicaChainClient.LockedClient block : blocks) {
-          if (block.getChain().equals(chain)) {
+          if (block.getChain().block_names.equals(chain.block_names)) {
             found = true;
             response = block.runCommandRedirected(cmdId, args).get(0);
             break;
           }
         }
         if (!found) {
-          response = new ReplicaChainClient(cache, chain).runCommandRedirected(cmdId, args).get(0);
+          response = new ReplicaChainClient(fs, path, cache, chain)
+              .runCommandRedirected(cmdId, args)
+              .get(0);
         }
       }
       return response;
@@ -83,19 +89,19 @@ public class KVClient implements Closeable {
         ByteBuffer response = responses.get(i);
         String resp;
         while ((resp = ByteBufferUtils.toString(response)).startsWith("!exporting")) {
-          List<String> chain = parent.extractChain(resp);
+          rpc_replica_chain chain = parent.extractChain(resp);
           List<ByteBuffer> opArgs = args.subList(i * numOpArgs, (i + 1) * numOpArgs);
           boolean found = false;
           for (ReplicaChainClient.LockedClient block : blocks) {
-            if (block.getChain().equals(chain)) {
+            if (block.getChain().block_names.equals(chain.block_names)) {
               found = true;
               response = block.runCommandRedirected(cmdId, args).get(0);
               break;
             }
           }
           if (!found) {
-            response = new ReplicaChainClient(cache, chain).runCommandRedirected(cmdId, opArgs)
-                .get(0);
+            response = new ReplicaChainClient(fs, path, cache, chain)
+                .runCommandRedirected(cmdId, opArgs).get(0);
           }
         }
         responses.set(i, response);
@@ -185,16 +191,16 @@ public class KVClient implements Closeable {
   private String path;
   private BlockClientCache cache;
 
-  public KVClient(directory_service.Client fs, String path, rpc_data_status dataStatus)
+  public KVClient(Client fs, String path, rpc_data_status dataStatus, int timeoutMs)
       throws TException {
     this.fs = fs;
     this.path = path;
     this.blocks = new ReplicaChainClient[dataStatus.data_blocks.size()];
     this.slots = new int[dataStatus.data_blocks.size()];
-    this.cache = new BlockClientCache();
+    this.cache = new BlockClientCache(timeoutMs);
     for (int i = 0; i < blocks.length; i++) {
       slots[i] = dataStatus.data_blocks.get(i).slot_begin;
-      blocks[i] = new ReplicaChainClient(cache, dataStatus.data_blocks.get(i).block_names);
+      blocks[i] = new ReplicaChainClient(fs, path, cache, dataStatus.data_blocks.get(i));
     }
   }
 
@@ -211,7 +217,7 @@ public class KVClient implements Closeable {
     this.slots = new int[dataStatus.data_blocks.size()];
     for (int i = 0; i < blocks.length; i++) {
       slots[i] = dataStatus.data_blocks.get(i).slot_begin;
-      blocks[i] = new ReplicaChainClient(cache, dataStatus.data_blocks.get(i).block_names);
+      blocks[i] = new ReplicaChainClient(fs, path, cache, dataStatus.data_blocks.get(i));
     }
   }
 
@@ -223,8 +229,8 @@ public class KVClient implements Closeable {
       throws TException {
     String resp;
     while ((resp = ByteBufferUtils.toString(response)).startsWith("!exporting")) {
-      List<String> chain = extractChain(resp);
-      response = new ReplicaChainClient(cache, chain).runCommandRedirected(cmdId, args).get(0);
+      rpc_replica_chain chain = extractChain(resp);
+      response = new ReplicaChainClient(fs, path, cache, chain).runCommandRedirected(cmdId, args).get(0);
     }
     if (ByteBufferUtils.toString(response).equals("!block_moved")) {
       refresh();
@@ -241,9 +247,10 @@ public class KVClient implements Closeable {
       ByteBuffer response = responses.get(i);
       String resp;
       while ((resp = ByteBufferUtils.toString(response)).startsWith("!exporting")) {
-        List<String> chain = extractChain(resp);
+        rpc_replica_chain chain = extractChain(resp);
         List<ByteBuffer> opArgs = args.subList(i * numOpArgs, (i + 1) * numOpArgs);
-        response = new ReplicaChainClient(cache, chain).runCommandRedirected(cmdId, opArgs).get(0);
+        response = new ReplicaChainClient(fs, path, cache, chain).runCommandRedirected(cmdId, opArgs)
+            .get(0);
       }
       if (ByteBufferUtils.toString(response).equals("!block_moved")) {
         refresh();
@@ -413,10 +420,10 @@ public class KVClient implements Closeable {
     return low - 1;
   }
 
-  private List<String> extractChain(String msg) {
+  private rpc_replica_chain extractChain(String msg) {
     String[] parts = msg.split("!");
     List<String> chain = new ArrayList<>(parts.length - 1);
     chain.addAll(Arrays.asList(parts).subList(2, parts.length));
-    return chain;
+    return new rpc_replica_chain(chain, 0, 0, rpc_storage_mode.rpc_in_memory);
   }
 }
