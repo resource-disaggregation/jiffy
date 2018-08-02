@@ -51,6 +51,7 @@ TEST_CASE("kv_no_failure_test", "[put][get]") {
 
   auto sm = std::make_shared<storage_manager>();
   auto t = std::make_shared<directory_tree>(alloc, sm);
+
   auto dserver = directory_server::create(t, HOST, DIRECTORY_SERVICE_PORT);
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
@@ -58,7 +59,7 @@ TEST_CASE("kv_no_failure_test", "[put][get]") {
   t->create("/file", "/tmp", 1, 3, 0);
   auto chain = t->dstatus("/file").data_blocks()[0];
 
-  replica_chain_client client(chain.block_names);
+  replica_chain_client client(t, "/file", chain, 100);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.run_command(kv_op_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
@@ -130,11 +131,14 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
 
   auto sm = std::make_shared<storage_manager>();
   auto t = std::make_shared<directory_tree>(alloc, sm);
+
   auto dserver = directory_server::create(t, HOST, DIRECTORY_SERVICE_PORT);
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
   t->create("/file", "/tmp", 1, 3, 0);
+  auto chain = t->dstatus("/file").data_blocks()[0];
+  replica_chain_client client(t, "/file", chain, 100);
 
   kv_servers[0]->stop();
   chain_servers[0]->stop();
@@ -146,10 +150,6 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
     }
   }
 
-  auto chain = t->dstatus("/file").data_blocks()[0];
-  auto fixed_chain = t->resolve_failures("/file", chain);
-
-  replica_chain_client client(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.run_command(kv_op_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
@@ -226,14 +226,19 @@ TEST_CASE("kv_mid_failure_test", "[put][get]") {
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
   t->create("/file", "/tmp", 1, 3, 0);
+  auto chain = t->dstatus("/file").data_blocks()[0];
+
+  replica_chain_client client(t, "/file", chain, 100);
 
   kv_servers[1]->stop();
   management_servers[1]->stop();
+  chain_servers[1]->stop();
+  for (int32_t i = 3; i < 6; i++) {
+    if (server_threads[i].joinable()) {
+      server_threads[i].join();
+    }
+  }
 
-  auto chain = t->dstatus("/file").data_blocks()[0];
-  auto fixed_chain = t->resolve_failures("/file", chain);
-
-  replica_chain_client client(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.run_command(kv_op_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
@@ -306,19 +311,25 @@ TEST_CASE("kv_tail_failure_test", "[put][get]") {
 
   auto sm = std::make_shared<storage_manager>();
   auto t = std::make_shared<directory_tree>(alloc, sm);
+
   auto dserver = directory_server::create(t, HOST, DIRECTORY_SERVICE_PORT);
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
   t->create("/file", "/tmp", 1, 3, 0);
+  auto chain = t->dstatus("/file").data_blocks()[0];
+
+  replica_chain_client client(t, "/file", chain, 100);
 
   kv_servers[2]->stop();
   management_servers[2]->stop();
+  chain_servers[2]->stop();
+  for (int32_t i = 6; i < 9; i++) {
+    if (server_threads[i].joinable()) {
+      server_threads[i].join();
+    }
+  }
 
-  auto chain = t->dstatus("/file").data_blocks()[0];
-  auto fixed_chain = t->resolve_failures("/file", chain);
-
-  replica_chain_client client(fixed_chain.block_names);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.run_command(kv_op_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
@@ -398,7 +409,7 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
 
   auto chain = t->dstatus("/file").data_blocks()[0].block_names;
   {
-    replica_chain_client client(chain);
+    replica_chain_client client(t, "/file", chain, 100);
     for (std::size_t i = 0; i < 1000; ++i) {
       REQUIRE(client.run_command(kv_op_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
     }
@@ -407,7 +418,7 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
   auto fixed_chain = t->add_replica_to_chain("/file", t->dstatus("/file").data_blocks()[0]);
 
   {
-    replica_chain_client client2(fixed_chain.block_names);
+    replica_chain_client client2(t, "/file", fixed_chain, 100);
     for (std::size_t i = 0; i < 1000; ++i) {
       REQUIRE(client2.run_command(kv_op_id::get, {std::to_string(i)}).front() == std::to_string(i));
     }

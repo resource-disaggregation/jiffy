@@ -164,6 +164,10 @@ struct replica_chain {
     this->mode = mode;
   }
 
+  replica_chain(const std::vector<std::string> block_names) : mode(storage_mode::in_memory) {
+    this->block_names = block_names;
+  }
+
   const std::string slot_range_string() const {
     return std::to_string(slot_range.first) + "_" + std::to_string(slot_range.second);
   }
@@ -267,7 +271,7 @@ class directory_entry {
     return status_.last_write_time();
   }
 
-  const file_status& status() const {
+  const file_status &status() const {
     return status_;
   }
 
@@ -361,11 +365,11 @@ class data_status {
     data_blocks_.erase(data_blocks_.begin() + i);
   }
 
-  void set_data_block(std::size_t i, replica_chain&& chain) {
+  void set_data_block(std::size_t i, replica_chain &&chain) {
     data_blocks_[i] = std::move(chain);
   }
 
-  const replica_chain& get_data_block(std::size_t i) const {
+  const replica_chain &get_data_block(std::size_t i) const {
     return data_blocks_[i];
   }
 
@@ -499,6 +503,8 @@ class directory_management_ops {
   virtual void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) = 0;
   virtual void handle_lease_expiry(const std::string &path) = 0;
 };
+
+class directory_interface: public directory_ops, public directory_management_ops {};
 
 }
 }

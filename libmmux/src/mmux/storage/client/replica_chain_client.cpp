@@ -1,10 +1,17 @@
+#include <thrift/transport/TTransportException.h>
 #include "replica_chain_client.h"
 #include "../../utils/string_utils.h"
+#include "../../utils/logger.h"
 
 namespace mmux {
 namespace storage {
 
-replica_chain_client::replica_chain_client(const std::vector<std::string> &chain, int timeout_ms) : in_flight_(false) {
+using namespace utils;
+
+replica_chain_client::replica_chain_client(std::shared_ptr<directory::directory_interface> fs,
+                                           const std::string &path,
+                                           const directory::replica_chain &chain,
+                                           int timeout_ms) : fs_(fs), path_(path), in_flight_(false) {
   seq_.client_id = -1;
   seq_.client_seq_no = 0;
   connect(chain, timeout_ms);
@@ -22,22 +29,24 @@ void replica_chain_client::disconnect() {
   tail_.disconnect();
 }
 
-const std::vector<std::string> &replica_chain_client::chain() const {
+const directory::replica_chain & replica_chain_client::chain() const {
   return chain_;
 }
 
-void replica_chain_client::connect(const std::vector<std::string> &chain, int timeout_ms) {
+void replica_chain_client::connect(const directory::replica_chain &chain, int timeout_ms) {
   chain_ = chain;
-  auto h = block_name_parser::parse(chain_.front());
+  timeout_ms_ = timeout_ms;
+  auto h = block_name_parser::parse(chain_.block_names.front());
   head_.connect(h.host, h.service_port, h.id, timeout_ms);
   seq_.client_id = head_.get_client_id();
-  if (chain.size() == 1) {
+  if (chain_.block_names.size() == 1) {
     tail_ = head_;
   } else {
-    auto t = block_name_parser::parse(chain_.back());
+    auto t = block_name_parser::parse(chain_.block_names.back());
     tail_.connect(t.host, t.service_port, t.id, timeout_ms);
   }
   response_reader_ = tail_.get_command_response_reader(seq_.client_id);
+  in_flight_ = false;
 }
 
 void replica_chain_client::send_command(int32_t cmd_id, const std::vector<std::string> &args) {
@@ -60,8 +69,22 @@ std::vector<std::string> replica_chain_client::recv_response() {
 }
 
 std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const std::vector<std::string> &args) {
-  send_command(cmd_id, args);
-  return recv_response();
+  std::vector<std::string> response;
+  bool retry = false;
+  while (response.empty()) {
+    try {
+      send_command(cmd_id, args);
+      response = recv_response();
+      if (retry && response[0] == "!duplicate_key") {
+        response[0] = "!ok";
+      }
+    } catch (apache::thrift::transport::TTransportException &e) {
+      LOG(log_level::info) << "Error in connection to chain: " << e.what();
+      connect(fs_->resolve_failures(path_, chain_), timeout_ms_);
+      retry = true;
+    }
+  }
+  return response;
 }
 
 std::vector<std::string> replica_chain_client::run_command_redirected(int32_t cmd_id,
@@ -97,7 +120,7 @@ void replica_chain_client::locked_client::unlock() {
   parent_.run_command(kv_op_id::unlock, {});
 }
 
-const std::vector<std::string> &replica_chain_client::locked_client::chain() {
+const directory::replica_chain & replica_chain_client::locked_client::chain() {
   return parent_.chain();
 }
 

@@ -39,6 +39,10 @@ TEST_CASE("scale_add_block_test", "[directory_tree][storage_server][management_s
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
+  auto dir_server = directory_server::create(tree, HOST, DIRECTORY_SERVICE_PORT);
+  std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
+
   REQUIRE_NOTHROW(tree->create("/sandbox/file.txt", "/tmp", 1, 1, 0));
 
   // Write some data into it
@@ -71,6 +75,11 @@ TEST_CASE("scale_add_block_test", "[directory_tree][storage_server][management_s
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
+
+  dir_server->stop();
+  if (dir_serve_thread.joinable()) {
+    dir_serve_thread.join();
+  }
 }
 
 TEST_CASE("scale_block_split_test", "[directory_tree][storage_server][management_server]") {
@@ -89,6 +98,10 @@ TEST_CASE("scale_block_split_test", "[directory_tree][storage_server][management
 
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
+
+  auto dir_server = directory_server::create(tree, HOST, DIRECTORY_SERVICE_PORT);
+  std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
   REQUIRE_NOTHROW(tree->create("/sandbox/file.txt", "/tmp", 1, 1, 0));
 
@@ -122,6 +135,11 @@ TEST_CASE("scale_block_split_test", "[directory_tree][storage_server][management
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
+
+  dir_server->stop();
+  if (dir_serve_thread.joinable()) {
+    dir_serve_thread.join();
+  }
 }
 
 TEST_CASE("scale_block_merge_test", "[directory_tree][storage_server][management_server]") {
@@ -140,6 +158,10 @@ TEST_CASE("scale_block_merge_test", "[directory_tree][storage_server][management
 
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
+
+  auto dir_server = directory_server::create(tree, HOST, DIRECTORY_SERVICE_PORT);
+  std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
   REQUIRE_NOTHROW(tree->create("/sandbox/file.txt", "/tmp", 2, 1, 0));
 
@@ -173,6 +195,11 @@ TEST_CASE("scale_block_merge_test", "[directory_tree][storage_server][management
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
+
+  dir_server->stop();
+  if (dir_serve_thread.joinable()) {
+    dir_serve_thread.join();
+  }
 }
 
 TEST_CASE("auto_scale_up_test", "[directory_service][storage_server][management_server]") {
@@ -191,6 +218,7 @@ TEST_CASE("auto_scale_up_test", "[directory_service][storage_server][management_
 
   auto sm = std::make_shared<storage_manager>();
   auto t = std::make_shared<directory_tree>(alloc, sm);
+
   auto dir_server = directory_server::create(t, HOST, DIRECTORY_SERVICE_PORT);
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
@@ -254,6 +282,7 @@ TEST_CASE("auto_scale_down_test", "[directory_service][storage_server][managemen
 
   auto sm = std::make_shared<storage_manager>();
   auto t = std::make_shared<directory_tree>(alloc, sm);
+
   auto dir_server = directory_server::create(t, HOST, DIRECTORY_SERVICE_PORT);
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);

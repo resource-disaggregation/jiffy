@@ -248,7 +248,6 @@ if (BUILD_TESTS)
           test/file_size_tracker_test.cpp
           test/kv_block_test.cpp
           test/kv_client_test.cc
-          test/kv_rpc_test.cpp
           test/lease_expiry_worker_test.cpp
           test/local_store_test.cpp
           test/mmux_client_test.cpp

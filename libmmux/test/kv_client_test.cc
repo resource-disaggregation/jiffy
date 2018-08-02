@@ -26,7 +26,7 @@ TEST_CASE("kv_client_put_get_test", "[put][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names);
+  auto blocks = test_utils::init_kv_blocks(block_names, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -67,7 +67,7 @@ TEST_CASE("kv_client_put_update_get_test", "[put][update][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names);
+  auto blocks = test_utils::init_kv_blocks(block_names, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -115,7 +115,7 @@ TEST_CASE("kv_client_put_remove_get_test", "[put][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names);
+  auto blocks = test_utils::init_kv_blocks(block_names, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -160,7 +160,7 @@ TEST_CASE("kv_client_pipelined_ops_test", "[put][update][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names);
+  auto blocks = test_utils::init_kv_blocks(block_names, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -267,7 +267,7 @@ TEST_CASE("kv_client_locked_ops_test", "[put][update][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names);
+  auto blocks = test_utils::init_kv_blocks(block_names, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -330,7 +330,7 @@ TEST_CASE("kv_client_locked_pipelined_ops_test", "[put][update][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names);
+  auto blocks = test_utils::init_kv_blocks(block_names, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });

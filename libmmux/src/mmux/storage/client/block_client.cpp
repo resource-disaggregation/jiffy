@@ -23,7 +23,8 @@ int64_t block_client::get_client_id() {
 void block_client::connect(const std::string &host, int port, int block_id, int timeout_ms) {
   block_id_ = block_id;
   auto sock = std::make_shared<TSocket>(host, port);
-  sock->setRecvTimeout(timeout_ms);
+  if (timeout_ms > 0)
+    sock->setRecvTimeout(timeout_ms);
   transport_ = std::shared_ptr<TTransport>(new TBufferedTransport(sock));
   protocol_ = std::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
   client_ = std::make_shared<thrift_client>(protocol_);
@@ -49,6 +50,37 @@ bool block_client::is_connected() const {
 
 void block_client::command_request(const sequence_id &seq, const int32_t cmd_id, const std::vector<std::string> &args) {
   client_->command_request(seq, block_id_, cmd_id, args);
+}
+
+block_client::command_response_reader::command_response_reader(std::shared_ptr<apache::thrift::protocol::TProtocol> prot)
+    : prot_(std::move(prot)) {
+  iprot_ = prot_.get();
+}
+
+int64_t block_client::command_response_reader::recv_response(std::vector<std::string> &out) {
+  using namespace ::apache::thrift::protocol;
+  using namespace ::apache::thrift;
+  int32_t rseqid = 0;
+  std::string fname;
+  TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == T_EXCEPTION) {
+    TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  block_response_service_response_args result;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+  if (result.__isset.seq && result.__isset.result) {
+    out = result.result;
+    return result.seq.client_seq_no;
+  }
+  throw TApplicationException(TApplicationException::MISSING_RESULT, "Command failed: unknown result");
 }
 
 }

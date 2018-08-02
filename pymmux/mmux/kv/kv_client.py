@@ -1,6 +1,8 @@
 import logging
 from bisect import bisect_right
 
+from mmux.directory.directory_client import ReplicaChain, StorageMode
+from mmux.directory.ttypes import rpc_storage_mode
 from mmux.kv import crc
 from mmux.kv.block_client import BlockClientCache
 from mmux.kv.compat import b, unicode, bytes, long, basestring, bytes_to_str
@@ -51,7 +53,10 @@ class KVClient:
                             break
 
                     if new_block:
-                        self.redirect_blocks[i] = ReplicaChainClient(self.parent.client_cache, self.blocks[i].get_redirect_chain())
+                        self.redirect_blocks[i] = ReplicaChainClient(self.parent.fs,
+                                                                     self.parent.path,
+                                                                     self.parent.client_cache,
+                                                                     self.blocks[i].get_redirect_chain())
                         self.locked_redirect_blocks[i] = self.redirect_blocks[i].lock()
                         self.new_blocks[i] = self.locked_redirect_blocks[i]
 
@@ -67,7 +72,8 @@ class KVClient:
                         response = self.blocks[i].run_command_redirected(cmd_id, args)[0]
                         break
                 if not found:
-                    response = ReplicaChainClient(self.parent.client_cache, chain).run_command_redirected(cmd_id, args)[0]
+                    response = ReplicaChainClient(self.parent.fs, self.parent.path, self.parent.client_cache,
+                                                  chain).run_command_redirected(cmd_id, args)[0]
             return response
 
         def _handle_redirects(self, cmd_id, args, responses):
@@ -76,17 +82,19 @@ class KVClient:
             for i in range(n_ops):
                 response = b(responses[i])
                 while response.startswith(b('!exporting')):
-                    chain = [bytes_to_str(x) for x in response[1:].split(b('!'))[1:]]
+                    chain = ReplicaChain([bytes_to_str(x) for x in response[1:].split(b('!'))[1:]], 0, 0, 0)
                     op_args = args[i * n_op_args: (i + 1) * n_op_args]
                     found = False
                     for j in range(len(self.blocks)):
-                        client_chain = self.parent.blocks[j].chain()
+                        client_chain = self.parent.blocks[j].get_chain()
                         if client_chain == chain:
                             found = True
                             response = self.blocks[j].run_command_redirected(cmd_id, op_args)[0]
                             break
                     if not found:
-                        response = ReplicaChainClient(self.parent.client_cache, chain).run_command_redirected(cmd_id, op_args)[0]
+                        response = \
+                            ReplicaChainClient(self.parent.fs, self.parent.path, self.parent.client_cache,
+                                               chain).run_command_redirected(cmd_id, op_args)[0]
                 responses[i] = response
             return responses
 
@@ -145,19 +153,20 @@ class KVClient:
                     n += int(self.new_blocks[i].recv_response()[0])
             return n
 
-    def __init__(self, fs, path, data_status, chain_failure_cb):
+    def __init__(self, fs, path, data_status, timeout_ms=1000):
         self.fs = fs
         self.path = path
-        self.client_cache = BlockClientCache()
+        self.client_cache = BlockClientCache(timeout_ms)
         self.file_info = data_status
-        self.blocks = [ReplicaChainClient(self.client_cache, chain.block_names) for chain in data_status.data_blocks]
+        self.blocks = [ReplicaChainClient(self.fs, self.path, self.client_cache, chain) for chain in
+                       data_status.data_blocks]
         self.slots = [chain.slot_range[0] for chain in data_status.data_blocks]
-        self.chain_failure_cb_ = chain_failure_cb
 
     def refresh(self):
         self.file_info = self.fs.dstatus(self.path)
         logging.info("Refreshing block mappings to {}".format(self.file_info.data_blocks))
-        self.blocks = [ReplicaChainClient(self.client_cache, chain.block_names) for chain in self.file_info.data_blocks]
+        self.blocks = [ReplicaChainClient(self.fs, self.path, self.client_cache, chain) for chain in
+                       self.file_info.data_blocks]
         self.slots = [chain.slot_range[0] for chain in self.file_info.data_blocks]
 
     def lock(self):
@@ -166,8 +175,10 @@ class KVClient:
     def _handle_redirect(self, cmd_id, args, response):
         response = b(response)
         while response.startswith(b('!exporting')):
-            chain = [bytes_to_str(x) for x in response[1:].split(b('!'))[1:]]
-            response = ReplicaChainClient(self.client_cache, chain).run_command_redirected(cmd_id, args)[0]
+            chain = ReplicaChain([bytes_to_str(x) for x in response[1:].split(b('!'))[1:]], 0, 0,
+                                 rpc_storage_mode.rpc_in_memory)
+            response = \
+                ReplicaChainClient(self.fs, self.path, self.client_cache, chain).run_command_redirected(cmd_id, args)[0]
         if response == b('!block_moved'):
             self.refresh()
             return None
@@ -179,9 +190,12 @@ class KVClient:
         for i in range(n_ops):
             response = b(responses[i])
             while response.startswith(b('!exporting')):
-                chain = [bytes_to_str(x) for x in response[1:].split(b('!'))[1:]]
+                chain = ReplicaChain([bytes_to_str(x) for x in response[1:].split(b('!'))[1:]], 0, 0,
+                                     StorageMode.in_memory)
                 op_args = args[i * n_op_args: (i + 1) * n_op_args]
-                response = ReplicaChainClient(self.client_cache, chain).run_command_redirected(cmd_id, op_args)[0]
+                response = \
+                    ReplicaChainClient(self.fs, self.path, self.client_cache, chain).run_command_redirected(cmd_id,
+                                                                                                            op_args)[0]
             if response == "!block_moved":
                 self.refresh()
                 return None

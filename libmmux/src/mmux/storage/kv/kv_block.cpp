@@ -502,9 +502,9 @@ void kv_block::export_slots() {
   if (state() != block_state::exporting) {
     throw std::logic_error("Source block is not in exporting state");
   }
-
-  replica_chain_client src(chain());
-  replica_chain_client dst(export_target());
+  auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
+  replica_chain_client src(fs, path_, chain(), 0);
+  replica_chain_client dst(fs, path_, export_target(), 0);
   auto exp_range = export_slot_range();
   size_t export_batch_size = 1024;
   size_t tot_export_keys = 0;

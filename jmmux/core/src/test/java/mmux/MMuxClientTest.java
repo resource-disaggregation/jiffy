@@ -1,6 +1,5 @@
 package mmux;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -14,10 +13,6 @@ import mmux.notification.KVListener;
 import mmux.notification.event.Notification;
 import mmux.util.ByteBufferUtils;
 import org.apache.thrift.TException;
-import org.apache.thrift.transport.TSocket;
-import org.apache.thrift.transport.TTransportException;
-import org.ini4j.Ini;
-import org.ini4j.Profile.Section;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,44 +25,20 @@ public class MMuxClientTest {
   @Rule
   public TestName testName = new TestName();
 
-  private String directoryConfFile;
-  private String storage1ConfFile;
-  private String storage2ConfFile;
-  private String storage3ConfFile;
-  private String storageASConfFile;
+  private DirectoryServer directoryServer;
+  private StorageServer storageServer1;
+  private StorageServer storageServer2;
+  private StorageServer storageServer3;
 
-  private Ini directoryConf;
-  private Ini storage1Conf;
-  private Ini storage2Conf;
-  private Ini storage3Conf;
-  private Ini storageASConf;
-
-  private Process directoryd;
-  private Process storaged1;
-  private Process storaged2;
-  private Process storaged3;
-
-  private String dirHost;
-  private int dirPort;
-  private int leasePort;
+  public MMuxClientTest() {
+    directoryServer = new DirectoryServer(System.getProperty("mmux.directory.exec", "directoryd"));
+    storageServer1 = new StorageServer(System.getProperty("mmux.storage.exec", "storaged"));
+    storageServer2 = new StorageServer(System.getProperty("mmux.storage.exec", "storaged"));
+    storageServer3 = new StorageServer(System.getProperty("mmux.storage.exec", "storaged"));
+  }
 
   @Before
-  public void setUp() throws Exception {
-    directoryConfFile = this.getClass().getResource("/directory.conf").getFile();
-    storage1ConfFile = this.getClass().getResource("/storage1.conf").getFile();
-    storage2ConfFile = this.getClass().getResource("/storage2.conf").getFile();
-    storage3ConfFile = this.getClass().getResource("/storage3.conf").getFile();
-    storageASConfFile = this.getClass().getResource("/storage_auto_scale.conf").getFile();
-
-    directoryConf = new Ini(new File(directoryConfFile));
-    storage1Conf = new Ini(new File(storage1ConfFile));
-    storage2Conf = new Ini(new File(storage2ConfFile));
-    storage3Conf = new Ini(new File(storage3ConfFile));
-    storageASConf = new Ini(new File(storageASConfFile));
-
-    dirHost = directoryConf.get("directory", "host");
-    dirPort = Integer.parseInt(directoryConf.get("directory", "service_port"));
-    leasePort = Integer.parseInt(directoryConf.get("directory", "lease_port"));
+  public void setUp() {
     System.out.println("=> Running " + testName.getMethodName());
   }
 
@@ -76,99 +47,50 @@ public class MMuxClientTest {
     stopServers();
   }
 
-  private Process startProcess(String... cmd) throws IOException {
-    ProcessBuilder ps = new ProcessBuilder(cmd);
-    File log = new File("/tmp/java_test.txt");
-    ps.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
-    ps.redirectErrorStream(true);
-    return ps.start();
-  }
-
-  private void stopProcess(Process process) throws InterruptedException {
-    if (process != null) {
-      process.destroyForcibly();
-      process.waitFor();
-    }
-  }
-
-  private void waitTillServerReady(String host, int port) throws InterruptedException {
-    boolean check = true;
-    while (check) {
-      try {
-        TSocket sock = new TSocket(host, port);
-        sock.open();
-        sock.close();
-        check = false;
-      } catch (TTransportException e) {
-        Thread.sleep(100);
-      }
-    }
+  private void stopServers() throws InterruptedException {
+    storageServer1.stop();
+    storageServer2.stop();
+    storageServer3.stop();
+    directoryServer.stop();
   }
 
   private void startServers(boolean chain, boolean autoScale) throws InterruptedException {
 
-    String dirExec = System.getProperty("mmux.directory.exec", "directoryd");
-    String storageExec = System.getProperty("mmux.storage.exec", "storaged");
-
     try {
-      directoryd = startProcess(dirExec, "--config", directoryConfFile);
+      directoryServer.start(this.getClass().getResource("/directory.conf").getFile());
     } catch (IOException e) {
       throw new InterruptedException(
-          String.format("Error running executable %s: %s\n", dirExec, e.getMessage()));
+          String.format("Error running executable %s: %s\n", directoryServer.getExecutable(),
+              e.getMessage()));
     }
-    Section dconf = directoryConf.get("directory");
-    waitTillServerReady(dconf.get("host"), Integer.parseInt(dconf.get("service_port")));
-    waitTillServerReady(dconf.get("host"), Integer.parseInt(dconf.get("lease_port")));
-    waitTillServerReady(dconf.get("host"), Integer.parseInt(dconf.get("block_port")));
 
-    String conf1 = autoScale ? storageASConfFile : storage1ConfFile;
+    String conf1 = autoScale ? this.getClass().getResource("/storage_auto_scale.conf").getFile()
+        : this.getClass().getResource("/storage1.conf").getFile();
     try {
-      storaged1 = startProcess(storageExec, "--config", conf1);
+      storageServer1.start(conf1);
     } catch (IOException e) {
       throw new InterruptedException(
-          String.format("Error running executable %s: %s\n", storageExec, e.getMessage()));
+          String.format("Error running executable %s: %s\n", storageServer1.getExecutable(),
+              e.getMessage()));
     }
-    Section s1conf = (autoScale ? storageASConf : storage1Conf).get("storage");
-    waitTillServerReady(s1conf.get("host"), Integer.parseInt(s1conf.get("service_port")));
-    waitTillServerReady(s1conf.get("host"), Integer.parseInt(s1conf.get("management_port")));
-    waitTillServerReady(s1conf.get("host"), Integer.parseInt(s1conf.get("notification_port")));
-    waitTillServerReady(s1conf.get("host"), Integer.parseInt(s1conf.get("chain_port")));
 
     if (chain) {
       try {
-        storaged2 = startProcess(storageExec, "--config", storage2ConfFile);
+        storageServer2.start(this.getClass().getResource("/storage2.conf").getFile());
       } catch (IOException e) {
         throw new InterruptedException(
-            String.format("Error running executable %s: %s\n", storageExec, e.getMessage()));
+            String.format("Error running executable %s: %s\n", storageServer2.getExecutable(),
+                e.getMessage()));
       }
-      Section s2conf = storage2Conf.get("storage");
-      waitTillServerReady(s2conf.get("host"), Integer.parseInt(s2conf.get("service_port")));
-      waitTillServerReady(s2conf.get("host"), Integer.parseInt(s2conf.get("management_port")));
-      waitTillServerReady(s2conf.get("host"), Integer.parseInt(s2conf.get("notification_port")));
-      waitTillServerReady(s2conf.get("host"), Integer.parseInt(s2conf.get("chain_port")));
 
       try {
-        storaged3 = startProcess(storageExec, "--config", storage3ConfFile);
+        storageServer3.start(this.getClass().getResource("/storage3.conf").getFile());
       } catch (IOException e) {
         throw new InterruptedException(
-            String.format("Error running executable %s: %s\n", storageExec, e.getMessage()));
+            String.format("Error running executable %s: %s\n", storageServer3.getExecutable(),
+                e.getMessage()));
       }
-      Section s3conf = storage3Conf.get("storage");
-      waitTillServerReady(s3conf.get("host"), Integer.parseInt(s3conf.get("service_port")));
-      waitTillServerReady(s3conf.get("host"), Integer.parseInt(s3conf.get("management_port")));
-      waitTillServerReady(s3conf.get("host"), Integer.parseInt(s3conf.get("notification_port")));
-      waitTillServerReady(s3conf.get("host"), Integer.parseInt(s3conf.get("chain_port")));
-    } else {
-      storaged2 = null;
-      storaged3 = null;
     }
-  }
-
-  private void stopServers() throws InterruptedException {
-    stopProcess(directoryd);
-    stopProcess(storaged1);
-    stopProcess(storaged2);
-    stopProcess(storaged3);
   }
 
   private ByteBuffer makeBB(int i) {
@@ -331,7 +253,7 @@ public class MMuxClientTest {
   @Test
   public void testLeaseWorker() throws InterruptedException, TException, IOException {
     startServers(false, false);
-    try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
+    try (MMuxClient client = directoryServer.connect()) {
       client.create("/a/file.txt", "local://tmp", 1, 1);
       Assert.assertTrue(client.fs().exists("/a/file.txt"));
       Thread.sleep(client.getWorker().getRenewalDurationMs());
@@ -346,7 +268,7 @@ public class MMuxClientTest {
   @Test
   public void testCreate() throws InterruptedException, TException, IOException {
     startServers(false, false);
-    try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
+    try (MMuxClient client = directoryServer.connect()) {
       KVClient kv = client.create("/a/file.txt", "local://tmp", 1, 1);
       kvOps(kv);
       Assert.assertTrue(client.fs().exists("/a/file.txt"));
@@ -358,7 +280,7 @@ public class MMuxClientTest {
   @Test
   public void testOpen() throws InterruptedException, TException, IOException {
     startServers(false, false);
-    try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
+    try (MMuxClient client = directoryServer.connect()) {
       client.create("/a/file.txt", "local://tmp", 1, 1);
       Assert.assertTrue(client.fs().exists("/a/file.txt"));
       KVClient kv = client.open("/a/file.txt");
@@ -371,7 +293,7 @@ public class MMuxClientTest {
   @Test
   public void testFlushRemove() throws InterruptedException, TException, IOException {
     startServers(false, false);
-    try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
+    try (MMuxClient client = directoryServer.connect()) {
       client.create("/a/file.txt", "local://tmp", 1, 1);
       Assert.assertTrue(client.getWorker().hasPath("/a/file.txt"));
       client.sync("/a/file.txt", "local://tmp");
@@ -387,7 +309,7 @@ public class MMuxClientTest {
   @Test
   public void testClose() throws InterruptedException, TException, IOException {
     startServers(false, false);
-    try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
+    try (MMuxClient client = directoryServer.connect()) {
       client.create("/a/file.txt", "local://tmp", 1, 1);
       client.create("/a/file1.txt", "local://tmp", 1, 1, Flags.PINNED);
       client.create("/a/file2.txt", "local://tmp", 1, 1, Flags.MAPPED);
@@ -416,7 +338,7 @@ public class MMuxClientTest {
   @Test
   public void testChainReplication() throws InterruptedException, TException, IOException {
     startServers(true, false);
-    try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
+    try (MMuxClient client = directoryServer.connect()) {
       KVClient kv = client.create("/a/file.txt", "local://tmp", 1, 3);
       Assert.assertEquals(3, client.fs().dstatus("/a/file.txt").chain_length);
       kvOps(kv);
@@ -426,9 +348,25 @@ public class MMuxClientTest {
   }
 
   @Test
+  public void testFailures() throws InterruptedException, TException, IOException {
+    List<StorageServer> servers = Arrays.asList(storageServer1, storageServer2, storageServer3);
+    for (StorageServer server : servers) {
+      startServers(true, false);
+      try (MMuxClient client = directoryServer.connect()) {
+        KVClient kv = client.create("/a/file.txt", "local://tmp", 1, 3);
+        Assert.assertEquals(3, client.fs().dstatus("/a/file.txt").chain_length);
+        server.stop();
+        kvOps(kv);
+      } finally {
+        stopServers();
+      }
+    }
+  }
+
+  @Test
   public void testAutoScale() throws InterruptedException, TException, IOException {
     startServers(false, true);
-    try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
+    try (MMuxClient client = directoryServer.connect()) {
       KVClient kv = client.create("/a/file.txt", "local://tmp", 1, 1);
       for (int i = 0; i < 2000; i++) {
         Assert.assertEquals(makeBB("!ok"), kv.put(makeBB(i), makeBB(i)));
@@ -446,7 +384,7 @@ public class MMuxClientTest {
   @Test
   public void testNotifications() throws InterruptedException, IOException, TException {
     startServers(false, false);
-    try (MMuxClient client = new MMuxClient(dirHost, dirPort, leasePort)) {
+    try (MMuxClient client = directoryServer.connect()) {
       String op1 = "put", op2 = "remove";
       ByteBuffer key = ByteBufferUtils.fromString("key1");
       ByteBuffer value = ByteBufferUtils.fromString("value1");

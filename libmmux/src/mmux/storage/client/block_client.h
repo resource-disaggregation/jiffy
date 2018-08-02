@@ -16,36 +16,9 @@ class block_client {
    public:
     command_response_reader() = default;
 
-    explicit command_response_reader(std::shared_ptr<apache::thrift::protocol::TProtocol> prot)
-        : prot_(std::move(prot)) {
-      iprot_ = prot_.get();
-    }
+    explicit command_response_reader(std::shared_ptr<apache::thrift::protocol::TProtocol> prot);
 
-    int64_t recv_response(std::vector<std::string> &out) {
-      using namespace ::apache::thrift::protocol;
-      using namespace ::apache::thrift;
-      int32_t rseqid = 0;
-      std::string fname;
-      TMessageType mtype;
-
-      this->iprot_->readMessageBegin(fname, mtype, rseqid);
-      if (mtype == T_EXCEPTION) {
-        TApplicationException x;
-        x.read(this->iprot_);
-        this->iprot_->readMessageEnd();
-        this->iprot_->getTransport()->readEnd();
-        throw x;
-      }
-      block_response_service_response_args result;
-      result.read(this->iprot_);
-      this->iprot_->readMessageEnd();
-      this->iprot_->getTransport()->readEnd();
-      if (result.__isset.seq && result.__isset.result) {
-        out = result.result;
-        return result.seq.client_seq_no;
-      }
-      throw TApplicationException(TApplicationException::MISSING_RESULT, "Command failed: unknown result");
-    }
+    int64_t recv_response(std::vector<std::string> &out);
 
    private:
     std::shared_ptr<apache::thrift::protocol::TProtocol> prot_;
@@ -58,7 +31,7 @@ class block_client {
   block_client() = default;
   ~block_client();
   int64_t get_client_id();
-  void connect(const std::string &hostname, int port, int block_id, int timeout_ms = 0);
+  void connect(const std::string &hostname, int port, int block_id, int timeout_ms = 1000);
   void disconnect();
   bool is_connected() const;
 
@@ -70,7 +43,6 @@ class block_client {
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_{};
   std::shared_ptr<thrift_client> client_{};
   int block_id_{-1};
-  int timeout_ms_;
 };
 
 }

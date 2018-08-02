@@ -11,7 +11,7 @@ mmux_client::mmux_client(const std::string &host, int dir_port, int lease_port)
   lease_worker_.start();
 }
 
-std::shared_ptr<directory::directory_ops> mmux_client::fs() {
+std::shared_ptr<directory::directory_client> mmux_client::fs() {
   return fs_;
 }
 

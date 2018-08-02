@@ -8,16 +8,16 @@ namespace storage {
 
 using namespace mmux::utils;
 
-kv_client::kv_client(std::shared_ptr<directory::directory_ops> fs,
+kv_client::kv_client(std::shared_ptr<directory::directory_interface> fs,
                      const std::string &path,
                      const directory::data_status &status,
                      int timeout_ms)
-    : fs_(std::move(fs)), path_(path), status_(status) {
+    : fs_(std::move(fs)), path_(path), status_(status), timeout_ms_(timeout_ms) {
   slots_.clear();
   blocks_.clear();
   for (const auto &block: status.data_blocks()) {
     slots_.push_back(block.slot_begin());
-    blocks_.push_back(std::make_shared<replica_chain_client>(block.block_names, timeout_ms));
+    blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, timeout_ms_));
   }
 }
 
@@ -36,7 +36,7 @@ void kv_client::refresh() {
   blocks_.clear();
   for (const auto &block: status_.data_blocks()) {
     slots_.push_back(block.slot_begin());
-    blocks_.push_back(std::make_shared<replica_chain_client>(block.block_names));
+    blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, timeout_ms_));
   }
 }
 
@@ -215,7 +215,10 @@ void kv_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &
     do {
       auto parts = string_utils::split(response, '!');
       auto chain = list_t(parts.begin() + 2, parts.end());
-      response = replica_chain_client(std::move(chain)).run_command_redirected(cmd_id, args).front();
+      response = replica_chain_client(fs_,
+                                      path_,
+                                      directory::replica_chain(chain),
+                                      0).run_command_redirected(cmd_id, args).front();
     } while (response.substr(0, 10) == "!exporting");
   }
   if (response == "!block_moved") {
@@ -237,7 +240,10 @@ void kv_client::handle_redirects(int32_t cmd_id,
       do {
         auto parts = string_utils::split(response, '!');
         auto chain = list_t(parts.begin() + 2, parts.end());
-        response = replica_chain_client(std::move(chain)).run_command_redirected(cmd_id, op_args).front();
+        response = replica_chain_client(fs_,
+                                        path_,
+                                        directory::replica_chain(chain),
+                                        0).run_command_redirected(cmd_id, op_args).front();
       } while (response.substr(0, 10) == "!exporting");
     }
     if (response == "!block_moved") {
@@ -259,7 +265,7 @@ kv_client::locked_client::locked_client(kv_client &parent) : parent_(parent) {
     if (blocks_[i]->redirecting()) {
       bool new_block = true;
       for (size_t j = 0; j < blocks_.size(); j++) {
-        if (blocks_[i]->redirect_chain() == blocks_[j]->chain()) {
+        if (blocks_[i]->redirect_chain() == blocks_[j]->chain().block_names) {
           new_block = false;
           redirect_blocks_[i] = parent_.blocks_[j];
           locked_redirect_blocks_[i] = blocks_[j];
@@ -268,7 +274,8 @@ kv_client::locked_client::locked_client(kv_client &parent) : parent_(parent) {
         }
       }
       if (new_block) {
-        redirect_blocks_[i] = std::make_shared<replica_chain_client>(blocks_[i]->chain());
+        redirect_blocks_[i] =
+            std::make_shared<replica_chain_client>(parent_.fs_, parent_.path_, blocks_[i]->chain(), parent_.timeout_ms_);
         locked_redirect_blocks_[i] = redirect_blocks_[i]->lock();
         new_blocks_[i] = locked_redirect_blocks_[i];
       }
@@ -368,14 +375,17 @@ void kv_client::locked_client::handle_redirect(int32_t cmd_id,
       bool found = false;
       for (size_t i = 0; i < blocks_.size(); i++) {
         const auto &client_chain = parent_.blocks_[i]->chain();
-        if (client_chain == chain) {
+        if (client_chain.block_names == chain) {
           found = true;
           response = blocks_[i]->run_command_redirected(cmd_id, args).front();
           break;
         }
       }
       if (!found)
-        response = replica_chain_client(std::move(chain)).run_command_redirected(cmd_id, args).front();
+        response = replica_chain_client(parent_.fs_,
+                                        parent_.path_,
+                                        directory::replica_chain(chain),
+                                        0).run_command_redirected(cmd_id, args).front();
     } while (response.substr(0, 10) == "!exporting");
   }
   // There can be !block_moved response, since:
@@ -399,14 +409,17 @@ void kv_client::locked_client::handle_redirects(int32_t cmd_id,
         bool found = false;
         for (size_t j = 0; j < blocks_.size(); j++) {
           const auto &client_chain = parent_.blocks_[j]->chain();
-          if (client_chain == chain) {
+          if (client_chain.block_names == chain) {
             found = true;
             response = blocks_[j]->run_command_redirected(cmd_id, args).front();
             break;
           }
         }
         if (!found)
-          response = replica_chain_client(std::move(chain)).run_command_redirected(cmd_id, op_args).front();
+          response = replica_chain_client(parent_.fs_,
+                                          parent_.path_,
+                                          directory::replica_chain(chain),
+                                          0).run_command_redirected(cmd_id, op_args).front();
       } while (response.substr(0, 10) == "!exporting");
     }
   }

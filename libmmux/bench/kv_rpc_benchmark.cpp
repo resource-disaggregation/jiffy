@@ -6,8 +6,6 @@
 #include "../src/mmux/utils/signal_handling.h"
 #include "../src/mmux/utils/logger.h"
 #include "../src/mmux/utils/cmd_parse.h"
-#include "../src/mmux/storage/kv/kv_block.h"
-#include "../src/mmux/directory/client/directory_client.h"
 #include "benchmark_utils.h"
 
 using namespace mmux::storage;
@@ -19,11 +17,11 @@ class throughput_benchmark {
  public:
   throughput_benchmark(const std::string &workload_path,
                        std::size_t workload_offset,
-                       const std::vector<std::string> &chain,
+                       std::shared_ptr<replica_chain_client> client,
                        std::size_t num_ops,
                        std::size_t max_async)
-      : num_ops_(num_ops), max_async_(max_async), client_(chain) {
-    benchmark_utils::load_workload(workload_path, workload_offset, num_ops, workload_);
+      : num_ops_(num_ops), max_async_(max_async), client_(client) {
+    benchmark_utils::load_workload(workload_path, workload_offset, num_ops_, workload_);
   }
 
   void run() {
@@ -31,7 +29,7 @@ class throughput_benchmark {
       std::size_t i = 0;
       auto begin = time_utils::now_us();
       while (i < num_ops_) {
-        client_.run_command(workload_[i].first, workload_[i].second);
+        client_->run_command(workload_[i].first, workload_[i].second);
         i++;
       }
       auto tot_time = time_utils::now_us() - begin;
@@ -50,16 +48,16 @@ class throughput_benchmark {
   std::size_t num_ops_;
   std::size_t max_async_;
   std::vector<std::pair<int32_t, std::vector<std::string>>> workload_;
-  replica_chain_client client_;
+  std::shared_ptr<replica_chain_client> client_;
 };
 
 class latency_benchmark {
  public:
   latency_benchmark(const std::string &workload_path,
                     std::size_t workload_offset,
-                    const std::vector<std::string> &chain,
+                    std::shared_ptr<replica_chain_client> client,
                     std::size_t num_ops)
-      : num_ops_(num_ops), client_(chain) {
+      : num_ops_(num_ops), client_(client) {
     benchmark_utils::load_workload(workload_path, workload_offset, num_ops, workload_);
   }
 
@@ -68,7 +66,7 @@ class latency_benchmark {
     time_utils::now_us();
     while (i < num_ops_) {
       auto t0 = time_utils::now_us();
-      client_.run_command(workload_[i].first, workload_[i].second);
+      client_->run_command(workload_[i].first, workload_[i].second);
       auto t = time_utils::now_us() - t0;
       fprintf(stdout, "%zu %" PRId64 "\n", i, t);
       ++i;
@@ -78,7 +76,7 @@ class latency_benchmark {
  private:
   std::size_t num_ops_;
   std::vector<std::pair<int32_t, std::vector<std::string>>> workload_;
-  replica_chain_client client_;
+  std::shared_ptr<replica_chain_client> client_;
 };
 
 int main(int argc, char **argv) {
@@ -135,19 +133,18 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  mmux::directory::directory_client client(host, port);
-  auto dstatus = client.create(file, "/tmp", 1, chain_length, 0);
+  auto client = std::make_shared<mmux::directory::directory_client>(host, port);
+  auto dstatus = client->create(file, "local://tmp", 1, chain_length, 0);
   auto chain = dstatus.data_blocks().front();
   std::cerr << "Chain: " << chain.to_string() << std::endl;
   if (benchmark_type == "throughput") {
     std::vector<throughput_benchmark *> benchmark;
-
     // Create
     for (std::size_t i = 0; i < num_threads; i++) {
       auto thread_ops = num_ops / num_threads;
       benchmark.push_back(new throughput_benchmark(workload_path,
                                                    workload_offset + i * thread_ops,
-                                                   chain.block_names,
+                                                   std::make_shared<replica_chain_client>(client, file, chain),
                                                    thread_ops,
                                                    max_async));
     }
@@ -167,8 +164,9 @@ int main(int argc, char **argv) {
       delete benchmark[i];
     }
   } else if (benchmark_type == "latency") {
-    latency_benchmark benchmark(workload_path, workload_offset, chain.block_names, num_ops);
+    latency_benchmark
+        benchmark(workload_path, workload_offset, std::make_shared<replica_chain_client>(client, file, chain), num_ops);
     benchmark.run();
   }
-  client.remove(file);
+  client->remove(file);
 }
