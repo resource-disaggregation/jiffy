@@ -354,7 +354,7 @@ class TestClient(TestCase):
             client.disconnect()
             self.stop_servers()
 
-    def test_chain_replication(self):  # TODO: Add failure tests
+    def test_chain_replication(self):
         self.start_servers(chain=True)
         client = self.mmux_client()
         try:
