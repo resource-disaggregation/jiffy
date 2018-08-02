@@ -34,10 +34,15 @@ add_subdirectory(libmmux)
 add_subdirectory(directory)
 add_subdirectory(storage)
 
-add_subdirectory(cmmux)
-
-include(cmake-modules/golang.cmake)
-add_subdirectory(gommux)
+if (BUILD_CLIENTS)
+  if (BUILD_C_CLIENT)
+    add_subdirectory(cmmux)
+  endif ()
+  if (BUILD_GO_CLIENT)
+    include(cmake-modules/golang.cmake)
+    add_subdirectory(gommux)
+  endif ()
+endif ()
 
 if (BUILD_TESTS)
   enable_testing(true)
@@ -56,8 +61,6 @@ if (NOT TARGET uninstall)
 endif ()
 
 # CPack
-
-
 # default package generators
 if (APPLE)
   set(PACKAGE_GENERATOR "TGZ;ZIP")
