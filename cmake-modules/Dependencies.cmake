@@ -113,7 +113,7 @@ if ((NOT USE_SYSTEM_AWS_SDK) OR (NOT USE_SYSTEM_THRIFT))
           DEPENDS zlib
           URL https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
           BUILD_IN_SOURCE 1
-          CONFIGURE_COMMAND ./config --prefix=${OPENSSL_PREFIX} --with-zlib-include=${ZLIB_INCLUDE_DIR} --with-zlib-lib=${ZLIB_PREFIX}/lib -fPIC no-shared no-tests CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER} CFLAGS=${OPENSSL_C_FLAGS} CXXFLAGS=${OPENSSL_CXX_FLAGS}
+          CONFIGURE_COMMAND ./config -fPIC --prefix=${OPENSSL_PREFIX} --with-zlib-include=${ZLIB_INCLUDE_DIR} --with-zlib-lib=${ZLIB_PREFIX}/lib no-shared no-tests CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER}
           BUILD_COMMAND "$(MAKE)"
           INSTALL_COMMAND "$(MAKE)" install
           LOG_DOWNLOAD ON
