@@ -21,11 +21,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>memorymux</groupId>
-      <artifactId>memorymux-core</artifactId>
-      <version>0.1.0</version>
-    </dependency>
-    <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-common</artifactId>
       <version>${hadoop.version}</version>

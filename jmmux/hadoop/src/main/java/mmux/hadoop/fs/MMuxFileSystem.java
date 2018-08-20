@@ -1,6 +1,7 @@
 package mmux.hadoop.fs;
 
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.List;
 import mmux.MMuxClient;
@@ -42,8 +43,13 @@ public class MMuxFileSystem extends FileSystem {
       throw new IOException(e);
     }
     this.uri = URI.create(String.format("mmfs://%s:%d", uri.getHost(), uri.getPort()));
-    String genPath = "/" + RandomStringUtils.random(10);
-    this.workingDir = new Path(conf.get("mmfs.app.name", genPath));
+    String genPath = "/fsdir/";
+    this.workingDir = new Path(genPath);
+    try {
+      client.fs().createDirectories(this.workingDir.toString());
+    } catch (TException e) {
+      throw new IOException(e);
+    }
   }
 
   public String getDirHost() {
@@ -210,14 +216,28 @@ public class MMuxFileSystem extends FileSystem {
         return new FileStatus(0, true, 0, 0, fileStatus.last_write_time, absolutePath);
       }
     } catch (TException e) {
-      throw new IOException(e);
+      throw new FileNotFoundException();
     }
   }
 
-  private Path makeAbsolute(Path path) {
-    if (path.isAbsolute()) {
-      return path;
+  private String RemoveMmfsPrefix(String s) {
+    if(s.length() >= 7 && s.substring(0, 7).equals("mmfs://"))
+    {
+      // String is of form mmfs://hostname:port/ACTUAL_PATH
+      // we want /ACTUAL_PATH, find index of / after mmfs://
+      int slash_idx = 8 + s.substring(8).indexOf('/');
+      return s.substring(slash_idx);
     }
-    return new Path(workingDir, path);
+    return s;
+  }
+
+
+  private Path makeAbsolute(Path path) {
+    String path_string = RemoveMmfsPrefix(path.toString());
+
+    if (path.isAbsolute()) {
+      return new Path(path_string);
+    }
+    return new Path(workingDir, path_string);
   }
 }

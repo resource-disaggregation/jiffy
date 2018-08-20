@@ -24,7 +24,7 @@ public class MMuxInputStream extends FSInputStream {
   MMuxInputStream(KVClient client, Configuration conf) throws TException {
     this.filePos = 0;
     this.client = client;
-    this.blockSize = conf.getInt("emfs.block_size", 64 * 1024 * 1024);
+    this.blockSize = conf.getInt("mmfs.block_size", 64 * 1024 * 1024);
     this.currentBlockNum = -1;
     this.currentBuf = null;
     this.lastBlockKey = ByteBufferUtils.fromString("LastBlock");
