@@ -43,8 +43,12 @@ public class MMuxFileSystem extends FileSystem {
       throw new IOException(e);
     }
     this.uri = URI.create(String.format("mmfs://%s:%d", uri.getHost(), uri.getPort()));
-    String genPath = "/fsdir/";
-    this.workingDir = new Path(genPath);
+    String path = uri.getPath();
+    if (path == null || path.equals(""))
+    {
+      path = "/fsdir/";
+    }
+    this.workingDir = new Path(path);
     try {
       client.fs().createDirectories(this.workingDir.toString());
     } catch (TException e) {
@@ -220,24 +224,18 @@ public class MMuxFileSystem extends FileSystem {
     }
   }
 
-  private String RemoveMmfsPrefix(String s) {
-    if(s.length() >= 7 && s.substring(0, 7).equals("mmfs://"))
-    {
-      // String is of form mmfs://hostname:port/ACTUAL_PATH
-      // we want /ACTUAL_PATH, find index of / after mmfs://
-      int slash_idx = 8 + s.substring(8).indexOf('/');
-      return s.substring(slash_idx);
-    }
-    return s;
+  private String removeMmfsPrefix(String s) {
+    URI uri = URI.create(s);
+    return uri.getPath();
   }
 
 
   private Path makeAbsolute(Path path) {
-    String path_string = RemoveMmfsPrefix(path.toString());
+    String pathString = removeMmfsPrefix(path.toString());
 
     if (path.isAbsolute()) {
-      return new Path(path_string);
+      return new Path(pathString);
     }
-    return new Path(workingDir, path_string);
+    return new Path(workingDir, pathString);
   }
 }
