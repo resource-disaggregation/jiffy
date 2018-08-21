@@ -103,6 +103,16 @@ public class MMuxClient implements Closeable {
     fs.remove(path);
   }
 
+  public void removeAll(String path) throws TException {
+    worker.removePaths(path);
+    fs.removeAll(path);
+  }
+
+  public void rename(String oldPath, String newPath) throws TException {
+    fs.rename(oldPath, newPath);
+    worker.renamePath(oldPath, newPath);
+  }
+
   public void sync(String path, String backingPath) throws TException {
     fs.sync(path, backingPath);
   }

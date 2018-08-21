@@ -1,7 +1,7 @@
 package mmux.hadoop.fs;
 
-import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import mmux.MMuxClient;
@@ -10,7 +10,6 @@ import mmux.directory.rpc_dir_entry;
 import mmux.directory.rpc_file_status;
 import mmux.directory.rpc_file_type;
 import mmux.kv.KVClient;
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -131,7 +130,7 @@ public class MMuxFileSystem extends FileSystem {
   @Override
   public boolean rename(Path path, Path path1) throws IOException {
     try {
-      client.fs().rename(makeAbsolute(path).toString(), makeAbsolute(path1).toString());
+      client.rename(makeAbsolute(path).toString(), makeAbsolute(path1).toString());
     } catch (mmux.directory.directory_service_exception directory_service_exception) {
       return false;
     } catch (TException e) {
@@ -144,7 +143,7 @@ public class MMuxFileSystem extends FileSystem {
   public boolean delete(Path path, boolean recursive) throws IOException {
     try {
       if (recursive) {
-        client.fs().removeAll(makeAbsolute(path).toString());
+        client.removeAll(makeAbsolute(path).toString());
       } else {
         client.remove(makeAbsolute(path).toString());
       }

@@ -5,14 +5,14 @@ import java.io.IOException;
 import org.apache.thrift.TException;
 import org.ini4j.Ini;
 
-class DirectoryServer extends MMuxServer {
+public class DirectoryServer extends MMuxServer {
 
-  private String host;
-  private int servicePort;
+  protected String host;
+  protected int servicePort;
   private int leasePort;
   private int blockPort;
 
-  DirectoryServer(String executable) {
+  public DirectoryServer(String executable) {
     super(executable);
     host = null;
     servicePort = -1;
@@ -21,7 +21,7 @@ class DirectoryServer extends MMuxServer {
   }
 
   @Override
-  void start(String conf) throws IOException, InterruptedException {
+  public void start(String conf) throws IOException, InterruptedException {
     super.start(conf);
     Ini ini = new Ini();
     ini.load(new File(conf));
@@ -35,7 +35,7 @@ class DirectoryServer extends MMuxServer {
   }
 
   @Override
-  void stop() throws InterruptedException {
+  public void stop() throws InterruptedException {
     super.stop();
     host = null;
     servicePort = -1;
@@ -43,7 +43,7 @@ class DirectoryServer extends MMuxServer {
     blockPort = -1;
   }
 
-  MMuxClient connect() throws TException {
+  public MMuxClient connect() throws TException {
     if (handle == null) {
       throw new RuntimeException("Cannot connect: server not running");
     }

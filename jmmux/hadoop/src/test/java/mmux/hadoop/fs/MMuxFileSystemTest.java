@@ -1,17 +1,12 @@
-package mmux;
+package mmux.hadoop.fs;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import mmux.hadoop.fs.MMuxFileSystem;
+import mmux.StorageServer;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Assert;
@@ -26,20 +21,12 @@ public class MMuxFileSystemTest {
   @Rule
   public TestName testName = new TestName();
 
-  private DirectoryServer directoryServer;
-  private StorageServer storageServer1;
-  private StorageServer storageServer2;
-  private StorageServer storageServer3;
+  private NameServer nameServer;
+  private StorageServer storageServer;
 
   public MMuxFileSystemTest() {
-    directoryServer = new DirectoryServer(System.getProperty("mmux.directory.exec",
-                                          "directoryd"));
-    storageServer1 = new StorageServer(System.getProperty("mmux.storage.exec",
-                                       "storaged"));
-    storageServer2 = new StorageServer(System.getProperty("mmux.storage.exec",
-                                       "storaged"));
-    storageServer3 = new StorageServer(System.getProperty("mmux.storage.exec",
-                                       "storaged"));
+    nameServer = new NameServer(System.getProperty("mmux.directory.exec", "directoryd"));
+    storageServer = new StorageServer(System.getProperty("mmux.storage.exec", "storaged"));
   }
 
   @Before
@@ -53,87 +40,56 @@ public class MMuxFileSystemTest {
   }
 
   private void stopServers() throws InterruptedException {
-    storageServer1.stop();
-    storageServer2.stop();
-    storageServer3.stop();
-    directoryServer.stop();
+    storageServer.stop();
+    nameServer.stop();
   }
 
-  private void startServers(boolean chain,
-                            boolean autoScale) throws InterruptedException {
-
+  private void startServers() throws InterruptedException {
     try {
-      directoryServer.start(this.getClass().getResource("/directory.conf").getFile());
+      nameServer.start(this.getClass().getResource("/directory.conf").getFile());
     } catch (IOException e) {
       throw new InterruptedException(
-        String.format("Error running executable %s: %s\n",
-                      directoryServer.getExecutable(),
-                      e.getMessage()));
+          String.format("Error running executable %s: %s\n", nameServer.getExecutable(),
+              e.getMessage()));
     }
 
-    String conf1 = autoScale ?
-                   this.getClass().getResource("/storage_auto_scale.conf").getFile()
-                   : this.getClass().getResource("/storage1.conf").getFile();
     try {
-      storageServer1.start(conf1);
+      storageServer.start(this.getClass().getResource("/storage.conf").getFile());
     } catch (IOException e) {
       throw new InterruptedException(
-        String.format("Error running executable %s: %s\n",
-                      storageServer1.getExecutable(),
-                      e.getMessage()));
+          String.format("Error running executable %s: %s\n", storageServer.getExecutable(),
+              e.getMessage()));
     }
 
-    if (chain) {
-      try {
-        storageServer2.start(this.getClass().getResource("/storage2.conf").getFile());
-      } catch (IOException e) {
-        throw new InterruptedException(
-          String.format("Error running executable %s: %s\n",
-                        storageServer2.getExecutable(),
-                        e.getMessage()));
-      }
-
-      try {
-        storageServer3.start(this.getClass().getResource("/storage3.conf").getFile());
-      } catch (IOException e) {
-        throw new InterruptedException(
-          String.format("Error running executable %s: %s\n",
-                        storageServer3.getExecutable(),
-                        e.getMessage()));
-      }
-    }
   }
 
   @Test
-  public void testCreateWriteRenameReadFile() throws InterruptedException,
-           TException,
-    IOException {
-    startServers(false, false);
-    try (MMuxFileSystem fs = directoryServer.connect()) {
+  public void testCreateWriteRenameReadFile() throws InterruptedException, TException, IOException {
+    startServers();
+    try (MMuxFileSystem fs = nameServer.connectFS()) {
 
       // Create file
-      Path file_path = new Path("testfile");
-      FSDataOutputStream out_stream = fs.create(file_path);
+      Path filePath = new Path("testfile");
+      FSDataOutputStream out_stream = fs.create(filePath);
 
       // Write string to file
       String data = "teststring";
-      byte[] data_bytes = data.getBytes();
-      out_stream.write(data_bytes, 0, data_bytes.length);
+      byte[] dataBytes = data.getBytes();
+      out_stream.write(dataBytes, 0, dataBytes.length);
       out_stream.close();
 
-
       Path rename_path = new Path("testfile_renamed");
-      fs.rename(file_path, rename_path);
+      fs.rename(filePath, rename_path);
 
       // Open created file
-      FSDataInputStream in_stream = fs.open(rename_path, data_bytes.length);
+      FSDataInputStream in_stream = fs.open(rename_path, dataBytes.length);
 
       // Read all data from the file
-      byte[] read_bytes = new byte[data_bytes.length];
+      byte[] read_bytes = new byte[dataBytes.length];
       in_stream.readFully(0, read_bytes);
 
       // Ensure data read from file is the string we wrote to file.
-      Assert.assertArrayEquals(data_bytes, read_bytes);
+      Assert.assertArrayEquals(dataBytes, read_bytes);
       Assert.assertEquals(data, new String(read_bytes));
       in_stream.close();
 
@@ -145,12 +101,11 @@ public class MMuxFileSystemTest {
   }
 
   @Test
-  public void testMakeAndDeleteDir() throws InterruptedException, TException,
-    IOException {
-    startServers(false, false);
-    try (MMuxFileSystem fs = directoryServer.connect()) {
-      Path expected_wd = new Path("/fsdir");
-      Assert.assertEquals(fs.getWorkingDirectory(), expected_wd);
+  public void testMakeAndDeleteDir() throws InterruptedException, TException, IOException {
+    startServers();
+    try (MMuxFileSystem fs = nameServer.connectFS()) {
+      Path expectedWorkingDirectory = new Path("/fsdir");
+      Assert.assertEquals(fs.getWorkingDirectory(), expectedWorkingDirectory);
 
       // Create a new directory and ls the base directory.
       fs.mkdirs(new Path("testdir"), FsPermission.getDefault());
