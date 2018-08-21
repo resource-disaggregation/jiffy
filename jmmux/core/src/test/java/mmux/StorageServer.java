@@ -4,14 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import org.ini4j.Ini;
 
-class StorageServer extends MMuxServer {
+public class StorageServer extends MMuxServer {
   private String host;
   private int servicePort;
   private int managementPort;
   private int notificationPort;
   private int chainPort;
 
-  StorageServer(String executable) {
+  public StorageServer(String executable) {
     super(executable);
     host = null;
     servicePort = -1;
@@ -21,7 +21,7 @@ class StorageServer extends MMuxServer {
   }
 
   @Override
-  void start(String conf) throws IOException, InterruptedException {
+  public void start(String conf) throws IOException, InterruptedException {
     super.start(conf);
     Ini ini = new Ini();
     ini.load(new File(conf));
@@ -37,7 +37,7 @@ class StorageServer extends MMuxServer {
   }
 
   @Override
-  void stop() throws InterruptedException {
+  public void stop() throws InterruptedException {
     super.stop();
     host = null;
     servicePort = -1;

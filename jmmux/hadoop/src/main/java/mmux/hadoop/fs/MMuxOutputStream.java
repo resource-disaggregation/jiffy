@@ -23,7 +23,7 @@ public class MMuxOutputStream extends OutputStream {
     this.pos = 0;
     this.blockNum = 0;
     this.client = client;
-    this.blockSize = conf.getInt("mmfs.block.size", 64 * 1024);
+    this.blockSize = conf.getInt("mmfs.block.size", 64 * 1024 * 1024);
     this.block = new byte[this.blockSize];
     this.lastBlockKey = ByteBufferUtils.fromString("LastBlock");
     ByteBuffer lastBlockValue = ByteBufferUtils.fromString(String.valueOf(blockNum));

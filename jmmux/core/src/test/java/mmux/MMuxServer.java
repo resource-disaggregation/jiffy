@@ -7,7 +7,7 @@ import org.apache.thrift.transport.TTransportException;
 
 class MMuxServer {
 
-  Process handle;
+  protected Process handle;
   private String executable;
 
   MMuxServer(String executable) {
@@ -15,11 +15,11 @@ class MMuxServer {
     handle = null;
   }
 
-  void start(String conf) throws IOException, InterruptedException {
+  public void start(String conf) throws IOException, InterruptedException {
     this.handle = startProcess(executable, "--config", conf);
   }
 
-  void stop() throws InterruptedException {
+  public void stop() throws InterruptedException {
     if (this.handle != null) {
       handle.destroyForcibly();
       handle.waitFor();
@@ -48,7 +48,7 @@ class MMuxServer {
     }
   }
 
-  String getExecutable() {
+  public String getExecutable() {
     return executable;
   }
 

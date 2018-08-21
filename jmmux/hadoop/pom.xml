@@ -22,8 +22,10 @@
   <dependencies>
     <dependency>
       <groupId>memorymux</groupId>
-      <artifactId>memorymux-core</artifactId>
+      <artifactId>jmmux-core</artifactId>
       <version>0.1.0</version>
+      <type>test-jar</type>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>

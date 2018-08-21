@@ -18,12 +18,12 @@
   <dependencies>
     <dependency>
       <groupId>memorymux</groupId>
-      <artifactId>memorymux-core</artifactId>
+      <artifactId>jmmux-core</artifactId>
       <version>0.1.0</version>
     </dependency>
     <dependency>
       <groupId>memorymux</groupId>
-      <artifactId>memorymux-hadoop</artifactId>
+      <artifactId>jmmux-hadoop</artifactId>
       <version>0.1.0</version>
     </dependency>
   </dependencies>

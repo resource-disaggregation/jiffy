@@ -1,5 +1,6 @@
 package mmux.hadoop.fs;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
@@ -9,7 +10,6 @@ import mmux.directory.rpc_dir_entry;
 import mmux.directory.rpc_file_status;
 import mmux.directory.rpc_file_type;
 import mmux.kv.KVClient;
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -42,8 +42,17 @@ public class MMuxFileSystem extends FileSystem {
       throw new IOException(e);
     }
     this.uri = URI.create(String.format("mmfs://%s:%d", uri.getHost(), uri.getPort()));
-    String genPath = "/" + RandomStringUtils.random(10);
-    this.workingDir = new Path(conf.get("mmfs.app.name", genPath));
+    String path = uri.getPath();
+    if (path == null || path.equals(""))
+    {
+      path = "/fsdir/";
+    }
+    this.workingDir = new Path(path);
+    try {
+      client.fs().createDirectories(this.workingDir.toString());
+    } catch (TException e) {
+      throw new IOException(e);
+    }
   }
 
   public String getDirHost() {
@@ -121,7 +130,7 @@ public class MMuxFileSystem extends FileSystem {
   @Override
   public boolean rename(Path path, Path path1) throws IOException {
     try {
-      client.fs().rename(makeAbsolute(path).toString(), makeAbsolute(path1).toString());
+      client.rename(makeAbsolute(path).toString(), makeAbsolute(path1).toString());
     } catch (mmux.directory.directory_service_exception directory_service_exception) {
       return false;
     } catch (TException e) {
@@ -134,7 +143,7 @@ public class MMuxFileSystem extends FileSystem {
   public boolean delete(Path path, boolean recursive) throws IOException {
     try {
       if (recursive) {
-        client.fs().removeAll(makeAbsolute(path).toString());
+        client.removeAll(makeAbsolute(path).toString());
       } else {
         client.remove(makeAbsolute(path).toString());
       }
@@ -210,14 +219,22 @@ public class MMuxFileSystem extends FileSystem {
         return new FileStatus(0, true, 0, 0, fileStatus.last_write_time, absolutePath);
       }
     } catch (TException e) {
-      throw new IOException(e);
+      throw new FileNotFoundException();
     }
   }
 
+  private String removeMmfsPrefix(String s) {
+    URI uri = URI.create(s);
+    return uri.getPath();
+  }
+
+
   private Path makeAbsolute(Path path) {
+    String pathString = removeMmfsPrefix(path.toString());
+
     if (path.isAbsolute()) {
-      return path;
+      return new Path(pathString);
     }
-    return new Path(workingDir, path);
+    return new Path(workingDir, pathString);
   }
 }
