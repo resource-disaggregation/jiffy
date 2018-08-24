@@ -72,7 +72,7 @@ public class MMuxInputStream extends FSInputStream {
     }
     int result = -1;
     if (filePos < fileLength) {
-      if (currentBuf.position() >= blockSize) {
+      if (currentBuf == null || currentBuf.position() >= blockSize) {
         resetBuf();
       }
       result = currentBuf.get();
@@ -87,10 +87,10 @@ public class MMuxInputStream extends FSInputStream {
       throw new IOException("Stream closed");
     }
     if (filePos < fileLength) {
-      if (currentBuf.position() >= blockSize) {
+      if (currentBuf == null || currentBuf.position() >= blockSize) {
         resetBuf();
       }
-      int realLen = Math.min(len, blockSize - currentBuf.position() + 1);
+      int realLen = Math.min(len, blockSize - currentBuf.position());
       currentBuf.get(buf, off, realLen);
       filePos += realLen;
       return realLen;

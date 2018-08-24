@@ -33,6 +33,7 @@ public class MMuxFileSystem extends FileSystem {
   public void initialize(URI uri, Configuration conf) throws IOException {
     super.initialize(uri, conf);
     setConf(conf);
+
     this.dirHost = uri.getHost();
     this.dirPort = uri.getPort();
     this.leasePort = dirPort + 1;
@@ -130,7 +131,7 @@ public class MMuxFileSystem extends FileSystem {
   @Override
   public boolean rename(Path path, Path path1) throws IOException {
     try {
-      client.rename(makeAbsolute(path).toString(), makeAbsolute(path1).toString());
+      client.fs().rename(makeAbsolute(path).toString(), makeAbsolute(path1).toString());
     } catch (mmux.directory.directory_service_exception directory_service_exception) {
       return false;
     } catch (TException e) {
@@ -143,7 +144,7 @@ public class MMuxFileSystem extends FileSystem {
   public boolean delete(Path path, boolean recursive) throws IOException {
     try {
       if (recursive) {
-        client.removeAll(makeAbsolute(path).toString());
+        client.fs().removeAll(makeAbsolute(path).toString());
       } else {
         client.remove(makeAbsolute(path).toString());
       }
@@ -159,6 +160,7 @@ public class MMuxFileSystem extends FileSystem {
   public FileStatus[] listStatus(Path path) throws IOException {
     Path absolutePath = makeAbsolute(path);
     FileStatus status = getFileStatus(absolutePath);
+
     if (status.isDirectory()) {
       try {
         List<rpc_dir_entry> entries = client.fs().directoryEntries(absolutePath.toString());
@@ -168,8 +170,8 @@ public class MMuxFileSystem extends FileSystem {
           Path child = new Path(absolutePath, entry.name);
           rpc_file_status fileStatus = entry.status;
           if (fileStatus.getType() == rpc_file_type.rpc_regular) {
-            rpc_data_status dataStatus = client.fs().dstatus(absolutePath.toString());
-            statuses[i] = new FileStatus(0, false, dataStatus.chain_length, 64 * 1024 * 1024,
+            rpc_data_status dataStatus = client.fs().dstatus(child.toString());
+            statuses[i] = new FileStatus(0, false, dataStatus.chain_length, 32 * 1024 * 1024,
                 fileStatus.last_write_time, child);
           } else {
             statuses[i] = new FileStatus(0, true, 0, 0, fileStatus.last_write_time, child);

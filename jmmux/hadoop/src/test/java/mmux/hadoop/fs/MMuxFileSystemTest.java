@@ -2,6 +2,7 @@ package mmux.hadoop.fs;
 
 import java.io.IOException;
 import mmux.StorageServer;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
@@ -15,7 +16,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
-
 public class MMuxFileSystemTest {
 
   @Rule
@@ -23,6 +23,8 @@ public class MMuxFileSystemTest {
 
   private NameServer nameServer;
   private StorageServer storageServer;
+
+  private static final int DEFAULT_FILE_LENGTH = 8;
 
   public MMuxFileSystemTest() {
     nameServer = new NameServer(System.getProperty("mmux.directory.exec", "directoryd"));
@@ -63,13 +65,20 @@ public class MMuxFileSystemTest {
 
   }
 
+  private String getRandomFilename(int length) {
+    return RandomStringUtils.randomAlphabetic(length);
+  }
+
   @Test
   public void testCreateWriteRenameReadFile() throws InterruptedException, TException, IOException {
     startServers();
     try (MMuxFileSystem fs = nameServer.connectFS()) {
 
       // Create file
-      Path filePath = new Path("testfile");
+      String originalFilename = getRandomFilename(DEFAULT_FILE_LENGTH);
+      String renamedFilename = getRandomFilename(DEFAULT_FILE_LENGTH);
+
+      Path filePath = new Path(originalFilename);
       FSDataOutputStream out_stream = fs.create(filePath);
 
       // Write string to file
@@ -78,11 +87,11 @@ public class MMuxFileSystemTest {
       out_stream.write(dataBytes, 0, dataBytes.length);
       out_stream.close();
 
-      Path rename_path = new Path("testfile_renamed");
-      fs.rename(filePath, rename_path);
+      Path renamePath = new Path(renamedFilename);
+      fs.rename(filePath, renamePath);
 
       // Open created file
-      FSDataInputStream in_stream = fs.open(rename_path, dataBytes.length);
+      FSDataInputStream in_stream = fs.open(renamePath, dataBytes.length);
 
       // Read all data from the file
       byte[] read_bytes = new byte[dataBytes.length];
@@ -94,7 +103,7 @@ public class MMuxFileSystemTest {
       in_stream.close();
 
       // Clean up test
-      fs.delete(rename_path, false);
+      fs.delete(renamePath, false);
     } finally {
       stopServers();
     }
@@ -107,15 +116,43 @@ public class MMuxFileSystemTest {
       Path expectedWorkingDirectory = new Path("/fsdir");
       Assert.assertEquals(fs.getWorkingDirectory(), expectedWorkingDirectory);
 
-      // Create a new directory and ls the base directory.
-      fs.mkdirs(new Path("testdir"), FsPermission.getDefault());
+      // Create a new directory and ls the base directory
+      String dirName = getRandomFilename(DEFAULT_FILE_LENGTH);
+      fs.mkdirs(new Path(dirName), FsPermission.getDefault());
 
       // Successfully list the directory
-      FileStatus[] files = fs.listStatus(new Path("testdir"));
+      FileStatus[] files = fs.listStatus(new Path(dirName));
       Assert.assertEquals(0, files.length);
 
       // Clean up test
-      fs.delete(new Path("testdir"), true);
+      fs.delete(new Path(dirName), true);
+    } finally {
+      stopServers();
+    }
+  }
+
+  @Test
+  public void listStatusWithNestedDirectories() throws InterruptedException, TException, IOException {
+    startServers();
+    try (MMuxFileSystem fs = nameServer.connectFS()) {
+      String dirName = getRandomFilename(8);
+      fs.mkdirs(new Path(dirName), FsPermission.getDefault());
+      fs.mkdirs(new Path(dirName + "/" + getRandomFilename(8)), FsPermission.getDefault());
+
+      /* Write a file */
+      Path filePath = new Path(dirName + "/" + getRandomFilename(8));
+      FSDataOutputStream out_stream = fs.create(filePath);
+
+      // Write string to file
+      String data = "teststring";
+      byte[] dataBytes = data.getBytes();
+      out_stream.write(dataBytes, 0, dataBytes.length);
+      out_stream.close();
+
+      FileStatus[] files = fs.listStatus(new Path(dirName));
+      Assert.assertEquals(2, files.length);
+
+      fs.delete(new Path(dirName), true);
     } finally {
       stopServers();
     }
