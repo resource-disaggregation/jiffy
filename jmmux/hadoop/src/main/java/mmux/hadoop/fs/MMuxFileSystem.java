@@ -171,7 +171,7 @@ public class MMuxFileSystem extends FileSystem {
           rpc_file_status fileStatus = entry.status;
           if (fileStatus.getType() == rpc_file_type.rpc_regular) {
             rpc_data_status dataStatus = client.fs().dstatus(child.toString());
-            statuses[i] = new FileStatus(0, false, dataStatus.chain_length, 32 * 1024 * 1024,
+            statuses[i] = new FileStatus(0, false, dataStatus.chain_length, 64 * 1024 * 1024,
                 fileStatus.last_write_time, child);
           } else {
             statuses[i] = new FileStatus(0, true, 0, 0, fileStatus.last_write_time, child);
