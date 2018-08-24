@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import mmux.kv.KVClient;
 import mmux.util.ByteBufferUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.thrift.TException;
 
 public class MMuxOutputStream extends OutputStream {
@@ -19,11 +18,11 @@ public class MMuxOutputStream extends OutputStream {
   private KVClient client;
   private ByteBuffer lastBlockKey;
 
-  MMuxOutputStream(KVClient client, Configuration conf) throws TException {
+  MMuxOutputStream(KVClient client, int blockSize) throws TException {
     this.pos = 0;
     this.blockNum = 0;
     this.client = client;
-    this.blockSize = conf.getInt("mmfs.block.size", 64 * 1024 * 1024);
+    this.blockSize = blockSize;
     this.block = new byte[this.blockSize];
     this.lastBlockKey = ByteBufferUtils.fromString("LastBlock");
     ByteBuffer lastBlockValue = ByteBufferUtils.fromString(String.valueOf(blockNum));
