@@ -131,7 +131,7 @@ public class MMuxFileSystem extends FileSystem {
   @Override
   public boolean rename(Path path, Path path1) throws IOException {
     try {
-      client.fs().rename(makeAbsolute(path).toString(), makeAbsolute(path1).toString());
+      client.rename(makeAbsolute(path).toString(), makeAbsolute(path1).toString());
     } catch (mmux.directory.directory_service_exception directory_service_exception) {
       return false;
     } catch (TException e) {
@@ -144,7 +144,7 @@ public class MMuxFileSystem extends FileSystem {
   public boolean delete(Path path, boolean recursive) throws IOException {
     try {
       if (recursive) {
-        client.fs().removeAll(makeAbsolute(path).toString());
+        client.removeAll(makeAbsolute(path).toString());
       } else {
         client.remove(makeAbsolute(path).toString());
       }
@@ -172,9 +172,9 @@ public class MMuxFileSystem extends FileSystem {
           if (fileStatus.getType() == rpc_file_type.rpc_regular) {
             rpc_data_status dataStatus = client.fs().dstatus(child.toString());
             statuses[i] = new FileStatus(dataStatus.getDataBlocksSize(), false, dataStatus.chain_length, 64 * 1024 * 1024,
-                fileStatus.last_write_time, child);
+                      1000, 1000, new FsPermission("777"), System.getProperty("user.name"), "default group", absolutePath);
           } else {
-            statuses[i] = new FileStatus(0, true, 0, 0, fileStatus.last_write_time, child);
+              statuses[i] = new FileStatus(0, true, 0, 0,1000, 1000, new FsPermission("777"),  System.getProperty("user.name"), "default group", child);
           }
           i++;
         }
@@ -197,7 +197,7 @@ public class MMuxFileSystem extends FileSystem {
   }
 
   @Override
-  public boolean mkdirs(Path path, FsPermission fsPermission) throws IOException {
+      public boolean mkdirs(Path path, FsPermission fsPermission) throws IOException {
     try {
       client.fs().createDirectories(makeAbsolute(path).toString());
     } catch (mmux.directory.directory_service_exception directory_service_exception) {
@@ -215,10 +215,10 @@ public class MMuxFileSystem extends FileSystem {
       rpc_file_status fileStatus = client.fs().status(absolutePath.toString());
       if (fileStatus.getType() == rpc_file_type.rpc_regular) {
         rpc_data_status dataStatus = client.fs().dstatus(absolutePath.toString());
-        return new FileStatus(0, false, dataStatus.chain_length, 64 * 1024 * 1024,
-            fileStatus.last_write_time, absolutePath);
+        return new FileStatus(dataStatus.getDataBlocksSize(), false, dataStatus.chain_length, 64 * 1024 * 1024,
+            1000, 1000, new FsPermission("777"),  System.getProperty("user.name"), "default group", absolutePath);
       } else {
-        return new FileStatus(0, true, 0, 0, fileStatus.last_write_time, absolutePath);
+        return new FileStatus(0, true, 0, 0,1000, 1000, new FsPermission("777"),  System.getProperty("user.name"), "default group", absolutePath);
       }
     } catch (TException e) {
       throw new FileNotFoundException();

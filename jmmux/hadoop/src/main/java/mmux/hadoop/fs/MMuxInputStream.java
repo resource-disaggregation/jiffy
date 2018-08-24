@@ -1,6 +1,7 @@
 package mmux.hadoop.fs;
 
 import java.io.IOException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import mmux.kv.KVClient;
 import mmux.util.ByteBufferUtils;
@@ -30,8 +31,10 @@ public class MMuxInputStream extends FSInputStream {
     this.lastBlockKey = ByteBufferUtils.fromString("LastBlock");
     ByteBuffer lastBlock = client.get(lastBlockKey);
     long lastBlockNum = Long.parseLong(ByteBufferUtils.toString(lastBlock));
-    this.fileLength = lastBlockNum * blockSize;
+    this.fileLength = (lastBlockNum + 1) * blockSize;
     ByteBuffer value;
+    System.out.println("blocknum: " + String.valueOf(lastBlockNum));
+    System.out.println("file length: " + String.valueOf(this.fileLength));
     if ((value = client.get(lastBlock)) != ByteBufferUtils.fromString("!key_not_found")) {
        this.fileLength += value.array().length;
     }
@@ -90,7 +93,8 @@ public class MMuxInputStream extends FSInputStream {
       if (currentBuf == null || currentBuf.position() >= blockSize) {
         resetBuf();
       }
-      int realLen = Math.min(len, blockSize - currentBuf.position());
+      System.out.println("Buffer capacity: " + String.valueOf(currentBuf.capacity()));
+      int realLen = Math.min(len, currentBuf.capacity() - currentBuf.position());
       currentBuf.get(buf, off, realLen);
       filePos += realLen;
       return realLen;
