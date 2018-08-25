@@ -183,7 +183,7 @@ public class MMuxFileSystem extends FileSystem {
         for (rpc_dir_entry entry : entries) {
           Path child = new Path(absolutePath, entry.name);
           rpc_file_status fileStatus = entry.status;
-          FsPermission perm = new FsPermission(fileStatus.getPermissions());
+          FsPermission perm = new FsPermission(String.valueOf(fileStatus.getPermissions()));
           long fileTS = fileStatus.getLastWriteTime();
           if (fileStatus.getType() == rpc_file_type.rpc_regular) {
             rpc_data_status dataStatus = client.fs().dstatus(child.toString());
@@ -233,7 +233,7 @@ public class MMuxFileSystem extends FileSystem {
     try {
       Path absolutePath = makeAbsolute(path);
       rpc_file_status fileStatus = client.fs().status(absolutePath.toString());
-      FsPermission perm = new FsPermission(fileStatus.getPermissions());
+      FsPermission perm = new FsPermission(String.valueOf(fileStatus.getPermissions()));
       long fileTS = fileStatus.getLastWriteTime();
       if (fileStatus.getType() == rpc_file_type.rpc_regular) {
         rpc_data_status dataStatus = client.fs().dstatus(absolutePath.toString());
