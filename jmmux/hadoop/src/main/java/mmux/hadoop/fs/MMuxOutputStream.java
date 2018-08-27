@@ -9,30 +9,21 @@ import org.apache.thrift.TException;
 
 public class MMuxOutputStream extends OutputStream {
 
-  private int blockSize;
   private boolean closed;
-  private long filePos = 0;
-  private int pos;
-  private byte[] block;
+  private MMuxBlock block;
   private long blockNum;
   private KVClient client;
   private ByteBuffer lastBlockKey;
 
   MMuxOutputStream(KVClient client, int blockSize) throws TException {
-    this.pos = 0;
     this.blockNum = 0;
     this.client = client;
-    this.blockSize = blockSize;
-    this.block = new byte[this.blockSize];
+    this.block = new MMuxBlock(blockSize);
     this.lastBlockKey = ByteBufferUtils.fromString("LastBlock");
     ByteBuffer lastBlockValue = ByteBufferUtils.fromString(String.valueOf(blockNum));
     if (client.put(lastBlockKey, lastBlockValue) == ByteBufferUtils.fromString("!key_already_exists")) {
       client.update(lastBlockKey, lastBlockValue);
     }
-  }
-
-  public long getPos() {
-    return filePos;
   }
 
   @Override
@@ -41,11 +32,10 @@ public class MMuxOutputStream extends OutputStream {
       throw new IOException("Stream closed");
     }
 
-    if (pos >= blockSize) {
+    if (block.remaining() == 0) {
       flush();
     }
-    block[pos++] = (byte) b;
-    filePos++;
+    block.write((byte) b);
   }
 
   @Override
@@ -54,15 +44,12 @@ public class MMuxOutputStream extends OutputStream {
       throw new IOException("Stream closed");
     }
     while (len > 0) {
-      int remaining = blockSize - pos;
-      int toWrite = Math.min(remaining, len);
-      System.arraycopy(b, off, block, pos, toWrite);
-      pos += toWrite;
+      int toWrite = Math.min(block.remaining(), len);
+      block.write(b, off, toWrite);
       off += toWrite;
       len -= toWrite;
-      filePos += toWrite;
 
-      if (pos == blockSize) {
+      if (block.remaining() == 0) {
         flush();
       }
     }
@@ -75,12 +62,12 @@ public class MMuxOutputStream extends OutputStream {
     }
     try {
       ByteBuffer key = ByteBufferUtils.fromString(String.valueOf(blockNum));
-      ByteBuffer value = ByteBuffer.wrap(block);
+      ByteBuffer value = block.getData();
       if (client.put(key, value) == ByteBufferUtils.fromString("!key_already_exists")) {
         client.update(key, value);
       }
-      if (pos == blockSize) {
-        pos = 0;
+      if (block.remaining() == 0) {
+        block.reset();
         blockNum++;
         client.update(lastBlockKey, ByteBufferUtils.fromString(String.valueOf(blockNum)));
       }
