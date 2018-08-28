@@ -15,6 +15,7 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FsStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.util.Progressable;
@@ -184,7 +185,7 @@ public class MMuxFileSystem extends FileSystem {
           Path child = new Path(absolutePath, entry.name);
           rpc_file_status fileStatus = entry.status;
           FsPermission perm = new FsPermission(String.valueOf(fileStatus.getPermissions()));
-          long fileTS = fileStatus.getLastWriteTime();
+          long fileTS = 100;
           if (fileStatus.getType() == rpc_file_type.rpc_regular) {
             rpc_data_status dataStatus = client.fs().dstatus(child.toString());
             // FIXME: Remove hardcoded parameter: access_time
@@ -200,7 +201,7 @@ public class MMuxFileSystem extends FileSystem {
         }
         return statuses;
       } catch (TException e) {
-        throw new IOException(e);
+        throw new FileNotFoundException(path.toUri().getRawPath());
       }
     }
     return new FileStatus[]{status};
@@ -234,7 +235,7 @@ public class MMuxFileSystem extends FileSystem {
       Path absolutePath = makeAbsolute(path);
       rpc_file_status fileStatus = client.fs().status(absolutePath.toString());
       FsPermission perm = new FsPermission(String.valueOf(fileStatus.getPermissions()));
-      long fileTS = fileStatus.getLastWriteTime();
+      long fileTS = 100;
       if (fileStatus.getType() == rpc_file_type.rpc_regular) {
         rpc_data_status dataStatus = client.fs().dstatus(absolutePath.toString());
         return new FileStatus(dataStatus.getDataBlocksSize(), false, dataStatus.getChainLength(),
@@ -247,18 +248,25 @@ public class MMuxFileSystem extends FileSystem {
     }
   }
 
+  @Override
+  public FsStatus getStatus(Path p) throws IOException {
+    return new FsStatus(Long.MAX_VALUE, 0, Long.MAX_VALUE);
+  }
+
   private String removeMmfsPrefix(String s) {
     URI uri = URI.create(s);
     return uri.getPath();
   }
-
 
   private Path makeAbsolute(Path path) {
     String pathString = removeMmfsPrefix(path.toString());
 
     if (path.isAbsolute()) {
       return new Path(pathString);
+    } else if (pathString.equals("")) {
+      return workingDir;
+    } else {
+      return new Path(workingDir, pathString);
     }
-    return new Path(workingDir, pathString);
   }
 }
