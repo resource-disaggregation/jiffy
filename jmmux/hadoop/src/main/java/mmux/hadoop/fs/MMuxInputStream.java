@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import mmux.kv.KVClient;
 import mmux.util.ByteBufferUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSInputStream;
 import org.apache.thrift.TException;
 
@@ -16,24 +15,24 @@ public class MMuxInputStream extends FSInputStream {
   private int blockSize;
   private long fileLength;
   private long currentBlockNum;
-  private ByteBuffer currentBuf;
+  private MMuxBlock currentBlock;
 
   private KVClient client;
   private ByteBuffer lastBlockKey;
 
-  MMuxInputStream(KVClient client, Configuration conf) throws TException {
+  MMuxInputStream(KVClient client, int blockSize) throws TException {
     this.filePos = 0;
     this.client = client;
-    this.blockSize = conf.getInt("mmfs.block_size", 64 * 1024 * 1024);
+    this.blockSize = blockSize;
     this.currentBlockNum = -1;
-    this.currentBuf = null;
+    this.currentBlock = null;
     this.lastBlockKey = ByteBufferUtils.fromString("LastBlock");
-    ByteBuffer lastBlock = client.get(lastBlockKey);
+    ByteBuffer lastBlock = getLastBlockNum();
     long lastBlockNum = Long.parseLong(ByteBufferUtils.toString(lastBlock));
-    this.fileLength = lastBlockNum * blockSize;
+    this.fileLength = lastBlockNum * this.blockSize;
     ByteBuffer value;
     if ((value = client.get(lastBlock)) != ByteBufferUtils.fromString("!key_not_found")) {
-       this.fileLength += value.array().length;
+       this.fileLength += MMuxBlock.usedBytes(value);
     }
   }
 
@@ -58,6 +57,9 @@ public class MMuxInputStream extends FSInputStream {
     }
     filePos = targetPos;
     resetBuf();
+    long bufferPos = filePos % blockSize;
+    currentBlock.seek(bufferPos);
+
   }
 
   @Override
@@ -72,10 +74,10 @@ public class MMuxInputStream extends FSInputStream {
     }
     int result = -1;
     if (filePos < fileLength) {
-      if (currentBuf.position() >= blockSize) {
+      if (currentBlock == null || !currentBlock.hasRemaining()) {
         resetBuf();
       }
-      result = currentBuf.get();
+      result = currentBlock.get();
       filePos++;
     }
     return result;
@@ -87,11 +89,11 @@ public class MMuxInputStream extends FSInputStream {
       throw new IOException("Stream closed");
     }
     if (filePos < fileLength) {
-      if (currentBuf.position() >= blockSize) {
+      if (currentBlock == null || !currentBlock.hasRemaining()) {
         resetBuf();
       }
-      int realLen = Math.min(len, blockSize - currentBuf.position() + 1);
-      currentBuf.get(buf, off, realLen);
+      int realLen = Math.min(len, currentBlock.usedBytes() - currentBlock.position());
+      currentBlock.get(buf, off, realLen);
       filePos += realLen;
       return realLen;
     }
@@ -137,7 +139,11 @@ public class MMuxInputStream extends FSInputStream {
         if (value == ByteBufferUtils.fromString("!key_not_found")) {
           throw new IOException("EOF");
         }
-        currentBuf = value;
+        if (currentBlock == null) {
+          currentBlock = new MMuxBlock(value);
+        } else {
+          currentBlock.setData(value);
+        }
       } catch (TException e) {
         throw new IOException(e);
       }
