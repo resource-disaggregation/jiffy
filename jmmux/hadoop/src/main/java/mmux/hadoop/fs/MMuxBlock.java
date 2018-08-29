@@ -17,6 +17,10 @@ class MMuxBlock {
     data.position(Integer.BYTES);
   }
 
+  void seek(long targetPos) {
+    data.position((int)targetPos + Integer.BYTES);
+  }
+
   static int usedBytes(ByteBuffer buf) {
     return buf.getInt(METADATA_OFFSET);
   }

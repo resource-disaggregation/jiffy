@@ -197,4 +197,56 @@ public class MMuxFileSystemTest {
       stopServers();
     }
   }
+
+  @Test
+  public void readFileFully() throws InterruptedException, IOException {
+    startServers();
+    try (MMuxFileSystem fs = nameServer.connectFS()) {
+      Path filePath = new Path(randomFilename());
+      int dataLength = 80;
+      byte[] data = randomData(dataLength).getBytes();
+      createFileWithData(fs, filePath, data);
+
+      FSDataInputStream in = fs.open(filePath);
+      byte[] buf = new byte[dataLength];
+      in.readFully(0, buf);
+      Assert.assertArrayEquals(data, buf);
+
+    } finally {
+      stopServers();
+    }
+  }
+
+  @Test
+  public void fileDoesNotExist() throws InterruptedException, IOException {
+    startServers();
+    try (MMuxFileSystem fs = nameServer.connectFS()) {
+      Assert.assertFalse(fs.exists(new Path(randomFilename())));
+
+    } finally {
+      stopServers();
+    }
+  }
+
+  @Test
+  public void seekThenRead() throws InterruptedException, IOException {
+    startServers();
+    try (MMuxFileSystem fs = nameServer.connectFS()) {
+      Path filePath = new Path(randomFilename());
+      int dataLength = 80;
+      byte[] data = randomData(dataLength).getBytes();
+      createFileWithData(fs, filePath, data);
+
+      FSDataInputStream in = fs.open(filePath);
+      in.seek(40);
+      byte[] buf = new byte[40];
+      in.read(buf, 0, 40);
+
+      byte[] targetSlice = ArrayUtils.subarray(data, 40, 80);
+      Assert.assertArrayEquals(buf, targetSlice);
+
+    } finally {
+      stopServers();
+    }
+  }
 }

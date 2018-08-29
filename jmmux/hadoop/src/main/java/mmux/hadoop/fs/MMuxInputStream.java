@@ -57,6 +57,9 @@ public class MMuxInputStream extends FSInputStream {
     }
     filePos = targetPos;
     resetBuf();
+    long bufferPos = filePos % blockSize;
+    currentBlock.seek(bufferPos);
+
   }
 
   @Override
