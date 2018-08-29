@@ -56,13 +56,13 @@ public class MMuxFileSystem extends FileSystem {
     String path = uri.getPath();
     if (path == null || path.equals("")) {
       path = "/fsdir/";
+      try {
+        client.fs().createDirectories(path);
+      } catch (TException e) {
+        throw new IOException(e);
+      }
     }
     this.workingDir = new Path(path);
-    try {
-      client.fs().createDirectories(this.workingDir.toString());
-    } catch (TException e) {
-      throw new IOException(e);
-    }
 
     this.blockSize = conf.getInt("mmux.blocksize", DEFAULT_BLOCK_SIZE);
     this.persistentPath = conf.get("mmux.persistent_path", DEFAULT_PERSISTENT_PATH);
