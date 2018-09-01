@@ -25,7 +25,7 @@ public class MMuxFileSystem extends FileSystem {
 
   private static final int DEFAULT_BLOCK_SIZE = 64 * 1024 * 1024;
   private static final String DEFAULT_PERSISTENT_PATH = "local://tmp";
-  private static final String DEFAULT_GROUP = "default group";
+  private static final String DEFAULT_GROUP = "defaultgroup";
   private static final String DEFAULT_USER = System.getProperty("user.name");
 
   private URI uri;
@@ -184,7 +184,8 @@ public class MMuxFileSystem extends FileSystem {
         for (rpc_dir_entry entry : entries) {
           Path child = new Path(absolutePath, entry.name);
           rpc_file_status fileStatus = entry.status;
-          FsPermission perm = new FsPermission(String.valueOf(fileStatus.getPermissions()));
+          // FIXME: Remove hardcoded parameter: permissions
+          FsPermission perm = new FsPermission("777");
           long fileTS = 100;
           if (fileStatus.getType() == rpc_file_type.rpc_regular) {
             rpc_data_status dataStatus = client.fs().dstatus(child.toString());
@@ -192,7 +193,7 @@ public class MMuxFileSystem extends FileSystem {
             // FIXME: Support storing username & groups in MemoryMUX
             statuses[i] = new FileStatus(dataStatus.getDataBlocksSize(), false,
                 dataStatus.getChainLength(), blockSize, fileTS, fileTS, perm, user, group,
-                absolutePath);
+                child);
           } else {
             statuses[i] = new FileStatus(0, true, 0, 0, fileTS, fileTS, perm, user,
                 group, child);
@@ -234,7 +235,8 @@ public class MMuxFileSystem extends FileSystem {
     try {
       Path absolutePath = makeAbsolute(path);
       rpc_file_status fileStatus = client.fs().status(absolutePath.toString());
-      FsPermission perm = new FsPermission(String.valueOf(fileStatus.getPermissions()));
+      // FIXME: Remove hardcoded parameter: permissions
+      FsPermission perm = new FsPermission("777");
       long fileTS = 100;
       if (fileStatus.getType() == rpc_file_type.rpc_regular) {
         rpc_data_status dataStatus = client.fs().dstatus(absolutePath.toString());
