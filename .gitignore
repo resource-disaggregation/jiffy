@@ -35,6 +35,7 @@ cmake-build-release
 javaclient/target
 javaclient/core/target
 javaclient/hadoop/target
+build
 
 # Eclipse files
 .settings
