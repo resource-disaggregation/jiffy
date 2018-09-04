@@ -55,7 +55,7 @@ public class BlockClient {
   private TProtocol protocol;
   private block_request_service.Client client;
 
-  public BlockClient(BlockClientCache cache, String host, int port, int blockId)
+  BlockClient(BlockClientCache cache, String host, int port, int blockId)
       throws TTransportException {
     BlockClientCache.Value value = cache.get(host, port);
     this.transport = value.getTransport();
@@ -68,17 +68,16 @@ public class BlockClient {
     transport.close();
   }
 
-  public CommandResponseReader newCommandResponseReader(long clientId) throws TException {
+  CommandResponseReader newCommandResponseReader(long clientId) throws TException {
     client.registerClientId(id, clientId);
     return new CommandResponseReader(protocol);
   }
 
-  public long getClientId() throws TException {
+  long getClientId() throws TException {
     return client.getClientId();
   }
 
-  public void sendCommandRequest(sequence_id seq, int cmdId, List<ByteBuffer> args)
-      throws TException {
+  void sendCommandRequest(sequence_id seq, int cmdId, List<ByteBuffer> args) throws TException {
     client.commandRequest(seq, id, cmdId, args);
   }
 }

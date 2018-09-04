@@ -33,7 +33,7 @@ public class MMuxClient implements Closeable {
     return fs;
   }
 
-  public LeaseWorker getWorker() {
+  LeaseWorker getWorker() {
     return worker;
   }
 
