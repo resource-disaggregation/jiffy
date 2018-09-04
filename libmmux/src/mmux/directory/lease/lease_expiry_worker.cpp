@@ -65,6 +65,9 @@ void lease_expiry_worker::remove_expired_nodes(std::shared_ptr<ds_dir_node> pare
   auto lease_duration = static_cast<uint64_t>(lease_period_ms_.count());
   auto extended_lease_duration = lease_duration + static_cast<uint64_t>(grace_period_ms_.count());
   if (time_since_last_renewal >= extended_lease_duration) {
+    if (child->is_regular_file() && std::dynamic_pointer_cast<ds_file_node>(child)->is_pinned()) {
+      return;
+    }
     // Remove child since its lease has expired
     LOG(warn) << "Lease expired for " << child_path << "...";
     tree_->handle_lease_expiry(child_path);

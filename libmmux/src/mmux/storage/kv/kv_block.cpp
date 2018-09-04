@@ -546,14 +546,14 @@ void kv_block::export_slots() {
     }
     auto nexport_keys = export_data.size() / 2;
     tot_export_keys += nexport_keys;
-    LOG(log_level::info) << "Read " << nexport_keys << " keys to export";
+    LOG(log_level::trace) << "Read " << nexport_keys << " keys to export";
 
     // Add redirected argument so that importing chain does not ignore our request
     export_data.emplace_back("!redirected");
 
     // Write data to dst block
     dst.run_command(kv_op_id::locked_put, export_data);
-    LOG(log_level::info) << "Sent " << nexport_keys << " keys";
+    LOG(log_level::trace) << "Sent " << nexport_keys << " keys";
 
     // Remove data from src block
     std::vector<std::string> remove_keys;
@@ -567,7 +567,7 @@ void kv_block::export_slots() {
     }
     assert(remove_keys.size() == nexport_keys);
     src.run_command(kv_op_id::locked_remove, remove_keys);
-    LOG(log_level::info) << "Removed " << remove_keys.size() << " exported keys";
+    LOG(log_level::trace) << "Removed " << remove_keys.size() << " exported keys";
 
     // Unlock source and destination blocks
     if (role() == chain_role::singleton) {
@@ -582,7 +582,7 @@ void kv_block::export_slots() {
     }
   }
 
-  LOG(log_level::info) << "Completed export for slot range (" << exp_range.first << ", " << exp_range.second << ")";
+  LOG(log_level::info) << "Exported slot range (" << exp_range.first << ", " << exp_range.second << ")";
 
   splitting_ = false;
   merging_ = false;
