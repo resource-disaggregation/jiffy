@@ -576,8 +576,10 @@ void directory_tree::handle_lease_expiry(const std::string &path) {
   auto parent = get_node_as_dir(ptemp);
   std::vector<std::string> cleared_blocks;
   parent->handle_lease_expiry(cleared_blocks, child_name, storage_);
-  LOG(log_level::info) << "Handled lease expiry, clearing freeing blocks for " << path;
-  allocator_->free(cleared_blocks);
+  if (!cleared_blocks.empty()) {
+    LOG(log_level::info) << "Handled lease expiry, freeing blocks for " << path;
+    allocator_->free(cleared_blocks);
+  }
 }
 
 std::shared_ptr<ds_node> directory_tree::get_node_unsafe(const std::string &path) const {

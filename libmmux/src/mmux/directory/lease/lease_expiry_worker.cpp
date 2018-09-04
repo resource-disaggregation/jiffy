@@ -20,7 +20,7 @@ lease_expiry_worker::~lease_expiry_worker() {
 }
 
 void lease_expiry_worker::start() {
-  worker_ = std::move(std::thread([&] {
+  worker_ = std::thread([&] {
     while (!stop_.load()) {
       LOG(trace) << "Looking for expired leases...";
       auto start = std::chrono::steady_clock::now();
@@ -37,7 +37,7 @@ void lease_expiry_worker::start() {
         std::this_thread::sleep_for(time_to_wait);
       }
     }
-  }));
+  });
 }
 
 void lease_expiry_worker::stop() {
@@ -66,7 +66,7 @@ void lease_expiry_worker::remove_expired_nodes(std::shared_ptr<ds_dir_node> pare
   auto extended_lease_duration = lease_duration + static_cast<uint64_t>(grace_period_ms_.count());
   if (time_since_last_renewal >= extended_lease_duration) {
     // Remove child since its lease has expired
-    LOG(warn) << "Lease expired for " << child_path << "; removing file.";
+    LOG(warn) << "Lease expired for " << child_path << "...";
     tree_->handle_lease_expiry(child_path);
   } else {
     if (time_since_last_renewal >= lease_duration && child->is_regular_file()) {
