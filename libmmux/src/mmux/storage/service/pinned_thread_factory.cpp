@@ -280,7 +280,7 @@ stdcxx::shared_ptr<Thread> pinned_thread_factory::newThread(stdcxx::shared_ptr<R
                                                                 toPthreadPriority(policy_, priority_),
                                                                 stackSize_,
                                                                 isDetached(),
-                                                                utils::rand_utils::rand_int32(num_cores_),
+                                                                utils::rand_utils::rand_int32(num_cores_ - 1),
                                                                 runnable));
   result->weakRef(result);
   runnable->thread(result);
