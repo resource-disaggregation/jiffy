@@ -10,6 +10,7 @@
 #include <mmux/storage/service/chain_server.h>
 #include <mmux/storage/service/server_storage_tracker.h>
 #include <boost/program_options.hpp>
+#include <ifaddrs.h>
 
 using namespace ::mmux::directory;
 using namespace ::mmux::storage;
@@ -24,6 +25,34 @@ std::string mapper(const std::string &env_var) {
   else if (env_var == "MMUX_STORAGE_HOST") return "storage.host";
   else if (env_var == "MMUX_STORAGE_SERVICE_PORT") return "storage.service_port";
   return "";
+}
+
+std::string local_address() {
+  std::string ip_address = "";
+  struct ifaddrs *interfaces = NULL;
+  struct ifaddrs *temp_addr = NULL;
+  int success = 0;
+  // retrieve the current interfaces - returns 0 on success
+  success = getifaddrs(&interfaces);
+  if (success == 0) {
+    // Loop through linked list of interfaces
+    temp_addr = interfaces;
+    while (temp_addr != NULL) {
+      if (temp_addr->ifa_addr->sa_family == AF_INET) {
+        // Check if interface is en0 which is the wifi connection on the iPhone
+        if (strcmp(temp_addr->ifa_name, "en0") == 0) {
+          ip_address = inet_ntoa(((struct sockaddr_in *) temp_addr->ifa_addr)->sin_addr);
+        }
+      }
+      temp_addr = temp_addr->ifa_next;
+    }
+  }
+  // Free memory
+  freeifaddrs(interfaces);
+  if (ip_address.empty()) {
+    throw std::runtime_error("Unable to get IP Address");
+  }
+  return ip_address;
 }
 
 std::string dir_host = "127.0.0.1";
@@ -182,9 +211,7 @@ int main(int argc, char **argv) {
 
   std::string hostname;
   if (address == "0.0.0.0") {
-    char hbuf[1024];
-    gethostname(hbuf, sizeof(hbuf));
-    hostname = hbuf;
+    hostname = local_address();
   } else {
     hostname = address;
   }
