@@ -1,12 +1,13 @@
 #include "pinned_thread_factory.h"
 #include "../../utils/rand_utils.h"
-
+#include "../../utils/logger.h"
 #include <thrift/concurrency/Monitor.h>
 
 #ifdef __APPLE__
 #include <sys/sysctl.h>
 #include <mach/mach_types.h>
 #include <mach/thread_act.h>
+
 typedef struct cpu_set {
   uint32_t count;
 } cpu_set_t;
@@ -33,6 +34,7 @@ int pthread_setaffinity_np(pthread_t thread, size_t cpu_size, cpu_set_t *cpu_set
 
 using namespace ::apache::thrift::concurrency;
 using namespace ::apache::thrift;
+using namespace ::mmux::utils;
 
 namespace mmux {
 namespace storage {
@@ -151,8 +153,11 @@ class pinnable_thread : public Thread {
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     CPU_SET(core_, &cpuset);
-    if (pthread_setaffinity_np(pthread_, sizeof(cpu_set_t), &cpuset) != 0) {
-      throw SystemResourceException("pthread_setaffinity_np failed");
+    int ret;
+    if ((ret = pthread_setaffinity_np(pthread_, sizeof(cpu_set_t), &cpuset)) != 0) {
+      LOG(log_level::warn) << "Could not pin thread to core#" << core_ << ": " << ret;
+    } else {
+      LOG(log_level::info) << "Pinned thread to core#" << core_;
     }
 
     // The caller may not choose to guarantee the scope of the Runnable
