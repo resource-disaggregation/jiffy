@@ -37,7 +37,7 @@ TEST_CASE("lease_manager_test") {
   REQUIRE(tree->exists("/sandbox/a/d/file.txt"));
   auto s1 = tree->dstatus("/sandbox/a/c/file.txt");
   for (const auto& blk: s1.data_blocks()) {
-    REQUIRE(blk.mode == storage_mode::in_memory_grace);
+    REQUIRE(blk.mode == storage_mode::in_memory);
   }
   auto s2 = tree->dstatus("/sandbox/a/d/file.txt");
   for (const auto& blk: s2.data_blocks()) {

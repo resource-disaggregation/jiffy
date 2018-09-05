@@ -73,9 +73,11 @@ void lease_expiry_worker::remove_expired_nodes(std::shared_ptr<ds_dir_node> pare
     tree_->handle_lease_expiry(child_path);
   } else {
     if (time_since_last_renewal >= lease_duration && child->is_regular_file()) {
-      LOG(warn) << "Lease in grace period for " << child_path;
       auto node = std::dynamic_pointer_cast<ds_file_node>(child);
-      node->mode(storage_mode::in_memory_grace);
+      if (!node->is_pinned()) {
+        LOG(warn) << "Lease in grace period for " << child_path;
+        node->mode(storage_mode::in_memory_grace);
+      }
     }
     if (child->is_directory()) {
       auto node = std::dynamic_pointer_cast<ds_dir_node>(child);
