@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "buffered_transport_factory.h"
+#include "pinned_thread_factory.h"
 namespace mmux {
 namespace storage {
 
@@ -47,8 +48,9 @@ std::shared_ptr<TServer> block_server::create(std::vector<std::shared_ptr<chain_
     LOG(log_level::info) << "Creating threaded server";
     std::shared_ptr<TServerSocket> sock(new TServerSocket(address, port));
     std::shared_ptr<BufferedTransportFactory> transport_factory(new BufferedTransportFactory(1024 * 1024));
+    stdcxx::shared_ptr<ThreadFactory> thread_factory(new pinned_thread_factory(false));
     std::shared_ptr<TServer>
-        server(new TThreadedServer(proc_factory, sock, transport_factory, protocol_factory));
+        server(new TThreadedServer(proc_factory, sock, transport_factory, protocol_factory, thread_factory));
     return server;
   }
 }

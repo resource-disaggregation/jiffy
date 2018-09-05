@@ -197,7 +197,7 @@ add_library(mmux STATIC
         src/mmux/utils/signal_handling.h
         src/mmux/utils/time_utils.h
         src/mmux/utils/retry_utils.h
-        src/mmux/utils/string_utils.h)
+        src/mmux/utils/string_utils.h src/mmux/storage/service/pinned_thread_factory.cpp src/mmux/storage/service/pinned_thread_factory.h)
 
 if (NOT USE_SYSTEM_LIBEVENT)
   add_dependencies(mmux libevent)
