@@ -184,6 +184,7 @@ int main(int argc, char **argv) {
 
   file_size_tracker tracker(tree, 1000, storage_trace);
   if (!storage_trace.empty()) {
+    LOG(log_level::info) << "Logging storage trace to " << storage_trace;
     tracker.start();
   }
 
