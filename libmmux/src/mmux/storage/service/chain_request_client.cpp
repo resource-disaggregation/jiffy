@@ -23,7 +23,7 @@ void chain_request_client::connect(const std::string &host, int port, int32_t bl
   port_ = port;
   block_id_ = block_id;
   socket_ = std::make_shared<TSocket>(host, port);
-  transport_ = std::shared_ptr<TTransport>(new TBufferedTransport(socket_));
+  transport_ = std::shared_ptr<TTransport>(new TFramedTransport(socket_));
   protocol_ = std::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
   client_ = std::make_shared<thrift_client>(protocol_);
   transport_->open();

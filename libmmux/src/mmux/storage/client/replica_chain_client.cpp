@@ -71,6 +71,7 @@ std::vector<std::string> replica_chain_client::recv_response() {
 std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const std::vector<std::string> &args) {
   std::vector<std::string> response;
   bool retry = false;
+  size_t num_tries = 0;
   while (response.empty()) {
     try {
       send_command(cmd_id, args);
@@ -79,9 +80,12 @@ std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const
         response[0] = "!ok";
       }
     } catch (apache::thrift::transport::TTransportException &e) {
-      LOG(log_level::info) << "Error in connection to chain: " << e.what();
+      LOG(log_level::warn) << "Error in connection to chain: " << e.what();
       connect(fs_->resolve_failures(path_, chain_), timeout_ms_);
       retry = true;
+      if (++num_tries == MAX_RETRIES) {
+        throw e;
+      }
     }
   }
   return response;

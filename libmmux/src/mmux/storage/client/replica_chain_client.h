@@ -6,6 +6,8 @@
 #include "../kv/kv_block.h"
 #include "../../directory/client/directory_client.h"
 
+#define MAX_RETRIES 3
+
 namespace mmux {
 namespace storage {
 

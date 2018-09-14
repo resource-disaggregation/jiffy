@@ -375,7 +375,7 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
     }
   }
   if (chain_pos == blocks.size()) {
-    throw directory_ops_exception("No such chain for path " + path);
+    throw directory_ops_exception("Cannot resolve failures: No such chain " + chain.to_string() + " for path " + path);
   }
   std::vector<std::string> fixed_chain;
   for (std::size_t i = 0; i < chain_length; i++) {
@@ -468,7 +468,7 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
     }
   }
   if (chain_pos == blocks.size()) {
-    throw directory_ops_exception("No such chain for path " + path);
+    throw directory_ops_exception("Cannot add replica: No such chain " + chain.to_string() + " for path " + path);
   }
   bool auto_scale = !dstatus.is_static_provisioned();
 

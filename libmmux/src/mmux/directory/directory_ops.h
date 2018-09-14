@@ -201,7 +201,7 @@ struct replica_chain {
   }
 
   bool operator==(const replica_chain &other) const {
-    return block_names == other.block_names && slot_range == other.slot_range;
+    return block_names == other.block_names;
   }
 
   bool operator!=(const replica_chain &other) const {

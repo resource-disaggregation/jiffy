@@ -129,7 +129,6 @@ add_library(mmux STATIC
         src/mmux/storage/block.cc
         src/mmux/storage/service/server_storage_tracker.cpp
         src/mmux/storage/service/server_storage_tracker.h
-        src/mmux/storage/service/buffered_transport_factory.h
         src/mmux/storage/manager/detail/block_name_parser.cpp
         src/mmux/storage/manager/detail/block_name_parser.h
         src/mmux/storage/manager/storage_management_client.cpp
