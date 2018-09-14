@@ -1,14 +1,14 @@
 package mmux.kv;
 
+import com.github.phantomthief.thrift.client.ThriftClient;
 import java.io.Closeable;
-import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import mmux.directory.directory_service.Client;
+import mmux.directory.directory_service;
 import mmux.directory.rpc_replica_chain;
 import mmux.directory.rpc_storage_mode;
 import mmux.kv.BlockClient.CommandResponse;
@@ -16,6 +16,7 @@ import mmux.kv.BlockClient.CommandResponseReader;
 import mmux.kv.BlockNameParser.BlockMetadata;
 import mmux.util.ByteBufferUtils;
 import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TTransportException;
 
 public class ReplicaChainClient implements Closeable {
@@ -85,7 +86,7 @@ public class ReplicaChainClient implements Closeable {
     }
   }
 
-  private Client fs;
+  private ThriftClient fs;
   private String path;
   private sequence_id seq;
   private rpc_replica_chain chain;
@@ -95,7 +96,7 @@ public class ReplicaChainClient implements Closeable {
   private BlockClientCache cache;
   private boolean inFlight;
 
-  ReplicaChainClient(Client fs, String path, BlockClientCache cache, rpc_replica_chain chain)
+  ReplicaChainClient(ThriftClient fs, String path, BlockClientCache cache, rpc_replica_chain chain)
       throws TException {
     if (chain == null || chain.block_names.size() == 0) {
       throw new IllegalArgumentException("Chain length must be >= 1");
@@ -111,6 +112,10 @@ public class ReplicaChainClient implements Closeable {
   public void close() {
     head.close();
     tail.close();
+  }
+
+  public directory_service.Iface fs() {
+    return fs.iface(directory_service.Client.class, TBinaryProtocol::new, 0);
   }
 
   public rpc_replica_chain getChain() {
@@ -171,7 +176,7 @@ public class ReplicaChainClient implements Closeable {
           }
         }
       } catch (TTransportException e) {
-        chain = fs.resloveFailures(path, chain);
+        chain = fs().resloveFailures(path, chain);
         invalidateCache();
         connect();
         retry = true;

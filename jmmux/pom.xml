@@ -42,6 +42,8 @@
     <hadoop.version>2.9.1</hadoop.version>
     <ini4j.version>0.5.4</ini4j.version>
     <slf4j.version>1.7.25</slf4j.version>
+    <thrift-pool.version>1.0.0</thrift-pool.version>
+    <guava.version>19.0</guava.version>
   </properties>
 
   <modules>

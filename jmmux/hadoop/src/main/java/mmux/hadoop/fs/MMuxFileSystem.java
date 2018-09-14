@@ -29,9 +29,6 @@ public class MMuxFileSystem extends FileSystem {
   private static final String DEFAULT_USER = System.getProperty("user.name");
 
   private URI uri;
-  private String dirHost;
-  private int dirPort;
-  private int leasePort;
   private Path workingDir;
   private MMuxClient client;
   private int blockSize;
@@ -43,12 +40,8 @@ public class MMuxFileSystem extends FileSystem {
   public void initialize(URI uri, Configuration conf) throws IOException {
     super.initialize(uri, conf);
     setConf(conf);
-
-    this.dirHost = uri.getHost();
-    this.dirPort = uri.getPort();
-    this.leasePort = dirPort + 1;
     try {
-      this.client = new MMuxClient(dirHost, dirPort, leasePort);
+      this.client = new MMuxClient(uri.getHost(), uri.getPort(), uri.getPort() + 1);
     } catch (TException e) {
       throw new IOException(e);
     }
@@ -68,22 +61,6 @@ public class MMuxFileSystem extends FileSystem {
     this.persistentPath = conf.get("mmux.persistent_path", DEFAULT_PERSISTENT_PATH);
     this.group = conf.get("mmux.group", DEFAULT_GROUP);
     this.user = conf.get("mmux.user", DEFAULT_USER);
-  }
-
-  public String getDirHost() {
-    return dirHost;
-  }
-
-  public int getDirPort() {
-    return dirPort;
-  }
-
-  public int getLeasePort() {
-    return leasePort;
-  }
-
-  public MMuxClient getClient() {
-    return client;
   }
 
   @Override
@@ -245,13 +222,13 @@ public class MMuxFileSystem extends FileSystem {
       } else {
         return new FileStatus(0, true, 0, 0, fileTS, fileTS, perm, user, group, absolutePath);
       }
-    } catch (TException e) {
+    } catch (Exception e) {
       throw new FileNotFoundException();
     }
   }
 
   @Override
-  public FsStatus getStatus(Path p) throws IOException {
+  public FsStatus getStatus(Path p) {
     return new FsStatus(Long.MAX_VALUE, 0, Long.MAX_VALUE);
   }
 
