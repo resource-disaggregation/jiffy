@@ -40,7 +40,7 @@ class BlockClientCache:
 
         socket = TSocket.TSocket(host, port)
         socket.setTimeout(self.timeout_ms)
-        transport = TTransport.TBufferedTransport(socket, 1024 * 1024)  # Increase buffer-size
+        transport = TTransport.TFramedTransport(socket)  # Increase buffer-size
         protocol = TBinaryProtocolAccelerated(transport)
         client = block_request_service.Client(protocol)
 
