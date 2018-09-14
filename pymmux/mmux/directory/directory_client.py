@@ -112,7 +112,7 @@ class Flags:
 class DirectoryClient:
     def __init__(self, host='127.0.0.1', port=9090):
         self.socket_ = TSocket.TSocket(host, port)
-        self.transport_ = TTransport.TBufferedTransport(self.socket_)
+        self.transport_ = TTransport.TFramedTransport(self.socket_)
         self.protocol_ = TBinaryProtocolAccelerated(self.transport_)
         self.client_ = directory_service.Client(self.protocol_)
         ex = None

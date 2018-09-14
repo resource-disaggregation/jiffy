@@ -8,7 +8,7 @@ from mmux.lease import lease_service
 class LeaseClient:
     def __init__(self, host, port):
         self.socket_ = TSocket.TSocket(host, port)
-        self.transport_ = TTransport.TBufferedTransport(self.socket_)
+        self.transport_ = TTransport.TFramedTransport(self.socket_)
         self.protocol_ = TBinaryProtocolAccelerated(self.transport_)
         self.client_ = lease_service.Client(self.protocol_)
         ex = None
