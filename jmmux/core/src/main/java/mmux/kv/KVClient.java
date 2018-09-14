@@ -232,7 +232,7 @@ public class KVClient implements Closeable {
       rpc_replica_chain chain = extractChain(resp);
       response = new ReplicaChainClient(fs, path, cache, chain).runCommandRedirected(cmdId, args).get(0);
     }
-    if (ByteBufferUtils.toString(response).equals("!block_moved")) {
+    if (resp.equals("!block_moved")) {
       refresh();
       return null;
     }

@@ -8,9 +8,7 @@ import java.util.List;
 
 public class ByteBufferUtils {
   public static String toString(ByteBuffer buf) {
-    String out = StandardCharsets.UTF_8.decode(buf).toString();
-    buf.rewind();
-    return out;
+    return new String(buf.array());
   }
 
   public static ByteBuffer fromString(String buf) {

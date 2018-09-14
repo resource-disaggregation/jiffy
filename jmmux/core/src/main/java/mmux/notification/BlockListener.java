@@ -10,6 +10,7 @@ import mmux.notification.notification_service.Client;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
@@ -23,7 +24,7 @@ public class BlockListener implements Closeable {
   private notification_service.Client client;
 
   BlockListener(String host, int port, Mailbox<Control> controls) throws TTransportException {
-    this.transport = new TSocket(host, port);
+    this.transport = new TFramedTransport(new TSocket(host, port));
     this.protocol = new TBinaryProtocol(transport);
     this.client = new Client(protocol);
     this.controls = controls;

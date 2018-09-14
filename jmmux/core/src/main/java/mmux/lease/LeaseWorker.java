@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
@@ -24,7 +25,7 @@ public class LeaseWorker implements Runnable, Closeable {
 
   public LeaseWorker(String leaseHost, int leasePort) throws TException {
     this.exit = new AtomicBoolean(false);
-    this.transport = new TSocket(leaseHost, leasePort);
+    this.transport = new TFramedTransport(new TSocket(leaseHost, leasePort));
     this.client = new lease_service.Client(new TBinaryProtocol(transport));
     this.toRenew = new ArrayList<>();
     transport.open();

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import mmux.kv.block_request_service.Client;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
@@ -84,8 +85,9 @@ public class BlockClientCache {
     if (cache.containsKey(key)) {
       return cache.get(key);
     }
-    TSocket transport = new TSocket(host, port);
-    transport.setTimeout(timeoutMs);
+    TSocket socket = new TSocket(host, port);
+    socket.setTimeout(timeoutMs);
+    TTransport transport = new TFramedTransport(socket);
     TProtocol protocol = new TBinaryProtocol(transport);
     Client client = new Client(protocol);
     TTransportException ex = null;
