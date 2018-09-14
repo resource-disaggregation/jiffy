@@ -20,7 +20,7 @@ std::shared_ptr<TThreadedServer> lease_server::create(std::shared_ptr<directory_
   std::shared_ptr<lease_serviceProcessorFactory>
       proc_factory(new lease_serviceProcessorFactory(clone_factory));
   std::shared_ptr<TServerSocket> sock(new TServerSocket(address, port));
-  std::shared_ptr<TBufferedTransportFactory> transport_factory(new TBufferedTransportFactory());
+  std::shared_ptr<TFramedTransportFactory> transport_factory(new TFramedTransportFactory());
   std::shared_ptr<TBinaryProtocolFactory> protocol_factory(new TBinaryProtocolFactory());
   std::shared_ptr<TThreadedServer> server(new TThreadedServer(proc_factory, sock, transport_factory, protocol_factory));
   return server;

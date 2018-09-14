@@ -21,7 +21,7 @@ std::shared_ptr<TThreadedServer> storage_management_server::create(std::vector<s
   std::shared_ptr<storage_management_serviceProcessorFactory>
       proc_factory(new storage_management_serviceProcessorFactory(clone_factory));
   std::shared_ptr<TServerSocket> sock(new TServerSocket(address, port));
-  std::shared_ptr<TBufferedTransportFactory> transport_factory(new TBufferedTransportFactory());
+  std::shared_ptr<TFramedTransportFactory> transport_factory(new TFramedTransportFactory());
   std::shared_ptr<TBinaryProtocolFactory> protocol_factory(new TBinaryProtocolFactory());
   std::shared_ptr<TThreadedServer> server(new TThreadedServer(proc_factory, sock, transport_factory, protocol_factory));
   return server;

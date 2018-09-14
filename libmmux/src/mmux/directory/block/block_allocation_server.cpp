@@ -21,7 +21,7 @@ std::shared_ptr<apache::thrift::server::TThreadedServer> block_allocation_server
   std::shared_ptr<block_allocation_serviceProcessorFactory>
       proc_factory(new block_allocation_serviceProcessorFactory(clone_factory));
   std::shared_ptr<TServerSocket> sock(new TServerSocket(address, port));
-  std::shared_ptr<TBufferedTransportFactory> transport_factory(new TBufferedTransportFactory());
+  std::shared_ptr<TFramedTransportFactory> transport_factory(new TFramedTransportFactory());
   std::shared_ptr<TBinaryProtocolFactory> protocol_factory(new TBinaryProtocolFactory());
   std::shared_ptr<TThreadedServer> server(new TThreadedServer(proc_factory, sock, transport_factory, protocol_factory));
   return server;
