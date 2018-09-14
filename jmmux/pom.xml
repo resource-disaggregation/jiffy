@@ -34,6 +34,8 @@
   </prerequisites>
 
   <properties>
+    <java.version>1.8</java.version>
+    <maven.version>3.3.9</maven.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <thrift.version>0.11.0</thrift.version>
     <junit.version>4.12</junit.version>
@@ -63,10 +65,10 @@
             <configuration>
               <rules>
                 <requireMavenVersion>
-                  <version>3.0.4</version>
+                  <version>${maven.version}</version>
                 </requireMavenVersion>
                 <requireJavaVersion>
-                  <version>1.7</version>
+                  <version>${java.version}</version>
                 </requireJavaVersion>
               </rules>
             </configuration>

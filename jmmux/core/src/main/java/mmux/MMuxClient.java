@@ -10,6 +10,7 @@ import mmux.lease.LeaseWorker;
 import mmux.notification.KVListener;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 
@@ -33,14 +34,12 @@ public class MMuxClient implements Closeable {
 
   public MMuxClient(String host, int dirPort, int leasePort, int timeoutMs) throws TException {
     this.timeoutMs = timeoutMs;
-    TSocket sock = new TSocket(host, dirPort);
-    sock.setTimeout(this.timeoutMs);
-    this.transport = sock;
-    this.fs = new Client(new TBinaryProtocol(transport));
-    this.transport.open();
-    this.worker = new LeaseWorker(host, leasePort);
-    this.workerThread = new Thread(worker);
-    this.workerThread.start();
+    transport = new TFramedTransport(new TSocket(host, dirPort));
+    fs = new Client(new TBinaryProtocol(transport));
+    transport.open();
+    worker = new LeaseWorker(host, leasePort);
+    workerThread = new Thread(worker);
+    workerThread.start();
   }
 
   public directory_service.Client fs() {
