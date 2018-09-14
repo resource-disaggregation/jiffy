@@ -353,6 +353,7 @@ public class MMuxClientTest {
     for (StorageServer server : servers) {
       startServers(true, false);
       try (MMuxClient client = directoryServer.connect()) {
+        System.out.println("== Failing " + server.toString() + " == ");
         KVClient kv = client.create("/a/file.txt", "local://tmp", 1, 3);
         Assert.assertEquals(3, client.fs().dstatus("/a/file.txt").chain_length);
         server.stop();

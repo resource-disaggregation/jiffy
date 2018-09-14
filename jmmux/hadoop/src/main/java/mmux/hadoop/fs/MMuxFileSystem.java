@@ -23,7 +23,7 @@ import org.apache.thrift.TException;
 
 public class MMuxFileSystem extends FileSystem {
 
-  private static final int DEFAULT_BLOCK_SIZE = 64 * 1024 * 1024;
+  private static final int DEFAULT_BLOCK_SIZE = 8 * 1024 * 1024;
   private static final String DEFAULT_PERSISTENT_PATH = "local://tmp";
   private static final String DEFAULT_GROUP = "defaultgroup";
   private static final String DEFAULT_USER = System.getProperty("user.name");

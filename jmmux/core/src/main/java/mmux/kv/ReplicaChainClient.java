@@ -20,6 +20,8 @@ import org.apache.thrift.transport.TTransportException;
 
 public class ReplicaChainClient implements Closeable {
 
+  private static final int MAX_RETRIES = 3;
+
   public class LockedClient implements Closeable {
 
     private ReplicaChainClient parent;
@@ -157,13 +159,14 @@ public class ReplicaChainClient implements Closeable {
   List<ByteBuffer> runCommand(int cmdId, List<ByteBuffer> args) throws TException {
     List<ByteBuffer> response = null;
     boolean retry = false;
+    int numTries = 0;
     while (response == null) {
       try {
         if (KVOpType.opType(cmdId) == KVOpType.accessor) {
           response = runCommand(tail, cmdId, args);
         } else {
           response = runCommand(head, cmdId, args);
-          if (retry && ByteBufferUtils.toString(response.get(0)).equals("!duplicate_key")) {
+          if (retry && ByteBufferUtils.toString(response.get(0).slice()).equals("!duplicate_key")) {
             response.set(0, ByteBufferUtils.fromString("!ok"));
           }
         }
@@ -172,6 +175,9 @@ public class ReplicaChainClient implements Closeable {
         invalidateCache();
         connect();
         retry = true;
+        if (++numTries > MAX_RETRIES) {
+          throw e;
+        }
       }
     }
     return response;

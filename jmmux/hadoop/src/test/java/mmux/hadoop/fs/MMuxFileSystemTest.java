@@ -158,7 +158,7 @@ public class MMuxFileSystemTest {
     }
   }
 
-  void createFileWithData(MMuxFileSystem fs, Path p, byte[] data) throws IOException {
+  private void createFileWithData(MMuxFileSystem fs, Path p, byte[] data) throws IOException {
     FSDataOutputStream out_stream = fs.create(p);
     out_stream.write(data, 0, data.length);
     out_stream.close();
@@ -240,7 +240,7 @@ public class MMuxFileSystemTest {
       FSDataInputStream in = fs.open(filePath);
       in.seek(40);
       byte[] buf = new byte[40];
-      in.read(buf, 0, 40);
+      Assert.assertEquals(40, in.read(buf, 0, 40));
 
       byte[] targetSlice = ArrayUtils.subarray(data, 40, 80);
       Assert.assertArrayEquals(buf, targetSlice);
