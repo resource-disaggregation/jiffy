@@ -45,4 +45,11 @@ public class StorageServer extends MMuxServer {
     notificationPort = -1;
     chainPort = -1;
   }
+
+  @Override
+  public String toString() {
+    if (host != null)
+      return host + ":" + servicePort + ":" + managementPort + ":" + notificationPort + ":" + chainPort;
+    return "<InvalidServer>";
+  }
 }

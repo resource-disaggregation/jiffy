@@ -68,14 +68,12 @@ public class KVClient implements Closeable {
         for (ReplicaChainClient.LockedClient block : blocks) {
           if (block.getChain().block_names.equals(chain.block_names)) {
             found = true;
-            response = block.runCommandRedirected(cmdId, args).get(0);
+            response = block.runCommandRedirected(cmdId, args).get(0).slice();
             break;
           }
         }
         if (!found) {
-          response = new ReplicaChainClient(fs, path, cache, chain)
-              .runCommandRedirected(cmdId, args)
-              .get(0);
+          response = makeClient(chain).runCommandRedirected(cmdId, args).get(0).slice();
         }
       }
       return response;
@@ -95,13 +93,13 @@ public class KVClient implements Closeable {
           for (ReplicaChainClient.LockedClient block : blocks) {
             if (block.getChain().block_names.equals(chain.block_names)) {
               found = true;
-              response = block.runCommandRedirected(cmdId, args).get(0);
+              response = block.runCommandRedirected(cmdId, args).get(0).slice();
               break;
             }
           }
           if (!found) {
             response = new ReplicaChainClient(fs, path, cache, chain)
-                .runCommandRedirected(cmdId, opArgs).get(0);
+                .runCommandRedirected(cmdId, opArgs).get(0).slice();
           }
         }
         responses.set(i, response);
@@ -124,25 +122,25 @@ public class KVClient implements Closeable {
 
     public ByteBuffer get(ByteBuffer key) throws TException {
       List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key);
-      ByteBuffer response = blocks[blockId(key)].runCommand(KVOps.LOCKED_GET, args).get(0);
+      ByteBuffer response = blocks[blockId(key)].runCommand(KVOps.LOCKED_GET, args).get(0).slice();
       return handleRedirect(KVOps.LOCKED_GET, args, response);
     }
 
     public ByteBuffer put(ByteBuffer key, ByteBuffer value) throws TException {
       List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
-      ByteBuffer response = blocks[blockId(key)].runCommand(KVOps.LOCKED_PUT, args).get(0);
+      ByteBuffer response = blocks[blockId(key)].runCommand(KVOps.LOCKED_PUT, args).get(0).slice();
       return handleRedirect(KVOps.LOCKED_PUT, args, response);
     }
 
     public ByteBuffer update(ByteBuffer key, ByteBuffer value) throws TException {
       List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
-      ByteBuffer response = blocks[blockId(key)].runCommand(KVOps.LOCKED_UPDATE, args).get(0);
+      ByteBuffer response = blocks[blockId(key)].runCommand(KVOps.LOCKED_UPDATE, args).get(0).slice();
       return handleRedirect(KVOps.LOCKED_UPDATE, args, response);
     }
 
     public ByteBuffer remove(ByteBuffer key) throws TException {
       List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key);
-      ByteBuffer response = blocks[blockId(key)].runCommand(KVOps.LOCKED_REMOVE, args).get(0);
+      ByteBuffer response = blocks[blockId(key)].runCommand(KVOps.LOCKED_REMOVE, args).get(0).slice();
       return handleRedirect(KVOps.LOCKED_REMOVE, args, response);
     }
 
@@ -175,10 +173,10 @@ public class KVClient implements Closeable {
       }
       long n = 0;
       for (int i = 0; i < blocks.length; i++) {
-        n += Long.parseLong(ByteBufferUtils.toString(blocks[i].receiveCommandResponse().get(0)));
+        n += Long.parseLong(ByteBufferUtils.toString(blocks[i].receiveCommandResponse().get(0).slice()));
         if (newBlocks[i] != null) {
           n += Long
-              .parseLong(ByteBufferUtils.toString(newBlocks[i].receiveCommandResponse().get(0)));
+              .parseLong(ByteBufferUtils.toString(newBlocks[i].receiveCommandResponse().get(0).slice()));
         }
       }
       return n;
@@ -200,7 +198,7 @@ public class KVClient implements Closeable {
     this.cache = new BlockClientCache(timeoutMs);
     for (int i = 0; i < blocks.length; i++) {
       slots[i] = dataStatus.data_blocks.get(i).slot_begin;
-      blocks[i] = new ReplicaChainClient(fs, path, cache, dataStatus.data_blocks.get(i));
+      blocks[i] = makeClient(dataStatus.data_blocks.get(i));
     }
   }
 
@@ -217,8 +215,12 @@ public class KVClient implements Closeable {
     this.slots = new int[dataStatus.data_blocks.size()];
     for (int i = 0; i < blocks.length; i++) {
       slots[i] = dataStatus.data_blocks.get(i).slot_begin;
-      blocks[i] = new ReplicaChainClient(fs, path, cache, dataStatus.data_blocks.get(i));
+      blocks[i] = makeClient(dataStatus.data_blocks.get(i));
     }
+  }
+
+  private ReplicaChainClient makeClient(rpc_replica_chain chain) throws TException {
+    return new ReplicaChainClient(fs, path, cache, chain);
   }
 
   public LockedClient lock() throws TException {
@@ -230,7 +232,7 @@ public class KVClient implements Closeable {
     String resp;
     while ((resp = ByteBufferUtils.toString(response)).startsWith("!exporting")) {
       rpc_replica_chain chain = extractChain(resp);
-      response = new ReplicaChainClient(fs, path, cache, chain).runCommandRedirected(cmdId, args).get(0);
+      response = makeClient(chain).runCommandRedirected(cmdId, args).get(0).slice();
     }
     if (resp.equals("!block_moved")) {
       refresh();
@@ -249,8 +251,7 @@ public class KVClient implements Closeable {
       while ((resp = ByteBufferUtils.toString(response)).startsWith("!exporting")) {
         rpc_replica_chain chain = extractChain(resp);
         List<ByteBuffer> opArgs = args.subList(i * numOpArgs, (i + 1) * numOpArgs);
-        response = new ReplicaChainClient(fs, path, cache, chain).runCommandRedirected(cmdId, opArgs)
-            .get(0);
+        response = makeClient(chain).runCommandRedirected(cmdId, opArgs).get(0).slice();
       }
       if (ByteBufferUtils.toString(response).equals("!block_moved")) {
         refresh();
@@ -296,7 +297,7 @@ public class KVClient implements Closeable {
       if (blockArgs.get(i) != null) {
         List<ByteBuffer> response = blocks[i].receiveCommandResponse();
         for (int j = 0; j < response.size(); j++) {
-          responses.set(positions.get(i).get(j), response.get(j));
+          responses.set(positions.get(i).get(j), response.get(j).slice());
         }
       }
     }
@@ -307,7 +308,7 @@ public class KVClient implements Closeable {
     List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(KVOps.EXISTS, args).get(0);
+      response = blocks[blockId(key)].runCommand(KVOps.EXISTS, args).get(0).slice();
       response = handleRedirect(KVOps.EXISTS, args, response);
     }
     return ByteBufferUtils.toString(response).equals("true");
@@ -317,7 +318,7 @@ public class KVClient implements Closeable {
     List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(KVOps.GET, args).get(0);
+      response = blocks[blockId(key)].runCommand(KVOps.GET, args).get(0).slice();
       response = handleRedirect(KVOps.GET, args, response);
     }
     return response;
@@ -327,7 +328,7 @@ public class KVClient implements Closeable {
     List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(KVOps.PUT, args).get(0);
+      response = blocks[blockId(key)].runCommand(KVOps.PUT, args).get(0).slice();
       response = handleRedirect(KVOps.PUT, args, response);
     }
     return response;
@@ -337,7 +338,7 @@ public class KVClient implements Closeable {
     List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(KVOps.UPDATE, args).get(0);
+      response = blocks[blockId(key)].runCommand(KVOps.UPDATE, args).get(0).slice();
       response = handleRedirect(KVOps.UPDATE, args, response);
     }
     return response;
@@ -347,7 +348,7 @@ public class KVClient implements Closeable {
     List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(KVOps.REMOVE, args).get(0);
+      response = blocks[blockId(key)].runCommand(KVOps.REMOVE, args).get(0).slice();
       response = handleRedirect(KVOps.REMOVE, args, response);
     }
     return response;

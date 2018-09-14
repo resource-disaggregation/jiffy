@@ -30,9 +30,9 @@ public class MMuxInputStream extends FSInputStream {
     ByteBuffer lastBlock = getLastBlockNum();
     long lastBlockNum = Long.parseLong(ByteBufferUtils.toString(lastBlock));
     this.fileLength = lastBlockNum * this.blockSize;
-    ByteBuffer value;
-    if ((value = client.get(lastBlock)) != ByteBufferUtils.fromString("!key_not_found")) {
-       this.fileLength += MMuxBlock.usedBytes(value);
+    ByteBuffer blockData = client.get(lastBlock);
+    if (blockData != ByteBufferUtils.fromString("!key_not_found")) {
+       this.fileLength += MMuxBlock.usedBytes(blockData);
     }
   }
 
