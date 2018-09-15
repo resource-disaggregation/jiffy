@@ -23,33 +23,6 @@ public class BlockClient {
     }
   }
 
-  class CommandResponseReader {
-
-    private TProtocol protocol;
-
-    CommandResponseReader(TProtocol protocol) {
-      this.protocol = protocol;
-    }
-
-    CommandResponse recieveResponse() throws TException {
-      TMessage message = protocol.readMessageBegin();
-      if (message.type == TMessageType.EXCEPTION) {
-        TApplicationException exception = new TApplicationException();
-        exception.read(protocol);
-        protocol.readMessageEnd();
-        throw exception;
-      }
-      block_response_service.response_args args = new response_args();
-      args.read(protocol);
-      protocol.readMessageEnd();
-      if (args.isSetSeq() && args.isSetResult()) {
-        return new CommandResponse(args.getSeq().getClientSeqNo(), args.getResult());
-      }
-      throw new TApplicationException(TApplicationException.MISSING_RESULT,
-          "Command response failure: unknown result");
-    }
-  }
-
   private int id;
   private TTransport transport;
   private TProtocol protocol;
@@ -68,9 +41,8 @@ public class BlockClient {
     transport.close();
   }
 
-  CommandResponseReader newCommandResponseReader(long clientId) throws TException {
+  void registerClientId(long clientId) throws TException {
     client.registerClientId(id, clientId);
-    return new CommandResponseReader(protocol);
   }
 
   long getClientId() throws TException {
@@ -79,5 +51,22 @@ public class BlockClient {
 
   void sendCommandRequest(sequence_id seq, int cmdId, List<ByteBuffer> args) throws TException {
     client.commandRequest(seq, id, cmdId, args);
+  }
+
+  CommandResponse recieveCommandResponse() throws TException {
+    TMessage message = protocol.readMessageBegin();
+    if (message.type == TMessageType.EXCEPTION) {
+      TApplicationException exception = new TApplicationException();
+      exception.read(protocol);
+      protocol.readMessageEnd();
+      throw exception;
+    }
+    block_response_service.response_args args = new response_args();
+    args.read(protocol);
+    protocol.readMessageEnd();
+    if (args.isSetSeq() && args.isSetResult()) {
+      return new CommandResponse(args.getSeq().getClientSeqNo(), args.getResult());
+    }
+    throw new TApplicationException(TApplicationException.MISSING_RESULT, "unknown result");
   }
 }

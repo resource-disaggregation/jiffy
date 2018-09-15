@@ -12,7 +12,6 @@ import mmux.directory.directory_service;
 import mmux.directory.rpc_replica_chain;
 import mmux.directory.rpc_storage_mode;
 import mmux.kv.BlockClient.CommandResponse;
-import mmux.kv.BlockClient.CommandResponseReader;
 import mmux.kv.BlockNameParser.BlockMetadata;
 import mmux.util.ByteBufferUtils;
 import org.apache.thrift.TException;
@@ -92,7 +91,6 @@ public class ReplicaChainClient implements Closeable {
   private rpc_replica_chain chain;
   private BlockClient head;
   private BlockClient tail;
-  private CommandResponseReader responseReader;
   private BlockClientCache cache;
   private boolean inFlight;
 
@@ -144,7 +142,7 @@ public class ReplicaChainClient implements Closeable {
   }
 
   List<ByteBuffer> receiveCommandResponse() throws TException {
-    CommandResponse response = responseReader.recieveResponse();
+    CommandResponse response = tail.recieveCommandResponse();
 
     if (response.clientSeqNo != seq.getClientSeqNo()) {
       throw new IllegalStateException(
@@ -215,7 +213,7 @@ public class ReplicaChainClient implements Closeable {
       BlockMetadata t = BlockNameParser.parse(chain.block_names.get(chain.block_names.size() - 1));
       this.tail = new BlockClient(cache, t.getHost(), t.getServicePort(), t.getBlockId());
     }
-    this.responseReader = this.tail.newCommandResponseReader(seq.getClientId());
+    this.tail.registerClientId(seq.getClientId());
     this.inFlight = false;
   }
 
