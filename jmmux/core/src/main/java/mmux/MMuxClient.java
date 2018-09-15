@@ -1,27 +1,16 @@
 package mmux;
 
 import com.github.phantomthief.thrift.client.ThriftClient;
-import com.github.phantomthief.thrift.client.impl.ThriftClientImpl;
-import com.github.phantomthief.thrift.client.pool.ThriftConnectionPoolProvider;
-import com.github.phantomthief.thrift.client.pool.ThriftServerInfo;
-import com.github.phantomthief.thrift.client.pool.impl.DefaultThriftConnectionPoolImpl;
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import mmux.directory.directory_service;
 import mmux.directory.rpc_data_status;
 import mmux.kv.KVClient;
 import mmux.lease.LeaseWorker;
 import mmux.notification.KVListener;
-import org.apache.commons.pool2.impl.GenericKeyedObjectPoolConfig;
+import mmux.util.ThriftPool;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.transport.TFramedTransport;
-import org.apache.thrift.transport.TSocket;
-import org.apache.thrift.transport.TTransport;
 
 public class MMuxClient implements Closeable {
 
@@ -42,22 +31,10 @@ public class MMuxClient implements Closeable {
 
   public MMuxClient(String host, int dirPort, int leasePort, int timeoutMs) throws TException {
     this.timeoutMs = timeoutMs;
-    fs = makeFS(host, dirPort);
+    fs = ThriftPool.clientPool(host, dirPort);
     worker = new LeaseWorker(host, leasePort);
     workerThread = new Thread(worker);
     workerThread.start();
-  }
-
-  private ThriftClient makeFS(String host, int port) {
-    Function<ThriftServerInfo, TTransport> tProvider = info -> {
-      TSocket socket = new TSocket(info.getHost(), info.getPort());
-      return new TFramedTransport(socket);
-    };
-    GenericKeyedObjectPoolConfig pConf = new GenericKeyedObjectPoolConfig();
-    ThriftServerInfo info = ThriftServerInfo.of(host, port);
-    Supplier<List<ThriftServerInfo>> iProvider = () -> Collections.singletonList(info);
-    ThriftConnectionPoolProvider pProvider = new DefaultThriftConnectionPoolImpl(pConf, tProvider);
-    return new ThriftClientImpl(iProvider, pProvider);
   }
 
   public directory_service.Iface fs() {
