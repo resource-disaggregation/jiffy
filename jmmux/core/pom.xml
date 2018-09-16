@@ -32,7 +32,7 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.github.phantomthief</groupId>
+      <groupId>memorymux</groupId>
       <artifactId>thrift-pool-client</artifactId>
       <version>${thrift-pool.version}</version>
       <exclusions>
@@ -43,10 +43,6 @@
         <exclusion>
           <groupId>org.apache.thrift</groupId>
           <artifactId>libthrift</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -65,11 +61,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
       <version>${slf4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>${guava.version}</version>
     </dependency>
   </dependencies>
 
