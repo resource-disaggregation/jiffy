@@ -19,6 +19,7 @@ public class MMuxClient implements Closeable {
   private static final int DEFAULT_NUM_BLOCKS = 1;
   private static final int DEFAULT_CHAIN_LENGTH = 1;
   private static final int DEFAULT_FLAGS = 0;
+  private static final int DEFAULT_TIMEOUT_MS = 5000;
 
   private TTransport transport;
   private directory_service.Client fs;
@@ -27,7 +28,7 @@ public class MMuxClient implements Closeable {
   private int timeoutMs;
 
   public MMuxClient(String host, int dirPort, int leasePort) throws TException {
-    this(host, dirPort, leasePort, 5000);
+    this(host, dirPort, leasePort, DEFAULT_TIMEOUT_MS);
   }
 
   public MMuxClient(String host, int dirPort, int leasePort, int timeoutMs) throws TException {
