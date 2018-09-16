@@ -294,7 +294,8 @@ else ()
   endif ()
   ExternalProject_Add(thrift
           DEPENDS boost libevent openssl zlib
-          URL "http://archive.apache.org/dist/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
+          #URL "http://archive.apache.org/dist/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
+          GIT_REPOSITORY "https://github.com/apache/thrift.git"
           LIST_SEPARATOR |
           CMAKE_ARGS ${THRIFT_CMAKE_ARGS}
           LOG_DOWNLOAD ON
