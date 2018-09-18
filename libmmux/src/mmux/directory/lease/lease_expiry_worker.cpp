@@ -61,6 +61,9 @@ void lease_expiry_worker::remove_expired_nodes(std::shared_ptr<ds_dir_node> pare
   auto child_path = parent_path;
   directory_utils::push_path_element(child_path, child_name);
   auto child = parent->get_child(child_name);
+  if (child == nullptr) {
+    return;
+  }
   auto time_since_last_renewal = epoch - child->last_write_time();
   auto lease_duration = static_cast<uint64_t>(lease_period_ms_.count());
   auto extended_lease_duration = lease_duration + static_cast<uint64_t>(grace_period_ms_.count());

@@ -56,6 +56,9 @@ void sync_worker::sync_nodes(std::shared_ptr<ds_dir_node> parent,
   auto child_path = parent_path;
   directory_utils::push_path_element(child_path, child_name);
   auto child = parent->get_child(child_name);
+  if (child == nullptr) {
+    return;
+  }
   if (child->is_regular_file()) {
     // Remove child since its lease has expired
     auto s = tree_->dstatus(child_path);
