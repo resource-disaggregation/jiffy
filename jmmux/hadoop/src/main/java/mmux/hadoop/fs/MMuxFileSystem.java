@@ -58,13 +58,6 @@ public class MMuxFileSystem extends FileSystem {
     if (path == null || path.equals("")) {
       path = DEFAULT_WORKING_DIR;
     }
-    if (!path.equals(DEFAULT_WORKING_DIR)) {
-      try {
-        this.client.fs().createDirectories(path);
-      } catch (TException e) {
-        throw new IOException(e);
-      }
-    }
     this.workingDir = new Path(path);
 
     this.blockSize = conf.getInt("mmux.blocksize", DEFAULT_BLOCK_SIZE);
