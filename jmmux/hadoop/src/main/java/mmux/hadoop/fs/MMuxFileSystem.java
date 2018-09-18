@@ -27,6 +27,7 @@ public class MMuxFileSystem extends FileSystem {
   private static final String DEFAULT_PERSISTENT_PATH = "local://tmp";
   private static final String DEFAULT_GROUP = "defaultgroup";
   private static final String DEFAULT_USER = System.getProperty("user.name");
+  private static final String DEFAULT_WORKING_DIR = "/";
 
   private URI uri;
   private String dirHost;
@@ -55,9 +56,9 @@ public class MMuxFileSystem extends FileSystem {
     this.uri = URI.create(String.format("mmfs://%s:%d", uri.getHost(), uri.getPort()));
     String path = uri.getPath();
     if (path == null || path.equals("")) {
-      path = "/";
+      path = DEFAULT_WORKING_DIR;
     }
-    if (!path.equals("/")) {
+    if (!path.equals(DEFAULT_WORKING_DIR)) {
       try {
         this.client.fs().createDirectories(path);
       } catch (TException e) {
