@@ -77,7 +77,7 @@ public class MMuxInputStream extends FSInputStream {
       if (currentBlock == null || !currentBlock.hasRemaining()) {
         resetBuf();
       }
-      result = currentBlock.get();
+      result = currentBlock.get() & 0xFF;
       filePos++;
     }
     return result;
