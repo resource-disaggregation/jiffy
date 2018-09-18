@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LeaseWorker implements Runnable, Closeable {
+
   private Logger logger = LoggerFactory.getLogger(getClass());
   private TTransport transport;
   private lease_service.Client client;
@@ -45,6 +46,19 @@ public class LeaseWorker implements Runnable, Closeable {
         long sleepTime = renewalDurationMs.get() - elapsed;
         if (sleepTime > 0) {
           Thread.sleep(sleepTime);
+        }
+      } catch (lease_service_exception e) {
+        String msg = e.getMsg();
+        if (msg != null) {
+          if (msg.startsWith("Path does not exist: ")) {
+            String path = msg.replace("Path does not exist: ", "");
+            logger.info("No longer renewing leases for: " + path);
+            synchronized (this) {
+              toRenew.remove(path);
+            }
+          } else {
+            logger.warn(msg);
+          }
         }
       } catch (Exception e) {
         if (e.getMessage() != null) {
