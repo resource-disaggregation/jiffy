@@ -55,9 +55,11 @@ public class MMuxFileSystem extends FileSystem {
     this.uri = URI.create(String.format("mmfs://%s:%d", uri.getHost(), uri.getPort()));
     String path = uri.getPath();
     if (path == null || path.equals("")) {
-      path = "/fsdir/";
+      path = "/";
+    }
+    if (!path.equals("/")) {
       try {
-        client.fs().createDirectories(path);
+        this.client.fs().createDirectories(path);
       } catch (TException e) {
         throw new IOException(e);
       }
