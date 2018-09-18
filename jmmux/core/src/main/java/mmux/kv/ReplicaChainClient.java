@@ -1,6 +1,5 @@
 package mmux.kv;
 
-import com.github.phantomthief.thrift.client.ThriftClient;
 import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -14,8 +13,8 @@ import mmux.directory.rpc_storage_mode;
 import mmux.kv.BlockClient.CommandResponse;
 import mmux.kv.BlockNameParser.BlockMetadata;
 import mmux.util.ByteBufferUtils;
+import mmux.util.ThriftClientPool;
 import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TTransportException;
 
 public class ReplicaChainClient implements Closeable {
@@ -85,7 +84,7 @@ public class ReplicaChainClient implements Closeable {
     }
   }
 
-  private ThriftClient fs;
+  private ThriftClientPool fs;
   private String path;
   private sequence_id seq;
   private rpc_replica_chain chain;
@@ -94,7 +93,7 @@ public class ReplicaChainClient implements Closeable {
   private BlockClientCache cache;
   private boolean inFlight;
 
-  ReplicaChainClient(ThriftClient fs, String path, BlockClientCache cache, rpc_replica_chain chain)
+  ReplicaChainClient(ThriftClientPool fs, String path, BlockClientCache cache, rpc_replica_chain chain)
       throws TException {
     if (chain == null || chain.block_names.size() == 0) {
       throw new IllegalArgumentException("Chain length must be >= 1");
@@ -113,7 +112,7 @@ public class ReplicaChainClient implements Closeable {
   }
 
   public directory_service.Iface fs() {
-    return fs.iface(directory_service.Client.class, TBinaryProtocol::new, 0);
+    return fs.iface(directory_service.Client.class);
   }
 
   public rpc_replica_chain getChain() {

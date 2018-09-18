@@ -1,6 +1,5 @@
 package mmux.kv;
 
-import com.github.phantomthief.thrift.client.ThriftClient;
 import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -11,8 +10,8 @@ import mmux.directory.rpc_data_status;
 import mmux.directory.rpc_replica_chain;
 import mmux.directory.rpc_storage_mode;
 import mmux.util.ByteBufferUtils;
+import mmux.util.ThriftClientPool;
 import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TBinaryProtocol;
 
 public class KVClient implements Closeable {
 
@@ -186,11 +185,11 @@ public class KVClient implements Closeable {
 
   private int[] slots;
   private ReplicaChainClient[] blocks;
-  private ThriftClient fs;
+  private ThriftClientPool fs;
   private String path;
   private BlockClientCache cache;
 
-  public KVClient(ThriftClient fs, String path, rpc_data_status dataStatus, int timeoutMs)
+  public KVClient(ThriftClientPool fs, String path, rpc_data_status dataStatus, int timeoutMs)
       throws TException {
     this.fs = fs;
     this.path = path;
@@ -211,7 +210,7 @@ public class KVClient implements Closeable {
   }
 
   public directory_service.Iface fs() {
-    return fs.iface(directory_service.Client.class, TBinaryProtocol::new, 0);
+    return fs.iface(directory_service.Client.class);
   }
 
   private void refresh() throws TException {

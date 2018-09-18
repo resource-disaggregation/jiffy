@@ -1,6 +1,5 @@
 package mmux;
 
-import com.github.phantomthief.thrift.client.ThriftClient;
 import java.io.Closeable;
 import java.io.IOException;
 import mmux.directory.directory_service;
@@ -8,9 +7,8 @@ import mmux.directory.rpc_data_status;
 import mmux.kv.KVClient;
 import mmux.lease.LeaseWorker;
 import mmux.notification.KVListener;
-import mmux.util.ThriftPool;
+import mmux.util.ThriftClientPool;
 import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TBinaryProtocol;
 
 public class MMuxClient implements Closeable {
 
@@ -20,7 +18,7 @@ public class MMuxClient implements Closeable {
   private static final int DEFAULT_FLAGS = 0;
   private static final int DEFAULT_TIMEOUT_MS = 5000;
 
-  private ThriftClient fs;
+  private ThriftClientPool fs;
   private LeaseWorker worker;
   private Thread workerThread;
   private int timeoutMs;
@@ -31,14 +29,14 @@ public class MMuxClient implements Closeable {
 
   public MMuxClient(String host, int dirPort, int leasePort, int timeoutMs) throws TException {
     this.timeoutMs = timeoutMs;
-    fs = ThriftPool.clientPool(host, dirPort);
+    fs = ThriftClientPool.build(host, dirPort);
     worker = new LeaseWorker(host, leasePort);
     workerThread = new Thread(worker);
     workerThread.start();
   }
 
   public directory_service.Iface fs() {
-    return fs.iface(directory_service.Client.class, TBinaryProtocol::new, 0);
+    return fs.iface(directory_service.Client.class);
   }
 
   LeaseWorker getWorker() {
