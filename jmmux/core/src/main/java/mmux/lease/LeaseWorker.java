@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LeaseWorker implements Runnable, Closeable {
+
   private Logger logger = LoggerFactory.getLogger(getClass());
 
   private TTransport transport;
