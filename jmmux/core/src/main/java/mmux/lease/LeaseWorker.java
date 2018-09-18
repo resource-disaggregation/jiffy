@@ -1,21 +1,19 @@
 package mmux.lease;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Logger;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
-import org.apache.thrift.transport.TTransportException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LeaseWorker implements Runnable, Closeable {
-
+  private Logger logger = LoggerFactory.getLogger(getClass());
   private TTransport transport;
   private lease_service.Client client;
   private List<String> toRenew;
@@ -48,8 +46,12 @@ public class LeaseWorker implements Runnable, Closeable {
         if (sleepTime > 0) {
           Thread.sleep(sleepTime);
         }
-      } catch (TException | InterruptedException e) {
-        throw new RuntimeException(e);
+      } catch (Exception e) {
+        if (e.getMessage() != null) {
+          logger.warn(e.getMessage());
+        } else {
+          logger.warn("Got exception of type " + e.getClass().getSimpleName());
+        }
       }
     }
   }
@@ -78,8 +80,11 @@ public class LeaseWorker implements Runnable, Closeable {
 
   public void renamePath(String oldPath, String newPath) {
     synchronized (this) {
-      toRenew.remove(oldPath);
-      toRenew.add(newPath);
+      if (!toRenew.remove(oldPath)) {
+        toRenew.replaceAll(p -> p.replace(oldPath, newPath));
+      } else {
+        toRenew.add(newPath);
+      }
     }
   }
 
@@ -89,16 +94,16 @@ public class LeaseWorker implements Runnable, Closeable {
     }
   }
 
+  public void removePaths(String path) {
+    synchronized (this) {
+      toRenew.removeIf(p -> p.startsWith(path));
+    }
+  }
+
   @Override
   public void close() {
     if (transport != null && transport.isOpen()) {
       transport.close();
-    }
-  }
-
-  public void removePaths(String path) {
-    synchronized (this) {
-      toRenew.removeIf(p -> p.startsWith(path));
     }
   }
 }
