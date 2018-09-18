@@ -26,6 +26,7 @@ public class LeaseWorker implements Runnable, Closeable {
     this.exit = new AtomicBoolean();
     this.transport = new TFramedTransport(new TSocket(leaseHost, leasePort));
     this.client = new lease_service.Client(new TBinaryProtocol(transport));
+    transport.open();
     this.toRenew = new ArrayList<>();
     rpc_lease_ack ack = broker().renewLeases(toRenew);
     this.renewalDurationMs = new AtomicLong(ack.getLeasePeriodMs());
