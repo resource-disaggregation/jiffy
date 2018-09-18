@@ -90,7 +90,7 @@ public class MMuxFileSystem extends FileSystem {
     try {
       KVClient kv = client.open(pathStr);
       return new FSDataInputStream(new MMuxInputStream(kv, blockSize));
-    } catch (TException e) {
+    } catch (Exception e) {
       throw new IOException(e);
     }
   }
@@ -109,7 +109,7 @@ public class MMuxFileSystem extends FileSystem {
         kv = client.create(pathStr, persistentPath, 1, replication);
       }
       return new FSDataOutputStream(new MMuxOutputStream(kv, this.blockSize), statistics);
-    } catch (TException e) {
+    } catch (Exception e) {
       throw new IOException(e);
     }
   }
@@ -124,10 +124,8 @@ public class MMuxFileSystem extends FileSystem {
   public boolean rename(Path path, Path path1) throws IOException {
     try {
       client.rename(makeAbsolute(path).toString(), makeAbsolute(path1).toString());
-    } catch (mmux.directory.directory_service_exception directory_service_exception) {
+    } catch (Exception e) {
       return false;
-    } catch (TException e) {
-      throw new IOException(e);
     }
     return true;
   }
@@ -140,10 +138,8 @@ public class MMuxFileSystem extends FileSystem {
       } else {
         client.remove(makeAbsolute(path).toString());
       }
-    } catch (mmux.directory.directory_service_exception directory_service_exception) {
+    } catch (Exception e) {
       return false;
-    } catch (TException e) {
-      throw new IOException(e);
     }
     return true;
   }
@@ -178,7 +174,7 @@ public class MMuxFileSystem extends FileSystem {
           i++;
         }
         return statuses;
-      } catch (TException e) {
+      } catch (Exception e) {
         throw new FileNotFoundException(path.toUri().getRawPath());
       }
     }
@@ -199,10 +195,8 @@ public class MMuxFileSystem extends FileSystem {
   public boolean mkdirs(Path path, FsPermission fsPermission) throws IOException {
     try {
       client.fs().createDirectories(makeAbsolute(path).toString());
-    } catch (mmux.directory.directory_service_exception directory_service_exception) {
+    } catch (Exception e) {
       return false;
-    } catch (TException e) {
-      throw new IOException(e);
     }
     return true;
   }
