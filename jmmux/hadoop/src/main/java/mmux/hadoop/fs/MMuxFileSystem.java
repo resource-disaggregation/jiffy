@@ -66,6 +66,10 @@ public class MMuxFileSystem extends FileSystem {
     this.user = conf.get("mmux.user", DEFAULT_USER);
   }
 
+  public MMuxClient getClient() {
+    return client;
+  }
+
   @Override
   public void close() throws IOException {
     client.close();

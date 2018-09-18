@@ -39,7 +39,7 @@ public class MMuxClient implements Closeable {
     return fs.iface(directory_service.Client.class);
   }
 
-  LeaseWorker getWorker() {
+  public LeaseWorker getWorker() {
     return worker;
   }
 

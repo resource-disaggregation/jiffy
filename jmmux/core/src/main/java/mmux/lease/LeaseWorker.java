@@ -6,8 +6,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import mmux.util.ThriftClientPool;
 import org.apache.thrift.TException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LeaseWorker implements Runnable {
+  private Logger logger = LoggerFactory.getLogger(getClass());
 
   private ThriftClientPool client;
   private List<String> toRenew;
@@ -42,8 +45,12 @@ public class LeaseWorker implements Runnable {
         if (sleepTime > 0) {
           Thread.sleep(sleepTime);
         }
-      } catch (TException | InterruptedException e) {
-        throw new RuntimeException(e);
+      } catch (Exception e) {
+        if (e.getMessage() != null) {
+          logger.warn(e.getMessage());
+        } else {
+          logger.warn("Got exception of type " + e.getClass().getSimpleName());
+        }
       }
     }
   }
@@ -72,8 +79,11 @@ public class LeaseWorker implements Runnable {
 
   public void renamePath(String oldPath, String newPath) {
     synchronized (this) {
-      toRenew.remove(oldPath);
-      toRenew.add(newPath);
+      if (!toRenew.remove(oldPath)) {
+        toRenew.replaceAll(p -> p.replace(oldPath, newPath));
+      } else {
+        toRenew.add(newPath);
+      }
     }
   }
 

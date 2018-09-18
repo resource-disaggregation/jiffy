@@ -1,9 +1,10 @@
 package mmux.hadoop.fs;
 
 import java.io.IOException;
+import java.util.Arrays;
 import mmux.StorageServer;
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
@@ -113,7 +114,7 @@ public class MMuxFileSystemTest {
   public void testMakeAndDeleteDir() throws InterruptedException, IOException {
     startServers();
     try (MMuxFileSystem fs = nameServer.connectFS()) {
-      Path expectedWorkingDirectory = new Path("/fsdir");
+      Path expectedWorkingDirectory = new Path("/");
       Assert.assertEquals(fs.getWorkingDirectory(), expectedWorkingDirectory);
 
       // Create a new directory and ls the base directory
@@ -158,10 +159,10 @@ public class MMuxFileSystemTest {
     }
   }
 
-  private void createFileWithData(MMuxFileSystem fs, Path p, byte[] data) throws IOException {
-    FSDataOutputStream out_stream = fs.create(p);
-    out_stream.write(data, 0, data.length);
-    out_stream.close();
+  void createFileWithData(MMuxFileSystem fs, Path p, byte[] data) throws IOException {
+    FSDataOutputStream out = fs.create(p);
+    out.write(data, 0, data.length);
+    out.close();
   }
 
   @Test
@@ -245,6 +246,39 @@ public class MMuxFileSystemTest {
       byte[] targetSlice = ArrayUtils.subarray(data, 40, 80);
       Assert.assertArrayEquals(buf, targetSlice);
 
+    } finally {
+      stopServers();
+    }
+  }
+
+  @Test
+  public void leasePathsOnRenameAndDelete() throws InterruptedException, IOException {
+    startServers();
+    try (MMuxFileSystem fs = nameServer.connectFS()) {
+      // Files
+      Path oldPath = new Path(randomFilename());
+      fs.create(oldPath).close();
+
+      Path newPath = new Path(randomFilename());
+      fs.rename(oldPath, newPath);
+      Assert.assertTrue(fs.getClient().getWorker().hasPath("/" + newPath.toString()));
+      Assert.assertFalse(fs.getClient().getWorker().hasPath("/" + oldPath.toString()));
+
+      fs.delete(newPath, false);
+      Assert.assertFalse(fs.getClient().getWorker().hasPath("/" + newPath.toString()));
+
+      // Directories
+      String fileName = randomFilename();
+      oldPath = new Path("/test");
+      fs.create(new Path("/test/" + fileName)).close();
+
+      newPath = new Path("/testRenamed");
+      fs.rename(oldPath, newPath);
+      Assert.assertTrue(fs.getClient().getWorker().hasPath("/testRenamed/" + fileName));
+      Assert.assertFalse(fs.getClient().getWorker().hasPath("/test/" + fileName));
+
+      fs.delete(new Path("/testRenamed"), true);
+      Assert.assertFalse(fs.getClient().getWorker().hasPath("/testRenewed/" + fileName));
     } finally {
       stopServers();
     }
