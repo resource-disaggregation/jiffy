@@ -169,10 +169,10 @@ public class MMuxFileSystem extends FileSystem {
   public FileStatus[] listStatus(Path path) throws IOException {
     Path absolutePath = makeAbsolute(path);
     FileStatus status = getFileStatus(absolutePath);
-
+    String pathStr = absolutePath.toString();
     if (status.isDirectory()) {
       try {
-        List<rpc_dir_entry> entries = client.fs().directoryEntries(absolutePath.toString());
+        List<rpc_dir_entry> entries = client.fs().directoryEntries(pathStr);
         FileStatus[] statuses = new FileStatus[entries.size()];
         int i = 0;
         for (rpc_dir_entry entry : entries) {
@@ -224,14 +224,15 @@ public class MMuxFileSystem extends FileSystem {
 
   @Override
   public FileStatus getFileStatus(Path path) throws IOException {
+    Path absolutePath = makeAbsolute(path);
+    String pathStr = absolutePath.toString();
     try {
-      Path absolutePath = makeAbsolute(path);
-      rpc_file_status fileStatus = client.fs().status(absolutePath.toString());
+      rpc_file_status fileStatus = client.fs().status(pathStr);
       // FIXME: Remove hardcoded parameter: permissions
       FsPermission perm = new FsPermission("777");
       long fileTS = 100;
       if (fileStatus.getType() == rpc_file_type.rpc_regular) {
-        rpc_data_status dataStatus = client.fs().dstatus(absolutePath.toString());
+        rpc_data_status dataStatus = client.fs().dstatus(pathStr);
         return new FileStatus(dataStatus.getDataBlocksSize(), false, dataStatus.getChainLength(),
             blockSize, fileTS, fileTS, perm, user, group, absolutePath);
       } else {
@@ -254,7 +255,6 @@ public class MMuxFileSystem extends FileSystem {
 
   private Path makeAbsolute(Path path) {
     String pathString = removeMmfsPrefix(path.toString());
-
     if (path.isAbsolute()) {
       return new Path(pathString);
     } else if (pathString.equals("")) {
