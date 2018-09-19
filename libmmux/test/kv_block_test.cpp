@@ -38,6 +38,23 @@ TEST_CASE("put_update_get_test", "[put][update][get]") {
   }
 }
 
+TEST_CASE("put_upsert_get_test", "[put][upsert][get]") {
+  kv_block block("nil");
+  block.slot_range(0, block::SLOT_MAX);
+  for (std::size_t i = 0; i < 1000; ++i) {
+    REQUIRE(block.put(std::to_string(i), std::to_string(i)) == "!ok");
+  }
+  for (std::size_t i = 0; i < 1000; ++i) {
+    REQUIRE(block.get(std::to_string(i)) == std::to_string(i));
+  }
+  for (std::size_t i = 0; i < 2000; ++i) {
+    REQUIRE(block.upsert(std::to_string(i), std::to_string(i + 1000)) == "!ok");
+  }
+  for (std::size_t i = 0; i < 2000; ++i) {
+    REQUIRE(block.get(std::to_string(i)) == std::to_string(i + 1000));
+  }
+}
+
 TEST_CASE("put_remove_get_test", "[put][update][get]") {
   kv_block block("nil");
   block.slot_range(0, block::SLOT_MAX);

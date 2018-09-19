@@ -15,4 +15,6 @@ public class KVOps {
   public static final int LOCKED_PUT = 11;
   public static final int LOCKED_REMOVE = 12;
   public static final int LOCKED_UPDATE = 13;
+  public static final int UPSERT = 14;
+  public static final int LOCKED_UPSERT = 15;
 }

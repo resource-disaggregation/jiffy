@@ -12,18 +12,22 @@ public class MMuxOutputStream extends OutputStream {
   private boolean closed;
   private MMuxBlock block;
   private long blockNum;
+  private int blockSize;
   private KVClient client;
-  private ByteBuffer lastBlockKey;
+  private ByteBuffer fileSizeKey;
 
   MMuxOutputStream(KVClient client, int blockSize) throws TException {
     this.blockNum = 0;
+    this.blockSize = blockSize;
     this.client = client;
     this.block = new MMuxBlock(blockSize);
-    this.lastBlockKey = ByteBufferUtils.fromString("LastBlock");
-    ByteBuffer lastBlockValue = ByteBufferUtils.fromString(String.valueOf(blockNum));
-    if (client.put(lastBlockKey, lastBlockValue) == ByteBufferUtils.fromString("!key_already_exists")) {
-      client.update(lastBlockKey, lastBlockValue);
-    }
+    this.fileSizeKey = ByteBufferUtils.fromString("FileSize");
+    ByteBuffer lastBlockValue = ByteBufferUtils.fromString(String.valueOf(0));
+    client.upsert(fileSizeKey, lastBlockValue);
+  }
+
+  private long filePos() {
+    return blockNum * blockSize + block.usedBytes();
   }
 
   @Override
@@ -61,15 +65,12 @@ public class MMuxOutputStream extends OutputStream {
       throw new IOException("Stream closed");
     }
     try {
-      ByteBuffer key = ByteBufferUtils.fromString(String.valueOf(blockNum));
-      ByteBuffer value = block.getData();
-      if (client.put(key, value) == ByteBufferUtils.fromString("!key_already_exists")) {
-        client.update(key, value);
-      }
+      client.upsert(ByteBufferUtils
+          .fromByteBuffers(ByteBufferUtils.fromString(String.valueOf(blockNum)), block.getData(),
+              fileSizeKey, ByteBufferUtils.fromString(String.valueOf(filePos()))));
       if (block.remaining() == 0) {
         block.reset();
         blockNum++;
-        client.update(lastBlockKey, ByteBufferUtils.fromString(String.valueOf(blockNum)));
       }
     } catch (TException e) {
       throw new IOException(e);

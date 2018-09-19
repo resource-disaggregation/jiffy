@@ -123,20 +123,24 @@ public class MMuxClientTest {
       Assert.assertEquals(makeBB("!key_not_found"), kv.update(makeBB(i), makeBB(i + 1000)));
     }
 
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 2000; i++) {
+      Assert.assertEquals(makeBB("!ok"), kv.upsert(makeBB(i), makeBB(i + 1000)));
+    }
+
+    for (int i = 0; i < 2000; i++) {
       Assert.assertEquals(makeBB(i + 1000), kv.get(makeBB(i)));
     }
 
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 2000; i++) {
       Assert.assertEquals(makeBB(i + 1000), kv.remove(makeBB(i)));
+    }
+
+    for (int i = 0; i < 2000; i++) {
+      Assert.assertEquals(makeBB("!key_not_found"), kv.get(makeBB(i)));
     }
 
     for (int i = 1000; i < 2000; i++) {
       Assert.assertEquals(makeBB("!key_not_found"), kv.remove(makeBB(i)));
-    }
-
-    for (int i = 0; i < 1000; i++) {
-      Assert.assertEquals(makeBB("!key_not_found"), kv.get(makeBB(i)));
     }
 
     List<ByteBuffer> validKeys = new ArrayList<>(1000);

@@ -36,6 +36,8 @@ enum kv_op_id : int32_t {
   locked_put = 11,
   locked_remove = 12,
   locked_update = 13,
+  upsert = 14,
+  locked_upsert = 15
 };
 
 class kv_block : public chain_module {
@@ -53,6 +55,10 @@ class kv_block : public chain_module {
   std::string put(const key_type &key, const value_type &value, bool redirect = false);
 
   std::string locked_put(const key_type &key, const value_type &value, bool redirect = false);
+
+  std::string upsert(const key_type &key, const value_type &value, bool redirect = false);
+
+  std::string locked_upsert(const key_type &key, const value_type &value, bool redirect = false);
 
   value_type get(const key_type &key, bool redirect = false);
 

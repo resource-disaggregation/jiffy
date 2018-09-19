@@ -134,6 +134,12 @@ public class KVClient implements Closeable {
       return handleRedirect(KVOps.LOCKED_PUT, args, response);
     }
 
+    public ByteBuffer upsert(ByteBuffer key, ByteBuffer value) throws TException {
+      List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
+      ByteBuffer response = blocks[blockId(key)].runCommand(KVOps.LOCKED_UPSERT, args).get(0);
+      return handleRedirect(KVOps.LOCKED_UPSERT, args, response);
+    }
+
     public ByteBuffer update(ByteBuffer key, ByteBuffer value) throws TException {
       List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
       ByteBuffer response = blocks[blockId(key)].runCommand(KVOps.LOCKED_UPDATE, args).get(0);
@@ -154,6 +160,11 @@ public class KVClient implements Closeable {
     public List<ByteBuffer> put(List<ByteBuffer> args) throws TException {
       List<ByteBuffer> response = parent.batchCommand(KVOps.LOCKED_PUT, args, 2);
       return handleRedirects(KVOps.LOCKED_PUT, args, response);
+    }
+
+    public List<ByteBuffer> upsert(List<ByteBuffer> args) throws TException {
+      List<ByteBuffer> response = parent.batchCommand(KVOps.LOCKED_UPSERT, args, 2);
+      return handleRedirects(KVOps.LOCKED_UPSERT, args, response);
     }
 
     public List<ByteBuffer> update(List<ByteBuffer> args) throws TException {
@@ -333,6 +344,16 @@ public class KVClient implements Closeable {
     return response;
   }
 
+  public ByteBuffer upsert(ByteBuffer key, ByteBuffer value) throws TException {
+    List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
+    ByteBuffer response = null;
+    while (response == null) {
+      response = blocks[blockId(key)].runCommand(KVOps.UPSERT, args).get(0);
+      response = handleRedirect(KVOps.UPSERT, args, response);
+    }
+    return response;
+  }
+
   public ByteBuffer update(ByteBuffer key, ByteBuffer value) throws TException {
     List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
     ByteBuffer response = null;
@@ -380,6 +401,15 @@ public class KVClient implements Closeable {
     while (response == null) {
       response = batchCommand(KVOps.PUT, args, 2);
       response = handleRedirects(KVOps.PUT, args, response);
+    }
+    return response;
+  }
+
+  public List<ByteBuffer> upsert(List<ByteBuffer> args) throws TException {
+    List<ByteBuffer> response = null;
+    while (response == null) {
+      response = batchCommand(KVOps.UPSERT, args, 2);
+      response = handleRedirects(KVOps.UPSERT, args, response);
     }
     return response;
   }

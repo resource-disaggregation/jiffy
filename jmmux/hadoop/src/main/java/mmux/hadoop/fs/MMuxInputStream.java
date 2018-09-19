@@ -18,7 +18,6 @@ public class MMuxInputStream extends FSInputStream {
   private MMuxBlock currentBlock;
 
   private KVClient client;
-  private ByteBuffer lastBlockKey;
 
   MMuxInputStream(KVClient client, int blockSize) throws TException {
     this.filePos = 0;
@@ -26,18 +25,8 @@ public class MMuxInputStream extends FSInputStream {
     this.blockSize = blockSize;
     this.currentBlockNum = -1;
     this.currentBlock = null;
-    this.lastBlockKey = ByteBufferUtils.fromString("LastBlock");
-    ByteBuffer lastBlock = getLastBlockNum();
-    long lastBlockNum = Long.parseLong(ByteBufferUtils.toString(lastBlock));
-    this.fileLength = lastBlockNum * this.blockSize;
-    ByteBuffer value;
-    if ((value = client.get(lastBlock)) != ByteBufferUtils.fromString("!key_not_found")) {
-       this.fileLength += MMuxBlock.usedBytes(value);
-    }
-  }
-
-  private ByteBuffer getLastBlockNum() throws TException {
-    return client.get(lastBlockKey);
+    ByteBuffer fileSizeKey = ByteBufferUtils.fromString("FileSize");
+    this.fileLength = Long.parseLong(ByteBufferUtils.toString(client.get(fileSizeKey)));
   }
 
   @Override

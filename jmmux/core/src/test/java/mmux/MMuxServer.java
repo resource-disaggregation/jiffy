@@ -28,7 +28,8 @@ class MMuxServer {
 
   private Process startProcess(String... cmd) throws IOException {
     ProcessBuilder ps = new ProcessBuilder(cmd);
-    File log = new File("/tmp/java_test.txt");
+    File cmdFile = new File(cmd[0]);
+    File log = new File("/tmp/" + cmdFile.getName() + ".log");
     ps.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
     ps.redirectErrorStream(true);
     return ps.start();

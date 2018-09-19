@@ -23,7 +23,9 @@ std::vector<block_op> KV_OPS = {block_op{block_op_type::accessor, "exists"},
                                 block_op{block_op_type::accessor, "locked_get"},
                                 block_op{block_op_type::mutator, "locked_put"},
                                 block_op{block_op_type::mutator, "locked_remove"},
-                                block_op{block_op_type::mutator, "locked_update"}};
+                                block_op{block_op_type::mutator, "locked_update"},
+                                block_op{block_op_type::mutator, "upsert"},
+                                block_op{block_op_type::mutator, "locked_upsert"}};
 
 kv_block::kv_block(const std::string &block_name,
                    size_t capacity,
@@ -78,6 +80,54 @@ std::string kv_block::locked_put(const key_type &key, const value_type &value, b
     } else {
       return "!duplicate_key";
     }
+  }
+  return "!block_moved";
+}
+
+std::string kv_block::upsert(const key_type &key, const value_type &value, bool redirect) {
+  auto hash = hash_slot::get(key);
+  if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
+    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+      return "!exporting!" + export_target_str();
+    }
+    if (block_.upsert(key, [&](value_type &v) {
+      if (value.size() > v.size()) {
+        bytes_.fetch_add(value.size() - v.size());
+      } else {
+        bytes_.fetch_sub(v.size() - value.size());
+      }
+      v = value;
+    }, value)) {
+      bytes_.fetch_add(key.size() + value.size());
+    }
+    return "!ok";
+  }
+  return "!block_moved";
+}
+
+std::string kv_block::locked_upsert(const key_type &key, const value_type &value, bool redirect) {
+  if (!locked_block_.is_active()) {
+    return "!block_not_locked";
+  }
+  auto hash = hash_slot::get(key);
+  if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
+    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+      return "!exporting!" + export_target_str();
+    }
+    locked_hash_table_type::iterator it;
+    if ((it = locked_block_.find(key)) == locked_block_.end()) {
+      locked_block_.insert(key, value);
+      bytes_.fetch_add(key.size() + value.size());
+      return "!ok";
+    } else {
+      if (value.size() > it->second.size()) {
+        bytes_.fetch_add(value.size() - it->second.size());
+      } else {
+        bytes_.fetch_sub(it->second.size() - value.size());
+      }
+      locked_block_[key] = value;
+    }
+    return "!ok";
   }
   return "!block_moved";
 }
@@ -306,6 +356,24 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
       } else {
         for (size_t i = 0; i < nargs; i += 2) {
           _return.emplace_back(put(args[i], args[i + 1], redirect));
+        }
+      }
+      break;
+    case kv_op_id::locked_upsert:
+      if (args.size() % 2 != 0 && !redirect) {
+        _return.emplace_back("!args_error");
+      } else {
+        for (size_t i = 0; i < nargs; i += 2) {
+          _return.emplace_back(locked_upsert(args[i], args[i + 1], redirect));
+        }
+      }
+      break;
+    case kv_op_id::upsert:
+      if (args.size() % 2 != 0 && !redirect) {
+        _return.emplace_back("!args_error");
+      } else {
+        for (size_t i = 0; i < nargs; i += 2) {
+          _return.emplace_back(upsert(args[i], args[i + 1], redirect));
         }
       }
       break;

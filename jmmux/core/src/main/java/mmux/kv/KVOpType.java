@@ -16,7 +16,10 @@ public enum KVOpType {
       KVOpType.accessor,
       KVOpType.accessor,
       KVOpType.accessor,
-      KVOpType.accessor};
+      KVOpType.accessor,
+      KVOpType.mutator,
+      KVOpType.mutator,
+  };
 
   public static KVOpType opType(int op) {
     return opTypes[op];
