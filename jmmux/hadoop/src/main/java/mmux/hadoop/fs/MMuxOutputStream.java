@@ -3,27 +3,35 @@ package mmux.hadoop.fs;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import mmux.MMuxClient;
 import mmux.kv.KVClient;
 import mmux.util.ByteBufferUtils;
 import org.apache.thrift.TException;
 
 public class MMuxOutputStream extends OutputStream {
 
+  private final MMuxClient mm;
+  private final String path;
   private boolean closed;
   private MMuxBlock block;
   private long blockNum;
-  private int blockSize;
+  private long blockSize;
   private KVClient client;
   private ByteBuffer fileSizeKey;
 
-  MMuxOutputStream(KVClient client, int blockSize) throws TException {
+  MMuxOutputStream(MMuxClient mm, String path, KVClient client, long blockSize) throws TException {
+    this.mm = mm;
+    this.path = path;
     this.blockNum = 0;
     this.blockSize = blockSize;
     this.client = client;
     this.block = new MMuxBlock(blockSize);
     this.fileSizeKey = ByteBufferUtils.fromString("FileSize");
-    ByteBuffer lastBlockValue = ByteBufferUtils.fromString(String.valueOf(0));
-    client.upsert(fileSizeKey, lastBlockValue);
+    ByteBuffer fileSizeValue = ByteBufferUtils.fromString(String.valueOf(0));
+    ByteBuffer blockSizeKey = ByteBufferUtils.fromString("BlockSize");
+    ByteBuffer blockSizeValue = ByteBufferUtils.fromString(String.valueOf(blockSize));
+    client.upsert(
+        ByteBufferUtils.fromByteBuffers(fileSizeKey, fileSizeValue, blockSizeKey, blockSizeValue));
   }
 
   private long filePos() {
@@ -65,12 +73,14 @@ public class MMuxOutputStream extends OutputStream {
       throw new IOException("Stream closed");
     }
     try {
-      client.upsert(ByteBufferUtils
-          .fromByteBuffers(ByteBufferUtils.fromString(String.valueOf(blockNum)), block.getData(),
-              fileSizeKey, ByteBufferUtils.fromString(String.valueOf(filePos()))));
-      if (block.remaining() == 0) {
-        block.reset();
-        blockNum++;
+      if (block.usedBytes() > 0) {
+        client.upsert(ByteBufferUtils
+            .fromByteBuffers(ByteBufferUtils.fromString(String.valueOf(blockNum)), block.getData(),
+                fileSizeKey, ByteBufferUtils.fromString(String.valueOf(filePos()))));
+        if (block.remaining() == 0) {
+          block.reset();
+          blockNum++;
+        }
       }
     } catch (TException e) {
       throw new IOException(e);
@@ -84,6 +94,7 @@ public class MMuxOutputStream extends OutputStream {
     }
     flush();
     super.close();
+    mm.close(path);
     closed = true;
   }
 

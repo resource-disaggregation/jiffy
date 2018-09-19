@@ -7,8 +7,8 @@ class MMuxBlock {
 
   private ByteBuffer data;
 
-  MMuxBlock(int blockSize) {
-    data = ByteBuffer.allocate(blockSize + Integer.BYTES);
+  MMuxBlock(long blockSize) {
+    data = ByteBuffer.allocate((int) (blockSize + Integer.BYTES));
     data.putInt(0);
   }
 

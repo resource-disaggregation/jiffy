@@ -2,6 +2,7 @@ package mmux.lease;
 
 import java.io.Closeable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -118,6 +119,12 @@ public class LeaseWorker implements Runnable, Closeable {
   public void close() {
     if (transport != null && transport.isOpen()) {
       transport.close();
+    }
+  }
+
+  public List<String> getPaths() {
+    synchronized (this) {
+      return new ArrayList<>(toRenew);
     }
   }
 }

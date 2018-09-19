@@ -23,6 +23,7 @@ import org.apache.hadoop.util.Progressable;
 public class MMuxFileSystem extends FileSystem {
 
   private static final int DEFAULT_BLOCK_SIZE = 64 * 1024 * 1024;
+  private static final int DEFAULT_NUM_BLOCKS = 1;
   private static final String DEFAULT_PERSISTENT_PATH = "local://tmp";
   private static final String DEFAULT_GROUP = "defaultgroup";
   private static final String DEFAULT_USER = System.getProperty("user.name");
@@ -34,7 +35,6 @@ public class MMuxFileSystem extends FileSystem {
   private int leasePort;
   private Path workingDir;
   private MMuxClient client;
-  private int blockSize;
   private String persistentPath;
   private String group;
   private String user;
@@ -58,8 +58,6 @@ public class MMuxFileSystem extends FileSystem {
       path = DEFAULT_WORKING_DIR;
     }
     this.workingDir = new Path(path);
-
-    this.blockSize = conf.getInt("mmux.blocksize", DEFAULT_BLOCK_SIZE);
     this.persistentPath = conf.get("mmux.persistent_path", DEFAULT_PERSISTENT_PATH);
     this.group = conf.get("mmux.group", DEFAULT_GROUP);
     this.user = conf.get("mmux.user", DEFAULT_USER);
@@ -107,7 +105,7 @@ public class MMuxFileSystem extends FileSystem {
     String pathStr = makeAbsolute(path).toString();
     try {
       KVClient kv = client.open(pathStr);
-      return new FSDataInputStream(new MMuxInputStream(kv, blockSize));
+      return new FSDataInputStream(new MMuxInputStream(client, pathStr, kv));
     } catch (Exception e) {
       throw new IOException(e);
     }
@@ -117,16 +115,15 @@ public class MMuxFileSystem extends FileSystem {
   public FSDataOutputStream create(Path path, FsPermission fsPermission, boolean overwrite,
       int bufferSize, short replication, long blockSize, Progressable progress) throws IOException {
     // TODO: Set permissions
-    // TODO: Make block size configurable per file
     String pathStr = makeAbsolute(path).toString();
     try {
       KVClient kv;
       if (overwrite) {
-        kv = client.openOrCreate(pathStr, persistentPath, 1, replication);
+        kv = client.openOrCreate(pathStr, persistentPath, DEFAULT_NUM_BLOCKS, replication);
       } else {
-        kv = client.create(pathStr, persistentPath, 1, replication);
+        kv = client.create(pathStr, persistentPath, DEFAULT_NUM_BLOCKS, replication);
       }
-      return new FSDataOutputStream(new MMuxOutputStream(kv, this.blockSize), statistics);
+      return new FSDataOutputStream(new MMuxOutputStream(client, pathStr, kv, blockSize), statistics);
     } catch (Exception e) {
       throw new IOException(e);
     }
@@ -134,12 +131,11 @@ public class MMuxFileSystem extends FileSystem {
 
   @Override
   public FSDataOutputStream append(Path path, int i, Progressable progressable) {
-    throw new UnsupportedOperationException(
-        "Append is not supported by " + MMuxFileSystem.class.getName());
+    throw new UnsupportedOperationException("Append is not supported by " + getClass().getName());
   }
 
   @Override
-  public boolean rename(Path path, Path path1) throws IOException {
+  public boolean rename(Path path, Path path1) {
     String pathStr = makeAbsolute(path).toString();
     String path1Str = makeAbsolute(path1).toString();
     try {
@@ -151,7 +147,7 @@ public class MMuxFileSystem extends FileSystem {
   }
 
   @Override
-  public boolean delete(Path path, boolean recursive) throws IOException {
+  public boolean delete(Path path, boolean recursive) {
     String pathStr = makeAbsolute(path).toString();
     try {
       if (recursive) {
@@ -186,7 +182,7 @@ public class MMuxFileSystem extends FileSystem {
             // FIXME: Remove hardcoded parameter: access_time
             // FIXME: Support storing username & groups in MemoryMUX
             statuses[i] = new FileStatus(dataStatus.getDataBlocksSize(), false,
-                dataStatus.getChainLength(), blockSize, fileTS, fileTS, perm, user, group,
+                dataStatus.getChainLength(), DEFAULT_BLOCK_SIZE, fileTS, fileTS, perm, user, group,
                 child);
           } else {
             statuses[i] = new FileStatus(0, true, 0, 0, fileTS, fileTS, perm, user,
@@ -213,9 +209,10 @@ public class MMuxFileSystem extends FileSystem {
   }
 
   @Override
-  public boolean mkdirs(Path path, FsPermission fsPermission) throws IOException {
+  public boolean mkdirs(Path path, FsPermission fsPermission) {
+    String pathStr = makeAbsolute(path).toString();
     try {
-      client.fs().createDirectories(makeAbsolute(path).toString());
+      client.fs().createDirectories(pathStr);
     } catch (Exception e) {
       return false;
     }
@@ -234,7 +231,7 @@ public class MMuxFileSystem extends FileSystem {
       if (fileStatus.getType() == rpc_file_type.rpc_regular) {
         rpc_data_status dataStatus = client.fs().dstatus(pathStr);
         return new FileStatus(dataStatus.getDataBlocksSize(), false, dataStatus.getChainLength(),
-            blockSize, fileTS, fileTS, perm, user, group, absolutePath);
+            DEFAULT_BLOCK_SIZE, fileTS, fileTS, perm, user, group, absolutePath);
       } else {
         return new FileStatus(0, true, 0, 0, fileTS, fileTS, perm, user, group, absolutePath);
       }
@@ -244,7 +241,7 @@ public class MMuxFileSystem extends FileSystem {
   }
 
   @Override
-  public FsStatus getStatus(Path p) throws IOException {
+  public FsStatus getStatus(Path p) {
     return new FsStatus(Long.MAX_VALUE, 0, Long.MAX_VALUE);
   }
 

@@ -1,12 +1,12 @@
 package mmux.hadoop.fs;
 
 import java.io.IOException;
-import java.util.Arrays;
 import mmux.StorageServer;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FSDataOutputStreamBuilder;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
@@ -159,8 +159,15 @@ public class MMuxFileSystemTest {
     }
   }
 
-  void createFileWithData(MMuxFileSystem fs, Path p, byte[] data) throws IOException {
+  private void createFileWithData(MMuxFileSystem fs, Path p, byte[] data) throws IOException {
     FSDataOutputStream out = fs.create(p);
+    out.write(data, 0, data.length);
+    out.close();
+  }
+
+  private void createFileWithData(MMuxFileSystem fs, Path p, byte[] data, long blockSize)
+      throws IOException {
+    FSDataOutputStream out = fs.create(p, false, 0, (short) 1, blockSize);
     out.write(data, 0, data.length);
     out.close();
   }
@@ -175,24 +182,7 @@ public class MMuxFileSystemTest {
       createFileWithData(fs, filePath, data);
 
       int buffSize = 8;
-      FSDataInputStream in = fs.open(filePath);
-      byte[] buf = new byte[buffSize];
-      int totalBytesRead = 0;
-      int bytesRead = in.read(buf);
-      totalBytesRead += bytesRead;
-      byte[] targetSlice = ArrayUtils.subarray(data, 0, buffSize);
-      Assert.assertArrayEquals(buf, targetSlice);
-
-      while (bytesRead >= 0) {
-        bytesRead = in.read(buf);
-        if(bytesRead > 0) {
-          targetSlice = ArrayUtils.subarray(data, totalBytesRead, totalBytesRead+bytesRead);
-          Assert.assertArrayEquals(buf, targetSlice);
-          totalBytesRead += bytesRead;
-        }
-      }
-
-      Assert.assertEquals(data.length, totalBytesRead);
+      Assert.assertEquals(data.length, testRead(data, fs.open(filePath), new byte[buffSize]));
 
     } finally {
       stopServers();
@@ -257,7 +247,7 @@ public class MMuxFileSystemTest {
     try (MMuxFileSystem fs = nameServer.connectFS()) {
       // Files
       Path oldPath = new Path(randomFilename());
-      fs.create(oldPath).close();
+      FSDataOutputStream os = fs.create(oldPath);
 
       Path newPath = new Path(randomFilename());
       fs.rename(oldPath, newPath);
@@ -266,11 +256,12 @@ public class MMuxFileSystemTest {
 
       fs.delete(newPath, false);
       Assert.assertFalse(fs.getClient().getWorker().hasPath("/" + newPath.toString()));
+      os.close();
 
       // Directories
       String fileName = randomFilename();
       oldPath = new Path("/test");
-      fs.create(new Path("/test/" + fileName)).close();
+      os = fs.create(new Path("/test/" + fileName));
 
       newPath = new Path("/testRenamed");
       fs.rename(oldPath, newPath);
@@ -279,8 +270,39 @@ public class MMuxFileSystemTest {
 
       fs.delete(new Path("/testRenamed"), true);
       Assert.assertFalse(fs.getClient().getWorker().hasPath("/testRenewed/" + fileName));
+      os.close();
     } finally {
       stopServers();
     }
+  }
+
+  @Test
+  public void testMultipleBlocks() throws InterruptedException, IOException {
+    startServers();
+    try (MMuxFileSystem fs = nameServer.connectFS()) {
+      Path filePath = new Path(randomFilename());
+      int dataLength = 5000;
+      byte[] data = randomData(dataLength).getBytes();
+      createFileWithData(fs, filePath, data,1024);
+      int buffSize = 64;
+      Assert.assertEquals(data.length, testRead(data, fs.open(filePath), new byte[buffSize]));
+    } finally {
+      stopServers();
+    }
+  }
+
+  private int testRead(byte[] data, FSDataInputStream in, byte[] buf) throws IOException {
+    int totalBytesRead = 0;
+    byte[] targetSlice;
+    int bytesRead;
+    do {
+      bytesRead = in.read(buf);
+      if (bytesRead > 0) {
+        targetSlice = ArrayUtils.subarray(data, totalBytesRead, totalBytesRead + bytesRead);
+        Assert.assertArrayEquals(targetSlice, ArrayUtils.subarray(buf, 0, bytesRead));
+        totalBytesRead += bytesRead;
+      }
+    } while (bytesRead >= 0);
+    return totalBytesRead;
   }
 }

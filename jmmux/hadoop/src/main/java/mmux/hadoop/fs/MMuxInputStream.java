@@ -2,6 +2,7 @@ package mmux.hadoop.fs;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import mmux.MMuxClient;
 import mmux.kv.KVClient;
 import mmux.util.ByteBufferUtils;
 import org.apache.hadoop.fs.FSInputStream;
@@ -9,24 +10,29 @@ import org.apache.thrift.TException;
 
 public class MMuxInputStream extends FSInputStream {
 
+  private final MMuxClient mm;
   private boolean closed;
   private long filePos;
 
-  private int blockSize;
+  private long blockSize;
   private long fileLength;
   private long currentBlockNum;
   private MMuxBlock currentBlock;
 
   private KVClient client;
+  private String path;
 
-  MMuxInputStream(KVClient client, int blockSize) throws TException {
+  MMuxInputStream(MMuxClient mm, String path, KVClient client) throws TException {
+    this.mm = mm;
+    this.path = path;
     this.filePos = 0;
     this.client = client;
-    this.blockSize = blockSize;
     this.currentBlockNum = -1;
     this.currentBlock = null;
     ByteBuffer fileSizeKey = ByteBufferUtils.fromString("FileSize");
     this.fileLength = Long.parseLong(ByteBufferUtils.toString(client.get(fileSizeKey)));
+    ByteBuffer blockSizeKey = ByteBufferUtils.fromString("BlockSize");
+    this.blockSize = Long.parseLong(ByteBufferUtils.toString(client.get(blockSizeKey)));
   }
 
   @Override
@@ -95,6 +101,7 @@ public class MMuxInputStream extends FSInputStream {
       return;
     }
     super.close();
+    mm.close(path);
     closed = true;
   }
 
@@ -108,7 +115,7 @@ public class MMuxInputStream extends FSInputStream {
 
   @Override
   public void mark(int readLimit) {
-    // marks not supported
+    throw new UnsupportedOperationException("Mark not supported");
   }
 
   @Override
