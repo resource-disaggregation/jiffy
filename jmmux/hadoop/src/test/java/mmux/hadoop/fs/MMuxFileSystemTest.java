@@ -6,7 +6,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FSDataOutputStreamBuilder;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
@@ -16,8 +15,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MMuxFileSystemTest {
+
+  private static final Logger LOG = LoggerFactory.getLogger(MMuxFileSystemTest.class);
 
   @Rule
   public TestName testName = new TestName();
@@ -33,9 +36,20 @@ public class MMuxFileSystemTest {
     storageServer = new StorageServer(System.getProperty("mmux.storage.exec", "storaged"));
   }
 
+  private static String formatTestDescription(String s) {
+    return s.replaceAll(
+        String.format("%s|%s|%s",
+            "(?<=[A-Z])(?=[A-Z][a-z])",
+            "(?<=[^A-Z])(?=[A-Z])",
+            "(?<=[A-Za-z])(?=[^A-Za-z])"
+        ),
+        " "
+    ).toLowerCase();
+  }
+
   @Before
   public void setUp() {
-    System.out.println("=> Running " + testName.getMethodName());
+    LOG.info(formatTestDescription(testName.getMethodName()));
   }
 
   @After
@@ -231,7 +245,8 @@ public class MMuxFileSystemTest {
       FSDataInputStream in = fs.open(filePath);
       in.seek(40);
       byte[] buf = new byte[40];
-      in.read(buf, 0, 40);
+      int bytesRead = in.read(buf, 0, 40);
+      Assert.assertEquals(40, bytesRead);
 
       byte[] targetSlice = ArrayUtils.subarray(data, 40, 80);
       Assert.assertArrayEquals(buf, targetSlice);

@@ -3,13 +3,14 @@ package mmux.hadoop.fs;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.Collections;
 import mmux.MMuxClient;
 import mmux.kv.KVClient;
 import mmux.util.ByteBufferUtils;
 import org.apache.thrift.TException;
 
 public class MMuxOutputStream extends OutputStream {
-
+  private final static String FILE_LENGTH_KEY = "FileLength";
   private final MMuxClient mm;
   private final String path;
   private boolean closed;
@@ -17,25 +18,22 @@ public class MMuxOutputStream extends OutputStream {
   private long blockNum;
   private long blockSize;
   private KVClient client;
-  private ByteBuffer fileSizeKey;
 
-  MMuxOutputStream(MMuxClient mm, String path, KVClient client, long blockSize) throws TException {
+  MMuxOutputStream(MMuxClient mm, String path, KVClient client, long blockSize) {
     this.mm = mm;
     this.path = path;
     this.blockNum = 0;
     this.blockSize = blockSize;
     this.client = client;
     this.block = new MMuxBlock(blockSize);
-    this.fileSizeKey = ByteBufferUtils.fromString("FileSize");
-    ByteBuffer fileSizeValue = ByteBufferUtils.fromString(String.valueOf(0));
-    ByteBuffer blockSizeKey = ByteBufferUtils.fromString("BlockSize");
-    ByteBuffer blockSizeValue = ByteBufferUtils.fromString(String.valueOf(blockSize));
-    client.upsert(
-        ByteBufferUtils.fromByteBuffers(fileSizeKey, fileSizeValue, blockSizeKey, blockSizeValue));
   }
 
-  private long filePos() {
-    return blockNum * blockSize + block.usedBytes();
+  private String fileLength() {
+    return String.valueOf(blockNum * blockSize + block.usedBytes());
+  }
+
+  private ByteBuffer blockKey() {
+    return ByteBufferUtils.fromString(String.valueOf(blockNum));
   }
 
   @Override
@@ -74,9 +72,8 @@ public class MMuxOutputStream extends OutputStream {
     }
     try {
       if (block.usedBytes() > 0) {
-        client.upsert(ByteBufferUtils
-            .fromByteBuffers(ByteBufferUtils.fromString(String.valueOf(blockNum)), block.getData(),
-                fileSizeKey, ByteBufferUtils.fromString(String.valueOf(filePos()))));
+        client.upsert(ByteBufferUtils.fromByteBuffers(blockKey(), block.getData()));
+        mm.fs().addTags(path, Collections.singletonMap(FILE_LENGTH_KEY, fileLength()));
         if (block.remaining() == 0) {
           block.reset();
           blockNum++;

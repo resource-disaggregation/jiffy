@@ -6,12 +6,12 @@ import mmux.DirectoryServer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 
-class NameServer extends DirectoryServer {
-  NameServer(String executable) {
+public class NameServer extends DirectoryServer {
+  public NameServer(String executable) {
     super(executable);
   }
 
-  MMuxFileSystem connectFS() {
+  public MMuxFileSystem connectFS() {
     if (handle == null) {
       throw new RuntimeException("Cannot connect: server not running");
     }

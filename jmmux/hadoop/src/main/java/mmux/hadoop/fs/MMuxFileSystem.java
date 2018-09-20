@@ -3,26 +3,33 @@ package mmux.hadoop.fs;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import mmux.MMuxClient;
+import mmux.directory.directory_service_exception;
 import mmux.directory.rpc_data_status;
 import mmux.directory.rpc_dir_entry;
 import mmux.directory.rpc_file_status;
 import mmux.directory.rpc_file_type;
 import mmux.kv.KVClient;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.CreateFlag;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileAlreadyExistsException;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FsStatus;
+import org.apache.hadoop.fs.ParentNotDirectoryException;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.util.Progressable;
+import org.apache.thrift.TException;
 
 public class MMuxFileSystem extends FileSystem {
 
-  private static final int DEFAULT_BLOCK_SIZE = 64 * 1024 * 1024;
   private static final int DEFAULT_NUM_BLOCKS = 1;
   private static final String DEFAULT_PERSISTENT_PATH = "local://tmp";
   private static final String DEFAULT_GROUP = "defaultgroup";
@@ -32,7 +39,6 @@ public class MMuxFileSystem extends FileSystem {
   private URI uri;
   private String dirHost;
   private int dirPort;
-  private int leasePort;
   private Path workingDir;
   private MMuxClient client;
   private String persistentPath;
@@ -46,7 +52,7 @@ public class MMuxFileSystem extends FileSystem {
 
     this.dirHost = uri.getHost();
     this.dirPort = uri.getPort();
-    this.leasePort = dirPort + 1;
+    int leasePort = conf.getInt("mmux.lease_port", dirPort + 1);
     try {
       this.client = new MMuxClient(dirHost, dirPort, leasePort);
     } catch (Exception e) {
@@ -63,19 +69,7 @@ public class MMuxFileSystem extends FileSystem {
     this.user = conf.get("mmux.user", DEFAULT_USER);
   }
 
-  public String getDirHost() {
-    return dirHost;
-  }
-
-  public int getDirPort() {
-    return dirPort;
-  }
-
-  public int getLeasePort() {
-    return leasePort;
-  }
-
-  public MMuxClient getClient() {
+  MMuxClient getClient() {
     return client;
   }
 
@@ -105,7 +99,15 @@ public class MMuxFileSystem extends FileSystem {
     String pathStr = makeAbsolute(path).toString();
     try {
       KVClient kv = client.open(pathStr);
-      return new FSDataInputStream(new MMuxInputStream(client, pathStr, kv));
+      long fileLength = Long.parseLong(kv.getDataStatus().tags.get("FileLength"));
+      long blockSize = Long.parseLong(kv.getDataStatus().tags.get("BlockSize"));
+      return new FSDataInputStream(new MMuxInputStream(client, pathStr, kv, blockSize, fileLength));
+    } catch (directory_service_exception e) {
+      String msg = e.getMsg();
+      if (msg.startsWith("Path corresponds to a directory")) {
+        throw new FileNotFoundException(pathStr);
+      }
+      throw new IOException(e.getMsg());
     } catch (Exception e) {
       throw new IOException(e);
     }
@@ -114,19 +116,40 @@ public class MMuxFileSystem extends FileSystem {
   @Override
   public FSDataOutputStream create(Path path, FsPermission fsPermission, boolean overwrite,
       int bufferSize, short replication, long blockSize, Progressable progress) throws IOException {
-    // TODO: Set permissions
     String pathStr = makeAbsolute(path).toString();
     try {
+      Map<String, String> tags = new HashMap<>();
+      tags.put("BlockSize", String.valueOf(blockSize));
+      tags.put("FileLength", String.valueOf(0));
       KVClient kv;
       if (overwrite) {
-        kv = client.openOrCreate(pathStr, persistentPath, DEFAULT_NUM_BLOCKS, replication);
+        kv = client.openOrCreate(pathStr, persistentPath, DEFAULT_NUM_BLOCKS, replication, 0,
+            fsPermission.toShort(), tags);
       } else {
-        kv = client.create(pathStr, persistentPath, DEFAULT_NUM_BLOCKS, replication);
+        kv = client.create(pathStr, persistentPath, DEFAULT_NUM_BLOCKS, replication, 0,
+            fsPermission.toShort(), tags);
       }
-      return new FSDataOutputStream(new MMuxOutputStream(client, pathStr, kv, blockSize), statistics);
+      return new FSDataOutputStream(new MMuxOutputStream(client, pathStr, kv, blockSize),
+          statistics);
+    } catch (directory_service_exception e) {
+      String msg = e.getMsg();
+      if (msg.endsWith("is a directory")) {
+        throw new FileAlreadyExistsException(pathStr + " is a directory");
+      } else if (msg.startsWith("Child node already exists")) {
+        throw new FileAlreadyExistsException(pathStr + " already exists");
+      }
+      throw new IOException(e);
     } catch (Exception e) {
       throw new IOException(e);
     }
+  }
+
+  @Override
+  public FSDataOutputStream createNonRecursive(Path path, FsPermission fsPermission,
+      EnumSet<CreateFlag> flags, int bufferSize, short replication, long blockSize,
+      Progressable progress) throws IOException {
+    return create(path, fsPermission, flags.contains(CreateFlag.OVERWRITE), bufferSize, replication,
+        blockSize, progress); // TODO: This should have its own unique implementation
   }
 
   @Override
@@ -147,7 +170,7 @@ public class MMuxFileSystem extends FileSystem {
   }
 
   @Override
-  public boolean delete(Path path, boolean recursive) {
+  public boolean delete(Path path, boolean recursive) throws IOException {
     String pathStr = makeAbsolute(path).toString();
     try {
       if (recursive) {
@@ -155,10 +178,32 @@ public class MMuxFileSystem extends FileSystem {
       } else {
         client.remove(pathStr);
       }
+    } catch (directory_service_exception e) {
+      String msg = e.getMsg();
+      if (msg.startsWith("Path does not exist")) {
+        return false;
+      }
+      throw new IOException(msg);
     } catch (Exception e) {
       return false;
     }
     return true;
+  }
+
+  private FileStatus toFileStatus(Path path, rpc_file_status fileStatus) throws TException {
+    FsPermission perm = new FsPermission((short) fileStatus.getPermissions());
+    long fileTS = 100; // TODO: Remove hardcoded file timestamp
+    if (fileStatus.getType() == rpc_file_type.rpc_regular) {
+      rpc_data_status dataStatus = client.fs().dstatus(path.toString());
+      long fileLength = Long.parseLong(dataStatus.getTags().get("FileLength"));
+      long blockSize = Long.parseLong(dataStatus.getTags().get("BlockSize"));
+      int chainLength = dataStatus.getChainLength();
+      return new FileStatus(fileLength, false, chainLength, blockSize, fileTS, fileTS,
+          perm, user, group, addScheme(path));
+    } else {
+      return new FileStatus(0, true, 0, 0, fileTS, fileTS, perm, user,
+          group, addScheme(path));
+    }
   }
 
   @Override
@@ -170,29 +215,13 @@ public class MMuxFileSystem extends FileSystem {
       try {
         List<rpc_dir_entry> entries = client.fs().directoryEntries(pathStr);
         FileStatus[] statuses = new FileStatus[entries.size()];
-        int i = 0;
-        for (rpc_dir_entry entry : entries) {
-          Path child = new Path(absolutePath, entry.name);
-          rpc_file_status fileStatus = entry.status;
-          // FIXME: Remove hardcoded parameter: permissions
-          FsPermission perm = new FsPermission("777");
-          long fileTS = 100;
-          if (fileStatus.getType() == rpc_file_type.rpc_regular) {
-            rpc_data_status dataStatus = client.fs().dstatus(child.toString());
-            // FIXME: Remove hardcoded parameter: access_time
-            // FIXME: Support storing username & groups in MemoryMUX
-            statuses[i] = new FileStatus(dataStatus.getDataBlocksSize(), false,
-                dataStatus.getChainLength(), DEFAULT_BLOCK_SIZE, fileTS, fileTS, perm, user, group,
-                child);
-          } else {
-            statuses[i] = new FileStatus(0, true, 0, 0, fileTS, fileTS, perm, user,
-                group, child);
-          }
-          i++;
+        for (int i = 0; i < entries.size(); ++i) {
+          rpc_dir_entry entry = entries.get(i);
+          statuses[i] = toFileStatus(new Path(absolutePath, entry.name), entry.status);
         }
         return statuses;
       } catch (Exception e) {
-        throw new FileNotFoundException(path.toUri().getRawPath());
+        throw new FileNotFoundException(pathStr);
       }
     }
     return new FileStatus[]{status};
@@ -209,11 +238,17 @@ public class MMuxFileSystem extends FileSystem {
   }
 
   @Override
-  public boolean mkdirs(Path path, FsPermission fsPermission) {
+  public boolean mkdirs(Path path, FsPermission fsPermission) throws ParentNotDirectoryException {
     String pathStr = makeAbsolute(path).toString();
     try {
       client.fs().createDirectories(pathStr);
-    } catch (Exception e) {
+    } catch (directory_service_exception e) {
+      String msg = e.getMsg();
+      if (msg.endsWith("is a file.")) {
+        throw new ParentNotDirectoryException(pathStr);
+      }
+      return false;
+    } catch (TException e) {
       return false;
     }
     return true;
@@ -224,17 +259,7 @@ public class MMuxFileSystem extends FileSystem {
     Path absolutePath = makeAbsolute(path);
     String pathStr = absolutePath.toString();
     try {
-      rpc_file_status fileStatus = client.fs().status(pathStr);
-      // FIXME: Remove hardcoded parameter: permissions
-      FsPermission perm = new FsPermission("777");
-      long fileTS = 100;
-      if (fileStatus.getType() == rpc_file_type.rpc_regular) {
-        rpc_data_status dataStatus = client.fs().dstatus(pathStr);
-        return new FileStatus(dataStatus.getDataBlocksSize(), false, dataStatus.getChainLength(),
-            DEFAULT_BLOCK_SIZE, fileTS, fileTS, perm, user, group, absolutePath);
-      } else {
-        return new FileStatus(0, true, 0, 0, fileTS, fileTS, perm, user, group, absolutePath);
-      }
+      return toFileStatus(absolutePath, client.fs().status(pathStr));
     } catch (Exception e) {
       throw new FileNotFoundException();
     }
@@ -245,13 +270,17 @@ public class MMuxFileSystem extends FileSystem {
     return new FsStatus(Long.MAX_VALUE, 0, Long.MAX_VALUE);
   }
 
-  private String removeMmfsPrefix(String s) {
+  private String removeScheme(String s) {
     URI uri = URI.create(s);
     return uri.getPath();
   }
 
+  private Path addScheme(Path path) {
+    return new Path(getScheme() + "://" + dirHost + ":" + dirPort + makeAbsolute(path).toString());
+  }
+
   private Path makeAbsolute(Path path) {
-    String pathString = removeMmfsPrefix(path.toString());
+    String pathString = removeScheme(path.toString());
     if (path.isAbsolute()) {
       return new Path(pathString);
     } else if (pathString.equals("")) {
