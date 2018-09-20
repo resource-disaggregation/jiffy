@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import mmux.directory.Flags;
+import mmux.directory.Permissions;
 import mmux.kv.KVClient;
 import mmux.kv.KVClient.LockedClient;
 import mmux.notification.KVListener;
@@ -315,8 +316,10 @@ public class MMuxClientTest {
     startServers(false, false);
     try (MMuxClient client = directoryServer.connect()) {
       client.create("/a/file.txt", "local://tmp", 1, 1);
-      client.create("/a/file1.txt", "local://tmp", 1, 1, Flags.PINNED);
-      client.create("/a/file2.txt", "local://tmp", 1, 1, Flags.MAPPED);
+      client.create("/a/file1.txt", "local://tmp", 1, 1, Flags.PINNED, Permissions.all,
+          Collections.emptyMap());
+      client.create("/a/file2.txt", "local://tmp", 1, 1, Flags.MAPPED, Permissions.all,
+          Collections.emptyMap());
       Assert.assertTrue(client.getWorker().hasPath("/a/file.txt"));
       Assert.assertTrue(client.getWorker().hasPath("/a/file1.txt"));
       Assert.assertTrue(client.getWorker().hasPath("/a/file2.txt"));

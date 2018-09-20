@@ -201,11 +201,13 @@ public class KVClient implements Closeable {
   private directory_service.Client fs;
   private String path;
   private BlockClientCache cache;
+  private rpc_data_status dataStatus;
 
   public KVClient(Client fs, String path, rpc_data_status dataStatus, int timeoutMs)
       throws TException {
     this.fs = fs;
     this.path = path;
+    this.dataStatus = dataStatus;
     this.blocks = new ReplicaChainClient[dataStatus.data_blocks.size()];
     this.slots = new int[dataStatus.data_blocks.size()];
     this.cache = new BlockClientCache(timeoutMs);
@@ -222,8 +224,12 @@ public class KVClient implements Closeable {
     }
   }
 
+  public rpc_data_status getDataStatus() {
+    return dataStatus;
+  }
+
   private void refresh() throws TException {
-    rpc_data_status dataStatus = fs.dstatus(path);
+    this.dataStatus  = fs.dstatus(path);
     this.blocks = new ReplicaChainClient[dataStatus.data_blocks.size()];
     this.slots = new int[dataStatus.data_blocks.size()];
     for (int i = 0; i < blocks.length; i++) {

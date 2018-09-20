@@ -2,6 +2,7 @@ package mmux;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransportException;
 

@@ -15,6 +15,7 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
   private static final org.apache.thrift.protocol.TField CHAIN_LENGTH_FIELD_DESC = new org.apache.thrift.protocol.TField("chain_length", org.apache.thrift.protocol.TType.I32, (short)2);
   private static final org.apache.thrift.protocol.TField DATA_BLOCKS_FIELD_DESC = new org.apache.thrift.protocol.TField("data_blocks", org.apache.thrift.protocol.TType.LIST, (short)3);
   private static final org.apache.thrift.protocol.TField FLAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("flags", org.apache.thrift.protocol.TType.I32, (short)4);
+  private static final org.apache.thrift.protocol.TField TAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("tags", org.apache.thrift.protocol.TType.MAP, (short)5);
 
   private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new rpc_data_statusStandardSchemeFactory();
   private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new rpc_data_statusTupleSchemeFactory();
@@ -23,13 +24,15 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
   public int chain_length; // required
   public java.util.List<rpc_replica_chain> data_blocks; // required
   public int flags; // required
+  public java.util.Map<java.lang.String,java.lang.String> tags; // required
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
     BACKING_PATH((short)1, "backing_path"),
     CHAIN_LENGTH((short)2, "chain_length"),
     DATA_BLOCKS((short)3, "data_blocks"),
-    FLAGS((short)4, "flags");
+    FLAGS((short)4, "flags"),
+    TAGS((short)5, "tags");
 
     private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
 
@@ -52,6 +55,8 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
           return DATA_BLOCKS;
         case 4: // FLAGS
           return FLAGS;
+        case 5: // TAGS
+          return TAGS;
         default:
           return null;
       }
@@ -107,6 +112,10 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
             new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, rpc_replica_chain.class))));
     tmpMap.put(_Fields.FLAGS, new org.apache.thrift.meta_data.FieldMetaData("flags", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+    tmpMap.put(_Fields.TAGS, new org.apache.thrift.meta_data.FieldMetaData("tags", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+        new org.apache.thrift.meta_data.MapMetaData(org.apache.thrift.protocol.TType.MAP, 
+            new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING), 
+            new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
     metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(rpc_data_status.class, metaDataMap);
   }
@@ -118,7 +127,8 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
     java.lang.String backing_path,
     int chain_length,
     java.util.List<rpc_replica_chain> data_blocks,
-    int flags)
+    int flags,
+    java.util.Map<java.lang.String,java.lang.String> tags)
   {
     this();
     this.backing_path = backing_path;
@@ -127,6 +137,7 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
     this.data_blocks = data_blocks;
     this.flags = flags;
     setFlagsIsSet(true);
+    this.tags = tags;
   }
 
   /**
@@ -146,6 +157,10 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
       this.data_blocks = __this__data_blocks;
     }
     this.flags = other.flags;
+    if (other.isSetTags()) {
+      java.util.Map<java.lang.String,java.lang.String> __this__tags = new java.util.HashMap<java.lang.String,java.lang.String>(other.tags);
+      this.tags = __this__tags;
+    }
   }
 
   public rpc_data_status deepCopy() {
@@ -160,6 +175,7 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
     this.data_blocks = null;
     setFlagsIsSet(false);
     this.flags = 0;
+    this.tags = null;
   }
 
   public java.lang.String getBackingPath() {
@@ -271,6 +287,41 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
     __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __FLAGS_ISSET_ID, value);
   }
 
+  public int getTagsSize() {
+    return (this.tags == null) ? 0 : this.tags.size();
+  }
+
+  public void putToTags(java.lang.String key, java.lang.String val) {
+    if (this.tags == null) {
+      this.tags = new java.util.HashMap<java.lang.String,java.lang.String>();
+    }
+    this.tags.put(key, val);
+  }
+
+  public java.util.Map<java.lang.String,java.lang.String> getTags() {
+    return this.tags;
+  }
+
+  public rpc_data_status setTags(java.util.Map<java.lang.String,java.lang.String> tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  public void unsetTags() {
+    this.tags = null;
+  }
+
+  /** Returns true if field tags is set (has been assigned a value) and false otherwise */
+  public boolean isSetTags() {
+    return this.tags != null;
+  }
+
+  public void setTagsIsSet(boolean value) {
+    if (!value) {
+      this.tags = null;
+    }
+  }
+
   public void setFieldValue(_Fields field, java.lang.Object value) {
     switch (field) {
     case BACKING_PATH:
@@ -305,6 +356,14 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
       }
       break;
 
+    case TAGS:
+      if (value == null) {
+        unsetTags();
+      } else {
+        setTags((java.util.Map<java.lang.String,java.lang.String>)value);
+      }
+      break;
+
     }
   }
 
@@ -321,6 +380,9 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
 
     case FLAGS:
       return getFlags();
+
+    case TAGS:
+      return getTags();
 
     }
     throw new java.lang.IllegalStateException();
@@ -341,6 +403,8 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
       return isSetDataBlocks();
     case FLAGS:
       return isSetFlags();
+    case TAGS:
+      return isSetTags();
     }
     throw new java.lang.IllegalStateException();
   }
@@ -396,6 +460,15 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
         return false;
     }
 
+    boolean this_present_tags = true && this.isSetTags();
+    boolean that_present_tags = true && that.isSetTags();
+    if (this_present_tags || that_present_tags) {
+      if (!(this_present_tags && that_present_tags))
+        return false;
+      if (!this.tags.equals(that.tags))
+        return false;
+    }
+
     return true;
   }
 
@@ -414,6 +487,10 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
       hashCode = hashCode * 8191 + data_blocks.hashCode();
 
     hashCode = hashCode * 8191 + flags;
+
+    hashCode = hashCode * 8191 + ((isSetTags()) ? 131071 : 524287);
+    if (isSetTags())
+      hashCode = hashCode * 8191 + tags.hashCode();
 
     return hashCode;
   }
@@ -466,6 +543,16 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
         return lastComparison;
       }
     }
+    lastComparison = java.lang.Boolean.valueOf(isSetTags()).compareTo(other.isSetTags());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetTags()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.tags, other.tags);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     return 0;
   }
 
@@ -509,6 +596,14 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
     sb.append("flags:");
     sb.append(this.flags);
     first = false;
+    if (!first) sb.append(", ");
+    sb.append("tags:");
+    if (this.tags == null) {
+      sb.append("null");
+    } else {
+      sb.append(this.tags);
+    }
+    first = false;
     sb.append(")");
     return sb.toString();
   }
@@ -523,6 +618,9 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
       throw new org.apache.thrift.protocol.TProtocolException("Required field 'data_blocks' was not present! Struct: " + toString());
     }
     // alas, we cannot check 'flags' because it's a primitive and you chose the non-beans generator.
+    if (tags == null) {
+      throw new org.apache.thrift.protocol.TProtocolException("Required field 'tags' was not present! Struct: " + toString());
+    }
     // check for sub-struct validity
   }
 
@@ -605,6 +703,26 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
+          case 5: // TAGS
+            if (schemeField.type == org.apache.thrift.protocol.TType.MAP) {
+              {
+                org.apache.thrift.protocol.TMap _map11 = iprot.readMapBegin();
+                struct.tags = new java.util.HashMap<java.lang.String,java.lang.String>(2*_map11.size);
+                java.lang.String _key12;
+                java.lang.String _val13;
+                for (int _i14 = 0; _i14 < _map11.size; ++_i14)
+                {
+                  _key12 = iprot.readString();
+                  _val13 = iprot.readString();
+                  struct.tags.put(_key12, _val13);
+                }
+                iprot.readMapEnd();
+              }
+              struct.setTagsIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
         }
@@ -638,9 +756,9 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
         oprot.writeFieldBegin(DATA_BLOCKS_FIELD_DESC);
         {
           oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.data_blocks.size()));
-          for (rpc_replica_chain _iter11 : struct.data_blocks)
+          for (rpc_replica_chain _iter15 : struct.data_blocks)
           {
-            _iter11.write(oprot);
+            _iter15.write(oprot);
           }
           oprot.writeListEnd();
         }
@@ -649,6 +767,19 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
       oprot.writeFieldBegin(FLAGS_FIELD_DESC);
       oprot.writeI32(struct.flags);
       oprot.writeFieldEnd();
+      if (struct.tags != null) {
+        oprot.writeFieldBegin(TAGS_FIELD_DESC);
+        {
+          oprot.writeMapBegin(new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRING, struct.tags.size()));
+          for (java.util.Map.Entry<java.lang.String, java.lang.String> _iter16 : struct.tags.entrySet())
+          {
+            oprot.writeString(_iter16.getKey());
+            oprot.writeString(_iter16.getValue());
+          }
+          oprot.writeMapEnd();
+        }
+        oprot.writeFieldEnd();
+      }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -670,12 +801,20 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
       oprot.writeI32(struct.chain_length);
       {
         oprot.writeI32(struct.data_blocks.size());
-        for (rpc_replica_chain _iter12 : struct.data_blocks)
+        for (rpc_replica_chain _iter17 : struct.data_blocks)
         {
-          _iter12.write(oprot);
+          _iter17.write(oprot);
         }
       }
       oprot.writeI32(struct.flags);
+      {
+        oprot.writeI32(struct.tags.size());
+        for (java.util.Map.Entry<java.lang.String, java.lang.String> _iter18 : struct.tags.entrySet())
+        {
+          oprot.writeString(_iter18.getKey());
+          oprot.writeString(_iter18.getValue());
+        }
+      }
     }
 
     @Override
@@ -686,19 +825,32 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
       struct.chain_length = iprot.readI32();
       struct.setChainLengthIsSet(true);
       {
-        org.apache.thrift.protocol.TList _list13 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-        struct.data_blocks = new java.util.ArrayList<rpc_replica_chain>(_list13.size);
-        rpc_replica_chain _elem14;
-        for (int _i15 = 0; _i15 < _list13.size; ++_i15)
+        org.apache.thrift.protocol.TList _list19 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+        struct.data_blocks = new java.util.ArrayList<rpc_replica_chain>(_list19.size);
+        rpc_replica_chain _elem20;
+        for (int _i21 = 0; _i21 < _list19.size; ++_i21)
         {
-          _elem14 = new rpc_replica_chain();
-          _elem14.read(iprot);
-          struct.data_blocks.add(_elem14);
+          _elem20 = new rpc_replica_chain();
+          _elem20.read(iprot);
+          struct.data_blocks.add(_elem20);
         }
       }
       struct.setDataBlocksIsSet(true);
       struct.flags = iprot.readI32();
       struct.setFlagsIsSet(true);
+      {
+        org.apache.thrift.protocol.TMap _map22 = new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+        struct.tags = new java.util.HashMap<java.lang.String,java.lang.String>(2*_map22.size);
+        java.lang.String _key23;
+        java.lang.String _val24;
+        for (int _i25 = 0; _i25 < _map22.size; ++_i25)
+        {
+          _key23 = iprot.readString();
+          _val24 = iprot.readString();
+          struct.tags.put(_key23, _val24);
+        }
+      }
+      struct.setTagsIsSet(true);
     }
   }
 

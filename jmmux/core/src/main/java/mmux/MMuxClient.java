@@ -2,6 +2,9 @@ package mmux;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import mmux.directory.Permissions;
 import mmux.directory.directory_service;
 import mmux.directory.directory_service.Client;
 import mmux.directory.rpc_data_status;
@@ -20,6 +23,8 @@ public class MMuxClient implements Closeable {
   private static final int DEFAULT_CHAIN_LENGTH = 1;
   private static final int DEFAULT_FLAGS = 0;
   private static final int DEFAULT_TIMEOUT_MS = 5000;
+  private static final int DEFAULT_PERMISSIONS = Permissions.all;
+  private static final Map<String, String> DEFAULT_TAGS = Collections.emptyMap();
 
   private TTransport transport;
   private directory_service.Client fs;
@@ -60,22 +65,24 @@ public class MMuxClient implements Closeable {
   }
 
   public KVClient create(String path) throws TException {
-    return create(path, DEFAULT_BACKING_PATH, DEFAULT_NUM_BLOCKS, DEFAULT_CHAIN_LENGTH,
-        DEFAULT_FLAGS);
+    return create(path, DEFAULT_BACKING_PATH);
   }
 
   public KVClient create(String path, String backingPath) throws TException {
-    return create(path, backingPath, DEFAULT_NUM_BLOCKS, DEFAULT_CHAIN_LENGTH, DEFAULT_FLAGS);
+    return create(path, backingPath, DEFAULT_NUM_BLOCKS, DEFAULT_CHAIN_LENGTH);
   }
 
   public KVClient create(String path, String backingPath, int numBlocks, int chainLength)
       throws TException {
-    return create(path, backingPath, numBlocks, chainLength, DEFAULT_FLAGS);
+    return create(path, backingPath, numBlocks, chainLength, DEFAULT_FLAGS, DEFAULT_PERMISSIONS,
+        DEFAULT_TAGS);
   }
 
-  public KVClient create(String path, String backingPath, int numBlocks, int chainLength, int flags)
+  public KVClient create(String path, String backingPath, int numBlocks, int chainLength, int flags,
+      int permissions, Map<String, String> tags)
       throws TException {
-    rpc_data_status status = fs.create(path, backingPath, numBlocks, chainLength, flags);
+    rpc_data_status status = fs
+        .create(path, backingPath, numBlocks, chainLength, flags, permissions, tags);
     beginScope(path);
     return new KVClient(fs, path, status, timeoutMs);
   }
@@ -87,23 +94,24 @@ public class MMuxClient implements Closeable {
   }
 
   public KVClient openOrCreate(String path) throws TException {
-    return openOrCreate(path, DEFAULT_BACKING_PATH, DEFAULT_NUM_BLOCKS, DEFAULT_CHAIN_LENGTH,
-        DEFAULT_FLAGS);
+    return openOrCreate(path, DEFAULT_BACKING_PATH);
   }
 
   public KVClient openOrCreate(String path, String backingPath) throws TException {
-    return openOrCreate(path, backingPath, DEFAULT_NUM_BLOCKS, DEFAULT_CHAIN_LENGTH, DEFAULT_FLAGS);
+    return openOrCreate(path, backingPath, DEFAULT_NUM_BLOCKS, DEFAULT_CHAIN_LENGTH);
   }
 
   public KVClient openOrCreate(String path, String backingPath, int numBlocks, int chainLength)
       throws TException {
-    return openOrCreate(path, backingPath, numBlocks, chainLength, DEFAULT_FLAGS);
+    return openOrCreate(path, backingPath, numBlocks, chainLength, DEFAULT_FLAGS,
+        DEFAULT_PERMISSIONS, DEFAULT_TAGS);
   }
 
   public KVClient openOrCreate(String path, String backingPath, int numBlocks,
-      int chainLength, int flags) throws TException {
+      int chainLength, int flags, int permissions,
+      Map<String, String> tags) throws TException {
     rpc_data_status status = fs
-        .openOrCreate(path, backingPath, numBlocks, chainLength, flags);
+        .openOrCreate(path, backingPath, numBlocks, chainLength, flags, permissions, tags);
     beginScope(path);
     return new KVClient(fs, path, status, timeoutMs);
   }

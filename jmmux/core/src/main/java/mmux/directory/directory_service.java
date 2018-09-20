@@ -18,9 +18,9 @@ public class directory_service {
 
     public rpc_data_status open(java.lang.String path) throws directory_service_exception, org.apache.thrift.TException;
 
-    public rpc_data_status create(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags) throws directory_service_exception, org.apache.thrift.TException;
+    public rpc_data_status create(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.Map<java.lang.String,java.lang.String> tags) throws directory_service_exception, org.apache.thrift.TException;
 
-    public rpc_data_status openOrCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags) throws directory_service_exception, org.apache.thrift.TException;
+    public rpc_data_status openOrCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.Map<java.lang.String,java.lang.String> tags) throws directory_service_exception, org.apache.thrift.TException;
 
     public boolean exists(java.lang.String path) throws directory_service_exception, org.apache.thrift.TException;
 
@@ -50,6 +50,8 @@ public class directory_service {
 
     public rpc_data_status dstatus(java.lang.String path) throws directory_service_exception, org.apache.thrift.TException;
 
+    public void addTags(java.lang.String path, java.util.Map<java.lang.String,java.lang.String> tags) throws directory_service_exception, org.apache.thrift.TException;
+
     public boolean isRegularFile(java.lang.String path) throws directory_service_exception, org.apache.thrift.TException;
 
     public boolean isDirectory(java.lang.String path) throws directory_service_exception, org.apache.thrift.TException;
@@ -74,9 +76,9 @@ public class directory_service {
 
     public void open(java.lang.String path, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException;
 
-    public void create(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException;
+    public void create(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException;
 
-    public void openOrCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException;
+    public void openOrCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException;
 
     public void exists(java.lang.String path, org.apache.thrift.async.AsyncMethodCallback<java.lang.Boolean> resultHandler) throws org.apache.thrift.TException;
 
@@ -105,6 +107,8 @@ public class directory_service {
     public void recursiveDirectoryEntries(java.lang.String path, org.apache.thrift.async.AsyncMethodCallback<java.util.List<rpc_dir_entry>> resultHandler) throws org.apache.thrift.TException;
 
     public void dstatus(java.lang.String path, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException;
+
+    public void addTags(java.lang.String path, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException;
 
     public void isRegularFile(java.lang.String path, org.apache.thrift.async.AsyncMethodCallback<java.lang.Boolean> resultHandler) throws org.apache.thrift.TException;
 
@@ -214,13 +218,13 @@ public class directory_service {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "open failed: unknown result");
     }
 
-    public rpc_data_status create(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags) throws directory_service_exception, org.apache.thrift.TException
+    public rpc_data_status create(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.Map<java.lang.String,java.lang.String> tags) throws directory_service_exception, org.apache.thrift.TException
     {
-      sendCreate(path, backing_path, num_blocks, chain_length, flags);
+      sendCreate(path, backing_path, num_blocks, chain_length, flags, permissions, tags);
       return recvCreate();
     }
 
-    public void sendCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags) throws org.apache.thrift.TException
+    public void sendCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.Map<java.lang.String,java.lang.String> tags) throws org.apache.thrift.TException
     {
       create_args args = new create_args();
       args.setPath(path);
@@ -228,6 +232,8 @@ public class directory_service {
       args.setNumBlocks(num_blocks);
       args.setChainLength(chain_length);
       args.setFlags(flags);
+      args.setPermissions(permissions);
+      args.setTags(tags);
       sendBase("create", args);
     }
 
@@ -244,13 +250,13 @@ public class directory_service {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "create failed: unknown result");
     }
 
-    public rpc_data_status openOrCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags) throws directory_service_exception, org.apache.thrift.TException
+    public rpc_data_status openOrCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.Map<java.lang.String,java.lang.String> tags) throws directory_service_exception, org.apache.thrift.TException
     {
-      sendOpenOrCreate(path, backing_path, num_blocks, chain_length, flags);
+      sendOpenOrCreate(path, backing_path, num_blocks, chain_length, flags, permissions, tags);
       return recvOpenOrCreate();
     }
 
-    public void sendOpenOrCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags) throws org.apache.thrift.TException
+    public void sendOpenOrCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.Map<java.lang.String,java.lang.String> tags) throws org.apache.thrift.TException
     {
       open_or_create_args args = new open_or_create_args();
       args.setPath(path);
@@ -258,6 +264,8 @@ public class directory_service {
       args.setNumBlocks(num_blocks);
       args.setChainLength(chain_length);
       args.setFlags(flags);
+      args.setPermissions(permissions);
+      args.setTags(tags);
       sendBase("open_or_create", args);
     }
 
@@ -623,6 +631,30 @@ public class directory_service {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "dstatus failed: unknown result");
     }
 
+    public void addTags(java.lang.String path, java.util.Map<java.lang.String,java.lang.String> tags) throws directory_service_exception, org.apache.thrift.TException
+    {
+      sendAddTags(path, tags);
+      recvAddTags();
+    }
+
+    public void sendAddTags(java.lang.String path, java.util.Map<java.lang.String,java.lang.String> tags) throws org.apache.thrift.TException
+    {
+      add_tags_args args = new add_tags_args();
+      args.setPath(path);
+      args.setTags(tags);
+      sendBase("add_tags", args);
+    }
+
+    public void recvAddTags() throws directory_service_exception, org.apache.thrift.TException
+    {
+      add_tags_result result = new add_tags_result();
+      receiveBase(result, "add_tags");
+      if (result.ex != null) {
+        throw result.ex;
+      }
+      return;
+    }
+
     public boolean isRegularFile(java.lang.String path) throws directory_service_exception, org.apache.thrift.TException
     {
       sendIsRegularFile(path);
@@ -916,9 +948,9 @@ public class directory_service {
       }
     }
 
-    public void create(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
+    public void create(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      create_call method_call = new create_call(path, backing_path, num_blocks, chain_length, flags, resultHandler, this, ___protocolFactory, ___transport);
+      create_call method_call = new create_call(path, backing_path, num_blocks, chain_length, flags, permissions, tags, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -929,13 +961,17 @@ public class directory_service {
       private int num_blocks;
       private int chain_length;
       private int flags;
-      public create_call(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private int permissions;
+      private java.util.Map<java.lang.String,java.lang.String> tags;
+      public create_call(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.path = path;
         this.backing_path = backing_path;
         this.num_blocks = num_blocks;
         this.chain_length = chain_length;
         this.flags = flags;
+        this.permissions = permissions;
+        this.tags = tags;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
@@ -946,6 +982,8 @@ public class directory_service {
         args.setNumBlocks(num_blocks);
         args.setChainLength(chain_length);
         args.setFlags(flags);
+        args.setPermissions(permissions);
+        args.setTags(tags);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -960,9 +998,9 @@ public class directory_service {
       }
     }
 
-    public void openOrCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
+    public void openOrCreate(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      open_or_create_call method_call = new open_or_create_call(path, backing_path, num_blocks, chain_length, flags, resultHandler, this, ___protocolFactory, ___transport);
+      open_or_create_call method_call = new open_or_create_call(path, backing_path, num_blocks, chain_length, flags, permissions, tags, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -973,13 +1011,17 @@ public class directory_service {
       private int num_blocks;
       private int chain_length;
       private int flags;
-      public open_or_create_call(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private int permissions;
+      private java.util.Map<java.lang.String,java.lang.String> tags;
+      public open_or_create_call(java.lang.String path, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.path = path;
         this.backing_path = backing_path;
         this.num_blocks = num_blocks;
         this.chain_length = chain_length;
         this.flags = flags;
+        this.permissions = permissions;
+        this.tags = tags;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
@@ -990,6 +1032,8 @@ public class directory_service {
         args.setNumBlocks(num_blocks);
         args.setChainLength(chain_length);
         args.setFlags(flags);
+        args.setPermissions(permissions);
+        args.setTags(tags);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -1470,6 +1514,41 @@ public class directory_service {
       }
     }
 
+    public void addTags(java.lang.String path, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
+      checkReady();
+      add_tags_call method_call = new add_tags_call(path, tags, resultHandler, this, ___protocolFactory, ___transport);
+      this.___currentMethod = method_call;
+      ___manager.call(method_call);
+    }
+
+    public static class add_tags_call extends org.apache.thrift.async.TAsyncMethodCall<Void> {
+      private java.lang.String path;
+      private java.util.Map<java.lang.String,java.lang.String> tags;
+      public add_tags_call(java.lang.String path, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+        super(client, protocolFactory, transport, resultHandler, false);
+        this.path = path;
+        this.tags = tags;
+      }
+
+      public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("add_tags", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        add_tags_args args = new add_tags_args();
+        args.setPath(path);
+        args.setTags(tags);
+        args.write(prot);
+        prot.writeMessageEnd();
+      }
+
+      public Void getResult() throws directory_service_exception, org.apache.thrift.TException {
+        if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
+          throw new java.lang.IllegalStateException("Method call not finished!");
+        }
+        org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
+        org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
+        return null;
+      }
+    }
+
     public void isRegularFile(java.lang.String path, org.apache.thrift.async.AsyncMethodCallback<java.lang.Boolean> resultHandler) throws org.apache.thrift.TException {
       checkReady();
       is_regular_file_call method_call = new is_regular_file_call(path, resultHandler, this, ___protocolFactory, ___transport);
@@ -1744,6 +1823,7 @@ public class directory_service {
       processMap.put("directory_entries", new directory_entries());
       processMap.put("recursive_directory_entries", new recursive_directory_entries());
       processMap.put("dstatus", new dstatus());
+      processMap.put("add_tags", new add_tags());
       processMap.put("is_regular_file", new is_regular_file());
       processMap.put("is_directory", new is_directory());
       processMap.put("reslove_failures", new reslove_failures());
@@ -1862,7 +1942,7 @@ public class directory_service {
       public create_result getResult(I iface, create_args args) throws org.apache.thrift.TException {
         create_result result = new create_result();
         try {
-          result.success = iface.create(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags);
+          result.success = iface.create(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags, args.permissions, args.tags);
         } catch (directory_service_exception ex) {
           result.ex = ex;
         }
@@ -1891,7 +1971,7 @@ public class directory_service {
       public open_or_create_result getResult(I iface, open_or_create_args args) throws org.apache.thrift.TException {
         open_or_create_result result = new open_or_create_result();
         try {
-          result.success = iface.openOrCreate(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags);
+          result.success = iface.openOrCreate(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags, args.permissions, args.tags);
         } catch (directory_service_exception ex) {
           result.ex = ex;
         }
@@ -2308,6 +2388,35 @@ public class directory_service {
       }
     }
 
+    public static class add_tags<I extends Iface> extends org.apache.thrift.ProcessFunction<I, add_tags_args> {
+      public add_tags() {
+        super("add_tags");
+      }
+
+      public add_tags_args getEmptyArgsInstance() {
+        return new add_tags_args();
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      @Override
+      protected boolean handleRuntimeExceptions() {
+        return true;
+      }
+
+      public add_tags_result getResult(I iface, add_tags_args args) throws org.apache.thrift.TException {
+        add_tags_result result = new add_tags_result();
+        try {
+          iface.addTags(args.path, args.tags);
+        } catch (directory_service_exception ex) {
+          result.ex = ex;
+        }
+        return result;
+      }
+    }
+
     public static class is_regular_file<I extends Iface> extends org.apache.thrift.ProcessFunction<I, is_regular_file_args> {
       public is_regular_file() {
         super("is_regular_file");
@@ -2545,6 +2654,7 @@ public class directory_service {
       processMap.put("directory_entries", new directory_entries());
       processMap.put("recursive_directory_entries", new recursive_directory_entries());
       processMap.put("dstatus", new dstatus());
+      processMap.put("add_tags", new add_tags());
       processMap.put("is_regular_file", new is_regular_file());
       processMap.put("is_directory", new is_directory());
       processMap.put("reslove_failures", new reslove_failures());
@@ -2809,7 +2919,7 @@ public class directory_service {
       }
 
       public void start(I iface, create_args args, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
-        iface.create(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags,resultHandler);
+        iface.create(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags, args.permissions, args.tags,resultHandler);
       }
     }
 
@@ -2874,7 +2984,7 @@ public class directory_service {
       }
 
       public void start(I iface, open_or_create_args args, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
-        iface.openOrCreate(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags,resultHandler);
+        iface.openOrCreate(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags, args.permissions, args.tags,resultHandler);
       }
     }
 
@@ -3781,6 +3891,70 @@ public class directory_service {
 
       public void start(I iface, dstatus_args args, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
         iface.dstatus(args.path,resultHandler);
+      }
+    }
+
+    public static class add_tags<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, add_tags_args, Void> {
+      public add_tags() {
+        super("add_tags");
+      }
+
+      public add_tags_args getEmptyArgsInstance() {
+        return new add_tags_args();
+      }
+
+      public org.apache.thrift.async.AsyncMethodCallback<Void> getResultHandler(final org.apache.thrift.server.AbstractNonblockingServer.AsyncFrameBuffer fb, final int seqid) {
+        final org.apache.thrift.AsyncProcessFunction fcall = this;
+        return new org.apache.thrift.async.AsyncMethodCallback<Void>() { 
+          public void onComplete(Void o) {
+            add_tags_result result = new add_tags_result();
+            try {
+              fcall.sendResponse(fb, result, org.apache.thrift.protocol.TMessageType.REPLY,seqid);
+            } catch (org.apache.thrift.transport.TTransportException e) {
+              _LOGGER.error("TTransportException writing to internal frame buffer", e);
+              fb.close();
+            } catch (java.lang.Exception e) {
+              _LOGGER.error("Exception writing to internal frame buffer", e);
+              onError(e);
+            }
+          }
+          public void onError(java.lang.Exception e) {
+            byte msgType = org.apache.thrift.protocol.TMessageType.REPLY;
+            org.apache.thrift.TSerializable msg;
+            add_tags_result result = new add_tags_result();
+            if (e instanceof directory_service_exception) {
+              result.ex = (directory_service_exception) e;
+              result.setExIsSet(true);
+              msg = result;
+            } else if (e instanceof org.apache.thrift.transport.TTransportException) {
+              _LOGGER.error("TTransportException inside handler", e);
+              fb.close();
+              return;
+            } else if (e instanceof org.apache.thrift.TApplicationException) {
+              _LOGGER.error("TApplicationException inside handler", e);
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = (org.apache.thrift.TApplicationException)e;
+            } else {
+              _LOGGER.error("Exception inside handler", e);
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.INTERNAL_ERROR, e.getMessage());
+            }
+            try {
+              fcall.sendResponse(fb,msg,msgType,seqid);
+            } catch (java.lang.Exception ex) {
+              _LOGGER.error("Exception writing to internal frame buffer", ex);
+              fb.close();
+            }
+          }
+        };
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      public void start(I iface, add_tags_args args, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
+        iface.addTags(args.path, args.tags,resultHandler);
       }
     }
 
@@ -6535,6 +6709,8 @@ public class directory_service {
     private static final org.apache.thrift.protocol.TField NUM_BLOCKS_FIELD_DESC = new org.apache.thrift.protocol.TField("num_blocks", org.apache.thrift.protocol.TType.I32, (short)3);
     private static final org.apache.thrift.protocol.TField CHAIN_LENGTH_FIELD_DESC = new org.apache.thrift.protocol.TField("chain_length", org.apache.thrift.protocol.TType.I32, (short)4);
     private static final org.apache.thrift.protocol.TField FLAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("flags", org.apache.thrift.protocol.TType.I32, (short)5);
+    private static final org.apache.thrift.protocol.TField PERMISSIONS_FIELD_DESC = new org.apache.thrift.protocol.TField("permissions", org.apache.thrift.protocol.TType.I32, (short)6);
+    private static final org.apache.thrift.protocol.TField TAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("tags", org.apache.thrift.protocol.TType.MAP, (short)7);
 
     private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new create_argsStandardSchemeFactory();
     private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new create_argsTupleSchemeFactory();
@@ -6544,6 +6720,8 @@ public class directory_service {
     public int num_blocks; // required
     public int chain_length; // required
     public int flags; // required
+    public int permissions; // required
+    public java.util.Map<java.lang.String,java.lang.String> tags; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -6551,7 +6729,9 @@ public class directory_service {
       BACKING_PATH((short)2, "backing_path"),
       NUM_BLOCKS((short)3, "num_blocks"),
       CHAIN_LENGTH((short)4, "chain_length"),
-      FLAGS((short)5, "flags");
+      FLAGS((short)5, "flags"),
+      PERMISSIONS((short)6, "permissions"),
+      TAGS((short)7, "tags");
 
       private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
 
@@ -6576,6 +6756,10 @@ public class directory_service {
             return CHAIN_LENGTH;
           case 5: // FLAGS
             return FLAGS;
+          case 6: // PERMISSIONS
+            return PERMISSIONS;
+          case 7: // TAGS
+            return TAGS;
           default:
             return null;
         }
@@ -6619,6 +6803,7 @@ public class directory_service {
     private static final int __NUM_BLOCKS_ISSET_ID = 0;
     private static final int __CHAIN_LENGTH_ISSET_ID = 1;
     private static final int __FLAGS_ISSET_ID = 2;
+    private static final int __PERMISSIONS_ISSET_ID = 3;
     private byte __isset_bitfield = 0;
     public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
@@ -6633,6 +6818,12 @@ public class directory_service {
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       tmpMap.put(_Fields.FLAGS, new org.apache.thrift.meta_data.FieldMetaData("flags", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      tmpMap.put(_Fields.PERMISSIONS, new org.apache.thrift.meta_data.FieldMetaData("permissions", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      tmpMap.put(_Fields.TAGS, new org.apache.thrift.meta_data.FieldMetaData("tags", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.MapMetaData(org.apache.thrift.protocol.TType.MAP, 
+              new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING), 
+              new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
       metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(create_args.class, metaDataMap);
     }
@@ -6645,7 +6836,9 @@ public class directory_service {
       java.lang.String backing_path,
       int num_blocks,
       int chain_length,
-      int flags)
+      int flags,
+      int permissions,
+      java.util.Map<java.lang.String,java.lang.String> tags)
     {
       this();
       this.path = path;
@@ -6656,6 +6849,9 @@ public class directory_service {
       setChainLengthIsSet(true);
       this.flags = flags;
       setFlagsIsSet(true);
+      this.permissions = permissions;
+      setPermissionsIsSet(true);
+      this.tags = tags;
     }
 
     /**
@@ -6672,6 +6868,11 @@ public class directory_service {
       this.num_blocks = other.num_blocks;
       this.chain_length = other.chain_length;
       this.flags = other.flags;
+      this.permissions = other.permissions;
+      if (other.isSetTags()) {
+        java.util.Map<java.lang.String,java.lang.String> __this__tags = new java.util.HashMap<java.lang.String,java.lang.String>(other.tags);
+        this.tags = __this__tags;
+      }
     }
 
     public create_args deepCopy() {
@@ -6688,6 +6889,9 @@ public class directory_service {
       this.chain_length = 0;
       setFlagsIsSet(false);
       this.flags = 0;
+      setPermissionsIsSet(false);
+      this.permissions = 0;
+      this.tags = null;
     }
 
     public java.lang.String getPath() {
@@ -6807,6 +7011,64 @@ public class directory_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __FLAGS_ISSET_ID, value);
     }
 
+    public int getPermissions() {
+      return this.permissions;
+    }
+
+    public create_args setPermissions(int permissions) {
+      this.permissions = permissions;
+      setPermissionsIsSet(true);
+      return this;
+    }
+
+    public void unsetPermissions() {
+      __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __PERMISSIONS_ISSET_ID);
+    }
+
+    /** Returns true if field permissions is set (has been assigned a value) and false otherwise */
+    public boolean isSetPermissions() {
+      return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __PERMISSIONS_ISSET_ID);
+    }
+
+    public void setPermissionsIsSet(boolean value) {
+      __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __PERMISSIONS_ISSET_ID, value);
+    }
+
+    public int getTagsSize() {
+      return (this.tags == null) ? 0 : this.tags.size();
+    }
+
+    public void putToTags(java.lang.String key, java.lang.String val) {
+      if (this.tags == null) {
+        this.tags = new java.util.HashMap<java.lang.String,java.lang.String>();
+      }
+      this.tags.put(key, val);
+    }
+
+    public java.util.Map<java.lang.String,java.lang.String> getTags() {
+      return this.tags;
+    }
+
+    public create_args setTags(java.util.Map<java.lang.String,java.lang.String> tags) {
+      this.tags = tags;
+      return this;
+    }
+
+    public void unsetTags() {
+      this.tags = null;
+    }
+
+    /** Returns true if field tags is set (has been assigned a value) and false otherwise */
+    public boolean isSetTags() {
+      return this.tags != null;
+    }
+
+    public void setTagsIsSet(boolean value) {
+      if (!value) {
+        this.tags = null;
+      }
+    }
+
     public void setFieldValue(_Fields field, java.lang.Object value) {
       switch (field) {
       case PATH:
@@ -6849,6 +7111,22 @@ public class directory_service {
         }
         break;
 
+      case PERMISSIONS:
+        if (value == null) {
+          unsetPermissions();
+        } else {
+          setPermissions((java.lang.Integer)value);
+        }
+        break;
+
+      case TAGS:
+        if (value == null) {
+          unsetTags();
+        } else {
+          setTags((java.util.Map<java.lang.String,java.lang.String>)value);
+        }
+        break;
+
       }
     }
 
@@ -6868,6 +7146,12 @@ public class directory_service {
 
       case FLAGS:
         return getFlags();
+
+      case PERMISSIONS:
+        return getPermissions();
+
+      case TAGS:
+        return getTags();
 
       }
       throw new java.lang.IllegalStateException();
@@ -6890,6 +7174,10 @@ public class directory_service {
         return isSetChainLength();
       case FLAGS:
         return isSetFlags();
+      case PERMISSIONS:
+        return isSetPermissions();
+      case TAGS:
+        return isSetTags();
       }
       throw new java.lang.IllegalStateException();
     }
@@ -6954,6 +7242,24 @@ public class directory_service {
           return false;
       }
 
+      boolean this_present_permissions = true;
+      boolean that_present_permissions = true;
+      if (this_present_permissions || that_present_permissions) {
+        if (!(this_present_permissions && that_present_permissions))
+          return false;
+        if (this.permissions != that.permissions)
+          return false;
+      }
+
+      boolean this_present_tags = true && this.isSetTags();
+      boolean that_present_tags = true && that.isSetTags();
+      if (this_present_tags || that_present_tags) {
+        if (!(this_present_tags && that_present_tags))
+          return false;
+        if (!this.tags.equals(that.tags))
+          return false;
+      }
+
       return true;
     }
 
@@ -6974,6 +7280,12 @@ public class directory_service {
       hashCode = hashCode * 8191 + chain_length;
 
       hashCode = hashCode * 8191 + flags;
+
+      hashCode = hashCode * 8191 + permissions;
+
+      hashCode = hashCode * 8191 + ((isSetTags()) ? 131071 : 524287);
+      if (isSetTags())
+        hashCode = hashCode * 8191 + tags.hashCode();
 
       return hashCode;
     }
@@ -7036,6 +7348,26 @@ public class directory_service {
           return lastComparison;
         }
       }
+      lastComparison = java.lang.Boolean.valueOf(isSetPermissions()).compareTo(other.isSetPermissions());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetPermissions()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.permissions, other.permissions);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = java.lang.Boolean.valueOf(isSetTags()).compareTo(other.isSetTags());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetTags()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.tags, other.tags);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
       return 0;
     }
 
@@ -7082,6 +7414,18 @@ public class directory_service {
       if (!first) sb.append(", ");
       sb.append("flags:");
       sb.append(this.flags);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("permissions:");
+      sb.append(this.permissions);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("tags:");
+      if (this.tags == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.tags);
+      }
       first = false;
       sb.append(")");
       return sb.toString();
@@ -7168,6 +7512,34 @@ public class directory_service {
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
               break;
+            case 6: // PERMISSIONS
+              if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+                struct.permissions = iprot.readI32();
+                struct.setPermissionsIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 7: // TAGS
+              if (schemeField.type == org.apache.thrift.protocol.TType.MAP) {
+                {
+                  org.apache.thrift.protocol.TMap _map26 = iprot.readMapBegin();
+                  struct.tags = new java.util.HashMap<java.lang.String,java.lang.String>(2*_map26.size);
+                  java.lang.String _key27;
+                  java.lang.String _val28;
+                  for (int _i29 = 0; _i29 < _map26.size; ++_i29)
+                  {
+                    _key27 = iprot.readString();
+                    _val28 = iprot.readString();
+                    struct.tags.put(_key27, _val28);
+                  }
+                  iprot.readMapEnd();
+                }
+                struct.setTagsIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
             default:
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
           }
@@ -7202,6 +7574,22 @@ public class directory_service {
         oprot.writeFieldBegin(FLAGS_FIELD_DESC);
         oprot.writeI32(struct.flags);
         oprot.writeFieldEnd();
+        oprot.writeFieldBegin(PERMISSIONS_FIELD_DESC);
+        oprot.writeI32(struct.permissions);
+        oprot.writeFieldEnd();
+        if (struct.tags != null) {
+          oprot.writeFieldBegin(TAGS_FIELD_DESC);
+          {
+            oprot.writeMapBegin(new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRING, struct.tags.size()));
+            for (java.util.Map.Entry<java.lang.String, java.lang.String> _iter30 : struct.tags.entrySet())
+            {
+              oprot.writeString(_iter30.getKey());
+              oprot.writeString(_iter30.getValue());
+            }
+            oprot.writeMapEnd();
+          }
+          oprot.writeFieldEnd();
+        }
         oprot.writeFieldStop();
         oprot.writeStructEnd();
       }
@@ -7235,7 +7623,13 @@ public class directory_service {
         if (struct.isSetFlags()) {
           optionals.set(4);
         }
-        oprot.writeBitSet(optionals, 5);
+        if (struct.isSetPermissions()) {
+          optionals.set(5);
+        }
+        if (struct.isSetTags()) {
+          optionals.set(6);
+        }
+        oprot.writeBitSet(optionals, 7);
         if (struct.isSetPath()) {
           oprot.writeString(struct.path);
         }
@@ -7251,12 +7645,25 @@ public class directory_service {
         if (struct.isSetFlags()) {
           oprot.writeI32(struct.flags);
         }
+        if (struct.isSetPermissions()) {
+          oprot.writeI32(struct.permissions);
+        }
+        if (struct.isSetTags()) {
+          {
+            oprot.writeI32(struct.tags.size());
+            for (java.util.Map.Entry<java.lang.String, java.lang.String> _iter31 : struct.tags.entrySet())
+            {
+              oprot.writeString(_iter31.getKey());
+              oprot.writeString(_iter31.getValue());
+            }
+          }
+        }
       }
 
       @Override
       public void read(org.apache.thrift.protocol.TProtocol prot, create_args struct) throws org.apache.thrift.TException {
         org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
-        java.util.BitSet incoming = iprot.readBitSet(5);
+        java.util.BitSet incoming = iprot.readBitSet(7);
         if (incoming.get(0)) {
           struct.path = iprot.readString();
           struct.setPathIsSet(true);
@@ -7276,6 +7683,25 @@ public class directory_service {
         if (incoming.get(4)) {
           struct.flags = iprot.readI32();
           struct.setFlagsIsSet(true);
+        }
+        if (incoming.get(5)) {
+          struct.permissions = iprot.readI32();
+          struct.setPermissionsIsSet(true);
+        }
+        if (incoming.get(6)) {
+          {
+            org.apache.thrift.protocol.TMap _map32 = new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+            struct.tags = new java.util.HashMap<java.lang.String,java.lang.String>(2*_map32.size);
+            java.lang.String _key33;
+            java.lang.String _val34;
+            for (int _i35 = 0; _i35 < _map32.size; ++_i35)
+            {
+              _key33 = iprot.readString();
+              _val34 = iprot.readString();
+              struct.tags.put(_key33, _val34);
+            }
+          }
+          struct.setTagsIsSet(true);
         }
       }
     }
@@ -7766,6 +8192,8 @@ public class directory_service {
     private static final org.apache.thrift.protocol.TField NUM_BLOCKS_FIELD_DESC = new org.apache.thrift.protocol.TField("num_blocks", org.apache.thrift.protocol.TType.I32, (short)3);
     private static final org.apache.thrift.protocol.TField CHAIN_LENGTH_FIELD_DESC = new org.apache.thrift.protocol.TField("chain_length", org.apache.thrift.protocol.TType.I32, (short)4);
     private static final org.apache.thrift.protocol.TField FLAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("flags", org.apache.thrift.protocol.TType.I32, (short)5);
+    private static final org.apache.thrift.protocol.TField PERMISSIONS_FIELD_DESC = new org.apache.thrift.protocol.TField("permissions", org.apache.thrift.protocol.TType.I32, (short)6);
+    private static final org.apache.thrift.protocol.TField TAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("tags", org.apache.thrift.protocol.TType.MAP, (short)7);
 
     private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new open_or_create_argsStandardSchemeFactory();
     private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new open_or_create_argsTupleSchemeFactory();
@@ -7775,6 +8203,8 @@ public class directory_service {
     public int num_blocks; // required
     public int chain_length; // required
     public int flags; // required
+    public int permissions; // required
+    public java.util.Map<java.lang.String,java.lang.String> tags; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -7782,7 +8212,9 @@ public class directory_service {
       BACKING_PATH((short)2, "backing_path"),
       NUM_BLOCKS((short)3, "num_blocks"),
       CHAIN_LENGTH((short)4, "chain_length"),
-      FLAGS((short)5, "flags");
+      FLAGS((short)5, "flags"),
+      PERMISSIONS((short)6, "permissions"),
+      TAGS((short)7, "tags");
 
       private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
 
@@ -7807,6 +8239,10 @@ public class directory_service {
             return CHAIN_LENGTH;
           case 5: // FLAGS
             return FLAGS;
+          case 6: // PERMISSIONS
+            return PERMISSIONS;
+          case 7: // TAGS
+            return TAGS;
           default:
             return null;
         }
@@ -7850,6 +8286,7 @@ public class directory_service {
     private static final int __NUM_BLOCKS_ISSET_ID = 0;
     private static final int __CHAIN_LENGTH_ISSET_ID = 1;
     private static final int __FLAGS_ISSET_ID = 2;
+    private static final int __PERMISSIONS_ISSET_ID = 3;
     private byte __isset_bitfield = 0;
     public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
@@ -7864,6 +8301,12 @@ public class directory_service {
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       tmpMap.put(_Fields.FLAGS, new org.apache.thrift.meta_data.FieldMetaData("flags", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      tmpMap.put(_Fields.PERMISSIONS, new org.apache.thrift.meta_data.FieldMetaData("permissions", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      tmpMap.put(_Fields.TAGS, new org.apache.thrift.meta_data.FieldMetaData("tags", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.MapMetaData(org.apache.thrift.protocol.TType.MAP, 
+              new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING), 
+              new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
       metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(open_or_create_args.class, metaDataMap);
     }
@@ -7876,7 +8319,9 @@ public class directory_service {
       java.lang.String backing_path,
       int num_blocks,
       int chain_length,
-      int flags)
+      int flags,
+      int permissions,
+      java.util.Map<java.lang.String,java.lang.String> tags)
     {
       this();
       this.path = path;
@@ -7887,6 +8332,9 @@ public class directory_service {
       setChainLengthIsSet(true);
       this.flags = flags;
       setFlagsIsSet(true);
+      this.permissions = permissions;
+      setPermissionsIsSet(true);
+      this.tags = tags;
     }
 
     /**
@@ -7903,6 +8351,11 @@ public class directory_service {
       this.num_blocks = other.num_blocks;
       this.chain_length = other.chain_length;
       this.flags = other.flags;
+      this.permissions = other.permissions;
+      if (other.isSetTags()) {
+        java.util.Map<java.lang.String,java.lang.String> __this__tags = new java.util.HashMap<java.lang.String,java.lang.String>(other.tags);
+        this.tags = __this__tags;
+      }
     }
 
     public open_or_create_args deepCopy() {
@@ -7919,6 +8372,9 @@ public class directory_service {
       this.chain_length = 0;
       setFlagsIsSet(false);
       this.flags = 0;
+      setPermissionsIsSet(false);
+      this.permissions = 0;
+      this.tags = null;
     }
 
     public java.lang.String getPath() {
@@ -8038,6 +8494,64 @@ public class directory_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __FLAGS_ISSET_ID, value);
     }
 
+    public int getPermissions() {
+      return this.permissions;
+    }
+
+    public open_or_create_args setPermissions(int permissions) {
+      this.permissions = permissions;
+      setPermissionsIsSet(true);
+      return this;
+    }
+
+    public void unsetPermissions() {
+      __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __PERMISSIONS_ISSET_ID);
+    }
+
+    /** Returns true if field permissions is set (has been assigned a value) and false otherwise */
+    public boolean isSetPermissions() {
+      return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __PERMISSIONS_ISSET_ID);
+    }
+
+    public void setPermissionsIsSet(boolean value) {
+      __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __PERMISSIONS_ISSET_ID, value);
+    }
+
+    public int getTagsSize() {
+      return (this.tags == null) ? 0 : this.tags.size();
+    }
+
+    public void putToTags(java.lang.String key, java.lang.String val) {
+      if (this.tags == null) {
+        this.tags = new java.util.HashMap<java.lang.String,java.lang.String>();
+      }
+      this.tags.put(key, val);
+    }
+
+    public java.util.Map<java.lang.String,java.lang.String> getTags() {
+      return this.tags;
+    }
+
+    public open_or_create_args setTags(java.util.Map<java.lang.String,java.lang.String> tags) {
+      this.tags = tags;
+      return this;
+    }
+
+    public void unsetTags() {
+      this.tags = null;
+    }
+
+    /** Returns true if field tags is set (has been assigned a value) and false otherwise */
+    public boolean isSetTags() {
+      return this.tags != null;
+    }
+
+    public void setTagsIsSet(boolean value) {
+      if (!value) {
+        this.tags = null;
+      }
+    }
+
     public void setFieldValue(_Fields field, java.lang.Object value) {
       switch (field) {
       case PATH:
@@ -8080,6 +8594,22 @@ public class directory_service {
         }
         break;
 
+      case PERMISSIONS:
+        if (value == null) {
+          unsetPermissions();
+        } else {
+          setPermissions((java.lang.Integer)value);
+        }
+        break;
+
+      case TAGS:
+        if (value == null) {
+          unsetTags();
+        } else {
+          setTags((java.util.Map<java.lang.String,java.lang.String>)value);
+        }
+        break;
+
       }
     }
 
@@ -8099,6 +8629,12 @@ public class directory_service {
 
       case FLAGS:
         return getFlags();
+
+      case PERMISSIONS:
+        return getPermissions();
+
+      case TAGS:
+        return getTags();
 
       }
       throw new java.lang.IllegalStateException();
@@ -8121,6 +8657,10 @@ public class directory_service {
         return isSetChainLength();
       case FLAGS:
         return isSetFlags();
+      case PERMISSIONS:
+        return isSetPermissions();
+      case TAGS:
+        return isSetTags();
       }
       throw new java.lang.IllegalStateException();
     }
@@ -8185,6 +8725,24 @@ public class directory_service {
           return false;
       }
 
+      boolean this_present_permissions = true;
+      boolean that_present_permissions = true;
+      if (this_present_permissions || that_present_permissions) {
+        if (!(this_present_permissions && that_present_permissions))
+          return false;
+        if (this.permissions != that.permissions)
+          return false;
+      }
+
+      boolean this_present_tags = true && this.isSetTags();
+      boolean that_present_tags = true && that.isSetTags();
+      if (this_present_tags || that_present_tags) {
+        if (!(this_present_tags && that_present_tags))
+          return false;
+        if (!this.tags.equals(that.tags))
+          return false;
+      }
+
       return true;
     }
 
@@ -8205,6 +8763,12 @@ public class directory_service {
       hashCode = hashCode * 8191 + chain_length;
 
       hashCode = hashCode * 8191 + flags;
+
+      hashCode = hashCode * 8191 + permissions;
+
+      hashCode = hashCode * 8191 + ((isSetTags()) ? 131071 : 524287);
+      if (isSetTags())
+        hashCode = hashCode * 8191 + tags.hashCode();
 
       return hashCode;
     }
@@ -8267,6 +8831,26 @@ public class directory_service {
           return lastComparison;
         }
       }
+      lastComparison = java.lang.Boolean.valueOf(isSetPermissions()).compareTo(other.isSetPermissions());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetPermissions()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.permissions, other.permissions);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = java.lang.Boolean.valueOf(isSetTags()).compareTo(other.isSetTags());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetTags()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.tags, other.tags);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
       return 0;
     }
 
@@ -8313,6 +8897,18 @@ public class directory_service {
       if (!first) sb.append(", ");
       sb.append("flags:");
       sb.append(this.flags);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("permissions:");
+      sb.append(this.permissions);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("tags:");
+      if (this.tags == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.tags);
+      }
       first = false;
       sb.append(")");
       return sb.toString();
@@ -8399,6 +8995,34 @@ public class directory_service {
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
               break;
+            case 6: // PERMISSIONS
+              if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+                struct.permissions = iprot.readI32();
+                struct.setPermissionsIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 7: // TAGS
+              if (schemeField.type == org.apache.thrift.protocol.TType.MAP) {
+                {
+                  org.apache.thrift.protocol.TMap _map36 = iprot.readMapBegin();
+                  struct.tags = new java.util.HashMap<java.lang.String,java.lang.String>(2*_map36.size);
+                  java.lang.String _key37;
+                  java.lang.String _val38;
+                  for (int _i39 = 0; _i39 < _map36.size; ++_i39)
+                  {
+                    _key37 = iprot.readString();
+                    _val38 = iprot.readString();
+                    struct.tags.put(_key37, _val38);
+                  }
+                  iprot.readMapEnd();
+                }
+                struct.setTagsIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
             default:
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
           }
@@ -8433,6 +9057,22 @@ public class directory_service {
         oprot.writeFieldBegin(FLAGS_FIELD_DESC);
         oprot.writeI32(struct.flags);
         oprot.writeFieldEnd();
+        oprot.writeFieldBegin(PERMISSIONS_FIELD_DESC);
+        oprot.writeI32(struct.permissions);
+        oprot.writeFieldEnd();
+        if (struct.tags != null) {
+          oprot.writeFieldBegin(TAGS_FIELD_DESC);
+          {
+            oprot.writeMapBegin(new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRING, struct.tags.size()));
+            for (java.util.Map.Entry<java.lang.String, java.lang.String> _iter40 : struct.tags.entrySet())
+            {
+              oprot.writeString(_iter40.getKey());
+              oprot.writeString(_iter40.getValue());
+            }
+            oprot.writeMapEnd();
+          }
+          oprot.writeFieldEnd();
+        }
         oprot.writeFieldStop();
         oprot.writeStructEnd();
       }
@@ -8466,7 +9106,13 @@ public class directory_service {
         if (struct.isSetFlags()) {
           optionals.set(4);
         }
-        oprot.writeBitSet(optionals, 5);
+        if (struct.isSetPermissions()) {
+          optionals.set(5);
+        }
+        if (struct.isSetTags()) {
+          optionals.set(6);
+        }
+        oprot.writeBitSet(optionals, 7);
         if (struct.isSetPath()) {
           oprot.writeString(struct.path);
         }
@@ -8482,12 +9128,25 @@ public class directory_service {
         if (struct.isSetFlags()) {
           oprot.writeI32(struct.flags);
         }
+        if (struct.isSetPermissions()) {
+          oprot.writeI32(struct.permissions);
+        }
+        if (struct.isSetTags()) {
+          {
+            oprot.writeI32(struct.tags.size());
+            for (java.util.Map.Entry<java.lang.String, java.lang.String> _iter41 : struct.tags.entrySet())
+            {
+              oprot.writeString(_iter41.getKey());
+              oprot.writeString(_iter41.getValue());
+            }
+          }
+        }
       }
 
       @Override
       public void read(org.apache.thrift.protocol.TProtocol prot, open_or_create_args struct) throws org.apache.thrift.TException {
         org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
-        java.util.BitSet incoming = iprot.readBitSet(5);
+        java.util.BitSet incoming = iprot.readBitSet(7);
         if (incoming.get(0)) {
           struct.path = iprot.readString();
           struct.setPathIsSet(true);
@@ -8507,6 +9166,25 @@ public class directory_service {
         if (incoming.get(4)) {
           struct.flags = iprot.readI32();
           struct.setFlagsIsSet(true);
+        }
+        if (incoming.get(5)) {
+          struct.permissions = iprot.readI32();
+          struct.setPermissionsIsSet(true);
+        }
+        if (incoming.get(6)) {
+          {
+            org.apache.thrift.protocol.TMap _map42 = new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+            struct.tags = new java.util.HashMap<java.lang.String,java.lang.String>(2*_map42.size);
+            java.lang.String _key43;
+            java.lang.String _val44;
+            for (int _i45 = 0; _i45 < _map42.size; ++_i45)
+            {
+              _key43 = iprot.readString();
+              _val44 = iprot.readString();
+              struct.tags.put(_key43, _val44);
+            }
+          }
+          struct.setTagsIsSet(true);
         }
       }
     }
@@ -18783,14 +19461,14 @@ public class directory_service {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list16 = iprot.readListBegin();
-                  struct.success = new java.util.ArrayList<rpc_dir_entry>(_list16.size);
-                  rpc_dir_entry _elem17;
-                  for (int _i18 = 0; _i18 < _list16.size; ++_i18)
+                  org.apache.thrift.protocol.TList _list46 = iprot.readListBegin();
+                  struct.success = new java.util.ArrayList<rpc_dir_entry>(_list46.size);
+                  rpc_dir_entry _elem47;
+                  for (int _i48 = 0; _i48 < _list46.size; ++_i48)
                   {
-                    _elem17 = new rpc_dir_entry();
-                    _elem17.read(iprot);
-                    struct.success.add(_elem17);
+                    _elem47 = new rpc_dir_entry();
+                    _elem47.read(iprot);
+                    struct.success.add(_elem47);
                   }
                   iprot.readListEnd();
                 }
@@ -18827,9 +19505,9 @@ public class directory_service {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.success.size()));
-            for (rpc_dir_entry _iter19 : struct.success)
+            for (rpc_dir_entry _iter49 : struct.success)
             {
-              _iter19.write(oprot);
+              _iter49.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -18868,9 +19546,9 @@ public class directory_service {
         if (struct.isSetSuccess()) {
           {
             oprot.writeI32(struct.success.size());
-            for (rpc_dir_entry _iter20 : struct.success)
+            for (rpc_dir_entry _iter50 : struct.success)
             {
-              _iter20.write(oprot);
+              _iter50.write(oprot);
             }
           }
         }
@@ -18885,14 +19563,14 @@ public class directory_service {
         java.util.BitSet incoming = iprot.readBitSet(2);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TList _list21 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.success = new java.util.ArrayList<rpc_dir_entry>(_list21.size);
-            rpc_dir_entry _elem22;
-            for (int _i23 = 0; _i23 < _list21.size; ++_i23)
+            org.apache.thrift.protocol.TList _list51 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.success = new java.util.ArrayList<rpc_dir_entry>(_list51.size);
+            rpc_dir_entry _elem52;
+            for (int _i53 = 0; _i53 < _list51.size; ++_i53)
             {
-              _elem22 = new rpc_dir_entry();
-              _elem22.read(iprot);
-              struct.success.add(_elem22);
+              _elem52 = new rpc_dir_entry();
+              _elem52.read(iprot);
+              struct.success.add(_elem52);
             }
           }
           struct.setSuccessIsSet(true);
@@ -19667,14 +20345,14 @@ public class directory_service {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list24 = iprot.readListBegin();
-                  struct.success = new java.util.ArrayList<rpc_dir_entry>(_list24.size);
-                  rpc_dir_entry _elem25;
-                  for (int _i26 = 0; _i26 < _list24.size; ++_i26)
+                  org.apache.thrift.protocol.TList _list54 = iprot.readListBegin();
+                  struct.success = new java.util.ArrayList<rpc_dir_entry>(_list54.size);
+                  rpc_dir_entry _elem55;
+                  for (int _i56 = 0; _i56 < _list54.size; ++_i56)
                   {
-                    _elem25 = new rpc_dir_entry();
-                    _elem25.read(iprot);
-                    struct.success.add(_elem25);
+                    _elem55 = new rpc_dir_entry();
+                    _elem55.read(iprot);
+                    struct.success.add(_elem55);
                   }
                   iprot.readListEnd();
                 }
@@ -19711,9 +20389,9 @@ public class directory_service {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.success.size()));
-            for (rpc_dir_entry _iter27 : struct.success)
+            for (rpc_dir_entry _iter57 : struct.success)
             {
-              _iter27.write(oprot);
+              _iter57.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -19752,9 +20430,9 @@ public class directory_service {
         if (struct.isSetSuccess()) {
           {
             oprot.writeI32(struct.success.size());
-            for (rpc_dir_entry _iter28 : struct.success)
+            for (rpc_dir_entry _iter58 : struct.success)
             {
-              _iter28.write(oprot);
+              _iter58.write(oprot);
             }
           }
         }
@@ -19769,14 +20447,14 @@ public class directory_service {
         java.util.BitSet incoming = iprot.readBitSet(2);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TList _list29 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.success = new java.util.ArrayList<rpc_dir_entry>(_list29.size);
-            rpc_dir_entry _elem30;
-            for (int _i31 = 0; _i31 < _list29.size; ++_i31)
+            org.apache.thrift.protocol.TList _list59 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.success = new java.util.ArrayList<rpc_dir_entry>(_list59.size);
+            rpc_dir_entry _elem60;
+            for (int _i61 = 0; _i61 < _list59.size; ++_i61)
             {
-              _elem30 = new rpc_dir_entry();
-              _elem30.read(iprot);
-              struct.success.add(_elem30);
+              _elem60 = new rpc_dir_entry();
+              _elem60.read(iprot);
+              struct.success.add(_elem60);
             }
           }
           struct.setSuccessIsSet(true);
@@ -20617,6 +21295,888 @@ public class directory_service {
           struct.setSuccessIsSet(true);
         }
         if (incoming.get(1)) {
+          struct.ex = new directory_service_exception();
+          struct.ex.read(iprot);
+          struct.setExIsSet(true);
+        }
+      }
+    }
+
+    private static <S extends org.apache.thrift.scheme.IScheme> S scheme(org.apache.thrift.protocol.TProtocol proto) {
+      return (org.apache.thrift.scheme.StandardScheme.class.equals(proto.getScheme()) ? STANDARD_SCHEME_FACTORY : TUPLE_SCHEME_FACTORY).getScheme();
+    }
+  }
+
+  public static class add_tags_args implements org.apache.thrift.TBase<add_tags_args, add_tags_args._Fields>, java.io.Serializable, Cloneable, Comparable<add_tags_args>   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("add_tags_args");
+
+    private static final org.apache.thrift.protocol.TField PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("path", org.apache.thrift.protocol.TType.STRING, (short)1);
+    private static final org.apache.thrift.protocol.TField TAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("tags", org.apache.thrift.protocol.TType.MAP, (short)2);
+
+    private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new add_tags_argsStandardSchemeFactory();
+    private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new add_tags_argsTupleSchemeFactory();
+
+    public java.lang.String path; // required
+    public java.util.Map<java.lang.String,java.lang.String> tags; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      PATH((short)1, "path"),
+      TAGS((short)2, "tags");
+
+      private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
+
+      static {
+        for (_Fields field : java.util.EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // PATH
+            return PATH;
+          case 2: // TAGS
+            return TAGS;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new java.lang.IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(java.lang.String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final java.lang.String _fieldName;
+
+      _Fields(short thriftId, java.lang.String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public java.lang.String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.PATH, new org.apache.thrift.meta_data.FieldMetaData("path", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      tmpMap.put(_Fields.TAGS, new org.apache.thrift.meta_data.FieldMetaData("tags", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.MapMetaData(org.apache.thrift.protocol.TType.MAP, 
+              new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING), 
+              new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
+      metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(add_tags_args.class, metaDataMap);
+    }
+
+    public add_tags_args() {
+    }
+
+    public add_tags_args(
+      java.lang.String path,
+      java.util.Map<java.lang.String,java.lang.String> tags)
+    {
+      this();
+      this.path = path;
+      this.tags = tags;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public add_tags_args(add_tags_args other) {
+      if (other.isSetPath()) {
+        this.path = other.path;
+      }
+      if (other.isSetTags()) {
+        java.util.Map<java.lang.String,java.lang.String> __this__tags = new java.util.HashMap<java.lang.String,java.lang.String>(other.tags);
+        this.tags = __this__tags;
+      }
+    }
+
+    public add_tags_args deepCopy() {
+      return new add_tags_args(this);
+    }
+
+    @Override
+    public void clear() {
+      this.path = null;
+      this.tags = null;
+    }
+
+    public java.lang.String getPath() {
+      return this.path;
+    }
+
+    public add_tags_args setPath(java.lang.String path) {
+      this.path = path;
+      return this;
+    }
+
+    public void unsetPath() {
+      this.path = null;
+    }
+
+    /** Returns true if field path is set (has been assigned a value) and false otherwise */
+    public boolean isSetPath() {
+      return this.path != null;
+    }
+
+    public void setPathIsSet(boolean value) {
+      if (!value) {
+        this.path = null;
+      }
+    }
+
+    public int getTagsSize() {
+      return (this.tags == null) ? 0 : this.tags.size();
+    }
+
+    public void putToTags(java.lang.String key, java.lang.String val) {
+      if (this.tags == null) {
+        this.tags = new java.util.HashMap<java.lang.String,java.lang.String>();
+      }
+      this.tags.put(key, val);
+    }
+
+    public java.util.Map<java.lang.String,java.lang.String> getTags() {
+      return this.tags;
+    }
+
+    public add_tags_args setTags(java.util.Map<java.lang.String,java.lang.String> tags) {
+      this.tags = tags;
+      return this;
+    }
+
+    public void unsetTags() {
+      this.tags = null;
+    }
+
+    /** Returns true if field tags is set (has been assigned a value) and false otherwise */
+    public boolean isSetTags() {
+      return this.tags != null;
+    }
+
+    public void setTagsIsSet(boolean value) {
+      if (!value) {
+        this.tags = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, java.lang.Object value) {
+      switch (field) {
+      case PATH:
+        if (value == null) {
+          unsetPath();
+        } else {
+          setPath((java.lang.String)value);
+        }
+        break;
+
+      case TAGS:
+        if (value == null) {
+          unsetTags();
+        } else {
+          setTags((java.util.Map<java.lang.String,java.lang.String>)value);
+        }
+        break;
+
+      }
+    }
+
+    public java.lang.Object getFieldValue(_Fields field) {
+      switch (field) {
+      case PATH:
+        return getPath();
+
+      case TAGS:
+        return getTags();
+
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new java.lang.IllegalArgumentException();
+      }
+
+      switch (field) {
+      case PATH:
+        return isSetPath();
+      case TAGS:
+        return isSetTags();
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(java.lang.Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof add_tags_args)
+        return this.equals((add_tags_args)that);
+      return false;
+    }
+
+    public boolean equals(add_tags_args that) {
+      if (that == null)
+        return false;
+      if (this == that)
+        return true;
+
+      boolean this_present_path = true && this.isSetPath();
+      boolean that_present_path = true && that.isSetPath();
+      if (this_present_path || that_present_path) {
+        if (!(this_present_path && that_present_path))
+          return false;
+        if (!this.path.equals(that.path))
+          return false;
+      }
+
+      boolean this_present_tags = true && this.isSetTags();
+      boolean that_present_tags = true && that.isSetTags();
+      if (this_present_tags || that_present_tags) {
+        if (!(this_present_tags && that_present_tags))
+          return false;
+        if (!this.tags.equals(that.tags))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int hashCode = 1;
+
+      hashCode = hashCode * 8191 + ((isSetPath()) ? 131071 : 524287);
+      if (isSetPath())
+        hashCode = hashCode * 8191 + path.hashCode();
+
+      hashCode = hashCode * 8191 + ((isSetTags()) ? 131071 : 524287);
+      if (isSetTags())
+        hashCode = hashCode * 8191 + tags.hashCode();
+
+      return hashCode;
+    }
+
+    @Override
+    public int compareTo(add_tags_args other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+
+      lastComparison = java.lang.Boolean.valueOf(isSetPath()).compareTo(other.isSetPath());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetPath()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.path, other.path);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = java.lang.Boolean.valueOf(isSetTags()).compareTo(other.isSetTags());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetTags()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.tags, other.tags);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      scheme(iprot).read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      scheme(oprot).write(oprot, this);
+    }
+
+    @Override
+    public java.lang.String toString() {
+      java.lang.StringBuilder sb = new java.lang.StringBuilder("add_tags_args(");
+      boolean first = true;
+
+      sb.append("path:");
+      if (this.path == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.path);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("tags:");
+      if (this.tags == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.tags);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, java.lang.ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class add_tags_argsStandardSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public add_tags_argsStandardScheme getScheme() {
+        return new add_tags_argsStandardScheme();
+      }
+    }
+
+    private static class add_tags_argsStandardScheme extends org.apache.thrift.scheme.StandardScheme<add_tags_args> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, add_tags_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // PATH
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.path = iprot.readString();
+                struct.setPathIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 2: // TAGS
+              if (schemeField.type == org.apache.thrift.protocol.TType.MAP) {
+                {
+                  org.apache.thrift.protocol.TMap _map62 = iprot.readMapBegin();
+                  struct.tags = new java.util.HashMap<java.lang.String,java.lang.String>(2*_map62.size);
+                  java.lang.String _key63;
+                  java.lang.String _val64;
+                  for (int _i65 = 0; _i65 < _map62.size; ++_i65)
+                  {
+                    _key63 = iprot.readString();
+                    _val64 = iprot.readString();
+                    struct.tags.put(_key63, _val64);
+                  }
+                  iprot.readMapEnd();
+                }
+                struct.setTagsIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, add_tags_args struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.path != null) {
+          oprot.writeFieldBegin(PATH_FIELD_DESC);
+          oprot.writeString(struct.path);
+          oprot.writeFieldEnd();
+        }
+        if (struct.tags != null) {
+          oprot.writeFieldBegin(TAGS_FIELD_DESC);
+          {
+            oprot.writeMapBegin(new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRING, struct.tags.size()));
+            for (java.util.Map.Entry<java.lang.String, java.lang.String> _iter66 : struct.tags.entrySet())
+            {
+              oprot.writeString(_iter66.getKey());
+              oprot.writeString(_iter66.getValue());
+            }
+            oprot.writeMapEnd();
+          }
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class add_tags_argsTupleSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public add_tags_argsTupleScheme getScheme() {
+        return new add_tags_argsTupleScheme();
+      }
+    }
+
+    private static class add_tags_argsTupleScheme extends org.apache.thrift.scheme.TupleScheme<add_tags_args> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, add_tags_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet optionals = new java.util.BitSet();
+        if (struct.isSetPath()) {
+          optionals.set(0);
+        }
+        if (struct.isSetTags()) {
+          optionals.set(1);
+        }
+        oprot.writeBitSet(optionals, 2);
+        if (struct.isSetPath()) {
+          oprot.writeString(struct.path);
+        }
+        if (struct.isSetTags()) {
+          {
+            oprot.writeI32(struct.tags.size());
+            for (java.util.Map.Entry<java.lang.String, java.lang.String> _iter67 : struct.tags.entrySet())
+            {
+              oprot.writeString(_iter67.getKey());
+              oprot.writeString(_iter67.getValue());
+            }
+          }
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, add_tags_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet incoming = iprot.readBitSet(2);
+        if (incoming.get(0)) {
+          struct.path = iprot.readString();
+          struct.setPathIsSet(true);
+        }
+        if (incoming.get(1)) {
+          {
+            org.apache.thrift.protocol.TMap _map68 = new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+            struct.tags = new java.util.HashMap<java.lang.String,java.lang.String>(2*_map68.size);
+            java.lang.String _key69;
+            java.lang.String _val70;
+            for (int _i71 = 0; _i71 < _map68.size; ++_i71)
+            {
+              _key69 = iprot.readString();
+              _val70 = iprot.readString();
+              struct.tags.put(_key69, _val70);
+            }
+          }
+          struct.setTagsIsSet(true);
+        }
+      }
+    }
+
+    private static <S extends org.apache.thrift.scheme.IScheme> S scheme(org.apache.thrift.protocol.TProtocol proto) {
+      return (org.apache.thrift.scheme.StandardScheme.class.equals(proto.getScheme()) ? STANDARD_SCHEME_FACTORY : TUPLE_SCHEME_FACTORY).getScheme();
+    }
+  }
+
+  public static class add_tags_result implements org.apache.thrift.TBase<add_tags_result, add_tags_result._Fields>, java.io.Serializable, Cloneable, Comparable<add_tags_result>   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("add_tags_result");
+
+    private static final org.apache.thrift.protocol.TField EX_FIELD_DESC = new org.apache.thrift.protocol.TField("ex", org.apache.thrift.protocol.TType.STRUCT, (short)1);
+
+    private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new add_tags_resultStandardSchemeFactory();
+    private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new add_tags_resultTupleSchemeFactory();
+
+    public directory_service_exception ex; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      EX((short)1, "ex");
+
+      private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
+
+      static {
+        for (_Fields field : java.util.EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // EX
+            return EX;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new java.lang.IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(java.lang.String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final java.lang.String _fieldName;
+
+      _Fields(short thriftId, java.lang.String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public java.lang.String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.EX, new org.apache.thrift.meta_data.FieldMetaData("ex", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, directory_service_exception.class)));
+      metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(add_tags_result.class, metaDataMap);
+    }
+
+    public add_tags_result() {
+    }
+
+    public add_tags_result(
+      directory_service_exception ex)
+    {
+      this();
+      this.ex = ex;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public add_tags_result(add_tags_result other) {
+      if (other.isSetEx()) {
+        this.ex = new directory_service_exception(other.ex);
+      }
+    }
+
+    public add_tags_result deepCopy() {
+      return new add_tags_result(this);
+    }
+
+    @Override
+    public void clear() {
+      this.ex = null;
+    }
+
+    public directory_service_exception getEx() {
+      return this.ex;
+    }
+
+    public add_tags_result setEx(directory_service_exception ex) {
+      this.ex = ex;
+      return this;
+    }
+
+    public void unsetEx() {
+      this.ex = null;
+    }
+
+    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    public boolean isSetEx() {
+      return this.ex != null;
+    }
+
+    public void setExIsSet(boolean value) {
+      if (!value) {
+        this.ex = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, java.lang.Object value) {
+      switch (field) {
+      case EX:
+        if (value == null) {
+          unsetEx();
+        } else {
+          setEx((directory_service_exception)value);
+        }
+        break;
+
+      }
+    }
+
+    public java.lang.Object getFieldValue(_Fields field) {
+      switch (field) {
+      case EX:
+        return getEx();
+
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new java.lang.IllegalArgumentException();
+      }
+
+      switch (field) {
+      case EX:
+        return isSetEx();
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(java.lang.Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof add_tags_result)
+        return this.equals((add_tags_result)that);
+      return false;
+    }
+
+    public boolean equals(add_tags_result that) {
+      if (that == null)
+        return false;
+      if (this == that)
+        return true;
+
+      boolean this_present_ex = true && this.isSetEx();
+      boolean that_present_ex = true && that.isSetEx();
+      if (this_present_ex || that_present_ex) {
+        if (!(this_present_ex && that_present_ex))
+          return false;
+        if (!this.ex.equals(that.ex))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int hashCode = 1;
+
+      hashCode = hashCode * 8191 + ((isSetEx()) ? 131071 : 524287);
+      if (isSetEx())
+        hashCode = hashCode * 8191 + ex.hashCode();
+
+      return hashCode;
+    }
+
+    @Override
+    public int compareTo(add_tags_result other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+
+      lastComparison = java.lang.Boolean.valueOf(isSetEx()).compareTo(other.isSetEx());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetEx()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.ex, other.ex);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      scheme(iprot).read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      scheme(oprot).write(oprot, this);
+      }
+
+    @Override
+    public java.lang.String toString() {
+      java.lang.StringBuilder sb = new java.lang.StringBuilder("add_tags_result(");
+      boolean first = true;
+
+      sb.append("ex:");
+      if (this.ex == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.ex);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, java.lang.ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class add_tags_resultStandardSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public add_tags_resultStandardScheme getScheme() {
+        return new add_tags_resultStandardScheme();
+      }
+    }
+
+    private static class add_tags_resultStandardScheme extends org.apache.thrift.scheme.StandardScheme<add_tags_result> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, add_tags_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // EX
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
+                struct.ex = new directory_service_exception();
+                struct.ex.read(iprot);
+                struct.setExIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, add_tags_result struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.ex != null) {
+          oprot.writeFieldBegin(EX_FIELD_DESC);
+          struct.ex.write(oprot);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class add_tags_resultTupleSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public add_tags_resultTupleScheme getScheme() {
+        return new add_tags_resultTupleScheme();
+      }
+    }
+
+    private static class add_tags_resultTupleScheme extends org.apache.thrift.scheme.TupleScheme<add_tags_result> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, add_tags_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet optionals = new java.util.BitSet();
+        if (struct.isSetEx()) {
+          optionals.set(0);
+        }
+        oprot.writeBitSet(optionals, 1);
+        if (struct.isSetEx()) {
+          struct.ex.write(oprot);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, add_tags_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet incoming = iprot.readBitSet(1);
+        if (incoming.get(0)) {
           struct.ex = new directory_service_exception();
           struct.ex.read(iprot);
           struct.setExIsSet(true);
