@@ -30,6 +30,7 @@ TEST_CASE("lease_manager_test") {
   std::this_thread::sleep_for(100ms);
   REQUIRE_NOTHROW(tree->touch("/sandbox/a/b/c"));
   std::this_thread::sleep_for(150ms);
+  REQUIRE_NOTHROW(mgr.stop());
   REQUIRE(tree->exists("/sandbox/a/b/c/file.txt"));
   REQUIRE(!tree->exists("/sandbox/a/b/file.txt"));
   REQUIRE(!tree->exists("/sandbox/a/file.txt"));
@@ -52,6 +53,4 @@ TEST_CASE("lease_manager_test") {
   REQUIRE(sm->COMMANDS[5] == "reset:1");
   REQUIRE(sm->COMMANDS[6] == "dump:4:local://tmp/0_65536");
   REQUIRE(sm->COMMANDS[7] == "reset:2");
-
-  REQUIRE_NOTHROW(mgr.stop());
 }

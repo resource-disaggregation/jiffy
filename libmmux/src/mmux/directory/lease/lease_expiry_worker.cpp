@@ -10,13 +10,15 @@ using namespace utils;
 lease_expiry_worker::lease_expiry_worker(std::shared_ptr<directory_tree> tree,
                                          std::uint64_t lease_period_ms,
                                          std::uint64_t grace_period_ms)
-    : lease_period_ms_(lease_period_ms), grace_period_ms_(grace_period_ms), tree_(std::move(tree)), stop_(false) {
+    : lease_period_ms_(lease_period_ms),
+      grace_period_ms_(grace_period_ms),
+      tree_(std::move(tree)),
+      stop_(false),
+      num_epochs_(0) {
 }
 
 lease_expiry_worker::~lease_expiry_worker() {
-  stop_.store(true);
-  if (worker_.joinable())
-    worker_.join();
+  stop();
 }
 
 void lease_expiry_worker::start() {
@@ -29,6 +31,7 @@ void lease_expiry_worker::start() {
       } catch (std::exception &e) {
         LOG(error) << "Exception: " << e.what();
       }
+      ++num_epochs_;
       auto end = std::chrono::steady_clock::now();
       auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
@@ -42,6 +45,8 @@ void lease_expiry_worker::start() {
 
 void lease_expiry_worker::stop() {
   stop_.store(true);
+  if (worker_.joinable())
+    worker_.join();
 }
 
 void lease_expiry_worker::remove_expired_leases() {
@@ -89,6 +94,10 @@ void lease_expiry_worker::remove_expired_nodes(std::shared_ptr<ds_dir_node> pare
       }
     }
   }
+}
+
+size_t lease_expiry_worker::num_epochs() const {
+  return num_epochs_.load();
 }
 
 }

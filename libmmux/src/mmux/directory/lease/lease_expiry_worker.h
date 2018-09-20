@@ -13,9 +13,8 @@ class lease_expiry_worker {
   ~lease_expiry_worker();
 
   void start();
-
   void stop();
-
+  size_t num_epochs() const;
  private:
   void remove_expired_leases();
 
@@ -29,6 +28,7 @@ class lease_expiry_worker {
   std::shared_ptr<directory_tree> tree_;
   std::thread worker_;
   std::atomic_bool stop_;
+  std::atomic_size_t num_epochs_;
 };
 
 }

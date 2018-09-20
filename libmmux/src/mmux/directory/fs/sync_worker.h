@@ -13,8 +13,8 @@ class sync_worker {
   ~sync_worker();
 
   void start();
-
   void stop();
+  size_t num_epochs() const;
  private:
   void sync_nodes();
 
@@ -28,6 +28,7 @@ class sync_worker {
 
   std::thread worker_;
   std::atomic_bool stop_;
+  std::atomic_size_t num_epochs_;
 };
 
 }

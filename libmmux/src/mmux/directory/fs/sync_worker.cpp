@@ -6,24 +6,23 @@ namespace directory {
 using namespace utils;
 
 sync_worker::sync_worker(std::shared_ptr<directory_tree> tree, uint64_t sync_period_ms)
-    : tree_(tree), sync_period_(sync_period_ms) {}
+    : tree_(tree), sync_period_(sync_period_ms), stop_(false), num_epochs_(0) {}
 
 sync_worker::~sync_worker() {
-  stop_.store(true);
-  if (worker_.joinable())
-    worker_.join();
+  stop();
 }
 
 void sync_worker::start() {
-  worker_ = std::move(std::thread([&] {
+  worker_ = std::thread([&] {
     while (!stop_.load()) {
-      LOG(trace) << "Looking for expired leases...";
+      LOG(trace) << "Looking for mapped files to synchronize...";
       auto start = std::chrono::steady_clock::now();
       try {
         sync_nodes();
       } catch (std::exception &e) {
         LOG(error) << "Exception: " << e.what();
       }
+      ++num_epochs_;
       auto end = std::chrono::steady_clock::now();
       auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
@@ -32,11 +31,13 @@ void sync_worker::start() {
         std::this_thread::sleep_for(time_to_wait);
       }
     }
-  }));
+  });
 }
 
 void sync_worker::stop() {
   stop_.store(true);
+  if (worker_.joinable())
+    worker_.join();
 }
 
 void sync_worker::sync_nodes() {
@@ -72,6 +73,10 @@ void sync_worker::sync_nodes(std::shared_ptr<ds_dir_node> parent,
       sync_nodes(node, child_path, cname, epoch);
     }
   }
+}
+
+size_t sync_worker::num_epochs() const {
+  return num_epochs_.load();
 }
 
 }
