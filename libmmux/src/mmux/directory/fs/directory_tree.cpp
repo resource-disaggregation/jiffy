@@ -53,7 +53,9 @@ data_status directory_tree::create(const std::string &path,
                                    const std::string &backing_path,
                                    std::size_t num_blocks,
                                    std::size_t chain_length,
-                                   std::int32_t flags) {
+                                   std::int32_t flags,
+                                   std::int32_t permissions,
+                                   const std::map<std::string, std::string> &tags) {
   LOG(log_level::info) << "Creating file " << path << " with backing_path=" << backing_path << " num_blocks="
                        << num_blocks << ", chain_length=" << chain_length;
   if (num_blocks == 0) {
@@ -119,9 +121,7 @@ data_status directory_tree::create(const std::string &path,
       }
     }
   }
-  auto child = std::make_shared<ds_file_node>(filename, backing_path, chain_length, blocks);
-  child->backing_path(backing_path);
-  child->flags(flags);
+  auto child = std::make_shared<ds_file_node>(filename, backing_path, chain_length, blocks, flags, permissions, tags);
   parent->add_child(child);
 
   return child->dstatus();
@@ -131,7 +131,9 @@ data_status directory_tree::open_or_create(const std::string &path,
                                            const std::string &backing_path,
                                            std::size_t num_blocks,
                                            std::size_t chain_length,
-                                           std::int32_t flags) {
+                                           std::int32_t flags,
+                                           std::int32_t permissions,
+                                           const std::map<std::string, std::string> &tags) {
 
   LOG(log_level::info) << "Opening or creating file " << path << " with backing_path=" << backing_path << " num_blocks="
                        << num_blocks << ", chain_length=" << chain_length;
@@ -207,9 +209,7 @@ data_status directory_tree::open_or_create(const std::string &path,
       }
     }
   }
-  auto child = std::make_shared<ds_file_node>(filename, backing_path, chain_length, blocks);
-  child->backing_path(backing_path);
-  child->flags(flags);
+  auto child = std::make_shared<ds_file_node>(filename, backing_path, chain_length, blocks, flags, permissions, tags);
   parent->add_child(child);
 
   return child->dstatus();
@@ -250,6 +250,11 @@ void directory_tree::permissions(const std::string &path, const perms &prms, per
 
 void directory_tree::remove(const std::string &path) {
   LOG(log_level::info) << "Removing path " << path;
+  if (path == "/") {
+    if (root_->children().empty())
+      return;
+    throw directory_ops_exception("Directory not empty: " + path);
+  }
   std::string ptemp = path;
   std::string child_name = directory_utils::pop_path_element(ptemp);
   auto parent = get_node_as_dir(ptemp);
@@ -266,21 +271,33 @@ void directory_tree::remove(const std::string &path) {
   allocator_->free(cleared_blocks);
 }
 
+void directory_tree::remove_all(std::shared_ptr<ds_dir_node> parent, const std::string &child_name) {
+  auto child = parent->get_child(child_name);
+  if (child == nullptr) {
+    throw directory_ops_exception("Node does not exist: " + child_name);
+  }
+  parent->remove_child(child_name);
+  LOG(log_level::info) << "Removed child " << child_name;
+  std::vector<std::string> cleared_blocks;
+  clear_storage(cleared_blocks, child);
+  LOG(log_level::info) << "Cleared all blocks " << child_name;
+  allocator_->free(cleared_blocks);
+}
+
 void directory_tree::remove_all(const std::string &path) {
   LOG(log_level::info) << "Removing path " << path;
+  if (path == "/") {
+    auto parent = root_;
+    auto children = root_->children();
+    for (const auto &child_name: children) {
+      remove_all(parent, child_name);
+    }
+    return;
+  }
   std::string ptemp = path;
   std::string child_name = directory_utils::pop_path_element(ptemp);
   auto parent = get_node_as_dir(ptemp);
-  auto child = parent->get_child(child_name);
-  if (child == nullptr) {
-    throw directory_ops_exception("Path does not exist: " + path);
-  }
-  parent->remove_child(child_name);
-  LOG(log_level::info) << "Removed child " << path;
-  std::vector<std::string> cleared_blocks;
-  clear_storage(cleared_blocks, child);
-  LOG(log_level::info) << "Cleared all blocks " << path;
-  allocator_->free(cleared_blocks);
+  remove_all(parent, child_name);
 }
 
 void directory_tree::sync(const std::string &path, const std::string &backing_path) {
@@ -305,24 +322,30 @@ void directory_tree::rename(const std::string &old_path, const std::string &new_
   if (old_path == new_path)
     return;
   std::string ptemp = old_path;
-  std::string child_name = directory_utils::pop_path_element(ptemp);
+  std::string old_child_name = directory_utils::pop_path_element(ptemp);
   auto old_parent = get_node_as_dir(ptemp);
-  auto old_child = old_parent->get_child(child_name);
+  auto old_child = old_parent->get_child(old_child_name);
   if (old_child == nullptr) {
     throw directory_ops_exception("Path does not exist: " + old_path);
   }
 
   ptemp = new_path;
-  child_name = directory_utils::pop_path_element(ptemp);
+  std::string new_child_name = directory_utils::pop_path_element(ptemp);
   auto new_parent = get_node_as_dir(ptemp);
-  auto new_child = new_parent->get_child(child_name);
+  auto new_child = new_parent->get_child(new_child_name);
   if (new_child != nullptr) {
-    if (new_child->is_directory())
-      throw directory_ops_exception("New path is a non-empty directory: " + new_path);
-    new_parent->remove_child(child_name);
+    if (new_child->is_directory()) {
+      new_parent = std::dynamic_pointer_cast<ds_dir_node>(new_child);
+      new_child_name = old_child_name;
+    } else {
+      new_parent->remove_child(new_child_name);
+      std::vector<std::string> cleared_blocks;
+      clear_storage(cleared_blocks, new_child);
+      allocator_->free(cleared_blocks);
+    }
   }
   old_parent->remove_child(old_child->name());
-  old_child->name(child_name);
+  old_child->name(new_child_name);
   new_parent->add_child(old_child);
 }
 
@@ -340,6 +363,10 @@ std::vector<directory_entry> directory_tree::recursive_directory_entries(const s
 
 data_status directory_tree::dstatus(const std::string &path) {
   return get_node_as_file(path)->dstatus();
+}
+
+void directory_tree::add_tags(const std::string &path, const std::map<std::string, std::string> &tags) {
+  get_node_as_file(path)->add_tags(tags);
 }
 
 bool directory_tree::is_regular_file(const std::string &path) {

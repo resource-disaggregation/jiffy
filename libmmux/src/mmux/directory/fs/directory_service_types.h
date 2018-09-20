@@ -177,6 +177,7 @@ class rpc_data_status {
   int32_t chain_length;
   std::vector<rpc_replica_chain>  data_blocks;
   int32_t flags;
+  std::map<std::string, std::string>  tags;
 
   void __set_backing_path(const std::string& val);
 
@@ -185,6 +186,8 @@ class rpc_data_status {
   void __set_data_blocks(const std::vector<rpc_replica_chain> & val);
 
   void __set_flags(const int32_t val);
+
+  void __set_tags(const std::map<std::string, std::string> & val);
 
   bool operator == (const rpc_data_status & rhs) const
   {
@@ -195,6 +198,8 @@ class rpc_data_status {
     if (!(data_blocks == rhs.data_blocks))
       return false;
     if (!(flags == rhs.flags))
+      return false;
+    if (!(tags == rhs.tags))
       return false;
     return true;
   }

@@ -52,14 +52,18 @@ data_status directory_client::create(const std::string &path,
                                      const std::string &backing_path,
                                      std::size_t num_blocks,
                                      std::size_t chain_length,
-                                     std::int32_t flags) {
+                                     std::int32_t flags,
+                                     std::int32_t permissions,
+                                     const std::map<std::string, std::string> &tags) {
   rpc_data_status s;
   client_->create(s,
                   path,
                   backing_path,
                   static_cast<const int32_t>(num_blocks),
                   static_cast<const int32_t>(chain_length),
-                  flags);
+                  flags,
+                  permissions,
+                  tags);
   return directory_type_conversions::from_rpc(s);
 }
 
@@ -67,14 +71,18 @@ data_status directory_client::open_or_create(const std::string &path,
                                              const std::string &backing_path,
                                              std::size_t num_blocks,
                                              std::size_t chain_length,
-                                             std::int32_t flags) {
+                                             std::int32_t flags,
+                                             std::int32_t permissions,
+                                             const std::map<std::string, std::string> &tags) {
   rpc_data_status s;
   client_->open_or_create(s,
                           path,
                           backing_path,
                           static_cast<const int32_t>(num_blocks),
                           static_cast<const int32_t>(chain_length),
-                          flags);
+                          flags,
+                          permissions,
+                          tags);
   return directory_type_conversions::from_rpc(s);
 }
 
@@ -148,6 +156,10 @@ data_status directory_client::dstatus(const std::string &path) {
   rpc_data_status s;
   client_->dstatus(s, path);
   return directory_type_conversions::from_rpc(s);
+}
+
+void directory_client::add_tags(const std::string &path, const std::map<std::string, std::string> &tags) {
+  client_->add_tags(path, tags);
 }
 
 bool directory_client::is_regular_file(const std::string &path) {

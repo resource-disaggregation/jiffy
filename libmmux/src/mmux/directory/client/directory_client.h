@@ -21,15 +21,19 @@ class directory_client : public directory_interface {
   void create_directories(const std::string &path) override;
   data_status open(const std::string &path) override;
   data_status create(const std::string &path,
-                     const std::string &backing_path,
-                     std::size_t num_blocks,
-                     std::size_t chain_length,
-                     std::int32_t flags) override;
+                     const std::string &backing_path = "",
+                     std::size_t num_blocks = 1,
+                     std::size_t chain_length = 1,
+                     std::int32_t flags = 0,
+                     std::int32_t permissions = perms::all(),
+                     const std::map<std::string, std::string> &tags = {}) override;
   data_status open_or_create(const std::string &path,
-                             const std::string &backing_path,
-                             std::size_t num_blocks,
-                             std::size_t chain_length,
-                             std::int32_t flags) override;
+                             const std::string &backing_path = "",
+                             std::size_t num_blocks = 1,
+                             std::size_t chain_length = 1,
+                             std::int32_t flags = 0,
+                             std::int32_t permissions = perms::all(),
+                             const std::map<std::string, std::string> &tags = {}) override;
   bool exists(const std::string &path) const override;
   std::uint64_t last_write_time(const std::string &path) const override;
   perms permissions(const std::string &path) override;
@@ -42,19 +46,20 @@ class directory_client : public directory_interface {
   std::vector<directory_entry> directory_entries(const std::string &path) override;
   std::vector<directory_entry> recursive_directory_entries(const std::string &path) override;
   data_status dstatus(const std::string &path) override;
+  void add_tags(const std::string &path, const std::map<std::string, std::string> &tags) override;
   bool is_regular_file(const std::string &path) override;
   bool is_directory(const std::string &path) override;
 
   // Management Ops
-  replica_chain resolve_failures(const std::string &path, const replica_chain &chain);
-  replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain);
-  void add_block_to_file(const std::string &path);
-  void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end);
-  void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end);
-  void dump(const std::string &path, const std::string &backing_path);
-  void load(const std::string &path, const std::string &backing_path);
-  virtual void touch(const std::string &path);
-  virtual void handle_lease_expiry(const std::string &path);
+  replica_chain resolve_failures(const std::string &path, const replica_chain &chain) override;
+  replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) override;
+  void add_block_to_file(const std::string &path) override;
+  void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) override;
+  void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) override;
+  void dump(const std::string &path, const std::string &backing_path) override;
+  void load(const std::string &path, const std::string &backing_path) override;
+  virtual void touch(const std::string &path) override;
+  virtual void handle_lease_expiry(const std::string &path) override;
 
  private:
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};

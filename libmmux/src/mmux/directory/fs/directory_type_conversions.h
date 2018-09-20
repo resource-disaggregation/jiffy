@@ -34,6 +34,7 @@ class directory_type_conversions {
     for (const auto &blk: status.data_blocks()) {
       rpc.data_blocks.push_back(to_rpc(blk));
     }
+    rpc.tags = status.get_tags();
     return rpc;
   }
 
@@ -59,7 +60,7 @@ class directory_type_conversions {
     for (const auto &blk: rpc.data_blocks) {
       data_blocks.push_back(from_rpc(blk));
     }
-    return data_status(rpc.backing_path, static_cast<size_t>(rpc.chain_length), data_blocks, rpc.flags);
+    return data_status(rpc.backing_path, static_cast<size_t>(rpc.chain_length), data_blocks, rpc.flags, rpc.tags);
   }
 
   static file_status from_rpc(const rpc_file_status &rpc) {

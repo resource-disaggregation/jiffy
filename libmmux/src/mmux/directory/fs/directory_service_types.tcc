@@ -247,6 +247,7 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
   bool isset_chain_length = false;
   bool isset_data_blocks = false;
   bool isset_flags = false;
+  bool isset_tags = false;
 
   while (true)
   {
@@ -300,6 +301,29 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 5:
+        if (ftype == ::apache::thrift::protocol::T_MAP) {
+          {
+            this->tags.clear();
+            uint32_t _size17;
+            ::apache::thrift::protocol::TType _ktype18;
+            ::apache::thrift::protocol::TType _vtype19;
+            xfer += iprot->readMapBegin(_ktype18, _vtype19, _size17);
+            uint32_t _i21;
+            for (_i21 = 0; _i21 < _size17; ++_i21)
+            {
+              std::string _key22;
+              xfer += iprot->readString(_key22);
+              std::string& _val23 = this->tags[_key22];
+              xfer += iprot->readString(_val23);
+            }
+            xfer += iprot->readMapEnd();
+          }
+          isset_tags = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -316,6 +340,8 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
   if (!isset_data_blocks)
     throw TProtocolException(TProtocolException::INVALID_DATA);
   if (!isset_flags)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
+  if (!isset_tags)
     throw TProtocolException(TProtocolException::INVALID_DATA);
   return xfer;
 }
@@ -337,10 +363,10 @@ uint32_t rpc_data_status::write(Protocol_* oprot) const {
   xfer += oprot->writeFieldBegin("data_blocks", ::apache::thrift::protocol::T_LIST, 3);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->data_blocks.size()));
-    std::vector<rpc_replica_chain> ::const_iterator _iter17;
-    for (_iter17 = this->data_blocks.begin(); _iter17 != this->data_blocks.end(); ++_iter17)
+    std::vector<rpc_replica_chain> ::const_iterator _iter24;
+    for (_iter24 = this->data_blocks.begin(); _iter24 != this->data_blocks.end(); ++_iter24)
     {
-      xfer += (*_iter17).write(oprot);
+      xfer += (*_iter24).write(oprot);
     }
     xfer += oprot->writeListEnd();
   }
@@ -348,6 +374,19 @@ uint32_t rpc_data_status::write(Protocol_* oprot) const {
 
   xfer += oprot->writeFieldBegin("flags", ::apache::thrift::protocol::T_I32, 4);
   xfer += oprot->writeI32(this->flags);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("tags", ::apache::thrift::protocol::T_MAP, 5);
+  {
+    xfer += oprot->writeMapBegin(::apache::thrift::protocol::T_STRING, ::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->tags.size()));
+    std::map<std::string, std::string> ::const_iterator _iter25;
+    for (_iter25 = this->tags.begin(); _iter25 != this->tags.end(); ++_iter25)
+    {
+      xfer += oprot->writeString(_iter25->first);
+      xfer += oprot->writeString(_iter25->second);
+    }
+    xfer += oprot->writeMapEnd();
+  }
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();

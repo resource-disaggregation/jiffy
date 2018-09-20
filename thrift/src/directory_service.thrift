@@ -40,6 +40,7 @@ struct rpc_data_status {
   2: required i32 chain_length,
   3: required list<rpc_replica_chain> data_blocks,
   4: required i32 flags,
+  5: required map<string, string> tags,
 }
 
 struct rpc_dir_entry {
@@ -59,9 +60,9 @@ service directory_service {
 
   rpc_data_status open(1: string path)
     throws (1: directory_service_exception ex),
-  rpc_data_status create(1: string path, 2: string backing_path, 3: i32 num_blocks, 4: i32 chain_length, 5: i32 flags)
+  rpc_data_status create(1: string path, 2: string backing_path, 3: i32 num_blocks, 4: i32 chain_length, 5: i32 flags, 6: i32 permissions, 7: map<string, string> tags)
     throws (1: directory_service_exception ex),
-  rpc_data_status open_or_create(1: string path, 2: string backing_path, 3: i32 num_blocks, 4: i32 chain_length, 5: i32 flags)
+  rpc_data_status open_or_create(1: string path, 2: string backing_path, 3: i32 num_blocks, 4: i32 chain_length, 5: i32 flags, 6: i32 permissions, 7: map<string, string> tags)
     throws (1: directory_service_exception ex),
 
   bool exists(1: string path)
@@ -100,6 +101,9 @@ service directory_service {
     throws (1: directory_service_exception ex),
   
   rpc_data_status dstatus(1: string path)
+    throws (1: directory_service_exception ex),
+
+  void add_tags(1: string path, 2: map<string, string> tags)
     throws (1: directory_service_exception ex),
 
   bool is_regular_file(1: string path)

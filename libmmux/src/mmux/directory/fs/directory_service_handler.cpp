@@ -36,13 +36,17 @@ void directory_service_handler::create(rpc_data_status &_return,
                                        const std::string &backing_path,
                                        int32_t num_blocks,
                                        int32_t chain_length,
-                                       int32_t flags) {
+                                       int32_t flags,
+                                       int32_t permissions,
+                                       const std::map<std::string, std::string> & tags) {
   try {
     _return = directory_type_conversions::to_rpc(shard_->create(path,
                                                                 backing_path,
                                                                 (size_t) num_blocks,
                                                                 (size_t) chain_length,
-                                                                flags));
+                                                                flags,
+                                                                permissions,
+                                                                tags));
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
   }
@@ -53,13 +57,17 @@ void directory_service_handler::open_or_create(rpc_data_status &_return,
                                                const std::string &backing_path,
                                                int32_t num_blocks,
                                                int32_t chain_length,
-                                               int32_t flags) {
+                                               int32_t flags,
+                                               int32_t permissions,
+                                               const std::map<std::string, std::string> & tags) {
   try {
     _return = directory_type_conversions::to_rpc(shard_->open_or_create(path,
                                                                         backing_path,
                                                                         (size_t) num_blocks,
                                                                         (size_t) chain_length,
-                                                                        flags));
+                                                                        flags,
+                                                                        permissions,
+                                                                        tags));
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
   }
@@ -178,6 +186,14 @@ void directory_service_handler::recursive_directory_entries(std::vector<rpc_dir_
 void directory_service_handler::dstatus(rpc_data_status &_return, const std::string &path) {
   try {
     _return = directory_type_conversions::to_rpc(shard_->dstatus(path));
+  } catch (directory_ops_exception &e) {
+    throw make_exception(e);
+  }
+}
+
+void directory_service_handler::add_tags(const std::string &path, const std::map<std::string, std::string> &tags) {
+  try {
+    shard_->add_tags(path, tags);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
   }

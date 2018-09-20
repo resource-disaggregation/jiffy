@@ -9,6 +9,7 @@
 #include <chrono>
 #include <sstream>
 #include <iostream>
+#include <map>
 
 namespace mmux {
 namespace directory {
@@ -285,13 +286,21 @@ class data_status {
   static const std::int32_t PINNED = 0x01;
   static const std::int32_t STATIC_PROVISIONED = 0x02;
   static const std::int32_t MAPPED = 0x04;
+  static const std::size_t MAX_TAG_KEYLEN = 256;
+  static const std::size_t MAX_TAG_VALLEN = 256;
+  static const std::size_t MAX_NUM_TAGS = 256;
 
   data_status() : chain_length_(1), flags_(0) {}
 
-  data_status(std::string backing_path, std::size_t chain_length, std::vector<replica_chain> blocks, int32_t flags = 0)
+  data_status(std::string backing_path,
+              std::size_t chain_length,
+              std::vector<replica_chain> blocks,
+              int32_t flags = 0,
+              const std::map<std::string, std::string> &tags = {})
       : backing_path_(std::move(backing_path)),
         chain_length_(chain_length),
         data_blocks_(std::move(blocks)),
+        tags_(tags),
         flags_(flags) {}
 
   const std::vector<replica_chain> &data_blocks() const {
@@ -390,9 +399,43 @@ class data_status {
     return data_blocks_[i].slot_range.second - data_blocks_[i].slot_range.second;
   }
 
+  void add_tag(const std::string &key, const std::string &value) {
+    if (key.size() > MAX_TAG_KEYLEN) {
+      throw directory_ops_exception("Tag key size > " + std::to_string(MAX_TAG_KEYLEN));
+    }
+    if (value.size() > MAX_TAG_VALLEN) {
+      throw directory_ops_exception("Tag value size > " + std::to_string(MAX_TAG_VALLEN));
+    }
+    auto it = tags_.find(key);
+    if (it != tags_.end()) {
+      it->second = value;
+    } else {
+      if (tags_.size() + 1 > MAX_NUM_TAGS) {
+        throw directory_ops_exception("Reached tag limit for file: " + std::to_string(MAX_NUM_TAGS));
+      }
+      tags_[key] = value;
+    }
+  }
+
+  void add_tags(const std::map<std::string, std::string> &tags) {
+    for (const auto &tag: tags) {
+      add_tag(tag.first, tag.second);
+    }
+  }
+
+  std::string get_tag(const std::string &key) const {
+    if (tags_.find(key) != tags_.end())
+      return tags_.at(key);
+    throw new directory_ops_exception("tag " + key + " not found");
+  }
+
+  const std::map<std::string, std::string> &get_tags() const {
+    return tags_;
+  }
+
   std::string to_string() const {
-    std::string out = "{ backing_path: " + backing_path_ + ", chain_length: "
-        + std::to_string(chain_length_) + ", data_blocks: { ";
+    std::string out = "{ backing_path: " + backing_path_ + ", chain_length: " + std::to_string(chain_length_)
+        + ", data_blocks: { ";
     for (const auto &chain: data_blocks_) {
       out += chain.to_string() + ", ";
     }
@@ -442,6 +485,7 @@ class data_status {
   std::string backing_path_;
   std::size_t chain_length_;
   std::vector<replica_chain> data_blocks_;
+  std::map<std::string, std::string> tags_;
   std::int32_t flags_;
 };
 
@@ -457,12 +501,16 @@ class directory_ops {
                              const std::string &backing_path,
                              std::size_t num_blocks,
                              std::size_t chain_length,
-                             std::int32_t flags) = 0;
+                             std::int32_t flags,
+                             std::int32_t permissions,
+                             const std::map<std::string, std::string> &tags) = 0;
   virtual data_status open_or_create(const std::string &path,
                                      const std::string &backing_path,
                                      std::size_t num_blocks,
                                      std::size_t chain_length,
-                                     std::int32_t flags) = 0;
+                                     std::int32_t flags,
+                                     std::int32_t permissions,
+                                     const std::map<std::string, std::string> &tags) = 0;
 
   virtual bool exists(const std::string &path) const = 0;
 
@@ -487,6 +535,7 @@ class directory_ops {
   virtual std::vector<directory_entry> recursive_directory_entries(const std::string &path) = 0;
 
   virtual data_status dstatus(const std::string &path) = 0;
+  virtual void add_tags(const std::string &path, const std::map<std::string, std::string> &tags) = 0;
 
   // Check file type
   virtual bool is_regular_file(const std::string &path) = 0;
@@ -504,7 +553,7 @@ class directory_management_ops {
   virtual void handle_lease_expiry(const std::string &path) = 0;
 };
 
-class directory_interface: public directory_ops, public directory_management_ops {};
+class directory_interface : public directory_ops, public directory_management_ops {};
 
 }
 }

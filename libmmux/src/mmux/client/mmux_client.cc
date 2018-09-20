@@ -31,8 +31,10 @@ std::shared_ptr<storage::kv_client> mmux_client::create(const std::string &path,
                                                         const std::string &backing_path,
                                                         size_t num_blocks,
                                                         size_t chain_length,
-                                                        int32_t flags) {
-  auto s = fs_->create(path, backing_path, num_blocks, chain_length, flags);
+                                                        int32_t flags,
+                                                        int32_t permissions,
+                                                        const std::map<std::string, std::string> &tags) {
+  auto s = fs_->create(path, backing_path, num_blocks, chain_length, flags, permissions, tags);
   begin_scope(path);
   return std::make_shared<storage::kv_client>(fs_, path, s);
 }
@@ -47,8 +49,10 @@ std::shared_ptr<storage::kv_client> mmux_client::open_or_create(const std::strin
                                                                 const std::string &backing_path,
                                                                 size_t num_blocks,
                                                                 size_t chain_length,
-                                                                int32_t flags) {
-  auto s = fs_->open_or_create(path, backing_path, num_blocks, chain_length, flags);
+                                                                int32_t flags,
+                                                                int32_t permissions,
+                                                                const std::map<std::string, std::string> &tags) {
+  auto s = fs_->open_or_create(path, backing_path, num_blocks, chain_length, flags, permissions, tags);
   begin_scope(path);
   return std::make_shared<storage::kv_client>(fs_, path, s);
 }

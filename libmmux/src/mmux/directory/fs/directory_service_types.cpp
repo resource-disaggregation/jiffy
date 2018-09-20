@@ -207,6 +207,10 @@ void rpc_data_status::__set_data_blocks(const std::vector<rpc_replica_chain> & v
 void rpc_data_status::__set_flags(const int32_t val) {
   this->flags = val;
 }
+
+void rpc_data_status::__set_tags(const std::map<std::string, std::string> & val) {
+  this->tags = val;
+}
 std::ostream& operator<<(std::ostream& out, const rpc_data_status& obj)
 {
   obj.printTo(out);
@@ -220,19 +224,22 @@ void swap(rpc_data_status &a, rpc_data_status &b) {
   swap(a.chain_length, b.chain_length);
   swap(a.data_blocks, b.data_blocks);
   swap(a.flags, b.flags);
+  swap(a.tags, b.tags);
 }
 
-rpc_data_status::rpc_data_status(const rpc_data_status& other18) {
-  backing_path = other18.backing_path;
-  chain_length = other18.chain_length;
-  data_blocks = other18.data_blocks;
-  flags = other18.flags;
+rpc_data_status::rpc_data_status(const rpc_data_status& other26) {
+  backing_path = other26.backing_path;
+  chain_length = other26.chain_length;
+  data_blocks = other26.data_blocks;
+  flags = other26.flags;
+  tags = other26.tags;
 }
-rpc_data_status& rpc_data_status::operator=(const rpc_data_status& other19) {
-  backing_path = other19.backing_path;
-  chain_length = other19.chain_length;
-  data_blocks = other19.data_blocks;
-  flags = other19.flags;
+rpc_data_status& rpc_data_status::operator=(const rpc_data_status& other27) {
+  backing_path = other27.backing_path;
+  chain_length = other27.chain_length;
+  data_blocks = other27.data_blocks;
+  flags = other27.flags;
+  tags = other27.tags;
   return *this;
 }
 void rpc_data_status::printTo(std::ostream& out) const {
@@ -242,6 +249,7 @@ void rpc_data_status::printTo(std::ostream& out) const {
   out << ", " << "chain_length=" << to_string(chain_length);
   out << ", " << "data_blocks=" << to_string(data_blocks);
   out << ", " << "flags=" << to_string(flags);
+  out << ", " << "tags=" << to_string(tags);
   out << ")";
 }
 
@@ -270,13 +278,13 @@ void swap(rpc_dir_entry &a, rpc_dir_entry &b) {
   swap(a.status, b.status);
 }
 
-rpc_dir_entry::rpc_dir_entry(const rpc_dir_entry& other20) {
-  name = other20.name;
-  status = other20.status;
+rpc_dir_entry::rpc_dir_entry(const rpc_dir_entry& other28) {
+  name = other28.name;
+  status = other28.status;
 }
-rpc_dir_entry& rpc_dir_entry::operator=(const rpc_dir_entry& other21) {
-  name = other21.name;
-  status = other21.status;
+rpc_dir_entry& rpc_dir_entry::operator=(const rpc_dir_entry& other29) {
+  name = other29.name;
+  status = other29.status;
   return *this;
 }
 void rpc_dir_entry::printTo(std::ostream& out) const {
@@ -307,11 +315,11 @@ void swap(directory_service_exception &a, directory_service_exception &b) {
   swap(a.msg, b.msg);
 }
 
-directory_service_exception::directory_service_exception(const directory_service_exception& other22) : TException() {
-  msg = other22.msg;
+directory_service_exception::directory_service_exception(const directory_service_exception& other30) : TException() {
+  msg = other30.msg;
 }
-directory_service_exception& directory_service_exception::operator=(const directory_service_exception& other23) {
-  msg = other23.msg;
+directory_service_exception& directory_service_exception::operator=(const directory_service_exception& other31) {
+  msg = other31.msg;
   return *this;
 }
 void directory_service_exception::printTo(std::ostream& out) const {

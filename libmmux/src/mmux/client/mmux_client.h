@@ -24,13 +24,17 @@ class mmux_client {
                                              const std::string &backing_path,
                                              size_t num_blocks = 1,
                                              size_t chain_length = 1,
-                                             int32_t flags = 0);
+                                             int32_t flags = 0,
+                                             int32_t permissions = directory::perms::all(),
+                                             const std::map<std::string, std::string> &tags = {});
   std::shared_ptr<storage::kv_client> open(const std::string &path);
   std::shared_ptr<storage::kv_client> open_or_create(const std::string &path,
                                                      const std::string &backing_path,
                                                      size_t num_blocks = 1,
                                                      size_t chain_length = 1,
-                                                     int32_t flags = 0);
+                                                     int32_t flags = 0,
+                                                     int32_t permissions = directory::perms::all(),
+                                                     const std::map<std::string, std::string> &tags = {});
   std::shared_ptr<storage::kv_listener> listen(const std::string &path);
   void close(const std::string &path);
 

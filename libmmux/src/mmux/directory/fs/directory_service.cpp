@@ -314,6 +314,22 @@ directory_service_dstatus_presult::~directory_service_dstatus_presult() throw() 
 }
 
 
+directory_service_add_tags_args::~directory_service_add_tags_args() throw() {
+}
+
+
+directory_service_add_tags_pargs::~directory_service_add_tags_pargs() throw() {
+}
+
+
+directory_service_add_tags_result::~directory_service_add_tags_result() throw() {
+}
+
+
+directory_service_add_tags_presult::~directory_service_add_tags_presult() throw() {
+}
+
+
 directory_service_is_regular_file_args::~directory_service_is_regular_file_args() throw() {
 }
 

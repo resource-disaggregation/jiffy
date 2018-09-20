@@ -24,8 +24,8 @@ class directory_serviceIf {
   virtual void create_directory(const std::string& path) = 0;
   virtual void create_directories(const std::string& path) = 0;
   virtual void open(rpc_data_status& _return, const std::string& path) = 0;
-  virtual void create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags) = 0;
-  virtual void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags) = 0;
+  virtual void create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::map<std::string, std::string> & tags) = 0;
+  virtual void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::map<std::string, std::string> & tags) = 0;
   virtual bool exists(const std::string& path) = 0;
   virtual int64_t last_write_time(const std::string& path) = 0;
   virtual void set_permissions(const std::string& path, const rpc_perms perms, const rpc_perm_options opts) = 0;
@@ -40,6 +40,7 @@ class directory_serviceIf {
   virtual void directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path) = 0;
   virtual void recursive_directory_entries(std::vector<rpc_dir_entry> & _return, const std::string& path) = 0;
   virtual void dstatus(rpc_data_status& _return, const std::string& path) = 0;
+  virtual void add_tags(const std::string& path, const std::map<std::string, std::string> & tags) = 0;
   virtual bool is_regular_file(const std::string& path) = 0;
   virtual bool is_directory(const std::string& path) = 0;
   virtual void reslove_failures(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain) = 0;
@@ -85,10 +86,10 @@ class directory_serviceNull : virtual public directory_serviceIf {
   void open(rpc_data_status& /* _return */, const std::string& /* path */) {
     return;
   }
-  void create(rpc_data_status& /* _return */, const std::string& /* path */, const std::string& /* backing_path */, const int32_t /* num_blocks */, const int32_t /* chain_length */, const int32_t /* flags */) {
+  void create(rpc_data_status& /* _return */, const std::string& /* path */, const std::string& /* backing_path */, const int32_t /* num_blocks */, const int32_t /* chain_length */, const int32_t /* flags */, const int32_t /* permissions */, const std::map<std::string, std::string> & /* tags */) {
     return;
   }
-  void open_or_create(rpc_data_status& /* _return */, const std::string& /* path */, const std::string& /* backing_path */, const int32_t /* num_blocks */, const int32_t /* chain_length */, const int32_t /* flags */) {
+  void open_or_create(rpc_data_status& /* _return */, const std::string& /* path */, const std::string& /* backing_path */, const int32_t /* num_blocks */, const int32_t /* chain_length */, const int32_t /* flags */, const int32_t /* permissions */, const std::map<std::string, std::string> & /* tags */) {
     return;
   }
   bool exists(const std::string& /* path */) {
@@ -134,6 +135,9 @@ class directory_serviceNull : virtual public directory_serviceIf {
     return;
   }
   void dstatus(rpc_data_status& /* _return */, const std::string& /* path */) {
+    return;
+  }
+  void add_tags(const std::string& /* path */, const std::map<std::string, std::string> & /* tags */) {
     return;
   }
   bool is_regular_file(const std::string& /* path */) {
@@ -500,12 +504,14 @@ class directory_service_open_presult {
 };
 
 typedef struct _directory_service_create_args__isset {
-  _directory_service_create_args__isset() : path(false), backing_path(false), num_blocks(false), chain_length(false), flags(false) {}
+  _directory_service_create_args__isset() : path(false), backing_path(false), num_blocks(false), chain_length(false), flags(false), permissions(false), tags(false) {}
   bool path :1;
   bool backing_path :1;
   bool num_blocks :1;
   bool chain_length :1;
   bool flags :1;
+  bool permissions :1;
+  bool tags :1;
 } _directory_service_create_args__isset;
 
 class directory_service_create_args {
@@ -513,7 +519,7 @@ class directory_service_create_args {
 
   directory_service_create_args(const directory_service_create_args&);
   directory_service_create_args& operator=(const directory_service_create_args&);
-  directory_service_create_args() : path(), backing_path(), num_blocks(0), chain_length(0), flags(0) {
+  directory_service_create_args() : path(), backing_path(), num_blocks(0), chain_length(0), flags(0), permissions(0) {
   }
 
   virtual ~directory_service_create_args() throw();
@@ -522,6 +528,8 @@ class directory_service_create_args {
   int32_t num_blocks;
   int32_t chain_length;
   int32_t flags;
+  int32_t permissions;
+  std::map<std::string, std::string>  tags;
 
   _directory_service_create_args__isset __isset;
 
@@ -535,6 +543,10 @@ class directory_service_create_args {
 
   void __set_flags(const int32_t val);
 
+  void __set_permissions(const int32_t val);
+
+  void __set_tags(const std::map<std::string, std::string> & val);
+
   bool operator == (const directory_service_create_args & rhs) const
   {
     if (!(path == rhs.path))
@@ -546,6 +558,10 @@ class directory_service_create_args {
     if (!(chain_length == rhs.chain_length))
       return false;
     if (!(flags == rhs.flags))
+      return false;
+    if (!(permissions == rhs.permissions))
+      return false;
+    if (!(tags == rhs.tags))
       return false;
     return true;
   }
@@ -573,6 +589,8 @@ class directory_service_create_pargs {
   const int32_t* num_blocks;
   const int32_t* chain_length;
   const int32_t* flags;
+  const int32_t* permissions;
+  const std::map<std::string, std::string> * tags;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -646,12 +664,14 @@ class directory_service_create_presult {
 };
 
 typedef struct _directory_service_open_or_create_args__isset {
-  _directory_service_open_or_create_args__isset() : path(false), backing_path(false), num_blocks(false), chain_length(false), flags(false) {}
+  _directory_service_open_or_create_args__isset() : path(false), backing_path(false), num_blocks(false), chain_length(false), flags(false), permissions(false), tags(false) {}
   bool path :1;
   bool backing_path :1;
   bool num_blocks :1;
   bool chain_length :1;
   bool flags :1;
+  bool permissions :1;
+  bool tags :1;
 } _directory_service_open_or_create_args__isset;
 
 class directory_service_open_or_create_args {
@@ -659,7 +679,7 @@ class directory_service_open_or_create_args {
 
   directory_service_open_or_create_args(const directory_service_open_or_create_args&);
   directory_service_open_or_create_args& operator=(const directory_service_open_or_create_args&);
-  directory_service_open_or_create_args() : path(), backing_path(), num_blocks(0), chain_length(0), flags(0) {
+  directory_service_open_or_create_args() : path(), backing_path(), num_blocks(0), chain_length(0), flags(0), permissions(0) {
   }
 
   virtual ~directory_service_open_or_create_args() throw();
@@ -668,6 +688,8 @@ class directory_service_open_or_create_args {
   int32_t num_blocks;
   int32_t chain_length;
   int32_t flags;
+  int32_t permissions;
+  std::map<std::string, std::string>  tags;
 
   _directory_service_open_or_create_args__isset __isset;
 
@@ -681,6 +703,10 @@ class directory_service_open_or_create_args {
 
   void __set_flags(const int32_t val);
 
+  void __set_permissions(const int32_t val);
+
+  void __set_tags(const std::map<std::string, std::string> & val);
+
   bool operator == (const directory_service_open_or_create_args & rhs) const
   {
     if (!(path == rhs.path))
@@ -692,6 +718,10 @@ class directory_service_open_or_create_args {
     if (!(chain_length == rhs.chain_length))
       return false;
     if (!(flags == rhs.flags))
+      return false;
+    if (!(permissions == rhs.permissions))
+      return false;
+    if (!(tags == rhs.tags))
       return false;
     return true;
   }
@@ -719,6 +749,8 @@ class directory_service_open_or_create_pargs {
   const int32_t* num_blocks;
   const int32_t* chain_length;
   const int32_t* flags;
+  const int32_t* permissions;
+  const std::map<std::string, std::string> * tags;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -2429,6 +2461,123 @@ class directory_service_dstatus_presult {
 
 };
 
+typedef struct _directory_service_add_tags_args__isset {
+  _directory_service_add_tags_args__isset() : path(false), tags(false) {}
+  bool path :1;
+  bool tags :1;
+} _directory_service_add_tags_args__isset;
+
+class directory_service_add_tags_args {
+ public:
+
+  directory_service_add_tags_args(const directory_service_add_tags_args&);
+  directory_service_add_tags_args& operator=(const directory_service_add_tags_args&);
+  directory_service_add_tags_args() : path() {
+  }
+
+  virtual ~directory_service_add_tags_args() throw();
+  std::string path;
+  std::map<std::string, std::string>  tags;
+
+  _directory_service_add_tags_args__isset __isset;
+
+  void __set_path(const std::string& val);
+
+  void __set_tags(const std::map<std::string, std::string> & val);
+
+  bool operator == (const directory_service_add_tags_args & rhs) const
+  {
+    if (!(path == rhs.path))
+      return false;
+    if (!(tags == rhs.tags))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_add_tags_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_add_tags_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class directory_service_add_tags_pargs {
+ public:
+
+
+  virtual ~directory_service_add_tags_pargs() throw();
+  const std::string* path;
+  const std::map<std::string, std::string> * tags;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_add_tags_result__isset {
+  _directory_service_add_tags_result__isset() : ex(false) {}
+  bool ex :1;
+} _directory_service_add_tags_result__isset;
+
+class directory_service_add_tags_result {
+ public:
+
+  directory_service_add_tags_result(const directory_service_add_tags_result&);
+  directory_service_add_tags_result& operator=(const directory_service_add_tags_result&);
+  directory_service_add_tags_result() {
+  }
+
+  virtual ~directory_service_add_tags_result() throw();
+  directory_service_exception ex;
+
+  _directory_service_add_tags_result__isset __isset;
+
+  void __set_ex(const directory_service_exception& val);
+
+  bool operator == (const directory_service_add_tags_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_add_tags_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_add_tags_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_add_tags_presult__isset {
+  _directory_service_add_tags_presult__isset() : ex(false) {}
+  bool ex :1;
+} _directory_service_add_tags_presult__isset;
+
+class directory_service_add_tags_presult {
+ public:
+
+
+  virtual ~directory_service_add_tags_presult() throw();
+  directory_service_exception ex;
+
+  _directory_service_add_tags_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
 typedef struct _directory_service_is_regular_file_args__isset {
   _directory_service_is_regular_file_args__isset() : path(false) {}
   bool path :1;
@@ -3308,11 +3457,11 @@ class directory_serviceClientT : virtual public directory_serviceIf {
   void open(rpc_data_status& _return, const std::string& path);
   void send_open(const std::string& path);
   void recv_open(rpc_data_status& _return);
-  void create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags);
-  void send_create(const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags);
+  void create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::map<std::string, std::string> & tags);
+  void send_create(const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::map<std::string, std::string> & tags);
   void recv_create(rpc_data_status& _return);
-  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags);
-  void send_open_or_create(const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags);
+  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::map<std::string, std::string> & tags);
+  void send_open_or_create(const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::map<std::string, std::string> & tags);
   void recv_open_or_create(rpc_data_status& _return);
   bool exists(const std::string& path);
   void send_exists(const std::string& path);
@@ -3356,6 +3505,9 @@ class directory_serviceClientT : virtual public directory_serviceIf {
   void dstatus(rpc_data_status& _return, const std::string& path);
   void send_dstatus(const std::string& path);
   void recv_dstatus(rpc_data_status& _return);
+  void add_tags(const std::string& path, const std::map<std::string, std::string> & tags);
+  void send_add_tags(const std::string& path, const std::map<std::string, std::string> & tags);
+  void recv_add_tags();
   bool is_regular_file(const std::string& path);
   void send_is_regular_file(const std::string& path);
   bool recv_is_regular_file();
@@ -3443,6 +3595,8 @@ class directory_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT
   void process_recursive_directory_entries(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_dstatus(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_dstatus(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_add_tags(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_add_tags(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_is_regular_file(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_is_regular_file(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_is_directory(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -3517,6 +3671,9 @@ class directory_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT
     processMap_["dstatus"] = ProcessFunctions(
       &directory_serviceProcessorT::process_dstatus,
       &directory_serviceProcessorT::process_dstatus);
+    processMap_["add_tags"] = ProcessFunctions(
+      &directory_serviceProcessorT::process_add_tags,
+      &directory_serviceProcessorT::process_add_tags);
     processMap_["is_regular_file"] = ProcessFunctions(
       &directory_serviceProcessorT::process_is_regular_file,
       &directory_serviceProcessorT::process_is_regular_file);
@@ -3599,23 +3756,23 @@ class directory_serviceMultiface : virtual public directory_serviceIf {
     return;
   }
 
-  void create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags) {
+  void create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::map<std::string, std::string> & tags) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->create(_return, path, backing_path, num_blocks, chain_length, flags);
+      ifaces_[i]->create(_return, path, backing_path, num_blocks, chain_length, flags, permissions, tags);
     }
-    ifaces_[i]->create(_return, path, backing_path, num_blocks, chain_length, flags);
+    ifaces_[i]->create(_return, path, backing_path, num_blocks, chain_length, flags, permissions, tags);
     return;
   }
 
-  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags) {
+  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::map<std::string, std::string> & tags) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->open_or_create(_return, path, backing_path, num_blocks, chain_length, flags);
+      ifaces_[i]->open_or_create(_return, path, backing_path, num_blocks, chain_length, flags, permissions, tags);
     }
-    ifaces_[i]->open_or_create(_return, path, backing_path, num_blocks, chain_length, flags);
+    ifaces_[i]->open_or_create(_return, path, backing_path, num_blocks, chain_length, flags, permissions, tags);
     return;
   }
 
@@ -3749,6 +3906,15 @@ class directory_serviceMultiface : virtual public directory_serviceIf {
     return;
   }
 
+  void add_tags(const std::string& path, const std::map<std::string, std::string> & tags) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->add_tags(path, tags);
+    }
+    ifaces_[i]->add_tags(path, tags);
+  }
+
   bool is_regular_file(const std::string& path) {
     size_t sz = ifaces_.size();
     size_t i = 0;
@@ -3854,11 +4020,11 @@ class directory_serviceConcurrentClientT : virtual public directory_serviceIf {
   void open(rpc_data_status& _return, const std::string& path);
   int32_t send_open(const std::string& path);
   void recv_open(rpc_data_status& _return, const int32_t seqid);
-  void create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags);
-  int32_t send_create(const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags);
+  void create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::map<std::string, std::string> & tags);
+  int32_t send_create(const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::map<std::string, std::string> & tags);
   void recv_create(rpc_data_status& _return, const int32_t seqid);
-  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags);
-  int32_t send_open_or_create(const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags);
+  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::map<std::string, std::string> & tags);
+  int32_t send_open_or_create(const std::string& path, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::map<std::string, std::string> & tags);
   void recv_open_or_create(rpc_data_status& _return, const int32_t seqid);
   bool exists(const std::string& path);
   int32_t send_exists(const std::string& path);
@@ -3902,6 +4068,9 @@ class directory_serviceConcurrentClientT : virtual public directory_serviceIf {
   void dstatus(rpc_data_status& _return, const std::string& path);
   int32_t send_dstatus(const std::string& path);
   void recv_dstatus(rpc_data_status& _return, const int32_t seqid);
+  void add_tags(const std::string& path, const std::map<std::string, std::string> & tags);
+  int32_t send_add_tags(const std::string& path, const std::map<std::string, std::string> & tags);
+  void recv_add_tags(const int32_t seqid);
   bool is_regular_file(const std::string& path);
   int32_t send_is_regular_file(const std::string& path);
   bool recv_is_regular_file(const int32_t seqid);

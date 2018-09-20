@@ -79,9 +79,13 @@ class ds_file_node : public ds_node {
   ds_file_node(const std::string &name,
                const std::string &backing_path,
                std::size_t chain_length,
-               std::vector<replica_chain> blocks) :
-      ds_node(name, file_status(file_type::regular, perms(perms::all), utils::time_utils::now_ms())),
-      dstatus_(backing_path, chain_length, std::move(blocks)) {}
+               std::vector<replica_chain> blocks,
+               int32_t flags,
+               int32_t permissions,
+               const std::map<std::string, std::string> &tags) :
+      ds_node(name,
+              file_status(file_type::regular, perms(static_cast<uint16_t>(permissions)), utils::time_utils::now_ms())),
+      dstatus_(backing_path, chain_length, std::move(blocks), flags, tags) {}
 
   const data_status &dstatus() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
@@ -128,13 +132,33 @@ class ds_file_node : public ds_node {
     dstatus_.chain_length(chain_length);
   }
 
+  void add_tag(const std::string &key, const std::string &value) {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    dstatus_.add_tag(key, value);
+  }
+
+  void add_tags(const std::map<std::string, std::string> &tags) {
+    std::unique_lock<std::shared_mutex> lock(mtx_);
+    dstatus_.add_tags(tags);
+  }
+
+  std::string get_tag(const std::string &key) const {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    return dstatus_.get_tag(key);
+  }
+
+  const std::map<std::string, std::string> &get_tags() const {
+    std::shared_lock<std::shared_mutex> lock(mtx_);
+    return dstatus_.get_tags();
+  }
+
   std::int32_t flags() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_.flags();
   }
 
   void flags(std::int32_t flags) {
-    std::shared_lock<std::shared_mutex> lock(mtx_);
+    std::unique_lock<std::shared_mutex> lock(mtx_);
     dstatus_.flags(flags);
   }
 
@@ -708,12 +732,16 @@ class directory_tree : public directory_interface {
                      const std::string &backing_path = "",
                      std::size_t num_blocks = 1,
                      std::size_t chain_length = 1,
-                     std::int32_t flags = 0) override;
+                     std::int32_t flags = 0,
+                     std::int32_t permissions = perms::all(),
+                     const std::map<std::string, std::string> &tags = {}) override;
   data_status open_or_create(const std::string &path,
                              const std::string &backing_path = "",
                              std::size_t num_blocks = 1,
                              std::size_t chain_length = 1,
-                             std::int32_t flags = 0) override;
+                             std::int32_t flags = 0,
+                             std::int32_t permissions = perms::all(),
+                             const std::map<std::string, std::string> &tags = {}) override;
 
   bool exists(const std::string &path) const override;
 
@@ -738,6 +766,7 @@ class directory_tree : public directory_interface {
   std::vector<directory_entry> recursive_directory_entries(const std::string &path) override;
 
   data_status dstatus(const std::string &path) override;
+  void add_tags(const std::string &path, const std::map<std::string, std::string> &tags) override;
 
   bool is_regular_file(const std::string &path) override;
   bool is_directory(const std::string &path) override;
@@ -747,11 +776,13 @@ class directory_tree : public directory_interface {
                                  const replica_chain &chain) override; // TODO: Take id as input
   replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) override;
   void add_block_to_file(const std::string &path) override;
-  virtual void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end);
-  virtual void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end);
-  virtual void handle_lease_expiry(const std::string &path);
+  void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) override;
+  void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) override;
+  void handle_lease_expiry(const std::string &path) override;
 
  private:
+  void remove_all(std::shared_ptr<ds_dir_node> parent, const std::string &child_name);
+
   std::shared_ptr<ds_node> get_node_unsafe(const std::string &path) const;
 
   std::shared_ptr<ds_node> get_node(const std::string &path) const;

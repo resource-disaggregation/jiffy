@@ -310,16 +310,19 @@ TEST_CASE("rpc_rename_test", "[file][dir]") {
   directory_client tree(HOST, PORT);
   REQUIRE_NOTHROW(tree.create("/sandbox/from/file1.txt", "/tmp", 1, 1, 0));
   REQUIRE_NOTHROW(tree.create_directory("/sandbox/to"));
+  REQUIRE_NOTHROW(tree.create_directory("/sandbox/to2"));
 
-  REQUIRE_THROWS_AS(tree.rename("/sandbox/from/file1.txt", "/sandbox/to/"), directory_service_exception);
   REQUIRE_NOTHROW(tree.rename("/sandbox/from/file1.txt", "/sandbox/to/file2.txt"));
   REQUIRE(tree.exists("/sandbox/to/file2.txt"));
   REQUIRE(!tree.exists("/sandbox/from/file1.txt"));
 
-  REQUIRE_THROWS_AS(tree.rename("/sandbox/from", "/sandbox/to"), directory_service_exception);
   REQUIRE_NOTHROW(tree.rename("/sandbox/from", "/sandbox/to/subdir"));
   REQUIRE(tree.exists("/sandbox/to/subdir"));
   REQUIRE(!tree.exists("/sandbox/from"));
+
+  REQUIRE_NOTHROW(tree.rename("/sandbox/to/subdir", "/sandbox/to2"));
+  REQUIRE(tree.exists("/sandbox/to2/subdir"));
+  REQUIRE(!tree.exists("/sandbox/to/subdir"));
 
   server->stop();
   if (serve_thread.joinable()) {
