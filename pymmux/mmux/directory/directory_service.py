@@ -39,7 +39,7 @@ class Iface(object):
         """
         pass
 
-    def create(self, path, backing_path, num_blocks, chain_length, flags):
+    def create(self, path, backing_path, num_blocks, chain_length, flags, permissions, tags):
         """
         Parameters:
          - path
@@ -47,10 +47,12 @@ class Iface(object):
          - num_blocks
          - chain_length
          - flags
+         - permissions
+         - tags
         """
         pass
 
-    def open_or_create(self, path, backing_path, num_blocks, chain_length, flags):
+    def open_or_create(self, path, backing_path, num_blocks, chain_length, flags, permissions, tags):
         """
         Parameters:
          - path
@@ -58,6 +60,8 @@ class Iface(object):
          - num_blocks
          - chain_length
          - flags
+         - permissions
+         - tags
         """
         pass
 
@@ -162,6 +166,14 @@ class Iface(object):
         """
         Parameters:
          - path
+        """
+        pass
+
+    def add_tags(self, path, tags):
+        """
+        Parameters:
+         - path
+         - tags
         """
         pass
 
@@ -323,7 +335,7 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "open failed: unknown result")
 
-    def create(self, path, backing_path, num_blocks, chain_length, flags):
+    def create(self, path, backing_path, num_blocks, chain_length, flags, permissions, tags):
         """
         Parameters:
          - path
@@ -331,11 +343,13 @@ class Client(Iface):
          - num_blocks
          - chain_length
          - flags
+         - permissions
+         - tags
         """
-        self.send_create(path, backing_path, num_blocks, chain_length, flags)
+        self.send_create(path, backing_path, num_blocks, chain_length, flags, permissions, tags)
         return self.recv_create()
 
-    def send_create(self, path, backing_path, num_blocks, chain_length, flags):
+    def send_create(self, path, backing_path, num_blocks, chain_length, flags, permissions, tags):
         self._oprot.writeMessageBegin('create', TMessageType.CALL, self._seqid)
         args = create_args()
         args.path = path
@@ -343,6 +357,8 @@ class Client(Iface):
         args.num_blocks = num_blocks
         args.chain_length = chain_length
         args.flags = flags
+        args.permissions = permissions
+        args.tags = tags
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -364,7 +380,7 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "create failed: unknown result")
 
-    def open_or_create(self, path, backing_path, num_blocks, chain_length, flags):
+    def open_or_create(self, path, backing_path, num_blocks, chain_length, flags, permissions, tags):
         """
         Parameters:
          - path
@@ -372,11 +388,13 @@ class Client(Iface):
          - num_blocks
          - chain_length
          - flags
+         - permissions
+         - tags
         """
-        self.send_open_or_create(path, backing_path, num_blocks, chain_length, flags)
+        self.send_open_or_create(path, backing_path, num_blocks, chain_length, flags, permissions, tags)
         return self.recv_open_or_create()
 
-    def send_open_or_create(self, path, backing_path, num_blocks, chain_length, flags):
+    def send_open_or_create(self, path, backing_path, num_blocks, chain_length, flags, permissions, tags):
         self._oprot.writeMessageBegin('open_or_create', TMessageType.CALL, self._seqid)
         args = open_or_create_args()
         args.path = path
@@ -384,6 +402,8 @@ class Client(Iface):
         args.num_blocks = num_blocks
         args.chain_length = chain_length
         args.flags = flags
+        args.permissions = permissions
+        args.tags = tags
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -865,6 +885,39 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "dstatus failed: unknown result")
 
+    def add_tags(self, path, tags):
+        """
+        Parameters:
+         - path
+         - tags
+        """
+        self.send_add_tags(path, tags)
+        self.recv_add_tags()
+
+    def send_add_tags(self, path, tags):
+        self._oprot.writeMessageBegin('add_tags', TMessageType.CALL, self._seqid)
+        args = add_tags_args()
+        args.path = path
+        args.tags = tags
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_add_tags(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = add_tags_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
     def is_regular_file(self, path):
         """
         Parameters:
@@ -1126,6 +1179,7 @@ class Processor(Iface, TProcessor):
         self._processMap["directory_entries"] = Processor.process_directory_entries
         self._processMap["recursive_directory_entries"] = Processor.process_recursive_directory_entries
         self._processMap["dstatus"] = Processor.process_dstatus
+        self._processMap["add_tags"] = Processor.process_add_tags
         self._processMap["is_regular_file"] = Processor.process_is_regular_file
         self._processMap["is_directory"] = Processor.process_is_directory
         self._processMap["reslove_failures"] = Processor.process_reslove_failures
@@ -1233,7 +1287,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = create_result()
         try:
-            result.success = self._handler.create(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags)
+            result.success = self._handler.create(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags, args.permissions, args.tags)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1259,7 +1313,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = open_or_create_result()
         try:
-            result.success = self._handler.open_or_create(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags)
+            result.success = self._handler.open_or_create(args.path, args.backing_path, args.num_blocks, args.chain_length, args.flags, args.permissions, args.tags)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1639,6 +1693,32 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("dstatus", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_add_tags(self, seqid, iprot, oprot):
+        args = add_tags_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = add_tags_result()
+        try:
+            self._handler.add_tags(args.path, args.tags)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except directory_service_exception as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("add_tags", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -2284,6 +2364,8 @@ class create_args(object):
      - num_blocks
      - chain_length
      - flags
+     - permissions
+     - tags
     """
 
     __slots__ = (
@@ -2292,15 +2374,19 @@ class create_args(object):
         'num_blocks',
         'chain_length',
         'flags',
+        'permissions',
+        'tags',
     )
 
 
-    def __init__(self, path=None, backing_path=None, num_blocks=None, chain_length=None, flags=None,):
+    def __init__(self, path=None, backing_path=None, num_blocks=None, chain_length=None, flags=None, permissions=None, tags=None,):
         self.path = path
         self.backing_path = backing_path
         self.num_blocks = num_blocks
         self.chain_length = chain_length
         self.flags = flags
+        self.permissions = permissions
+        self.tags = tags
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -2336,6 +2422,22 @@ class create_args(object):
                     self.flags = iprot.readI32()
                 else:
                     iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.I32:
+                    self.permissions = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.MAP:
+                    self.tags = {}
+                    (_ktype24, _vtype25, _size23) = iprot.readMapBegin()
+                    for _i27 in range(_size23):
+                        _key28 = iprot.readString()
+                        _val29 = iprot.readString()
+                        self.tags[_key28] = _val29
+                    iprot.readMapEnd()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -2365,6 +2467,18 @@ class create_args(object):
         if self.flags is not None:
             oprot.writeFieldBegin('flags', TType.I32, 5)
             oprot.writeI32(self.flags)
+            oprot.writeFieldEnd()
+        if self.permissions is not None:
+            oprot.writeFieldBegin('permissions', TType.I32, 6)
+            oprot.writeI32(self.permissions)
+            oprot.writeFieldEnd()
+        if self.tags is not None:
+            oprot.writeFieldBegin('tags', TType.MAP, 7)
+            oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.tags))
+            for kiter30, viter31 in self.tags.items():
+                oprot.writeString(kiter30)
+                oprot.writeString(viter31)
+            oprot.writeMapEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -2397,6 +2511,8 @@ create_args.thrift_spec = (
     (3, TType.I32, 'num_blocks', None, None, ),  # 3
     (4, TType.I32, 'chain_length', None, None, ),  # 4
     (5, TType.I32, 'flags', None, None, ),  # 5
+    (6, TType.I32, 'permissions', None, None, ),  # 6
+    (7, TType.MAP, 'tags', (TType.STRING, None, TType.STRING, None, False), None, ),  # 7
 )
 
 
@@ -2494,6 +2610,8 @@ class open_or_create_args(object):
      - num_blocks
      - chain_length
      - flags
+     - permissions
+     - tags
     """
 
     __slots__ = (
@@ -2502,15 +2620,19 @@ class open_or_create_args(object):
         'num_blocks',
         'chain_length',
         'flags',
+        'permissions',
+        'tags',
     )
 
 
-    def __init__(self, path=None, backing_path=None, num_blocks=None, chain_length=None, flags=None,):
+    def __init__(self, path=None, backing_path=None, num_blocks=None, chain_length=None, flags=None, permissions=None, tags=None,):
         self.path = path
         self.backing_path = backing_path
         self.num_blocks = num_blocks
         self.chain_length = chain_length
         self.flags = flags
+        self.permissions = permissions
+        self.tags = tags
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -2546,6 +2668,22 @@ class open_or_create_args(object):
                     self.flags = iprot.readI32()
                 else:
                     iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.I32:
+                    self.permissions = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.MAP:
+                    self.tags = {}
+                    (_ktype33, _vtype34, _size32) = iprot.readMapBegin()
+                    for _i36 in range(_size32):
+                        _key37 = iprot.readString()
+                        _val38 = iprot.readString()
+                        self.tags[_key37] = _val38
+                    iprot.readMapEnd()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -2575,6 +2713,18 @@ class open_or_create_args(object):
         if self.flags is not None:
             oprot.writeFieldBegin('flags', TType.I32, 5)
             oprot.writeI32(self.flags)
+            oprot.writeFieldEnd()
+        if self.permissions is not None:
+            oprot.writeFieldBegin('permissions', TType.I32, 6)
+            oprot.writeI32(self.permissions)
+            oprot.writeFieldEnd()
+        if self.tags is not None:
+            oprot.writeFieldBegin('tags', TType.MAP, 7)
+            oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.tags))
+            for kiter39, viter40 in self.tags.items():
+                oprot.writeString(kiter39)
+                oprot.writeString(viter40)
+            oprot.writeMapEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -2607,6 +2757,8 @@ open_or_create_args.thrift_spec = (
     (3, TType.I32, 'num_blocks', None, None, ),  # 3
     (4, TType.I32, 'chain_length', None, None, ),  # 4
     (5, TType.I32, 'flags', None, None, ),  # 5
+    (6, TType.I32, 'permissions', None, None, ),  # 6
+    (7, TType.MAP, 'tags', (TType.STRING, None, TType.STRING, None, False), None, ),  # 7
 )
 
 
@@ -4519,11 +4671,11 @@ class directory_entries_result(object):
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype17, _size14) = iprot.readListBegin()
-                    for _i18 in range(_size14):
-                        _elem19 = rpc_dir_entry()
-                        _elem19.read(iprot)
-                        self.success.append(_elem19)
+                    (_etype44, _size41) = iprot.readListBegin()
+                    for _i45 in range(_size41):
+                        _elem46 = rpc_dir_entry()
+                        _elem46.read(iprot)
+                        self.success.append(_elem46)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -4546,8 +4698,8 @@ class directory_entries_result(object):
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.LIST, 0)
             oprot.writeListBegin(TType.STRUCT, len(self.success))
-            for iter20 in self.success:
-                iter20.write(oprot)
+            for iter47 in self.success:
+                iter47.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.ex is not None:
@@ -4685,11 +4837,11 @@ class recursive_directory_entries_result(object):
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype24, _size21) = iprot.readListBegin()
-                    for _i25 in range(_size21):
-                        _elem26 = rpc_dir_entry()
-                        _elem26.read(iprot)
-                        self.success.append(_elem26)
+                    (_etype51, _size48) = iprot.readListBegin()
+                    for _i52 in range(_size48):
+                        _elem53 = rpc_dir_entry()
+                        _elem53.read(iprot)
+                        self.success.append(_elem53)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -4712,8 +4864,8 @@ class recursive_directory_entries_result(object):
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.LIST, 0)
             oprot.writeListBegin(TType.STRUCT, len(self.success))
-            for iter27 in self.success:
-                iter27.write(oprot)
+            for iter54 in self.success:
+                iter54.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.ex is not None:
@@ -4904,6 +5056,174 @@ class dstatus_result(object):
 all_structs.append(dstatus_result)
 dstatus_result.thrift_spec = (
     (0, TType.STRUCT, 'success', [rpc_data_status, None], None, ),  # 0
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
+)
+
+
+class add_tags_args(object):
+    """
+    Attributes:
+     - path
+     - tags
+    """
+
+    __slots__ = (
+        'path',
+        'tags',
+    )
+
+
+    def __init__(self, path=None, tags=None,):
+        self.path = path
+        self.tags = tags
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.path = iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.MAP:
+                    self.tags = {}
+                    (_ktype56, _vtype57, _size55) = iprot.readMapBegin()
+                    for _i59 in range(_size55):
+                        _key60 = iprot.readString()
+                        _val61 = iprot.readString()
+                        self.tags[_key60] = _val61
+                    iprot.readMapEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('add_tags_args')
+        if self.path is not None:
+            oprot.writeFieldBegin('path', TType.STRING, 1)
+            oprot.writeString(self.path)
+            oprot.writeFieldEnd()
+        if self.tags is not None:
+            oprot.writeFieldBegin('tags', TType.MAP, 2)
+            oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.tags))
+            for kiter62, viter63 in self.tags.items():
+                oprot.writeString(kiter62)
+                oprot.writeString(viter63)
+            oprot.writeMapEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(add_tags_args)
+add_tags_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'path', None, None, ),  # 1
+    (2, TType.MAP, 'tags', (TType.STRING, None, TType.STRING, None, False), None, ),  # 2
+)
+
+
+class add_tags_result(object):
+    """
+    Attributes:
+     - ex
+    """
+
+    __slots__ = (
+        'ex',
+    )
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = directory_service_exception()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('add_tags_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(add_tags_result)
+add_tags_result.thrift_spec = (
+    None,  # 0
     (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 

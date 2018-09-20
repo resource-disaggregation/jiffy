@@ -96,12 +96,15 @@ class ReplicaChain:
 
 
 class DataStatus:
-    def __init__(self, backing_path, chain_length, data_blocks):
+    def __init__(self, backing_path, chain_length, data_blocks, flags, tags):
         self.backing_path = backing_path
         self.chain_length = chain_length
         self.data_blocks = [ReplicaChain(replica_chain.block_names, replica_chain.slot_begin, replica_chain.slot_end,
                                          replica_chain.storage_mode)
                             for replica_chain in data_blocks]
+        self.flags = flags
+        self.tags = tags
+
 
 class Flags:
     pinned = 0x01
@@ -144,15 +147,18 @@ class DirectoryClient:
 
     def open(self, path):
         s = self.client_.open(path)
-        return DataStatus(s.backing_path, s.chain_length, s.data_blocks)
+        return DataStatus(s.backing_path, s.chain_length, s.data_blocks, s.flags, s.tags)
 
-    def create(self, path, backing_path, num_blocks=1, chain_length=1, flags=0):
-        s = self.client_.create(path, backing_path, num_blocks, chain_length, flags)
-        return DataStatus(s.backing_path, s.chain_length, s.data_blocks)
+    def create(self, path, backing_path, num_blocks=1, chain_length=1, flags=0, permissions=Perms.all, tags=None):
+        s = self.client_.create(path, backing_path, num_blocks, chain_length, flags, permissions,
+                                {} if tags is None else tags)
+        return DataStatus(s.backing_path, s.chain_length, s.data_blocks, s.flags, s.tags)
 
-    def open_or_create(self, path, backing_path, num_blocks=1, chain_length=1, flags=0):
-        s = self.client_.open_or_create(path, backing_path, num_blocks, chain_length, flags)
-        return DataStatus(s.backing_path, s.chain_length, s.data_blocks)
+    def open_or_create(self, path, backing_path, num_blocks=1, chain_length=1, flags=0, permissions=Perms.all,
+                       tags=None):
+        s = self.client_.open_or_create(path, backing_path, num_blocks, chain_length, flags, permissions,
+                                        {} if tags is None else tags)
+        return DataStatus(s.backing_path, s.chain_length, s.data_blocks, s.flags, s.tags)
 
     def exists(self, path):
         return self.client_.exists(path)
@@ -195,7 +201,10 @@ class DirectoryClient:
 
     def dstatus(self, path):
         s = self.client_.dstatus(path)
-        return DataStatus(s.backing_path, s.chain_length, s.data_blocks)
+        return DataStatus(s.backing_path, s.chain_length, s.data_blocks, s.flags, s.tags)
+
+    def add_tags(self, path, tags):
+        self.client_.add_tags(path, tags)
 
     def is_regular_file(self, path):
         return self.client_.is_regular_file(path)

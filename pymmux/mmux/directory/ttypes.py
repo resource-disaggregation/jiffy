@@ -292,6 +292,7 @@ class rpc_data_status(object):
      - chain_length
      - data_blocks
      - flags
+     - tags
     """
 
     __slots__ = (
@@ -299,14 +300,16 @@ class rpc_data_status(object):
         'chain_length',
         'data_blocks',
         'flags',
+        'tags',
     )
 
 
-    def __init__(self, backing_path=None, chain_length=None, data_blocks=None, flags=None,):
+    def __init__(self, backing_path=None, chain_length=None, data_blocks=None, flags=None, tags=None,):
         self.backing_path = backing_path
         self.chain_length = chain_length
         self.data_blocks = data_blocks
         self.flags = flags
+        self.tags = tags
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -343,6 +346,17 @@ class rpc_data_status(object):
                     self.flags = iprot.readI32()
                 else:
                     iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.MAP:
+                    self.tags = {}
+                    (_ktype14, _vtype15, _size13) = iprot.readMapBegin()
+                    for _i17 in range(_size13):
+                        _key18 = iprot.readString()
+                        _val19 = iprot.readString()
+                        self.tags[_key18] = _val19
+                    iprot.readMapEnd()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -364,13 +378,21 @@ class rpc_data_status(object):
         if self.data_blocks is not None:
             oprot.writeFieldBegin('data_blocks', TType.LIST, 3)
             oprot.writeListBegin(TType.STRUCT, len(self.data_blocks))
-            for iter13 in self.data_blocks:
-                iter13.write(oprot)
+            for iter20 in self.data_blocks:
+                iter20.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.flags is not None:
             oprot.writeFieldBegin('flags', TType.I32, 4)
             oprot.writeI32(self.flags)
+            oprot.writeFieldEnd()
+        if self.tags is not None:
+            oprot.writeFieldBegin('tags', TType.MAP, 5)
+            oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.tags))
+            for kiter21, viter22 in self.tags.items():
+                oprot.writeString(kiter21)
+                oprot.writeString(viter22)
+            oprot.writeMapEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -384,6 +406,8 @@ class rpc_data_status(object):
             raise TProtocolException(message='Required field data_blocks is unset!')
         if self.flags is None:
             raise TProtocolException(message='Required field flags is unset!')
+        if self.tags is None:
+            raise TProtocolException(message='Required field tags is unset!')
         return
 
     def __repr__(self):
@@ -581,6 +605,7 @@ rpc_data_status.thrift_spec = (
     (2, TType.I32, 'chain_length', None, None, ),  # 2
     (3, TType.LIST, 'data_blocks', (TType.STRUCT, [rpc_replica_chain, None], False), None, ),  # 3
     (4, TType.I32, 'flags', None, None, ),  # 4
+    (5, TType.MAP, 'tags', (TType.STRING, None, TType.STRING, None, False), None, ),  # 5
 )
 all_structs.append(rpc_dir_entry)
 rpc_dir_entry.thrift_spec = (
