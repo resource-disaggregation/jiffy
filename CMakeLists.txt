@@ -32,11 +32,6 @@ add_subdirectory(libmmux)
 add_subdirectory(directory)
 add_subdirectory(storage)
 
-add_subdirectory(cmmux)
-
-include(cmake-modules/golang.cmake)
-add_subdirectory(gommux)
-
 if (BUILD_TESTS)
   enable_testing(true)
 endif ()
