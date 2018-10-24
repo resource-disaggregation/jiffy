@@ -435,3 +435,24 @@ TEST_CASE("merge_block_test", "[file]") {
   REQUIRE(sm->COMMANDS[5] == "reset:0");
   REQUIRE(sm->COMMANDS[6] == "set_regular:1:0:65536");
 }
+
+int dummy_test_function(std::string str_input) {
+  if (str_input == "hello"){
+    return 1;
+  } else {
+    throw std::out_of_range("wrong input");
+  }
+};
+
+TEST_CASE("register_function_test", "[file]") {
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
+  REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "local://tmp", 2, 1, 0));
+  REQUIRE_NOTHROW(tree.merge_slot_range("/sandbox/file.txt", 0, 32767));
+  dummy_server_function dummy_func = dummy_server_function("hello",dummy_test_function);
+  
+  tree.register_function("/sandbox/file.txt",dummy_func,"test_hello","hello");
+  REQUIRE(tree.invoke_function("/sandbox/file.txt","test_hello") == 1);
+}
+

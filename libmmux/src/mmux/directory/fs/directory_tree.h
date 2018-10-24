@@ -23,6 +23,15 @@ class lease_expiry_worker;
 class file_size_tracker;
 class sync_worker;
 
+class serverless_function {
+  std::string metadata;
+  public:
+  virtual int invoke(){};
+  void set_metadata(std::string input_meta) {
+    metadata = input_meta;
+  }
+};
+
 class ds_node {
  public:
   explicit ds_node(std::string name, file_status status)
@@ -71,6 +80,34 @@ class ds_file_node : public ds_node {
     replica_chain from_block;
     replica_chain to_block;
   };
+  std::map<std::string,serverless_function> function_registry;
+  
+  serverless_function get_registered(std::string func_trigger) {
+    if (function_registry.find(func_trigger) != function_registry.end()){
+      return function_registry.at(func_trigger);
+    } else {
+      throw directory_ops_exception("Function not registered ");
+    }
+  }
+
+  void register_function(serverless_function &func, std::string func_trigger, std::string metadata) {
+    if (function_registry.find(func_trigger) == function_registry.end()){
+      function_registry[func_trigger] = func;
+      func.set_metadata(metadata);
+    } else {
+      throw directory_ops_exception("Function already registered ");
+    }
+  }
+
+  void register_update_function(serverless_function &func,std::string func_trigger, std::string metadata) {
+    function_registry[func_trigger] = func;
+    func.set_metadata(metadata);
+  }
+
+  auto invoke_function(std::string func_trigger) {
+    serverless_function func = get_registered(func_trigger);
+    return func.invoke();
+  }
 
   explicit ds_file_node(const std::string &name)
       : ds_node(name, file_status(file_type::regular, perms(perms::all), utils::time_utils::now_ms())),
@@ -779,6 +816,10 @@ class directory_tree : public directory_interface {
   void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) override;
   void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) override;
   void handle_lease_expiry(const std::string &path) override;
+
+  void register_function(const std::string &path, directory::serverless_function func, std::string func_trigger, std::string metadata);
+  int invoke_function(const std::string &path,std::string func_trigger);
+
 
  private:
   void remove_all(std::shared_ptr<ds_dir_node> parent, const std::string &child_name);

@@ -12,6 +12,7 @@
 #include "../src/mmux/storage/notification/subscription_map.h"
 #include "../src/mmux/utils/logger.h"
 #include "../src/mmux/directory/directory_ops.h"
+#include "../src/mmux/directory/fs/directory_tree.h"
 
 class dummy_storage_manager : public mmux::storage::storage_management_ops {
  public:
@@ -295,5 +296,27 @@ class test_utils {
     return blks;
   }
 };
+
+class dummy_server_function : public mmux::directory::serverless_function {
+  std::string metadata;
+  std::function<int(std::string)> func;
+  public:
+    dummy_server_function(std::string _metadata, std::function<int(std::string)> _func){
+      metadata=_metadata;
+      func = _func;
+    };
+    int invoke() {
+      func(metadata);
+    };
+};
+
+// int dummy_test_function(std::string str_input) {
+//   if (str_input == "hello"){
+//     return 1;
+//   } else {
+//     throw std::out_of_range("wrong input");
+//   }
+// };
+
 
 #endif //MMUX_TEST_UTILS_H

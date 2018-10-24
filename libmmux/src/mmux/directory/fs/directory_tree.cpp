@@ -698,5 +698,16 @@ void directory_tree::clear_storage(std::vector<std::string> &cleared_blocks, std
   }
 }
 
+void directory_tree::register_function(const std::string &path, serverless_function func, std::string func_trigger, std::string metadata){
+  auto node = get_node_as_file(path);
+  node->register_function(func,func_trigger,metadata);
+}
+
+//at the moment I put int because I was running a test. But i need to figure out how to make this an ambiguous return type
+int directory_tree::invoke_function(const std::string &path, std::string func_trigger){
+  auto node = get_node_as_file(path);
+  node->invoke_function(func_trigger);
+}
+
 }
 }
