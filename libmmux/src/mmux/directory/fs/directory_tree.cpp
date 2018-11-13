@@ -17,7 +17,7 @@ directory_tree::directory_tree(std::shared_ptr<block_allocator> allocator,
       allocator_(std::move(allocator)),
       storage_(std::move(storage)) {}
 /**
- * Create a directory at a certain path
+ * Create a directory at certain path
  * @param path path to be created
  */
 void directory_tree::create_directory(const std::string &path) {
@@ -30,7 +30,7 @@ void directory_tree::create_directory(const std::string &path) {
   }
 }
 /**
- * Create several directorys at the given paths
+ * Create several directorys at given paths
  * @param path paths to be created
  */
 void directory_tree::create_directories(const std::string &path) {
@@ -55,7 +55,7 @@ void directory_tree::create_directories(const std::string &path) {
 }
 
 /**
- * Open the file and return the file status
+ * Open the file and return file status
  * @param path file path to be opened
  * @return dstatus of the file
  */
@@ -153,7 +153,7 @@ data_status directory_tree::create(const std::string &path,
 }
 /**
  * TODO same question
- * @param path
+ * @param path file path
  * @param backing_path
  * @param num_blocks
  * @param chain_length
@@ -173,6 +173,7 @@ data_status directory_tree::open_or_create(const std::string &path,
   LOG(log_level::info) << "Opening or creating file " << path << " with backing_path=" << backing_path << " num_blocks="
                        << num_blocks << ", chain_length=" << chain_length;
   std::string filename = directory_utils::get_filename(path);
+  /* Path has to be path of file */
   if (filename == "." || filename == "/") {
     throw directory_ops_exception("Path is a directory: " + path);
   }
@@ -195,7 +196,7 @@ data_status directory_tree::open_or_create(const std::string &path,
       throw directory_ops_exception("Cannot open or create " + path + ": is a directory");
     }
   }
-
+/* If file doesn't exist, c is nullptr and need to be created */
   if (num_blocks == 0) {
     throw directory_ops_exception("File cannot have zero blocks");
   }
@@ -203,7 +204,7 @@ data_status directory_tree::open_or_create(const std::string &path,
   if (chain_length == 0) {
     throw directory_ops_exception("Chain length cannot be zero");
   }
-
+/* Same code as create */
   std::vector<replica_chain> blocks;
   std::size_t slots_per_block = storage::block::SLOT_MAX / num_blocks;
   bool auto_scale = (flags & data_status::STATIC_PROVISIONED) != data_status::STATIC_PROVISIONED;

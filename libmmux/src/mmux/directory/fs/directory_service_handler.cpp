@@ -40,7 +40,7 @@ void directory_service_handler::create_directories(const std::string &path) {
 
 /**
  * Open a file given file path
- * @param _return replication chain data status
+ * @param _return replication chain data status to be collected
  * @param path file path
  */
 
@@ -53,16 +53,17 @@ void directory_service_handler::open(rpc_data_status &_return, const std::string
 }
 
 /**
- * Create a fix size file
+ * Create file
  * @param _return replication chain data status to be collected
- * @param path destination path
+ * @param path file path
  * @param backing_path backing path
- * @param num_blocks number of blocks
- * @param chain_length replication string length
- * @param flags
- * @param permissions
- * @param tags
+ * @param num_blocks number of blocks to be allocated for the file
+ * @param chain_length replication chain length
+ * @param flags flag arguments
+ * @param permissions file permission set
+ * @param tags tag arguments
  */
+
 void directory_service_handler::create(rpc_data_status &_return,
                                        const std::string &path,
                                        const std::string &backing_path,
@@ -83,17 +84,21 @@ void directory_service_handler::create(rpc_data_status &_return,
     throw make_exception(e);
   }
 }
+
 /**
- * Opening or creating the file using directory tree method
- * @param _return _return replication chain data status to be collected
- * @param path destination path
- * @param backing_path backing path
- * @param num_blocks number of blocks
- * @param chain_length length of replication chain
- * @param flags
- * @param permissions
- * @param tags
+ * Open or create a file
+ * Open file if file exists
+ * If not, create it
+ * @param _return replication chain data status to be collected
+ * @param path file path
+ * @param backing_path file backing path
+ * @param num_blocks number of blocks to be allocated for the file
+ * @param chain_length replication chain length
+ * @param flags flag arguments
+ * @param permissions file permission set
+ * @param tags tag arguments
  */
+
 void directory_service_handler::open_or_create(rpc_data_status &_return,
                                                const std::string &path,
                                                const std::string &backing_path,
@@ -114,11 +119,13 @@ void directory_service_handler::open_or_create(rpc_data_status &_return,
     throw make_exception(e);
   }
 }
+
 /**
  * Check if the file exists
  * @param path file path
  * @return bool value
  */
+
 bool directory_service_handler::exists(const std::string &path) {
   try {
     return shard_->exists(path);
@@ -126,11 +133,13 @@ bool directory_service_handler::exists(const std::string &path) {
     throw make_exception(e);
   }
 }
+
 /**
- * Get the last write time for the file
+ * Fetch the last write time for the file
  * @param path file path
  * @return last write time
  */
+
 int64_t directory_service_handler::last_write_time(const std::string &path) {
   try {
     return static_cast<int64_t>(shard_->last_write_time(path));
@@ -138,12 +147,14 @@ int64_t directory_service_handler::last_write_time(const std::string &path) {
     throw make_exception(e);
   }
 }
+
 /**
  * Set permissions of a file
  * @param path file path
  * @param prms permission
- * @param opts permission options
+ * @param opts permission options replace, add, remove
  */
+
 void directory_service_handler::set_permissions(const std::string &path,
                                                 rpc_perms prms,
                                                 rpc_perm_options opts) {
@@ -153,11 +164,13 @@ void directory_service_handler::set_permissions(const std::string &path,
     throw make_exception(e);
   }
 }
+
 /**
- * Get the permission of a file
+ * Fetch permission of a file
  * @param path file path
  * @return permission
  */
+
 rpc_perms directory_service_handler::get_permissions(const std::string &path) {
   try {
     return static_cast<rpc_perms>(shard_->permissions(path)());
@@ -165,10 +178,12 @@ rpc_perms directory_service_handler::get_permissions(const std::string &path) {
     throw make_exception(e);
   }
 }
+
 /**
  * Remove one file
  * @param path file path
  */
+
 void directory_service_handler::remove(const std::string &path) {
   try {
     shard_->remove(path);

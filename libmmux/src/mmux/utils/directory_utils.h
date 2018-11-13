@@ -47,12 +47,20 @@ class directory_utils {
       }
     mkdir(tmp, 0755);
   }
-
+/**
+ * Fetch file name from path
+ * @param path file path
+ * @return file name
+ */
   static std::string get_filename(const std::string &path) {
     auto tmp = path;
     return pop_path_element(tmp);
   }
-
+/**
+ * Fetch parent path from path
+ * @param path file path
+ * @return parent path
+ */
   static std::string get_parent_path(const std::string &path) {
     auto tmp = path;
     pop_path_element(tmp);
@@ -80,7 +88,12 @@ class directory_utils {
   static void push_path_element(std::string &path, const std::string &element) {
     path = path + PATH_SEPARATOR + element;
   }
-
+/**
+ * Pop file name from path
+ * Path modified to parent path
+ * @param path file path
+ * @return file name
+ */
   static std::string pop_path_element(std::string &path) {
     path = normalize_path(path);
 
