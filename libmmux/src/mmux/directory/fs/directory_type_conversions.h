@@ -6,7 +6,9 @@
 
 namespace mmux {
 namespace directory {
-
+/**
+ * Class to convert directory type
+ */
 class directory_type_conversions {
  public:
   static rpc_replica_chain to_rpc(const replica_chain &chain) {

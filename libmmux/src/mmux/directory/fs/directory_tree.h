@@ -22,39 +22,88 @@ namespace directory {
 class lease_expiry_worker;
 class file_size_tracker;
 class sync_worker;
-
+/**
+ * Virtual class of directory tree node
+ */
 class ds_node {
  public:
   explicit ds_node(std::string name, file_status status)
       : name_(std::move(name)), status_(status) {}
 
   virtual ~ds_node() = default;
-
+/**
+ * Fetch node's name
+ * @return node's name
+ */
   const std::string &name() const { return name_; }
-
+/**
+ * Set node's name
+ * @param name name to be set
+ */
   void name(const std::string &name) { name_ = name; }
-
+/**
+ * Check if it is directory
+ * @return bool variable
+ */
   bool is_directory() const { return status_.type() == file_type::directory; }
-
+/**
+ * Check if it is regular file
+ * @return bool variable
+ */
   bool is_regular_file() const { return status_.type() == file_type::regular; }
-
+/**
+ * Return file status
+ * @return file status
+ */
   file_status status() const { return status_; }
-
+/**
+ * Return all the file entries in the directory
+ * @return file entries
+ */
   directory_entry entry() const { return directory_entry(name_, status_); }
-
+/**
+ * Return last_write_time
+ * @return last_write_time
+ */
   std::uint64_t last_write_time() const { return status_.last_write_time(); }
-
+/**
+ * Set permissions
+ * @param prms permission to be set
+ */
   void permissions(const perms &prms) { status_.permissions(prms); }
-
+/**
+ * Return current permissions
+ * @return current permissions
+ */
   perms permissions() const { return status_.permissions(); }
-
+/**
+ * Set last write time
+ * @param time last write time to be set
+ */
   void last_write_time(std::uint64_t time) { status_.last_write_time(time); }
-
+/**
+ * TODO
+ * @param backing_path
+ * @param storage
+ */
   virtual void sync(const std::string &backing_path,
                     const std::shared_ptr<storage::storage_management_ops> &storage) = 0;
+  /**
+   * TODO
+   * @param cleared_blocks
+   * @param backing_path
+   * @param storage
+   */
   virtual void dump(std::vector<std::string> &cleared_blocks,
                     const std::string &backing_path,
                     const std::shared_ptr<storage::storage_management_ops> &storage) = 0;
+  /**
+   * TODO
+   * @param path
+   * @param backing_path
+   * @param storage
+   * @param allocator
+   */
   virtual void load(const std::string &path,
                     const std::string &backing_path,
                     const std::shared_ptr<storage::storage_management_ops> &storage,
@@ -65,17 +114,37 @@ class ds_node {
   file_status status_{};
 };
 
+/**
+ * Class of file node
+ * Inherited from virtual class ds_node
+ */
+
 class ds_file_node : public ds_node {
  public:
+  /**
+   * Structure of replication chain
+   */
   struct export_ctx {
     replica_chain from_block;
     replica_chain to_block;
   };
-
+/**
+ * Explicit constructor function
+ * @param name node name
+ */
   explicit ds_file_node(const std::string &name)
       : ds_node(name, file_status(file_type::regular, perms(perms::all), utils::time_utils::now_ms())),
         dstatus_{} {}
-
+/**
+ * Constructor function for file node
+ * @param name file name
+ * @param backing_path file backing_path
+ * @param chain_length chain length
+ * @param blocks number of blocks
+ * @param flags
+ * @param permissions
+ * @param tags key and value
+ */
   ds_file_node(const std::string &name,
                const std::string &backing_path,
                std::size_t chain_length,
@@ -86,109 +155,180 @@ class ds_file_node : public ds_node {
       ds_node(name,
               file_status(file_type::regular, perms(static_cast<uint16_t>(permissions)), utils::time_utils::now_ms())),
       dstatus_(backing_path, chain_length, std::move(blocks), flags, tags) {}
-
+/**
+ * TODO why lock?
+ * Return the dstatus of the file
+ * @return dstatus
+ */
   const data_status &dstatus() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_;
   }
-
+/**
+ * Set dstatus
+ * @param status dstatus to be set
+ */
   void dstatus(const data_status &status) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     dstatus_ = status;
   }
-
+/**
+ * Return storage mode of the file
+ * @return
+ */
   std::vector<storage_mode> mode() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_.mode();
   }
-
+/**
+ * Set new storage mode
+ * @param i block id to be set
+ * @param m storage mode to be set
+ */
   void mode(size_t i, const storage_mode &m) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     dstatus_.mode(i, m);
   }
-
+/**
+ * Set new storage mode to all blocks
+ * @param m storage mode to be set
+ */
   void mode(const storage_mode &m) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     dstatus_.mode(m);
   }
-
+/**
+ * Return backing path of the file
+ * @return backing path
+ */
   const std::string &backing_path() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_.backing_path();
   }
-
+/**
+ * Set prefix backing path
+ * @param prefix backing path to be set
+ */
   void backing_path(const std::string &prefix) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     dstatus_.backing_path(prefix);
   }
-
+/**
+ * Return chain length of the file
+ * @return chain length
+ */
   std::size_t chain_length() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_.chain_length();
   }
-
+/**
+ * Set chain length
+ * @param chain_length
+ */
   void chain_length(std::size_t chain_length) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     dstatus_.chain_length(chain_length);
   }
-
+/**
+ * Add tags to file(set value for provided key)
+ * @param key key to be set
+ * @param value value to be set
+ */
   void add_tag(const std::string &key, const std::string &value) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     dstatus_.add_tag(key, value);
   }
-
+/**
+ * Add tags to file, passing arguments in pairs
+ * @param tags key and value pair to be set
+ */
   void add_tags(const std::map<std::string, std::string> &tags) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     dstatus_.add_tags(tags);
   }
-
+/**
+ * Return the tag for a specific key
+ * @param key provided key
+ * @return tag tag
+ */
   std::string get_tag(const std::string &key) const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_.get_tag(key);
   }
-
+/**
+ * Return all tags
+ * @return tags
+ */
   const std::map<std::string, std::string> &get_tags() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_.get_tags();
   }
-
+/**
+ *  TODO
+ * @return
+ */
   std::int32_t flags() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_.flags();
   }
-
+/**
+ * TODO
+ * @param flags
+ */
   void flags(std::int32_t flags) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     dstatus_.flags(flags);
   }
-
+/**
+ * TODO
+ * @return
+ */
   bool is_pinned() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_.is_pinned();
   }
-
+/**
+ * TODO
+ * @return
+ */
   bool is_mapped() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_.is_mapped();
   }
-
+/**
+ * TODO
+ * Check if the file memory is static provisioned
+ * it seems that all these checks are check different bits of the flag
+ * @return
+ */
   bool is_static_provisioned() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_.is_static_provisioned();
   }
-
+/**
+ * TODO
+ * data_blocks is a vector of repication chain
+ * @return
+ */
   const std::vector<replica_chain> &data_blocks() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     return dstatus_.data_blocks();
   }
-
+  /**
+   * TODO
+   * @return
+   */
   std::vector<replica_chain> _all_data_blocks() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     std::vector<replica_chain> out = dstatus_.data_blocks();
     out.insert(out.end(), adding_.begin(), adding_.end());
     return out;
   }
-
+/**
+ * TODO
+ * @param backing_path
+ * @param storage
+ */
   void sync(const std::string &backing_path, const std::shared_ptr<storage::storage_management_ops> &storage) override {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     for (const auto &block: dstatus_.data_blocks()) {
@@ -198,6 +338,12 @@ class ds_file_node : public ds_node {
         storage->sync(block.tail(), block_backing_path);
     }
   }
+  /**
+   * TODO
+   * @param cleared_blocks
+   * @param backing_path
+   * @param storage
+   */
 
   void dump(std::vector<std::string> &cleared_blocks,
             const std::string &backing_path,
@@ -217,6 +363,13 @@ class ds_file_node : public ds_node {
       }
     }
   }
+  /**
+   * TODO
+   * @param path
+   * @param backing_path
+   * @param storage
+   * @param allocator
+   */
 
   void load(const std::string &path,
             const std::string &backing_path,
@@ -273,7 +426,16 @@ class ds_file_node : public ds_node {
       }
     }
   }
-
+/**
+ * TODO
+ * Clear storage of blocks
+ * If it is pinned, do nothing
+ * If it is already mapped, then clear the blocks but do not delete the path
+ * Else clear the blocks and also the path
+ * @param cleared_blocks
+ * @param storage
+ * @return
+ */
   bool handle_lease_expiry(std::vector<std::string> &cleared_blocks,
                            std::shared_ptr<storage::storage_management_ops> storage) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
@@ -307,7 +469,14 @@ class ds_file_node : public ds_node {
     }
     return false; // Don't clear the blocks or delete the path
   }
-
+/**
+ * TODO
+ * What to do with split?
+ * @param storage
+ * @param allocator
+ * @param path
+ * @return
+ */
   export_ctx setup_add_block(std::shared_ptr<storage::storage_management_ops> storage,
                              const std::shared_ptr<block_allocator> &allocator,
                              const std::string &path) {
@@ -383,7 +552,15 @@ class ds_file_node : public ds_node {
     adding_.push_back(to_chain);
     return export_ctx{from_chain, to_chain};
   }
-
+/**
+ * TODO what for slot, split??
+ * @param storage
+ * @param allocator
+ * @param path
+ * @param slot_begin
+ * @param slot_end
+ * @return
+ */
   export_ctx setup_slot_range_split(std::shared_ptr<storage::storage_management_ops> storage,
                                     const std::shared_ptr<block_allocator> &allocator,
                                     const std::string &path,
@@ -457,6 +634,11 @@ class ds_file_node : public ds_node {
     return export_ctx{from_chain, to_chain};
   }
 
+/**
+ * TODO
+ * @param storage
+ * @param ctx
+ */
   void finalize_slot_range_split(std::shared_ptr<storage::storage_management_ops> storage, const export_ctx &ctx) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     auto slot_begin = ctx.from_block.slot_begin();
@@ -479,7 +661,13 @@ class ds_file_node : public ds_node {
     using namespace utils;
     LOG(log_level::info) << "Updated file data_status: " << dstatus_.to_string();
   }
-
+/**
+ * TODO
+ * @param storage
+ * @param slot_begin
+ * @param slot_end
+ * @return
+ */
   export_ctx setup_slot_range_merge(std::shared_ptr<storage::storage_management_ops> storage,
                                     int32_t slot_begin,
                                     int32_t slot_end) {
@@ -528,7 +716,12 @@ class ds_file_node : public ds_node {
     }
     return export_ctx{from_chain, to_chain};
   }
-
+/**
+ * TODO
+ * @param storage
+ * @param allocator
+ * @param ctx
+ */
   void finalize_slot_range_merge(std::shared_ptr<storage::storage_management_ops> storage,
                                  const std::shared_ptr<block_allocator> &allocator,
                                  const export_ctx &ctx) {
@@ -560,12 +753,23 @@ class ds_file_node : public ds_node {
   std::vector<replica_chain> adding_{};
 };
 
+/**
+ * Class of directory nodes
+ */
 class ds_dir_node : public ds_node {
  public:
   typedef std::map<std::string, std::shared_ptr<ds_node>> child_map;
+/**
+ * Explicit construction function of directory node
+ * @param name name of directory
+ */
   explicit ds_dir_node(const std::string &name)
       : ds_node(name, file_status(file_type::directory, perms(perms::all), utils::time_utils::now_ms())) {}
-
+/**
+ * Return a child from the directory using the name
+ * @param name name to be found
+ * @return pointer to the child node
+ */
   std::shared_ptr<ds_node> get_child(const std::string &name) const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     auto ret = children_.find(name);
@@ -575,7 +779,10 @@ class ds_dir_node : public ds_node {
       return nullptr;
     }
   }
-
+/**
+ * Add a child node to current directory node
+ * @param node child node to be added
+ */
   void add_child(std::shared_ptr<ds_node> node) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     if (children_.find(node->name()) == children_.end()) {
@@ -584,7 +791,10 @@ class ds_dir_node : public ds_node {
       throw directory_ops_exception("Child node already exists: " + node->name());
     }
   }
-
+/**
+ * Remove a child from the directory using the name
+ * @param name child to be removed
+ */
   void remove_child(const std::string &name) {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     auto ret = children_.find(name);
@@ -594,7 +804,14 @@ class ds_dir_node : public ds_node {
       throw directory_ops_exception("Child node not found: " + name);
     }
   }
-
+/**
+ * TODO
+ * What's the difference between this one and last function
+ * @param cleared_blocks
+ * @param child_name
+ * @param storage
+ * @return
+ */
   bool handle_lease_expiry(std::vector<std::string> &cleared_blocks,
                            const std::string &child_name,
                            std::shared_ptr<storage::storage_management_ops> storage) {
@@ -625,13 +842,23 @@ class ds_dir_node : public ds_node {
     }
     return false;
   }
-
+/**
+ * TODO
+ * @param backing_path
+ * @param storage
+ */
   void sync(const std::string &backing_path, const std::shared_ptr<storage::storage_management_ops> &storage) override {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     for (const auto &entry: children_) {
       entry.second->sync(backing_path, storage);
     }
   }
+  /**
+   * TODO
+   * @param cleared_blocks
+   * @param backing_path
+   * @param storage
+   */
 
   void dump(std::vector<std::string> &cleared_blocks,
             const std::string &backing_path,
@@ -641,7 +868,13 @@ class ds_dir_node : public ds_node {
       entry.second->dump(cleared_blocks, backing_path, storage);
     }
   }
-
+/**
+ * TODO
+ * @param path
+ * @param backing_path
+ * @param storage
+ * @param allocator
+ */
   void load(const std::string &path,
             const std::string &backing_path,
             const std::shared_ptr<storage::storage_management_ops> &storage,
@@ -651,7 +884,11 @@ class ds_dir_node : public ds_node {
       entry.second->load(path, backing_path, storage, allocator);
     }
   }
-
+/**
+ * Return all the entries of the child in current directory
+ * TODO why not use the virtual function?
+ * @return entries of files in current directory
+ */
   std::vector<directory_entry> entries() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     std::vector<directory_entry> ret;
@@ -659,14 +896,20 @@ class ds_dir_node : public ds_node {
     populate_entries(ret);
     return ret;
   }
-
+/**
+ * Return all the entries of the child in current directory recursively
+ * @return entries of files in directory recursively
+ */
   std::vector<directory_entry> recursive_entries() const {
     std::shared_lock<std::shared_mutex> lock(mtx_);
     std::vector<directory_entry> ret;
     populate_recursive_entries(ret);
     return ret;
   }
-
+/**
+ * Return all the children of the diretory in a vector
+ * @return all the children of the directory in a vector
+ */
   std::vector<std::string> children() const {
     std::vector<std::string> ret;
     for (const auto &entry: children_) {
@@ -674,30 +917,49 @@ class ds_dir_node : public ds_node {
     }
     return ret;
   }
-
+/**
+ * Return beginning child
+ * @return beginning child
+ */
   child_map::const_iterator begin() const {
     return children_.begin();
   }
-
+/**
+ * Return ending child
+ * @return ending child
+ */
   child_map::const_iterator end() const {
     return children_.end();
   }
-
+/**
+ * Return size of children
+ * @return size of children
+ */
   std::size_t size() const {
     return children_.size();
   }
-
+/**
+ * Check if children is empty
+ * @return bool variable
+ */
   bool empty() const {
     return children_.empty();
   }
 
  private:
+/**
+ * TODO
+ * @param entries
+ */
   void populate_entries(std::vector<directory_entry> &entries) const {
     for (auto &entry: children_) {
       entries.emplace_back(entry.second->entry());
     }
   }
-
+/**
+ * TODO
+ * @param entries
+ */
   void populate_recursive_entries(std::vector<directory_entry> &entries) const {
     for (auto &entry: children_) {
       entries.emplace_back(entry.second->entry());
@@ -710,7 +972,10 @@ class ds_dir_node : public ds_node {
   mutable std::shared_mutex mtx_;
   child_map children_{};
 };
-
+/**
+ * Class of directory tree
+ * most function implemented in the cpp file
+ */
 class directory_tree : public directory_interface {
  public:
   explicit directory_tree(std::shared_ptr<block_allocator> allocator,

@@ -6,13 +6,20 @@ namespace mmux {
 namespace directory {
 
 using namespace utils;
-
+/**
+ * Explicit construction function of directory tree
+ * @param allocator shared pointer to block allocator
+ * @param storage shared pointer to storage management
+ */
 directory_tree::directory_tree(std::shared_ptr<block_allocator> allocator,
                                std::shared_ptr<storage::storage_management_ops> storage)
     : root_(std::make_shared<ds_dir_node>(std::string("/"))),
       allocator_(std::move(allocator)),
       storage_(std::move(storage)) {}
-
+/**
+ * Create a directory at a certain path
+ * @param path path to be created
+ */
 void directory_tree::create_directory(const std::string &path) {
   LOG(log_level::info) << "Creating directory " << path;
   std::string ptemp = path;
@@ -22,7 +29,10 @@ void directory_tree::create_directory(const std::string &path) {
     parent->add_child(std::make_shared<ds_dir_node>(directory_name));
   }
 }
-
+/**
+ * Create several directorys at the given paths
+ * @param path paths to be created
+ */
 void directory_tree::create_directories(const std::string &path) {
   LOG(log_level::info) << "Creating directory " << path;
   std::string p_so_far(root_->name());
@@ -44,11 +54,26 @@ void directory_tree::create_directories(const std::string &path) {
   }
 }
 
+/**
+ * Open the file and return the file status
+ * @param path file path to be opened
+ * @return dstatus of the file
+ */
 data_status directory_tree::open(const std::string &path) {
   LOG(log_level::info) << "Opening file " << path;
   return dstatus(path);
 }
-
+/**
+ * TODO why do need a create method that seems to be creating files in the directory tree class??
+ * @param path
+ * @param backing_path
+ * @param num_blocks
+ * @param chain_length
+ * @param flags
+ * @param permissions
+ * @param tags
+ * @return
+ */
 data_status directory_tree::create(const std::string &path,
                                    const std::string &backing_path,
                                    std::size_t num_blocks,
@@ -126,7 +151,17 @@ data_status directory_tree::create(const std::string &path,
 
   return child->dstatus();
 }
-
+/**
+ * TODO same question
+ * @param path
+ * @param backing_path
+ * @param num_blocks
+ * @param chain_length
+ * @param flags
+ * @param permissions
+ * @param tags
+ * @return
+ */
 data_status directory_tree::open_or_create(const std::string &path,
                                            const std::string &backing_path,
                                            std::size_t num_blocks,
@@ -214,19 +249,38 @@ data_status directory_tree::open_or_create(const std::string &path,
 
   return child->dstatus();
 }
-
+/**
+ * TODO why is it unsafe?
+ * @param path
+ * @return
+ */
 bool directory_tree::exists(const std::string &path) const {
   return get_node_unsafe(path) != nullptr;
 }
+/**
+ * TODO why do we need these functions again in directory tree class
+ * @param path
+ * @return
+ */
 
 std::uint64_t directory_tree::last_write_time(const std::string &path) const {
   return get_node(path)->last_write_time();
 }
-
+/**
+ * TODO same question
+ * @param path
+ * @return
+ */
 perms directory_tree::permissions(const std::string &path) {
   return get_node(path)->permissions();
 }
 
+/**
+ * TODO same question
+ * @param path
+ * @param prms
+ * @param opts
+ */
 void directory_tree::permissions(const std::string &path, const perms &prms, perm_options opts) {
   auto node = get_node(path);
   perms p;
@@ -247,7 +301,10 @@ void directory_tree::permissions(const std::string &path, const perms &prms, per
   LOG(log_level::info) << "Setting permissions for " << path << " to " << p;
   node->permissions(p);
 }
-
+/**
+ * TODO same question
+ * @param path
+ */
 void directory_tree::remove(const std::string &path) {
   LOG(log_level::info) << "Removing path " << path;
   if (path == "/") {
@@ -270,7 +327,11 @@ void directory_tree::remove(const std::string &path) {
   clear_storage(cleared_blocks, child);
   allocator_->free(cleared_blocks);
 }
-
+/**
+ * TODO same question
+ * @param parent
+ * @param child_name
+ */
 void directory_tree::remove_all(std::shared_ptr<ds_dir_node> parent, const std::string &child_name) {
   auto child = parent->get_child(child_name);
   if (child == nullptr) {
@@ -283,7 +344,10 @@ void directory_tree::remove_all(std::shared_ptr<ds_dir_node> parent, const std::
   LOG(log_level::info) << "Cleared all blocks " << child_name;
   allocator_->free(cleared_blocks);
 }
-
+/**
+ * TODO same question
+ * @param path
+ */
 void directory_tree::remove_all(const std::string &path) {
   LOG(log_level::info) << "Removing path " << path;
   if (path == "/") {
@@ -299,24 +363,40 @@ void directory_tree::remove_all(const std::string &path) {
   auto parent = get_node_as_dir(ptemp);
   remove_all(parent, child_name);
 }
-
+/**
+ * TODO same question
+ * @param path
+ * @param backing_path
+ */
 void directory_tree::sync(const std::string &path, const std::string &backing_path) {
   LOG(log_level::info) << "Syncing path " << path;
   get_node(path)->sync(backing_path, storage_);
 }
-
+/**
+ * TODO same question
+ * @param path
+ * @param backing_path
+ */
 void directory_tree::dump(const std::string &path, const std::string &backing_path) {
   LOG(log_level::info) << "Dumping path " << path;
   std::vector<std::string> cleared_blocks;
   get_node(path)->dump(cleared_blocks, backing_path, storage_);
   allocator_->free(cleared_blocks);
 }
-
+/**
+ * TODO same question
+ * @param path
+ * @param backing_path
+ */
 void directory_tree::load(const std::string &path, const std::string &backing_path) {
   LOG(log_level::info) << "Loading path " << path;
   get_node(path)->load(path, backing_path, storage_, allocator_);
 }
-
+/**
+ * TODO same question
+ * @param old_path
+ * @param new_path
+ */
 void directory_tree::rename(const std::string &old_path, const std::string &new_path) {
   LOG(log_level::info) << "Renaming " << old_path << " to " << new_path;
   if (old_path == new_path)
@@ -348,35 +428,66 @@ void directory_tree::rename(const std::string &old_path, const std::string &new_
   old_child->name(new_child_name);
   new_parent->add_child(old_child);
 }
-
+/**
+ * TODO
+ * @param path
+ * @return
+ */
 file_status directory_tree::status(const std::string &path) const {
   return get_node(path)->status();
 }
-
+/**
+ * TODO
+ * @param path
+ * @return
+ */
 std::vector<directory_entry> directory_tree::directory_entries(const std::string &path) {
   return get_node_as_dir(path)->entries();
 }
-
+/**
+ * TODO
+ * @param path
+ * @return
+ */
 std::vector<directory_entry> directory_tree::recursive_directory_entries(const std::string &path) {
   return get_node_as_dir(path)->recursive_entries();
 }
-
+/**
+ * TODO
+ * @param path
+ * @return
+ */
 data_status directory_tree::dstatus(const std::string &path) {
   return get_node_as_file(path)->dstatus();
 }
-
+/**
+ * TODO
+ * @param path
+ * @param tags
+ */
 void directory_tree::add_tags(const std::string &path, const std::map<std::string, std::string> &tags) {
   get_node_as_file(path)->add_tags(tags);
 }
-
+/**
+ * TODO
+ * @param path
+ * @return
+ */
 bool directory_tree::is_regular_file(const std::string &path) {
   return get_node(path)->is_regular_file();
 }
-
+/**
+ * TODO
+ * @param path
+ * @return
+ */
 bool directory_tree::is_directory(const std::string &path) {
   return get_node(path)->is_directory();
 }
-
+/**
+ * TODO
+ * @param path
+ */
 void directory_tree::touch(const std::string &path) {
   auto time = utils::time_utils::now_ms();
   auto node = touch_node_path(path, time);
@@ -385,7 +496,12 @@ void directory_tree::touch(const std::string &path) {
   }
   touch(node, time);
 }
-
+/**
+ * TODO
+ * @param path
+ * @param chain
+ * @return
+ */
 replica_chain directory_tree::resolve_failures(const std::string &path, const replica_chain &chain) {
   // TODO: Replace replica_chain argument with chain id
   std::size_t chain_length = chain.block_names.size();
@@ -479,7 +595,12 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
   node->dstatus(dstatus);
   return dstatus.get_data_block(chain_pos);
 }
-
+/**
+ * TODO
+ * @param path
+ * @param chain
+ * @return
+ */
 replica_chain directory_tree::add_replica_to_chain(const std::string &path, const replica_chain &chain) {
   // TODO: Replace replica_chain argument with chain id
   using namespace storage;
@@ -555,7 +676,10 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
   node->dstatus(dstatus);
   return dstatus.get_data_block(chain_pos);
 }
-
+/**
+ * TODO
+ * @param path
+ */
 void directory_tree::add_block_to_file(const std::string &path) {
   LOG(log_level::info) << "Adding new block to file " << path;
   auto node = get_node_as_file(path);
@@ -569,7 +693,12 @@ void directory_tree::add_block_to_file(const std::string &path) {
     node->finalize_slot_range_split(storage_, ctx);
   }).detach();
 }
-
+/**
+ * TODO
+ * @param path
+ * @param slot_begin
+ * @param slot_end
+ */
 void directory_tree::split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) {
   LOG(log_level::info) << "Splitting slot range (" << slot_begin << ", " << slot_end << ") @ " << path;
   auto node = get_node_as_file(path);
@@ -582,7 +711,12 @@ void directory_tree::split_slot_range(const std::string &path, int32_t slot_begi
     node->finalize_slot_range_split(storage_, ctx);
   }).detach();
 }
-
+/**
+ * TODO
+ * @param path
+ * @param slot_begin
+ * @param slot_end
+ */
 void directory_tree::merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) {
   LOG(log_level::info) << "Merging slot range (" << slot_begin << ", " << slot_end << ") @ " << path;
   auto node = get_node_as_file(path);
@@ -595,7 +729,10 @@ void directory_tree::merge_slot_range(const std::string &path, int32_t slot_begi
     node->finalize_slot_range_merge(storage_, allocator_, ctx);
   }).detach();
 }
-
+/**
+ * TODO
+ * @param path
+ */
 void directory_tree::handle_lease_expiry(const std::string &path) {
   LOG(log_level::info) << "Handling expiry for " << path;
   std::string ptemp = path;
@@ -608,7 +745,11 @@ void directory_tree::handle_lease_expiry(const std::string &path) {
     allocator_->free(cleared_blocks);
   }
 }
-
+/**
+ * TODO
+ * @param path
+ * @return
+ */
 std::shared_ptr<ds_node> directory_tree::get_node_unsafe(const std::string &path) const {
   std::shared_ptr<ds_node> node = root_;
   for (auto &name: directory_utils::path_elements(path)) {
@@ -623,7 +764,11 @@ std::shared_ptr<ds_node> directory_tree::get_node_unsafe(const std::string &path
   }
   return node;
 }
-
+/**
+ * TODO
+ * @param path
+ * @return
+ */
 std::shared_ptr<ds_node> directory_tree::get_node(const std::string &path) const {
   auto node = get_node_unsafe(path);
   if (node == nullptr) {
@@ -631,7 +776,11 @@ std::shared_ptr<ds_node> directory_tree::get_node(const std::string &path) const
   }
   return node;
 }
-
+/**
+ * TODO
+ * @param path
+ * @return
+ */
 std::shared_ptr<ds_dir_node> directory_tree::get_node_as_dir(const std::string &path) const {
   auto node = get_node(path);
   if (node->is_regular_file()) {
@@ -639,7 +788,11 @@ std::shared_ptr<ds_dir_node> directory_tree::get_node_as_dir(const std::string &
   }
   return std::dynamic_pointer_cast<ds_dir_node>(node);
 }
-
+/**
+ * TODO
+ * @param path
+ * @return
+ */
 std::shared_ptr<ds_file_node> directory_tree::get_node_as_file(const std::string &path) const {
   auto node = get_node(path);
   if (!node->is_regular_file()) {
@@ -647,7 +800,12 @@ std::shared_ptr<ds_file_node> directory_tree::get_node_as_file(const std::string
   }
   return std::dynamic_pointer_cast<ds_file_node>(node);
 }
-
+/**
+ * TODO
+ * @param path
+ * @param time
+ * @return
+ */
 std::shared_ptr<ds_node> directory_tree::touch_node_path(const std::string &path, const std::uint64_t time) const {
   std::shared_ptr<ds_node> node = root_;
   for (auto &name: directory_utils::path_elements(path)) {
@@ -663,7 +821,11 @@ std::shared_ptr<ds_node> directory_tree::touch_node_path(const std::string &path
   }
   return node;
 }
-
+/**
+ * TODO
+ * @param node
+ * @param time
+ */
 void directory_tree::touch(std::shared_ptr<ds_node> node, std::uint64_t time) {
   node->last_write_time(time);
   if (node->is_regular_file()) {
@@ -674,7 +836,11 @@ void directory_tree::touch(std::shared_ptr<ds_node> node, std::uint64_t time) {
     touch(child.second, time);
   }
 }
-
+/**
+ * TODO
+ * @param cleared_blocks
+ * @param node
+ */
 void directory_tree::clear_storage(std::vector<std::string> &cleared_blocks, std::shared_ptr<ds_node> node) {
   if (node == nullptr)
     return;

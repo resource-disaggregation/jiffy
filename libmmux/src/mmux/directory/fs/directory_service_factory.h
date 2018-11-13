@@ -6,7 +6,10 @@
 
 namespace mmux {
 namespace directory {
-
+/**
+ * Directory service class
+ * Inherited from directory_serviceIfFactory
+ */
 class directory_service_factory : public directory_serviceIfFactory {
  public:
   explicit directory_service_factory(std::shared_ptr<directory_tree> shard);
