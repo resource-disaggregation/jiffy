@@ -191,10 +191,12 @@ void directory_service_handler::remove(const std::string &path) {
     throw make_exception(e);
   }
 }
+
 /**
  * Remove all file under given directory
  * @param path directory path
  */
+
 void directory_service_handler::remove_all(const std::string &path) {
   try {
     shard_->remove_all(path);
@@ -202,11 +204,14 @@ void directory_service_handler::remove_all(const std::string &path) {
     throw make_exception(e);
   }
 }
+
 /**
- * Sychronization of a file
+ * TODO
+ * Sychronization
  * @param path file path
  * @param backing_path file backing path
  */
+
 void directory_service_handler::sync(const std::string &path, const std::string &backing_path) {
   try {
     shard_->sync(path, backing_path);
@@ -214,11 +219,13 @@ void directory_service_handler::sync(const std::string &path, const std::string 
     throw make_exception(e);
   }
 }
+
 /**
  * TODO
  * @param path
  * @param backing_path
  */
+
 void directory_service_handler::dump(const std::string &path, const std::string &backing_path) {
   try {
     shard_->dump(path, backing_path);
@@ -226,11 +233,13 @@ void directory_service_handler::dump(const std::string &path, const std::string 
     throw make_exception(e);
   }
 }
+
 /**
  * TODO
  * @param path
  * @param backing_path
  */
+
 void directory_service_handler::load(const std::string &path, const std::string &backing_path) {
   try {
     shard_->load(path, backing_path);
@@ -238,12 +247,13 @@ void directory_service_handler::load(const std::string &path, const std::string 
     throw make_exception(e);
   }
 }
+
 /**
- * TODO
- * Rename a file ?? weird implement
+ * Rename a file
  * @param old_path original file path
- * @param new_path new file path(or just the name ??)
+ * @param new_path new file path
  */
+
 void directory_service_handler::rename(const std::string &old_path, const std::string &new_path) {
   try {
     shard_->rename(old_path, new_path);
@@ -251,11 +261,13 @@ void directory_service_handler::rename(const std::string &old_path, const std::s
     throw make_exception(e);
   }
 }
+
 /**
  * Fetch file status
  * @param _return replication chain status to be collected
  * @param path file path
  */
+
 void directory_service_handler::status(rpc_file_status &_return, const std::string &path) {
   try {
     _return = directory_type_conversions::to_rpc(shard_->status(path));
@@ -263,11 +275,13 @@ void directory_service_handler::status(rpc_file_status &_return, const std::stri
     throw make_exception(e);
   }
 }
+
 /**
  * Collect all entries of files in the directory
  * @param _return replication chain status to be collected
  * @param path directory path
  */
+
 void directory_service_handler::directory_entries(std::vector<rpc_dir_entry> &_return, const std::string &path) {
   try {
     auto out = shard_->directory_entries(path);
@@ -277,11 +291,13 @@ void directory_service_handler::directory_entries(std::vector<rpc_dir_entry> &_r
     throw make_exception(e);
   }
 }
+
 /**
  * Collect all entries of files in the directory recursively
  * @param _return replication chain status to be collected
  * @param path directory path
  */
+
 void directory_service_handler::recursive_directory_entries(std::vector<rpc_dir_entry> &_return,
                                                             const std::string &path) {
   try {
@@ -292,11 +308,13 @@ void directory_service_handler::recursive_directory_entries(std::vector<rpc_dir_
     throw make_exception(e);
   }
 }
+
 /**
  * Collect data status
  * @param _return replication chain status to be collected
- * @param path data path
+ * @param path file path
  */
+
 void directory_service_handler::dstatus(rpc_data_status &_return, const std::string &path) {
   try {
     _return = directory_type_conversions::to_rpc(shard_->dstatus(path));
@@ -304,11 +322,13 @@ void directory_service_handler::dstatus(rpc_data_status &_return, const std::str
     throw make_exception(e);
   }
 }
+
 /**
- * Add tags to a file
+ * Add tags to the file status
  * @param path file path
  * @param tags tags in string
  */
+
 void directory_service_handler::add_tags(const std::string &path, const std::map<std::string, std::string> &tags) {
   try {
     shard_->add_tags(path, tags);
@@ -316,11 +336,13 @@ void directory_service_handler::add_tags(const std::string &path, const std::map
     throw make_exception(e);
   }
 }
+
 /**
- * Check if file is regular file
+ * Check if it is regular file
  * @param path file path
  * @return bool variable
  */
+
 bool directory_service_handler::is_regular_file(const std::string &path) {
   try {
     return shard_->is_regular_file(path);
@@ -328,11 +350,13 @@ bool directory_service_handler::is_regular_file(const std::string &path) {
     throw make_exception(e);
   }
 }
+
 /**
- * Check if it is a directory
+ * Check if it is directory
  * @param path directory path
  * @return bool variable
  */
+
 bool directory_service_handler::is_directory(const std::string &path) {
   try {
     return shard_->is_directory(path);
@@ -340,12 +364,14 @@ bool directory_service_handler::is_directory(const std::string &path) {
     throw make_exception(e);
   }
 }
+
 /**
  * Resolve failures using replication chain
  * @param _return replication chain status to be collected
  * @param path file path
  * @param chain replication chain
  */
+
 void directory_service_handler::reslove_failures(rpc_replica_chain &_return,
                                                  const std::string &path,
                                                  const rpc_replica_chain &chain) {
@@ -354,14 +380,17 @@ void directory_service_handler::reslove_failures(rpc_replica_chain &_return,
     _return = directory_type_conversions::to_rpc(ret);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
+    catch(directory_serviceClient.)
   }
 }
+
 /**
  * TODO
  * @param _return
  * @param path
  * @param chain
  */
+
 void directory_service_handler::add_replica_to_chain(rpc_replica_chain &_return, const std::string &path,
                                                      const rpc_replica_chain &chain) {
   try {
@@ -371,10 +400,12 @@ void directory_service_handler::add_replica_to_chain(rpc_replica_chain &_return,
     throw make_exception(e);
   }
 }
+
 /**
  * Expand the file by a memory block
  * @param path file path
  */
+
 void directory_service_handler::add_block_to_file(const std::string &path) {
   try {
     shard_->add_block_to_file(path);
@@ -382,12 +413,14 @@ void directory_service_handler::add_block_to_file(const std::string &path) {
     throw make_exception(e);
   }
 }
+
 /**
  * TODO ??
  * @param path
  * @param slot_begin
  * @param slot_end
  */
+
 void directory_service_handler::split_slot_range(const std::string &path,
                                                  const int32_t slot_begin,
                                                  const int32_t slot_end) {
@@ -397,12 +430,14 @@ void directory_service_handler::split_slot_range(const std::string &path,
     throw make_exception(e);
   }
 }
+
 /**
  * TODO ???
  * @param path
  * @param slot_begin
  * @param slot_end
  */
+
 void directory_service_handler::merge_slot_range(const std::string &path,
                                                  const int32_t slot_begin,
                                                  const int32_t slot_end) {
@@ -412,11 +447,13 @@ void directory_service_handler::merge_slot_range(const std::string &path,
     throw make_exception(e);
   }
 }
+
 /**
  * Make exceptions
  * @param ex exception handler
  * @return exception message
  */
+
 directory_service_exception directory_service_handler::make_exception(directory_ops_exception &ex) const {
   directory_service_exception e;
   e.msg = ex.what();
