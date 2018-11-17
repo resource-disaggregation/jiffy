@@ -407,13 +407,16 @@ void directory_tree::load(const std::string &path, const std::string &backing_pa
   LOG(log_level::info) << "Loading path " << path;
   get_node(path)->load(path, backing_path, storage_, allocator_);
 }
+
 /**
- * TODO check the logic
  * Rename a file
- *
+ * If new file path is a directory path, then put old path file under that directory.
+ * If new file path is a file path, overwrite that file with old path file.
+ * If new file path doesn't exist, put old path file in new path
  * @param old_path original file path
  * @param new_path new file path
  */
+
 void directory_tree::rename(const std::string &old_path, const std::string &new_path) {
   LOG(log_level::info) << "Renaming " << old_path << " to " << new_path;
   if (old_path == new_path)
@@ -432,79 +435,99 @@ void directory_tree::rename(const std::string &old_path, const std::string &new_
   auto new_child = new_parent->get_child(new_child_name);
   if (new_child != nullptr) {
     if (new_child->is_directory()) {
+      /* If given new path is directory, move the old file under this new directory */
       new_parent = std::dynamic_pointer_cast<ds_dir_node>(new_child);
       new_child_name = old_child_name;
     } else {
+      /* If given new path exists a file, Overwrite it */
       new_parent->remove_child(new_child_name);
       std::vector<std::string> cleared_blocks;
       clear_storage(cleared_blocks, new_child);
       allocator_->free(cleared_blocks);
     }
   }
+  /* Ordinary situation */
   old_parent->remove_child(old_child->name());
   old_child->name(new_child_name);
   new_parent->add_child(old_child);
 }
+
 /**
  * Fetch file status
  * @param path file path
  * @return file status
  */
+
 file_status directory_tree::status(const std::string &path) const {
   return get_node(path)->status();
 }
+
 /**
  * Collect all entries of files in the directory
  * @param path directory path
  * @return directory entries
  */
+
 std::vector<directory_entry> directory_tree::directory_entries(const std::string &path) {
   return get_node_as_dir(path)->entries();
 }
+
 /**
- * TODO
- * @param path
- * @return
+ * Collect all entries of files in the directory recursively
+ * @param path directory path
+ * @return directory recursive entries
  */
+
 std::vector<directory_entry> directory_tree::recursive_directory_entries(const std::string &path) {
   return get_node_as_dir(path)->recursive_entries();
 }
+
 /**
- * TODO
- * @param path
- * @return
+ * Collect data status
+ * @param path file path
+ * @return data status
  */
+
 data_status directory_tree::dstatus(const std::string &path) {
   return get_node_as_file(path)->dstatus();
 }
+
 /**
- * TODO
- * @param path
- * @param tags
+ * Add tags to the file status
+ * @param path file path
+ * @param tags tags
  */
+
 void directory_tree::add_tags(const std::string &path, const std::map<std::string, std::string> &tags) {
   get_node_as_file(path)->add_tags(tags);
 }
+
 /**
- * TODO
- * @param path
- * @return
+ * Check if path is regular file
+ * @param path file path
+ * @return bool value
  */
+
 bool directory_tree::is_regular_file(const std::string &path) {
   return get_node(path)->is_regular_file();
 }
+
 /**
- * TODO
- * @param path
- * @return
+ * Check if path is directory
+ * @param path file path
+ * @return bool value
  */
+
 bool directory_tree::is_directory(const std::string &path) {
   return get_node(path)->is_directory();
 }
+
 /**
- * TODO
- * @param path
+ * Touch file or directory at given path
+ * First touch all nodes along the path, then touch all nodes under the path
+ * @param path file or directory path
  */
+
 void directory_tree::touch(const std::string &path) {
   auto time = utils::time_utils::now_ms();
   auto node = touch_node_path(path, time);
@@ -513,12 +536,14 @@ void directory_tree::touch(const std::string &path) {
   }
   touch(node, time);
 }
+
 /**
- * TODO
- * @param path
- * @param chain
- * @return
+ * Resolve failure
+ * @param path file path
+ * @param chain replication chain
+ * @return replication chain
  */
+
 replica_chain directory_tree::resolve_failures(const std::string &path, const replica_chain &chain) {
   // TODO: Replace replica_chain argument with chain id
   std::size_t chain_length = chain.block_names.size();
@@ -587,8 +612,10 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
     for (std::size_t i = 0; i < fixed_chain.size(); ++i) {
       std::string block_name = fixed_chain[i];
       std::string next_block_name = (i == fixed_chain.size() - 1) ? "nil" : fixed_chain[i + 1];
-      int32_t role = (i == 0) ? chain_role::head : (i == fixed_chain.size() - 1) ? chain_role::tail : chain_role::mid;
-      LOG(log_level::info) << "Setting block <" << block_name << ">: path=" << path << ", role=" << role << ", next="
+      int32_t
+          role = (i == 0) ? chain_role::head : (i == fixed_chain.size() - 1) ? chain_role::tail : chain_role::mid;
+      LOG(log_level::info) << "Setting block <" << block_name << ">: path=" << path << ", role=" << role
+                           << ", next="
                            << next_block_name << ">";
       storage_->setup_block(block_name,
                             path,
@@ -612,12 +639,14 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
   node->dstatus(dstatus);
   return dstatus.get_data_block(chain_pos);
 }
+
 /**
- * TODO
- * @param path
- * @param chain
- * @return
+ * Add a new replication to the chain of the given path
+ * @param path file path
+ * @param chain replication chain
+ * @return replication chain
  */
+
 replica_chain directory_tree::add_replica_to_chain(const std::string &path, const replica_chain &chain) {
   // TODO: Replace replica_chain argument with chain id
   using namespace storage;
@@ -642,7 +671,8 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
   updated_chain.insert(updated_chain.end(), new_blocks.begin(), new_blocks.end());
 
   // Setup forwarding path
-  LOG(log_level::info) << "Setting old tail block <" << chain.block_names.back() << ">: path=" << path << ", role="
+  LOG(log_level::info) << "Setting old tail block <" << chain.block_names.back() << ">: path=" << path
+                       << ", role="
                        << chain_role::tail << ", next=" << new_blocks.front() << ">";
   auto slot_range = storage_->slot_range(chain.block_names.back());
   storage_->setup_block(chain.block_names.back(),
@@ -656,8 +686,10 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
   for (std::size_t i = chain.block_names.size(); i < updated_chain.size(); i++) {
     std::string block_name = updated_chain[i];
     std::string next_block_name = (i == updated_chain.size() - 1) ? "nil" : updated_chain[i + 1];
-    int32_t role = (i == 0) ? chain_role::head : (i == updated_chain.size() - 1) ? chain_role::tail : chain_role::mid;
-    LOG(log_level::info) << "Setting block <" << block_name << ">: path=" << path << ", role=" << role << ", next="
+    int32_t
+        role = (i == 0) ? chain_role::head : (i == updated_chain.size() - 1) ? chain_role::tail : chain_role::mid;
+    LOG(log_level::info) << "Setting block <" << block_name << ">: path=" << path << ", role=" << role
+                         << ", next="
                          << next_block_name << ">";
     // TODO: this is incorrect -- we shouldn't be setting the chain to updated_chain right now...
     storage_->setup_block(block_name,
@@ -670,11 +702,13 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
                           next_block_name);
   }
 
-  LOG(log_level::info) << "Forwarding data from <" << chain.block_names.back() << "> to <" << new_blocks.front() << ">";
+  LOG(log_level::info) << "Forwarding data from <" << chain.block_names.back() << "> to <" << new_blocks.front()
+                       << ">";
 
   storage_->forward_all(chain.block_names.back());
 
-  LOG(log_level::info) << "Setting old tail block <" << chain.block_names.back() << ">: path=" << path << ", role="
+  LOG(log_level::info) << "Setting old tail block <" << chain.block_names.back() << ">: path=" << path
+                       << ", role="
                        << chain_role::mid << ", next=" << new_blocks.front() << ">";
   storage_->setup_block(chain.block_names.back(),
                         path,
@@ -695,8 +729,8 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
 }
 
 /**
- * TODO
- * @param path
+ * Expand the file by a memory block
+ * @param path file path
  */
 
 void directory_tree::add_block_to_file(const std::string &path) {
@@ -761,8 +795,8 @@ void directory_tree::merge_slot_range(const std::string &path, int32_t slot_begi
 }
 
 /**
- * TODO
- * @param path
+ * Handle lease expiry
+ * @param path file path
  */
 
 void directory_tree::handle_lease_expiry(const std::string &path) {
@@ -778,9 +812,9 @@ void directory_tree::handle_lease_expiry(const std::string &path) {
   }
 }
 /**
- * TODO
- * @param path
- * @return
+ * Get file or directory node, might be NULL ptr
+ * @param path file or directory path
+ * @return ds_node
  */
 std::shared_ptr<ds_node> directory_tree::get_node_unsafe(const std::string &path) const {
   std::shared_ptr<ds_node> node = root_;
@@ -796,11 +830,13 @@ std::shared_ptr<ds_node> directory_tree::get_node_unsafe(const std::string &path
   }
   return node;
 }
+
 /**
- * TODO
- * @param path
- * @return
+ * Get file or directory node, make exception if NULL ptr
+ * @param path file or directory path
+ * @return ds_node
  */
+
 std::shared_ptr<ds_node> directory_tree::get_node(const std::string &path) const {
   auto node = get_node_unsafe(path);
   if (node == nullptr) {
@@ -808,11 +844,13 @@ std::shared_ptr<ds_node> directory_tree::get_node(const std::string &path) const
   }
   return node;
 }
+
 /**
- * TODO
- * @param path
- * @return
+ * Get directory node, make exception if not directory
+ * @param path directory path
+ * @return ds_dir_node
  */
+
 std::shared_ptr<ds_dir_node> directory_tree::get_node_as_dir(const std::string &path) const {
   auto node = get_node(path);
   if (node->is_regular_file()) {
@@ -820,11 +858,13 @@ std::shared_ptr<ds_dir_node> directory_tree::get_node_as_dir(const std::string &
   }
   return std::dynamic_pointer_cast<ds_dir_node>(node);
 }
+
 /**
- * TODO
- * @param path
- * @return
+ * Get file node, make exception if not file
+ * @param path file path
+ * @return ds_file_node
  */
+
 std::shared_ptr<ds_file_node> directory_tree::get_node_as_file(const std::string &path) const {
   auto node = get_node(path);
   if (!node->is_regular_file()) {
@@ -832,13 +872,17 @@ std::shared_ptr<ds_file_node> directory_tree::get_node_as_file(const std::string
   }
   return std::dynamic_pointer_cast<ds_file_node>(node);
 }
+
 /**
- * TODO
- * @param path
- * @param time
- * @return
+ * Touch all nodes along the file path
+ * Stop when node doesn't exist
+ * @param path file path
+ * @param time time
+ * @return file node
  */
-std::shared_ptr<ds_node> directory_tree::touch_node_path(const std::string &path, const std::uint64_t time) const {
+
+std::shared_ptr<ds_node> directory_tree::touch_node_path(const std::string &path,
+                                                         const std::uint64_t time) const {
   std::shared_ptr<ds_node> node = root_;
   for (auto &name: directory_utils::path_elements(path)) {
     if (!node->is_directory()) {
@@ -853,11 +897,15 @@ std::shared_ptr<ds_node> directory_tree::touch_node_path(const std::string &path
   }
   return node;
 }
+
 /**
- * TODO
- * @param node
- * @param time
+ * Touch file or directory node
+ * If file node, modify last write time directly
+ * If directory node, modify last write time recursively
+ * @param node file or directory node
+ * @param time time
  */
+
 void directory_tree::touch(std::shared_ptr<ds_node> node, std::uint64_t time) {
   node->last_write_time(time);
   if (node->is_regular_file()) {
@@ -869,9 +917,9 @@ void directory_tree::touch(std::shared_ptr<ds_node> node, std::uint64_t time) {
   }
 }
 /**
- * TODO
- * @param cleared_blocks
- * @param node
+ * Clear storage
+ * @param cleared_blocks all blocks that are cleared
+ * @param node file or directory node
  */
 void directory_tree::clear_storage(std::vector<std::string> &cleared_blocks, std::shared_ptr<ds_node> node) {
   if (node == nullptr)

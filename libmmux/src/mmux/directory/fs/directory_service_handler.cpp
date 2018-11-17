@@ -339,7 +339,7 @@ void directory_service_handler::add_tags(const std::string &path, const std::map
 /**
  * Check if path is regular file
  * @param path file path
- * @return bool variable
+ * @return bool value
  */
 
 bool directory_service_handler::is_regular_file(const std::string &path) {
@@ -353,7 +353,7 @@ bool directory_service_handler::is_regular_file(const std::string &path) {
 /**
  * Check if path is directory
  * @param path directory path
- * @return bool variable
+ * @return bool value
  */
 
 bool directory_service_handler::is_directory(const std::string &path) {
