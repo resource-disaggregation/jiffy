@@ -6,10 +6,12 @@
 
 namespace mmux {
 namespace directory {
+
 /**
- * Directory_service_handler class
+ * Directory service handler class
  * Inherited from directory_serviceIF
  */
+
 class directory_service_handler : public directory_serviceIf {
  public:
   explicit directory_service_handler(std::shared_ptr<directory_tree> shard);
@@ -57,7 +59,7 @@ class directory_service_handler : public directory_serviceIf {
   void dump(const std::string &path, const std::string &backing_path) override;
   void load(const std::string &path, const std::string &backing_path) override;
  private:
-  /* Exception handler */
+  /* Exception */
   directory_service_exception make_exception(directory_ops_exception &ex) const;
   /* Directory tree smart pointer */
   std::shared_ptr<directory_tree> shard_;

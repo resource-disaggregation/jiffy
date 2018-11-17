@@ -87,7 +87,11 @@ void storage_manager::load(const std::string &block_name, const std::string &bac
   LOG(log_level::trace) << "load on " << bid.host << ":" << bid.management_port;
   client.load(bid.id, backing_path);
 }
-
+/**
+ * @brief
+ * @param block_name
+ * @param backing_path
+ */
 void storage_manager::sync(const std::string &block_name, const std::string &backing_path) {
   auto bid = block_name_parser::parse(block_name);
   storage_management_client client(bid.host, bid.management_port);

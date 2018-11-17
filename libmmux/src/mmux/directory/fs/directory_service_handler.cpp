@@ -5,7 +5,7 @@ namespace mmux {
 namespace directory {
 
 /**
- * Construction of directory_service_handler class
+ * Construction function of directory_service_handler class
  * @param shard server's directory tree
  */
 
@@ -40,7 +40,7 @@ void directory_service_handler::create_directories(const std::string &path) {
 
 /**
  * Open a file given file path
- * @param _return replication chain data status to be collected
+ * @param _return rpc data status to be collected
  * @param path file path
  */
 
@@ -54,10 +54,10 @@ void directory_service_handler::open(rpc_data_status &_return, const std::string
 
 /**
  * Create file
- * @param _return replication chain data status to be collected
+ * @param _return rpc data status to be collected
  * @param path file path
  * @param backing_path backing path
- * @param num_blocks number of blocks to be allocated for the file
+ * @param num_blocks number of blocks
  * @param chain_length replication chain length
  * @param flags flag arguments
  * @param permissions file permission set
@@ -89,10 +89,10 @@ void directory_service_handler::create(rpc_data_status &_return,
  * Open or create a file
  * Open file if file exists
  * If not, create it
- * @param _return replication chain data status to be collected
+ * @param _return rpc data status to be collected
  * @param path file path
  * @param backing_path file backing path
- * @param num_blocks number of blocks to be allocated for the file
+ * @param num_blocks number of blocks
  * @param chain_length replication chain length
  * @param flags flag arguments
  * @param permissions file permission set
@@ -135,7 +135,7 @@ bool directory_service_handler::exists(const std::string &path) {
 }
 
 /**
- * Fetch the last write time for the file
+ * Fetch last write time of file
  * @param path file path
  * @return last write time
  */
@@ -180,7 +180,7 @@ rpc_perms directory_service_handler::get_permissions(const std::string &path) {
 }
 
 /**
- * Remove one file
+ * Remove file
  * @param path file path
  */
 
@@ -193,7 +193,7 @@ void directory_service_handler::remove(const std::string &path) {
 }
 
 /**
- * Remove all file under given directory
+ * Remove all files under given directory
  * @param path directory path
  */
 
@@ -206,8 +206,7 @@ void directory_service_handler::remove_all(const std::string &path) {
 }
 
 /**
- * TODO
- * Sychronization
+ * Write all dirty blocks back to persistent storage
  * @param path file path
  * @param backing_path file backing path
  */
@@ -221,9 +220,9 @@ void directory_service_handler::sync(const std::string &path, const std::string 
 }
 
 /**
- * TODO
- * @param path
- * @param backing_path
+ * Write all dirty blocks back to persistent storage and clear the block
+ * @param path file path
+ * @param backing_path file backing path
  */
 
 void directory_service_handler::dump(const std::string &path, const std::string &backing_path) {
@@ -235,7 +234,7 @@ void directory_service_handler::dump(const std::string &path, const std::string 
 }
 
 /**
- * TODO
+ * Load blocks from persistent storage
  * @param path
  * @param backing_path
  */
@@ -264,7 +263,7 @@ void directory_service_handler::rename(const std::string &old_path, const std::s
 
 /**
  * Fetch file status
- * @param _return replication chain status to be collected
+ * @param _return file status to be collected
  * @param path file path
  */
 
@@ -278,7 +277,7 @@ void directory_service_handler::status(rpc_file_status &_return, const std::stri
 
 /**
  * Collect all entries of files in the directory
- * @param _return replication chain status to be collected
+ * @param _return rpc directory entries to be collected
  * @param path directory path
  */
 
@@ -294,7 +293,7 @@ void directory_service_handler::directory_entries(std::vector<rpc_dir_entry> &_r
 
 /**
  * Collect all entries of files in the directory recursively
- * @param _return replication chain status to be collected
+ * @param _return rpc directory entries to be collected
  * @param path directory path
  */
 
@@ -311,7 +310,7 @@ void directory_service_handler::recursive_directory_entries(std::vector<rpc_dir_
 
 /**
  * Collect data status
- * @param _return replication chain status to be collected
+ * @param _return rpc data status to be collected
  * @param path file path
  */
 
@@ -338,7 +337,7 @@ void directory_service_handler::add_tags(const std::string &path, const std::map
 }
 
 /**
- * Check if it is regular file
+ * Check if path is regular file
  * @param path file path
  * @return bool variable
  */
@@ -352,7 +351,7 @@ bool directory_service_handler::is_regular_file(const std::string &path) {
 }
 
 /**
- * Check if it is directory
+ * Check if path is directory
  * @param path directory path
  * @return bool variable
  */
@@ -366,8 +365,9 @@ bool directory_service_handler::is_directory(const std::string &path) {
 }
 
 /**
+ * TODO should be a spelling mistake here resolve : reslove
  * Resolve failures using replication chain
- * @param _return replication chain status to be collected
+ * @param _return rpc replication chain to be collected
  * @param path file path
  * @param chain replication chain
  */
@@ -385,10 +385,10 @@ void directory_service_handler::reslove_failures(rpc_replica_chain &_return,
 }
 
 /**
- * TODO
- * @param _return
- * @param path
- * @param chain
+ * Add a new replication to the chain of the given path
+ * @param _return replication chain status
+ * @param path file path
+ * @param chain replication chain
  */
 
 void directory_service_handler::add_replica_to_chain(rpc_replica_chain &_return, const std::string &path,
@@ -415,10 +415,10 @@ void directory_service_handler::add_block_to_file(const std::string &path) {
 }
 
 /**
- * TODO ??
- * @param path
- * @param slot_begin
- * @param slot_end
+ * Split block hash range
+ * @param path file path
+ * @param slot_begin split begin range
+ * @param slot_end split end range
  */
 
 void directory_service_handler::split_slot_range(const std::string &path,
@@ -432,10 +432,10 @@ void directory_service_handler::split_slot_range(const std::string &path,
 }
 
 /**
- * TODO ???
+ * Merge slot range
  * @param path
- * @param slot_begin
- * @param slot_end
+ * @param slot_begin merge begin range
+ * @param slot_end merge end range
  */
 
 void directory_service_handler::merge_slot_range(const std::string &path,
@@ -450,7 +450,7 @@ void directory_service_handler::merge_slot_range(const std::string &path,
 
 /**
  * Make exceptions
- * @param ex exception handler
+ * @param ex exception
  * @return exception message
  */
 
