@@ -7,7 +7,7 @@
 
 namespace mmux {
 namespace directory {
-
+/* Lease server class */
 class lease_server {
  public:
   static std::shared_ptr<apache::thrift::server::TThreadedServer> create(std::shared_ptr<directory_tree> tree,

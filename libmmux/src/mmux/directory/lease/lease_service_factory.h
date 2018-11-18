@@ -8,6 +8,11 @@
 namespace mmux {
 namespace directory {
 
+/**
+ * Lease sevice factory class
+ * Inherited from lease_serviceIfFactory
+ */
+
 class lease_service_factory : public lease_serviceIfFactory {
  public:
   explicit lease_service_factory(std::shared_ptr<directory_tree> tree, int64_t lease_period_ms);
@@ -15,7 +20,9 @@ class lease_service_factory : public lease_serviceIfFactory {
   void releaseHandler(lease_serviceIf *anIf) override;
 
  private:
+  /* Directory tree */
   std::shared_ptr<directory_tree> tree_;
+  /* Lease duration */
   int64_t lease_period_ms_;
 };
 
