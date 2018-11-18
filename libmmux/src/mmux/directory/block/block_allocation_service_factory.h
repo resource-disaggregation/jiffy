@@ -6,7 +6,7 @@
 
 namespace mmux {
 namespace directory {
-
+/* Block allocation service factory class */
 class block_allocation_service_factory : public block_allocation_serviceIfFactory {
  public:
   explicit block_allocation_service_factory(std::shared_ptr<block_allocator> alloc);
@@ -15,6 +15,7 @@ class block_allocation_service_factory : public block_allocation_serviceIfFactor
   void releaseHandler(block_allocation_serviceIf *anIf) override;
 
  private:
+  /* Block allocator */
   std::shared_ptr<block_allocator> alloc_;
 };
 

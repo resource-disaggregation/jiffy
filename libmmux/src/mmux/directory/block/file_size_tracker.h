@@ -10,12 +10,12 @@
 
 namespace mmux {
 namespace directory {
-
+/* File size tracker class */
 class file_size_tracker {
  public:
   file_size_tracker(std::shared_ptr<directory_tree> tree,
-                      uint64_t periodicity_ms,
-                      const std::string &output_file);
+                    uint64_t periodicity_ms,
+                    const std::string &output_file);
 
   ~file_size_tracker();
 
@@ -30,13 +30,19 @@ class file_size_tracker {
                          std::shared_ptr<ds_node> node,
                          const std::string &parent_path,
                          uint64_t epoch);
-
+  /* Working period */
   std::chrono::milliseconds periodicity_ms_;
+  /* Stop bool */
   std::atomic_bool stop_{false};
+  /* Worker thread */
   std::thread worker_;
+  /* Output file name */
   std::string output_file_;
+  /* Directory tree */
   std::shared_ptr<directory_tree> tree_;
+  /* Storage */
   std::shared_ptr<storage::storage_management_ops> storage_;
+
 };
 
 }

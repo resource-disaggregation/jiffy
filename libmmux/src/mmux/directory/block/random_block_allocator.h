@@ -11,7 +11,7 @@
 
 namespace mmux {
 namespace directory {
-
+/* Random block allocator class, inherited from block allocator */
 class random_block_allocator : public block_allocator {
  public:
   random_block_allocator() = default;
@@ -31,9 +31,11 @@ class random_block_allocator : public block_allocator {
     }
     return block_name.substr(0, pos);
   }
-
+  /* Operation mutex */
   std::shared_mutex mtx_;
+  /* Allocated blocks */
   std::set<std::string> allocated_blocks_;
+  /* Free blocks */
   std::set<std::string> free_blocks_;
 };
 

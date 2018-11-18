@@ -10,14 +10,30 @@ using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 
+/**
+ * @brief Deconstruction function
+ */
+
 block_advertisement_client::~block_advertisement_client() {
   if (transport_ != nullptr)
     disconnect();
 }
 
+/**
+ * @brief Construction function
+ * @param host server host
+ * @param port server port
+ */
+
 block_advertisement_client::block_advertisement_client(const std::string &host, int port) {
   connect(host, port);
 }
+
+/**
+ * @brief Connect
+ * @param host server host
+ * @param port server port
+ */
 
 void block_advertisement_client::connect(const std::string &host, int port) {
   socket_ = std::make_shared<TSocket>(host, port);
@@ -27,15 +43,29 @@ void block_advertisement_client::connect(const std::string &host, int port) {
   transport_->open();
 }
 
+/**
+ * @brief Disconnect
+ */
+
 void block_advertisement_client::disconnect() {
   if (transport_->isOpen()) {
     transport_->close();
   }
 }
 
+/**
+ * @brief Advertise all blocks to the directory server
+ * @param block_names block names
+ */
+
 void block_advertisement_client::advertise_blocks(const std::vector<std::string> &block_names) {
   client_->add_blocks(block_names);
 }
+
+/**
+ * @brief Remove blocks
+ * @param block_names block names
+ */
 
 void block_advertisement_client::retract_blocks(const std::vector<std::string> &block_names) {
   client_->remove_blocks(block_names);

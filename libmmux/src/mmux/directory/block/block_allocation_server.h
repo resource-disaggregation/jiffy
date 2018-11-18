@@ -6,7 +6,7 @@
 
 namespace mmux {
 namespace directory {
-
+/* Block allocation server class */
 class block_allocation_server {
  public:
   static std::shared_ptr<apache::thrift::server::TThreadedServer> create(std::shared_ptr<block_allocator> alloc,
