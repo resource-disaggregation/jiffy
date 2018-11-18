@@ -7,7 +7,8 @@
 namespace mmux {
 namespace directory {
 /**
- * Class to convert directory type
+ * Directory type conversion class
+ * Aim to interact with RPC
  */
 class directory_type_conversions {
  public:

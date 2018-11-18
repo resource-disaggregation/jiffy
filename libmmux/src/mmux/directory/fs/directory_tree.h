@@ -31,75 +31,75 @@ class ds_node {
   virtual ~ds_node() = default;
 
   /**
-   * Fetch node's name
+   * @brief Fetch node's name
    * @return node's name
    */
 
   const std::string &name() const { return name_; }
 
   /**
-   * Set node's name
+   * @brief Set node's name
    * @param name name to be set
    */
 
   void name(const std::string &name) { name_ = name; }
 
   /**
-   * Check if node is directory
+   * @brief Check if node is directory
    * @return bool variable
    */
 
   bool is_directory() const { return status_.type() == file_type::directory; }
 
   /**
-   * Check if node is regular file
+   * @brief Check if node is regular file
    * @return bool variable
    */
 
   bool is_regular_file() const { return status_.type() == file_type::regular; }
 
   /**
-   * Fetch file status
+   * @brief Fetch file status
    * @return file status
    */
   file_status status() const { return status_; }
 
   /**
-   * Collect entry of file
+   * @brief Collect entry of file
    * @return file entry
    */
   directory_entry entry() const { return directory_entry(name_, status_); }
 
   /**
-   * Fetch last write time of file
+   * @brief Fetch last write time of file
    * @return last_write_time
    */
 
   std::uint64_t last_write_time() const { return status_.last_write_time(); }
 
   /**
-   * Set permissions
+   * @brief Set permissions
    * @param prms permissions
    */
 
   void permissions(const perms &prms) { status_.permissions(prms); }
 
   /**
-   * Fetch file permissions
+   * @brief Fetch file permissions
    * @return permissions
    */
 
   perms permissions() const { return status_.permissions(); }
 
   /**
-   * Set last write time
+   * @brief Set last write time
    * @param time last write time
    */
 
   void last_write_time(std::uint64_t time) { status_.last_write_time(time); }
 
   /**
-   * Virtual function
+   * @brief Virtual function
    * Write all dirty blocks back to persistent storage
    * @param backing_path file backing path
    * @param storage storage
@@ -108,7 +108,7 @@ class ds_node {
   virtual void sync(const std::string &backing_path,
                     const std::shared_ptr<storage::storage_management_ops> &storage) = 0;
   /**
-   * Virtual function
+   * @brief Virtual function
    * Write all dirty blocks back to persistent storage and clear the block
    * @param cleared_blocks cleared blocks
    * @param backing_path file backing path
@@ -119,7 +119,7 @@ class ds_node {
                     const std::string &backing_path,
                     const std::shared_ptr<storage::storage_management_ops> &storage) = 0;
   /**
-   * Virtual function
+   * @brief Virtual function
    * Load blocks from persistent storage
    * @param path file path
    * @param backing_path file backing path
@@ -154,14 +154,14 @@ class ds_file_node : public ds_node {
     replica_chain to_block;
   };
   /**
-   * Explicit constructor function
+   * @brief Explicit constructor function
    * @param name node name
    */
   explicit ds_file_node(const std::string &name)
       : ds_node(name, file_status(file_type::regular, perms(perms::all), utils::time_utils::now_ms())),
         dstatus_{} {}
   /**
-   * Constructor function
+   * @brief Constructor function
    * @param name file name
    * @param backing_path file backing_path
    * @param chain_length chain length
@@ -182,7 +182,7 @@ class ds_file_node : public ds_node {
       dstatus_(backing_path, chain_length, std::move(blocks), flags, tags) {}
 
   /**
-   * Fetch data status
+   * @brief Fetch data status
    * @return dstatus
    */
 
@@ -192,7 +192,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Set data status
+   * @brief Set data status
    * @param data status
    */
 
@@ -202,7 +202,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Fetch storage mode
+   * @brief Fetch storage mode
    * in_memory = 0,
    * in_memory_grace = 1,
    * on_disk = 2
@@ -215,7 +215,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Set new storage mode
+   * @brief Set new storage mode
    * @param i block id
    * @param m new storage mode
    */
@@ -226,7 +226,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Set new storage mode to all data blocks
+   * @brief Set new storage mode to all data blocks
    * @param m new storage mode
    */
   void mode(const storage_mode &m) {
@@ -235,7 +235,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Fetch backing path of file
+   * @brief Fetch backing path of file
    * @return backing path
    */
 
@@ -245,7 +245,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Set prefix backing path
+   * @brief Set prefix backing path
    * @param prefix backing path
    */
 
@@ -255,7 +255,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Fetch chain length
+   * @brief Fetch chain length
    * @return chain length
    */
 
@@ -265,7 +265,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Set chain length
+   * @brief Set chain length
    * @param chain_length
    */
 
@@ -275,7 +275,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Add tag to file
+   * @brief Add tag to file
    * @param key key
    * @param value value
    */
@@ -286,7 +286,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Add tags to file, passing arguments in pairs
+   * @brief Add tags to file, passing arguments in pairs
    * @param tags key and value pair
    */
 
@@ -296,7 +296,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Fetch the tag for a specific key
+   * @brief Fetch the tag for a specific key
    * @param key key
    * @return tag tag
    */
@@ -307,7 +307,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Fetch all tags
+   * @brief Fetch all tags
    * @return tags
    */
 
@@ -317,7 +317,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Fetch all flags
+   * @brief Fetch all flags
    * @return flags
    */
   std::int32_t flags() const {
@@ -326,7 +326,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Set flags
+   * @brief Set flags
    * @param flags flags
    */
   void flags(std::int32_t flags) {
@@ -335,7 +335,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Check if data is pinned
+   * @brief Check if data is pinned
    * @return bool value
    */
 
@@ -345,7 +345,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Check if data is mapped
+   * @brief Check if data is mapped
    * @return bool value
    */
 
@@ -355,7 +355,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Check if data is static provisioned
+   * @brief Check if data is static provisioned
    * Check static provisioned bit on flag
    * @return bool value
    */
@@ -366,7 +366,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Fetch data blocks
+   * @brief Fetch data blocks
    * @return vector of data blocks
    */
 
@@ -376,7 +376,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Fetch all data blocks, including the adding blocks
+   * @brief Fetch all data blocks, including the adding blocks
    * @return vector of data blocks
    */
 
@@ -388,7 +388,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Write all dirty blocks back to persistent storage
+   * @brief Write all dirty blocks back to persistent storage
    * @param backing_path file backing path
    * @param storage storage
    */
@@ -404,7 +404,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Write all dirty blocks back to persistent storage and clear the block
+   * @brief Write all dirty blocks back to persistent storage and clear the block
    * @param cleared_blocks cleared blocks
    * @param backing_path file backing path
    * @param storage storage
@@ -430,7 +430,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Load blocks from persistent storage
+   * @brief Load blocks from persistent storage
    * @param path file path
    * @param backing_path file backing path
    * @param storage storage
@@ -494,7 +494,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Handle lease expiry
+   * @brief Handle lease expiry
    * Clear storage of blocks
    * If it is pinned, do nothing
    * If it is already mapped, then clear the blocks but do not delete the path
@@ -539,7 +539,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Setup old chain and new chain and be ready for splitting
+   * @brief Setup old chain and new chain and be ready for splitting
    * @param storage storage
    * @param allocator block allocator
    * @param path file path
@@ -623,7 +623,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Setup old chain and new chain and be ready for splitting
+   * @brief Setup old chain and new chain and be ready for splitting
    * @param storage storage
    * @param allocator block allocator
    * @param path file path
@@ -708,7 +708,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Finalize slot range split and update file data status
+   * @brief Finalize slot range split and update file data status
    * @param storage storage
    * @param ctx from chain and to chain
    */
@@ -737,7 +737,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Setup old chain and new chain and be ready for merging
+   * @brief Setup old chain and new chain and be ready for merging
    * @param storage storage
    * @param slot_begin merge begin slot
    * @param slot_end merge end slot
@@ -794,7 +794,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * Finalize slot range merge and update file data status
+   * @brief Finalize slot range merge and update file data status
    * @param storage storage
    * @param allocator block allocator
    * @param ctx from chain and to chain
@@ -843,14 +843,14 @@ class ds_dir_node : public ds_node {
   typedef std::map<std::string, std::shared_ptr<ds_node>> child_map;
 
   /**
-   * Explicit construction function
+   * @brief Explicit construction function
    * @param name directory name
    */
   explicit ds_dir_node(const std::string &name)
       : ds_node(name, file_status(file_type::directory, perms(perms::all), utils::time_utils::now_ms())) {}
 
   /**
-   * Fetch child corresponding to name
+   * @brief Fetch child corresponding to name
    * @param name child name
    * @return child node
    */
@@ -866,7 +866,7 @@ class ds_dir_node : public ds_node {
   }
 
   /**
-  * Add child node to directory
+  * @brief Add child node to directory
   * @param node child node
   */
   void add_child(std::shared_ptr<ds_node> node) {
@@ -879,7 +879,7 @@ class ds_dir_node : public ds_node {
   }
 
   /**
-   * Remove child from directory
+   * @brief Remove child from directory
    * @param name child name
    */
   void remove_child(const std::string &name) {
@@ -892,7 +892,7 @@ class ds_dir_node : public ds_node {
     }
   }
   /**
-  * Handle lease expiry recursively for directories
+  * @brief Handle lease expiry recursively for directories
   * @param cleared_blocks cleared blocks
   * @param child_name child name
   * @param storage storage
@@ -930,7 +930,7 @@ class ds_dir_node : public ds_node {
   }
 
   /**
-   * Write all dirty blocks back to persistent storage
+   * @brief Write all dirty blocks back to persistent storage
    * @param backing_path backing path
    * @param storage stoage
    */
@@ -943,7 +943,7 @@ class ds_dir_node : public ds_node {
   }
 
   /**
-   * Write all dirty blocks back to persistent storage and clear the block
+   * @brief Write all dirty blocks back to persistent storage and clear the block
    * @param cleared_blocks cleared blocks
    * @param backing_path backing path
    * @param storage storage
@@ -959,7 +959,7 @@ class ds_dir_node : public ds_node {
   }
 
   /**
-   * Load blocks from persistent storage
+   * @brief Load blocks from persistent storage
    * @param path directory path
    * @param backing_path backing path
    * @param storage storage
@@ -977,7 +977,7 @@ class ds_dir_node : public ds_node {
   }
 
   /**
-   * Return all entries in directory
+   * @brief Return all entries in directory
    * @return entries
    */
 
@@ -990,7 +990,7 @@ class ds_dir_node : public ds_node {
   }
 
   /**
-   * Return all entries in directory recursively
+   * @brief Return all entries in directory recursively
    * @return entries
    */
 
@@ -1002,7 +1002,7 @@ class ds_dir_node : public ds_node {
   }
 
   /**
-  * Return all children names
+  * @brief Return all children names
   * @return children names
   */
 
@@ -1015,23 +1015,25 @@ class ds_dir_node : public ds_node {
   }
 
   /**
-   * Fetch beginning child
+   * @brief Fetch beginning child
    * @return beginning child
    */
+
   child_map::const_iterator begin() const {
     return children_.begin();
   }
 
   /**
-   * Fetch ending child
+   * @brief Fetch ending child
    * @return ending child
    */
+
   child_map::const_iterator end() const {
     return children_.end();
   }
 
   /**
-   * Fetch number of children
+   * @brief Fetch number of children
    * @return number of children
    */
 
@@ -1040,7 +1042,7 @@ class ds_dir_node : public ds_node {
   }
 
   /**
-   * Check if directory is empty
+   * @brief Check if directory is empty
    * @return bool variable
    */
 
@@ -1050,7 +1052,7 @@ class ds_dir_node : public ds_node {
 
  private:
   /**
-   * Fetch all entries
+   * @brief Fetch all entries
    * @param entries entries vector
    */
   void populate_entries(std::vector<directory_entry> &entries) const {
@@ -1060,7 +1062,7 @@ class ds_dir_node : public ds_node {
   }
 
   /**
-   * Fetch all entries recursively
+   * @brief Fetch all entries recursively
    * @param entries vector
    */
   void populate_recursive_entries(std::vector<directory_entry> &entries) const {

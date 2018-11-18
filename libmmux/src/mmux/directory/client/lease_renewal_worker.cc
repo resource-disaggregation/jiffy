@@ -6,9 +6,19 @@ namespace directory {
 
 using namespace mmux::utils;
 
+/**
+ * @brief Construction function
+ * @param host socket host
+ * @param port socket port
+ */
+
 lease_renewal_worker::lease_renewal_worker(const std::string &host, int port)
     : stop_(false), ls_(host, port) {
 }
+
+/**
+ * @brief Deconstruction function
+ */
 
 lease_renewal_worker::~lease_renewal_worker() {
   stop_.store(true);
@@ -16,9 +26,17 @@ lease_renewal_worker::~lease_renewal_worker() {
     worker_.join();
 }
 
+/**
+ * @brief Stop renewal worker
+ */
 void lease_renewal_worker::stop() {
   stop_.store(true);
 }
+
+/**
+ * @brief Start lease renewal worker thread
+ * Renew leases in the list and sleep until next work period
+ */
 
 void lease_renewal_worker::start() {
   worker_ = std::move(std::thread([&] {
@@ -45,12 +63,22 @@ void lease_renewal_worker::start() {
   }));
 }
 
+/**
+ * @brief Add file path to to_renew list if file path doesn't already exist in the list
+ * @param path file path
+ */
+
 void lease_renewal_worker::add_path(const std::string &path) {
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   if (std::find(to_renew_.begin(), to_renew_.end(), path) == to_renew_.end()) {
     to_renew_.push_back(path);
   }
 }
+
+/**
+ * @brief Remove path from to_renew list
+ * @param path file path
+ */
 
 void lease_renewal_worker::remove_path(const std::string &path) {
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
@@ -59,6 +87,12 @@ void lease_renewal_worker::remove_path(const std::string &path) {
     to_renew_.erase(it);
   }
 }
+
+/**
+ * @brief Check if path is already in to_renew list
+ * @param path file path
+ * @return bool value
+ */
 
 bool lease_renewal_worker::has_path(const std::string &path) {
   std::shared_lock<std::shared_mutex> lock(metadata_mtx_);

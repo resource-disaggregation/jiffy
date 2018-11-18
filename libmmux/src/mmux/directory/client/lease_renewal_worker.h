@@ -11,7 +11,7 @@
 
 namespace mmux {
 namespace directory {
-
+/* Lease renewal worker */
 class lease_renewal_worker {
  public:
   lease_renewal_worker(const std::string &host, int port);
@@ -24,11 +24,15 @@ class lease_renewal_worker {
   void remove_path(const std::string &path);
   bool has_path(const std::string &path);
  private:
+  /* Metadata mutex */
   mutable std::shared_mutex metadata_mtx_;
-
+  /* Worker thread */
   std::thread worker_;
+  /* Stop bool */
   std::atomic_bool stop_;
+  /* Lease client */
   lease_client ls_;
+  /* To renew files */
   std::vector<std::string> to_renew_;
 };
 

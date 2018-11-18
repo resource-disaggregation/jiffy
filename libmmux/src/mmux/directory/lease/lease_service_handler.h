@@ -7,10 +7,7 @@
 
 namespace mmux {
 namespace directory {
-/**
- * Lease service handler class
- * Inherited from lease_serviceIf
- */
+/* Lease service handler class, inherited from lease_serviceIf */
 class lease_service_handler : public lease_serviceIf {
  public:
   explicit lease_service_handler(std::shared_ptr<directory_tree> tree, int64_t lease_period_ms);

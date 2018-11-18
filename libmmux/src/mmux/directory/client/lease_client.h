@@ -7,6 +7,8 @@
 namespace mmux {
 namespace directory {
 
+/* Lease client class */
+
 class lease_client {
  public:
   typedef lease_serviceClient thrift_client;

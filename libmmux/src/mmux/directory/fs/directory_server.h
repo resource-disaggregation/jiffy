@@ -8,13 +8,13 @@
 namespace mmux {
 namespace directory {
 
-/*! Directory server class */
+/* Directory server class */
 
 class directory_server {
  public:
 
 /**
- * Create a directory server
+ * @brief Create a directory server
  * @param shard server's directory tree
  * @param address socket address
  * @param port socket port

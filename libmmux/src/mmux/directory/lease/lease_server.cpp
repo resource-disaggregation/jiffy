@@ -14,7 +14,7 @@ using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
 /**
- * Create lease server
+ * @brief Create lease server
  * @param tree directory tree
  * @param lease_period_ms lease duration
  * @param address socket address

@@ -8,6 +8,8 @@
 namespace mmux {
 namespace directory {
 
+/* Directory client class, inherited from directory_interface */
+
 class directory_client : public directory_interface {
  public:
   typedef directory_serviceClient thrift_client;
@@ -62,9 +64,13 @@ class directory_client : public directory_interface {
   virtual void handle_lease_expiry(const std::string &path) override;
 
  private:
+  /* Socket */
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};
+  /* Transport */
   std::shared_ptr<apache::thrift::transport::TTransport> transport_{};
+  /* Protocol */
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_{};
+  /* Client */
   std::shared_ptr<thrift_client> client_{};
 };
 

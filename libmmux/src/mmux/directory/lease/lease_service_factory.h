@@ -8,10 +8,7 @@
 namespace mmux {
 namespace directory {
 
-/**
- * Lease sevice factory class
- * Inherited from lease_serviceIfFactory
- */
+/* Lease sevice factory class, inherited from lease_serviceIfFactory */
 
 class lease_service_factory : public lease_serviceIfFactory {
  public:

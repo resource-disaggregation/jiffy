@@ -13,7 +13,7 @@ using namespace ::apache::thrift::transport;
 using namespace utils;
 
 /**
- * Construction function of directory_service_factory class
+ * @brief Construction function of directory_service_factory class
  * @param shard server's directory tree
  */
 directory_service_factory::directory_service_factory(std::shared_ptr<directory_tree> shard)
@@ -21,7 +21,7 @@ directory_service_factory::directory_service_factory(std::shared_ptr<directory_t
 }
 
 /**
- * Get directory_service_handler
+ * @brief Get directory_service_handler
  * @param conn_info connection info provided by apache thrift
  * @return directory_service_handler generated with directory tree
  */
@@ -32,7 +32,7 @@ directory_serviceIf *directory_service_factory::getHandler(const TConnectionInfo
 }
 
 /**
- * Delete the directory_service_handler
+ * @brief Delete the directory_service_handler
  * @param handler directory_service_handler
  */
 void directory_service_factory::releaseHandler(directory_serviceIf *handler) {
