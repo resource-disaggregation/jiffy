@@ -4,19 +4,23 @@ namespace mmux {
 namespace directory {
 
 using namespace utils;
+
 /**
- * Initialization of sync_worker TODO
- * @param tree
- * @param sync_period_ms
+ * Construction function
+ * @param tree directory tree
+ * @param sync_period_ms synchronization worker working period
  */
+
 sync_worker::sync_worker(std::shared_ptr<directory_tree> tree, uint64_t sync_period_ms)
     : tree_(tree), sync_period_(sync_period_ms), stop_(false), num_epochs_(0) {}
 
 sync_worker::~sync_worker() {
   stop();
 }
+
 /**
- * TODO
+ * Start synchronization worker
+ * Check if any node needs sychronization, then sleep for period time
  */
 void sync_worker::start() {
   worker_ = std::thread([&] {
@@ -40,7 +44,7 @@ void sync_worker::start() {
   });
 }
 /**
- * TODO
+ * Stop synchronization worker
  */
 void sync_worker::stop() {
   stop_.store(true);
@@ -48,7 +52,7 @@ void sync_worker::stop() {
     worker_.join();
 }
 /**
- * TODO
+ * Sychronization starting from root directory node
  */
 void sync_worker::sync_nodes() {
   namespace ts = std::chrono;
@@ -60,11 +64,11 @@ void sync_worker::sync_nodes() {
   }
 }
 /**
- * TODO
- * @param parent
- * @param parent_path
- * @param child_name
- * @param epoch
+ * Synchronization of nodes recursively
+ * @param parent parent directory node
+ * @param parent_path  parent path
+ * @param child_name child node name
+ * @param epoch time epoch
  */
 void sync_worker::sync_nodes(std::shared_ptr<ds_dir_node> parent,
                              const std::string &parent_path,
@@ -90,7 +94,10 @@ void sync_worker::sync_nodes(std::shared_ptr<ds_dir_node> parent,
     }
   }
 }
-
+/**
+ * Fetch time epoch of worker
+ * @return num_epochs
+ */
 size_t sync_worker::num_epochs() const {
   return num_epochs_.load();
 }

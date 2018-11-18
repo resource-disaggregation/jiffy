@@ -729,7 +729,7 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
 }
 
 /**
- * Expand the file by a memory block
+ * Add block to file
  * @param path file path
  */
 
