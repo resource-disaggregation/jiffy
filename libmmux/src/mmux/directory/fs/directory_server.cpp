@@ -16,9 +16,9 @@ using namespace ::apache::thrift::server;
 
 /**
  * @brief Create a directory server
- * @param shard server's directory tree
- * @param address socket address
- * @param port socket port
+ * @param shard Server's directory tree
+ * @param address Socket address
+ * @param port Socket port
  * @return TThreadedServer
  */
 

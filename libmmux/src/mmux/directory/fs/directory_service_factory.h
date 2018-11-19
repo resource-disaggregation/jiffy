@@ -16,6 +16,7 @@ class directory_service_factory : public directory_serviceIfFactory {
   directory_serviceIf *getHandler(const ::apache::thrift::TConnectionInfo &connInfo) override;
   void releaseHandler(directory_serviceIf *anIf) override;
  private:
+  /* Directory tree */
   std::shared_ptr<directory_tree> shard_;
 };
 

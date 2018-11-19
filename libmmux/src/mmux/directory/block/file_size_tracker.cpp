@@ -11,9 +11,9 @@ using namespace utils;
 
 /**
  * @brief Constructor
- * @param tree directory tree
- * @param periodicity_ms working period
- * @param output_file output file name
+ * @param tree Directory tree
+ * @param periodicity_ms Working period
+ * @param output_file Output file name
  */
 
 file_size_tracker::file_size_tracker(std::shared_ptr<directory_tree> tree,
@@ -71,7 +71,7 @@ void file_size_tracker::stop() {
 
 /**
  * @brief Report file size starting from root
- * @param out output file stream
+ * @param out Output file stream
  */
 
 void file_size_tracker::report_file_sizes(std::ofstream &out) {
@@ -86,10 +86,10 @@ void file_size_tracker::report_file_sizes(std::ofstream &out) {
 
 /**
  * @brief Report file size recursively
- * @param out output file stream
- * @param node file node
- * @param parent_path parent path
- * @param epoch time epoch
+ * @param out Output file stream
+ * @param node File node
+ * @param parent_path Parent path
+ * @param epoch Time epoch
  */
 
 void file_size_tracker::report_file_sizes(std::ofstream &out,

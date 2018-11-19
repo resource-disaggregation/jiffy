@@ -13,9 +13,9 @@ using namespace ::apache::thrift::transport;
 using namespace utils;
 
 /**
- * @brief Construction
- * @param tree directory tree
- * @param lease_period_ms lease duration
+ * @brief Constructor
+ * @param tree Directory tree
+ * @param lease_period_ms Lease duration
  */
 
 lease_service_factory::lease_service_factory(std::shared_ptr<directory_tree> tree, int64_t lease_period_ms)
@@ -23,8 +23,8 @@ lease_service_factory::lease_service_factory(std::shared_ptr<directory_tree> tre
 
 /**
  * @brief Get lease_service_factory handler
- * @param conn_info connection information
- * @return handler
+ * @param conn_info Connection information
+ * @return Handler
  */
 
 lease_serviceIf *lease_service_factory::getHandler(const ::apache::thrift::TConnectionInfo &conn_info) {
@@ -35,7 +35,7 @@ lease_serviceIf *lease_service_factory::getHandler(const ::apache::thrift::TConn
 
 /**
  * @brief Release handler
- * @param handler handler
+ * @param handler Handler
  */
 void lease_service_factory::releaseHandler(lease_serviceIf *handler) {
   LOG(trace) << "Releasing connection";

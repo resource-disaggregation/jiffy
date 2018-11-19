@@ -6,9 +6,9 @@ namespace directory {
 using namespace utils;
 
 /**
- * @brief Construction function
- * @param tree directory tree
- * @param sync_period_ms synchronization worker working period
+ * @brief Constructor
+ * @param tree Directory tree
+ * @param sync_period_ms Synchronization worker working period
  */
 
 sync_worker::sync_worker(std::shared_ptr<directory_tree> tree, uint64_t sync_period_ms)
@@ -71,10 +71,10 @@ void sync_worker::sync_nodes() {
 
 /**
  * @brief Synchronization of nodes recursively
- * @param parent parent directory node
- * @param parent_path  parent path
- * @param child_name child node name
- * @param epoch time epoch
+ * @param parent Parent directory node
+ * @param parent_path  Parent path
+ * @param child_name Child node name
+ * @param epoch Time epoch
  */
 
 void sync_worker::sync_nodes(std::shared_ptr<ds_dir_node> parent,
@@ -104,7 +104,7 @@ void sync_worker::sync_nodes(std::shared_ptr<ds_dir_node> parent,
 
 /**
  * @brief Fetch time epoch of worker
- * @return num_epochs
+ * @return Num_epochs
  */
 
 size_t sync_worker::num_epochs() const {

@@ -15,10 +15,10 @@ using namespace ::apache::thrift::server;
 
 /**
  * @brief Create block allocation server
- * @param alloc block allocator
- * @param address socket address
- * @param port socket port number
- * @return server
+ * @param alloc Block allocator
+ * @param address Socket address
+ * @param port Socket port number
+ * @return Server
  */
 
 std::shared_ptr<apache::thrift::server::TThreadedServer> block_allocation_server::create(std::shared_ptr<block_allocator> alloc,

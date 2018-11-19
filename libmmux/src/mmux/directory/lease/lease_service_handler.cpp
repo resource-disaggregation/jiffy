@@ -9,9 +9,9 @@ namespace directory {
 using namespace utils;
 
 /**
- * @brief Construction function
- * @param tree directory tree
- * @param lease_period_ms lease duration
+ * @brief Constructor
+ * @param tree Directory tree
+ * @param lease_period_ms Lease duration
  */
 
 lease_service_handler::lease_service_handler(std::shared_ptr<directory_tree> tree, int64_t lease_period_ms)
@@ -19,8 +19,8 @@ lease_service_handler::lease_service_handler(std::shared_ptr<directory_tree> tre
 
 /**
  * @brief Renew leases
- * @param _return rpc lease acknowledgement
- * @param to_renew vector of paths to be renewed
+ * @param _return Rpc lease acknowledgement
+ * @param to_renew Vector of paths to be renewed
  */
 
 void lease_service_handler::renew_leases(rpc_lease_ack &_return, const std::vector<std::string> &to_renew) {

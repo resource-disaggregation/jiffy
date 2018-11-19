@@ -7,8 +7,8 @@ namespace directory {
 using namespace utils;
 
 /**
- * @brief Construction function
- * @param alloc block allocator
+ * @brief Constructor
+ * @param alloc Block allocator
  */
 
 block_allocation_service_handler::block_allocation_service_handler(std::shared_ptr<block_allocator> alloc)
@@ -16,7 +16,7 @@ block_allocation_service_handler::block_allocation_service_handler(std::shared_p
 
 /**
  * @brief Add blocks
- * @param block_names block names
+ * @param block_names Block names
  */
 
 void block_allocation_service_handler::add_blocks(const std::vector<std::string> &block_names) {
@@ -30,7 +30,7 @@ void block_allocation_service_handler::add_blocks(const std::vector<std::string>
 
 /**
  * @brief Remove blocks
- * @param block_names block names
+ * @param block_names Block names
  */
 
 void block_allocation_service_handler::remove_blocks(const std::vector<std::string> &block_names) {
@@ -44,8 +44,8 @@ void block_allocation_service_handler::remove_blocks(const std::vector<std::stri
 
 /**
  * @brief Make exception
- * @param e exception
- * @return exception
+ * @param e Exception
+ * @return Exception
  */
 
 block_allocation_service_exception block_allocation_service_handler::make_exception(const std::out_of_range &e) {

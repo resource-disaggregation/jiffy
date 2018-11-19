@@ -11,7 +11,7 @@ namespace mmux {
 namespace directory {
 
 /**
- * @brief Deconstruction
+ * @brief Destructor
  */
 
 lease_client::~lease_client() {
@@ -20,18 +20,19 @@ lease_client::~lease_client() {
 }
 
 /**
- * @brief Construction function
- * @param host socket host
- * @param port socket port
+ * @brief Constructor
+ * @param host Socket host
+ * @param port Socket port
  */
+
 lease_client::lease_client(const std::string &host, int port) {
   connect(host, port);
 }
 
 /**
- * @brief Connect
- * @param host socket host
- * @param port socket port
+ * @brief Connect server
+ * @param host Socket host
+ * @param port Socket port
  */
 
 void lease_client::connect(const std::string &host, int port) {
@@ -43,8 +44,9 @@ void lease_client::connect(const std::string &host, int port) {
 }
 
 /**
- * @brief Disconnect
+ * @brief Disconnect server
  */
+
 void lease_client::disconnect() {
   if (transport_->isOpen()) {
     transport_->close();
@@ -53,8 +55,8 @@ void lease_client::disconnect() {
 
 /**
  * @brief Renew lease
- * @param to_renew file to be renewed
- * @return lease acknowledgement
+ * @param to_renew File to be renewed
+ * @return Lease acknowledgement
  */
 
 rpc_lease_ack lease_client::renew_leases(const std::vector<std::string> &to_renew) {

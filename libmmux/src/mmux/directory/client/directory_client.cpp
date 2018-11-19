@@ -12,9 +12,9 @@ namespace mmux {
 namespace directory {
 
 /**
- * @brief Construction
- * @param host service host
- * @param port service port number
+ * @brief Constructor
+ * @param host Service host
+ * @param port Service port number
  */
 
 directory_client::directory_client(const std::string &host, int port) {
@@ -22,7 +22,7 @@ directory_client::directory_client(const std::string &host, int port) {
 }
 
 /**
- * @brief Deconstruction
+ * @brief Destructor
  */
 
 directory_client::~directory_client() {
@@ -32,8 +32,8 @@ directory_client::~directory_client() {
 
 /**
  * @brief Connect service
- * @param host service host
- * @param port service port
+ * @param host Service host
+ * @param port Service port number
  */
 
 void directory_client::connect(const std::string &host, int port) {
@@ -55,7 +55,7 @@ void directory_client::disconnect() {
 
 /**
  * @brief Create directory
- * @param path directory path
+ * @param path Directory path
  */
 
 void directory_client::create_directory(const std::string &path) {
@@ -64,7 +64,7 @@ void directory_client::create_directory(const std::string &path) {
 
 /**
  * @brief Create directories
- * @param path directory paths
+ * @param path Directory paths
  */
 
 void directory_client::create_directories(const std::string &path) {
@@ -73,8 +73,8 @@ void directory_client::create_directories(const std::string &path) {
 
 /**
  * @brief Open file
- * @param path file path
- * @return data status
+ * @param path File path
+ * @return Data status
  */
 
 data_status directory_client::open(const std::string &path) {
@@ -85,14 +85,14 @@ data_status directory_client::open(const std::string &path) {
 
 /**
  * @brief Create a file
- * @param path file path
- * @param backing_path file backing path
- * @param num_blocks number of blocks
- * @param chain_length replication chain length
- * @param flags flag arguments
- * @param permissions permissions
- * @param tags tag arguments
- * @return data status
+ * @param path File path
+ * @param backing_path File backing path
+ * @param num_blocks Number of blocks
+ * @param chain_length Replication chain length
+ * @param flags Flag arguments
+ * @param permissions Permissions
+ * @param tags Tag arguments
+ * @return Data status
  */
 
 data_status directory_client::create(const std::string &path,
@@ -116,14 +116,14 @@ data_status directory_client::create(const std::string &path,
 
 /**
  * @brief Open if exist, otherwise create
- * @param path file path
- * @param backing_path backing_path
- * @param num_blocks number of blocks
- * @param chain_length replication chain length
- * @param flags flag arguments
- * @param permissions permissions
- * @param tags tag arguments
- * @return data status
+ * @param path File path
+ * @param backing_path Backing_path
+ * @param num_blocks Number of blocks
+ * @param chain_length Replication chain length
+ * @param flags Flag arguments
+ * @param permissions Permissions
+ * @param tags Tag arguments
+ * @return Data status
  */
 
 data_status directory_client::open_or_create(const std::string &path,
@@ -147,8 +147,8 @@ data_status directory_client::open_or_create(const std::string &path,
 
 /**
  * @brief Check if the file exists
- * @param path file path
- * @return bool value
+ * @param path File path
+ * @return Bool value
  */
 
 bool directory_client::exists(const std::string &path) const {
@@ -157,8 +157,8 @@ bool directory_client::exists(const std::string &path) const {
 
 /**
  * @brief Fetch last write time of file
- * @param path file path
- * @return last write time
+ * @param path File path
+ * @return Last write time
  */
 
 std::uint64_t directory_client::last_write_time(const std::string &path) const {
@@ -167,8 +167,8 @@ std::uint64_t directory_client::last_write_time(const std::string &path) const {
 
 /**
  * @brief Fetch permission of a file
- * @param path file path
- * @return permission
+ * @param path File path
+ * @return Permission
  */
 
 perms directory_client::permissions(const std::string &path) {
@@ -177,9 +177,9 @@ perms directory_client::permissions(const std::string &path) {
 
 /**
  * @brief Set permissions
- * @param path
- * @param prms
- * @param opts
+ * @param path File path
+ * @param prms Permissions
+ * @param opts Permission options
  */
 
 void directory_client::permissions(const std::string &path, const perms &prms, perm_options opts) {
@@ -188,7 +188,7 @@ void directory_client::permissions(const std::string &path, const perms &prms, p
 
 /**
  * @brief Remove file
- * @param path file path
+ * @param path File path
  */
 
 void directory_client::remove(const std::string &path) {
@@ -197,7 +197,7 @@ void directory_client::remove(const std::string &path) {
 
 /**
  * @brief Remove all files under given directory
- * @param path directory path
+ * @param path Directory path
  */
 
 void directory_client::remove_all(const std::string &path) {
@@ -206,8 +206,8 @@ void directory_client::remove_all(const std::string &path) {
 
 /**
  * @brief Write all dirty blocks back to persistent storage
- * @param path file path
- * @param backing_path file backing path
+ * @param path File path
+ * @param backing_path File backing path
  */
 
 void directory_client::sync(const std::string &path, const std::string &backing_path) {
@@ -216,8 +216,8 @@ void directory_client::sync(const std::string &path, const std::string &backing_
 
 /**
  * @brief Write all dirty blocks back to persistent storage and clear the block
- * @param path file path
- * @param backing_path file backing path
+ * @param path File path
+ * @param backing_path File backing path
  */
 
 void directory_client::dump(const std::string &path, const std::string &backing_path) {
@@ -226,8 +226,8 @@ void directory_client::dump(const std::string &path, const std::string &backing_
 
 /**
  * @brief Load blocks from persistent storage
- * @param path
- * @param backing_path
+ * @param path File path
+ * @param backing_path File backing path
  */
 
 void directory_client::load(const std::string &path, const std::string &backing_path) {
@@ -236,8 +236,8 @@ void directory_client::load(const std::string &path, const std::string &backing_
 
 /**
  * @brief Rename a file
- * @param old_path original file path
- * @param new_path new file path
+ * @param old_path Original file path
+ * @param new_path New file path
  */
 
 void directory_client::rename(const std::string &old_path, const std::string &new_path) {
@@ -247,7 +247,7 @@ void directory_client::rename(const std::string &old_path, const std::string &ne
 /**
  * @brief Fetch file status
  * @param path file path
- * @return file status
+ * @return File status
  */
 
 file_status directory_client::status(const std::string &path) const {
@@ -258,8 +258,8 @@ file_status directory_client::status(const std::string &path) const {
 
 /**
  * @brief Collect all entries of files in the directory
- * @param path directory path
- * @return directory entries
+ * @param path Directory path
+ * @return Directory entries
  */
 
 std::vector<directory_entry> directory_client::directory_entries(const std::string &path) {
@@ -274,8 +274,8 @@ std::vector<directory_entry> directory_client::directory_entries(const std::stri
 
 /**
  * @brief Collect all entries of files in the directory recursively
- * @param path directory path
- * @return directory entries
+ * @param path Directory path
+ * @return Directory entries
  */
 
 std::vector<directory_entry> directory_client::recursive_directory_entries(const std::string &path) {
@@ -290,8 +290,8 @@ std::vector<directory_entry> directory_client::recursive_directory_entries(const
 
 /**
  * @brief Collect data status
- * @param path file path
- * @return data status
+ * @param path File path
+ * @return Data status
  */
 
 data_status directory_client::dstatus(const std::string &path) {
@@ -302,8 +302,8 @@ data_status directory_client::dstatus(const std::string &path) {
 
 /**
  * @brief Add tags to the file status
- * @param path file path
- * @param tags tags
+ * @param path File path
+ * @param tags Tags
  */
 
 void directory_client::add_tags(const std::string &path, const std::map<std::string, std::string> &tags) {
@@ -312,8 +312,8 @@ void directory_client::add_tags(const std::string &path, const std::map<std::str
 
 /**
  * @brief Check if path is regular file
- * @param path file path
- * @return bool value
+ * @param path File path
+ * @return Bool value
  */
 
 bool directory_client::is_regular_file(const std::string &path) {
@@ -322,8 +322,8 @@ bool directory_client::is_regular_file(const std::string &path) {
 
 /**
  * @brief Check if path is directory
- * @param path directory path
- * @return bool value
+ * @param path Directory path
+ * @return Bool value
  */
 
 bool directory_client::is_directory(const std::string &path) {
@@ -332,9 +332,9 @@ bool directory_client::is_directory(const std::string &path) {
 
 /**
  * @brief Resolve failures using replication chain
- * @param path file path
- * @param chain replication chain
- * @return replication chain
+ * @param path File path
+ * @param chain Replication chain
+ * @return Replication chain
  */
 
 replica_chain directory_client::resolve_failures(const std::string &path, const replica_chain &chain) {
@@ -346,9 +346,9 @@ replica_chain directory_client::resolve_failures(const std::string &path, const 
 
 /**
  * @brief Add a new replication to chain
- * @param path file path
- * @param chain replication chain
- * @return replication chain
+ * @param path File path
+ * @param chain Replication chain
+ * @return Replication chain
  */
 
 replica_chain directory_client::add_replica_to_chain(const std::string &path, const replica_chain &chain) {
@@ -360,7 +360,7 @@ replica_chain directory_client::add_replica_to_chain(const std::string &path, co
 
 /**
  * @brief Add block to file
- * @param path file path
+ * @param path File path
  */
 
 void directory_client::add_block_to_file(const std::string &path) {
@@ -369,9 +369,9 @@ void directory_client::add_block_to_file(const std::string &path) {
 
 /**
  * @brief Split block hash range
- * @param path file path
- * @param slot_begin split begin range
- * @param slot_end split end range
+ * @param path File path
+ * @param slot_begin Split begin range
+ * @param slot_end Split end range
  */
 
 void directory_client::split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) {
@@ -380,9 +380,9 @@ void directory_client::split_slot_range(const std::string &path, int32_t slot_be
 
 /**
  * @brief Merge slot hash range
- * @param path file path
- * @param slot_begin merge begin range
- * @param slot_end merge end range
+ * @param path File path
+ * @param slot_begin Merge begin range
+ * @param slot_end Merge end range
  */
 
 void directory_client::merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) {
@@ -390,14 +390,14 @@ void directory_client::merge_slot_range(const std::string &path, int32_t slot_be
 }
 
 /**
- * @brief touch -> unsupported operation
+ * @brief Touch -> unsupported operation
  */
 void directory_client::touch(const std::string &) {
   throw directory_ops_exception("Unsupported operation");
 }
 
 /**
- * @brief handle lease expiry -> unsupported operation
+ * @brief Handle lease expiry -> unsupported operation
  */
 
 void directory_client::handle_lease_expiry(const std::string &) {

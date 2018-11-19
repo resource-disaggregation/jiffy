@@ -7,9 +7,9 @@ namespace directory {
 using namespace mmux::utils;
 
 /**
- * @brief Construction function
- * @param host socket host
- * @param port socket port
+ * @brief Constructor
+ * @param host Socket host
+ * @param port Socket port
  */
 
 lease_renewal_worker::lease_renewal_worker(const std::string &host, int port)
@@ -17,7 +17,7 @@ lease_renewal_worker::lease_renewal_worker(const std::string &host, int port)
 }
 
 /**
- * @brief Deconstruction function
+ * @brief Destructor
  */
 
 lease_renewal_worker::~lease_renewal_worker() {
@@ -65,7 +65,7 @@ void lease_renewal_worker::start() {
 
 /**
  * @brief Add file path to to_renew list if file path doesn't already exist in the list
- * @param path file path
+ * @param path File path
  */
 
 void lease_renewal_worker::add_path(const std::string &path) {
@@ -77,7 +77,7 @@ void lease_renewal_worker::add_path(const std::string &path) {
 
 /**
  * @brief Remove path from to_renew list
- * @param path file path
+ * @param path File path
  */
 
 void lease_renewal_worker::remove_path(const std::string &path) {
@@ -90,8 +90,8 @@ void lease_renewal_worker::remove_path(const std::string &path) {
 
 /**
  * @brief Check if path is already in to_renew list
- * @param path file path
- * @return bool value
+ * @param path File path
+ * @return Bool value
  */
 
 bool lease_renewal_worker::has_path(const std::string &path) {

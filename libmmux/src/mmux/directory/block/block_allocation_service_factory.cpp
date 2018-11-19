@@ -11,8 +11,8 @@ using namespace ::apache::thrift::transport;
 using namespace utils;
 
 /**
- * @brief Construction function
- * @param alloc block allocator
+ * @brief Constructor
+ * @param alloc Block allocator
  */
 
 block_allocation_service_factory::block_allocation_service_factory(std::shared_ptr<block_allocator> alloc)
@@ -20,8 +20,8 @@ block_allocation_service_factory::block_allocation_service_factory(std::shared_p
 
 /**
  * @brief Get block allocation service handler
- * @param conn_info connection information
- * @return handler
+ * @param conn_info Connection information
+ * @return Handler
  */
 
 block_allocation_serviceIf *block_allocation_service_factory::getHandler(const ::apache::thrift::TConnectionInfo &conn_info) {
@@ -32,7 +32,7 @@ block_allocation_serviceIf *block_allocation_service_factory::getHandler(const :
 
 /**
  * @brief Release handler
- * @param handler handler
+ * @param handler Handler
  */
 
 void block_allocation_service_factory::releaseHandler(block_allocation_serviceIf *handler) {

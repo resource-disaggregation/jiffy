@@ -9,8 +9,8 @@ namespace directory {
 
 /**
  * @brief Allocate blocks in different prefixs
- * @param count number of block
- * @return block names
+ * @param count Number of block
+ * @return Block names
  */
 
 std::vector<std::string> random_block_allocator::allocate(std::size_t count, const std::vector<std::string> &) {
@@ -53,7 +53,7 @@ std::vector<std::string> random_block_allocator::allocate(std::size_t count, con
 
 /**
  * @brief Free blocks
- * @param blocks block names
+ * @param blocks Block names
  */
 
 void random_block_allocator::free(const std::vector<std::string> &blocks) {
@@ -79,7 +79,7 @@ void random_block_allocator::free(const std::vector<std::string> &blocks) {
 
 /**
  * @brief Add blocks to free block list
- * @param block_names block names
+ * @param block_names Block names
  */
 
 void random_block_allocator::add_blocks(const std::vector<std::string> &block_names) {
@@ -89,7 +89,7 @@ void random_block_allocator::add_blocks(const std::vector<std::string> &block_na
 
 /**
  * @brief Remove blocks from free block list
- * @param block_names block names
+ * @param block_names Block names
  */
 
 void random_block_allocator::remove_blocks(const std::vector<std::string> &block_names) {
@@ -105,7 +105,7 @@ void random_block_allocator::remove_blocks(const std::vector<std::string> &block
 
 /**
  * @brief Fetch number of free blocks
- * @return number of free blocks
+ * @return Number of free blocks
  */
 
 std::size_t random_block_allocator::num_free_blocks() {
@@ -115,7 +115,7 @@ std::size_t random_block_allocator::num_free_blocks() {
 
 /**
  * @brief Fetch number of allocated blocks
- * @return number of allocated blocks
+ * @return Number of allocated blocks
  */
 
 std::size_t random_block_allocator::num_allocated_blocks() {
@@ -125,7 +125,7 @@ std::size_t random_block_allocator::num_allocated_blocks() {
 
 /**
  * @brief Fetch number of total blocks
- * @return number of total blocks
+ * @return Number of total blocks
  */
 
 std::size_t random_block_allocator::num_total_blocks() {

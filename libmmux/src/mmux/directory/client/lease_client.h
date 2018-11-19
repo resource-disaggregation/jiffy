@@ -22,9 +22,13 @@ class lease_client {
   rpc_lease_ack renew_leases(const std::vector<std::string> &to_renew);
 
  private:
+  /* Socket */
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};
+  /* Transport */
   std::shared_ptr<apache::thrift::transport::TTransport> transport_{};
+  /* Protocol */
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_{};
+  /* Client */
   std::shared_ptr<thrift_client> client_{};
 };
 

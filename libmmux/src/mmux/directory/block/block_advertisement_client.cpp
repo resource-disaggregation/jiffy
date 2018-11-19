@@ -11,7 +11,7 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 
 /**
- * @brief Deconstruction function
+ * @brief Destructor
  */
 
 block_advertisement_client::~block_advertisement_client() {
@@ -20,9 +20,9 @@ block_advertisement_client::~block_advertisement_client() {
 }
 
 /**
- * @brief Construction function
- * @param host server host
- * @param port server port
+ * @brief Constructor
+ * @param host Server host
+ * @param port Server port
  */
 
 block_advertisement_client::block_advertisement_client(const std::string &host, int port) {
@@ -30,9 +30,9 @@ block_advertisement_client::block_advertisement_client(const std::string &host, 
 }
 
 /**
- * @brief Connect
- * @param host server host
- * @param port server port
+ * @brief Connect client
+ * @param host Server host
+ * @param hort Server port
  */
 
 void block_advertisement_client::connect(const std::string &host, int port) {
@@ -44,7 +44,7 @@ void block_advertisement_client::connect(const std::string &host, int port) {
 }
 
 /**
- * @brief Disconnect
+ * @brief Disconnect client
  */
 
 void block_advertisement_client::disconnect() {
@@ -55,7 +55,7 @@ void block_advertisement_client::disconnect() {
 
 /**
  * @brief Advertise all blocks to the directory server
- * @param block_names block names
+ * @param block_names Block names
  */
 
 void block_advertisement_client::advertise_blocks(const std::vector<std::string> &block_names) {
@@ -64,7 +64,7 @@ void block_advertisement_client::advertise_blocks(const std::vector<std::string>
 
 /**
  * @brief Remove blocks
- * @param block_names block names
+ * @param block_names Block names
  */
 
 void block_advertisement_client::retract_blocks(const std::vector<std::string> &block_names) {
