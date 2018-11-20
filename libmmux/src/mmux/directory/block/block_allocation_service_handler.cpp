@@ -6,18 +6,8 @@ namespace directory {
 
 using namespace utils;
 
-/**
- * @brief Constructor
- * @param alloc Block allocator
- */
-
 block_allocation_service_handler::block_allocation_service_handler(std::shared_ptr<block_allocator> alloc)
     : alloc_(std::move(alloc)) {}
-
-/**
- * @brief Add blocks
- * @param block_names Block names
- */
 
 void block_allocation_service_handler::add_blocks(const std::vector<std::string> &block_names) {
   try {
@@ -28,11 +18,6 @@ void block_allocation_service_handler::add_blocks(const std::vector<std::string>
   }
 }
 
-/**
- * @brief Remove blocks
- * @param block_names Block names
- */
-
 void block_allocation_service_handler::remove_blocks(const std::vector<std::string> &block_names) {
   try {
     LOG(log_level::info) << "Received retraction for " << block_names.size() << " blocks";
@@ -41,12 +26,6 @@ void block_allocation_service_handler::remove_blocks(const std::vector<std::stri
     throw make_exception(e);
   }
 }
-
-/**
- * @brief Make exception
- * @param e Exception
- * @return Exception
- */
 
 block_allocation_service_exception block_allocation_service_handler::make_exception(const std::out_of_range &e) {
   block_allocation_service_exception ex;

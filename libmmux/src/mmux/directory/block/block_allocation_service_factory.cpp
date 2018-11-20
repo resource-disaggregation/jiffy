@@ -10,30 +10,14 @@ using namespace ::apache::thrift;
 using namespace ::apache::thrift::transport;
 using namespace utils;
 
-/**
- * @brief Constructor
- * @param alloc Block allocator
- */
-
 block_allocation_service_factory::block_allocation_service_factory(std::shared_ptr<block_allocator> alloc)
     : alloc_(std::move(alloc)) {}
-
-/**
- * @brief Get block allocation service handler
- * @param conn_info Connection information
- * @return Handler
- */
 
 block_allocation_serviceIf *block_allocation_service_factory::getHandler(const ::apache::thrift::TConnectionInfo &conn_info) {
   std::shared_ptr<TSocket> sock = std::dynamic_pointer_cast<TSocket>(conn_info.transport);
   LOG(trace) << "Incoming connection from " << sock->getSocketInfo();
   return new block_allocation_service_handler(alloc_);
 }
-
-/**
- * @brief Release handler
- * @param handler Handler
- */
 
 void block_allocation_service_factory::releaseHandler(block_allocation_serviceIf *handler) {
   LOG(trace) << "Releasing connection...";

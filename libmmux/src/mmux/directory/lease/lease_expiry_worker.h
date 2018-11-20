@@ -9,14 +9,57 @@ namespace directory {
 /* Lease_expiry worker class */
 class lease_expiry_worker {
  public:
+
+  /**
+   * @brief Constructor
+   * @param tree current Directory tree
+   * @param lease_period_ms Worker time period
+   * @param grace_period_ms Extended time
+   */
+
   lease_expiry_worker(std::shared_ptr<directory_tree> tree, uint64_t lease_period_ms, uint64_t grace_period_ms);
+
+  /**
+   * @brief Destructor
+  */
+
   ~lease_expiry_worker();
 
+  /**
+   * @brief Start worker
+   * Remove expired leases and sleep until next time period
+   */
+
   void start();
+
+  /**
+   * @brief Stop worker
+   */
+
   void stop();
+
+  /**
+   * @brief Fetch epochs
+   * @return Num_epochs
+   */
+
   size_t num_epochs() const;
+
  private:
+
+  /**
+   * @brief Remove lease-expired starting from root
+   */
+
   void remove_expired_leases();
+
+  /**
+   * @brief Recursively remove expired children
+   * @param parent Parent node
+   * @param parent_path Child's path to root
+   * @param child_name Child name
+   * @param epoch Time epoch
+   */
 
   void remove_expired_nodes(std::shared_ptr<ds_dir_node> parent,
                             const std::string &parent_path,

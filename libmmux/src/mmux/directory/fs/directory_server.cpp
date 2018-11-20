@@ -14,14 +14,6 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
-/**
- * @brief Create a directory server
- * @param shard Server's directory tree
- * @param address Socket address
- * @param port Socket port
- * @return TThreadedServer
- */
-
 std::shared_ptr<TThreadedServer> directory_server::create(std::shared_ptr<directory_tree> shard,
                                                           const std::string &address,
                                                           int port) {

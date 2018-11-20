@@ -7,13 +7,6 @@ namespace directory {
 
 using namespace utils;
 
-/**
- * @brief Constructor
- * @param tree current Directory tree
- * @param lease_period_ms Worker time period
- * @param grace_period_ms Extended time
- */
-
 lease_expiry_worker::lease_expiry_worker(std::shared_ptr<directory_tree> tree,
                                          std::uint64_t lease_period_ms,
                                          std::uint64_t grace_period_ms)
@@ -24,18 +17,9 @@ lease_expiry_worker::lease_expiry_worker(std::shared_ptr<directory_tree> tree,
       num_epochs_(0) {
 }
 
-/**
- * @brief Destructor
- */
-
 lease_expiry_worker::~lease_expiry_worker() {
   stop();
 }
-
-/**
- * @brief Start worker
- * Remove expired leases and sleep until next time period
- */
 
 void lease_expiry_worker::start() {
   worker_ = std::thread([&] {
@@ -59,19 +43,11 @@ void lease_expiry_worker::start() {
   });
 }
 
-/**
- * @brief Stop worker
- */
-
 void lease_expiry_worker::stop() {
   stop_.store(true);
   if (worker_.joinable())
     worker_.join();
 }
-
-/**
- * @brief Remove lease-expired starting from root
- */
 
 void lease_expiry_worker::remove_expired_leases() {
   namespace ts = std::chrono;
@@ -82,14 +58,6 @@ void lease_expiry_worker::remove_expired_leases() {
     remove_expired_nodes(node, parent_path, cname, static_cast<uint64_t>(cur_epoch));
   }
 }
-
-/**
- * @brief Recursively remove expired children
- * @param parent Parent node
- * @param parent_path Child's path to root
- * @param child_name Child name
- * @param epoch Time epoch
- */
 
 void lease_expiry_worker::remove_expired_nodes(std::shared_ptr<ds_dir_node> parent,
                                                const std::string &parent_path,
@@ -127,10 +95,7 @@ void lease_expiry_worker::remove_expired_nodes(std::shared_ptr<ds_dir_node> pare
     }
   }
 }
-/**
- * @brief Fetch epochs
- * @return Num_epochs
- */
+
 size_t lease_expiry_worker::num_epochs() const {
   return num_epochs_.load();
 }

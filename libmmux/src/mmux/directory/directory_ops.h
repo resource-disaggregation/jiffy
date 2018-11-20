@@ -16,14 +16,17 @@ namespace directory {
 /* Directory exception class */
 class directory_ops_exception : public std::exception {
  public:
+
   /*
    * Constructor
    */
+
   explicit directory_ops_exception(std::string msg) : msg_(std::move(msg)) {}
 
   /*
    * Fetch exception message
    */
+
   char const *what() const noexcept override {
     return msg_.c_str();
   }
@@ -58,14 +61,18 @@ class perms {
   static const perms sticky_bit;
 
   static const perms mask;
+
   /**
    * @brief Default constructor
    */
+
   perms() : prms_(0) {}
+
   /**
    * @brief Constructor
    * @param prms permissions
    */
+
   explicit perms(uint16_t prms) : prms_(prms) {}
 
   /**

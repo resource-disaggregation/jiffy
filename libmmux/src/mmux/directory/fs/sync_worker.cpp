@@ -5,23 +5,12 @@ namespace directory {
 
 using namespace utils;
 
-/**
- * @brief Constructor
- * @param tree Directory tree
- * @param sync_period_ms Synchronization worker working period
- */
-
 sync_worker::sync_worker(std::shared_ptr<directory_tree> tree, uint64_t sync_period_ms)
     : tree_(tree), sync_period_(sync_period_ms), stop_(false), num_epochs_(0) {}
 
 sync_worker::~sync_worker() {
   stop();
 }
-
-/**
- * @brief Start synchronization worker
- * Check if any node needs sychronization, then sleep for period time
- */
 
 void sync_worker::start() {
   worker_ = std::thread([&] {
@@ -45,19 +34,11 @@ void sync_worker::start() {
   });
 }
 
-/**
- * @brief Stop synchronization worker
- */
-
 void sync_worker::stop() {
   stop_.store(true);
   if (worker_.joinable())
     worker_.join();
 }
-
-/**
- * @brief Sychronization starting from root directory node
- */
 
 void sync_worker::sync_nodes() {
   namespace ts = std::chrono;
@@ -68,14 +49,6 @@ void sync_worker::sync_nodes() {
     sync_nodes(node, parent_path, cname, static_cast<uint64_t>(cur_epoch));
   }
 }
-
-/**
- * @brief Synchronization of nodes recursively
- * @param parent Parent directory node
- * @param parent_path  Parent path
- * @param child_name Child node name
- * @param epoch Time epoch
- */
 
 void sync_worker::sync_nodes(std::shared_ptr<ds_dir_node> parent,
                              const std::string &parent_path,
@@ -101,11 +74,6 @@ void sync_worker::sync_nodes(std::shared_ptr<ds_dir_node> parent,
     }
   }
 }
-
-/**
- * @brief Fetch time epoch of worker
- * @return Num_epochs
- */
 
 size_t sync_worker::num_epochs() const {
   return num_epochs_.load();

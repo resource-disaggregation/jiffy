@@ -14,10 +14,40 @@ class lease_client {
   typedef lease_serviceClient thrift_client;
 
   lease_client() = default;
+
+  /**
+   * @brief Destructor
+   */
+
   ~lease_client();
+
+  /**
+   * @brief Constructor
+   * @param host Socket host
+   * @param port Socket port
+   */
+
   lease_client(const std::string &hostname, int port);
+
+  /**
+   * @brief Connect server
+   * @param host Socket host
+   * @param port Socket port
+   */
+
   void connect(const std::string &hostname, int port);
+
+  /**
+   * @brief Disconnect server
+   */
+
   void disconnect();
+
+  /**
+   * @brief Renew lease
+   * @param to_renew File to be renewed
+   * @return Lease acknowledgement
+   */
 
   rpc_lease_ack renew_leases(const std::vector<std::string> &to_renew);
 

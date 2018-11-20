@@ -13,14 +13,6 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
-/**
- * @brief Create block allocation server
- * @param alloc Block allocator
- * @param address Socket address
- * @param port Socket port number
- * @return Server
- */
-
 std::shared_ptr<apache::thrift::server::TThreadedServer> block_allocation_server::create(std::shared_ptr<block_allocator> alloc,
                                                                                          const std::string &address,
                                                                                          int port) {

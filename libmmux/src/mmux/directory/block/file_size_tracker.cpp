@@ -9,13 +9,6 @@ namespace directory {
 
 using namespace utils;
 
-/**
- * @brief Constructor
- * @param tree Directory tree
- * @param periodicity_ms Working period
- * @param output_file Output file name
- */
-
 file_size_tracker::file_size_tracker(std::shared_ptr<directory_tree> tree,
                                      uint64_t periodicity_ms,
                                      const std::string &output_file)
@@ -24,20 +17,11 @@ file_size_tracker::file_size_tracker(std::shared_ptr<directory_tree> tree,
       tree_(std::move(tree)),
       storage_(tree_->get_storage_manager()) {}
 
-/**
- * @brief Destructor
- */
-
 file_size_tracker::~file_size_tracker() {
   stop_.store(true);
   if (worker_.joinable())
     worker_.join();
 }
-
-/**
- * @brief Start worker
- * Report file size and then sleep until next period
- */
 
 void file_size_tracker::start() {
   worker_ = std::move(std::thread([&] {
@@ -61,18 +45,9 @@ void file_size_tracker::start() {
   }));
 }
 
-/**
- * @brief Stop worker
- */
-
 void file_size_tracker::stop() {
   stop_.store(true);
 }
-
-/**
- * @brief Report file size starting from root
- * @param out Output file stream
- */
 
 void file_size_tracker::report_file_sizes(std::ofstream &out) {
   namespace ts = std::chrono;
@@ -83,14 +58,6 @@ void file_size_tracker::report_file_sizes(std::ofstream &out) {
     report_file_sizes(out, node->get_child(cname), "", static_cast<uint64_t>(cur_epoch));
   }
 }
-
-/**
- * @brief Report file size recursively
- * @param out Output file stream
- * @param node File node
- * @param parent_path Parent path
- * @param epoch Time epoch
- */
 
 void file_size_tracker::report_file_sizes(std::ofstream &out,
                                           std::shared_ptr<ds_node> node,

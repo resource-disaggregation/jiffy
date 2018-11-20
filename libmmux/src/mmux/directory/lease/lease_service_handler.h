@@ -10,10 +10,28 @@ namespace directory {
 /* Lease service handler class, inherited from lease_serviceIf */
 class lease_service_handler : public lease_serviceIf {
  public:
+
+  /**
+   * @brief Constructor
+   * @param tree Directory tree
+   * @param lease_period_ms Lease duration
+   */
+
   explicit lease_service_handler(std::shared_ptr<directory_tree> tree, int64_t lease_period_ms);
+
+  /**
+   * @brief Renew leases
+   * @param _return rpc lease acknowledgement
+   * @param to_renew Vector of paths to be renewed
+   */
+
   void renew_leases(rpc_lease_ack &_return, const std::vector<std::string> &to_renew) override;
 
  private:
+  /**
+   * @brief Make exception
+   */
+
   lease_service_exception make_exception(const directory_ops_exception &ex);
   /* Directory tree */
   std::shared_ptr<directory_tree> tree_;

@@ -9,6 +9,15 @@ namespace directory {
 /* Block allocation server class */
 class block_allocation_server {
  public:
+
+  /**
+   * @brief Create block allocation server
+   * @param alloc Block allocator
+   * @param address Socket address
+   * @param port Socket port number
+   * @return Server
+   */
+
   static std::shared_ptr<apache::thrift::server::TThreadedServer> create(std::shared_ptr<block_allocator> alloc,
                                                                          const std::string &address,
                                                                          int port);

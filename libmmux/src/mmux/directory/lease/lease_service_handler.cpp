@@ -8,20 +8,8 @@ namespace directory {
 
 using namespace utils;
 
-/**
- * @brief Constructor
- * @param tree Directory tree
- * @param lease_period_ms Lease duration
- */
-
 lease_service_handler::lease_service_handler(std::shared_ptr<directory_tree> tree, int64_t lease_period_ms)
     : tree_(std::move(tree)), lease_period_ms_(lease_period_ms) {}
-
-/**
- * @brief Renew leases
- * @param _return Rpc lease acknowledgement
- * @param to_renew Vector of paths to be renewed
- */
 
 void lease_service_handler::renew_leases(rpc_lease_ack &_return, const std::vector<std::string> &to_renew) {
   try {
@@ -37,10 +25,6 @@ void lease_service_handler::renew_leases(rpc_lease_ack &_return, const std::vect
     throw make_exception(ex);
   }
 }
-
-/*
- * @brief Make exception
- */
 
 lease_service_exception lease_service_handler::make_exception(const directory_ops_exception &ex) {
   lease_service_exception e;

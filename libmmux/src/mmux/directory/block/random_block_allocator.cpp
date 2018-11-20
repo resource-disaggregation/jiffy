@@ -7,12 +7,6 @@
 namespace mmux {
 namespace directory {
 
-/**
- * @brief Allocate blocks in different prefixs
- * @param count Number of block
- * @return Block names
- */
-
 std::vector<std::string> random_block_allocator::allocate(std::size_t count, const std::vector<std::string> &) {
   std::unique_lock<std::shared_mutex> lock(mtx_);
   if (count > free_blocks_.size()) {
@@ -51,11 +45,6 @@ std::vector<std::string> random_block_allocator::allocate(std::size_t count, con
   return blocks;
 }
 
-/**
- * @brief Free blocks
- * @param blocks Block names
- */
-
 void random_block_allocator::free(const std::vector<std::string> &blocks) {
   std::unique_lock<std::shared_mutex> lock(mtx_);
   std::vector<std::string> not_freed;
@@ -77,20 +66,10 @@ void random_block_allocator::free(const std::vector<std::string> &blocks) {
   }
 }
 
-/**
- * @brief Add blocks to free block list
- * @param block_names Block names
- */
-
 void random_block_allocator::add_blocks(const std::vector<std::string> &block_names) {
   std::unique_lock<std::shared_mutex> lock(mtx_);
   free_blocks_.insert(block_names.begin(), block_names.end());
 }
-
-/**
- * @brief Remove blocks from free block list
- * @param block_names Block names
- */
 
 void random_block_allocator::remove_blocks(const std::vector<std::string> &block_names) {
   std::unique_lock<std::shared_mutex> lock(mtx_);
@@ -103,30 +82,15 @@ void random_block_allocator::remove_blocks(const std::vector<std::string> &block
   }
 }
 
-/**
- * @brief Fetch number of free blocks
- * @return Number of free blocks
- */
-
 std::size_t random_block_allocator::num_free_blocks() {
   std::shared_lock<std::shared_mutex> lock(mtx_);
   return free_blocks_.size();
 }
 
-/**
- * @brief Fetch number of allocated blocks
- * @return Number of allocated blocks
- */
-
 std::size_t random_block_allocator::num_allocated_blocks() {
   std::shared_lock<std::shared_mutex> lock(mtx_);
   return allocated_blocks_.size();
 }
-
-/**
- * @brief Fetch number of total blocks
- * @return Number of total blocks
- */
 
 std::size_t random_block_allocator::num_total_blocks() {
   std::shared_lock<std::shared_mutex> lock(mtx_);

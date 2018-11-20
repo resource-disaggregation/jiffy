@@ -13,15 +13,6 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
-/**
- * @brief Create lease server
- * @param tree Directory tree
- * @param lease_period_ms Lease duration
- * @param address Socket address
- * @param port Socket port number
- * @return Server socket
- */
-
 std::shared_ptr<TThreadedServer> lease_server::create(std::shared_ptr<directory_tree> tree, int64_t lease_period_ms,
                                                       const std::string &address, int port) {
   std::shared_ptr<lease_serviceIfFactory>
