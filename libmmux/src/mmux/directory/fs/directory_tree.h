@@ -542,6 +542,9 @@ class ds_file_node : public ds_node {
 
   /**
    * @brief Setup old chain and new chain and be ready for splitting
+   * Whenever we want to add a new block(replication) chain to a file,
+   * we find the maximum existing block and set up the new block to split the hash
+   * range of the maximum block
    * @param storage Storage
    * @param allocator Block allocator
    * @param path File path
@@ -625,7 +628,8 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * @brief Setup old chain and new chain and be ready for splitting
+   * @brief Setup new replication chain to split the slot range block
+   * corresponding to slot_begin and slot_end
    * @param storage Storage
    * @param allocator Block allocator
    * @param path File path
@@ -711,6 +715,7 @@ class ds_file_node : public ds_node {
 
   /**
    * @brief Finalize slot range split and update file data status
+   * Modify the two new slot ranges
    * @param storage Storage
    * @param ctx From chain and to chain
    */
@@ -832,7 +837,7 @@ class ds_file_node : public ds_node {
   mutable std::shared_mutex mtx_;
   /* Data status */
   data_status dstatus_{};
-  /* Adding replication chain */
+  /* Replication chain that are currently being added to the file(temporary) */
   std::vector<replica_chain> adding_{};
 };
 
