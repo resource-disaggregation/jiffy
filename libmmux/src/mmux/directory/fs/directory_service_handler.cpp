@@ -224,7 +224,6 @@ void directory_service_handler::reslove_failures(rpc_replica_chain &_return,
     _return = directory_type_conversions::to_rpc(ret);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
-    catch(directory_serviceClient.)
   }
 }
 

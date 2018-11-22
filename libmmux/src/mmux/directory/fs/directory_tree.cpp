@@ -138,7 +138,6 @@ data_status directory_tree::open_or_create(const std::string &path,
   LOG(log_level::info) << "Opening or creating file " << path << " with backing_path=" << backing_path << " num_blocks="
                        << num_blocks << ", chain_length=" << chain_length;
   std::string filename = directory_utils::get_filename(path);
-  /* Path has to be path of file */
   if (filename == "." || filename == "/") {
     throw directory_ops_exception("Path is a directory: " + path);
   }
@@ -161,7 +160,6 @@ data_status directory_tree::open_or_create(const std::string &path,
       throw directory_ops_exception("Cannot open or create " + path + ": is a directory");
     }
   }
-/* If file doesn't exist, c is nullptr and need to be created */
   if (num_blocks == 0) {
     throw directory_ops_exception("File cannot have zero blocks");
   }
@@ -169,7 +167,6 @@ data_status directory_tree::open_or_create(const std::string &path,
   if (chain_length == 0) {
     throw directory_ops_exception("Chain length cannot be zero");
   }
-/* Same code as create */
   std::vector<replica_chain> blocks;
   std::size_t slots_per_block = storage::block::SLOT_MAX / num_blocks;
   bool auto_scale = (flags & data_status::STATIC_PROVISIONED) != data_status::STATIC_PROVISIONED;
@@ -336,18 +333,15 @@ void directory_tree::rename(const std::string &old_path, const std::string &new_
   auto new_child = new_parent->get_child(new_child_name);
   if (new_child != nullptr) {
     if (new_child->is_directory()) {
-      /* If given new path is directory, move the old file under this new directory */
       new_parent = std::dynamic_pointer_cast<ds_dir_node>(new_child);
       new_child_name = old_child_name;
     } else {
-      /* If given new path exists a file, Overwrite it */
       new_parent->remove_child(new_child_name);
       std::vector<std::string> cleared_blocks;
       clear_storage(cleared_blocks, new_child);
       allocator_->free(cleared_blocks);
     }
   }
-  /* Ordinary situation */
   old_parent->remove_child(old_child->name());
   old_child->name(new_child_name);
   new_parent->add_child(old_child);
