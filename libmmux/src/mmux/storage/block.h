@@ -17,10 +17,17 @@
 namespace mmux {
 namespace storage {
 
+/*
+ *
+ */
 enum block_op_type : uint8_t {
   accessor = 0,
   mutator = 1
 };
+
+/*
+ *
+ */
 
 enum block_state {
   regular = 0,
@@ -28,9 +35,19 @@ enum block_state {
   exporting = 2
 };
 
+/*
+ *
+ */
+
 struct block_op {
   block_op_type type;
   char name[MAX_BLOCK_OP_NAME_SIZE];
+
+  /**
+   * @brief
+   * @param other
+   * @return
+   */
 
   bool operator<(const block_op &other) const {
     return std::strcmp(name, other.name) < 0;
@@ -43,6 +60,12 @@ class block {
  public:
   static const int32_t SLOT_MAX = 65536;
 
+  /**
+   * @brief
+   * @param block_ops
+   * @param block_name
+   */
+
   explicit block(const std::vector<block_op> &block_ops, std::string block_name)
       : block_ops_(block_ops),
         path_(""),
@@ -53,21 +76,49 @@ class block {
         export_slot_range_(0, -1),
         import_slot_range_(0, -1) {}
 
+  /**
+   * @brief
+   * @param _return
+   * @param oid
+   * @param args
+   */
+
   virtual void run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) = 0;
+
+  /**
+   * @brief
+   * @param path
+   */
 
   void path(const std::string &path) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     path_ = path;
   }
 
+  /**
+   * @brief
+   * @return
+   */
+
   const std::string &path() const {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return path_;
   }
 
+  /**
+   * @brief
+   * @return
+   */
+
   const std::string &name() const {
     return block_name_; // Does not require locking since block_name does not change
   }
+
+  /**
+   * @brief
+   * @param slot_begin
+   * @param slot_end
+   */
 
   void slot_range(int32_t slot_begin, int32_t slot_end) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
@@ -75,35 +126,72 @@ class block {
     slot_range_.second = slot_end;
   }
 
+  /**
+   * @brief
+   * @return
+   */
+
   const std::pair<int32_t, int32_t> &slot_range() const {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot_range_;
   }
+
+  /**
+   * @brief
+   * @return
+   */
 
   int32_t slot_begin() const {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot_range_.first;
   }
 
+  /**
+   * @brief
+   * @return
+   */
+
   int32_t slot_end() const {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot_range_.second;
   }
+
+  /**
+   * @brief
+   * @param slot
+   * @return
+   */
 
   bool in_slot_range(int32_t slot) {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot >= slot_range_.first && slot <= slot_range_.second;
   }
 
+  /**
+   * @brief
+   * @param state
+   */
+
   void state(block_state state) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     state_ = state;
   }
 
+  /**
+   * @brief
+   * @return
+   */
+
   const block_state &state() const {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return state_;
   }
+
+  /**
+   * @brief
+   * @param slot_begin
+   * @param slot_end
+   */
 
   void export_slot_range(int32_t slot_begin, int32_t slot_end) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
@@ -111,15 +199,32 @@ class block {
     export_slot_range_.second = slot_end;
   }
 
+  /**
+   * @brief
+   * @return
+   */
+
   const std::pair<int32_t, int32_t> &export_slot_range() {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return export_slot_range_;
   };
 
+  /**
+   * @brief
+   * @param slot
+   * @return
+   */
+
   bool in_export_slot_range(int32_t slot) {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot >= export_slot_range_.first && slot <= export_slot_range_.second;
   }
+
+  /**
+   * @brief
+   * @param slot_begin
+   * @param slot_end
+   */
 
   void import_slot_range(int32_t slot_begin, int32_t slot_end) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
@@ -127,14 +232,30 @@ class block {
     import_slot_range_.second = slot_end;
   }
 
+  /**
+   * @brief
+   * @return
+   */
+
   const std::pair<int32_t, int32_t> &import_slot_range() {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return import_slot_range_;
   };
 
+  /**
+   * @brief
+   * @param slot
+   * @return
+   */
+
   bool in_import_slot_range(int32_t slot) {
     return slot >= import_slot_range_.first && slot <= import_slot_range_.second;
   }
+
+  /**
+   * @brief
+   * @param target
+   */
 
   void export_target(const std::vector<std::string> &target) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
@@ -146,23 +267,51 @@ class block {
     export_target_str_.pop_back();
   }
 
+  /**
+   * @brief
+   * @return
+   */
+
   const std::vector<std::string> &export_target() const {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return export_target_;
   }
+
+  /**
+   * @brief
+   * @return
+   */
 
   const std::string export_target_str() const {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return export_target_str_;
   }
 
+  /**
+   * @brief
+   * @param i
+   * @return
+   */
+
   bool is_accessor(int i) const {
     return block_ops_.at(static_cast<size_t>(i)).type == accessor; // Does not require lock since block_ops don't change
   }
 
+  /**
+   * @brief
+   * @param i
+   * @return
+   */
+
   bool is_mutator(int i) const {
     return block_ops_.at(static_cast<size_t>(i)).type == mutator; // Does not require lock since block_ops don't change
   }
+
+  /**
+   * @brief
+   * @param op_id
+   * @return
+   */
 
   std::string op_name(int op_id) {
     return block_ops_[op_id].name;  // Does not require lock since block_ops don't change
@@ -183,10 +332,20 @@ class block {
 
   virtual void export_slots() = 0;
 
+  /**
+   * @brief
+   * @return
+   */
+
   subscription_map &subscriptions() {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return sub_map_;
   }
+
+  /**
+   * @brief
+   * @return
+   */
 
   block_response_client_map &clients() {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
@@ -194,23 +353,31 @@ class block {
   }
 
  protected:
+  /* */
   mutable std::shared_mutex metadata_mtx_;
-
+  /* */
   const std::vector<block_op> &block_ops_;
+  /* */
   std::string path_;
+  /* */
   std::string block_name_;
-
+  /* */
   block_state state_;
+  /* */
   std::pair<int32_t, int32_t> slot_range_;
+  /* */
   std::atomic_bool auto_scale_;
-
+  /* */
   std::pair<int32_t, int32_t> export_slot_range_;
+  /* */
   std::vector<std::string> export_target_;
+  /* */
   std::string export_target_str_;
-
+  /* */
   std::pair<int32_t, int32_t> import_slot_range_;
-
+  /* */
   subscription_map sub_map_{};
+  /* */
   block_response_client_map client_map_{};
 };
 

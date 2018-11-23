@@ -275,7 +275,10 @@ kv_client::locked_client::locked_client(kv_client &parent) : parent_(parent) {
       }
       if (new_block) {
         redirect_blocks_[i] =
-            std::make_shared<replica_chain_client>(parent_.fs_, parent_.path_, blocks_[i]->chain(), parent_.timeout_ms_);
+            std::make_shared<replica_chain_client>(parent_.fs_,
+                                                   parent_.path_,
+                                                   blocks_[i]->chain(),
+                                                   parent_.timeout_ms_);
         locked_redirect_blocks_[i] = redirect_blocks_[i]->lock();
         new_blocks_[i] = locked_redirect_blocks_[i];
       }

@@ -6,14 +6,28 @@
 
 namespace mmux {
 namespace storage {
-
+/* */
 class block_response_client {
  public:
   typedef block_response_serviceClient thrift_client;
+
+  /**
+   * @brief
+   * @param protocol
+   */
+
   explicit block_response_client(std::shared_ptr<apache::thrift::protocol::TProtocol> protocol);
 
-  void response(const sequence_id& seq, const std::vector<std::string>& result);
+  /**
+   * @brief
+   * @param seq
+   * @param result
+   */
+
+  void response(const sequence_id &seq, const std::vector<std::string> &result);
+
  private:
+  /* */
   std::shared_ptr<thrift_client> client_{};
 };
 

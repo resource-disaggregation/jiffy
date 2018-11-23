@@ -6,9 +6,21 @@
 
 namespace mmux {
 namespace storage {
-
+/* */
 class chain_server {
  public:
+
+  /**
+   * @brief
+   * @param blocks
+   * @param address
+   * @param port
+   * @param non_blocking
+   * @param num_io_threads
+   * @param num_proc_threads
+   * @return
+   */
+
   static std::shared_ptr<apache::thrift::server::TServer> create(std::vector<std::shared_ptr<chain_module>> &blocks,
                                                                  const std::string &address,
                                                                  int port,

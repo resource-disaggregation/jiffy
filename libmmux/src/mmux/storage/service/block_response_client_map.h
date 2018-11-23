@@ -7,20 +7,47 @@
 
 namespace mmux {
 namespace storage {
-
+/* */
 class block_response_client_map {
  public:
+
+  /**
+   * @brief
+   */
+
   block_response_client_map();
+
+  /**
+   * @brief
+   * @param client_id
+   * @param client
+   */
 
   void add_client(int64_t client_id, std::shared_ptr<block_response_client> client);
 
+  /**
+   * @brief
+   * @param client_id
+   */
+
   void remove_client(int64_t client_id);
 
+  /**
+   * @brief
+   * @param seq
+   * @param result
+   */
+
   void respond_client(const sequence_id &seq, const std::vector<std::string> &result);
+
+  /**
+   * @brief
+   */
 
   void clear();
 
  private:
+  /* */
   cuckoohash_map<int64_t, std::shared_ptr<block_response_client>> clients_;
 };
 

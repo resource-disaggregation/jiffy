@@ -7,7 +7,7 @@
 
 namespace mmux {
 namespace storage {
-
+/* */
 class notification_worker {
  public:
   typedef subscription_serviceProcessor processor_t;
@@ -15,21 +15,51 @@ class notification_worker {
   typedef std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_ptr_t;
   typedef blocking_queue<std::pair<std::string, std::string>> mailbox_t;
 
+  /**
+   * @brief
+   * @param notifications
+   * @param controls
+   */
+
   notification_worker(mailbox_t &notifications, mailbox_t &controls);
+
+  /**
+   * @brief
+   */
+
   ~notification_worker();
+
+  /**
+   * @brief
+   * @param protocol
+   */
 
   void add_protocol(protocol_ptr_t protocol);
 
+  /**
+   * @brief
+   */
+
   void start();
+
+  /**
+   * @brief
+   */
+
   void stop();
 
  private:
+  /* */
   mailbox_t &notifications_;
+  /* */
   mailbox_t &controls_;
+  /* */
   std::atomic_bool stop_;
+  /* */
   std::thread worker_;
-
+  /* */
   processor_ptr_t processor_;
+  /* */
   std::vector<protocol_ptr_t> protocols_;
 };
 

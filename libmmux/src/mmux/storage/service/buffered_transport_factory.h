@@ -6,16 +6,26 @@
 
 namespace mmux {
 namespace storage {
-
+/* */
 class BufferedTransportFactory : public apache::thrift::transport::TTransportFactory {
  public:
+  /**
+   * @brief
+   * @param buffer_size
+   */
+
   explicit BufferedTransportFactory(uint32_t buffer_size) : buffer_size_(buffer_size) {}
+
+  /**
+   * @brief
+   */
 
   virtual ~BufferedTransportFactory() {}
 
   /**
    * Wraps the transport into a buffered one.
    */
+
   std::shared_ptr<apache::thrift::transport::TTransport> getTransport(std::shared_ptr<apache::thrift::transport::TTransport> trans) override {
     return std::shared_ptr<apache::thrift::transport::TTransport>(new apache::thrift::transport::TBufferedTransport(
         trans,
@@ -23,6 +33,7 @@ class BufferedTransportFactory : public apache::thrift::transport::TTransportFac
   }
 
  private:
+  /* */
   uint32_t buffer_size_;
 };
 }

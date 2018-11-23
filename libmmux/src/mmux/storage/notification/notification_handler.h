@@ -8,17 +8,40 @@
 
 namespace mmux {
 namespace storage {
-
+/* */
 class notification_handler : public subscription_serviceIf {
  public:
   typedef blocking_queue<std::pair<std::string, std::string>> mailbox_t;
 
-  explicit notification_handler(mailbox_t &notifications, mailbox_t& controls);
+  /**
+   * @brief
+   * @param notifications
+   * @param controls
+   */
+
+  explicit notification_handler(mailbox_t &notifications, mailbox_t &controls);
+
+  /**
+   * @brief
+   * @param op
+   * @param data
+   */
+
   void notification(const std::string &op, const std::string &data) override;
+
+  /**
+   * @brief
+   * @param type
+   * @param ops
+   * @param msg
+   */
+
   void control(response_type type, const std::vector<std::string> &ops, const std::string &msg) override;
 
  private:
+  /* */
   mailbox_t &notifications_;
+  /* */
   mailbox_t &controls_;
 };
 

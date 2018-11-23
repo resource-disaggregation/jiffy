@@ -7,13 +7,34 @@
 
 namespace mmux {
 namespace storage {
-
+/* */
 class storage_management_service_factory : public storage_management_serviceIfFactory {
  public:
+
+  /**
+   * @brief
+   * @param blocks
+   */
+
   explicit storage_management_service_factory(std::vector<std::shared_ptr<chain_module>> &blocks);
+
+  /**
+   * @brief
+   * @param connInfo
+   * @return
+   */
+
   storage_management_serviceIf *getHandler(const ::apache::thrift::TConnectionInfo &connInfo) override;
+
+  /**
+   * @brief
+   * @param anIf
+   */
+
   void releaseHandler(storage_management_serviceIf *anIf) override;
  private:
+
+  /* */
   std::vector<std::shared_ptr<chain_module>> &blocks_;
 };
 

@@ -12,9 +12,18 @@ using namespace std::chrono_literals;
 namespace mmux {
 namespace storage {
 
+
 template<typename T>
+/* */
 class blocking_queue {
  public:
+
+  /**
+   * @brief
+   * @param timeout_ms
+   * @return
+   */
+
   T pop(int64_t timeout_ms = -1) {
     std::unique_lock<std::mutex> mlock(mutex_);
     while (queue_.empty()) {
@@ -31,12 +40,22 @@ class blocking_queue {
     return item;
   }
 
+  /**
+   * @brief
+   * @param item
+   */
+
   void push(const T &item) {
     std::unique_lock<std::mutex> mlock(mutex_);
     queue_.push(item);
     mlock.unlock();
     cond_.notify_one();
   }
+
+  /**
+   * @brief
+   * @param item
+   */
 
   void push(T &&item) {
     std::unique_lock<std::mutex> mlock(mutex_);
@@ -46,8 +65,11 @@ class blocking_queue {
   }
 
  private:
+  /* */
   std::queue<T> queue_;
+  /* */
   std::mutex mutex_;
+  /* */
   std::condition_variable cond_;
 };
 

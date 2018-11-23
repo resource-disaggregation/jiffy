@@ -8,9 +8,18 @@
 
 namespace mmux {
 namespace storage {
-
+/* */
 class notification_server {
  public:
+
+  /**
+   * @brief
+   * @param blocks
+   * @param address
+   * @param port
+   * @return
+   */
+
   static std::shared_ptr<apache::thrift::server::TThreadedServer> create(std::vector<std::shared_ptr<chain_module>> &blocks,
                                                                          const std::string &address,
                                                                          int port);
