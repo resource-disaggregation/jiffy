@@ -47,7 +47,7 @@ class block_response_client_map {
   void clear();
 
  private:
-  /* */
+  /* TODO no cuckoohash currently */
   cuckoohash_map<int64_t, std::shared_ptr<block_response_client>> clients_;
 };
 

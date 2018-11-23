@@ -22,7 +22,9 @@ namespace mmux {
 namespace storage {
 
 /*
- *
+ * Chain roles
+ * We mark out the special rule singleton if there is only one block for the chain
+ * i.e. we don't use chain replication
  */
 
 enum chain_role {
@@ -33,7 +35,7 @@ enum chain_role {
 };
 
 /*
- *
+ * Chain operation
  */
 
 struct chain_op {
@@ -42,13 +44,13 @@ struct chain_op {
   std::vector<std::string> args;
 };
 
-/* */
+/* Next block cxn TODO */
 class next_block_cxn {
  public:
   next_block_cxn() = default;
 
   /**
-   * @brief
+   * @brief Constructor
    * @param block_name
    */
 
@@ -57,7 +59,7 @@ class next_block_cxn {
   }
 
   /**
-   * @brief
+   * @brief Destructor
    */
 
   ~next_block_cxn() {
@@ -65,9 +67,10 @@ class next_block_cxn {
   }
 
   /**
-   * @brief
-   * @param block_name
-   * @return
+   * @brief Reset block
+   * Disconnect the current chain request client and connect to the new block
+   * @param block_name Block name
+   * @return Client protocol
    */
 
   std::shared_ptr<apache::thrift::protocol::TProtocol> reset(const std::string &block_name) {
@@ -84,7 +87,7 @@ class next_block_cxn {
   }
 
   /**
-   * @brief
+   * @brief TODO
    * @param seq
    * @param op_id
    * @param args
@@ -98,10 +101,10 @@ class next_block_cxn {
   }
 
   /**
-   * @brief
-   * @param result
-   * @param cmd_id
-   * @param args
+   * @brief Run command on next block
+   * @param result Running result
+   * @param cmd_id Command id
+   * @param args Arguments
    */
 
   void run_command(std::vector<std::string> &result, int32_t cmd_id, const std::vector<std::string> &args) {
@@ -110,9 +113,9 @@ class next_block_cxn {
   }
 
  private:
-  /* */
+  /* Class next_block_cxn operation mutex */
   std::shared_mutex mtx_;
-  /* */
+  /* Chain request client */
   chain_request_client client_;
 };
 
@@ -121,7 +124,7 @@ class prev_block_cxn {
   prev_block_cxn() = default;
 
   /**
-   * @brief
+   * @brief Constructor
    * @param prot
    */
 
@@ -130,8 +133,8 @@ class prev_block_cxn {
   }
 
   /**
-   * @brief
-   * @param prot
+   * @brief Reset protocol
+   * @param prot Protocol
    */
 
   void reset(std::shared_ptr<::apache::thrift::protocol::TProtocol> prot) {
@@ -139,7 +142,7 @@ class prev_block_cxn {
   }
 
   /**
-   * @brief
+   * @brief TODO
    * @param seq
    */
 
@@ -148,7 +151,7 @@ class prev_block_cxn {
   }
 
   /**
-   * @brief
+   * @brief Fetch
    * @return
    */
 
@@ -161,14 +164,16 @@ class prev_block_cxn {
   chain_response_client client_;
 };
 
-/* */
+/* Chain modult class
+ * Inherited from block */
 class chain_module : public block {
  public:
-  /* */
+  /* Class chain response handler
+   * Inherited from chain response serviceIf */
   class chain_response_handler : public chain_response_serviceIf {
    public:
     /**
-     * @brief
+     * @brief Constructor
      * @param module
      */
 
@@ -184,7 +189,7 @@ class chain_module : public block {
     }
 
    private:
-    /* */
+    /* Chain module */
     chain_module *module_;
   };
 

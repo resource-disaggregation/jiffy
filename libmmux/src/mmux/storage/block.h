@@ -18,15 +18,19 @@ namespace mmux {
 namespace storage {
 
 /*
- *
+ * Block operation type
+ * Mutator can be read and written
+ * Accessor can only be read
  */
+
 enum block_op_type : uint8_t {
   accessor = 0,
   mutator = 1
 };
 
 /*
- *
+ * Block state
+ * Regular, importing and exporting
  */
 
 enum block_state {
@@ -36,7 +40,7 @@ enum block_state {
 };
 
 /*
- *
+ * Block operation structure
  */
 
 struct block_op {
@@ -44,9 +48,9 @@ struct block_op {
   char name[MAX_BLOCK_OP_NAME_SIZE];
 
   /**
-   * @brief
-   * @param other
-   * @return
+   * @brief Operator < to check if name is smaller in Lexicographical order
+   * @param other Other block operation
+   * @return Bool value
    */
 
   bool operator<(const block_op &other) const {
@@ -56,14 +60,16 @@ struct block_op {
 
 // TODO: Setting metadata should be atomic: e.g., reset function, or setup block function, should acquire lock before
 // setting metadata
+/* Block class */
 class block {
  public:
+  /* Slot max range */
   static const int32_t SLOT_MAX = 65536;
 
   /**
-   * @brief
-   * @param block_ops
-   * @param block_name
+   * @brief Constructor
+   * @param block_ops Block operations
+   * @param block_name Block name
    */
 
   explicit block(const std::vector<block_op> &block_ops, std::string block_name)
@@ -77,17 +83,17 @@ class block {
         import_slot_range_(0, -1) {}
 
   /**
-   * @brief
-   * @param _return
-   * @param oid
-   * @param args
+   * @brief Virtual function for running a command on the block
+   * @param _return Return value
+   * @param oid Operation id
+   * @param args arguments
    */
 
   virtual void run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) = 0;
 
   /**
-   * @brief
-   * @param path
+   * @brief Set block path
+   * @param path Block path
    */
 
   void path(const std::string &path) {
@@ -96,8 +102,8 @@ class block {
   }
 
   /**
-   * @brief
-   * @return
+   * @brief Fetch block path
+   * @return Block path
    */
 
   const std::string &path() const {
@@ -106,8 +112,8 @@ class block {
   }
 
   /**
-   * @brief
-   * @return
+   * @brief Fetch block name
+   * @return Block name
    */
 
   const std::string &name() const {
@@ -115,9 +121,9 @@ class block {
   }
 
   /**
-   * @brief
-   * @param slot_begin
-   * @param slot_end
+   * @brief Set block hash slot range
+   * @param slot_begin Slot begin
+   * @param slot_end Slot end
    */
 
   void slot_range(int32_t slot_begin, int32_t slot_end) {
@@ -127,8 +133,8 @@ class block {
   }
 
   /**
-   * @brief
-   * @return
+   * @brief Fetch slot_range
+   * @return Block slot range
    */
 
   const std::pair<int32_t, int32_t> &slot_range() const {
@@ -137,8 +143,8 @@ class block {
   }
 
   /**
-   * @brief
-   * @return
+   * @brief Fetch slot begin
+   * @return Slot begin
    */
 
   int32_t slot_begin() const {
@@ -147,8 +153,8 @@ class block {
   }
 
   /**
-   * @brief
-   * @return
+   * @brief Fetch slot end
+   * @return Slot end
    */
 
   int32_t slot_end() const {
@@ -157,9 +163,9 @@ class block {
   }
 
   /**
-   * @brief
-   * @param slot
-   * @return
+   * @brief Check if slot is within the slot range
+   * @param slot Slot
+   * @return Bool value, true if slot is within the range
    */
 
   bool in_slot_range(int32_t slot) {
@@ -168,8 +174,8 @@ class block {
   }
 
   /**
-   * @brief
-   * @param state
+   * @brief Set block state
+   * @param state State, orginal, importing or exporting
    */
 
   void state(block_state state) {
@@ -178,8 +184,8 @@ class block {
   }
 
   /**
-   * @brief
-   * @return
+   * @brief Fetch block state
+   * @return Block state
    */
 
   const block_state &state() const {
@@ -188,9 +194,9 @@ class block {
   }
 
   /**
-   * @brief
-   * @param slot_begin
-   * @param slot_end
+   * @brief Set export slot range
+   * @param slot_begin Slot begin
+   * @param slot_end Slot end
    */
 
   void export_slot_range(int32_t slot_begin, int32_t slot_end) {
@@ -200,8 +206,8 @@ class block {
   }
 
   /**
-   * @brief
-   * @return
+   * @brief Fetch export slot range
+   * @return Export slot range
    */
 
   const std::pair<int32_t, int32_t> &export_slot_range() {
@@ -210,9 +216,9 @@ class block {
   };
 
   /**
-   * @brief
-   * @param slot
-   * @return
+   * @brief Check if slot is within export slot range
+   * @param slot Slot
+   * @return Bool value, true if slot is within the range
    */
 
   bool in_export_slot_range(int32_t slot) {
@@ -221,9 +227,9 @@ class block {
   }
 
   /**
-   * @brief
-   * @param slot_begin
-   * @param slot_end
+   * @brief Set import slot range
+   * @param slot_begin Slot begin
+   * @param slot_end Slot end
    */
 
   void import_slot_range(int32_t slot_begin, int32_t slot_end) {
@@ -233,8 +239,8 @@ class block {
   }
 
   /**
-   * @brief
-   * @return
+   * @brief Fetch import slot range
+   * @return Import slot range
    */
 
   const std::pair<int32_t, int32_t> &import_slot_range() {
@@ -243,9 +249,9 @@ class block {
   };
 
   /**
-   * @brief
-   * @param slot
-   * @return
+   * @brief Check if slot is within import slot range
+   * @param slot Slot
+   * @return Bool value, true if slot is within the range
    */
 
   bool in_import_slot_range(int32_t slot) {
@@ -253,7 +259,7 @@ class block {
   }
 
   /**
-   * @brief
+   * @brief TODO
    * @param target
    */
 
@@ -268,8 +274,8 @@ class block {
   }
 
   /**
-   * @brief
-   * @return
+   * @brief Fetch export target
+   * @return Export target
    */
 
   const std::vector<std::string> &export_target() const {
@@ -278,8 +284,8 @@ class block {
   }
 
   /**
-   * @brief
-   * @return
+   * @brief Fetch export target string
+   * @return Export target string
    */
 
   const std::string export_target_str() const {
@@ -288,9 +294,9 @@ class block {
   }
 
   /**
-   * @brief
-   * @param i
-   * @return
+   * @brief Check if ith block operation type is accessor
+   * @param i Block operation id
+   * @return Bool value, true if is accessor
    */
 
   bool is_accessor(int i) const {
@@ -298,9 +304,9 @@ class block {
   }
 
   /**
-   * @brief
-   * @param i
-   * @return
+   * @brief Check if ith block operation type is mutator
+   * @param i Block operation id
+   * @return Bool value, true if is mutator
    */
 
   bool is_mutator(int i) const {
@@ -308,16 +314,19 @@ class block {
   }
 
   /**
-   * @brief
-   * @param op_id
-   * @return
+   * @brief Fetch operation name
+   * @param op_id Operation id
+   * @return Operation name
    */
 
   std::string op_name(int op_id) {
     return block_ops_[op_id].name;  // Does not require lock since block_ops don't change
   }
 
-  /** Management Operations **/
+  /**
+   * Management Operations
+   * Virtual function
+   **/
   virtual void load(const std::string &path) = 0;
 
   virtual bool sync(const std::string &path) = 0;
@@ -333,8 +342,8 @@ class block {
   virtual void export_slots() = 0;
 
   /**
-   * @brief
-   * @return
+   * @brief Fetch subscription map
+   * @return Subscription map
    */
 
   subscription_map &subscriptions() {
@@ -343,8 +352,8 @@ class block {
   }
 
   /**
-   * @brief
-   * @return
+   * @brief Fetch block_response_client_map
+   * @return Block_response_client_map
    */
 
   block_response_client_map &clients() {
@@ -353,31 +362,36 @@ class block {
   }
 
  protected:
-  /* */
+  /* Metadata mutex */
   mutable std::shared_mutex metadata_mtx_;
-  /* */
+  /* Block operations
+   * Block operation type can be accessor or mutator
+   * Accessor can only be read only
+   * Mutator can be read and write
+   * Each operation has it name
+   * */
   const std::vector<block_op> &block_ops_;
-  /* */
+  /* Block file path */
   std::string path_;
-  /* */
+  /* Block name */
   std::string block_name_;
-  /* */
+  /* Block state, regular, importing or exporting */
   block_state state_;
-  /* */
+  /* Hash slot range */
   std::pair<int32_t, int32_t> slot_range_;
-  /* */
+  /* TODO */
   std::atomic_bool auto_scale_;
-  /* */
+  /* TODO */
   std::pair<int32_t, int32_t> export_slot_range_;
-  /* */
+  /* TODO */
   std::vector<std::string> export_target_;
-  /* */
+  /* TODO */
   std::string export_target_str_;
-  /* */
+  /* TODO */
   std::pair<int32_t, int32_t> import_slot_range_;
-  /* */
+  /* Subscription map */
   subscription_map sub_map_{};
-  /* */
+  /* TODO */
   block_response_client_map client_map_{};
 };
 

@@ -7,28 +7,30 @@
 #include "subscription_service.h"
 namespace mmux {
 namespace storage {
-/* */
+/* Subscription map class */
 class subscription_map {
  public:
   /**
-   * @brief
+   * @brief Constructor
    */
 
   subscription_map();
 
   /**
-   * @brief
-   * @param ops
-   * @param client
+   * @brief Add operations to subscription map
+   * The subscription service client will generate a response
+   * @param ops Operations
+   * @param client Subscription service client
    */
 
   void add_subscriptions(const std::vector<std::string> &ops, std::shared_ptr<subscription_serviceClient> client);
 
   /**
-   * @brief
-   * @param ops
-   * @param client
-   * @param inform
+   * @brief Remove a subscription from subscription map
+   * If inform is true, subscription service client will generate a response
+   * @param ops Operations
+   * @param client Subscription service client
+   * @param inform Bool value that indicates inform or not
    */
 
   void remove_subscriptions(const std::vector<std::string> &ops,
@@ -36,23 +38,23 @@ class subscription_map {
                             bool inform = true);
 
   /**
-   * @brief
-   * @param op
-   * @param msg
+   * @brief Notify all the waiting clients of the operation
+   * @param op Operation
+   * @param msg Message to be sent to waiting clients
    */
 
   void notify(const std::string &op, const std::string &msg);
 
   /**
-   * @brief
+   * @brief Clear the subscription map
    */
 
   void clear();
 
  private:
-  /* */
+  /* Subscription mapp operation mutex */
   std::mutex mtx_{};
-  /* */
+  /* Subscription map TODO map or unordered map ??*/
   std::map<std::string, std::set<std::shared_ptr<subscription_serviceClient>>> subs_{};
 };
 

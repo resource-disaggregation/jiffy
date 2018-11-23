@@ -7,45 +7,45 @@
 
 namespace mmux {
 namespace storage {
-/* */
+/* Storage management service handler, inherited from */
 class storage_management_service_handler : public storage_management_serviceIf {
  public:
 
   /**
-   * @brief
-   * @param blocks
+   * @brief Constructor
+   * @param blocks Blocks chain
    */
 
   explicit storage_management_service_handler(std::vector<std::shared_ptr<chain_module>> &blocks);
 
   /**
-   * @brief
-   * @param _return
-   * @param block_id
+   * @brief Get block path
+   * @param _return The returning value, string of block path
+   * @param block_id Block id
    */
 
   void get_path(std::string &_return, int32_t block_id) override;
 
   /**
-   * @brief
-   * @param block_id
-   * @param backing_path
+   * @brief Write data back to persistent storage
+   * @param block_id Block id
+   * @param backing_path Block backing path
    */
 
   void sync(int32_t block_id, const std::string &backing_path) override;
 
   /**
-   * @brief
-   * @param block_id
-   * @param backing_path
+   * @brief Write data back to persistent storage and clear the block
+   * @param block_id Block id
+   * @param backing_path Block backing path
    */
 
   void dump(int32_t block_id, const std::string &backing_path) override;
 
   /**
-   * @brief
-   * @param block_id
-   * @param backing_path
+   * @brief Load data block from persistent storage
+   * @param block_id Block id
+   * @param backing_path Block backing path
    */
 
   void load(int32_t block_id, const std::string &backing_path) override;
@@ -196,7 +196,7 @@ class storage_management_service_handler : public storage_management_serviceIf {
   /**
    * @brief
    */
-   
+
   std::vector<std::shared_ptr<chain_module>> &blocks_;
 };
 
