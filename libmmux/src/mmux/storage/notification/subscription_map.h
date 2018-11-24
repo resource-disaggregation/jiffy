@@ -7,7 +7,11 @@
 #include "subscription_service.h"
 namespace mmux {
 namespace storage {
-/* Subscription map class */
+/* Subscription map class
+ * This map records all the clients that are waiting for a specific operation
+ *  on the block. When the operation is done, the block will send a notification
+ *  in order to let the client get the right data at right time
+ * */
 class subscription_map {
  public:
   /**

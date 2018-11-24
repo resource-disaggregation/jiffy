@@ -24,7 +24,9 @@ namespace storage {
 /*
  * Chain roles
  * We mark out the special rule singleton if there is only one block for the chain
- * i.e. we don't use chain replication
+ * i.e. we don't use chain replication in this case
+ * The head would deal with update request and the tail would deal with query request
+ * and also generate the respond
  */
 
 enum chain_role {
@@ -39,19 +41,22 @@ enum chain_role {
  */
 
 struct chain_op {
+  /* Operation sequence id */
   sequence_id seq;
+  /* Operation id */
   int32_t op_id;
+  /* Operation arguments */
   std::vector<std::string> args;
 };
 
-/* Next block cxn TODO */
+/* Next block connection */
 class next_block_cxn {
  public:
   next_block_cxn() = default;
 
   /**
    * @brief Constructor
-   * @param block_name
+   * @param block_name Next block name
    */
 
   explicit next_block_cxn(const std::string &block_name) {
@@ -87,10 +92,10 @@ class next_block_cxn {
   }
 
   /**
-   * @brief TODO
-   * @param seq
-   * @param op_id
-   * @param args
+   * @brief Deal with a request, either query or update
+   * @param seq Request sequence_id
+   * @param op_id Operation id
+   * @param args Arguments
    */
 
   void request(const sequence_id &seq,
@@ -118,14 +123,14 @@ class next_block_cxn {
   /* Chain request client */
   chain_request_client client_;
 };
-
+/* Previous block connection */
 class prev_block_cxn {
  public:
   prev_block_cxn() = default;
 
   /**
    * @brief Constructor
-   * @param prot
+   * @param prot Protocol
    */
 
   explicit prev_block_cxn(std::shared_ptr<::apache::thrift::protocol::TProtocol> prot) {
@@ -142,8 +147,8 @@ class prev_block_cxn {
   }
 
   /**
-   * @brief TODO
-   * @param seq
+   * @brief Chairn acknowledgement
+   * @param seq Operation sequence id
    */
 
   void ack(const sequence_id &seq) {
@@ -151,8 +156,8 @@ class prev_block_cxn {
   }
 
   /**
-   * @brief Fetch
-   * @return
+   * @brief Check if chain response client is set
+   * @return Bool value, true if set
    */
 
   bool is_set() const {
@@ -160,28 +165,28 @@ class prev_block_cxn {
   }
 
  private:
-  /* */
+  /* Charin response client */
   chain_response_client client_;
 };
 
-/* Chain modult class
+/* Chain module class
  * Inherited from block */
 class chain_module : public block {
  public:
   /* Class chain response handler
-   * Inherited from chain response serviceIf */
+   * Inherited from chain_response_serviceIf */
   class chain_response_handler : public chain_response_serviceIf {
    public:
     /**
      * @brief Constructor
-     * @param module
+     * @param module Chain module
      */
 
     explicit chain_response_handler(chain_module *module) : module_(module) {}
 
     /**
-     * @brief
-     * @param seq
+     * @brief Chain acknowledgement
+     * @param seq Operation sequence id
      */
 
     void chain_ack(const sequence_id &seq) override {
@@ -194,9 +199,9 @@ class chain_module : public block {
   };
 
   /**
-   * @brief
-   * @param block_name
-   * @param block_ops
+   * @brief Constructor
+   * @param block_name Block name
+   * @param block_ops Block operations
    */
 
   chain_module(const std::string &block_name,
@@ -207,7 +212,7 @@ class chain_module : public block {
         pending_(0) {}
 
   /**
-   * @brief
+   * @brief Destructor
    */
 
   ~chain_module() {
@@ -217,14 +222,14 @@ class chain_module : public block {
   }
 
   /**
-   * @brief
-   * @param path
-   * @param slot_begin
-   * @param slot_end
-   * @param chain
-   * @param auto_scale
-   * @param role
-   * @param next_block_name
+   * @brief Setup a chain module and start the processor thread
+   * @param path Block path
+   * @param slot_begin Hash slot begin
+   * @param slot_end Hash slot end
+   * @param chain Replication chain block names
+   * @param auto_scale Auto scaling boolean
+   * @param role Chain module role
+   * @param next_block_name Next block name
    */
 
   void setup(const std::string &path,
@@ -262,10 +267,10 @@ class chain_module : public block {
   }
 
   /**
-   * @brief
-   * @param target_block
-   * @param slot_begin
-   * @param slot_end
+   * @brief Set block to be exporting
+   * @param target_block Export target block
+   * @param slot_begin Slot begin
+   * @param slot_end Slot end
    */
 
   void set_exporting(const std::vector<std::string> &target_block, int32_t slot_begin, int32_t slot_end) {
@@ -282,9 +287,9 @@ class chain_module : public block {
   }
 
   /**
-   * @brief
-   * @param slot_begin
-   * @param slot_end
+   * @brief Set block to be importing
+   * @param slot_begin Slot begin
+   * @param slot_end Slot end
    */
 
   void set_importing(int32_t slot_begin, int32_t slot_end) {
@@ -295,9 +300,9 @@ class chain_module : public block {
   }
 
   /**
-   * @brief
-   * @param slot_begin
-   * @param slot_end
+   * @brief Set block back to regular
+   * @param slot_begin Slot begin
+   * @param slot_end Slot end
    */
 
   void set_regular(int32_t slot_begin, int32_t slot_end) {
@@ -312,8 +317,8 @@ class chain_module : public block {
   }
 
   /**
-   * @brief
-   * @param role
+   * @brief Set chain module role
+   * @param role Role
    */
 
   void role(chain_role role) {
@@ -322,8 +327,8 @@ class chain_module : public block {
   }
 
   /**
-   * @brief
-   * @return
+   * @brief Fetch chain module role
+   * @return Role
    */
 
   chain_role role() const {
@@ -332,8 +337,8 @@ class chain_module : public block {
   }
 
   /**
-   * @brief
-   * @param chain
+   * @brief Set replication chain block names
+   * @param chain Chain block names
    */
 
   void chain(const std::vector<std::string> &chain) {
@@ -342,8 +347,8 @@ class chain_module : public block {
   }
 
   /**
-   * @brief
-   * @return
+   * @brief Fetch replication chain block names
+   * @return Replication chain block names
    */
 
   const std::vector<std::string> &chain() {
@@ -352,8 +357,10 @@ class chain_module : public block {
   }
 
   /**
-   * @brief
-   * @return
+   * @brief Check if chain module role is head
+   * @return Bool value, true if chain role is head or singleton
+   * In implementation, we regard singleton as a chain module that consists both
+   * head and tail roles
    */
 
   bool is_head() const {
@@ -362,8 +369,10 @@ class chain_module : public block {
   }
 
   /**
-   * @brief
-   * @return
+   * @brief Check if chain module role is tail
+   * @return Bool value, true if chain role is tail or singleton
+   * In implementation, we regard singleton as a chain module that consists both
+   * head and tail roles
    */
 
   bool is_tail() const {
@@ -372,8 +381,8 @@ class chain_module : public block {
   }
 
   /**
-   * @brief
-   * @return
+   * @brief Check if previous chain module is set
+   * @return Bool value, true if set
    */
 
   bool is_set_prev() const {
@@ -381,8 +390,8 @@ class chain_module : public block {
   }
 
   /**
-   * @brief
-   * @param prot
+   * @brief Reset previous block
+   * @param prot Protocol
    */
 
   void reset_prev(const std::shared_ptr<::apache::thrift::protocol::TProtocol> &prot) {
@@ -390,24 +399,24 @@ class chain_module : public block {
   }
 
   /**
-   * @brief
-   * @param next_block
+   * @brief Reset next block
+   * @param next_block Next block
    */
 
   void reset_next(const std::string &next_block);
 
   /**
-   * @brief
-   * @param next_block
+   * @brief Reset next block and start up response processor thread
+   * @param next_block Next block
    */
 
   void reset_next_and_listen(const std::string &next_block);
 
   /**
-   * @brief
-   * @param result
-   * @param oid
-   * @param args
+   * @brief Run command on next block
+   * @param result Command result
+   * @param oid Operation id
+   * @param args Arguments
    */
 
   void run_command_on_next(std::vector<std::string> &result, int32_t oid, const std::vector<std::string> &args) {
@@ -415,10 +424,10 @@ class chain_module : public block {
   }
 
   /**
-   * @brief
-   * @param seq
-   * @param op_id
-   * @param args
+   * @brief Add request to pending
+   * @param seq Request sequence id number
+   * @param op_id Operation id
+   * @param args Argumentss
    */
 
   void add_pending(const sequence_id &seq, int op_id, const std::vector<std::string> &args) {
@@ -426,8 +435,8 @@ class chain_module : public block {
   }
 
   /**
-   * @brief
-   * @param seq
+   * @brief Remove a pending request
+   * @param seq Sequence id
    */
 
   void remove_pending(const sequence_id &seq) {
@@ -435,15 +444,19 @@ class chain_module : public block {
   }
 
   /**
-   * @brief
+   * @brief Resend the pending request
    */
 
   void resend_pending();
 
+  /**
+   * @brief Virtual function for forwarding all
+   */
+
   virtual void forward_all() = 0;
 
   /**
-   * @brief
+   * @brief Request
    * @param seq
    * @param oid
    * @param args
@@ -468,21 +481,21 @@ class chain_module : public block {
   void ack(const sequence_id &seq);
 
  protected:
-  /* */
+  /* Request mutex */
   std::mutex request_mtx_;
-  /* */
+  /* Role of chain module */
   chain_role role_{singleton};
-  /* */
+  /* Chain sequence number */
   int64_t chain_seq_no_{0};
-  /* */
+  /* Next block connection */
   std::unique_ptr<next_block_cxn> next_{nullptr};
-  /* */
+  /* Previous block connection */
   std::unique_ptr<prev_block_cxn> prev_{nullptr};
-  /* */
+  /* Replication chain block names */
   std::vector<std::string> chain_;
-  /* */
+  /* Response processor thread */
   std::thread response_processor_;
-  /* */
+  /* Pending operations */
   cuckoohash_map<int64_t, chain_op> pending_;
 };
 

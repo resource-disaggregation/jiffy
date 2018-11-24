@@ -379,7 +379,7 @@ class block {
   block_state state_;
   /* Hash slot range */
   std::pair<int32_t, int32_t> slot_range_;
-  /* TODO */
+  /* Bool value for auto scaling */
   std::atomic_bool auto_scale_;
   /* TODO */
   std::pair<int32_t, int32_t> export_slot_range_;
@@ -391,7 +391,7 @@ class block {
   std::pair<int32_t, int32_t> import_slot_range_;
   /* Subscription map */
   subscription_map sub_map_{};
-  /* TODO */
+  /* Block response client map */
   block_response_client_map client_map_{};
 };
 

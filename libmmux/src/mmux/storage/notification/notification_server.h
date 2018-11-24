@@ -8,16 +8,16 @@
 
 namespace mmux {
 namespace storage {
-/* */
+/* Notification server class */
 class notification_server {
  public:
 
   /**
-   * @brief
-   * @param blocks
-   * @param address
-   * @param port
-   * @return
+   * @brief Create notification server
+   * @param blocks Chain modules
+   * @param address Host address
+   * @param port Port number
+   * @return Server
    */
 
   static std::shared_ptr<apache::thrift::server::TThreadedServer> create(std::vector<std::shared_ptr<chain_module>> &blocks,

@@ -5,41 +5,43 @@
 
 namespace mmux {
 namespace storage {
-/* */
+/* Chain response client */
 class chain_response_client {
  public:
   typedef chain_response_serviceClient thrift_client;
   chain_response_client() = default;
 
   /**
-   * @brief
-   * @param prot
+   * @brief Constructor
+   * Reset client protocol
+   * @param prot Protocol
    */
 
   explicit chain_response_client(std::shared_ptr<::apache::thrift::protocol::TProtocol> prot);
 
   /**
-   * @brief
-   * @return
+   * @brief Check if chain response serviceClient is set
+   * @return Bool value, true if set
    */
 
   bool is_set() const;
 
   /**
-   * @brief
-   * @param prot
+   * @brief Reset client protocol
+   * Construct a new chain response serviceClient
+   * @param prot Protocol
    */
 
   void reset_prot(std::shared_ptr<::apache::thrift::protocol::TProtocol> prot);
 
   /**
-   * @brief
+   * @brief TODO
    * @param seq
    */
 
   void ack(const sequence_id &seq);
  private:
-  /* */
+  /* Chain response serviceClient */
   std::unique_ptr<thrift_client> client_{};
 };
 

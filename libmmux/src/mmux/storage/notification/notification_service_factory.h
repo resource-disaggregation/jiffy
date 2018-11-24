@@ -7,34 +7,35 @@
 
 namespace mmux {
 namespace storage {
-/* */
+/* Notification service factory class
+ * Inherited from notification_serviceIfFactory */
 class notification_service_factory: public notification_serviceIfFactory {
  public:
 
   /**
-   * @brief
-   * @param blocks
+   * @brief Constructor
+   * @param blocks Data block
    */
 
   explicit notification_service_factory(std::vector<std::shared_ptr<chain_module>> &blocks);
 
   /**
-   * @brief
-   * @param conn_info
-   * @return
+   * @brief Fetch notification service handler
+   * @param conn_info Connection info
+   * @return Notification service handler
    */
 
   notification_serviceIf *getHandler(const ::apache::thrift::TConnectionInfo &conn_info) override;
 
   /**
-   * @brief
-   * @param anIf
+   * @brief Release handler
+   * @param anIf Notification handler
    */
 
   void releaseHandler(notification_serviceIf *anIf) override;
 
  private:
-  /* */
+  /* Data blocks */
   std::vector<std::shared_ptr<chain_module>> &blocks_;
 };
 

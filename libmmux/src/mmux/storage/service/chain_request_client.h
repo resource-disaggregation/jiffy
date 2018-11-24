@@ -7,7 +7,7 @@
 
 namespace mmux {
 namespace storage {
-/* */
+/* Chain request client */
 class chain_request_client {
  public:
   typedef chain_request_serviceClient thrift_client;

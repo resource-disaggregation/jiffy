@@ -14,12 +14,18 @@ namespace storage {
 
 
 template<typename T>
-/* */
+/* A blocking queue class template
+ * Each push and pop argument can only be done once at a time.
+ * Push can be done immediately when it gets the lock.
+ * Pull can be done only when queue is not empty.
+ * If empty and given timeout time, wait for conditional variable for given time
+ * If empty and given timeout time is -1, wait fot conditional variable
+ * */
 class blocking_queue {
  public:
 
   /**
-   * @brief
+   * @brief Pop element out of queue
    * @param timeout_ms
    * @return
    */
@@ -41,8 +47,8 @@ class blocking_queue {
   }
 
   /**
-   * @brief
-   * @param item
+   * @brief Push item in the queue using lvalue reference
+   * @param item Item
    */
 
   void push(const T &item) {
@@ -53,8 +59,9 @@ class blocking_queue {
   }
 
   /**
-   * @brief
-   * @param item
+   * @brief Push item in the queue using rvalue reference
+   * Even if the item is temporary, the push will succeed
+   * @param item Item
    */
 
   void push(T &&item) {
@@ -65,11 +72,11 @@ class blocking_queue {
   }
 
  private:
-  /* */
+  /* Queue */
   std::queue<T> queue_;
-  /* */
+  /* Operation mutex */
   std::mutex mutex_;
-  /* */
+  /* Conditional variable */
   std::condition_variable cond_;
 };
 
