@@ -10,14 +10,14 @@ namespace storage {
 class block_server {
  public:
   /**
-   * @brief
-   * @param blocks
-   * @param address
-   * @param port
-   * @param non_blocking
-   * @param num_io_threads
-   * @param num_proc_threads
-   * @return
+   * @brief Create block server
+   * @param blocks Data blocks -> used to create block request handler factory
+   * @param address Socket address
+   * @param port Socket port
+   * @param non_blocking TODO
+   * @param num_io_threads Number of IO threads TODO
+   * @param num_proc_threads Number of process threads
+   * @return Block server
    */
 
   static std::shared_ptr<apache::thrift::server::TServer> create(std::vector<std::shared_ptr<chain_module>> &blocks,
