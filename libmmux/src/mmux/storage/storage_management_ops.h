@@ -9,7 +9,7 @@
 
 namespace mmux {
 namespace storage {
-
+/* Storage management operation virtual class */
 class storage_management_ops {
  public:
   virtual void setup_block(const std::string &block_name,
