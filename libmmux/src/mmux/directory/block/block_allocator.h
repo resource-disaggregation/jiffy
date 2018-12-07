@@ -6,7 +6,7 @@
 
 namespace mmux {
 namespace directory {
-
+/* Block allocator virtual class */
 class block_allocator {
  public:
   virtual std::vector<std::string> allocate(std::size_t count, const std::vector<std::string> &exclude_list) = 0;

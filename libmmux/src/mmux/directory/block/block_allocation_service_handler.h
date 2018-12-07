@@ -6,15 +6,41 @@
 
 namespace mmux {
 namespace directory {
-
-class block_allocation_service_handler: public block_allocation_serviceIf {
+/* Block allocation service handler class */
+class block_allocation_service_handler : public block_allocation_serviceIf {
  public:
+
+  /**
+   * @brief Constructor
+   * @param alloc Block allocator
+   */
+
   explicit block_allocation_service_handler(std::shared_ptr<block_allocator> alloc);
+
+  /**
+   * @brief Add blocks
+   * @param block_names Block names
+   */
+
   void add_blocks(const std::vector<std::string> &block_names) override;
+
+  /**
+   * @brief Remove blocks
+   * @param block_names Block names
+   */
+
   void remove_blocks(const std::vector<std::string> &block_names) override;
 
  private:
-  block_allocation_service_exception make_exception(const std::out_of_range& e);
+
+  /**
+   * @brief Make exception
+   * @param e Exception
+   * @return Exception
+   */
+
+  block_allocation_service_exception make_exception(const std::out_of_range &e);
+  /* Block allocator */
   std::shared_ptr<block_allocator> alloc_;
 };
 

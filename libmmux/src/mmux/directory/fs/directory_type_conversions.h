@@ -6,9 +6,19 @@
 
 namespace mmux {
 namespace directory {
-
+/**
+ * Directory type conversion class
+ * Aim to interact with RPC
+ */
 class directory_type_conversions {
  public:
+
+  /**
+   * @brief Convert replication chain to rpc
+   * @param chain Replication chain
+   * @return rpc_replication_chain
+   */
+
   static rpc_replica_chain to_rpc(const replica_chain &chain) {
     rpc_replica_chain rpc;
     rpc.block_names = chain.block_names;
@@ -18,6 +28,12 @@ class directory_type_conversions {
     return rpc;
   }
 
+  /**
+   * @brief Convert rpc_replication chain to replication chain
+   * @param rpc rpc_replication chain
+   * @return Replication chain
+   */
+
   static replica_chain from_rpc(const rpc_replica_chain &rpc) {
     return replica_chain(rpc.block_names,
                          rpc.slot_begin,
@@ -25,6 +41,12 @@ class directory_type_conversions {
                          chain_status::stable,
                          static_cast<storage_mode>(rpc.storage_mode));
   }
+
+  /**
+   * @brief Convert data status to rpc data status
+   * @param status Data status
+   * @return rpc_data_status
+   */
 
   static rpc_data_status to_rpc(const data_status &status) {
     rpc_data_status rpc;
@@ -38,6 +60,12 @@ class directory_type_conversions {
     return rpc;
   }
 
+  /**
+   * @brief Convert file status to rpc file status
+   * @param status File status
+   * @return rpc_file_status
+   */
+
   static rpc_file_status to_rpc(const file_status &status) {
     rpc_file_status rpc;
     rpc.type = (rpc_file_type) status.type();
@@ -45,6 +73,12 @@ class directory_type_conversions {
     rpc.permissions = status.permissions()();
     return rpc;
   }
+
+  /**
+   * @brief Convert directory entry to rpc directory_entry
+   * @param entry Directory entry
+   * @return rpc_dir_entry
+   */
 
   static rpc_dir_entry to_rpc(const directory_entry &entry) {
     rpc_dir_entry rpc;
@@ -55,6 +89,12 @@ class directory_type_conversions {
     return rpc;
   }
 
+  /**
+   * @brief Convert rpc_data_status to data status
+   * @param rpc rpc_data_status
+   * @return Data status
+   */
+
   static data_status from_rpc(const rpc_data_status &rpc) {
     std::vector<replica_chain> data_blocks;
     for (const auto &blk: rpc.data_blocks) {
@@ -63,11 +103,23 @@ class directory_type_conversions {
     return data_status(rpc.backing_path, static_cast<size_t>(rpc.chain_length), data_blocks, rpc.flags, rpc.tags);
   }
 
+  /**
+   * @brief Convert rpc_file_status to file status
+   * @param rpc rpc_file_status
+   * @return File status
+   */
+
   static file_status from_rpc(const rpc_file_status &rpc) {
     return file_status(static_cast<file_type>(rpc.type),
                        perms(static_cast<uint16_t>(rpc.permissions)),
                        static_cast<uint64_t>(rpc.last_write_time));
   }
+
+  /**
+   * @brief Convert rpc_dir_entry to directory entry
+   * @param rpc rpc_dir_entry
+   * @return Directory entry
+   */
 
   static directory_entry from_rpc(const rpc_dir_entry &rpc) {
     return directory_entry(rpc.name, from_rpc(rpc.status));

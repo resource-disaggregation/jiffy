@@ -13,7 +13,7 @@ void block_allocation_service_handler::add_blocks(const std::vector<std::string>
   try {
     LOG(log_level::info) << "Received advertisement for " << block_names.size() << " blocks";
     alloc_->add_blocks(block_names);
-  } catch (std::out_of_range& e) {
+  } catch (std::out_of_range &e) {
     throw make_exception(e);
   }
 }
@@ -22,10 +22,11 @@ void block_allocation_service_handler::remove_blocks(const std::vector<std::stri
   try {
     LOG(log_level::info) << "Received retraction for " << block_names.size() << " blocks";
     alloc_->remove_blocks(block_names);
-  } catch (std::out_of_range& e) {
+  } catch (std::out_of_range &e) {
     throw make_exception(e);
   }
 }
+
 block_allocation_service_exception block_allocation_service_handler::make_exception(const std::out_of_range &e) {
   block_allocation_service_exception ex;
   ex.msg = e.what();

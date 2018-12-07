@@ -38,7 +38,7 @@ void directory_service_handler::create(rpc_data_status &_return,
                                        int32_t chain_length,
                                        int32_t flags,
                                        int32_t permissions,
-                                       const std::map<std::string, std::string> & tags) {
+                                       const std::map<std::string, std::string> &tags) {
   try {
     _return = directory_type_conversions::to_rpc(shard_->create(path,
                                                                 backing_path,
@@ -59,7 +59,7 @@ void directory_service_handler::open_or_create(rpc_data_status &_return,
                                                int32_t chain_length,
                                                int32_t flags,
                                                int32_t permissions,
-                                               const std::map<std::string, std::string> & tags) {
+                                               const std::map<std::string, std::string> &tags) {
   try {
     _return = directory_type_conversions::to_rpc(shard_->open_or_create(path,
                                                                         backing_path,
@@ -88,6 +88,7 @@ int64_t directory_service_handler::last_write_time(const std::string &path) {
     throw make_exception(e);
   }
 }
+
 void directory_service_handler::set_permissions(const std::string &path,
                                                 rpc_perms prms,
                                                 rpc_perm_options opts) {

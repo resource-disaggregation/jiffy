@@ -7,15 +7,16 @@
 
 namespace mmux {
 namespace storage {
-
+/* TODO */
 class redo_error : public std::exception {
  public:
   redo_error() {}
 };
 
+/* Key value storage client */
 class kv_client {
  public:
-
+  /* Locked client class */
   class locked_client {
    public:
     typedef replica_chain_client::locked_client locked_block_t;

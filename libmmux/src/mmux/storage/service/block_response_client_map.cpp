@@ -6,7 +6,7 @@ namespace storage {
 
 using namespace utils;
 
-block_response_client_map::block_response_client_map(): clients_(0) {}
+block_response_client_map::block_response_client_map() : clients_(0) {}
 
 void block_response_client_map::add_client(int64_t client_id, std::shared_ptr<block_response_client> client) {
   clients_.insert(client_id, client);

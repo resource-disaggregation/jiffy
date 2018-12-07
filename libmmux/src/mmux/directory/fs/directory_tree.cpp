@@ -160,7 +160,6 @@ data_status directory_tree::open_or_create(const std::string &path,
       throw directory_ops_exception("Cannot open or create " + path + ": is a directory");
     }
   }
-
   if (num_blocks == 0) {
     throw directory_ops_exception("File cannot have zero blocks");
   }
@@ -168,7 +167,6 @@ data_status directory_tree::open_or_create(const std::string &path,
   if (chain_length == 0) {
     throw directory_ops_exception("Chain length cannot be zero");
   }
-
   std::vector<replica_chain> blocks;
   std::size_t slots_per_block = storage::block::SLOT_MAX / num_blocks;
   bool auto_scale = (flags & data_status::STATIC_PROVISIONED) != data_status::STATIC_PROVISIONED;
@@ -454,8 +452,10 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
     for (std::size_t i = 0; i < fixed_chain.size(); ++i) {
       std::string block_name = fixed_chain[i];
       std::string next_block_name = (i == fixed_chain.size() - 1) ? "nil" : fixed_chain[i + 1];
-      int32_t role = (i == 0) ? chain_role::head : (i == fixed_chain.size() - 1) ? chain_role::tail : chain_role::mid;
-      LOG(log_level::info) << "Setting block <" << block_name << ">: path=" << path << ", role=" << role << ", next="
+      int32_t
+          role = (i == 0) ? chain_role::head : (i == fixed_chain.size() - 1) ? chain_role::tail : chain_role::mid;
+      LOG(log_level::info) << "Setting block <" << block_name << ">: path=" << path << ", role=" << role
+                           << ", next="
                            << next_block_name << ">";
       storage_->setup_block(block_name,
                             path,
@@ -504,7 +504,8 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
   updated_chain.insert(updated_chain.end(), new_blocks.begin(), new_blocks.end());
 
   // Setup forwarding path
-  LOG(log_level::info) << "Setting old tail block <" << chain.block_names.back() << ">: path=" << path << ", role="
+  LOG(log_level::info) << "Setting old tail block <" << chain.block_names.back() << ">: path=" << path
+                       << ", role="
                        << chain_role::tail << ", next=" << new_blocks.front() << ">";
   auto slot_range = storage_->slot_range(chain.block_names.back());
   storage_->setup_block(chain.block_names.back(),
@@ -518,8 +519,10 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
   for (std::size_t i = chain.block_names.size(); i < updated_chain.size(); i++) {
     std::string block_name = updated_chain[i];
     std::string next_block_name = (i == updated_chain.size() - 1) ? "nil" : updated_chain[i + 1];
-    int32_t role = (i == 0) ? chain_role::head : (i == updated_chain.size() - 1) ? chain_role::tail : chain_role::mid;
-    LOG(log_level::info) << "Setting block <" << block_name << ">: path=" << path << ", role=" << role << ", next="
+    int32_t
+        role = (i == 0) ? chain_role::head : (i == updated_chain.size() - 1) ? chain_role::tail : chain_role::mid;
+    LOG(log_level::info) << "Setting block <" << block_name << ">: path=" << path << ", role=" << role
+                         << ", next="
                          << next_block_name << ">";
     // TODO: this is incorrect -- we shouldn't be setting the chain to updated_chain right now...
     storage_->setup_block(block_name,
@@ -532,11 +535,13 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
                           next_block_name);
   }
 
-  LOG(log_level::info) << "Forwarding data from <" << chain.block_names.back() << "> to <" << new_blocks.front() << ">";
+  LOG(log_level::info) << "Forwarding data from <" << chain.block_names.back() << "> to <" << new_blocks.front()
+                       << ">";
 
   storage_->forward_all(chain.block_names.back());
 
-  LOG(log_level::info) << "Setting old tail block <" << chain.block_names.back() << ">: path=" << path << ", role="
+  LOG(log_level::info) << "Setting old tail block <" << chain.block_names.back() << ">: path=" << path
+                       << ", role="
                        << chain_role::mid << ", next=" << new_blocks.front() << ">";
   storage_->setup_block(chain.block_names.back(),
                         path,
@@ -648,7 +653,8 @@ std::shared_ptr<ds_file_node> directory_tree::get_node_as_file(const std::string
   return std::dynamic_pointer_cast<ds_file_node>(node);
 }
 
-std::shared_ptr<ds_node> directory_tree::touch_node_path(const std::string &path, const std::uint64_t time) const {
+std::shared_ptr<ds_node> directory_tree::touch_node_path(const std::string &path,
+                                                         const std::uint64_t time) const {
   std::shared_ptr<ds_node> node = root_;
   for (auto &name: directory_utils::path_elements(path)) {
     if (!node->is_directory()) {

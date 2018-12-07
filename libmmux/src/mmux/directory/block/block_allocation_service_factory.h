@@ -6,15 +6,36 @@
 
 namespace mmux {
 namespace directory {
-
+/* Block allocation service factory class */
 class block_allocation_service_factory : public block_allocation_serviceIfFactory {
  public:
+
+  /**
+   * @brief Constructor
+   * @param alloc Block allocator
+   */
+
   explicit block_allocation_service_factory(std::shared_ptr<block_allocator> alloc);
+
  private:
+
+  /**
+   * @brief Get block allocation service handler
+   * @param conn_info Connection information
+   * @return Handler
+   */
+
   block_allocation_serviceIf *getHandler(const ::apache::thrift::TConnectionInfo &connInfo) override;
+
+  /**
+   * @brief Release handler
+   * @param handler Handler
+   */
+
   void releaseHandler(block_allocation_serviceIf *anIf) override;
 
  private:
+  /* Block allocator */
   std::shared_ptr<block_allocator> alloc_;
 };
 

@@ -6,24 +6,63 @@
 
 namespace mmux {
 namespace directory {
-
+/* Block advertisement client class */
 class block_advertisement_client {
  public:
   typedef block_allocation_serviceClient thrift_client;
 
   block_advertisement_client() = default;
+
+  /**
+   * @brief Destructor
+   */
+
   ~block_advertisement_client();
+
+  /**
+   * @brief Constructor
+   * @param host Server host
+   * @param port Server port
+   */
+
   block_advertisement_client(const std::string &hostname, int port);
+
+  /**
+   * @brief Connect client
+   * @param host Server host
+   * @param hort Server port
+   */
+
   void connect(const std::string &hostname, int port);
+
+  /**
+   * @brief Disconnect client
+   */
+
   void disconnect();
 
-  void advertise_blocks(const std::vector<std::string>& block_names);
-  void retract_blocks(const std::vector<std::string>& block_names);
+  /**
+   * @brief Advertise all blocks to the directory server
+   * @param block_names Block names
+   */
+
+  void advertise_blocks(const std::vector<std::string> &block_names);
+
+  /**
+   * @brief Remove blocks
+   * @param block_names Block names
+   */
+
+  void retract_blocks(const std::vector<std::string> &block_names);
 
  private:
+  /* Socket */
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};
+  /* Transport */
   std::shared_ptr<apache::thrift::transport::TTransport> transport_{};
+  /* Protocol */
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_{};
+  /* Client */
   std::shared_ptr<thrift_client> client_{};
 };
 

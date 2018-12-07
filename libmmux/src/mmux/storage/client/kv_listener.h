@@ -7,28 +7,64 @@
 
 namespace mmux {
 namespace storage {
-
+/* */
 class kv_listener {
  public:
   typedef std::pair<std::string, std::string> notification_t;
   typedef blocking_queue<notification_t> mailbox_t;
 
+  /**
+   * @brief
+   * @param path
+   * @param status
+   */
+
   kv_listener(const std::string &path, const directory::data_status &status);
+
+  /**
+   * @brief
+   */
+
   ~kv_listener();
 
+  /**
+   * @brief
+   * @param ops
+   */
+
   void subscribe(const std::vector<std::string> &ops);
+
+  /**
+   * @brief
+   * @param ops
+   */
+
   void unsubscribe(const std::vector<std::string> &ops);
+
+  /**
+   * @brief
+   * @param timeout_ms
+   * @return
+   */
+
   notification_t get_notification(int64_t timeout_ms = -1);
 
  private:
+  /* */
   mailbox_t notifications_;
+  /* */
   mailbox_t controls_;
 
+  /* */
   std::string path_;
+  /* */
   directory::data_status status_;
+  /* */
   notification_worker worker_;
 
+  /* */
   std::vector<std::shared_ptr<block_listener>> listeners_;
+  /* */
   std::vector<int32_t> block_ids_;
 };
 
