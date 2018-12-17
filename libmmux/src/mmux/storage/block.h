@@ -259,8 +259,8 @@ class block {
   }
 
   /**
-   * @brief TODO
-   * @param target
+   * @brief Create export target and string
+   * @param target Export target
    */
 
   void export_target(const std::vector<std::string> &target) {

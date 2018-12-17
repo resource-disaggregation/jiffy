@@ -7,7 +7,8 @@
 
 namespace mmux {
 namespace storage {
-/* TODO */
+/* Redo when exception class
+ * Redo whenever exception happens */
 class redo_error : public std::exception {
  public:
   redo_error() {}

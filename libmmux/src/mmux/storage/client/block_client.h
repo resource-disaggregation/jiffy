@@ -25,7 +25,7 @@ class block_client {
     explicit command_response_reader(std::shared_ptr<apache::thrift::protocol::TProtocol> prot);
 
     /**
-     * @brief Response receiver
+     * @brief Receive response
      * @param out Response result
      * @return Client sequence number
      */

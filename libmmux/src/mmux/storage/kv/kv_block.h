@@ -41,18 +41,18 @@ enum kv_op_id : int32_t {
   upsert = 14,
   locked_upsert = 15
 };
-/* */
+/* Key value block structure class, inherited from chain module */
 class kv_block : public chain_module {
  public:
   /**
-   * @brief
-   * @param block_name
-   * @param capacity
-   * @param threshold_lo
-   * @param threshold_hi
-   * @param directory_host
-   * @param directory_port
-   * @param ser
+   * @brief Constructor
+   * @param block_name Block name
+   * @param capacity Block capacity
+   * @param threshold_lo low threshold
+   * @param threshold_hi high threshold
+   * @param directory_host Directory host
+   * @param directory_port Directory port number
+   * @param ser Ser
    */
 
   explicit kv_block(const std::string &block_name,
