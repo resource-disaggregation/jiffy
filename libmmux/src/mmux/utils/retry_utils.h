@@ -7,7 +7,7 @@
 
 namespace mmux {
 namespace utils {
-
+/* Retry utility class */
 class retry_utils {
  public:
   template<typename F, typename... Args>
