@@ -92,7 +92,7 @@ class next_block_cxn {
   }
 
   /**
-   * @brief Deal with a request, either query or update
+   * @brief Request an operatiion
    * @param seq Request sequence_id
    * @param op_id Operation id
    * @param args Arguments

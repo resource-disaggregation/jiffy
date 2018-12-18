@@ -9,7 +9,7 @@
 
 namespace mmux {
 namespace client {
-
+/* mmux_client class */
 class mmux_client {
  public:
   mmux_client(const std::string &host, int dir_port, int lease_port);
@@ -44,7 +44,9 @@ class mmux_client {
   void load(const std::string &path, const std::string &dest);
 
  private:
+  /* Directory client */
   std::shared_ptr<directory::directory_client> fs_;
+  /* Lease worker */
   directory::lease_renewal_worker lease_worker_;
 };
 

@@ -20,7 +20,7 @@ class storage_management_client {
   ~storage_management_client();
 
   /**
-   * @brief Constuctor
+   * @brief Constructor
    * @param host Host
    * @param port Port number
    */
@@ -37,21 +37,20 @@ class storage_management_client {
 
   /**
    * @brief Disconnect
-   * TODO why twice?
    */
 
   void disconnect();
 
   /**
-   * @brief
-   * @param block_id
-   * @param path
-   * @param slot_begin
-   * @param slot_end
-   * @param chain
-   * @param auto_scale
-   * @param role
-   * @param next_block_name
+   * @brief Setup block
+   * @param block_id Block id
+   * @param path Block path
+   * @param slot_begin Slot begin
+   * @param slot_end Slot end
+   * @param chain Chain block names
+   * @param auto_scale Bool value, true if auto_scale is on
+   * @param role Block role
+   * @param next_block_name Next block's name
    */
 
   void setup_block(int32_t block_id,
@@ -64,19 +63,19 @@ class storage_management_client {
                    const std::string &next_block_name);
 
   /**
-   * @brief
-   * @param block_id
-   * @return
+   * @brief Fetch slot range for particular block
+   * @param block_id Block id
+   * @return (slot_begin, slot_end)
    */
 
   std::pair<int32_t, int32_t> slot_range(int32_t block_id);
 
   /**
-   * @brief
-   * @param block_id
-   * @param target_block_name
-   * @param slot_begin
-   * @param slot_end
+   * @brief Set block to be exporting
+   * @param block_id Block id
+   * @param target_block_name Target block name
+   * @param slot_begin Exporting slot begin
+   * @param slot_end Exporting slot end
    */
 
   void set_exporting(int32_t block_id,
@@ -85,23 +84,23 @@ class storage_management_client {
                      int32_t slot_end);
 
   /**
-   * @brief
-   * @param block_id
-   * @param slot_begin
-   * @param slot_end
+   * @brief Set block to be importing
+   * @param block_id Block id
+   * @param slot_begin Importing slot begin
+   * @param slot_end Importing slot end
    */
 
   void set_importing(int32_t block_id, int32_t slot_begin, int32_t slot_end);
 
   /**
-   * @brief
-   * @param block_id
-   * @param path
-   * @param slot_begin
-   * @param slot_end
-   * @param chain
-   * @param role
-   * @param next_block_name
+   * @brief Setup the block and set importing
+   * @param block_id Block id
+   * @param path Block path
+   * @param slot_begin Importing slot begin
+   * @param slot_end Importing slot end
+   * @param chain Chain block names
+   * @param role Block role
+   * @param next_block_name Next block's name
    */
 
   void setup_and_set_importing(int32_t block_id,
@@ -113,98 +112,98 @@ class storage_management_client {
                                const std::string &next_block_name);
 
   /**
-   * @brief
-   * @param block_id
-   * @param slot_begin
-   * @param slot_end
+   * @brief Set block back to regular
+   * @param block_id Block id
+   * @param slot_begin Slot begin
+   * @param slot_end Slot end
    */
 
   void set_regular(int32_t block_id, int32_t slot_begin, int32_t slot_end);
 
   /**
-   * @brief
-   * @param block_id
-   * @return
+   * @brief Fetch block path
+   * @param block_id Block id
+   * @return Block path
    */
 
   std::string path(int32_t block_id);
 
   /**
-   * @brief
-   * @param block_id
-   * @param backing_path
+   * @brief Write data back to persistent storage if dirty
+   * @param block_id Block id
+   * @param backing_path Backing path
    */
 
   void sync(int32_t block_id, const std::string &backing_path);
 
   /**
-   * @brief
-   * @param block_id
-   * @param backing_path
+   * @brief Load data from persistent storage to block
+   * @param block_id Block id
+   * @param backing_path Backing path
    */
 
   void load(int32_t block_id, const std::string &backing_path);
 
   /**
-   * @brief
-   * @param block_id
-   * @param backing_path
+   * @brief Dump data back to persistent storage and clear the block
+   * @param block_id Block id
+   * @param backing_path Backing path
    */
 
   void dump(int32_t block_id, const std::string &backing_path);
 
   /**
-   * @brief
-   * @param block_id
+   * @brief Reset block
+   * @param block_id Block id
    */
 
   void reset(int32_t block_id);
 
   /**
-   * @brief
-   * @param block_id
-   * @return
+   * @brief Fetch storage capacity
+   * @param block_id Block id
+   * @return Storage capacity
    */
 
   int64_t storage_capacity(int32_t block_id);
 
   /**
-   * @brief
-   * @param block_id
-   * @return
+   * @brief Fetch storage size
+   * @param block_id Block id
+   * @return Storage size
    */
 
   int64_t storage_size(int32_t block_id);
 
   /**
-   * @brief
-   * @param block_id
+   * @brief Resend pending request
+   * @param block_id Block id
    */
 
   void resend_pending(int32_t block_id);
 
   /**
-   * @brief
-   * @param block_id
+   * @brief Forward all key and value to next block(currently only kv store)
+   * @param block_id Block id
    */
 
   void forward_all(int32_t block_id);
 
   /**
-   * @brief
-   * @param block_id
+   * @brief Export slots
+   * @param block_id Block id
    */
 
   void export_slots(int32_t block_id);
 
  private:
-  /* */
+  /* Socket */
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};
-  /* */
+  /* Transport */
   std::shared_ptr<apache::thrift::transport::TTransport> transport_{};
-  /* */
+  /* Protocol */
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_{};
-  /* */
+  /* Storage management service client */
   std::shared_ptr<thrift_client> client_{};
 };
 

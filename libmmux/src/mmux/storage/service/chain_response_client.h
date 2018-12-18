@@ -35,8 +35,8 @@ class chain_response_client {
   void reset_prot(std::shared_ptr<::apache::thrift::protocol::TProtocol> prot);
 
   /**
-   * @brief TODO
-   * @param seq
+   * @brief Acknowledge previous block
+   * @param seq Sequence id
    */
 
   void ack(const sequence_id &seq);

@@ -26,7 +26,7 @@ class block_client {
 
     /**
      * @brief Receive response
-     * @param out Response result
+     * @param out Response result to be returned
      * @return Client sequence number
      */
 

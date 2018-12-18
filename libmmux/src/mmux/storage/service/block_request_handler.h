@@ -43,8 +43,8 @@ class block_request_handler : public block_request_serviceIf {
   void register_client_id(int32_t block_id, int64_t client_id) override;
 
   /**
-   * @brief Request an command
-   * @param seq Sequence id TODO
+   * @brief Request an command, starting from either the head or tail of the chain
+   * @param seq Sequence id
    * @param block_id Block id number
    * @param cmd_id Command id number
    * @param arguments Arguments

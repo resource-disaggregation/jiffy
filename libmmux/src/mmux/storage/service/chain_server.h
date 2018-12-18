@@ -11,14 +11,14 @@ class chain_server {
  public:
 
   /**
-   * @brief
-   * @param blocks
-   * @param address
-   * @param port
-   * @param non_blocking
-   * @param num_io_threads
-   * @param num_proc_threads
-   * @return
+   * @brief Create chain server
+   * @param blocks Data blocks
+   * @param address Address
+   * @param port Port number
+   * @param non_blocking Bool value, true if server is non_blocking
+   * @param num_io_threads Number of I/O threads
+   * @param num_proc_threads Number of process threads
+   * @return Chain server
    */
 
   static std::shared_ptr<apache::thrift::server::TServer> create(std::vector<std::shared_ptr<chain_module>> &blocks,

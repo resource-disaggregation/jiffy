@@ -60,7 +60,7 @@ class block_listener {
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol();
 
   /**
-   * @brief Subscribe for block on operation type
+   * @brief Subscribe for block on operation types
    * @param block_id Block id
    * @param ops Operation type
    */
@@ -68,7 +68,7 @@ class block_listener {
   void subscribe(int32_t block_id, const std::vector<std::string> &ops);
 
   /**
-   * @brief Unsubscribe for block on operation type
+   * @brief Unsubscribe for block on operation types
    * @param block_id Block id
    * @param ops Operation type
    */

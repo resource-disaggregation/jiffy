@@ -20,7 +20,7 @@ class block_response_client {
 
   /**
    * @brief Response
-   * @param seq TODO
+   * @param seq Sequence id
    * @param result Operation result
    */
 

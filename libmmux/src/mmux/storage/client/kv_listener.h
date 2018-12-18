@@ -14,37 +14,38 @@ class kv_listener {
   typedef blocking_queue<notification_t> mailbox_t;
 
   /**
-   * @brief
-   * @param path
-   * @param status
+   * @brief Constructor
+   * @param path key value block path
+   * @param status Data status
    */
 
   kv_listener(const std::string &path, const directory::data_status &status);
 
   /**
-   * @brief
+   * @brief Destructor
+   * Close all block listeners
    */
 
   ~kv_listener();
 
   /**
-   * @brief
-   * @param ops
+   * @brief Subscribe for block on operations
+   * @param ops operations
    */
 
   void subscribe(const std::vector<std::string> &ops);
 
   /**
-   * @brief
-   * @param ops
+   * @brief Unsubscribe for block on operations
+   * @param ops operations
    */
 
   void unsubscribe(const std::vector<std::string> &ops);
 
   /**
-   * @brief
-   * @param timeout_ms
-   * @return
+   * @brief Get notification
+   * @param timeout_ms timeout
+   * @return Notification pair
    */
 
   notification_t get_notification(int64_t timeout_ms = -1);
@@ -71,7 +72,6 @@ class kv_listener {
   directory::data_status status_;
   /* Notification worker */
   notification_worker worker_;
-
   /* Vector of block listeners */
   std::vector<std::shared_ptr<block_listener>> listeners_;
   /* Block ids */

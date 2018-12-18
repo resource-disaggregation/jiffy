@@ -10,7 +10,7 @@ namespace storage {
 /* Block response client map class
  * This map records all the client that sent request to the block.
  * The map is from client id to block response client
- * */
+ */
 class block_response_client_map {
  public:
 
@@ -50,7 +50,7 @@ class block_response_client_map {
   void clear();
 
  private:
-  /* TODO no cuckoohash currently */
+  /* Response client map */
   cuckoohash_map<int64_t, std::shared_ptr<block_response_client>> clients_;
 };
 

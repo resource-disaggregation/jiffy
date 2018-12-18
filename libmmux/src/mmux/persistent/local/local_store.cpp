@@ -10,7 +10,7 @@ local_store::local_store(std::shared_ptr<storage::serde> ser) : persistent_servi
 
 void local_store::write(const storage::locked_hash_table_type &table, const std::string &out_path) {
   size_t found = out_path.find_last_of("/\\");
-  auto dir = out_path.substr(0,found);
+  auto dir = out_path.substr(0, found);
   directory_utils::create_directory(dir);
   std::shared_ptr<std::ofstream> out(new std::ofstream(out_path));
   serde()->serialize(table, out);
