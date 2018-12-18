@@ -29,7 +29,7 @@ class block_listener {
   ~block_listener();
 
   /**
-   * @brief Constuctor
+   * @brief Constructor
    * @param host Host
    * @param port Port number
    * @param notifications Notifications
@@ -76,9 +76,15 @@ class block_listener {
   void unsubscribe(int32_t block_id, const std::vector<std::string> &ops);
 
  private:
-  /* Notifications */
+  /* Notification mailbox
+   * The notification mailbox is like a notification
+   * buffer as to prevent client from being overwhelmed
+   */
   mailbox_t &notifications_;
-  /* TODO */
+  /* Control mailbox
+   * The control mailbox is a log for subscribe and
+   * unsubscribe control operations
+   */
   mailbox_t &controls_;
 
   /* Socket */

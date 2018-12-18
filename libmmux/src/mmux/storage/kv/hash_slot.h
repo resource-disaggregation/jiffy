@@ -52,7 +52,7 @@ namespace storage {
 class hash_slot {
  public:
   /* Return hash number from string key */
-  static int32_t get(const std::string& key) {
+  static int32_t get(const std::string &key) {
     return crc16(key.c_str(), key.length());
   }
 

@@ -26,63 +26,267 @@ class kv_client {
     typedef replica_chain_client block_t;
     typedef std::shared_ptr<block_t> block_ptr_t;
 
+    /**
+     * @brief
+     * @param parent
+     */
+
     locked_client(kv_client &parent);
+
+    /**
+     * @brief
+     */
 
     void unlock();
 
+    /**
+     * @brief
+     * @param key
+     * @param value
+     * @return
+     */
+
     std::string put(const std::string &key, const std::string &value);
+
+    /**
+     * @brief
+     * @param key
+     * @return
+     */
+
     std::string get(const std::string &key);
+
+    /**
+     * @brief
+     * @param key
+     * @param value
+     * @return
+     */
+
     std::string update(const std::string &key, const std::string &value);
+
+    /**
+     * @brief
+     * @param key
+     * @return
+     */
+
     std::string remove(const std::string &key);
 
+    /**
+     * @brief
+     * @param kvs
+     * @return
+     */
+
     std::vector<std::string> put(const std::vector<std::string> &kvs);
+
+    /**
+     * @brief
+     * @param keys
+     * @return
+     */
+
     std::vector<std::string> get(const std::vector<std::string> &keys);
+
+    /**
+     * @brief
+     * @param kvs
+     * @return
+     */
+
     std::vector<std::string> update(const std::vector<std::string> &kvs);
+
+    /**
+     * @brief
+     * @param keys
+     * @return
+     */
+
     std::vector<std::string> remove(const std::vector<std::string> &keys);
+
+    /**
+     * @brief
+     * @return
+     */
 
     size_t num_keys();
    private:
+    /**
+     * @brief
+     * @param cmd_id
+     * @param args
+     * @param response
+     */
+
     void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response);
+
+    /**
+     * @brief
+     * @param cmd_id
+     * @param args
+     * @param responses
+     */
+
     void handle_redirects(int32_t cmd_id, const std::vector<std::string> &args, std::vector<std::string> &responses);
 
+    /* */
     kv_client &parent_;
+    /* */
     std::vector<locked_block_ptr_t> blocks_;
+    /* */
     std::vector<block_ptr_t> redirect_blocks_;
+    /* */
     std::vector<locked_block_ptr_t> locked_redirect_blocks_;
+    /* */
     std::vector<locked_block_ptr_t> new_blocks_;
   };
+
+  /**
+   * @brief
+   * @param fs
+   * @param path
+   * @param status
+   * @param timeout_ms
+   */
 
   kv_client(std::shared_ptr<directory::directory_interface> fs,
             const std::string &path,
             const directory::data_status &status,
             int timeout_ms = 1000);
 
+  /**
+   * @brief
+   */
+
   void refresh();
+
+  /**
+   * @brief
+   * @return
+   */
 
   directory::data_status &status();
 
+  /**
+   * @brief
+   * @return
+   */
+
   std::shared_ptr<locked_client> lock();
 
+  /**
+   * @brief
+   * @param key
+   * @param value
+   * @return
+   */
+
   std::string put(const std::string &key, const std::string &value);
+
+  /**
+   * @brief
+   * @param key
+   * @return
+   */
+
   std::string get(const std::string &key);
+
+  /**
+   * @brief
+   * @param key
+   * @param value
+   * @return
+   */
+
   std::string update(const std::string &key, const std::string &value);
+
+  /**
+   * @brief
+   * @param key
+   * @return
+   */
+
   std::string remove(const std::string &key);
 
+  /**
+   * @brief
+   * @param kvs
+   * @return
+   */
+
   std::vector<std::string> put(const std::vector<std::string> &kvs);
+
+  /**
+   * @brief
+   * @param keys
+   * @return
+   */
+
   std::vector<std::string> get(const std::vector<std::string> &keys);
+
+  /**
+   * @brief
+   * @param kvs
+   * @return
+   */
+
   std::vector<std::string> update(const std::vector<std::string> &kvs);
+
+  /**
+   * @brief
+   * @param keys
+   * @return
+   */
+
   std::vector<std::string> remove(const std::vector<std::string> &keys);
  private:
-  size_t block_id(const std::string &key);
-  std::vector<std::string> batch_command(const kv_op_id &id, const std::vector<std::string> &args, size_t args_per_op);
-  void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response);
-  void handle_redirects(int32_t cmd_id, const std::vector<std::string> &args, std::vector<std::string> &responses);
+  /**
+   * @brief
+   * @param key
+   * @return
+   */
 
+  size_t block_id(const std::string &key);
+
+  /**
+   * @brief
+   * @param id
+   * @param args
+   * @param args_per_op
+   * @return
+   */
+
+  std::vector<std::string> batch_command(const kv_op_id &id, const std::vector<std::string> &args, size_t args_per_op);
+
+  /**
+   * @brief
+   * @param cmd_id
+   * @param args
+   * @param response
+   */
+
+  void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response);
+
+  /**
+   * @brief
+   * @param cmd_id
+   * @param args
+   * @param responses
+   */
+
+  void handle_redirects(int32_t cmd_id, const std::vector<std::string> &args, std::vector<std::string> &responses);
+  /* */
   std::shared_ptr<directory::directory_interface> fs_;
+  /* */
   std::string path_;
+  /* */
   directory::data_status status_;
+  /* */
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
+  /* */
   std::vector<int32_t> slots_;
+  /* */
   int timeout_ms_;
 };
 

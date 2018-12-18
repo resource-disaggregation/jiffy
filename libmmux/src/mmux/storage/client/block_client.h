@@ -94,6 +94,7 @@ class block_client {
    * @param cmd_id Command id number
    * @param args Arguments
    */
+
   void command_request(const sequence_id &seq, int32_t cmd_id, const std::vector<std::string> &args);
 
  private:

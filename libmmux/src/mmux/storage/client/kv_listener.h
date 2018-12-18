@@ -7,7 +7,7 @@
 
 namespace mmux {
 namespace storage {
-/* */
+/* Key value block listener */
 class kv_listener {
  public:
   typedef std::pair<std::string, std::string> notification_t;
@@ -50,21 +50,31 @@ class kv_listener {
   notification_t get_notification(int64_t timeout_ms = -1);
 
  private:
-  /* */
+
+  /* Notification mailbox
+   * The notification mailbox is like a notification
+   * buffer as to prevent client from being overwhelmed
+   */
+
   mailbox_t notifications_;
-  /* */
+
+  /* Control mailbox
+   * The control mailbox is a log for subscribe and
+   * unsubscribe control operations
+   */
+
   mailbox_t controls_;
 
-  /* */
+  /* Key value block path */
   std::string path_;
-  /* */
+  /* Data status */
   directory::data_status status_;
-  /* */
+  /* Notification worker */
   notification_worker worker_;
 
-  /* */
+  /* Vector of block listeners */
   std::vector<std::shared_ptr<block_listener>> listeners_;
-  /* */
+  /* Block ids */
   std::vector<int32_t> block_ids_;
 };
 

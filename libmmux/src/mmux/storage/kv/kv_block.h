@@ -296,13 +296,14 @@ class kv_block : public chain_module {
   void reset() override;
 
   /**
-   * @brief TODO
+   * @brief Send all key and value to the next block
    */
 
   void forward_all() override;
 
   /**
-   * @brief
+   * @brief Export slots
+   * Called by directory functions via thrift
    */
 
   void export_slots() override;
