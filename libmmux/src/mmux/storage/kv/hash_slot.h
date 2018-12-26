@@ -48,14 +48,16 @@
 
 namespace mmux {
 namespace storage {
-
+/* Hash slot class */
 class hash_slot {
  public:
-  static int32_t get(const std::string& key) {
+  /* Return hash number from string key */
+  static int32_t get(const std::string &key) {
     return crc16(key.c_str(), key.length());
   }
 
  private:
+  /* Hash function */
   static uint16_t crc16(const char *buf, size_t len) {
     size_t counter;
     uint16_t crc = 0;
@@ -63,7 +65,7 @@ class hash_slot {
       crc = (crc << 8) ^ crc16tab[((crc >> 8) ^ *buf++) & 0x00FF];
     return crc;
   }
-
+  /* Hash function table */
   static const uint16_t crc16tab[256];
 
 };

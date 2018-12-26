@@ -81,7 +81,7 @@ void chain_module::request(sequence_id seq, int32_t oid, const std::vector<std::
   add_pending(seq, oid, args);
 }
 
-void chain_module::chain_request(const sequence_id& seq, int32_t oid, const std::vector<std::string> &args) {
+void chain_module::chain_request(const sequence_id &seq, int32_t oid, const std::vector<std::string> &args) {
   if (is_head()) {
     LOG(log_level::error) << "Invalid state: Chain request " << op_name(oid) << " on head node";
     return;

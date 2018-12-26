@@ -11,7 +11,21 @@ namespace persistent {
 
 class persistent_store {
  public:
+
+  /**
+   * @brief Fetch persistent service instance
+   * @param path Path
+   * @param ser Serialization options
+   * @return Persistent service
+   */
+
   static std::shared_ptr<persistent_service> instance(const std::string &path, std::shared_ptr<storage::serde> ser);
+
+  /**
+   * @brief Decompose path
+   * @param path Path
+   * @return (uri, key)
+   */
 
   static std::pair<std::string, std::string> decompose_path(const std::string &path);
 

@@ -10,16 +10,27 @@
 
 namespace mmux {
 namespace utils {
-
+/* Directory utility class */
 class directory_utils {
  public:
   static const char PATH_SEPARATOR = '/';
+
+  /**
+   * @brief Check if path is in correct format
+   * @param path Path
+   */
 
   static void check_path(const std::string &path) {
     if (!std::regex_match(path, std::regex("^(/[^/ ]*)+/?$"))) {
       throw std::invalid_argument("Malformed path: " + path);
     }
   }
+
+  /**
+   * @brief Copy file from source to destination
+   * @param source Source file
+   * @param dest Destination file
+   */
 
   static void copy_file(const std::string &source, const std::string &dest) {
     std::ifstream src(source, std::ios::binary);
@@ -30,6 +41,11 @@ class directory_utils {
     src.close();
     dst.close();
   }
+
+  /**
+   * @brief Create a directory under path
+   * @param path Path
+   */
 
   static void create_directory(const std::string &path) {
     char tmp[256];
@@ -71,12 +87,24 @@ class directory_utils {
     return tmp;
   }
 
+  /**
+   * @brief Normalize path
+   * @param path Path
+   * @return Path
+   */
+
   static std::string normalize_path(const std::string &path) {
     std::string ret = path;
     while (ret.rbegin() != ret.rend() && *ret.rbegin() == PATH_SEPARATOR)
       ret.pop_back();
     return ret;
   }
+
+  /**
+   * @brief Fetch path elements
+   * @param path Path
+   * @return Path elements
+   */
 
   static std::vector<std::string> path_elements(const std::string &path) {
     check_path(path);
@@ -88,6 +116,12 @@ class directory_utils {
         result.insert(result.begin(), elem);
     return result;
   }
+
+  /**
+   * @brief Add element to path
+   * @param path Path
+   * @param element Element
+   */
 
   static void push_path_element(std::string &path, const std::string &element) {
     path = path + PATH_SEPARATOR + element;
