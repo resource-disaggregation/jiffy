@@ -21,11 +21,11 @@ class chain_request_handler : public chain_request_serviceIf {
                                  std::vector<std::shared_ptr<chain_module>> &blocks);
 
   /**
-   * @brief Send chain request
-   * @param seq TODO
-   * @param block_id Block index
+   * @brief Send chain request, propagate down the chain
+   * @param seq Sequence id
+   * @param block_id Block id
    * @param cmd_id Command id
-   * @param arguments arguments
+   * @param arguments Command arguments
    */
 
   void chain_request(const sequence_id &seq,
@@ -34,10 +34,10 @@ class chain_request_handler : public chain_request_serviceIf {
                      const std::vector<std::string> &arguments) override;
   /**
    * @brief Run command on data block
-   * @param _return
-   * @param block_id
-   * @param cmd_id
-   * @param arguments
+   * @param _return Return status
+   * @param block_id Block id
+   * @param cmd_id Command id
+   * @param arguments Command arguments
    */
 
   void run_command(std::vector<std::string> &_return,

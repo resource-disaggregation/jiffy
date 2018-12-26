@@ -25,8 +25,8 @@ class block_client {
     explicit command_response_reader(std::shared_ptr<apache::thrift::protocol::TProtocol> prot);
 
     /**
-     * @brief Response receiver
-     * @param out Response result
+     * @brief Receive response
+     * @param out Response result to be returned
      * @return Client sequence number
      */
 
@@ -94,6 +94,7 @@ class block_client {
    * @param cmd_id Command id number
    * @param args Arguments
    */
+
   void command_request(const sequence_id &seq, int32_t cmd_id, const std::vector<std::string> &args);
 
  private:

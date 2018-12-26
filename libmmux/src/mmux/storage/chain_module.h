@@ -49,7 +49,7 @@ struct chain_op {
   std::vector<std::string> args;
 };
 
-/* Next block connection */
+/* Next block connection class */
 class next_block_cxn {
  public:
   next_block_cxn() = default;
@@ -92,7 +92,7 @@ class next_block_cxn {
   }
 
   /**
-   * @brief Deal with a request, either query or update
+   * @brief Request an operatiion
    * @param seq Request sequence_id
    * @param op_id Operation id
    * @param args Arguments
@@ -123,7 +123,8 @@ class next_block_cxn {
   /* Chain request client */
   chain_request_client client_;
 };
-/* Previous block connection */
+
+/* Previous block connection class */
 class prev_block_cxn {
  public:
   prev_block_cxn() = default;
@@ -147,8 +148,8 @@ class prev_block_cxn {
   }
 
   /**
-   * @brief Chairn acknowledgement
-   * @param seq Operation sequence id
+   * @brief Acknowledge previous block
+   * @param seq Chain Sequence id
    */
 
   void ack(const sequence_id &seq) {
@@ -165,7 +166,7 @@ class prev_block_cxn {
   }
 
  private:
-  /* Charin response client */
+  /* Chain response client */
   chain_response_client client_;
 };
 
@@ -300,7 +301,7 @@ class chain_module : public block {
   }
 
   /**
-   * @brief Set block back to regular
+   * @brief Set block back to regular after changing slot exporting
    * @param slot_begin Slot begin
    * @param slot_end Slot end
    */
@@ -456,26 +457,26 @@ class chain_module : public block {
   virtual void forward_all() = 0;
 
   /**
-   * @brief Request
-   * @param seq
-   * @param oid
-   * @param args
+   * @brief Request for the first time
+   * @param seq Sequence id
+   * @param oid Operation id
+   * @param args Operation arguments
    */
 
   void request(sequence_id seq, int32_t oid, const std::vector<std::string> &args);
 
   /**
-   * @brief
-   * @param seq
-   * @param oid
-   * @param args
+   * @brief Request executed anywhere down the chain
+   * @param seq Sequence id
+   * @param oid Operation id
+   * @param args Operation arguments
    */
 
   void chain_request(const sequence_id &seq, int32_t oid, const std::vector<std::string> &args);
 
   /**
-   * @brief
-   * @param seq
+   * @brief Acknowledge the previous block
+   * @param seq Sequence id
    */
 
   void ack(const sequence_id &seq);

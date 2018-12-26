@@ -26,7 +26,7 @@ block_request_serviceIf *block_request_handler_factory::getHandler(const ::apach
 
 void block_request_handler_factory::releaseHandler(block_request_serviceIf *handler) {
   LOG(log_level::trace) << "Releasing connection";
-  auto br_handler = reinterpret_cast<block_request_handler*>(handler);
+  auto br_handler = reinterpret_cast<block_request_handler *>(handler);
   int64_t client_id = br_handler->registered_client_id();
   int32_t block_id = br_handler->registered_block_id();
   if (client_id != -1 && block_id != -1) {

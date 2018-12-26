@@ -8,21 +8,22 @@
 
 namespace mmux {
 namespace storage {
-/* */
+/* Storage manager class
+ * Inherited from storage_management_ops virtual class */
 class storage_manager : public storage_management_ops {
  public:
   storage_manager() = default;
 
   /**
-   * @brief
-   * @param block_name
-   * @param path
-   * @param slot_begin
-   * @param slot_end
-   * @param chain
-   * @param auto_scale
-   * @param role
-   * @param next_block_name
+   * @brief Setup block
+   * @param block_name Block name
+   * @param path Block path
+   * @param slot_begin Slot begin
+   * @param slot_end Slot end
+   * @param chain Chain block names
+   * @param auto_scale Bool value, true if auto_scale is on
+   * @param role Block role
+   * @param next_block_name Next block's name
    */
 
   void setup_block(const std::string &block_name,
@@ -35,95 +36,95 @@ class storage_manager : public storage_management_ops {
                    const std::string &next_block_name) override;
 
   /**
-   * @brief
-   * @param block_name
-   * @return
+   * @brief Fetch block path
+   * @param block_name Block name
+   * @return Block path
    */
 
   std::string path(const std::string &block_name) override;
 
   /**
-   * @brief
-   * @param block_name
-   * @return
+   * @brief Fetch block slot range
+   * @param block_name Block name
+   * @return Block slot range
    */
 
   std::pair<int32_t, int32_t> slot_range(const std::string &block_name) override;
 
   /**
-   * @brief
-   * @param block_name
-   * @param backing_path
+   * @brief Load block from persistent storage
+   * @param block_name Block name
+   * @param backing_path Block backing path on persistent storage
    */
 
   void load(const std::string &block_name, const std::string &backing_path) override;
 
   /**
-   * @brief
-   * @param block_name
-   * @param backing_path
+   * @brief Synchronize block and persistent storage
+   * @param block_name Block name
+   * @param backing_path Block backing path on persistent storage
    */
 
   void sync(const std::string &block_name, const std::string &backing_path) override;
 
   /**
-   * @brief
-   * @param block_name
-   * @param backing_path
+   * @brief Write block back to persistent storage and clear the block
+   * @param block_name Block name
+   * @param backing_path Block backing path on persistent storage
    */
 
   void dump(const std::string &block_name, const std::string &backing_path) override;
 
   /**
-   * @brief
-   * @param block_name
+   * @brief Reset block
+   * @param block_name Block name
    */
 
   void reset(const std::string &block_name) override;
 
   /**
-   * @brief
-   * @param block_name
-   * @return
+   * @brief Fetch storage capacity of block
+   * @param block_name Block name
+   * @return Storage capacity
    */
 
   size_t storage_capacity(const std::string &block_name) override;
 
   /**
-   * @brief
-   * @param block_name
-   * @return
+   * @brief Fetch storage size of block
+   * @param block_name Block name
+   * @return Storage size
    */
 
   size_t storage_size(const std::string &block_name) override;
 
   /**
-   * @brief
-   * @param block_name
+   * @brief Resending pending request
+   * @param block_name Block name
    */
 
   void resend_pending(const std::string &block_name) override;
 
   /**
-   * @brief
+   * @brief Forward all key and values to next block
    * @param block_name
    */
 
   void forward_all(const std::string &block_name) override;
 
   /**
-   * @brief
-   * @param block_name
+   * @brief Export slot range
+   * @param block_name Block name
    */
 
   void export_slots(const std::string &block_name) override;
 
   /**
-   * @brief
-   * @param block_name
-   * @param target_block
-   * @param slot_begin
-   * @param slot_end
+   * @brief Set exporting slot range and exporting target
+   * @param block_name Block name
+   * @param target_block Exporting target blocks
+   * @param slot_begin Exporting slot begin
+   * @param slot_end Exporting slot end
    */
 
   void set_exporting(const std::string &block_name,
@@ -132,14 +133,14 @@ class storage_manager : public storage_management_ops {
                      int32_t slot_end) override;
 
   /**
-   * @brief
-   * @param block_name
-   * @param path
-   * @param slot_begin
-   * @param slot_end
-   * @param chain
-   * @param role
-   * @param next_block_name
+   * @brief Setup the block and set importing slot range
+   * @param block_name Block name
+   * @param path Block path
+   * @param slot_begin Importing slot begin
+   * @param slot_end Importing slot end
+   * @param chain Chain block names
+   * @param role Block role
+   * @param next_block_name Next block's name
    */
 
   void setup_and_set_importing(const std::string &block_name,
@@ -151,19 +152,19 @@ class storage_manager : public storage_management_ops {
                                const std::string &next_block_name) override;
 
   /**
-   * @brief
-   * @param block_name
-   * @param slot_begin
-   * @param slot_end
+   * @brief Set block to regular after exporting
+   * @param block_name Block name
+   * @param slot_begin Slot begin
+   * @param slot_end Slot end
    */
 
   void set_regular(const std::string &block_name, int32_t slot_begin, int32_t slot_end) override;
 
   /**
-   * @brief
-   * @param block_name
-   * @param slot_begin
-   * @param slot_end
+   * @brief Virtual function of set importing
+   * @param block_name Block name
+   * @param slot_begin Importing slot begin
+   * @param slot_end Importing slot end
    */
 
   virtual void set_importing(const std::string &block_name, int32_t slot_begin, int32_t slot_end);

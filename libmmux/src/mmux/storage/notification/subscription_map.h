@@ -58,7 +58,7 @@ class subscription_map {
  private:
   /* Subscription mapp operation mutex */
   std::mutex mtx_{};
-  /* Subscription map TODO map or unordered map ??*/
+  /* Subscription map */
   std::map<std::string, std::set<std::shared_ptr<subscription_serviceClient>>> subs_{};
 };
 

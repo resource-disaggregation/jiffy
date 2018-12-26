@@ -259,8 +259,8 @@ class block {
   }
 
   /**
-   * @brief TODO
-   * @param target
+   * @brief Create export target and string
+   * @param target Export target
    */
 
   void export_target(const std::vector<std::string> &target) {
@@ -327,6 +327,7 @@ class block {
    * Management Operations
    * Virtual function
    **/
+
   virtual void load(const std::string &path) = 0;
 
   virtual bool sync(const std::string &path) = 0;
@@ -369,7 +370,7 @@ class block {
    * Accessor can only be read only
    * Mutator can be read and write
    * Each operation has it name
-   * */
+   */
   const std::vector<block_op> &block_ops_;
   /* Block file path */
   std::string path_;
@@ -381,13 +382,13 @@ class block {
   std::pair<int32_t, int32_t> slot_range_;
   /* Bool value for auto scaling */
   std::atomic_bool auto_scale_;
-  /* TODO */
+  /* Export slot range */
   std::pair<int32_t, int32_t> export_slot_range_;
-  /* TODO */
+  /* Export targets in string vector */
   std::vector<std::string> export_target_;
-  /* TODO */
+  /* Export targets in a whole string */
   std::string export_target_str_;
-  /* TODO */
+  /* Import slot range */
   std::pair<int32_t, int32_t> import_slot_range_;
   /* Subscription map */
   subscription_map sub_map_{};

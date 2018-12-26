@@ -8,6 +8,7 @@
 
 namespace mmux {
 namespace storage {
+
 /* Notification handler class
  * Inherited from subscription_serviceIf */
 class notification_handler : public subscription_serviceIf {

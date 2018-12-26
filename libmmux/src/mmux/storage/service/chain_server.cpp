@@ -34,7 +34,8 @@ std::shared_ptr<TServer> chain_server::create(std::vector<std::shared_ptr<chain_
     thread_manager->threadFactory(thread_factory);
     thread_manager->start();
     std::shared_ptr<TNonblockingServerSocket> socket(new TNonblockingServerSocket(port));
-    std::shared_ptr<TNonblockingServer> server(new TNonblockingServer(proc_factory, protocol_factory, socket, thread_manager));
+    std::shared_ptr<TNonblockingServer>
+        server(new TNonblockingServer(proc_factory, protocol_factory, socket, thread_manager));
     server->setNumIOThreads(static_cast<size_t>(num_io_threads));
     server->setUseHighPriorityIOThreads(true);
     return server;
