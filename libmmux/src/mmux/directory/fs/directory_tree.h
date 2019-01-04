@@ -591,7 +591,7 @@ class ds_file_node : public ds_node {
                            slot_end,
                            chain_status::stable,
                            storage_mode::in_memory);
-    assert(to_chain.block_names.size() == chain_length);
+    assert(to_chain.block_names.size() == dstatus_.chain_length());
 
     // Set old chain to exporting and new chain to importing
     if (dstatus_.chain_length() == 1) {
@@ -677,7 +677,7 @@ class ds_file_node : public ds_node {
                            slot_end,
                            chain_status::stable,
                            storage_mode::in_memory);
-    assert(to_chain.block_names.size() == chain_length);
+    assert(to_chain.block_names.size() == dstatus_.chain_length());
 
     // Set old chain to exporting and new chain to importing
     if (dstatus_.chain_length() == 1) {
