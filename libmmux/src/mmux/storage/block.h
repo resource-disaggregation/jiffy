@@ -30,7 +30,6 @@ enum block_op_type : uint8_t {
 
 /*
  * Block state
- * Regular, importing and exporting
  */
 
 enum block_state {
@@ -63,7 +62,7 @@ struct block_op {
 /* Block class */
 class block {
  public:
-  /* Slot max range */
+  /* Slot range max */
   static const int32_t SLOT_MAX = 65536;
 
   /**
@@ -83,10 +82,10 @@ class block {
         import_slot_range_(0, -1) {}
 
   /**
-   * @brief Virtual function for running a command on the block
+   * @brief Virtual function for running a command on a block
    * @param _return Return value
-   * @param oid Operation id
-   * @param args arguments
+   * @param oid Operation identifier
+   * @param args Operation arguments
    */
 
   virtual void run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) = 0;
@@ -122,8 +121,8 @@ class block {
 
   /**
    * @brief Set block hash slot range
-   * @param slot_begin Slot begin
-   * @param slot_end Slot end
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
    */
 
   void slot_range(int32_t slot_begin, int32_t slot_end) {
@@ -133,7 +132,7 @@ class block {
   }
 
   /**
-   * @brief Fetch slot_range
+   * @brief Fetch slot range
    * @return Block slot range
    */
 
@@ -143,8 +142,8 @@ class block {
   }
 
   /**
-   * @brief Fetch slot begin
-   * @return Slot begin
+   * @brief Fetch begin slot
+   * @return Begin slot
    */
 
   int32_t slot_begin() const {
@@ -153,8 +152,8 @@ class block {
   }
 
   /**
-   * @brief Fetch slot end
-   * @return Slot end
+   * @brief Fetch end slot
+   * @return End slot
    */
 
   int32_t slot_end() const {
@@ -175,7 +174,7 @@ class block {
 
   /**
    * @brief Set block state
-   * @param state State, orginal, importing or exporting
+   * @param state Block state
    */
 
   void state(block_state state) {
@@ -195,8 +194,8 @@ class block {
 
   /**
    * @brief Set export slot range
-   * @param slot_begin Slot begin
-   * @param slot_end Slot end
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
    */
 
   void export_slot_range(int32_t slot_begin, int32_t slot_end) {
@@ -228,8 +227,8 @@ class block {
 
   /**
    * @brief Set import slot range
-   * @param slot_begin Slot begin
-   * @param slot_end Slot end
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
    */
 
   void import_slot_range(int32_t slot_begin, int32_t slot_end) {
@@ -259,7 +258,7 @@ class block {
   }
 
   /**
-   * @brief Create export target and string
+   * @brief Set the export target
    * @param target Export target
    */
 
@@ -295,8 +294,8 @@ class block {
 
   /**
    * @brief Check if ith block operation type is accessor
-   * @param i Block operation id
-   * @return Bool value, true if is accessor
+   * @param i Block operation identifier
+   * @return Bool value, true if block is accessor
    */
 
   bool is_accessor(int i) const {
@@ -305,7 +304,7 @@ class block {
 
   /**
    * @brief Check if ith block operation type is mutator
-   * @param i Block operation id
+   * @param i Block operation identifier
    * @return Bool value, true if is mutator
    */
 
@@ -315,7 +314,7 @@ class block {
 
   /**
    * @brief Fetch operation name
-   * @param op_id Operation id
+   * @param op_id Operation identifier
    * @return Operation name
    */
 
@@ -326,7 +325,7 @@ class block {
   /**
    * Management Operations
    * Virtual function
-   **/
+   */
 
   virtual void load(const std::string &path) = 0;
 
@@ -353,8 +352,8 @@ class block {
   }
 
   /**
-   * @brief Fetch block_response_client_map
-   * @return Block_response_client_map
+   * @brief Fetch block response client map
+   * @return Block response client map
    */
 
   block_response_client_map &clients() {
@@ -365,12 +364,7 @@ class block {
  protected:
   /* Metadata mutex */
   mutable std::shared_mutex metadata_mtx_;
-  /* Block operations
-   * Block operation type can be accessor or mutator
-   * Accessor can only be read only
-   * Mutator can be read and write
-   * Each operation has it name
-   */
+  /* Block operations */
   const std::vector<block_op> &block_ops_;
   /* Block file path */
   std::string path_;
@@ -384,9 +378,9 @@ class block {
   std::atomic_bool auto_scale_;
   /* Export slot range */
   std::pair<int32_t, int32_t> export_slot_range_;
-  /* Export targets in string vector */
+  /* Export targets */
   std::vector<std::string> export_target_;
-  /* Export targets in a whole string */
+  /* String representation for export target */
   std::string export_target_str_;
   /* Import slot range */
   std::pair<int32_t, int32_t> import_slot_range_;

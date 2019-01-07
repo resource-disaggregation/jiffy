@@ -21,15 +21,15 @@ class storage_management_service_handler : public storage_management_serviceIf {
 
   /**
    * @brief Get block path
-   * @param _return The returning value, string of block path
-   * @param block_id Block id
+   * @param _return Block path
+   * @param block_id Block identifier
    */
 
   void get_path(std::string &_return, int32_t block_id) override;
 
   /**
    * @brief Write data back to persistent storage
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @param backing_path Block backing path
    */
 
@@ -37,7 +37,7 @@ class storage_management_service_handler : public storage_management_serviceIf {
 
   /**
    * @brief Write data back to persistent storage and clear the block
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @param backing_path Block backing path
    */
 
@@ -45,7 +45,7 @@ class storage_management_service_handler : public storage_management_serviceIf {
 
   /**
    * @brief Load data block from persistent storage
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @param backing_path Block backing path
    */
 
@@ -53,14 +53,14 @@ class storage_management_service_handler : public storage_management_serviceIf {
 
   /**
    * @brief Reset block
-   * @param block_id Block id
+   * @param block_id Block identifier
    */
 
   void reset(int32_t block_id) override;
 
   /**
    * @brief Fetch storage capacity of block
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @return Block storage capacity
    */
 
@@ -68,7 +68,7 @@ class storage_management_service_handler : public storage_management_serviceIf {
 
   /**
    * @brief Fetch storage size of block
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @return Block storage size
    */
 
@@ -76,24 +76,24 @@ class storage_management_service_handler : public storage_management_serviceIf {
 
   /**
    * @brief Resend pending requests
-   * @param block_id Block id
+   * @param block_id Block identifier
    */
 
   void resend_pending(int32_t block_id) override;
 
   /**
    * @brief Send all key values to next block
-   * @param block_id Block id
+   * @param block_id Block identifier
    */
 
   void forward_all(int32_t block_id) override;
 
   /**
    * @brief Setup a block
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @param path Block path
-   * @param slot_begin Block hash slot begin
-   * @param slot_end Block hash slot end
+   * @param slot_begin Block begin slot
+   * @param slot_end Block end slot
    * @param chain Chain block names
    * @param auto_scale Bool value, true if auto_scale is on
    * @param chain_role Chain role
@@ -112,17 +112,17 @@ class storage_management_service_handler : public storage_management_serviceIf {
   /**
    * @brief Fetch slot range of block
    * @param _return Slot range to be returned
-   * @param block_id Block id
+   * @param block_id Block identifier
    */
 
   void slot_range(rpc_slot_range &_return, int32_t block_id) override;
 
   /**
    * @brief Setup exporting target and slot range
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @param target_block Exporting target blocks
-   * @param slot_begin Export slot begin
-   * @param slot_end Export slot end
+   * @param slot_begin Export begin slot
+   * @param slot_end Export end slot
    */
 
   void set_exporting(int32_t block_id,
@@ -132,9 +132,9 @@ class storage_management_service_handler : public storage_management_serviceIf {
 
   /**
    * @brief Setup importing slot range
-   * @param block_id Block id
-   * @param slot_begin Importing slot begin
-   * @param slot_end Importing slot end
+   * @param block_id Block identifier
+   * @param slot_begin Importing begin slot
+   * @param slot_end Importing end slot
    */
 
   void set_importing(int32_t block_id,
@@ -143,10 +143,10 @@ class storage_management_service_handler : public storage_management_serviceIf {
 
   /**
    * @brief Setup the block and set importing slot range
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @param path Block path
-   * @param slot_begin Importing slot begin
-   * @param slot_end Importing slot end
+   * @param slot_begin Importing begin slot
+   * @param slot_end Importing end slot
    * @param chain Chain block names
    * @param chain_role Chain role
    * @param next_block_name Next block name
@@ -162,16 +162,16 @@ class storage_management_service_handler : public storage_management_serviceIf {
 
   /**
    * @brief Export slots
-   * @param block_id Block id
+   * @param block_id Block identifier
    */
 
   void export_slots(int32_t block_id) override;
 
   /**
    * @brief Set the block to be regular after exporting
-   * @param block_id BLock id
-   * @param slot_begin Slot begin
-   * @param slot_end Slot end
+   * @param block_id Block identifier
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
    */
 
   void set_regular(int32_t block_id, int32_t slot_begin, int32_t slot_end) override;

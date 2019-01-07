@@ -72,9 +72,9 @@ class kv_listener {
   directory::data_status status_;
   /* Notification worker */
   notification_worker worker_;
-  /* Vector of block listeners */
+  /* Block listeners */
   std::vector<std::shared_ptr<block_listener>> listeners_;
-  /* Block ids */
+  /* Block identifiers */
   std::vector<int32_t> block_ids_;
 };
 

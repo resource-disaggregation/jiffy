@@ -34,7 +34,7 @@ class logger {
   /**
    * @brief Constructor
    * @param level Log level
-   * @param fname Log fname(i.e. thrift)
+   * @param fname Log function name
    */
 
   explicit logger(log_level level, const std::string &fname) : opened_(false), msg_level_(level) {
@@ -58,7 +58,7 @@ class logger {
 
   template<typename T>
   /**
-   * @brief <<
+   * @brief << operator
    * @tparam T Log message type
    * @param msg Log message
    * @return Logger

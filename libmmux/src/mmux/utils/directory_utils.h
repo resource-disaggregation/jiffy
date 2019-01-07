@@ -65,9 +65,9 @@ class directory_utils {
   }
 
   /**
-   * Fetch file name from path
-   * @param path file path
-   * @return file name
+   * Fetch file name
+   * @param path File path
+   * @return File name
    */
 
   static std::string get_filename(const std::string &path) {
@@ -76,9 +76,9 @@ class directory_utils {
   }
 
   /**
-   * Fetch parent path from path
-   * @param path file path
-   * @return parent path
+   * Fetch parent path
+   * @param path File path
+   * @return Parent path
    */
 
   static std::string get_parent_path(const std::string &path) {
@@ -90,7 +90,7 @@ class directory_utils {
   /**
    * @brief Normalize path
    * @param path Path
-   * @return Path
+   * @return Normalized Path
    */
 
   static std::string normalize_path(const std::string &path) {
@@ -128,10 +128,10 @@ class directory_utils {
   }
 
   /**
-   * Pop file name from path
+   * Pop file name
    * Path modified to parent path
-   * @param path file path
-   * @return file name
+   * @param path File path
+   * @return File name
    */
 
   static std::string pop_path_element(std::string &path) {

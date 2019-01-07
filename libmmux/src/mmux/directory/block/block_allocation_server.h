@@ -15,7 +15,7 @@ class block_allocation_server {
    * @param alloc Block allocator
    * @param address Socket address
    * @param port Socket port number
-   * @return Server
+   * @return Block allocation server
    */
 
   static std::shared_ptr<apache::thrift::server::TThreadedServer> create(std::shared_ptr<block_allocator> alloc,

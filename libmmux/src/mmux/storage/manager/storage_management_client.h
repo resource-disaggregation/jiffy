@@ -21,7 +21,7 @@ class storage_management_client {
 
   /**
    * @brief Constructor
-   * @param host Host
+   * @param host Storage management server hostname
    * @param port Port number
    */
 
@@ -29,7 +29,7 @@ class storage_management_client {
 
   /**
    * @brief Connect
-   * @param host Host
+   * @param host Storage management server hostname
    * @param port Port number
    */
 
@@ -43,10 +43,10 @@ class storage_management_client {
 
   /**
    * @brief Setup block
-   * @param block_id Block id
-   * @param path Block path
-   * @param slot_begin Slot begin
-   * @param slot_end Slot end
+   * @param block_id Block identifier
+   * @param path File path
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
    * @param chain Chain block names
    * @param auto_scale Bool value, true if auto_scale is on
    * @param role Block role
@@ -64,18 +64,18 @@ class storage_management_client {
 
   /**
    * @brief Fetch slot range for particular block
-   * @param block_id Block id
-   * @return (slot_begin, slot_end)
+   * @param block_id Block identifier
+   * @return Pair containing the beginning and end slots for the block
    */
 
   std::pair<int32_t, int32_t> slot_range(int32_t block_id);
 
   /**
    * @brief Set block to be exporting
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @param target_block_name Target block name
-   * @param slot_begin Exporting slot begin
-   * @param slot_end Exporting slot end
+   * @param slot_begin Exporting begin slot
+   * @param slot_end Exporting end slot
    */
 
   void set_exporting(int32_t block_id,
@@ -85,19 +85,19 @@ class storage_management_client {
 
   /**
    * @brief Set block to be importing
-   * @param block_id Block id
-   * @param slot_begin Importing slot begin
-   * @param slot_end Importing slot end
+   * @param block_id Block identifier
+   * @param slot_begin Importing begin slot
+   * @param slot_end Importing end slot
    */
 
   void set_importing(int32_t block_id, int32_t slot_begin, int32_t slot_end);
 
   /**
    * @brief Setup the block and set importing
-   * @param block_id Block id
-   * @param path Block path
-   * @param slot_begin Importing slot begin
-   * @param slot_end Importing slot end
+   * @param block_id Block identifier
+   * @param path File path
+   * @param slot_begin Importing begin slot
+   * @param slot_end Importing end slot
    * @param chain Chain block names
    * @param role Block role
    * @param next_block_name Next block's name
@@ -113,7 +113,7 @@ class storage_management_client {
 
   /**
    * @brief Set block back to regular
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @param slot_begin Slot begin
    * @param slot_end Slot end
    */
@@ -122,7 +122,7 @@ class storage_management_client {
 
   /**
    * @brief Fetch block path
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @return Block path
    */
 
@@ -130,7 +130,7 @@ class storage_management_client {
 
   /**
    * @brief Write data back to persistent storage if dirty
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @param backing_path Backing path
    */
 
@@ -138,7 +138,7 @@ class storage_management_client {
 
   /**
    * @brief Load data from persistent storage to block
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @param backing_path Backing path
    */
 
@@ -146,7 +146,7 @@ class storage_management_client {
 
   /**
    * @brief Dump data back to persistent storage and clear the block
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @param backing_path Backing path
    */
 
@@ -154,14 +154,14 @@ class storage_management_client {
 
   /**
    * @brief Reset block
-   * @param block_id Block id
+   * @param block_id Block identifier
    */
 
   void reset(int32_t block_id);
 
   /**
    * @brief Fetch storage capacity
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @return Storage capacity
    */
 
@@ -169,7 +169,7 @@ class storage_management_client {
 
   /**
    * @brief Fetch storage size
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @return Storage size
    */
 
@@ -177,21 +177,21 @@ class storage_management_client {
 
   /**
    * @brief Resend pending request
-   * @param block_id Block id
+   * @param block_id Block identifier
    */
 
   void resend_pending(int32_t block_id);
 
   /**
-   * @brief Forward all key and value to next block(currently only kv store)
-   * @param block_id Block id
+   * @brief Forward all key and value to next block
+   * @param block_id Block identifier
    */
 
   void forward_all(int32_t block_id);
 
   /**
    * @brief Export slots
-   * @param block_id Block id
+   * @param block_id Block identifier
    */
 
   void export_slots(int32_t block_id);

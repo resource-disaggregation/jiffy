@@ -6,7 +6,7 @@
 
 namespace mmux {
 namespace directory {
-/* Syncronization worker class */
+/* Synchronization worker class */
 class sync_worker {
  public:
   /**
@@ -25,7 +25,6 @@ class sync_worker {
 
   /**
    * @brief Start synchronization worker
-   * Check if any node needs sychronization, then sleep for period time
    */
 
   void start();
@@ -38,14 +37,14 @@ class sync_worker {
 
   /**
    * @brief Fetch time epoch of worker
-   * @return Num_epochs
+   * @return Number epochs
    */
 
   size_t num_epochs() const;
  private:
 
   /**
-   * @brief Sychronization starting from root directory node
+   * @brief Synchronization starting from root directory node
    */
 
   void sync_nodes();
@@ -65,13 +64,13 @@ class sync_worker {
 
   /* Directory tree */
   std::shared_ptr<directory_tree> tree_;
-  /* Sychronizatio working period */
+  /* Synchronization working period */
   std::chrono::milliseconds sync_period_;
   /* Worker thread */
   std::thread worker_;
   /* Bool for stopping the worker */
   std::atomic_bool stop_;
-  /* Time epoch since started */
+  /* Time epoch */
   std::atomic_size_t num_epochs_;
 };
 

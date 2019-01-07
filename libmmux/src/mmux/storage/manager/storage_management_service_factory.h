@@ -8,7 +8,7 @@
 namespace mmux {
 namespace storage {
 /* Storage management service factory class
- * Inherited from storage management_serviceIfFactory */
+ * Inherited from storage management_serviceIfFactory class */
 class storage_management_service_factory : public storage_management_serviceIfFactory {
  public:
 

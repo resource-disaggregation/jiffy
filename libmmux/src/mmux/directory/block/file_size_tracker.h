@@ -33,7 +33,7 @@ class file_size_tracker {
 
   /**
    * @brief Start worker
-   * Report file size and then sleep until next period
+   * Report file size and sleep until next period
    */
 
   void start();

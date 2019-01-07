@@ -18,8 +18,8 @@ class storage_manager : public storage_management_ops {
    * @brief Setup block
    * @param block_name Block name
    * @param path Block path
-   * @param slot_begin Slot begin
-   * @param slot_end Slot end
+   * @param slot_begin Begin Slot
+   * @param slot_end End Slot
    * @param chain Chain block names
    * @param auto_scale Bool value, true if auto_scale is on
    * @param role Block role
@@ -54,7 +54,7 @@ class storage_manager : public storage_management_ops {
   /**
    * @brief Load block from persistent storage
    * @param block_name Block name
-   * @param backing_path Block backing path on persistent storage
+   * @param backing_path Block backing path
    */
 
   void load(const std::string &block_name, const std::string &backing_path) override;
@@ -62,7 +62,7 @@ class storage_manager : public storage_management_ops {
   /**
    * @brief Synchronize block and persistent storage
    * @param block_name Block name
-   * @param backing_path Block backing path on persistent storage
+   * @param backing_path Block backing path
    */
 
   void sync(const std::string &block_name, const std::string &backing_path) override;
@@ -70,7 +70,7 @@ class storage_manager : public storage_management_ops {
   /**
    * @brief Write block back to persistent storage and clear the block
    * @param block_name Block name
-   * @param backing_path Block backing path on persistent storage
+   * @param backing_path Block backing path
    */
 
   void dump(const std::string &block_name, const std::string &backing_path) override;
@@ -107,7 +107,7 @@ class storage_manager : public storage_management_ops {
 
   /**
    * @brief Forward all key and values to next block
-   * @param block_name
+   * @param block_name Block name
    */
 
   void forward_all(const std::string &block_name) override;
@@ -123,8 +123,8 @@ class storage_manager : public storage_management_ops {
    * @brief Set exporting slot range and exporting target
    * @param block_name Block name
    * @param target_block Exporting target blocks
-   * @param slot_begin Exporting slot begin
-   * @param slot_end Exporting slot end
+   * @param slot_begin Exporting begin slot
+   * @param slot_end Exporting end slot
    */
 
   void set_exporting(const std::string &block_name,
@@ -136,8 +136,8 @@ class storage_manager : public storage_management_ops {
    * @brief Setup the block and set importing slot range
    * @param block_name Block name
    * @param path Block path
-   * @param slot_begin Importing slot begin
-   * @param slot_end Importing slot end
+   * @param slot_begin Importing begin slot
+   * @param slot_end Importing end slot
    * @param chain Chain block names
    * @param role Block role
    * @param next_block_name Next block's name
@@ -154,8 +154,8 @@ class storage_manager : public storage_management_ops {
   /**
    * @brief Set block to regular after exporting
    * @param block_name Block name
-   * @param slot_begin Slot begin
-   * @param slot_end Slot end
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
    */
 
   void set_regular(const std::string &block_name, int32_t slot_begin, int32_t slot_end) override;
@@ -163,8 +163,8 @@ class storage_manager : public storage_management_ops {
   /**
    * @brief Virtual function of set importing
    * @param block_name Block name
-   * @param slot_begin Importing slot begin
-   * @param slot_end Importing slot end
+   * @param slot_begin Importing begin slot
+   * @param slot_end Importing end slot
    */
 
   virtual void set_importing(const std::string &block_name, int32_t slot_begin, int32_t slot_end);

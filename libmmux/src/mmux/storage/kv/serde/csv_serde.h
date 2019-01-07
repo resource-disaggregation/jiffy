@@ -7,8 +7,8 @@
 namespace mmux {
 namespace storage {
 
-/* CSV serialize and deserialize class
- * Inherited from serialize and deserialize class */
+/* CSV serializer/deserializer class
+ * Inherited from serde class */
 
 class csv_serde : public serde {
  public:
@@ -17,17 +17,17 @@ class csv_serde : public serde {
   /**
    * @brief Serialize hash table in CSV format
    * @param table Locked hash table
-   * @param path Ostream
-   * @return Ostream position after flushing
+   * @param path Output stream
+   * @return Output stream position after flushing
    */
 
   size_t serialize(const block_type &table, std::shared_ptr<std::ostream> path) override;
 
   /**
-   * @brief Deserialize Istream to hash table in CSV format
-   * @param in Istream
+   * @brief Deserialize Input stream to hash table in CSV format
+   * @param in Input stream
    * @param table Locked hash table
-   * @return Istream position after reading
+   * @return Input stream position after reading
    */
 
   size_t deserialize(std::shared_ptr<std::istream> in, block_type &table) override;
@@ -35,11 +35,11 @@ class csv_serde : public serde {
  private:
 
   /**
-   * @brief Split the string separated by delim in count parts
+   * @brief Split the string separated by separation symbol in count parts
    * @param s String
    * @param delim Separation symbol
-   * @param count Part count
-   * @return Vector of split result
+   * @param count Count
+   * @return Split result
    */
 
   inline std::vector<std::string> split(const std::string &s, char delim, size_t count) {
@@ -60,7 +60,7 @@ class csv_serde : public serde {
    * @brief Split with default count
    * @param s String
    * @param delim Separation symbol
-   * @return Vector of split result
+   * @return Split result
    */
 
   inline std::vector<std::string> split(const std::string &s, char delim) {

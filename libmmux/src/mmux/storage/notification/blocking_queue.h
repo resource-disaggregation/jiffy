@@ -19,7 +19,7 @@ template<typename T>
  * Push can be done immediately when it gets the lock.
  * Pull can be done only when queue is not empty.
  * If empty and given timeout time, release lock and wait for given time
- * If empty and given timeout time is -1, wait for conditional variable
+ * If empty and given timeout time is -1, wait for condition variable
  */
 class blocking_queue {
  public:
@@ -48,7 +48,7 @@ class blocking_queue {
 
   /**
    * @brief Push item in the queue using lvalue reference
-   * @param item Item
+   * @param item Item to be pushed
    */
 
   void push(const T &item) {
@@ -60,7 +60,6 @@ class blocking_queue {
 
   /**
    * @brief Push item in the queue using rvalue reference
-   * Even if the item is temporary, the push will succeed
    * @param item Item to be pushed
    */
 

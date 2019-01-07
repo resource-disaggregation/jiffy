@@ -53,8 +53,8 @@ class event {
   explicit event() : event_data_() {}
 
   /**
-   * @brief Check if event_data_ is set
-   * @return Bool value, true if event_data_ is set
+   * @brief Check if event data is set
+   * @return Bool value, true if event data is set
    */
 
   bool is_set() const {
@@ -71,7 +71,7 @@ class event {
   }
 
   /**
-   * @brief ()
+   * @brief Parenthesis operator
    * @param val Event data value
    */
 
@@ -80,7 +80,7 @@ class event {
   }
 
   /**
-   * @brief Set event data and notify all waiting cv
+   * @brief Set event data and notify all waiting condition variable
    * @param val Event data to be set
    */
 
@@ -90,9 +90,9 @@ class event {
   }
 
   /**
-   * @brief Conditional wait for timeout time
+   * @brief Wait for timeout time
    * @param timeout_ms timeout
-   * @return Bool value, true if event_data_ is set
+   * @return Bool value, true if event data is set
    */
 
   bool wait(int64_t timeout_ms) {
@@ -119,7 +119,7 @@ class event {
   atomic_unique_ptr<T> event_data_;
   /* Event mutex */
   std::mutex mtx_;
-  /* Event conditional variable */
+  /* Event condition variable */
   std::condition_variable cv_;
 };
 

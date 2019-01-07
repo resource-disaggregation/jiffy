@@ -13,7 +13,7 @@ class local_store : public persistent_service {
 
   /**
    * @brief Constructor
-   * @param ser Serialization option
+   * @param ser Custom serializer/deserializer
    */
 
   local_store(std::shared_ptr<storage::serde> ser);
@@ -35,8 +35,8 @@ class local_store : public persistent_service {
   void read(const std::string &in_path, storage::locked_hash_table_type &table) override;
 
   /**
-   * @brief Fetch URI "local"
-   * @return String "local"
+   * @brief Fetch URI
+   * @return URI string
    */
 
   std::string URI() override;

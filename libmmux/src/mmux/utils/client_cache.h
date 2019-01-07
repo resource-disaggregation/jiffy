@@ -26,7 +26,7 @@ class client_cache {
   client_cache() {}
 
   /**
-   * @brief Destructor, close all clients in cache
+   * @brief Destructor
    */
 
   ~client_cache() {
@@ -38,10 +38,10 @@ class client_cache {
   }
 
   /**
-   * @brief Get client for given host and port number
-   * @param host Host
+   * @brief Get cache type
+   * @param host Socket hostname
    * @param port Port number
-   * @return Client
+   * @return Cache type
    */
 
   value_type get(const std::string &host, int port) {

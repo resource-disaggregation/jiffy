@@ -40,7 +40,7 @@ class kv_client {
     void unlock();
 
     /**
-     * @brief Put in locked client
+     * @brief Put
      * @param key Key
      * @param value Value
      * @return Response of the command
@@ -49,7 +49,7 @@ class kv_client {
     std::string put(const std::string &key, const std::string &value);
 
     /**
-     * @brief Get in locked client
+     * @brief Get
      * @param key Key
      * @return Response of the command
      */
@@ -57,7 +57,7 @@ class kv_client {
     std::string get(const std::string &key);
 
     /**
-     * @brief Update in locked client
+     * @brief Update
      * @param key Key
      * @param value Value
      * @return Response of the command
@@ -67,7 +67,7 @@ class kv_client {
     std::string update(const std::string &key, const std::string &value);
 
     /**
-     * @brief Remove in locked client
+     * @brief Remove
      * @param key Key
      * @return Response of the command
      */
@@ -76,7 +76,7 @@ class kv_client {
     std::string remove(const std::string &key);
 
     /**
-     * @brief Put in batch in locked client
+     * @brief Put in batch
      * @param kvs Key value batch
      * @return Responses of the batch commands
      */
@@ -84,7 +84,7 @@ class kv_client {
     std::vector<std::string> put(const std::vector<std::string> &kvs);
 
     /**
-     * @brief Get in batch in locked client
+     * @brief Get in batch
      * @param keys Key batch
      * @return Responses of the batch commands
      */
@@ -92,7 +92,7 @@ class kv_client {
     std::vector<std::string> get(const std::vector<std::string> &keys);
 
     /**
-     * @brief Update in batch in locked client
+     * @brief Update in batch
      * @param kvs Key value batch
      * @return Responses of the batch commands
      */
@@ -100,7 +100,7 @@ class kv_client {
     std::vector<std::string> update(const std::vector<std::string> &kvs);
 
     /**
-     * @brief Remove in batch in locked client
+     * @brief Remove in batch
      * @param keys Key batch
      * @return Responses of the batch commands
      */
@@ -109,15 +109,15 @@ class kv_client {
 
     /**
      * @brief Fetch number of keys
-     * @return
+     * @return Key number
      */
 
     size_t num_keys();
    private:
 
     /**
-     * @brief Handle command in redirect case, lock client
-     * @param cmd_id Command id
+     * @brief Handle command in redirect case
+     * @param cmd_id Command identifier
      * @param args Command arguments
      * @param response Response to be collected
      */
@@ -125,8 +125,8 @@ class kv_client {
     void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response);
 
     /**
-     * @brief Handle batch commands in redirect case, lock client
-     * @param cmd_id Command id
+     * @brief Handle batch commands in redirect case
+     * @param cmd_id Command identifier
      * @param args Command arguments
      * @param response Response to be collected
      */
@@ -148,11 +148,11 @@ class kv_client {
 
   /**
    * @brief Constructor
-   * Store all replication chain and their begin slot
+   * Store all replica chain and their begin slot
    * @param fs Directory service
    * @param path Key value block path
    * @param status Data status
-   * @param timeout_ms Timeout, default to be 1000
+   * @param timeout_ms Timeout
    */
 
   kv_client(std::shared_ptr<directory::directory_interface> fs,
@@ -174,14 +174,14 @@ class kv_client {
   directory::data_status &status();
 
   /**
-   * @brief Lock this key value client
-   * @return Client after locked
+   * @brief Lock key value client
+   * @return Locked client
    */
 
   std::shared_ptr<locked_client> lock();
 
   /**
-   * @brief Put key value pair, redo until success
+   * @brief Put key value pair
    * @param key Key
    * @param value Value
    * @return Response of the command
@@ -190,7 +190,7 @@ class kv_client {
   std::string put(const std::string &key, const std::string &value);
 
   /**
-   * @brief Get value for specified key, redo until success
+   * @brief Get value for specified key
    * @param key Key
    * @return Response of the command
    */
@@ -198,7 +198,7 @@ class kv_client {
   std::string get(const std::string &key);
 
   /**
-   * @brief Update key value pair, redo until success
+   * @brief Update key value pair
    * @param key Key
    * @param value Value
    * @return Response of the command
@@ -207,7 +207,7 @@ class kv_client {
   std::string update(const std::string &key, const std::string &value);
 
   /**
-   * @brief Remove key value pair, redo until success
+   * @brief Remove key value pair
    * @param key Key
    * @return Response of the command
    */
@@ -215,7 +215,7 @@ class kv_client {
   std::string remove(const std::string &key);
 
   /**
-   * @brief Put in batch version
+   * @brief Put in batch
    * @param kvs Key value batch
    * @return Response of batch command
    */
@@ -223,7 +223,7 @@ class kv_client {
   std::vector<std::string> put(const std::vector<std::string> &kvs);
 
   /**
-   * @brief Get in batch version
+   * @brief Get in batch
    * @param keys Key batch
    * @return Response of batch command
    */
@@ -231,7 +231,7 @@ class kv_client {
   std::vector<std::string> get(const std::vector<std::string> &keys);
 
   /**
-   * @brief Update in batch version
+   * @brief Update in batch
    * @param kvs Key value batch
    * @return Response of batch command
    */
@@ -239,7 +239,7 @@ class kv_client {
   std::vector<std::string> update(const std::vector<std::string> &kvs);
 
   /**
-   * @brief Remove in batch version
+   * @brief Remove in batch
    * @param keys Key batch
    * @return Response of batch command
    */
@@ -247,17 +247,17 @@ class kv_client {
   std::vector<std::string> remove(const std::vector<std::string> &keys);
  private:
   /**
-   * @brief Fetch block id for particular key
+   * @brief Fetch block identifier for particular key
    * @param key Key
-   * @return Block id
+   * @return Block identifier
    */
 
   size_t block_id(const std::string &key);
 
   /**
    * @brief Run same operation in batch
-   * @param id Operation id
-   * @param args Arguments
+   * @param id Operation identifier
+   * @param args Operation arguments
    * @param args_per_op Argument per operation
    * @return
    */
@@ -265,8 +265,8 @@ class kv_client {
   std::vector<std::string> batch_command(const kv_op_id &id, const std::vector<std::string> &args, size_t args_per_op);
 
   /**
-   * @brief Handle command when redirect case
-   * @param cmd_id Command id
+   * @brief Handle command in redirect case
+   * @param cmd_id Command identifier
    * @param args Command arguments
    * @param response Response to be collected
    */
@@ -274,8 +274,8 @@ class kv_client {
   void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response);
 
   /**
-   * @brief Handle multiple command in redirect case
-   * @param cmd_id Command id
+   * @brief Handle multiple commands in redirect case
+   * @param cmd_id Command identifier
    * @param args Command arguments
    * @param responses Responses to be collected
    */
@@ -287,7 +287,7 @@ class kv_client {
   std::string path_;
   /* Data status */
   directory::data_status status_;
-  /* Key value blocks, each block only save a replication chain client */
+  /* Key value blocks, each block only save a replica chain client */
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
   /* Slot begin of the blocks */
   std::vector<int32_t> slots_;

@@ -17,8 +17,8 @@ class random_block_allocator : public block_allocator {
   random_block_allocator() = default;
 
   /**
-   * @brief Allocate blocks in different prefixs
-   * @param count Number of block
+   * @brief Allocate blocks in different prefixes
+   * @param count Number of blocks
    * @return Block names
    */
 

@@ -23,16 +23,16 @@ class lease_client {
 
   /**
    * @brief Constructor
-   * @param host Socket host
-   * @param port Socket port
+   * @param host Lease server hostname
+   * @param port Port number
    */
 
   lease_client(const std::string &hostname, int port);
 
   /**
-   * @brief Connect server
-   * @param host Socket host
-   * @param port Socket port
+   * @brief Connect lease server
+   * @param host Lease server hostname
+   * @param port Port number
    */
 
   void connect(const std::string &hostname, int port);

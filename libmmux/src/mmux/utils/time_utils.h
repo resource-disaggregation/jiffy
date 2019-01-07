@@ -28,7 +28,7 @@ class time_utils {
   }
 
   /**
-   * @brief Fetch time now in nanoseconds
+   * @brief Fetch current time in nanoseconds
    * @return Time
    */
 
@@ -38,7 +38,7 @@ class time_utils {
   }
 
   /**
-   * @brief Fetch time now in microseconds
+   * @brief Fetch current time in microseconds
    * @return Time
    */
 
@@ -48,7 +48,7 @@ class time_utils {
   }
 
   /**
-   * @brief Fetch time now in milliseconds
+   * @brief Fetch current time in milliseconds
    * @return Time
    */
 
@@ -58,7 +58,7 @@ class time_utils {
   }
 
   /**
-   * @brief Fetch time now in seconds
+   * @brief Fetch current time in seconds
    * @return Time
    */
 

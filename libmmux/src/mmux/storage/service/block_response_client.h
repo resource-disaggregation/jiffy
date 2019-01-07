@@ -20,7 +20,7 @@ class block_response_client {
 
   /**
    * @brief Response
-   * @param seq Sequence id
+   * @param seq Sequence identifier
    * @param result Operation result
    */
 

@@ -30,24 +30,24 @@ class block_listener {
 
   /**
    * @brief Constructor
-   * @param host Host
+   * @param host Notification server hostname
    * @param port Port number
-   * @param notifications Notifications
+   * @param notifications Notification mailbox
    * @param controls Controls
    */
 
   block_listener(const std::string &host, int port, mailbox_t &notifications, mailbox_t &controls);
 
   /**
-   * @brief Connect host
-   * @param host Host
+   * @brief Connect notification server
+   * @param host Notification server hostname
    * @param port Port number
    */
 
   void connect(const std::string &host, int port);
 
   /**
-   * @brief Disconnect host
+   * @brief Disconnect server
    */
 
   void disconnect();
@@ -61,7 +61,7 @@ class block_listener {
 
   /**
    * @brief Subscribe for block on operation types
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @param ops Operation type
    */
 
@@ -69,7 +69,7 @@ class block_listener {
 
   /**
    * @brief Unsubscribe for block on operation types
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @param ops Operation type
    */
 

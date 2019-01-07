@@ -18,7 +18,7 @@ class string_utils {
    * @param s String
    * @param delim Separation symbol
    * @param count Total parts
-   * @return Vector of separated strings
+   * @return Separated strings
    */
 
   inline static std::vector<std::string> split(const std::string &s, char delim,
@@ -40,7 +40,7 @@ class string_utils {
    * @brief Split string with default count
    * @param s String
    * @param delim Separation symbol
-   * @return Vector of separated strings
+   * @return Separated strings
    */
 
   inline static std::vector<std::string> split(const std::string &s,
@@ -49,8 +49,8 @@ class string_utils {
   }
 
   /**
-   * @brief Make a string from vector of strings
-   * @param v Vector of strings
+   * @brief Combine multiple strings to one string
+   * @param v Strings
    * @param delim Separation symbol
    * @return String
    */
@@ -67,7 +67,7 @@ class string_utils {
 
   template<typename functor>
   /**
-   * @brief Transform string according to tranformation function
+   * @brief Transform string according to transformation function
    * @tparam functor Transformation function type
    * @param str String
    * @param f Transformation function

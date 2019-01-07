@@ -46,14 +46,14 @@ enum kv_op_id : int32_t {
 class kv_block : public chain_module {
  public:
   /**
-   * @brief Constructor, lock map created by assigning block_.lock_table
+   * @brief Constructor
    * @param block_name Block name
    * @param capacity Block capacity
    * @param threshold_lo low threshold
    * @param threshold_hi high threshold
-   * @param directory_host Directory host
+   * @param directory_host Directory hostname
    * @param directory_port Directory port number
-   * @param ser Serialization and deserialization method, csv for default
+   * @param ser Custom serializer/deserializer
    */
 
   explicit kv_block(const std::string &block_name,
@@ -67,7 +67,8 @@ class kv_block : public chain_module {
   /**
    * @brief Check if hash map contains key
    * @param key Key
-   * @param redirect Bool value to choose whether to indirect to the destination block when block is in repartitioning
+   * @param redirect Bool value to choose whether to indirect to the destination
+   * block when block is in repartitioning
    * @return String of key status
    */
 
@@ -78,7 +79,7 @@ class kv_block : public chain_module {
    * @param key Key
    * @param value Value
    * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning, false for default
+   * block when block is in repartitioning
    * @return Put status string
    */
 
@@ -89,8 +90,8 @@ class kv_block : public chain_module {
    * @param key Key
    * @param value Value
    * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning, false for default
-   * @return Locked put status string
+   * block when block is in repartitioning
+   * @return Put status string
    */
 
   std::string locked_put(const key_type &key, const value_type &value, bool redirect = false);
@@ -100,7 +101,7 @@ class kv_block : public chain_module {
    * @param key Key
    * @param value Value
    * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning, false for default
+   * block when block is in repartitioning
    * @return Upsert status string
    */
 
@@ -111,8 +112,8 @@ class kv_block : public chain_module {
    * @param key Key
    * @param value Value
    * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning, false for default
-   * @return Locked upsert status string
+   * block when block is in repartitioning
+   * @return Upsert status string
    */
 
   std::string locked_upsert(const key_type &key, const value_type &value, bool redirect = false);
@@ -121,18 +122,18 @@ class kv_block : public chain_module {
    * @brief Get value for specified key
    * @param key Key
    * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning, false for default
+   * block when block is in repartitioning
    * @return Get status string
    */
 
   value_type get(const key_type &key, bool redirect = false);
 
   /**
-   * @brief Get value for specified key from locked block
+   * @brief Get value for specified key in locked block
    * @param key Key
    * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning, false for default
-   * @return Locked get status string
+   * block when block is in repartitioning
+   * @return Get status string
    */
 
   std::string locked_get(const key_type &key, bool redirect = false);
@@ -142,7 +143,7 @@ class kv_block : public chain_module {
    * @param key Key
    * @param value Value
    * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning, false for default
+   * block when block is in repartitioning
    * @return Update status string
    */
 
@@ -153,8 +154,8 @@ class kv_block : public chain_module {
    * @param key Key
    * @param value Value
    * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning, false for default
-   * @return Locked update status string
+   * block when block is in repartitioning
+   * @return Update status string
    */
 
   std::string locked_update(const key_type &key, const value_type &value, bool redirect = false);
@@ -163,7 +164,7 @@ class kv_block : public chain_module {
    * @brief Remove value for specified key
    * @param key Key
    * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning, false for default
+   * block when block is in repartitioning
    * @return Remove status string
    */
 
@@ -173,23 +174,23 @@ class kv_block : public chain_module {
    * @brief Remove value for specified key in locked block
    * @param key Key
    * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning, false for default
-   * @return Locked remove status
+   * block when block is in repartitioning
+   * @return Remove status
    */
 
   std::string locked_remove(const key_type &key, bool redirect = false);
 
   /**
-   * @brief Return keys in locked block
-   * @param keys Vector to store keys
+   * @brief Return keys
+   * @param keys Keys
    * TODO to be removed?
    */
 
   void keys(std::vector<std::string> &keys);
 
   /**
-   * @brief Fetch num_keys data from keys which lie in slot range
-   * @param data Data vector to be fetched
+   * @brief Fetch data from keys which lie in slot range
+   * @param data Data to be fetched
    * @param slot_begin Slot begin value
    * @param slot_end Slot end value
    * @param num_keys Key numbers to be fetched
@@ -202,13 +203,13 @@ class kv_block : public chain_module {
 
   /**
    * @brief Active lock block
-   * @return Lock status string, export target string if block exporting
+   * @return Lock status string
    */
 
   std::string lock();
 
   /**
-   * @brief Unlock the lock block
+   * @brief Unlock the locked block
    * @return Unlock status string
    */
 
@@ -237,9 +238,8 @@ class kv_block : public chain_module {
 
   /**
    * @brief Run particular command on key value block
-   * Check whether block hash range overloads or underloads
-   * @param _return Return status to be fetched
-   * @param oid Operation id
+   * @param _return Return status to be collected
+   * @param oid Operation identifier
    * @param args Command arguments
    */
 
@@ -262,7 +262,7 @@ class kv_block : public chain_module {
   /**
    * @brief If dirty, synchronize persistent storage and block
    * @param path Persistent storage path
-   * @return Bool
+   * @return Bool value, true if block successfully synchronized
    */
 
   bool sync(const std::string &path) override;
@@ -290,7 +290,7 @@ class kv_block : public chain_module {
   std::size_t storage_size() override;
 
   /**
-   * @brief Reset the block, while occupying metadata_mtx_
+   * @brief Reset the block
    */
 
   void reset() override;
@@ -303,7 +303,6 @@ class kv_block : public chain_module {
 
   /**
    * @brief Export slots
-   * Called by directory functions via thrift
    */
 
   void export_slots() override;
@@ -311,22 +310,22 @@ class kv_block : public chain_module {
  private:
   /**
    * @brief Check if block is overloaded
-   * @return Bool value, true if block size overflows the high threshold capacity
+   * @return Bool value, true if block size is over the high threshold capacity
    */
 
   bool overload();
 
   /**
    * @brief Check if block is underloaded
-   * @return Bool value, true if block size underflows the low threshold capacity
+   * @return Bool value, true if block size is under the low threshold capacity
    */
 
   bool underload();
 
-  /* Cuckoohash_map block allocation */
+  /* Cuckoo hash map block */
   hash_table_type block_;
 
-  /* Locked cuckoohash_map block */
+  /* Locked cuckoo hash map block */
   locked_hash_table_type locked_block_;
 
   /* Directory host number */
@@ -335,7 +334,7 @@ class kv_block : public chain_module {
   /* Directory port number */
   int directory_port_;
 
-  /* Serialization & deserialization option */
+  /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
 
   /* Atomic value to collect the sum of key size and value size */

@@ -16,7 +16,7 @@ class directory_service_handler : public directory_serviceIf {
  public:
   /**
    * @brief Constructor
-   * @param shard Server's directory tree
+   * @param shard Directory tree
    */
 
   explicit directory_service_handler(std::shared_ptr<directory_tree> shard);
@@ -37,7 +37,7 @@ class directory_service_handler : public directory_serviceIf {
 
   /**
    * @brief Open a file given file path
-   * @param _return rpc data status to be collected
+   * @param _return RPC data status to be collected
    * @param path File path
    */
 
@@ -45,14 +45,14 @@ class directory_service_handler : public directory_serviceIf {
 
   /**
    * @brief Create file
-   * @param _return rpc data status to be collected
+   * @param _return RPC data status to be collected
    * @param path File path
-   * @param backing_path Backing path
+   * @param backing_path File backing path
    * @param num_blocks Number of blocks
-   * @param chain_length Replication chain length
-   * @param flags Flag arguments
-   * @param permissions File permission set
-   * @param tags Tag arguments
+   * @param chain_length Replica chain length
+   * @param flags Flags
+   * @param permissions File permissions
+   * @param tags Tags
    */
 
   void create(rpc_data_status &_return,
@@ -68,14 +68,14 @@ class directory_service_handler : public directory_serviceIf {
    * @brief Open or create a file
    * Open file if file exists
    * If not, create it
-   * @param _return rpc data status to be collected
+   * @param _return RPC data status to be collected
    * @param path File path
    * @param backing_path File backing path
    * @param num_blocks Number of blocks
-   * @param chain_length Replication chain length
-   * @param flags Flag arguments
-   * @param permissions File permission set
-   * @param tags Tag arguments
+   * @param chain_length Replica chain length
+   * @param flags Flags
+   * @param permissions File permissions
+   * @param tags Tags
    */
 
   void open_or_create(rpc_data_status &_return,
@@ -90,7 +90,7 @@ class directory_service_handler : public directory_serviceIf {
   /**
    * @brief Check if the file exists
    * @param path File path
-   * @return Bool value
+   * @return Bool value, true if exists
    */
 
   bool exists(const std::string &path) override;
@@ -106,8 +106,8 @@ class directory_service_handler : public directory_serviceIf {
   /**
    * @brief Set permissions of a file
    * @param path File path
-   * @param prms Permission
-   * @param opts Permission options replace, add, remove
+   * @param prms RPC Permission
+   * @param opts RPC Permission options
    */
 
   void set_permissions(const std::string &path, rpc_perms perms, rpc_perm_options opts) override;
@@ -115,7 +115,7 @@ class directory_service_handler : public directory_serviceIf {
   /**
    * @brief Fetch permission of a file
    * @param path File path
-   * @return Permission
+   * @return RPC Permission
    */
 
   rpc_perms get_permissions(const std::string &path) override;
@@ -152,7 +152,7 @@ class directory_service_handler : public directory_serviceIf {
 
   /**
    * @brief Collect all entries of files in the directory
-   * @param _return rpc directory entries to be collected
+   * @param _return RPC directory entries to be collected
    * @param path Directory path
    */
 
@@ -160,7 +160,7 @@ class directory_service_handler : public directory_serviceIf {
 
   /**
    * @brief Collect all entries of files in the directory recursively
-   * @param _return rpc directory entries to be collected
+   * @param _return RPC directory entries to be collected
    * @param path Directory path
    */
 
@@ -168,7 +168,7 @@ class directory_service_handler : public directory_serviceIf {
 
   /**
    * @brief Collect data status
-   * @param _return rpc data status to be collected
+   * @param _return RPC data status to be collected
    * @param path File path
    */
 
@@ -185,7 +185,7 @@ class directory_service_handler : public directory_serviceIf {
   /**
    * @brief Check if path is regular file
    * @param path File path
-   * @return Bool value
+   * @return Bool value, true if file is regular file
    */
 
   bool is_regular_file(const std::string &path) override;
@@ -193,26 +193,25 @@ class directory_service_handler : public directory_serviceIf {
   /**
    * @brief Check if path is directory
    * @param path Directory path
-   * @return Bool value
+   * @return Bool value, true if path is directory
    */
 
   bool is_directory(const std::string &path) override;
 
   /**
-   * TODO should be a spelling mistake here resolve : reslove
-   * @brief Resolve failures using replication chain
-   * @param _return rpc replication chain to be collected
+   * @brief Resolve failures using replica chain
+   * @param _return RPC replica chain to be collected
    * @param path File path
-   * @param chain Replication chain
+   * @param chain RPC replica chain
    */
 
   void reslove_failures(rpc_replica_chain &_return, const std::string &path, const rpc_replica_chain &chain) override;
 
   /**
-   * @brief Add a new replication to chain
-   * @param _return Replication chain status
+   * @brief Add a new replica to chain
+   * @param _return RPC replica chain status to be collected
    * @param path File path
-   * @param chain Replication chain
+   * @param chain RPC replica chain
    */
 
   void add_replica_to_chain(rpc_replica_chain &_return,
@@ -276,7 +275,7 @@ class directory_service_handler : public directory_serviceIf {
    */
 
   directory_service_exception make_exception(directory_ops_exception &ex) const;
-  /* Directory tree smart pointer */
+  /* Directory tree */
   std::shared_ptr<directory_tree> shard_;
 };
 }

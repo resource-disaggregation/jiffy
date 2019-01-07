@@ -14,9 +14,9 @@ class directory_type_conversions {
  public:
 
   /**
-   * @brief Convert replication chain to rpc
-   * @param chain Replication chain
-   * @return rpc_replication_chain
+   * @brief Convert replica chain to RPC
+   * @param chain Replica chain
+   * @return RPC replica chain
    */
 
   static rpc_replica_chain to_rpc(const replica_chain &chain) {
@@ -29,9 +29,9 @@ class directory_type_conversions {
   }
 
   /**
-   * @brief Convert rpc_replication chain to replication chain
-   * @param rpc rpc_replication chain
-   * @return Replication chain
+   * @brief Convert RPC replica chain to replica chain
+   * @param rpc RPC replica chain
+   * @return Replica chain
    */
 
   static replica_chain from_rpc(const rpc_replica_chain &rpc) {
@@ -43,9 +43,9 @@ class directory_type_conversions {
   }
 
   /**
-   * @brief Convert data status to rpc data status
+   * @brief Convert data status to RPC data status
    * @param status Data status
-   * @return rpc_data_status
+   * @return RPC data status
    */
 
   static rpc_data_status to_rpc(const data_status &status) {
@@ -61,9 +61,9 @@ class directory_type_conversions {
   }
 
   /**
-   * @brief Convert file status to rpc file status
+   * @brief Convert file status to RPC file status
    * @param status File status
-   * @return rpc_file_status
+   * @return RPC file status
    */
 
   static rpc_file_status to_rpc(const file_status &status) {
@@ -75,9 +75,9 @@ class directory_type_conversions {
   }
 
   /**
-   * @brief Convert directory entry to rpc directory_entry
+   * @brief Convert directory entry to RPC directory entry
    * @param entry Directory entry
-   * @return rpc_dir_entry
+   * @return RPC directory entry
    */
 
   static rpc_dir_entry to_rpc(const directory_entry &entry) {
@@ -90,8 +90,8 @@ class directory_type_conversions {
   }
 
   /**
-   * @brief Convert rpc_data_status to data status
-   * @param rpc rpc_data_status
+   * @brief Convert RPC data status to data status
+   * @param rpc RPC data status
    * @return Data status
    */
 
@@ -104,8 +104,8 @@ class directory_type_conversions {
   }
 
   /**
-   * @brief Convert rpc_file_status to file status
-   * @param rpc rpc_file_status
+   * @brief Convert RPC file status to file status
+   * @param rpc RPC file status
    * @return File status
    */
 
@@ -116,8 +116,8 @@ class directory_type_conversions {
   }
 
   /**
-   * @brief Convert rpc_dir_entry to directory entry
-   * @param rpc rpc_dir_entry
+   * @brief Convert RPC directory entry to directory entry
+   * @param rpc RPC directory entry
    * @return Directory entry
    */
 

@@ -15,7 +15,7 @@ class persistent_store {
   /**
    * @brief Fetch persistent service instance
    * @param path Path
-   * @param ser Serialization options
+   * @param ser Custom serializer/deserializer
    * @return Persistent service
    */
 
@@ -24,7 +24,7 @@ class persistent_store {
   /**
    * @brief Decompose path
    * @param path Path
-   * @return (uri, key)
+   * @return Pair of uri and key
    */
 
   static std::pair<std::string, std::string> decompose_path(const std::string &path);

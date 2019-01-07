@@ -12,7 +12,7 @@ class s3_store : public persistent_service {
 
   /**
    * @brief Constructor
-   * @param ser Serialization option
+   * @param ser Custom serializer/deserializer
    */
 
   s3_store(std::shared_ptr<storage::serde> ser);
@@ -40,19 +40,19 @@ class s3_store : public persistent_service {
   void read(const std::string &in_path, storage::locked_hash_table_type &table) override;
 
   /**
-   * @brief Fetch URI "s3"
-   * @return String "s3"
+   * @brief Fetch URI
+   * @return URI string
    */
 
   std::string URI() override;
  private:
   /**
-   * @brief Extract s3 path element
+   * @brief Extract path element
    * @param s3_path s3 path
-   * @return (bucket_name, key)
+   * @return Pair of bucket name and key
    */
   std::pair<std::string, std::string> extract_path_elements(const std::string &s3_path);
-  /* SDK options */
+  /* AWS SDK options */
   Aws::SDKOptions options_;
 };
 

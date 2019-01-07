@@ -15,8 +15,8 @@ class notification_server {
   /**
    * @brief Create notification server
    * @param blocks Chain modules
-   * @param address Host address
-   * @param port Port number
+   * @param address Socket address
+   * @param port Socket Port number
    * @return Server
    */
 

@@ -16,7 +16,7 @@ class server_storage_tracker {
   /**
    * @brief Constructor
    * @param blocks Data blocks
-   * @param periodicity_ms Periodicity in milliseconds
+   * @param periodicity_ms Periodicity
    * @param output_file Output file name
    */
 
@@ -43,8 +43,8 @@ class server_storage_tracker {
 
  private:
   /**
-   * @brief Report file size to ofstream
-   * @param out ofstream
+   * @brief Report file size to output file stream
+   * @param out output file stream
    */
   void report_file_sizes(std::ofstream &out);
   /* Data blocks */

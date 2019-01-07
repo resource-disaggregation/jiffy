@@ -8,7 +8,7 @@
 
 namespace mmux {
 namespace storage {
-/* Replication chain client class
+/* Replica chain client class
  * This class only considers the two most important
  * blocks in the chain(i.e. head and tail)*/
 class replica_chain_client {
@@ -21,7 +21,7 @@ class replica_chain_client {
      * @brief Constructor
      * Lock parent, if needs redirect, set redirecting true and
      * take down redirect chain
-     * @param parent Replication chain to be locked
+     * @param parent Replica chain to be locked
      */
 
     locked_client(replica_chain_client &parent);
@@ -39,14 +39,14 @@ class replica_chain_client {
     void unlock();
 
     /**
-     * @brief Fetch directory replication chain class
-     * @return Directory replication chain class
+     * @brief Fetch directory replica chain
+     * @return Directory replica chain class
      */
 
     const directory::replica_chain &chain();
 
     /**
-     * @brief Fetch if redirected
+     * @brief Check redirecting boolean
      * @return Bool value, true if redirected
      */
 
@@ -54,14 +54,14 @@ class replica_chain_client {
 
     /**
      * @brief Fetch redirect chain block names
-     * @return Vector of redirect chain block names
+     * @return Redirect chain block names
      */
 
     const std::vector<std::string> &redirect_chain();
 
     /**
      * @brief Send command
-     * @param cmd_id Command id
+     * @param cmd_id Command identifier
      * @param args Command arguments
      */
 
@@ -75,8 +75,8 @@ class replica_chain_client {
     std::vector<std::string> recv_response();
 
     /**
-     * @brief Run command on replication chain
-     * @param cmd_id Command id
+     * @brief Run command on replica chain
+     * @param cmd_id Command identifier
      * @param args Command arguments
      * @return Response of the command
      */
@@ -84,8 +84,8 @@ class replica_chain_client {
     std::vector<std::string> run_command(int32_t cmd_id, const std::vector<std::string> &args);
 
     /**
-     * @brief Run command on redirect replication chain
-     * @param cmd_id Command id
+     * @brief Run command on redirect replica chain
+     * @param cmd_id Command identifier
      * @param args Command arguments
      * @return Response of the command
      */
@@ -93,7 +93,7 @@ class replica_chain_client {
     std::vector<std::string> run_command_redirected(int32_t cmd_id, const std::vector<std::string> &args);
 
    private:
-    /* Parent replication chain client */
+    /* Parent replica chain client */
     replica_chain_client &parent_;
     /* Bool value, true if redirecting */
     bool redirecting_;
@@ -103,10 +103,10 @@ class replica_chain_client {
 
   /**
    * @brief Constructor
-   * @param fs directory interface
-   * @param path Replication chain path
-   * @param chain Directory replication chain class
-   * @param timeout_ms Timeout, default for 1000
+   * @param fs Directory interface
+   * @param path File path
+   * @param chain Directory replica chain
+   * @param timeout_ms Timeout
    */
 
   explicit replica_chain_client(std::shared_ptr<directory::directory_interface> fs,
@@ -115,38 +115,38 @@ class replica_chain_client {
                                 int timeout_ms = 1000);
 
   /**
-   * @brief Destructor, disconnect the client
+   * @brief Destructor
    */
 
   ~replica_chain_client();
 
   /**
-   * @brief Fetch directory replication chain class
-   * @return Directory replication chain class
+   * @brief Fetch directory replica chain
+   * @return Directory replica chain
    */
 
   const directory::replica_chain &chain() const;
 
   /**
-   * @brief Lock this replication chain client
-   * @return Client after locked
+   * @brief Lock this replica chain client
+   * @return Locked client
    */
 
   std::shared_ptr<locked_client> lock();
 
   /**
-   * @brief Check if head and tail of replication chain is connected
+   * @brief Check if head and tail of replica chain is connected
    * @return Bool value, true if both connected
    */
 
   bool is_connected() const;
 
   /**
-   * @brief Send out command via command client
-   * For each command id, we either save tail block client or
+   * @brief Send out command
+   * For each command identifier, we either save tail block client or
    * head block client into command client, so we can use
-   * command id directly to locate the right block
-   * @param cmd_id Command id
+   * command identifier to locate the right block
+   * @param cmd_id Command identifier
    * @param args Command arguments
    */
 
@@ -154,16 +154,16 @@ class replica_chain_client {
 
   /**
    * @brief Receive response of command
-   * Check whether response equals seq_.client_seq_no
+   * Check whether response equals client sequence number
    * @return Response
    */
 
   std::vector<std::string> recv_response();
 
   /**
-   * @brief Run command, first send command to the correct block(head || tail)
+   * @brief Run command, first send command to the correct block(head or tail)
    * Then receive the response
-   * @param cmd_id Command id
+   * @param cmd_id Command identifier
    * @param args Command argument
    * @return Response of the command
    */
@@ -172,7 +172,7 @@ class replica_chain_client {
 
   /**
    * @brief Sent command with a redirect symbol at the back of the arguments
-   * @param cmd_id Command id
+   * @param cmd_id Command identifier
    * @param args Command arguments
    * @return Response of the command
    */
@@ -181,8 +181,8 @@ class replica_chain_client {
  private:
 
   /**
-   * @brief Connect replication chain client to directory replication chain class
-   * @param chain Directory replication chain class
+   * @brief Connect replica chain client to directory replica chain
+   * @param chain Directory replica chain
    * @param timeout_ms time out
    */
   void connect(const directory::replica_chain &chain, int timeout_ms = 0);
@@ -194,11 +194,11 @@ class replica_chain_client {
   void disconnect();
   /* Directory client */
   std::shared_ptr<directory::directory_interface> fs_;
-  /* Replication chain path */
+  /* File path */
   std::string path_;
-  /* Sequence id */
+  /* Sequence identifier */
   sequence_id seq_;
-  /* Directory replication chain structure */
+  /* Directory replica chain structure */
   directory::replica_chain chain_;
   /* Block client, head of the chain
    * Set after connection */

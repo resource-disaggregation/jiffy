@@ -8,7 +8,7 @@
 namespace mmux {
 namespace directory {
 
-/* Lease sevice factory class, inherited from lease_serviceIfFactory */
+/* Lease service factory class, inherited from lease_serviceIfFactory class */
 
 class lease_service_factory : public lease_serviceIfFactory {
  public:
@@ -22,9 +22,9 @@ class lease_service_factory : public lease_serviceIfFactory {
   explicit lease_service_factory(std::shared_ptr<directory_tree> tree, int64_t lease_period_ms);
 
   /**
-   * @brief Get lease_service_factory handler
+   * @brief Get lease service handler
    * @param conn_info Connection information
-   * @return Handler
+   * @return Lease service handler
    */
 
   lease_serviceIf *getHandler(const ::apache::thrift::TConnectionInfo &connInfo) override;

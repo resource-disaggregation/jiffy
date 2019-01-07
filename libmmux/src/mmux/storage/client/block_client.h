@@ -19,7 +19,7 @@ class block_client {
 
     /**
      * @brief Constructor
-     * @param prot Thrift protocol
+     * @param prot Protocol
      */
 
     explicit command_response_reader(std::shared_ptr<apache::thrift::protocol::TProtocol> prot);
@@ -51,38 +51,38 @@ class block_client {
   ~block_client();
 
   /**
-   * @brief Fetch client id
-   * @return Client id number
+   * @brief Fetch client identifier
+   * @return Client identifier
    */
 
   int64_t get_client_id();
 
   /**
-   * @brief Connect host
-   * @param hostname Host name
+   * @brief Connect block server
+   * @param hostname Block server hostname
    * @param port Port number
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @param timeout_ms Timeout
    */
 
   void connect(const std::string &hostname, int port, int block_id, int timeout_ms = 1000);
 
   /**
-   * @brief Disconnect host
+   * @brief Disconnect server
    */
 
   void disconnect();
 
   /**
    * @brief Check if connection is opened
-   * @return Bool value
+   * @return Bool value, true if connection is opened
    */
 
   bool is_connected() const;
 
   /**
-   * @brief Register client id with block id and return command_response reader
-   * @param client_id Client id number
+   * @brief Register client identifier with block identifier and return command response reader
+   * @param client_id Client identifier
    * @return Command response reader
    */
 
@@ -90,8 +90,8 @@ class block_client {
 
   /**
    * @brief Request command
-   * @param seq Sequence id number
-   * @param cmd_id Command id number
+   * @param seq Sequence identifier
+   * @param cmd_id Command identifier
    * @param args Arguments
    */
 
@@ -104,7 +104,7 @@ class block_client {
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_{};
   /* Block request client */
   std::shared_ptr<thrift_client> client_{};
-  /* Block id */
+  /* Block identifier */
   int block_id_{-1};
 };
 

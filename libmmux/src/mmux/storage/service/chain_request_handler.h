@@ -21,10 +21,10 @@ class chain_request_handler : public chain_request_serviceIf {
                                  std::vector<std::shared_ptr<chain_module>> &blocks);
 
   /**
-   * @brief Send chain request, propagate down the chain
-   * @param seq Sequence id
-   * @param block_id Block id
-   * @param cmd_id Command id
+   * @brief Send chain request
+   * @param seq Sequence identifier
+   * @param block_id Block identifier
+   * @param cmd_id Command identifier
    * @param arguments Command arguments
    */
 
@@ -35,8 +35,8 @@ class chain_request_handler : public chain_request_serviceIf {
   /**
    * @brief Run command on data block
    * @param _return Return status
-   * @param block_id Block id
-   * @param cmd_id Command id
+   * @param block_id Block identifier
+   * @param cmd_id Command identifier
    * @param arguments Command arguments
    */
 

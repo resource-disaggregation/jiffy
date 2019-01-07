@@ -5,7 +5,7 @@
 
 namespace mmux {
 namespace storage {
-/* Structure of block id */
+/* Structure of block identifier */
 struct block_id {
   std::string host;
   int32_t service_port;
@@ -21,20 +21,20 @@ class block_name_parser {
   /**
    * @brief Block name parser
    * @param name Block name
-   * @return Block id structure
+   * @return Block identifier structure
    */
 
   static block_id parse(const std::string &name);
 
   /**
-   * @brief Make a block name by connecting all parts in a single string
-   * @param host Host
+   * @brief Make a block name by merging all parts into a single string
+   * @param host Hostname
    * @param service_port Service port number
    * @param management_port Management port number
    * @param notification_port Notification port number
    * @param chain_port Chain port number
-   * @param id Block id number
-   * @return Block name string
+   * @param id Block identifier
+   * @return Block name
    */
 
   static std::string make(const std::string &host,

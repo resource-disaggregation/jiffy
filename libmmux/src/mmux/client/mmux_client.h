@@ -9,14 +9,14 @@
 
 namespace mmux {
 namespace client {
-/* mmux_client class */
+/* MemoryMUX client class */
 class mmux_client {
  public:
   /**
    * @brief Constructor
-   * @param host Directory client & lease client host
+   * @param host Directory client hostname
    * @param dir_port Directory client port number
-   * @param lease_port Lease port number
+   * @param lease_port Lease worker port number
    */
 
   mmux_client(const std::string &host, int dir_port, int lease_port);
@@ -37,14 +37,14 @@ class mmux_client {
 
   /**
    * @brief Begin scope, add path to lease worker
-   * @param path Path
+   * @param path File Path
    */
 
   void begin_scope(const std::string &path);
 
   /**
    * @brief End scope, remove path from lease worker
-   * @param path Path
+   * @param path File Path
    */
 
   void end_scope(const std::string &path);
@@ -58,7 +58,7 @@ class mmux_client {
    * @param flags Flags
    * @param permissions Permissions
    * @param tags Tags
-   * @return KV_client
+   * @return Key value client
    */
 
   std::shared_ptr<storage::kv_client> create(const std::string &path,
@@ -70,23 +70,23 @@ class mmux_client {
                                              const std::map<std::string, std::string> &tags = {});
 
   /**
-   * @brief Open file, begin lease and create kv_client
-   * @param path Path
-   * @return KV_client
+   * @brief Open file, begin lease
+   * @param path File path
+   * @return Key value client
    */
 
   std::shared_ptr<storage::kv_client> open(const std::string &path);
 
   /**
-   * @brief Open or create, begin lease and create kv_client
-   * @param path Path
-   * @param backing_path Backing path
+   * @brief Open or create, begin lease
+   * @param path File path
+   * @param backing_path File backing path
    * @param num_blocks Number of blocks
-   * @param chain_length Chain length
+   * @param chain_length Replication chain length
    * @param flags Flags
    * @param permissions Permissions
    * @param tags Tags
-   * @return KV_client
+   * @return Key value client
    */
 
   std::shared_ptr<storage::kv_client> open_or_create(const std::string &path,
@@ -97,23 +97,23 @@ class mmux_client {
                                                      int32_t permissions = directory::perms::all(),
                                                      const std::map<std::string, std::string> &tags = {});
   /**
-   * @brief Open a file and start kv_listener
-   * @param path Path
-   * @return KV_listener
+   * @brief Open a file and start key value listener
+   * @param path File path
+   * @return Key value listener
    */
 
   std::shared_ptr<storage::kv_listener> listen(const std::string &path);
 
   /**
-   * @brief End scope of path
-   * @param path Path
+   * @brief End scope of file
+   * @param path File path
    */
 
   void close(const std::string &path);
 
   /**
-   * @brief End scope and remove it from directory
-   * @param path Path
+   * @brief End scope and remove file from directory
+   * @param path File path
    */
 
   void remove(const std::string &path);
@@ -127,7 +127,7 @@ class mmux_client {
   void sync(const std::string &path, const std::string &dest);
 
   /**
-   * @brief Write all dirty blocks back to persistent storage and clear the block
+   * @brief Write all dirty blocks back to persistent storage and clear the blocks
    * @param path File path
    * @param dest File backing path
    */

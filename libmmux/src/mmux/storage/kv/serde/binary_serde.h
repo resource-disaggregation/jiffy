@@ -5,25 +5,25 @@
 
 namespace mmux {
 namespace storage {
-/* Binary serialization and deserialization class
- * Inherited from serde */
+/* Binary serializer/deserializer class
+ * Inherited from serde class */
 class binary_serde : public serde {
  public:
   binary_serde() = default;
   /**
    * @brief Binary serialization
-   * @param table Lock hash table
-   * @param out Ostream
-   * @return Ostream position
+   * @param table Locked hash table
+   * @param out Output stream
+   * @return Output stream position
    */
 
   size_t serialize(const block_type &table, std::shared_ptr<std::ostream> out) override;
 
   /**
    * @brief Binary deserialization
-   * @param in Istream
-   * @param table Lock hash table
-   * @return Istream position
+   * @param in Input stream
+   * @param table Locked hash table
+   * @return Input stream position
    */
 
   size_t deserialize(std::shared_ptr<std::istream> in, block_type &table) override;

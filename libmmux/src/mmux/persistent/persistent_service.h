@@ -21,15 +21,15 @@ class persistent_service {
   virtual std::string URI() = 0;
 
   /**
-   * @brief  Fetch serialization option
-   * @return Serialization option
+   * @brief  Fetch custom serializer/deserializer
+   * @return Custom serializer/deserializer
    */
   std::shared_ptr<storage::serde> serde() {
     return ser_;
   }
 
  private:
-  /* Serialization option */
+  /* Custom serializer/deserializer */
   std::shared_ptr<storage::serde> ser_;
 };
 

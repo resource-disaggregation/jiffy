@@ -15,10 +15,10 @@ class directory_server {
 
   /**
    * @brief Create a directory server
-   * @param shard server's directory tree
+   * @param shard Directory tree
    * @param address socket address
-   * @param port socket port
-   * @return TThreadedServer
+   * @param port socket port number
+   * @return Directory server
    */
 
   static std::shared_ptr<apache::thrift::server::TThreadedServer> create(std::shared_ptr<directory_tree> shard,
