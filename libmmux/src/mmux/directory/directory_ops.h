@@ -63,7 +63,7 @@ class perms {
   static const perms mask;
 
   /**
-   * @brief Default constructor
+   * @brief Constructor
    */
 
   perms() : prms_(0) {}
@@ -76,10 +76,10 @@ class perms {
   explicit perms(uint16_t prms) : prms_(prms) {}
 
   /**
-   * @brief Bitwise &
+   * @brief Bitwise AND operator
    * @param p1 Permission
    * @param p2 Permission
-   * @return Bitwise & result
+   * @return Bitwise AND result
    */
 
   friend inline perms operator&(const perms &p1, const perms &p2) {
@@ -87,10 +87,10 @@ class perms {
   }
 
   /**
-   * @brief Bitwise |
+   * @brief Bitwise OR operator
    * @param p1 Permission
    * @param p2 Permission
-   * @return Bitwise | result
+   * @return Bitwise OR result
    */
 
   friend inline perms operator|(const perms &p1, const perms &p2) {
@@ -98,7 +98,7 @@ class perms {
   }
 
   /**
-   * @brief XOR
+   * @brief XOR operator
    * @param p1 Permission
    * @param p2 Permission
    * @return XOR result
@@ -109,9 +109,9 @@ class perms {
   }
 
   /**
-   * @brief &=
+   * @brief AND assignment operator
    * @param p Permission
-   * @return &= result
+   * @return AND assignment result
    */
 
   perms &operator&=(const perms &p) {
@@ -120,9 +120,9 @@ class perms {
   }
 
   /**
-   * @brief |=
+   * @brief OR assignment operator
    * @param p Permission
-   * @return |= result
+   * @return OR assignment result
    */
 
   perms &operator|=(const perms &p) {
@@ -131,9 +131,9 @@ class perms {
   }
 
   /**
-   * @brief ^=
+   * @brief XOR assignment operator
    * @param p Permission
-   * @return ^= result
+   * @return XOR assignment result
    */
 
   perms &operator^=(const perms &p) {
@@ -142,9 +142,9 @@ class perms {
   }
 
   /**
-   * @brief ~
+   * @brief NOT operator
    * @param p Permission
-   * @return ~ result
+   * @return NOT result
    */
 
   perms operator~() const {
@@ -152,9 +152,9 @@ class perms {
   }
 
   /**
-   * @brief =
+   * @brief Assignment operator
    * @param p Permission
-   * @return = result
+   * @return Assignment result
    */
 
   perms &operator=(uint16_t prms) {
@@ -163,7 +163,7 @@ class perms {
   }
 
   /**
-   * @brief ()
+   * @brief Brackets operator
    * @param p Permission
    * @return Permission
    */
@@ -173,9 +173,9 @@ class perms {
   }
 
   /**
-   * @brief ==
+   * @brief Equal Operator
    * @param p Permission
-   * @return bool value
+   * @return Bool value, true if two equal
    */
 
   bool operator==(const perms &other) const {
@@ -183,9 +183,9 @@ class perms {
   }
 
   /**
-   * @brief !=
+   * @brief Not equal Operator
    * @param p Permission
-   * @return bool value
+   * @return bool value, true if two not equal
    */
 
   bool operator!=(const perms &other) const {
@@ -194,9 +194,9 @@ class perms {
 
   /**
    * @brief Output stream
-   * @param out Ostream
+   * @param out Output stream
    * @param p Permission
-   * @return Ostream
+   * @return Output stream
    */
 
   friend std::ostream &operator<<(std::ostream &out, const perms &p) {
@@ -217,30 +217,33 @@ class perms {
   uint16_t prms_;
 };
 
+/* Permission options */
 enum perm_options {
   replace = 0,
   add = 1,
   remove = 2
 };
-
+/* File types */
 enum file_type {
   none = 0,
   regular = 1,
   directory = 2
 };
 
+/* Storage mode */
 enum storage_mode {
   in_memory = 0,
   in_memory_grace = 1,
   on_disk = 2
 };
 
+/* Chain status */
 enum chain_status {
   stable = 0,
   exporting = 1,
   importing = 2
 };
-/* Replication chain structure */
+/* Replica chain structure */
 struct replica_chain {
   /* Block names */
   std::vector<std::string> block_names;
@@ -250,9 +253,19 @@ struct replica_chain {
   chain_status status;
   /* Storage mode */
   storage_mode mode;
-
+  /**
+   * Default Constructor
+   */
   replica_chain() : mode(storage_mode::in_memory) {}
 
+  /**
+   * Constructor
+   * @param block_names Block names
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
+   * @param status Chain status
+   * @param mode Storage mode
+   */
   replica_chain(const std::vector<std::string> &block_names,
                 int32_t slot_begin,
                 int32_t slot_end,
@@ -265,30 +278,58 @@ struct replica_chain {
     this->mode = mode;
   }
 
+  /**
+   * Constructor
+   * @param block_names Block names
+   */
   replica_chain(const std::vector<std::string> block_names) : mode(storage_mode::in_memory) {
     this->block_names = block_names;
   }
 
+  /**
+   * Fetch slot range string
+   * @return Slot range string
+   */
   const std::string slot_range_string() const {
     return std::to_string(slot_range.first) + "_" + std::to_string(slot_range.second);
   }
 
+  /**
+   * Fetch head block name
+   * @return Head block name
+   */
   const std::string &head() const {
     return block_names.front();
   }
 
+  /**
+   * Fetch tail block name
+   * @return Tail block name
+   */
   const std::string &tail() const {
     return block_names.back();
   }
 
+  /**
+   * Fetch begin slot
+   * @return Begin slot
+   */
   int32_t slot_begin() const {
     return slot_range.first;
   }
 
+  /**
+   * Fetch end slot
+   * @return End slot
+   */
   int32_t slot_end() const {
     return slot_range.second;
   }
 
+  /**
+   * Convert replica chain to string
+   * @return Replica chain string
+   */
   std::string to_string() const {
     std::string out = "<";
     for (const auto &name: block_names) {
@@ -301,10 +342,20 @@ struct replica_chain {
     return out;
   }
 
+  /**
+   * Equal operator
+   * @param other Replica chain to compare with
+   * @return Bool value, true if equal
+   */
   bool operator==(const replica_chain &other) const {
     return block_names == other.block_names && slot_range == other.slot_range;
   }
 
+  /**
+   * Not equal operator
+   * @param other Replica chain to compare with
+   * @return Bool value, true if not equal
+   */
   bool operator!=(const replica_chain &other) const {
     return *this != other;
   }
@@ -313,32 +364,58 @@ struct replica_chain {
 /* File status class */
 class file_status {
  public:
+  /**
+   * Constructor
+   */
   file_status()
       : type_(file_type::none),
         permissions_(),
         last_write_time_(0) {}
-
+  /**
+   * Constructor
+   * @param type File type
+   * @param prms File permissions
+   * @param last_write_time Last write time
+   */
   file_status(file_type type, const perms &prms, std::uint64_t last_write_time)
       : type_(type),
         permissions_(prms),
         last_write_time_(last_write_time) {}
-
+  /**
+   * Fetch file type
+   * @return File type
+   */
   const file_type &type() const {
     return type_;
   }
-
+  /**
+   * Fetch file permissions
+   * @return File permissions
+   */
   const perms &permissions() const {
     return permissions_;
   }
 
+  /**
+   * Set file permissions
+   * @param prms File permissions
+   */
   void permissions(const perms &prms) {
     permissions_ = prms;
   }
 
+  /**
+   * Fetch last write time
+   * @return File last write time
+   */
   const std::uint64_t &last_write_time() const {
     return last_write_time_;
   }
 
+  /**
+   * Set file last write time
+   * @param time File last write time
+   */
   void last_write_time(std::uint64_t time) {
     last_write_time_ = time;
   }
@@ -357,26 +434,47 @@ class directory_entry {
  public:
   directory_entry() = default;
 
+  /**
+   * Constructor
+   * @param name File name
+   * @param status File status
+   */
   directory_entry(std::string name, const file_status &status)
       : name_(std::move(name)),
         status_(status) {}
-
+  /**
+   * Fetch file name
+   * @return File name
+   */
   const std::string &name() const {
     return name_;
   }
-
+  /**
+   * Fetch file type
+   * @return File type
+   */
   const file_type &type() const {
     return status_.type();
   }
-
+  /**
+   * Fetch file permission
+   * @return File permission
+   */
   const perms &permissions() const {
     return status_.permissions();
   }
-
+  /**
+   * Fetch last write time
+   * @return File last write time
+   */
   const std::uint64_t &last_write_time() const {
     return status_.last_write_time();
   }
 
+  /**
+   * Fetch file status
+   * @return File status
+   */
   const file_status &status() const {
     return status_;
   }
@@ -398,8 +496,19 @@ class data_status {
   static const std::size_t MAX_TAG_VALLEN = 256;
   static const std::size_t MAX_NUM_TAGS = 256;
 
+  /**
+   * Constructor
+   */
   data_status() : chain_length_(1), flags_(0) {}
 
+  /**
+   * Constructor
+   * @param backing_path File backing path
+   * @param chain_length Chain length
+   * @param blocks Data blocks
+   * @param flags Flags
+   * @param tags Tags
+   */
   data_status(std::string backing_path,
               std::size_t chain_length,
               std::vector<replica_chain> blocks,
@@ -422,7 +531,7 @@ class data_status {
 
   /**
    * @brief Fetch all block's storage mode
-   * @return Modes
+   * @return Storage modes
    */
 
   std::vector<storage_mode> mode() const {
@@ -435,9 +544,9 @@ class data_status {
   }
 
   /**
-   * @brief Set mode for block
-   * @param block_id Block id
-   * @param mode Mode
+   * @brief Set storage mode for block
+   * @param block_id Block identifier
+   * @param mode Storage mode
    */
 
   void mode(size_t block_id, storage_mode mode) {
@@ -445,8 +554,8 @@ class data_status {
   }
 
   /**
-   * @brief Set mode for all blocks
-   * @param mode Mode
+   * @brief Set storage mode for all blocks
+   * @param mode Storage mode
    */
 
   void mode(storage_mode mode) {
@@ -458,7 +567,7 @@ class data_status {
   /**
    * @brief Mark block as dumped
    * Mark on disk and clear
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @return Block names
    */
 
@@ -471,7 +580,7 @@ class data_status {
 
   /**
    * @brief Mark block as loaded
-   * @param block_id Block id
+   * @param block_id Block identifier
    * @param chain Block chain
    */
 
@@ -525,9 +634,9 @@ class data_status {
   }
 
   /**
-   * @brief Find replication chain in data blocks
-   * @param chain Replication chain
-   * @return Replication chain offset
+   * @brief Find replica chain in data blocks
+   * @param chain Replica chain
+   * @return Replica chain offset
    */
 
   std::size_t find_replica_chain(const replica_chain &chain) {
@@ -539,7 +648,7 @@ class data_status {
   }
 
   /**
-   * @brief Add data blocks to data blocks
+   * @brief Add data blocks
    * @param block Blocks
    * @param i Data block offset
    */
@@ -560,7 +669,7 @@ class data_status {
   /**
    * @brief Set data block
    * @param i Data block offset
-   * @param chain Replication chain
+   * @param chain Replica chain
    */
 
   void set_data_block(std::size_t i, replica_chain &&chain) {
@@ -570,7 +679,7 @@ class data_status {
   /**
    * @brief Fetch data block
    * @param i Data block offset
-   * @return Replication chain
+   * @return Replica chain
    */
 
   const replica_chain &get_data_block(std::size_t i) const {
@@ -610,7 +719,7 @@ class data_status {
   }
 
   /**
-   * @brief Count slot numbers of block
+   * @brief Count block slot numbers
    * @param i Data block offset
    * @return Number of slots
    */
@@ -675,8 +784,8 @@ class data_status {
   }
 
   /**
-   * @brief Form all data info into string
-   * @return String of data info
+   * @brief Form all data information into string
+   * @return String of data information
    */
 
   std::string to_string() const {
@@ -743,7 +852,7 @@ class data_status {
 
   /**
    * @brief Check if data is pinned
-   * @return Bool value
+   * @return Bool value, true if data is pinned
    */
 
   bool is_pinned() const {
@@ -752,7 +861,7 @@ class data_status {
 
   /**
    * @brief Check if data is static provisioned
-   * @return Bool value
+   * @return Bool value, true if data is static provisioned
    */
 
   bool is_static_provisioned() const {
@@ -761,7 +870,7 @@ class data_status {
 
   /**
    * @brief Check if data is mapped
-   * @return Bool value
+   * @return Bool value, true if data is mapped
    */
 
   bool is_mapped() const {
@@ -771,7 +880,7 @@ class data_status {
  private:
   /* Backing path */
   std::string backing_path_;
-  /* Replication chain */
+  /* Replica chain */
   std::size_t chain_length_;
   /* Data blocks */
   std::vector<replica_chain> data_blocks_;

@@ -17,8 +17,8 @@ class lease_renewal_worker {
 
   /**
    * @brief Constructor
-   * @param host Socket host
-   * @param port Socket port
+   * @param host Lease server hostname
+   * @param port Port number
    */
 
   lease_renewal_worker(const std::string &host, int port);
@@ -43,23 +43,23 @@ class lease_renewal_worker {
   void stop();
 
   /**
-   * @brief Add file path to to_renew list if file path doesn't already exist in the list
+   * @brief Add file path to to renew list if file path doesn't exist in the list
    * @param path File path
    */
 
   void add_path(const std::string &path);
 
   /**
-   * @brief Remove path from to_renew list
+   * @brief Remove path from to renew list
    * @param path File path
    */
 
   void remove_path(const std::string &path);
 
   /**
-   * @brief Check if path is already in to_renew list
+   * @brief Check if path is already in to renew list
    * @param path File path
-   * @return Bool value
+   * @return Bool value, true if path already in to renew list
    */
 
   bool has_path(const std::string &path);

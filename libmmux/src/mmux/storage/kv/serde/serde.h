@@ -5,7 +5,7 @@
 
 namespace mmux {
 namespace storage {
-
+/* Virtual class for Custom serializer/deserializer */
 class serde {
  public:
   typedef locked_hash_table_type block_type;

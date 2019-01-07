@@ -55,7 +55,7 @@ class notification_worker {
   mailbox_t &controls_;
   /* Atomic boolean stop */
   std::atomic_bool stop_;
-  /* worker thread */
+  /* Worker thread */
   std::thread worker_;
   /* Processor */
   processor_ptr_t processor_;

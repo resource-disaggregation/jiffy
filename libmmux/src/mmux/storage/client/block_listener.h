@@ -29,25 +29,25 @@ class block_listener {
   ~block_listener();
 
   /**
-   * @brief Constuctor
-   * @param host Host
+   * @brief Constructor
+   * @param host Notification server hostname
    * @param port Port number
-   * @param notifications Notifications
+   * @param notifications Notification mailbox
    * @param controls Controls
    */
 
   block_listener(const std::string &host, int port, mailbox_t &notifications, mailbox_t &controls);
 
   /**
-   * @brief Connect host
-   * @param host Host
+   * @brief Connect notification server
+   * @param host Notification server hostname
    * @param port Port number
    */
 
   void connect(const std::string &host, int port);
 
   /**
-   * @brief Disconnect host
+   * @brief Disconnect server
    */
 
   void disconnect();
@@ -60,25 +60,31 @@ class block_listener {
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol();
 
   /**
-   * @brief Subscribe for block on operation type
-   * @param block_id Block id
+   * @brief Subscribe for block on operation types
+   * @param block_id Block identifier
    * @param ops Operation type
    */
 
   void subscribe(int32_t block_id, const std::vector<std::string> &ops);
 
   /**
-   * @brief Unsubscribe for block on operation type
-   * @param block_id Block id
+   * @brief Unsubscribe for block on operation types
+   * @param block_id Block identifier
    * @param ops Operation type
    */
 
   void unsubscribe(int32_t block_id, const std::vector<std::string> &ops);
 
  private:
-  /* Notifications */
+  /* Notification mailbox
+   * The notification mailbox is like a notification
+   * buffer as to prevent client from being overwhelmed
+   */
   mailbox_t &notifications_;
-  /* TODO */
+  /* Control mailbox
+   * The control mailbox is a log for subscribe and
+   * unsubscribe control operations
+   */
   mailbox_t &controls_;
 
   /* Socket */

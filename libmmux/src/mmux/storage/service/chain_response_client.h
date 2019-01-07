@@ -20,7 +20,7 @@ class chain_response_client {
   explicit chain_response_client(std::shared_ptr<::apache::thrift::protocol::TProtocol> prot);
 
   /**
-   * @brief Check if chain response serviceClient is set
+   * @brief Check if chain response service client is set
    * @return Bool value, true if set
    */
 
@@ -28,20 +28,20 @@ class chain_response_client {
 
   /**
    * @brief Reset client protocol
-   * Construct a new chain response serviceClient
+   * Construct a new chain response service client
    * @param prot Protocol
    */
 
   void reset_prot(std::shared_ptr<::apache::thrift::protocol::TProtocol> prot);
 
   /**
-   * @brief TODO
-   * @param seq
+   * @brief Acknowledge previous block
+   * @param seq Sequence identifier
    */
 
   void ack(const sequence_id &seq);
  private:
-  /* Chain response serviceClient */
+  /* Chain response service client */
   std::unique_ptr<thrift_client> client_{};
 };
 

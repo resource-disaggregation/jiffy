@@ -11,7 +11,7 @@ namespace storage {
  * This map records all the clients that are waiting for a specific operation
  *  on the block. When the operation is done, the block will send a notification
  *  in order to let the client get the right data at right time
- * */
+ */
 class subscription_map {
  public:
   /**
@@ -22,7 +22,6 @@ class subscription_map {
 
   /**
    * @brief Add operations to subscription map
-   * The subscription service client will generate a response
    * @param ops Operations
    * @param client Subscription service client
    */
@@ -31,10 +30,9 @@ class subscription_map {
 
   /**
    * @brief Remove a subscription from subscription map
-   * If inform is true, subscription service client will generate a response
    * @param ops Operations
    * @param client Subscription service client
-   * @param inform Bool value that indicates inform or not
+   * @param inform Bool value. true if informed
    */
 
   void remove_subscriptions(const std::vector<std::string> &ops,
@@ -56,9 +54,9 @@ class subscription_map {
   void clear();
 
  private:
-  /* Subscription mapp operation mutex */
+  /* Subscription map operation mutex */
   std::mutex mtx_{};
-  /* Subscription map TODO map or unordered map ??*/
+  /* Subscription map */
   std::map<std::string, std::set<std::shared_ptr<subscription_serviceClient>>> subs_{};
 };
 

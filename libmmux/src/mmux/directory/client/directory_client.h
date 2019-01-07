@@ -24,22 +24,22 @@ class directory_client : public directory_interface {
 
   /**
    * @brief Constructor
-   * @param host Service host
-   * @param port Service port number
+   * @param hostname Directory server hostname
+   * @param port Port number
    */
 
   directory_client(const std::string &hostname, int port);
 
   /**
-   * @brief Connect service
-   * @param host Service host
-   * @param port Service port number
+   * @brief Connect server
+   * @param hostname Directory server hostname
+   * @param port Port number
    */
 
   void connect(const std::string &hostname, int port);
 
   /**
-   * @brief Disconnect service
+   * @brief Disconnect server
    */
 
   void disconnect();
@@ -59,7 +59,7 @@ class directory_client : public directory_interface {
   void create_directories(const std::string &path) override;
 
   /**
-   * @brief Open file
+   * @brief Open a file
    * @param path File path
    * @return Data status
    */
@@ -71,7 +71,7 @@ class directory_client : public directory_interface {
    * @param path File path
    * @param backing_path File backing path
    * @param num_blocks Number of blocks
-   * @param chain_length Replication chain length
+   * @param chain_length Replica chain length
    * @param flags Flag arguments
    * @param permissions Permissions
    * @param tags Tag arguments
@@ -91,7 +91,7 @@ class directory_client : public directory_interface {
    * @param path File path
    * @param backing_path Backing_path
    * @param num_blocks Number of blocks
-   * @param chain_length Replication chain length
+   * @param chain_length Replica chain length
    * @param flags Flag arguments
    * @param permissions Permissions
    * @param tags Tag arguments
@@ -109,13 +109,13 @@ class directory_client : public directory_interface {
   /**
    * @brief Check if the file exists
    * @param path File path
-   * @return Bool value
+   * @return Bool value, true if exists
    */
 
   bool exists(const std::string &path) const override;
 
   /**
-   * @brief Fetch last write time of file
+   * @brief Fetch last write time of a file
    * @param path File path
    * @return Last write time
    */
@@ -123,9 +123,9 @@ class directory_client : public directory_interface {
   std::uint64_t last_write_time(const std::string &path) const override;
 
   /**
-   * @brief Fetch permission of a file
+   * @brief Fetch permissions of a file
    * @param path File path
-   * @return Permission
+   * @return Permissions
    */
 
   perms permissions(const std::string &path) override;
@@ -210,36 +210,36 @@ class directory_client : public directory_interface {
   void add_tags(const std::string &path, const std::map<std::string, std::string> &tags) override;
 
   /**
-   * @brief Check if path is regular file
+   * @brief Check if file is regular file
    * @param path File path
-   * @return Bool value
+   * @return Bool value, true if file is regular file
    */
 
   bool is_regular_file(const std::string &path) override;
 
   /**
-   * @brief Check if path is directory
+   * @brief Check if file is directory
    * @param path Directory path
-   * @return Bool value
+   * @return Bool value, true if file is directory
    */
 
   bool is_directory(const std::string &path) override;
 
   // Management Ops
   /**
-   * @brief Resolve failures using replication chain
+   * @brief Resolve failures using replica chain
    * @param path File path
-   * @param chain Replication chain
-   * @return Replication chain
+   * @param chain Replica chain
+   * @return Replica chain
    */
 
   replica_chain resolve_failures(const std::string &path, const replica_chain &chain) override;
 
   /**
-   * @brief Add a new replication to chain
+   * @brief Add a new replica to chain
    * @param path File path
-   * @param chain Replication chain
-   * @return Replication chain
+   * @param chain Replica chain
+   * @return Replica chain
    */
 
   replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) override;

@@ -18,7 +18,7 @@ class block_request_handler_factory : public block_request_serviceIfFactory {
 
   /**
    * @brief Fetch block request handler
-   * @param connInfo Connection info
+   * @param connInfo Connection information
    * @return Block request handler
    */
 
@@ -35,7 +35,7 @@ class block_request_handler_factory : public block_request_serviceIfFactory {
  public:
   /* Data blocks */
   std::vector<std::shared_ptr<chain_module>> &blocks_;
-  /* Client id generator, starts at 1 */
+  /* Client identifier generator, starts at 1 */
   std::atomic<int64_t> client_id_gen_;
 };
 

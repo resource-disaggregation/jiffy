@@ -26,16 +26,26 @@ enum log_level {
 #else
 #define LOG(level) logger(level, __func__)
 #endif
-
+/* Logger class */
 class logger {
  public:
   static log_level LOG_LEVEL;
+
+  /**
+   * @brief Constructor
+   * @param level Log level
+   * @param fname Log function name
+   */
 
   explicit logger(log_level level, const std::string &fname) : opened_(false), msg_level_(level) {
     os_ << time_utils::current_date_time();
     os_ << " " << to_string(level);
     os_ << " " << fname << " ";
   }
+
+  /**
+   * @brief Virtual destructor
+   */
 
   virtual ~logger() {
     if (opened_) {
@@ -47,6 +57,12 @@ class logger {
   }
 
   template<typename T>
+  /**
+   * @brief << operator
+   * @tparam T Log message type
+   * @param msg Log message
+   * @return Logger
+   */
   logger &operator<<(const T &msg) {
     if (msg_level_ >= LOG_LEVEL) {
       os_ << msg;
@@ -56,6 +72,12 @@ class logger {
   }
 
  private:
+  /**
+   * @brief Convert log level to string
+   * @param level Log level
+   * @return String
+   */
+
   std::string to_string(const log_level level) {
     switch (level) {
       case log_level::trace:return "TRACE";
@@ -67,17 +89,29 @@ class logger {
       default:return "";
     }
   }
-
+  /* Bool value, true if logger is opened */
   bool opened_;
+  /* String stream */
   std::ostringstream os_;
+  /* Log message level */
   log_level msg_level_;
 };
-
+/* Log utility class */
 class log_utils {
  public:
+  /**
+   * @brief Log thrift message
+   * @param msg Thrift message
+   */
+
   static void log_thrift_msg(const char *msg) {
     logger(info, "Thrift") << msg;
   }
+
+  /**
+   * @brief Configure log level
+   * @param level Log level
+   */
 
   static void configure_log_level(log_level level) {
     logger::LOG_LEVEL = level;

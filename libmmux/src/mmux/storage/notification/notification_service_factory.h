@@ -21,7 +21,7 @@ class notification_service_factory: public notification_serviceIfFactory {
 
   /**
    * @brief Fetch notification service handler
-   * @param conn_info Connection info
+   * @param conn_info Connection information
    * @return Notification service handler
    */
 

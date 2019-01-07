@@ -43,26 +43,57 @@ class atomic_unique_ptr {
 };
 
 template<typename T>
+/* Event class */
 class event {
  public:
+  /**
+   * @brief Constructor
+   */
+
   explicit event() : event_data_() {}
+
+  /**
+   * @brief Check if event data is set
+   * @return Bool value, true if event data is set
+   */
 
   bool is_set() const {
     return event_data_.get() != nullptr;
   }
 
+  /**
+   * @brief Fetch event data
+   * @return Event data
+   */
+
   const T &get() const {
     return *(event_data_.get());
   }
+
+  /**
+   * @brief Parenthesis operator
+   * @param val Event data value
+   */
 
   void operator()(const T& val) {
     set(val);
   }
 
+  /**
+   * @brief Set event data and notify all waiting condition variable
+   * @param val Event data to be set
+   */
+
   void set(const T &val) {
     event_data_ = std::make_unique<T>(val);
     cv_.notify_all();
   }
+
+  /**
+   * @brief Wait for timeout time
+   * @param timeout_ms timeout
+   * @return Bool value, true if event data is set
+   */
 
   bool wait(int64_t timeout_ms) {
     using namespace std::chrono_literals;
@@ -72,6 +103,10 @@ class event {
     });
   }
 
+  /**
+   * @brief Wait without time out
+   */
+
   void wait() {
     std::unique_lock<std::mutex> cv_lock(mtx_);
     cv_.wait(cv_lock, [this]() -> bool {
@@ -80,8 +115,11 @@ class event {
   }
 
  private:
+  /* Atomic unique pointer to event data */
   atomic_unique_ptr<T> event_data_;
+  /* Event mutex */
   std::mutex mtx_;
+  /* Event condition variable */
   std::condition_variable cv_;
 };
 

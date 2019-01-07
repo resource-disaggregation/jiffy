@@ -7,7 +7,7 @@
 
 namespace mmux {
 namespace persistent {
-
+/* Persistent service virtual class */
 class persistent_service {
  public:
   persistent_service(std::shared_ptr<storage::serde> ser): ser_(std::move(ser)) {}
@@ -20,11 +20,16 @@ class persistent_service {
 
   virtual std::string URI() = 0;
 
+  /**
+   * @brief  Fetch custom serializer/deserializer
+   * @return Custom serializer/deserializer
+   */
   std::shared_ptr<storage::serde> serde() {
     return ser_;
   }
 
  private:
+  /* Custom serializer/deserializer */
   std::shared_ptr<storage::serde> ser_;
 };
 

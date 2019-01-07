@@ -6,18 +6,18 @@
 
 namespace mmux {
 namespace storage {
-/* */
+/* Buffered transport factory class */
 class BufferedTransportFactory : public apache::thrift::transport::TTransportFactory {
  public:
   /**
-   * @brief
-   * @param buffer_size
+   * @brief Constructor
+   * @param buffer_size Buffer size
    */
 
   explicit BufferedTransportFactory(uint32_t buffer_size) : buffer_size_(buffer_size) {}
 
   /**
-   * @brief
+   * @brief Virtual destructor
    */
 
   virtual ~BufferedTransportFactory() {}
@@ -33,7 +33,7 @@ class BufferedTransportFactory : public apache::thrift::transport::TTransportFac
   }
 
  private:
-  /* */
+  /* Buffer size */
   uint32_t buffer_size_;
 };
 }

@@ -21,22 +21,22 @@ class block_advertisement_client {
 
   /**
    * @brief Constructor
-   * @param host Server host
-   * @param port Server port
+   * @param hostname Block allocation server hostname
+   * @param port port number
    */
 
   block_advertisement_client(const std::string &hostname, int port);
 
   /**
-   * @brief Connect client
-   * @param host Server host
-   * @param hort Server port
+   * @brief Connect Block allocation server
+   * @param hostname Block allocation server hostname
+   * @param port Port number
    */
 
   void connect(const std::string &hostname, int port);
 
   /**
-   * @brief Disconnect client
+   * @brief Disconnect server
    */
 
   void disconnect();

@@ -25,35 +25,41 @@ class sync_worker;
 /* Directory tree node virtual class */
 class ds_node {
  public:
+
+  /**
+   * Constructor
+   * @param name Node name
+   * @param status File status
+   */
   explicit ds_node(std::string name, file_status status)
       : name_(std::move(name)), status_(status) {}
 
   virtual ~ds_node() = default;
 
   /**
-   * @brief Fetch node's name
-   * @return Node's name
+   * @brief Fetch node name
+   * @return Node name
    */
 
   const std::string &name() const { return name_; }
 
   /**
-   * @brief Set node's name
-   * @param name Name to be set
+   * @brief Set node name
+   * @param name Name
    */
 
   void name(const std::string &name) { name_ = name; }
 
   /**
    * @brief Check if node is directory
-   * @return Bool variable
+   * @return Bool variable, true if node is directory
    */
 
   bool is_directory() const { return status_.type() == file_type::directory; }
 
   /**
    * @brief Check if node is regular file
-   * @return Bool variable
+   * @return Bool variable, true if node is regular file
    */
 
   bool is_regular_file() const { return status_.type() == file_type::regular; }
@@ -65,8 +71,8 @@ class ds_node {
   file_status status() const { return status_; }
 
   /**
-   * @brief Collect entry of file
-   * @return File entry
+   * @brief Collect entry of Directory
+   * @return Directory entry
    */
   directory_entry entry() const { return directory_entry(name_, status_); }
 
@@ -124,7 +130,7 @@ class ds_node {
    * @param path File path
    * @param backing_path File backing path
    * @param storage Storage
-   * @param allocator Allocator
+   * @param allocator Block allocator
    */
 
   virtual void load(const std::string &path,
@@ -161,14 +167,14 @@ class ds_file_node : public ds_node {
       : ds_node(name, file_status(file_type::regular, perms(perms::all), utils::time_utils::now_ms())),
         dstatus_{} {}
   /**
-   * @brief Constructor function
+   * @brief Constructor
    * @param name File name
    * @param backing_path File backing_path
    * @param chain_length Chain length
    * @param blocks Number of blocks
-   * @param flags Flag arguments
+   * @param flags Flags
    * @param permissions Permissions
-   * @param tags Key and value
+   * @param tags Tags
    */
   ds_file_node(const std::string &name,
                const std::string &backing_path,
@@ -203,10 +209,7 @@ class ds_file_node : public ds_node {
 
   /**
    * @brief Fetch storage mode
-   * in_memory = 0,
-   * in_memory_grace = 1,
-   * on_disk = 2
-   * @return Storage mode vector
+   * @return Storage mode
    */
 
   std::vector<storage_mode> mode() const {
@@ -216,7 +219,7 @@ class ds_file_node : public ds_node {
 
   /**
    * @brief Set new storage mode
-   * @param i Block id
+   * @param i Block identifier
    * @param m New storage mode
    */
 
@@ -236,7 +239,7 @@ class ds_file_node : public ds_node {
 
   /**
    * @brief Fetch backing path of file
-   * @return Backing path
+   * @return File backing path
    */
 
   const std::string &backing_path() const {
@@ -246,7 +249,7 @@ class ds_file_node : public ds_node {
 
   /**
    * @brief Set prefix backing path
-   * @param prefix Backing path
+   * @param prefix Prefix backing path
    */
 
   void backing_path(const std::string &prefix) {
@@ -286,7 +289,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * @brief Add tags to file, passing arguments in pairs
+   * @brief Add tags to file
    * @param tags Key and value pair
    */
 
@@ -296,7 +299,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * @brief Fetch the tag for a specific key
+   * @brief Fetch the tag for a given key
    * @param key Key
    * @return tag Tag
    */
@@ -338,7 +341,7 @@ class ds_file_node : public ds_node {
 
   /**
    * @brief Check if data is pinned
-   * @return Bool value
+   * @return Bool value, true if data is pinned
    */
 
   bool is_pinned() const {
@@ -348,7 +351,7 @@ class ds_file_node : public ds_node {
 
   /**
    * @brief Check if data is mapped
-   * @return Bool value
+   * @return Bool value, true if data is mapped
    */
 
   bool is_mapped() const {
@@ -359,7 +362,7 @@ class ds_file_node : public ds_node {
   /**
    * @brief Check if data is static provisioned
    * Check static provisioned bit on flag
-   * @return Bool value
+   * @return Bool value, true if static provisioned
    */
 
   bool is_static_provisioned() const {
@@ -369,7 +372,7 @@ class ds_file_node : public ds_node {
 
   /**
    * @brief Fetch data blocks
-   * @return Vector of data blocks
+   * @return Data blocks
    */
 
   const std::vector<replica_chain> &data_blocks() const {
@@ -379,7 +382,7 @@ class ds_file_node : public ds_node {
 
   /**
    * @brief Fetch all data blocks, including the adding blocks
-   * @return Vector of data blocks
+   * @return Data blocks
    */
 
   std::vector<replica_chain> _all_data_blocks() const {
@@ -497,13 +500,13 @@ class ds_file_node : public ds_node {
 
   /**
    * @brief Handle lease expiry
-   * Clear storage of blocks
+   * Clear storage blocks
    * If it is pinned, do nothing
-   * If it is already mapped, then clear the blocks but do not delete the path
+   * If it is already mapped, then clear the blocks but keep the path
    * Else clear the blocks and also the path
    * @param cleared_blocks Cleared blocks
    * @param storage Storage
-   * @return Bool value
+   * @return Bool value, true if blocks and path are all deleted
    */
 
   bool handle_lease_expiry(std::vector<std::string> &cleared_blocks,
@@ -542,7 +545,7 @@ class ds_file_node : public ds_node {
 
   /**
    * @brief Setup old chain and new chain and be ready for splitting
-   * Whenever we want to add a new block(replication) chain to a file,
+   * Whenever we want to add a new block chain to a file,
    * we find the maximum existing block and set up the new block to split the hash
    * range of the maximum block
    * @param storage Storage
@@ -628,8 +631,7 @@ class ds_file_node : public ds_node {
   }
 
   /**
-   * @brief Setup new replication chain to split the slot range block
-   * corresponding to slot_begin and slot_end
+   * @brief Setup new replica chain to split the slot range block
    * @param storage Storage
    * @param allocator Block allocator
    * @param path File path
@@ -715,7 +717,6 @@ class ds_file_node : public ds_node {
 
   /**
    * @brief Finalize slot range split and update file data status
-   * Modify the two new slot ranges
    * @param storage Storage
    * @param ctx From chain and to chain
    */
@@ -804,7 +805,7 @@ class ds_file_node : public ds_node {
    * @brief Finalize slot range merge and update file data status
    * @param storage Storage
    * @param allocator Block allocator
-   * @param ctx Rrom chain and to chain
+   * @param ctx From chain and to chain
    */
 
   void finalize_slot_range_merge(std::shared_ptr<storage::storage_management_ops> storage,
@@ -837,7 +838,7 @@ class ds_file_node : public ds_node {
   mutable std::shared_mutex mtx_;
   /* Data status */
   data_status dstatus_{};
-  /* Replication chain that are currently being added to the file(temporary) */
+  /* Replica chain that are currently being added to the file(temporary) */
   std::vector<replica_chain> adding_{};
 };
 
@@ -857,7 +858,7 @@ class ds_dir_node : public ds_node {
       : ds_node(name, file_status(file_type::directory, perms(perms::all), utils::time_utils::now_ms())) {}
 
   /**
-   * @brief Fetch child corresponding to name
+   * @brief Fetch child node
    * @param name Child name
    * @return Child node
    */
@@ -987,7 +988,7 @@ class ds_dir_node : public ds_node {
 
   /**
    * @brief Return all entries in directory
-   * @return Entries
+   * @return Directory entries
    */
 
   std::vector<directory_entry> entries() const {
@@ -1000,7 +1001,7 @@ class ds_dir_node : public ds_node {
 
   /**
    * @brief Return all entries in directory recursively
-   * @return Entries
+   * @return Directory entries
    */
 
   std::vector<directory_entry> recursive_entries() const {
@@ -1052,7 +1053,7 @@ class ds_dir_node : public ds_node {
 
   /**
    * @brief Check if directory is empty
-   * @return Bool variable
+   * @return Bool variable, true if directory is empty
    */
 
   bool empty() const {
@@ -1062,7 +1063,7 @@ class ds_dir_node : public ds_node {
  private:
   /**
    * @brief Fetch all entries
-   * @param entries Entries vector
+   * @param entries Entries
    */
   void populate_entries(std::vector<directory_entry> &entries) const {
     for (auto &entry: children_) {
@@ -1072,7 +1073,7 @@ class ds_dir_node : public ds_node {
 
   /**
    * @brief Fetch all entries recursively
-   * @param entries Entries vector
+   * @param entries Entries
    */
   void populate_recursive_entries(std::vector<directory_entry> &entries) const {
     for (auto &entry: children_) {
@@ -1139,7 +1140,7 @@ class directory_tree : public directory_interface {
   /**
    * @brief Open a file given file path
    * @param path File path
-   * @return Status of the file
+   * @return Data status
    */
 
   data_status open(const std::string &path) override;
@@ -1149,11 +1150,11 @@ class directory_tree : public directory_interface {
    * @param path File path
    * @param backing_path File backing path
    * @param num_blocks Number of blocks
-   * @param chain_length Replication chain length
-   * @param flags Flag arguments
-   * @param permissions File permission set
-   * @param tags Tag arguments
-   * @return File data status
+   * @param chain_length Replica chain length
+   * @param flags Flags
+   * @param permissions File permissions
+   * @param tags Tags
+   * @return Data status
    */
 
   data_status create(const std::string &path,
@@ -1171,10 +1172,10 @@ class directory_tree : public directory_interface {
    * @param path File path
    * @param backing_path File backing path
    * @param num_blocks Number of blocks
-   * @param chain_length Replication chain length
-   * @param flags Flag arguments
-   * @param permissions File permission set
-   * @param tags Tag arguments
+   * @param chain_length Replica chain length
+   * @param flags Flags
+   * @param permissions File permissions
+   * @param tags Tags
    * @return File data status
    */
 
@@ -1189,7 +1190,7 @@ class directory_tree : public directory_interface {
   /**
    * @brief Check if the file exists
    * @param path File path
-   * @return Bool value
+   * @return Bool value, true if file exists
    */
 
   bool exists(const std::string &path) const override;
@@ -1214,7 +1215,7 @@ class directory_tree : public directory_interface {
    * @brief Set permissions of a file
    * @param path File path
    * @param prms Permission
-   * @param opts Permission options replace, add, remove
+   * @param opts Permission options
    */
 
   void permissions(const std::string &path, const perms &permissions, perm_options opts) override;
@@ -1335,18 +1336,18 @@ class directory_tree : public directory_interface {
   /**
    * @brief Resolve failure
    * @param path File path
-   * @param chain Replication chain
-   * @return Replication chain
+   * @param chain Replica chain
+   * @return Replica chain
    */
 
   replica_chain resolve_failures(const std::string &path,
                                  const replica_chain &chain) override; // TODO: Take id as input
 
   /**
-   * @brief Add a new replication to the chain of the given path
+   * @brief Add a new replica to the chain of the given path
    * @param path File path
-   * @param chain Replication chain
-   * @return Replication chain
+   * @param chain Replica chain
+   * @return Replica chain
    */
 
   replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) override;
@@ -1402,15 +1403,15 @@ class directory_tree : public directory_interface {
   /**
    * @brief Get file or directory node, might be NULL ptr
    * @param path File or directory path
-   * @return Ds_node
+   * @return Node
    */
 
   std::shared_ptr<ds_node> get_node_unsafe(const std::string &path) const;
 
   /**
-   * @brief Get file or directory node, make exception if NULL ptr
+   * @brief Get file or directory node, make exception if NULL pointer
    * @param path File or directory path
-   * @return Ds_node
+   * @return Node
    */
 
   std::shared_ptr<ds_node> get_node(const std::string &path) const;
@@ -1418,7 +1419,7 @@ class directory_tree : public directory_interface {
   /**
    * @brief Get directory node, make exception if not directory
    * @param path Directory path
-   * @return Ds_dir_node
+   * @return Directory node
    */
 
   std::shared_ptr<ds_dir_node> get_node_as_dir(const std::string &path) const;
@@ -1426,14 +1427,13 @@ class directory_tree : public directory_interface {
   /**
    * @brief Get file node, make exception if not file
    * @param path File path
-   * @return Ds_file_node
+   * @return File node
    */
 
   std::shared_ptr<ds_file_node> get_node_as_file(const std::string &path) const;
 
   /**
    * @brief Touch all nodes along the file path
-   * Stop when node doesn't exist
    * @param path File path
    * @param time Time
    * @return File node

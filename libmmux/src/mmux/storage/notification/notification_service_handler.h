@@ -26,8 +26,7 @@ class notification_service_handler : public notification_serviceIf {
    * This function adds all pairs of block and operations in local subscription set
    * and adds all the operation with the subscription service client to the subscription map
    * of the block
-   *
-   * @param block_id Block id number
+   * @param block_id Block identifier
    * @param ops Operations
    */
 
@@ -38,10 +37,8 @@ class notification_service_handler : public notification_serviceIf {
    * This function takes down all the operations that are unsubscribed
    * and clears local subscription, then it removes the subscription in
    * the block's subscription map
-   *
-   * @param block_id Block id, if block id is -1, find block id in local subscription
-   * @param ops Operations, if ops is empty, clear all in local subscription, otherwise
-   * just clear the specific operations
+   * @param block_id Block identifier, if block identifier is -1, find block identifier in local subscription
+   * @param ops Operations, if operation is empty, clear all in local subscription
    */
 
   void unsubscribe(int32_t block_id, const std::vector<std::string> &ops) override;

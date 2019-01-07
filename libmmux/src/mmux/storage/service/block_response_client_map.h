@@ -9,8 +9,8 @@ namespace mmux {
 namespace storage {
 /* Block response client map class
  * This map records all the client that sent request to the block.
- * The map is from client id to block response client
- * */
+ * It maps data from client identifier to block response client
+ */
 class block_response_client_map {
  public:
 
@@ -22,7 +22,7 @@ class block_response_client_map {
 
   /**
    * @brief Add a client to the map
-   * @param client_id Client id
+   * @param client_id Client identifier
    * @param client Block response client
    */
 
@@ -30,14 +30,14 @@ class block_response_client_map {
 
   /**
    * @brief Remove a client from the map
-   * @param client_id Client id number
+   * @param client_id Client identifier
    */
 
   void remove_client(int64_t client_id);
 
   /**
    * @brief Respond to the client
-   * @param seq Request sequence id
+   * @param seq Request sequence identifier
    * @param result Request result
    */
 
@@ -50,7 +50,7 @@ class block_response_client_map {
   void clear();
 
  private:
-  /* TODO no cuckoohash currently */
+  /* Response client map */
   cuckoohash_map<int64_t, std::shared_ptr<block_response_client>> clients_;
 };
 

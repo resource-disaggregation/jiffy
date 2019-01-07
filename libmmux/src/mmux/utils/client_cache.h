@@ -10,6 +10,7 @@ namespace mmux {
 namespace utils {
 
 template<typename C>
+/* Client cache class, a cache for client */
 class client_cache {
  public:
   typedef std::pair<std::string, int> key_type;
@@ -18,7 +19,15 @@ class client_cache {
                      std::shared_ptr<C>> value_type;
   typedef std::map<key_type, value_type> cache_type;
 
+  /**
+   * @brief Constructor
+   */
+
   client_cache() {}
+
+  /**
+   * @brief Destructor
+   */
 
   ~client_cache() {
     for (auto const &entry: cache_) {
@@ -27,6 +36,13 @@ class client_cache {
       }
     }
   }
+
+  /**
+   * @brief Get cache type
+   * @param host Socket hostname
+   * @param port Port number
+   * @return Cache type
+   */
 
   value_type get(const std::string &host, int port) {
     using namespace apache::thrift;
@@ -58,6 +74,7 @@ class client_cache {
   }
 
  private:
+  /* Cache type */
   cache_type cache_;
 };
 

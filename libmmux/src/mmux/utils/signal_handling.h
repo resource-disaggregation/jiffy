@@ -13,7 +13,7 @@
 
 namespace mmux {
 namespace utils {
-
+/* Signal handling class */
 class signal_handling {
  public:
   static const uint32_t MAX_FRAMES = 64;

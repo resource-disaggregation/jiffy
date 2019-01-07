@@ -13,25 +13,41 @@
 
 namespace mmux {
 namespace utils {
-
+/* Command parse exception class */
 class cmd_parse_exception : std::exception {
  public:
+
+  /**
+   * @brief Constructor
+   * @param msg Exception message
+   */
+
   explicit cmd_parse_exception(const std::string &msg) {
     msg_ = msg.c_str();
   }
+
+  /**
+   * @brief Constructor
+   * @param msg Exception message pointer
+   */
 
   explicit cmd_parse_exception(const char *msg) {
     msg_ = msg;
   }
 
+  /**
+   * @brief Fetch exception message
+   * @return Exception message pointer
+   */
   const char *what() const throw() override {
     return msg_;
   }
 
  private:
+  /* Exception message pointer */
   const char *msg_;
 };
-
+/* Command option class */
 class cmd_option {
  public:
   friend class cmd_options;
@@ -56,6 +72,7 @@ class cmd_option {
     }
   }
 
+
   cmd_option &set_required(const bool value) {
     required_ = value;
     default_ = "";
@@ -73,6 +90,7 @@ class cmd_option {
     return *this;
   }
 
+
   std::string desc_str() const {
     std::string desc = desc_;
     if (!default_.empty() && has_arg_ != no_argument)
@@ -84,6 +102,7 @@ class cmd_option {
     desc += "\n";
     return desc;
   }
+
 
   std::string opt_str() const {
     return option_str_;
@@ -108,7 +127,7 @@ class cmd_option {
   std::string default_;
   bool required_;
 };
-
+/* command options class */
 class cmd_options {
  public:
   friend class cmd_parser;
@@ -141,7 +160,7 @@ class cmd_options {
   std::vector<option> lopts_;
   std::map<char, size_t> sopt_to_idx_;
 };
-
+/* Command parser class */
 class cmd_parser {
  public:
   cmd_parser(int argc, char *const *argv, cmd_options &opts) {

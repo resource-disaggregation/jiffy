@@ -29,7 +29,7 @@ void replica_chain_client::disconnect() {
   tail_.disconnect();
 }
 
-const directory::replica_chain & replica_chain_client::chain() const {
+const directory::replica_chain &replica_chain_client::chain() const {
   return chain_;
 }
 
@@ -120,7 +120,7 @@ void replica_chain_client::locked_client::unlock() {
   parent_.run_command(kv_op_id::unlock, {});
 }
 
-const directory::replica_chain & replica_chain_client::locked_client::chain() {
+const directory::replica_chain &replica_chain_client::locked_client::chain() {
   return parent_.chain();
 }
 

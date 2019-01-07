@@ -12,7 +12,7 @@ class lease_expiry_worker {
 
   /**
    * @brief Constructor
-   * @param tree current Directory tree
+   * @param tree Directory tree
    * @param lease_period_ms Worker time period
    * @param grace_period_ms Extended time
    */
@@ -40,7 +40,7 @@ class lease_expiry_worker {
 
   /**
    * @brief Fetch epochs
-   * @return Num_epochs
+   * @return Time epochs
    */
 
   size_t num_epochs() const;
@@ -48,7 +48,7 @@ class lease_expiry_worker {
  private:
 
   /**
-   * @brief Remove lease-expired starting from root
+   * @brief Remove lease expired starting from root
    */
 
   void remove_expired_leases();

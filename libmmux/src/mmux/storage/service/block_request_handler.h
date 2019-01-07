@@ -17,7 +17,7 @@ class block_request_handler : public block_request_serviceIf {
   /**
    * @brief Constructor
    * @param client Block response client
-   * @param client_id_gen Client id generator
+   * @param client_id_gen Client identifier generator
    * @param blocks Data blocks
    */
 
@@ -26,28 +26,28 @@ class block_request_handler : public block_request_serviceIf {
                                  std::vector<std::shared_ptr<chain_module>> &blocks);
 
   /**
-   * @brief Fetch current client_id_gen_ and add one to the atomic pointer
-   * @return Current client_id_gen_
+   * @brief Fetch client identifier and add one to the atomic pointer
+   * @return Client identifier
    */
 
   int64_t get_client_id() override;
 
   /**
    * @brief Register the client with the block
-   * Save the block id and client id to the request handler and
+   * Save the block identifier and client identifier to the request handler and
    * add client to the block response client map
-   * @param block_id Block id number
-   * @param client_id Client id number
+   * @param block_id Block identifier
+   * @param client_id Client identifier
    */
 
   void register_client_id(int32_t block_id, int64_t client_id) override;
 
   /**
-   * @brief Request an command
-   * @param seq Sequence id TODO
-   * @param block_id Block id number
-   * @param cmd_id Command id number
-   * @param arguments Arguments
+   * @brief Request a command, starting from either the head or tail of the chain
+   * @param seq Sequence identifier
+   * @param block_id Block identifier
+   * @param cmd_id Command identifier
+   * @param arguments Command arguments
    */
 
   void command_request(const sequence_id &seq,
@@ -56,15 +56,15 @@ class block_request_handler : public block_request_serviceIf {
                        const std::vector<std::string> &arguments) override;
 
   /**
-   * @brief Fetch the handler's registered block id
-   * @return Registered block id number
+   * @brief Fetch the registered block identifier
+   * @return Registered block identifier
    */
 
   int32_t registered_block_id() const;
 
   /**
-   * @brief Fetch the handler's registered client id
-   * @return Registered client id number
+   * @brief Fetch the registered client identifier
+   * @return Registered client identifier
    */
 
   int64_t registered_client_id() const;
@@ -72,11 +72,11 @@ class block_request_handler : public block_request_serviceIf {
  private:
   /* Block response client */
   std::shared_ptr<block_response_client> client_;
-  /* Registered block id */
+  /* Registered block identifier */
   int32_t registered_block_id_;
-  /* Registered client id */
+  /* Registered client identifier */
   int64_t registered_client_id_;
-  /* Client id generator */
+  /* Client identifier generator */
   std::atomic<int64_t> &client_id_gen_;
   /* Data blocks */
   std::vector<std::shared_ptr<chain_module>> &blocks_;

@@ -6,17 +6,17 @@
 
 namespace mmux {
 namespace storage {
-/* */
+/* Block server class */
 class block_server {
  public:
   /**
    * @brief Create block server
-   * @param blocks Data blocks -> used to create block request handler factory
+   * @param blocks Data blocks
    * @param address Socket address
    * @param port Socket port
-   * @param non_blocking TODO
-   * @param num_io_threads Number of IO threads TODO
-   * @param num_proc_threads Number of process threads
+   * @param non_blocking Bool value, true if non blocking server
+   * @param num_io_threads Number of I/O threads
+   * @param num_proc_threads Number of processing threads
    * @return Block server
    */
 

@@ -22,14 +22,14 @@ class block_allocation_service_factory : public block_allocation_serviceIfFactor
   /**
    * @brief Get block allocation service handler
    * @param conn_info Connection information
-   * @return Handler
+   * @return Block allocation handler
    */
 
   block_allocation_serviceIf *getHandler(const ::apache::thrift::TConnectionInfo &connInfo) override;
 
   /**
    * @brief Release handler
-   * @param handler Handler
+   * @param handler Block allocation handler
    */
 
   void releaseHandler(block_allocation_serviceIf *anIf) override;

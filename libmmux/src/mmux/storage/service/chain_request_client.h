@@ -16,32 +16,30 @@ class chain_request_client {
 
   /**
    * @brief Constructor
-   * @param host Socket host
-   * @param port Socket port number
-   * @param block_id Block id
+   * @param host Chain server hostname
+   * @param port Port number
+   * @param block_id Block identifier
    */
 
   explicit chain_request_client(const std::string &host, int32_t port, int32_t block_id);
 
   /**
    * @brief Destructor
-   * Close transport and set block id to -1
    */
 
   ~chain_request_client();
 
   /**
-   * @brief Open client connection
-   * @param host Socket host number
-   * @param port Socket port number
-   * @param block_id Block id number
+   * @brief Connect server
+   * @param host Chain server host number
+   * @param port Port number
+   * @param block_id Block identifier
    */
 
   void connect(const std::string &host, int port, int32_t block_id);
 
   /**
-   * @brief Close client connection
-   * Set block id to -1
+   * @brief Close connection
    */
 
   void disconnect();
@@ -55,7 +53,7 @@ class chain_request_client {
 
   /**
    * @brief Fetch end point
-   * @return End point string: host + " : " + port
+   * @return End point string
    */
 
   std::string endpoint();
@@ -69,8 +67,8 @@ class chain_request_client {
 
   /**
    * @brief Send a request
-   * @param seq Sequence id
-   * @param cmd_id Command id
+   * @param seq Sequence identifier
+   * @param cmd_id Command identifier
    * @param arguments Arguments
    */
 
@@ -79,18 +77,18 @@ class chain_request_client {
   /**
    * @brief Run command
    * @param _return Return value
-   * @param cmd_id Command id
+   * @param cmd_id Command identifier
    * @param arguments Arguments
    */
 
   void run_command(std::vector<std::string> &_return, int32_t cmd_id, const std::vector<std::string> &arguments);
 
  private:
-  /* Client host number */
+  /* Server hostname */
   std::string host_;
   /* Client port number */
   int32_t port_{};
-  /* Block id */
+  /* Block identifier */
   int32_t block_id_{};
   /* Socket */
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};
