@@ -475,7 +475,7 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
 }
 
 void kv_block::reset() {
-  std::unique_lock lock(metadata_mtx_);
+  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   block_.clear();
   next_->reset("nil");
   path_ = "";
@@ -526,7 +526,7 @@ bool kv_block::sync(const std::string &path) {
 }
 
 bool kv_block::dump(const std::string &path) {
-  std::unique_lock lock(metadata_mtx_);
+  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   bool expected = true;
   bool flushed = false;
   if (dirty_.compare_exchange_strong(expected, false)) {
