@@ -370,23 +370,23 @@ public class JiffyClientTest {
     }
   }
 
-  @Test
-  public void testAutoScale() throws InterruptedException, TException, IOException {
-    startServers(false, true);
-    try (JiffyClient client = directoryServer.connect()) {
-      HashTableClient kv = client.createHashTable("/a/file.txt", "local://tmp", 1, 1);
-      for (int i = 0; i < 2000; i++) {
-        Assert.assertEquals(makeBB("!ok"), kv.put(makeBB(i), makeBB(i)));
-      }
-      Assert.assertEquals(4, client.fs().dstatus("/a/file.txt").data_blocks.size());
-      for (int i = 0; i < 2000; i++) {
-        Assert.assertEquals(makeBB(i), kv.remove(makeBB(i)));
-      }
-      Assert.assertEquals(1, client.fs().dstatus("/a/file.txt").data_blocks.size());
-    } finally {
-      stopServers();
-    }
-  }
+//  @Test
+//  public void testAutoScale() throws InterruptedException, TException, IOException {
+//    startServers(false, true);
+//    try (JiffyClient client = directoryServer.connect()) {
+//      HashTableClient kv = client.createHashTable("/a/file.txt", "local://tmp", 1, 1);
+//      for (int i = 0; i < 2000; i++) {
+//        Assert.assertEquals(makeBB("!ok"), kv.put(makeBB(i), makeBB(i)));
+//      }
+//      Assert.assertEquals(4, client.fs().dstatus("/a/file.txt").data_blocks.size());
+//      for (int i = 0; i < 2000; i++) {
+//        Assert.assertEquals(makeBB(i), kv.remove(makeBB(i)));
+//      }
+//      Assert.assertEquals(1, client.fs().dstatus("/a/file.txt").data_blocks.size());
+//    } finally {
+//      stopServers();
+//    }
+//  }
 
   @Test
   public void testNotifications() throws InterruptedException, IOException, TException {
