@@ -20,7 +20,7 @@ set(THRIFT_GEN_PY "py:no_utf8strings,slots")
 set(THRIFT_GEN_JAVA "java:fullcamel,handle_runtime_exceptions,generated_annotations=undated")
 
 # Generate cpp sources
-thrift_gen(${THRIFT_GEN_CXX} src/block_allocation_service.thrift ../libjiffy/src/jiffy/directory/block/)
+thrift_gen(${THRIFT_GEN_CXX} src/block_registration_service.thrift ../libjiffy/src/jiffy/directory/block/)
 thrift_gen(${THRIFT_GEN_CXX} src/block_service.thrift ../libjiffy/src/jiffy/storage/service/)
 thrift_gen(${THRIFT_GEN_CXX} src/directory_service.thrift ../libjiffy/src/jiffy/directory/fs/)
 thrift_gen(${THRIFT_GEN_CXX} src/lease_service.thrift ../libjiffy/src/jiffy/directory/lease/)

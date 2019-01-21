@@ -4,16 +4,16 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-#include "block_allocation_service.h"
-#ifndef block_allocation_service_TCC
-#define block_allocation_service_TCC
+#include "block_registration_service.h"
+#ifndef block_registration_service_TCC
+#define block_registration_service_TCC
 
 
 namespace jiffy { namespace directory {
 
 
 template <class Protocol_>
-uint32_t block_allocation_service_add_blocks_args::read(Protocol_* iprot) {
+uint32_t block_registration_service_add_blocks_args::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -67,10 +67,10 @@ uint32_t block_allocation_service_add_blocks_args::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t block_allocation_service_add_blocks_args::write(Protocol_* oprot) const {
+uint32_t block_registration_service_add_blocks_args::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("block_allocation_service_add_blocks_args");
+  xfer += oprot->writeStructBegin("block_registration_service_add_blocks_args");
 
   xfer += oprot->writeFieldBegin("block_names", ::apache::thrift::protocol::T_LIST, 1);
   {
@@ -91,10 +91,10 @@ uint32_t block_allocation_service_add_blocks_args::write(Protocol_* oprot) const
 
 
 template <class Protocol_>
-uint32_t block_allocation_service_add_blocks_pargs::write(Protocol_* oprot) const {
+uint32_t block_registration_service_add_blocks_pargs::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("block_allocation_service_add_blocks_pargs");
+  xfer += oprot->writeStructBegin("block_registration_service_add_blocks_pargs");
 
   xfer += oprot->writeFieldBegin("block_names", ::apache::thrift::protocol::T_LIST, 1);
   {
@@ -115,7 +115,7 @@ uint32_t block_allocation_service_add_blocks_pargs::write(Protocol_* oprot) cons
 
 
 template <class Protocol_>
-uint32_t block_allocation_service_add_blocks_result::read(Protocol_* iprot) {
+uint32_t block_registration_service_add_blocks_result::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -157,11 +157,11 @@ uint32_t block_allocation_service_add_blocks_result::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t block_allocation_service_add_blocks_result::write(Protocol_* oprot) const {
+uint32_t block_registration_service_add_blocks_result::write(Protocol_* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("block_allocation_service_add_blocks_result");
+  xfer += oprot->writeStructBegin("block_registration_service_add_blocks_result");
 
   if (this->__isset.ex) {
     xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
@@ -175,7 +175,7 @@ uint32_t block_allocation_service_add_blocks_result::write(Protocol_* oprot) con
 
 
 template <class Protocol_>
-uint32_t block_allocation_service_add_blocks_presult::read(Protocol_* iprot) {
+uint32_t block_registration_service_add_blocks_presult::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -218,7 +218,7 @@ uint32_t block_allocation_service_add_blocks_presult::read(Protocol_* iprot) {
 
 
 template <class Protocol_>
-uint32_t block_allocation_service_remove_blocks_args::read(Protocol_* iprot) {
+uint32_t block_registration_service_remove_blocks_args::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -272,10 +272,10 @@ uint32_t block_allocation_service_remove_blocks_args::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t block_allocation_service_remove_blocks_args::write(Protocol_* oprot) const {
+uint32_t block_registration_service_remove_blocks_args::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("block_allocation_service_remove_blocks_args");
+  xfer += oprot->writeStructBegin("block_registration_service_remove_blocks_args");
 
   xfer += oprot->writeFieldBegin("block_names", ::apache::thrift::protocol::T_LIST, 1);
   {
@@ -296,10 +296,10 @@ uint32_t block_allocation_service_remove_blocks_args::write(Protocol_* oprot) co
 
 
 template <class Protocol_>
-uint32_t block_allocation_service_remove_blocks_pargs::write(Protocol_* oprot) const {
+uint32_t block_registration_service_remove_blocks_pargs::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("block_allocation_service_remove_blocks_pargs");
+  xfer += oprot->writeStructBegin("block_registration_service_remove_blocks_pargs");
 
   xfer += oprot->writeFieldBegin("block_names", ::apache::thrift::protocol::T_LIST, 1);
   {
@@ -320,7 +320,7 @@ uint32_t block_allocation_service_remove_blocks_pargs::write(Protocol_* oprot) c
 
 
 template <class Protocol_>
-uint32_t block_allocation_service_remove_blocks_result::read(Protocol_* iprot) {
+uint32_t block_registration_service_remove_blocks_result::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -362,11 +362,11 @@ uint32_t block_allocation_service_remove_blocks_result::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t block_allocation_service_remove_blocks_result::write(Protocol_* oprot) const {
+uint32_t block_registration_service_remove_blocks_result::write(Protocol_* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("block_allocation_service_remove_blocks_result");
+  xfer += oprot->writeStructBegin("block_registration_service_remove_blocks_result");
 
   if (this->__isset.ex) {
     xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
@@ -380,7 +380,7 @@ uint32_t block_allocation_service_remove_blocks_result::write(Protocol_* oprot) 
 
 
 template <class Protocol_>
-uint32_t block_allocation_service_remove_blocks_presult::read(Protocol_* iprot) {
+uint32_t block_registration_service_remove_blocks_presult::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -422,19 +422,19 @@ uint32_t block_allocation_service_remove_blocks_presult::read(Protocol_* iprot) 
 }
 
 template <class Protocol_>
-void block_allocation_serviceClientT<Protocol_>::add_blocks(const std::vector<std::string> & block_names)
+void block_registration_serviceClientT<Protocol_>::add_blocks(const std::vector<std::string> & block_names)
 {
   send_add_blocks(block_names);
   recv_add_blocks();
 }
 
 template <class Protocol_>
-void block_allocation_serviceClientT<Protocol_>::send_add_blocks(const std::vector<std::string> & block_names)
+void block_registration_serviceClientT<Protocol_>::send_add_blocks(const std::vector<std::string> & block_names)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("add_blocks", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  block_allocation_service_add_blocks_pargs args;
+  block_registration_service_add_blocks_pargs args;
   args.block_names = &block_names;
   args.write(this->oprot_);
 
@@ -444,7 +444,7 @@ void block_allocation_serviceClientT<Protocol_>::send_add_blocks(const std::vect
 }
 
 template <class Protocol_>
-void block_allocation_serviceClientT<Protocol_>::recv_add_blocks()
+void block_registration_serviceClientT<Protocol_>::recv_add_blocks()
 {
 
   int32_t rseqid = 0;
@@ -469,7 +469,7 @@ void block_allocation_serviceClientT<Protocol_>::recv_add_blocks()
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  block_allocation_service_add_blocks_presult result;
+  block_registration_service_add_blocks_presult result;
   result.read(this->iprot_);
   this->iprot_->readMessageEnd();
   this->iprot_->getTransport()->readEnd();
@@ -481,19 +481,19 @@ void block_allocation_serviceClientT<Protocol_>::recv_add_blocks()
 }
 
 template <class Protocol_>
-void block_allocation_serviceClientT<Protocol_>::remove_blocks(const std::vector<std::string> & block_names)
+void block_registration_serviceClientT<Protocol_>::remove_blocks(const std::vector<std::string> & block_names)
 {
   send_remove_blocks(block_names);
   recv_remove_blocks();
 }
 
 template <class Protocol_>
-void block_allocation_serviceClientT<Protocol_>::send_remove_blocks(const std::vector<std::string> & block_names)
+void block_registration_serviceClientT<Protocol_>::send_remove_blocks(const std::vector<std::string> & block_names)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("remove_blocks", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  block_allocation_service_remove_blocks_pargs args;
+  block_registration_service_remove_blocks_pargs args;
   args.block_names = &block_names;
   args.write(this->oprot_);
 
@@ -503,7 +503,7 @@ void block_allocation_serviceClientT<Protocol_>::send_remove_blocks(const std::v
 }
 
 template <class Protocol_>
-void block_allocation_serviceClientT<Protocol_>::recv_remove_blocks()
+void block_registration_serviceClientT<Protocol_>::recv_remove_blocks()
 {
 
   int32_t rseqid = 0;
@@ -528,7 +528,7 @@ void block_allocation_serviceClientT<Protocol_>::recv_remove_blocks()
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  block_allocation_service_remove_blocks_presult result;
+  block_registration_service_remove_blocks_presult result;
   result.read(this->iprot_);
   this->iprot_->readMessageEnd();
   this->iprot_->getTransport()->readEnd();
@@ -540,7 +540,7 @@ void block_allocation_serviceClientT<Protocol_>::recv_remove_blocks()
 }
 
 template <class Protocol_>
-bool block_allocation_serviceProcessorT<Protocol_>::dispatchCall(::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, const std::string& fname, int32_t seqid, void* callContext) {
+bool block_registration_serviceProcessorT<Protocol_>::dispatchCall(::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, const std::string& fname, int32_t seqid, void* callContext) {
   typename ProcessMap::iterator pfn;
   pfn = processMap_.find(fname);
   if (pfn == processMap_.end()) {
@@ -560,7 +560,7 @@ bool block_allocation_serviceProcessorT<Protocol_>::dispatchCall(::apache::thrif
 }
 
 template <class Protocol_>
-bool block_allocation_serviceProcessorT<Protocol_>::dispatchCallTemplated(Protocol_* iprot, Protocol_* oprot, const std::string& fname, int32_t seqid, void* callContext) {
+bool block_registration_serviceProcessorT<Protocol_>::dispatchCallTemplated(Protocol_* iprot, Protocol_* oprot, const std::string& fname, int32_t seqid, void* callContext) {
   typename ProcessMap::iterator pfn;
   pfn = processMap_.find(fname);
   if (pfn == processMap_.end()) {
@@ -580,36 +580,36 @@ bool block_allocation_serviceProcessorT<Protocol_>::dispatchCallTemplated(Protoc
 }
 
 template <class Protocol_>
-void block_allocation_serviceProcessorT<Protocol_>::process_add_blocks(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void block_registration_serviceProcessorT<Protocol_>::process_add_blocks(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("block_allocation_service.add_blocks", callContext);
+    ctx = this->eventHandler_->getContext("block_registration_service.add_blocks", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_allocation_service.add_blocks");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_registration_service.add_blocks");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "block_allocation_service.add_blocks");
+    this->eventHandler_->preRead(ctx, "block_registration_service.add_blocks");
   }
 
-  block_allocation_service_add_blocks_args args;
+  block_registration_service_add_blocks_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "block_allocation_service.add_blocks", bytes);
+    this->eventHandler_->postRead(ctx, "block_registration_service.add_blocks", bytes);
   }
 
-  block_allocation_service_add_blocks_result result;
+  block_registration_service_add_blocks_result result;
   try {
     iface_->add_blocks(args.block_names);
-  } catch (block_allocation_service_exception &ex) {
+  } catch (block_registration_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "block_allocation_service.add_blocks");
+      this->eventHandler_->handlerError(ctx, "block_registration_service.add_blocks");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
@@ -622,7 +622,7 @@ void block_allocation_serviceProcessorT<Protocol_>::process_add_blocks(int32_t s
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "block_allocation_service.add_blocks");
+    this->eventHandler_->preWrite(ctx, "block_registration_service.add_blocks");
   }
 
   oprot->writeMessageBegin("add_blocks", ::apache::thrift::protocol::T_REPLY, seqid);
@@ -632,41 +632,41 @@ void block_allocation_serviceProcessorT<Protocol_>::process_add_blocks(int32_t s
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "block_allocation_service.add_blocks", bytes);
+    this->eventHandler_->postWrite(ctx, "block_registration_service.add_blocks", bytes);
   }
 }
 
 template <class Protocol_>
-void block_allocation_serviceProcessorT<Protocol_>::process_add_blocks(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+void block_registration_serviceProcessorT<Protocol_>::process_add_blocks(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("block_allocation_service.add_blocks", callContext);
+    ctx = this->eventHandler_->getContext("block_registration_service.add_blocks", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_allocation_service.add_blocks");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_registration_service.add_blocks");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "block_allocation_service.add_blocks");
+    this->eventHandler_->preRead(ctx, "block_registration_service.add_blocks");
   }
 
-  block_allocation_service_add_blocks_args args;
+  block_registration_service_add_blocks_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "block_allocation_service.add_blocks", bytes);
+    this->eventHandler_->postRead(ctx, "block_registration_service.add_blocks", bytes);
   }
 
-  block_allocation_service_add_blocks_result result;
+  block_registration_service_add_blocks_result result;
   try {
     iface_->add_blocks(args.block_names);
-  } catch (block_allocation_service_exception &ex) {
+  } catch (block_registration_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "block_allocation_service.add_blocks");
+      this->eventHandler_->handlerError(ctx, "block_registration_service.add_blocks");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
@@ -679,7 +679,7 @@ void block_allocation_serviceProcessorT<Protocol_>::process_add_blocks(int32_t s
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "block_allocation_service.add_blocks");
+    this->eventHandler_->preWrite(ctx, "block_registration_service.add_blocks");
   }
 
   oprot->writeMessageBegin("add_blocks", ::apache::thrift::protocol::T_REPLY, seqid);
@@ -689,41 +689,41 @@ void block_allocation_serviceProcessorT<Protocol_>::process_add_blocks(int32_t s
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "block_allocation_service.add_blocks", bytes);
+    this->eventHandler_->postWrite(ctx, "block_registration_service.add_blocks", bytes);
   }
 }
 
 template <class Protocol_>
-void block_allocation_serviceProcessorT<Protocol_>::process_remove_blocks(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void block_registration_serviceProcessorT<Protocol_>::process_remove_blocks(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("block_allocation_service.remove_blocks", callContext);
+    ctx = this->eventHandler_->getContext("block_registration_service.remove_blocks", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_allocation_service.remove_blocks");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_registration_service.remove_blocks");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "block_allocation_service.remove_blocks");
+    this->eventHandler_->preRead(ctx, "block_registration_service.remove_blocks");
   }
 
-  block_allocation_service_remove_blocks_args args;
+  block_registration_service_remove_blocks_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "block_allocation_service.remove_blocks", bytes);
+    this->eventHandler_->postRead(ctx, "block_registration_service.remove_blocks", bytes);
   }
 
-  block_allocation_service_remove_blocks_result result;
+  block_registration_service_remove_blocks_result result;
   try {
     iface_->remove_blocks(args.block_names);
-  } catch (block_allocation_service_exception &ex) {
+  } catch (block_registration_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "block_allocation_service.remove_blocks");
+      this->eventHandler_->handlerError(ctx, "block_registration_service.remove_blocks");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
@@ -736,7 +736,7 @@ void block_allocation_serviceProcessorT<Protocol_>::process_remove_blocks(int32_
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "block_allocation_service.remove_blocks");
+    this->eventHandler_->preWrite(ctx, "block_registration_service.remove_blocks");
   }
 
   oprot->writeMessageBegin("remove_blocks", ::apache::thrift::protocol::T_REPLY, seqid);
@@ -746,41 +746,41 @@ void block_allocation_serviceProcessorT<Protocol_>::process_remove_blocks(int32_
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "block_allocation_service.remove_blocks", bytes);
+    this->eventHandler_->postWrite(ctx, "block_registration_service.remove_blocks", bytes);
   }
 }
 
 template <class Protocol_>
-void block_allocation_serviceProcessorT<Protocol_>::process_remove_blocks(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+void block_registration_serviceProcessorT<Protocol_>::process_remove_blocks(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("block_allocation_service.remove_blocks", callContext);
+    ctx = this->eventHandler_->getContext("block_registration_service.remove_blocks", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_allocation_service.remove_blocks");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_registration_service.remove_blocks");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "block_allocation_service.remove_blocks");
+    this->eventHandler_->preRead(ctx, "block_registration_service.remove_blocks");
   }
 
-  block_allocation_service_remove_blocks_args args;
+  block_registration_service_remove_blocks_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "block_allocation_service.remove_blocks", bytes);
+    this->eventHandler_->postRead(ctx, "block_registration_service.remove_blocks", bytes);
   }
 
-  block_allocation_service_remove_blocks_result result;
+  block_registration_service_remove_blocks_result result;
   try {
     iface_->remove_blocks(args.block_names);
-  } catch (block_allocation_service_exception &ex) {
+  } catch (block_registration_service_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "block_allocation_service.remove_blocks");
+      this->eventHandler_->handlerError(ctx, "block_registration_service.remove_blocks");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
@@ -793,7 +793,7 @@ void block_allocation_serviceProcessorT<Protocol_>::process_remove_blocks(int32_
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "block_allocation_service.remove_blocks");
+    this->eventHandler_->preWrite(ctx, "block_registration_service.remove_blocks");
   }
 
   oprot->writeMessageBegin("remove_blocks", ::apache::thrift::protocol::T_REPLY, seqid);
@@ -803,33 +803,33 @@ void block_allocation_serviceProcessorT<Protocol_>::process_remove_blocks(int32_
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "block_allocation_service.remove_blocks", bytes);
+    this->eventHandler_->postWrite(ctx, "block_registration_service.remove_blocks", bytes);
   }
 }
 
 template <class Protocol_>
-::apache::thrift::stdcxx::shared_ptr< ::apache::thrift::TProcessor > block_allocation_serviceProcessorFactoryT<Protocol_>::getProcessor(const ::apache::thrift::TConnectionInfo& connInfo) {
-  ::apache::thrift::ReleaseHandler< block_allocation_serviceIfFactory > cleanup(handlerFactory_);
-  ::apache::thrift::stdcxx::shared_ptr< block_allocation_serviceIf > handler(handlerFactory_->getHandler(connInfo), cleanup);
-  ::apache::thrift::stdcxx::shared_ptr< ::apache::thrift::TProcessor > processor(new block_allocation_serviceProcessorT<Protocol_>(handler));
+::apache::thrift::stdcxx::shared_ptr< ::apache::thrift::TProcessor > block_registration_serviceProcessorFactoryT<Protocol_>::getProcessor(const ::apache::thrift::TConnectionInfo& connInfo) {
+  ::apache::thrift::ReleaseHandler< block_registration_serviceIfFactory > cleanup(handlerFactory_);
+  ::apache::thrift::stdcxx::shared_ptr< block_registration_serviceIf > handler(handlerFactory_->getHandler(connInfo), cleanup);
+  ::apache::thrift::stdcxx::shared_ptr< ::apache::thrift::TProcessor > processor(new block_registration_serviceProcessorT<Protocol_>(handler));
   return processor;
 }
 
 template <class Protocol_>
-void block_allocation_serviceConcurrentClientT<Protocol_>::add_blocks(const std::vector<std::string> & block_names)
+void block_registration_serviceConcurrentClientT<Protocol_>::add_blocks(const std::vector<std::string> & block_names)
 {
   int32_t seqid = send_add_blocks(block_names);
   recv_add_blocks(seqid);
 }
 
 template <class Protocol_>
-int32_t block_allocation_serviceConcurrentClientT<Protocol_>::send_add_blocks(const std::vector<std::string> & block_names)
+int32_t block_registration_serviceConcurrentClientT<Protocol_>::send_add_blocks(const std::vector<std::string> & block_names)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("add_blocks", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  block_allocation_service_add_blocks_pargs args;
+  block_registration_service_add_blocks_pargs args;
   args.block_names = &block_names;
   args.write(this->oprot_);
 
@@ -842,7 +842,7 @@ int32_t block_allocation_serviceConcurrentClientT<Protocol_>::send_add_blocks(co
 }
 
 template <class Protocol_>
-void block_allocation_serviceConcurrentClientT<Protocol_>::recv_add_blocks(const int32_t seqid)
+void block_registration_serviceConcurrentClientT<Protocol_>::recv_add_blocks(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -880,7 +880,7 @@ void block_allocation_serviceConcurrentClientT<Protocol_>::recv_add_blocks(const
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
-      block_allocation_service_add_blocks_presult result;
+      block_registration_service_add_blocks_presult result;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
       this->iprot_->getTransport()->readEnd();
@@ -901,20 +901,20 @@ void block_allocation_serviceConcurrentClientT<Protocol_>::recv_add_blocks(const
 }
 
 template <class Protocol_>
-void block_allocation_serviceConcurrentClientT<Protocol_>::remove_blocks(const std::vector<std::string> & block_names)
+void block_registration_serviceConcurrentClientT<Protocol_>::remove_blocks(const std::vector<std::string> & block_names)
 {
   int32_t seqid = send_remove_blocks(block_names);
   recv_remove_blocks(seqid);
 }
 
 template <class Protocol_>
-int32_t block_allocation_serviceConcurrentClientT<Protocol_>::send_remove_blocks(const std::vector<std::string> & block_names)
+int32_t block_registration_serviceConcurrentClientT<Protocol_>::send_remove_blocks(const std::vector<std::string> & block_names)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("remove_blocks", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  block_allocation_service_remove_blocks_pargs args;
+  block_registration_service_remove_blocks_pargs args;
   args.block_names = &block_names;
   args.write(this->oprot_);
 
@@ -927,7 +927,7 @@ int32_t block_allocation_serviceConcurrentClientT<Protocol_>::send_remove_blocks
 }
 
 template <class Protocol_>
-void block_allocation_serviceConcurrentClientT<Protocol_>::recv_remove_blocks(const int32_t seqid)
+void block_registration_serviceConcurrentClientT<Protocol_>::recv_remove_blocks(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -965,7 +965,7 @@ void block_allocation_serviceConcurrentClientT<Protocol_>::recv_remove_blocks(co
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
-      block_allocation_service_remove_blocks_presult result;
+      block_registration_service_remove_blocks_presult result;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
       this->iprot_->getTransport()->readEnd();

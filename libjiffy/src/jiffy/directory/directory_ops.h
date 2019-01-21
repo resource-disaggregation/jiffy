@@ -223,6 +223,7 @@ enum perm_options {
   add = 1,
   remove = 2
 };
+
 /* File types */
 enum file_type {
   none = 0,
@@ -243,6 +244,7 @@ enum chain_status {
   exporting = 1,
   importing = 2
 };
+
 /* Replica chain structure */
 struct replica_chain {
   /* Block names */

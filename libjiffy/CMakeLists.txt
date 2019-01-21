@@ -2,22 +2,22 @@ include_directories(${THRIFT_INCLUDE_DIR} src/)
 add_library(jiffy STATIC
         src/jiffy/client/jiffy_client.cc
         src/jiffy/client/jiffy_client.h
-        src/jiffy/directory/block/block_advertisement_client.cpp
-        src/jiffy/directory/block/block_advertisement_client.h
-        src/jiffy/directory/block/block_allocation_service.cpp
-        src/jiffy/directory/block/block_allocation_service.h
-        src/jiffy/directory/block/block_allocation_service.tcc
-        src/jiffy/directory/block/block_allocation_service_constants.cpp
-        src/jiffy/directory/block/block_allocation_service_constants.h
-        src/jiffy/directory/block/block_allocation_service_factory.cpp
-        src/jiffy/directory/block/block_allocation_service_factory.h
-        src/jiffy/directory/block/block_allocation_service_handler.cpp
-        src/jiffy/directory/block/block_allocation_service_handler.h
-        src/jiffy/directory/block/block_allocation_service_types.cpp
-        src/jiffy/directory/block/block_allocation_service_types.h
-        src/jiffy/directory/block/block_allocation_service_types.tcc
-        src/jiffy/directory/block/block_allocation_server.cpp
-        src/jiffy/directory/block/block_allocation_server.h
+        src/jiffy/directory/block/block_registration_client.cpp
+        src/jiffy/directory/block/block_registration_client.h
+        src/jiffy/directory/block/block_registration_service.cpp
+        src/jiffy/directory/block/block_registration_service.h
+        src/jiffy/directory/block/block_registration_service.tcc
+        src/jiffy/directory/block/block_registration_service_constants.cpp
+        src/jiffy/directory/block/block_registration_service_constants.h
+        src/jiffy/directory/block/block_registration_service_factory.cpp
+        src/jiffy/directory/block/block_registration_service_factory.h
+        src/jiffy/directory/block/block_registration_service_handler.cpp
+        src/jiffy/directory/block/block_registration_service_handler.h
+        src/jiffy/directory/block/block_registration_service_types.cpp
+        src/jiffy/directory/block/block_registration_service_types.h
+        src/jiffy/directory/block/block_registration_service_types.tcc
+        src/jiffy/directory/block/block_registration_server.cpp
+        src/jiffy/directory/block/block_registration_server.h
         src/jiffy/directory/block/block_allocator.h
         src/jiffy/directory/block/file_size_tracker.cpp
         src/jiffy/directory/block/file_size_tracker.h

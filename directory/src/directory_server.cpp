@@ -8,7 +8,7 @@
 #include <jiffy/directory/lease/lease_server.h>
 #include <jiffy/storage/manager/storage_manager.h>
 #include <jiffy/utils/signal_handling.h>
-#include <jiffy/directory/block/block_allocation_server.h>
+#include <jiffy/directory/block/block_registration_server.h>
 #include <jiffy/utils/logger.h>
 #include <jiffy/directory/block/file_size_tracker.h>
 #include <boost/program_options.hpp>
@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
 
   std::exception_ptr alloc_exception = nullptr;
   auto alloc = std::make_shared<random_block_allocator>();
-  auto alloc_server = block_allocation_server::create(alloc, address, block_port);
+  auto alloc_server = block_registration_server::create(alloc, address, block_port);
   std::thread alloc_serve_thread([&alloc_exception, &alloc_server, &failing_thread, &failure_condition] {
     try {
       alloc_server->serve();

@@ -1,13 +1,13 @@
 #ifndef JIFFY_BLOCK_ALLOCATION_SERVICE_FACTORY_H
 #define JIFFY_BLOCK_ALLOCATION_SERVICE_FACTORY_H
 
-#include "block_allocation_service.h"
+#include "block_registration_service.h"
 #include "block_allocator.h"
 
 namespace jiffy {
 namespace directory {
 /* Block allocation service factory class */
-class block_allocation_service_factory : public block_allocation_serviceIfFactory {
+class block_registration_service_factory : public block_registration_serviceIfFactory {
  public:
 
   /**
@@ -15,7 +15,7 @@ class block_allocation_service_factory : public block_allocation_serviceIfFactor
    * @param alloc Block allocator
    */
 
-  explicit block_allocation_service_factory(std::shared_ptr<block_allocator> alloc);
+  explicit block_registration_service_factory(std::shared_ptr<block_allocator> alloc);
 
  private:
 
@@ -25,14 +25,14 @@ class block_allocation_service_factory : public block_allocation_serviceIfFactor
    * @return Block allocation handler
    */
 
-  block_allocation_serviceIf *getHandler(const ::apache::thrift::TConnectionInfo &connInfo) override;
+  block_registration_serviceIf *getHandler(const ::apache::thrift::TConnectionInfo &connInfo) override;
 
   /**
    * @brief Release handler
    * @param handler Block allocation handler
    */
 
-  void releaseHandler(block_allocation_serviceIf *anIf) override;
+  void releaseHandler(block_registration_serviceIf *anIf) override;
 
  private:
   /* Block allocator */

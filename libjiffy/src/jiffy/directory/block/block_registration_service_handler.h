@@ -1,13 +1,13 @@
 #ifndef JIFFY_BLOCK_ALLOCATION_SERVICE_HANDLER_H
 #define JIFFY_BLOCK_ALLOCATION_SERVICE_HANDLER_H
 
-#include "block_allocation_service.h"
+#include "block_registration_service.h"
 #include "block_allocator.h"
 
 namespace jiffy {
 namespace directory {
 /* Block allocation service handler class */
-class block_allocation_service_handler : public block_allocation_serviceIf {
+class block_registration_service_handler : public block_registration_serviceIf {
  public:
 
   /**
@@ -15,7 +15,7 @@ class block_allocation_service_handler : public block_allocation_serviceIf {
    * @param alloc Block allocator
    */
 
-  explicit block_allocation_service_handler(std::shared_ptr<block_allocator> alloc);
+  explicit block_registration_service_handler(std::shared_ptr<block_allocator> alloc);
 
   /**
    * @brief Add blocks
@@ -39,7 +39,7 @@ class block_allocation_service_handler : public block_allocation_serviceIf {
    * @return Exception
    */
 
-  block_allocation_service_exception make_exception(const std::out_of_range &e);
+  block_registration_service_exception make_exception(const std::out_of_range &e);
   /* Block allocator */
   std::shared_ptr<block_allocator> alloc_;
 };

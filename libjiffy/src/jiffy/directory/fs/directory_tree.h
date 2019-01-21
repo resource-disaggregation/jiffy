@@ -22,6 +22,7 @@ namespace directory {
 class lease_expiry_worker;
 class file_size_tracker;
 class sync_worker;
+
 /* Directory tree node virtual class */
 class ds_node {
  public:

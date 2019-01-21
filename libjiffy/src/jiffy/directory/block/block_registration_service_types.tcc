@@ -4,15 +4,15 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-#ifndef block_allocation_service_TYPES_TCC
-#define block_allocation_service_TYPES_TCC
+#ifndef block_registration_service_TYPES_TCC
+#define block_registration_service_TYPES_TCC
 
-#include "block_allocation_service_types.h"
+#include "block_registration_service_types.h"
 
 namespace jiffy { namespace directory {
 
 template <class Protocol_>
-uint32_t block_allocation_service_exception::read(Protocol_* iprot) {
+uint32_t block_registration_service_exception::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -54,10 +54,10 @@ uint32_t block_allocation_service_exception::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t block_allocation_service_exception::write(Protocol_* oprot) const {
+uint32_t block_registration_service_exception::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("block_allocation_service_exception");
+  xfer += oprot->writeStructBegin("block_registration_service_exception");
 
   xfer += oprot->writeFieldBegin("msg", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeString(this->msg);

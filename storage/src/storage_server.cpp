@@ -1,6 +1,6 @@
 #include <atomic>
 #include <iostream>
-#include <jiffy/directory/block/block_advertisement_client.h>
+#include <jiffy/directory/block/block_registration_client.h>
 #include <jiffy/storage/kv/kv_block.h>
 #include <jiffy/storage/manager/storage_management_server.h>
 #include <jiffy/storage/notification/notification_server.h>
@@ -60,8 +60,8 @@ void retract_block_names_and_print_stacktrace(int sig_num) {
   std::string trace = signal_handling::stacktrace();
   LOG(log_level::info) << "Caught signal " << sig_num << ", cleaning up...";
   try {
-    block_advertisement_client client(dir_host, block_port);
-    client.retract_blocks(block_names);
+    block_registration_client client(dir_host, block_port);
+    client.deregister_blocks(block_names);
     client.disconnect();
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to retract blocks: " << e.what()
@@ -251,8 +251,8 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Management server listening on " << address << ":" << mgmt_port;
 
   try {
-    block_advertisement_client client(dir_host, block_port);
-    client.advertise_blocks(block_names);
+    block_registration_client client(dir_host, block_port);
+    client.register_blocks(block_names);
     client.disconnect();
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to advertise blocks: " << e.what()
@@ -367,8 +367,8 @@ int main(int argc, char **argv) {
   }
 
   try {
-    block_advertisement_client client(dir_host, block_port);
-    client.retract_blocks(block_names);
+    block_registration_client client(dir_host, block_port);
+    client.deregister_blocks(block_names);
     client.disconnect();
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to retract blocks: " << e.what()

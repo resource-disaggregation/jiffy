@@ -6,8 +6,9 @@
 
 namespace jiffy {
 namespace directory {
-/* Block allocation server class */
-class block_allocation_server {
+
+/* Block registration server class */
+class block_registration_server {
  public:
 
   /**

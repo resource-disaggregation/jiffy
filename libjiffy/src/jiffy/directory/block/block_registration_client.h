@@ -2,22 +2,22 @@
 #define JIFFY_BLOCK_ALLOCATION_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
-#include "block_allocation_service.h"
+#include "block_registration_service.h"
 
 namespace jiffy {
 namespace directory {
 /* Block advertisement client class */
-class block_advertisement_client {
+class block_registration_client {
  public:
-  typedef block_allocation_serviceClient thrift_client;
+  typedef block_registration_serviceClient thrift_client;
 
-  block_advertisement_client() = default;
+  block_registration_client() = default;
 
   /**
    * @brief Destructor
    */
 
-  ~block_advertisement_client();
+  ~block_registration_client();
 
   /**
    * @brief Constructor
@@ -25,7 +25,7 @@ class block_advertisement_client {
    * @param port port number
    */
 
-  block_advertisement_client(const std::string &hostname, int port);
+  block_registration_client(const std::string &hostname, int port);
 
   /**
    * @brief Connect Block allocation server
@@ -42,18 +42,18 @@ class block_advertisement_client {
   void disconnect();
 
   /**
-   * @brief Advertise all blocks to the directory server
+   * @brief Register blocks with the directory server
    * @param block_names Block names
    */
 
-  void advertise_blocks(const std::vector<std::string> &block_names);
+  void register_blocks(const std::vector<std::string> &block_names);
 
   /**
-   * @brief Remove blocks
+   * @brief De-register blocks with the directory server
    * @param block_names Block names
    */
 
-  void retract_blocks(const std::vector<std::string> &block_names);
+  void deregister_blocks(const std::vector<std::string> &block_names);
 
  private:
   /* Socket */
