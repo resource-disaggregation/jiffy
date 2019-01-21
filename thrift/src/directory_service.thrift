@@ -1,6 +1,6 @@
-namespace cpp mmux.directory
-namespace py mmux.directory
-namespace java mmux.directory
+namespace cpp jiffy.directory
+namespace py jiffy.directory
+namespace java jiffy.directory
 
 typedef i32 rpc_perms
 
