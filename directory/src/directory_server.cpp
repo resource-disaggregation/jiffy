@@ -1,32 +1,32 @@
 #include <iostream>
 #include <vector>
 #include <thread>
-#include <mmux/directory/fs/directory_tree.h>
-#include <mmux/directory/block/random_block_allocator.h>
-#include <mmux/directory/fs/directory_server.h>
-#include <mmux/directory/lease/lease_expiry_worker.h>
-#include <mmux/directory/lease/lease_server.h>
-#include <mmux/storage/manager/storage_manager.h>
-#include <mmux/utils/signal_handling.h>
-#include <mmux/directory/block/block_allocation_server.h>
-#include <mmux/utils/logger.h>
-#include <mmux/directory/block/file_size_tracker.h>
+#include <jiffy/directory/fs/directory_tree.h>
+#include <jiffy/directory/block/random_block_allocator.h>
+#include <jiffy/directory/fs/directory_server.h>
+#include <jiffy/directory/lease/lease_expiry_worker.h>
+#include <jiffy/directory/lease/lease_server.h>
+#include <jiffy/storage/manager/storage_manager.h>
+#include <jiffy/utils/signal_handling.h>
+#include <jiffy/directory/block/block_allocation_server.h>
+#include <jiffy/utils/logger.h>
+#include <jiffy/directory/block/file_size_tracker.h>
 #include <boost/program_options.hpp>
-#include <mmux/directory/fs/sync_worker.h>
+#include <jiffy/directory/fs/sync_worker.h>
 
-using namespace ::mmux::directory;
-using namespace ::mmux::storage;
-using namespace ::mmux::utils;
+using namespace ::jiffy::directory;
+using namespace ::jiffy::storage;
+using namespace ::jiffy::utils;
 
 using namespace ::apache::thrift;
 
 std::string mapper(const std::string& env_var) {
-  if (env_var == "MMUX_DIRECTORY_HOST") return "directory.host";
-  else if (env_var == "MMUX_DIRECTORY_SERVICE_PORT") return "directory.service_port";
-  else if (env_var == "MMUX_LEASE_PORT") return "directory.lease_port";
-  else if (env_var == "MMUX_BLOCK_PORT") return "directory.block_port";
-  else if (env_var == "MMUX_LEASE_PERIOD_MS") return "directory.lease.lease_period_ms";
-  else if (env_var == "MMUX_GRACE_PERIOD_MS") return "directory.lease.grace_period_ms";
+  if (env_var == "JIFFY_DIRECTORY_HOST") return "directory.host";
+  else if (env_var == "JIFFY_DIRECTORY_SERVICE_PORT") return "directory.service_port";
+  else if (env_var == "JIFFY_LEASE_PORT") return "directory.lease_port";
+  else if (env_var == "JIFFY_BLOCK_PORT") return "directory.block_port";
+  else if (env_var == "JIFFY_LEASE_PERIOD_MS") return "directory.lease.lease_period_ms";
+  else if (env_var == "JIFFY_GRACE_PERIOD_MS") return "directory.lease.grace_period_ms";
   return "";
 }
 
@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
     // Configuration files have higher priority than env vars
     std::vector<std::string> config_files;
     if (config_file == "") {
-      config_files = {"conf/mmux.conf", "/etc/mmux/mmux.conf", "/usr/conf/mmux.conf", "/usr/local/conf/mmux.conf"};
+      config_files = {"conf/jiffy.conf", "/etc/jiffy/jiffy.conf", "/usr/conf/jiffy.conf", "/usr/local/conf/jiffy.conf"};
     } else {
       config_files = {config_file};
     }

@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.9)
-project(MemoryMUX C CXX)
+project(Jiffy C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(PROJECT_NAME "MemoryMUX")
+set(PROJECT_NAME "Jiffy")
 set(PROJECT_VERSION_MAJOR "0")
 set(PROJECT_VERSION_MINOR "1")
 set(PROJECT_VERSION_PATCH "0")
@@ -28,7 +28,7 @@ if (GENERATE_THRIFT)
   add_subdirectory(thrift)
 endif ()
 
-add_subdirectory(libmmux)
+add_subdirectory(libjiffy)
 add_subdirectory(directory)
 add_subdirectory(storage)
 
@@ -36,7 +36,7 @@ if (BUILD_TESTS)
   enable_testing(true)
 endif ()
 
-install(FILES conf/mmux.conf DESTINATION conf)
+install(FILES conf/jiffy.conf DESTINATION conf)
 
 # uninstall target
 if (NOT TARGET uninstall)
@@ -73,12 +73,12 @@ configure_file("${CMAKE_CURRENT_LIST_DIR}/README.md" "${CMAKE_CURRENT_BINARY_DIR
 
 set(CPACK_PACKAGE_VENDOR "Anurag Khandelwal")
 set(CPACK_PACKAGE_CONTACT "anuragk@berkeley.edu")
-set(CPACK_PACKAGE_NAME "mmux")
+set(CPACK_PACKAGE_NAME "jiffy")
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MemoryMUX")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Jiffy")
 set(CPACK_RESOURCE_FILE_WELCOME "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_BINARY_DIR}/README.txt")

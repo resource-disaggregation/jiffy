@@ -1,4 +1,4 @@
-namespace cpp mmux.directory
+namespace cpp jiffy.directory
 
 exception block_allocation_service_exception {
   1: string msg,

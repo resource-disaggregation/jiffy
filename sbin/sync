@@ -3,13 +3,13 @@
 sbin="`dirname "$0"`"
 sbin="`cd "$sbin"; pwd`"
 
-. "$sbin/mmux-config.sh"
+. "$sbin/jiffy-config.sh"
 
 # If the servers file is specified in the command line,
 # then it takes precedence over the definition in
-# mmux-env.sh. Save it here.
-if [ -f "$MMUX_SERVERS" ]; then
-  SERVERLIST=`cat "$MMUX_SERVERS"`
+# jiffy-env.sh. Save it here.
+if [ -f "$JIFFY_SERVERS" ]; then
+  SERVERLIST=`cat "$JIFFY_SERVERS"`
 fi
 
 # Check if --config is passed as an argument. It is an optional parameter.
@@ -24,20 +24,20 @@ then
     echo $usage
     exit 1
   else
-    export MMUX_CONF_DIR="$conf_dir"
+    export JIFFY_CONF_DIR="$conf_dir"
   fi
   shift
 fi
 
 if [ "$SERVERLIST" = "" ]; then
-  if [ "$MMUX_SERVERS" = "" ]; then
-    if [ -f "${MMUX_CONF_DIR}/storage.hosts" ]; then
-      SERVERLIST=`cat "${MMUX_CONF_DIR}/storage.hosts"`
+  if [ "$JIFFY_SERVERS" = "" ]; then
+    if [ -f "${JIFFY_CONF_DIR}/storage.hosts" ]; then
+      SERVERLIST=`cat "${JIFFY_CONF_DIR}/storage.hosts"`
     else
       SERVERLIST=localhost
     fi
   else
-    SERVERLIST=`cat "${MMUX_SERVERS}"`
+    SERVERLIST=`cat "${JIFFY_SERVERS}"`
   fi
 fi
 

@@ -3,10 +3,10 @@
 sbin="`dirname "$0"`"
 sbin="`cd "$sbin"; pwd`"
 
-. "$sbin/mmux-config.sh"
+. "$sbin/jiffy-config.sh"
 
-LOG_PATH="$MMUX_PREFIX/log"
+LOG_PATH="$JIFFY_PREFIX/log"
 mkdir -p $LOG_PATH
 
-$sbin/../build/storage/storaged -c $MMUX_CONF_DIR/mmux.conf \
-  2>$LOG_PATH/mmux-storage.stderr 1>$LOG_PATH/mmux-storage.stdout &
+$sbin/../build/storage/storaged -c $JIFFY_CONF_DIR/jiffy.conf \
+  2>$LOG_PATH/jiffy-storage.stderr 1>$LOG_PATH/jiffy-storage.stdout &

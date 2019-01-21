@@ -1,6 +1,6 @@
-namespace cpp mmux.storage
-namespace py mmux.subscription
-namespace java mmux.notification
+namespace cpp jiffy.storage
+namespace py jiffy.subscription
+namespace java jiffy.notification
 
 enum response_type {
   subscribe,

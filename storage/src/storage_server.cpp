@@ -1,29 +1,29 @@
 #include <atomic>
 #include <iostream>
-#include <mmux/directory/block/block_advertisement_client.h>
-#include <mmux/storage/kv/kv_block.h>
-#include <mmux/storage/manager/storage_management_server.h>
-#include <mmux/storage/notification/notification_server.h>
-#include <mmux/storage/service/block_server.h>
-#include <mmux/utils/signal_handling.h>
-#include <mmux/utils/logger.h>
-#include <mmux/storage/service/chain_server.h>
-#include <mmux/storage/service/server_storage_tracker.h>
+#include <jiffy/directory/block/block_advertisement_client.h>
+#include <jiffy/storage/kv/kv_block.h>
+#include <jiffy/storage/manager/storage_management_server.h>
+#include <jiffy/storage/notification/notification_server.h>
+#include <jiffy/storage/service/block_server.h>
+#include <jiffy/utils/signal_handling.h>
+#include <jiffy/utils/logger.h>
+#include <jiffy/storage/service/chain_server.h>
+#include <jiffy/storage/service/server_storage_tracker.h>
 #include <boost/program_options.hpp>
 #include <ifaddrs.h>
 
-using namespace ::mmux::directory;
-using namespace ::mmux::storage;
-using namespace ::mmux::utils;
+using namespace ::jiffy::directory;
+using namespace ::jiffy::storage;
+using namespace ::jiffy::utils;
 
 using namespace ::apache::thrift;
 
 std::string mapper(const std::string &env_var) {
-  if (env_var == "MMUX_DIRECTORY_HOST") return "directory.host";
-  else if (env_var == "MMUX_DIRECTORY_SERVICE_PORT") return "directory.service_port";
-  else if (env_var == "MMUX_BLOCK_PORT") return "directory.block_port";
-  else if (env_var == "MMUX_STORAGE_HOST") return "storage.host";
-  else if (env_var == "MMUX_STORAGE_SERVICE_PORT") return "storage.service_port";
+  if (env_var == "JIFFY_DIRECTORY_HOST") return "directory.host";
+  else if (env_var == "JIFFY_DIRECTORY_SERVICE_PORT") return "directory.service_port";
+  else if (env_var == "JIFFY_BLOCK_PORT") return "directory.block_port";
+  else if (env_var == "JIFFY_STORAGE_HOST") return "storage.host";
+  else if (env_var == "JIFFY_STORAGE_SERVICE_PORT") return "storage.service_port";
   return "";
 }
 
@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
     // Configuration files have higher priority than env vars
     std::vector<std::string> config_files;
     if (config_file == "") {
-      config_files = {"conf/mmux.conf", "/etc/mmux/mmux.conf", "/usr/conf/mmux.conf", "/usr/local/conf/mmux.conf"};
+      config_files = {"conf/jiffy.conf", "/etc/jiffy/jiffy.conf", "/usr/conf/jiffy.conf", "/usr/local/conf/jiffy.conf"};
     } else {
       config_files = {config_file};
     }

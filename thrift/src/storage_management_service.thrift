@@ -1,4 +1,4 @@
-namespace cpp mmux.storage
+namespace cpp jiffy.storage
 
 exception storage_management_exception {
   1: string msg
