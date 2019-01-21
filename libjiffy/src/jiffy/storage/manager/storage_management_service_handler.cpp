@@ -6,92 +6,25 @@ namespace storage {
 storage_management_service_handler::storage_management_service_handler(std::vector<std::shared_ptr<chain_module>> &blocks)
     : blocks_(blocks) {}
 
-void storage_management_service_handler::setup_block(const int32_t block_id,
+void storage_management_service_handler::setup_block(int32_t block_id,
                                                      const std::string &path,
-                                                     const int32_t slot_begin,
-                                                     const int32_t slot_end,
+                                                     const std::string &partition_type,
+                                                     const std::string &partition_name,
+                                                     const std::string &partition_metadata,
                                                      const std::vector<std::string> &chain,
-                                                     bool auto_scale,
-                                                     const int32_t role,
+                                                     int32_t chain_role,
                                                      const std::string &next_block_name) {
   try {
+    // TODO: Allocate data structure of type partition_type
     blocks_.at(static_cast<std::size_t>(block_id))->setup(path,
-                                                          slot_begin,
-                                                          slot_end,
+                                                          partition_name,
+                                                          partition_metadata,
                                                           chain,
-                                                          auto_scale,
-                                                          static_cast<chain_role>(role),
+                                                          static_cast<storage::chain_role>(chain_role),
                                                           next_block_name);
   } catch (std::exception &e) {
     throw make_exception(e);
   }
-}
-
-void storage_management_service_handler::set_exporting(const int32_t block_id,
-                                                       const std::vector<std::string> &target_block,
-                                                       const int32_t slot_begin,
-                                                       const int32_t slot_end) {
-  try {
-    blocks_.at(static_cast<std::size_t>(block_id))->set_exporting(target_block, slot_begin, slot_end);
-  } catch (std::exception &e) {
-    throw make_exception(e);
-  }
-}
-
-void storage_management_service_handler::set_importing(const int32_t block_id,
-                                                       const int32_t slot_begin,
-                                                       const int32_t slot_end) {
-  try {
-    blocks_.at(static_cast<std::size_t>(block_id))->set_importing(slot_begin, slot_end);
-  } catch (std::exception &e) {
-    throw make_exception(e);
-  }
-}
-
-void storage_management_service_handler::setup_and_set_importing(const int32_t block_id,
-                                                                 const std::string &path,
-                                                                 const int32_t slot_begin,
-                                                                 const int32_t slot_end,
-                                                                 const std::vector<std::string> &chain,
-                                                                 const int32_t role,
-                                                                 const std::string &next_block_name) {
-  try {
-    blocks_.at(static_cast<std::size_t>(block_id))->setup(path,
-                                                          0,
-                                                          -1,
-                                                          chain,
-                                                          true,
-                                                          static_cast<chain_role>(role),
-                                                          next_block_name);
-    blocks_.at(static_cast<std::size_t>(block_id))->set_importing(slot_begin, slot_end);
-  } catch (std::exception &e) {
-    throw make_exception(e);
-  }
-
-}
-
-void storage_management_service_handler::export_slots(const int32_t block_id) {
-  try {
-    blocks_.at(static_cast<std::size_t>(block_id))->export_slots();
-  } catch (std::exception &e) {
-    throw make_exception(e);
-  }
-}
-
-void storage_management_service_handler::set_regular(const int32_t block_id,
-                                                     const int32_t slot_begin,
-                                                     const int32_t slot_end) {
-  try {
-    blocks_.at(static_cast<std::size_t>(block_id))->set_regular(slot_begin, slot_end);
-  } catch (std::exception &e) {
-    throw make_exception(e);
-  }
-}
-
-void storage_management_service_handler::slot_range(rpc_slot_range &_return, const int32_t block_id) {
-  auto range = blocks_.at(static_cast<std::size_t>(block_id))->slot_range();
-  _return.slot_begin = range.first;
-  _return.slot_end = range.second;
 }
 
 void storage_management_service_handler::get_path(std::string &_return, const int32_t block_id) {

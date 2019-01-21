@@ -393,53 +393,5 @@ directory_service_add_replica_to_chain_result::~directory_service_add_replica_to
 directory_service_add_replica_to_chain_presult::~directory_service_add_replica_to_chain_presult() throw() {
 }
 
-
-directory_service_add_block_to_file_args::~directory_service_add_block_to_file_args() throw() {
-}
-
-
-directory_service_add_block_to_file_pargs::~directory_service_add_block_to_file_pargs() throw() {
-}
-
-
-directory_service_add_block_to_file_result::~directory_service_add_block_to_file_result() throw() {
-}
-
-
-directory_service_add_block_to_file_presult::~directory_service_add_block_to_file_presult() throw() {
-}
-
-
-directory_service_split_slot_range_args::~directory_service_split_slot_range_args() throw() {
-}
-
-
-directory_service_split_slot_range_pargs::~directory_service_split_slot_range_pargs() throw() {
-}
-
-
-directory_service_split_slot_range_result::~directory_service_split_slot_range_result() throw() {
-}
-
-
-directory_service_split_slot_range_presult::~directory_service_split_slot_range_presult() throw() {
-}
-
-
-directory_service_merge_slot_range_args::~directory_service_merge_slot_range_args() throw() {
-}
-
-
-directory_service_merge_slot_range_pargs::~directory_service_merge_slot_range_pargs() throw() {
-}
-
-
-directory_service_merge_slot_range_result::~directory_service_merge_slot_range_result() throw() {
-}
-
-
-directory_service_merge_slot_range_presult::~directory_service_merge_slot_range_presult() throw() {
-}
-
 }} // namespace
 

@@ -4,8 +4,8 @@
 #include <string>
 #include "../directory/directory_ops.h"
 #include "../directory/client/lease_renewal_worker.h"
-#include "../storage/client/kv_client.h"
-#include "../storage/client/kv_listener.h"
+#include "jiffy/storage/client/hash_table_client.h"
+#include "jiffy/storage/client/hash_table_listener.h"
 
 namespace jiffy {
 namespace client {
@@ -62,13 +62,13 @@ class jiffy_client {
    * @return Key value client
    */
 
-  std::shared_ptr<storage::kv_client> create(const std::string &path,
-                                             const std::string &backing_path,
-                                             size_t num_blocks = 1,
-                                             size_t chain_length = 1,
-                                             int32_t flags = 0,
-                                             int32_t permissions = directory::perms::all(),
-                                             const std::map<std::string, std::string> &tags = {});
+  std::shared_ptr<storage::hash_table_client> create_hash_table(const std::string &path,
+                                                                const std::string &backing_path,
+                                                                int32_t num_blocks = 1,
+                                                                int32_t chain_length = 1,
+                                                                int32_t flags = 0,
+                                                                int32_t permissions = directory::perms::all(),
+                                                                const std::map<std::string, std::string> &tags = {});
 
   /**
    * @brief Open file, begin lease
@@ -76,7 +76,7 @@ class jiffy_client {
    * @return Key value client
    */
 
-  std::shared_ptr<storage::kv_client> open(const std::string &path);
+  std::shared_ptr<storage::hash_table_client> open(const std::string &path);
 
   /**
    * @brief Open or create, begin lease
@@ -90,20 +90,21 @@ class jiffy_client {
    * @return Key value client
    */
 
-  std::shared_ptr<storage::kv_client> open_or_create(const std::string &path,
-                                                     const std::string &backing_path,
-                                                     size_t num_blocks = 1,
-                                                     size_t chain_length = 1,
-                                                     int32_t flags = 0,
-                                                     int32_t permissions = directory::perms::all(),
-                                                     const std::map<std::string, std::string> &tags = {});
+  std::shared_ptr<storage::hash_table_client> open_or_create_hash_table(const std::string &path,
+                                                                        const std::string &backing_path,
+                                                                        int32_t num_blocks = 1,
+                                                                        int32_t chain_length = 1,
+                                                                        int32_t flags = 0,
+                                                                        int32_t permissions = directory::perms::all(),
+                                                                        const std::map<std::string,
+                                                                                       std::string> &tags = {});
   /**
    * @brief Open a file and start key value listener
    * @param path File path
    * @return Key value listener
    */
 
-  std::shared_ptr<storage::kv_listener> listen(const std::string &path);
+  std::shared_ptr<storage::hash_table_listener> listen(const std::string &path);
 
   /**
    * @brief End scope of file

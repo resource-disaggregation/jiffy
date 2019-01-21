@@ -72,7 +72,7 @@ class block_request_handler : public block_request_serviceIf {
  private:
   /* Block response client */
   std::shared_ptr<block_response_client> client_;
-  /* Registered block identifier */
+  /* Registered partition identifier */
   int32_t registered_block_id_;
   /* Registered client identifier */
   int64_t registered_client_id_;

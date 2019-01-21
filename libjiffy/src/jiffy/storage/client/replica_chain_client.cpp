@@ -16,7 +16,7 @@ replica_chain_client::replica_chain_client(std::shared_ptr<directory::directory_
   seq_.client_seq_no = 0;
   connect(chain, timeout_ms);
   for (auto &op: KV_OPS) {
-    cmd_client_.push_back(op.type == block_op_type::accessor ? &tail_ : &head_);
+    cmd_client_.push_back(op.type == command_type::accessor ? &tail_ : &head_);
   }
 }
 

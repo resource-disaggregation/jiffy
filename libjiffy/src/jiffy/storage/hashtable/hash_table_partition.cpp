@@ -1,4 +1,5 @@
-#include "kv_block.h"
+#include <jiffy/utils/string_utils.h>
+#include "hash_table_partition.h"
 #include "hash_slot.h"
 #include "../client/replica_chain_client.h"
 #include "../../utils/logger.h"
@@ -10,24 +11,26 @@ namespace storage {
 
 using namespace utils;
 
-std::vector<block_op> KV_OPS = {block_op{block_op_type::accessor, "exists"},
-                                block_op{block_op_type::accessor, "get"},
-                                block_op{block_op_type::accessor, "keys"},
-                                block_op{block_op_type::accessor, "num_keys"},
-                                block_op{block_op_type::mutator, "put"},
-                                block_op{block_op_type::mutator, "remove"},
-                                block_op{block_op_type::mutator, "update"},
-                                block_op{block_op_type::mutator, "lock"},
-                                block_op{block_op_type::mutator, "unlock"},
-                                block_op{block_op_type::accessor, "locked_get_data_in_slot_range"},
-                                block_op{block_op_type::accessor, "locked_get"},
-                                block_op{block_op_type::mutator, "locked_put"},
-                                block_op{block_op_type::mutator, "locked_remove"},
-                                block_op{block_op_type::mutator, "locked_update"},
-                                block_op{block_op_type::mutator, "upsert"},
-                                block_op{block_op_type::mutator, "locked_upsert"}};
+std::vector<command> KV_OPS = {command{command_type::accessor, "exists"},
+                                command{command_type::accessor, "get"},
+                                command{command_type::accessor, "keys"},
+                                command{command_type::accessor, "num_keys"},
+                                command{command_type::mutator, "put"},
+                                command{command_type::mutator, "remove"},
+                                command{command_type::mutator, "update"},
+                                command{command_type::mutator, "lock"},
+                                command{command_type::mutator, "unlock"},
+                                command{command_type::accessor, "locked_get_data_in_slot_range"},
+                                command{command_type::accessor, "locked_get"},
+                                command{command_type::mutator, "locked_put"},
+                                command{command_type::mutator, "locked_remove"},
+                                command{command_type::mutator, "locked_update"},
+                                command{command_type::mutator, "upsert"},
+                                command{command_type::mutator, "locked_upsert"}};
 
-kv_block::kv_block(const std::string &block_name,
+const int32_t hash_table_partition::SLOT_MAX;
+
+hash_table_partition::hash_table_partition(const std::string &block_name,
                    size_t capacity,
                    double threshold_lo,
                    double threshold_hi,
@@ -45,14 +48,42 @@ kv_block::kv_block(const std::string &block_name,
       threshold_hi_(threshold_hi),
       splitting_(false),
       merging_(false),
-      dirty_(false) {
+      dirty_(false),
+      state_(hash_partition_state::regular),
+      slot_range_(0, -1),
+      auto_scale_(true),
+      export_slot_range_(0, -1),
+      import_slot_range_(0, -1) {
   locked_block_.unlock();
 }
 
-std::string kv_block::put(const key_type &key, const value_type &value, bool redirect) {
+void hash_table_partition::setup(const std::string &path,
+                                 const std::string &partition_name,
+                                 const std::string &partition_metadata,
+                                 const std::vector<std::string> &chain,
+                                 chain_role role,
+                                 const std::string &next_block_name) {
+  chain_module::setup(path, partition_name, partition_metadata, chain, role, next_block_name);
+  auto r = utils::string_utils::split(partition_name, '_');
+  auto parts = utils::string_utils::split(partition_metadata, ':');
+  if (parts[0] == "exporting") {
+    slot_range(std::stoi(r[0]), std::stoi(r[1]));
+    auto target = utils::string_utils::split(parts[1], '!');
+    r = utils::string_utils::split(parts[2], ':');
+    set_exporting(target, std::stoi(r[0]), std::stoi(r[1]));
+  } else if (parts[0] == "importing") {
+    slot_range(std::stoi(r[0]), std::stoi(r[1]));
+    r = utils::string_utils::split(parts[1], ':');
+    set_importing(std::stoi(r[0]), std::stoi(r[1]));
+  } else if (parts[0] == "regular") {
+    set_regular(std::stoi(r[0]), std::stoi(r[1]));
+  }
+}
+
+std::string hash_table_partition::put(const key_type &key, const value_type &value, bool redirect) {
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
-    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+    if (state() == hash_partition_state::exporting && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
     }
     if (block_.insert(key, value)) {
@@ -65,13 +96,13 @@ std::string kv_block::put(const key_type &key, const value_type &value, bool red
   return "!block_moved";
 }
 
-std::string kv_block::locked_put(const key_type &key, const value_type &value, bool redirect) {
+std::string hash_table_partition::locked_put(const key_type &key, const value_type &value, bool redirect) {
   if (!locked_block_.is_active()) {
     return "!block_not_locked";
   }
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
-    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+    if (state() == hash_partition_state::exporting && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
     }
     if (locked_block_.insert(key, value).second) {
@@ -84,10 +115,10 @@ std::string kv_block::locked_put(const key_type &key, const value_type &value, b
   return "!block_moved";
 }
 
-std::string kv_block::upsert(const key_type &key, const value_type &value, bool redirect) {
+std::string hash_table_partition::upsert(const key_type &key, const value_type &value, bool redirect) {
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
-    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+    if (state() == hash_partition_state::exporting && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
     }
     if (block_.upsert(key, [&](value_type &v) {
@@ -105,13 +136,13 @@ std::string kv_block::upsert(const key_type &key, const value_type &value, bool 
   return "!block_moved";
 }
 
-std::string kv_block::locked_upsert(const key_type &key, const value_type &value, bool redirect) {
+std::string hash_table_partition::locked_upsert(const key_type &key, const value_type &value, bool redirect) {
   if (!locked_block_.is_active()) {
     return "!block_not_locked";
   }
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
-    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+    if (state() == hash_partition_state::exporting && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
     }
     locked_hash_table_type::iterator it;
@@ -132,13 +163,13 @@ std::string kv_block::locked_upsert(const key_type &key, const value_type &value
   return "!block_moved";
 }
 
-std::string kv_block::exists(const key_type &key, bool redirect) {
+std::string hash_table_partition::exists(const key_type &key, bool redirect) {
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     if (block_.contains(key)) {
       return "true";
     }
-    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+    if (state() == hash_partition_state::exporting && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
     }
     return "!key_not_found";
@@ -146,14 +177,14 @@ std::string kv_block::exists(const key_type &key, bool redirect) {
   return "!block_moved";
 }
 
-value_type kv_block::get(const key_type &key, bool redirect) {
+value_type hash_table_partition::get(const key_type &key, bool redirect) {
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     value_type value;
     if (block_.find(key, value)) {
       return value;
     }
-    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+    if (state() == hash_partition_state::exporting && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
     }
     return "!key_not_found";
@@ -161,7 +192,7 @@ value_type kv_block::get(const key_type &key, bool redirect) {
   return "!block_moved";
 }
 
-std::string kv_block::locked_get(const key_type &key, bool redirect) {
+std::string hash_table_partition::locked_get(const key_type &key, bool redirect) {
   if (!locked_block_.is_active()) {
     return "!block_not_locked";
   }
@@ -171,7 +202,7 @@ std::string kv_block::locked_get(const key_type &key, bool redirect) {
     if (it != locked_block_.end()) {
       return it->second;
     }
-    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+    if (state() == hash_partition_state::exporting && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
     }
     return "!key_not_found";
@@ -179,7 +210,7 @@ std::string kv_block::locked_get(const key_type &key, bool redirect) {
   return "!block_moved";
 }
 
-std::string kv_block::update(const key_type &key, const value_type &value, bool redirect) {
+std::string hash_table_partition::update(const key_type &key, const value_type &value, bool redirect) {
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     value_type old_val;
@@ -194,7 +225,7 @@ std::string kv_block::update(const key_type &key, const value_type &value, bool 
     })) {
       return old_val;
     }
-    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+    if (state() == hash_partition_state::exporting && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
     }
     return "!key_not_found";
@@ -202,7 +233,7 @@ std::string kv_block::update(const key_type &key, const value_type &value, bool 
   return "!block_moved";
 }
 
-std::string kv_block::locked_update(const key_type &key, const value_type &value, bool redirect) {
+std::string hash_table_partition::locked_update(const key_type &key, const value_type &value, bool redirect) {
   if (!locked_block_.is_active()) {
     return "!block_not_locked";
   }
@@ -220,7 +251,7 @@ std::string kv_block::locked_update(const key_type &key, const value_type &value
       it->second = value;
       return old_val;
     }
-    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+    if (state() == hash_partition_state::exporting && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
     }
     return "!key_not_found";
@@ -228,7 +259,7 @@ std::string kv_block::locked_update(const key_type &key, const value_type &value
   return "!block_moved";
 }
 
-std::string kv_block::remove(const key_type &key, bool redirect) {
+std::string hash_table_partition::remove(const key_type &key, bool redirect) {
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     value_type old_val;
@@ -239,7 +270,7 @@ std::string kv_block::remove(const key_type &key, bool redirect) {
     })) {
       return old_val;
     }
-    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+    if (state() == hash_partition_state::exporting && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
     }
     return "!key_not_found";
@@ -247,7 +278,7 @@ std::string kv_block::remove(const key_type &key, bool redirect) {
   return "!block_moved";
 }
 
-std::string kv_block::locked_remove(const key_type &key, bool redirect) {
+std::string hash_table_partition::locked_remove(const key_type &key, bool redirect) {
   if (!locked_block_.is_active()) {
     return "!block_not_locked";
   }
@@ -261,7 +292,7 @@ std::string kv_block::locked_remove(const key_type &key, bool redirect) {
       locked_block_.erase(it);
       return old_val;
     }
-    if (state() == block_state::exporting && in_export_slot_range(hash)) {
+    if (state() == hash_partition_state::exporting && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
     }
     return "!key_not_found";
@@ -269,7 +300,7 @@ std::string kv_block::locked_remove(const key_type &key, bool redirect) {
   return "!block_moved";
 }
 
-void kv_block::keys(std::vector<std::string> &keys) { // Remove this operation
+void hash_table_partition::keys(std::vector<std::string> &keys) { // Remove this operation
   if (!locked_block_.is_active()) {
     keys.push_back("!block_not_locked");
     return;
@@ -279,7 +310,7 @@ void kv_block::keys(std::vector<std::string> &keys) { // Remove this operation
   }
 }
 
-void kv_block::locked_get_data_in_slot_range(std::vector<std::string> &data,
+void hash_table_partition::locked_get_data_in_slot_range(std::vector<std::string> &data,
                                              int32_t slot_begin,
                                              int32_t slot_end,
                                              int32_t num_keys) {
@@ -301,24 +332,24 @@ void kv_block::locked_get_data_in_slot_range(std::vector<std::string> &data,
   }
 }
 
-std::string kv_block::unlock() {
+std::string hash_table_partition::unlock() {
   locked_block_.unlock();
   return "!ok";
 }
 
-std::string kv_block::lock() {
+std::string hash_table_partition::lock() {
   locked_block_ = block_.lock_table();
-  if (state() == block_state::exporting) {
+  if (state() == hash_partition_state::exporting) {
     return "!" + export_target_str();
   }
   return "!ok";
 }
 
-bool kv_block::is_locked() {
+bool hash_table_partition::is_locked() {
   return locked_block_.is_active();
 }
 
-void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) {
+void hash_table_partition::run_command(std::vector<std::string> &_return, int32_t oid, const std::vector<std::string> &args) {
   bool redirect = !args.empty() && args.back() == "!redirected";
   size_t nargs = redirect ? args.size() - 1 : args.size();
   switch (oid) {
@@ -439,15 +470,15 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
     dirty_ = true;
   }
   bool expected = false;
-  if (auto_scale_.load() && is_mutator(oid) && overload() && state() != block_state::exporting
-      && state() != block_state::importing && is_tail() && !locked_block_.is_active()
+  if (auto_scale_.load() && is_mutator(oid) && overload() && state() != hash_partition_state::exporting
+      && state() != hash_partition_state::importing && is_tail() && !locked_block_.is_active()
       && splitting_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
-    LOG(log_level::info) << "Overloaded block; storage = " << bytes_.load() << " capacity = " << capacity_
+    LOG(log_level::info) << "Overloaded partition; storage = " << bytes_.load() << " capacity = " << capacity_
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
       directory::directory_client client(directory_host_, directory_port_);
-      client.split_slot_range(path(), slot_begin(), slot_end());
+      // TODO: Add logic for splitting slot range
       client.disconnect();
       LOG(log_level::info) << "Requested slot range split";
     } catch (std::exception &e) {
@@ -456,15 +487,15 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
     }
   }
   expected = false;
-  if (auto_scale_.load() && oid == kv_op_id::remove && underload() && state() != block_state::exporting
-      && state() != block_state::importing && slot_end() != block::SLOT_MAX && is_tail() && !locked_block_.is_active()
+  if (auto_scale_.load() && oid == kv_op_id::remove && underload() && state() != hash_partition_state::exporting
+      && state() != hash_partition_state::importing && slot_end() != SLOT_MAX && is_tail() && !locked_block_.is_active()
       && merging_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
-    LOG(log_level::info) << "Underloaded block; storage = " << bytes_.load() << " capacity = " << capacity_
+    LOG(log_level::info) << "Underloaded partition; storage = " << bytes_.load() << " capacity = " << capacity_
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
       directory::directory_client client(directory_host_, directory_port_);
-      client.merge_slot_range(path(), slot_begin(), slot_end());
+      // TODO: Add logic for merging slot range
       client.disconnect();
       LOG(log_level::info) << "Requested slot range merge";
     } catch (std::exception &e) {
@@ -474,7 +505,7 @@ void kv_block::run_command(std::vector<std::string> &_return, int32_t oid, const
   }
 }
 
-void kv_block::reset() {
+void hash_table_partition::reset() {
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   block_.clear();
   next_->reset("nil");
@@ -484,7 +515,7 @@ void kv_block::reset() {
   bytes_.store(0);
   slot_range_.first = 0;
   slot_range_.second = -1;
-  state_ = block_state::regular;
+  state_ = hash_partition_state::regular;
   chain_ = {};
   role_ = singleton;
   splitting_ = false;
@@ -492,19 +523,19 @@ void kv_block::reset() {
   dirty_ = false;
 }
 
-std::size_t kv_block::size() const {
+std::size_t hash_table_partition::size() const {
   return block_.size();
 }
 
-bool kv_block::empty() const {
+bool hash_table_partition::empty() const {
   return block_.empty();
 }
 
-bool kv_block::is_dirty() const {
+bool hash_table_partition::is_dirty() const {
   return dirty_.load();
 }
 
-void kv_block::load(const std::string &path) {
+void hash_table_partition::load(const std::string &path) {
   locked_hash_table_type ltable = block_.lock_table();
   auto remote = persistent::persistent_store::instance(path, ser_);
   auto decomposed = persistent::persistent_store::decompose_path(path);
@@ -512,7 +543,7 @@ void kv_block::load(const std::string &path) {
   ltable.unlock();
 }
 
-bool kv_block::sync(const std::string &path) {
+bool hash_table_partition::sync(const std::string &path) {
   bool expected = true;
   if (dirty_.compare_exchange_strong(expected, false)) {
     locked_hash_table_type ltable = block_.lock_table();
@@ -525,7 +556,7 @@ bool kv_block::sync(const std::string &path) {
   return false;
 }
 
-bool kv_block::dump(const std::string &path) {
+bool hash_table_partition::dump(const std::string &path) {
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   bool expected = true;
   bool flushed = false;
@@ -545,7 +576,7 @@ bool kv_block::dump(const std::string &path) {
   bytes_.store(0);
   slot_range_.first = 0;
   slot_range_.second = -1;
-  state_ = block_state::regular;
+  state_ = hash_partition_state::regular;
   chain_ = {};
   role_ = singleton;
   splitting_ = false;
@@ -554,7 +585,7 @@ bool kv_block::dump(const std::string &path) {
   return flushed;
 }
 
-void kv_block::forward_all() {
+void hash_table_partition::forward_all() {
   locked_hash_table_type ltable = block_.lock_table();
   int64_t i = 0;
   for (const auto &entry: ltable) {
@@ -566,9 +597,9 @@ void kv_block::forward_all() {
 }
 
 // TODO: Exporting isn't fault tolerant...
-void kv_block::export_slots() {
-  if (state() != block_state::exporting) {
-    throw std::logic_error("Source block is not in exporting state");
+void hash_table_partition::export_slots() {
+  if (state() != hash_partition_state::exporting) {
+    throw std::logic_error("Source partition is not in exporting state");
   }
   auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
   replica_chain_client src(fs, path_, chain(), 0);
@@ -619,11 +650,11 @@ void kv_block::export_slots() {
     // Add redirected argument so that importing chain does not ignore our request
     export_data.emplace_back("!redirected");
 
-    // Write data to dst block
+    // Write data to dst partition
     dst.run_command(kv_op_id::locked_put, export_data);
     LOG(log_level::trace) << "Sent " << nexport_keys << " keys";
 
-    // Remove data from src block
+    // Remove data from src partition
     std::vector<std::string> remove_keys;
     export_data.pop_back(); // Remove !redirected argument
     std::size_t n_export_items = export_data.size();
@@ -656,19 +687,19 @@ void kv_block::export_slots() {
   merging_ = false;
 }
 
-std::size_t kv_block::storage_capacity() {
+std::size_t hash_table_partition::storage_capacity() {
   return capacity_;
 }
 
-std::size_t kv_block::storage_size() {
+std::size_t hash_table_partition::storage_size() {
   return bytes_.load();
 }
 
-bool kv_block::overload() {
+bool hash_table_partition::overload() {
   return bytes_.load() > static_cast<size_t>(static_cast<double>(capacity_) * threshold_hi_);
 }
 
-bool kv_block::underload() {
+bool hash_table_partition::underload() {
   return bytes_.load() < static_cast<size_t>(static_cast<double>(capacity_) * threshold_lo_);
 }
 

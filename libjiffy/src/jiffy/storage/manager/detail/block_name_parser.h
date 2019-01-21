@@ -5,7 +5,7 @@
 
 namespace jiffy {
 namespace storage {
-/* Structure of block identifier */
+/* Structure of partition identifier */
 struct block_id {
   std::string host;
   int32_t service_port;

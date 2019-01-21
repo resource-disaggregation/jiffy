@@ -66,19 +66,21 @@ add_library(jiffy STATIC
         src/jiffy/directory/lease/lease_expiry_worker.h
         src/jiffy/directory/directory_ops.h
         src/jiffy/directory/directory_ops.cpp
-        src/jiffy/storage/kv/serde/csv_serde.cpp
-        src/jiffy/storage/kv/serde/csv_serde.h
-        src/jiffy/storage/kv/serde/serde.h
-        src/jiffy/storage/kv/serde/binary_serde.cpp
-        src/jiffy/storage/kv/serde/binary_serde.h
-        src/jiffy/storage/kv/hash_slot.h
-        src/jiffy/storage/kv/hash_slot.cpp
-        src/jiffy/storage/kv/kv_block.cpp
-        src/jiffy/storage/kv/kv_block.h
-        src/jiffy/storage/kv/kv_hash.h
-        src/jiffy/storage/block.h
+        src/jiffy/storage/partition.h
         src/jiffy/storage/chain_module.h
         src/jiffy/storage/chain_module.cpp
+        src/jiffy/storage/command.h
+        src/jiffy/storage/command.cpp
+        src/jiffy/storage/hashtable/serde/csv_serde.cpp
+        src/jiffy/storage/hashtable/serde/csv_serde.h
+        src/jiffy/storage/hashtable/serde/serde.h
+        src/jiffy/storage/hashtable/serde/binary_serde.cpp
+        src/jiffy/storage/hashtable/serde/binary_serde.h
+        src/jiffy/storage/hashtable/hash_slot.h
+        src/jiffy/storage/hashtable/hash_slot.cpp
+        src/jiffy/storage/hashtable/hash_table_partition.cpp
+        src/jiffy/storage/hashtable/hash_table_partition.h
+        src/jiffy/storage/hashtable/hash_table_defs.h
         src/jiffy/storage/client/replica_chain_client.cpp
         src/jiffy/storage/client/replica_chain_client.h
         src/jiffy/storage/service/block_response_client.cpp
@@ -89,10 +91,10 @@ add_library(jiffy STATIC
         src/jiffy/storage/client/block_client.h
         src/jiffy/storage/client/block_listener.cpp
         src/jiffy/storage/client/block_listener.h
-        src/jiffy/storage/client/kv_client.cpp
-        src/jiffy/storage/client/kv_client.h
-        src/jiffy/storage/client/kv_listener.cpp
-        src/jiffy/storage/client/kv_listener.h
+        src/jiffy/storage/client/hash_table_client.cpp
+        src/jiffy/storage/client/hash_table_client.h
+        src/jiffy/storage/client/hash_table_listener.cpp
+        src/jiffy/storage/client/hash_table_listener.h
         src/jiffy/storage/service/block_request_handler.cpp
         src/jiffy/storage/service/block_request_handler.h
         src/jiffy/storage/service/chain_request_handler_factory.cpp
@@ -126,7 +128,7 @@ add_library(jiffy STATIC
         src/jiffy/storage/service/chain_response_service.tcc
         src/jiffy/storage/service/chain_server.cpp
         src/jiffy/storage/service/chain_server.h
-        src/jiffy/storage/block.cc
+        src/jiffy/storage/partition.cpp
         src/jiffy/storage/service/server_storage_tracker.cpp
         src/jiffy/storage/service/server_storage_tracker.h
         src/jiffy/storage/service/buffered_transport_factory.h
@@ -240,7 +242,7 @@ if (BUILD_TESTS)
   include_directories(${CATCH_INCLUDE_DIR})
   add_executable(jiffy_tests
           test/jiffy_tests.cpp
-          test/auto_scaling_test.cpp
+          # test/auto_scaling_test.cpp
           test/block_allocation_service_test.cpp
           test/block_allocator_test.cpp
           test/chain_replication_test.cpp

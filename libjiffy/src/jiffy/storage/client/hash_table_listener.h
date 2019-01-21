@@ -7,8 +7,9 @@
 
 namespace jiffy {
 namespace storage {
-/* Key value block listener */
-class kv_listener {
+
+/* Hash table partition listener */
+class hash_table_listener {
  public:
   typedef std::pair<std::string, std::string> notification_t;
   typedef blocking_queue<notification_t> mailbox_t;
@@ -19,14 +20,14 @@ class kv_listener {
    * @param status Data status
    */
 
-  kv_listener(const std::string &path, const directory::data_status &status);
+  hash_table_listener(const std::string &path, const directory::data_status &status);
 
   /**
    * @brief Destructor
    * Close all block listeners
    */
 
-  ~kv_listener();
+  ~hash_table_listener();
 
   /**
    * @brief Subscribe for block on operations
@@ -66,7 +67,7 @@ class kv_listener {
 
   mailbox_t controls_;
 
-  /* Key value block path */
+  /* Key value partition path */
   std::string path_;
   /* Data status */
   directory::data_status status_;

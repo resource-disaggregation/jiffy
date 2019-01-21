@@ -9,8 +9,8 @@
 #include "jiffy/directory/client/directory_client.h"
 #include "benchmark_utils.h"
 #include "jiffy/storage/client/block_listener.h"
-#include "jiffy/storage/client/kv_listener.h"
-#include "jiffy/storage/client/kv_client.h"
+#include "jiffy/storage/client/hash_table_listener.h"
+#include "jiffy/storage/client/hash_table_client.h"
 #include "jiffy/client/jiffy_client.h"
 
 using namespace jiffy::storage;
@@ -22,7 +22,7 @@ class workload_runner {
  public:
   workload_runner(const std::string &workload_path,
                   std::size_t workload_offset,
-                  std::shared_ptr<kv_client> kv,
+                  std::shared_ptr<hash_table_client> kv,
                   std::size_t num_ops) : num_ops_(num_ops), kv_(kv) {
     benchmark_utils::load_workload(workload_path, workload_offset, num_ops, workload_);
     timestamps_.resize(workload_.size());
@@ -45,7 +45,7 @@ class workload_runner {
   std::vector<std::uint64_t> timestamps_{};
   std::size_t num_ops_;
   std::vector<std::pair<int32_t, std::vector<std::string>>> workload_{};
-  std::shared_ptr<kv_client> kv_;
+  std::shared_ptr<hash_table_client> kv_;
 };
 
 class notification_listener {
@@ -77,7 +77,7 @@ class notification_listener {
 
  private:
   std::thread worker_;
-  std::shared_ptr<kv_listener> listener_;
+  std::shared_ptr<hash_table_listener> listener_;
   std::size_t num_ops_;
   std::vector<std::uint64_t> timestamps_{};
 };
@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
   }
 
   jiffy::client::jiffy_client client(host, port, lease_port);
-  auto kv = client.open_or_create(file, "/tmp", 1, chain_length);
+  auto kv = client.open_or_create_hash_table(file, "/tmp", 1, chain_length);
 
   // Create workload runner
   std::cerr << "Creating workload runner" << std::endl;

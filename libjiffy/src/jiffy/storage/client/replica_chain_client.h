@@ -3,8 +3,8 @@
 
 #include <map>
 #include "block_client.h"
-#include "../kv/kv_block.h"
-#include "../../directory/client/directory_client.h"
+#include "jiffy/storage/hashtable/hash_table_partition.h"
+#include "jiffy/directory/client/directory_client.h"
 
 namespace jiffy {
 namespace storage {

@@ -1,14 +1,14 @@
-#include "kv_client.h"
-#include "../../utils/logger.h"
-#include "../../utils/string_utils.h"
-#include "../kv/hash_slot.h"
+#include "hash_table_client.h"
+#include "jiffy/utils/logger.h"
+#include "jiffy/utils/string_utils.h"
+#include "jiffy/storage/hashtable/hash_slot.h"
 
 namespace jiffy {
 namespace storage {
 
 using namespace jiffy::utils;
 
-kv_client::kv_client(std::shared_ptr<directory::directory_interface> fs,
+hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interface> fs,
                      const std::string &path,
                      const directory::data_status &status,
                      int timeout_ms)
@@ -16,31 +16,31 @@ kv_client::kv_client(std::shared_ptr<directory::directory_interface> fs,
   slots_.clear();
   blocks_.clear();
   for (const auto &block: status.data_blocks()) {
-    slots_.push_back(block.slot_begin());
+    slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0]));
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, timeout_ms_));
   }
 }
 
-directory::data_status &kv_client::status() {
+directory::data_status &hash_table_client::status() {
   return status_;
 }
 
-std::shared_ptr<kv_client::locked_client> kv_client::lock() {
-  return std::make_shared<kv_client::locked_client>(*this);
+std::shared_ptr<hash_table_client::locked_client> hash_table_client::lock() {
+  return std::make_shared<hash_table_client::locked_client>(*this);
 }
 
-void kv_client::refresh() {
+void hash_table_client::refresh() {
   status_ = fs_->dstatus(path_);
-  LOG(log_level::info) << "Refreshing block mappings to " << status_.to_string();
+  LOG(log_level::info) << "Refreshing partition mappings to " << status_.to_string();
   slots_.clear();
   blocks_.clear();
   for (const auto &block: status_.data_blocks()) {
-    slots_.push_back(block.slot_begin());
+    slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0]));
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, timeout_ms_));
   }
 }
 
-std::string kv_client::put(const std::string &key, const std::string &value) {
+std::string hash_table_client::put(const std::string &key, const std::string &value) {
   std::string _return;
   std::vector<std::string> args{key, value};
   bool redo;
@@ -56,7 +56,7 @@ std::string kv_client::put(const std::string &key, const std::string &value) {
   return _return;
 }
 
-std::string kv_client::get(const std::string &key) {
+std::string hash_table_client::get(const std::string &key) {
   std::string _return;
   std::vector<std::string> args{key};
   bool redo;
@@ -72,7 +72,7 @@ std::string kv_client::get(const std::string &key) {
   return _return;
 }
 
-std::string kv_client::update(const std::string &key, const std::string &value) {
+std::string hash_table_client::update(const std::string &key, const std::string &value) {
   std::string _return;
   std::vector<std::string> args{key, value};
   bool redo;
@@ -88,7 +88,7 @@ std::string kv_client::update(const std::string &key, const std::string &value) 
   return _return;
 }
 
-std::string kv_client::remove(const std::string &key) {
+std::string hash_table_client::remove(const std::string &key) {
   std::string _return;
   std::vector<std::string> args{key};
   bool redo;
@@ -104,7 +104,7 @@ std::string kv_client::remove(const std::string &key) {
   return _return;
 }
 
-std::vector<std::string> kv_client::put(const std::vector<std::string> &kvs) {
+std::vector<std::string> hash_table_client::put(const std::vector<std::string> &kvs) {
   if (kvs.size() % 2 != 0) {
     throw std::invalid_argument("Incorrect number of arguments");
   }
@@ -122,7 +122,7 @@ std::vector<std::string> kv_client::put(const std::vector<std::string> &kvs) {
   return _return;
 }
 
-std::vector<std::string> kv_client::get(const std::vector<std::string> &keys) {
+std::vector<std::string> hash_table_client::get(const std::vector<std::string> &keys) {
   std::vector<std::string> _return;
   bool redo;
   do {
@@ -137,7 +137,7 @@ std::vector<std::string> kv_client::get(const std::vector<std::string> &keys) {
   return _return;
 }
 
-std::vector<std::string> kv_client::update(const std::vector<std::string> &kvs) {
+std::vector<std::string> hash_table_client::update(const std::vector<std::string> &kvs) {
   if (kvs.size() % 2 != 0) {
     throw std::invalid_argument("Incorrect number of arguments");
   }
@@ -155,7 +155,7 @@ std::vector<std::string> kv_client::update(const std::vector<std::string> &kvs) 
   return _return;
 }
 
-std::vector<std::string> kv_client::remove(const std::vector<std::string> &keys) {
+std::vector<std::string> hash_table_client::remove(const std::vector<std::string> &keys) {
   std::vector<std::string> _return;
   bool redo;
   do {
@@ -170,11 +170,11 @@ std::vector<std::string> kv_client::remove(const std::vector<std::string> &keys)
   return _return;
 }
 
-size_t kv_client::block_id(const std::string &key) {
+size_t hash_table_client::block_id(const std::string &key) {
   return static_cast<size_t>(std::upper_bound(slots_.begin(), slots_.end(), hash_slot::get(key)) - slots_.begin() - 1);
 }
 
-std::vector<std::string> kv_client::batch_command(const kv_op_id &op,
+std::vector<std::string> hash_table_client::batch_command(const kv_op_id &op,
                                                   const std::vector<std::string> &args,
                                                   size_t args_per_op) {
   // Split arguments
@@ -209,7 +209,7 @@ std::vector<std::string> kv_client::batch_command(const kv_op_id &op,
   return results;
 }
 
-void kv_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
+void hash_table_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
   if (response.substr(0, 10) == "!exporting") {
     typedef std::vector<std::string> list_t;
     do {
@@ -227,7 +227,7 @@ void kv_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &
   }
 }
 
-void kv_client::handle_redirects(int32_t cmd_id,
+void hash_table_client::handle_redirects(int32_t cmd_id,
                                  const std::vector<std::string> &args,
                                  std::vector<std::string> &responses) {
   size_t n_ops = responses.size();
@@ -253,7 +253,7 @@ void kv_client::handle_redirects(int32_t cmd_id,
   }
 }
 
-kv_client::locked_client::locked_client(kv_client &parent) : parent_(parent) {
+hash_table_client::locked_client::locked_client(hash_table_client &parent) : parent_(parent) {
   blocks_.resize(parent_.blocks_.size());
   redirect_blocks_.resize(parent_.blocks_.size());
   locked_redirect_blocks_.resize(parent_.blocks_.size());
@@ -290,7 +290,7 @@ kv_client::locked_client::locked_client(kv_client &parent) : parent_(parent) {
   }
 }
 
-void kv_client::locked_client::unlock() {
+void hash_table_client::locked_client::unlock() {
   for (size_t i = 0; i < blocks_.size(); i++) {
     blocks_[i]->unlock();
     if (new_blocks_[i] != nullptr)
@@ -298,7 +298,7 @@ void kv_client::locked_client::unlock() {
   }
 }
 
-size_t kv_client::locked_client::num_keys() {
+size_t hash_table_client::locked_client::num_keys() {
   for (size_t i = 0; i < blocks_.size(); i++) {
     blocks_[i]->send_command(kv_op_id::num_keys, {});
     if (new_blocks_[i] != nullptr) {
@@ -315,59 +315,59 @@ size_t kv_client::locked_client::num_keys() {
   return n;
 }
 
-std::string kv_client::locked_client::put(const std::string &key, const std::string &value) {
+std::string hash_table_client::locked_client::put(const std::string &key, const std::string &value) {
   std::vector<std::string> args{key, value};
   auto _return = blocks_[parent_.block_id(key)]->run_command(kv_op_id::locked_put, args).front();
   handle_redirect(kv_op_id::locked_put, args, _return);
   return _return;
 }
 
-std::string kv_client::locked_client::get(const std::string &key) {
+std::string hash_table_client::locked_client::get(const std::string &key) {
   std::vector<std::string> args{key};
   auto _return = blocks_[parent_.block_id(key)]->run_command(kv_op_id::locked_get, args).front();
   handle_redirect(kv_op_id::locked_get, args, _return);
   return _return;
 }
 
-std::string kv_client::locked_client::update(const std::string &key, const std::string &value) {
+std::string hash_table_client::locked_client::update(const std::string &key, const std::string &value) {
   std::vector<std::string> args{key, value};
   auto _return = blocks_[parent_.block_id(key)]->run_command(kv_op_id::locked_update, args).front();
   handle_redirect(kv_op_id::locked_update, args, _return);
   return _return;
 }
 
-std::string kv_client::locked_client::remove(const std::string &key) {
+std::string hash_table_client::locked_client::remove(const std::string &key) {
   std::vector<std::string> args{key};
   auto _return = blocks_[parent_.block_id(key)]->run_command(kv_op_id::locked_remove, args).front();
   handle_redirect(kv_op_id::locked_remove, args, _return);
   return _return;
 }
 
-std::vector<std::string> kv_client::locked_client::put(const std::vector<std::string> &kvs) {
+std::vector<std::string> hash_table_client::locked_client::put(const std::vector<std::string> &kvs) {
   auto _return = parent_.batch_command(kv_op_id::locked_put, kvs, 2);
   handle_redirects(kv_op_id::locked_put, kvs, _return);
   return _return;
 }
 
-std::vector<std::string> kv_client::locked_client::get(const std::vector<std::string> &keys) {
+std::vector<std::string> hash_table_client::locked_client::get(const std::vector<std::string> &keys) {
   auto _return = parent_.batch_command(kv_op_id::locked_get, keys, 1);
   handle_redirects(kv_op_id::locked_get, keys, _return);
   return _return;
 }
 
-std::vector<std::string> kv_client::locked_client::update(const std::vector<std::string> &kvs) {
+std::vector<std::string> hash_table_client::locked_client::update(const std::vector<std::string> &kvs) {
   auto _return = parent_.batch_command(kv_op_id::locked_update, kvs, 2);
   handle_redirects(kv_op_id::locked_update, kvs, _return);
   return _return;
 }
 
-std::vector<std::string> kv_client::locked_client::remove(const std::vector<std::string> &keys) {
+std::vector<std::string> hash_table_client::locked_client::remove(const std::vector<std::string> &keys) {
   auto _return = parent_.batch_command(kv_op_id::locked_remove, keys, 1);
   handle_redirects(kv_op_id::locked_remove, keys, _return);
   return _return;
 }
 
-void kv_client::locked_client::handle_redirect(int32_t cmd_id,
+void hash_table_client::locked_client::handle_redirect(int32_t cmd_id,
                                                const std::vector<std::string> &args,
                                                std::string &response) {
   if (response.substr(0, 10) == "!exporting") {
@@ -392,11 +392,11 @@ void kv_client::locked_client::handle_redirect(int32_t cmd_id,
     } while (response.substr(0, 10) == "!exporting");
   }
   // There can be !block_moved response, since:
-  // (1) No new exports can start while the kv is locked
-  // (2) Ongoing exports cannot finish while the kv is locked
+  // (1) No new exports can start while the hashtable is locked
+  // (2) Ongoing exports cannot finish while the hashtable is locked
 }
 
-void kv_client::locked_client::handle_redirects(int32_t cmd_id,
+void hash_table_client::locked_client::handle_redirects(int32_t cmd_id,
                                                 const std::vector<std::string> &args,
                                                 std::vector<std::string> &responses) {
   size_t n_ops = responses.size();
@@ -427,8 +427,8 @@ void kv_client::locked_client::handle_redirects(int32_t cmd_id,
     }
   }
   // There can be !block_moved response, since:
-  // (1) No new exports can start while the kv is locked
-  // (2) Ongoing exports cannot finish while the kv is locked
+  // (1) No new exports can start while the hashtable is locked
+  // (2) Ongoing exports cannot finish while the hashtable is locked
 }
 
 }

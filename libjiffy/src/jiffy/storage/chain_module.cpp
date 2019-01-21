@@ -1,12 +1,55 @@
 #include "chain_module.h"
-#include "../utils/logger.h"
-#include "kv/kv_block.h"
-#include "../utils/time_utils.h"
+#include "jiffy/utils/logger.h"
+#include "jiffy/utils/time_utils.h"
 
 namespace jiffy {
 namespace storage {
 
 using namespace utils;
+
+chain_module::chain_module(const std::string &block_name, const std::vector<command> &block_ops)
+    : partition(block_ops, block_name),
+      next_(std::make_unique<next_chain_module_cxn>("nil")),
+      prev_(std::make_unique<prev_chain_module_cxn>()),
+      pending_(0) {}
+
+chain_module::~chain_module() {
+  next_->reset("nil");
+  if (response_processor_.joinable())
+    response_processor_.join();
+}
+
+void chain_module::setup(const std::string &path,
+                         const std::string &partition_name,
+                         const std::string &partition_metadata,
+                         const std::vector<std::string> &chain,
+                         chain_role role,
+                         const std::string &next_block_name) {
+  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+  path_ = path;
+  partition_name_ = partition_name;
+  partition_metadata_ = partition_metadata;
+  chain_ = chain;
+  role_ = role;
+  auto protocol = next_->reset(next_block_name);
+  if (protocol && role_ != chain_role::tail) {
+    auto handler = std::make_shared<chain_response_handler>(this);
+    auto processor = std::make_shared<chain_response_serviceProcessor>(handler);
+    if (response_processor_.joinable())
+      response_processor_.join();
+    response_processor_ = std::thread([processor, protocol] {
+      while (true) {
+        try {
+          if (!processor->process(protocol, protocol, nullptr)) {
+            break;
+          }
+        } catch (std::exception &e) {
+          break;
+        }
+      }
+    });
+  }
+}
 
 void chain_module::resend_pending() {
   auto ops = pending_.lock_table();
@@ -66,7 +109,7 @@ void chain_module::request(sequence_id seq, int32_t oid, const std::vector<std::
   run_command(result, oid, args);
   if (is_tail()) {
     clients().respond_client(seq, result);
-    subscriptions().notify(op_name(oid), args[0]); // TODO: Fix
+    subscriptions().notify(command_name(oid), args[0]); // TODO: Fix
   } else {
     if (is_accessor(oid)) {
       LOG(log_level::error) << "Invalid state: Accessor request on non-tail node";
@@ -83,11 +126,11 @@ void chain_module::request(sequence_id seq, int32_t oid, const std::vector<std::
 
 void chain_module::chain_request(const sequence_id &seq, int32_t oid, const std::vector<std::string> &args) {
   if (is_head()) {
-    LOG(log_level::error) << "Invalid state: Chain request " << op_name(oid) << " on head node";
+    LOG(log_level::error) << "Invalid state: Chain request " << command_name(oid) << " on head node";
     return;
   }
   if (is_accessor(oid)) {
-    LOG(log_level::error) << "Invalid state: Accessor " << op_name(oid) << " as chain request";
+    LOG(log_level::error) << "Invalid state: Accessor " << command_name(oid) << " as chain request";
     return;
   }
 
@@ -96,7 +139,7 @@ void chain_module::chain_request(const sequence_id &seq, int32_t oid, const std:
 
   if (is_tail()) {
     clients().respond_client(seq, result);
-    subscriptions().notify(op_name(oid), args[0]); // TODO: Fix
+    subscriptions().notify(command_name(oid), args[0]); // TODO: Fix
     ack(seq);
   } else {
     // Do not need a lock since this is the only thread handling chain requests

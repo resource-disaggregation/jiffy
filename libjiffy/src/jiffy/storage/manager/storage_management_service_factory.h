@@ -2,7 +2,7 @@
 #define JIFFY_KV_MANAGEMENT_RPC_SERVICE_FACTORY_H
 
 #include "storage_management_service.h"
-#include "../block.h"
+#include "jiffy/storage/partition.h"
 #include "../chain_module.h"
 
 namespace jiffy {

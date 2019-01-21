@@ -1,8 +1,8 @@
 #ifndef JIFFY_LOCAL_STORE_H
 #define JIFFY_LOCAL_STORE_H
 
-#include "../persistent_service.h"
-#include "../../storage/kv/kv_hash.h"
+#include "jiffy/persistent/persistent_service.h"
+#include "jiffy/storage/hashtable/hash_table_defs.h"
 
 namespace jiffy {
 namespace persistent {

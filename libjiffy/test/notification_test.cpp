@@ -2,18 +2,19 @@
 #include <thrift/transport/TBufferTransports.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <iostream>
+
+#include "jiffy/directory/fs/directory_tree.h"
+#include "jiffy/directory/fs/directory_server.h"
+#include "jiffy/storage/client/hash_table_client.h"
+#include "jiffy/storage/client/hash_table_listener.h"
+#include "jiffy/storage/hashtable/hash_table_partition.h"
+#include "jiffy/storage/hashtable/hash_slot.h"
 #include "jiffy/storage/manager/storage_management_server.h"
 #include "jiffy/storage/manager/storage_management_client.h"
 #include "jiffy/storage/manager/storage_manager.h"
-#include "jiffy/storage/kv/kv_block.h"
-#include "test_utils.h"
-#include "jiffy/storage/service/block_server.h"
-#include "jiffy/storage/kv/hash_slot.h"
-#include "jiffy/directory/fs/directory_tree.h"
-#include "jiffy/directory/fs/directory_server.h"
-#include "jiffy/storage/client/kv_client.h"
-#include "jiffy/storage/client/kv_listener.h"
 #include "jiffy/storage/notification/notification_server.h"
+#include "jiffy/storage/service/block_server.h"
+#include "test_utils.h"
 
 using namespace ::jiffy::storage;
 using namespace ::jiffy::directory;
@@ -54,16 +55,17 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  data_status status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1, 0);
-  kv_client kv(tree, "/sandbox/file.txt", status);
+  data_status status = tree->create("/sandbox/file.txt",  "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0, {"0_65536"},
+      {"regular"});
+  hash_table_client kv(tree, "/sandbox/file.txt", status);
 
   std::string op1 = "put", op2 = "get";
   std::string key = "msg1";
 
   {
-    kv_listener sub1("/sandbox/file.txt", status);
-    kv_listener sub2("/sandbox/file.txt", status);
-    kv_listener sub3("/sandbox/file.txt", status);
+    hash_table_listener sub1("/sandbox/file.txt", status);
+    hash_table_listener sub2("/sandbox/file.txt", status);
+    hash_table_listener sub3("/sandbox/file.txt", status);
 
     REQUIRE_NOTHROW(sub1.subscribe({op1}));
     REQUIRE_NOTHROW(sub2.subscribe({op1, op2}));

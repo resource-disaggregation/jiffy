@@ -2,7 +2,7 @@
 #define JIFFY_KV_MANAGEMENT_RPC_SERVER_H
 
 #include <thrift/server/TThreadedServer.h>
-#include "../block.h"
+#include "jiffy/storage/partition.h"
 #include "../chain_module.h"
 
 namespace jiffy {

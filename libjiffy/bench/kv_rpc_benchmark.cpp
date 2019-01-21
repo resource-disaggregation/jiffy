@@ -18,9 +18,8 @@ class throughput_benchmark {
   throughput_benchmark(const std::string &workload_path,
                        std::size_t workload_offset,
                        std::shared_ptr<replica_chain_client> client,
-                       std::size_t num_ops,
-                       std::size_t max_async)
-      : num_ops_(num_ops), max_async_(max_async), client_(client) {
+                       std::size_t num_ops)
+      : num_ops_(num_ops), client_(client) {
     benchmark_utils::load_workload(workload_path, workload_offset, num_ops_, workload_);
   }
 
@@ -46,7 +45,6 @@ class throughput_benchmark {
  private:
   std::thread worker_thread_;
   std::size_t num_ops_;
-  std::size_t max_async_;
   std::vector<std::pair<int32_t, std::vector<std::string>>> workload_;
   std::shared_ptr<replica_chain_client> client_;
 };
@@ -92,8 +90,6 @@ int main(int argc, char **argv) {
   opts.add(cmd_option("chain-length", 'c', false).set_default("1").set_description("Chain length"));
   opts.add(cmd_option("num-threads", 't', false).set_default("1").set_description("# of benchmark threads to run"));
   opts.add(cmd_option("num-ops", 'n', false).set_default("100000").set_description("# of operations to run"));
-  opts.add(cmd_option("max-async", 'm', false).set_default("1000").set_description(
-      "Maximum number of unacknowledged requests in flight"));
   opts.add(cmd_option("workload-path", 'w', false).set_default("data").set_description(
       "Path to read the workload from"));
   opts.add(cmd_option("workload-offset", 'o', false).set_default("0").set_description(
@@ -111,7 +107,6 @@ int main(int argc, char **argv) {
   std::string benchmark_type;
   std::size_t num_threads;
   std::size_t num_ops;
-  std::size_t max_async;
   std::string workload_path;
   std::size_t workload_offset;
   std::size_t chain_length;
@@ -124,7 +119,6 @@ int main(int argc, char **argv) {
     chain_length = static_cast<std::size_t>(parser.get_long("chain-length"));
     num_threads = static_cast<std::size_t>(parser.get_long("num-threads"));
     num_ops = static_cast<std::size_t>(parser.get_long("num-ops"));
-    max_async = static_cast<std::size_t>(parser.get_long("max-async"));
     workload_path = parser.get("workload-path");
     workload_offset = static_cast<std::size_t>(parser.get_long("workload-offset"));
   } catch (cmd_parse_exception &ex) {
@@ -134,7 +128,7 @@ int main(int argc, char **argv) {
   }
 
   auto client = std::make_shared<jiffy::directory::directory_client>(host, port);
-  auto dstatus = client->create(file, "local://tmp", 1, chain_length, 0);
+  auto dstatus = client->create(file, "hashtable", "local://tmp", 1, chain_length, 0);
   auto chain = dstatus.data_blocks().front();
   std::cerr << "Chain: " << chain.to_string() << std::endl;
   if (benchmark_type == "throughput") {
@@ -145,8 +139,7 @@ int main(int argc, char **argv) {
       benchmark.push_back(new throughput_benchmark(workload_path,
                                                    workload_offset + i * thread_ops,
                                                    std::make_shared<replica_chain_client>(client, file, chain),
-                                                   thread_ops,
-                                                   max_async));
+                                                   thread_ops));
     }
 
     // Start

@@ -18,18 +18,18 @@ TEST_CASE("file_size_tracker_test") {
   auto sm = std::make_shared<dummy_storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
   file_size_tracker tracker(tree, PERIODICITY_MS, "/tmp/file.trace");
-  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/c/file.txt", "/tmp", 1, 1, 0));
-  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/file.txt", "/tmp", 1, 1, 0));
-  REQUIRE_NOTHROW(tree->create("/sandbox/a/file.txt", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/c/file.txt", "testtype", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/file.txt", "testtype", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/file.txt", "testtype", "/tmp", 1, 1, 0));
 
   REQUIRE_NOTHROW(tracker.start());
   std::this_thread::sleep_for(150ms);
   REQUIRE_NOTHROW(tracker.stop());
 
   REQUIRE(sm->COMMANDS.size() == 9);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/a/b/c/file.txt:0:65536:0:1:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "setup_block:1:/sandbox/a/b/file.txt:0:65536:1:1:0:nil");
-  REQUIRE(sm->COMMANDS[2] == "setup_block:2:/sandbox/a/file.txt:0:65536:2:1:0:nil");
+  REQUIRE(sm->COMMANDS[0] == "setup_block:0:testtype:0::/sandbox/a/b/c/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[1] == "setup_block:1:testtype:0::/sandbox/a/b/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[2] == "setup_block:2:testtype:0::/sandbox/a/file.txt:0:nil");
   REQUIRE(sm->COMMANDS[3] == "storage_size:0");
   REQUIRE(sm->COMMANDS[4] == "storage_size:1");
   REQUIRE(sm->COMMANDS[5] == "storage_size:2");

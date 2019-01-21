@@ -2,7 +2,7 @@
 #define JIFFY_KV_MANAGEMENT_RPC_SERVICE_HANDLER_H
 
 #include "storage_management_service.h"
-#include "../block.h"
+#include "jiffy/storage/partition.h"
 #include "../chain_module.h"
 
 namespace jiffy {
@@ -102,79 +102,12 @@ class storage_management_service_handler : public storage_management_serviceIf {
 
   void setup_block(int32_t block_id,
                    const std::string &path,
-                   int32_t slot_begin,
-                   int32_t slot_end,
+                   const std::string &partition_type,
+                   const std::string &partition_name,
+                   const std::string &partition_metadata,
                    const std::vector<std::string> &chain,
-                   bool auto_scale,
                    int32_t chain_role,
                    const std::string &next_block_name) override;
-
-  /**
-   * @brief Fetch slot range of block
-   * @param _return Slot range to be returned
-   * @param block_id Block identifier
-   */
-
-  void slot_range(rpc_slot_range &_return, int32_t block_id) override;
-
-  /**
-   * @brief Setup exporting target and slot range
-   * @param block_id Block identifier
-   * @param target_block Exporting target blocks
-   * @param slot_begin Export begin slot
-   * @param slot_end Export end slot
-   */
-
-  void set_exporting(int32_t block_id,
-                     const std::vector<std::string> &target_block,
-                     int32_t slot_begin,
-                     int32_t slot_end) override;
-
-  /**
-   * @brief Setup importing slot range
-   * @param block_id Block identifier
-   * @param slot_begin Importing begin slot
-   * @param slot_end Importing end slot
-   */
-
-  void set_importing(int32_t block_id,
-                     int32_t slot_begin,
-                     int32_t slot_end) override;
-
-  /**
-   * @brief Setup the block and set importing slot range
-   * @param block_id Block identifier
-   * @param path Block path
-   * @param slot_begin Importing begin slot
-   * @param slot_end Importing end slot
-   * @param chain Chain block names
-   * @param chain_role Chain role
-   * @param next_block_name Next block name
-   */
-
-  void setup_and_set_importing(int32_t block_id,
-                               const std::string &path,
-                               int32_t slot_begin,
-                               int32_t slot_end,
-                               const std::vector<std::string> &chain,
-                               int32_t chain_role,
-                               const std::string &next_block_name) override;
-
-  /**
-   * @brief Export slots
-   * @param block_id Block identifier
-   */
-
-  void export_slots(int32_t block_id) override;
-
-  /**
-   * @brief Set the block to be regular after exporting
-   * @param block_id Block identifier
-   * @param slot_begin Begin slot
-   * @param slot_end End slot
-   */
-
-  void set_regular(int32_t block_id, int32_t slot_begin, int32_t slot_end) override;
 
  private:
 

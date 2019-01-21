@@ -25,8 +25,8 @@ uint32_t rpc_replica_chain::read(Protocol_* iprot) {
   using ::apache::thrift::protocol::TProtocolException;
 
   bool isset_block_names = false;
-  bool isset_slot_begin = false;
-  bool isset_slot_end = false;
+  bool isset_name = false;
+  bool isset_metadata = false;
   bool isset_storage_mode = false;
 
   while (true)
@@ -58,17 +58,17 @@ uint32_t rpc_replica_chain::read(Protocol_* iprot) {
         }
         break;
       case 2:
-        if (ftype == ::apache::thrift::protocol::T_I32) {
-          xfer += iprot->readI32(this->slot_begin);
-          isset_slot_begin = true;
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->name);
+          isset_name = true;
         } else {
           xfer += iprot->skip(ftype);
         }
         break;
       case 3:
-        if (ftype == ::apache::thrift::protocol::T_I32) {
-          xfer += iprot->readI32(this->slot_end);
-          isset_slot_end = true;
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->metadata);
+          isset_metadata = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -94,9 +94,9 @@ uint32_t rpc_replica_chain::read(Protocol_* iprot) {
 
   if (!isset_block_names)
     throw TProtocolException(TProtocolException::INVALID_DATA);
-  if (!isset_slot_begin)
+  if (!isset_name)
     throw TProtocolException(TProtocolException::INVALID_DATA);
-  if (!isset_slot_end)
+  if (!isset_metadata)
     throw TProtocolException(TProtocolException::INVALID_DATA);
   if (!isset_storage_mode)
     throw TProtocolException(TProtocolException::INVALID_DATA);
@@ -121,12 +121,12 @@ uint32_t rpc_replica_chain::write(Protocol_* oprot) const {
   }
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("slot_begin", ::apache::thrift::protocol::T_I32, 2);
-  xfer += oprot->writeI32(this->slot_begin);
+  xfer += oprot->writeFieldBegin("name", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->name);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("slot_end", ::apache::thrift::protocol::T_I32, 3);
-  xfer += oprot->writeI32(this->slot_end);
+  xfer += oprot->writeFieldBegin("metadata", ::apache::thrift::protocol::T_STRING, 3);
+  xfer += oprot->writeString(this->metadata);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("storage_mode", ::apache::thrift::protocol::T_I32, 4);
@@ -243,6 +243,7 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
+  bool isset_type = false;
   bool isset_backing_path = false;
   bool isset_chain_length = false;
   bool isset_data_blocks = false;
@@ -259,13 +260,21 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->type);
+          isset_type = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->backing_path);
           isset_backing_path = true;
         } else {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_I32) {
           xfer += iprot->readI32(this->chain_length);
           isset_chain_length = true;
@@ -273,7 +282,7 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 3:
+      case 4:
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->data_blocks.clear();
@@ -293,7 +302,7 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 4:
+      case 5:
         if (ftype == ::apache::thrift::protocol::T_I32) {
           xfer += iprot->readI32(this->flags);
           isset_flags = true;
@@ -301,7 +310,7 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 5:
+      case 6:
         if (ftype == ::apache::thrift::protocol::T_MAP) {
           {
             this->tags.clear();
@@ -333,6 +342,8 @@ uint32_t rpc_data_status::read(Protocol_* iprot) {
 
   xfer += iprot->readStructEnd();
 
+  if (!isset_type)
+    throw TProtocolException(TProtocolException::INVALID_DATA);
   if (!isset_backing_path)
     throw TProtocolException(TProtocolException::INVALID_DATA);
   if (!isset_chain_length)
@@ -352,15 +363,19 @@ uint32_t rpc_data_status::write(Protocol_* oprot) const {
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_data_status");
 
-  xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("type", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString(this->type);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString(this->backing_path);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("chain_length", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeFieldBegin("chain_length", ::apache::thrift::protocol::T_I32, 3);
   xfer += oprot->writeI32(this->chain_length);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("data_blocks", ::apache::thrift::protocol::T_LIST, 3);
+  xfer += oprot->writeFieldBegin("data_blocks", ::apache::thrift::protocol::T_LIST, 4);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->data_blocks.size()));
     std::vector<rpc_replica_chain> ::const_iterator _iter24;
@@ -372,11 +387,11 @@ uint32_t rpc_data_status::write(Protocol_* oprot) const {
   }
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("flags", ::apache::thrift::protocol::T_I32, 4);
+  xfer += oprot->writeFieldBegin("flags", ::apache::thrift::protocol::T_I32, 5);
   xfer += oprot->writeI32(this->flags);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("tags", ::apache::thrift::protocol::T_MAP, 5);
+  xfer += oprot->writeFieldBegin("tags", ::apache::thrift::protocol::T_MAP, 6);
   {
     xfer += oprot->writeMapBegin(::apache::thrift::protocol::T_STRING, ::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->tags.size()));
     std::map<std::string, std::string> ::const_iterator _iter25;

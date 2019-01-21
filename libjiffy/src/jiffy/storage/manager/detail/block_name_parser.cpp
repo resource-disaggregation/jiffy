@@ -19,7 +19,7 @@ block_id block_name_parser::parse(const std::string &name) {
     return {host, std::stoi(service_port), std::stoi(management_port), std::stoi(notification_port),
             std::stoi(chain_port), std::stoi(block_id)};
   } catch (std::exception &e) {
-    throw std::invalid_argument("Could not parse block name: " + name + "; " + e.what());
+    throw std::invalid_argument("Could not parse partition name: " + name + "; " + e.what());
   }
 }
 

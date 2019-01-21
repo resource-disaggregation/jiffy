@@ -1,16 +1,16 @@
 #include <catch.hpp>
 #include <thrift/transport/TTransportException.h>
 #include <thread>
+#include "test_utils.h"
+#include "jiffy/directory/fs/directory_tree.h"
+#include "jiffy/directory/fs/directory_server.h"
 #include "jiffy/storage/manager/storage_management_server.h"
 #include "jiffy/storage/manager/storage_management_client.h"
 #include "jiffy/storage/manager/storage_manager.h"
-#include "jiffy/storage/kv/kv_block.h"
-#include "test_utils.h"
+#include "jiffy/storage/hashtable/hash_table_partition.h"
 #include "jiffy/storage/service/block_server.h"
-#include "jiffy/storage/kv/hash_slot.h"
-#include "jiffy/directory/fs/directory_tree.h"
-#include "jiffy/directory/fs/directory_server.h"
-#include "jiffy/storage/client/kv_client.h"
+#include "jiffy/storage/hashtable/hash_slot.h"
+#include "jiffy/storage/client/hash_table_client.h"
 
 using namespace ::jiffy::storage;
 using namespace ::jiffy::directory;
@@ -39,9 +39,10 @@ TEST_CASE("kv_client_put_get_test", "[put][get]") {
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  data_status status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1, 0);
+  data_status status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
+      {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"});
 
-  kv_client client(tree, "/sandbox/file.txt", status);
+  hash_table_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -81,9 +82,10 @@ TEST_CASE("kv_client_put_update_get_test", "[put][update][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1, 0));
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
+      {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
-  kv_client client(tree, "/sandbox/file.txt", status);
+  hash_table_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -129,9 +131,10 @@ TEST_CASE("kv_client_put_remove_get_test", "[put][remove][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1, 0));
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
+      {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
-  kv_client client(tree, "/sandbox/file.txt", status);
+  hash_table_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -174,9 +177,10 @@ TEST_CASE("kv_client_pipelined_ops_test", "[put][update][remove][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1, 0));
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
+      {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
-  kv_client client(tree, "/sandbox/file.txt", status);
+  hash_table_client client(tree, "/sandbox/file.txt", status);
   std::vector<std::string> kvs;
   for (size_t i = 0; i < 1000; i++) {
     kvs.push_back(std::to_string(i));
@@ -281,9 +285,10 @@ TEST_CASE("kv_client_locked_ops_test", "[put][update][remove][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1, 0));
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
+                                        {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
-  kv_client kv(tree, "/sandbox/file.txt", status);
+  hash_table_client kv(tree, "/sandbox/file.txt", status);
   {
     auto client = kv.lock();
     REQUIRE(client->num_keys() == 0);
@@ -344,9 +349,10 @@ TEST_CASE("kv_client_locked_pipelined_ops_test", "[put][update][remove][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "/tmp", NUM_BLOCKS, 1, 0));
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
+                                        {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
-  kv_client kv(tree, "/sandbox/file.txt", status);
+  hash_table_client kv(tree, "/sandbox/file.txt", status);
   {
     auto client = kv.lock();
     std::vector<std::string> kvs;

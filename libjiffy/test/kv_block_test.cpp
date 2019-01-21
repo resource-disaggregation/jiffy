@@ -1,12 +1,12 @@
 #include "catch.hpp"
-#include "jiffy/storage/kv/kv_block.h"
+#include "jiffy/storage/hashtable/hash_table_partition.h"
 
 using namespace ::jiffy::storage;
 using namespace ::jiffy::persistent;
 
 TEST_CASE("put_get_test", "[put][get]") {
-  kv_block block("nil");
-  block.slot_range(0, block::SLOT_MAX);
+  hash_table_partition block("nil");
+  block.slot_range(0, hash_table_partition::SLOT_MAX);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -19,8 +19,8 @@ TEST_CASE("put_get_test", "[put][get]") {
 }
 
 TEST_CASE("put_update_get_test", "[put][update][get]") {
-  kv_block block("nil");
-  block.slot_range(0, block::SLOT_MAX);
+  hash_table_partition block("nil");
+  block.slot_range(0, hash_table_partition::SLOT_MAX);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -39,8 +39,8 @@ TEST_CASE("put_update_get_test", "[put][update][get]") {
 }
 
 TEST_CASE("put_upsert_get_test", "[put][upsert][get]") {
-  kv_block block("nil");
-  block.slot_range(0, block::SLOT_MAX);
+  hash_table_partition block("nil");
+  block.slot_range(0, hash_table_partition::SLOT_MAX);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -56,8 +56,8 @@ TEST_CASE("put_upsert_get_test", "[put][upsert][get]") {
 }
 
 TEST_CASE("put_remove_get_test", "[put][update][get]") {
-  kv_block block("nil");
-  block.slot_range(0, block::SLOT_MAX);
+  hash_table_partition block("nil");
+  block.slot_range(0, hash_table_partition::SLOT_MAX);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -73,8 +73,8 @@ TEST_CASE("put_remove_get_test", "[put][update][get]") {
 }
 
 TEST_CASE("storage_size_test", "[put][size][storage_size][reset]") {
-  kv_block block("nil");
-  block.slot_range(0, block::SLOT_MAX);
+  hash_table_partition block("nil");
+  block.slot_range(0, hash_table_partition::SLOT_MAX);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -86,8 +86,8 @@ TEST_CASE("storage_size_test", "[put][size][storage_size][reset]") {
 }
 
 TEST_CASE("flush_load_test", "[put][sync][reset][load][get]") {
-  kv_block block("nil");
-  block.slot_range(0, block::SLOT_MAX);
+  hash_table_partition block("nil");
+  block.slot_range(0, hash_table_partition::SLOT_MAX);
   for (std::size_t i = 0; i < 1000; ++i) {
     std::vector<std::string> res;
     block.run_command(res, kv_op_id::put, {std::to_string(i), std::to_string(i)});
@@ -98,7 +98,7 @@ TEST_CASE("flush_load_test", "[put][sync][reset][load][get]") {
   REQUIRE(!block.is_dirty());
   REQUIRE_FALSE(block.sync("local://tmp/test"));
   REQUIRE_NOTHROW(block.reset());
-  REQUIRE_NOTHROW(block.slot_range(0, block::SLOT_MAX));
+  REQUIRE_NOTHROW(block.slot_range(0, hash_table_partition::SLOT_MAX));
   REQUIRE(block.empty());
   REQUIRE_NOTHROW(block.load("local://tmp/test"));
   for (std::size_t i = 0; i < 1000; ++i) {

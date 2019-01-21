@@ -26,86 +26,6 @@ storage_management_service_setup_block_presult::~storage_management_service_setu
 }
 
 
-storage_management_service_slot_range_args::~storage_management_service_slot_range_args() throw() {
-}
-
-
-storage_management_service_slot_range_pargs::~storage_management_service_slot_range_pargs() throw() {
-}
-
-
-storage_management_service_slot_range_result::~storage_management_service_slot_range_result() throw() {
-}
-
-
-storage_management_service_slot_range_presult::~storage_management_service_slot_range_presult() throw() {
-}
-
-
-storage_management_service_set_exporting_args::~storage_management_service_set_exporting_args() throw() {
-}
-
-
-storage_management_service_set_exporting_pargs::~storage_management_service_set_exporting_pargs() throw() {
-}
-
-
-storage_management_service_set_exporting_result::~storage_management_service_set_exporting_result() throw() {
-}
-
-
-storage_management_service_set_exporting_presult::~storage_management_service_set_exporting_presult() throw() {
-}
-
-
-storage_management_service_set_importing_args::~storage_management_service_set_importing_args() throw() {
-}
-
-
-storage_management_service_set_importing_pargs::~storage_management_service_set_importing_pargs() throw() {
-}
-
-
-storage_management_service_set_importing_result::~storage_management_service_set_importing_result() throw() {
-}
-
-
-storage_management_service_set_importing_presult::~storage_management_service_set_importing_presult() throw() {
-}
-
-
-storage_management_service_setup_and_set_importing_args::~storage_management_service_setup_and_set_importing_args() throw() {
-}
-
-
-storage_management_service_setup_and_set_importing_pargs::~storage_management_service_setup_and_set_importing_pargs() throw() {
-}
-
-
-storage_management_service_setup_and_set_importing_result::~storage_management_service_setup_and_set_importing_result() throw() {
-}
-
-
-storage_management_service_setup_and_set_importing_presult::~storage_management_service_setup_and_set_importing_presult() throw() {
-}
-
-
-storage_management_service_set_regular_args::~storage_management_service_set_regular_args() throw() {
-}
-
-
-storage_management_service_set_regular_pargs::~storage_management_service_set_regular_pargs() throw() {
-}
-
-
-storage_management_service_set_regular_result::~storage_management_service_set_regular_result() throw() {
-}
-
-
-storage_management_service_set_regular_presult::~storage_management_service_set_regular_presult() throw() {
-}
-
-
 storage_management_service_get_path_args::~storage_management_service_get_path_args() throw() {
 }
 
@@ -247,22 +167,6 @@ storage_management_service_forward_all_result::~storage_management_service_forwa
 
 
 storage_management_service_forward_all_presult::~storage_management_service_forward_all_presult() throw() {
-}
-
-
-storage_management_service_export_slots_args::~storage_management_service_export_slots_args() throw() {
-}
-
-
-storage_management_service_export_slots_pargs::~storage_management_service_export_slots_pargs() throw() {
-}
-
-
-storage_management_service_export_slots_result::~storage_management_service_export_slots_result() throw() {
-}
-
-
-storage_management_service_export_slots_presult::~storage_management_service_export_slots_presult() throw() {
 }
 
 }} // namespace

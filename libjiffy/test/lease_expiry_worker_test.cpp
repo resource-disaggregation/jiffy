@@ -16,11 +16,11 @@ TEST_CASE("lease_manager_test") {
   auto sm = std::make_shared<dummy_storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
   lease_expiry_worker mgr(tree, LEASE_PERIOD_MS, GRACE_PERIOD_MS);
-  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/c/file.txt", "local://tmp", 1, 1, 0));
-  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/file.txt", "local://tmp", 1, 1, 0));
-  REQUIRE_NOTHROW(tree->create("/sandbox/a/file.txt", "local://tmp", 1, 1, 0));
-  REQUIRE_NOTHROW(tree->create("/sandbox/a/c/file.txt", "local://tmp", 1, 1, data_status::PINNED));
-  REQUIRE_NOTHROW(tree->create("/sandbox/a/d/file.txt", "local://tmp", 1, 1, data_status::MAPPED));
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/c/file.txt", "testtype", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/file.txt", "testtype", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/file.txt", "testtype", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/c/file.txt", "testtype", "local://tmp", 1, 1, data_status::PINNED));
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/d/file.txt", "testtype", "local://tmp", 1, 1, data_status::MAPPED));
   REQUIRE(tree->exists("/sandbox/a/b/c/file.txt"));
   REQUIRE(tree->exists("/sandbox/a/b/file.txt"));
   REQUIRE(tree->exists("/sandbox/a/file.txt"));
@@ -45,12 +45,12 @@ TEST_CASE("lease_manager_test") {
     REQUIRE(blk.mode == storage_mode::on_disk);
   }
   REQUIRE(sm->COMMANDS.size() == 8);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/a/b/c/file.txt:0:65536:0:1:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "setup_block:1:/sandbox/a/b/file.txt:0:65536:1:1:0:nil");
-  REQUIRE(sm->COMMANDS[2] == "setup_block:2:/sandbox/a/file.txt:0:65536:2:1:0:nil");
-  REQUIRE(sm->COMMANDS[3] == "setup_block:3:/sandbox/a/c/file.txt:0:65536:3:1:0:nil");
-  REQUIRE(sm->COMMANDS[4] == "setup_block:4:/sandbox/a/d/file.txt:0:65536:4:1:0:nil");
+  REQUIRE(sm->COMMANDS[0] == "setup_block:0:testtype:0::/sandbox/a/b/c/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[1] == "setup_block:1:testtype:0::/sandbox/a/b/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[2] == "setup_block:2:testtype:0::/sandbox/a/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[3] == "setup_block:3:testtype:0::/sandbox/a/c/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[4] == "setup_block:4:testtype:0::/sandbox/a/d/file.txt:0:nil");
   REQUIRE(sm->COMMANDS[5] == "reset:1");
-  REQUIRE(sm->COMMANDS[6] == "dump:4:local://tmp/0_65536");
+  REQUIRE(sm->COMMANDS[6] == "dump:4:local://tmp/0");
   REQUIRE(sm->COMMANDS[7] == "reset:2");
 }

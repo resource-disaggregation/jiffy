@@ -1,5 +1,5 @@
 #include <thrift/transport/TTransportException.h>
-#include "kv_listener.h"
+#include "hash_table_listener.h"
 #include "../manager/detail/block_name_parser.h"
 #include "../../utils/logger.h"
 
@@ -9,7 +9,7 @@ using namespace jiffy::utils;
 namespace jiffy {
 namespace storage {
 
-kv_listener::kv_listener(const std::string &path, const directory::data_status &status)
+hash_table_listener::hash_table_listener(const std::string &path, const directory::data_status &status)
     : path_(path), status_(status), worker_(notifications_, controls_) {
   for (const auto &block: status_.data_blocks()) {
     auto t = block_name_parser::parse(block.block_names.back());
@@ -20,7 +20,7 @@ kv_listener::kv_listener(const std::string &path, const directory::data_status &
   worker_.start();
 }
 
-kv_listener::~kv_listener() {
+hash_table_listener::~hash_table_listener() {
   try {
     for (auto &listener: listeners_) {
       listener->disconnect();
@@ -31,19 +31,19 @@ kv_listener::~kv_listener() {
   }
 }
 
-void kv_listener::subscribe(const std::vector<std::string> &ops) {
+void hash_table_listener::subscribe(const std::vector<std::string> &ops) {
   for (size_t i = 0; i < listeners_.size(); i++) {
     listeners_[i]->subscribe(block_ids_[i], ops);
   }
 }
 
-void kv_listener::unsubscribe(const std::vector<std::string> &ops) {
+void hash_table_listener::unsubscribe(const std::vector<std::string> &ops) {
   for (size_t i = 0; i < listeners_.size(); i++) {
     listeners_[i]->unsubscribe(block_ids_[i], ops);
   }
 }
 
-kv_listener::notification_t kv_listener::get_notification(int64_t timeout_ms) {
+hash_table_listener::notification_t hash_table_listener::get_notification(int64_t timeout_ms) {
   return notifications_.pop(timeout_ms);
 }
 

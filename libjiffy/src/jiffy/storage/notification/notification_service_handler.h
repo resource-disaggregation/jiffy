@@ -44,7 +44,7 @@ class notification_service_handler : public notification_serviceIf {
   void unsubscribe(int32_t block_id, const std::vector<std::string> &ops) override;
 
  private:
-  /* Local subscription set for pairs of block and operation */
+  /* Local subscription set for pairs of partition and operation */
   std::set<std::pair<int32_t, std::string>> local_subs_;
   /* Protocol */
   std::shared_ptr<::apache::thrift::protocol::TProtocol> oprot_;

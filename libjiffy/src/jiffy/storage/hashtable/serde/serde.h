@@ -1,7 +1,7 @@
 #ifndef JIFFY_SERDE_H
 #define JIFFY_SERDE_H
 
-#include "../kv_hash.h"
+#include "jiffy/storage/hashtable/hash_table_defs.h"
 
 namespace jiffy {
 namespace storage {

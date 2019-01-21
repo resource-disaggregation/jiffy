@@ -6,10 +6,10 @@
 #include <string>
 #include "serde/serde.h"
 #include "serde/binary_serde.h"
-#include "../block.h"
+#include "jiffy/storage/partition.h"
 #include "../../persistent/persistent_service.h"
 #include "../chain_module.h"
-#include "kv_hash.h"
+#include "hash_table_defs.h"
 #include "serde/csv_serde.h"
 
 namespace jiffy {
@@ -19,7 +19,17 @@ typedef std::string binary; // Since thrift translates binary to string
 typedef binary key_type;
 typedef binary value_type;
 
-extern std::vector<block_op> KV_OPS;
+/**
+ * Hash partition state
+ */
+
+enum hash_partition_state {
+  regular = 0,
+  importing = 1,
+  exporting = 2
+};
+
+extern std::vector<command> KV_OPS;
 /**
  * @brief Key value block supported operations
  */
@@ -42,9 +52,12 @@ enum kv_op_id : int32_t {
   locked_upsert = 15
 };
 
-/* Key value block structure class, inherited from chain module */
-class kv_block : public chain_module {
+/* Key value partition structure class, inherited from chain module */
+class hash_table_partition : public chain_module {
  public:
+  /* Slot range max */
+  static const int32_t SLOT_MAX = 65536;
+
   /**
    * @brief Constructor
    * @param block_name Block name
@@ -56,15 +69,195 @@ class kv_block : public chain_module {
    * @param ser Custom serializer/deserializer
    */
 
-  explicit kv_block(const std::string &block_name,
-                    std::size_t capacity = 134217728, // 128 MB; TODO: hardcoded default
-                    double threshold_lo = 0.05,
-                    double threshold_hi = 0.95,
-                    const std::string &directory_host = "127.0.0.1",
-                    int directory_port = 9090,
-                    std::shared_ptr<serde> ser = std::make_shared<csv_serde>());
+  explicit hash_table_partition(const std::string &block_name,
+                                std::size_t capacity = 134217728, // 128 MB; TODO: hardcoded default
+                                double threshold_lo = 0.05,
+                                double threshold_hi = 0.95,
+                                const std::string &directory_host = "127.0.0.1",
+                                int directory_port = 9090,
+                                std::shared_ptr<serde> ser = std::make_shared<csv_serde>());
 
-  virtual ~kv_block() = default;
+  virtual ~hash_table_partition() = default;
+
+  void setup(const std::string &path,
+             const std::string &partition_name,
+             const std::string &partition_metadata,
+             const std::vector<std::string> &chain,
+             chain_role role,
+             const std::string &next_block_name) override;
+
+  /**
+   * @brief Set block hash slot range
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
+   */
+
+  void slot_range(int32_t slot_begin, int32_t slot_end) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    slot_range_.first = slot_begin;
+    slot_range_.second = slot_end;
+  }
+
+  /**
+   * @brief Fetch slot range
+   * @return Block slot range
+   */
+
+  const std::pair<int32_t, int32_t> &slot_range() const {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return slot_range_;
+  }
+
+  /**
+   * @brief Fetch begin slot
+   * @return Begin slot
+   */
+
+  int32_t slot_begin() const {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return slot_range_.first;
+  }
+
+  /**
+   * @brief Fetch end slot
+   * @return End slot
+   */
+
+  int32_t slot_end() const {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return slot_range_.second;
+  }
+
+  /**
+   * @brief Check if slot is within the slot range
+   * @param slot Slot
+   * @return Bool value, true if slot is within the range
+   */
+
+  bool in_slot_range(int32_t slot) {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return slot >= slot_range_.first && slot <= slot_range_.second;
+  }
+
+  /**
+   * @brief Set block state
+   * @param state Block state
+   */
+
+  void state(hash_partition_state state) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    state_ = state;
+  }
+
+  /**
+   * @brief Fetch block state
+   * @return Block state
+   */
+
+  const hash_partition_state &state() const {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return state_;
+  }
+
+  /**
+   * @brief Set export slot range
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
+   */
+
+  void export_slot_range(int32_t slot_begin, int32_t slot_end) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    export_slot_range_.first = slot_begin;
+    export_slot_range_.second = slot_end;
+  }
+
+  /**
+   * @brief Fetch export slot range
+   * @return Export slot range
+   */
+
+  const std::pair<int32_t, int32_t> &export_slot_range() {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return export_slot_range_;
+  };
+
+  /**
+   * @brief Check if slot is within export slot range
+   * @param slot Slot
+   * @return Bool value, true if slot is within the range
+   */
+
+  bool in_export_slot_range(int32_t slot) {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return slot >= export_slot_range_.first && slot <= export_slot_range_.second;
+  }
+
+  /**
+   * @brief Set import slot range
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
+   */
+
+  void import_slot_range(int32_t slot_begin, int32_t slot_end) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    import_slot_range_.first = slot_begin;
+    import_slot_range_.second = slot_end;
+  }
+
+  /**
+   * @brief Fetch import slot range
+   * @return Import slot range
+   */
+
+  const std::pair<int32_t, int32_t> &import_slot_range() {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return import_slot_range_;
+  };
+
+  /**
+   * @brief Check if slot is within import slot range
+   * @param slot Slot
+   * @return Bool value, true if slot is within the range
+   */
+
+  bool in_import_slot_range(int32_t slot) {
+    return slot >= import_slot_range_.first && slot <= import_slot_range_.second;
+  }
+
+  /**
+   * @brief Set the export target
+   * @param target Export target
+   */
+
+  void export_target(const std::vector<std::string> &target) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    export_target_ = target;
+    export_target_str_ = "";
+    for (const auto &block: target) {
+      export_target_str_ += (block + "!");
+    }
+    export_target_str_.pop_back();
+  }
+
+  /**
+   * @brief Fetch export target
+   * @return Export target
+   */
+
+  const std::vector<std::string> &export_target() const {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return export_target_;
+  }
+
+  /**
+   * @brief Fetch export target string
+   * @return Export target string
+   */
+
+  const std::string export_target_str() const {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return export_target_str_;
+  }
 
   /**
    * @brief Check if hash map contains key
@@ -309,6 +502,56 @@ class kv_block : public chain_module {
 
   void export_slots() override;
 
+  /**
+   * @brief Set block to be exporting
+   * @param target_block Export target block
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
+   */
+
+  void set_exporting(const std::vector<std::string> &target_block, int32_t slot_begin, int32_t slot_end) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    state_ = hash_partition_state::exporting;
+    export_target_ = target_block;
+    export_target_str_ = "";
+    for (const auto &block: target_block) {
+      export_target_str_ += (block + "!");
+    }
+    export_target_str_.pop_back();
+    export_slot_range_.first = slot_begin;
+    export_slot_range_.second = slot_end;
+  }
+
+  /**
+   * @brief Set block to be importing
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
+   */
+
+  void set_importing(int32_t slot_begin, int32_t slot_end) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    state_ = hash_partition_state::importing;
+    import_slot_range_.first = slot_begin;
+    import_slot_range_.second = slot_end;
+  }
+
+  /**
+   * @brief Set block to regular after exporting slot
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
+   */
+
+  void set_regular(int32_t slot_begin, int32_t slot_end) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    state_ = hash_partition_state::regular;
+    slot_range_.first = slot_begin;
+    slot_range_.second = slot_end;
+    export_slot_range_.first = 0;
+    export_slot_range_.second = -1;
+    import_slot_range_.first = 0;
+    import_slot_range_.second = -1;
+  }
+
  private:
   /**
    * @brief Check if block is overloaded
@@ -324,10 +567,10 @@ class kv_block : public chain_module {
 
   bool underload();
 
-  /* Cuckoo hash map block */
+  /* Cuckoo hash map partition */
   hash_table_type block_;
 
-  /* Locked cuckoo hash map block */
+  /* Locked cuckoo hash map partition */
   locked_hash_table_type locked_block_;
 
   /* Directory host number */
@@ -342,7 +585,7 @@ class kv_block : public chain_module {
   /* Atomic value to collect the sum of key size and value size */
   std::atomic<size_t> bytes_;
 
-  /* Key value block capacity */
+  /* Key value partition capacity */
   std::size_t capacity_;
 
   /**
@@ -354,14 +597,29 @@ class kv_block : public chain_module {
   /* High threshold */
   double threshold_hi_;
 
-  /* Atomic bool for block hash slot range splitting */
+  /* Atomic bool for partition hash slot range splitting */
   std::atomic<bool> splitting_;
 
-  /* Atomic bool for block hash slot range merging */
+  /* Atomic bool for partition hash slot range merging */
   std::atomic<bool> merging_;
 
-  /* Atomic block dirty bit */
+  /* Atomic partition dirty bit */
   std::atomic<bool> dirty_;
+
+  /* Block state, regular, importing or exporting */
+  hash_partition_state state_;
+  /* Hash slot range */
+  std::pair<int32_t, int32_t> slot_range_;
+  /* Bool value for auto scaling */
+  std::atomic_bool auto_scale_;
+  /* Export slot range */
+  std::pair<int32_t, int32_t> export_slot_range_;
+  /* Export targets */
+  std::vector<std::string> export_target_;
+  /* String representation for export target */
+  std::string export_target_str_;
+  /* Import slot range */
+  std::pair<int32_t, int32_t> import_slot_range_;
 };
 
 }

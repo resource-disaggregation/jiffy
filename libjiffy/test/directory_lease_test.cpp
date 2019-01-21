@@ -28,8 +28,7 @@ TEST_CASE("update_lease_test", "[update_lease]") {
 
   lease_client client(HOST, PORT);
 
-  t->create("/sandbox/a/b/c/file.txt", "/tmp", 1, 1, 0);
-
+  t->create("/sandbox/a/b/c/file.txt", "testtype", "local://tmp");
 
   std::vector<std::string> to_renew = {"/sandbox/a/b/c/file.txt"};
   rpc_lease_ack ack;
@@ -38,7 +37,7 @@ TEST_CASE("update_lease_test", "[update_lease]") {
   REQUIRE(t->exists("/sandbox/a/b/c/file.txt"));
   REQUIRE(t->dstatus("/sandbox/a/b/c/file.txt").mode() == std::vector<storage_mode>{storage_mode::in_memory});
   REQUIRE(sm->COMMANDS.size() == 1);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/a/b/c/file.txt:0:65536:0:1:0:nil");
+  REQUIRE(sm->COMMANDS[0] == "setup_block:0:testtype:0::/sandbox/a/b/c/file.txt:0:nil");
 
   server->stop();
   if (serve_thread.joinable()) {

@@ -45,80 +45,19 @@ class storage_management_client {
    * @brief Setup block
    * @param block_id Block identifier
    * @param path File path
-   * @param slot_begin Begin slot
-   * @param slot_end End slot
    * @param chain Chain block names
-   * @param auto_scale Bool value, true if auto_scale is on
    * @param role Block role
    * @param next_block_name Next block's name
    */
 
   void setup_block(int32_t block_id,
                    const std::string &path,
-                   int32_t slot_begin,
-                   int32_t slot_end,
+                   const std::string &partition_type,
+                   const std::string &partition_name,
+                   const std::string &partition_metadata,
                    const std::vector<std::string> &chain,
-                   bool auto_scale,
                    int32_t role,
                    const std::string &next_block_name);
-
-  /**
-   * @brief Fetch slot range for particular block
-   * @param block_id Block identifier
-   * @return Pair containing the beginning and end slots for the block
-   */
-
-  std::pair<int32_t, int32_t> slot_range(int32_t block_id);
-
-  /**
-   * @brief Set block to be exporting
-   * @param block_id Block identifier
-   * @param target_block_name Target block name
-   * @param slot_begin Exporting begin slot
-   * @param slot_end Exporting end slot
-   */
-
-  void set_exporting(int32_t block_id,
-                     const std::vector<std::string> &target_block_name,
-                     int32_t slot_begin,
-                     int32_t slot_end);
-
-  /**
-   * @brief Set block to be importing
-   * @param block_id Block identifier
-   * @param slot_begin Importing begin slot
-   * @param slot_end Importing end slot
-   */
-
-  void set_importing(int32_t block_id, int32_t slot_begin, int32_t slot_end);
-
-  /**
-   * @brief Setup the block and set importing
-   * @param block_id Block identifier
-   * @param path File path
-   * @param slot_begin Importing begin slot
-   * @param slot_end Importing end slot
-   * @param chain Chain block names
-   * @param role Block role
-   * @param next_block_name Next block's name
-   */
-
-  void setup_and_set_importing(int32_t block_id,
-                               const std::string &path,
-                               int32_t slot_begin,
-                               int32_t slot_end,
-                               const std::vector<std::string> &chain,
-                               int32_t role,
-                               const std::string &next_block_name);
-
-  /**
-   * @brief Set block back to regular
-   * @param block_id Block identifier
-   * @param slot_begin Slot begin
-   * @param slot_end Slot end
-   */
-
-  void set_regular(int32_t block_id, int32_t slot_begin, int32_t slot_end);
 
   /**
    * @brief Fetch block path
@@ -188,13 +127,6 @@ class storage_management_client {
    */
 
   void forward_all(int32_t block_id);
-
-  /**
-   * @brief Export slots
-   * @param block_id Block identifier
-   */
-
-  void export_slots(int32_t block_id);
 
  private:
   /* Socket */

@@ -7,6 +7,7 @@
 
 namespace jiffy {
 namespace storage {
+
 /* Redo when exception class
  * Redo whenever exception happens */
 class redo_error : public std::exception {
@@ -14,8 +15,8 @@ class redo_error : public std::exception {
   redo_error() {}
 };
 
-/* Key value storage client */
-class kv_client {
+/* Hash table client */
+class hash_table_client {
  public:
   /* Locked client class */
   class locked_client {
@@ -28,10 +29,10 @@ class kv_client {
 
     /**
      * @brief Constructor
-     * @param parent Key value client parent
+     * @param parent Parent client
      */
 
-    locked_client(kv_client &parent);
+    locked_client(hash_table_client &parent);
 
     /**
      * @brief Unlock the key value client
@@ -135,14 +136,14 @@ class kv_client {
     void handle_redirects(int32_t cmd_id, const std::vector<std::string> &args, std::vector<std::string> &responses);
 
     /* Parent key value client */
-    kv_client &parent_;
+    hash_table_client &parent_;
     /* Blocks */
     std::vector<locked_block_ptr_t> blocks_;
     /* Redirect blocks */
     std::vector<block_ptr_t> redirect_blocks_;
     /* Locked redirect blocks */
     std::vector<locked_block_ptr_t> locked_redirect_blocks_;
-    /* New block */
+    /* New partition */
     std::vector<locked_block_ptr_t> new_blocks_;
   };
 
@@ -155,7 +156,7 @@ class kv_client {
    * @param timeout_ms Timeout
    */
 
-  kv_client(std::shared_ptr<directory::directory_interface> fs,
+  hash_table_client(std::shared_ptr<directory::directory_interface> fs,
             const std::string &path,
             const directory::data_status &status,
             int timeout_ms = 1000);
@@ -283,11 +284,11 @@ class kv_client {
   void handle_redirects(int32_t cmd_id, const std::vector<std::string> &args, std::vector<std::string> &responses);
   /* Directory client */
   std::shared_ptr<directory::directory_interface> fs_;
-  /* Key value block path */
+  /* Key value partition path */
   std::string path_;
   /* Data status */
   directory::data_status status_;
-  /* Key value blocks, each block only save a replica chain client */
+  /* Key value blocks, each partition only save a replica chain client */
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
   /* Slot begin of the blocks */
   std::vector<int32_t> slots_;
