@@ -1,6 +1,6 @@
-package jiffy.kv;
+package jiffy.storage;
 
-public class KVOps {
+public class HashTableOps {
   public static final int EXISTS = 0;
   public static final int GET = 1;
   public static final int KEYS = 2;

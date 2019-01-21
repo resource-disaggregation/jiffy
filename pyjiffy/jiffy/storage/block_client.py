@@ -5,8 +5,8 @@ from thrift.protocol.TBinaryProtocol import TBinaryProtocolAccelerated
 from thrift.transport import TTransport, TSocket
 from thrift.transport.TTransport import TTransportException
 
-from jiffy.kv import block_request_service
-from jiffy.kv import block_response_service
+from jiffy.storage import block_request_service
+from jiffy.storage import block_response_service
 
 
 class ClientEntry:

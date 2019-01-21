@@ -3,11 +3,11 @@ from bisect import bisect_right
 
 from jiffy.directory.directory_client import ReplicaChain, StorageMode
 from jiffy.directory.ttypes import rpc_storage_mode
-from jiffy.kv import crc
-from jiffy.kv.block_client import BlockClientCache
-from jiffy.kv.compat import b, unicode, bytes, long, basestring, bytes_to_str
-from jiffy.kv.kv_ops import KVOps
-from jiffy.kv.replica_chain_client import ReplicaChainClient
+from jiffy.storage import crc
+from jiffy.storage.block_client import BlockClientCache
+from jiffy.storage.compat import b, unicode, bytes, long, basestring, bytes_to_str
+from jiffy.storage.hash_table_ops import HashTableOps
+from jiffy.storage.replica_chain_client import ReplicaChainClient
 
 
 def encode(value):
@@ -34,7 +34,7 @@ class RedirectError(Exception):
         self.blocks = blocks
 
 
-class KVClient:
+class HashTableClient:
     class LockedClient:
         def __init__(self, parent):
             self.parent = parent
@@ -106,45 +106,45 @@ class KVClient:
 
         def put(self, key, value):
             args = [key, value]
-            response = self.blocks[self.parent.block_id(key)].run_command(KVOps.locked_put, args)[0]
-            return self._handle_redirect(KVOps.locked_put, args, response)
+            response = self.blocks[self.parent.block_id(key)].run_command(HashTableOps.locked_put, args)[0]
+            return self._handle_redirect(HashTableOps.locked_put, args, response)
 
         def get(self, key):
             args = [key]
-            response = self.blocks[self.parent.block_id(key)].run_command(KVOps.locked_get, args)[0]
-            return self._handle_redirect(KVOps.locked_get, args, response)
+            response = self.blocks[self.parent.block_id(key)].run_command(HashTableOps.locked_get, args)[0]
+            return self._handle_redirect(HashTableOps.locked_get, args, response)
 
         def update(self, key, value):
             args = [key, value]
-            response = self.blocks[self.parent.block_id(key)].run_command(KVOps.locked_update, args)[0]
-            return self._handle_redirect(KVOps.locked_update, args, response)
+            response = self.blocks[self.parent.block_id(key)].run_command(HashTableOps.locked_update, args)[0]
+            return self._handle_redirect(HashTableOps.locked_update, args, response)
 
         def remove(self, key):
             args = [key]
-            response = self.blocks[self.parent.block_id(key)].run_command(KVOps.locked_remove, args)[0]
-            return self._handle_redirect(KVOps.locked_remove, args, response)
+            response = self.blocks[self.parent.block_id(key)].run_command(HashTableOps.locked_remove, args)[0]
+            return self._handle_redirect(HashTableOps.locked_remove, args, response)
 
         def multi_put(self, args):
-            response = self.parent._batch_command(KVOps.locked_put, args, 2)
-            return self._handle_redirects(KVOps.locked_put, args, response)
+            response = self.parent._batch_command(HashTableOps.locked_put, args, 2)
+            return self._handle_redirects(HashTableOps.locked_put, args, response)
 
         def multi_get(self, args):
-            response = self.parent._batch_command(KVOps.locked_get, args, 1)
-            return self._handle_redirects(KVOps.locked_get, args, response)
+            response = self.parent._batch_command(HashTableOps.locked_get, args, 1)
+            return self._handle_redirects(HashTableOps.locked_get, args, response)
 
         def multi_update(self, args):
-            response = self.parent._batch_command(KVOps.locked_update, args, 2)
-            return self._handle_redirects(KVOps.locked_update, args, response)
+            response = self.parent._batch_command(HashTableOps.locked_update, args, 2)
+            return self._handle_redirects(HashTableOps.locked_update, args, response)
 
         def multi_remove(self, args):
-            response = self.parent._batch_command(KVOps.locked_remove, args, 1)
-            return self._handle_redirects(KVOps.locked_remove, args, response)
+            response = self.parent._batch_command(HashTableOps.locked_remove, args, 1)
+            return self._handle_redirects(HashTableOps.locked_remove, args, response)
 
         def num_keys(self):
             for i in range(len(self.blocks)):
-                self.blocks[i].send_command(KVOps.num_keys, [])
+                self.blocks[i].send_command(HashTableOps.num_keys, [])
                 if self.new_blocks[i] is not None:
-                    self.new_blocks[i].send_command(KVOps.num_keys, [])
+                    self.new_blocks[i].send_command(HashTableOps.num_keys, [])
 
             n = 0
             for i in range(len(self.blocks)):
@@ -160,14 +160,14 @@ class KVClient:
         self.file_info = data_status
         self.blocks = [ReplicaChainClient(self.fs, self.path, self.client_cache, chain) for chain in
                        data_status.data_blocks]
-        self.slots = [chain.slot_range[0] for chain in data_status.data_blocks]
+        self.slots = [int(chain.name.split('_')[0]) for chain in self.file_info.data_blocks]
 
     def refresh(self):
         self.file_info = self.fs.dstatus(self.path)
         logging.info("Refreshing block mappings to {}".format(self.file_info.data_blocks))
         self.blocks = [ReplicaChainClient(self.fs, self.path, self.client_cache, chain) for chain in
                        self.file_info.data_blocks]
-        self.slots = [chain.slot_range[0] for chain in self.file_info.data_blocks]
+        self.slots = [int(chain.name.split('_')[0]) for chain in self.file_info.data_blocks]
 
     def lock(self):
         return self.LockedClient(self)
@@ -232,75 +232,75 @@ class KVClient:
         args = [key, value]
         response = None
         while response is None:
-            response = self.blocks[self.block_id(key)].run_command(KVOps.put, args)[0]
-            response = self._handle_redirect(KVOps.put, args, response)
+            response = self.blocks[self.block_id(key)].run_command(HashTableOps.put, args)[0]
+            response = self._handle_redirect(HashTableOps.put, args, response)
         return response
 
     def get(self, key):
         args = [key]
         response = None
         while response is None:
-            response = self.blocks[self.block_id(key)].run_command(KVOps.get, args)[0]
-            response = self._handle_redirect(KVOps.get, args, response)
+            response = self.blocks[self.block_id(key)].run_command(HashTableOps.get, args)[0]
+            response = self._handle_redirect(HashTableOps.get, args, response)
         return response
 
     def exists(self, key):
         args = [key]
         response = None
         while response is None:
-            response = self.blocks[self.block_id(key)].run_command(KVOps.exists, args)[0]
-            response = self._handle_redirect(KVOps.exists, args, response)
+            response = self.blocks[self.block_id(key)].run_command(HashTableOps.exists, args)[0]
+            response = self._handle_redirect(HashTableOps.exists, args, response)
         return response == b'true'
 
     def update(self, key, value):
         args = [key, value]
         response = None
         while response is None:
-            response = self.blocks[self.block_id(key)].run_command(KVOps.update, args)[0]
-            response = self._handle_redirect(KVOps.update, args, response)
+            response = self.blocks[self.block_id(key)].run_command(HashTableOps.update, args)[0]
+            response = self._handle_redirect(HashTableOps.update, args, response)
         return response
 
     def remove(self, key):
         args = [key]
         response = None
         while response is None:
-            response = self.blocks[self.block_id(key)].run_command(KVOps.remove, args)[0]
-            response = self._handle_redirect(KVOps.remove, args, response)
+            response = self.blocks[self.block_id(key)].run_command(HashTableOps.remove, args)[0]
+            response = self._handle_redirect(HashTableOps.remove, args, response)
         return response
 
     def multi_put(self, args):
         response = None
         while response is None:
-            response = self._batch_command(KVOps.put, args, 2)
-            response = self._handle_redirects(KVOps.put, args, response)
+            response = self._batch_command(HashTableOps.put, args, 2)
+            response = self._handle_redirects(HashTableOps.put, args, response)
         return response
 
     def multi_get(self, args):
         response = None
         while response is None:
-            response = self._batch_command(KVOps.get, args, 1)
-            response = self._handle_redirects(KVOps.get, args, response)
+            response = self._batch_command(HashTableOps.get, args, 1)
+            response = self._handle_redirects(HashTableOps.get, args, response)
         return response
 
     def multi_exists(self, args):
         response = None
         while response is None:
-            response = self._batch_command(KVOps.exists, args, 1)
-            response = self._handle_redirects(KVOps.exists, args, response)
+            response = self._batch_command(HashTableOps.exists, args, 1)
+            response = self._handle_redirects(HashTableOps.exists, args, response)
         return [r == b'true' for r in response]
 
     def multi_update(self, args):
         response = None
         while response is None:
-            response = self._batch_command(KVOps.update, args, 2)
-            response = self._handle_redirects(KVOps.update, args, response)
+            response = self._batch_command(HashTableOps.update, args, 2)
+            response = self._handle_redirects(HashTableOps.update, args, response)
         return response
 
     def multi_remove(self, args):
         response = None
         while response is None:
-            response = self._batch_command(KVOps.remove, args, 1)
-            response = self._handle_redirects(KVOps.remove, args, response)
+            response = self._batch_command(HashTableOps.remove, args, 1)
+            response = self._handle_redirects(HashTableOps.remove, args, response)
         return response
 
     def block_id(self, key):

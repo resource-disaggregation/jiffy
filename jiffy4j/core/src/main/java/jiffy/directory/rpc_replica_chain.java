@@ -12,16 +12,16 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("rpc_replica_chain");
 
   private static final org.apache.thrift.protocol.TField BLOCK_NAMES_FIELD_DESC = new org.apache.thrift.protocol.TField("block_names", org.apache.thrift.protocol.TType.LIST, (short)1);
-  private static final org.apache.thrift.protocol.TField SLOT_BEGIN_FIELD_DESC = new org.apache.thrift.protocol.TField("slot_begin", org.apache.thrift.protocol.TType.I32, (short)2);
-  private static final org.apache.thrift.protocol.TField SLOT_END_FIELD_DESC = new org.apache.thrift.protocol.TField("slot_end", org.apache.thrift.protocol.TType.I32, (short)3);
+  private static final org.apache.thrift.protocol.TField NAME_FIELD_DESC = new org.apache.thrift.protocol.TField("name", org.apache.thrift.protocol.TType.STRING, (short)2);
+  private static final org.apache.thrift.protocol.TField METADATA_FIELD_DESC = new org.apache.thrift.protocol.TField("metadata", org.apache.thrift.protocol.TType.STRING, (short)3);
   private static final org.apache.thrift.protocol.TField STORAGE_MODE_FIELD_DESC = new org.apache.thrift.protocol.TField("storage_mode", org.apache.thrift.protocol.TType.I32, (short)4);
 
   private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new rpc_replica_chainStandardSchemeFactory();
   private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new rpc_replica_chainTupleSchemeFactory();
 
   public java.util.List<java.lang.String> block_names; // required
-  public int slot_begin; // required
-  public int slot_end; // required
+  public java.lang.String name; // required
+  public java.lang.String metadata; // required
   /**
    * 
    * @see rpc_storage_mode
@@ -31,8 +31,8 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
     BLOCK_NAMES((short)1, "block_names"),
-    SLOT_BEGIN((short)2, "slot_begin"),
-    SLOT_END((short)3, "slot_end"),
+    NAME((short)2, "name"),
+    METADATA((short)3, "metadata"),
     /**
      * 
      * @see rpc_storage_mode
@@ -54,10 +54,10 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
       switch(fieldId) {
         case 1: // BLOCK_NAMES
           return BLOCK_NAMES;
-        case 2: // SLOT_BEGIN
-          return SLOT_BEGIN;
-        case 3: // SLOT_END
-          return SLOT_END;
+        case 2: // NAME
+          return NAME;
+        case 3: // METADATA
+          return METADATA;
         case 4: // STORAGE_MODE
           return STORAGE_MODE;
         default:
@@ -100,19 +100,16 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
   }
 
   // isset id assignments
-  private static final int __SLOT_BEGIN_ISSET_ID = 0;
-  private static final int __SLOT_END_ISSET_ID = 1;
-  private byte __isset_bitfield = 0;
   public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
     tmpMap.put(_Fields.BLOCK_NAMES, new org.apache.thrift.meta_data.FieldMetaData("block_names", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
             new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
-    tmpMap.put(_Fields.SLOT_BEGIN, new org.apache.thrift.meta_data.FieldMetaData("slot_begin", org.apache.thrift.TFieldRequirementType.REQUIRED, 
-        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
-    tmpMap.put(_Fields.SLOT_END, new org.apache.thrift.meta_data.FieldMetaData("slot_end", org.apache.thrift.TFieldRequirementType.REQUIRED, 
-        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+    tmpMap.put(_Fields.NAME, new org.apache.thrift.meta_data.FieldMetaData("name", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+    tmpMap.put(_Fields.METADATA, new org.apache.thrift.meta_data.FieldMetaData("metadata", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.STORAGE_MODE, new org.apache.thrift.meta_data.FieldMetaData("storage_mode", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.EnumMetaData(org.apache.thrift.protocol.TType.ENUM, rpc_storage_mode.class)));
     metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
@@ -124,16 +121,14 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
 
   public rpc_replica_chain(
     java.util.List<java.lang.String> block_names,
-    int slot_begin,
-    int slot_end,
+    java.lang.String name,
+    java.lang.String metadata,
     rpc_storage_mode storage_mode)
   {
     this();
     this.block_names = block_names;
-    this.slot_begin = slot_begin;
-    setSlotBeginIsSet(true);
-    this.slot_end = slot_end;
-    setSlotEndIsSet(true);
+    this.name = name;
+    this.metadata = metadata;
     this.storage_mode = storage_mode;
   }
 
@@ -141,13 +136,16 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
    * Performs a deep copy on <i>other</i>.
    */
   public rpc_replica_chain(rpc_replica_chain other) {
-    __isset_bitfield = other.__isset_bitfield;
     if (other.isSetBlockNames()) {
       java.util.List<java.lang.String> __this__block_names = new java.util.ArrayList<java.lang.String>(other.block_names);
       this.block_names = __this__block_names;
     }
-    this.slot_begin = other.slot_begin;
-    this.slot_end = other.slot_end;
+    if (other.isSetName()) {
+      this.name = other.name;
+    }
+    if (other.isSetMetadata()) {
+      this.metadata = other.metadata;
+    }
     if (other.isSetStorageMode()) {
       this.storage_mode = other.storage_mode;
     }
@@ -160,10 +158,8 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
   @Override
   public void clear() {
     this.block_names = null;
-    setSlotBeginIsSet(false);
-    this.slot_begin = 0;
-    setSlotEndIsSet(false);
-    this.slot_end = 0;
+    this.name = null;
+    this.metadata = null;
     this.storage_mode = null;
   }
 
@@ -206,50 +202,52 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     }
   }
 
-  public int getSlotBegin() {
-    return this.slot_begin;
+  public java.lang.String getName() {
+    return this.name;
   }
 
-  public rpc_replica_chain setSlotBegin(int slot_begin) {
-    this.slot_begin = slot_begin;
-    setSlotBeginIsSet(true);
+  public rpc_replica_chain setName(java.lang.String name) {
+    this.name = name;
     return this;
   }
 
-  public void unsetSlotBegin() {
-    __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __SLOT_BEGIN_ISSET_ID);
+  public void unsetName() {
+    this.name = null;
   }
 
-  /** Returns true if field slot_begin is set (has been assigned a value) and false otherwise */
-  public boolean isSetSlotBegin() {
-    return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __SLOT_BEGIN_ISSET_ID);
+  /** Returns true if field name is set (has been assigned a value) and false otherwise */
+  public boolean isSetName() {
+    return this.name != null;
   }
 
-  public void setSlotBeginIsSet(boolean value) {
-    __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __SLOT_BEGIN_ISSET_ID, value);
+  public void setNameIsSet(boolean value) {
+    if (!value) {
+      this.name = null;
+    }
   }
 
-  public int getSlotEnd() {
-    return this.slot_end;
+  public java.lang.String getMetadata() {
+    return this.metadata;
   }
 
-  public rpc_replica_chain setSlotEnd(int slot_end) {
-    this.slot_end = slot_end;
-    setSlotEndIsSet(true);
+  public rpc_replica_chain setMetadata(java.lang.String metadata) {
+    this.metadata = metadata;
     return this;
   }
 
-  public void unsetSlotEnd() {
-    __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __SLOT_END_ISSET_ID);
+  public void unsetMetadata() {
+    this.metadata = null;
   }
 
-  /** Returns true if field slot_end is set (has been assigned a value) and false otherwise */
-  public boolean isSetSlotEnd() {
-    return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __SLOT_END_ISSET_ID);
+  /** Returns true if field metadata is set (has been assigned a value) and false otherwise */
+  public boolean isSetMetadata() {
+    return this.metadata != null;
   }
 
-  public void setSlotEndIsSet(boolean value) {
-    __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __SLOT_END_ISSET_ID, value);
+  public void setMetadataIsSet(boolean value) {
+    if (!value) {
+      this.metadata = null;
+    }
   }
 
   /**
@@ -294,19 +292,19 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
       }
       break;
 
-    case SLOT_BEGIN:
+    case NAME:
       if (value == null) {
-        unsetSlotBegin();
+        unsetName();
       } else {
-        setSlotBegin((java.lang.Integer)value);
+        setName((java.lang.String)value);
       }
       break;
 
-    case SLOT_END:
+    case METADATA:
       if (value == null) {
-        unsetSlotEnd();
+        unsetMetadata();
       } else {
-        setSlotEnd((java.lang.Integer)value);
+        setMetadata((java.lang.String)value);
       }
       break;
 
@@ -326,11 +324,11 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     case BLOCK_NAMES:
       return getBlockNames();
 
-    case SLOT_BEGIN:
-      return getSlotBegin();
+    case NAME:
+      return getName();
 
-    case SLOT_END:
-      return getSlotEnd();
+    case METADATA:
+      return getMetadata();
 
     case STORAGE_MODE:
       return getStorageMode();
@@ -348,10 +346,10 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     switch (field) {
     case BLOCK_NAMES:
       return isSetBlockNames();
-    case SLOT_BEGIN:
-      return isSetSlotBegin();
-    case SLOT_END:
-      return isSetSlotEnd();
+    case NAME:
+      return isSetName();
+    case METADATA:
+      return isSetMetadata();
     case STORAGE_MODE:
       return isSetStorageMode();
     }
@@ -382,21 +380,21 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
         return false;
     }
 
-    boolean this_present_slot_begin = true;
-    boolean that_present_slot_begin = true;
-    if (this_present_slot_begin || that_present_slot_begin) {
-      if (!(this_present_slot_begin && that_present_slot_begin))
+    boolean this_present_name = true && this.isSetName();
+    boolean that_present_name = true && that.isSetName();
+    if (this_present_name || that_present_name) {
+      if (!(this_present_name && that_present_name))
         return false;
-      if (this.slot_begin != that.slot_begin)
+      if (!this.name.equals(that.name))
         return false;
     }
 
-    boolean this_present_slot_end = true;
-    boolean that_present_slot_end = true;
-    if (this_present_slot_end || that_present_slot_end) {
-      if (!(this_present_slot_end && that_present_slot_end))
+    boolean this_present_metadata = true && this.isSetMetadata();
+    boolean that_present_metadata = true && that.isSetMetadata();
+    if (this_present_metadata || that_present_metadata) {
+      if (!(this_present_metadata && that_present_metadata))
         return false;
-      if (this.slot_end != that.slot_end)
+      if (!this.metadata.equals(that.metadata))
         return false;
     }
 
@@ -420,9 +418,13 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     if (isSetBlockNames())
       hashCode = hashCode * 8191 + block_names.hashCode();
 
-    hashCode = hashCode * 8191 + slot_begin;
+    hashCode = hashCode * 8191 + ((isSetName()) ? 131071 : 524287);
+    if (isSetName())
+      hashCode = hashCode * 8191 + name.hashCode();
 
-    hashCode = hashCode * 8191 + slot_end;
+    hashCode = hashCode * 8191 + ((isSetMetadata()) ? 131071 : 524287);
+    if (isSetMetadata())
+      hashCode = hashCode * 8191 + metadata.hashCode();
 
     hashCode = hashCode * 8191 + ((isSetStorageMode()) ? 131071 : 524287);
     if (isSetStorageMode())
@@ -449,22 +451,22 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
         return lastComparison;
       }
     }
-    lastComparison = java.lang.Boolean.valueOf(isSetSlotBegin()).compareTo(other.isSetSlotBegin());
+    lastComparison = java.lang.Boolean.valueOf(isSetName()).compareTo(other.isSetName());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    if (isSetSlotBegin()) {
-      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.slot_begin, other.slot_begin);
+    if (isSetName()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.name, other.name);
       if (lastComparison != 0) {
         return lastComparison;
       }
     }
-    lastComparison = java.lang.Boolean.valueOf(isSetSlotEnd()).compareTo(other.isSetSlotEnd());
+    lastComparison = java.lang.Boolean.valueOf(isSetMetadata()).compareTo(other.isSetMetadata());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    if (isSetSlotEnd()) {
-      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.slot_end, other.slot_end);
+    if (isSetMetadata()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.metadata, other.metadata);
       if (lastComparison != 0) {
         return lastComparison;
       }
@@ -507,12 +509,20 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     }
     first = false;
     if (!first) sb.append(", ");
-    sb.append("slot_begin:");
-    sb.append(this.slot_begin);
+    sb.append("name:");
+    if (this.name == null) {
+      sb.append("null");
+    } else {
+      sb.append(this.name);
+    }
     first = false;
     if (!first) sb.append(", ");
-    sb.append("slot_end:");
-    sb.append(this.slot_end);
+    sb.append("metadata:");
+    if (this.metadata == null) {
+      sb.append("null");
+    } else {
+      sb.append(this.metadata);
+    }
     first = false;
     if (!first) sb.append(", ");
     sb.append("storage_mode:");
@@ -531,8 +541,12 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     if (block_names == null) {
       throw new org.apache.thrift.protocol.TProtocolException("Required field 'block_names' was not present! Struct: " + toString());
     }
-    // alas, we cannot check 'slot_begin' because it's a primitive and you chose the non-beans generator.
-    // alas, we cannot check 'slot_end' because it's a primitive and you chose the non-beans generator.
+    if (name == null) {
+      throw new org.apache.thrift.protocol.TProtocolException("Required field 'name' was not present! Struct: " + toString());
+    }
+    if (metadata == null) {
+      throw new org.apache.thrift.protocol.TProtocolException("Required field 'metadata' was not present! Struct: " + toString());
+    }
     if (storage_mode == null) {
       throw new org.apache.thrift.protocol.TProtocolException("Required field 'storage_mode' was not present! Struct: " + toString());
     }
@@ -549,8 +563,6 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
 
   private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, java.lang.ClassNotFoundException {
     try {
-      // it doesn't seem like you should have to do this, but java serialization is wacky, and doesn't call the default constructor.
-      __isset_bitfield = 0;
       read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
     } catch (org.apache.thrift.TException te) {
       throw new java.io.IOException(te);
@@ -593,18 +605,18 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 2: // SLOT_BEGIN
-            if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
-              struct.slot_begin = iprot.readI32();
-              struct.setSlotBeginIsSet(true);
+          case 2: // NAME
+            if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+              struct.name = iprot.readString();
+              struct.setNameIsSet(true);
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 3: // SLOT_END
-            if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
-              struct.slot_end = iprot.readI32();
-              struct.setSlotEndIsSet(true);
+          case 3: // METADATA
+            if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+              struct.metadata = iprot.readString();
+              struct.setMetadataIsSet(true);
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
@@ -625,12 +637,6 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
       iprot.readStructEnd();
 
       // check for required fields of primitive type, which can't be checked in the validate method
-      if (!struct.isSetSlotBegin()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'slot_begin' was not found in serialized data! Struct: " + toString());
-      }
-      if (!struct.isSetSlotEnd()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'slot_end' was not found in serialized data! Struct: " + toString());
-      }
       struct.validate();
     }
 
@@ -650,12 +656,16 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
         }
         oprot.writeFieldEnd();
       }
-      oprot.writeFieldBegin(SLOT_BEGIN_FIELD_DESC);
-      oprot.writeI32(struct.slot_begin);
-      oprot.writeFieldEnd();
-      oprot.writeFieldBegin(SLOT_END_FIELD_DESC);
-      oprot.writeI32(struct.slot_end);
-      oprot.writeFieldEnd();
+      if (struct.name != null) {
+        oprot.writeFieldBegin(NAME_FIELD_DESC);
+        oprot.writeString(struct.name);
+        oprot.writeFieldEnd();
+      }
+      if (struct.metadata != null) {
+        oprot.writeFieldBegin(METADATA_FIELD_DESC);
+        oprot.writeString(struct.metadata);
+        oprot.writeFieldEnd();
+      }
       if (struct.storage_mode != null) {
         oprot.writeFieldBegin(STORAGE_MODE_FIELD_DESC);
         oprot.writeI32(struct.storage_mode.getValue());
@@ -685,8 +695,8 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
           oprot.writeString(_iter4);
         }
       }
-      oprot.writeI32(struct.slot_begin);
-      oprot.writeI32(struct.slot_end);
+      oprot.writeString(struct.name);
+      oprot.writeString(struct.metadata);
       oprot.writeI32(struct.storage_mode.getValue());
     }
 
@@ -704,10 +714,10 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
         }
       }
       struct.setBlockNamesIsSet(true);
-      struct.slot_begin = iprot.readI32();
-      struct.setSlotBeginIsSet(true);
-      struct.slot_end = iprot.readI32();
-      struct.setSlotEndIsSet(true);
+      struct.name = iprot.readString();
+      struct.setNameIsSet(true);
+      struct.metadata = iprot.readString();
+      struct.setMetadataIsSet(true);
       struct.storage_mode = jiffy.directory.rpc_storage_mode.findByValue(iprot.readI32());
       struct.setStorageModeIsSet(true);
     }

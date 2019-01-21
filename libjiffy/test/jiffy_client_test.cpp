@@ -539,7 +539,7 @@ TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
     std::string op1 = "put", op2 = "remove";
     std::string key = "key1", value = "value1";
 
-    client.fs()->create("/a/file.txt", "hashtable", "/tmp", 1, 1, 0, 0, {"0_65536"}, {"regular"});
+    client.fs()->create("/a/file.txt", "storage", "/tmp", 1, 1, 0, 0, {"0_65536"}, {"regular"});
     auto n1 = client.listen("/a/file.txt");
     auto n2 = client.listen("/a/file.txt");
     auto n3 = client.listen("/a/file.txt");

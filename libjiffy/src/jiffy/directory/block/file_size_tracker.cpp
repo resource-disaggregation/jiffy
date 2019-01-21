@@ -54,7 +54,7 @@ void file_size_tracker::report_file_sizes(std::ofstream &out) {
   auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
 
   auto node = std::dynamic_pointer_cast<ds_dir_node>(tree_->root_);
-  for (const auto &cname: node->children()) {
+  for (const auto &cname: node->child_names()) {
     report_file_sizes(out, node->get_child(cname), "", static_cast<uint64_t>(cur_epoch));
   }
 }
@@ -75,7 +75,7 @@ void file_size_tracker::report_file_sizes(std::ofstream &out,
         << std::endl;
   } else {
     auto dir = std::dynamic_pointer_cast<ds_dir_node>(node);
-    for (const auto &cname: dir->children()) {
+    for (const auto &cname: dir->child_names()) {
       report_file_sizes(out, dir->get_child(cname), child_path, static_cast<uint64_t>(epoch));
     }
   }

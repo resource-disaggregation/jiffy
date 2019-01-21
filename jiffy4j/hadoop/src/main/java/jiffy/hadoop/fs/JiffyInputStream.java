@@ -4,7 +4,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import jiffy.JiffyClient;
-import jiffy.kv.KVClient;
+import jiffy.storage.HashTableClient;
 import jiffy.util.ByteBufferUtils;
 import org.apache.hadoop.fs.FSInputStream;
 import org.apache.thrift.TException;
@@ -20,10 +20,10 @@ public class JiffyInputStream extends FSInputStream {
   private long currentBlockNum;
   private JiffyBlock currentBlock;
 
-  private KVClient client;
+  private HashTableClient client;
   private String path;
 
-  JiffyInputStream(JiffyClient mm, String path, KVClient client, long blockSize, long fileLength) {
+  JiffyInputStream(JiffyClient mm, String path, HashTableClient client, long blockSize, long fileLength) {
     this.mm = mm;
     this.path = path;
     this.filePos = 0;

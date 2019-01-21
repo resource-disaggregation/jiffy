@@ -392,8 +392,8 @@ void hash_table_client::locked_client::handle_redirect(int32_t cmd_id,
     } while (response.substr(0, 10) == "!exporting");
   }
   // There can be !block_moved response, since:
-  // (1) No new exports can start while the hashtable is locked
-  // (2) Ongoing exports cannot finish while the hashtable is locked
+  // (1) No new exports can start while the storage is locked
+  // (2) Ongoing exports cannot finish while the storage is locked
 }
 
 void hash_table_client::locked_client::handle_redirects(int32_t cmd_id,
@@ -427,8 +427,8 @@ void hash_table_client::locked_client::handle_redirects(int32_t cmd_id,
     }
   }
   // There can be !block_moved response, since:
-  // (1) No new exports can start while the hashtable is locked
-  // (2) Ongoing exports cannot finish while the hashtable is locked
+  // (1) No new exports can start while the storage is locked
+  // (2) Ongoing exports cannot finish while the storage is locked
 }
 
 }

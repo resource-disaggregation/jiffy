@@ -1,4 +1,4 @@
-package jiffy.kv;
+package jiffy.storage;
 
 public class BlockNameParser {
 

@@ -1,7 +1,6 @@
-package jiffy.kv;
+package jiffy.storage;
 
 import java.io.Closeable;
-import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -11,9 +10,9 @@ import java.util.List;
 import jiffy.directory.directory_service.Client;
 import jiffy.directory.rpc_replica_chain;
 import jiffy.directory.rpc_storage_mode;
-import jiffy.kv.BlockClient.CommandResponse;
-import jiffy.kv.BlockClient.CommandResponseReader;
-import jiffy.kv.BlockNameParser.BlockMetadata;
+import jiffy.storage.BlockClient.CommandResponse;
+import jiffy.storage.BlockClient.CommandResponseReader;
+import jiffy.storage.BlockNameParser.BlockMetadata;
 import jiffy.util.ByteBufferUtils;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
@@ -29,11 +28,11 @@ public class ReplicaChainClient implements Closeable {
     LockedClient(ReplicaChainClient parent) throws TException {
       this.parent = parent;
       String response = StandardCharsets.UTF_8
-          .decode(runCommand(KVOps.LOCK, Collections.emptyList()).get(0)).toString();
+          .decode(runCommand(HashTableOps.LOCK, Collections.emptyList()).get(0)).toString();
       if (!response.equals("!ok")) {
         this.redirecting = true;
         String[] parts = response.split("!");
-        this.redirectChain = new rpc_replica_chain(new ArrayList<>(parts.length - 1), 0, 0,
+        this.redirectChain = new rpc_replica_chain(new ArrayList<>(parts.length - 1), parent.getChain().getName(), parent.getChain().getMetadata(),
             rpc_storage_mode.rpc_in_memory);
         this.redirectChain.block_names.addAll(Arrays.asList(parts).subList(2, parts.length));
       } else {
@@ -43,7 +42,7 @@ public class ReplicaChainClient implements Closeable {
     }
 
     void unlock() throws TException {
-      runCommand(KVOps.UNLOCK, Collections.emptyList());
+      runCommand(HashTableOps.UNLOCK, Collections.emptyList());
     }
 
     void sendCommandRequest(int cmdId, List<ByteBuffer> args) throws TException {
@@ -129,7 +128,7 @@ public class ReplicaChainClient implements Closeable {
   }
 
   void sendCommandRequest(int cmdId, List<ByteBuffer> args) throws TException {
-    if (KVOpType.opType(cmdId) == KVOpType.accessor) {
+    if (CommandType.opType(cmdId) == CommandType.accessor) {
       sendCommandRequest(tail, cmdId, args);
     } else {
       sendCommandRequest(head, cmdId, args);
@@ -159,7 +158,7 @@ public class ReplicaChainClient implements Closeable {
     boolean retry = false;
     while (response == null) {
       try {
-        if (KVOpType.opType(cmdId) == KVOpType.accessor) {
+        if (CommandType.opType(cmdId) == CommandType.accessor) {
           response = runCommand(tail, cmdId, args);
         } else {
           response = runCommand(head, cmdId, args);
@@ -186,7 +185,7 @@ public class ReplicaChainClient implements Closeable {
   }
 
   List<ByteBuffer> runCommandRedirected(int cmdId, List<ByteBuffer> args) throws TException {
-    if (KVOpType.opType(cmdId) == KVOpType.accessor) {
+    if (CommandType.opType(cmdId) == CommandType.accessor) {
       return runCommandRedirected(tail, cmdId, args);
     } else {
       return runCommandRedirected(head, cmdId, args);

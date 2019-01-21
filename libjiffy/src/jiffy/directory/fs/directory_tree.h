@@ -619,7 +619,8 @@ class ds_dir_node : public ds_node {
       } else if (ret->second->is_directory()) {
         auto dir = std::dynamic_pointer_cast<ds_dir_node>(ret->second);
         bool cleared = true;
-        for (auto &entry: *dir) {
+        auto entries = dir->children();
+        for (auto &entry: entries) {
           if (!dir->handle_lease_expiry(cleared_blocks, entry.first, storage)) {
             cleared = false;
           }
@@ -707,16 +708,24 @@ class ds_dir_node : public ds_node {
   }
 
   /**
-  * @brief Return all children names
-  * @return Children names
+  * @brief Return all child names
+  * @return Child names
   */
 
-  std::vector<std::string> children() const {
+  std::vector<std::string> child_names() const {
     std::vector<std::string> ret;
     for (const auto &entry: children_) {
       ret.push_back(entry.first);
     }
     return ret;
+  }
+
+  /**
+   * @brief Return the child map
+   * @return The child map
+   */
+  child_map children() const {
+    return children_;
   }
 
   /**

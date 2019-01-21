@@ -1,7 +1,7 @@
 #include <atomic>
 #include <iostream>
 #include <jiffy/directory/block/block_registration_client.h>
-#include <jiffy/storage/kv/kv_block.h>
+#include <jiffy/storage/hashtable/hash_table_partition.h>
 #include <jiffy/storage/manager/storage_management_server.h>
 #include <jiffy/storage/notification/notification_server.h>
 #include <jiffy/storage/service/block_server.h>
@@ -227,12 +227,12 @@ int main(int argc, char **argv) {
   std::vector<std::shared_ptr<chain_module>> blocks;
   blocks.resize(num_blocks);
   for (size_t i = 0; i < blocks.size(); ++i) {
-    blocks[i] = std::make_shared<kv_block>(block_names[i],
-                                           block_capacity,
-                                           blk_thresh_lo,
-                                           blk_thresh_hi,
-                                           dir_host,
-                                           dir_port);
+    blocks[i] = std::make_shared<hash_table_partition>(block_names[i],
+                                                       block_capacity,
+                                                       blk_thresh_lo,
+                                                       blk_thresh_hi,
+                                                       dir_host,
+                                                       dir_port);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
 

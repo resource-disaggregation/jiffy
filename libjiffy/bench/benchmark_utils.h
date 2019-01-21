@@ -6,7 +6,7 @@
 #include <iostream>
 #include <cstdint>
 
-#include "jiffy/storage/kv/kv_block.h"
+#include "jiffy/storage/hashtable/hash_table_partition.h"
 
 namespace jiffy {
 namespace benchmark {
@@ -18,8 +18,7 @@ class benchmark_utils {
   static void load_workload(const std::string &workload_path,
                             std::size_t workload_offset,
                             std::size_t num_ops,
-                            std::vector<std::pair<int32_t, std::vector < std::string>>
-  > &workload) {
+                            std::vector<std::pair<int32_t, std::vector<std::string>>> &workload) {
     workload.clear();
     std::ifstream in(workload_path);
     std::string line;
@@ -29,8 +28,8 @@ class benchmark_utils {
       if (line_num++ < workload_offset)
         continue;
       std::istringstream iss(line);
-      std::vector<std::string> tokens{std::istream_iterator < std::string > {iss},
-                                      std::istream_iterator < std::string > {}};
+      std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
+                                      std::istream_iterator<std::string>{}};
       int32_t cmd_id = -1;
       if (tokens[0] == "get") {
         cmd_id = kv_op_id::get;

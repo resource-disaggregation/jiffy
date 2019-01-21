@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
   }
 
   auto client = std::make_shared<jiffy::directory::directory_client>(host, port);
-  auto dstatus = client->create(file, "hashtable", "local://tmp", 1, chain_length, 0);
+  auto dstatus = client->create(file, "storage", "local://tmp", 1, chain_length, 0);
   auto chain = dstatus.data_blocks().front();
   std::cerr << "Chain: " << chain.to_string() << std::endl;
   if (benchmark_type == "throughput") {

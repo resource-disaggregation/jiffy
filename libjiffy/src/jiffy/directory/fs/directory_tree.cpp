@@ -244,7 +244,7 @@ void directory_tree::permissions(const std::string &path, const perms &prms, per
 void directory_tree::remove(const std::string &path) {
   LOG(log_level::info) << "Removing path " << path;
   if (path == "/") {
-    if (root_->children().empty())
+    if (root_->child_names().empty())
       return;
     throw directory_ops_exception("Directory not empty: " + path);
   }
@@ -281,7 +281,7 @@ void directory_tree::remove_all(const std::string &path) {
   LOG(log_level::info) << "Removing path " << path;
   if (path == "/") {
     auto parent = root_;
-    auto children = root_->children();
+    auto children = root_->child_names();
     for (const auto &child_name: children) {
       remove_all(parent, child_name);
     }

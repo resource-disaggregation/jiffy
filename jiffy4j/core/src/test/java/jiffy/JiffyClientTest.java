@@ -8,8 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import jiffy.directory.Flags;
 import jiffy.directory.Permissions;
-import jiffy.kv.KVClient;
-import jiffy.kv.KVClient.LockedClient;
+import jiffy.storage.HashTableClient;
+import jiffy.storage.HashTableClient.LockedClient;
 import jiffy.notification.KVListener;
 import jiffy.notification.event.Notification;
 import jiffy.util.ByteBufferUtils;
@@ -102,7 +102,7 @@ public class JiffyClientTest {
     return ByteBufferUtils.fromString(str);
   }
 
-  private void kvOps(KVClient kv) throws TException {
+  private void kvOps(HashTableClient kv) throws TException {
     System.out.println("==> Testing KV ops");
     for (int i = 0; i < 1000; i++) {
       Assert.assertEquals(makeBB("!ok"), kv.put(makeBB(i), makeBB(i)));
@@ -169,7 +169,7 @@ public class JiffyClientTest {
     lkv.close();
   }
 
-  private void lockedKVOps(KVClient.LockedClient kv) throws TException {
+  private void lockedKVOps(HashTableClient.LockedClient kv) throws TException {
     System.out.println("==> Testing locked KV ops");
     Assert.assertEquals(0, kv.numKeys());
     for (int i = 0; i < 1000; i++) {
@@ -259,7 +259,7 @@ public class JiffyClientTest {
   public void testLeaseWorker() throws InterruptedException, TException, IOException {
     startServers(false, false);
     try (JiffyClient client = directoryServer.connect()) {
-      client.create("/a/file.txt", "local://tmp", 1, 1);
+      client.createHashTable("/a/file.txt", "local://tmp", 1, 1);
       Assert.assertTrue(client.fs().exists("/a/file.txt"));
       Thread.sleep(client.getWorker().getRenewalDurationMs());
       Assert.assertTrue(client.fs().exists("/a/file.txt"));
@@ -274,7 +274,7 @@ public class JiffyClientTest {
   public void testCreate() throws InterruptedException, TException, IOException {
     startServers(false, false);
     try (JiffyClient client = directoryServer.connect()) {
-      KVClient kv = client.create("/a/file.txt", "local://tmp", 1, 1);
+      HashTableClient kv = client.createHashTable("/a/file.txt", "local://tmp", 1, 1);
       kvOps(kv);
       Assert.assertTrue(client.fs().exists("/a/file.txt"));
     } finally {
@@ -286,9 +286,9 @@ public class JiffyClientTest {
   public void testOpen() throws InterruptedException, TException, IOException {
     startServers(false, false);
     try (JiffyClient client = directoryServer.connect()) {
-      client.create("/a/file.txt", "local://tmp", 1, 1);
+      client.createHashTable("/a/file.txt", "local://tmp", 1, 1);
       Assert.assertTrue(client.fs().exists("/a/file.txt"));
-      KVClient kv = client.open("/a/file.txt");
+      HashTableClient kv = client.open("/a/file.txt");
       kvOps(kv);
     } finally {
       stopServers();
@@ -299,7 +299,7 @@ public class JiffyClientTest {
   public void testFlushRemove() throws InterruptedException, TException, IOException {
     startServers(false, false);
     try (JiffyClient client = directoryServer.connect()) {
-      client.create("/a/file.txt", "local://tmp", 1, 1);
+      client.createHashTable("/a/file.txt", "local://tmp", 1, 1);
       Assert.assertTrue(client.getWorker().hasPath("/a/file.txt"));
       client.sync("/a/file.txt", "local://tmp");
       Assert.assertTrue(client.getWorker().hasPath("/a/file.txt"));
@@ -315,10 +315,10 @@ public class JiffyClientTest {
   public void testClose() throws InterruptedException, TException, IOException {
     startServers(false, false);
     try (JiffyClient client = directoryServer.connect()) {
-      client.create("/a/file.txt", "local://tmp", 1, 1);
-      client.create("/a/file1.txt", "local://tmp", 1, 1, Flags.PINNED, Permissions.all,
+      client.createHashTable("/a/file.txt", "local://tmp", 1, 1);
+      client.createHashTable("/a/file1.txt", "local://tmp", 1, 1, Flags.PINNED, Permissions.all,
           Collections.emptyMap());
-      client.create("/a/file2.txt", "local://tmp", 1, 1, Flags.MAPPED, Permissions.all,
+      client.createHashTable("/a/file2.txt", "local://tmp", 1, 1, Flags.MAPPED, Permissions.all,
           Collections.emptyMap());
       Assert.assertTrue(client.getWorker().hasPath("/a/file.txt"));
       Assert.assertTrue(client.getWorker().hasPath("/a/file1.txt"));
@@ -346,7 +346,7 @@ public class JiffyClientTest {
   public void testChainReplication() throws InterruptedException, TException, IOException {
     startServers(true, false);
     try (JiffyClient client = directoryServer.connect()) {
-      KVClient kv = client.create("/a/file.txt", "local://tmp", 1, 3);
+      HashTableClient kv = client.createHashTable("/a/file.txt", "local://tmp", 1, 3);
       Assert.assertEquals(3, client.fs().dstatus("/a/file.txt").chain_length);
       kvOps(kv);
     } finally {
@@ -360,7 +360,7 @@ public class JiffyClientTest {
     for (StorageServer server : servers) {
       startServers(true, false);
       try (JiffyClient client = directoryServer.connect()) {
-        KVClient kv = client.create("/a/file.txt", "local://tmp", 1, 3);
+        HashTableClient kv = client.createHashTable("/a/file.txt", "local://tmp", 1, 3);
         Assert.assertEquals(3, client.fs().dstatus("/a/file.txt").chain_length);
         server.stop();
         kvOps(kv);
@@ -374,7 +374,7 @@ public class JiffyClientTest {
   public void testAutoScale() throws InterruptedException, TException, IOException {
     startServers(false, true);
     try (JiffyClient client = directoryServer.connect()) {
-      KVClient kv = client.create("/a/file.txt", "local://tmp", 1, 1);
+      HashTableClient kv = client.createHashTable("/a/file.txt", "local://tmp", 1, 1);
       for (int i = 0; i < 2000; i++) {
         Assert.assertEquals(makeBB("!ok"), kv.put(makeBB(i), makeBB(i)));
       }
@@ -396,7 +396,7 @@ public class JiffyClientTest {
       ByteBuffer key = ByteBufferUtils.fromString("key1");
       ByteBuffer value = ByteBufferUtils.fromString("value1");
 
-      client.create("/a/file.txt", "local://tmp", 1, 1);
+      client.createHashTable("/a/file.txt", "local://tmp", 1, 1);
       KVListener n1 = client.listen("/a/file.txt");
       KVListener n2 = client.listen("/a/file.txt");
       KVListener n3 = client.listen("/a/file.txt");
@@ -405,7 +405,7 @@ public class JiffyClientTest {
       n2.subscribe(Arrays.asList(op1, op2));
       n3.subscribe(Collections.singletonList(op2));
 
-      KVClient kv = client.open("/a/file.txt");
+      HashTableClient kv = client.open("/a/file.txt");
       kv.put(key, value);
       kv.remove(key);
 

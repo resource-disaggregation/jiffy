@@ -28,7 +28,7 @@ TEST_CASE("manager_setup_block_test", "[setup_block][path][slot_range]") {
   auto block_name = block_name_parser::make(HOST, SERVICE_PORT, MANAGEMENT_PORT, 0, 0, 0);
   REQUIRE_NOTHROW(manager.setup_block(block_name,
                                       "/path/to/data",
-                                      "hashtable",
+                                      "storage",
                                       "0_65536",
                                       "regular",
                                       {block_name},

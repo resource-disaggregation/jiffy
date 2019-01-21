@@ -1,8 +1,8 @@
-package jiffy.kv;
+package jiffy.storage;
 
 import java.nio.ByteBuffer;
 import java.util.List;
-import jiffy.kv.block_response_service.response_args;
+import jiffy.storage.block_response_service.response_args;
 import org.apache.thrift.TApplicationException;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TMessage;

@@ -5,17 +5,17 @@ from thrift.transport.TTransport import TTransportException
 
 from jiffy.directory.directory_client import ReplicaChain
 from jiffy.directory.ttypes import rpc_replica_chain
-from jiffy.kv import block_request_service
-from jiffy.kv.block_client import BlockClient
-from jiffy.kv.compat import b, bytes_to_str
-from jiffy.kv.kv_ops import KVOpType, op_type, KVOps
+from jiffy.storage import block_request_service
+from jiffy.storage.block_client import BlockClient
+from jiffy.storage.compat import b, bytes_to_str
+from jiffy.storage.hash_table_ops import CommandType, op_type, HashTableOps
 
 
 class ReplicaChainClient:
     class LockedClient:
         def __init__(self, parent):
             self.parent = parent
-            response = b(self.run_command(KVOps.lock, [])[0])
+            response = b(self.run_command(HashTableOps.lock, [])[0])
             if response != b("!ok"):
                 self.redirecting = True
                 self.redirect_chain = [bytes_to_str(x) for x in response[1:].split(b('!'))]
@@ -28,7 +28,7 @@ class ReplicaChainClient:
                 self.unlock()
 
         def unlock(self):
-            self.run_command(KVOps.unlock, [])
+            self.run_command(HashTableOps.unlock, [])
 
         def get_chain(self):
             return self.parent.get_chain()
@@ -93,7 +93,7 @@ class ReplicaChainClient:
         self.in_flight = True
 
     def send_command(self, cmd_id, args):
-        if op_type(cmd_id) == KVOpType.accessor:
+        if op_type(cmd_id) == CommandType.accessor:
             self._send_command(self.tail, cmd_id, args)
         else:
             self._send_command(self.head, cmd_id, args)
@@ -118,7 +118,7 @@ class ReplicaChainClient:
         retry = False
         while resp is None:
             try:
-                if op_type(cmd_id) == KVOpType.accessor:
+                if op_type(cmd_id) == CommandType.accessor:
                     resp = self._run_command(self.tail, cmd_id, args)
                 else:
                     resp = self._run_command(self.head, cmd_id, args)
@@ -127,10 +127,10 @@ class ReplicaChainClient:
             except (TTransportException, socket.timeout) as e:
                 logging.warning("Error in connection to chain {}: {}".format(self.chain.block_names, e))
                 rchain = self.fs.resolve_failures(self.path, rpc_replica_chain(self.chain.block_names,
-                                                                               self.chain.slot_range[0],
-                                                                               self.chain.slot_range[1],
+                                                                               self.chain.name,
+                                                                               self.chain.metadata,
                                                                                self.chain.storage_mode))
-                self.chain = ReplicaChain(rchain.block_names, rchain.slot_begin, rchain.slot_end, rchain.storage_mode)
+                self.chain = ReplicaChain(rchain.block_names, rchain.name, rchain.metadata, rchain.storage_mode)
                 logging.warning("Updated chain: {}".format(self.chain.block_names))
                 # invalidate the client cache for the failed connection(s)
                 self._invalidate_cache()
@@ -144,7 +144,7 @@ class ReplicaChainClient:
         return self._recv_response()
 
     def run_command_redirected(self, cmd_id, args):
-        if op_type(cmd_id) == KVOpType.accessor:
+        if op_type(cmd_id) == CommandType.accessor:
             return self._run_command_redirected(self.tail, cmd_id, args)
         else:
             return self._run_command_redirected(self.head, cmd_id, args)

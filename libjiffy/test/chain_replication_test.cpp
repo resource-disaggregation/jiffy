@@ -56,7 +56,7 @@ TEST_CASE("kv_no_failure_test", "[put][get]") {
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  t->create("/file", "hashtable", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
+  t->create("/file", "storage", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
   auto chain = t->dstatus("/file").data_blocks()[0];
 
   replica_chain_client client(t, "/file", chain, 100);
@@ -136,7 +136,7 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  t->create("/file", "hashtable", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
+  t->create("/file", "storage", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
   auto chain = t->dstatus("/file").data_blocks()[0];
   replica_chain_client client(t, "/file", chain, 100);
 
@@ -225,7 +225,7 @@ TEST_CASE("kv_mid_failure_test", "[put][get]") {
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  t->create("/file", "hashtable", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
+  t->create("/file", "storage", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
   auto chain = t->dstatus("/file").data_blocks()[0];
 
   replica_chain_client client(t, "/file", chain, 100);
@@ -316,7 +316,7 @@ TEST_CASE("kv_tail_failure_test", "[put][get]") {
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  t->create("/file", "hashtable", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
+  t->create("/file", "storage", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
   auto chain = t->dstatus("/file").data_blocks()[0];
 
   replica_chain_client client(t, "/file", chain, 100);
@@ -405,7 +405,7 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  t->create("/file", "hashtable", "/tmp", 1, 2, 0, 0, {"0_65536"}, {"regular"});
+  t->create("/file", "storage", "/tmp", 1, 2, 0, 0, {"0_65536"}, {"regular"});
 
   auto chain = t->dstatus("/file").data_blocks()[0].block_names;
   {

@@ -1,7 +1,7 @@
-package jiffy.kv;
+package jiffy.storage;
 
 import java.util.HashMap;
-import jiffy.kv.block_request_service.Client;
+import jiffy.storage.block_request_service.Client;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;

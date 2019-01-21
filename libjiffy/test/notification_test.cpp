@@ -55,7 +55,7 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  data_status status = tree->create("/sandbox/file.txt",  "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0, {"0_65536"},
+  data_status status = tree->create("/sandbox/file.txt",  "storage", "/tmp", NUM_BLOCKS, 1, 0, 0, {"0_65536"},
       {"regular"});
   hash_table_client kv(tree, "/sandbox/file.txt", status);
 

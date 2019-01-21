@@ -1,4 +1,4 @@
-package jiffy.kv;
+package jiffy.storage;
 
 import java.io.Closeable;
 import java.nio.ByteBuffer;
@@ -13,17 +13,17 @@ import jiffy.directory.rpc_storage_mode;
 import jiffy.util.ByteBufferUtils;
 import org.apache.thrift.TException;
 
-public class KVClient implements Closeable {
+public class HashTableClient implements Closeable {
 
   public class LockedClient implements Closeable {
 
-    private KVClient parent;
+    private HashTableClient parent;
     private ReplicaChainClient.LockedClient[] blocks;
     private ReplicaChainClient[] redirectBlocks;
     private ReplicaChainClient.LockedClient[] lockedRedirectBlocks;
     private ReplicaChainClient.LockedClient[] newBlocks;
 
-    LockedClient(KVClient parent) throws TException {
+    LockedClient(HashTableClient parent) throws TException {
       this.parent = parent;
       this.blocks = new ReplicaChainClient.LockedClient[parent.blocks.length];
       this.redirectBlocks = new ReplicaChainClient[parent.blocks.length];
@@ -124,64 +124,64 @@ public class KVClient implements Closeable {
 
     public ByteBuffer get(ByteBuffer key) throws TException {
       List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key);
-      ByteBuffer response = blocks[blockId(key)].runCommand(KVOps.LOCKED_GET, args).get(0);
-      return handleRedirect(KVOps.LOCKED_GET, args, response);
+      ByteBuffer response = blocks[blockId(key)].runCommand(HashTableOps.LOCKED_GET, args).get(0);
+      return handleRedirect(HashTableOps.LOCKED_GET, args, response);
     }
 
     public ByteBuffer put(ByteBuffer key, ByteBuffer value) throws TException {
       List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
-      ByteBuffer response = blocks[blockId(key)].runCommand(KVOps.LOCKED_PUT, args).get(0);
-      return handleRedirect(KVOps.LOCKED_PUT, args, response);
+      ByteBuffer response = blocks[blockId(key)].runCommand(HashTableOps.LOCKED_PUT, args).get(0);
+      return handleRedirect(HashTableOps.LOCKED_PUT, args, response);
     }
 
     public ByteBuffer upsert(ByteBuffer key, ByteBuffer value) throws TException {
       List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
-      ByteBuffer response = blocks[blockId(key)].runCommand(KVOps.LOCKED_UPSERT, args).get(0);
-      return handleRedirect(KVOps.LOCKED_UPSERT, args, response);
+      ByteBuffer response = blocks[blockId(key)].runCommand(HashTableOps.LOCKED_UPSERT, args).get(0);
+      return handleRedirect(HashTableOps.LOCKED_UPSERT, args, response);
     }
 
     public ByteBuffer update(ByteBuffer key, ByteBuffer value) throws TException {
       List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
-      ByteBuffer response = blocks[blockId(key)].runCommand(KVOps.LOCKED_UPDATE, args).get(0);
-      return handleRedirect(KVOps.LOCKED_UPDATE, args, response);
+      ByteBuffer response = blocks[blockId(key)].runCommand(HashTableOps.LOCKED_UPDATE, args).get(0);
+      return handleRedirect(HashTableOps.LOCKED_UPDATE, args, response);
     }
 
     public ByteBuffer remove(ByteBuffer key) throws TException {
       List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key);
-      ByteBuffer response = blocks[blockId(key)].runCommand(KVOps.LOCKED_REMOVE, args).get(0);
-      return handleRedirect(KVOps.LOCKED_REMOVE, args, response);
+      ByteBuffer response = blocks[blockId(key)].runCommand(HashTableOps.LOCKED_REMOVE, args).get(0);
+      return handleRedirect(HashTableOps.LOCKED_REMOVE, args, response);
     }
 
     public List<ByteBuffer> get(List<ByteBuffer> args) throws TException {
-      List<ByteBuffer> response = parent.batchCommand(KVOps.LOCKED_GET, args, 1);
-      return handleRedirects(KVOps.LOCKED_GET, args, response);
+      List<ByteBuffer> response = parent.batchCommand(HashTableOps.LOCKED_GET, args, 1);
+      return handleRedirects(HashTableOps.LOCKED_GET, args, response);
     }
 
     public List<ByteBuffer> put(List<ByteBuffer> args) throws TException {
-      List<ByteBuffer> response = parent.batchCommand(KVOps.LOCKED_PUT, args, 2);
-      return handleRedirects(KVOps.LOCKED_PUT, args, response);
+      List<ByteBuffer> response = parent.batchCommand(HashTableOps.LOCKED_PUT, args, 2);
+      return handleRedirects(HashTableOps.LOCKED_PUT, args, response);
     }
 
     public List<ByteBuffer> upsert(List<ByteBuffer> args) throws TException {
-      List<ByteBuffer> response = parent.batchCommand(KVOps.LOCKED_UPSERT, args, 2);
-      return handleRedirects(KVOps.LOCKED_UPSERT, args, response);
+      List<ByteBuffer> response = parent.batchCommand(HashTableOps.LOCKED_UPSERT, args, 2);
+      return handleRedirects(HashTableOps.LOCKED_UPSERT, args, response);
     }
 
     public List<ByteBuffer> update(List<ByteBuffer> args) throws TException {
-      List<ByteBuffer> response = parent.batchCommand(KVOps.LOCKED_UPDATE, args, 2);
-      return handleRedirects(KVOps.LOCKED_UPDATE, args, response);
+      List<ByteBuffer> response = parent.batchCommand(HashTableOps.LOCKED_UPDATE, args, 2);
+      return handleRedirects(HashTableOps.LOCKED_UPDATE, args, response);
     }
 
     public List<ByteBuffer> remove(List<ByteBuffer> args) throws TException {
-      List<ByteBuffer> response = parent.batchCommand(KVOps.LOCKED_REMOVE, args, 1);
-      return handleRedirects(KVOps.LOCKED_REMOVE, args, response);
+      List<ByteBuffer> response = parent.batchCommand(HashTableOps.LOCKED_REMOVE, args, 1);
+      return handleRedirects(HashTableOps.LOCKED_REMOVE, args, response);
     }
 
     public long numKeys() throws TException {
       for (int i = 0; i < blocks.length; i++) {
-        blocks[i].sendCommandRequest(KVOps.NUM_KEYS, ByteBufferUtils.fromByteBuffers());
+        blocks[i].sendCommandRequest(HashTableOps.NUM_KEYS, ByteBufferUtils.fromByteBuffers());
         if (newBlocks[i] != null) {
-          newBlocks[i].sendCommandRequest(KVOps.NUM_KEYS, ByteBufferUtils.fromByteBuffers());
+          newBlocks[i].sendCommandRequest(HashTableOps.NUM_KEYS, ByteBufferUtils.fromByteBuffers());
         }
       }
       long n = 0;
@@ -203,7 +203,7 @@ public class KVClient implements Closeable {
   private BlockClientCache cache;
   private rpc_data_status dataStatus;
 
-  public KVClient(Client fs, String path, rpc_data_status dataStatus, int timeoutMs)
+  public HashTableClient(Client fs, String path, rpc_data_status dataStatus, int timeoutMs)
       throws TException {
     this.fs = fs;
     this.path = path;
@@ -212,7 +212,7 @@ public class KVClient implements Closeable {
     this.slots = new int[dataStatus.data_blocks.size()];
     this.cache = new BlockClientCache(timeoutMs);
     for (int i = 0; i < blocks.length; i++) {
-      slots[i] = dataStatus.data_blocks.get(i).slot_begin;
+      slots[i] = Integer.parseInt(dataStatus.data_blocks.get(i).name.split("_")[0]);
       blocks[i] = new ReplicaChainClient(fs, path, cache, dataStatus.data_blocks.get(i));
     }
   }
@@ -233,7 +233,7 @@ public class KVClient implements Closeable {
     this.blocks = new ReplicaChainClient[dataStatus.data_blocks.size()];
     this.slots = new int[dataStatus.data_blocks.size()];
     for (int i = 0; i < blocks.length; i++) {
-      slots[i] = dataStatus.data_blocks.get(i).slot_begin;
+      slots[i] = Integer.parseInt(dataStatus.data_blocks.get(i).name.split("_")[0]);
       blocks[i] = new ReplicaChainClient(fs, path, cache, dataStatus.data_blocks.get(i));
     }
   }
@@ -324,8 +324,8 @@ public class KVClient implements Closeable {
     List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(KVOps.EXISTS, args).get(0);
-      response = handleRedirect(KVOps.EXISTS, args, response);
+      response = blocks[blockId(key)].runCommand(HashTableOps.EXISTS, args).get(0);
+      response = handleRedirect(HashTableOps.EXISTS, args, response);
     }
     return ByteBufferUtils.toString(response).equals("true");
   }
@@ -334,8 +334,8 @@ public class KVClient implements Closeable {
     List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(KVOps.GET, args).get(0);
-      response = handleRedirect(KVOps.GET, args, response);
+      response = blocks[blockId(key)].runCommand(HashTableOps.GET, args).get(0);
+      response = handleRedirect(HashTableOps.GET, args, response);
     }
     return response;
   }
@@ -344,8 +344,8 @@ public class KVClient implements Closeable {
     List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(KVOps.PUT, args).get(0);
-      response = handleRedirect(KVOps.PUT, args, response);
+      response = blocks[blockId(key)].runCommand(HashTableOps.PUT, args).get(0);
+      response = handleRedirect(HashTableOps.PUT, args, response);
     }
     return response;
   }
@@ -354,8 +354,8 @@ public class KVClient implements Closeable {
     List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(KVOps.UPSERT, args).get(0);
-      response = handleRedirect(KVOps.UPSERT, args, response);
+      response = blocks[blockId(key)].runCommand(HashTableOps.UPSERT, args).get(0);
+      response = handleRedirect(HashTableOps.UPSERT, args, response);
     }
     return response;
   }
@@ -364,8 +364,8 @@ public class KVClient implements Closeable {
     List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(KVOps.UPDATE, args).get(0);
-      response = handleRedirect(KVOps.UPDATE, args, response);
+      response = blocks[blockId(key)].runCommand(HashTableOps.UPDATE, args).get(0);
+      response = handleRedirect(HashTableOps.UPDATE, args, response);
     }
     return response;
   }
@@ -374,8 +374,8 @@ public class KVClient implements Closeable {
     List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(KVOps.REMOVE, args).get(0);
-      response = handleRedirect(KVOps.REMOVE, args, response);
+      response = blocks[blockId(key)].runCommand(HashTableOps.REMOVE, args).get(0);
+      response = handleRedirect(HashTableOps.REMOVE, args, response);
     }
     return response;
   }
@@ -383,8 +383,8 @@ public class KVClient implements Closeable {
   public List<Boolean> exists(List<ByteBuffer> args) throws TException {
     List<ByteBuffer> response = null;
     while (response == null) {
-      response = batchCommand(KVOps.EXISTS, args, 1);
-      response = handleRedirects(KVOps.EXISTS, args, response);
+      response = batchCommand(HashTableOps.EXISTS, args, 1);
+      response = handleRedirects(HashTableOps.EXISTS, args, response);
     }
     List<Boolean> out = new ArrayList<>(response.size());
     for (ByteBuffer r : response) {
@@ -396,8 +396,8 @@ public class KVClient implements Closeable {
   public List<ByteBuffer> get(List<ByteBuffer> args) throws TException {
     List<ByteBuffer> response = null;
     while (response == null) {
-      response = batchCommand(KVOps.GET, args, 1);
-      response = handleRedirects(KVOps.GET, args, response);
+      response = batchCommand(HashTableOps.GET, args, 1);
+      response = handleRedirects(HashTableOps.GET, args, response);
     }
     return response;
   }
@@ -405,8 +405,8 @@ public class KVClient implements Closeable {
   public List<ByteBuffer> put(List<ByteBuffer> args) throws TException {
     List<ByteBuffer> response = null;
     while (response == null) {
-      response = batchCommand(KVOps.PUT, args, 2);
-      response = handleRedirects(KVOps.PUT, args, response);
+      response = batchCommand(HashTableOps.PUT, args, 2);
+      response = handleRedirects(HashTableOps.PUT, args, response);
     }
     return response;
   }
@@ -414,8 +414,8 @@ public class KVClient implements Closeable {
   public List<ByteBuffer> upsert(List<ByteBuffer> args) throws TException {
     List<ByteBuffer> response = null;
     while (response == null) {
-      response = batchCommand(KVOps.UPSERT, args, 2);
-      response = handleRedirects(KVOps.UPSERT, args, response);
+      response = batchCommand(HashTableOps.UPSERT, args, 2);
+      response = handleRedirects(HashTableOps.UPSERT, args, response);
     }
     return response;
   }
@@ -423,8 +423,8 @@ public class KVClient implements Closeable {
   public List<ByteBuffer> update(List<ByteBuffer> args) throws TException {
     List<ByteBuffer> response = null;
     while (response == null) {
-      response = batchCommand(KVOps.UPDATE, args, 2);
-      response = handleRedirects(KVOps.UPDATE, args, response);
+      response = batchCommand(HashTableOps.UPDATE, args, 2);
+      response = handleRedirects(HashTableOps.UPDATE, args, response);
     }
     return response;
   }
@@ -432,14 +432,14 @@ public class KVClient implements Closeable {
   public List<ByteBuffer> remove(List<ByteBuffer> args) throws TException {
     List<ByteBuffer> response = null;
     while (response == null) {
-      response = batchCommand(KVOps.REMOVE, args, 1);
-      response = handleRedirects(KVOps.REMOVE, args, response);
+      response = batchCommand(HashTableOps.REMOVE, args, 1);
+      response = handleRedirects(HashTableOps.REMOVE, args, response);
     }
     return response;
   }
 
   private int blockId(ByteBuffer key) {
-    return findSlot(KVHash.get(key));
+    return findSlot(HashSlot.get(key));
   }
 
   private int findSlot(int hash) {
@@ -460,6 +460,6 @@ public class KVClient implements Closeable {
     String[] parts = msg.split("!");
     List<String> chain = new ArrayList<>(parts.length - 1);
     chain.addAll(Arrays.asList(parts).subList(2, parts.length));
-    return new rpc_replica_chain(chain, 0, 0, rpc_storage_mode.rpc_in_memory);
+    return new rpc_replica_chain(chain, "", "", rpc_storage_mode.rpc_in_memory);
   }
 }

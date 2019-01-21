@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
   }
 
   hash_table_partition block("nil", 134217728, 0.0, 1.0, "127.0.0.1", 9090, fmt);
-  block.slot_range(0, partition::SLOT_MAX);
+  block.slot_range(0, hash_table_partition::SLOT_MAX);
 
   if (mode == "write") {
     // Load phase
