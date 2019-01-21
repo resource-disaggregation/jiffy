@@ -1,12 +1,14 @@
+#!/usr/bin/env bash
+
 # Run a shell command on all servers.
 #
 # Environment Variables
 #
-#   MMUX_SERVERS    File naming remote servers.
-#     Default is ${MMUX_CONF_DIR}/servers.
-#   MMUX_CONF_DIR  Alternate conf dir. Default is ${MMUX_HOME}/conf.
-#   MMUX_HOST_SLEEP Seconds to sleep between spawning remote commands.
-#   MMUX_SSH_OPTS Options passed to ssh when running remote commands.
+#   JIFFY_SERVERS    File naming remote servers.
+#     Default is ${JIFFY_CONF_DIR}/servers.
+#   JIFFY_CONF_DIR  Alternate conf dir. Default is ${JIFFY_HOME}/conf.
+#   JIFFY_HOST_SLEEP Seconds to sleep between spawning remote commands.
+#   JIFFY_SSH_OPTS Options passed to ssh when running remote commands.
 ##
 
 usage="Usage: servers.sh [--config <conf-dir>] command..."
@@ -20,13 +22,13 @@ fi
 sbin="`dirname "$0"`"
 sbin="`cd "$sbin"; pwd`"
 
-. "$sbin/mmux-config.sh"
+. "$sbin/jiffy-config.sh"
 
 # If the servers file is specified in the command line,
 # then it takes precedence over the definition in
-# mmux-env.sh. Save it here.
-if [ -f "$MMUX_SERVERS" ]; then
-  SERVERLIST=`cat "$MMUX_SERVERS"`
+# jiffy-env.sh. Save it here.
+if [ -f "$JIFFY_SERVERS" ]; then
+  SERVERLIST=`cat "$JIFFY_SERVERS"`
 fi
 
 # Check if --config is passed as an argument. It is an optional parameter.
@@ -41,40 +43,40 @@ then
     echo $usage
     exit 1
   else
-    export MMUX_CONF_DIR="$conf_dir"
+    export JIFFY_CONF_DIR="$conf_dir"
   fi
   shift
 fi
 
 if [ "$SERVERLIST" = "" ]; then
-  if [ "$MMUX_SERVERS" = "" ]; then
-    if [ -f "${MMUX_CONF_DIR}/storage.hosts" ]; then
-      SERVERLIST=`cat "${MMUX_CONF_DIR}/storage.hosts"`
+  if [ "$JIFFY_SERVERS" = "" ]; then
+    if [ -f "${JIFFY_CONF_DIR}/storage.hosts" ]; then
+      SERVERLIST=`cat "${JIFFY_CONF_DIR}/storage.hosts"`
     else
       SERVERLIST=localhost
     fi
   else
-    SERVERLIST=`cat "${MMUX_SERVERS}"`
+    SERVERLIST=`cat "${JIFFY_SERVERS}"`
   fi
 fi
 
 
 
 # By default disable strict host key checking
-if [ "$MMUX_SSH_OPTS" = "" ]; then
-  MMUX_SSH_OPTS="-o StrictHostKeyChecking=no"
+if [ "$JIFFY_SSH_OPTS" = "" ]; then
+  JIFFY_SSH_OPTS="-o StrictHostKeyChecking=no"
 fi
 
 for host in `echo "$SERVERLIST"|sed  "s/#.*$//;/^$/d"`; do
-  if [ -n "${MMUX_SSH_FOREGROUND}" ]; then
-    ssh $MMUX_SSH_OPTS "$host" $"${@// /\\ }" \
+  if [ -n "${JIFFY_SSH_FOREGROUND}" ]; then
+    ssh $JIFFY_SSH_OPTS "$host" $"${@// /\\ }" \
       2>&1 | sed "s/^/$host: /"
   else
-    ssh $MMUX_SSH_OPTS "$host" $"${@// /\\ }" \
+    ssh $JIFFY_SSH_OPTS "$host" $"${@// /\\ }" \
       2>&1 | sed "s/^/$host: /" &
   fi
-  if [ "$MMUX_HOST_SLEEP" != "" ]; then
-    sleep $MMUX_HOST_SLEEP
+  if [ "$JIFFY_HOST_SLEEP" != "" ]; then
+    sleep $JIFFY_HOST_SLEEP
   fi
 done
 

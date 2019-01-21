@@ -3,7 +3,7 @@
 sbin="`dirname "$0"`"
 sbin="`cd "$sbin"; pwd`"
 
-. "$sbin/mmux-config.sh"
+. "$sbin/jiffy-config.sh"
 
 $sbin/start-directory.sh
 sleep 1

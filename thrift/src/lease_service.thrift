@@ -1,6 +1,6 @@
-namespace cpp mmux.directory
-namespace py mmux.lease
-namespace java mmux.lease
+namespace cpp jiffy.directory
+namespace py jiffy.lease
+namespace java jiffy.lease
 
 struct rpc_lease_ack {
   1: required i64 renewed,
