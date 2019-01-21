@@ -81,6 +81,8 @@ class block {
         export_slot_range_(0, -1),
         import_slot_range_(0, -1) {}
 
+  virtual ~block() = default;
+
   /**
    * @brief Virtual function for running a command on a block
    * @param _return Return value

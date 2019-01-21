@@ -16,6 +16,7 @@
 class dummy_storage_manager : public jiffy::storage::storage_management_ops {
  public:
   dummy_storage_manager() = default;
+  virtual ~dummy_storage_manager() = default;
 
   void setup_block(const std::string &block_name,
                    const std::string &path,
@@ -125,7 +126,9 @@ class dummy_storage_manager : public jiffy::storage::storage_management_ops {
 
 class sequential_block_allocator : public jiffy::directory::block_allocator {
  public:
-  sequential_block_allocator() : cur_idx_{0} {}
+  sequential_block_allocator() {}
+
+  virtual ~sequential_block_allocator() = default;
 
   std::vector<std::string> allocate(std::size_t count, const std::vector<std::string> &) override {
     std::vector<std::string> allocated;
@@ -161,7 +164,6 @@ class sequential_block_allocator : public jiffy::directory::block_allocator {
   }
 
  private:
-  std::size_t cur_idx_;
   std::vector<std::string> free_;
   std::vector<std::string> alloc_;
 };
@@ -169,6 +171,8 @@ class sequential_block_allocator : public jiffy::directory::block_allocator {
 class dummy_block_allocator : public jiffy::directory::block_allocator {
  public:
   explicit dummy_block_allocator(std::size_t num_blocks) : num_free_(num_blocks) {}
+
+  virtual ~dummy_block_allocator() = default;
 
   std::vector<std::string> allocate(std::size_t count, const std::vector<std::string> &) override {
     if (num_free_ == 0) {

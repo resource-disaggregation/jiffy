@@ -21,7 +21,7 @@ void lease_renewal_worker::stop() {
 }
 
 void lease_renewal_worker::start() {
-  worker_ = std::move(std::thread([&] {
+  worker_ = std::thread([&] {
     rpc_lease_ack ack;
     while (!stop_.load()) {
       LOG(trace) << "Looking for expired leases...";
@@ -42,7 +42,7 @@ void lease_renewal_worker::start() {
         std::this_thread::sleep_for(time_to_wait);
       }
     }
-  }));
+  });
 }
 
 void lease_renewal_worker::add_path(const std::string &path) {

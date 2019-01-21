@@ -216,7 +216,7 @@ class chain_module : public block {
    * @brief Destructor
    */
 
-  ~chain_module() {
+  virtual ~chain_module() {
     next_->reset("nil");
     if (response_processor_.joinable())
       response_processor_.join();

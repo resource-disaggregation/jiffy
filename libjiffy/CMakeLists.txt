@@ -249,7 +249,7 @@ if (BUILD_TESTS)
           test/directory_service_test.cpp
           test/file_size_tracker_test.cpp
           test/kv_block_test.cpp
-          test/kv_client_test.cc
+          test/kv_client_test.cpp
           test/lease_expiry_worker_test.cpp
           test/local_store_test.cpp
           test/jiffy_client_test.cpp

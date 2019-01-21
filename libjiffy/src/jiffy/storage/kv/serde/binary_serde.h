@@ -10,6 +10,8 @@ namespace storage {
 class binary_serde : public serde {
  public:
   binary_serde() = default;
+
+  virtual ~binary_serde() = default;
   /**
    * @brief Binary serialization
    * @param table Locked hash table

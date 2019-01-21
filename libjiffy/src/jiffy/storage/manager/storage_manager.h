@@ -14,6 +14,8 @@ class storage_manager : public storage_management_ops {
  public:
   storage_manager() = default;
 
+  virtual ~storage_manager() = default;
+
   /**
    * @brief Setup block
    * @param block_name Block name
@@ -167,7 +169,7 @@ class storage_manager : public storage_management_ops {
    * @param slot_end Importing end slot
    */
 
-  virtual void set_importing(const std::string &block_name, int32_t slot_begin, int32_t slot_end);
+  void set_importing(const std::string &block_name, int32_t slot_begin, int32_t slot_end) override;
 };
 
 }

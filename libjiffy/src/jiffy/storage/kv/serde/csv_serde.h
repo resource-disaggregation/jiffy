@@ -14,6 +14,8 @@ class csv_serde : public serde {
  public:
   csv_serde() = default;
 
+  virtual ~csv_serde() = default;
+
   /**
    * @brief Serialize hash table in CSV format
    * @param table Locked hash table

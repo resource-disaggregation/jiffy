@@ -16,7 +16,7 @@ server_storage_tracker::~server_storage_tracker() {
 }
 
 void server_storage_tracker::start() {
-  worker_ = std::move(std::thread([&] {
+  worker_ = std::thread([&] {
     std::ofstream out(output_file_);
     while (!stop_.load()) {
       auto start = std::chrono::steady_clock::now();
@@ -34,7 +34,7 @@ void server_storage_tracker::start() {
       }
     }
     out.close();
-  }));
+  });
 }
 
 void server_storage_tracker::stop() {

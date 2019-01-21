@@ -357,7 +357,7 @@ struct replica_chain {
    * @return Bool value, true if not equal
    */
   bool operator!=(const replica_chain &other) const {
-    return *this != other;
+    return !(*this == other);
   }
 };
 

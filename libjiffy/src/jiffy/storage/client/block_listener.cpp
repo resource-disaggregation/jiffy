@@ -13,8 +13,10 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::jiffy::utils;
 
-block_listener::block_listener(const std::string &host, int port, mailbox_t &notifications, mailbox_t &controls)
-    : notifications_(notifications), controls_(controls) {
+block_listener::block_listener(const std::string &host,
+                               int port,
+                               mailbox_t &controls)
+    : controls_(controls) {
   connect(host, port);
 }
 

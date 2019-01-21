@@ -16,6 +16,8 @@ class random_block_allocator : public block_allocator {
  public:
   random_block_allocator() = default;
 
+  virtual ~random_block_allocator() = default;
+
   /**
    * @brief Allocate blocks in different prefixes
    * @param count Number of blocks

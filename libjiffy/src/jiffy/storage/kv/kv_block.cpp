@@ -35,7 +35,7 @@ kv_block::kv_block(const std::string &block_name,
                    int directory_port,
                    std::shared_ptr<serde> ser)
     : chain_module(block_name, KV_OPS),
-      locked_block_(std::move(block_.lock_table())),
+      locked_block_(block_.lock_table()),
       directory_host_(directory_host),
       directory_port_(directory_port),
       ser_(std::move(ser)),
@@ -307,7 +307,7 @@ std::string kv_block::unlock() {
 }
 
 std::string kv_block::lock() {
-  locked_block_ = std::move(block_.lock_table());
+  locked_block_ = block_.lock_table();
   if (state() == block_state::exporting) {
     return "!" + export_target_str();
   }

@@ -14,7 +14,7 @@ kv_listener::kv_listener(const std::string &path, const directory::data_status &
   for (const auto &block: status_.data_blocks()) {
     auto t = block_name_parser::parse(block.block_names.back());
     block_ids_.push_back(t.id);
-    listeners_.push_back(std::make_shared<block_listener>(t.host, t.notification_port, notifications_, controls_));
+    listeners_.push_back(std::make_shared<block_listener>(t.host, t.notification_port, controls_));
     worker_.add_protocol(listeners_.back()->protocol());
   }
   worker_.start();

@@ -24,7 +24,7 @@ file_size_tracker::~file_size_tracker() {
 }
 
 void file_size_tracker::start() {
-  worker_ = std::move(std::thread([&] {
+  worker_ = std::thread([&] {
     std::ofstream out(output_file_);
     while (!stop_.load()) {
       auto start = std::chrono::steady_clock::now();
@@ -42,7 +42,7 @@ void file_size_tracker::start() {
       }
     }
     out.close();
-  }));
+  });
 }
 
 void file_size_tracker::stop() {

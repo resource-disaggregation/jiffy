@@ -12,6 +12,7 @@ namespace storage {
 /* Storage management operation virtual class */
 class storage_management_ops {
  public:
+  virtual ~storage_management_ops() = default;
   virtual void setup_block(const std::string &block_name,
                            const std::string &path,
                            int32_t slot_begin,

@@ -64,6 +64,8 @@ class kv_block : public chain_module {
                     int directory_port = 9090,
                     std::shared_ptr<serde> ser = std::make_shared<csv_serde>());
 
+  virtual ~kv_block() = default;
+
   /**
    * @brief Check if hash map contains key
    * @param key Key

@@ -23,7 +23,7 @@ void notification_worker::add_protocol(notification_worker::protocol_ptr_t proto
 }
 
 void notification_worker::start() {
-  worker_ = std::move(std::thread([&] {
+  worker_ = std::thread([&] {
     while (!stop_.load()) {
       try {
         for (auto protocol: protocols_) {
@@ -39,7 +39,7 @@ void notification_worker::start() {
         return;
       }
     }
-  }));
+  });
   LOG(log_level::info) << "Notification Worker " << worker_.get_id() << " started";
 }
 
