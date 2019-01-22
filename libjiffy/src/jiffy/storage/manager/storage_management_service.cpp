@@ -10,19 +10,51 @@
 namespace jiffy { namespace storage {
 
 
-storage_management_service_setup_block_args::~storage_management_service_setup_block_args() throw() {
+storage_management_service_create_partition_args::~storage_management_service_create_partition_args() throw() {
 }
 
 
-storage_management_service_setup_block_pargs::~storage_management_service_setup_block_pargs() throw() {
+storage_management_service_create_partition_pargs::~storage_management_service_create_partition_pargs() throw() {
 }
 
 
-storage_management_service_setup_block_result::~storage_management_service_setup_block_result() throw() {
+storage_management_service_create_partition_result::~storage_management_service_create_partition_result() throw() {
 }
 
 
-storage_management_service_setup_block_presult::~storage_management_service_setup_block_presult() throw() {
+storage_management_service_create_partition_presult::~storage_management_service_create_partition_presult() throw() {
+}
+
+
+storage_management_service_setup_chain_args::~storage_management_service_setup_chain_args() throw() {
+}
+
+
+storage_management_service_setup_chain_pargs::~storage_management_service_setup_chain_pargs() throw() {
+}
+
+
+storage_management_service_setup_chain_result::~storage_management_service_setup_chain_result() throw() {
+}
+
+
+storage_management_service_setup_chain_presult::~storage_management_service_setup_chain_presult() throw() {
+}
+
+
+storage_management_service_destroy_partition_args::~storage_management_service_destroy_partition_args() throw() {
+}
+
+
+storage_management_service_destroy_partition_pargs::~storage_management_service_destroy_partition_pargs() throw() {
+}
+
+
+storage_management_service_destroy_partition_result::~storage_management_service_destroy_partition_result() throw() {
+}
+
+
+storage_management_service_destroy_partition_presult::~storage_management_service_destroy_partition_presult() throw() {
 }
 
 
@@ -87,22 +119,6 @@ storage_management_service_load_result::~storage_management_service_load_result(
 
 
 storage_management_service_load_presult::~storage_management_service_load_presult() throw() {
-}
-
-
-storage_management_service_reset_args::~storage_management_service_reset_args() throw() {
-}
-
-
-storage_management_service_reset_pargs::~storage_management_service_reset_pargs() throw() {
-}
-
-
-storage_management_service_reset_result::~storage_management_service_reset_result() throw() {
-}
-
-
-storage_management_service_reset_presult::~storage_management_service_reset_presult() throw() {
 }
 
 

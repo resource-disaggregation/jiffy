@@ -36,22 +36,24 @@ void storage_management_client::disconnect() {
   }
 }
 
-void storage_management_client::setup_block(int32_t block_id,
+void storage_management_client::create_partition(int32_t block_id,
+                                                 const std::string &type,
+                                                 const std::string &name,
+                                                 const std::string &metadata,
+                                                 const std::map<std::string, std::string> &conf) {
+  client_->create_partition(block_id, type, name, metadata, conf);
+}
+
+void storage_management_client::setup_chain(int32_t block_id,
                                             const std::string &path,
-                                            const std::string &partition_type,
-                                            const std::string &partition_name,
-                                            const std::string &partition_metadata,
                                             const std::vector<std::string> &chain,
                                             int32_t role,
-                                            const std::string &next_block_name) {
-  client_->setup_block(block_id,
-                       path,
-                       partition_type,
-                       partition_name,
-                       partition_metadata,
-                       chain,
-                       role,
-                       next_block_name);
+                                            const std::string &next_block_id) {
+  client_->setup_chain(block_id, path, chain, role, next_block_id);
+}
+
+void storage_management_client::destroy_partition(int32_t block_id) {
+  client_->destroy_partition(block_id);
 }
 
 std::string storage_management_client::path(int32_t block_id) {
@@ -70,10 +72,6 @@ void storage_management_client::load(int32_t block_id, const std::string &backin
 
 void storage_management_client::dump(int32_t block_id, const std::string &backing_path) {
   client_->dump(block_id, backing_path);
-}
-
-void storage_management_client::reset(const int32_t block_id) {
-  client_->reset(block_id);
 }
 
 int64_t storage_management_client::storage_capacity(const int32_t block_id) {

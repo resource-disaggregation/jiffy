@@ -11,7 +11,7 @@ using namespace ::apache::thrift;
 using namespace ::apache::thrift::transport;
 using namespace utils;
 
-notification_service_factory::notification_service_factory(std::vector<std::shared_ptr<chain_module>> &blocks)
+notification_service_factory::notification_service_factory(std::vector<std::shared_ptr<memory_block>> &blocks)
     : blocks_(blocks) {}
 
 notification_serviceIf *notification_service_factory::getHandler(const TConnectionInfo &conn_info) {

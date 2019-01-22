@@ -44,13 +44,18 @@ TEST_CASE("lease_manager_test") {
   for (const auto& blk: s2.data_blocks()) {
     REQUIRE(blk.mode == storage_mode::on_disk);
   }
-  REQUIRE(sm->COMMANDS.size() == 8);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:testtype:0::/sandbox/a/b/c/file.txt:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "setup_block:1:testtype:0::/sandbox/a/b/file.txt:0:nil");
-  REQUIRE(sm->COMMANDS[2] == "setup_block:2:testtype:0::/sandbox/a/file.txt:0:nil");
-  REQUIRE(sm->COMMANDS[3] == "setup_block:3:testtype:0::/sandbox/a/c/file.txt:0:nil");
-  REQUIRE(sm->COMMANDS[4] == "setup_block:4:testtype:0::/sandbox/a/d/file.txt:0:nil");
-  REQUIRE(sm->COMMANDS[5] == "reset:1");
-  REQUIRE(sm->COMMANDS[6] == "dump:4:local://tmp/0");
-  REQUIRE(sm->COMMANDS[7] == "reset:2");
+  REQUIRE(sm->COMMANDS.size() == 13);
+  REQUIRE(sm->COMMANDS[0] == "create_partition:0:testtype:0:");
+  REQUIRE(sm->COMMANDS[1] == "setup_chain:0:/sandbox/a/b/c/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[2] == "create_partition:1:testtype:0:");
+  REQUIRE(sm->COMMANDS[3] == "setup_chain:1:/sandbox/a/b/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[4] == "create_partition:2:testtype:0:");
+  REQUIRE(sm->COMMANDS[5] == "setup_chain:2:/sandbox/a/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[6] == "create_partition:3:testtype:0:");
+  REQUIRE(sm->COMMANDS[7] == "setup_chain:3:/sandbox/a/c/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[8] == "create_partition:4:testtype:0:");
+  REQUIRE(sm->COMMANDS[9] == "setup_chain:4:/sandbox/a/d/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[10] == "destroy_partition:1");
+  REQUIRE(sm->COMMANDS[11] == "dump:4:local://tmp/0");
+  REQUIRE(sm->COMMANDS[12] == "destroy_partition:2");
 }

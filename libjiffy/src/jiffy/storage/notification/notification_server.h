@@ -2,7 +2,7 @@
 #define JIFFY_BROKER_SERVER_H
 
 #include "subscription_map.h"
-#include "../chain_module.h"
+#include "jiffy/storage/memory_block.h"
 
 #include <thrift/server/TThreadedServer.h>
 
@@ -20,7 +20,7 @@ class notification_server {
    * @return Server
    */
 
-  static std::shared_ptr<apache::thrift::server::TThreadedServer> create(std::vector<std::shared_ptr<chain_module>> &blocks,
+  static std::shared_ptr<apache::thrift::server::TThreadedServer> create(std::vector<std::shared_ptr<memory_block>> &blocks,
                                                                          const std::string &address,
                                                                          int port);
 };

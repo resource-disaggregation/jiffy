@@ -21,7 +21,7 @@ using namespace ::apache::thrift::server;
 using namespace ::apache::thrift::concurrency;
 using namespace jiffy::utils;
 
-std::shared_ptr<TServer> block_server::create(std::vector<std::shared_ptr<chain_module>> &blocks,
+std::shared_ptr<TServer> block_server::create(std::vector<std::shared_ptr<memory_block>> &blocks,
                                               const std::string &address,
                                               int port,
                                               bool non_blocking,

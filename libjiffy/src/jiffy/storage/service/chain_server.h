@@ -2,7 +2,7 @@
 #define JIFFY_CHAIN_SERVER_H
 
 #include <thrift/server/TThreadedServer.h>
-#include "../chain_module.h"
+#include "jiffy/storage/memory_block.h"
 
 namespace jiffy {
 namespace storage {
@@ -21,7 +21,7 @@ class chain_server {
    * @return Chain server
    */
 
-  static std::shared_ptr<apache::thrift::server::TServer> create(std::vector<std::shared_ptr<chain_module>> &blocks,
+  static std::shared_ptr<apache::thrift::server::TServer> create(std::vector<std::shared_ptr<memory_block>> &blocks,
                                                                  const std::string &address,
                                                                  int port,
                                                                  bool non_blocking = false,

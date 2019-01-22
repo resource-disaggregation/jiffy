@@ -3,7 +3,7 @@
 
 #include "notification_service.h"
 #include "subscription_map.h"
-#include "../chain_module.h"
+#include "jiffy/storage/memory_block.h"
 
 namespace jiffy {
 namespace storage {
@@ -17,7 +17,7 @@ class notification_service_factory: public notification_serviceIfFactory {
    * @param blocks Data block
    */
 
-  explicit notification_service_factory(std::vector<std::shared_ptr<chain_module>> &blocks);
+  explicit notification_service_factory(std::vector<std::shared_ptr<memory_block>> &blocks);
 
   /**
    * @brief Fetch notification service handler
@@ -36,7 +36,7 @@ class notification_service_factory: public notification_serviceIfFactory {
 
  private:
   /* Data blocks */
-  std::vector<std::shared_ptr<chain_module>> &blocks_;
+  std::vector<std::shared_ptr<memory_block>> &blocks_;
 };
 
 }

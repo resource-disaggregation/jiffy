@@ -11,6 +11,7 @@
 #include <jiffy/storage/service/server_storage_tracker.h>
 #include <boost/program_options.hpp>
 #include <ifaddrs.h>
+#include <jiffy/storage/memory_block.h>
 
 using namespace ::jiffy::directory;
 using namespace ::jiffy::storage;
@@ -155,7 +156,7 @@ int main(int argc, char **argv) {
     }
 
     if (vm.count("version")) {
-      std::cout << "Storage service daemon, Version 0.1.0" << std::endl; // TODO: Configure version string
+      std::cout << "Jiffy storage service daemon, Version 0.1.0" << std::endl; // TODO: Configure version string
       return 0;
     }
 
@@ -216,7 +217,7 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Hostname: " << hostname;
 
   for (int i = 0; i < static_cast<int>(num_blocks); i++) {
-    block_names.push_back(block_name_parser::make(hostname,
+    block_names.push_back(block_id_parser::make(hostname,
                                                   service_port,
                                                   mgmt_port,
                                                   notf_port,
@@ -224,15 +225,10 @@ int main(int argc, char **argv) {
                                                   i));
   }
 
-  std::vector<std::shared_ptr<chain_module>> blocks;
+  std::vector<std::shared_ptr<memory_block>> blocks;
   blocks.resize(num_blocks);
   for (size_t i = 0; i < blocks.size(); ++i) {
-    blocks[i] = std::make_shared<hash_table_partition>(block_names[i],
-                                                       block_capacity,
-                                                       blk_thresh_lo,
-                                                       blk_thresh_hi,
-                                                       dir_host,
-                                                       dir_port);
+    blocks[i] = std::make_shared<memory_block>(block_names[i], block_capacity);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
 
@@ -263,10 +259,10 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Advertised " << num_blocks << " to block allocation server";
 
   std::exception_ptr kv_exception = nullptr;
-  auto kv_server = block_server::create(blocks, address, service_port, non_blocking, io_threads, work_threads);
-  std::thread kv_serve_thread([&kv_exception, &kv_server, &failing_thread, &failure_condition] {
+  auto storage_server = block_server::create(blocks, address, service_port, non_blocking, io_threads, work_threads);
+  std::thread storage_serve_thread([&kv_exception, &storage_server, &failing_thread, &failure_condition] {
     try {
-      kv_server->serve();
+      storage_server->serve();
     } catch (...) {
       kv_exception = std::current_exception();
       failing_thread = 1;

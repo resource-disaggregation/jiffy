@@ -42,22 +42,37 @@ class storage_management_client {
   void disconnect();
 
   /**
-   * @brief Setup block
+   * @brief Create partition
    * @param block_id Block identifier
-   * @param path File path
-   * @param chain Chain block names
-   * @param role Block role
-   * @param next_block_name Next block's name
+   * @param type Partition type
+   * @param name Partition name
+   * @param metadata Partition metadata
+   * @param conf Partition configuration parameters
+   */
+  void create_partition(int32_t block_id,
+                        const std::string &type,
+                        const std::string &name,
+                        const std::string &metadata,
+                        const std::map<std::string, std::string> &conf);
+
+  /**
+   * @brief Setup chain
+   * @param block_id Block identifier
+   * @param path Path associated with partition
+   * @param chain Replica chain for the partition
+   * @param role Role of the partition in the chain
+   * @param next_block_id Identifier for the next block in the chain
+   */
+  void setup_chain(int32_t block_id, const std::string &path,
+                   const std::vector<std::string>& chain, int32_t role,
+                   const std::string& next_block_id);
+
+  /**
+   * @brief Reset block
+   * @param block_id Block identifier
    */
 
-  void setup_block(int32_t block_id,
-                   const std::string &path,
-                   const std::string &partition_type,
-                   const std::string &partition_name,
-                   const std::string &partition_metadata,
-                   const std::vector<std::string> &chain,
-                   int32_t role,
-                   const std::string &next_block_name);
+  void destroy_partition(int32_t block_id);
 
   /**
    * @brief Fetch block path
@@ -90,13 +105,6 @@ class storage_management_client {
    */
 
   void dump(int32_t block_id, const std::string &backing_path);
-
-  /**
-   * @brief Reset block
-   * @param block_id Block identifier
-   */
-
-  void reset(int32_t block_id);
 
   /**
    * @brief Fetch storage capacity

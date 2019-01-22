@@ -44,16 +44,8 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::create_hash_table(cons
     block_names.push_back(std::to_string(begin) + "_" + std::to_string(end));
     block_metadata.push_back("regular");
   }
-  auto s = fs_->create(path,
-                       "storage",
-                       backing_path,
-                       num_blocks,
-                       chain_length,
-                       flags,
-                       permissions,
-                       block_names,
-                       block_metadata,
-                       tags);
+  auto s = fs_->create(path, "hashtable", backing_path, num_blocks, chain_length, flags, permissions, block_names,
+                       block_metadata, tags);
   begin_scope(path);
   return std::make_shared<storage::hash_table_client>(fs_, path, s);
 }
@@ -81,7 +73,7 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::open_or_create_hash_ta
     block_names.push_back(std::to_string(begin) + "_" + std::to_string(end));
     block_metadata.push_back("regular");
   }
-  auto s = fs_->open_or_create(path, "storage", backing_path, num_blocks, chain_length, flags, permissions,
+  auto s = fs_->open_or_create(path, "hashtable", backing_path, num_blocks, chain_length, flags, permissions,
                                block_names, block_metadata, tags);
   begin_scope(path);
   return std::make_shared<storage::hash_table_client>(fs_, path, s);

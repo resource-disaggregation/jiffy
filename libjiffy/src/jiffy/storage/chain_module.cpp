@@ -7,8 +7,10 @@ namespace storage {
 
 using namespace utils;
 
-chain_module::chain_module(const std::string &block_name, const std::vector<command> &block_ops)
-    : partition(block_ops, block_name),
+chain_module::chain_module(const std::string &name,
+                           const std::string &metadata,
+                           const std::vector<command> &supported_cmds)
+    : partition(name, metadata, supported_cmds),
       next_(std::make_unique<next_chain_module_cxn>("nil")),
       prev_(std::make_unique<prev_chain_module_cxn>()),
       pending_(0) {}
@@ -20,18 +22,14 @@ chain_module::~chain_module() {
 }
 
 void chain_module::setup(const std::string &path,
-                         const std::string &partition_name,
-                         const std::string &partition_metadata,
                          const std::vector<std::string> &chain,
                          chain_role role,
-                         const std::string &next_block_name) {
+                         const std::string &next_block_id) {
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   path_ = path;
-  partition_name_ = partition_name;
-  partition_metadata_ = partition_metadata;
   chain_ = chain;
   role_ = role;
-  auto protocol = next_->reset(next_block_name);
+  auto protocol = next_->reset(next_block_id);
   if (protocol && role_ != chain_role::tail) {
     auto handler = std::make_shared<chain_response_handler>(this);
     auto processor = std::make_shared<chain_response_serviceProcessor>(handler);

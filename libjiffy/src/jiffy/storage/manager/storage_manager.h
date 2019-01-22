@@ -3,13 +3,14 @@
 
 #include <vector>
 #include <string>
+#include <jiffy/utils/property_map.h>
 
 #include "../storage_management_ops.h"
 
 namespace jiffy {
 namespace storage {
-/* Storage manager class
- * Inherited from storage_management_ops virtual class */
+
+/* Storage manager class -- inherited from storage_management_ops virtual class */
 class storage_manager : public storage_management_ops {
  public:
   storage_manager() = default;
@@ -17,22 +18,25 @@ class storage_manager : public storage_management_ops {
   virtual ~storage_manager() = default;
 
   /**
-   * @brief Setup block
-   * @param block_name Partition name
+   * @brief Create partition
+   * @param block_id Partition name
    * @param path Block path
    * @param chain Chain block names
    * @param role Block role
    * @param next_block_name Next block's name
    */
+  void create_partition(const std::string &block_id,
+                        const std::string &type,
+                        const std::string &name,
+                        const std::string &metadata,
+                        const std::map<std::string, std::string> &conf) override;
 
-  void setup_block(const std::string &block_name,
-                   const std::string &path,
-                   const std::string &partition_type,
-                   const std::string &partition_name,
-                   const std::string &partition_metadata,
-                   const std::vector<std::string> &chain,
-                   int32_t role,
-                   const std::string &next_block_name) override;
+
+  /**
+   * @brief Destroy partition
+   * @param block_name Block name
+   */
+  void destroy_partition(const std::string &block_name) override;
 
   /**
    * @brief Fetch block path
@@ -67,13 +71,6 @@ class storage_manager : public storage_management_ops {
   void dump(const std::string &block_name, const std::string &backing_path) override;
 
   /**
-   * @brief Reset block
-   * @param block_name Block name
-   */
-
-  void reset(const std::string &block_name) override;
-
-  /**
    * @brief Fetch storage capacity of block
    * @param block_name Block name
    * @return Storage capacity
@@ -102,6 +99,11 @@ class storage_manager : public storage_management_ops {
    */
 
   void forward_all(const std::string &block_name) override;
+  void setup_chain(const std::string &block_id,
+                   const std::string &path,
+                   const std::vector<std::string> &chain,
+                   int32_t role,
+                   const std::string &next_block_id) override;
 };
 
 }

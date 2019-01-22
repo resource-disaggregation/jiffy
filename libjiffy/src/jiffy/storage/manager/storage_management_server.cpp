@@ -1,6 +1,6 @@
-#include "storage_management_server.h"
-#include "storage_management_service.h"
-#include "storage_management_service_factory.h"
+#include "jiffy/storage/manager/storage_management_server.h"
+#include "jiffy/storage/manager/storage_management_service.h"
+#include "jiffy/storage/manager/storage_management_service_factory.h"
 
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
@@ -14,7 +14,7 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
-std::shared_ptr<TThreadedServer> storage_management_server::create(std::vector<std::shared_ptr<chain_module>> &blocks,
+std::shared_ptr<TThreadedServer> storage_management_server::create(std::vector<std::shared_ptr<memory_block>> &blocks,
                                                                    const std::string &address,
                                                                    int port) {
   std::shared_ptr<storage_management_serviceIfFactory> clone_factory(new storage_management_service_factory(blocks));

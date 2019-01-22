@@ -177,9 +177,10 @@ TEST_CASE("path_remove_test", "[file][dir]") {
   REQUIRE(!tree.exists("/sandbox/abcdef"));
   REQUIRE(alloc->num_free_blocks() == 4);
 
-  REQUIRE(sm->COMMANDS.size() == 2);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:testtype:0::/sandbox/abcdef/example/a/b:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "reset:0");
+  REQUIRE(sm->COMMANDS.size() == 3);
+  REQUIRE(sm->COMMANDS[0] == "create_partition:0:testtype:0:");
+  REQUIRE(sm->COMMANDS[1] == "setup_chain:0:/sandbox/abcdef/example/a/b:0:nil");
+  REQUIRE(sm->COMMANDS[2] == "destroy_partition:0");
 }
 
 TEST_CASE("path_sync_test", "[file][dir]") {
@@ -197,11 +198,13 @@ TEST_CASE("path_sync_test", "[file][dir]") {
   REQUIRE(tree.dstatus("/sandbox/abcdef/example/a/b").mode() == std::vector<storage_mode>{storage_mode::in_memory});
 
   REQUIRE(alloc->num_free_blocks() == 2);
-  REQUIRE(sm->COMMANDS.size() == 4);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:testtype:0::/sandbox/abcdef/example/a/b:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "setup_block:1:testtype:0::/sandbox/abcdef/example/c:0:nil");
-  REQUIRE(sm->COMMANDS[2] == "sync:1:local://tmp/0");
-  REQUIRE(sm->COMMANDS[3] == "sync:0:local://tmp/0");
+  REQUIRE(sm->COMMANDS.size() == 6);
+  REQUIRE(sm->COMMANDS[0] == "create_partition:0:testtype:0:");
+  REQUIRE(sm->COMMANDS[1] == "setup_chain:0:/sandbox/abcdef/example/a/b:0:nil");
+  REQUIRE(sm->COMMANDS[2] == "create_partition:1:testtype:0:");
+  REQUIRE(sm->COMMANDS[3] == "setup_chain:1:/sandbox/abcdef/example/c:0:nil");
+  REQUIRE(sm->COMMANDS[4] == "sync:1:local://tmp/0");
+  REQUIRE(sm->COMMANDS[5] == "sync:0:local://tmp/0");
 }
 
 TEST_CASE("rename_test", "[file][dir]") {

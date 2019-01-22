@@ -67,6 +67,8 @@ add_library(jiffy STATIC
         src/jiffy/directory/directory_ops.h
         src/jiffy/directory/directory_ops.cpp
         src/jiffy/storage/partition.h
+        src/jiffy/storage/partition_manager.h
+        src/jiffy/storage/partition_manager.cpp
         src/jiffy/storage/chain_module.h
         src/jiffy/storage/chain_module.cpp
         src/jiffy/storage/command.h
@@ -132,8 +134,8 @@ add_library(jiffy STATIC
         src/jiffy/storage/service/server_storage_tracker.cpp
         src/jiffy/storage/service/server_storage_tracker.h
         src/jiffy/storage/service/buffered_transport_factory.h
-        src/jiffy/storage/manager/detail/block_name_parser.cpp
-        src/jiffy/storage/manager/detail/block_name_parser.h
+        src/jiffy/storage/manager/detail/block_id_parser.cpp
+        src/jiffy/storage/manager/detail/block_id_parser.h
         src/jiffy/storage/manager/storage_management_client.cpp
         src/jiffy/storage/manager/storage_management_client.h
         src/jiffy/storage/manager/storage_management_server.cpp
@@ -201,7 +203,7 @@ add_library(jiffy STATIC
         src/jiffy/utils/retry_utils.h
         src/jiffy/utils/string_utils.h
         src/jiffy/storage/service/pinned_thread_factory.cpp
-        src/jiffy/storage/service/pinned_thread_factory.h)
+        src/jiffy/storage/service/pinned_thread_factory.h src/jiffy/storage/memory_block.cpp src/jiffy/storage/memory_block.h src/jiffy/utils/property_map.cpp src/jiffy/utils/property_map.h)
 
 if (NOT USE_SYSTEM_LIBEVENT)
   add_dependencies(jiffy libevent)
@@ -250,8 +252,8 @@ if (BUILD_TESTS)
           test/directory_tree_test.cpp
           test/directory_service_test.cpp
           test/file_size_tracker_test.cpp
-          test/kv_block_test.cpp
-          test/kv_client_test.cpp
+          test/hash_table_partition_test.cpp
+          test/hash_table_client_test.cpp
           test/lease_expiry_worker_test.cpp
           test/local_store_test.cpp
           test/jiffy_client_test.cpp

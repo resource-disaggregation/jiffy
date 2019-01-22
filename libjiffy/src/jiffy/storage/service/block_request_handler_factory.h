@@ -2,7 +2,7 @@
 #define JIFFY_BLOCK_REQUEST_HANDLER_FACTORY_H
 
 #include "block_request_service.h"
-#include "../chain_module.h"
+#include "jiffy/storage/memory_block.h"
 
 namespace jiffy {
 namespace storage {
@@ -14,7 +14,7 @@ class block_request_handler_factory : public block_request_serviceIfFactory {
    * @param blocks Data blocks
    */
 
-  explicit block_request_handler_factory(std::vector<std::shared_ptr<chain_module>> &blocks);
+  explicit block_request_handler_factory(std::vector<std::shared_ptr<memory_block>> &blocks);
 
   /**
    * @brief Fetch block request handler
@@ -34,7 +34,7 @@ class block_request_handler_factory : public block_request_serviceIfFactory {
 
  public:
   /* Data blocks */
-  std::vector<std::shared_ptr<chain_module>> &blocks_;
+  std::vector<std::shared_ptr<memory_block>> &blocks_;
   /* Client identifier generator, starts at 1 */
   std::atomic<int64_t> client_id_gen_;
 };

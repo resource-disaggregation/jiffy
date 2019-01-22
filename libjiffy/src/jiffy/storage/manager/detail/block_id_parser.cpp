@@ -1,12 +1,12 @@
 #include <sstream>
 #include <tuple>
 #include <iostream>
-#include "block_name_parser.h"
+#include "block_id_parser.h"
 
 namespace jiffy {
 namespace storage {
 
-block_id block_name_parser::parse(const std::string &name) {
+block_id block_id_parser::parse(const std::string &name) {
   std::string host, service_port, management_port, notification_port, chain_port, block_id;
   try {
     std::istringstream in(name);
@@ -23,7 +23,7 @@ block_id block_name_parser::parse(const std::string &name) {
   }
 }
 
-std::string block_name_parser::make(const std::string &host,
+std::string block_id_parser::make(const std::string &host,
                                     int32_t service_port,
                                     int32_t management_port,
                                     int32_t notification_port,

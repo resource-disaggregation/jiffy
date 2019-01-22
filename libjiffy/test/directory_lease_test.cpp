@@ -36,8 +36,9 @@ TEST_CASE("update_lease_test", "[update_lease]") {
   REQUIRE(ack.renewed == 1);
   REQUIRE(t->exists("/sandbox/a/b/c/file.txt"));
   REQUIRE(t->dstatus("/sandbox/a/b/c/file.txt").mode() == std::vector<storage_mode>{storage_mode::in_memory});
-  REQUIRE(sm->COMMANDS.size() == 1);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:testtype:0::/sandbox/a/b/c/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS.size() == 2);
+  REQUIRE(sm->COMMANDS[0] == "create_partition:0:testtype:0:");
+  REQUIRE(sm->COMMANDS[1] == "setup_chain:0:/sandbox/a/b/c/file.txt:0:nil");
 
   server->stop();
   if (serve_thread.joinable()) {

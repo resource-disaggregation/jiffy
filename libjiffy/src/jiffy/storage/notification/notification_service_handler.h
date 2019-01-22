@@ -4,7 +4,7 @@
 #include "notification_service.h"
 #include "subscription_service.h"
 #include "subscription_map.h"
-#include "../chain_module.h"
+#include "jiffy/storage/memory_block.h"
 #include <thrift/transport/TSocket.h>
 
 namespace jiffy {
@@ -20,7 +20,7 @@ class notification_service_handler : public notification_serviceIf {
    */
 
   explicit notification_service_handler(std::shared_ptr<::apache::thrift::protocol::TProtocol> oprot,
-                                        std::vector<std::shared_ptr<chain_module>> &blocks);
+                                        std::vector<std::shared_ptr<memory_block>> &blocks);
   /**
    * @brief Subscribe to a block for given operations
    * This function adds all pairs of block and operations in local subscription set
@@ -51,7 +51,7 @@ class notification_service_handler : public notification_serviceIf {
   /* Subscription service client */
   std::shared_ptr<subscription_serviceClient> client_;
   /* Data blocks */
-  std::vector<std::shared_ptr<chain_module>> &blocks_;
+  std::vector<std::shared_ptr<memory_block>> &blocks_;
 };
 
 }

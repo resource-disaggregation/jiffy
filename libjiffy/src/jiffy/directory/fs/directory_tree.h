@@ -418,7 +418,7 @@ class ds_file_node : public ds_node {
           storage->dump(block.tail(), block_backing_path);
           dstatus_.mark_dumped(i);
         } else {
-          storage->reset(block.block_names[i]);
+          storage->destroy_partition(block.block_names[i]);
         }
         cleared_blocks.push_back(block.block_names[i]);
       }
@@ -448,14 +448,8 @@ class ds_file_node : public ds_node {
       if (chain_length == 1) {
         std::string block_backing_path = backing_path;
         utils::directory_utils::push_path_element(block_backing_path, chain.name);
-        storage->setup_block(chain.block_names[0],
-                             path,
-                             dstatus_.type(),
-                             chain.name,
-                             chain.metadata,
-                             chain.block_names,
-                             chain_role::singleton,
-                             "nil");
+        storage->create_partition(chain.block_names[0], dstatus_.type(), chain.name, chain.metadata, get_tags());
+        storage->setup_chain(chain.block_names[0], path, chain.block_names, chain_role::singleton, "nil");
         storage->load(chain.block_names[0], block_backing_path);
         dstatus_.mark_loaded(i, chain.block_names);
       } else {
@@ -465,14 +459,8 @@ class ds_file_node : public ds_node {
           std::string block_name = chain.block_names[j];
           std::string next_block_name = (j == chain_length - 1) ? "nil" : chain.block_names[j + 1];
           int32_t role = (j == 0) ? chain_role::head : (j == chain_length - 1) ? chain_role::tail : chain_role::mid;
-          storage->setup_block(block_name,
-                               path,
-                               dstatus_.type(),
-                               chain.name,
-                               chain.metadata,
-                               chain.block_names,
-                               role,
-                               next_block_name);
+          storage->create_partition(block_name, dstatus_.type(), chain.name, chain.metadata, get_tags());
+          storage->setup_chain(block_name, path, chain.block_names, role, next_block_name);
           storage->load(block_name, block_backing_path);
         }
         dstatus_.mark_loaded(i, chain.block_names);
@@ -506,7 +494,7 @@ class ds_file_node : public ds_node {
               storage->dump(block.tail(), block_backing_path);
               dstatus_.mode(i, storage_mode::on_disk);
             } else {
-              storage->reset(block.block_names[i]);
+              storage->destroy_partition(block.block_names[i]);
             }
             cleared_blocks.push_back(block.block_names[i]);
           }
@@ -515,7 +503,7 @@ class ds_file_node : public ds_node {
       } else {
         for (const auto &block: dstatus_.data_blocks()) {
           for (const auto &block_name: block.block_names) {
-            storage->reset(block_name);
+            storage->destroy_partition(block_name);
             cleared_blocks.push_back(block_name);
           }
         }

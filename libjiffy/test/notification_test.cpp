@@ -38,7 +38,7 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
                                                   STORAGE_NOTIFICATION_PORT,
                                                   0);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names);
+  auto blocks = test_utils::init_hash_table_blocks(block_names);
 
   auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -55,7 +55,7 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  data_status status = tree->create("/sandbox/file.txt",  "storage", "/tmp", NUM_BLOCKS, 1, 0, 0, {"0_65536"},
+  data_status status = tree->create("/sandbox/file.txt",  "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0, {"0_65536"},
       {"regular"});
   hash_table_client kv(tree, "/sandbox/file.txt", status);
 

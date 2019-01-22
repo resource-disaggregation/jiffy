@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  hash_table_partition block("nil", 134217728, 0.0, 1.0, "127.0.0.1", 9090, fmt);
+  hash_table_partition block("0_65536");
   block.slot_range(0, hash_table_partition::SLOT_MAX);
 
   if (mode == "write") {

@@ -16,19 +16,23 @@
 namespace jiffy {
 namespace storage {
 
+#define DEFAULT_CAPACITY 134217728
 
-// TODO: Setting metadata should be atomic: e.g., reset function, or setup function, should acquire lock before
-// setting metadata
+class memory_block;
+
 /* Partition class */
 class partition {
  public:
   /**
    * @brief Constructor
-   * @param supported_commands Commands supported by the partition
    * @param name Partition name
+   * @param metadata Partition metadata
+   * @param supported_commands Commands supported by the partition
    */
 
-  explicit partition(const std::vector<command> &supported_commands, std::string name);
+  explicit partition(const std::string &name,
+                     const std::string &metadata,
+                     const std::vector<command> &supported_commands);
 
   /**
    * @brief Destructor
@@ -61,11 +65,17 @@ class partition {
   const std::string &path() const;
 
   /**
-   * @brief Fetch block name
-   * @return Block name
+   * @brief Fetch partition name
+   * @return Partition name
    */
 
   const std::string &name() const;
+
+  /**
+   * @brief Fetch partition metadata
+   * @return Partition metadata
+   */
+  const std::string &metadata() const;
 
   /**
    * @brief Check if ith command type is accessor
@@ -98,17 +108,31 @@ class partition {
 
   virtual void load(const std::string &path) = 0;
 
+  /**
+   * @brief Synchronize partition with persistent store.
+   * @param path Persistent store path to write to.
+   * @return True if data was written, false otherwise.
+   */
   virtual bool sync(const std::string &path) = 0;
 
+  /**
+   * @brief Dump partition data to persistent store.
+   * @param path Persistent store path to write to.
+   * @return True if data was written, false otherwise.
+   */
   virtual bool dump(const std::string &path) = 0;
 
-  virtual std::size_t storage_capacity() = 0;
+  /**
+   * @brief Get the storage capacity of the partition.
+   * @return The storage capacity of the partition.
+   */
+  std::size_t storage_capacity();
 
-  virtual std::size_t storage_size() = 0;
-
-  virtual void reset() = 0;
-
-  virtual void export_slots() = 0;
+  /**
+   * @brief Get the storage utilized by the partition.
+   * @return The storage capacity utilized by the partition.
+   */
+  std::size_t storage_size();
 
   /**
    * @brief Fetch subscription map
@@ -127,20 +151,27 @@ class partition {
  protected:
   /* Metadata mutex */
   mutable std::shared_mutex metadata_mtx_;
-  /* Block operations */
-  const std::vector<command> &supported_commands_;
-  /* Block file path */
-  std::string path_;
-  /* Block name */
-  std::string name_;
   /* Partition name */
-  std::string partition_name_;
+  std::string name_;
   /* Partition metadata */
-  std::string partition_metadata_;
+  std::string metadata_;
+  /* Partition path */
+  std::string path_;
+  /* Supported commands */
+  const std::vector<command> &supported_commands_;
+  /* Atomic value to collect the sum of key size and value size */
+  std::atomic<size_t> bytes_;
+  /* Key value partition capacity */
+  std::size_t capacity_;
   /* Subscription map */
   subscription_map sub_map_{};
   /* Block response client map */
   block_response_client_map client_map_{};
+
+ private:
+  void set_capacity(size_t capacity);
+
+  friend class memory_block;
 };
 
 }

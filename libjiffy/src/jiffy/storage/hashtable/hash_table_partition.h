@@ -4,6 +4,7 @@
 #include <libcuckoo/cuckoohash_map.hh>
 
 #include <string>
+#include <jiffy/utils/property_map.h>
 #include "serde/serde.h"
 #include "serde/binary_serde.h"
 #include "jiffy/storage/partition.h"
@@ -33,7 +34,7 @@ extern std::vector<command> KV_OPS;
 /**
  * @brief Key value block supported operations
  */
-enum kv_op_id : int32_t {
+enum hash_table_cmd_id : int32_t {
   exists = 0,
   get = 1,
   keys = 2, // TODO: We should not support multi-key operations since we do not provide any guarantees
@@ -60,31 +61,17 @@ class hash_table_partition : public chain_module {
 
   /**
    * @brief Constructor
-   * @param block_name Block name
-   * @param capacity Block capacity
-   * @param threshold_lo low threshold
-   * @param threshold_hi high threshold
-   * @param directory_host Directory hostname
-   * @param directory_port Directory port number
-   * @param ser Custom serializer/deserializer
+   * @param conf Configuration properties
    */
 
-  explicit hash_table_partition(const std::string &block_name,
-                                std::size_t capacity = 134217728, // 128 MB; TODO: hardcoded default
-                                double threshold_lo = 0.05,
-                                double threshold_hi = 0.95,
-                                const std::string &directory_host = "127.0.0.1",
-                                int directory_port = 9090,
-                                std::shared_ptr<serde> ser = std::make_shared<csv_serde>());
+  explicit hash_table_partition(const std::string &name = "",
+                                const std::string &metadata = "",
+                                const utils::property_map &conf = {});
 
+  /**
+   * @brief Virtual destructor
+   */
   virtual ~hash_table_partition() = default;
-
-  void setup(const std::string &path,
-             const std::string &partition_name,
-             const std::string &partition_metadata,
-             const std::vector<std::string> &chain,
-             chain_role role,
-             const std::string &next_block_name) override;
 
   /**
    * @brief Set block hash slot range
@@ -434,11 +421,11 @@ class hash_table_partition : public chain_module {
   /**
    * @brief Run particular command on key value block
    * @param _return Return status to be collected
-   * @param oid Operation identifier
+   * @param cmd_id Operation identifier
    * @param args Command arguments
    */
 
-  void run_command(std::vector<std::string> &_return, int oid, const std::vector<std::string> &args) override;
+  void run_command(std::vector<std::string> &_return, int cmd_id, const std::vector<std::string> &args) override;
 
   /**
    * @brief Atomically check dirty bit
@@ -471,26 +458,6 @@ class hash_table_partition : public chain_module {
   bool dump(const std::string &path) override;
 
   /**
-   * @brief Fetch block storage capacity
-   * @return Block storage capacity
-   */
-
-  std::size_t storage_capacity() override;
-
-  /**
-   * @brief Fetch block storage size, total size of all the keys and values
-   * @return Block storage size
-   */
-
-  std::size_t storage_size() override;
-
-  /**
-   * @brief Reset the block
-   */
-
-  void reset() override;
-
-  /**
    * @brief Send all key and value to the next block
    */
 
@@ -500,7 +467,7 @@ class hash_table_partition : public chain_module {
    * @brief Export slots
    */
 
-  void export_slots() override;
+  void export_slots();
 
   /**
    * @brief Set block to be exporting
@@ -581,12 +548,6 @@ class hash_table_partition : public chain_module {
 
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
-
-  /* Atomic value to collect the sum of key size and value size */
-  std::atomic<size_t> bytes_;
-
-  /* Key value partition capacity */
-  std::size_t capacity_;
 
   /**
    * @brief The two threshold to determine whether the block

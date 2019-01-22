@@ -15,7 +15,7 @@ struct block_id {
   int32_t id;
 };
 /* Block name parser class */
-class block_name_parser {
+class block_id_parser {
  public:
 
   /**

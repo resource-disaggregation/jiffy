@@ -263,7 +263,7 @@ class hash_table_client {
    * @return
    */
 
-  std::vector<std::string> batch_command(const kv_op_id &id, const std::vector<std::string> &args, size_t args_per_op);
+  std::vector<std::string> batch_command(const hash_table_cmd_id &id, const std::vector<std::string> &args, size_t args_per_op);
 
   /**
    * @brief Handle command in redirect case

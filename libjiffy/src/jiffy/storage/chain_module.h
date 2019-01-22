@@ -10,7 +10,7 @@
 #include <libcuckoo/cuckoohash_map.hh>
 #include <shared_mutex>
 #include "client/block_client.h"
-#include "manager/detail/block_name_parser.h"
+#include "jiffy/storage/manager/detail/block_id_parser.h"
 #include "partition.h"
 #include "service/chain_request_service.h"
 #include "service/chain_request_client.h"
@@ -82,7 +82,7 @@ class next_chain_module_cxn {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     client_.disconnect();
     if (block_name != "nil") {
-      auto bid = block_name_parser::parse(block_name);
+      auto bid = block_id_parser::parse(block_name);
       auto host = bid.host;
       auto port = bid.chain_port;
       auto block_id = bid.id;
@@ -201,12 +201,14 @@ class chain_module : public partition {
 
   /**
    * @brief Constructor
-   * @param block_name Block name
-   * @param block_ops Block operations
+   * @param name Partition name
+   * @param metadata Partition metadata
+   * @param supported_cmds Supported commands
    */
 
-  chain_module(const std::string &block_name,
-               const std::vector<command> &block_ops);
+  chain_module(const std::string &name,
+               const std::string &metadata,
+               const std::vector<command> &supported_cmds);
 
   /**
    * @brief Destructor
@@ -217,19 +219,15 @@ class chain_module : public partition {
   /**
    * @brief Setup a chain module and start the processor thread
    * @param path Block path
-   * @param partition_name Partition name
-   * @param partition_metadata Partition metadata
    * @param chain Replica chain block names
    * @param role Chain module role
-   * @param next_block_name Next block name
+   * @param next_block_id Next block name
    */
 
   virtual void setup(const std::string &path,
-                     const std::string &partition_name,
-                     const std::string &partition_metadata,
                      const std::vector<std::string> &chain,
                      chain_role role,
-                     const std::string &next_block_name);
+                     const std::string &next_block_id);
 
   /**
    * @brief Set chain module role

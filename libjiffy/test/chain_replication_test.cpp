@@ -20,7 +20,7 @@ using namespace jiffy::directory;
 
 TEST_CASE("kv_no_failure_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
-  std::vector<std::vector<std::shared_ptr<chain_module>>> blocks(NUM_BLOCKS);
+  std::vector<std::vector<std::shared_ptr<memory_block>>> blocks(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> kv_servers(NUM_BLOCKS);
@@ -34,7 +34,7 @@ TEST_CASE("kv_no_failure_test", "[put][get]") {
                                                   0,
                                                   STORAGE_CHAIN_PORT_N(i));
     alloc->add_blocks(block_names[i]);
-    blocks[i] = test_utils::init_kv_blocks(block_names[i]);
+    blocks[i] = test_utils::init_hash_table_blocks(block_names[i]);
 
     management_servers[i] = storage_management_server::create(blocks[i], HOST, STORAGE_MANAGEMENT_PORT_N(i));
     server_threads.emplace_back([i, &management_servers] { management_servers[i]->serve(); });
@@ -56,25 +56,26 @@ TEST_CASE("kv_no_failure_test", "[put][get]") {
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  t->create("/file", "storage", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
+  t->create("/file", "hashtable", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
   auto chain = t->dstatus("/file").data_blocks()[0];
 
   replica_chain_client client(t, "/file", chain, 100);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+    REQUIRE(client.run_command(hash_table_cmd_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::get, {std::to_string(i)}).front() == std::to_string(i));
+    REQUIRE(client.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::get, {std::to_string(i)}).front() == "!key_not_found");
+    REQUIRE(client.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
   for (size_t i = 0; i < NUM_BLOCKS; i++) {
     for (std::size_t j = 0; j < 1000; j++) {
-      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0])->get(std::to_string(j)) == std::to_string(j));
+      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl())->get(std::to_string(j))
+                  == std::to_string(j));
     }
   }
 
@@ -100,7 +101,7 @@ TEST_CASE("kv_no_failure_test", "[put][get]") {
 
 TEST_CASE("kv_head_failure_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
-  std::vector<std::vector<std::shared_ptr<chain_module>>> blocks(NUM_BLOCKS);
+  std::vector<std::vector<std::shared_ptr<memory_block>>> blocks(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> kv_servers(NUM_BLOCKS);
@@ -114,7 +115,7 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
                                                   0,
                                                   STORAGE_CHAIN_PORT_N(i));
     alloc->add_blocks(block_names[i]);
-    blocks[i] = test_utils::init_kv_blocks(block_names[i]);
+    blocks[i] = test_utils::init_hash_table_blocks(block_names[i]);
 
     management_servers[i] = storage_management_server::create(blocks[i], HOST, STORAGE_MANAGEMENT_PORT_N(i));
     server_threads.emplace_back([i, &management_servers] { management_servers[i]->serve(); });
@@ -136,7 +137,7 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  t->create("/file", "storage", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
+  t->create("/file", "hashtable", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
   auto chain = t->dstatus("/file").data_blocks()[0];
   replica_chain_client client(t, "/file", chain, 100);
 
@@ -151,20 +152,21 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+    REQUIRE(client.run_command(hash_table_cmd_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::get, {std::to_string(i)}).front() == std::to_string(i));
+    REQUIRE(client.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::get, {std::to_string(i)}).front() == "!key_not_found");
+    REQUIRE(client.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
   for (size_t i = 1; i < NUM_BLOCKS; i++) {
     for (std::size_t j = 0; j < 1000; j++) {
-      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0])->get(std::to_string(j)) == std::to_string(j));
+      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl())->get(std::to_string(j))
+                  == std::to_string(j));
     }
   }
 
@@ -190,7 +192,7 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
 
 TEST_CASE("kv_mid_failure_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
-  std::vector<std::vector<std::shared_ptr<chain_module>>> blocks(NUM_BLOCKS);
+  std::vector<std::vector<std::shared_ptr<memory_block>>> blocks(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> kv_servers(NUM_BLOCKS);
@@ -204,7 +206,7 @@ TEST_CASE("kv_mid_failure_test", "[put][get]") {
                                                   0,
                                                   STORAGE_CHAIN_PORT_N(i));
     alloc->add_blocks(block_names[i]);
-    blocks[i] = test_utils::init_kv_blocks(block_names[i]);
+    blocks[i] = test_utils::init_hash_table_blocks(block_names[i]);
 
     management_servers[i] = storage_management_server::create(blocks[i], HOST, STORAGE_MANAGEMENT_PORT_N(i));
     server_threads.emplace_back([i, &management_servers] { management_servers[i]->serve(); });
@@ -225,7 +227,7 @@ TEST_CASE("kv_mid_failure_test", "[put][get]") {
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  t->create("/file", "storage", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
+  t->create("/file", "hashtable", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
   auto chain = t->dstatus("/file").data_blocks()[0];
 
   replica_chain_client client(t, "/file", chain, 100);
@@ -240,21 +242,22 @@ TEST_CASE("kv_mid_failure_test", "[put][get]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+    REQUIRE(client.run_command(hash_table_cmd_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::get, {std::to_string(i)}).front() == std::to_string(i));
+    REQUIRE(client.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::get, {std::to_string(i)}).front() == "!key_not_found");
+    REQUIRE(client.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
   for (size_t i = 0; i < NUM_BLOCKS; i++) {
     if (i == 1) continue;
     for (std::size_t j = 0; j < 1000; j++) {
-      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0])->get(std::to_string(j)) == std::to_string(j));
+      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl())->get(std::to_string(j))
+                  == std::to_string(j));
     }
   }
 
@@ -280,7 +283,7 @@ TEST_CASE("kv_mid_failure_test", "[put][get]") {
 
 TEST_CASE("kv_tail_failure_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
-  std::vector<std::vector<std::shared_ptr<chain_module>>> blocks(NUM_BLOCKS);
+  std::vector<std::vector<std::shared_ptr<memory_block>>> blocks(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> kv_servers(NUM_BLOCKS);
@@ -294,7 +297,7 @@ TEST_CASE("kv_tail_failure_test", "[put][get]") {
                                                   0,
                                                   STORAGE_CHAIN_PORT_N(i));
     alloc->add_blocks(block_names[i]);
-    blocks[i] = test_utils::init_kv_blocks(block_names[i]);
+    blocks[i] = test_utils::init_hash_table_blocks(block_names[i]);
 
     management_servers[i] = storage_management_server::create(blocks[i], HOST, STORAGE_MANAGEMENT_PORT_N(i));
     server_threads.emplace_back([i, &management_servers] { management_servers[i]->serve(); });
@@ -316,7 +319,7 @@ TEST_CASE("kv_tail_failure_test", "[put][get]") {
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  t->create("/file", "storage", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
+  t->create("/file", "hashtable", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
   auto chain = t->dstatus("/file").data_blocks()[0];
 
   replica_chain_client client(t, "/file", chain, 100);
@@ -331,20 +334,21 @@ TEST_CASE("kv_tail_failure_test", "[put][get]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+    REQUIRE(client.run_command(hash_table_cmd_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::get, {std::to_string(i)}).front() == std::to_string(i));
+    REQUIRE(client.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.run_command(kv_op_id::get, {std::to_string(i)}).front() == "!key_not_found");
+    REQUIRE(client.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
   for (size_t i = 0; i < NUM_BLOCKS - 1; i++) {
     for (std::size_t j = 0; j < 1000; j++) {
-      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0])->get(std::to_string(j)) == std::to_string(j));
+      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl())->get(std::to_string(j))
+                  == std::to_string(j));
     }
   }
 
@@ -370,7 +374,7 @@ TEST_CASE("kv_tail_failure_test", "[put][get]") {
 
 TEST_CASE("kv_add_block_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
-  std::vector<std::vector<std::shared_ptr<chain_module>>> blocks(NUM_BLOCKS);
+  std::vector<std::vector<std::shared_ptr<memory_block>>> blocks(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> kv_servers(NUM_BLOCKS);
@@ -384,7 +388,7 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
                                                   0,
                                                   STORAGE_CHAIN_PORT_N(i));
     alloc->add_blocks(block_names[i]);
-    blocks[i] = test_utils::init_kv_blocks(block_names[i]);
+    blocks[i] = test_utils::init_hash_table_blocks(block_names[i]);
 
     management_servers[i] = storage_management_server::create(blocks[i], HOST, STORAGE_MANAGEMENT_PORT_N(i));
     server_threads.emplace_back([i, &management_servers] { management_servers[i]->serve(); });
@@ -405,13 +409,13 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
   server_threads.emplace_back([&] { dserver->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  t->create("/file", "storage", "/tmp", 1, 2, 0, 0, {"0_65536"}, {"regular"});
+  t->create("/file", "hashtable", "/tmp", 1, 2, 0, 0, {"0_65536"}, {"regular"});
 
   auto chain = t->dstatus("/file").data_blocks()[0].block_names;
   {
     replica_chain_client client(t, "/file", chain, 100);
     for (std::size_t i = 0; i < 1000; ++i) {
-      REQUIRE(client.run_command(kv_op_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+      REQUIRE(client.run_command(hash_table_cmd_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
     }
   }
 
@@ -420,17 +424,18 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
   {
     replica_chain_client client2(t, "/file", fixed_chain, 100);
     for (std::size_t i = 0; i < 1000; ++i) {
-      REQUIRE(client2.run_command(kv_op_id::get, {std::to_string(i)}).front() == std::to_string(i));
+      REQUIRE(client2.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == std::to_string(i));
     }
     for (std::size_t i = 1000; i < 2000; ++i) {
-      REQUIRE(client2.run_command(kv_op_id::get, {std::to_string(i)}).front() == "!key_not_found");
+      REQUIRE(client2.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == "!key_not_found");
     }
   }
 
   // Ensure all three blocks have the data
   for (size_t i = 0; i < NUM_BLOCKS; i++) {
     for (std::size_t j = 0; j < 1000; j++) {
-      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0])->get(std::to_string(j)) == std::to_string(j));
+      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl())->get(std::to_string(j))
+                  == std::to_string(j));
     }
   }
 

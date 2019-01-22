@@ -22,11 +22,11 @@ using namespace ::apache::thrift::transport;
 #define STORAGE_SERVICE_PORT 9091
 #define STORAGE_MANAGEMENT_PORT 9092
 
-TEST_CASE("kv_client_put_get_test", "[put][get]") {
+TEST_CASE("hash_table_client_put_get_test", "[put][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names, 134217728, 0, 1);
+  auto blocks = test_utils::init_hash_table_blocks(block_names, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -39,7 +39,7 @@ TEST_CASE("kv_client_put_get_test", "[put][get]") {
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  data_status status = tree->create("/sandbox/file.txt", "storage", "/tmp", NUM_BLOCKS, 1, 0, 0,
+  data_status status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
       {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"});
 
   hash_table_client client(tree, "/sandbox/file.txt", status);
@@ -64,11 +64,11 @@ TEST_CASE("kv_client_put_get_test", "[put][get]") {
   }
 }
 
-TEST_CASE("kv_client_put_update_get_test", "[put][update][get]") {
+TEST_CASE("hash_table_client_put_update_get_test", "[put][update][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names, 134217728, 0, 1);
+  auto blocks = test_utils::init_hash_table_blocks(block_names, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -82,7 +82,7 @@ TEST_CASE("kv_client_put_update_get_test", "[put][update][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "storage", "/tmp", NUM_BLOCKS, 1, 0, 0,
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
       {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
   hash_table_client client(tree, "/sandbox/file.txt", status);
@@ -113,11 +113,11 @@ TEST_CASE("kv_client_put_update_get_test", "[put][update][get]") {
   }
 }
 
-TEST_CASE("kv_client_put_remove_get_test", "[put][remove][get]") {
+TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names, 134217728, 0, 1);
+  auto blocks = test_utils::init_hash_table_blocks(block_names, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -131,7 +131,7 @@ TEST_CASE("kv_client_put_remove_get_test", "[put][remove][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "storage", "/tmp", NUM_BLOCKS, 1, 0, 0,
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
       {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
   hash_table_client client(tree, "/sandbox/file.txt", status);
@@ -159,11 +159,11 @@ TEST_CASE("kv_client_put_remove_get_test", "[put][remove][get]") {
   }
 }
 
-TEST_CASE("kv_client_pipelined_ops_test", "[put][update][remove][get]") {
+TEST_CASE("hash_table_client_pipelined_ops_test", "[put][update][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names, 134217728, 0, 1);
+  auto blocks = test_utils::init_hash_table_blocks(block_names, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -177,7 +177,7 @@ TEST_CASE("kv_client_pipelined_ops_test", "[put][update][remove][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "storage", "/tmp", NUM_BLOCKS, 1, 0, 0,
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
       {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
   hash_table_client client(tree, "/sandbox/file.txt", status);
@@ -267,11 +267,11 @@ TEST_CASE("kv_client_pipelined_ops_test", "[put][update][remove][get]") {
   }
 }
 
-TEST_CASE("kv_client_locked_ops_test", "[put][update][remove][get]") {
+TEST_CASE("hash_table_client_locked_ops_test", "[put][update][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names, 134217728, 0, 1);
+  auto blocks = test_utils::init_hash_table_blocks(block_names, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -285,7 +285,7 @@ TEST_CASE("kv_client_locked_ops_test", "[put][update][remove][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "storage", "/tmp", NUM_BLOCKS, 1, 0, 0,
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
                                         {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
   hash_table_client kv(tree, "/sandbox/file.txt", status);
@@ -331,11 +331,11 @@ TEST_CASE("kv_client_locked_ops_test", "[put][update][remove][get]") {
   }
 }
 
-TEST_CASE("kv_client_locked_pipelined_ops_test", "[put][update][remove][get]") {
+TEST_CASE("hash_table_client_locked_pipelined_ops_test", "[put][update][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names, 134217728, 0, 1);
+  auto blocks = test_utils::init_hash_table_blocks(block_names, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -349,7 +349,7 @@ TEST_CASE("kv_client_locked_pipelined_ops_test", "[put][update][remove][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "storage", "/tmp", NUM_BLOCKS, 1, 0, 0,
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
                                         {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
   hash_table_client kv(tree, "/sandbox/file.txt", status);

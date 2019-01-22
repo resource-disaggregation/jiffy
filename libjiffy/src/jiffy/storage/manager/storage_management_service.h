@@ -21,12 +21,13 @@ namespace jiffy { namespace storage {
 class storage_management_serviceIf {
  public:
   virtual ~storage_management_serviceIf() {}
-  virtual void setup_block(const int32_t block_id, const std::string& path, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name) = 0;
+  virtual void create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf) = 0;
+  virtual void setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id) = 0;
+  virtual void destroy_partition(const int32_t block_id) = 0;
   virtual void get_path(std::string& _return, const int32_t block_id) = 0;
   virtual void sync(const int32_t block_id, const std::string& backing_path) = 0;
   virtual void dump(const int32_t block_id, const std::string& backing_path) = 0;
   virtual void load(const int32_t block_id, const std::string& backing_path) = 0;
-  virtual void reset(const int32_t block_id) = 0;
   virtual int64_t storage_capacity(const int32_t block_id) = 0;
   virtual int64_t storage_size(const int32_t block_id) = 0;
   virtual void resend_pending(const int32_t block_id) = 0;
@@ -60,7 +61,13 @@ class storage_management_serviceIfSingletonFactory : virtual public storage_mana
 class storage_management_serviceNull : virtual public storage_management_serviceIf {
  public:
   virtual ~storage_management_serviceNull() {}
-  void setup_block(const int32_t /* block_id */, const std::string& /* path */, const std::string& /* partition_type */, const std::string& /* partition_name */, const std::string& /* partition_metadata */, const std::vector<std::string> & /* chain */, const int32_t /* chain_role */, const std::string& /* next_block_name */) {
+  void create_partition(const int32_t /* block_id */, const std::string& /* partition_type */, const std::string& /* partition_name */, const std::string& /* partition_metadata */, const std::map<std::string, std::string> & /* conf */) {
+    return;
+  }
+  void setup_chain(const int32_t /* block_id */, const std::string& /* path */, const std::vector<std::string> & /* chain */, const int32_t /* chain_role */, const std::string& /* next_block_id */) {
+    return;
+  }
+  void destroy_partition(const int32_t /* block_id */) {
     return;
   }
   void get_path(std::string& /* _return */, const int32_t /* block_id */) {
@@ -73,9 +80,6 @@ class storage_management_serviceNull : virtual public storage_management_service
     return;
   }
   void load(const int32_t /* block_id */, const std::string& /* backing_path */) {
-    return;
-  }
-  void reset(const int32_t /* block_id */) {
     return;
   }
   int64_t storage_capacity(const int32_t /* block_id */) {
@@ -94,41 +98,33 @@ class storage_management_serviceNull : virtual public storage_management_service
   }
 };
 
-typedef struct _storage_management_service_setup_block_args__isset {
-  _storage_management_service_setup_block_args__isset() : block_id(false), path(false), partition_type(false), partition_name(false), partition_metadata(false), chain(false), chain_role(false), next_block_name(false) {}
+typedef struct _storage_management_service_create_partition_args__isset {
+  _storage_management_service_create_partition_args__isset() : block_id(false), partition_type(false), partition_name(false), partition_metadata(false), conf(false) {}
   bool block_id :1;
-  bool path :1;
   bool partition_type :1;
   bool partition_name :1;
   bool partition_metadata :1;
-  bool chain :1;
-  bool chain_role :1;
-  bool next_block_name :1;
-} _storage_management_service_setup_block_args__isset;
+  bool conf :1;
+} _storage_management_service_create_partition_args__isset;
 
-class storage_management_service_setup_block_args {
+class storage_management_service_create_partition_args {
  public:
 
-  storage_management_service_setup_block_args(const storage_management_service_setup_block_args&);
-  storage_management_service_setup_block_args& operator=(const storage_management_service_setup_block_args&);
-  storage_management_service_setup_block_args() : block_id(0), path(), partition_type(), partition_name(), partition_metadata(), chain_role(0), next_block_name() {
+  storage_management_service_create_partition_args(const storage_management_service_create_partition_args&);
+  storage_management_service_create_partition_args& operator=(const storage_management_service_create_partition_args&);
+  storage_management_service_create_partition_args() : block_id(0), partition_type(), partition_name(), partition_metadata() {
   }
 
-  virtual ~storage_management_service_setup_block_args() throw();
+  virtual ~storage_management_service_create_partition_args() throw();
   int32_t block_id;
-  std::string path;
   std::string partition_type;
   std::string partition_name;
   std::string partition_metadata;
-  std::vector<std::string>  chain;
-  int32_t chain_role;
-  std::string next_block_name;
+  std::map<std::string, std::string>  conf;
 
-  _storage_management_service_setup_block_args__isset __isset;
+  _storage_management_service_create_partition_args__isset __isset;
 
   void __set_block_id(const int32_t val);
-
-  void __set_path(const std::string& val);
 
   void __set_partition_type(const std::string& val);
 
@@ -136,17 +132,11 @@ class storage_management_service_setup_block_args {
 
   void __set_partition_metadata(const std::string& val);
 
-  void __set_chain(const std::vector<std::string> & val);
+  void __set_conf(const std::map<std::string, std::string> & val);
 
-  void __set_chain_role(const int32_t val);
-
-  void __set_next_block_name(const std::string& val);
-
-  bool operator == (const storage_management_service_setup_block_args & rhs) const
+  bool operator == (const storage_management_service_create_partition_args & rhs) const
   {
     if (!(block_id == rhs.block_id))
-      return false;
-    if (!(path == rhs.path))
       return false;
     if (!(partition_type == rhs.partition_type))
       return false;
@@ -154,19 +144,15 @@ class storage_management_service_setup_block_args {
       return false;
     if (!(partition_metadata == rhs.partition_metadata))
       return false;
-    if (!(chain == rhs.chain))
-      return false;
-    if (!(chain_role == rhs.chain_role))
-      return false;
-    if (!(next_block_name == rhs.next_block_name))
+    if (!(conf == rhs.conf))
       return false;
     return true;
   }
-  bool operator != (const storage_management_service_setup_block_args &rhs) const {
+  bool operator != (const storage_management_service_create_partition_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const storage_management_service_setup_block_args & ) const;
+  bool operator < (const storage_management_service_create_partition_args & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -176,56 +162,53 @@ class storage_management_service_setup_block_args {
 };
 
 
-class storage_management_service_setup_block_pargs {
+class storage_management_service_create_partition_pargs {
  public:
 
 
-  virtual ~storage_management_service_setup_block_pargs() throw();
+  virtual ~storage_management_service_create_partition_pargs() throw();
   const int32_t* block_id;
-  const std::string* path;
   const std::string* partition_type;
   const std::string* partition_name;
   const std::string* partition_metadata;
-  const std::vector<std::string> * chain;
-  const int32_t* chain_role;
-  const std::string* next_block_name;
+  const std::map<std::string, std::string> * conf;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
 
 };
 
-typedef struct _storage_management_service_setup_block_result__isset {
-  _storage_management_service_setup_block_result__isset() : ex(false) {}
+typedef struct _storage_management_service_create_partition_result__isset {
+  _storage_management_service_create_partition_result__isset() : ex(false) {}
   bool ex :1;
-} _storage_management_service_setup_block_result__isset;
+} _storage_management_service_create_partition_result__isset;
 
-class storage_management_service_setup_block_result {
+class storage_management_service_create_partition_result {
  public:
 
-  storage_management_service_setup_block_result(const storage_management_service_setup_block_result&);
-  storage_management_service_setup_block_result& operator=(const storage_management_service_setup_block_result&);
-  storage_management_service_setup_block_result() {
+  storage_management_service_create_partition_result(const storage_management_service_create_partition_result&);
+  storage_management_service_create_partition_result& operator=(const storage_management_service_create_partition_result&);
+  storage_management_service_create_partition_result() {
   }
 
-  virtual ~storage_management_service_setup_block_result() throw();
+  virtual ~storage_management_service_create_partition_result() throw();
   storage_management_exception ex;
 
-  _storage_management_service_setup_block_result__isset __isset;
+  _storage_management_service_create_partition_result__isset __isset;
 
   void __set_ex(const storage_management_exception& val);
 
-  bool operator == (const storage_management_service_setup_block_result & rhs) const
+  bool operator == (const storage_management_service_create_partition_result & rhs) const
   {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const storage_management_service_setup_block_result &rhs) const {
+  bool operator != (const storage_management_service_create_partition_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const storage_management_service_setup_block_result & ) const;
+  bool operator < (const storage_management_service_create_partition_result & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -234,19 +217,267 @@ class storage_management_service_setup_block_result {
 
 };
 
-typedef struct _storage_management_service_setup_block_presult__isset {
-  _storage_management_service_setup_block_presult__isset() : ex(false) {}
+typedef struct _storage_management_service_create_partition_presult__isset {
+  _storage_management_service_create_partition_presult__isset() : ex(false) {}
   bool ex :1;
-} _storage_management_service_setup_block_presult__isset;
+} _storage_management_service_create_partition_presult__isset;
 
-class storage_management_service_setup_block_presult {
+class storage_management_service_create_partition_presult {
  public:
 
 
-  virtual ~storage_management_service_setup_block_presult() throw();
+  virtual ~storage_management_service_create_partition_presult() throw();
   storage_management_exception ex;
 
-  _storage_management_service_setup_block_presult__isset __isset;
+  _storage_management_service_create_partition_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
+typedef struct _storage_management_service_setup_chain_args__isset {
+  _storage_management_service_setup_chain_args__isset() : block_id(false), path(false), chain(false), chain_role(false), next_block_id(false) {}
+  bool block_id :1;
+  bool path :1;
+  bool chain :1;
+  bool chain_role :1;
+  bool next_block_id :1;
+} _storage_management_service_setup_chain_args__isset;
+
+class storage_management_service_setup_chain_args {
+ public:
+
+  storage_management_service_setup_chain_args(const storage_management_service_setup_chain_args&);
+  storage_management_service_setup_chain_args& operator=(const storage_management_service_setup_chain_args&);
+  storage_management_service_setup_chain_args() : block_id(0), path(), chain_role(0), next_block_id() {
+  }
+
+  virtual ~storage_management_service_setup_chain_args() throw();
+  int32_t block_id;
+  std::string path;
+  std::vector<std::string>  chain;
+  int32_t chain_role;
+  std::string next_block_id;
+
+  _storage_management_service_setup_chain_args__isset __isset;
+
+  void __set_block_id(const int32_t val);
+
+  void __set_path(const std::string& val);
+
+  void __set_chain(const std::vector<std::string> & val);
+
+  void __set_chain_role(const int32_t val);
+
+  void __set_next_block_id(const std::string& val);
+
+  bool operator == (const storage_management_service_setup_chain_args & rhs) const
+  {
+    if (!(block_id == rhs.block_id))
+      return false;
+    if (!(path == rhs.path))
+      return false;
+    if (!(chain == rhs.chain))
+      return false;
+    if (!(chain_role == rhs.chain_role))
+      return false;
+    if (!(next_block_id == rhs.next_block_id))
+      return false;
+    return true;
+  }
+  bool operator != (const storage_management_service_setup_chain_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const storage_management_service_setup_chain_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class storage_management_service_setup_chain_pargs {
+ public:
+
+
+  virtual ~storage_management_service_setup_chain_pargs() throw();
+  const int32_t* block_id;
+  const std::string* path;
+  const std::vector<std::string> * chain;
+  const int32_t* chain_role;
+  const std::string* next_block_id;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _storage_management_service_setup_chain_result__isset {
+  _storage_management_service_setup_chain_result__isset() : ex(false) {}
+  bool ex :1;
+} _storage_management_service_setup_chain_result__isset;
+
+class storage_management_service_setup_chain_result {
+ public:
+
+  storage_management_service_setup_chain_result(const storage_management_service_setup_chain_result&);
+  storage_management_service_setup_chain_result& operator=(const storage_management_service_setup_chain_result&);
+  storage_management_service_setup_chain_result() {
+  }
+
+  virtual ~storage_management_service_setup_chain_result() throw();
+  storage_management_exception ex;
+
+  _storage_management_service_setup_chain_result__isset __isset;
+
+  void __set_ex(const storage_management_exception& val);
+
+  bool operator == (const storage_management_service_setup_chain_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const storage_management_service_setup_chain_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const storage_management_service_setup_chain_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _storage_management_service_setup_chain_presult__isset {
+  _storage_management_service_setup_chain_presult__isset() : ex(false) {}
+  bool ex :1;
+} _storage_management_service_setup_chain_presult__isset;
+
+class storage_management_service_setup_chain_presult {
+ public:
+
+
+  virtual ~storage_management_service_setup_chain_presult() throw();
+  storage_management_exception ex;
+
+  _storage_management_service_setup_chain_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
+typedef struct _storage_management_service_destroy_partition_args__isset {
+  _storage_management_service_destroy_partition_args__isset() : block_id(false) {}
+  bool block_id :1;
+} _storage_management_service_destroy_partition_args__isset;
+
+class storage_management_service_destroy_partition_args {
+ public:
+
+  storage_management_service_destroy_partition_args(const storage_management_service_destroy_partition_args&);
+  storage_management_service_destroy_partition_args& operator=(const storage_management_service_destroy_partition_args&);
+  storage_management_service_destroy_partition_args() : block_id(0) {
+  }
+
+  virtual ~storage_management_service_destroy_partition_args() throw();
+  int32_t block_id;
+
+  _storage_management_service_destroy_partition_args__isset __isset;
+
+  void __set_block_id(const int32_t val);
+
+  bool operator == (const storage_management_service_destroy_partition_args & rhs) const
+  {
+    if (!(block_id == rhs.block_id))
+      return false;
+    return true;
+  }
+  bool operator != (const storage_management_service_destroy_partition_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const storage_management_service_destroy_partition_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class storage_management_service_destroy_partition_pargs {
+ public:
+
+
+  virtual ~storage_management_service_destroy_partition_pargs() throw();
+  const int32_t* block_id;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _storage_management_service_destroy_partition_result__isset {
+  _storage_management_service_destroy_partition_result__isset() : ex(false) {}
+  bool ex :1;
+} _storage_management_service_destroy_partition_result__isset;
+
+class storage_management_service_destroy_partition_result {
+ public:
+
+  storage_management_service_destroy_partition_result(const storage_management_service_destroy_partition_result&);
+  storage_management_service_destroy_partition_result& operator=(const storage_management_service_destroy_partition_result&);
+  storage_management_service_destroy_partition_result() {
+  }
+
+  virtual ~storage_management_service_destroy_partition_result() throw();
+  storage_management_exception ex;
+
+  _storage_management_service_destroy_partition_result__isset __isset;
+
+  void __set_ex(const storage_management_exception& val);
+
+  bool operator == (const storage_management_service_destroy_partition_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const storage_management_service_destroy_partition_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const storage_management_service_destroy_partition_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _storage_management_service_destroy_partition_presult__isset {
+  _storage_management_service_destroy_partition_presult__isset() : ex(false) {}
+  bool ex :1;
+} _storage_management_service_destroy_partition_presult__isset;
+
+class storage_management_service_destroy_partition_presult {
+ public:
+
+
+  virtual ~storage_management_service_destroy_partition_presult() throw();
+  storage_management_exception ex;
+
+  _storage_management_service_destroy_partition_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -716,116 +947,6 @@ class storage_management_service_load_presult {
   storage_management_exception ex;
 
   _storage_management_service_load_presult__isset __isset;
-
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-
-};
-
-typedef struct _storage_management_service_reset_args__isset {
-  _storage_management_service_reset_args__isset() : block_id(false) {}
-  bool block_id :1;
-} _storage_management_service_reset_args__isset;
-
-class storage_management_service_reset_args {
- public:
-
-  storage_management_service_reset_args(const storage_management_service_reset_args&);
-  storage_management_service_reset_args& operator=(const storage_management_service_reset_args&);
-  storage_management_service_reset_args() : block_id(0) {
-  }
-
-  virtual ~storage_management_service_reset_args() throw();
-  int32_t block_id;
-
-  _storage_management_service_reset_args__isset __isset;
-
-  void __set_block_id(const int32_t val);
-
-  bool operator == (const storage_management_service_reset_args & rhs) const
-  {
-    if (!(block_id == rhs.block_id))
-      return false;
-    return true;
-  }
-  bool operator != (const storage_management_service_reset_args &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const storage_management_service_reset_args & ) const;
-
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
-
-};
-
-
-class storage_management_service_reset_pargs {
- public:
-
-
-  virtual ~storage_management_service_reset_pargs() throw();
-  const int32_t* block_id;
-
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
-
-};
-
-typedef struct _storage_management_service_reset_result__isset {
-  _storage_management_service_reset_result__isset() : ex(false) {}
-  bool ex :1;
-} _storage_management_service_reset_result__isset;
-
-class storage_management_service_reset_result {
- public:
-
-  storage_management_service_reset_result(const storage_management_service_reset_result&);
-  storage_management_service_reset_result& operator=(const storage_management_service_reset_result&);
-  storage_management_service_reset_result() {
-  }
-
-  virtual ~storage_management_service_reset_result() throw();
-  storage_management_exception ex;
-
-  _storage_management_service_reset_result__isset __isset;
-
-  void __set_ex(const storage_management_exception& val);
-
-  bool operator == (const storage_management_service_reset_result & rhs) const
-  {
-    if (!(ex == rhs.ex))
-      return false;
-    return true;
-  }
-  bool operator != (const storage_management_service_reset_result &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const storage_management_service_reset_result & ) const;
-
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
-
-};
-
-typedef struct _storage_management_service_reset_presult__isset {
-  _storage_management_service_reset_presult__isset() : ex(false) {}
-  bool ex :1;
-} _storage_management_service_reset_presult__isset;
-
-class storage_management_service_reset_presult {
- public:
-
-
-  virtual ~storage_management_service_reset_presult() throw();
-  storage_management_exception ex;
-
-  _storage_management_service_reset_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -1314,9 +1435,15 @@ class storage_management_serviceClientT : virtual public storage_management_serv
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void setup_block(const int32_t block_id, const std::string& path, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name);
-  void send_setup_block(const int32_t block_id, const std::string& path, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name);
-  void recv_setup_block();
+  void create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf);
+  void send_create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf);
+  void recv_create_partition();
+  void setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id);
+  void send_setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id);
+  void recv_setup_chain();
+  void destroy_partition(const int32_t block_id);
+  void send_destroy_partition(const int32_t block_id);
+  void recv_destroy_partition();
   void get_path(std::string& _return, const int32_t block_id);
   void send_get_path(const int32_t block_id);
   void recv_get_path(std::string& _return);
@@ -1329,9 +1456,6 @@ class storage_management_serviceClientT : virtual public storage_management_serv
   void load(const int32_t block_id, const std::string& backing_path);
   void send_load(const int32_t block_id, const std::string& backing_path);
   void recv_load();
-  void reset(const int32_t block_id);
-  void send_reset(const int32_t block_id);
-  void recv_reset();
   int64_t storage_capacity(const int32_t block_id);
   void send_storage_capacity(const int32_t block_id);
   int64_t recv_storage_capacity();
@@ -1372,8 +1496,12 @@ class storage_management_serviceProcessorT : public ::apache::thrift::TDispatchP
   };
   typedef std::map<std::string, ProcessFunctions> ProcessMap;
   ProcessMap processMap_;
-  void process_setup_block(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_setup_block(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_create_partition(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_create_partition(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_setup_chain(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_setup_chain(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_destroy_partition(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_destroy_partition(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_get_path(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get_path(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_sync(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -1382,8 +1510,6 @@ class storage_management_serviceProcessorT : public ::apache::thrift::TDispatchP
   void process_dump(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_load(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_load(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_reset(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_reset(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_storage_capacity(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_storage_capacity(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_storage_size(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -1395,9 +1521,15 @@ class storage_management_serviceProcessorT : public ::apache::thrift::TDispatchP
  public:
   storage_management_serviceProcessorT(::apache::thrift::stdcxx::shared_ptr<storage_management_serviceIf> iface) :
     iface_(iface) {
-    processMap_["setup_block"] = ProcessFunctions(
-      &storage_management_serviceProcessorT::process_setup_block,
-      &storage_management_serviceProcessorT::process_setup_block);
+    processMap_["create_partition"] = ProcessFunctions(
+      &storage_management_serviceProcessorT::process_create_partition,
+      &storage_management_serviceProcessorT::process_create_partition);
+    processMap_["setup_chain"] = ProcessFunctions(
+      &storage_management_serviceProcessorT::process_setup_chain,
+      &storage_management_serviceProcessorT::process_setup_chain);
+    processMap_["destroy_partition"] = ProcessFunctions(
+      &storage_management_serviceProcessorT::process_destroy_partition,
+      &storage_management_serviceProcessorT::process_destroy_partition);
     processMap_["get_path"] = ProcessFunctions(
       &storage_management_serviceProcessorT::process_get_path,
       &storage_management_serviceProcessorT::process_get_path);
@@ -1410,9 +1542,6 @@ class storage_management_serviceProcessorT : public ::apache::thrift::TDispatchP
     processMap_["load"] = ProcessFunctions(
       &storage_management_serviceProcessorT::process_load,
       &storage_management_serviceProcessorT::process_load);
-    processMap_["reset"] = ProcessFunctions(
-      &storage_management_serviceProcessorT::process_reset,
-      &storage_management_serviceProcessorT::process_reset);
     processMap_["storage_capacity"] = ProcessFunctions(
       &storage_management_serviceProcessorT::process_storage_capacity,
       &storage_management_serviceProcessorT::process_storage_capacity);
@@ -1458,13 +1587,31 @@ class storage_management_serviceMultiface : virtual public storage_management_se
     ifaces_.push_back(iface);
   }
  public:
-  void setup_block(const int32_t block_id, const std::string& path, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name) {
+  void create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->setup_block(block_id, path, partition_type, partition_name, partition_metadata, chain, chain_role, next_block_name);
+      ifaces_[i]->create_partition(block_id, partition_type, partition_name, partition_metadata, conf);
     }
-    ifaces_[i]->setup_block(block_id, path, partition_type, partition_name, partition_metadata, chain, chain_role, next_block_name);
+    ifaces_[i]->create_partition(block_id, partition_type, partition_name, partition_metadata, conf);
+  }
+
+  void setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->setup_chain(block_id, path, chain, chain_role, next_block_id);
+    }
+    ifaces_[i]->setup_chain(block_id, path, chain, chain_role, next_block_id);
+  }
+
+  void destroy_partition(const int32_t block_id) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->destroy_partition(block_id);
+    }
+    ifaces_[i]->destroy_partition(block_id);
   }
 
   void get_path(std::string& _return, const int32_t block_id) {
@@ -1502,15 +1649,6 @@ class storage_management_serviceMultiface : virtual public storage_management_se
       ifaces_[i]->load(block_id, backing_path);
     }
     ifaces_[i]->load(block_id, backing_path);
-  }
-
-  void reset(const int32_t block_id) {
-    size_t sz = ifaces_.size();
-    size_t i = 0;
-    for (; i < (sz - 1); ++i) {
-      ifaces_[i]->reset(block_id);
-    }
-    ifaces_[i]->reset(block_id);
   }
 
   int64_t storage_capacity(const int32_t block_id) {
@@ -1580,9 +1718,15 @@ class storage_management_serviceConcurrentClientT : virtual public storage_manag
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void setup_block(const int32_t block_id, const std::string& path, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name);
-  int32_t send_setup_block(const int32_t block_id, const std::string& path, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_name);
-  void recv_setup_block(const int32_t seqid);
+  void create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf);
+  int32_t send_create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf);
+  void recv_create_partition(const int32_t seqid);
+  void setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id);
+  int32_t send_setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id);
+  void recv_setup_chain(const int32_t seqid);
+  void destroy_partition(const int32_t block_id);
+  int32_t send_destroy_partition(const int32_t block_id);
+  void recv_destroy_partition(const int32_t seqid);
   void get_path(std::string& _return, const int32_t block_id);
   int32_t send_get_path(const int32_t block_id);
   void recv_get_path(std::string& _return, const int32_t seqid);
@@ -1595,9 +1739,6 @@ class storage_management_serviceConcurrentClientT : virtual public storage_manag
   void load(const int32_t block_id, const std::string& backing_path);
   int32_t send_load(const int32_t block_id, const std::string& backing_path);
   void recv_load(const int32_t seqid);
-  void reset(const int32_t block_id);
-  int32_t send_reset(const int32_t block_id);
-  void recv_reset(const int32_t seqid);
   int64_t storage_capacity(const int32_t block_id);
   int32_t send_storage_capacity(const int32_t block_id);
   int64_t recv_storage_capacity(const int32_t seqid);
