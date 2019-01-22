@@ -26,7 +26,7 @@ TEST_CASE("auto_scale_up_test", "[directory_service][storage_server][management_
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(2, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names, 7705);
+  auto blocks = test_utils::init_hash_table_blocks(block_names, 7705);
 
   auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -49,7 +49,7 @@ TEST_CASE("auto_scale_up_test", "[directory_service][storage_server][management_
   for (std::size_t i = 0; i < 1000; ++i) {
     std::vector<std::string> result;
     REQUIRE_NOTHROW(std::dynamic_pointer_cast<hash_table_partition>(blocks[0])->run_command(result,
-                                                                                kv_op_id::put,
+                                                                                hash_table_cmd_id::put,
                                                                                 {std::to_string(i),
                                                                                  std::to_string(i)}));
     REQUIRE(result[0] == "!ok");
@@ -90,7 +90,7 @@ TEST_CASE("auto_scale_down_test", "[directory_service][storage_server][managemen
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(2, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT, 0, 0);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names);
+  auto blocks = test_utils::init_hash_table_blocks(block_names);
 
   auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -123,7 +123,7 @@ TEST_CASE("auto_scale_down_test", "[directory_service][storage_server][managemen
   // A single remove should trigger scale down
   std::vector<std::string> result;
   REQUIRE_NOTHROW(std::dynamic_pointer_cast<hash_table_partition>(blocks[0])->run_command(result,
-                                                                              kv_op_id::remove,
+                                                                              hash_table_cmd_id::remove,
                                                                               {std::to_string(0)}));
   REQUIRE(result[0] == "0");
 

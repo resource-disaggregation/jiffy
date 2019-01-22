@@ -268,16 +268,16 @@ if (BUILD_TESTS)
 endif ()
 
 if (BUILD_BENCHMARKS)
-  add_executable(kv_rpc_benchmark
-          bench/kv_rpc_benchmark.cpp
+  add_executable(hash_table_benchmark
+          bench/hash_table_benchmark.cpp
           bench/benchmark_utils.h)
-  add_executable(kv_notification_benchmark
-          bench/kv_notification_benchmark.cpp
+  add_executable(hash_table_notification_benchmark
+          bench/hash_table_notification_benchmark.cpp
           bench/benchmark_utils.h)
   add_executable(persistence_benchmark
           bench/persistence_benchmark.cpp
           bench/benchmark_utils.h)
-  target_link_libraries(kv_rpc_benchmark jiffy)
-  target_link_libraries(kv_notification_benchmark jiffy)
+  target_link_libraries(hash_table_benchmark jiffy)
+  target_link_libraries(hash_table_notification_benchmark jiffy)
   target_link_libraries(persistence_benchmark jiffy)
 endif ()

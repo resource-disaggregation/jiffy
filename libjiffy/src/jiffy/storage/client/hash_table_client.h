@@ -1,9 +1,9 @@
-#ifndef JIFFY_KV_CLIENT_H
-#define JIFFY_KV_CLIENT_H
+#ifndef JIFFY_HASH_TABLE_CLIENT_H
+#define JIFFY_HASH_TABLE_CLIENT_H
 
-#include "../../directory/client/directory_client.h"
-#include "../../utils/client_cache.h"
-#include "replica_chain_client.h"
+#include "jiffy/directory/client/directory_client.h"
+#include "jiffy/utils/client_cache.h"
+#include "jiffy/storage/client/replica_chain_client.h"
 
 namespace jiffy {
 namespace storage {
@@ -299,4 +299,4 @@ class hash_table_client {
 }
 }
 
-#endif //JIFFY_KV_CLIENT_H
+#endif //JIFFY_HASH_TABLE_CLIENT_H

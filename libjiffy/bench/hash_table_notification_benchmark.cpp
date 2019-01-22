@@ -22,8 +22,8 @@ class workload_runner {
  public:
   workload_runner(const std::string &workload_path,
                   std::size_t workload_offset,
-                  std::shared_ptr<hash_table_client> kv,
-                  std::size_t num_ops) : num_ops_(num_ops), kv_(kv) {
+                  std::shared_ptr<hash_table_client> hash_table,
+                  std::size_t num_ops) : num_ops_(num_ops), hash_table_(hash_table) {
     benchmark_utils::load_workload(workload_path, workload_offset, num_ops, workload_);
     timestamps_.resize(workload_.size());
   }
@@ -32,7 +32,7 @@ class workload_runner {
     std::size_t i = 0;
     while (i < num_ops_) {
       timestamps_[i] = time_utils::now_us();
-      kv_->put(workload_[i].second[0], workload_[i].second[1]);
+      hash_table_->put(workload_[i].second[0], workload_[i].second[1]);
       ++i;
     }
   }
@@ -45,7 +45,7 @@ class workload_runner {
   std::vector<std::uint64_t> timestamps_{};
   std::size_t num_ops_;
   std::vector<std::pair<int32_t, std::vector<std::string>>> workload_{};
-  std::shared_ptr<hash_table_client> kv_;
+  std::shared_ptr<hash_table_client> hash_table_;
 };
 
 class notification_listener {
@@ -133,11 +133,11 @@ int main(int argc, char **argv) {
   }
 
   jiffy::client::jiffy_client client(host, port, lease_port);
-  auto kv = client.open_or_create_hash_table(file, "/tmp", 1, chain_length);
+  auto hash_table = client.open_or_create_hash_table(file, "/tmp", 1, chain_length);
 
   // Create workload runner
   std::cerr << "Creating workload runner" << std::endl;
-  workload_runner wrunner(workload_path, workload_offset, kv, num_ops);
+  workload_runner w_runner(workload_path, workload_offset, hash_table, num_ops);
 
   // Create all listeners and start them
   std::vector<notification_listener *> listeners(num_threads, nullptr);
@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
 
   // Start workload runner
   std::cerr << "Starting workload runner" << std::endl;
-  wrunner.run();
+  w_runner.run();
 
   // Do all the measurements
   std::cerr << "Finished" << std::endl;
@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
     auto l = listeners[i];
     l->wait();
     auto out_file = "listen_latency_" + std::to_string(i) + "_of_" + std::to_string(num_threads);
-    benchmark_utils::vector_diff(l->timestamps(), wrunner.timestamps(), out_file);
+    benchmark_utils::vector_diff(l->timestamps(), w_runner.timestamps(), out_file);
     delete l;
   }
 }

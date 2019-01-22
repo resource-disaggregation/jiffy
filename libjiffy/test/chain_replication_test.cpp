@@ -18,12 +18,12 @@ using namespace apache::thrift::server;
 using namespace jiffy::storage;
 using namespace jiffy::directory;
 
-TEST_CASE("kv_no_failure_test", "[put][get]") {
+TEST_CASE("chain_replication_no_failure_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
   std::vector<std::vector<std::shared_ptr<memory_block>>> blocks(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TServer>> kv_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> storage_servers(NUM_BLOCKS);
   std::vector<std::thread> server_threads;
 
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -44,8 +44,8 @@ TEST_CASE("kv_no_failure_test", "[put][get]") {
     server_threads.emplace_back([i, &chain_servers] { chain_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT_N(i));
 
-    kv_servers[i] = block_server::create(blocks[i], HOST, STORAGE_SERVICE_PORT_N(i));
-    server_threads.emplace_back([i, &kv_servers] { kv_servers[i]->serve(); });
+    storage_servers[i] = block_server::create(blocks[i], HOST, STORAGE_SERVICE_PORT_N(i));
+    server_threads.emplace_back([i, &storage_servers] { storage_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT_N(i));
   }
 
@@ -79,8 +79,8 @@ TEST_CASE("kv_no_failure_test", "[put][get]") {
     }
   }
 
-  for (const auto &kv: kv_servers) {
-    kv->stop();
+  for (const auto &s: storage_servers) {
+    s->stop();
   }
 
   for (const auto &c: chain_servers) {
@@ -99,12 +99,12 @@ TEST_CASE("kv_no_failure_test", "[put][get]") {
   }
 }
 
-TEST_CASE("kv_head_failure_test", "[put][get]") {
+TEST_CASE("chain_replication_head_failure_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
   std::vector<std::vector<std::shared_ptr<memory_block>>> blocks(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TServer>> kv_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> storage_servers(NUM_BLOCKS);
   std::vector<std::thread> server_threads;
 
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -125,8 +125,8 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
     server_threads.emplace_back([i, &chain_servers] { chain_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT_N(i));
 
-    kv_servers[i] = block_server::create(blocks[i], HOST, STORAGE_SERVICE_PORT_N(i));
-    server_threads.emplace_back([i, &kv_servers] { kv_servers[i]->serve(); });
+    storage_servers[i] = block_server::create(blocks[i], HOST, STORAGE_SERVICE_PORT_N(i));
+    server_threads.emplace_back([i, &storage_servers] { storage_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT_N(i));
   }
 
@@ -141,7 +141,7 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
   auto chain = t->dstatus("/file").data_blocks()[0];
   replica_chain_client client(t, "/file", chain, 100);
 
-  kv_servers[0]->stop();
+  storage_servers[0]->stop();
   chain_servers[0]->stop();
   management_servers[0]->stop();
 
@@ -170,8 +170,8 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
     }
   }
 
-  for (const auto &kv: kv_servers) {
-    kv->stop();
+  for (const auto &s: storage_servers) {
+    s->stop();
   }
 
   for (const auto &c: chain_servers) {
@@ -190,12 +190,12 @@ TEST_CASE("kv_head_failure_test", "[put][get]") {
   }
 }
 
-TEST_CASE("kv_mid_failure_test", "[put][get]") {
+TEST_CASE("chain_replication_mid_failure_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
   std::vector<std::vector<std::shared_ptr<memory_block>>> blocks(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TServer>> kv_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> storage_servers(NUM_BLOCKS);
   std::vector<std::thread> server_threads;
 
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -216,8 +216,8 @@ TEST_CASE("kv_mid_failure_test", "[put][get]") {
     server_threads.emplace_back([i, &chain_servers] { chain_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT_N(i));
 
-    kv_servers[i] = block_server::create(blocks[i], HOST, STORAGE_SERVICE_PORT_N(i));
-    server_threads.emplace_back([i, &kv_servers] { kv_servers[i]->serve(); });
+    storage_servers[i] = block_server::create(blocks[i], HOST, STORAGE_SERVICE_PORT_N(i));
+    server_threads.emplace_back([i, &storage_servers] { storage_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT_N(i));
   }
 
@@ -232,7 +232,7 @@ TEST_CASE("kv_mid_failure_test", "[put][get]") {
 
   replica_chain_client client(t, "/file", chain, 100);
 
-  kv_servers[1]->stop();
+  storage_servers[1]->stop();
   management_servers[1]->stop();
   chain_servers[1]->stop();
   for (int32_t i = 3; i < 6; i++) {
@@ -261,8 +261,8 @@ TEST_CASE("kv_mid_failure_test", "[put][get]") {
     }
   }
 
-  for (const auto &kv: kv_servers) {
-    kv->stop();
+  for (const auto &s: storage_servers) {
+    s->stop();
   }
 
   for (const auto &c: chain_servers) {
@@ -281,12 +281,12 @@ TEST_CASE("kv_mid_failure_test", "[put][get]") {
   }
 }
 
-TEST_CASE("kv_tail_failure_test", "[put][get]") {
+TEST_CASE("chain_replication_tail_failure_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
   std::vector<std::vector<std::shared_ptr<memory_block>>> blocks(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TServer>> kv_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> storage_servers(NUM_BLOCKS);
   std::vector<std::thread> server_threads;
 
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -307,8 +307,8 @@ TEST_CASE("kv_tail_failure_test", "[put][get]") {
     server_threads.emplace_back([i, &chain_servers] { chain_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT_N(i));
 
-    kv_servers[i] = block_server::create(blocks[i], HOST, STORAGE_SERVICE_PORT_N(i));
-    server_threads.emplace_back([i, &kv_servers] { kv_servers[i]->serve(); });
+    storage_servers[i] = block_server::create(blocks[i], HOST, STORAGE_SERVICE_PORT_N(i));
+    server_threads.emplace_back([i, &storage_servers] { storage_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT_N(i));
   }
 
@@ -324,7 +324,7 @@ TEST_CASE("kv_tail_failure_test", "[put][get]") {
 
   replica_chain_client client(t, "/file", chain, 100);
 
-  kv_servers[2]->stop();
+  storage_servers[2]->stop();
   management_servers[2]->stop();
   chain_servers[2]->stop();
   for (int32_t i = 6; i < 9; i++) {
@@ -352,8 +352,8 @@ TEST_CASE("kv_tail_failure_test", "[put][get]") {
     }
   }
 
-  for (const auto &kv: kv_servers) {
-    kv->stop();
+  for (const auto &s: storage_servers) {
+    s->stop();
   }
 
   for (const auto &c: chain_servers) {
@@ -372,12 +372,12 @@ TEST_CASE("kv_tail_failure_test", "[put][get]") {
   }
 }
 
-TEST_CASE("kv_add_block_test", "[put][get]") {
+TEST_CASE("chain_replication_add_block_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
   std::vector<std::vector<std::shared_ptr<memory_block>>> blocks(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
-  std::vector<std::shared_ptr<TServer>> kv_servers(NUM_BLOCKS);
+  std::vector<std::shared_ptr<TServer>> storage_servers(NUM_BLOCKS);
   std::vector<std::thread> server_threads;
 
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -398,8 +398,8 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
     server_threads.emplace_back([i, &chain_servers] { chain_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT_N(i));
 
-    kv_servers[i] = block_server::create(blocks[i], HOST, STORAGE_SERVICE_PORT_N(i));
-    server_threads.emplace_back([i, &kv_servers] { kv_servers[i]->serve(); });
+    storage_servers[i] = block_server::create(blocks[i], HOST, STORAGE_SERVICE_PORT_N(i));
+    server_threads.emplace_back([i, &storage_servers] { storage_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT_N(i));
   }
 
@@ -439,8 +439,8 @@ TEST_CASE("kv_add_block_test", "[put][get]") {
     }
   }
 
-  for (const auto &kv: kv_servers) {
-    kv->stop();
+  for (const auto &s: storage_servers) {
+    s->stop();
   }
 
   for (const auto &c: chain_servers) {

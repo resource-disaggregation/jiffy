@@ -57,7 +57,7 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
 
   data_status status = tree->create("/sandbox/file.txt",  "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0, {"0_65536"},
       {"regular"});
-  hash_table_client kv(tree, "/sandbox/file.txt", status);
+  hash_table_client table(tree, "/sandbox/file.txt", status);
 
   std::string op1 = "put", op2 = "get";
   std::string key = "msg1";
@@ -71,8 +71,8 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
     REQUIRE_NOTHROW(sub2.subscribe({op1, op2}));
     REQUIRE_NOTHROW(sub3.subscribe({op2}));
 
-    REQUIRE_NOTHROW(kv.put(key, "random data"));
-    REQUIRE_NOTHROW(kv.get(key));
+    REQUIRE_NOTHROW(table.put(key, "random data"));
+    REQUIRE_NOTHROW(table.get(key));
 
     REQUIRE(sub1.get_notification() == std::make_pair(op1, key));
     REQUIRE(sub2.get_notification() == std::make_pair(op1, key));
@@ -86,9 +86,9 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
     REQUIRE_NOTHROW(sub1.unsubscribe({op1}));
     REQUIRE_NOTHROW(sub2.unsubscribe({op2}));
 
-    REQUIRE_NOTHROW(kv.remove(key));
-    REQUIRE_NOTHROW(kv.put(key, "random data"));
-    REQUIRE_NOTHROW(kv.get(key));
+    REQUIRE_NOTHROW(table.remove(key));
+    REQUIRE_NOTHROW(table.put(key, "random data"));
+    REQUIRE_NOTHROW(table.get(key));
 
     REQUIRE(sub2.get_notification() == std::make_pair(op1, key));
     REQUIRE(sub3.get_notification() == std::make_pair(op2, key));

@@ -181,12 +181,12 @@ TEST_CASE("hash_table_client_pipelined_ops_test", "[put][update][remove][get]") 
       {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
   hash_table_client client(tree, "/sandbox/file.txt", status);
-  std::vector<std::string> kvs;
+  std::vector<std::string> key_value_batch;
   for (size_t i = 0; i < 1000; i++) {
-    kvs.push_back(std::to_string(i));
-    kvs.push_back(std::to_string(i));
+    key_value_batch.push_back(std::to_string(i));
+    key_value_batch.push_back(std::to_string(i));
   }
-  auto res = client.put(kvs);
+  auto res = client.put(key_value_batch);
   for (size_t i = 0; i < 1000; i++) {
     REQUIRE(res[i] == "!ok");
   }
@@ -209,22 +209,22 @@ TEST_CASE("hash_table_client_pipelined_ops_test", "[put][update][remove][get]") 
     REQUIRE(res3[i] == "!key_not_found");
   }
 
-  std::vector<std::string> kvs2;
+  std::vector<std::string> key_value_batch2;
   for (size_t i = 0; i < 1000; i++) {
-    kvs2.push_back(std::to_string(i));
-    kvs2.push_back(std::to_string(i + 1000));
+    key_value_batch2.push_back(std::to_string(i));
+    key_value_batch2.push_back(std::to_string(i + 1000));
   }
-  auto res4 = client.update(kvs2);
+  auto res4 = client.update(key_value_batch2);
   for (size_t i = 0; i < 1000; i++) {
     REQUIRE(res4[i] == std::to_string(i));
   }
 
-  std::vector<std::string> kvs3;
+  std::vector<std::string> key_value_batch3;
   for (size_t i = 1000; i < 2000; i++) {
-    kvs3.push_back(std::to_string(i));
-    kvs3.push_back(std::to_string(i + 1000));
+    key_value_batch3.push_back(std::to_string(i));
+    key_value_batch3.push_back(std::to_string(i + 1000));
   }
-  auto res5 = client.update(kvs3);
+  auto res5 = client.update(key_value_batch3);
   for (size_t i = 0; i < 1000; i++) {
     REQUIRE(res5[i] == "!key_not_found");
   }
@@ -288,9 +288,9 @@ TEST_CASE("hash_table_client_locked_ops_test", "[put][update][remove][get]") {
   REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
                                         {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
-  hash_table_client kv(tree, "/sandbox/file.txt", status);
+  hash_table_client table(tree, "/sandbox/file.txt", status);
   {
-    auto client = kv.lock();
+    auto client = table.lock();
     REQUIRE(client->num_keys() == 0);
     for (std::size_t i = 0; i < 1000; ++i) {
       REQUIRE(client->put(std::to_string(i), std::to_string(i)) == "!ok");
@@ -352,16 +352,16 @@ TEST_CASE("hash_table_client_locked_pipelined_ops_test", "[put][update][remove][
   REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
                                         {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
-  hash_table_client kv(tree, "/sandbox/file.txt", status);
+  hash_table_client table(tree, "/sandbox/file.txt", status);
   {
-    auto client = kv.lock();
-    std::vector<std::string> kvs;
+    auto client = table.lock();
+    std::vector<std::string> key_value_batch;
     for (size_t i = 0; i < 1000; i++) {
-      kvs.push_back(std::to_string(i));
-      kvs.push_back(std::to_string(i));
+      key_value_batch.push_back(std::to_string(i));
+      key_value_batch.push_back(std::to_string(i));
     }
 
-    auto res = client->put(kvs);
+    auto res = client->put(key_value_batch);
     for (size_t i = 0; i < 1000; i++) {
       REQUIRE(res[i] == "!ok");
     }
@@ -384,22 +384,22 @@ TEST_CASE("hash_table_client_locked_pipelined_ops_test", "[put][update][remove][
       REQUIRE(res3[i] == "!key_not_found");
     }
 
-    std::vector<std::string> kvs2;
+    std::vector<std::string> key_value_batch2;
     for (size_t i = 0; i < 1000; i++) {
-      kvs2.push_back(std::to_string(i));
-      kvs2.push_back(std::to_string(i + 1000));
+      key_value_batch2.push_back(std::to_string(i));
+      key_value_batch2.push_back(std::to_string(i + 1000));
     }
-    auto res4 = client->update(kvs2);
+    auto res4 = client->update(key_value_batch2);
     for (size_t i = 0; i < 1000; i++) {
       REQUIRE(res4[i] == std::to_string(i));
     }
 
-    std::vector<std::string> kvs3;
+    std::vector<std::string> key_value_batch3;
     for (size_t i = 1000; i < 2000; i++) {
-      kvs3.push_back(std::to_string(i));
-      kvs3.push_back(std::to_string(i + 1000));
+      key_value_batch3.push_back(std::to_string(i));
+      key_value_batch3.push_back(std::to_string(i + 1000));
     }
-    auto res5 = client->update(kvs3);
+    auto res5 = client->update(key_value_batch3);
     for (size_t i = 0; i < 1000; i++) {
       REQUIRE(res5[i] == "!key_not_found");
     }

@@ -33,37 +33,37 @@ using namespace jiffy::utils;
 #define LEASE_PERIOD_MS 100
 #define LEASE_PERIOD_US (LEASE_PERIOD_MS * 1000)
 
-void test_kv_ops(std::shared_ptr<hash_table_client> kv) {
+void test_hash_table_ops(std::shared_ptr<hash_table_client> table) {
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(kv->put(std::to_string(i), std::to_string(i)) == "!ok");
+    REQUIRE(table->put(std::to_string(i), std::to_string(i)) == "!ok");
   }
 
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(kv->get(std::to_string(i)) == std::to_string(i));
+    REQUIRE(table->get(std::to_string(i)) == std::to_string(i));
   }
 
   for (size_t i = 1000; i < 2000; i++) {
-    REQUIRE(kv->get(std::to_string(i)) == "!key_not_found");
+    REQUIRE(table->get(std::to_string(i)) == "!key_not_found");
   }
 
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(kv->update(std::to_string(i), std::to_string(i + 1000)) == std::to_string(i));
+    REQUIRE(table->update(std::to_string(i), std::to_string(i + 1000)) == std::to_string(i));
   }
 
   for (size_t i = 1000; i < 2000; i++) {
-    REQUIRE(kv->update(std::to_string(i), std::to_string(i + 1000)) == "!key_not_found");
+    REQUIRE(table->update(std::to_string(i), std::to_string(i + 1000)) == "!key_not_found");
   }
 
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(kv->remove(std::to_string(i)) == std::to_string(i + 1000));
+    REQUIRE(table->remove(std::to_string(i)) == std::to_string(i + 1000));
   }
 
   for (size_t i = 1000; i < 2000; i++) {
-    REQUIRE(kv->remove(std::to_string(i)) == "!key_not_found");
+    REQUIRE(table->remove(std::to_string(i)) == "!key_not_found");
   }
 
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(kv->get(std::to_string(i)) == "!key_not_found");
+    REQUIRE(table->get(std::to_string(i)) == "!key_not_found");
   }
 }
 
@@ -194,9 +194,9 @@ TEST_CASE("jiffy_client_create_test", "[put][get][update][remove]") {
 
   {
     jiffy_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-    auto kv = client.create_hash_table("/a/file.txt", "/tmp");
+    auto table = client.create_hash_table("/a/file.txt", "/tmp");
     REQUIRE(client.fs()->exists("/a/file.txt"));
-    test_kv_ops(kv);
+    test_hash_table_ops(table);
   }
 
   storage_server->stop();
@@ -276,8 +276,8 @@ TEST_CASE("jiffy_client_open_test", "[put][get][update][remove]") {
     jiffy_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
     client.create_hash_table("/a/file.txt", "/tmp");
     REQUIRE(client.fs()->exists("/a/file.txt"));
-    auto kv = client.open("/a/file.txt");
-    test_kv_ops(kv);
+    auto table = client.open("/a/file.txt");
+    test_hash_table_ops(table);
   }
 
   storage_server->stop();
@@ -548,9 +548,9 @@ TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
     n2->subscribe({op1, op2});
     n3->subscribe({op2});
 
-    auto kv = client.open("/a/file.txt");
-    kv->put(key, value);
-    kv->remove(key);
+    auto table = client.open("/a/file.txt");
+    table->put(key, value);
+    table->remove(key);
 
     REQUIRE(n1->get_notification() == std::make_pair(op1, key));
     REQUIRE(n2->get_notification() == std::make_pair(op1, key));
@@ -564,8 +564,8 @@ TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
     n1->unsubscribe({op1});
     n2->unsubscribe({op2});
 
-    kv->put(key, value);
-    kv->remove(key);
+    table->put(key, value);
+    table->remove(key);
 
     REQUIRE(n2->get_notification() == std::make_pair(op1, key));
     REQUIRE(n3->get_notification() == std::make_pair(op2, key));
@@ -650,9 +650,9 @@ TEST_CASE("jiffy_client_chain_replication_test", "[put][get][update][remove]") {
 
   {
     jiffy_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-    auto kv = client.create_hash_table("/a/file.txt", "/tmp", 1, NUM_BLOCKS);
-    REQUIRE(kv->status().chain_length() == 3);
-    test_kv_ops(kv);
+    auto table = client.create_hash_table("/a/file.txt", "/tmp", 1, NUM_BLOCKS);
+    REQUIRE(table->status().chain_length() == 3);
+    test_hash_table_ops(table);
   }
 
   storage_server->stop();
