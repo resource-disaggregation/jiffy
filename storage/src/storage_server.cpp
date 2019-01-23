@@ -11,7 +11,7 @@
 #include <jiffy/storage/service/server_storage_tracker.h>
 #include <boost/program_options.hpp>
 #include <ifaddrs.h>
-#include <jiffy/storage/memory_block.h>
+#include <jiffy/storage/block.h>
 
 using namespace ::jiffy::directory;
 using namespace ::jiffy::storage;
@@ -225,10 +225,10 @@ int main(int argc, char **argv) {
                                                   i));
   }
 
-  std::vector<std::shared_ptr<memory_block>> blocks;
+  std::vector<std::shared_ptr<block>> blocks;
   blocks.resize(num_blocks);
   for (size_t i = 0; i < blocks.size(); ++i) {
-    blocks[i] = std::make_shared<memory_block>(block_names[i], block_capacity);
+    blocks[i] = std::make_shared<block>(block_names[i], block_capacity);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
 
