@@ -10,19 +10,14 @@
 namespace jiffy {
 namespace storage {
 
-struct memory_stats {
-  size_t capacity;
-  std::atomic_size_t bytes;
-};
-
-class memory_block {
+class block {
  public:
   /**
    * @brief Constructor.
-   * @param id The identifier for the memory block.
-   * @param capacity The memory block capacity.
+   * @param id The identifier for the block.
+   * @param capacity The block memory capacity.
    */
-  memory_block(const std::string& id, const size_t capacity = 134217728);
+  block(const std::string& id, const size_t capacity = 134217728);
 
   /**
    * @brief Get memory block identifier.
@@ -52,14 +47,20 @@ class memory_block {
   void destroy();
 
   /**
-   * @brief Get the capacity of the memory block.
-   * @return The capacity of the memory block.
+   * @brief Get the capacity of the block.
+   * @return The capacity of the block.
    */
   size_t capacity() const;
 
+  /**
+   * @brief Get the used number of bytes of the block.
+   * @return
+   */
+  size_t used() const;
+
  private:
   std::string id_;
-  size_t capacity_;
+  block_memory_manager manager_;
   std::shared_ptr<chain_module> impl_;
 };
 

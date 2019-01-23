@@ -1,5 +1,7 @@
-include_directories(${THRIFT_INCLUDE_DIR} src/)
-add_library(jiffy STATIC
+include_directories(${THRIFT_INCLUDE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libcuckoo)
+add_library(jiffy OBJECT
         src/jiffy/client/jiffy_client.cc
         src/jiffy/client/jiffy_client.h
         src/jiffy/directory/block/block_registration_client.cpp
@@ -203,7 +205,7 @@ add_library(jiffy STATIC
         src/jiffy/utils/retry_utils.h
         src/jiffy/utils/string_utils.h
         src/jiffy/storage/service/pinned_thread_factory.cpp
-        src/jiffy/storage/service/pinned_thread_factory.h src/jiffy/storage/memory_block.cpp src/jiffy/storage/memory_block.h src/jiffy/utils/property_map.cpp src/jiffy/utils/property_map.h)
+        src/jiffy/storage/service/pinned_thread_factory.h src/jiffy/storage/block.cpp src/jiffy/storage/block.h src/jiffy/utils/property_map.cpp src/jiffy/utils/property_map.h src/jiffy/storage/block_memory_manager.h src/jiffy/storage/block_memory_manager.cpp src/jiffy/storage/block_memory_allocator.h)
 
 if (NOT USE_SYSTEM_LIBEVENT)
   add_dependencies(jiffy libevent)
@@ -217,11 +219,12 @@ if (NOT USE_SYSTEM_AWS_SDK)
   add_dependencies(jiffy awssdk)
 endif ()
 
-if (NOT USE_SYSTEM_LIBCUCKOO)
-  add_dependencies(jiffy libcuckoo)
+if (NOT USE_SYSTEM_JEMALLOC)
+  add_dependencies(jiffy jemalloc)
 endif ()
 
-target_link_libraries(jiffy ${THRIFT_LIBRARIES}
+target_link_libraries(jiffy ${JEMALLOC_LIBRARIES}
+        ${THRIFT_LIBRARIES}
         ${THRIFTNB_LIBRARIES}
         ${LIBEVENT_LIBRARIES}
         ${AWS_LIBRARIES}

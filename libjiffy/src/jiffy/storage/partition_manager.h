@@ -16,12 +16,14 @@ class partition_builder {
 
   /**
    * @brief Builds a partition.
+   * @param manager Partition memory manager
    * @param name Partition name
    * @param metadata Partition metadata
    * @param conf Partition configuration
    * @return An instance of the partition.
    */
-  virtual std::shared_ptr<chain_module> build(const std::string &name,
+  virtual std::shared_ptr<chain_module> build(block_memory_manager *manager,
+                                              const std::string &name,
                                               const std::string &metadata,
                                               const utils::property_map &conf) = 0;
 };
@@ -45,7 +47,8 @@ class partition_manager {
    * @param conf Partition configuration.
    * @return An instance of the partition.
    */
-  static std::shared_ptr<chain_module> build_partition(const std::string &type,
+  static std::shared_ptr<chain_module> build_partition(block_memory_manager *manager,
+                                                       const std::string &type,
                                                        const std::string &name,
                                                        const std::string &metadata,
                                                        const utils::property_map &conf);
@@ -66,21 +69,22 @@ class impl##_builder : public partition_builder {                               
                                                                                   \
   virtual ~impl##_builder() = default;                                            \
                                                                                   \
-  std::shared_ptr<chain_module> build(const std::string& name,                    \
+  std::shared_ptr<chain_module> build(block_memory_manager *manager,              \
+                                      const std::string& name,                    \
                                       const std::string& metadata,                \
                                       const utils::property_map& conf) override { \
-    return std::make_shared<impl>(name, metadata, conf);                          \
+    return std::make_shared<impl>(manager, name, metadata, conf);                 \
   }                                                                               \
 };                                                                                \
                                                                                   \
-class impl##_registeration_stub {                                                 \
+class impl##_registration_stub {                                                  \
   public:                                                                         \
-   impl##_registeration_stub() {                                                  \
+   impl##_registration_stub() {                                                   \
      partition_manager::register_impl(type, std::make_shared<impl##_builder>());  \
    }                                                                              \
 };                                                                                \
                                                                                   \
-static impl##_registeration_stub impl##_registeration_stub_singleton
+static impl##_registration_stub impl##_registeration_stub_singleton
 
 }
 }

@@ -6,7 +6,7 @@ namespace jiffy {
 namespace storage {
 
 chain_request_handler::chain_request_handler(std::shared_ptr<TProtocol> prot,
-                                             std::vector<std::shared_ptr<memory_block>> &blocks)
+                                             std::vector<std::shared_ptr<block>> &blocks)
     : blocks_(blocks), prot_(std::move(prot)) {}
 
 void chain_request_handler::chain_request(const sequence_id &seq,

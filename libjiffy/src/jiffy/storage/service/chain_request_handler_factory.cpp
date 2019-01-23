@@ -14,7 +14,7 @@ using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::protocol;
 using namespace utils;
 
-chain_request_handler_factory::chain_request_handler_factory(std::vector<std::shared_ptr<memory_block>> &blocks)
+chain_request_handler_factory::chain_request_handler_factory(std::vector<std::shared_ptr<block>> &blocks)
     : blocks_(blocks) {}
 
 chain_request_serviceIf *chain_request_handler_factory::getHandler(const ::apache::thrift::TConnectionInfo &conn_info) {

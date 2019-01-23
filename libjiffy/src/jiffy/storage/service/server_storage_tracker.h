@@ -5,7 +5,7 @@
 #include <atomic>
 #include <chrono>
 #include <thread>
-#include "jiffy/storage/memory_block.h"
+#include "jiffy/storage/block.h"
 
 namespace jiffy {
 namespace storage {
@@ -20,7 +20,7 @@ class server_storage_tracker {
    * @param output_file Output file name
    */
 
-  server_storage_tracker(std::vector<std::shared_ptr<memory_block>> &blocks,
+  server_storage_tracker(std::vector<std::shared_ptr<block>> &blocks,
                          uint64_t periodicity_ms,
                          const std::string &output_file);
   /**
@@ -48,7 +48,7 @@ class server_storage_tracker {
    */
   void report_file_sizes(std::ofstream &out);
   /* Data blocks */
-  std::vector<std::shared_ptr<memory_block>> &blocks_;
+  std::vector<std::shared_ptr<block>> &blocks_;
   /* Periodicity */
   std::chrono::milliseconds periodicity_ms_;
   /* Atomic stop bool */

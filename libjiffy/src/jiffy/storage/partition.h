@@ -9,20 +9,21 @@
 #include <stdexcept>
 #include <iostream>
 #include <shared_mutex>
-#include "notification/subscription_map.h"
-#include "service/block_response_client_map.h"
-#include "command.h"
+#include "jiffy/storage/notification/subscription_map.h"
+#include "jiffy/storage/service/block_response_client_map.h"
+#include "jiffy/storage/command.h"
+#include "jiffy/storage/block_memory_manager.h"
+#include "jiffy/storage/block_memory_allocator.h"
 
 namespace jiffy {
 namespace storage {
 
-#define DEFAULT_CAPACITY 134217728
-
-class memory_block;
-
 /* Partition class */
 class partition {
  public:
+  template <typename T>
+  using allocator = block_memory_allocator<T>;
+
   /**
    * @brief Constructor
    * @param name Partition name
@@ -30,7 +31,8 @@ class partition {
    * @param supported_commands Commands supported by the partition
    */
 
-  explicit partition(const std::string &name,
+  explicit partition(block_memory_manager *manager,
+                     const std::string &name,
                      const std::string &metadata,
                      const std::vector<command> &supported_commands);
 
@@ -135,6 +137,16 @@ class partition {
   std::size_t storage_size();
 
   /**
+   * @brief Build STL compliant allocator with memory managed by block memory manager.
+   * @tparam T Type of data.
+   * @return STL compliant allocator.
+   */
+  template<typename T>
+  allocator<T> build_allocator() {
+    return allocator<T>(manager_);
+  }
+
+  /**
    * @brief Fetch subscription map
    * @return Subscription map
    */
@@ -161,17 +173,12 @@ class partition {
   const std::vector<command> &supported_commands_;
   /* Atomic value to collect the sum of key size and value size */
   std::atomic<size_t> bytes_;
-  /* Key value partition capacity */
-  std::size_t capacity_;
   /* Subscription map */
   subscription_map sub_map_{};
   /* Block response client map */
   block_response_client_map client_map_{};
-
- private:
-  void set_capacity(size_t capacity);
-
-  friend class memory_block;
+  /* Block memory manager */
+  block_memory_manager *manager_;
 };
 
 }

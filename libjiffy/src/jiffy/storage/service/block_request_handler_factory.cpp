@@ -13,7 +13,7 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace utils;
 
-block_request_handler_factory::block_request_handler_factory(std::vector<std::shared_ptr<memory_block>> &blocks)
+block_request_handler_factory::block_request_handler_factory(std::vector<std::shared_ptr<block>> &blocks)
     : blocks_(blocks), client_id_gen_(1) {}
 
 block_request_serviceIf *block_request_handler_factory::getHandler(const ::apache::thrift::TConnectionInfo &conn_info) {

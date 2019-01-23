@@ -5,7 +5,7 @@
 #include <string>
 #include <jiffy/utils/property_map.h>
 
-#include "../persistent/persistent_service.h"
+#include "jiffy/persistent/persistent_service.h"
 #include "partition.h"
 
 namespace jiffy {

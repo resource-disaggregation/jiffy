@@ -6,7 +6,7 @@ namespace storage {
 
 using namespace utils;
 
-server_storage_tracker::server_storage_tracker(std::vector<std::shared_ptr<memory_block>> &blocks,
+server_storage_tracker::server_storage_tracker(std::vector<std::shared_ptr<block>> &blocks,
                                                uint64_t periodicity_ms,
                                                const std::string &output_file)
     : blocks_(blocks), periodicity_ms_(periodicity_ms), output_file_(output_file) {}

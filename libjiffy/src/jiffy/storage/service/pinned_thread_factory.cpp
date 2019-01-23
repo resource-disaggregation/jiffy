@@ -51,7 +51,6 @@ class pinnable_thread : public Thread {
   pthread_t pthread_;
   Monitor monitor_;        // guard to protect state_ and also notification
   STATE state_;         // to protect proper thread start behavior
-  int policy_;
   int priority_;
   int stackSize_;
   stdcxx::weak_ptr<pinnable_thread> self_;
@@ -59,15 +58,13 @@ class pinnable_thread : public Thread {
   int core_;
 
  public:
-  pinnable_thread(int policy,
-                  int priority,
+  pinnable_thread(int priority,
                   int stackSize,
                   bool detached,
                   int core,
                   stdcxx::shared_ptr<Runnable> runnable)
       : pthread_(0),
         state_(uninitialized),
-        policy_(policy),
         priority_(priority),
         stackSize_(stackSize),
         detached_(detached),
@@ -276,12 +273,12 @@ pinned_thread_factory::pinned_thread_factory(bool detached)
 
 stdcxx::shared_ptr<Thread> pinned_thread_factory::newThread(stdcxx::shared_ptr<Runnable> runnable) const {
   stdcxx::shared_ptr<pinnable_thread> result
-      = stdcxx::shared_ptr<pinnable_thread>(new pinnable_thread(toPthreadPolicy(policy_),
-                                                                toPthreadPriority(policy_, priority_),
-                                                                stackSize_,
-                                                                isDetached(),
-                                                                utils::rand_utils::rand_int32(num_cores_ - 1),
-                                                                runnable));
+      = stdcxx::shared_ptr<pinnable_thread>(new pinnable_thread(
+          toPthreadPriority(policy_, priority_),
+          stackSize_,
+          isDetached(),
+          utils::rand_utils::rand_int32(num_cores_ - 1),
+          runnable));
   result->weakRef(result);
   runnable->thread(result);
   return result;

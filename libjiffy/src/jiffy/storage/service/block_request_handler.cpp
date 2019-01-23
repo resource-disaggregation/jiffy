@@ -5,7 +5,7 @@ namespace storage {
 
 block_request_handler::block_request_handler(std::shared_ptr<block_response_client> client,
                                              std::atomic<int64_t> &client_id_gen,
-                                             std::vector<std::shared_ptr<memory_block>> &blocks)
+                                             std::vector<std::shared_ptr<block>> &blocks)
     : client_(std::move(client)),
       registered_block_id_(-1),
       registered_client_id_(-1),

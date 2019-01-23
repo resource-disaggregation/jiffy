@@ -20,7 +20,7 @@ using namespace jiffy::directory;
 
 TEST_CASE("chain_replication_no_failure_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
-  std::vector<std::vector<std::shared_ptr<memory_block>>> blocks(NUM_BLOCKS);
+  std::vector<std::vector<std::shared_ptr<block>>> blocks(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> storage_servers(NUM_BLOCKS);
@@ -101,7 +101,7 @@ TEST_CASE("chain_replication_no_failure_test", "[put][get]") {
 
 TEST_CASE("chain_replication_head_failure_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
-  std::vector<std::vector<std::shared_ptr<memory_block>>> blocks(NUM_BLOCKS);
+  std::vector<std::vector<std::shared_ptr<block>>> blocks(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> storage_servers(NUM_BLOCKS);
@@ -192,7 +192,7 @@ TEST_CASE("chain_replication_head_failure_test", "[put][get]") {
 
 TEST_CASE("chain_replication_mid_failure_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
-  std::vector<std::vector<std::shared_ptr<memory_block>>> blocks(NUM_BLOCKS);
+  std::vector<std::vector<std::shared_ptr<block>>> blocks(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> storage_servers(NUM_BLOCKS);
@@ -283,7 +283,7 @@ TEST_CASE("chain_replication_mid_failure_test", "[put][get]") {
 
 TEST_CASE("chain_replication_tail_failure_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
-  std::vector<std::vector<std::shared_ptr<memory_block>>> blocks(NUM_BLOCKS);
+  std::vector<std::vector<std::shared_ptr<block>>> blocks(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> storage_servers(NUM_BLOCKS);
@@ -374,7 +374,7 @@ TEST_CASE("chain_replication_tail_failure_test", "[put][get]") {
 
 TEST_CASE("chain_replication_add_block_test", "[put][get]") {
   std::vector<std::vector<std::string>> block_names(NUM_BLOCKS);
-  std::vector<std::vector<std::shared_ptr<memory_block>>> blocks(NUM_BLOCKS);
+  std::vector<std::vector<std::shared_ptr<block>>> blocks(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> management_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> chain_servers(NUM_BLOCKS);
   std::vector<std::shared_ptr<TServer>> storage_servers(NUM_BLOCKS);

@@ -30,10 +30,12 @@ std::vector<command> KV_OPS = {command{command_type::accessor, "exists"},
 
 const int32_t hash_table_partition::SLOT_MAX;
 
-hash_table_partition::hash_table_partition(const std::string &name,
+hash_table_partition::hash_table_partition(block_memory_manager *manager,
+                                           const std::string &name,
                                            const std::string &metadata,
                                            const utils::property_map &conf)
-    : chain_module(name, metadata, KV_OPS),
+    : chain_module(manager, name, metadata, KV_OPS),
+      block_(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type(), build_allocator<kv_pair_type>()),
       locked_block_(block_.lock_table()),
       splitting_(false),
       merging_(false),
@@ -457,7 +459,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       && state() != hash_partition_state::importing && is_tail() && !locked_block_.is_active()
       && splitting_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
-    LOG(log_level::info) << "Overloaded partition; storage = " << bytes_.load() << " capacity = " << capacity_
+    LOG(log_level::info) << "Overloaded partition; storage = " << bytes_.load() << " capacity = " << manager_->mb_capacity()
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
       // TODO: Add logic for splitting slot range
@@ -473,7 +475,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       && state() != hash_partition_state::importing && slot_end() != SLOT_MAX && is_tail() && !locked_block_.is_active()
       && merging_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
-    LOG(log_level::info) << "Underloaded partition; storage = " << bytes_.load() << " capacity = " << capacity_
+    LOG(log_level::info) << "Underloaded partition; storage = " << bytes_.load() << " capacity = " << manager_->mb_capacity()
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
       // TODO: Add logic for merging slot range
@@ -651,11 +653,11 @@ void hash_table_partition::export_slots() {
 }
 
 bool hash_table_partition::overload() {
-  return bytes_.load() > static_cast<size_t>(static_cast<double>(capacity_) * threshold_hi_);
+  return bytes_.load() > static_cast<size_t>(static_cast<double>(manager_->mb_capacity()) * threshold_hi_);
 }
 
 bool hash_table_partition::underload() {
-  return bytes_.load() < static_cast<size_t>(static_cast<double>(capacity_) * threshold_lo_);
+  return bytes_.load() < static_cast<size_t>(static_cast<double>(manager_->mb_capacity()) * threshold_lo_);
 }
 
 REGISTER_IMPLEMENTATION("hashtable", hash_table_partition);

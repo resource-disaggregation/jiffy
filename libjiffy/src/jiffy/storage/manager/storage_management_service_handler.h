@@ -2,7 +2,7 @@
 #define JIFFY_KV_MANAGEMENT_RPC_SERVICE_HANDLER_H
 
 #include "storage_management_service.h"
-#include "jiffy/storage/memory_block.h"
+#include "jiffy/storage/block.h"
 
 namespace jiffy {
 namespace storage {
@@ -16,7 +16,7 @@ class storage_management_service_handler : public storage_management_serviceIf {
    * @param blocks Blocks
    */
 
-  explicit storage_management_service_handler(std::vector<std::shared_ptr<memory_block>> &blocks);
+  explicit storage_management_service_handler(std::vector<std::shared_ptr<block>> &blocks);
 
   /**
    * @brief Create partition
@@ -133,7 +133,7 @@ class storage_management_service_handler : public storage_management_serviceIf {
   storage_management_exception make_exception(const std::string &msg);
 
   /* Blocks */
-  std::vector<std::shared_ptr<memory_block>> &blocks_;
+  std::vector<std::shared_ptr<block>> &blocks_;
 };
 
 }

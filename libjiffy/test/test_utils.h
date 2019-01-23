@@ -8,7 +8,7 @@
 #include <thrift/transport/TSocket.h>
 #include "jiffy/storage/storage_management_ops.h"
 #include "jiffy/directory/block/block_allocator.h"
-#include "jiffy/storage/memory_block.h"
+#include "jiffy/storage/block.h"
 #include "jiffy/storage/hashtable/hash_table_partition.h"
 #include "jiffy/storage/notification/subscription_map.h"
 #include "jiffy/utils/logger.h"
@@ -219,24 +219,24 @@ class test_utils {
     return block_names;
   }
 
-  static std::vector<std::shared_ptr<jiffy::storage::memory_block>> init_hash_table_blocks(size_t num_blocks,
+  static std::vector<std::shared_ptr<jiffy::storage::block>> init_hash_table_blocks(size_t num_blocks,
                                                                                            int32_t service_port,
                                                                                            int32_t management_port,
                                                                                            int32_t notification_port) {
     using namespace jiffy::storage;
-    std::vector<std::shared_ptr<memory_block>> blks;
+    std::vector<std::shared_ptr<block>> blks;
     blks.resize(num_blocks);
     for (size_t i = 0; i < num_blocks; ++i) {
       std::string id = block_id_parser::make("127.0.0.1", service_port, management_port, notification_port, 0,
                                              static_cast<int32_t>(i));
-      blks[i] = std::make_shared<memory_block>(id);
+      blks[i] = std::make_shared<block>(id);
       blks[i]->setup("hashtable", "0_65536", "regular", {});
       std::dynamic_pointer_cast<hash_table_partition>(blks[i]->impl())->slot_range(0, 65536);
     }
     return blks;
   }
 
-  static std::vector<std::shared_ptr<jiffy::storage::memory_block>> init_hash_table_blocks(const std::vector<std::string> &block_ids,
+  static std::vector<std::shared_ptr<jiffy::storage::block>> init_hash_table_blocks(const std::vector<std::string> &block_ids,
                                                                                            size_t block_capacity = 134217728,
                                                                                            double threshold_lo = 0.25,
                                                                                            double threshold_hi = 0.75,
@@ -247,10 +247,10 @@ class test_utils {
     conf.set("hashtable.capacity_threshold_hi", std::to_string(threshold_hi));
     conf.set("directory.host", dir_host);
     conf.set("directory.port", std::to_string(dir_port));
-    std::vector<std::shared_ptr<jiffy::storage::memory_block>> blks;
+    std::vector<std::shared_ptr<jiffy::storage::block>> blks;
     blks.resize(block_ids.size());
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::memory_block>(block_ids[i], block_capacity);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
       blks[i]->setup("hashtable", "0_65536", "regular", conf);
     }
     return blks;

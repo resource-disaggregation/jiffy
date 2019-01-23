@@ -65,7 +65,8 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  hash_table_partition block("0_65536");
+  block_memory_manager manager;
+  hash_table_partition block(&manager);
   block.slot_range(0, hash_table_partition::SLOT_MAX);
 
   if (mode == "write") {

@@ -8,13 +8,13 @@
 #include <shared_mutex>
 #include <future>
 
-#include "../directory_ops.h"
-#include "../block/block_allocator.h"
-#include "../../utils/time_utils.h"
-#include "../../storage/storage_management_ops.h"
-#include "../../utils/directory_utils.h"
-#include "../../storage/chain_module.h"
-#include "../../utils/logger.h"
+#include "jiffy/directory/directory_ops.h"
+#include "jiffy/directory/block/block_allocator.h"
+#include "jiffy/utils/time_utils.h"
+#include "jiffy/storage/storage_management_ops.h"
+#include "jiffy/utils/directory_utils.h"
+#include "jiffy/storage/chain_module.h"
+#include "jiffy/utils/logger.h"
 
 namespace jiffy {
 namespace directory {

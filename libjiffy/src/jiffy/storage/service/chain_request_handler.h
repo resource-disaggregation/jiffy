@@ -2,7 +2,7 @@
 #define JIFFY_CHAIN_REQUEST_HANDLER_H
 
 #include "chain_request_service.h"
-#include "jiffy/storage/memory_block.h"
+#include "jiffy/storage/block.h"
 #include "chain_response_service.h"
 
 namespace jiffy {
@@ -18,7 +18,7 @@ class chain_request_handler : public chain_request_serviceIf {
    */
 
   explicit chain_request_handler(std::shared_ptr<::apache::thrift::protocol::TProtocol> prot,
-                                 std::vector<std::shared_ptr<memory_block>> &blocks);
+                                 std::vector<std::shared_ptr<block>> &blocks);
 
   /**
    * @brief Send chain request
@@ -46,7 +46,7 @@ class chain_request_handler : public chain_request_serviceIf {
                    const std::vector<std::string> &arguments) override;
  private:
   /* Data blocks*/
-  std::vector<std::shared_ptr<memory_block>> &blocks_;
+  std::vector<std::shared_ptr<block>> &blocks_;
   /* Protocol */
   std::shared_ptr<::apache::thrift::protocol::TProtocol> prot_;
 };

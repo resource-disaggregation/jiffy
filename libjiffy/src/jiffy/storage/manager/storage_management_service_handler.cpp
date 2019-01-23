@@ -6,7 +6,7 @@ namespace storage {
 
 using namespace jiffy::utils;
 
-storage_management_service_handler::storage_management_service_handler(std::vector<std::shared_ptr<memory_block>> &blocks)
+storage_management_service_handler::storage_management_service_handler(std::vector<std::shared_ptr<block>> &blocks)
     : blocks_(blocks) {}
 
 void storage_management_service_handler::create_partition(int32_t block_id,
@@ -32,7 +32,6 @@ void storage_management_service_handler::setup_chain(int32_t block_id,
                                                                   static_cast<storage::chain_role>(chain_role),
                                                                   next_block_name);
   } catch (std::exception &e) {
-    LOG(log_level::info) << "Caught exception: " << e.what();
     throw make_exception(e);
   }
 }

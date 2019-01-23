@@ -7,7 +7,7 @@ namespace jiffy {
 namespace storage {
 
 notification_service_handler::notification_service_handler(std::shared_ptr<TProtocol> oprot,
-                                                           std::vector<std::shared_ptr<memory_block>> &blocks)
+                                                           std::vector<std::shared_ptr<block>> &blocks)
     : oprot_(std::move(oprot)), client_(new subscription_serviceClient(oprot_)), blocks_(blocks) {}
 
 void notification_service_handler::subscribe(const int32_t block_id, const std::vector<std::string> &ops) {

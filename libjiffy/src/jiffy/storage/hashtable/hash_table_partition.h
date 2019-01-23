@@ -1,15 +1,13 @@
 #ifndef JIFFY_KV_SERVICE_SHARD_H
 #define JIFFY_KV_SERVICE_SHARD_H
 
-#include <libcuckoo/cuckoohash_map.hh>
-
 #include <string>
 #include <jiffy/utils/property_map.h>
 #include "serde/serde.h"
 #include "serde/binary_serde.h"
 #include "jiffy/storage/partition.h"
-#include "../../persistent/persistent_service.h"
-#include "../chain_module.h"
+#include "jiffy/persistent/persistent_service.h"
+#include "jiffy/storage/chain_module.h"
 #include "hash_table_defs.h"
 #include "serde/csv_serde.h"
 
@@ -64,8 +62,9 @@ class hash_table_partition : public chain_module {
    * @param conf Configuration properties
    */
 
-  explicit hash_table_partition(const std::string &name = "",
-                                const std::string &metadata = "",
+  explicit hash_table_partition(block_memory_manager *manager,
+                                const std::string &name = "0_65536",
+                                const std::string &metadata = "regular",
                                 const utils::property_map &conf = {});
 
   /**

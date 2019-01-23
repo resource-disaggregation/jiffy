@@ -4,12 +4,12 @@
 namespace jiffy {
 namespace storage {
 
-partition::partition(const std::string &name,
+partition::partition(block_memory_manager *manager,
+                     const std::string &name,
                      const std::string &metadata,
                      const std::vector<command> &supported_commands)
-    : name_(name), metadata_(metadata), supported_commands_(supported_commands) {
+    : name_(name), metadata_(metadata), supported_commands_(supported_commands), manager_(manager) {
   bytes_ = 0;
-  capacity_ = DEFAULT_CAPACITY;
 }
 
 void partition::path(const std::string &path) {
@@ -46,7 +46,7 @@ std::string partition::command_name(int cmd_id) {
 }
 
 std::size_t partition::storage_capacity() {
-  return capacity_;
+  return manager_->mb_capacity();
 }
 
 std::size_t partition::storage_size() {
@@ -61,10 +61,6 @@ subscription_map &partition::subscriptions() {
 block_response_client_map &partition::clients() {
   std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
   return client_map_;
-}
-
-void partition::set_capacity(size_t capacity) {
-  capacity_ = capacity;
 }
 
 }
