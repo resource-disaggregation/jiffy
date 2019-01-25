@@ -1,0 +1,114 @@
+# Project Information
+site_name: Jiffy
+docs_dir: @CMAKE_CURRENT_SOURCE_DIR@/src
+site_dir: @CMAKE_CURRENT_BINARY_DIR@/site
+site_author: 'Anurag Khandelwal'
+
+# Repository
+repo_name: ucbrise/jiffy
+repo_url: https://github.com/ucbrise/jiffy/
+
+# Configuration
+theme:
+  name: null
+  custom_dir: @CMAKE_CURRENT_SOURCE_DIR@/material-theme
+  
+  # Language for theme localization
+  language: en
+
+  # Feature flags for functionality that alters behavior significantly, and thus
+  # may be a matter of taste
+  feature:
+
+    # Another layer on top of the main navigation for larger screens in the form
+    # of tabs, especially useful for larger documentation projects
+    tabs: true
+
+  # Sets the primary and accent color palettes as defined in the Material Design
+  # documentation - possible values can be looked up in the getting started guide
+  palette:
+
+    # Primary color used for header, sidebar and links, default: indigo
+    primary: light green
+
+    # Accent color for highlighting user interaction, default: indigo
+    accent: orange
+
+  # Fonts used by Material, automatically loaded from Google Fonts - see the site
+  # for a list of available fonts
+  font:
+
+    # Default font for text
+    text: Lato
+
+    # Fixed-width font for code listings
+    code: Inconsolata
+
+  # Favicon to be rendered
+  favicon: theme/assets/images/favicon.png
+
+  # The logo of the documentation shown in the header and navigation can either
+  # be a Material Icon ligature or an image URL
+  logo:
+  # TODO
+
+  # Material includes the search in the header as a partial, not as a separate
+  # template, so it's correct that search.html is missing
+  include_search_page: false
+
+  # Material doesn't use MkDocs search functionality but provides its own. For
+  # this reason, only the search index needs to be built
+  search_index_only: true
+
+  # Static pages to build
+  static_templates:
+    - 404.html
+
+markdown_extensions:
+  - markdown.extensions.admonition
+  - markdown.extensions.codehilite:
+      guess_lang: false
+  - markdown.extensions.def_list
+  - markdown.extensions.footnotes
+  - markdown.extensions.meta
+  - markdown.extensions.toc:
+      permalink: true
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+nav:
+  - About: index.md
+  - Research Papers: research.md
+  - Contributing: contributing.md
+  - User Guide:
+    - Quick Start: quick_start.md
+    - Installation: install.md
+  - API Docs:
+    - Overview: api.md
+    - C++: cpp_api.md
+    - Client APIs:
+      - Overview: client_api.md
+      - Python: python_client_api.md
+      - Java: java_client_api.md
+  - People:
+    - Jiffy Team: contact.md
+
+# Google Analytics
+google_analytics:
+  - !!python/object/apply:os.getenv ["GOOGLE_ANALYTICS_KEY"]
+  - auto
