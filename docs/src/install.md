@@ -22,9 +22,9 @@ cmake ..
 
 It is possible to configure the build specifying certain options based on 
 requirements; the supported options are:
-* `BUILD_BENCHMARKS` Build benchmarks(OFF by default)
+* `BUILD_BENCHMARKS` Build benchmarks (OFF by default)
 * `BUILD_TESTS`: Builds all tests (ON by default)
-
+* `BUILD_DOC`: Build documentation (OFF by default)
 In order to explicitly enable or disable any of these options, set the value of
 the corresponding variable to `ON` or `OFF` as follows:
 

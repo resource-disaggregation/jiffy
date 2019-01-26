@@ -22,9 +22,6 @@ istoica AT berkeley.edu</p>
 <br/>
 
 
-<p>Confluo also benefits from contributions from amazing current and past 
+<p>Jiffy also benefits from contributions from amazing current and past 
 undergraduate students at UC Berkeley: <br/></p>
 
-* [Ujval Misra](http://ujvl.github.io)
-* Neil Giridharan
-* [Sritej Attaluri](http://sritej.com)

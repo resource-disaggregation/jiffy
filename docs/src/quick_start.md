@@ -14,8 +14,6 @@ Before you can install Jiffy, make sure you have the following prerequisites:
 - CMake 3.9 or later
 
 For Python client, you will additionally require:
-TODO: accurate
-
 - Python 2.7 or later, 3.6 or later
 - Python Packages: setuptools
 
@@ -23,7 +21,6 @@ For java client, you will additionally require:
 TODO: accurate
 
 - Java 1.7 or later
-- ant 1.6.2 or later
 
 ## Download and Install
 
@@ -36,7 +33,7 @@ cd build
 cmake ..
 make -j && make test && make install
 ```
-For macOS Mojave users, the headers are no longer installed under /usr/include by default.
+For macOS Mojave users, the headers are no longer installed under `/usr/include` by default.
 Please run the following command in terminal and follow the installation instructions before building:
 
 ```bash
@@ -69,13 +66,13 @@ storaged --config jiffy2.conf
 ...
 ```
 
-We have to first start the directory server before the storage server because the storage will find it's corresponding directory server to advertise its blocks right after start up.
+We have to start the directory server before the storage server because the storage will find it's corresponding directory server to advertise its blocks right after start up.
 
 
 
 ### Configuration files
 
-A sample configuration file for Jiffy could be find under jiffy/conf. Users can specify their own configuration parameters and pass in as an argument to directoryd and storaged executables as follows:
+A sample configuration file for Jiffy could be find under jiffy/conf. Users can specify their own configuration parameters to directoryd and storaged executables as follows:
 
 ```bash
 directoryd --config jiffy.conf
@@ -89,7 +86,7 @@ storaged --config jiffy.conf
 
 ## Using Jiffy
 
-Once the directory server and storage server is running, you can store and query using Python or Java client APIs.
+Once the directory server and storage server are running, you can store and query using Python or Java client APIs.
 
 
 
@@ -101,6 +98,11 @@ Setup Jiffy Python client with the following commands:
 cd jiffy/pyjiffy/
 python setup.py build
 python setup.py install
+```
+
+Setup Jiffy Java client with the following commands:
+```bash
+TODO
 ```
 
 We first create a new client connection to the directory server.
@@ -115,11 +117,13 @@ client = JiffyClient("127.0.0.1", 9090, 9091)
 TODO
 ```
 
-The first argument to the JiffyClient constructor corresponds to the server hostname, while the second and third argument corresponds to the directory server port and lease server port.
+The first argument to the JiffyClient constructor corresponds to the server hostname, while the second and third argument correspond to the directory server port and lease server port.
 
-We could then create a file and also back it up in persistent storage. The backing path on persistent storage, the number of blocks, the replication chain length and also the flag are the four arguments that can be specified when creating a file. TODO meanings of the flag
+We could then create a file and also back it up in persistent storage. The backing path on persistent storage, the number of blocks, the replication chain length and also the flag are the four arguments that can be specified when creating a file. 
+TODO meanings of the flag
 
-```python tab=&quot;Python&quot;
+```python tab="Python"
+
 hash_table = client.create("/a/file.txt", "local://tmp", 1, 1, 0)
 
 hash_table = client.open("/a/file.txt")
@@ -137,9 +141,9 @@ The open and create operations will return a data structure client, from which w
 
 
 
-The Jiffy client could also sychronize it's data with the persistent storage.The operations are as follows:
+The Jiffy client could also sychronize its data with the persistent storage.The operations are as follows:
 
-```python tab=&quot;Python&quot;
+```python tab="Python"
 # Synchronize file data with persistent storage
 client.sync("/a/file.txt", "local://tmp")
 
@@ -158,7 +162,7 @@ TODO
 
 The Jiffy client could also listen after a path and receive notification by using the subscription client.
 
-```python tab=&quot;Python&quot;
+```python tab="Python"
 subscription = client.listen("/a/file.txt")
 
 subscription.subscribe("put")
@@ -174,7 +178,7 @@ We could use the subscription client to check whether it has received notificati
 
 TODO: not able to realize and in chain_module.cpp there is some code that needs fix
 
-```python tab=&quot;Python&quot;
+```python tab="Python"
 while not subscription.has_notification():
 	notify = subscription.get_notification()
 ```
@@ -187,7 +191,7 @@ TODO
 
 After operating on the file, the client could also close or remove the file and disconnect the server.
 
-```python tab=&quot;Python&quot;
+```python tab="Python"
 client.close("/a/file.txt")
 client.remove("/a/file.txt")
 client.disconnect()
@@ -207,7 +211,7 @@ After file creation, user can achieve multiple commands with the hash table clie
 
 We can put key-value pairs in the storage server and also get them in byte-strings.
 
-```python tab=&quot;Python&quot;
+```python tab="Python"
 hash_table.put(b"key", b"value")
 if hash_table.exists(b"key") == b'true':
 	hash_table.get(b"key")
@@ -219,9 +223,9 @@ TODO
 
 
 
-We can also update and remove specific key-value pairs as following:
+We can also update or remove specific key-value pairs as following:
 
-```python tab=&quot;Python&quot;
+```python tab="Python"
 hash_table.update(b"key", b"value")
 hash_table.remove(b"key")
 ```
@@ -234,23 +238,23 @@ TODO
 
 All the operation can be done in batches as following:
 
-```python tab=&quot;Python&quot;
+```python tab="Python"
 args = [b"key1", b"value1", b"key2", b"value2"]
 args_key = [b"key1", b"key2", b"key3"]
-
+# Put in batches
 response = hash_table.multi_put(args)
-
+# Get in batches
 response = hash_table.multi_get(args_key)
-
+# Check exists in batches
 response = hash_table.multi_exists(args_key)
-
+# Update in batches
 response = hash_table.multi_update(args)
-
+# Remove in batches
 response = hash_table.multi_remove(args_key)
 
 ```
 
-```java tab=&quot;Java&quot;
+```java tab="Java"
 TODO
 ```
 

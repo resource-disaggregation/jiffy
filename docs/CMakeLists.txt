@@ -40,19 +40,19 @@ add_custom_target(mkdocs ALL
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/mkdocs.stamp)
 
 # generate doxygen API documentation
-file(GLOB_RECURSE CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../libconfluo/confluo/*.h)
+file(GLOB_RECURSE CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/../libjiffy/src/jiffy/*.h)
 add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/cpp.log
-        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/mkdocs.stamp ${DOXYGEN_CPP_IN} ${CPP_SOURCES}
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/mkdocs.stamp ${DOXYGEN_CPP_IN} ${CPP_SOURCE}
         COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_CPP_OUT}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Generating C++ API documentation with Doxygen"
         VERBATIM)
 
-add_custom_target(doxygen_cpp_client ALL
-        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cpp_client.log)
+add_custom_target(doxygen_cpp ALL
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cpp.log)
 
-file(GLOB_RECURSE PY_CLIENT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../pyclient/confluo/*.py)
+file(GLOB_RECURSE PY_CLIENT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../pyjiffy/jiffy/*.py)
 add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/py_client.log
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/mkdocs.stamp ${DOXYGEN_PY_CLIENT_IN} ${PY_CLIENT_SOURCES}
@@ -64,7 +64,7 @@ add_custom_command(
 add_custom_target(pyclient_doc ALL
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/py_client.log)
 
-file(GLOB JAVA_CLIENT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../javaclient/src/main/java/*.java)
+file(GLOB JAVA_CLIENT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../jffy4j/core/src/main/java/*.java)
 add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/java_client.log
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/mkdocs.stamp ${DOXYGEN_JAVA_CLIENT_IN} ${JAVA_CLIENT_SOURCES}

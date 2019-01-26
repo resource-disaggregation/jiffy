@@ -10,6 +10,7 @@ set(AWSSDK_VERSION "1.4.26")
 set(BOOST_VERSION "1.69.0")
 set(CATCH_VERSION "2.2.1")
 set(LIBCUCKOO_VERSION "0.2")
+set(DOXYGEN_VERSION "1.8")
 
 set(BOOST_COMPONENTS "program_options")
 
@@ -394,3 +395,8 @@ if (BUILD_TESTS AND NOT USE_SYSTEM_CATCH)
   ExternalProject_Get_Property(catch source_dir)
   set(CATCH_INCLUDE_DIR ${source_dir}/single_include CACHE INTERNAL "Path to include folder for Catch")
 endif ()
+
+if (BUILD_DOC)
+    find_package(MkDocs REQUIRED)
+    find_package(Doxygen ${DOXYGEN_VERSION} REQUIRED)
+endif()

@@ -1,8 +1,8 @@
 # Contributing 
 
 Please contribute by creating 
-[pull-requests](https://github.com/ucbrise/confluo/pulls) and filing 
-[issues](https://github.com/ucbrise/confluo/issues) on our GitHub repository.
+[pull-requests](https://github.com/ucbrise/jiffy/pulls) and filing 
+[issues](https://github.com/ucbrise/jiffy/issues) on our GitHub repository.
 
 When contributing to this repository, please first discuss the change you wish
 to make via issue, email, or any other method with the owners of this 

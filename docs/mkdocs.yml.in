@@ -9,10 +9,11 @@ repo_name: ucbrise/jiffy
 repo_url: https://github.com/ucbrise/jiffy/
 
 # Configuration
+
 theme:
   name: null
   custom_dir: @CMAKE_CURRENT_SOURCE_DIR@/material-theme
-  
+
   # Language for theme localization
   language: en
 
@@ -63,6 +64,7 @@ theme:
   # Static pages to build
   static_templates:
     - 404.html
+
 
 markdown_extensions:
   - markdown.extensions.admonition
