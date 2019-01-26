@@ -16,7 +16,7 @@ replica_chain_client::replica_chain_client(std::shared_ptr<directory::directory_
   seq_.client_seq_no = 0;
   connect(chain, timeout_ms);
   for (auto &op: KV_OPS) {
-    cmd_client_.push_back(op.type == block_op_type::accessor ? &tail_ : &head_);
+    cmd_client_.push_back(op.type == command_type::accessor ? &tail_ : &head_);
   }
 }
 
@@ -36,13 +36,13 @@ const directory::replica_chain &replica_chain_client::chain() const {
 void replica_chain_client::connect(const directory::replica_chain &chain, int timeout_ms) {
   chain_ = chain;
   timeout_ms_ = timeout_ms;
-  auto h = block_name_parser::parse(chain_.block_names.front());
+  auto h = block_id_parser::parse(chain_.block_names.front());
   head_.connect(h.host, h.service_port, h.id, timeout_ms);
   seq_.client_id = head_.get_client_id();
   if (chain_.block_names.size() == 1) {
     tail_ = head_;
   } else {
-    auto t = block_name_parser::parse(chain_.block_names.back());
+    auto t = block_id_parser::parse(chain_.block_names.back());
     tail_.connect(t.host, t.service_port, t.id, timeout_ms);
   }
   response_reader_ = tail_.get_command_response_reader(seq_.client_id);
@@ -103,7 +103,7 @@ bool replica_chain_client::is_connected() const {
 }
 
 replica_chain_client::locked_client::locked_client(replica_chain_client &parent) : parent_(parent) {
-  auto res = parent_.run_command(kv_op_id::lock, {});
+  auto res = parent_.run_command(hash_table_cmd_id::lock, {});
   if (res[0] != "!ok") {
     redirecting_ = true;
     redirect_chain_ = utils::string_utils::split(res[0], '!');
@@ -117,7 +117,7 @@ replica_chain_client::locked_client::~locked_client() {
 }
 
 void replica_chain_client::locked_client::unlock() {
-  parent_.run_command(kv_op_id::unlock, {});
+  parent_.run_command(hash_table_cmd_id::unlock, {});
 }
 
 const directory::replica_chain &replica_chain_client::locked_client::chain() {

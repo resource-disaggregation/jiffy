@@ -7,7 +7,7 @@ namespace jiffy {
 namespace storage {
 
 notification_service_handler::notification_service_handler(std::shared_ptr<TProtocol> oprot,
-                                                           std::vector<std::shared_ptr<chain_module>> &blocks)
+                                                           std::vector<std::shared_ptr<block>> &blocks)
     : oprot_(std::move(oprot)), client_(new subscription_serviceClient(oprot_)), blocks_(blocks) {}
 
 void notification_service_handler::subscribe(const int32_t block_id, const std::vector<std::string> &ops) {
@@ -16,7 +16,7 @@ void notification_service_handler::subscribe(const int32_t block_id, const std::
     local_subs_.insert(std::make_pair(block_id, op));
     added.push_back(op);
   }
-  blocks_[block_id]->subscriptions().add_subscriptions(added, client_);
+  blocks_[block_id]->impl()->subscriptions().add_subscriptions(added, client_);
 }
 
 void notification_service_handler::unsubscribe(int32_t block_id, const std::vector<std::string> &ops) {
@@ -41,7 +41,7 @@ void notification_service_handler::unsubscribe(int32_t block_id, const std::vect
     }
   }
   if (!removed.empty())
-    blocks_[block_id]->subscriptions().remove_subscriptions(removed, client_, inform);
+    blocks_[block_id]->impl()->subscriptions().remove_subscriptions(removed, client_, inform);
 }
 
 }

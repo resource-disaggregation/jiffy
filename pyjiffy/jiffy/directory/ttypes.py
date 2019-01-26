@@ -73,23 +73,23 @@ class rpc_replica_chain(object):
     """
     Attributes:
      - block_names
-     - slot_begin
-     - slot_end
+     - name
+     - metadata
      - storage_mode
     """
 
     __slots__ = (
         'block_names',
-        'slot_begin',
-        'slot_end',
+        'name',
+        'metadata',
         'storage_mode',
     )
 
 
-    def __init__(self, block_names=None, slot_begin=None, slot_end=None, storage_mode=None,):
+    def __init__(self, block_names=None, name=None, metadata=None, storage_mode=None,):
         self.block_names = block_names
-        self.slot_begin = slot_begin
-        self.slot_end = slot_end
+        self.name = name
+        self.metadata = metadata
         self.storage_mode = storage_mode
 
     def read(self, iprot):
@@ -112,13 +112,13 @@ class rpc_replica_chain(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
-                if ftype == TType.I32:
-                    self.slot_begin = iprot.readI32()
+                if ftype == TType.STRING:
+                    self.name = iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
-                if ftype == TType.I32:
-                    self.slot_end = iprot.readI32()
+                if ftype == TType.STRING:
+                    self.metadata = iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 4:
@@ -143,13 +143,13 @@ class rpc_replica_chain(object):
                 oprot.writeString(iter6)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
-        if self.slot_begin is not None:
-            oprot.writeFieldBegin('slot_begin', TType.I32, 2)
-            oprot.writeI32(self.slot_begin)
+        if self.name is not None:
+            oprot.writeFieldBegin('name', TType.STRING, 2)
+            oprot.writeString(self.name)
             oprot.writeFieldEnd()
-        if self.slot_end is not None:
-            oprot.writeFieldBegin('slot_end', TType.I32, 3)
-            oprot.writeI32(self.slot_end)
+        if self.metadata is not None:
+            oprot.writeFieldBegin('metadata', TType.STRING, 3)
+            oprot.writeString(self.metadata)
             oprot.writeFieldEnd()
         if self.storage_mode is not None:
             oprot.writeFieldBegin('storage_mode', TType.I32, 4)
@@ -161,10 +161,10 @@ class rpc_replica_chain(object):
     def validate(self):
         if self.block_names is None:
             raise TProtocolException(message='Required field block_names is unset!')
-        if self.slot_begin is None:
-            raise TProtocolException(message='Required field slot_begin is unset!')
-        if self.slot_end is None:
-            raise TProtocolException(message='Required field slot_end is unset!')
+        if self.name is None:
+            raise TProtocolException(message='Required field name is unset!')
+        if self.metadata is None:
+            raise TProtocolException(message='Required field metadata is unset!')
         if self.storage_mode is None:
             raise TProtocolException(message='Required field storage_mode is unset!')
         return
@@ -288,6 +288,7 @@ class rpc_file_status(object):
 class rpc_data_status(object):
     """
     Attributes:
+     - type
      - backing_path
      - chain_length
      - data_blocks
@@ -296,6 +297,7 @@ class rpc_data_status(object):
     """
 
     __slots__ = (
+        'type',
         'backing_path',
         'chain_length',
         'data_blocks',
@@ -304,7 +306,8 @@ class rpc_data_status(object):
     )
 
 
-    def __init__(self, backing_path=None, chain_length=None, data_blocks=None, flags=None, tags=None,):
+    def __init__(self, type=None, backing_path=None, chain_length=None, data_blocks=None, flags=None, tags=None,):
+        self.type = type
         self.backing_path = backing_path
         self.chain_length = chain_length
         self.data_blocks = data_blocks
@@ -322,15 +325,20 @@ class rpc_data_status(object):
                 break
             if fid == 1:
                 if ftype == TType.STRING:
-                    self.backing_path = iprot.readString()
+                    self.type = iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
+                if ftype == TType.STRING:
+                    self.backing_path = iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
                 if ftype == TType.I32:
                     self.chain_length = iprot.readI32()
                 else:
                     iprot.skip(ftype)
-            elif fid == 3:
+            elif fid == 4:
                 if ftype == TType.LIST:
                     self.data_blocks = []
                     (_etype10, _size7) = iprot.readListBegin()
@@ -341,12 +349,12 @@ class rpc_data_status(object):
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
-            elif fid == 4:
+            elif fid == 5:
                 if ftype == TType.I32:
                     self.flags = iprot.readI32()
                 else:
                     iprot.skip(ftype)
-            elif fid == 5:
+            elif fid == 6:
                 if ftype == TType.MAP:
                     self.tags = {}
                     (_ktype14, _vtype15, _size13) = iprot.readMapBegin()
@@ -367,27 +375,31 @@ class rpc_data_status(object):
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
         oprot.writeStructBegin('rpc_data_status')
+        if self.type is not None:
+            oprot.writeFieldBegin('type', TType.STRING, 1)
+            oprot.writeString(self.type)
+            oprot.writeFieldEnd()
         if self.backing_path is not None:
-            oprot.writeFieldBegin('backing_path', TType.STRING, 1)
+            oprot.writeFieldBegin('backing_path', TType.STRING, 2)
             oprot.writeString(self.backing_path)
             oprot.writeFieldEnd()
         if self.chain_length is not None:
-            oprot.writeFieldBegin('chain_length', TType.I32, 2)
+            oprot.writeFieldBegin('chain_length', TType.I32, 3)
             oprot.writeI32(self.chain_length)
             oprot.writeFieldEnd()
         if self.data_blocks is not None:
-            oprot.writeFieldBegin('data_blocks', TType.LIST, 3)
+            oprot.writeFieldBegin('data_blocks', TType.LIST, 4)
             oprot.writeListBegin(TType.STRUCT, len(self.data_blocks))
             for iter20 in self.data_blocks:
                 iter20.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.flags is not None:
-            oprot.writeFieldBegin('flags', TType.I32, 4)
+            oprot.writeFieldBegin('flags', TType.I32, 5)
             oprot.writeI32(self.flags)
             oprot.writeFieldEnd()
         if self.tags is not None:
-            oprot.writeFieldBegin('tags', TType.MAP, 5)
+            oprot.writeFieldBegin('tags', TType.MAP, 6)
             oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.tags))
             for kiter21, viter22 in self.tags.items():
                 oprot.writeString(kiter21)
@@ -398,6 +410,8 @@ class rpc_data_status(object):
         oprot.writeStructEnd()
 
     def validate(self):
+        if self.type is None:
+            raise TProtocolException(message='Required field type is unset!')
         if self.backing_path is None:
             raise TProtocolException(message='Required field backing_path is unset!')
         if self.chain_length is None:
@@ -587,8 +601,8 @@ all_structs.append(rpc_replica_chain)
 rpc_replica_chain.thrift_spec = (
     None,  # 0
     (1, TType.LIST, 'block_names', (TType.STRING, None, False), None, ),  # 1
-    (2, TType.I32, 'slot_begin', None, None, ),  # 2
-    (3, TType.I32, 'slot_end', None, None, ),  # 3
+    (2, TType.STRING, 'name', None, None, ),  # 2
+    (3, TType.STRING, 'metadata', None, None, ),  # 3
     (4, TType.I32, 'storage_mode', None, None, ),  # 4
 )
 all_structs.append(rpc_file_status)
@@ -601,11 +615,12 @@ rpc_file_status.thrift_spec = (
 all_structs.append(rpc_data_status)
 rpc_data_status.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'backing_path', None, None, ),  # 1
-    (2, TType.I32, 'chain_length', None, None, ),  # 2
-    (3, TType.LIST, 'data_blocks', (TType.STRUCT, [rpc_replica_chain, None], False), None, ),  # 3
-    (4, TType.I32, 'flags', None, None, ),  # 4
-    (5, TType.MAP, 'tags', (TType.STRING, None, TType.STRING, None, False), None, ),  # 5
+    (1, TType.STRING, 'type', None, None, ),  # 1
+    (2, TType.STRING, 'backing_path', None, None, ),  # 2
+    (3, TType.I32, 'chain_length', None, None, ),  # 3
+    (4, TType.LIST, 'data_blocks', (TType.STRUCT, [rpc_replica_chain, None], False), None, ),  # 4
+    (5, TType.I32, 'flags', None, None, ),  # 5
+    (6, TType.MAP, 'tags', (TType.STRING, None, TType.STRING, None, False), None, ),  # 6
 )
 all_structs.append(rpc_dir_entry)
 rpc_dir_entry.thrift_spec = (

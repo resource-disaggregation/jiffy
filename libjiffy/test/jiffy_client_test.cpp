@@ -4,10 +4,10 @@
 #include "jiffy/storage/manager/storage_management_server.h"
 #include "jiffy/storage/manager/storage_management_client.h"
 #include "jiffy/storage/manager/storage_manager.h"
-#include "jiffy/storage/kv/kv_block.h"
+#include "jiffy/storage/hashtable/hash_table_partition.h"
 #include "test_utils.h"
 #include "jiffy/storage/service/block_server.h"
-#include "jiffy/storage/kv/hash_slot.h"
+#include "jiffy/storage/hashtable/hash_slot.h"
 #include "jiffy/directory/fs/directory_tree.h"
 #include "jiffy/directory/fs/directory_server.h"
 #include "jiffy/client/jiffy_client.h"
@@ -33,37 +33,37 @@ using namespace jiffy::utils;
 #define LEASE_PERIOD_MS 100
 #define LEASE_PERIOD_US (LEASE_PERIOD_MS * 1000)
 
-void test_kv_ops(std::shared_ptr<kv_client> kv) {
+void test_hash_table_ops(std::shared_ptr<hash_table_client> table) {
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(kv->put(std::to_string(i), std::to_string(i)) == "!ok");
+    REQUIRE(table->put(std::to_string(i), std::to_string(i)) == "!ok");
   }
 
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(kv->get(std::to_string(i)) == std::to_string(i));
+    REQUIRE(table->get(std::to_string(i)) == std::to_string(i));
   }
 
   for (size_t i = 1000; i < 2000; i++) {
-    REQUIRE(kv->get(std::to_string(i)) == "!key_not_found");
+    REQUIRE(table->get(std::to_string(i)) == "!key_not_found");
   }
 
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(kv->update(std::to_string(i), std::to_string(i + 1000)) == std::to_string(i));
+    REQUIRE(table->update(std::to_string(i), std::to_string(i + 1000)) == std::to_string(i));
   }
 
   for (size_t i = 1000; i < 2000; i++) {
-    REQUIRE(kv->update(std::to_string(i), std::to_string(i + 1000)) == "!key_not_found");
+    REQUIRE(table->update(std::to_string(i), std::to_string(i + 1000)) == "!key_not_found");
   }
 
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(kv->remove(std::to_string(i)) == std::to_string(i + 1000));
+    REQUIRE(table->remove(std::to_string(i)) == std::to_string(i + 1000));
   }
 
   for (size_t i = 1000; i < 2000; i++) {
-    REQUIRE(kv->remove(std::to_string(i)) == "!key_not_found");
+    REQUIRE(table->remove(std::to_string(i)) == "!key_not_found");
   }
 
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(kv->get(std::to_string(i)) == "!key_not_found");
+    REQUIRE(table->get(std::to_string(i)) == "!key_not_found");
   }
 }
 
@@ -75,7 +75,7 @@ TEST_CASE("jiffy_client_lease_worker_test", "[put][get][update][remove]") {
                                                   STORAGE_NOTIFICATION_PORT,
                                                   STORAGE_CHAIN_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names);
+  auto blocks = test_utils::init_hash_table_blocks(block_names);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
@@ -111,7 +111,7 @@ TEST_CASE("jiffy_client_lease_worker_test", "[put][get][update][remove]") {
 
   {
     jiffy_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-    REQUIRE_NOTHROW(client.create("/a/file.txt", "local://tmp"));
+    REQUIRE_NOTHROW(client.create_hash_table("/a/file.txt", "local://tmp"));
     REQUIRE(client.fs()->exists("/a/file.txt"));
     usleep(LEASE_PERIOD_US);
     REQUIRE(client.fs()->exists("/a/file.txt"));
@@ -158,7 +158,7 @@ TEST_CASE("jiffy_client_create_test", "[put][get][update][remove]") {
                                                   STORAGE_NOTIFICATION_PORT,
                                                   STORAGE_CHAIN_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names);
+  auto blocks = test_utils::init_hash_table_blocks(block_names);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
@@ -194,9 +194,9 @@ TEST_CASE("jiffy_client_create_test", "[put][get][update][remove]") {
 
   {
     jiffy_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-    auto kv = client.create("/a/file.txt", "/tmp");
+    auto table = client.create_hash_table("/a/file.txt", "/tmp");
     REQUIRE(client.fs()->exists("/a/file.txt"));
-    test_kv_ops(kv);
+    test_hash_table_ops(table);
   }
 
   storage_server->stop();
@@ -238,7 +238,7 @@ TEST_CASE("jiffy_client_open_test", "[put][get][update][remove]") {
                                                   STORAGE_NOTIFICATION_PORT,
                                                   STORAGE_CHAIN_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names);
+  auto blocks = test_utils::init_hash_table_blocks(block_names);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
@@ -274,10 +274,10 @@ TEST_CASE("jiffy_client_open_test", "[put][get][update][remove]") {
 
   {
     jiffy_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-    client.create("/a/file.txt", "/tmp");
+    client.create_hash_table("/a/file.txt", "/tmp");
     REQUIRE(client.fs()->exists("/a/file.txt"));
-    auto kv = client.open("/a/file.txt");
-    test_kv_ops(kv);
+    auto table = client.open("/a/file.txt");
+    test_hash_table_ops(table);
   }
 
   storage_server->stop();
@@ -319,7 +319,7 @@ TEST_CASE("jiffy_client_flush_remove_test", "[put][get][update][remove]") {
                                                   STORAGE_NOTIFICATION_PORT,
                                                   STORAGE_CHAIN_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names);
+  auto blocks = test_utils::init_hash_table_blocks(block_names);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
@@ -355,7 +355,7 @@ TEST_CASE("jiffy_client_flush_remove_test", "[put][get][update][remove]") {
 
   {
     jiffy_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-    client.create("/file.txt", "local://tmp");
+    client.create_hash_table("/file.txt", "local://tmp");
     REQUIRE(client.lease_worker().has_path("/file.txt"));
     REQUIRE_NOTHROW(client.sync("/file.txt", "local://tmp"));
     REQUIRE(client.lease_worker().has_path("/file.txt"));
@@ -403,7 +403,7 @@ TEST_CASE("jiffy_client_close_test", "[put][get][update][remove]") {
                                                   STORAGE_NOTIFICATION_PORT,
                                                   STORAGE_CHAIN_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names);
+  auto blocks = test_utils::init_hash_table_blocks(block_names);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
@@ -439,9 +439,9 @@ TEST_CASE("jiffy_client_close_test", "[put][get][update][remove]") {
 
   {
     jiffy_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-    client.create("/file.txt", "local://tmp");
-    client.create("/file1.txt", "local://tmp", 1, 1, data_status::PINNED);
-    client.create("/file2.txt", "local://tmp", 1, 1, data_status::MAPPED);
+    client.create_hash_table("/file.txt", "local://tmp");
+    client.create_hash_table("/file1.txt", "local://tmp", 1, 1, data_status::PINNED);
+    client.create_hash_table("/file2.txt", "local://tmp", 1, 1, data_status::MAPPED);
     REQUIRE(client.lease_worker().has_path("/file.txt"));
     REQUIRE(client.lease_worker().has_path("/file1.txt"));
     REQUIRE(client.lease_worker().has_path("/file2.txt"));
@@ -500,7 +500,7 @@ TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
                                                   STORAGE_NOTIFICATION_PORT,
                                                   STORAGE_CHAIN_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names);
+  auto blocks = test_utils::init_hash_table_blocks(block_names);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
@@ -539,7 +539,7 @@ TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
     std::string op1 = "put", op2 = "remove";
     std::string key = "key1", value = "value1";
 
-    client.fs()->create("/a/file.txt", "/tmp", 1, 1, 0);
+    client.fs()->create("/a/file.txt", "hashtable", "/tmp", 1, 1, 0, 0, {"0_65536"}, {"regular"});
     auto n1 = client.listen("/a/file.txt");
     auto n2 = client.listen("/a/file.txt");
     auto n3 = client.listen("/a/file.txt");
@@ -548,9 +548,9 @@ TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
     n2->subscribe({op1, op2});
     n3->subscribe({op2});
 
-    auto kv = client.open("/a/file.txt");
-    kv->put(key, value);
-    kv->remove(key);
+    auto table = client.open("/a/file.txt");
+    table->put(key, value);
+    table->remove(key);
 
     REQUIRE(n1->get_notification() == std::make_pair(op1, key));
     REQUIRE(n2->get_notification() == std::make_pair(op1, key));
@@ -564,8 +564,8 @@ TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
     n1->unsubscribe({op1});
     n2->unsubscribe({op2});
 
-    kv->put(key, value);
-    kv->remove(key);
+    table->put(key, value);
+    table->remove(key);
 
     REQUIRE(n2->get_notification() == std::make_pair(op1, key));
     REQUIRE(n3->get_notification() == std::make_pair(op2, key));
@@ -614,7 +614,7 @@ TEST_CASE("jiffy_client_chain_replication_test", "[put][get][update][remove]") {
                                                   STORAGE_NOTIFICATION_PORT,
                                                   STORAGE_CHAIN_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_kv_blocks(block_names);
+  auto blocks = test_utils::init_hash_table_blocks(block_names);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
@@ -650,9 +650,9 @@ TEST_CASE("jiffy_client_chain_replication_test", "[put][get][update][remove]") {
 
   {
     jiffy_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-    auto kv = client.create("/a/file.txt", "/tmp", 1, NUM_BLOCKS);
-    REQUIRE(kv->status().chain_length() == 3);
-    test_kv_ops(kv);
+    auto table = client.create_hash_table("/a/file.txt", "/tmp", 1, NUM_BLOCKS);
+    REQUIRE(table->status().chain_length() == 3);
+    test_hash_table_ops(table);
   }
 
   storage_server->stop();

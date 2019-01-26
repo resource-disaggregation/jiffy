@@ -5,9 +5,9 @@
 #include "jiffy/utils/signal_handling.h"
 #include "jiffy/utils/logger.h"
 #include "jiffy/utils/cmd_parse.h"
-#include "jiffy/storage/kv/kv_block.h"
+#include "jiffy/storage/hashtable/hash_table_partition.h"
+#include "jiffy/storage/hashtable/hash_slot.h"
 #include "benchmark_utils.h"
-#include "jiffy/storage/kv/hash_slot.h"
 
 using namespace jiffy::storage;
 using namespace jiffy::persistent;
@@ -65,8 +65,9 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  kv_block block("nil", 134217728, 0.0, 1.0, "127.0.0.1", 9090, fmt);
-  block.slot_range(0, block::SLOT_MAX);
+  block_memory_manager manager;
+  hash_table_partition block(&manager);
+  block.slot_range(0, hash_table_partition::SLOT_MAX);
 
   if (mode == "write") {
     // Load phase

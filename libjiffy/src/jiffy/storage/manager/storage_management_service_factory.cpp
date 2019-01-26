@@ -11,7 +11,7 @@ using namespace ::apache::thrift;
 using namespace ::apache::thrift::transport;
 using namespace utils;
 
-storage_management_service_factory::storage_management_service_factory(std::vector<std::shared_ptr<chain_module>> &blocks)
+storage_management_service_factory::storage_management_service_factory(std::vector<std::shared_ptr<block>> &blocks)
     : blocks_(blocks) {}
 
 storage_management_serviceIf *storage_management_service_factory::getHandler(const TConnectionInfo &conn_info) {

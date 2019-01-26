@@ -1,6 +1,6 @@
 namespace cpp jiffy.storage
-namespace py jiffy.kv
-namespace java jiffy.kv
+namespace py jiffy.storage
+namespace java jiffy.storage
 
 exception block_exception {
   1: string msg

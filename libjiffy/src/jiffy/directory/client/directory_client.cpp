@@ -49,40 +49,34 @@ data_status directory_client::open(const std::string &path) {
 }
 
 data_status directory_client::create(const std::string &path,
+                                     const std::string &type,
                                      const std::string &backing_path,
-                                     std::size_t num_blocks,
-                                     std::size_t chain_length,
-                                     std::int32_t flags,
-                                     std::int32_t permissions,
+                                     int32_t num_blocks,
+                                     int32_t chain_length,
+                                     int32_t flags,
+                                     int32_t permissions,
+                                     const std::vector<std::string> &block_names,
+                                     const std::vector<std::string> &block_metadata,
                                      const std::map<std::string, std::string> &tags) {
   rpc_data_status s;
-  client_->create(s,
-                  path,
-                  backing_path,
-                  static_cast<const int32_t>(num_blocks),
-                  static_cast<const int32_t>(chain_length),
-                  flags,
-                  permissions,
-                  tags);
+  client_->create(s, path, type, backing_path, num_blocks, chain_length, flags, permissions, block_names,
+                  block_metadata, tags);
   return directory_type_conversions::from_rpc(s);
 }
 
 data_status directory_client::open_or_create(const std::string &path,
+                                             const std::string &type,
                                              const std::string &backing_path,
-                                             std::size_t num_blocks,
-                                             std::size_t chain_length,
-                                             std::int32_t flags,
-                                             std::int32_t permissions,
+                                             int32_t num_blocks,
+                                             int32_t chain_length,
+                                             int32_t flags,
+                                             int32_t permissions,
+                                             const std::vector<std::string> &block_names,
+                                             const std::vector<std::string> &block_metadata,
                                              const std::map<std::string, std::string> &tags) {
   rpc_data_status s;
-  client_->open_or_create(s,
-                          path,
-                          backing_path,
-                          static_cast<const int32_t>(num_blocks),
-                          static_cast<const int32_t>(chain_length),
-                          flags,
-                          permissions,
-                          tags);
+  client_->open_or_create(s, path, type, backing_path, num_blocks, chain_length, flags, permissions, block_names,
+                          block_metadata, tags);
   return directory_type_conversions::from_rpc(s);
 }
 
@@ -182,18 +176,6 @@ replica_chain directory_client::add_replica_to_chain(const std::string &path, co
   in = directory_type_conversions::to_rpc(chain);
   client_->add_replica_to_chain(out, path, in);
   return directory_type_conversions::from_rpc(out);
-}
-
-void directory_client::add_block_to_file(const std::string &path) {
-  client_->add_block_to_file(path);
-}
-
-void directory_client::split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) {
-  client_->split_slot_range(path, slot_begin, slot_end);
-}
-
-void directory_client::merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) {
-  client_->merge_slot_range(path, slot_begin, slot_end);
 }
 
 void directory_client::touch(const std::string &) {

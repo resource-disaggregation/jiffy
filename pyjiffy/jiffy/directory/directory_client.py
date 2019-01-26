@@ -83,13 +83,14 @@ class StorageMode:
 
 
 class ReplicaChain:
-    def __init__(self, block_names, slot_begin, slot_end, storage_mode):
+    def __init__(self, block_names, name, metadata, storage_mode):
         self.block_names = block_names
-        self.slot_range = (slot_begin, slot_end)
+        self.name = name
+        self.metadata = metadata
         self.storage_mode = storage_mode
 
     def __str__(self):
-        return "{} : {}".format(self.block_names, self.slot_range)
+        return "{} : {}, {}, {}".format(self.name, self.block_names, self.metadata, self.storage_mode)
 
     def __repr__(self):
         return self.__str__()
@@ -99,7 +100,7 @@ class DataStatus:
     def __init__(self, backing_path, chain_length, data_blocks, flags, tags):
         self.backing_path = backing_path
         self.chain_length = chain_length
-        self.data_blocks = [ReplicaChain(replica_chain.block_names, replica_chain.slot_begin, replica_chain.slot_end,
+        self.data_blocks = [ReplicaChain(replica_chain.block_names, replica_chain.name, replica_chain.metadata,
                                          replica_chain.storage_mode)
                             for replica_chain in data_blocks]
         self.flags = flags
@@ -149,15 +150,28 @@ class DirectoryClient:
         s = self.client_.open(path)
         return DataStatus(s.backing_path, s.chain_length, s.data_blocks, s.flags, s.tags)
 
-    def create(self, path, backing_path, num_blocks=1, chain_length=1, flags=0, permissions=Perms.all, tags=None):
-        s = self.client_.create(path, backing_path, num_blocks, chain_length, flags, permissions,
-                                {} if tags is None else tags)
+    def create(self, path, ds_type, backing_path, num_blocks=1, chain_length=1, flags=0, permissions=Perms.all,
+               block_names=None, block_metadata=None, tags=None):
+        if tags is None:
+            tags = {}
+        if block_names is None:
+            block_names = ["0"]
+        if block_metadata is None:
+            block_metadata = [""]
+        s = self.client_.create(path, ds_type, backing_path, num_blocks, chain_length, flags, permissions, block_names,
+                                block_metadata, tags)
         return DataStatus(s.backing_path, s.chain_length, s.data_blocks, s.flags, s.tags)
 
-    def open_or_create(self, path, backing_path, num_blocks=1, chain_length=1, flags=0, permissions=Perms.all,
-                       tags=None):
-        s = self.client_.open_or_create(path, backing_path, num_blocks, chain_length, flags, permissions,
-                                        {} if tags is None else tags)
+    def open_or_create(self, path, ds_type, backing_path, num_blocks=1, chain_length=1, flags=0, permissions=Perms.all,
+                       block_names=None, block_metadata=None, tags=None):
+        if tags is None:
+            tags = {}
+        if block_names is None:
+            block_names = ["0"]
+        if block_metadata is None:
+            block_metadata = [""]
+        s = self.client_.open_or_create(path, ds_type, backing_path, num_blocks, chain_length, flags, permissions,
+                                        block_names, block_metadata, tags)
         return DataStatus(s.backing_path, s.chain_length, s.data_blocks, s.flags, s.tags)
 
     def exists(self, path):
@@ -217,9 +231,3 @@ class DirectoryClient:
 
     def add_replica_to_chain(self, path, chain):
         return self.client_.add_replica_to_chain(path, chain)
-
-    def add_block_to_file(self, path):
-        self.client_.add_block_to_file(path)
-
-    def split_slot_range(self, path, slot_begin, slot_end):
-        self.client_.split_slot_range(path, slot_begin, slot_end)

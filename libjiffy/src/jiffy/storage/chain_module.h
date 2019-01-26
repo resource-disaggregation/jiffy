@@ -10,8 +10,8 @@
 #include <libcuckoo/cuckoohash_map.hh>
 #include <shared_mutex>
 #include "client/block_client.h"
-#include "manager/detail/block_name_parser.h"
-#include "block.h"
+#include "jiffy/storage/manager/detail/block_id_parser.h"
+#include "partition.h"
 #include "service/chain_request_service.h"
 #include "service/chain_request_client.h"
 #include "service/chain_response_client.h"
@@ -23,7 +23,7 @@ namespace storage {
 
 /*
  * Chain roles
- * We mark out the special rule singleton if there is only one block for the chain
+ * We mark out the special rule singleton if there is only one partition for the chain
  * i.e. we don't use chain replication in this case
  * The head would deal with update request and the tail would deal with query request
  * and also generate the respond
@@ -49,17 +49,17 @@ struct chain_op {
   std::vector<std::string> args;
 };
 
-/* Next block connection class */
-class next_block_cxn {
+/* Connection to next chain module */
+class next_chain_module_cxn {
  public:
-  next_block_cxn() = default;
+  next_chain_module_cxn() = default;
 
   /**
    * @brief Constructor
    * @param block_name Next block name
    */
 
-  explicit next_block_cxn(const std::string &block_name) {
+  explicit next_chain_module_cxn(const std::string &block_name) {
     reset(block_name);
   }
 
@@ -67,7 +67,7 @@ class next_block_cxn {
    * @brief Destructor
    */
 
-  ~next_block_cxn() {
+  ~next_chain_module_cxn() {
     client_.disconnect();
   }
 
@@ -82,7 +82,7 @@ class next_block_cxn {
     std::unique_lock<std::shared_mutex> lock(mtx_);
     client_.disconnect();
     if (block_name != "nil") {
-      auto bid = block_name_parser::parse(block_name);
+      auto bid = block_id_parser::parse(block_name);
       auto host = bid.host;
       auto port = bid.chain_port;
       auto block_id = bid.id;
@@ -124,17 +124,17 @@ class next_block_cxn {
   chain_request_client client_;
 };
 
-/* Previous block connection class */
-class prev_block_cxn {
+/* Connection to previous chain module */
+class prev_chain_module_cxn {
  public:
-  prev_block_cxn() = default;
+  prev_chain_module_cxn() = default;
 
   /**
    * @brief Constructor
    * @param prot Protocol
    */
 
-  explicit prev_block_cxn(std::shared_ptr<::apache::thrift::protocol::TProtocol> prot) {
+  explicit prev_chain_module_cxn(std::shared_ptr<::apache::thrift::protocol::TProtocol> prot) {
     reset(std::move(prot));
   }
 
@@ -171,8 +171,8 @@ class prev_block_cxn {
 };
 
 /* Chain module class
- * Inherited from block */
-class chain_module : public block {
+ * Inherited from partition */
+class chain_module : public partition {
  public:
   /* Class chain response handler
    * Inherited from chain response serviceIf class */
@@ -201,121 +201,34 @@ class chain_module : public block {
 
   /**
    * @brief Constructor
-   * @param block_name Block name
-   * @param block_ops Block operations
+   * @param name Partition name
+   * @param metadata Partition metadata
+   * @param supported_cmds Supported commands
    */
 
-  chain_module(const std::string &block_name,
-               const std::vector<block_op> &block_ops)
-      : block(block_ops, block_name),
-        next_(std::make_unique<next_block_cxn>("nil")),
-        prev_(std::make_unique<prev_block_cxn>()),
-        pending_(0) {}
+  chain_module(block_memory_manager *manager,
+               const std::string &name,
+               const std::string &metadata,
+               const std::vector<command> &supported_cmds);
 
   /**
    * @brief Destructor
    */
 
-  virtual ~chain_module() {
-    next_->reset("nil");
-    if (response_processor_.joinable())
-      response_processor_.join();
-  }
+  virtual ~chain_module();
 
   /**
    * @brief Setup a chain module and start the processor thread
    * @param path Block path
-   * @param slot_begin Hash begin slot
-   * @param slot_end Hash end slot
    * @param chain Replica chain block names
-   * @param auto_scale Auto scaling boolean
    * @param role Chain module role
-   * @param next_block_name Next block name
+   * @param next_block_id Next block name
    */
 
-  void setup(const std::string &path,
-             int32_t slot_begin,
-             int32_t slot_end,
-             const std::vector<std::string> &chain,
-             bool auto_scale,
-             const chain_role &role,
-             const std::string &next_block_name) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    path_ = path;
-    slot_range_.first = slot_begin;
-    slot_range_.second = slot_end;
-    chain_ = chain;
-    role_ = role;
-    auto_scale_ = auto_scale;
-    auto protocol = next_->reset(next_block_name);
-    if (protocol && role_ != chain_role::tail) {
-      auto handler = std::make_shared<chain_response_handler>(this);
-      auto processor = std::make_shared<chain_response_serviceProcessor>(handler);
-      if (response_processor_.joinable())
-        response_processor_.join();
-      response_processor_ = std::thread([processor, protocol] {
-        while (true) {
-          try {
-            if (!processor->process(protocol, protocol, nullptr)) {
-              break;
-            }
-          } catch (std::exception &e) {
-            break;
-          }
-        }
-      });
-    }
-  }
-
-  /**
-   * @brief Set block to be exporting
-   * @param target_block Export target block
-   * @param slot_begin Begin slot
-   * @param slot_end End slot
-   */
-
-  void set_exporting(const std::vector<std::string> &target_block, int32_t slot_begin, int32_t slot_end) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    state_ = block_state::exporting;
-    export_target_ = target_block;
-    export_target_str_ = "";
-    for (const auto &block: target_block) {
-      export_target_str_ += (block + "!");
-    }
-    export_target_str_.pop_back();
-    export_slot_range_.first = slot_begin;
-    export_slot_range_.second = slot_end;
-  }
-
-  /**
-   * @brief Set block to be importing
-   * @param slot_begin Begin slot
-   * @param slot_end End slot
-   */
-
-  void set_importing(int32_t slot_begin, int32_t slot_end) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    state_ = block_state::importing;
-    import_slot_range_.first = slot_begin;
-    import_slot_range_.second = slot_end;
-  }
-
-  /**
-   * @brief Set block to regular after exporting slot
-   * @param slot_begin Begin slot
-   * @param slot_end End slot
-   */
-
-  void set_regular(int32_t slot_begin, int32_t slot_end) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    state_ = block_state::regular;
-    slot_range_.first = slot_begin;
-    slot_range_.second = slot_end;
-    export_slot_range_.first = 0;
-    export_slot_range_.second = -1;
-    import_slot_range_.first = 0;
-    import_slot_range_.second = -1;
-  }
+  virtual void setup(const std::string &path,
+                     const std::vector<std::string> &chain,
+                     chain_role role,
+                     const std::string &next_block_id);
 
   /**
    * @brief Set chain module role
@@ -484,11 +397,11 @@ class chain_module : public block {
   chain_role role_{singleton};
   /* Chain sequence number */
   int64_t chain_seq_no_{0};
-  /* Next block connection */
-  std::unique_ptr<next_block_cxn> next_{nullptr};
-  /* Previous block connection */
-  std::unique_ptr<prev_block_cxn> prev_{nullptr};
-  /* Replica chain block names */
+  /* Next partition connection */
+  std::unique_ptr<next_chain_module_cxn> next_{nullptr};
+  /* Previous partition connection */
+  std::unique_ptr<prev_chain_module_cxn> prev_{nullptr};
+  /* Replica chain partition names */
   std::vector<std::string> chain_;
   /* Response processor thread */
   std::thread response_processor_;

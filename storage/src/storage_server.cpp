@@ -1,7 +1,7 @@
 #include <atomic>
 #include <iostream>
-#include <jiffy/directory/block/block_advertisement_client.h>
-#include <jiffy/storage/kv/kv_block.h>
+#include <jiffy/directory/block/block_registration_client.h>
+#include <jiffy/storage/hashtable/hash_table_partition.h>
 #include <jiffy/storage/manager/storage_management_server.h>
 #include <jiffy/storage/notification/notification_server.h>
 #include <jiffy/storage/service/block_server.h>
@@ -11,6 +11,7 @@
 #include <jiffy/storage/service/server_storage_tracker.h>
 #include <boost/program_options.hpp>
 #include <ifaddrs.h>
+#include <jiffy/storage/block.h>
 
 using namespace ::jiffy::directory;
 using namespace ::jiffy::storage;
@@ -60,8 +61,8 @@ void retract_block_names_and_print_stacktrace(int sig_num) {
   std::string trace = signal_handling::stacktrace();
   LOG(log_level::info) << "Caught signal " << sig_num << ", cleaning up...";
   try {
-    block_advertisement_client client(dir_host, block_port);
-    client.retract_blocks(block_names);
+    block_registration_client client(dir_host, block_port);
+    client.deregister_blocks(block_names);
     client.disconnect();
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to retract blocks: " << e.what()
@@ -155,7 +156,7 @@ int main(int argc, char **argv) {
     }
 
     if (vm.count("version")) {
-      std::cout << "Storage service daemon, Version 0.1.0" << std::endl; // TODO: Configure version string
+      std::cout << "Jiffy storage service daemon, Version 0.1.0" << std::endl; // TODO: Configure version string
       return 0;
     }
 
@@ -216,7 +217,7 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Hostname: " << hostname;
 
   for (int i = 0; i < static_cast<int>(num_blocks); i++) {
-    block_names.push_back(block_name_parser::make(hostname,
+    block_names.push_back(block_id_parser::make(hostname,
                                                   service_port,
                                                   mgmt_port,
                                                   notf_port,
@@ -224,15 +225,10 @@ int main(int argc, char **argv) {
                                                   i));
   }
 
-  std::vector<std::shared_ptr<chain_module>> blocks;
+  std::vector<std::shared_ptr<block>> blocks;
   blocks.resize(num_blocks);
   for (size_t i = 0; i < blocks.size(); ++i) {
-    blocks[i] = std::make_shared<kv_block>(block_names[i],
-                                           block_capacity,
-                                           blk_thresh_lo,
-                                           blk_thresh_hi,
-                                           dir_host,
-                                           dir_port);
+    blocks[i] = std::make_shared<block>(block_names[i], block_capacity);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
 
@@ -251,8 +247,8 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Management server listening on " << address << ":" << mgmt_port;
 
   try {
-    block_advertisement_client client(dir_host, block_port);
-    client.advertise_blocks(block_names);
+    block_registration_client client(dir_host, block_port);
+    client.register_blocks(block_names);
     client.disconnect();
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to advertise blocks: " << e.what()
@@ -263,10 +259,10 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Advertised " << num_blocks << " to block allocation server";
 
   std::exception_ptr kv_exception = nullptr;
-  auto kv_server = block_server::create(blocks, address, service_port, non_blocking, io_threads, work_threads);
-  std::thread kv_serve_thread([&kv_exception, &kv_server, &failing_thread, &failure_condition] {
+  auto storage_server = block_server::create(blocks, address, service_port, non_blocking, io_threads, work_threads);
+  std::thread storage_serve_thread([&kv_exception, &storage_server, &failing_thread, &failure_condition] {
     try {
-      kv_server->serve();
+      storage_server->serve();
     } catch (...) {
       kv_exception = std::current_exception();
       failing_thread = 1;
@@ -367,8 +363,8 @@ int main(int argc, char **argv) {
   }
 
   try {
-    block_advertisement_client client(dir_host, block_port);
-    client.retract_blocks(block_names);
+    block_registration_client client(dir_host, block_port);
+    client.deregister_blocks(block_names);
     client.disconnect();
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to retract blocks: " << e.what()

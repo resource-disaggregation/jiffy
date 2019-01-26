@@ -13,7 +13,7 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace utils;
 
-block_request_handler_factory::block_request_handler_factory(std::vector<std::shared_ptr<chain_module>> &blocks)
+block_request_handler_factory::block_request_handler_factory(std::vector<std::shared_ptr<block>> &blocks)
     : blocks_(blocks), client_id_gen_(1) {}
 
 block_request_serviceIf *block_request_handler_factory::getHandler(const ::apache::thrift::TConnectionInfo &conn_info) {
@@ -30,7 +30,7 @@ void block_request_handler_factory::releaseHandler(block_request_serviceIf *hand
   int64_t client_id = br_handler->registered_client_id();
   int32_t block_id = br_handler->registered_block_id();
   if (client_id != -1 && block_id != -1) {
-    blocks_.at(static_cast<std::size_t>(block_id))->clients().remove_client(client_id);
+    blocks_.at(static_cast<std::size_t>(block_id))->impl()->clients().remove_client(client_id);
   }
   delete handler;
 }

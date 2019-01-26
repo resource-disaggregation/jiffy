@@ -13,7 +13,7 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
-std::shared_ptr<TThreadedServer> notification_server::create(std::vector<std::shared_ptr<chain_module>> &blocks,
+std::shared_ptr<TThreadedServer> notification_server::create(std::vector<std::shared_ptr<block>> &blocks,
                                                              const std::string &address,
                                                              int port) {
   std::shared_ptr<notification_serviceIfFactory> clone_factory(new notification_service_factory(blocks));

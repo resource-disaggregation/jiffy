@@ -2,7 +2,7 @@ from collections import Counter
 
 from jiffy import JiffyClient, RemoveMode, logging
 from jiffy.benchmark.zipf_generator import gen_zipf
-from jiffy.kv import crc
+from jiffy.storage import crc
 
 
 class Distribution:

@@ -6,7 +6,7 @@ namespace storage {
 
 using namespace utils;
 
-server_storage_tracker::server_storage_tracker(std::vector<std::shared_ptr<chain_module>> &blocks,
+server_storage_tracker::server_storage_tracker(std::vector<std::shared_ptr<block>> &blocks,
                                                uint64_t periodicity_ms,
                                                const std::string &output_file)
     : blocks_(blocks), periodicity_ms_(periodicity_ms), output_file_(output_file) {}
@@ -48,7 +48,7 @@ void server_storage_tracker::report_file_sizes(std::ofstream &out) {
   auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
   out << cur_epoch;
   for (const auto &block: blocks_) {
-    out << "\t" << block->storage_size();
+    out << "\t" << block->impl()->storage_size();
   }
   out << std::endl;
 }

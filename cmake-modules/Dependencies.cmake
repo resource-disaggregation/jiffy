@@ -12,6 +12,7 @@ set(CATCH_VERSION "2.2.1")
 set(LIBCUCKOO_VERSION "0.2")
 set(DOXYGEN_VERSION "1.8")
 
+
 set(BOOST_COMPONENTS "program_options")
 
 ## Prefer static to dynamic libraries
@@ -319,37 +320,6 @@ else ()
   install(DIRECTORY ${THRIFT_INCLUDE_DIR}/thrift DESTINATION include)
 endif ()
 
-if (NOT USE_SYSTEM_LIBCUCKOO)
-  set(LIBCUCKOO_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
-  set(LIBCUCKOO_C_FLAGS "${EXTERNAL_C_FLAGS}")
-  set(LIBCUCKOO_PREFIX "${PROJECT_BINARY_DIR}/external/libcuckoo")
-  set(LIBCUCKOO_HOME "${LIBCUCKOO_PREFIX}")
-  set(LIBCUCKOO_INCLUDE_DIR "${LIBCUCKOO_PREFIX}/include")
-  set(LIBCUCKOO_CMAKE_ARGS "-Wno-dev"
-          "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
-          "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
-          "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-          "-DCMAKE_CXX_FLAGS=${LIBCUCKOO_CXX_FLAGS}"
-          "-DCMAKE_INSTALL_PREFIX=${LIBCUCKOO_PREFIX}"
-          "-DBUILD_EXAMPLES=OFF"
-          "-DBUILD_TESTS=OFF"
-          "-DBUILD_STRESS_TESTS=OFF"
-          "-DBUILD_UNIVERSAL_BENCHMARK=OFF")
-
-  ExternalProject_Add(libcuckoo
-          URL "https://github.com/efficient/libcuckoo/archive/v${LIBCUCKOO_VERSION}.tar.gz"
-          CMAKE_ARGS ${LIBCUCKOO_CMAKE_ARGS}
-          LOG_DOWNLOAD ON
-          LOG_CONFIGURE ON
-          LOG_BUILD ON
-          LOG_INSTALL ON)
-
-  include_directories(SYSTEM ${LIBCUCKOO_INCLUDE_DIR})
-  message(STATUS "libcuckoo include dir: ${LIBCUCKOO_INCLUDE_DIR}")
-
-  install(DIRECTORY ${LIBCUCKOO_INCLUDE_DIR}/libcuckoo DESTINATION include)
-endif ()
-
 if (NOT USE_SYSTEM_JEMALLOC)
   set(JEMALLOC_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(JEMALLOC_C_FLAGS "${EXTERNAL_C_FLAGS}")
@@ -357,6 +327,7 @@ if (NOT USE_SYSTEM_JEMALLOC)
   set(JEMALLOC_PREFIX "${PROJECT_BINARY_DIR}/external/jemalloc")
   set(JEMALLOC_HOME "${JEMALLOC_PREFIX}")
   set(JEMALLOC_INCLUDE_DIR "${JEMALLOC_PREFIX}/include")
+  set(JEMALLOC_FUNCTION_PREFIX "")
   set(JEMALLOC_CMAKE_ARGS "-Wno-dev"
           "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
           "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
@@ -369,7 +340,7 @@ if (NOT USE_SYSTEM_JEMALLOC)
           URL https://github.com/jemalloc/jemalloc/releases/download/5.0.1/jemalloc-5.0.1.tar.bz2
           PREFIX ${JEMALLOC_PREFIX}
           BUILD_BYPRODUCTS ${JEMALLOC_LIBRARIES}
-          CONFIGURE_COMMAND ${JEMALLOC_PREFIX}/src/jemalloc/configure --prefix=${JEMALLOC_PREFIX} --enable-autogen --enable-prof-libunwind CFLAGS=${JEMALLOC_C_FLAGS} CXXFLAGS=${JEMALLOC_CXX_FLAGS}
+          CONFIGURE_COMMAND ${JEMALLOC_PREFIX}/src/jemalloc/configure --with-jemalloc-prefix=${JEMALLOC_FUNCTION_PREFIX} --prefix=${JEMALLOC_PREFIX} --enable-autogen --enable-prof-libunwind CFLAGS=${JEMALLOC_C_FLAGS} CXXFLAGS=${JEMALLOC_CXX_FLAGS}
           INSTALL_COMMAND make install_lib
           LOG_DOWNLOAD ON
           LOG_CONFIGURE ON

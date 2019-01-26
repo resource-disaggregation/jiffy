@@ -28,15 +28,14 @@ TEST_CASE("create_file_test", "[file][dir]") {
   auto sm = std::make_shared<dummy_storage_manager>();
   directory_tree tree(alloc, sm);
 
-  REQUIRE_NOTHROW(tree.create("/sandbox/a.txt", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/a.txt", "testtype", "local://tmp", 1, 1, 0));
   REQUIRE(tree.is_regular_file("/sandbox/a.txt"));
 
-  REQUIRE_NOTHROW(tree.create("/sandbox/foo/bar/baz/a", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/foo/bar/baz/a", "testtype", "local://tmp", 1, 1, 0));
   REQUIRE(tree.is_regular_file("/sandbox/foo/bar/baz/a"));
 
-  REQUIRE_THROWS_AS(tree.create("/sandbox/foo/bar/baz/a/b", "local://tmp", 1, 1, 0), directory_ops_exception);
-  REQUIRE_THROWS_AS(tree.create_directories("/sandbox/foo/bar/baz/a/b"),
-                    directory_ops_exception);
+  REQUIRE_THROWS_AS(tree.create("/sandbox/foo/bar/baz/a/b", "testtype", "local://tmp", 1, 1, 0), directory_ops_exception);
+  REQUIRE_THROWS_AS(tree.create_directories("/sandbox/foo/bar/baz/a/b"), directory_ops_exception);
 }
 
 TEST_CASE("open_file_test", "[file][dir]") {
@@ -44,8 +43,8 @@ TEST_CASE("open_file_test", "[file][dir]") {
   auto sm = std::make_shared<dummy_storage_manager>();
   directory_tree tree(alloc, sm);
 
-  REQUIRE_NOTHROW(tree.create("/sandbox/a.txt", "local://tmp", 1, 1, 0));
-  REQUIRE_NOTHROW(tree.create("/sandbox/foo/bar/baz/a", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/a.txt", "testtype", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/foo/bar/baz/a", "testtype", "local://tmp", 1, 1, 0));
 
   data_status s;
   REQUIRE_NOTHROW(s = tree.open("/sandbox/a.txt"));
@@ -68,23 +67,23 @@ TEST_CASE("open_or_create_file_test", "[file][dir]") {
   auto sm = std::make_shared<dummy_storage_manager>();
   directory_tree tree(alloc, sm);
 
-  REQUIRE_NOTHROW(tree.create("/sandbox/a.txt", "local://tmp", 1, 1, 0));
-  REQUIRE_NOTHROW(tree.create("/sandbox/foo/bar/baz/a", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/a.txt", "testtype", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/foo/bar/baz/a", "testtype", "local://tmp", 1, 1, 0));
 
   data_status s;
-  REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/a.txt", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/a.txt", "testtype", "local://tmp", 1, 1, 0));
   REQUIRE(s.chain_length() == 1);
   REQUIRE(s.mode() == std::vector<storage_mode>{storage_mode::in_memory});
   REQUIRE(s.backing_path() == "local://tmp");
   REQUIRE(s.data_blocks().size() == 1);
 
-  REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/foo/bar/baz/a", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/foo/bar/baz/a", "testtype", "local://tmp", 1, 1, 0));
   REQUIRE(s.chain_length() == 1);
   REQUIRE(s.mode() == std::vector<storage_mode>{storage_mode::in_memory});
   REQUIRE(s.backing_path() == "local://tmp");
   REQUIRE(s.data_blocks().size() == 1);
 
-  REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/b.txt", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/b.txt", "testtype", "local://tmp", 1, 1, 0));
   REQUIRE(s.chain_length() == 1);
   REQUIRE(s.mode() == std::vector<storage_mode>{storage_mode::in_memory});
   REQUIRE(s.backing_path() == "local://tmp");
@@ -96,7 +95,7 @@ TEST_CASE("exists_test", "[file][dir]") {
   auto sm = std::make_shared<dummy_storage_manager>();
   directory_tree tree(alloc, sm);
 
-  REQUIRE_NOTHROW(tree.create("/sandbox/file", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file", "testtype", "local://tmp", 1, 1, 0));
   REQUIRE(tree.exists("/sandbox"));
   REQUIRE(tree.exists("/sandbox/file"));
   REQUIRE(!tree.exists("/sandbox/foo"));
@@ -108,7 +107,7 @@ TEST_CASE("last_write_time_test", "[file][dir][touch]") {
   directory_tree tree(alloc, sm);
 
   std::uint64_t before = time_utils::now_ms();
-  REQUIRE_NOTHROW(tree.create("/sandbox/file", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file", "testtype", "local://tmp", 1, 1, 0));
   std::uint64_t after = time_utils::now_ms();
   REQUIRE(before <= tree.last_write_time("/sandbox/file"));
   REQUIRE(tree.last_write_time("/sandbox/file") <= after);
@@ -134,7 +133,7 @@ TEST_CASE("permissions_test", "[file][dir]") {
   auto sm = std::make_shared<dummy_storage_manager>();
   directory_tree tree(alloc, sm);
 
-  REQUIRE_NOTHROW(tree.create("/sandbox/file", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file", "testtype", "local://tmp", 1, 1, 0));
   REQUIRE(tree.permissions("/sandbox") == perms::all);
   REQUIRE(tree.permissions("/sandbox/file") == perms::all);
 
@@ -162,7 +161,7 @@ TEST_CASE("path_remove_test", "[file][dir]") {
   auto sm = std::make_shared<dummy_storage_manager>();
   directory_tree tree(alloc, sm);
 
-  REQUIRE_NOTHROW(tree.create("/sandbox/abcdef/example/a/b", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/abcdef/example/a/b", "testtype", "local://tmp", 1, 1, 0));
   REQUIRE(alloc->num_free_blocks() == 3);
 
   REQUIRE_NOTHROW(tree.remove("/sandbox/abcdef/example/a/b"));
@@ -178,17 +177,18 @@ TEST_CASE("path_remove_test", "[file][dir]") {
   REQUIRE(!tree.exists("/sandbox/abcdef"));
   REQUIRE(alloc->num_free_blocks() == 4);
 
-  REQUIRE(sm->COMMANDS.size() == 2);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/abcdef/example/a/b:0:65536:0:1:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "reset:0");
+  REQUIRE(sm->COMMANDS.size() == 3);
+  REQUIRE(sm->COMMANDS[0] == "create_partition:0:testtype:0:");
+  REQUIRE(sm->COMMANDS[1] == "setup_chain:0:/sandbox/abcdef/example/a/b:0:nil");
+  REQUIRE(sm->COMMANDS[2] == "destroy_partition:0");
 }
 
 TEST_CASE("path_sync_test", "[file][dir]") {
   auto alloc = std::make_shared<dummy_block_allocator>(4);
   auto sm = std::make_shared<dummy_storage_manager>();
   directory_tree tree(alloc, sm);
-  REQUIRE_NOTHROW(tree.create("/sandbox/abcdef/example/a/b", "local://tmp", 1, 1, 0));
-  REQUIRE_NOTHROW(tree.create("/sandbox/abcdef/example/c", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/abcdef/example/a/b", "testtype", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/abcdef/example/c", "testtype", "local://tmp", 1, 1, 0));
   REQUIRE(alloc->num_free_blocks() == 2);
 
   REQUIRE_NOTHROW(tree.sync("/sandbox/abcdef/example/c", "local://tmp"));
@@ -198,11 +198,13 @@ TEST_CASE("path_sync_test", "[file][dir]") {
   REQUIRE(tree.dstatus("/sandbox/abcdef/example/a/b").mode() == std::vector<storage_mode>{storage_mode::in_memory});
 
   REQUIRE(alloc->num_free_blocks() == 2);
-  REQUIRE(sm->COMMANDS.size() == 4);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/abcdef/example/a/b:0:65536:0:1:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "setup_block:1:/sandbox/abcdef/example/c:0:65536:1:1:0:nil");
-  REQUIRE(sm->COMMANDS[2] == "sync:1:local://tmp/0_65536");
-  REQUIRE(sm->COMMANDS[3] == "sync:0:local://tmp/0_65536");
+  REQUIRE(sm->COMMANDS.size() == 6);
+  REQUIRE(sm->COMMANDS[0] == "create_partition:0:testtype:0:");
+  REQUIRE(sm->COMMANDS[1] == "setup_chain:0:/sandbox/abcdef/example/a/b:0:nil");
+  REQUIRE(sm->COMMANDS[2] == "create_partition:1:testtype:0:");
+  REQUIRE(sm->COMMANDS[3] == "setup_chain:1:/sandbox/abcdef/example/c:0:nil");
+  REQUIRE(sm->COMMANDS[4] == "sync:1:local://tmp/0");
+  REQUIRE(sm->COMMANDS[5] == "sync:0:local://tmp/0");
 }
 
 TEST_CASE("rename_test", "[file][dir]") {
@@ -210,7 +212,7 @@ TEST_CASE("rename_test", "[file][dir]") {
   auto sm = std::make_shared<dummy_storage_manager>();
   directory_tree tree(alloc, sm);
 
-  REQUIRE_NOTHROW(tree.create("/sandbox/from/file1.txt", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/from/file1.txt", "testtype", "local://tmp", 1, 1, 0));
   REQUIRE_NOTHROW(tree.create_directory("/sandbox/to"));
   REQUIRE_NOTHROW(tree.create_directory("/sandbox/to2"));
 
@@ -233,7 +235,7 @@ TEST_CASE("status_test", "[file][dir]") {
   directory_tree tree(alloc, sm);
 
   std::uint64_t before = time_utils::now_ms();
-  REQUIRE_NOTHROW(tree.create("/sandbox/file", "local://tmp", 1, 1, 0, perms::owner_all()));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file", "testtype", "local://tmp", 1, 1, 0, perms::owner_all()));
   std::uint64_t after = time_utils::now_ms();
   REQUIRE(tree.status("/sandbox/file").permissions() == perms::owner_all);
   REQUIRE(tree.status("/sandbox/file").type() == file_type::regular);
@@ -257,9 +259,9 @@ TEST_CASE("directory_entries_test", "[file][dir]") {
   std::uint64_t t0 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_directories("/sandbox/a/b"));
   std::uint64_t t1 = time_utils::now_ms();
-  REQUIRE_NOTHROW(tree.create("/sandbox/file1.txt", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file1.txt", "testtype", "local://tmp", 1, 1, 0));
   std::uint64_t t2 = time_utils::now_ms();
-  REQUIRE_NOTHROW(tree.create("/sandbox/file2.txt", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file2.txt", "testtype", "local://tmp", 1, 1, 0));
   std::uint64_t t3 = time_utils::now_ms();
 
   std::vector<directory_entry> entries;
@@ -290,9 +292,9 @@ TEST_CASE("recursive_directory_entries_test", "[file][dir]") {
   std::uint64_t t0 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_directories("/sandbox/a/b"));
   std::uint64_t t1 = time_utils::now_ms();
-  REQUIRE_NOTHROW(tree.create("/sandbox/file1.txt", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file1.txt", "testtype", "local://tmp", 1, 1, 0));
   std::uint64_t t2 = time_utils::now_ms();
-  REQUIRE_NOTHROW(tree.create("/sandbox/file2.txt", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file2.txt", "testtype", "local://tmp", 1, 1, 0));
   std::uint64_t t3 = time_utils::now_ms();
 
   std::vector<directory_entry> entries;
@@ -325,13 +327,15 @@ TEST_CASE("dstatus_test", "[file]") {
   auto sm = std::make_shared<dummy_storage_manager>();
   directory_tree tree(alloc, sm);
 
-  REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "local://tmp", 1, 1, 0, perms::all(), {{"key", "value"}}));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "testtype", "local://tmp", 1, 1, 0, perms::all(), {"partition_name"},
+      {"partition_metadata"}, {{"key", "value"}}));
   REQUIRE_THROWS_AS(tree.dstatus("/sandbox"), directory_ops_exception);
   REQUIRE(tree.dstatus("/sandbox/file.txt").mode() == std::vector<storage_mode>{storage_mode::in_memory});
   REQUIRE(tree.dstatus("/sandbox/file.txt").backing_path() == "local://tmp");
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().size() == 1);
-  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).slot_range == std::make_pair(0, 65536));
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).block_names[0] == "0");
+  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).name == "partition_name");
+  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).metadata == "partition_metadata");
   REQUIRE(tree.dstatus("/sandbox/file.txt").get_tag("key") == "value");
 }
 
@@ -345,7 +349,8 @@ TEST_CASE("tags_test", "[file]") {
   auto sm = std::make_shared<dummy_storage_manager>();
   directory_tree tree(alloc, sm);
 
-  REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "local://tmp", 1, 1, 0, perms::all(), {{"key", "value"}}));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "testtype", "local://tmp", 1, 1, 0, perms::all(), {"0"}, {""},
+      {{"key", "value"}}));
   REQUIRE(tree.dstatus("/sandbox/file.txt").get_tag("key") == "value");
   REQUIRE_NOTHROW(tree.add_tags("/sandbox/file.txt", {{"key2", "value2"}}));
   REQUIRE(map_equals(tree.dstatus("/sandbox/file.txt").get_tags(), {{"key", "value"}, {"key2", "value2"}}));
@@ -358,80 +363,10 @@ TEST_CASE("file_type_test", "[file][dir]") {
   auto sm = std::make_shared<dummy_storage_manager>();
   directory_tree tree(alloc, sm);
 
-  REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "local://tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "testtype", "local://tmp", 1, 1, 0));
   REQUIRE(tree.is_regular_file("/sandbox/file.txt"));
   REQUIRE_FALSE(tree.is_directory("/sandbox/file.txt"));
 
   REQUIRE(tree.is_directory("/sandbox"));
   REQUIRE_FALSE(tree.is_regular_file("/sandbox"));
-}
-
-TEST_CASE("add_block_to_file_test", "[file]") {
-  auto alloc = std::make_shared<dummy_block_allocator>(4);
-  auto sm = std::make_shared<dummy_storage_manager>();
-  directory_tree tree(alloc, sm);
-  REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "local://tmp", 1, 1, 0));
-  REQUIRE_NOTHROW(tree.add_block_to_file("/sandbox/file.txt"));
-  // Busy wait until number of blocks increases
-  while (tree.dstatus("/sandbox/file.txt").data_blocks().size() == 1);
-  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().size() == 2);
-  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).status == chain_status::stable);
-  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).slot_range == std::make_pair(0, 32768));
-  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(1).status == chain_status::stable);
-  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(1).slot_range == std::make_pair(32769, 65536));
-  REQUIRE(sm->COMMANDS.size() == 7);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/file.txt:0:65536:0:1:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "storage_size:0");
-  REQUIRE(sm->COMMANDS[2] == "setup_and_set_importing:1:/sandbox/file.txt:32769:65536:1:0:nil");
-  REQUIRE(sm->COMMANDS[3] == "set_exporting:0:1:32769:65536");
-  REQUIRE(sm->COMMANDS[4] == "export_slots:0");
-  REQUIRE(sm->COMMANDS[5] == "set_regular:0:0:32768");
-  REQUIRE(sm->COMMANDS[6] == "set_regular:1:32769:65536");
-}
-
-TEST_CASE("split_block_test", "[file]") {
-  auto alloc = std::make_shared<dummy_block_allocator>(4);
-  auto sm = std::make_shared<dummy_storage_manager>();
-  directory_tree tree(alloc, sm);
-  REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "local://tmp", 1, 1, 0));
-  REQUIRE_NOTHROW(tree.split_slot_range("/sandbox/file.txt", 0, 65536));
-  // Busy wait until number of blocks increases
-  while (tree.dstatus("/sandbox/file.txt").data_blocks().size() == 1);
-
-  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().size() == 2);
-  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).status == chain_status::stable);
-  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).slot_range == std::make_pair(0, 32768));
-  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(1).status == chain_status::stable);
-  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(1).slot_range == std::make_pair(32769, 65536));
-  REQUIRE(sm->COMMANDS.size() == 6);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/file.txt:0:65536:0:1:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "setup_and_set_importing:1:/sandbox/file.txt:32769:65536:1:0:nil");
-  REQUIRE(sm->COMMANDS[2] == "set_exporting:0:1:32769:65536");
-  REQUIRE(sm->COMMANDS[3] == "export_slots:0");
-  REQUIRE(sm->COMMANDS[4] == "set_regular:0:0:32768");
-  REQUIRE(sm->COMMANDS[5] == "set_regular:1:32769:65536");
-}
-
-TEST_CASE("merge_block_test", "[file]") {
-  auto alloc = std::make_shared<dummy_block_allocator>(4);
-  auto sm = std::make_shared<dummy_storage_manager>();
-  directory_tree tree(alloc, sm);
-  REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "local://tmp", 2, 1, 0));
-  REQUIRE_NOTHROW(tree.merge_slot_range("/sandbox/file.txt", 0, 32767));
-  // Busy wait until number of blocks decreases
-  while (tree.dstatus("/sandbox/file.txt").data_blocks().size() == 2);
-
-  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().size() == 1);
-  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).status == chain_status::stable);
-  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).slot_range == std::make_pair(0, 65536));
-  REQUIRE(sm->COMMANDS.size() == 7);
-  const auto &cmd1 = std::min(sm->COMMANDS[0], sm->COMMANDS[1]);
-  const auto &cmd2 = std::max(sm->COMMANDS[0], sm->COMMANDS[1]);
-  REQUIRE(cmd1 == "setup_block:0:/sandbox/file.txt:0:32767:0:1:0:nil");
-  REQUIRE(cmd2 == "setup_block:1:/sandbox/file.txt:32768:65536:1:1:0:nil");
-  REQUIRE(sm->COMMANDS[2] == "set_importing:1:0:32767");
-  REQUIRE(sm->COMMANDS[3] == "set_exporting:0:1:0:32767");
-  REQUIRE(sm->COMMANDS[4] == "export_slots:0");
-  REQUIRE(sm->COMMANDS[5] == "reset:0");
-  REQUIRE(sm->COMMANDS[6] == "set_regular:1:0:65536");
 }

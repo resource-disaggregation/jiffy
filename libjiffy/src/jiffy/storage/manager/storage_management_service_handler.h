@@ -2,8 +2,7 @@
 #define JIFFY_KV_MANAGEMENT_RPC_SERVICE_HANDLER_H
 
 #include "storage_management_service.h"
-#include "../block.h"
-#include "../chain_module.h"
+#include "jiffy/storage/block.h"
 
 namespace jiffy {
 namespace storage {
@@ -17,7 +16,41 @@ class storage_management_service_handler : public storage_management_serviceIf {
    * @param blocks Blocks
    */
 
-  explicit storage_management_service_handler(std::vector<std::shared_ptr<chain_module>> &blocks);
+  explicit storage_management_service_handler(std::vector<std::shared_ptr<block>> &blocks);
+
+  /**
+   * @brief Create partition
+   * @param block_id Block identifier
+   * @param type Partition type
+   * @param name Partition name
+   * @param metadata Partition metadata
+   * @param conf Partition configuration parameters
+   */
+
+  void create_partition(int32_t block_id,
+                        const std::string &type,
+                        const std::string &name,
+                        const std::string &metadata,
+                        const std::map<std::string, std::string> &conf) override;
+
+  /**
+   * @brief Setup a block
+   * @param block_id Block identifier
+   * @param path Block path
+   * @param chain Chain block names
+   * @param chain_role Chain role
+   * @param next_block_name Next block's name
+   */
+
+  void setup_chain(int32_t block_id, const std::string &path, const std::vector<std::string> &chain,
+                   int32_t chain_role, const std::string &next_block_name) override;
+
+  /**
+   * @brief Destroy partition
+   * @param block_id Block identifier
+   */
+
+  void destroy_partition(int32_t block_id) override;
 
   /**
    * @brief Get block path
@@ -52,13 +85,6 @@ class storage_management_service_handler : public storage_management_serviceIf {
   void load(int32_t block_id, const std::string &backing_path) override;
 
   /**
-   * @brief Reset block
-   * @param block_id Block identifier
-   */
-
-  void reset(int32_t block_id) override;
-
-  /**
    * @brief Fetch storage capacity of block
    * @param block_id Block identifier
    * @return Block storage capacity
@@ -88,94 +114,6 @@ class storage_management_service_handler : public storage_management_serviceIf {
 
   void forward_all(int32_t block_id) override;
 
-  /**
-   * @brief Setup a block
-   * @param block_id Block identifier
-   * @param path Block path
-   * @param slot_begin Block begin slot
-   * @param slot_end Block end slot
-   * @param chain Chain block names
-   * @param auto_scale Bool value, true if auto_scale is on
-   * @param chain_role Chain role
-   * @param next_block_name Next block's name
-   */
-
-  void setup_block(int32_t block_id,
-                   const std::string &path,
-                   int32_t slot_begin,
-                   int32_t slot_end,
-                   const std::vector<std::string> &chain,
-                   bool auto_scale,
-                   int32_t chain_role,
-                   const std::string &next_block_name) override;
-
-  /**
-   * @brief Fetch slot range of block
-   * @param _return Slot range to be returned
-   * @param block_id Block identifier
-   */
-
-  void slot_range(rpc_slot_range &_return, int32_t block_id) override;
-
-  /**
-   * @brief Setup exporting target and slot range
-   * @param block_id Block identifier
-   * @param target_block Exporting target blocks
-   * @param slot_begin Export begin slot
-   * @param slot_end Export end slot
-   */
-
-  void set_exporting(int32_t block_id,
-                     const std::vector<std::string> &target_block,
-                     int32_t slot_begin,
-                     int32_t slot_end) override;
-
-  /**
-   * @brief Setup importing slot range
-   * @param block_id Block identifier
-   * @param slot_begin Importing begin slot
-   * @param slot_end Importing end slot
-   */
-
-  void set_importing(int32_t block_id,
-                     int32_t slot_begin,
-                     int32_t slot_end) override;
-
-  /**
-   * @brief Setup the block and set importing slot range
-   * @param block_id Block identifier
-   * @param path Block path
-   * @param slot_begin Importing begin slot
-   * @param slot_end Importing end slot
-   * @param chain Chain block names
-   * @param chain_role Chain role
-   * @param next_block_name Next block name
-   */
-
-  void setup_and_set_importing(int32_t block_id,
-                               const std::string &path,
-                               int32_t slot_begin,
-                               int32_t slot_end,
-                               const std::vector<std::string> &chain,
-                               int32_t chain_role,
-                               const std::string &next_block_name) override;
-
-  /**
-   * @brief Export slots
-   * @param block_id Block identifier
-   */
-
-  void export_slots(int32_t block_id) override;
-
-  /**
-   * @brief Set the block to be regular after exporting
-   * @param block_id Block identifier
-   * @param slot_begin Begin slot
-   * @param slot_end End slot
-   */
-
-  void set_regular(int32_t block_id, int32_t slot_begin, int32_t slot_end) override;
-
  private:
 
   /**
@@ -195,7 +133,7 @@ class storage_management_service_handler : public storage_management_serviceIf {
   storage_management_exception make_exception(const std::string &msg);
 
   /* Blocks */
-  std::vector<std::shared_ptr<chain_module>> &blocks_;
+  std::vector<std::shared_ptr<block>> &blocks_;
 };
 
 }

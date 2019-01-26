@@ -18,7 +18,7 @@ using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 using namespace ::apache::thrift::concurrency;
 
-std::shared_ptr<TServer> chain_server::create(std::vector<std::shared_ptr<chain_module>> &blocks,
+std::shared_ptr<TServer> chain_server::create(std::vector<std::shared_ptr<block>> &blocks,
                                               const std::string &address,
                                               int port,
                                               bool non_blocking,

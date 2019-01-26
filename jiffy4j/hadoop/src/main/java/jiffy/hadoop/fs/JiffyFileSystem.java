@@ -13,7 +13,7 @@ import jiffy.directory.rpc_data_status;
 import jiffy.directory.rpc_dir_entry;
 import jiffy.directory.rpc_file_status;
 import jiffy.directory.rpc_file_type;
-import jiffy.kv.KVClient;
+import jiffy.storage.HashTableClient;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CreateFlag;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -98,7 +98,7 @@ public class JiffyFileSystem extends FileSystem {
   public FSDataInputStream open(Path path, int bufferSize) throws IOException {
     String pathStr = makeAbsolute(path).toString();
     try {
-      KVClient kv = client.open(pathStr);
+      HashTableClient kv = client.open(pathStr);
       long fileLength = Long.parseLong(kv.getDataStatus().tags.get("FileLength"));
       long blockSize = Long.parseLong(kv.getDataStatus().tags.get("BlockSize"));
       return new FSDataInputStream(new JiffyInputStream(client, pathStr, kv, blockSize, fileLength));
@@ -121,12 +121,12 @@ public class JiffyFileSystem extends FileSystem {
       Map<String, String> tags = new HashMap<>();
       tags.put("BlockSize", String.valueOf(blockSize));
       tags.put("FileLength", String.valueOf(0));
-      KVClient kv;
+      HashTableClient kv;
       if (overwrite) {
-        kv = client.openOrCreate(pathStr, persistentPath, DEFAULT_NUM_BLOCKS, replication, 0,
+        kv = client.openOrCreateHashTable(pathStr, persistentPath, DEFAULT_NUM_BLOCKS, replication, 0,
             fsPermission.toShort(), tags);
       } else {
-        kv = client.create(pathStr, persistentPath, DEFAULT_NUM_BLOCKS, replication, 0,
+        kv = client.createHashTable(pathStr, persistentPath, DEFAULT_NUM_BLOCKS, replication, 0,
             fsPermission.toShort(), tags);
       }
       return new FSDataOutputStream(new JiffyOutputStream(client, pathStr, kv, blockSize),

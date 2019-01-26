@@ -5,7 +5,7 @@
 
 #include "block_request_service.h"
 #include "block_response_client.h"
-#include "../chain_module.h"
+#include "jiffy/storage/block.h"
 
 namespace jiffy {
 namespace storage {
@@ -23,7 +23,7 @@ class block_request_handler : public block_request_serviceIf {
 
   explicit block_request_handler(std::shared_ptr<block_response_client> client,
                                  std::atomic<int64_t> &client_id_gen,
-                                 std::vector<std::shared_ptr<chain_module>> &blocks);
+                                 std::vector<std::shared_ptr<block>> &blocks);
 
   /**
    * @brief Fetch client identifier and add one to the atomic pointer
@@ -72,14 +72,14 @@ class block_request_handler : public block_request_serviceIf {
  private:
   /* Block response client */
   std::shared_ptr<block_response_client> client_;
-  /* Registered block identifier */
+  /* Registered partition identifier */
   int32_t registered_block_id_;
   /* Registered client identifier */
   int64_t registered_client_id_;
   /* Client identifier generator */
   std::atomic<int64_t> &client_id_gen_;
   /* Data blocks */
-  std::vector<std::shared_ptr<chain_module>> &blocks_;
+  std::vector<std::shared_ptr<block>> &blocks_;
 };
 
 }
