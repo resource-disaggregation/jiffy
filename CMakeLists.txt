@@ -33,8 +33,12 @@ add_subdirectory(directory)
 add_subdirectory(storage)
 
 if (BUILD_TESTS)
-  enable_testing(true)
+  include(CTest)
 endif ()
+
+if (BUILD_DOC)
+  add_subdirectory(docs)
+endif()
 
 install(FILES conf/jiffy.conf DESTINATION conf)
 

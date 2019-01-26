@@ -2,6 +2,7 @@ include(CMakeDependentOption)
 
 # Components to build
 option(BUILD_TESTS "Build with unittests" ON)
+option(BUILD_DOC "Build documentation" OFF)
 CMAKE_DEPENDENT_OPTION(USE_SYSTEM_CATCH "Use system catch library" OFF "BUILD_TESTS" OFF)
 option(USE_SYSTEM_BOOST "Use system boost libraries" OFF)
 option(USE_SYSTEM_THRIFT "Use system thrift library" OFF)
@@ -16,6 +17,7 @@ message(STATUS "${PROJECT_NAME} version:                        ${PROJECT_VERSIO
 message(STATUS "Build configuration Summary")
 message(STATUS "  Build with unit tests:                  ${BUILD_TESTS}")
 message(STATUS "    Use system catch library:             ${USE_SYSTEM_CATCH}")
+message(STATUS "  Build documentation:                    ${BUILD_DOC}")
 message(STATUS "  Use system thrift library:              ${USE_SYSTEM_THRIFT}")
 message(STATUS "  Use system libcuckoo library:           ${USE_SYSTEM_LIBCUCKOO}")
 message(STATUS "  Use system AWS SDK:                     ${USE_SYSTEM_AWS_SDK}")
