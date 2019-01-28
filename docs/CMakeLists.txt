@@ -79,7 +79,7 @@ add_custom_target(javaclient_doc ALL
 add_custom_target(docs
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/mkdocs.stamp ${CMAKE_CURRENT_BINARY_DIR}/cpp.log ${CMAKE_CURRENT_BINARY_DIR}/py_client.log ${CMAKE_CURRENT_BINARY_DIR}/java_client.log)
 
-serve documentation website locally
+#serve documentation website locally
 add_custom_target(docs_serve
         COMMAND ${MKDOCS_EXECUTABLE} serve
         DEPENDS docs
