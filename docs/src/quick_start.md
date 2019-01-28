@@ -46,8 +46,6 @@ open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10
 
 TODO needs to be replaced with proper image
 
-![Diagram](./img/diagram.png)
-
 
 
 ### Start server
@@ -55,7 +53,7 @@ TODO needs to be replaced with proper image
 After installation, we can first start a directory server by running:
 
 ```bash
-directoryd
+directoryd --config jiffy.conf
 ```
 
 We can then start multiple storage servers in different port configurations by running:
@@ -160,12 +158,35 @@ TODO
 
 
 
-The Jiffy client could also listen after a path and receive notification by using the subscription client.
+The Jiffy client could also listen after a path on a specific operation and receive notification via the subscription client.
 
 ```python tab="Python"
+
+client = JiffyClient("127.0.0.1", 9090, 9091)
+client.create("/a/file.txt", "local://tmp")
+# Create subscription client listenning to specific file
 subscription = client.listen("/a/file.txt")
+# Subscription client listenning on operation 'put'
+subscription.subscribe(['put'])
 
-subscription.subscribe("put")
+hash_table = client.open("/a/file.txt")
+hash_table.put(b'key1', b'value1')
+hash_table.remove(b'key1')
+
+# Receive notification
+# The expected output would be {op=put, data=b'key1'}
+print(subscription.get_notification())
+
+# Unsubscrbe operations
+subscription.unsubscrbe(['put'])
+
+# Disconnect
+subscription.disconnect()
+
+client.close("/a/file.txt")
+client.remove("/a/file.txt")
+client.disconnect()
+
 ```
 
 ```java tab="Java"
@@ -174,18 +195,6 @@ TODO
 
 
 
-We could use the subscription client to check whether it has received notification and get the notification.
-
-TODO: not able to realize and in chain_module.cpp there is some code that needs fix
-
-```python tab="Python"
-while not subscription.has_notification():
-	notify = subscription.get_notification()
-```
-
-```java tab="Java"
-TODO
-```
 
 
 
@@ -223,7 +232,7 @@ TODO
 
 
 
-We can also update or remove specific key-value pairs as following:
+We can also update or remove specific key-value pairs as follows:
 
 ```python tab="Python"
 hash_table.update(b"key", b"value")
@@ -236,7 +245,7 @@ TODO
 
 
 
-All the operation can be done in batches as following:
+All the operation can be done in batches as follows:
 
 ```python tab="Python"
 args = [b"key1", b"value1", b"key2", b"value2"]

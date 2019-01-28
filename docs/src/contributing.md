@@ -9,7 +9,7 @@ to make via issue, email, or any other method with the owners of this
 repository before making a change.
 
 Please note we have a 
-[code of conduct](https://github.com/ucbrise/confluo/blob/single-machine/CODE_OF_CONDUCT.md),
+[code of conduct](https://github.com/ucbrise/jiffy/blob/new_arch/CODE_OF_CONDUCT.md),
 please follow it in all your interactions with the project.
 
 ## Pull Request Process

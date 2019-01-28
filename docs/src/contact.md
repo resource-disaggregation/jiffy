@@ -24,4 +24,5 @@ istoica AT berkeley.edu</p>
 
 <p>Jiffy also benefits from contributions from amazing current and past 
 undergraduate students at UC Berkeley: <br/></p>
+Yupeng Tang
 

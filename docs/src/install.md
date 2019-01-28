@@ -39,7 +39,7 @@ The external libraries are automatically downloaded and built. User can specify 
 * `USE_SYSTEM_LIBCUCKOO`: Use system libcuckoo library (OFF by default)
 * `USE_SYSTEM_THRIFT`: Use system thrift library (OFF by default)
 
-Finally, you can configure the install location for Confluo by modifying the
+Finally, you can configure the install location for Jiffy by modifying the
 `CMAKE_INSTALL_PREFIX` variable (which is set to /usr/local by default):
 
 ```bash
