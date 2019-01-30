@@ -341,7 +341,7 @@ if (NOT USE_SYSTEM_JEMALLOC)
           PREFIX ${JEMALLOC_PREFIX}
           BUILD_BYPRODUCTS ${JEMALLOC_LIBRARIES}
           CONFIGURE_COMMAND ${JEMALLOC_PREFIX}/src/jemalloc/configure --with-jemalloc-prefix=${JEMALLOC_FUNCTION_PREFIX} --prefix=${JEMALLOC_PREFIX} --enable-autogen --enable-prof-libunwind CFLAGS=${JEMALLOC_C_FLAGS} CXXFLAGS=${JEMALLOC_CXX_FLAGS}
-          INSTALL_COMMAND make install_lib
+          INSTALL_COMMAND make install_include install_lib
           LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON
