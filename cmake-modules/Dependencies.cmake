@@ -346,6 +346,8 @@ if (NOT USE_SYSTEM_JEMALLOC)
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
+  include_directories(SYSTEM ${JEMALLOC_INCLUDE_DIR})
+  message(STATUS "Jemalloc include dir: ${JEMALLOC_INCLUDE_DIR}")
   message(STATUS "Jemalloc library: ${JEMALLOC_LIBRARIES}")
   install(FILES ${JEMALLOC_LIBRARIES} DESTINATION lib)
 endif ()
