@@ -17,8 +17,9 @@ void *block_memory_manager::mb_malloc(size_t size) {
 }
 
 void block_memory_manager::mb_free(void *ptr) {
+  auto size = sallocx(ptr, 0);
   free(ptr);
-  used_ -= sallocx(ptr, 0);
+  used_ -= size;
 }
 
 size_t block_memory_manager::mb_capacity() const {
