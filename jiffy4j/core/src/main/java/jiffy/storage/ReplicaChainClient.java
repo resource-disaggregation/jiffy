@@ -34,7 +34,7 @@ public class ReplicaChainClient implements Closeable {
         String[] parts = response.split("!");
         this.redirectChain = new rpc_replica_chain(new ArrayList<>(parts.length - 1), parent.getChain().getName(), parent.getChain().getMetadata(),
             rpc_storage_mode.rpc_in_memory);
-        this.redirectChain.block_names.addAll(Arrays.asList(parts).subList(2, parts.length));
+        this.redirectChain.block_ids.addAll(Arrays.asList(parts).subList(2, parts.length));
       } else {
         this.redirecting = false;
         this.redirectChain = null;
@@ -94,7 +94,7 @@ public class ReplicaChainClient implements Closeable {
 
   ReplicaChainClient(Client fs, String path, BlockClientCache cache, rpc_replica_chain chain)
       throws TException {
-    if (chain == null || chain.block_names.size() == 0) {
+    if (chain == null || chain.block_ids.size() == 0) {
       throw new IllegalArgumentException("Chain length must be >= 1");
     }
     this.fs = fs;
@@ -194,13 +194,13 @@ public class ReplicaChainClient implements Closeable {
 
   private void connect() throws TException {
     this.seq = new sequence_id(-1, 0, -1);
-    BlockMetadata h = BlockNameParser.parse(chain.block_names.get(0));
+    BlockMetadata h = BlockNameParser.parse(chain.block_ids.get(0));
     this.head = new BlockClient(cache, h.getHost(), h.getServicePort(), h.getBlockId());
     this.seq.setClientId(this.head.getClientId());
-    if (chain.block_names.size() == 1) {
+    if (chain.block_ids.size() == 1) {
       this.tail = this.head;
     } else {
-      BlockMetadata t = BlockNameParser.parse(chain.block_names.get(chain.block_names.size() - 1));
+      BlockMetadata t = BlockNameParser.parse(chain.block_ids.get(chain.block_ids.size() - 1));
       this.tail = new BlockClient(cache, t.getHost(), t.getServicePort(), t.getBlockId());
     }
     this.responseReader = this.tail.newCommandResponseReader(seq.getClientId());
@@ -208,7 +208,7 @@ public class ReplicaChainClient implements Closeable {
   }
 
   private void invalidateCache() {
-    for (String block : chain.block_names) {
+    for (String block : chain.block_ids) {
       BlockMetadata m = BlockNameParser.parse(block);
       cache.remove(m.getHost(), m.getServicePort());
     }

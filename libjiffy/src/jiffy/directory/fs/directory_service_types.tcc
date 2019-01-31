@@ -24,7 +24,7 @@ uint32_t rpc_replica_chain::read(Protocol_* iprot) {
 
   using ::apache::thrift::protocol::TProtocolException;
 
-  bool isset_block_names = false;
+  bool isset_block_ids = false;
   bool isset_name = false;
   bool isset_metadata = false;
   bool isset_storage_mode = false;
@@ -40,19 +40,19 @@ uint32_t rpc_replica_chain::read(Protocol_* iprot) {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
-            this->block_names.clear();
+            this->block_ids.clear();
             uint32_t _size0;
             ::apache::thrift::protocol::TType _etype3;
             xfer += iprot->readListBegin(_etype3, _size0);
-            this->block_names.resize(_size0);
+            this->block_ids.resize(_size0);
             uint32_t _i4;
             for (_i4 = 0; _i4 < _size0; ++_i4)
             {
-              xfer += iprot->readString(this->block_names[_i4]);
+              xfer += iprot->readString(this->block_ids[_i4]);
             }
             xfer += iprot->readListEnd();
           }
-          isset_block_names = true;
+          isset_block_ids = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -92,7 +92,7 @@ uint32_t rpc_replica_chain::read(Protocol_* iprot) {
 
   xfer += iprot->readStructEnd();
 
-  if (!isset_block_names)
+  if (!isset_block_ids)
     throw TProtocolException(TProtocolException::INVALID_DATA);
   if (!isset_name)
     throw TProtocolException(TProtocolException::INVALID_DATA);
@@ -109,11 +109,11 @@ uint32_t rpc_replica_chain::write(Protocol_* oprot) const {
   ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_replica_chain");
 
-  xfer += oprot->writeFieldBegin("block_names", ::apache::thrift::protocol::T_LIST, 1);
+  xfer += oprot->writeFieldBegin("block_ids", ::apache::thrift::protocol::T_LIST, 1);
   {
-    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->block_names.size()));
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->block_ids.size()));
     std::vector<std::string> ::const_iterator _iter6;
-    for (_iter6 = this->block_names.begin(); _iter6 != this->block_names.end(); ++_iter6)
+    for (_iter6 = this->block_ids.begin(); _iter6 != this->block_ids.end(); ++_iter6)
     {
       xfer += oprot->writeString((*_iter6));
     }

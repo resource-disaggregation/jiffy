@@ -21,8 +21,8 @@ namespace jiffy { namespace directory {
 class block_registration_serviceIf {
  public:
   virtual ~block_registration_serviceIf() {}
-  virtual void add_blocks(const std::vector<std::string> & block_names) = 0;
-  virtual void remove_blocks(const std::vector<std::string> & block_names) = 0;
+  virtual void add_blocks(const std::vector<std::string> & block_ids) = 0;
+  virtual void remove_blocks(const std::vector<std::string> & block_ids) = 0;
 };
 
 class block_registration_serviceIfFactory {
@@ -52,17 +52,17 @@ class block_registration_serviceIfSingletonFactory : virtual public block_regist
 class block_registration_serviceNull : virtual public block_registration_serviceIf {
  public:
   virtual ~block_registration_serviceNull() {}
-  void add_blocks(const std::vector<std::string> & /* block_names */) {
+  void add_blocks(const std::vector<std::string> & /* block_ids */) {
     return;
   }
-  void remove_blocks(const std::vector<std::string> & /* block_names */) {
+  void remove_blocks(const std::vector<std::string> & /* block_ids */) {
     return;
   }
 };
 
 typedef struct _block_registration_service_add_blocks_args__isset {
-  _block_registration_service_add_blocks_args__isset() : block_names(false) {}
-  bool block_names :1;
+  _block_registration_service_add_blocks_args__isset() : block_ids(false) {}
+  bool block_ids :1;
 } _block_registration_service_add_blocks_args__isset;
 
 class block_registration_service_add_blocks_args {
@@ -74,15 +74,15 @@ class block_registration_service_add_blocks_args {
   }
 
   virtual ~block_registration_service_add_blocks_args() throw();
-  std::vector<std::string>  block_names;
+  std::vector<std::string>  block_ids;
 
   _block_registration_service_add_blocks_args__isset __isset;
 
-  void __set_block_names(const std::vector<std::string> & val);
+  void __set_block_ids(const std::vector<std::string> & val);
 
   bool operator == (const block_registration_service_add_blocks_args & rhs) const
   {
-    if (!(block_names == rhs.block_names))
+    if (!(block_ids == rhs.block_ids))
       return false;
     return true;
   }
@@ -105,7 +105,7 @@ class block_registration_service_add_blocks_pargs {
 
 
   virtual ~block_registration_service_add_blocks_pargs() throw();
-  const std::vector<std::string> * block_names;
+  const std::vector<std::string> * block_ids;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -171,8 +171,8 @@ class block_registration_service_add_blocks_presult {
 };
 
 typedef struct _block_registration_service_remove_blocks_args__isset {
-  _block_registration_service_remove_blocks_args__isset() : block_names(false) {}
-  bool block_names :1;
+  _block_registration_service_remove_blocks_args__isset() : block_ids(false) {}
+  bool block_ids :1;
 } _block_registration_service_remove_blocks_args__isset;
 
 class block_registration_service_remove_blocks_args {
@@ -184,15 +184,15 @@ class block_registration_service_remove_blocks_args {
   }
 
   virtual ~block_registration_service_remove_blocks_args() throw();
-  std::vector<std::string>  block_names;
+  std::vector<std::string>  block_ids;
 
   _block_registration_service_remove_blocks_args__isset __isset;
 
-  void __set_block_names(const std::vector<std::string> & val);
+  void __set_block_ids(const std::vector<std::string> & val);
 
   bool operator == (const block_registration_service_remove_blocks_args & rhs) const
   {
-    if (!(block_names == rhs.block_names))
+    if (!(block_ids == rhs.block_ids))
       return false;
     return true;
   }
@@ -215,7 +215,7 @@ class block_registration_service_remove_blocks_pargs {
 
 
   virtual ~block_registration_service_remove_blocks_pargs() throw();
-  const std::vector<std::string> * block_names;
+  const std::vector<std::string> * block_ids;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -306,11 +306,11 @@ class block_registration_serviceClientT : virtual public block_registration_serv
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void add_blocks(const std::vector<std::string> & block_names);
-  void send_add_blocks(const std::vector<std::string> & block_names);
+  void add_blocks(const std::vector<std::string> & block_ids);
+  void send_add_blocks(const std::vector<std::string> & block_ids);
   void recv_add_blocks();
-  void remove_blocks(const std::vector<std::string> & block_names);
-  void send_remove_blocks(const std::vector<std::string> & block_names);
+  void remove_blocks(const std::vector<std::string> & block_ids);
+  void send_remove_blocks(const std::vector<std::string> & block_ids);
   void recv_remove_blocks();
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
@@ -386,22 +386,22 @@ class block_registration_serviceMultiface : virtual public block_registration_se
     ifaces_.push_back(iface);
   }
  public:
-  void add_blocks(const std::vector<std::string> & block_names) {
+  void add_blocks(const std::vector<std::string> & block_ids) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->add_blocks(block_names);
+      ifaces_[i]->add_blocks(block_ids);
     }
-    ifaces_[i]->add_blocks(block_names);
+    ifaces_[i]->add_blocks(block_ids);
   }
 
-  void remove_blocks(const std::vector<std::string> & block_names) {
+  void remove_blocks(const std::vector<std::string> & block_ids) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->remove_blocks(block_names);
+      ifaces_[i]->remove_blocks(block_ids);
     }
-    ifaces_[i]->remove_blocks(block_names);
+    ifaces_[i]->remove_blocks(block_ids);
   }
 
 };
@@ -435,11 +435,11 @@ class block_registration_serviceConcurrentClientT : virtual public block_registr
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void add_blocks(const std::vector<std::string> & block_names);
-  int32_t send_add_blocks(const std::vector<std::string> & block_names);
+  void add_blocks(const std::vector<std::string> & block_ids);
+  int32_t send_add_blocks(const std::vector<std::string> & block_ids);
   void recv_add_blocks(const int32_t seqid);
-  void remove_blocks(const std::vector<std::string> & block_names);
-  int32_t send_remove_blocks(const std::vector<std::string> & block_names);
+  void remove_blocks(const std::vector<std::string> & block_ids);
+  int32_t send_remove_blocks(const std::vector<std::string> & block_ids);
   void recv_remove_blocks(const int32_t seqid);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;

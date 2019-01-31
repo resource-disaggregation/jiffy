@@ -72,22 +72,22 @@ class rpc_storage_mode(object):
 class rpc_replica_chain(object):
     """
     Attributes:
-     - block_names
+     - block_ids
      - name
      - metadata
      - storage_mode
     """
 
     __slots__ = (
-        'block_names',
+        'block_ids',
         'name',
         'metadata',
         'storage_mode',
     )
 
 
-    def __init__(self, block_names=None, name=None, metadata=None, storage_mode=None,):
-        self.block_names = block_names
+    def __init__(self, block_ids=None, name=None, metadata=None, storage_mode=None,):
+        self.block_ids = block_ids
         self.name = name
         self.metadata = metadata
         self.storage_mode = storage_mode
@@ -103,11 +103,11 @@ class rpc_replica_chain(object):
                 break
             if fid == 1:
                 if ftype == TType.LIST:
-                    self.block_names = []
+                    self.block_ids = []
                     (_etype3, _size0) = iprot.readListBegin()
                     for _i4 in range(_size0):
                         _elem5 = iprot.readString()
-                        self.block_names.append(_elem5)
+                        self.block_ids.append(_elem5)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -136,10 +136,10 @@ class rpc_replica_chain(object):
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
         oprot.writeStructBegin('rpc_replica_chain')
-        if self.block_names is not None:
-            oprot.writeFieldBegin('block_names', TType.LIST, 1)
-            oprot.writeListBegin(TType.STRING, len(self.block_names))
-            for iter6 in self.block_names:
+        if self.block_ids is not None:
+            oprot.writeFieldBegin('block_ids', TType.LIST, 1)
+            oprot.writeListBegin(TType.STRING, len(self.block_ids))
+            for iter6 in self.block_ids:
                 oprot.writeString(iter6)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
@@ -159,8 +159,8 @@ class rpc_replica_chain(object):
         oprot.writeStructEnd()
 
     def validate(self):
-        if self.block_names is None:
-            raise TProtocolException(message='Required field block_names is unset!')
+        if self.block_ids is None:
+            raise TProtocolException(message='Required field block_ids is unset!')
         if self.name is None:
             raise TProtocolException(message='Required field name is unset!')
         if self.metadata is None:
@@ -600,7 +600,7 @@ class directory_service_exception(TException):
 all_structs.append(rpc_replica_chain)
 rpc_replica_chain.thrift_spec = (
     None,  # 0
-    (1, TType.LIST, 'block_names', (TType.STRING, None, False), None, ),  # 1
+    (1, TType.LIST, 'block_ids', (TType.STRING, None, False), None, ),  # 1
     (2, TType.STRING, 'name', None, None, ),  # 2
     (3, TType.STRING, 'metadata', None, None, ),  # 3
     (4, TType.I32, 'storage_mode', None, None, ),  # 4

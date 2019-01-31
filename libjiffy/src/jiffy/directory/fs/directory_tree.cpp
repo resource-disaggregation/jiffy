@@ -56,8 +56,8 @@ data_status directory_tree::create(const std::string &path,
                                    int32_t chain_length,
                                    int32_t flags,
                                    int32_t permissions,
-                                   const std::vector<std::string> &block_names,
-                                   const std::vector<std::string> &block_metadata,
+                                   const std::vector<std::string> &partition_names,
+                                   const std::vector<std::string> &partition_metadata,
                                    const std::map<std::string, std::string> &tags) {
   LOG(log_level::info) << "Creating file " << path << " with backing_path=" << backing_path << " num_blocks="
                        << num_blocks << ", chain_length=" << chain_length;
@@ -87,21 +87,21 @@ data_status directory_tree::create(const std::string &path,
   std::vector<replica_chain> blocks;
   for (int32_t i = 0; i < num_blocks; ++i) {
     replica_chain chain(allocator_->allocate(static_cast<size_t>(chain_length), {}), storage_mode::in_memory);
-    chain.name = block_names[i];
-    chain.metadata = block_metadata[i];
-    assert(chain.block_names.size() == chain_length);
+    chain.name = partition_names[i];
+    chain.metadata = partition_metadata[i];
+    assert(chain.block_ids.size() == chain_length);
     blocks.push_back(chain);
     using namespace storage;
     if (chain_length == 1) {
-      storage_->create_partition(chain.block_names[0], type, chain.name, chain.metadata, tags);
-      storage_->setup_chain(chain.block_names[0], path, chain.block_names, chain_role::singleton, "nil");
+      storage_->create_partition(chain.block_ids[0], type, chain.name, chain.metadata, tags);
+      storage_->setup_chain(chain.block_ids[0], path, chain.block_ids, chain_role::singleton, "nil");
     } else {
       for (int32_t j = 0; j < chain_length; ++j) {
-        std::string block_name = chain.block_names[j];
-        std::string next_block_name = (j == chain_length - 1) ? "nil" : chain.block_names[j + 1];
+        std::string block_id = chain.block_ids[j];
+        std::string next_block_id = (j == chain_length - 1) ? "nil" : chain.block_ids[j + 1];
         int32_t role = (j == 0) ? chain_role::head : (j == chain_length - 1) ? chain_role::tail : chain_role::mid;
-        storage_->create_partition(block_name, type, chain.name, chain.metadata, tags);
-        storage_->setup_chain(block_name, path, chain.block_names, role, next_block_name);
+        storage_->create_partition(block_id, type, chain.name, chain.metadata, tags);
+        storage_->setup_chain(block_id, path, chain.block_ids, role, next_block_id);
       }
     }
   }
@@ -120,8 +120,8 @@ data_status directory_tree::open_or_create(const std::string &path,
                                            int32_t chain_length,
                                            int32_t flags,
                                            int32_t permissions,
-                                           const std::vector<std::string> &block_names,
-                                           const std::vector<std::string> &block_metadata,
+                                           const std::vector<std::string> &partition_names,
+                                           const std::vector<std::string> &partition_metadata,
                                            const std::map<std::string, std::string> &tags) {
 
   LOG(log_level::info) << "Opening or creating file " << path << " with backing_path=" << backing_path << " num_blocks="
@@ -159,21 +159,21 @@ data_status directory_tree::open_or_create(const std::string &path,
   std::vector<replica_chain> blocks;
   for (int32_t i = 0; i < num_blocks; ++i) {
     replica_chain chain(allocator_->allocate(static_cast<size_t>(chain_length), {}), storage_mode::in_memory);
-    chain.name = block_names[i];
-    chain.metadata = block_metadata[i];
-    assert(chain.block_names.size() == chain_length);
+    chain.name = partition_names[i];
+    chain.metadata = partition_metadata[i];
+    assert(chain.block_ids.size() == chain_length);
     blocks.push_back(chain);
     using namespace storage;
     if (chain_length == 1) {
-      storage_->create_partition(chain.block_names[0], type, chain.name, chain.metadata, tags);
-      storage_->setup_chain(chain.block_names[0], path, chain.block_names, chain_role::singleton, "nil");
+      storage_->create_partition(chain.block_ids[0], type, chain.name, chain.metadata, tags);
+      storage_->setup_chain(chain.block_ids[0], path, chain.block_ids, chain_role::singleton, "nil");
     } else {
       for (int32_t j = 0; j < chain_length; ++j) {
-        std::string block_name = chain.block_names[j];
-        std::string next_block_name = (j == chain_length - 1) ? "nil" : chain.block_names[j + 1];
+        std::string block_id = chain.block_ids[j];
+        std::string next_block_id = (j == chain_length - 1) ? "nil" : chain.block_ids[j + 1];
         int32_t role = (j == 0) ? chain_role::head : (j == chain_length - 1) ? chain_role::tail : chain_role::mid;
-        storage_->create_partition(block_name, type, chain.name, chain.metadata, tags);
-        storage_->setup_chain(block_name, path, chain.block_names, role, next_block_name);
+        storage_->create_partition(block_id, type, chain.name, chain.metadata, tags);
+        storage_->setup_chain(block_id, path, chain.block_ids, role, next_block_id);
       }
     }
   }
@@ -357,7 +357,8 @@ void directory_tree::touch(const std::string &path) {
 
 replica_chain directory_tree::resolve_failures(const std::string &path, const replica_chain &chain) {
   // TODO: Replace replica_chain argument with chain id
-  std::size_t chain_length = chain.block_names.size();
+  // FIXME: This is not thread safe
+  std::size_t chain_length = chain.block_ids.size();
   std::vector<bool> failed(chain_length);
   LOG(log_level::info) << "Resolving failures for partition chain " << chain.to_string() << " @ " << path;
   bool mid_failure = false;
@@ -375,8 +376,8 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
   }
   std::vector<std::string> fixed_chain;
   for (std::size_t i = 0; i < chain_length; i++) {
-    std::string block_name = chain.block_names[i];
-    auto parsed = storage::block_id_parser::parse(block_name);
+    std::string block_id = chain.block_ids[i];
+    auto parsed = storage::block_id_parser::parse(block_id);
     try {
       utils::retry_utils::retry(3, [parsed]() {
         using namespace ::apache::thrift::transport;
@@ -386,10 +387,10 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
         m_sock.close();
         return true;
       });
-      LOG(log_level::info) << "Block " << block_name << " is still live";
-      fixed_chain.push_back(block_name);
+      LOG(log_level::info) << "Block " << block_id << " is still live";
+      fixed_chain.push_back(block_id);
     } catch (std::exception &) {
-      LOG(log_level::warn) << "Block " << block_name << " has failed, removing it from chain";
+      LOG(log_level::warn) << "Block " << block_id << " has failed, removing it from chain";
       failed[i] = true;
       if (i > 0 && i < chain_length - 1 && failed[i] && !failed[i - 1]) {
         mid_failure = true;
@@ -411,13 +412,13 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
   } else {                                         // More than one left
     LOG(log_level::info) << fixed_chain.size() << " blocks left in chain";
     for (std::size_t i = 0; i < fixed_chain.size(); ++i) {
-      std::string block_name = fixed_chain[i];
-      std::string next_block_name = (i == fixed_chain.size() - 1) ? "nil" : fixed_chain[i + 1];
+      std::string block_id = fixed_chain[i];
+      std::string next_block_id = (i == fixed_chain.size() - 1) ? "nil" : fixed_chain[i + 1];
       int32_t
           role = (i == 0) ? chain_role::head : (i == fixed_chain.size() - 1) ? chain_role::tail : chain_role::mid;
-      LOG(log_level::info) << "Setting partition <" << block_name << ">: path=" << path << ", role=" << role
-                           << ", next=" << next_block_name << ">";
-      storage_->setup_chain(block_name, path, fixed_chain, role, next_block_name);
+      LOG(log_level::info) << "Setting partition <" << block_id << ">: path=" << path << ", role=" << role
+                           << ", next=" << next_block_id << ">";
+      storage_->setup_chain(block_id, path, fixed_chain, role, next_block_id);
     }
     if (mid_failure) {
       LOG(log_level::info) << "Resending pending requests to resolve mid partition failure";
@@ -431,6 +432,7 @@ replica_chain directory_tree::resolve_failures(const std::string &path, const re
 
 replica_chain directory_tree::add_replica_to_chain(const std::string &path, const replica_chain &chain) {
   // TODO: Replace replica_chain argument with chain id
+  // FIXME: This is not thread safe
   using namespace storage;
   LOG(log_level::info) << "Adding new replica to chain " << chain.to_string() << " @ " << path;
 
@@ -447,33 +449,33 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
     throw directory_ops_exception("No such chain for path " + path);
   }
 
-  auto new_blocks = allocator_->allocate(1, chain.block_names);
-  auto updated_chain = chain.block_names;
+  auto new_blocks = allocator_->allocate(1, chain.block_ids);
+  auto updated_chain = chain.block_ids;
   updated_chain.insert(updated_chain.end(), new_blocks.begin(), new_blocks.end());
 
   // Setup forwarding path
-  LOG(log_level::info) << "Setting old tail partition <" << chain.block_names.back() << ">: path=" << path
+  LOG(log_level::info) << "Setting old tail partition <" << chain.block_ids.back() << ">: path=" << path
                        << ", role=" << chain_role::tail << ", next=" << new_blocks.front() << ">";
-  storage_->setup_chain(chain.block_names.back(), path, updated_chain, chain_role::tail, new_blocks.front());
-  for (std::size_t i = chain.block_names.size(); i < updated_chain.size(); i++) {
-    std::string block_name = updated_chain[i];
-    std::string next_block_name = (i == updated_chain.size() - 1) ? "nil" : updated_chain[i + 1];
+  storage_->setup_chain(chain.block_ids.back(), path, updated_chain, chain_role::tail, new_blocks.front());
+  for (std::size_t i = chain.block_ids.size(); i < updated_chain.size(); i++) {
+    std::string block_id = updated_chain[i];
+    std::string next_block_id = (i == updated_chain.size() - 1) ? "nil" : updated_chain[i + 1];
     int32_t
         role = (i == 0) ? chain_role::head : (i == updated_chain.size() - 1) ? chain_role::tail : chain_role::mid;
-    LOG(log_level::info) << "Setting partition <" << block_name << ">: path=" << path << ", role=" << role
-                         << ", next=" << next_block_name << ">";
+    LOG(log_level::info) << "Setting partition <" << block_id << ">: path=" << path << ", role=" << role
+                         << ", next=" << next_block_id << ">";
     // TODO: this is incorrect -- we shouldn't be setting the chain to updated_chain right now...
-    storage_->create_partition(block_name, dstatus.type(), chain.name, chain.metadata, dstatus.get_tags());
-    storage_->setup_chain(block_name, path, updated_chain, role, next_block_name);
+    storage_->create_partition(block_id, dstatus.type(), chain.name, chain.metadata, dstatus.get_tags());
+    storage_->setup_chain(block_id, path, updated_chain, role, next_block_id);
   }
 
-  LOG(log_level::info) << "Forwarding data from <" << chain.block_names.back() << "> to <" << new_blocks.front() << ">";
+  LOG(log_level::info) << "Forwarding data from <" << chain.block_ids.back() << "> to <" << new_blocks.front() << ">";
 
-  storage_->forward_all(chain.block_names.back());
+  storage_->forward_all(chain.block_ids.back());
 
-  LOG(log_level::info) << "Setting old tail partition <" << chain.block_names.back() << ">: path=" << path
+  LOG(log_level::info) << "Setting old tail partition <" << chain.block_ids.back() << ">: path=" << path
                        << ", role=" << chain_role::mid << ", next=" << new_blocks.front() << ">";
-  storage_->setup_chain(chain.block_names.back(), path, updated_chain, chain_role::mid, new_blocks.front());
+  storage_->setup_chain(chain.block_ids.back(), path, updated_chain, chain_role::mid, new_blocks.front());
 
   dstatus.set_data_block(chain_pos, replica_chain(updated_chain, storage_mode::in_memory));
   node->dstatus(dstatus);
@@ -567,11 +569,11 @@ void directory_tree::clear_storage(std::vector<std::string> &cleared_blocks, std
     auto file = std::dynamic_pointer_cast<ds_file_node>(node);
     auto s = file->dstatus();
     for (const auto &block: s.data_blocks()) {
-      for (const auto &block_name: block.block_names) {
-        LOG(log_level::info) << "Clearing partition " << block_name;
-        storage_->destroy_partition(block_name);
-        LOG(log_level::info) << "Cleared partition " << block_name;
-        cleared_blocks.push_back(block_name);
+      for (const auto &block_id: block.block_ids) {
+        LOG(log_level::info) << "Destroying partition @ block " << block_id;
+        storage_->destroy_partition(block_id);
+        LOG(log_level::info) << "Destroyed partition @ block " << block_id;
+        cleared_blocks.push_back(block_id);
       }
     }
   } else if (node->is_directory()) {
@@ -581,6 +583,19 @@ void directory_tree::clear_storage(std::vector<std::string> &cleared_blocks, std
       clear_storage(cleared_blocks, entry.second);
     }
   }
+}
+
+replica_chain directory_tree::add_block(const std::string &path,
+                                        const std::string &partition_name,
+                                        const std::string &partition_metadata) {
+  LOG(log_level::info) << "Adding block with partition_name = " << partition_name << " and partition_metadata = "
+                       << partition_metadata << " to file " << path;
+  return get_node_as_file(path)->add_data_block(path, partition_name, partition_metadata, storage_, allocator_);
+}
+
+void directory_tree::remove_block(const std::string &path, const std::string &partition_name) {
+  LOG(log_level::info) << "Removing block with partition_name = " << partition_name << " from file " << path;
+  get_node_as_file(path)->remove_block(partition_name, storage_, allocator_);
 }
 
 }

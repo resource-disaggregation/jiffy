@@ -60,20 +60,20 @@ class ReplicaChainClient:
 
     def _init(self):
         self.seq = block_request_service.sequence_id(-1, 0, -1)
-        h_host, h_port, _, _, _, h_bid = self.chain.block_names[0].split(':')
+        h_host, h_port, _, _, _, h_bid = self.chain.block_ids[0].split(':')
         self.head = BlockClient(self.client_cache, h_host, int(h_port), int(h_bid))
         self.seq.client_id = self.head.get_client_id()
-        if len(self.chain.block_names) == 1:
+        if len(self.chain.block_ids) == 1:
             self.tail = self.head
         else:
-            t_host, t_port, _, _, _, t_bid = self.chain.block_names[-1].split(':')
+            t_host, t_port, _, _, _, t_bid = self.chain.block_ids[-1].split(':')
             self.tail = BlockClient(self.client_cache, t_host, int(t_port), int(t_bid))
         self.response_reader = self.tail.get_response_reader(self.seq.client_id)
         self.response_cache = {}
         self.in_flight = False
 
     def _invalidate_cache(self):
-        for block in self.chain.block_names:
+        for block in self.chain.block_ids:
             host, port, _, _, _, _ = block.split(':')
             self.client_cache.remove(host, int(port))
 
@@ -125,13 +125,13 @@ class ReplicaChainClient:
                     if retry and resp[0] == b('!duplicate_key'):
                         resp[0] = b('!ok')
             except (TTransportException, socket.timeout) as e:
-                logging.warning("Error in connection to chain {}: {}".format(self.chain.block_names, e))
-                rchain = self.fs.resolve_failures(self.path, rpc_replica_chain(self.chain.block_names,
+                logging.warning("Error in connection to chain {}: {}".format(self.chain.block_ids, e))
+                rchain = self.fs.resolve_failures(self.path, rpc_replica_chain(self.chain.block_ids,
                                                                                self.chain.name,
                                                                                self.chain.metadata,
                                                                                self.chain.storage_mode))
-                self.chain = ReplicaChain(rchain.block_names, rchain.name, rchain.metadata, rchain.storage_mode)
-                logging.warning("Updated chain: {}".format(self.chain.block_names))
+                self.chain = ReplicaChain(rchain.block_ids, rchain.name, rchain.metadata, rchain.storage_mode)
+                logging.warning("Updated chain: {}".format(self.chain.block_ids))
                 # invalidate the client cache for the failed connection(s)
                 self._invalidate_cache()
                 self._init()

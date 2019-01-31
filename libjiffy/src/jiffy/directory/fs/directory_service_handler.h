@@ -240,6 +240,11 @@ class directory_service_handler : public directory_serviceIf {
    */
 
   void load(const std::string &path, const std::string &backing_path) override;
+  void add_data_block(rpc_replica_chain &_return,
+                      const std::string &path,
+                      const std::string &partition_name,
+                      const std::string &partition_metadata) override;
+  void remove_data_block(const std::string &path, const std::string &partition_name) override;
 
  private:
   /**

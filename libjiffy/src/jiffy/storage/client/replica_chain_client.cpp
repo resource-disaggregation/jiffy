@@ -36,13 +36,13 @@ const directory::replica_chain &replica_chain_client::chain() const {
 void replica_chain_client::connect(const directory::replica_chain &chain, int timeout_ms) {
   chain_ = chain;
   timeout_ms_ = timeout_ms;
-  auto h = block_id_parser::parse(chain_.block_names.front());
+  auto h = block_id_parser::parse(chain_.block_ids.front());
   head_.connect(h.host, h.service_port, h.id, timeout_ms);
   seq_.client_id = head_.get_client_id();
-  if (chain_.block_names.size() == 1) {
+  if (chain_.block_ids.size() == 1) {
     tail_ = head_;
   } else {
-    auto t = block_id_parser::parse(chain_.block_names.back());
+    auto t = block_id_parser::parse(chain_.block_ids.back());
     tail_.connect(t.host, t.service_port, t.id, timeout_ms);
   }
   response_reader_ = tail_.get_command_response_reader(seq_.client_id);

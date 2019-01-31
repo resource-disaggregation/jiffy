@@ -333,7 +333,7 @@ TEST_CASE("dstatus_test", "[file]") {
   REQUIRE(tree.dstatus("/sandbox/file.txt").mode() == std::vector<storage_mode>{storage_mode::in_memory});
   REQUIRE(tree.dstatus("/sandbox/file.txt").backing_path() == "local://tmp");
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().size() == 1);
-  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).block_names[0] == "0");
+  REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).block_ids[0] == "0");
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).name == "partition_name");
   REQUIRE(tree.dstatus("/sandbox/file.txt").data_blocks().at(0).metadata == "partition_metadata");
   REQUIRE(tree.dstatus("/sandbox/file.txt").get_tag("key") == "value");
@@ -369,4 +369,31 @@ TEST_CASE("file_type_test", "[file][dir]") {
 
   REQUIRE(tree.is_directory("/sandbox"));
   REQUIRE_FALSE(tree.is_regular_file("/sandbox"));
+}
+
+TEST_CASE("add_remove_block_test", "[file][dir]") {
+  auto alloc = std::make_shared<dummy_block_allocator>(4);
+  auto sm = std::make_shared<dummy_storage_manager>();
+  directory_tree tree(alloc, sm);
+
+  REQUIRE(alloc->num_allocated_blocks() == 0);
+  REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "testtype", "local://tmp", 1, 1, 0));
+  REQUIRE(alloc->num_allocated_blocks() == 1);
+
+  auto block = tree.add_block("/sandbox/file.txt", "1", "test");
+  REQUIRE(alloc->num_allocated_blocks() == 2);
+  REQUIRE(block.name == "1");
+  REQUIRE(block.metadata == "test");
+  REQUIRE(block.block_ids.size() == 1);
+  REQUIRE(block.mode == storage_mode::in_memory);
+
+  REQUIRE_NOTHROW(tree.remove_block("/sandbox/file.txt", "1"));
+  REQUIRE(alloc->num_allocated_blocks() == 1);
+
+  REQUIRE(sm->COMMANDS.size() == 5);
+  REQUIRE(sm->COMMANDS[0] == "create_partition:0:testtype:0:");
+  REQUIRE(sm->COMMANDS[1] == "setup_chain:0:/sandbox/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[2] == "create_partition:1:testtype:1:test");
+  REQUIRE(sm->COMMANDS[3] == "setup_chain:1:/sandbox/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[4] == "destroy_partition:1");
 }

@@ -64,19 +64,7 @@ public class HashTableClient implements Closeable {
       String resp;
       while ((resp = ByteBufferUtils.toString(response)).startsWith("!exporting")) {
         rpc_replica_chain chain = parent.extractChain(resp);
-        boolean found = false;
-        for (ReplicaChainClient.LockedClient block : blocks) {
-          if (block.getChain().block_names.equals(chain.block_names)) {
-            found = true;
-            response = block.runCommandRedirected(cmdId, args).get(0);
-            break;
-          }
-        }
-        if (!found) {
-          response = new ReplicaChainClient(fs, path, cache, chain)
-              .runCommandRedirected(cmdId, args)
-              .get(0);
-        }
+        response = runRedirectedCommand(chain, cmdId, args);
       }
       return response;
     }
@@ -91,22 +79,26 @@ public class HashTableClient implements Closeable {
         while ((resp = ByteBufferUtils.toString(response)).startsWith("!exporting")) {
           rpc_replica_chain chain = parent.extractChain(resp);
           List<ByteBuffer> opArgs = args.subList(i * numOpArgs, (i + 1) * numOpArgs);
-          boolean found = false;
-          for (ReplicaChainClient.LockedClient block : blocks) {
-            if (block.getChain().block_names.equals(chain.block_names)) {
-              found = true;
-              response = block.runCommandRedirected(cmdId, args).get(0);
-              break;
-            }
-          }
-          if (!found) {
-            response = new ReplicaChainClient(fs, path, cache, chain)
-                .runCommandRedirected(cmdId, opArgs).get(0);
-          }
+          response = runRedirectedCommand(chain, cmdId, opArgs);
         }
         responses.set(i, response);
       }
       return responses;
+    }
+
+    private ByteBuffer runRedirectedCommand(rpc_replica_chain chain, int cmdId,
+                                            List<ByteBuffer> args) throws TException {
+      ByteBuffer response = null;
+      for (ReplicaChainClient.LockedClient block : blocks) {
+        if (block.getChain().block_ids.equals(chain.block_ids)) {
+          response = block.runCommandRedirected(cmdId, args).get(0);
+          break;
+        }
+      }
+      if (response == null) {
+        response = new ReplicaChainClient(fs, path, cache, chain).runCommandRedirected(cmdId, args).get(0);
+      }
+      return response;
     }
 
     @Override
