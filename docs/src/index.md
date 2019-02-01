@@ -2,7 +2,7 @@
 
 ## Overview
 
-TODO: need accurate description
+Jiffy is a distributed memory management system that decouples memory capacity and lifetime from compute in the serverless paradigm.
 
 ## User Guide
 

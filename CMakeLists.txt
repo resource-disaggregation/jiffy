@@ -34,6 +34,7 @@ add_subdirectory(storage)
 
 if (BUILD_TESTS)
   include(CTest)
+  #enable_testing(true)
 endif ()
 
 if (BUILD_DOC)

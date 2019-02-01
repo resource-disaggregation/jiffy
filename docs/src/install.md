@@ -75,6 +75,17 @@ To run the various unit tests, run:
 make test
 ```
 
+To run the unit tests with all log information, use:
+
+```bash
+make test ARGS="-VV"
+```
+
+To run the unit tests with log information only when test fails, use:
+```bash
+make test ARGS="--output-on-failure"
+```
+
 and finally, to install, use:
 
 ```bash

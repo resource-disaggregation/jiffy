@@ -1,9 +1,8 @@
 # Quick Start
 
 In this Quick Start, we will take a look at how to download and setup Jiffy,
-load some sample data, and query it.
+create some data structure to store data, and query it.
 
-TODO: need accurate usage description
 
 ## Pre-requisites
 
@@ -14,13 +13,14 @@ Before you can install Jiffy, make sure you have the following prerequisites:
 - CMake 3.9 or later
 
 For Python client, you will additionally require:
+
 - Python 2.7 or later, 3.6 or later
 - Python Packages: setuptools
 
 For java client, you will additionally require:
-TODO: accurate
 
 - Java 1.7 or later
+- Maven
 
 ## Download and Install
 
@@ -44,7 +44,7 @@ open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10
 
 ### Diagram
 
-TODO needs to be replaced with proper image
+![Diagram](./img/jiffy_arch.png)
 
 
 
@@ -100,7 +100,8 @@ python setup.py install
 
 Setup Jiffy Java client with the following commands:
 ```bash
-TODO
+cd jiffy/jiffy4j
+maven package -D TODO: should be fixed after adding cmake 
 ```
 
 We first create a new client connection to the directory server.
@@ -112,16 +113,16 @@ client = JiffyClient("127.0.0.1", 9090, 9091)
 ```
 
 ```java tab="Java"
-TODO
+JiffyClient client = JiffyClient("127.0.0.1", 9090, 9091);
 ```
 
 The first argument to the JiffyClient constructor corresponds to the server hostname, while the second and third argument correspond to the directory server port and lease server port.
 
 We could then create a file and also back it up in persistent storage. The backing path on persistent storage, the number of blocks, the replication chain length and also the flag are the four arguments that can be specified when creating a file. 
-TODO meanings of the flag
+The create method also accepts flags as it's last argument, details can be seen in the following chart.
 
 ```python tab="Python"
-
+# create(path, backing path, number of blocks, replication chain length, flags)
 hash_table = client.create("/a/file.txt", "local://tmp", 1, 1, 0)
 
 hash_table = client.open("/a/file.txt")
@@ -130,9 +131,18 @@ hash_table = client.open_or_create("/a/file.txt", "local://tmp", 1, 1, 0)
 ```
 
 ```java tab="Java"
-TODO
+client.createHashTable("/a/file.txt", "local://tmp", 1, 1, 0);
+
+HashTableClient kv = client.open("/a/file.txt");
+
+HashTableClient kv = client.openOrCreateHashTable("/a/file.txt", "local://tmp", 1, 1, 0);
 ```
 
+|   Flags  |      Description     |  Value|
+|----------|:--------------------:|------:|
+| PINNED |  If set, pins memory in Jiffy, and does not free it when lease expires | 0x01 |
+| STATIC_PROVISIONED |    If set, does not perform auto scaling // NO LONGER USED   |   0x02 |
+| MAPPED | Map the data structure to a persistent store |    0x04 |
 
 
 The open and create operations will return a data structure client, from which we could achieve specific operations on the file data.
@@ -153,7 +163,11 @@ client.load("/a/file.txt", "local://tmp")
 ```
 
 ```java tab="Java"
-TODO
+client.sync("/a/file.txt", "local://tmp");
+
+client.dump("/a/file.txt", "local://tmp");
+
+client.load("/a/file.txt", "local://tmp");
 ```
 
 
@@ -177,7 +191,7 @@ hash_table.remove(b'key1')
 # The expected output would be {op=put, data=b'key1'}
 print(subscription.get_notification())
 
-# Unsubscrbe operations
+# Unsubscribe operation
 subscription.unsubscrbe(['put'])
 
 # Disconnect
@@ -190,7 +204,30 @@ client.disconnect()
 ```
 
 ```java tab="Java"
-TODO
+JiffyClient client = JiffyClient("127.0.0.1", 9090, 9091);
+String op1 = "put";
+ByteBuffer key = ByteBufferUtils.fromString("key1");
+ByteBuffer value = ByteBufferUtils.fromString("value1");
+client.create("/a/file.txt", "local://tmp", 1, 1);
+// Create listenner for specific file
+KVListener n1 = client.listen("/a/file.txt");
+// Subscribe for a operation
+n1.subscribe(Collections.singletonList(op1));
+
+KVClient kv = client.open("/a/file.txt");
+kv.put(key, value);
+kv.remove(key);
+
+// Receive notification
+Notification N1 = n1.getNotification();
+
+// Unsubscribe operation
+n1.unsubscribe(Collections.singletonList(op1));
+
+client.close("/a/file.txt");
+client.remove("/a/file.txt");
+
+TODO disconnect?
 ```
 
 
@@ -207,7 +244,10 @@ client.disconnect()
 ```
 
 ```java tab="Java"
-TODO
+client.close("/a/file.txt");
+client.remove("/a/file.txt");
+
+TODO disconnect?
 ```
 
 
@@ -223,11 +263,16 @@ We can put key-value pairs in the storage server and also get them in byte-strin
 ```python tab="Python"
 hash_table.put(b"key", b"value")
 if hash_table.exists(b"key") == b'true':
-	hash_table.get(b"key")
+	value = hash_table.get(b"key")
 ```
 
 ```java tab="Java"
-TODO
+ByteBuffer key = ByteBufferUtils.fromString("key1");
+ByteBuffer value = ByteBufferUtils.fromString("value1");
+KVClient kv = client.open("/a/file.txt");
+kv.put(key, value);
+if(kv.exists(key))
+    value2 = kv.get(key);
 ```
 
 
@@ -240,7 +285,8 @@ hash_table.remove(b"key")
 ```
 
 ```java tab="Java"
-TODO
+kv.update(key, value);
+kv.remove(key);
 ```
 
 
@@ -264,6 +310,22 @@ response = hash_table.multi_remove(args_key)
 ```
 
 ```java tab="Java"
-TODO
+ByteBuffer key1 = ByteBufferUtils.fromString("key1");
+ByteBuffer value1 = ByteBufferUtils.fromString("value1");
+ByteBuffer key2 = ByteBufferUtils.fromString("key2");
+ByteBuffer value2 = ByteBufferUtils.fromString("value2");
+List<ByteBuffer> args = Arrays.asList(key1, value1, key2, value2);
+List<ByteBuffer> args_key = Arrays.asList(key1, key2);
+// Put in batches
+response = kv.put(args);
+// Get in batches
+response = kv.get(args_key);
+// Check exists in batches
+response = kv.exists(args_key);
+// Update in batches
+response = kv.update(args);
+// Remove in batches
+response = kv.remove(args_key);
+
 ```
 

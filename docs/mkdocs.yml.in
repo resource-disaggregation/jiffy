@@ -50,8 +50,7 @@ theme:
 
   # The logo of the documentation shown in the header and navigation can either
   # be a Material Icon ligature or an image URL
-  logo:
-  # TODO
+  logo: 'img/Jiffy_logo.png'
 
   # Material includes the search in the header as a partial, not as a separate
   # template, so it's correct that search.html is missing
