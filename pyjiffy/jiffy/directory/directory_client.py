@@ -83,14 +83,14 @@ class StorageMode:
 
 
 class ReplicaChain:
-    def __init__(self, block_names, name, metadata, storage_mode):
-        self.block_names = block_names
+    def __init__(self, block_ids, name, metadata, storage_mode):
+        self.block_ids = block_ids
         self.name = name
         self.metadata = metadata
         self.storage_mode = storage_mode
 
     def __str__(self):
-        return "{} : {}, {}, {}".format(self.name, self.block_names, self.metadata, self.storage_mode)
+        return "{} : {}, {}, {}".format(self.name, self.block_ids, self.metadata, self.storage_mode)
 
     def __repr__(self):
         return self.__str__()
@@ -100,7 +100,7 @@ class DataStatus:
     def __init__(self, backing_path, chain_length, data_blocks, flags, tags):
         self.backing_path = backing_path
         self.chain_length = chain_length
-        self.data_blocks = [ReplicaChain(replica_chain.block_names, replica_chain.name, replica_chain.metadata,
+        self.data_blocks = [ReplicaChain(replica_chain.block_ids, replica_chain.name, replica_chain.metadata,
                                          replica_chain.storage_mode)
                             for replica_chain in data_blocks]
         self.flags = flags

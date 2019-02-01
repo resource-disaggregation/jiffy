@@ -277,6 +277,10 @@ class directory_client : public directory_interface {
    */
 
   void handle_lease_expiry(const std::string &path) override;
+  replica_chain add_block(const std::string &path,
+                          const std::string &partition_name,
+                          const std::string &partition_metadata) override;
+  void remove_block(const std::string &path, const std::string &partition_name) override;
 
  private:
   /* Socket */

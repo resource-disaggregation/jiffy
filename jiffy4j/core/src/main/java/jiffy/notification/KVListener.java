@@ -30,7 +30,7 @@ public class KVListener implements Closeable {
     this.worker = new NotificationWorker(notifications, controls);
     int i = 0;
     for (rpc_replica_chain block: status.data_blocks) {
-      BlockMetadata t = BlockNameParser.parse(block.block_names.get(block.block_names.size() - 1));
+      BlockMetadata t = BlockNameParser.parse(block.block_ids.get(block.block_ids.size() - 1));
       blockIds[i] = t.getBlockId();
       listeners[i] = new BlockListener(t.getHost(), t.getNotificationPort(), controls);
       worker.addProtocol(listeners[i].getProtocol());

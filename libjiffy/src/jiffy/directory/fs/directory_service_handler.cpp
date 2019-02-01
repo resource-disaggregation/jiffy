@@ -234,6 +234,26 @@ void directory_service_handler::add_replica_to_chain(rpc_replica_chain &_return,
   }
 }
 
+void directory_service_handler::add_data_block(rpc_replica_chain &_return,
+                                               const std::string &path,
+                                               const std::string &partition_name,
+                                               const std::string &partition_metadata) {
+  try {
+    auto ret = shard_->add_block(path, partition_name, partition_metadata);
+    _return = directory_type_conversions::to_rpc(ret);
+  } catch (directory_ops_exception &e) {
+    throw make_exception(e);
+  }
+}
+
+void directory_service_handler::remove_data_block(const std::string &path, const std::string &partition_name) {
+  try {
+    shard_->remove_block(path, partition_name);
+  } catch (directory_ops_exception &e) {
+    throw make_exception(e);
+  }
+}
+
 directory_service_exception directory_service_handler::make_exception(directory_ops_exception &ex) const {
   directory_service_exception e;
   e.msg = ex.what();

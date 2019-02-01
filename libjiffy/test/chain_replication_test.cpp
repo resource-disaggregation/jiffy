@@ -411,7 +411,7 @@ TEST_CASE("chain_replication_add_block_test", "[put][get]") {
 
   t->create("/file", "hashtable", "/tmp", 1, 2, 0, 0, {"0_65536"}, {"regular"});
 
-  auto chain = t->dstatus("/file").data_blocks()[0].block_names;
+  auto chain = t->dstatus("/file").data_blocks()[0].block_ids;
   {
     replica_chain_client client(t, "/file", chain, 100);
     for (std::size_t i = 0; i < 1000; ++i) {

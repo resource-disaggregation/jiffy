@@ -5,9 +5,9 @@ exception block_registration_service_exception {
 }
 
 service block_registration_service {
-  void add_blocks(1: list<string> block_names)
+  void add_blocks(1: list<string> block_ids)
     throws (1: block_registration_service_exception ex),
 
-  void remove_blocks(1: list<string> block_names)
+  void remove_blocks(1: list<string> block_ids)
     throws (1: block_registration_service_exception ex),
 }

@@ -18,9 +18,9 @@ public class directory_service {
 
     public rpc_data_status open(java.lang.String path) throws directory_service_exception, org.apache.thrift.TException;
 
-    public rpc_data_status create(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_names, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags) throws directory_service_exception, org.apache.thrift.TException;
+    public rpc_data_status create(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_ids, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags) throws directory_service_exception, org.apache.thrift.TException;
 
-    public rpc_data_status openOrCreate(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_names, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags) throws directory_service_exception, org.apache.thrift.TException;
+    public rpc_data_status openOrCreate(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_ids, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags) throws directory_service_exception, org.apache.thrift.TException;
 
     public boolean exists(java.lang.String path) throws directory_service_exception, org.apache.thrift.TException;
 
@@ -60,6 +60,10 @@ public class directory_service {
 
     public rpc_replica_chain addReplicaToChain(java.lang.String path, rpc_replica_chain chain) throws directory_service_exception, org.apache.thrift.TException;
 
+    public rpc_replica_chain addDataBlock(java.lang.String path, java.lang.String partition_name, java.lang.String partition_metadata) throws directory_service_exception, org.apache.thrift.TException;
+
+    public void removeDataBlock(java.lang.String path, java.lang.String partition_name) throws directory_service_exception, org.apache.thrift.TException;
+
   }
 
   public interface AsyncIface {
@@ -70,9 +74,9 @@ public class directory_service {
 
     public void open(java.lang.String path, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException;
 
-    public void create(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_names, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException;
+    public void create(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_ids, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException;
 
-    public void openOrCreate(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_names, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException;
+    public void openOrCreate(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_ids, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException;
 
     public void exists(java.lang.String path, org.apache.thrift.async.AsyncMethodCallback<java.lang.Boolean> resultHandler) throws org.apache.thrift.TException;
 
@@ -111,6 +115,10 @@ public class directory_service {
     public void resloveFailures(java.lang.String path, rpc_replica_chain chain, org.apache.thrift.async.AsyncMethodCallback<rpc_replica_chain> resultHandler) throws org.apache.thrift.TException;
 
     public void addReplicaToChain(java.lang.String path, rpc_replica_chain chain, org.apache.thrift.async.AsyncMethodCallback<rpc_replica_chain> resultHandler) throws org.apache.thrift.TException;
+
+    public void addDataBlock(java.lang.String path, java.lang.String partition_name, java.lang.String partition_metadata, org.apache.thrift.async.AsyncMethodCallback<rpc_replica_chain> resultHandler) throws org.apache.thrift.TException;
+
+    public void removeDataBlock(java.lang.String path, java.lang.String partition_name, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -206,13 +214,13 @@ public class directory_service {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "open failed: unknown result");
     }
 
-    public rpc_data_status create(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_names, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags) throws directory_service_exception, org.apache.thrift.TException
+    public rpc_data_status create(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_ids, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags) throws directory_service_exception, org.apache.thrift.TException
     {
-      sendCreate(path, type, backing_path, num_blocks, chain_length, flags, permissions, block_names, block_metadata, tags);
+      sendCreate(path, type, backing_path, num_blocks, chain_length, flags, permissions, block_ids, block_metadata, tags);
       return recvCreate();
     }
 
-    public void sendCreate(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_names, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags) throws org.apache.thrift.TException
+    public void sendCreate(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_ids, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags) throws org.apache.thrift.TException
     {
       create_args args = new create_args();
       args.setPath(path);
@@ -222,7 +230,7 @@ public class directory_service {
       args.setChainLength(chain_length);
       args.setFlags(flags);
       args.setPermissions(permissions);
-      args.setBlockNames(block_names);
+      args.setBlockIds(block_ids);
       args.setBlockMetadata(block_metadata);
       args.setTags(tags);
       sendBase("create", args);
@@ -241,13 +249,13 @@ public class directory_service {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "create failed: unknown result");
     }
 
-    public rpc_data_status openOrCreate(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_names, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags) throws directory_service_exception, org.apache.thrift.TException
+    public rpc_data_status openOrCreate(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_ids, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags) throws directory_service_exception, org.apache.thrift.TException
     {
-      sendOpenOrCreate(path, type, backing_path, num_blocks, chain_length, flags, permissions, block_names, block_metadata, tags);
+      sendOpenOrCreate(path, type, backing_path, num_blocks, chain_length, flags, permissions, block_ids, block_metadata, tags);
       return recvOpenOrCreate();
     }
 
-    public void sendOpenOrCreate(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_names, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags) throws org.apache.thrift.TException
+    public void sendOpenOrCreate(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_ids, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags) throws org.apache.thrift.TException
     {
       open_or_create_args args = new open_or_create_args();
       args.setPath(path);
@@ -257,7 +265,7 @@ public class directory_service {
       args.setChainLength(chain_length);
       args.setFlags(flags);
       args.setPermissions(permissions);
-      args.setBlockNames(block_names);
+      args.setBlockIds(block_ids);
       args.setBlockMetadata(block_metadata);
       args.setTags(tags);
       sendBase("open_or_create", args);
@@ -755,6 +763,58 @@ public class directory_service {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "add_replica_to_chain failed: unknown result");
     }
 
+    public rpc_replica_chain addDataBlock(java.lang.String path, java.lang.String partition_name, java.lang.String partition_metadata) throws directory_service_exception, org.apache.thrift.TException
+    {
+      sendAddDataBlock(path, partition_name, partition_metadata);
+      return recvAddDataBlock();
+    }
+
+    public void sendAddDataBlock(java.lang.String path, java.lang.String partition_name, java.lang.String partition_metadata) throws org.apache.thrift.TException
+    {
+      add_data_block_args args = new add_data_block_args();
+      args.setPath(path);
+      args.setPartitionName(partition_name);
+      args.setPartitionMetadata(partition_metadata);
+      sendBase("add_data_block", args);
+    }
+
+    public rpc_replica_chain recvAddDataBlock() throws directory_service_exception, org.apache.thrift.TException
+    {
+      add_data_block_result result = new add_data_block_result();
+      receiveBase(result, "add_data_block");
+      if (result.isSetSuccess()) {
+        return result.success;
+      }
+      if (result.ex != null) {
+        throw result.ex;
+      }
+      throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "add_data_block failed: unknown result");
+    }
+
+    public void removeDataBlock(java.lang.String path, java.lang.String partition_name) throws directory_service_exception, org.apache.thrift.TException
+    {
+      sendRemoveDataBlock(path, partition_name);
+      recvRemoveDataBlock();
+    }
+
+    public void sendRemoveDataBlock(java.lang.String path, java.lang.String partition_name) throws org.apache.thrift.TException
+    {
+      remove_data_block_args args = new remove_data_block_args();
+      args.setPath(path);
+      args.setPartitionName(partition_name);
+      sendBase("remove_data_block", args);
+    }
+
+    public void recvRemoveDataBlock() throws directory_service_exception, org.apache.thrift.TException
+    {
+      remove_data_block_result result = new remove_data_block_result();
+      receiveBase(result, "remove_data_block");
+      if (result.ex != null) {
+        throw result.ex;
+      }
+      return;
+    }
+
   }
   public static class AsyncClient extends org.apache.thrift.async.TAsyncClient implements AsyncIface {
     public static class Factory implements org.apache.thrift.async.TAsyncClientFactory<AsyncClient> {
@@ -869,9 +929,9 @@ public class directory_service {
       }
     }
 
-    public void create(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_names, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
+    public void create(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_ids, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      create_call method_call = new create_call(path, type, backing_path, num_blocks, chain_length, flags, permissions, block_names, block_metadata, tags, resultHandler, this, ___protocolFactory, ___transport);
+      create_call method_call = new create_call(path, type, backing_path, num_blocks, chain_length, flags, permissions, block_ids, block_metadata, tags, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -884,10 +944,10 @@ public class directory_service {
       private int chain_length;
       private int flags;
       private int permissions;
-      private java.util.List<java.lang.String> block_names;
+      private java.util.List<java.lang.String> block_ids;
       private java.util.List<java.lang.String> block_metadata;
       private java.util.Map<java.lang.String,java.lang.String> tags;
-      public create_call(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_names, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      public create_call(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_ids, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.path = path;
         this.type = type;
@@ -896,7 +956,7 @@ public class directory_service {
         this.chain_length = chain_length;
         this.flags = flags;
         this.permissions = permissions;
-        this.block_names = block_names;
+        this.block_ids = block_ids;
         this.block_metadata = block_metadata;
         this.tags = tags;
       }
@@ -911,7 +971,7 @@ public class directory_service {
         args.setChainLength(chain_length);
         args.setFlags(flags);
         args.setPermissions(permissions);
-        args.setBlockNames(block_names);
+        args.setBlockIds(block_ids);
         args.setBlockMetadata(block_metadata);
         args.setTags(tags);
         args.write(prot);
@@ -928,9 +988,9 @@ public class directory_service {
       }
     }
 
-    public void openOrCreate(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_names, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
+    public void openOrCreate(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_ids, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      open_or_create_call method_call = new open_or_create_call(path, type, backing_path, num_blocks, chain_length, flags, permissions, block_names, block_metadata, tags, resultHandler, this, ___protocolFactory, ___transport);
+      open_or_create_call method_call = new open_or_create_call(path, type, backing_path, num_blocks, chain_length, flags, permissions, block_ids, block_metadata, tags, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -943,10 +1003,10 @@ public class directory_service {
       private int chain_length;
       private int flags;
       private int permissions;
-      private java.util.List<java.lang.String> block_names;
+      private java.util.List<java.lang.String> block_ids;
       private java.util.List<java.lang.String> block_metadata;
       private java.util.Map<java.lang.String,java.lang.String> tags;
-      public open_or_create_call(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_names, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      public open_or_create_call(java.lang.String path, java.lang.String type, java.lang.String backing_path, int num_blocks, int chain_length, int flags, int permissions, java.util.List<java.lang.String> block_ids, java.util.List<java.lang.String> block_metadata, java.util.Map<java.lang.String,java.lang.String> tags, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.path = path;
         this.type = type;
@@ -955,7 +1015,7 @@ public class directory_service {
         this.chain_length = chain_length;
         this.flags = flags;
         this.permissions = permissions;
-        this.block_names = block_names;
+        this.block_ids = block_ids;
         this.block_metadata = block_metadata;
         this.tags = tags;
       }
@@ -970,7 +1030,7 @@ public class directory_service {
         args.setChainLength(chain_length);
         args.setFlags(flags);
         args.setPermissions(permissions);
-        args.setBlockNames(block_names);
+        args.setBlockIds(block_ids);
         args.setBlockMetadata(block_metadata);
         args.setTags(tags);
         args.write(prot);
@@ -1622,6 +1682,79 @@ public class directory_service {
       }
     }
 
+    public void addDataBlock(java.lang.String path, java.lang.String partition_name, java.lang.String partition_metadata, org.apache.thrift.async.AsyncMethodCallback<rpc_replica_chain> resultHandler) throws org.apache.thrift.TException {
+      checkReady();
+      add_data_block_call method_call = new add_data_block_call(path, partition_name, partition_metadata, resultHandler, this, ___protocolFactory, ___transport);
+      this.___currentMethod = method_call;
+      ___manager.call(method_call);
+    }
+
+    public static class add_data_block_call extends org.apache.thrift.async.TAsyncMethodCall<rpc_replica_chain> {
+      private java.lang.String path;
+      private java.lang.String partition_name;
+      private java.lang.String partition_metadata;
+      public add_data_block_call(java.lang.String path, java.lang.String partition_name, java.lang.String partition_metadata, org.apache.thrift.async.AsyncMethodCallback<rpc_replica_chain> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+        super(client, protocolFactory, transport, resultHandler, false);
+        this.path = path;
+        this.partition_name = partition_name;
+        this.partition_metadata = partition_metadata;
+      }
+
+      public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("add_data_block", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        add_data_block_args args = new add_data_block_args();
+        args.setPath(path);
+        args.setPartitionName(partition_name);
+        args.setPartitionMetadata(partition_metadata);
+        args.write(prot);
+        prot.writeMessageEnd();
+      }
+
+      public rpc_replica_chain getResult() throws directory_service_exception, org.apache.thrift.TException {
+        if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
+          throw new java.lang.IllegalStateException("Method call not finished!");
+        }
+        org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
+        org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
+        return (new Client(prot)).recvAddDataBlock();
+      }
+    }
+
+    public void removeDataBlock(java.lang.String path, java.lang.String partition_name, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
+      checkReady();
+      remove_data_block_call method_call = new remove_data_block_call(path, partition_name, resultHandler, this, ___protocolFactory, ___transport);
+      this.___currentMethod = method_call;
+      ___manager.call(method_call);
+    }
+
+    public static class remove_data_block_call extends org.apache.thrift.async.TAsyncMethodCall<Void> {
+      private java.lang.String path;
+      private java.lang.String partition_name;
+      public remove_data_block_call(java.lang.String path, java.lang.String partition_name, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+        super(client, protocolFactory, transport, resultHandler, false);
+        this.path = path;
+        this.partition_name = partition_name;
+      }
+
+      public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("remove_data_block", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        remove_data_block_args args = new remove_data_block_args();
+        args.setPath(path);
+        args.setPartitionName(partition_name);
+        args.write(prot);
+        prot.writeMessageEnd();
+      }
+
+      public Void getResult() throws directory_service_exception, org.apache.thrift.TException {
+        if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
+          throw new java.lang.IllegalStateException("Method call not finished!");
+        }
+        org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
+        org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
+        return null;
+      }
+    }
+
   }
 
   public static class Processor<I extends Iface> extends org.apache.thrift.TBaseProcessor<I> implements org.apache.thrift.TProcessor {
@@ -1659,6 +1792,8 @@ public class directory_service {
       processMap.put("is_directory", new is_directory());
       processMap.put("reslove_failures", new reslove_failures());
       processMap.put("add_replica_to_chain", new add_replica_to_chain());
+      processMap.put("add_data_block", new add_data_block());
+      processMap.put("remove_data_block", new remove_data_block());
       return processMap;
     }
 
@@ -1770,7 +1905,7 @@ public class directory_service {
       public create_result getResult(I iface, create_args args) throws org.apache.thrift.TException {
         create_result result = new create_result();
         try {
-          result.success = iface.create(args.path, args.type, args.backing_path, args.num_blocks, args.chain_length, args.flags, args.permissions, args.block_names, args.block_metadata, args.tags);
+          result.success = iface.create(args.path, args.type, args.backing_path, args.num_blocks, args.chain_length, args.flags, args.permissions, args.block_ids, args.block_metadata, args.tags);
         } catch (directory_service_exception ex) {
           result.ex = ex;
         }
@@ -1799,7 +1934,7 @@ public class directory_service {
       public open_or_create_result getResult(I iface, open_or_create_args args) throws org.apache.thrift.TException {
         open_or_create_result result = new open_or_create_result();
         try {
-          result.success = iface.openOrCreate(args.path, args.type, args.backing_path, args.num_blocks, args.chain_length, args.flags, args.permissions, args.block_names, args.block_metadata, args.tags);
+          result.success = iface.openOrCreate(args.path, args.type, args.backing_path, args.num_blocks, args.chain_length, args.flags, args.permissions, args.block_ids, args.block_metadata, args.tags);
         } catch (directory_service_exception ex) {
           result.ex = ex;
         }
@@ -2363,6 +2498,64 @@ public class directory_service {
       }
     }
 
+    public static class add_data_block<I extends Iface> extends org.apache.thrift.ProcessFunction<I, add_data_block_args> {
+      public add_data_block() {
+        super("add_data_block");
+      }
+
+      public add_data_block_args getEmptyArgsInstance() {
+        return new add_data_block_args();
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      @Override
+      protected boolean handleRuntimeExceptions() {
+        return true;
+      }
+
+      public add_data_block_result getResult(I iface, add_data_block_args args) throws org.apache.thrift.TException {
+        add_data_block_result result = new add_data_block_result();
+        try {
+          result.success = iface.addDataBlock(args.path, args.partition_name, args.partition_metadata);
+        } catch (directory_service_exception ex) {
+          result.ex = ex;
+        }
+        return result;
+      }
+    }
+
+    public static class remove_data_block<I extends Iface> extends org.apache.thrift.ProcessFunction<I, remove_data_block_args> {
+      public remove_data_block() {
+        super("remove_data_block");
+      }
+
+      public remove_data_block_args getEmptyArgsInstance() {
+        return new remove_data_block_args();
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      @Override
+      protected boolean handleRuntimeExceptions() {
+        return true;
+      }
+
+      public remove_data_block_result getResult(I iface, remove_data_block_args args) throws org.apache.thrift.TException {
+        remove_data_block_result result = new remove_data_block_result();
+        try {
+          iface.removeDataBlock(args.path, args.partition_name);
+        } catch (directory_service_exception ex) {
+          result.ex = ex;
+        }
+        return result;
+      }
+    }
+
   }
 
   public static class AsyncProcessor<I extends AsyncIface> extends org.apache.thrift.TBaseAsyncProcessor<I> {
@@ -2400,6 +2593,8 @@ public class directory_service {
       processMap.put("is_directory", new is_directory());
       processMap.put("reslove_failures", new reslove_failures());
       processMap.put("add_replica_to_chain", new add_replica_to_chain());
+      processMap.put("add_data_block", new add_data_block());
+      processMap.put("remove_data_block", new remove_data_block());
       return processMap;
     }
 
@@ -2657,7 +2852,7 @@ public class directory_service {
       }
 
       public void start(I iface, create_args args, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
-        iface.create(args.path, args.type, args.backing_path, args.num_blocks, args.chain_length, args.flags, args.permissions, args.block_names, args.block_metadata, args.tags,resultHandler);
+        iface.create(args.path, args.type, args.backing_path, args.num_blocks, args.chain_length, args.flags, args.permissions, args.block_ids, args.block_metadata, args.tags,resultHandler);
       }
     }
 
@@ -2722,7 +2917,7 @@ public class directory_service {
       }
 
       public void start(I iface, open_or_create_args args, org.apache.thrift.async.AsyncMethodCallback<rpc_data_status> resultHandler) throws org.apache.thrift.TException {
-        iface.openOrCreate(args.path, args.type, args.backing_path, args.num_blocks, args.chain_length, args.flags, args.permissions, args.block_names, args.block_metadata, args.tags,resultHandler);
+        iface.openOrCreate(args.path, args.type, args.backing_path, args.num_blocks, args.chain_length, args.flags, args.permissions, args.block_ids, args.block_metadata, args.tags,resultHandler);
       }
     }
 
@@ -3955,6 +4150,135 @@ public class directory_service {
 
       public void start(I iface, add_replica_to_chain_args args, org.apache.thrift.async.AsyncMethodCallback<rpc_replica_chain> resultHandler) throws org.apache.thrift.TException {
         iface.addReplicaToChain(args.path, args.chain,resultHandler);
+      }
+    }
+
+    public static class add_data_block<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, add_data_block_args, rpc_replica_chain> {
+      public add_data_block() {
+        super("add_data_block");
+      }
+
+      public add_data_block_args getEmptyArgsInstance() {
+        return new add_data_block_args();
+      }
+
+      public org.apache.thrift.async.AsyncMethodCallback<rpc_replica_chain> getResultHandler(final org.apache.thrift.server.AbstractNonblockingServer.AsyncFrameBuffer fb, final int seqid) {
+        final org.apache.thrift.AsyncProcessFunction fcall = this;
+        return new org.apache.thrift.async.AsyncMethodCallback<rpc_replica_chain>() { 
+          public void onComplete(rpc_replica_chain o) {
+            add_data_block_result result = new add_data_block_result();
+            result.success = o;
+            try {
+              fcall.sendResponse(fb, result, org.apache.thrift.protocol.TMessageType.REPLY,seqid);
+            } catch (org.apache.thrift.transport.TTransportException e) {
+              _LOGGER.error("TTransportException writing to internal frame buffer", e);
+              fb.close();
+            } catch (java.lang.Exception e) {
+              _LOGGER.error("Exception writing to internal frame buffer", e);
+              onError(e);
+            }
+          }
+          public void onError(java.lang.Exception e) {
+            byte msgType = org.apache.thrift.protocol.TMessageType.REPLY;
+            org.apache.thrift.TSerializable msg;
+            add_data_block_result result = new add_data_block_result();
+            if (e instanceof directory_service_exception) {
+              result.ex = (directory_service_exception) e;
+              result.setExIsSet(true);
+              msg = result;
+            } else if (e instanceof org.apache.thrift.transport.TTransportException) {
+              _LOGGER.error("TTransportException inside handler", e);
+              fb.close();
+              return;
+            } else if (e instanceof org.apache.thrift.TApplicationException) {
+              _LOGGER.error("TApplicationException inside handler", e);
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = (org.apache.thrift.TApplicationException)e;
+            } else {
+              _LOGGER.error("Exception inside handler", e);
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.INTERNAL_ERROR, e.getMessage());
+            }
+            try {
+              fcall.sendResponse(fb,msg,msgType,seqid);
+            } catch (java.lang.Exception ex) {
+              _LOGGER.error("Exception writing to internal frame buffer", ex);
+              fb.close();
+            }
+          }
+        };
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      public void start(I iface, add_data_block_args args, org.apache.thrift.async.AsyncMethodCallback<rpc_replica_chain> resultHandler) throws org.apache.thrift.TException {
+        iface.addDataBlock(args.path, args.partition_name, args.partition_metadata,resultHandler);
+      }
+    }
+
+    public static class remove_data_block<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, remove_data_block_args, Void> {
+      public remove_data_block() {
+        super("remove_data_block");
+      }
+
+      public remove_data_block_args getEmptyArgsInstance() {
+        return new remove_data_block_args();
+      }
+
+      public org.apache.thrift.async.AsyncMethodCallback<Void> getResultHandler(final org.apache.thrift.server.AbstractNonblockingServer.AsyncFrameBuffer fb, final int seqid) {
+        final org.apache.thrift.AsyncProcessFunction fcall = this;
+        return new org.apache.thrift.async.AsyncMethodCallback<Void>() { 
+          public void onComplete(Void o) {
+            remove_data_block_result result = new remove_data_block_result();
+            try {
+              fcall.sendResponse(fb, result, org.apache.thrift.protocol.TMessageType.REPLY,seqid);
+            } catch (org.apache.thrift.transport.TTransportException e) {
+              _LOGGER.error("TTransportException writing to internal frame buffer", e);
+              fb.close();
+            } catch (java.lang.Exception e) {
+              _LOGGER.error("Exception writing to internal frame buffer", e);
+              onError(e);
+            }
+          }
+          public void onError(java.lang.Exception e) {
+            byte msgType = org.apache.thrift.protocol.TMessageType.REPLY;
+            org.apache.thrift.TSerializable msg;
+            remove_data_block_result result = new remove_data_block_result();
+            if (e instanceof directory_service_exception) {
+              result.ex = (directory_service_exception) e;
+              result.setExIsSet(true);
+              msg = result;
+            } else if (e instanceof org.apache.thrift.transport.TTransportException) {
+              _LOGGER.error("TTransportException inside handler", e);
+              fb.close();
+              return;
+            } else if (e instanceof org.apache.thrift.TApplicationException) {
+              _LOGGER.error("TApplicationException inside handler", e);
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = (org.apache.thrift.TApplicationException)e;
+            } else {
+              _LOGGER.error("Exception inside handler", e);
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.INTERNAL_ERROR, e.getMessage());
+            }
+            try {
+              fcall.sendResponse(fb,msg,msgType,seqid);
+            } catch (java.lang.Exception ex) {
+              _LOGGER.error("Exception writing to internal frame buffer", ex);
+              fb.close();
+            }
+          }
+        };
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      public void start(I iface, remove_data_block_args args, org.apache.thrift.async.AsyncMethodCallback<Void> resultHandler) throws org.apache.thrift.TException {
+        iface.removeDataBlock(args.path, args.partition_name,resultHandler);
       }
     }
 
@@ -6257,7 +6581,7 @@ public class directory_service {
     private static final org.apache.thrift.protocol.TField CHAIN_LENGTH_FIELD_DESC = new org.apache.thrift.protocol.TField("chain_length", org.apache.thrift.protocol.TType.I32, (short)5);
     private static final org.apache.thrift.protocol.TField FLAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("flags", org.apache.thrift.protocol.TType.I32, (short)6);
     private static final org.apache.thrift.protocol.TField PERMISSIONS_FIELD_DESC = new org.apache.thrift.protocol.TField("permissions", org.apache.thrift.protocol.TType.I32, (short)7);
-    private static final org.apache.thrift.protocol.TField BLOCK_NAMES_FIELD_DESC = new org.apache.thrift.protocol.TField("block_names", org.apache.thrift.protocol.TType.LIST, (short)8);
+    private static final org.apache.thrift.protocol.TField BLOCK_IDS_FIELD_DESC = new org.apache.thrift.protocol.TField("block_ids", org.apache.thrift.protocol.TType.LIST, (short)8);
     private static final org.apache.thrift.protocol.TField BLOCK_METADATA_FIELD_DESC = new org.apache.thrift.protocol.TField("block_metadata", org.apache.thrift.protocol.TType.LIST, (short)9);
     private static final org.apache.thrift.protocol.TField TAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("tags", org.apache.thrift.protocol.TType.MAP, (short)10);
 
@@ -6271,7 +6595,7 @@ public class directory_service {
     public int chain_length; // required
     public int flags; // required
     public int permissions; // required
-    public java.util.List<java.lang.String> block_names; // required
+    public java.util.List<java.lang.String> block_ids; // required
     public java.util.List<java.lang.String> block_metadata; // required
     public java.util.Map<java.lang.String,java.lang.String> tags; // required
 
@@ -6284,7 +6608,7 @@ public class directory_service {
       CHAIN_LENGTH((short)5, "chain_length"),
       FLAGS((short)6, "flags"),
       PERMISSIONS((short)7, "permissions"),
-      BLOCK_NAMES((short)8, "block_names"),
+      BLOCK_IDS((short)8, "block_ids"),
       BLOCK_METADATA((short)9, "block_metadata"),
       TAGS((short)10, "tags");
 
@@ -6315,8 +6639,8 @@ public class directory_service {
             return FLAGS;
           case 7: // PERMISSIONS
             return PERMISSIONS;
-          case 8: // BLOCK_NAMES
-            return BLOCK_NAMES;
+          case 8: // BLOCK_IDS
+            return BLOCK_IDS;
           case 9: // BLOCK_METADATA
             return BLOCK_METADATA;
           case 10: // TAGS
@@ -6383,7 +6707,7 @@ public class directory_service {
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       tmpMap.put(_Fields.PERMISSIONS, new org.apache.thrift.meta_data.FieldMetaData("permissions", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
-      tmpMap.put(_Fields.BLOCK_NAMES, new org.apache.thrift.meta_data.FieldMetaData("block_names", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+      tmpMap.put(_Fields.BLOCK_IDS, new org.apache.thrift.meta_data.FieldMetaData("block_ids", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
               new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
       tmpMap.put(_Fields.BLOCK_METADATA, new org.apache.thrift.meta_data.FieldMetaData("block_metadata", org.apache.thrift.TFieldRequirementType.DEFAULT, 
@@ -6408,7 +6732,7 @@ public class directory_service {
       int chain_length,
       int flags,
       int permissions,
-      java.util.List<java.lang.String> block_names,
+      java.util.List<java.lang.String> block_ids,
       java.util.List<java.lang.String> block_metadata,
       java.util.Map<java.lang.String,java.lang.String> tags)
     {
@@ -6424,7 +6748,7 @@ public class directory_service {
       setFlagsIsSet(true);
       this.permissions = permissions;
       setPermissionsIsSet(true);
-      this.block_names = block_names;
+      this.block_ids = block_ids;
       this.block_metadata = block_metadata;
       this.tags = tags;
     }
@@ -6447,9 +6771,9 @@ public class directory_service {
       this.chain_length = other.chain_length;
       this.flags = other.flags;
       this.permissions = other.permissions;
-      if (other.isSetBlockNames()) {
-        java.util.List<java.lang.String> __this__block_names = new java.util.ArrayList<java.lang.String>(other.block_names);
-        this.block_names = __this__block_names;
+      if (other.isSetBlockIds()) {
+        java.util.List<java.lang.String> __this__block_ids = new java.util.ArrayList<java.lang.String>(other.block_ids);
+        this.block_ids = __this__block_ids;
       }
       if (other.isSetBlockMetadata()) {
         java.util.List<java.lang.String> __this__block_metadata = new java.util.ArrayList<java.lang.String>(other.block_metadata);
@@ -6478,7 +6802,7 @@ public class directory_service {
       this.flags = 0;
       setPermissionsIsSet(false);
       this.permissions = 0;
-      this.block_names = null;
+      this.block_ids = null;
       this.block_metadata = null;
       this.tags = null;
     }
@@ -6647,42 +6971,42 @@ public class directory_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __PERMISSIONS_ISSET_ID, value);
     }
 
-    public int getBlockNamesSize() {
-      return (this.block_names == null) ? 0 : this.block_names.size();
+    public int getBlockIdsSize() {
+      return (this.block_ids == null) ? 0 : this.block_ids.size();
     }
 
-    public java.util.Iterator<java.lang.String> getBlockNamesIterator() {
-      return (this.block_names == null) ? null : this.block_names.iterator();
+    public java.util.Iterator<java.lang.String> getBlockIdsIterator() {
+      return (this.block_ids == null) ? null : this.block_ids.iterator();
     }
 
-    public void addToBlockNames(java.lang.String elem) {
-      if (this.block_names == null) {
-        this.block_names = new java.util.ArrayList<java.lang.String>();
+    public void addToBlockIds(java.lang.String elem) {
+      if (this.block_ids == null) {
+        this.block_ids = new java.util.ArrayList<java.lang.String>();
       }
-      this.block_names.add(elem);
+      this.block_ids.add(elem);
     }
 
-    public java.util.List<java.lang.String> getBlockNames() {
-      return this.block_names;
+    public java.util.List<java.lang.String> getBlockIds() {
+      return this.block_ids;
     }
 
-    public create_args setBlockNames(java.util.List<java.lang.String> block_names) {
-      this.block_names = block_names;
+    public create_args setBlockIds(java.util.List<java.lang.String> block_ids) {
+      this.block_ids = block_ids;
       return this;
     }
 
-    public void unsetBlockNames() {
-      this.block_names = null;
+    public void unsetBlockIds() {
+      this.block_ids = null;
     }
 
-    /** Returns true if field block_names is set (has been assigned a value) and false otherwise */
-    public boolean isSetBlockNames() {
-      return this.block_names != null;
+    /** Returns true if field block_ids is set (has been assigned a value) and false otherwise */
+    public boolean isSetBlockIds() {
+      return this.block_ids != null;
     }
 
-    public void setBlockNamesIsSet(boolean value) {
+    public void setBlockIdsIsSet(boolean value) {
       if (!value) {
-        this.block_names = null;
+        this.block_ids = null;
       }
     }
 
@@ -6818,11 +7142,11 @@ public class directory_service {
         }
         break;
 
-      case BLOCK_NAMES:
+      case BLOCK_IDS:
         if (value == null) {
-          unsetBlockNames();
+          unsetBlockIds();
         } else {
-          setBlockNames((java.util.List<java.lang.String>)value);
+          setBlockIds((java.util.List<java.lang.String>)value);
         }
         break;
 
@@ -6868,8 +7192,8 @@ public class directory_service {
       case PERMISSIONS:
         return getPermissions();
 
-      case BLOCK_NAMES:
-        return getBlockNames();
+      case BLOCK_IDS:
+        return getBlockIds();
 
       case BLOCK_METADATA:
         return getBlockMetadata();
@@ -6902,8 +7226,8 @@ public class directory_service {
         return isSetFlags();
       case PERMISSIONS:
         return isSetPermissions();
-      case BLOCK_NAMES:
-        return isSetBlockNames();
+      case BLOCK_IDS:
+        return isSetBlockIds();
       case BLOCK_METADATA:
         return isSetBlockMetadata();
       case TAGS:
@@ -6990,12 +7314,12 @@ public class directory_service {
           return false;
       }
 
-      boolean this_present_block_names = true && this.isSetBlockNames();
-      boolean that_present_block_names = true && that.isSetBlockNames();
-      if (this_present_block_names || that_present_block_names) {
-        if (!(this_present_block_names && that_present_block_names))
+      boolean this_present_block_ids = true && this.isSetBlockIds();
+      boolean that_present_block_ids = true && that.isSetBlockIds();
+      if (this_present_block_ids || that_present_block_ids) {
+        if (!(this_present_block_ids && that_present_block_ids))
           return false;
-        if (!this.block_names.equals(that.block_names))
+        if (!this.block_ids.equals(that.block_ids))
           return false;
       }
 
@@ -7044,9 +7368,9 @@ public class directory_service {
 
       hashCode = hashCode * 8191 + permissions;
 
-      hashCode = hashCode * 8191 + ((isSetBlockNames()) ? 131071 : 524287);
-      if (isSetBlockNames())
-        hashCode = hashCode * 8191 + block_names.hashCode();
+      hashCode = hashCode * 8191 + ((isSetBlockIds()) ? 131071 : 524287);
+      if (isSetBlockIds())
+        hashCode = hashCode * 8191 + block_ids.hashCode();
 
       hashCode = hashCode * 8191 + ((isSetBlockMetadata()) ? 131071 : 524287);
       if (isSetBlockMetadata())
@@ -7137,12 +7461,12 @@ public class directory_service {
           return lastComparison;
         }
       }
-      lastComparison = java.lang.Boolean.valueOf(isSetBlockNames()).compareTo(other.isSetBlockNames());
+      lastComparison = java.lang.Boolean.valueOf(isSetBlockIds()).compareTo(other.isSetBlockIds());
       if (lastComparison != 0) {
         return lastComparison;
       }
-      if (isSetBlockNames()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.block_names, other.block_names);
+      if (isSetBlockIds()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.block_ids, other.block_ids);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -7227,11 +7551,11 @@ public class directory_service {
       sb.append(this.permissions);
       first = false;
       if (!first) sb.append(", ");
-      sb.append("block_names:");
-      if (this.block_names == null) {
+      sb.append("block_ids:");
+      if (this.block_ids == null) {
         sb.append("null");
       } else {
-        sb.append(this.block_names);
+        sb.append(this.block_ids);
       }
       first = false;
       if (!first) sb.append(", ");
@@ -7351,20 +7675,20 @@ public class directory_service {
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
               break;
-            case 8: // BLOCK_NAMES
+            case 8: // BLOCK_IDS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
                   org.apache.thrift.protocol.TList _list26 = iprot.readListBegin();
-                  struct.block_names = new java.util.ArrayList<java.lang.String>(_list26.size);
+                  struct.block_ids = new java.util.ArrayList<java.lang.String>(_list26.size);
                   java.lang.String _elem27;
                   for (int _i28 = 0; _i28 < _list26.size; ++_i28)
                   {
                     _elem27 = iprot.readString();
-                    struct.block_names.add(_elem27);
+                    struct.block_ids.add(_elem27);
                   }
                   iprot.readListEnd();
                 }
-                struct.setBlockNamesIsSet(true);
+                struct.setBlockIdsIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
@@ -7449,11 +7773,11 @@ public class directory_service {
         oprot.writeFieldBegin(PERMISSIONS_FIELD_DESC);
         oprot.writeI32(struct.permissions);
         oprot.writeFieldEnd();
-        if (struct.block_names != null) {
-          oprot.writeFieldBegin(BLOCK_NAMES_FIELD_DESC);
+        if (struct.block_ids != null) {
+          oprot.writeFieldBegin(BLOCK_IDS_FIELD_DESC);
           {
-            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.block_names.size()));
-            for (java.lang.String _iter36 : struct.block_names)
+            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.block_ids.size()));
+            for (java.lang.String _iter36 : struct.block_ids)
             {
               oprot.writeString(_iter36);
             }
@@ -7525,7 +7849,7 @@ public class directory_service {
         if (struct.isSetPermissions()) {
           optionals.set(6);
         }
-        if (struct.isSetBlockNames()) {
+        if (struct.isSetBlockIds()) {
           optionals.set(7);
         }
         if (struct.isSetBlockMetadata()) {
@@ -7556,10 +7880,10 @@ public class directory_service {
         if (struct.isSetPermissions()) {
           oprot.writeI32(struct.permissions);
         }
-        if (struct.isSetBlockNames()) {
+        if (struct.isSetBlockIds()) {
           {
-            oprot.writeI32(struct.block_names.size());
-            for (java.lang.String _iter39 : struct.block_names)
+            oprot.writeI32(struct.block_ids.size());
+            for (java.lang.String _iter39 : struct.block_ids)
             {
               oprot.writeString(_iter39);
             }
@@ -7621,15 +7945,15 @@ public class directory_service {
         if (incoming.get(7)) {
           {
             org.apache.thrift.protocol.TList _list42 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
-            struct.block_names = new java.util.ArrayList<java.lang.String>(_list42.size);
+            struct.block_ids = new java.util.ArrayList<java.lang.String>(_list42.size);
             java.lang.String _elem43;
             for (int _i44 = 0; _i44 < _list42.size; ++_i44)
             {
               _elem43 = iprot.readString();
-              struct.block_names.add(_elem43);
+              struct.block_ids.add(_elem43);
             }
           }
-          struct.setBlockNamesIsSet(true);
+          struct.setBlockIdsIsSet(true);
         }
         if (incoming.get(8)) {
           {
@@ -8150,7 +8474,7 @@ public class directory_service {
     private static final org.apache.thrift.protocol.TField CHAIN_LENGTH_FIELD_DESC = new org.apache.thrift.protocol.TField("chain_length", org.apache.thrift.protocol.TType.I32, (short)5);
     private static final org.apache.thrift.protocol.TField FLAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("flags", org.apache.thrift.protocol.TType.I32, (short)6);
     private static final org.apache.thrift.protocol.TField PERMISSIONS_FIELD_DESC = new org.apache.thrift.protocol.TField("permissions", org.apache.thrift.protocol.TType.I32, (short)7);
-    private static final org.apache.thrift.protocol.TField BLOCK_NAMES_FIELD_DESC = new org.apache.thrift.protocol.TField("block_names", org.apache.thrift.protocol.TType.LIST, (short)8);
+    private static final org.apache.thrift.protocol.TField BLOCK_IDS_FIELD_DESC = new org.apache.thrift.protocol.TField("block_ids", org.apache.thrift.protocol.TType.LIST, (short)8);
     private static final org.apache.thrift.protocol.TField BLOCK_METADATA_FIELD_DESC = new org.apache.thrift.protocol.TField("block_metadata", org.apache.thrift.protocol.TType.LIST, (short)9);
     private static final org.apache.thrift.protocol.TField TAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("tags", org.apache.thrift.protocol.TType.MAP, (short)10);
 
@@ -8164,7 +8488,7 @@ public class directory_service {
     public int chain_length; // required
     public int flags; // required
     public int permissions; // required
-    public java.util.List<java.lang.String> block_names; // required
+    public java.util.List<java.lang.String> block_ids; // required
     public java.util.List<java.lang.String> block_metadata; // required
     public java.util.Map<java.lang.String,java.lang.String> tags; // required
 
@@ -8177,7 +8501,7 @@ public class directory_service {
       CHAIN_LENGTH((short)5, "chain_length"),
       FLAGS((short)6, "flags"),
       PERMISSIONS((short)7, "permissions"),
-      BLOCK_NAMES((short)8, "block_names"),
+      BLOCK_IDS((short)8, "block_ids"),
       BLOCK_METADATA((short)9, "block_metadata"),
       TAGS((short)10, "tags");
 
@@ -8208,8 +8532,8 @@ public class directory_service {
             return FLAGS;
           case 7: // PERMISSIONS
             return PERMISSIONS;
-          case 8: // BLOCK_NAMES
-            return BLOCK_NAMES;
+          case 8: // BLOCK_IDS
+            return BLOCK_IDS;
           case 9: // BLOCK_METADATA
             return BLOCK_METADATA;
           case 10: // TAGS
@@ -8276,7 +8600,7 @@ public class directory_service {
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       tmpMap.put(_Fields.PERMISSIONS, new org.apache.thrift.meta_data.FieldMetaData("permissions", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
-      tmpMap.put(_Fields.BLOCK_NAMES, new org.apache.thrift.meta_data.FieldMetaData("block_names", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+      tmpMap.put(_Fields.BLOCK_IDS, new org.apache.thrift.meta_data.FieldMetaData("block_ids", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
               new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
       tmpMap.put(_Fields.BLOCK_METADATA, new org.apache.thrift.meta_data.FieldMetaData("block_metadata", org.apache.thrift.TFieldRequirementType.DEFAULT, 
@@ -8301,7 +8625,7 @@ public class directory_service {
       int chain_length,
       int flags,
       int permissions,
-      java.util.List<java.lang.String> block_names,
+      java.util.List<java.lang.String> block_ids,
       java.util.List<java.lang.String> block_metadata,
       java.util.Map<java.lang.String,java.lang.String> tags)
     {
@@ -8317,7 +8641,7 @@ public class directory_service {
       setFlagsIsSet(true);
       this.permissions = permissions;
       setPermissionsIsSet(true);
-      this.block_names = block_names;
+      this.block_ids = block_ids;
       this.block_metadata = block_metadata;
       this.tags = tags;
     }
@@ -8340,9 +8664,9 @@ public class directory_service {
       this.chain_length = other.chain_length;
       this.flags = other.flags;
       this.permissions = other.permissions;
-      if (other.isSetBlockNames()) {
-        java.util.List<java.lang.String> __this__block_names = new java.util.ArrayList<java.lang.String>(other.block_names);
-        this.block_names = __this__block_names;
+      if (other.isSetBlockIds()) {
+        java.util.List<java.lang.String> __this__block_ids = new java.util.ArrayList<java.lang.String>(other.block_ids);
+        this.block_ids = __this__block_ids;
       }
       if (other.isSetBlockMetadata()) {
         java.util.List<java.lang.String> __this__block_metadata = new java.util.ArrayList<java.lang.String>(other.block_metadata);
@@ -8371,7 +8695,7 @@ public class directory_service {
       this.flags = 0;
       setPermissionsIsSet(false);
       this.permissions = 0;
-      this.block_names = null;
+      this.block_ids = null;
       this.block_metadata = null;
       this.tags = null;
     }
@@ -8540,42 +8864,42 @@ public class directory_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __PERMISSIONS_ISSET_ID, value);
     }
 
-    public int getBlockNamesSize() {
-      return (this.block_names == null) ? 0 : this.block_names.size();
+    public int getBlockIdsSize() {
+      return (this.block_ids == null) ? 0 : this.block_ids.size();
     }
 
-    public java.util.Iterator<java.lang.String> getBlockNamesIterator() {
-      return (this.block_names == null) ? null : this.block_names.iterator();
+    public java.util.Iterator<java.lang.String> getBlockIdsIterator() {
+      return (this.block_ids == null) ? null : this.block_ids.iterator();
     }
 
-    public void addToBlockNames(java.lang.String elem) {
-      if (this.block_names == null) {
-        this.block_names = new java.util.ArrayList<java.lang.String>();
+    public void addToBlockIds(java.lang.String elem) {
+      if (this.block_ids == null) {
+        this.block_ids = new java.util.ArrayList<java.lang.String>();
       }
-      this.block_names.add(elem);
+      this.block_ids.add(elem);
     }
 
-    public java.util.List<java.lang.String> getBlockNames() {
-      return this.block_names;
+    public java.util.List<java.lang.String> getBlockIds() {
+      return this.block_ids;
     }
 
-    public open_or_create_args setBlockNames(java.util.List<java.lang.String> block_names) {
-      this.block_names = block_names;
+    public open_or_create_args setBlockIds(java.util.List<java.lang.String> block_ids) {
+      this.block_ids = block_ids;
       return this;
     }
 
-    public void unsetBlockNames() {
-      this.block_names = null;
+    public void unsetBlockIds() {
+      this.block_ids = null;
     }
 
-    /** Returns true if field block_names is set (has been assigned a value) and false otherwise */
-    public boolean isSetBlockNames() {
-      return this.block_names != null;
+    /** Returns true if field block_ids is set (has been assigned a value) and false otherwise */
+    public boolean isSetBlockIds() {
+      return this.block_ids != null;
     }
 
-    public void setBlockNamesIsSet(boolean value) {
+    public void setBlockIdsIsSet(boolean value) {
       if (!value) {
-        this.block_names = null;
+        this.block_ids = null;
       }
     }
 
@@ -8711,11 +9035,11 @@ public class directory_service {
         }
         break;
 
-      case BLOCK_NAMES:
+      case BLOCK_IDS:
         if (value == null) {
-          unsetBlockNames();
+          unsetBlockIds();
         } else {
-          setBlockNames((java.util.List<java.lang.String>)value);
+          setBlockIds((java.util.List<java.lang.String>)value);
         }
         break;
 
@@ -8761,8 +9085,8 @@ public class directory_service {
       case PERMISSIONS:
         return getPermissions();
 
-      case BLOCK_NAMES:
-        return getBlockNames();
+      case BLOCK_IDS:
+        return getBlockIds();
 
       case BLOCK_METADATA:
         return getBlockMetadata();
@@ -8795,8 +9119,8 @@ public class directory_service {
         return isSetFlags();
       case PERMISSIONS:
         return isSetPermissions();
-      case BLOCK_NAMES:
-        return isSetBlockNames();
+      case BLOCK_IDS:
+        return isSetBlockIds();
       case BLOCK_METADATA:
         return isSetBlockMetadata();
       case TAGS:
@@ -8883,12 +9207,12 @@ public class directory_service {
           return false;
       }
 
-      boolean this_present_block_names = true && this.isSetBlockNames();
-      boolean that_present_block_names = true && that.isSetBlockNames();
-      if (this_present_block_names || that_present_block_names) {
-        if (!(this_present_block_names && that_present_block_names))
+      boolean this_present_block_ids = true && this.isSetBlockIds();
+      boolean that_present_block_ids = true && that.isSetBlockIds();
+      if (this_present_block_ids || that_present_block_ids) {
+        if (!(this_present_block_ids && that_present_block_ids))
           return false;
-        if (!this.block_names.equals(that.block_names))
+        if (!this.block_ids.equals(that.block_ids))
           return false;
       }
 
@@ -8937,9 +9261,9 @@ public class directory_service {
 
       hashCode = hashCode * 8191 + permissions;
 
-      hashCode = hashCode * 8191 + ((isSetBlockNames()) ? 131071 : 524287);
-      if (isSetBlockNames())
-        hashCode = hashCode * 8191 + block_names.hashCode();
+      hashCode = hashCode * 8191 + ((isSetBlockIds()) ? 131071 : 524287);
+      if (isSetBlockIds())
+        hashCode = hashCode * 8191 + block_ids.hashCode();
 
       hashCode = hashCode * 8191 + ((isSetBlockMetadata()) ? 131071 : 524287);
       if (isSetBlockMetadata())
@@ -9030,12 +9354,12 @@ public class directory_service {
           return lastComparison;
         }
       }
-      lastComparison = java.lang.Boolean.valueOf(isSetBlockNames()).compareTo(other.isSetBlockNames());
+      lastComparison = java.lang.Boolean.valueOf(isSetBlockIds()).compareTo(other.isSetBlockIds());
       if (lastComparison != 0) {
         return lastComparison;
       }
-      if (isSetBlockNames()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.block_names, other.block_names);
+      if (isSetBlockIds()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.block_ids, other.block_ids);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -9120,11 +9444,11 @@ public class directory_service {
       sb.append(this.permissions);
       first = false;
       if (!first) sb.append(", ");
-      sb.append("block_names:");
-      if (this.block_names == null) {
+      sb.append("block_ids:");
+      if (this.block_ids == null) {
         sb.append("null");
       } else {
-        sb.append(this.block_names);
+        sb.append(this.block_ids);
       }
       first = false;
       if (!first) sb.append(", ");
@@ -9244,20 +9568,20 @@ public class directory_service {
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
               break;
-            case 8: // BLOCK_NAMES
+            case 8: // BLOCK_IDS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
                   org.apache.thrift.protocol.TList _list52 = iprot.readListBegin();
-                  struct.block_names = new java.util.ArrayList<java.lang.String>(_list52.size);
+                  struct.block_ids = new java.util.ArrayList<java.lang.String>(_list52.size);
                   java.lang.String _elem53;
                   for (int _i54 = 0; _i54 < _list52.size; ++_i54)
                   {
                     _elem53 = iprot.readString();
-                    struct.block_names.add(_elem53);
+                    struct.block_ids.add(_elem53);
                   }
                   iprot.readListEnd();
                 }
-                struct.setBlockNamesIsSet(true);
+                struct.setBlockIdsIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
@@ -9342,11 +9666,11 @@ public class directory_service {
         oprot.writeFieldBegin(PERMISSIONS_FIELD_DESC);
         oprot.writeI32(struct.permissions);
         oprot.writeFieldEnd();
-        if (struct.block_names != null) {
-          oprot.writeFieldBegin(BLOCK_NAMES_FIELD_DESC);
+        if (struct.block_ids != null) {
+          oprot.writeFieldBegin(BLOCK_IDS_FIELD_DESC);
           {
-            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.block_names.size()));
-            for (java.lang.String _iter62 : struct.block_names)
+            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.block_ids.size()));
+            for (java.lang.String _iter62 : struct.block_ids)
             {
               oprot.writeString(_iter62);
             }
@@ -9418,7 +9742,7 @@ public class directory_service {
         if (struct.isSetPermissions()) {
           optionals.set(6);
         }
-        if (struct.isSetBlockNames()) {
+        if (struct.isSetBlockIds()) {
           optionals.set(7);
         }
         if (struct.isSetBlockMetadata()) {
@@ -9449,10 +9773,10 @@ public class directory_service {
         if (struct.isSetPermissions()) {
           oprot.writeI32(struct.permissions);
         }
-        if (struct.isSetBlockNames()) {
+        if (struct.isSetBlockIds()) {
           {
-            oprot.writeI32(struct.block_names.size());
-            for (java.lang.String _iter65 : struct.block_names)
+            oprot.writeI32(struct.block_ids.size());
+            for (java.lang.String _iter65 : struct.block_ids)
             {
               oprot.writeString(_iter65);
             }
@@ -9514,15 +9838,15 @@ public class directory_service {
         if (incoming.get(7)) {
           {
             org.apache.thrift.protocol.TList _list68 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
-            struct.block_names = new java.util.ArrayList<java.lang.String>(_list68.size);
+            struct.block_ids = new java.util.ArrayList<java.lang.String>(_list68.size);
             java.lang.String _elem69;
             for (int _i70 = 0; _i70 < _list68.size; ++_i70)
             {
               _elem69 = iprot.readString();
-              struct.block_names.add(_elem69);
+              struct.block_ids.add(_elem69);
             }
           }
-          struct.setBlockNamesIsSet(true);
+          struct.setBlockIdsIsSet(true);
         }
         if (incoming.get(8)) {
           {
@@ -26087,6 +26411,1879 @@ public class directory_service {
           struct.setSuccessIsSet(true);
         }
         if (incoming.get(1)) {
+          struct.ex = new directory_service_exception();
+          struct.ex.read(iprot);
+          struct.setExIsSet(true);
+        }
+      }
+    }
+
+    private static <S extends org.apache.thrift.scheme.IScheme> S scheme(org.apache.thrift.protocol.TProtocol proto) {
+      return (org.apache.thrift.scheme.StandardScheme.class.equals(proto.getScheme()) ? STANDARD_SCHEME_FACTORY : TUPLE_SCHEME_FACTORY).getScheme();
+    }
+  }
+
+  public static class add_data_block_args implements org.apache.thrift.TBase<add_data_block_args, add_data_block_args._Fields>, java.io.Serializable, Cloneable, Comparable<add_data_block_args>   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("add_data_block_args");
+
+    private static final org.apache.thrift.protocol.TField PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("path", org.apache.thrift.protocol.TType.STRING, (short)1);
+    private static final org.apache.thrift.protocol.TField PARTITION_NAME_FIELD_DESC = new org.apache.thrift.protocol.TField("partition_name", org.apache.thrift.protocol.TType.STRING, (short)2);
+    private static final org.apache.thrift.protocol.TField PARTITION_METADATA_FIELD_DESC = new org.apache.thrift.protocol.TField("partition_metadata", org.apache.thrift.protocol.TType.STRING, (short)3);
+
+    private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new add_data_block_argsStandardSchemeFactory();
+    private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new add_data_block_argsTupleSchemeFactory();
+
+    public java.lang.String path; // required
+    public java.lang.String partition_name; // required
+    public java.lang.String partition_metadata; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      PATH((short)1, "path"),
+      PARTITION_NAME((short)2, "partition_name"),
+      PARTITION_METADATA((short)3, "partition_metadata");
+
+      private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
+
+      static {
+        for (_Fields field : java.util.EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // PATH
+            return PATH;
+          case 2: // PARTITION_NAME
+            return PARTITION_NAME;
+          case 3: // PARTITION_METADATA
+            return PARTITION_METADATA;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new java.lang.IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(java.lang.String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final java.lang.String _fieldName;
+
+      _Fields(short thriftId, java.lang.String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public java.lang.String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.PATH, new org.apache.thrift.meta_data.FieldMetaData("path", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      tmpMap.put(_Fields.PARTITION_NAME, new org.apache.thrift.meta_data.FieldMetaData("partition_name", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      tmpMap.put(_Fields.PARTITION_METADATA, new org.apache.thrift.meta_data.FieldMetaData("partition_metadata", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(add_data_block_args.class, metaDataMap);
+    }
+
+    public add_data_block_args() {
+    }
+
+    public add_data_block_args(
+      java.lang.String path,
+      java.lang.String partition_name,
+      java.lang.String partition_metadata)
+    {
+      this();
+      this.path = path;
+      this.partition_name = partition_name;
+      this.partition_metadata = partition_metadata;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public add_data_block_args(add_data_block_args other) {
+      if (other.isSetPath()) {
+        this.path = other.path;
+      }
+      if (other.isSetPartitionName()) {
+        this.partition_name = other.partition_name;
+      }
+      if (other.isSetPartitionMetadata()) {
+        this.partition_metadata = other.partition_metadata;
+      }
+    }
+
+    public add_data_block_args deepCopy() {
+      return new add_data_block_args(this);
+    }
+
+    @Override
+    public void clear() {
+      this.path = null;
+      this.partition_name = null;
+      this.partition_metadata = null;
+    }
+
+    public java.lang.String getPath() {
+      return this.path;
+    }
+
+    public add_data_block_args setPath(java.lang.String path) {
+      this.path = path;
+      return this;
+    }
+
+    public void unsetPath() {
+      this.path = null;
+    }
+
+    /** Returns true if field path is set (has been assigned a value) and false otherwise */
+    public boolean isSetPath() {
+      return this.path != null;
+    }
+
+    public void setPathIsSet(boolean value) {
+      if (!value) {
+        this.path = null;
+      }
+    }
+
+    public java.lang.String getPartitionName() {
+      return this.partition_name;
+    }
+
+    public add_data_block_args setPartitionName(java.lang.String partition_name) {
+      this.partition_name = partition_name;
+      return this;
+    }
+
+    public void unsetPartitionName() {
+      this.partition_name = null;
+    }
+
+    /** Returns true if field partition_name is set (has been assigned a value) and false otherwise */
+    public boolean isSetPartitionName() {
+      return this.partition_name != null;
+    }
+
+    public void setPartitionNameIsSet(boolean value) {
+      if (!value) {
+        this.partition_name = null;
+      }
+    }
+
+    public java.lang.String getPartitionMetadata() {
+      return this.partition_metadata;
+    }
+
+    public add_data_block_args setPartitionMetadata(java.lang.String partition_metadata) {
+      this.partition_metadata = partition_metadata;
+      return this;
+    }
+
+    public void unsetPartitionMetadata() {
+      this.partition_metadata = null;
+    }
+
+    /** Returns true if field partition_metadata is set (has been assigned a value) and false otherwise */
+    public boolean isSetPartitionMetadata() {
+      return this.partition_metadata != null;
+    }
+
+    public void setPartitionMetadataIsSet(boolean value) {
+      if (!value) {
+        this.partition_metadata = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, java.lang.Object value) {
+      switch (field) {
+      case PATH:
+        if (value == null) {
+          unsetPath();
+        } else {
+          setPath((java.lang.String)value);
+        }
+        break;
+
+      case PARTITION_NAME:
+        if (value == null) {
+          unsetPartitionName();
+        } else {
+          setPartitionName((java.lang.String)value);
+        }
+        break;
+
+      case PARTITION_METADATA:
+        if (value == null) {
+          unsetPartitionMetadata();
+        } else {
+          setPartitionMetadata((java.lang.String)value);
+        }
+        break;
+
+      }
+    }
+
+    public java.lang.Object getFieldValue(_Fields field) {
+      switch (field) {
+      case PATH:
+        return getPath();
+
+      case PARTITION_NAME:
+        return getPartitionName();
+
+      case PARTITION_METADATA:
+        return getPartitionMetadata();
+
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new java.lang.IllegalArgumentException();
+      }
+
+      switch (field) {
+      case PATH:
+        return isSetPath();
+      case PARTITION_NAME:
+        return isSetPartitionName();
+      case PARTITION_METADATA:
+        return isSetPartitionMetadata();
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(java.lang.Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof add_data_block_args)
+        return this.equals((add_data_block_args)that);
+      return false;
+    }
+
+    public boolean equals(add_data_block_args that) {
+      if (that == null)
+        return false;
+      if (this == that)
+        return true;
+
+      boolean this_present_path = true && this.isSetPath();
+      boolean that_present_path = true && that.isSetPath();
+      if (this_present_path || that_present_path) {
+        if (!(this_present_path && that_present_path))
+          return false;
+        if (!this.path.equals(that.path))
+          return false;
+      }
+
+      boolean this_present_partition_name = true && this.isSetPartitionName();
+      boolean that_present_partition_name = true && that.isSetPartitionName();
+      if (this_present_partition_name || that_present_partition_name) {
+        if (!(this_present_partition_name && that_present_partition_name))
+          return false;
+        if (!this.partition_name.equals(that.partition_name))
+          return false;
+      }
+
+      boolean this_present_partition_metadata = true && this.isSetPartitionMetadata();
+      boolean that_present_partition_metadata = true && that.isSetPartitionMetadata();
+      if (this_present_partition_metadata || that_present_partition_metadata) {
+        if (!(this_present_partition_metadata && that_present_partition_metadata))
+          return false;
+        if (!this.partition_metadata.equals(that.partition_metadata))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int hashCode = 1;
+
+      hashCode = hashCode * 8191 + ((isSetPath()) ? 131071 : 524287);
+      if (isSetPath())
+        hashCode = hashCode * 8191 + path.hashCode();
+
+      hashCode = hashCode * 8191 + ((isSetPartitionName()) ? 131071 : 524287);
+      if (isSetPartitionName())
+        hashCode = hashCode * 8191 + partition_name.hashCode();
+
+      hashCode = hashCode * 8191 + ((isSetPartitionMetadata()) ? 131071 : 524287);
+      if (isSetPartitionMetadata())
+        hashCode = hashCode * 8191 + partition_metadata.hashCode();
+
+      return hashCode;
+    }
+
+    @Override
+    public int compareTo(add_data_block_args other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+
+      lastComparison = java.lang.Boolean.valueOf(isSetPath()).compareTo(other.isSetPath());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetPath()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.path, other.path);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = java.lang.Boolean.valueOf(isSetPartitionName()).compareTo(other.isSetPartitionName());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetPartitionName()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.partition_name, other.partition_name);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = java.lang.Boolean.valueOf(isSetPartitionMetadata()).compareTo(other.isSetPartitionMetadata());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetPartitionMetadata()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.partition_metadata, other.partition_metadata);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      scheme(iprot).read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      scheme(oprot).write(oprot, this);
+    }
+
+    @Override
+    public java.lang.String toString() {
+      java.lang.StringBuilder sb = new java.lang.StringBuilder("add_data_block_args(");
+      boolean first = true;
+
+      sb.append("path:");
+      if (this.path == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.path);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("partition_name:");
+      if (this.partition_name == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.partition_name);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("partition_metadata:");
+      if (this.partition_metadata == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.partition_metadata);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, java.lang.ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class add_data_block_argsStandardSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public add_data_block_argsStandardScheme getScheme() {
+        return new add_data_block_argsStandardScheme();
+      }
+    }
+
+    private static class add_data_block_argsStandardScheme extends org.apache.thrift.scheme.StandardScheme<add_data_block_args> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, add_data_block_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // PATH
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.path = iprot.readString();
+                struct.setPathIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 2: // PARTITION_NAME
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.partition_name = iprot.readString();
+                struct.setPartitionNameIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 3: // PARTITION_METADATA
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.partition_metadata = iprot.readString();
+                struct.setPartitionMetadataIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, add_data_block_args struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.path != null) {
+          oprot.writeFieldBegin(PATH_FIELD_DESC);
+          oprot.writeString(struct.path);
+          oprot.writeFieldEnd();
+        }
+        if (struct.partition_name != null) {
+          oprot.writeFieldBegin(PARTITION_NAME_FIELD_DESC);
+          oprot.writeString(struct.partition_name);
+          oprot.writeFieldEnd();
+        }
+        if (struct.partition_metadata != null) {
+          oprot.writeFieldBegin(PARTITION_METADATA_FIELD_DESC);
+          oprot.writeString(struct.partition_metadata);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class add_data_block_argsTupleSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public add_data_block_argsTupleScheme getScheme() {
+        return new add_data_block_argsTupleScheme();
+      }
+    }
+
+    private static class add_data_block_argsTupleScheme extends org.apache.thrift.scheme.TupleScheme<add_data_block_args> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, add_data_block_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet optionals = new java.util.BitSet();
+        if (struct.isSetPath()) {
+          optionals.set(0);
+        }
+        if (struct.isSetPartitionName()) {
+          optionals.set(1);
+        }
+        if (struct.isSetPartitionMetadata()) {
+          optionals.set(2);
+        }
+        oprot.writeBitSet(optionals, 3);
+        if (struct.isSetPath()) {
+          oprot.writeString(struct.path);
+        }
+        if (struct.isSetPartitionName()) {
+          oprot.writeString(struct.partition_name);
+        }
+        if (struct.isSetPartitionMetadata()) {
+          oprot.writeString(struct.partition_metadata);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, add_data_block_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet incoming = iprot.readBitSet(3);
+        if (incoming.get(0)) {
+          struct.path = iprot.readString();
+          struct.setPathIsSet(true);
+        }
+        if (incoming.get(1)) {
+          struct.partition_name = iprot.readString();
+          struct.setPartitionNameIsSet(true);
+        }
+        if (incoming.get(2)) {
+          struct.partition_metadata = iprot.readString();
+          struct.setPartitionMetadataIsSet(true);
+        }
+      }
+    }
+
+    private static <S extends org.apache.thrift.scheme.IScheme> S scheme(org.apache.thrift.protocol.TProtocol proto) {
+      return (org.apache.thrift.scheme.StandardScheme.class.equals(proto.getScheme()) ? STANDARD_SCHEME_FACTORY : TUPLE_SCHEME_FACTORY).getScheme();
+    }
+  }
+
+  public static class add_data_block_result implements org.apache.thrift.TBase<add_data_block_result, add_data_block_result._Fields>, java.io.Serializable, Cloneable, Comparable<add_data_block_result>   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("add_data_block_result");
+
+    private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.STRUCT, (short)0);
+    private static final org.apache.thrift.protocol.TField EX_FIELD_DESC = new org.apache.thrift.protocol.TField("ex", org.apache.thrift.protocol.TType.STRUCT, (short)1);
+
+    private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new add_data_block_resultStandardSchemeFactory();
+    private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new add_data_block_resultTupleSchemeFactory();
+
+    public rpc_replica_chain success; // required
+    public directory_service_exception ex; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      SUCCESS((short)0, "success"),
+      EX((short)1, "ex");
+
+      private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
+
+      static {
+        for (_Fields field : java.util.EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 0: // SUCCESS
+            return SUCCESS;
+          case 1: // EX
+            return EX;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new java.lang.IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(java.lang.String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final java.lang.String _fieldName;
+
+      _Fields(short thriftId, java.lang.String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public java.lang.String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, rpc_replica_chain.class)));
+      tmpMap.put(_Fields.EX, new org.apache.thrift.meta_data.FieldMetaData("ex", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, directory_service_exception.class)));
+      metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(add_data_block_result.class, metaDataMap);
+    }
+
+    public add_data_block_result() {
+    }
+
+    public add_data_block_result(
+      rpc_replica_chain success,
+      directory_service_exception ex)
+    {
+      this();
+      this.success = success;
+      this.ex = ex;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public add_data_block_result(add_data_block_result other) {
+      if (other.isSetSuccess()) {
+        this.success = new rpc_replica_chain(other.success);
+      }
+      if (other.isSetEx()) {
+        this.ex = new directory_service_exception(other.ex);
+      }
+    }
+
+    public add_data_block_result deepCopy() {
+      return new add_data_block_result(this);
+    }
+
+    @Override
+    public void clear() {
+      this.success = null;
+      this.ex = null;
+    }
+
+    public rpc_replica_chain getSuccess() {
+      return this.success;
+    }
+
+    public add_data_block_result setSuccess(rpc_replica_chain success) {
+      this.success = success;
+      return this;
+    }
+
+    public void unsetSuccess() {
+      this.success = null;
+    }
+
+    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    public boolean isSetSuccess() {
+      return this.success != null;
+    }
+
+    public void setSuccessIsSet(boolean value) {
+      if (!value) {
+        this.success = null;
+      }
+    }
+
+    public directory_service_exception getEx() {
+      return this.ex;
+    }
+
+    public add_data_block_result setEx(directory_service_exception ex) {
+      this.ex = ex;
+      return this;
+    }
+
+    public void unsetEx() {
+      this.ex = null;
+    }
+
+    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    public boolean isSetEx() {
+      return this.ex != null;
+    }
+
+    public void setExIsSet(boolean value) {
+      if (!value) {
+        this.ex = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, java.lang.Object value) {
+      switch (field) {
+      case SUCCESS:
+        if (value == null) {
+          unsetSuccess();
+        } else {
+          setSuccess((rpc_replica_chain)value);
+        }
+        break;
+
+      case EX:
+        if (value == null) {
+          unsetEx();
+        } else {
+          setEx((directory_service_exception)value);
+        }
+        break;
+
+      }
+    }
+
+    public java.lang.Object getFieldValue(_Fields field) {
+      switch (field) {
+      case SUCCESS:
+        return getSuccess();
+
+      case EX:
+        return getEx();
+
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new java.lang.IllegalArgumentException();
+      }
+
+      switch (field) {
+      case SUCCESS:
+        return isSetSuccess();
+      case EX:
+        return isSetEx();
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(java.lang.Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof add_data_block_result)
+        return this.equals((add_data_block_result)that);
+      return false;
+    }
+
+    public boolean equals(add_data_block_result that) {
+      if (that == null)
+        return false;
+      if (this == that)
+        return true;
+
+      boolean this_present_success = true && this.isSetSuccess();
+      boolean that_present_success = true && that.isSetSuccess();
+      if (this_present_success || that_present_success) {
+        if (!(this_present_success && that_present_success))
+          return false;
+        if (!this.success.equals(that.success))
+          return false;
+      }
+
+      boolean this_present_ex = true && this.isSetEx();
+      boolean that_present_ex = true && that.isSetEx();
+      if (this_present_ex || that_present_ex) {
+        if (!(this_present_ex && that_present_ex))
+          return false;
+        if (!this.ex.equals(that.ex))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int hashCode = 1;
+
+      hashCode = hashCode * 8191 + ((isSetSuccess()) ? 131071 : 524287);
+      if (isSetSuccess())
+        hashCode = hashCode * 8191 + success.hashCode();
+
+      hashCode = hashCode * 8191 + ((isSetEx()) ? 131071 : 524287);
+      if (isSetEx())
+        hashCode = hashCode * 8191 + ex.hashCode();
+
+      return hashCode;
+    }
+
+    @Override
+    public int compareTo(add_data_block_result other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+
+      lastComparison = java.lang.Boolean.valueOf(isSetSuccess()).compareTo(other.isSetSuccess());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetSuccess()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, other.success);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = java.lang.Boolean.valueOf(isSetEx()).compareTo(other.isSetEx());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetEx()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.ex, other.ex);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      scheme(iprot).read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      scheme(oprot).write(oprot, this);
+      }
+
+    @Override
+    public java.lang.String toString() {
+      java.lang.StringBuilder sb = new java.lang.StringBuilder("add_data_block_result(");
+      boolean first = true;
+
+      sb.append("success:");
+      if (this.success == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.success);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("ex:");
+      if (this.ex == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.ex);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      // check for sub-struct validity
+      if (success != null) {
+        success.validate();
+      }
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, java.lang.ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class add_data_block_resultStandardSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public add_data_block_resultStandardScheme getScheme() {
+        return new add_data_block_resultStandardScheme();
+      }
+    }
+
+    private static class add_data_block_resultStandardScheme extends org.apache.thrift.scheme.StandardScheme<add_data_block_result> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, add_data_block_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 0: // SUCCESS
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
+                struct.success = new rpc_replica_chain();
+                struct.success.read(iprot);
+                struct.setSuccessIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 1: // EX
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
+                struct.ex = new directory_service_exception();
+                struct.ex.read(iprot);
+                struct.setExIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, add_data_block_result struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.success != null) {
+          oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
+          struct.success.write(oprot);
+          oprot.writeFieldEnd();
+        }
+        if (struct.ex != null) {
+          oprot.writeFieldBegin(EX_FIELD_DESC);
+          struct.ex.write(oprot);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class add_data_block_resultTupleSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public add_data_block_resultTupleScheme getScheme() {
+        return new add_data_block_resultTupleScheme();
+      }
+    }
+
+    private static class add_data_block_resultTupleScheme extends org.apache.thrift.scheme.TupleScheme<add_data_block_result> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, add_data_block_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet optionals = new java.util.BitSet();
+        if (struct.isSetSuccess()) {
+          optionals.set(0);
+        }
+        if (struct.isSetEx()) {
+          optionals.set(1);
+        }
+        oprot.writeBitSet(optionals, 2);
+        if (struct.isSetSuccess()) {
+          struct.success.write(oprot);
+        }
+        if (struct.isSetEx()) {
+          struct.ex.write(oprot);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, add_data_block_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet incoming = iprot.readBitSet(2);
+        if (incoming.get(0)) {
+          struct.success = new rpc_replica_chain();
+          struct.success.read(iprot);
+          struct.setSuccessIsSet(true);
+        }
+        if (incoming.get(1)) {
+          struct.ex = new directory_service_exception();
+          struct.ex.read(iprot);
+          struct.setExIsSet(true);
+        }
+      }
+    }
+
+    private static <S extends org.apache.thrift.scheme.IScheme> S scheme(org.apache.thrift.protocol.TProtocol proto) {
+      return (org.apache.thrift.scheme.StandardScheme.class.equals(proto.getScheme()) ? STANDARD_SCHEME_FACTORY : TUPLE_SCHEME_FACTORY).getScheme();
+    }
+  }
+
+  public static class remove_data_block_args implements org.apache.thrift.TBase<remove_data_block_args, remove_data_block_args._Fields>, java.io.Serializable, Cloneable, Comparable<remove_data_block_args>   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("remove_data_block_args");
+
+    private static final org.apache.thrift.protocol.TField PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("path", org.apache.thrift.protocol.TType.STRING, (short)1);
+    private static final org.apache.thrift.protocol.TField PARTITION_NAME_FIELD_DESC = new org.apache.thrift.protocol.TField("partition_name", org.apache.thrift.protocol.TType.STRING, (short)2);
+
+    private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new remove_data_block_argsStandardSchemeFactory();
+    private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new remove_data_block_argsTupleSchemeFactory();
+
+    public java.lang.String path; // required
+    public java.lang.String partition_name; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      PATH((short)1, "path"),
+      PARTITION_NAME((short)2, "partition_name");
+
+      private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
+
+      static {
+        for (_Fields field : java.util.EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // PATH
+            return PATH;
+          case 2: // PARTITION_NAME
+            return PARTITION_NAME;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new java.lang.IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(java.lang.String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final java.lang.String _fieldName;
+
+      _Fields(short thriftId, java.lang.String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public java.lang.String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.PATH, new org.apache.thrift.meta_data.FieldMetaData("path", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      tmpMap.put(_Fields.PARTITION_NAME, new org.apache.thrift.meta_data.FieldMetaData("partition_name", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(remove_data_block_args.class, metaDataMap);
+    }
+
+    public remove_data_block_args() {
+    }
+
+    public remove_data_block_args(
+      java.lang.String path,
+      java.lang.String partition_name)
+    {
+      this();
+      this.path = path;
+      this.partition_name = partition_name;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public remove_data_block_args(remove_data_block_args other) {
+      if (other.isSetPath()) {
+        this.path = other.path;
+      }
+      if (other.isSetPartitionName()) {
+        this.partition_name = other.partition_name;
+      }
+    }
+
+    public remove_data_block_args deepCopy() {
+      return new remove_data_block_args(this);
+    }
+
+    @Override
+    public void clear() {
+      this.path = null;
+      this.partition_name = null;
+    }
+
+    public java.lang.String getPath() {
+      return this.path;
+    }
+
+    public remove_data_block_args setPath(java.lang.String path) {
+      this.path = path;
+      return this;
+    }
+
+    public void unsetPath() {
+      this.path = null;
+    }
+
+    /** Returns true if field path is set (has been assigned a value) and false otherwise */
+    public boolean isSetPath() {
+      return this.path != null;
+    }
+
+    public void setPathIsSet(boolean value) {
+      if (!value) {
+        this.path = null;
+      }
+    }
+
+    public java.lang.String getPartitionName() {
+      return this.partition_name;
+    }
+
+    public remove_data_block_args setPartitionName(java.lang.String partition_name) {
+      this.partition_name = partition_name;
+      return this;
+    }
+
+    public void unsetPartitionName() {
+      this.partition_name = null;
+    }
+
+    /** Returns true if field partition_name is set (has been assigned a value) and false otherwise */
+    public boolean isSetPartitionName() {
+      return this.partition_name != null;
+    }
+
+    public void setPartitionNameIsSet(boolean value) {
+      if (!value) {
+        this.partition_name = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, java.lang.Object value) {
+      switch (field) {
+      case PATH:
+        if (value == null) {
+          unsetPath();
+        } else {
+          setPath((java.lang.String)value);
+        }
+        break;
+
+      case PARTITION_NAME:
+        if (value == null) {
+          unsetPartitionName();
+        } else {
+          setPartitionName((java.lang.String)value);
+        }
+        break;
+
+      }
+    }
+
+    public java.lang.Object getFieldValue(_Fields field) {
+      switch (field) {
+      case PATH:
+        return getPath();
+
+      case PARTITION_NAME:
+        return getPartitionName();
+
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new java.lang.IllegalArgumentException();
+      }
+
+      switch (field) {
+      case PATH:
+        return isSetPath();
+      case PARTITION_NAME:
+        return isSetPartitionName();
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(java.lang.Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof remove_data_block_args)
+        return this.equals((remove_data_block_args)that);
+      return false;
+    }
+
+    public boolean equals(remove_data_block_args that) {
+      if (that == null)
+        return false;
+      if (this == that)
+        return true;
+
+      boolean this_present_path = true && this.isSetPath();
+      boolean that_present_path = true && that.isSetPath();
+      if (this_present_path || that_present_path) {
+        if (!(this_present_path && that_present_path))
+          return false;
+        if (!this.path.equals(that.path))
+          return false;
+      }
+
+      boolean this_present_partition_name = true && this.isSetPartitionName();
+      boolean that_present_partition_name = true && that.isSetPartitionName();
+      if (this_present_partition_name || that_present_partition_name) {
+        if (!(this_present_partition_name && that_present_partition_name))
+          return false;
+        if (!this.partition_name.equals(that.partition_name))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int hashCode = 1;
+
+      hashCode = hashCode * 8191 + ((isSetPath()) ? 131071 : 524287);
+      if (isSetPath())
+        hashCode = hashCode * 8191 + path.hashCode();
+
+      hashCode = hashCode * 8191 + ((isSetPartitionName()) ? 131071 : 524287);
+      if (isSetPartitionName())
+        hashCode = hashCode * 8191 + partition_name.hashCode();
+
+      return hashCode;
+    }
+
+    @Override
+    public int compareTo(remove_data_block_args other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+
+      lastComparison = java.lang.Boolean.valueOf(isSetPath()).compareTo(other.isSetPath());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetPath()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.path, other.path);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = java.lang.Boolean.valueOf(isSetPartitionName()).compareTo(other.isSetPartitionName());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetPartitionName()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.partition_name, other.partition_name);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      scheme(iprot).read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      scheme(oprot).write(oprot, this);
+    }
+
+    @Override
+    public java.lang.String toString() {
+      java.lang.StringBuilder sb = new java.lang.StringBuilder("remove_data_block_args(");
+      boolean first = true;
+
+      sb.append("path:");
+      if (this.path == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.path);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("partition_name:");
+      if (this.partition_name == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.partition_name);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, java.lang.ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class remove_data_block_argsStandardSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public remove_data_block_argsStandardScheme getScheme() {
+        return new remove_data_block_argsStandardScheme();
+      }
+    }
+
+    private static class remove_data_block_argsStandardScheme extends org.apache.thrift.scheme.StandardScheme<remove_data_block_args> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, remove_data_block_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // PATH
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.path = iprot.readString();
+                struct.setPathIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 2: // PARTITION_NAME
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.partition_name = iprot.readString();
+                struct.setPartitionNameIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, remove_data_block_args struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.path != null) {
+          oprot.writeFieldBegin(PATH_FIELD_DESC);
+          oprot.writeString(struct.path);
+          oprot.writeFieldEnd();
+        }
+        if (struct.partition_name != null) {
+          oprot.writeFieldBegin(PARTITION_NAME_FIELD_DESC);
+          oprot.writeString(struct.partition_name);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class remove_data_block_argsTupleSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public remove_data_block_argsTupleScheme getScheme() {
+        return new remove_data_block_argsTupleScheme();
+      }
+    }
+
+    private static class remove_data_block_argsTupleScheme extends org.apache.thrift.scheme.TupleScheme<remove_data_block_args> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, remove_data_block_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet optionals = new java.util.BitSet();
+        if (struct.isSetPath()) {
+          optionals.set(0);
+        }
+        if (struct.isSetPartitionName()) {
+          optionals.set(1);
+        }
+        oprot.writeBitSet(optionals, 2);
+        if (struct.isSetPath()) {
+          oprot.writeString(struct.path);
+        }
+        if (struct.isSetPartitionName()) {
+          oprot.writeString(struct.partition_name);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, remove_data_block_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet incoming = iprot.readBitSet(2);
+        if (incoming.get(0)) {
+          struct.path = iprot.readString();
+          struct.setPathIsSet(true);
+        }
+        if (incoming.get(1)) {
+          struct.partition_name = iprot.readString();
+          struct.setPartitionNameIsSet(true);
+        }
+      }
+    }
+
+    private static <S extends org.apache.thrift.scheme.IScheme> S scheme(org.apache.thrift.protocol.TProtocol proto) {
+      return (org.apache.thrift.scheme.StandardScheme.class.equals(proto.getScheme()) ? STANDARD_SCHEME_FACTORY : TUPLE_SCHEME_FACTORY).getScheme();
+    }
+  }
+
+  public static class remove_data_block_result implements org.apache.thrift.TBase<remove_data_block_result, remove_data_block_result._Fields>, java.io.Serializable, Cloneable, Comparable<remove_data_block_result>   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("remove_data_block_result");
+
+    private static final org.apache.thrift.protocol.TField EX_FIELD_DESC = new org.apache.thrift.protocol.TField("ex", org.apache.thrift.protocol.TType.STRUCT, (short)1);
+
+    private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new remove_data_block_resultStandardSchemeFactory();
+    private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new remove_data_block_resultTupleSchemeFactory();
+
+    public directory_service_exception ex; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      EX((short)1, "ex");
+
+      private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
+
+      static {
+        for (_Fields field : java.util.EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // EX
+            return EX;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new java.lang.IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(java.lang.String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final java.lang.String _fieldName;
+
+      _Fields(short thriftId, java.lang.String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public java.lang.String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.EX, new org.apache.thrift.meta_data.FieldMetaData("ex", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, directory_service_exception.class)));
+      metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(remove_data_block_result.class, metaDataMap);
+    }
+
+    public remove_data_block_result() {
+    }
+
+    public remove_data_block_result(
+      directory_service_exception ex)
+    {
+      this();
+      this.ex = ex;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public remove_data_block_result(remove_data_block_result other) {
+      if (other.isSetEx()) {
+        this.ex = new directory_service_exception(other.ex);
+      }
+    }
+
+    public remove_data_block_result deepCopy() {
+      return new remove_data_block_result(this);
+    }
+
+    @Override
+    public void clear() {
+      this.ex = null;
+    }
+
+    public directory_service_exception getEx() {
+      return this.ex;
+    }
+
+    public remove_data_block_result setEx(directory_service_exception ex) {
+      this.ex = ex;
+      return this;
+    }
+
+    public void unsetEx() {
+      this.ex = null;
+    }
+
+    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    public boolean isSetEx() {
+      return this.ex != null;
+    }
+
+    public void setExIsSet(boolean value) {
+      if (!value) {
+        this.ex = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, java.lang.Object value) {
+      switch (field) {
+      case EX:
+        if (value == null) {
+          unsetEx();
+        } else {
+          setEx((directory_service_exception)value);
+        }
+        break;
+
+      }
+    }
+
+    public java.lang.Object getFieldValue(_Fields field) {
+      switch (field) {
+      case EX:
+        return getEx();
+
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new java.lang.IllegalArgumentException();
+      }
+
+      switch (field) {
+      case EX:
+        return isSetEx();
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(java.lang.Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof remove_data_block_result)
+        return this.equals((remove_data_block_result)that);
+      return false;
+    }
+
+    public boolean equals(remove_data_block_result that) {
+      if (that == null)
+        return false;
+      if (this == that)
+        return true;
+
+      boolean this_present_ex = true && this.isSetEx();
+      boolean that_present_ex = true && that.isSetEx();
+      if (this_present_ex || that_present_ex) {
+        if (!(this_present_ex && that_present_ex))
+          return false;
+        if (!this.ex.equals(that.ex))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int hashCode = 1;
+
+      hashCode = hashCode * 8191 + ((isSetEx()) ? 131071 : 524287);
+      if (isSetEx())
+        hashCode = hashCode * 8191 + ex.hashCode();
+
+      return hashCode;
+    }
+
+    @Override
+    public int compareTo(remove_data_block_result other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+
+      lastComparison = java.lang.Boolean.valueOf(isSetEx()).compareTo(other.isSetEx());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetEx()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.ex, other.ex);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      scheme(iprot).read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      scheme(oprot).write(oprot, this);
+      }
+
+    @Override
+    public java.lang.String toString() {
+      java.lang.StringBuilder sb = new java.lang.StringBuilder("remove_data_block_result(");
+      boolean first = true;
+
+      sb.append("ex:");
+      if (this.ex == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.ex);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, java.lang.ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class remove_data_block_resultStandardSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public remove_data_block_resultStandardScheme getScheme() {
+        return new remove_data_block_resultStandardScheme();
+      }
+    }
+
+    private static class remove_data_block_resultStandardScheme extends org.apache.thrift.scheme.StandardScheme<remove_data_block_result> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, remove_data_block_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // EX
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
+                struct.ex = new directory_service_exception();
+                struct.ex.read(iprot);
+                struct.setExIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, remove_data_block_result struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.ex != null) {
+          oprot.writeFieldBegin(EX_FIELD_DESC);
+          struct.ex.write(oprot);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class remove_data_block_resultTupleSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public remove_data_block_resultTupleScheme getScheme() {
+        return new remove_data_block_resultTupleScheme();
+      }
+    }
+
+    private static class remove_data_block_resultTupleScheme extends org.apache.thrift.scheme.TupleScheme<remove_data_block_result> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, remove_data_block_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet optionals = new java.util.BitSet();
+        if (struct.isSetEx()) {
+          optionals.set(0);
+        }
+        oprot.writeBitSet(optionals, 1);
+        if (struct.isSetEx()) {
+          struct.ex.write(oprot);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, remove_data_block_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet incoming = iprot.readBitSet(1);
+        if (incoming.get(0)) {
           struct.ex = new directory_service_exception();
           struct.ex.read(iprot);
           struct.setExIsSet(true);

@@ -393,5 +393,37 @@ directory_service_add_replica_to_chain_result::~directory_service_add_replica_to
 directory_service_add_replica_to_chain_presult::~directory_service_add_replica_to_chain_presult() throw() {
 }
 
+
+directory_service_add_data_block_args::~directory_service_add_data_block_args() throw() {
+}
+
+
+directory_service_add_data_block_pargs::~directory_service_add_data_block_pargs() throw() {
+}
+
+
+directory_service_add_data_block_result::~directory_service_add_data_block_result() throw() {
+}
+
+
+directory_service_add_data_block_presult::~directory_service_add_data_block_presult() throw() {
+}
+
+
+directory_service_remove_data_block_args::~directory_service_remove_data_block_args() throw() {
+}
+
+
+directory_service_remove_data_block_pargs::~directory_service_remove_data_block_pargs() throw() {
+}
+
+
+directory_service_remove_data_block_result::~directory_service_remove_data_block_result() throw() {
+}
+
+
+directory_service_remove_data_block_presult::~directory_service_remove_data_block_presult() throw() {
+}
+
 }} // namespace
 

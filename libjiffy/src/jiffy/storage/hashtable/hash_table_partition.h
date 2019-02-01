@@ -539,12 +539,6 @@ class hash_table_partition : public chain_module {
   /* Locked cuckoo hash map partition */
   locked_hash_table_type locked_block_;
 
-  /* Directory host number */
-  std::string directory_host_;
-
-  /* Directory port number */
-  int directory_port_;
-
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
 

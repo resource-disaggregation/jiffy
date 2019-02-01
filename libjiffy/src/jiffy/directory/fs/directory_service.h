@@ -24,8 +24,8 @@ class directory_serviceIf {
   virtual void create_directory(const std::string& path) = 0;
   virtual void create_directories(const std::string& path) = 0;
   virtual void open(rpc_data_status& _return, const std::string& path) = 0;
-  virtual void create(rpc_data_status& _return, const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_names, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags) = 0;
-  virtual void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_names, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags) = 0;
+  virtual void create(rpc_data_status& _return, const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_ids, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags) = 0;
+  virtual void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_ids, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags) = 0;
   virtual bool exists(const std::string& path) = 0;
   virtual int64_t last_write_time(const std::string& path) = 0;
   virtual void set_permissions(const std::string& path, const rpc_perms perms, const rpc_perm_options opts) = 0;
@@ -45,6 +45,8 @@ class directory_serviceIf {
   virtual bool is_directory(const std::string& path) = 0;
   virtual void reslove_failures(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain) = 0;
   virtual void add_replica_to_chain(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain) = 0;
+  virtual void add_data_block(rpc_replica_chain& _return, const std::string& path, const std::string& partition_name, const std::string& partition_metadata) = 0;
+  virtual void remove_data_block(const std::string& path, const std::string& partition_name) = 0;
 };
 
 class directory_serviceIfFactory {
@@ -83,10 +85,10 @@ class directory_serviceNull : virtual public directory_serviceIf {
   void open(rpc_data_status& /* _return */, const std::string& /* path */) {
     return;
   }
-  void create(rpc_data_status& /* _return */, const std::string& /* path */, const std::string& /* type */, const std::string& /* backing_path */, const int32_t /* num_blocks */, const int32_t /* chain_length */, const int32_t /* flags */, const int32_t /* permissions */, const std::vector<std::string> & /* block_names */, const std::vector<std::string> & /* block_metadata */, const std::map<std::string, std::string> & /* tags */) {
+  void create(rpc_data_status& /* _return */, const std::string& /* path */, const std::string& /* type */, const std::string& /* backing_path */, const int32_t /* num_blocks */, const int32_t /* chain_length */, const int32_t /* flags */, const int32_t /* permissions */, const std::vector<std::string> & /* block_ids */, const std::vector<std::string> & /* block_metadata */, const std::map<std::string, std::string> & /* tags */) {
     return;
   }
-  void open_or_create(rpc_data_status& /* _return */, const std::string& /* path */, const std::string& /* type */, const std::string& /* backing_path */, const int32_t /* num_blocks */, const int32_t /* chain_length */, const int32_t /* flags */, const int32_t /* permissions */, const std::vector<std::string> & /* block_names */, const std::vector<std::string> & /* block_metadata */, const std::map<std::string, std::string> & /* tags */) {
+  void open_or_create(rpc_data_status& /* _return */, const std::string& /* path */, const std::string& /* type */, const std::string& /* backing_path */, const int32_t /* num_blocks */, const int32_t /* chain_length */, const int32_t /* flags */, const int32_t /* permissions */, const std::vector<std::string> & /* block_ids */, const std::vector<std::string> & /* block_metadata */, const std::map<std::string, std::string> & /* tags */) {
     return;
   }
   bool exists(const std::string& /* path */) {
@@ -149,6 +151,12 @@ class directory_serviceNull : virtual public directory_serviceIf {
     return;
   }
   void add_replica_to_chain(rpc_replica_chain& /* _return */, const std::string& /* path */, const rpc_replica_chain& /* chain */) {
+    return;
+  }
+  void add_data_block(rpc_replica_chain& /* _return */, const std::string& /* path */, const std::string& /* partition_name */, const std::string& /* partition_metadata */) {
+    return;
+  }
+  void remove_data_block(const std::string& /* path */, const std::string& /* partition_name */) {
     return;
   }
 };
@@ -492,7 +500,7 @@ class directory_service_open_presult {
 };
 
 typedef struct _directory_service_create_args__isset {
-  _directory_service_create_args__isset() : path(false), type(false), backing_path(false), num_blocks(false), chain_length(false), flags(false), permissions(false), block_names(false), block_metadata(false), tags(false) {}
+  _directory_service_create_args__isset() : path(false), type(false), backing_path(false), num_blocks(false), chain_length(false), flags(false), permissions(false), block_ids(false), block_metadata(false), tags(false) {}
   bool path :1;
   bool type :1;
   bool backing_path :1;
@@ -500,7 +508,7 @@ typedef struct _directory_service_create_args__isset {
   bool chain_length :1;
   bool flags :1;
   bool permissions :1;
-  bool block_names :1;
+  bool block_ids :1;
   bool block_metadata :1;
   bool tags :1;
 } _directory_service_create_args__isset;
@@ -521,7 +529,7 @@ class directory_service_create_args {
   int32_t chain_length;
   int32_t flags;
   int32_t permissions;
-  std::vector<std::string>  block_names;
+  std::vector<std::string>  block_ids;
   std::vector<std::string>  block_metadata;
   std::map<std::string, std::string>  tags;
 
@@ -541,7 +549,7 @@ class directory_service_create_args {
 
   void __set_permissions(const int32_t val);
 
-  void __set_block_names(const std::vector<std::string> & val);
+  void __set_block_ids(const std::vector<std::string> & val);
 
   void __set_block_metadata(const std::vector<std::string> & val);
 
@@ -563,7 +571,7 @@ class directory_service_create_args {
       return false;
     if (!(permissions == rhs.permissions))
       return false;
-    if (!(block_names == rhs.block_names))
+    if (!(block_ids == rhs.block_ids))
       return false;
     if (!(block_metadata == rhs.block_metadata))
       return false;
@@ -597,7 +605,7 @@ class directory_service_create_pargs {
   const int32_t* chain_length;
   const int32_t* flags;
   const int32_t* permissions;
-  const std::vector<std::string> * block_names;
+  const std::vector<std::string> * block_ids;
   const std::vector<std::string> * block_metadata;
   const std::map<std::string, std::string> * tags;
 
@@ -673,7 +681,7 @@ class directory_service_create_presult {
 };
 
 typedef struct _directory_service_open_or_create_args__isset {
-  _directory_service_open_or_create_args__isset() : path(false), type(false), backing_path(false), num_blocks(false), chain_length(false), flags(false), permissions(false), block_names(false), block_metadata(false), tags(false) {}
+  _directory_service_open_or_create_args__isset() : path(false), type(false), backing_path(false), num_blocks(false), chain_length(false), flags(false), permissions(false), block_ids(false), block_metadata(false), tags(false) {}
   bool path :1;
   bool type :1;
   bool backing_path :1;
@@ -681,7 +689,7 @@ typedef struct _directory_service_open_or_create_args__isset {
   bool chain_length :1;
   bool flags :1;
   bool permissions :1;
-  bool block_names :1;
+  bool block_ids :1;
   bool block_metadata :1;
   bool tags :1;
 } _directory_service_open_or_create_args__isset;
@@ -702,7 +710,7 @@ class directory_service_open_or_create_args {
   int32_t chain_length;
   int32_t flags;
   int32_t permissions;
-  std::vector<std::string>  block_names;
+  std::vector<std::string>  block_ids;
   std::vector<std::string>  block_metadata;
   std::map<std::string, std::string>  tags;
 
@@ -722,7 +730,7 @@ class directory_service_open_or_create_args {
 
   void __set_permissions(const int32_t val);
 
-  void __set_block_names(const std::vector<std::string> & val);
+  void __set_block_ids(const std::vector<std::string> & val);
 
   void __set_block_metadata(const std::vector<std::string> & val);
 
@@ -744,7 +752,7 @@ class directory_service_open_or_create_args {
       return false;
     if (!(permissions == rhs.permissions))
       return false;
-    if (!(block_names == rhs.block_names))
+    if (!(block_ids == rhs.block_ids))
       return false;
     if (!(block_metadata == rhs.block_metadata))
       return false;
@@ -778,7 +786,7 @@ class directory_service_open_or_create_pargs {
   const int32_t* chain_length;
   const int32_t* flags;
   const int32_t* permissions;
-  const std::vector<std::string> * block_names;
+  const std::vector<std::string> * block_ids;
   const std::vector<std::string> * block_metadata;
   const std::map<std::string, std::string> * tags;
 
@@ -3094,6 +3102,255 @@ class directory_service_add_replica_to_chain_presult {
 
 };
 
+typedef struct _directory_service_add_data_block_args__isset {
+  _directory_service_add_data_block_args__isset() : path(false), partition_name(false), partition_metadata(false) {}
+  bool path :1;
+  bool partition_name :1;
+  bool partition_metadata :1;
+} _directory_service_add_data_block_args__isset;
+
+class directory_service_add_data_block_args {
+ public:
+
+  directory_service_add_data_block_args(const directory_service_add_data_block_args&);
+  directory_service_add_data_block_args& operator=(const directory_service_add_data_block_args&);
+  directory_service_add_data_block_args() : path(), partition_name(), partition_metadata() {
+  }
+
+  virtual ~directory_service_add_data_block_args() throw();
+  std::string path;
+  std::string partition_name;
+  std::string partition_metadata;
+
+  _directory_service_add_data_block_args__isset __isset;
+
+  void __set_path(const std::string& val);
+
+  void __set_partition_name(const std::string& val);
+
+  void __set_partition_metadata(const std::string& val);
+
+  bool operator == (const directory_service_add_data_block_args & rhs) const
+  {
+    if (!(path == rhs.path))
+      return false;
+    if (!(partition_name == rhs.partition_name))
+      return false;
+    if (!(partition_metadata == rhs.partition_metadata))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_add_data_block_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_add_data_block_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class directory_service_add_data_block_pargs {
+ public:
+
+
+  virtual ~directory_service_add_data_block_pargs() throw();
+  const std::string* path;
+  const std::string* partition_name;
+  const std::string* partition_metadata;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_add_data_block_result__isset {
+  _directory_service_add_data_block_result__isset() : success(false), ex(false) {}
+  bool success :1;
+  bool ex :1;
+} _directory_service_add_data_block_result__isset;
+
+class directory_service_add_data_block_result {
+ public:
+
+  directory_service_add_data_block_result(const directory_service_add_data_block_result&);
+  directory_service_add_data_block_result& operator=(const directory_service_add_data_block_result&);
+  directory_service_add_data_block_result() {
+  }
+
+  virtual ~directory_service_add_data_block_result() throw();
+  rpc_replica_chain success;
+  directory_service_exception ex;
+
+  _directory_service_add_data_block_result__isset __isset;
+
+  void __set_success(const rpc_replica_chain& val);
+
+  void __set_ex(const directory_service_exception& val);
+
+  bool operator == (const directory_service_add_data_block_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_add_data_block_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_add_data_block_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_add_data_block_presult__isset {
+  _directory_service_add_data_block_presult__isset() : success(false), ex(false) {}
+  bool success :1;
+  bool ex :1;
+} _directory_service_add_data_block_presult__isset;
+
+class directory_service_add_data_block_presult {
+ public:
+
+
+  virtual ~directory_service_add_data_block_presult() throw();
+  rpc_replica_chain* success;
+  directory_service_exception ex;
+
+  _directory_service_add_data_block_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
+typedef struct _directory_service_remove_data_block_args__isset {
+  _directory_service_remove_data_block_args__isset() : path(false), partition_name(false) {}
+  bool path :1;
+  bool partition_name :1;
+} _directory_service_remove_data_block_args__isset;
+
+class directory_service_remove_data_block_args {
+ public:
+
+  directory_service_remove_data_block_args(const directory_service_remove_data_block_args&);
+  directory_service_remove_data_block_args& operator=(const directory_service_remove_data_block_args&);
+  directory_service_remove_data_block_args() : path(), partition_name() {
+  }
+
+  virtual ~directory_service_remove_data_block_args() throw();
+  std::string path;
+  std::string partition_name;
+
+  _directory_service_remove_data_block_args__isset __isset;
+
+  void __set_path(const std::string& val);
+
+  void __set_partition_name(const std::string& val);
+
+  bool operator == (const directory_service_remove_data_block_args & rhs) const
+  {
+    if (!(path == rhs.path))
+      return false;
+    if (!(partition_name == rhs.partition_name))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_remove_data_block_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_remove_data_block_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class directory_service_remove_data_block_pargs {
+ public:
+
+
+  virtual ~directory_service_remove_data_block_pargs() throw();
+  const std::string* path;
+  const std::string* partition_name;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_remove_data_block_result__isset {
+  _directory_service_remove_data_block_result__isset() : ex(false) {}
+  bool ex :1;
+} _directory_service_remove_data_block_result__isset;
+
+class directory_service_remove_data_block_result {
+ public:
+
+  directory_service_remove_data_block_result(const directory_service_remove_data_block_result&);
+  directory_service_remove_data_block_result& operator=(const directory_service_remove_data_block_result&);
+  directory_service_remove_data_block_result() {
+  }
+
+  virtual ~directory_service_remove_data_block_result() throw();
+  directory_service_exception ex;
+
+  _directory_service_remove_data_block_result__isset __isset;
+
+  void __set_ex(const directory_service_exception& val);
+
+  bool operator == (const directory_service_remove_data_block_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const directory_service_remove_data_block_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const directory_service_remove_data_block_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _directory_service_remove_data_block_presult__isset {
+  _directory_service_remove_data_block_presult__isset() : ex(false) {}
+  bool ex :1;
+} _directory_service_remove_data_block_presult__isset;
+
+class directory_service_remove_data_block_presult {
+ public:
+
+
+  virtual ~directory_service_remove_data_block_presult() throw();
+  directory_service_exception ex;
+
+  _directory_service_remove_data_block_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
 template <class Protocol_>
 class directory_serviceClientT : virtual public directory_serviceIf {
  public:
@@ -3129,11 +3386,11 @@ class directory_serviceClientT : virtual public directory_serviceIf {
   void open(rpc_data_status& _return, const std::string& path);
   void send_open(const std::string& path);
   void recv_open(rpc_data_status& _return);
-  void create(rpc_data_status& _return, const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_names, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags);
-  void send_create(const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_names, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags);
+  void create(rpc_data_status& _return, const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_ids, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags);
+  void send_create(const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_ids, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags);
   void recv_create(rpc_data_status& _return);
-  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_names, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags);
-  void send_open_or_create(const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_names, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags);
+  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_ids, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags);
+  void send_open_or_create(const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_ids, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags);
   void recv_open_or_create(rpc_data_status& _return);
   bool exists(const std::string& path);
   void send_exists(const std::string& path);
@@ -3192,6 +3449,12 @@ class directory_serviceClientT : virtual public directory_serviceIf {
   void add_replica_to_chain(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain);
   void send_add_replica_to_chain(const std::string& path, const rpc_replica_chain& chain);
   void recv_add_replica_to_chain(rpc_replica_chain& _return);
+  void add_data_block(rpc_replica_chain& _return, const std::string& path, const std::string& partition_name, const std::string& partition_metadata);
+  void send_add_data_block(const std::string& path, const std::string& partition_name, const std::string& partition_metadata);
+  void recv_add_data_block(rpc_replica_chain& _return);
+  void remove_data_block(const std::string& path, const std::string& partition_name);
+  void send_remove_data_block(const std::string& path, const std::string& partition_name);
+  void recv_remove_data_block();
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
@@ -3268,6 +3531,10 @@ class directory_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT
   void process_reslove_failures(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_add_replica_to_chain(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_add_replica_to_chain(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_add_data_block(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_add_data_block(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_remove_data_block(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_remove_data_block(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
  public:
   directory_serviceProcessorT(::apache::thrift::stdcxx::shared_ptr<directory_serviceIf> iface) :
     iface_(iface) {
@@ -3343,6 +3610,12 @@ class directory_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT
     processMap_["add_replica_to_chain"] = ProcessFunctions(
       &directory_serviceProcessorT::process_add_replica_to_chain,
       &directory_serviceProcessorT::process_add_replica_to_chain);
+    processMap_["add_data_block"] = ProcessFunctions(
+      &directory_serviceProcessorT::process_add_data_block,
+      &directory_serviceProcessorT::process_add_data_block);
+    processMap_["remove_data_block"] = ProcessFunctions(
+      &directory_serviceProcessorT::process_remove_data_block,
+      &directory_serviceProcessorT::process_remove_data_block);
   }
 
   virtual ~directory_serviceProcessorT() {}
@@ -3404,23 +3677,23 @@ class directory_serviceMultiface : virtual public directory_serviceIf {
     return;
   }
 
-  void create(rpc_data_status& _return, const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_names, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags) {
+  void create(rpc_data_status& _return, const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_ids, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->create(_return, path, type, backing_path, num_blocks, chain_length, flags, permissions, block_names, block_metadata, tags);
+      ifaces_[i]->create(_return, path, type, backing_path, num_blocks, chain_length, flags, permissions, block_ids, block_metadata, tags);
     }
-    ifaces_[i]->create(_return, path, type, backing_path, num_blocks, chain_length, flags, permissions, block_names, block_metadata, tags);
+    ifaces_[i]->create(_return, path, type, backing_path, num_blocks, chain_length, flags, permissions, block_ids, block_metadata, tags);
     return;
   }
 
-  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_names, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags) {
+  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_ids, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->open_or_create(_return, path, type, backing_path, num_blocks, chain_length, flags, permissions, block_names, block_metadata, tags);
+      ifaces_[i]->open_or_create(_return, path, type, backing_path, num_blocks, chain_length, flags, permissions, block_ids, block_metadata, tags);
     }
-    ifaces_[i]->open_or_create(_return, path, type, backing_path, num_blocks, chain_length, flags, permissions, block_names, block_metadata, tags);
+    ifaces_[i]->open_or_create(_return, path, type, backing_path, num_blocks, chain_length, flags, permissions, block_ids, block_metadata, tags);
     return;
   }
 
@@ -3601,6 +3874,25 @@ class directory_serviceMultiface : virtual public directory_serviceIf {
     return;
   }
 
+  void add_data_block(rpc_replica_chain& _return, const std::string& path, const std::string& partition_name, const std::string& partition_metadata) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->add_data_block(_return, path, partition_name, partition_metadata);
+    }
+    ifaces_[i]->add_data_block(_return, path, partition_name, partition_metadata);
+    return;
+  }
+
+  void remove_data_block(const std::string& path, const std::string& partition_name) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->remove_data_block(path, partition_name);
+    }
+    ifaces_[i]->remove_data_block(path, partition_name);
+  }
+
 };
 
 // The 'concurrent' client is a thread safe client that correctly handles
@@ -3641,11 +3933,11 @@ class directory_serviceConcurrentClientT : virtual public directory_serviceIf {
   void open(rpc_data_status& _return, const std::string& path);
   int32_t send_open(const std::string& path);
   void recv_open(rpc_data_status& _return, const int32_t seqid);
-  void create(rpc_data_status& _return, const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_names, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags);
-  int32_t send_create(const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_names, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags);
+  void create(rpc_data_status& _return, const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_ids, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags);
+  int32_t send_create(const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_ids, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags);
   void recv_create(rpc_data_status& _return, const int32_t seqid);
-  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_names, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags);
-  int32_t send_open_or_create(const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_names, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags);
+  void open_or_create(rpc_data_status& _return, const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_ids, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags);
+  int32_t send_open_or_create(const std::string& path, const std::string& type, const std::string& backing_path, const int32_t num_blocks, const int32_t chain_length, const int32_t flags, const int32_t permissions, const std::vector<std::string> & block_ids, const std::vector<std::string> & block_metadata, const std::map<std::string, std::string> & tags);
   void recv_open_or_create(rpc_data_status& _return, const int32_t seqid);
   bool exists(const std::string& path);
   int32_t send_exists(const std::string& path);
@@ -3704,6 +3996,12 @@ class directory_serviceConcurrentClientT : virtual public directory_serviceIf {
   void add_replica_to_chain(rpc_replica_chain& _return, const std::string& path, const rpc_replica_chain& chain);
   int32_t send_add_replica_to_chain(const std::string& path, const rpc_replica_chain& chain);
   void recv_add_replica_to_chain(rpc_replica_chain& _return, const int32_t seqid);
+  void add_data_block(rpc_replica_chain& _return, const std::string& path, const std::string& partition_name, const std::string& partition_metadata);
+  int32_t send_add_data_block(const std::string& path, const std::string& partition_name, const std::string& partition_metadata);
+  void recv_add_data_block(rpc_replica_chain& _return, const int32_t seqid);
+  void remove_data_block(const std::string& path, const std::string& partition_name);
+  int32_t send_remove_data_block(const std::string& path, const std::string& partition_name);
+  void recv_remove_data_block(const int32_t seqid);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;

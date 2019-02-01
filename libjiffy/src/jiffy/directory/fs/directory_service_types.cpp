@@ -84,8 +84,8 @@ rpc_replica_chain::~rpc_replica_chain() throw() {
 }
 
 
-void rpc_replica_chain::__set_block_names(const std::vector<std::string> & val) {
-  this->block_names = val;
+void rpc_replica_chain::__set_block_ids(const std::vector<std::string> & val) {
+  this->block_ids = val;
 }
 
 void rpc_replica_chain::__set_name(const std::string& val) {
@@ -108,20 +108,20 @@ std::ostream& operator<<(std::ostream& out, const rpc_replica_chain& obj)
 
 void swap(rpc_replica_chain &a, rpc_replica_chain &b) {
   using ::std::swap;
-  swap(a.block_names, b.block_names);
+  swap(a.block_ids, b.block_ids);
   swap(a.name, b.name);
   swap(a.metadata, b.metadata);
   swap(a.storage_mode, b.storage_mode);
 }
 
 rpc_replica_chain::rpc_replica_chain(const rpc_replica_chain& other7) {
-  block_names = other7.block_names;
+  block_ids = other7.block_ids;
   name = other7.name;
   metadata = other7.metadata;
   storage_mode = other7.storage_mode;
 }
 rpc_replica_chain& rpc_replica_chain::operator=(const rpc_replica_chain& other8) {
-  block_names = other8.block_names;
+  block_ids = other8.block_ids;
   name = other8.name;
   metadata = other8.metadata;
   storage_mode = other8.storage_mode;
@@ -130,7 +130,7 @@ rpc_replica_chain& rpc_replica_chain::operator=(const rpc_replica_chain& other8)
 void rpc_replica_chain::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
   out << "rpc_replica_chain(";
-  out << "block_names=" << to_string(block_names);
+  out << "block_ids=" << to_string(block_ids);
   out << ", " << "name=" << to_string(name);
   out << ", " << "metadata=" << to_string(metadata);
   out << ", " << "storage_mode=" << to_string(storage_mode);

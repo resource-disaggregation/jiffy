@@ -205,7 +205,7 @@ add_library(jiffy OBJECT
         src/jiffy/utils/retry_utils.h
         src/jiffy/utils/string_utils.h
         src/jiffy/storage/service/pinned_thread_factory.cpp
-        src/jiffy/storage/service/pinned_thread_factory.h src/jiffy/storage/block.cpp src/jiffy/storage/block.h src/jiffy/utils/property_map.cpp src/jiffy/utils/property_map.h src/jiffy/storage/block_memory_manager.h src/jiffy/storage/block_memory_manager.cpp src/jiffy/storage/block_memory_allocator.h)
+        src/jiffy/storage/service/pinned_thread_factory.h src/jiffy/storage/block.cpp src/jiffy/storage/block.h src/jiffy/utils/property_map.cpp src/jiffy/utils/property_map.h src/jiffy/storage/block_memory_manager.h src/jiffy/storage/block_memory_manager.cpp src/jiffy/storage/block_memory_allocator.h src/jiffy/directory/fs/ds_node.cpp src/jiffy/directory/fs/ds_node.h src/jiffy/directory/fs/ds_file_node.cpp src/jiffy/directory/fs/ds_file_node.h src/jiffy/directory/fs/ds_dir_node.cpp src/jiffy/directory/fs/ds_dir_node.h)
 
 if (NOT USE_SYSTEM_LIBEVENT)
   add_dependencies(jiffy libevent)

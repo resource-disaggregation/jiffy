@@ -178,6 +178,18 @@ replica_chain directory_client::add_replica_to_chain(const std::string &path, co
   return directory_type_conversions::from_rpc(out);
 }
 
+replica_chain directory_client::add_block(const std::string &path,
+                                          const std::string &partition_name,
+                                          const std::string &partition_metadata) {
+  rpc_replica_chain out;
+  client_->add_data_block(out, path, partition_name, partition_metadata);
+  return directory_type_conversions::from_rpc(out);
+}
+
+void directory_client::remove_block(const std::string &path, const std::string &partition_name) {
+  client_->remove_data_block(path, partition_name);
+}
+
 void directory_client::touch(const std::string &) {
   throw directory_ops_exception("Unsupported operation");
 }

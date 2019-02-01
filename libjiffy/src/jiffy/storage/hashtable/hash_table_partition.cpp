@@ -45,8 +45,6 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
       export_slot_range_(0, -1),
       import_slot_range_(0, -1) {
   locked_block_.unlock();
-  directory_host_ = conf.get("directory.host", "localhost");
-  directory_port_ = conf.get_as<int>("directory.port", 9090);
   auto ser = conf.get("hashtable.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>();
@@ -566,7 +564,7 @@ void hash_table_partition::export_slots() {
   if (state() != hash_partition_state::exporting) {
     throw std::logic_error("Source partition is not in exporting state");
   }
-  auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
+  auto fs = std::make_shared<directory::directory_client>("localhost", 9090); // FIXME: Replace with actual
   replica_chain_client src(fs, path_, chain(), 0);
   replica_chain_client dst(fs, path_, export_target(), 0);
   auto exp_range = export_slot_range();

@@ -12,7 +12,7 @@ namespace storage {
 hash_table_listener::hash_table_listener(const std::string &path, const directory::data_status &status)
     : path_(path), status_(status), worker_(notifications_, controls_) {
   for (const auto &block: status_.data_blocks()) {
-    auto t = block_id_parser::parse(block.block_names.back());
+    auto t = block_id_parser::parse(block.block_ids.back());
     block_ids_.push_back(t.id);
     listeners_.push_back(std::make_shared<block_listener>(t.host, t.notification_port, controls_));
     worker_.add_protocol(listeners_.back()->protocol());

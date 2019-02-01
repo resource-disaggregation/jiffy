@@ -21,7 +21,7 @@ class directory_type_conversions {
 
   static rpc_replica_chain to_rpc(const replica_chain &chain) {
     rpc_replica_chain rpc;
-    rpc.block_names = chain.block_names;
+    rpc.block_ids = chain.block_ids;
     rpc.name = chain.name;
     rpc.metadata = chain.metadata;
     rpc.storage_mode = (rpc_storage_mode) chain.mode;
@@ -35,7 +35,7 @@ class directory_type_conversions {
    */
 
   static replica_chain from_rpc(const rpc_replica_chain &rpc) {
-    replica_chain chain(rpc.block_names, static_cast<storage_mode>(rpc.storage_mode));
+    replica_chain chain(rpc.block_ids, static_cast<storage_mode>(rpc.storage_mode));
     chain.name = rpc.name;
     chain.metadata = rpc.metadata;
     return chain;

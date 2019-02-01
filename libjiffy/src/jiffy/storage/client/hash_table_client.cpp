@@ -265,7 +265,7 @@ hash_table_client::locked_client::locked_client(hash_table_client &parent) : par
     if (blocks_[i]->redirecting()) {
       bool new_block = true;
       for (size_t j = 0; j < blocks_.size(); j++) {
-        if (blocks_[i]->redirect_chain() == blocks_[j]->chain().block_names) {
+        if (blocks_[i]->redirect_chain() == blocks_[j]->chain().block_ids) {
           new_block = false;
           redirect_blocks_[i] = parent_.blocks_[j];
           locked_redirect_blocks_[i] = blocks_[j];
@@ -378,7 +378,7 @@ void hash_table_client::locked_client::handle_redirect(int32_t cmd_id,
       bool found = false;
       for (size_t i = 0; i < blocks_.size(); i++) {
         const auto &client_chain = parent_.blocks_[i]->chain();
-        if (client_chain.block_names == chain) {
+        if (client_chain.block_ids == chain) {
           found = true;
           response = blocks_[i]->run_command_redirected(cmd_id, args).front();
           break;
@@ -412,7 +412,7 @@ void hash_table_client::locked_client::handle_redirects(int32_t cmd_id,
         bool found = false;
         for (size_t j = 0; j < blocks_.size(); j++) {
           const auto &client_chain = parent_.blocks_[j]->chain();
-          if (client_chain.block_names == chain) {
+          if (client_chain.block_ids == chain) {
             found = true;
             response = blocks_[j]->run_command_redirected(cmd_id, args).front();
             break;

@@ -95,7 +95,7 @@ public class JiffyClient implements Closeable {
       partitionMetadata.add(i, "regular");
     }
     rpc_data_status status = fs
-        .create(path, "storage", backingPath, numBlocks, chainLength, flags, permissions, partitionNames,
+        .create(path, "hashtable", backingPath, numBlocks, chainLength, flags, permissions, partitionNames,
                 partitionMetadata, tags);
     beginScope(path);
     return new HashTableClient(fs, path, status, timeoutMs);
@@ -134,7 +134,7 @@ public class JiffyClient implements Closeable {
       partitionMetadata.add(i, "regular");
     }
     rpc_data_status status = fs
-        .openOrCreate(path, "storage", backingPath, numBlocks, chainLength, flags, permissions, partitionNames, partitionMetadata,
+        .openOrCreate(path, "hashtable", backingPath, numBlocks, chainLength, flags, permissions, partitionNames, partitionMetadata,
                 tags);
     beginScope(path);
     return new HashTableClient(fs, path, status, timeoutMs);

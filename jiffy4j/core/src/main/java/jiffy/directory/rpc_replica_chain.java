@@ -11,7 +11,7 @@ package jiffy.directory;
 public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_chain, rpc_replica_chain._Fields>, java.io.Serializable, Cloneable, Comparable<rpc_replica_chain> {
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("rpc_replica_chain");
 
-  private static final org.apache.thrift.protocol.TField BLOCK_NAMES_FIELD_DESC = new org.apache.thrift.protocol.TField("block_names", org.apache.thrift.protocol.TType.LIST, (short)1);
+  private static final org.apache.thrift.protocol.TField BLOCK_IDS_FIELD_DESC = new org.apache.thrift.protocol.TField("block_ids", org.apache.thrift.protocol.TType.LIST, (short)1);
   private static final org.apache.thrift.protocol.TField NAME_FIELD_DESC = new org.apache.thrift.protocol.TField("name", org.apache.thrift.protocol.TType.STRING, (short)2);
   private static final org.apache.thrift.protocol.TField METADATA_FIELD_DESC = new org.apache.thrift.protocol.TField("metadata", org.apache.thrift.protocol.TType.STRING, (short)3);
   private static final org.apache.thrift.protocol.TField STORAGE_MODE_FIELD_DESC = new org.apache.thrift.protocol.TField("storage_mode", org.apache.thrift.protocol.TType.I32, (short)4);
@@ -19,7 +19,7 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
   private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new rpc_replica_chainStandardSchemeFactory();
   private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new rpc_replica_chainTupleSchemeFactory();
 
-  public java.util.List<java.lang.String> block_names; // required
+  public java.util.List<java.lang.String> block_ids; // required
   public java.lang.String name; // required
   public java.lang.String metadata; // required
   /**
@@ -30,7 +30,7 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-    BLOCK_NAMES((short)1, "block_names"),
+    BLOCK_IDS((short)1, "block_ids"),
     NAME((short)2, "name"),
     METADATA((short)3, "metadata"),
     /**
@@ -52,8 +52,8 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
      */
     public static _Fields findByThriftId(int fieldId) {
       switch(fieldId) {
-        case 1: // BLOCK_NAMES
-          return BLOCK_NAMES;
+        case 1: // BLOCK_IDS
+          return BLOCK_IDS;
         case 2: // NAME
           return NAME;
         case 3: // METADATA
@@ -103,7 +103,7 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
   public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
-    tmpMap.put(_Fields.BLOCK_NAMES, new org.apache.thrift.meta_data.FieldMetaData("block_names", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+    tmpMap.put(_Fields.BLOCK_IDS, new org.apache.thrift.meta_data.FieldMetaData("block_ids", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
             new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
     tmpMap.put(_Fields.NAME, new org.apache.thrift.meta_data.FieldMetaData("name", org.apache.thrift.TFieldRequirementType.REQUIRED, 
@@ -120,13 +120,13 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
   }
 
   public rpc_replica_chain(
-    java.util.List<java.lang.String> block_names,
+    java.util.List<java.lang.String> block_ids,
     java.lang.String name,
     java.lang.String metadata,
     rpc_storage_mode storage_mode)
   {
     this();
-    this.block_names = block_names;
+    this.block_ids = block_ids;
     this.name = name;
     this.metadata = metadata;
     this.storage_mode = storage_mode;
@@ -136,9 +136,9 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
    * Performs a deep copy on <i>other</i>.
    */
   public rpc_replica_chain(rpc_replica_chain other) {
-    if (other.isSetBlockNames()) {
-      java.util.List<java.lang.String> __this__block_names = new java.util.ArrayList<java.lang.String>(other.block_names);
-      this.block_names = __this__block_names;
+    if (other.isSetBlockIds()) {
+      java.util.List<java.lang.String> __this__block_ids = new java.util.ArrayList<java.lang.String>(other.block_ids);
+      this.block_ids = __this__block_ids;
     }
     if (other.isSetName()) {
       this.name = other.name;
@@ -157,48 +157,48 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
 
   @Override
   public void clear() {
-    this.block_names = null;
+    this.block_ids = null;
     this.name = null;
     this.metadata = null;
     this.storage_mode = null;
   }
 
-  public int getBlockNamesSize() {
-    return (this.block_names == null) ? 0 : this.block_names.size();
+  public int getBlockIdsSize() {
+    return (this.block_ids == null) ? 0 : this.block_ids.size();
   }
 
-  public java.util.Iterator<java.lang.String> getBlockNamesIterator() {
-    return (this.block_names == null) ? null : this.block_names.iterator();
+  public java.util.Iterator<java.lang.String> getBlockIdsIterator() {
+    return (this.block_ids == null) ? null : this.block_ids.iterator();
   }
 
-  public void addToBlockNames(java.lang.String elem) {
-    if (this.block_names == null) {
-      this.block_names = new java.util.ArrayList<java.lang.String>();
+  public void addToBlockIds(java.lang.String elem) {
+    if (this.block_ids == null) {
+      this.block_ids = new java.util.ArrayList<java.lang.String>();
     }
-    this.block_names.add(elem);
+    this.block_ids.add(elem);
   }
 
-  public java.util.List<java.lang.String> getBlockNames() {
-    return this.block_names;
+  public java.util.List<java.lang.String> getBlockIds() {
+    return this.block_ids;
   }
 
-  public rpc_replica_chain setBlockNames(java.util.List<java.lang.String> block_names) {
-    this.block_names = block_names;
+  public rpc_replica_chain setBlockIds(java.util.List<java.lang.String> block_ids) {
+    this.block_ids = block_ids;
     return this;
   }
 
-  public void unsetBlockNames() {
-    this.block_names = null;
+  public void unsetBlockIds() {
+    this.block_ids = null;
   }
 
-  /** Returns true if field block_names is set (has been assigned a value) and false otherwise */
-  public boolean isSetBlockNames() {
-    return this.block_names != null;
+  /** Returns true if field block_ids is set (has been assigned a value) and false otherwise */
+  public boolean isSetBlockIds() {
+    return this.block_ids != null;
   }
 
-  public void setBlockNamesIsSet(boolean value) {
+  public void setBlockIdsIsSet(boolean value) {
     if (!value) {
-      this.block_names = null;
+      this.block_ids = null;
     }
   }
 
@@ -284,11 +284,11 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
 
   public void setFieldValue(_Fields field, java.lang.Object value) {
     switch (field) {
-    case BLOCK_NAMES:
+    case BLOCK_IDS:
       if (value == null) {
-        unsetBlockNames();
+        unsetBlockIds();
       } else {
-        setBlockNames((java.util.List<java.lang.String>)value);
+        setBlockIds((java.util.List<java.lang.String>)value);
       }
       break;
 
@@ -321,8 +321,8 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
 
   public java.lang.Object getFieldValue(_Fields field) {
     switch (field) {
-    case BLOCK_NAMES:
-      return getBlockNames();
+    case BLOCK_IDS:
+      return getBlockIds();
 
     case NAME:
       return getName();
@@ -344,8 +344,8 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     }
 
     switch (field) {
-    case BLOCK_NAMES:
-      return isSetBlockNames();
+    case BLOCK_IDS:
+      return isSetBlockIds();
     case NAME:
       return isSetName();
     case METADATA:
@@ -371,12 +371,12 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     if (this == that)
       return true;
 
-    boolean this_present_block_names = true && this.isSetBlockNames();
-    boolean that_present_block_names = true && that.isSetBlockNames();
-    if (this_present_block_names || that_present_block_names) {
-      if (!(this_present_block_names && that_present_block_names))
+    boolean this_present_block_ids = true && this.isSetBlockIds();
+    boolean that_present_block_ids = true && that.isSetBlockIds();
+    if (this_present_block_ids || that_present_block_ids) {
+      if (!(this_present_block_ids && that_present_block_ids))
         return false;
-      if (!this.block_names.equals(that.block_names))
+      if (!this.block_ids.equals(that.block_ids))
         return false;
     }
 
@@ -414,9 +414,9 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
   public int hashCode() {
     int hashCode = 1;
 
-    hashCode = hashCode * 8191 + ((isSetBlockNames()) ? 131071 : 524287);
-    if (isSetBlockNames())
-      hashCode = hashCode * 8191 + block_names.hashCode();
+    hashCode = hashCode * 8191 + ((isSetBlockIds()) ? 131071 : 524287);
+    if (isSetBlockIds())
+      hashCode = hashCode * 8191 + block_ids.hashCode();
 
     hashCode = hashCode * 8191 + ((isSetName()) ? 131071 : 524287);
     if (isSetName())
@@ -441,12 +441,12 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
 
     int lastComparison = 0;
 
-    lastComparison = java.lang.Boolean.valueOf(isSetBlockNames()).compareTo(other.isSetBlockNames());
+    lastComparison = java.lang.Boolean.valueOf(isSetBlockIds()).compareTo(other.isSetBlockIds());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    if (isSetBlockNames()) {
-      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.block_names, other.block_names);
+    if (isSetBlockIds()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.block_ids, other.block_ids);
       if (lastComparison != 0) {
         return lastComparison;
       }
@@ -501,11 +501,11 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     java.lang.StringBuilder sb = new java.lang.StringBuilder("rpc_replica_chain(");
     boolean first = true;
 
-    sb.append("block_names:");
-    if (this.block_names == null) {
+    sb.append("block_ids:");
+    if (this.block_ids == null) {
       sb.append("null");
     } else {
-      sb.append(this.block_names);
+      sb.append(this.block_ids);
     }
     first = false;
     if (!first) sb.append(", ");
@@ -538,8 +538,8 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
 
   public void validate() throws org.apache.thrift.TException {
     // check for required fields
-    if (block_names == null) {
-      throw new org.apache.thrift.protocol.TProtocolException("Required field 'block_names' was not present! Struct: " + toString());
+    if (block_ids == null) {
+      throw new org.apache.thrift.protocol.TProtocolException("Required field 'block_ids' was not present! Struct: " + toString());
     }
     if (name == null) {
       throw new org.apache.thrift.protocol.TProtocolException("Required field 'name' was not present! Struct: " + toString());
@@ -587,20 +587,20 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
           break;
         }
         switch (schemeField.id) {
-          case 1: // BLOCK_NAMES
+          case 1: // BLOCK_IDS
             if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
               {
                 org.apache.thrift.protocol.TList _list0 = iprot.readListBegin();
-                struct.block_names = new java.util.ArrayList<java.lang.String>(_list0.size);
+                struct.block_ids = new java.util.ArrayList<java.lang.String>(_list0.size);
                 java.lang.String _elem1;
                 for (int _i2 = 0; _i2 < _list0.size; ++_i2)
                 {
                   _elem1 = iprot.readString();
-                  struct.block_names.add(_elem1);
+                  struct.block_ids.add(_elem1);
                 }
                 iprot.readListEnd();
               }
-              struct.setBlockNamesIsSet(true);
+              struct.setBlockIdsIsSet(true);
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
@@ -644,11 +644,11 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
       struct.validate();
 
       oprot.writeStructBegin(STRUCT_DESC);
-      if (struct.block_names != null) {
-        oprot.writeFieldBegin(BLOCK_NAMES_FIELD_DESC);
+      if (struct.block_ids != null) {
+        oprot.writeFieldBegin(BLOCK_IDS_FIELD_DESC);
         {
-          oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.block_names.size()));
-          for (java.lang.String _iter3 : struct.block_names)
+          oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.block_ids.size()));
+          for (java.lang.String _iter3 : struct.block_ids)
           {
             oprot.writeString(_iter3);
           }
@@ -689,8 +689,8 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
     public void write(org.apache.thrift.protocol.TProtocol prot, rpc_replica_chain struct) throws org.apache.thrift.TException {
       org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
       {
-        oprot.writeI32(struct.block_names.size());
-        for (java.lang.String _iter4 : struct.block_names)
+        oprot.writeI32(struct.block_ids.size());
+        for (java.lang.String _iter4 : struct.block_ids)
         {
           oprot.writeString(_iter4);
         }
@@ -705,15 +705,15 @@ public class rpc_replica_chain implements org.apache.thrift.TBase<rpc_replica_ch
       org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
       {
         org.apache.thrift.protocol.TList _list5 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
-        struct.block_names = new java.util.ArrayList<java.lang.String>(_list5.size);
+        struct.block_ids = new java.util.ArrayList<java.lang.String>(_list5.size);
         java.lang.String _elem6;
         for (int _i7 = 0; _i7 < _list5.size; ++_i7)
         {
           _elem6 = iprot.readString();
-          struct.block_names.add(_elem6);
+          struct.block_ids.add(_elem6);
         }
       }
-      struct.setBlockNamesIsSet(true);
+      struct.setBlockIdsIsSet(true);
       struct.name = iprot.readString();
       struct.setNameIsSet(true);
       struct.metadata = iprot.readString();

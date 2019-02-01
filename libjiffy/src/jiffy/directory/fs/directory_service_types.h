@@ -72,12 +72,12 @@ class rpc_replica_chain {
   }
 
   virtual ~rpc_replica_chain() throw();
-  std::vector<std::string>  block_names;
+  std::vector<std::string>  block_ids;
   std::string name;
   std::string metadata;
   rpc_storage_mode storage_mode;
 
-  void __set_block_names(const std::vector<std::string> & val);
+  void __set_block_ids(const std::vector<std::string> & val);
 
   void __set_name(const std::string& val);
 
@@ -87,7 +87,7 @@ class rpc_replica_chain {
 
   bool operator == (const rpc_replica_chain & rhs) const
   {
-    if (!(block_names == rhs.block_names))
+    if (!(block_ids == rhs.block_ids))
       return false;
     if (!(name == rhs.name))
       return false;
