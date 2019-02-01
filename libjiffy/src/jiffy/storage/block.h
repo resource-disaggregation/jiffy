@@ -16,14 +16,19 @@ class block {
    * @brief Constructor.
    * @param id The identifier for the block.
    * @param capacity The block memory capacity.
+   * @param directory_host The directory host.
+   * @param directory_port The directory port.
    */
-  block(const std::string& id, const size_t capacity = 134217728);
+  block(const std::string &id,
+        const size_t capacity = 134217728,
+        const std::string &directory_host = "localhost",
+        int directory_port = 9091);
 
   /**
    * @brief Get memory block identifier.
    * @return Memory block identifier.
    */
-  const std::string& id() const;
+  const std::string &id() const;
 
   /**
    * @brief Get the underlying partition implementation.
@@ -62,6 +67,9 @@ class block {
   std::string id_;
   block_memory_manager manager_;
   std::shared_ptr<chain_module> impl_;
+
+  std::string directory_host_;
+  int directory_port_;
 };
 
 }

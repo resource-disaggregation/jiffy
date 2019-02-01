@@ -11,7 +11,6 @@
 #include <jiffy/storage/service/server_storage_tracker.h>
 #include <boost/program_options.hpp>
 #include <ifaddrs.h>
-#include <jiffy/storage/block.h>
 
 using namespace ::jiffy::directory;
 using namespace ::jiffy::storage;
@@ -55,14 +54,14 @@ std::string local_address() {
 
 std::string dir_host = "127.0.0.1";
 int32_t block_port = 9092;
-std::vector<std::string> block_names;
+std::vector<std::string> block_ids;
 
 void retract_block_names_and_print_stacktrace(int sig_num) {
   std::string trace = signal_handling::stacktrace();
   LOG(log_level::info) << "Caught signal " << sig_num << ", cleaning up...";
   try {
     block_registration_client client(dir_host, block_port);
-    client.deregister_blocks(block_names);
+    client.deregister_blocks(block_ids);
     client.disconnect();
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to retract blocks: " << e.what()
@@ -217,18 +216,13 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Hostname: " << hostname;
 
   for (int i = 0; i < static_cast<int>(num_blocks); i++) {
-    block_names.push_back(block_id_parser::make(hostname,
-                                                  service_port,
-                                                  mgmt_port,
-                                                  notf_port,
-                                                  chain_port,
-                                                  i));
+    block_ids.push_back(block_id_parser::make(hostname, service_port, mgmt_port, notf_port, chain_port, i));
   }
 
   std::vector<std::shared_ptr<block>> blocks;
   blocks.resize(num_blocks);
   for (size_t i = 0; i < blocks.size(); ++i) {
-    blocks[i] = std::make_shared<block>(block_names[i], block_capacity);
+    blocks[i] = std::make_shared<block>(block_ids[i], block_capacity, dir_host, dir_port);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
 
@@ -248,7 +242,7 @@ int main(int argc, char **argv) {
 
   try {
     block_registration_client client(dir_host, block_port);
-    client.register_blocks(block_names);
+    client.register_blocks(block_ids);
     client.disconnect();
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to advertise blocks: " << e.what()
@@ -364,7 +358,7 @@ int main(int argc, char **argv) {
 
   try {
     block_registration_client client(dir_host, block_port);
-    client.deregister_blocks(block_names);
+    client.deregister_blocks(block_ids);
     client.disconnect();
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to retract blocks: " << e.what()

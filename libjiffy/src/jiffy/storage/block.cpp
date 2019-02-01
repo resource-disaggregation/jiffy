@@ -7,8 +7,8 @@ namespace storage {
 
 using namespace jiffy::utils;
 
-block::block(const std::string &id, const size_t capacity)
-    : id_(id), manager_(capacity), impl_(nullptr) {
+block::block(const std::string &id, const size_t capacity, const std::string &directory_host, int directory_port)
+    : id_(id), manager_(capacity), impl_(nullptr), directory_host_(directory_host), directory_port_(directory_port) {
 }
 
 const std::string &block::id() const {
