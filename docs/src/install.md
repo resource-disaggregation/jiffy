@@ -22,9 +22,13 @@ cmake ..
 
 It is possible to configure the build specifying certain options based on 
 requirements; the supported options are:
+
 * `BUILD_BENCHMARKS` Build benchmarks (OFF by default)
 * `BUILD_TESTS`: Builds all tests (ON by default)
 * `BUILD_DOC`: Build documentation (OFF by default)
+* `BUILD_PYTHON_CLIENT`: Build Python Client(ON by default)
+* `BUILD_JAVA_CLIENT`: Build Java Client(ON by default)
+
 In order to explicitly enable or disable any of these options, set the value of
 the corresponding variable to `ON` or `OFF` as follows:
 
@@ -32,6 +36,7 @@ the corresponding variable to `ON` or `OFF` as follows:
 cmake -DBUILD_TESTS=OFF
 ```
 The external libraries are automatically downloaded and built. User can specify using the existing external libraries installed in system to speed up the building process.The certain options are:
+
 * `USE_SYSTEM_AWS_SDK`: Use system AWS SDK (OFF by default)
 * `USE_SYSTEM_BOOST`: Use system boost library (OFF by default)
 * `USE_SYSTEM_CATCH`: Use system catch library (OFF by default)

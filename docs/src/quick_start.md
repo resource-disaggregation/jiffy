@@ -20,7 +20,7 @@ For Python client, you will additionally require:
 For java client, you will additionally require:
 
 - Java 1.7 or later
-- Maven
+- Maven 3.0.4 or later
 
 ## Download and Install
 
@@ -90,19 +90,6 @@ Once the directory server and storage server are running, you can store and quer
 
 ### Client interface
 
-Setup Jiffy Python client with the following commands:
-
-```bash
-cd jiffy/pyjiffy/
-python setup.py build
-python setup.py install
-```
-
-Setup Jiffy Java client with the following commands:
-```bash
-cd jiffy/jiffy4j
-maven package -D TODO: should be fixed after adding cmake 
-```
 
 We first create a new client connection to the directory server.
 
@@ -122,20 +109,19 @@ We could then create a file and also back it up in persistent storage. The backi
 The create method also accepts flags as it's last argument, details can be seen in the following chart.
 
 ```python tab="Python"
-# create(path, backing path, number of blocks, replication chain length, flags)
-hash_table = client.create("/a/file.txt", "local://tmp", 1, 1, 0)
+hash_table = client.create_hash_table("/a/file.txt", "local://tmp")
 
 hash_table = client.open("/a/file.txt")
 
-hash_table = client.open_or_create("/a/file.txt", "local://tmp", 1, 1, 0)
+hash_table = client.open_or_create("/a/file.txt", "local://tmp")
 ```
 
 ```java tab="Java"
-client.createHashTable("/a/file.txt", "local://tmp", 1, 1, 0);
+client.createHashTable("/a/file.txt", "local://tmp");
 
 HashTableClient kv = client.open("/a/file.txt");
 
-HashTableClient kv = client.openOrCreateHashTable("/a/file.txt", "local://tmp", 1, 1, 0);
+HashTableClient kv = client.openOrCreateHashTable("/a/file.txt", "local://tmp");
 ```
 
 |   Flags  |      Description     |  Value|
@@ -177,7 +163,7 @@ The Jiffy client could also listen after a path on a specific operation and rece
 ```python tab="Python"
 
 client = JiffyClient("127.0.0.1", 9090, 9091)
-client.create("/a/file.txt", "local://tmp")
+client.createHashTable("/a/file.txt", "local://tmp")
 # Create subscription client listenning to specific file
 subscription = client.listen("/a/file.txt")
 # Subscription client listenning on operation 'put'
@@ -208,7 +194,7 @@ JiffyClient client = JiffyClient("127.0.0.1", 9090, 9091);
 String op1 = "put";
 ByteBuffer key = ByteBufferUtils.fromString("key1");
 ByteBuffer value = ByteBufferUtils.fromString("value1");
-client.create("/a/file.txt", "local://tmp", 1, 1);
+client.createHashTable("/a/file.txt", "local://tmp", 1, 1);
 // Create listenner for specific file
 KVListener n1 = client.listen("/a/file.txt");
 // Subscribe for a operation
@@ -226,8 +212,7 @@ n1.unsubscribe(Collections.singletonList(op1));
 
 client.close("/a/file.txt");
 client.remove("/a/file.txt");
-
-TODO disconnect?
+client.close();
 ```
 
 
@@ -246,8 +231,7 @@ client.disconnect()
 ```java tab="Java"
 client.close("/a/file.txt");
 client.remove("/a/file.txt");
-
-TODO disconnect?
+client.close();
 ```
 
 
