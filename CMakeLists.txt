@@ -28,12 +28,25 @@ if (GENERATE_THRIFT)
   add_subdirectory(thrift)
 endif ()
 
+if (BUILD_TESTS)
+  include(CTest)
+  enable_testing(true)
+endif ()
+
 add_subdirectory(libjiffy)
 add_subdirectory(directory)
 add_subdirectory(storage)
 
-if (BUILD_TESTS)
-  enable_testing(true)
+if (BUILD_PYTHON_CLIENT)
+  add_subdirectory(pyjiffy)
+endif ()
+
+if (BUILD_JAVA_CLIENT)
+  add_subdirectory(jiffy4j)
+endif ()
+
+if (BUILD_DOC)
+  add_subdirectory(docs)
 endif ()
 
 install(FILES conf/jiffy.conf DESTINATION conf)

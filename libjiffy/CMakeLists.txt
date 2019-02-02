@@ -268,6 +268,8 @@ if (BUILD_TESTS)
   if (NOT USE_SYSTEM_CATCH)
     add_dependencies(jiffy_tests catch)
   endif ()
+  # Register test
+  add_test(JiffyTest jiffy_tests)
 endif ()
 
 if (BUILD_BENCHMARKS)
