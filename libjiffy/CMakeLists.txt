@@ -269,7 +269,6 @@ if (BUILD_TESTS)
     add_dependencies(jiffy_tests catch)
   endif ()
   # Register test
-  enable_testing(true)
   add_test(JiffyTest jiffy_tests)
 endif ()
 

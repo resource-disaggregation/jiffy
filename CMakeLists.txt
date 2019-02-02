@@ -28,14 +28,14 @@ if (GENERATE_THRIFT)
   add_subdirectory(thrift)
 endif ()
 
+if (BUILD_TESTS)
+  include(CTest)
+  enable_testing(true)
+endif ()
+
 add_subdirectory(libjiffy)
 add_subdirectory(directory)
 add_subdirectory(storage)
-
-if (BUILD_TESTS)
-  include(CTest)
-  #enable_testing(true)
-endif ()
 
 if (BUILD_DOC)
   add_subdirectory(docs)
