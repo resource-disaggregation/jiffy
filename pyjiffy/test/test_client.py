@@ -77,11 +77,11 @@ class StorageServer(MMuxServer):
         super(StorageServer, self).start(executable, conf)
         config = configparser.ConfigParser()
         config.read(conf)
-        self.host = config['storage']['host']
-        self.service_port = int(config['storage']['service_port'])
-        self.management_port = int(config['storage']['management_port'])
-        self.notification_port = int(config['storage']['notification_port'])
-        self.chain_port = int(config['storage']['chain_port'])
+        self.host = config.get('storage', 'host')
+        self.service_port = int(config.get('storage', 'service_port'))
+        self.management_port = int(config.get('storage', 'management_port'))
+        self.notification_port = int(config.get('storage', 'notification_port'))
+        self.chain_port = int(config.get('storage', 'chain_port'))
         wait_till_server_ready(self.host, self.service_port)
         wait_till_server_ready(self.host, self.management_port)
         wait_till_server_ready(self.host, self.notification_port)
@@ -108,10 +108,10 @@ class DirectoryServer(MMuxServer):
         super(DirectoryServer, self).start(executable, conf)
         config = configparser.ConfigParser()
         config.read(conf)
-        self.host = config['directory']['host']
-        self.service_port = int(config['directory']['service_port'])
-        self.lease_port = int(config['directory']['lease_port'])
-        self.block_port = int(config['directory']['block_port'])
+        self.host = config.get('directory', 'host')
+        self.service_port = int(config.get('directory', 'service_port'))
+        self.lease_port = int(config.get('directory', 'lease_port'))
+        self.block_port = int(config.get('directory', 'block_port'))
         wait_till_server_ready(self.host, self.service_port)
         wait_till_server_ready(self.host, self.lease_port)
         wait_till_server_ready(self.host, self.block_port)
@@ -189,43 +189,43 @@ class TestClient(TestCase):
 
         # Test exists/get/put
         for i in range(0, 1000):
-            self.assertEqual(b('!ok'), kv.put(str(i), str(i)))
+            self.assertEqual(b('!ok'), kv.put(b(str(i)), b(str(i))))
 
         for i in range(0, 1000):
             if getattr(kv, "exists", None) is not None:
-                self.assertTrue(kv.exists(str(i)))
-            self.assertEqual(b(str(i)), kv.get(str(i)))
+                self.assertTrue(kv.exists(b(str(i))))
+            self.assertEqual(b(str(i)), kv.get(b(str(i))))
 
         for i in range(1000, 2000):
             if getattr(kv, "exists", None) is not None:
-                self.assertFalse(kv.exists(str(i)))
-            self.assertEqual(b('!key_not_found'), kv.get(str(i)))
+                self.assertFalse(kv.exists(b(str(i))))
+            self.assertEqual(b('!key_not_found'), kv.get(b(str(i))))
 
         if getattr(kv, "num_keys", None) is not None:
             self.assertEqual(1000, kv.num_keys())
 
         # Test update
         for i in range(0, 1000):
-            self.assertEqual(b(str(i)), kv.update(str(i), str(i + 1000)))
+            self.assertEqual(b(str(i)), kv.update(b(str(i)), b(str(i + 1000))))
 
         for i in range(1000, 2000):
-            self.assertEqual(b('!key_not_found'), kv.update(str(i), str(i + 1000)))
+            self.assertEqual(b('!key_not_found'), kv.update(b(str(i)), b(str(i + 1000))))
 
         for i in range(0, 1000):
-            self.assertEqual(b(str(i + 1000)), kv.get(str(i)))
+            self.assertEqual(b(str(i + 1000)), kv.get(b(str(i))))
 
         if getattr(kv, "num_keys", None) is not None:
             self.assertEqual(1000, kv.num_keys())
 
         # Test remove
         for i in range(0, 1000):
-            self.assertEqual(b(str(i + 1000)), kv.remove(str(i)))
+            self.assertEqual(b(str(i + 1000)), kv.remove(b(str(i))))
 
         for i in range(1000, 2000):
-            self.assertEqual(b('!key_not_found'), kv.remove(str(i)))
+            self.assertEqual(b('!key_not_found'), kv.remove(b(str(i))))
 
         for i in range(0, 1000):
-            self.assertEqual(b('!key_not_found'), kv.get(str(i)))
+            self.assertEqual(b('!key_not_found'), kv.get(b(str(i))))
 
         if getattr(kv, "num_keys", None) is not None:
             self.assertEqual(0, kv.num_keys())
@@ -383,10 +383,10 @@ class TestClient(TestCase):
     #     try:
     #         kv = client.create("/a/file.txt", "local://tmp")
     #         for i in range(0, 2000):
-    #             self.assertEqual(b('!ok'), kv.put(str(i), str(i)))
+    #             self.assertEqual(b('!ok'), kv.put(b(str(i)), b(str(i))))
     #         self.assertEqual(4, len(client.fs.dstatus("/a/file.txt").data_blocks))
     #         for i in range(0, 2000):
-    #             self.assertEqual(b(str(i)), kv.remove(str(i)))
+    #             self.assertEqual(b(str(i)), kv.remove(b(str(i))))
     #         self.assertEqual(1, len(client.fs.dstatus("/a/file.txt").data_blocks))
     #     finally:
     #         client.disconnect()
@@ -407,8 +407,8 @@ class TestClient(TestCase):
             n3.subscribe(['remove'])
 
             kv = client.open("/a/file.txt")
-            kv.put('key1', 'value1')
-            kv.remove('key1')
+            kv.put(b'key1', b'value1')
+            kv.remove(b'key1')
 
             self.assertEqual(Notification('put', b('key1')), n1.get_notification())
             n2_notifs = [n2.get_notification(), n2.get_notification()]
@@ -426,8 +426,8 @@ class TestClient(TestCase):
             n1.unsubscribe(['put'])
             n2.unsubscribe(['remove'])
 
-            kv.put('key1', 'value1')
-            kv.remove('key1')
+            kv.put(b'key1', b'value1')
+            kv.remove(b'key1')
 
             self.assertEqual(Notification('put', b'key1'), n2.get_notification())
             self.assertEqual(Notification('remove', b'key1'), n3.get_notification())
