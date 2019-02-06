@@ -65,7 +65,9 @@ class hash_table_partition : public chain_module {
   explicit hash_table_partition(block_memory_manager *manager,
                                 const std::string &name = "0_65536",
                                 const std::string &metadata = "regular",
-                                const utils::property_map &conf = {});
+                                const utils::property_map &conf = {},
+                                const std::string &directory_host = "localhost",
+                                const int directory_port = 9091);
 
   /**
    * @brief Virtual destructor
@@ -574,6 +576,13 @@ class hash_table_partition : public chain_module {
   std::string export_target_str_;
   /* Import slot range */
   std::pair<int32_t, int32_t> import_slot_range_;
+
+  /* Directory server hostname */
+  std::string directory_host_;
+
+  /* Directory server port number */
+  int directory_port_;
+
 };
 
 }

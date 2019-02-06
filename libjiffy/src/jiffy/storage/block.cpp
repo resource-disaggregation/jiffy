@@ -7,7 +7,7 @@ namespace storage {
 
 using namespace jiffy::utils;
 
-block::block(const std::string &id, const size_t capacity, const std::string &directory_host, int directory_port)
+block::block(const std::string &id, const size_t capacity, const std::string &directory_host, const int directory_port)
     : id_(id), manager_(capacity), impl_(nullptr), directory_host_(directory_host), directory_port_(directory_port) {
 }
 
@@ -26,7 +26,7 @@ void block::setup(const std::string &type,
                   const std::string &name,
                   const std::string &metadata,
                   const utils::property_map &conf) {
-  impl_ = partition_manager::build_partition(&manager_, type, name, metadata, conf);
+  impl_ = partition_manager::build_partition(&manager_, type, name, metadata, conf, directory_host_, directory_port_);
   if (impl_ == nullptr) {
     throw std::invalid_argument("No such type " + type);
   }

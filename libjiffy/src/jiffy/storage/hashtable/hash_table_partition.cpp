@@ -5,6 +5,7 @@
 #include "jiffy/utils/logger.h"
 #include "jiffy/persistent/persistent_store.h"
 #include "jiffy/storage/partition_manager.h"
+#include "jiffy/directory/client/directory_client.h"
 
 namespace jiffy {
 namespace storage {
@@ -33,7 +34,9 @@ const int32_t hash_table_partition::SLOT_MAX;
 hash_table_partition::hash_table_partition(block_memory_manager *manager,
                                            const std::string &name,
                                            const std::string &metadata,
-                                           const utils::property_map &conf)
+                                           const utils::property_map &conf,
+                                           const std::string &directory_host,
+                                           const int directory_port)
     : chain_module(manager, name, metadata, KV_OPS),
       block_(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type(), build_allocator<kv_pair_type>()),
       locked_block_(block_.lock_table()),
@@ -43,7 +46,9 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
       state_(hash_partition_state::regular),
       slot_range_(0, -1),
       export_slot_range_(0, -1),
-      import_slot_range_(0, -1) {
+      import_slot_range_(0, -1),
+      directory_host_(directory_host),
+      directory_port_(directory_port) {
   locked_block_.unlock();
   auto ser = conf.get("hashtable.serializer", "csv");
   if (ser == "binary") {
@@ -457,11 +462,12 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       && state() != hash_partition_state::importing && is_tail() && !locked_block_.is_active()
       && splitting_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
-    LOG(log_level::info) << "Overloaded partition; storage = " << bytes_.load() << " capacity = " << manager_->mb_capacity()
+    LOG(log_level::info) << "Overloaded partition; storage = " << bytes_.load() << " capacity = "
+                         << manager_->mb_capacity()
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
       // TODO: Add logic for splitting slot range
-      splitting_ = false;
+      splitting_ = true;
       LOG(log_level::info) << "Requested slot range split";
     } catch (std::exception &e) {
       splitting_ = false;
@@ -469,15 +475,17 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
     }
   }
   expected = false;
-  if (auto_scale_.load() && cmd_id == hash_table_cmd_id::remove && underload() && state() != hash_partition_state::exporting
+  if (auto_scale_.load() && cmd_id == hash_table_cmd_id::remove && underload()
+      && state() != hash_partition_state::exporting
       && state() != hash_partition_state::importing && slot_end() != SLOT_MAX && is_tail() && !locked_block_.is_active()
       && merging_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
-    LOG(log_level::info) << "Underloaded partition; storage = " << bytes_.load() << " capacity = " << manager_->mb_capacity()
+    LOG(log_level::info) << "Underloaded partition; storage = " << bytes_.load() << " capacity = "
+                         << manager_->mb_capacity()
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
       // TODO: Add logic for merging slot range
-      merging_ = false;
+      merging_ = true;
       LOG(log_level::info) << "Requested slot range merge";
     } catch (std::exception &e) {
       merging_ = false;
@@ -564,7 +572,7 @@ void hash_table_partition::export_slots() {
   if (state() != hash_partition_state::exporting) {
     throw std::logic_error("Source partition is not in exporting state");
   }
-  auto fs = std::make_shared<directory::directory_client>("localhost", 9090); // FIXME: Replace with actual
+  auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_); // FIXME: Replace with actual
   replica_chain_client src(fs, path_, chain(), 0);
   replica_chain_client dst(fs, path_, export_target(), 0);
   auto exp_range = export_slot_range();
