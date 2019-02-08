@@ -2,10 +2,9 @@
 #define JIFFY_BLOCK_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
-#include <libcuckoo/cuckoohash_map.hh>
-#include "../service/block_request_service.h"
-#include "../service/block_response_service.h"
-#include "../../utils/client_cache.h"
+#include "jiffy/storage/service/block_request_service.h"
+#include "jiffy/storage/service/block_response_service.h"
+#include "jiffy/utils/client_cache.h"
 
 namespace jiffy {
 namespace storage {

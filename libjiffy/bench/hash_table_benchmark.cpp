@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <thread>
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/time_utils.h"
 #include "jiffy/utils/signal_handling.h"
@@ -66,7 +67,7 @@ class latency_benchmark {
       auto t0 = time_utils::now_us();
       client_->run_command(workload_[i].first, workload_[i].second);
       auto t = time_utils::now_us() - t0;
-      fprintf(stdout, "%zu %" PRId64 "\n", i, t);
+      std::cout << i << " " << t << std::endl;
       ++i;
     }
   }

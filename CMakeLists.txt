@@ -34,8 +34,14 @@ if (BUILD_TESTS)
 endif ()
 
 add_subdirectory(libjiffy)
-add_subdirectory(directory)
-add_subdirectory(storage)
+
+if (BUILD_STORAGE)
+  add_subdirectory(directory)
+endif()
+
+if (BUILD_DIRECTORY)
+  add_subdirectory(storage)
+endif()
 
 if (BUILD_PYTHON_CLIENT)
   add_subdirectory(pyjiffy)

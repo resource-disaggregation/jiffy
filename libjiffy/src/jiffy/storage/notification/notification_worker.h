@@ -2,11 +2,12 @@
 #define JIFFY_NOTIFICATION_WORKER_H
 
 #include <thrift/protocol/TProtocol.h>
-#include "notification_handler.h"
 #include "subscription_service.h"
+#include "blocking_queue.h"
 
 namespace jiffy {
 namespace storage {
+
 /* Notification worker class */
 class notification_worker {
  public:

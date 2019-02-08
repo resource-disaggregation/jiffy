@@ -12,19 +12,23 @@ set(CATCH_VERSION "2.2.1")
 set(LIBCUCKOO_VERSION "0.2")
 set(DOXYGEN_VERSION "1.8")
 
-
-set(BOOST_COMPONENTS "program_options")
-
-## Prefer static to dynamic libraries
-set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
-
-find_package(Threads REQUIRED)
-
+# External C/C++ Flags
 set(EXTERNAL_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${UPPERCASE_BUILD_TYPE}}")
 set(EXTERNAL_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_${UPPERCASE_BUILD_TYPE}}")
 
+# Prefer static to dynamic libraries
+set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_FIND_LIBRARY_SUFFIXES})
+
+# Threads
+find_package(Threads REQUIRED)
+
+# Boost
+set(BOOST_COMPONENTS "program_options")
 if (USE_SYSTEM_BOOST)
+  set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost ${BOOST_VERSION} COMPONENTS program_options REQUIRED)
+  set(BOOST_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
+  set(BOOST_LIBRARIES ${Boost_LIBRARIES})
 else ()
   foreach (component ${BOOST_COMPONENTS})
     list(APPEND BOOST_COMPONENTS_FOR_BUILD --with-${component})
@@ -34,8 +38,8 @@ else ()
   set(BOOST_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(BOOST_C_FLAGS "${EXTERNAL_C_FLAGS}")
   set(BOOST_PREFIX "${PROJECT_BINARY_DIR}/external/boost")
-  set(BOOST_INCLUDE_DIR "${BOOST_PREFIX}/include")
-  ExternalProject_Add(boost
+  set(BOOST_INCLUDE_DIRS "${BOOST_PREFIX}/include")
+  ExternalProject_Add(boost_ep
           URL https://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION}/boost_${BOOST_VERSION_STR}.zip
           UPDATE_COMMAND ""
           CONFIGURE_COMMAND ./bootstrap.sh --prefix=${BOOST_PREFIX}
@@ -55,18 +59,13 @@ else ()
     endforeach ()
   endmacro()
   libraries_to_fullpath(BOOST_LIBRARIES)
-  set(Boost_INCLUDE_DIRS ${BOOST_INCLUDE_DIR})
-  set(Boost_LIBRARIES ${BOOST_LIBRARIES})
-
-  include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-  message(STATUS "Boost include dirs: ${Boost_INCLUDE_DIRS}")
-  message(STATUS "Boost static libraries: ${Boost_LIBRARIES}")
-
-  install(FILES ${Boost_LIBRARIES} DESTINATION lib)
-  install(DIRECTORY ${Boost_INCLUDE_DIRS}/boost DESTINATION include)
+  set(BOOST_DEPENDENCY boost_ep)
 endif ()
+include_directories(SYSTEM ${BOOST_INCLUDE_DIRS})
+message(STATUS "Boost include dirs: ${BOOST_INCLUDE_DIRS}")
+message(STATUS "Boost static libraries: ${BOOST_LIBRARIES}")
 
-if ((NOT USE_SYSTEM_AWS_SDK) OR (NOT USE_SYSTEM_THRIFT))
+if ((NOT USE_SYSTEM_AWSSDK_SDK) OR (NOT USE_SYSTEM_THRIFT))
   set(ZLIB_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(ZLIB_C_FLAGS "${EXTERNAL_C_FLAGS}")
   set(ZLIB_PREFIX "${PROJECT_BINARY_DIR}/external/zlib")
@@ -80,7 +79,7 @@ if ((NOT USE_SYSTEM_AWS_SDK) OR (NOT USE_SYSTEM_THRIFT))
 
   set(ZLIB_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}z")
   set(ZLIB_LIBRARY "${ZLIB_PREFIX}/lib/${ZLIB_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  ExternalProject_Add(zlib
+  ExternalProject_Add(zlib_ep
           URL http://zlib.net/zlib-${ZLIB_VERSION}.tar.gz
           CMAKE_ARGS ${ZLIB_CMAKE_ARGS}
           LOG_DOWNLOAD ON
@@ -92,9 +91,6 @@ if ((NOT USE_SYSTEM_AWS_SDK) OR (NOT USE_SYSTEM_THRIFT))
   message(STATUS "ZLib include dir: ${ZLIB_INCLUDE_DIR}")
   message(STATUS "ZLib static library: ${ZLIB_LIBRARY}")
 
-  install(FILES ${ZLIB_LIBRARY} DESTINATION lib)
-  install(DIRECTORY ${ZLIB_INCLUDE_DIR}/ DESTINATION include)
-
   set(OPENSSL_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(OPENSSL_C_FLAGS "${EXTERNAL_C_FLAGS}")
   set(OPENSSL_PREFIX "${PROJECT_BINARY_DIR}/external/openssl")
@@ -103,8 +99,8 @@ if ((NOT USE_SYSTEM_AWS_SDK) OR (NOT USE_SYSTEM_THRIFT))
   set(CRYPTO_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}crypto")
   set(OPENSSL_LIBRARIES "${OPENSSL_PREFIX}/lib/${OPENSSL_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
           "${OPENSSL_PREFIX}/lib/${CRYPTO_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  ExternalProject_Add(openssl
-          DEPENDS zlib
+  ExternalProject_Add(openssl_ep
+          DEPENDS zlib_ep
           URL https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
           BUILD_IN_SOURCE 1
           CONFIGURE_COMMAND ./config --prefix=${OPENSSL_PREFIX} --with-zlib-include=${ZLIB_INCLUDE_DIR} --with-zlib-lib=${ZLIB_PREFIX}/lib no-shared no-tests CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER} CFLAGS=${OPENSSL_C_FLAGS} CXXFLAGS=${OPENSSL_CXX_FLAGS}
@@ -118,13 +114,10 @@ if ((NOT USE_SYSTEM_AWS_SDK) OR (NOT USE_SYSTEM_THRIFT))
   include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR})
   message(STATUS "OpenSSL include dir: ${OPENSSL_INCLUDE_DIR}")
   message(STATUS "OpenSSL static libraries: ${OPENSSL_LIBRARIES}")
-
-  install(FILES ${OPENSSL_LIBRARIES} DESTINATION lib)
-  install(DIRECTORY ${OPENSSL_INCLUDE_DIR}/openssl DESTINATION include)
 endif ()
 
-if (USE_SYSTEM_AWS_SDK)
-  find_package(aws-sdk-cpp REQUIRED)
+if (USE_SYSTEM_AWSSDK_SDK)
+  find_package(AWSSDK REQUIRED COMPONENTS s3)
 else ()
   set(CURL_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(CURL_C_FLAGS "${EXTERNAL_C_FLAGS}")
@@ -149,8 +142,8 @@ else ()
   set(CURL_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}curl")
   set(CURL_LIBRARY "${CURL_PREFIX}/lib/${CURL_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
   string(REGEX REPLACE "\\." "_" CURL_VERSION_STR ${CURL_VERSION})
-  ExternalProject_Add(curl
-          DEPENDS zlib openssl
+  ExternalProject_Add(curl_ep
+          DEPENDS zlib_ep openssl_ep
           URL https://github.com/curl/curl/releases/download/curl-${CURL_VERSION_STR}/curl-${CURL_VERSION}.tar.gz
           LIST_SEPARATOR |
           CMAKE_ARGS ${CURL_CMAKE_ARGS}
@@ -166,50 +159,50 @@ else ()
   install(FILES ${CURL_LIBRARY} DESTINATION lib)
   install(DIRECTORY ${CURL_INCLUDE_DIR}/curl DESTINATION include)
 
-  set(AWS_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
-  set(AWS_C_FLAGS "${EXTERNAL_C_FLAGS}")
-  set(AWS_PREFIX "${PROJECT_BINARY_DIR}/external/aws")
-  set(AWS_HOME "${AWS_PREFIX}")
-  set(AWS_BUILD_PROJECTS "s3")
-  set(AWS_INCLUDE_DIR "${AWS_PREFIX}/include")
-  set(AWS_PREFIX_PATH "${ZLIB_PREFIX}|${OPENSSL_PREFIX}|${CURL_PREFIX}")
-  set(AWS_CMAKE_ARGS "-Wno-dev"
+  set(AWSSDK_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
+  set(AWSSDK_C_FLAGS "${EXTERNAL_C_FLAGS}")
+  set(AWSSDK_PREFIX "${PROJECT_BINARY_DIR}/external/aws")
+  set(AWSSDK_HOME "${AWSSDK_PREFIX}")
+  set(AWSSDK_BUILD_PROJECTS "s3")
+  set(AWSSDK_INCLUDE_DIR "${AWSSDK_PREFIX}/include")
+  set(AWSSDK_PREFIX_PATH "${ZLIB_PREFIX}|${OPENSSL_PREFIX}|${CURL_PREFIX}")
+  set(AWSSDK_CMAKE_ARGS "-Wno-dev"
           "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
           "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
           "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-          "-DBUILD_ONLY=${AWS_BUILD_PROJECTS}"
-          "-DCMAKE_INSTALL_PREFIX=${AWS_PREFIX}"
+          "-DBUILD_ONLY=${AWSSDK_BUILD_PROJECTS}"
+          "-DCMAKE_INSTALL_PREFIX=${AWSSDK_PREFIX}"
           "-DENABLE_TESTING=OFF"
           "-DBUILD_SHARED_LIBS=OFF"
-          "-DCMAKE_PREFIX_PATH=${AWS_PREFIX_PATH}"
+          "-DCMAKE_PREFIX_PATH=${AWSSDK_PREFIX_PATH}"
           "-DZLIB_LIBRARY=${ZLIB_LIBRARY}") # Force usage of static library
 
-  set(AWS_STATIC_CORE_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-core")
-  set(AWS_STATIC_S3_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-s3")
-  set(AWS_LIBRARIES "${AWS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/${AWS_STATIC_S3_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-          "${AWS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/${AWS_STATIC_CORE_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(AWSSDK_STATIC_CORE_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-core")
+  set(AWSSDK_STATIC_S3_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}aws-cpp-sdk-s3")
+  set(AWSSDK_LINK_LIBRARIES "${AWSSDK_PREFIX}/${CMAKE_INSTALL_LIBDIR}/${AWSSDK_STATIC_S3_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+          "${AWSSDK_PREFIX}/${CMAKE_INSTALL_LIBDIR}/${AWSSDK_STATIC_CORE_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(AWSSDK_LINK_LIBRARIES ${AWSSDK_LINK_LIBRARIES} ${CURL_LIBRARY} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARY})
 
-  ExternalProject_Add(awssdk
-          DEPENDS curl openssl zlib
+  ExternalProject_Add(awssdk_ep
+          DEPENDS curl_ep openssl_ep zlib_ep
           GIT_REPOSITORY "https://github.com/awslabs/aws-sdk-cpp.git"
           GIT_TAG "${AWSSDK_VERSION}"
           GIT_SHALLOW 1
           BUILD_IN_SOURCE true
           LIST_SEPARATOR |
-          CMAKE_ARGS ${AWS_CMAKE_ARGS}
+          CMAKE_ARGS ${AWSSDK_CMAKE_ARGS}
           LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
-
-  include_directories(SYSTEM ${AWS_INCLUDE_DIR})
-  message(STATUS "AWS include dir: ${AWS_INCLUDE_DIR}")
-  message(STATUS "AWS static libraries: ${AWS_LIBRARIES}")
-
-  install(FILES ${AWS_LIBRARIES} DESTINATION lib)
-  install(DIRECTORY ${AWS_INCLUDE_DIR}/aws DESTINATION include)
+  set(AWSSDK_DEPENDENCY "awssdk_ep")
 endif ()
 
+include_directories(SYSTEM ${AWSSDK_INCLUDE_DIR})
+message(STATUS "AWS include dir: ${AWSSDK_INCLUDE_DIR}")
+message(STATUS "AWS static libraries: ${AWSSDK_LINK_LIBRARIES}")
+
+# Thrift
 if (USE_SYSTEM_THRIFT)
   find_package(Thrift ${THRIFT_VERSION} REQUIRED)
 else ()
@@ -232,7 +225,7 @@ else ()
           "-DEVENT__DISABLE_OPENSSL=ON"
           "-DEVENT__DISABLE_BENCHMARK=ON"
           "-DEVENT__DISABLE_TESTS=ON")
-  ExternalProject_Add(libevent
+  ExternalProject_Add(libevent_ep
           URL https://github.com/nmathewson/Libevent/archive/release-${LIBEVENT_VERSION}-stable.tar.gz
           CMAKE_ARGS ${LIBEVENT_CMAKE_ARGS}
           LOG_DOWNLOAD ON
@@ -242,9 +235,7 @@ else ()
   include_directories(SYSTEM ${LIBEVENT_INCLUDE_DIR})
   message(STATUS "Libevent include dir: ${LIBEVENT_INCLUDE_DIR}")
   message(STATUS "Libevent static libraries: ${LIBEVENT_LIBRARIES}")
-
-  install(FILES ${LIBEVENT_LIBRARIES} DESTINATION lib)
-  install(DIRECTORY ${LIBEVENT_INCLUDE_DIR}/ DESTINATION include)
+  set(LIBEVENT_DEPENDENCY "libevent_ep")
 
   set(THRIFT_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(THRIFT_C_FLAGS "${EXTERNAL_C_FLAGS}")
@@ -290,12 +281,13 @@ else ()
   if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     set(THRIFTNB_STATIC_LIB_NAME "${THRIFTNB_STATIC_LIB_NAME}d")
   endif ()
-  set(THRIFTNB_LIBRARIES "${THRIFT_PREFIX}/lib/${THRIFTNB_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(THRIFTNB_LIBRARIES "${THRIFT_PREFIX}/lib/${THRIFTNB_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+          "${LIBEVENT_LIBRARIES}")
   if (GENERATE_THRIFT)
     set(THRIFT_COMPILER "${THRIFT_PREFIX}/bin/thrift")
   endif ()
-  ExternalProject_Add(thrift
-          DEPENDS boost libevent openssl zlib
+  ExternalProject_Add(thrift_ep
+          DEPENDS libevent_ep openssl_ep zlib_ep
           URL "http://archive.apache.org/dist/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
           LIST_SEPARATOR |
           CMAKE_ARGS ${THRIFT_CMAKE_ARGS}
@@ -303,24 +295,23 @@ else ()
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
+  set(THRIFT_DEPENDENCY "thrift_ep")
+endif ()
+set(THRIFT_LIBRARIES ${THRIFT_LIBRARIES} ${THRIFTNB_LIBRARIES})
+include_directories(SYSTEM ${THRIFT_INCLUDE_DIR})
+message(STATUS "Thrift include dir: ${THRIFT_INCLUDE_DIR}")
+message(STATUS "Thrift static libraries: ${THRIFT_LIBRARIES}")
 
-  include_directories(SYSTEM ${THRIFT_INCLUDE_DIR})
-  message(STATUS "Thrift include dir: ${THRIFT_INCLUDE_DIR}")
-  message(STATUS "Thrift static libraries: ${THRIFT_LIBRARIES}")
-  message(STATUS "Thrift non-blocking libraries: ${THRIFTNB_LIBRARIES}")
-
-  if (GENERATE_THRIFT)
-    message(STATUS "Thrift compiler: ${THRIFT_COMPILER}")
-    add_executable(thriftcompiler IMPORTED GLOBAL)
-    set_target_properties(thriftcompiler PROPERTIES IMPORTED_LOCATION ${THRIFT_COMPILER})
-    add_dependencies(thriftcompiler thrift)
-  endif ()
-
-  install(FILES ${THRIFT_LIBRARIES} DESTINATION lib)
-  install(DIRECTORY ${THRIFT_INCLUDE_DIR}/thrift DESTINATION include)
+if (GENERATE_THRIFT)
+  message(STATUS "Thrift compiler: ${THRIFT_COMPILER}")
+  add_executable(thriftcompiler IMPORTED GLOBAL)
+  set_target_properties(thriftcompiler PROPERTIES IMPORTED_LOCATION ${THRIFT_COMPILER})
+  add_dependencies(thriftcompiler thrift)
 endif ()
 
-if (NOT USE_SYSTEM_JEMALLOC)
+if (USE_SYSTEM_JEMALLOC)
+  find_package(Jemalloc REQUIRED)
+else ()
   set(JEMALLOC_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(JEMALLOC_C_FLAGS "${EXTERNAL_C_FLAGS}")
   set(JEMALLOC_LD_FLAGS "-Wl,--no-as-needed")
@@ -336,7 +327,7 @@ if (NOT USE_SYSTEM_JEMALLOC)
           "-DCMAKE_INSTALL_PREFIX=${JEMALLOC_PREFIX}")
   set(JEMALLOC_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}jemalloc")
   set(JEMALLOC_LIBRARIES "${JEMALLOC_PREFIX}/lib/${JEMALLOC_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  ExternalProject_Add(jemalloc
+  ExternalProject_Add(jemalloc_ep
           URL https://github.com/jemalloc/jemalloc/releases/download/5.0.1/jemalloc-5.0.1.tar.bz2
           PREFIX ${JEMALLOC_PREFIX}
           BUILD_BYPRODUCTS ${JEMALLOC_LIBRARIES}
@@ -346,15 +337,15 @@ if (NOT USE_SYSTEM_JEMALLOC)
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
-  include_directories(SYSTEM ${JEMALLOC_INCLUDE_DIR})
-  message(STATUS "Jemalloc include dir: ${JEMALLOC_INCLUDE_DIR}")
-  message(STATUS "Jemalloc library: ${JEMALLOC_LIBRARIES}")
-  install(FILES ${JEMALLOC_LIBRARIES} DESTINATION lib)
+  set(JEMALLOC_DEPENDENCY "jemalloc_ep")
 endif ()
+include_directories(SYSTEM ${JEMALLOC_INCLUDE_DIR})
+message(STATUS "Jemalloc include dir: ${JEMALLOC_INCLUDE_DIR}")
+message(STATUS "Jemalloc library: ${JEMALLOC_LIBRARIES}")
 
 # Catch2 Test framework
-if (BUILD_TESTS AND NOT USE_SYSTEM_CATCH)
-  ExternalProject_Add(catch
+if (BUILD_TESTS)
+  ExternalProject_Add(catch_ep
           PREFIX ${CMAKE_BINARY_DIR}/catch
           URL https://github.com/catchorg/Catch2/archive/v${CATCH_VERSION}.tar.gz
           CONFIGURE_COMMAND ""
@@ -365,11 +356,13 @@ if (BUILD_TESTS AND NOT USE_SYSTEM_CATCH)
           LOG_BUILD ON
           LOG_INSTALL ON)
 
-  ExternalProject_Get_Property(catch source_dir)
+  ExternalProject_Get_Property(catch_ep source_dir)
   set(CATCH_INCLUDE_DIR ${source_dir}/single_include CACHE INTERNAL "Path to include folder for Catch")
+  include_directories(SYSTEM ${CATCH_INCLUDE_DIR})
+  set(CATCH_DEPENDENCY "catch_ep")
 endif ()
 
 if (BUILD_DOC)
-    find_package(MkDocs REQUIRED)
-    find_package(Doxygen ${DOXYGEN_VERSION} REQUIRED)
-endif()
+  find_package(MkDocs REQUIRED)
+  find_package(Doxygen ${DOXYGEN_VERSION} REQUIRED)
+endif ()
