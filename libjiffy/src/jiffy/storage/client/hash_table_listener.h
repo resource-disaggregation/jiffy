@@ -1,9 +1,9 @@
 #ifndef JIFFY_KV_LISTENER_H
 #define JIFFY_KV_LISTENER_H
 
-#include "../../directory/directory_ops.h"
+#include "jiffy/directory/directory_ops.h"
 #include "block_listener.h"
-#include "../notification/notification_worker.h"
+#include "jiffy/storage/notification/notification_worker.h"
 
 namespace jiffy {
 namespace storage {

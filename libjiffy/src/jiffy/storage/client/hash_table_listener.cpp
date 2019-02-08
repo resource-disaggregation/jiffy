@@ -1,7 +1,7 @@
 #include <thrift/transport/TTransportException.h>
-#include "hash_table_listener.h"
+#include "jiffy/storage/client/hash_table_listener.h"
 #include "jiffy/storage/manager/detail/block_id_parser.h"
-#include "../../utils/logger.h"
+#include "jiffy/utils/logger.h"
 
 using namespace apache::thrift::transport;
 using namespace jiffy::utils;

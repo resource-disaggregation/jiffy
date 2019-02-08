@@ -6,7 +6,7 @@
 #include <iostream>
 #include <cstdint>
 
-#include "jiffy/storage/hashtable/hash_table_partition.h"
+#include "jiffy/storage/hashtable/hash_table_ops.h"
 
 namespace jiffy {
 namespace benchmark {

@@ -7,13 +7,13 @@
 #include <thrift/transport/TTransport.h>
 #include <thrift/protocol/TProtocol.h>
 #include <thrift/protocol/TMultiplexedProtocol.h>
-#include "../notification/notification_service.h"
-#include "../notification/subscription_service.h"
-#include "../notification/blocking_queue.h"
-#include "../notification/subscription_service.h"
+
+#include "jiffy/storage/notification/notification_service.h"
+#include "jiffy/storage/notification/blocking_queue.h"
 
 namespace jiffy {
 namespace storage {
+
 /* Block listener class */
 class block_listener {
  public:

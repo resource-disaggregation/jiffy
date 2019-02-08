@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
 
   block_memory_manager manager;
   hash_table_partition block(&manager);
-  block.slot_range(0, hash_table_partition::SLOT_MAX);
+  block.slot_range(0, hash_slot::MAX);
 
   if (mode == "write") {
     // Load phase

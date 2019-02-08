@@ -2,8 +2,8 @@
 #define JIFFY_JIFFY_CLIENT_H
 
 #include <string>
-#include "../directory/directory_ops.h"
-#include "../directory/client/lease_renewal_worker.h"
+#include "jiffy/directory/directory_ops.h"
+#include "jiffy/directory/client/lease_renewal_worker.h"
 #include "jiffy/storage/client/hash_table_client.h"
 #include "jiffy/storage/client/hash_table_listener.h"
 

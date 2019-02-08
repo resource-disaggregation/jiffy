@@ -1,4 +1,6 @@
 #include "catch.hpp"
+#include "jiffy/storage/hashtable/hash_slot.h"
+#include "jiffy/storage/hashtable/hash_table_ops.h"
 #include "jiffy/storage/hashtable/hash_table_partition.h"
 
 using namespace ::jiffy::storage;
@@ -58,7 +60,7 @@ TEST_CASE("put_upsert_get_test", "[put][upsert][get]") {
 TEST_CASE("put_remove_get_test", "[put][update][get]") {
   block_memory_manager manager;
   hash_table_partition block(&manager);
-  block.slot_range(0, hash_table_partition::SLOT_MAX);
+  block.slot_range(0, hash_slot::MAX);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.put(std::to_string(i), std::to_string(i)) == "!ok");
   }

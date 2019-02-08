@@ -7,15 +7,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../libjiffy/src
         ${Boost_INCLUDE_DIRS})
 add_executable(storaged src/storage_server.cpp)
 
-if (NOT USE_SYSTEM_BOOST)
-  add_dependencies(directoryd boost)
-endif ()
+add_dependencies(storaged ${BOOST_DEPENDENCY} ${JEMALLOC_DEPENDENCY})
 
-if (NOT USE_SYSTEM_JEMALLOC)
-  add_dependencies(storaged jemalloc)
-endif ()
-
-target_link_libraries(storaged jiffy ${JEMALLOC_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(storaged jiffy ${JEMALLOC_LIBRARIES} ${BOOST_LIBRARIES})
 
 install(TARGETS storaged
         RUNTIME DESTINATION bin
