@@ -21,7 +21,7 @@ endif ()
 
 if (JEMALLOC_BUILD)
   set(JEMALLOC_LD_FLAGS "-Wl,--no-as-needed")
-  set(JEMALLOC_PREFIX "${PROJECT_BINARY_DIR}/external/jemalloc")
+  set(JEMALLOC_PREFIX "${PROJECT_BINARY_DIR}/external/jemalloc_ep")
   set(JEMALLOC_HOME "${JEMALLOC_PREFIX}")
   set(JEMALLOC_INCLUDE_DIR "${JEMALLOC_PREFIX}/include")
   set(JEMALLOC_FUNCTION_PREFIX "")
@@ -35,7 +35,7 @@ if (JEMALLOC_BUILD)
           URL https://github.com/jemalloc/jemalloc/releases/download/${JEMALLOC_VERSION}/jemalloc-${JEMALLOC_VERSION}.tar.bz2
           BUILD_IN_SOURCE 1
           PREFIX ${JEMALLOC_PREFIX}
-          CONFIGURE_COMMAND ${JEMALLOC_PREFIX}/src/jemalloc/configure --with-jemalloc-prefix=${JEMALLOC_FUNCTION_PREFIX} --prefix=${JEMALLOC_PREFIX} --enable-autogen --enable-prof-libunwind CFLAGS=${JEMALLOC_C_FLAGS} CXXFLAGS=${JEMALLOC_CXX_FLAGS}
+          CONFIGURE_COMMAND ./configure --with-jemalloc-prefix=${JEMALLOC_FUNCTION_PREFIX} --prefix=${JEMALLOC_PREFIX} --enable-autogen --enable-prof-libunwind CFLAGS=${JEMALLOC_C_FLAGS} CXXFLAGS=${JEMALLOC_CXX_FLAGS}
           INSTALL_COMMAND make install_include install_lib
           LOG_DOWNLOAD ON
           LOG_CONFIGURE ON

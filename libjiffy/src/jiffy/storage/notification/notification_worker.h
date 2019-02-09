@@ -1,6 +1,7 @@
 #ifndef JIFFY_NOTIFICATION_WORKER_H
 #define JIFFY_NOTIFICATION_WORKER_H
 
+#include <atomic>
 #include <thrift/protocol/TProtocol.h>
 #include "subscription_service.h"
 #include "blocking_queue.h"

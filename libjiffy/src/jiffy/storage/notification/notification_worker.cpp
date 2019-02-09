@@ -1,4 +1,3 @@
-#include <iostream>
 #include <thrift/transport/TTransportException.h>
 #include "jiffy/storage/notification/notification_worker.h"
 #include "jiffy/storage/notification/notification_handler.h"
