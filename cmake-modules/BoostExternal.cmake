@@ -55,5 +55,5 @@ if (Boost_BUILD)
 endif ()
 
 include_directories(SYSTEM ${BOOST_INCLUDE_DIRS})
-message(STATUS "Boost include dirs: ${BOOST_INCLUDE_DIRS}")
-message(STATUS "Boost static libraries: ${BOOST_LIBRARIES}")
+message(STATUS "Boost include dirs: ${Boost_INCLUDE_DIRS}")
+message(STATUS "Boost program options library: ${Boost_PROGRAM_OPTIONS_LIBRARY}")
