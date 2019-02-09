@@ -3,10 +3,6 @@
 #include "buffered_transport_factory.h"
 
 #include <thrift/transport/TBufferTransports.h>
-#include <thrift/transport/TNonblockingServerSocket.h>
-#include <thrift/concurrency/ThreadManager.h>
-#include <thrift/concurrency/PosixThreadFactory.h>
-#include <thrift/server/TNonblockingServer.h>
 #include <thrift/server/TThreadPoolServer.h>
 
 namespace jiffy {

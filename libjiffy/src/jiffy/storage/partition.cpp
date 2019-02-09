@@ -1,4 +1,3 @@
-#include <ldap.h>
 #include "partition.h"
 
 namespace jiffy {
