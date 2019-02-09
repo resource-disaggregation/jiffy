@@ -19,7 +19,10 @@ else ()
   set(AWSSDK_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/awssdk_ep")
   set(AWSSDK_HOME "${AWSSDK_PREFIX}")
   set(AWSSDK_INCLUDE_DIR "${AWSSDK_PREFIX}/include")
-  set(AWSSDK_LINK_LIBRARIES "${CURL_LIBRARY}")
+  set(AWSSDK_LINK_LIBRARIES "${CURL_LIBRARY}"
+          "${ZLIB_LIBRARY}"
+          "${OPENSSL_SSL_LIBRARY}"
+          "${OPENSSL_CRYPTO_LIBRARY}")
 
   foreach (MODULE ${AWSSDK_MODULES})
     message(STATUS "AWS SDK Module to build: ${MODULE}")
