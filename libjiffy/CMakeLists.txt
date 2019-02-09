@@ -208,8 +208,6 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/utils/time_utils.h
           src/jiffy/utils/retry_utils.h
           src/jiffy/utils/string_utils.h
-          src/jiffy/storage/service/pinned_thread_factory.cpp
-          src/jiffy/storage/service/pinned_thread_factory.h
           src/jiffy/storage/block.cpp
           src/jiffy/storage/block.h
           src/jiffy/utils/property_map.cpp
@@ -224,10 +222,10 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/directory/fs/ds_dir_node.cpp
           src/jiffy/directory/fs/ds_dir_node.h)
 
-  add_dependencies(jiffy ${LIBEVENT_DEPENDENCY} ${THRIFT_DEPENDENCY} ${AWSSDK_DEPENDENCY} ${JEMALLOC_DEPENDENCY})
-  target_link_libraries(jiffy ${THRIFT_LIBRARIES}
+  add_dependencies(jiffy thrift_ep awssdk_ep jemalloc_ep)
+  target_link_libraries(jiffy ${THRIFT_LIBRARY}
           ${AWSSDK_LINK_LIBRARIES}
-          ${JEMALLOC_LIBRARIES}
+          ${JEMALLOC_LIBRARY}
           ${CMAKE_DL_LIBS}
           ${CMAKE_THREAD_LIBS_INIT})
   set_target_properties(jiffy PROPERTIES LINKER_LANGUAGE CXX)
@@ -362,8 +360,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/utils/string_utils.h
           src/jiffy/utils/property_map.cpp
           src/jiffy/utils/property_map.h)
-  add_dependencies(jiffy_client ${LIBEVENT_DEPENDENCY} ${THRIFT_DEPENDENCY})
-  target_link_libraries(jiffy_client ${THRIFT_LIBRARIES}
+  add_dependencies(jiffy_client thrift_ep)
+  target_link_libraries(jiffy_client ${THRIFT_LIBRARY}
           ${CMAKE_DL_LIBS}
           ${CMAKE_THREAD_LIBS_INIT})
   set_target_properties(jiffy_client PROPERTIES LINKER_LANGUAGE CXX)

@@ -6,6 +6,7 @@
 
 namespace jiffy {
 namespace storage {
+
 /* Buffered transport factory class */
 class BufferedTransportFactory : public apache::thrift::transport::TTransportFactory {
  public:
