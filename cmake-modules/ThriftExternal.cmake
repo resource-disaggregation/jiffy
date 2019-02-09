@@ -43,7 +43,7 @@ if (THRIFT_BUILD)
           "-DWITH_STDTHREADS=OFF"
           "-DWITH_BOOSTTHREADS=OFF"
           "-DWITH_STATIC_LIB=ON"
-          "-DCMAKE_PREFIX_PATH=${OPENSSL_HOME}")
+          "-DCMAKE_PREFIX_PATH=${OPENSSL_HOME}|${Boost_HOME}")
 
   set(THRIFT_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}thrift")
   if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
@@ -53,8 +53,9 @@ if (THRIFT_BUILD)
   set(THRIFT_COMPILER "${THRIFT_PREFIX}/bin/thrift")
   ExternalProject_Add(thrift_ep
           URL "http://archive.apache.org/dist/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
-          DEPENDS openssl_ep
+          DEPENDS boost_ep openssl_ep
           CMAKE_ARGS ${THRIFT_CMAKE_ARGS}
+          LIST_SEPARATOR |
           LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON
