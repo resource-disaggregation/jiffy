@@ -33,6 +33,7 @@ if (JEMALLOC_BUILD)
   set(JEMALLOC_LIBRARY "${JEMALLOC_PREFIX}/lib/${JEMALLOC_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
   ExternalProject_Add(jemalloc_ep
           URL https://github.com/jemalloc/jemalloc/releases/download/${JEMALLOC_VERSION}/jemalloc-${JEMALLOC_VERSION}.tar.bz2
+          BUILD_IN_SOURCE 1
           PREFIX ${JEMALLOC_PREFIX}
           CONFIGURE_COMMAND ${JEMALLOC_PREFIX}/src/jemalloc/configure --with-jemalloc-prefix=${JEMALLOC_FUNCTION_PREFIX} --prefix=${JEMALLOC_PREFIX} --enable-autogen --enable-prof-libunwind CFLAGS=${JEMALLOC_C_FLAGS} CXXFLAGS=${JEMALLOC_CXX_FLAGS}
           INSTALL_COMMAND make install_include install_lib
