@@ -63,8 +63,8 @@ if (THRIFT_BUILD)
 endif ()
 
 include_directories(SYSTEM ${THRIFT_INCLUDE_DIR})
-message(STATUS "ZLib include dir: ${THRIFT_INCLUDE_DIR}")
-message(STATUS "ZLib static library: ${THRIFT_LIBRARY}")
+message(STATUS "Thrift include dir: ${THRIFT_INCLUDE_DIR}")
+message(STATUS "Thrift static library: ${THRIFT_LIBRARY}")
 
 if (GENERATE_THRIFT)
   message(STATUS "Thrift compiler: ${THRIFT_COMPILER}")
