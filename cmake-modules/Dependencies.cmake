@@ -25,6 +25,9 @@ find_package(Threads REQUIRED)
 # Boost
 include(BoostExternal)
 
+# OpenSSL
+include(OpenSSLExternal)
+
 # AWS SDK
 include(AwsSDKExternal)
 

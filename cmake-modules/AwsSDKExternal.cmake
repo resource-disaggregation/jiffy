@@ -38,14 +38,15 @@ else ()
           "-DBUILD_SHARED_LIBS=OFF"
           "-DFORCE_CURL=ON"
           "-DZLIB_ROOT=${ZLIB_HOME}"
-          "-DCMAKE_PREFIX_PATH=${CURL_HOME}"
+          "-DCMAKE_PREFIX_PATH=${CURL_HOME}|${OPENSSL_HOME}"
           "-DBUILD_ONLY=s3")
 
   ExternalProject_Add(awssdk_ep
-          DEPENDS curl_ep zlib_ep
+          DEPENDS curl_ep zlib_ep openssl_ep
           URL "https://github.com/aws/aws-sdk-cpp/archive/${AWSSDK_VERSION}.tar.gz"
           BUILD_IN_SOURCE 1
           CMAKE_ARGS ${AWSSDK_CMAKE_ARGS}
+          LIST_SEPARATOR |
           LOG_DOWNLOAD ON
           LOG_CONFIGURE ON
           LOG_BUILD ON

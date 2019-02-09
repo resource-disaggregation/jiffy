@@ -19,8 +19,6 @@ if (DEFINED ENV{THRIFT_ROOT} AND EXISTS $ENV{THRIFT_ROOT})
 endif ()
 
 if (THRIFT_BUILD)
-  include(OpenSSLExternal)
-
   set(THRIFT_PREFIX "${PROJECT_BINARY_DIR}/external/thrift_ep")
   set(THRIFT_HOME "${THRIFT_PREFIX}")
   set(THRIFT_INCLUDE_DIR "${THRIFT_PREFIX}/include")
