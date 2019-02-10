@@ -47,11 +47,11 @@ size_t block::used() const {
 }
 
 block::operator bool() const noexcept {
-  return impl_ == nullptr;
+  return impl_ != nullptr;
 }
 
 bool block::valid() const {
-  return impl_ == nullptr;
+  return impl_ != nullptr;
 }
 
 }
