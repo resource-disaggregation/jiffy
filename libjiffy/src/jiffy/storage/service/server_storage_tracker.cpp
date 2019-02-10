@@ -48,7 +48,7 @@ void server_storage_tracker::report_file_sizes(std::ofstream &out) {
   auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
   out << cur_epoch;
   for (const auto &block: blocks_) {
-    out << "\t" << block->impl()->storage_size();
+    out << "\t" << block->used();
   }
   out << std::endl;
 }
