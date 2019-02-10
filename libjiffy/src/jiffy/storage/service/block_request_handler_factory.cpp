@@ -29,7 +29,7 @@ void block_request_handler_factory::releaseHandler(block_request_serviceIf *hand
   auto br_handler = reinterpret_cast<block_request_handler *>(handler);
   int64_t client_id = br_handler->registered_client_id();
   int32_t block_id = br_handler->registered_block_id();
-  if (client_id != -1 && block_id != -1 && blocks_.at(static_cast<std::size_t>(block_id))->impl()) {
+  if (client_id != -1 && block_id != -1 && blocks_.at(static_cast<std::size_t>(block_id))->valid()) {
     blocks_.at(static_cast<std::size_t>(block_id))->impl()->clients().remove_client(client_id);
   }
   delete handler;

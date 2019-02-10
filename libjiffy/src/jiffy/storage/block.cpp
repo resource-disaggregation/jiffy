@@ -46,5 +46,13 @@ size_t block::used() const {
   return manager_.mb_used();
 }
 
+block::operator bool() const noexcept {
+  return impl_ == nullptr;
+}
+
+bool block::valid() const {
+  return impl_ == nullptr;
+}
+
 }
 }
