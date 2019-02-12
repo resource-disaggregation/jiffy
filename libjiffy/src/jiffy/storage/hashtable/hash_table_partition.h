@@ -512,6 +512,7 @@ class hash_table_partition : public chain_module {
   void set_regular(int32_t slot_begin, int32_t slot_end) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     state_ = hash_partition_state::regular;
+    name_ = std::to_string(slot_begin) + "_" + std::to_string(slot_end);
     slot_range_.first = slot_begin;
     slot_range_.second = slot_end;
     export_slot_range_.first = 0;

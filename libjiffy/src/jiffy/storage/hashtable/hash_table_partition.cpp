@@ -6,6 +6,7 @@
 #include "jiffy/persistent/persistent_store.h"
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/directory/client/directory_client.h"
+#include "jiffy/directory/directory_ops.h"
 
 namespace jiffy {
 namespace storage {
@@ -469,30 +470,36 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       // TODO: Add logic for splitting slot range
       splitting_ = true;
       LOG(log_level::info) << "Requested slot range split";
-      // TODO Handle exceptions in splitting slot range, e.g. What if the block already exists?
       // Setup slot range split
       auto split_range_begin = slot_range_.first;
       auto split_range_end = (slot_range_.first + slot_range_.second) / 2;
       std::string new_partition_name = std::to_string(split_range_end + 1) + "_" + std::to_string(slot_range_.second);
       auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
-      auto dst_replica_chain = fs->add_block(path_, new_partition_name, "regular");// TODO what metadata to be set here? regular?
-      // TODO check if add_block succeed, might not be enougth capacity in extreme situation
-      replica_chain_client src(fs, path_, chain(), 0);
-      replica_chain_client dst(fs, path_, dst_replica_chain, 0);
+      auto dst_replica_chain =
+          fs->add_block(path_, new_partition_name, "importing");
+      // TODO check if add_block succeed, might not be enough capacity in extreme situation
+      auto src = std::make_shared<replica_chain_client>(fs, path_, chain(), 0);
+      auto dst = std::make_shared<replica_chain_client>(fs, path_, dst_replica_chain, 0);
+
+      // set the partition state to be exporting and importing
+      set_exporting(dst_replica_chain.block_ids, split_range_end + 1, slot_range_.second);
+      //set_importing(dst.chain().block_ids, split_range_end + 1. slot_range_.second); Need a way to set importing for the destination chain state
+
+
       bool has_more = true;
       std::size_t split_batch_size = 1024;
       std::size_t tot_split_keys = 0;
       while (has_more) {
         // Lock source and destination blocks
         if (role() == chain_role::singleton) {
-          dst.send_command(hash_table_cmd_id::lock, {});
+          dst->send_command(hash_table_cmd_id::lock, {});
           lock();
-          dst.recv_response();
+          dst->recv_response();
         } else {
-          src.send_command(hash_table_cmd_id::lock, {});
-          dst.send_command(hash_table_cmd_id::lock, {});
-          src.recv_response();
-          dst.recv_response();
+          src->send_command(hash_table_cmd_id::lock, {});
+          dst->send_command(hash_table_cmd_id::lock, {});
+          src->recv_response();
+          dst->recv_response();
         }
         // Read data to split
         std::vector<std::string> split_data;
@@ -502,14 +509,14 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
                                       static_cast<int32_t>(split_batch_size));
         if (split_data.size() == 0) {
           if (role() == chain_role::singleton) {
-            dst.send_command(hash_table_cmd_id::unlock, {});
+            dst->send_command(hash_table_cmd_id::unlock, {});
             unlock();
-            dst.recv_response();
+            dst->recv_response();
           } else {
-            src.send_command(hash_table_cmd_id::unlock, {});
-            dst.send_command(hash_table_cmd_id::unlock, {});
-            src.recv_response();
-            dst.recv_response();
+            src->send_command(hash_table_cmd_id::unlock, {});
+            dst->send_command(hash_table_cmd_id::unlock, {});
+            src->recv_response();
+            dst->recv_response();
           }
           break;
         } else if (split_data.size() < split_batch_size) {
@@ -524,7 +531,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         split_data.emplace_back("!redirected");
 
         // Write data to dst partition
-        dst.run_command(hash_table_cmd_id::locked_put, split_data);
+        dst->run_command(hash_table_cmd_id::locked_put, split_data);
         LOG(log_level::trace) << "Sent " << split_keys << " keys";
 
         // Remove data from src partition
@@ -538,29 +545,27 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
           split_data.pop_back();
         }
         assert(remove_keys.size() == split_keys);
-        src.run_command(hash_table_cmd_id::locked_remove, remove_keys);
+        src->run_command(hash_table_cmd_id::locked_remove, remove_keys);
         LOG(log_level::trace) << "Removed " << remove_keys.size() << " split keys";
 
         // Unlock source and destination blocks
         if (role() == chain_role::singleton) {
-          dst.send_command(hash_table_cmd_id::unlock, {});
+          dst->send_command(hash_table_cmd_id::unlock, {});
           unlock();
-          dst.recv_response();
+          dst->recv_response();
         } else {
-          src.send_command(hash_table_cmd_id::unlock, {});
-          dst.send_command(hash_table_cmd_id::unlock, {});
-          src.recv_response();
-          dst.recv_response();
+          src->send_command(hash_table_cmd_id::unlock, {});
+          dst->send_command(hash_table_cmd_id::unlock, {});
+          src->recv_response();
+          dst->recv_response();
         }
       }
       // Finalize slot range split
-      name_ = std::to_string(split_range_begin) + "_" + std::to_string(split_range_end);
-      metadata_ = "regular";        // TODO: metadata set
-      //TODO update partition bytes
-      // TODO two of them share the same subscription map? What about the client map?
-      // TODO update chain_ in chain_module
-      // TODO update pending operations?
-      // TODO how to inform the directory server, change the dstatus
+      //need to reset current partition and replica chain name, metadata
+      //set_regular(split_range_begin, split_range_end);
+      //metadata_ = "regular";        // TODO: metadata not actually used till now since partition state is enough
+
+      // TODO how to modify the status of the new block from importing to regular
 
     } catch (std::exception &e) {
       splitting_ = false;
@@ -580,30 +585,55 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       // TODO: Add logic for merging slot range
       merging_ = true;
       LOG(log_level::info) << "Requested slot range merge";
+
+      auto split_range_begin = slot_range_.first;
+      auto split_range_end = slot_range_.second;
+      auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
       // Find the smallest one in the adjacent partition, search through all dstatus
-      // Could access dstatus via directory client, but need to keep track of all the paths, is it currently implemented?
-      // Find one small and slot range adjacent to current partition
-      // Need to handle exceptions, e.g. there are no neighbors to merge with, neighbors don't have enough space
+      auto replica_set = fs->dstatus(path()).data_blocks();
+      //TODO : fix when fetching the target replica chain for merging, we need to make sure that the new chain doesn't exceed the merge limit
+      // Calculate size, should fail if merging it would let the other block exceed it's threshold
+      // Need to contact the directory server to get a lot of things, such as the bytes and such kind of stuff
+      // Concurrency issue: when I fetch slot range of another block, what if the slot range continues to change?Keep a lock?
+      // When the server starts up, we should find a way to stop the server from merging since there are just very few?
+      directory::replica_chain merge_target;
+      int32_t find_smallest_slot_range = hash_table_partition::SLOT_MAX + 1;
+      for (auto &i : replica_set) {
+        if (i.fetch_slot_range().first == slot_range_.second + 1
+            || i.fetch_slot_range().second == slot_range_.first - 1) {
+          int32_t slot_range_size = i.fetch_slot_range().second - i.fetch_slot_range().first;
+          if (slot_range_size < find_smallest_slot_range) {
+            find_smallest_slot_range = slot_range_size;
+            merge_target = i;
+          }
+        }
+      }
+      if (merge_target.metadata == "importing" || merge_target.metadata == "exporting") {
+        throw std::logic_error("Replica chain already involved in re-partitioning");
+      }
+      if(find_smallest_slot_range == hash_table_partition::SLOT_MAX + 1) {
+        throw std::logic_error("Cannot find a merge partner");
+      }
+      // TODO  Exceptions, e.g. there are no neighbors to merge with, neighbors don't have enough space need to fetch bytes_
 
+      // Modify new block meta data
 
-      // Connect the two replica_chain_client, merge and remove
-      /*
-      replica_chain_client src(fs, path_, chain(), 0);
-      replica_chain_client dst(fs, path_, dst_replica_chain, 0);
+      auto src = std::make_shared<replica_chain_client>(fs, path_, chain(), 0);
+      auto dst = std::make_shared<replica_chain_client>(fs, path_, merge_target, 0);
       bool has_more = true;
       std::size_t split_batch_size = 1024;
       std::size_t tot_split_keys = 0;
       while (has_more) {
         // Lock source and destination blocks
         if (role() == chain_role::singleton) {
-          dst.send_command(hash_table_cmd_id::lock, {});
+          dst->send_command(hash_table_cmd_id::lock, {});
           lock();
-          dst.recv_response();
+          dst->recv_response();
         } else {
-          src.send_command(hash_table_cmd_id::lock, {});
-          dst.send_command(hash_table_cmd_id::lock, {});
-          src.recv_response();
-          dst.recv_response();
+          src->send_command(hash_table_cmd_id::lock, {});
+          dst->send_command(hash_table_cmd_id::lock, {});
+          src->recv_response();
+          dst->recv_response();
         }
         // Read data to split
         std::vector<std::string> split_data;
@@ -613,14 +643,14 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
                                       static_cast<int32_t>(split_batch_size));
         if (split_data.size() == 0) {
           if (role() == chain_role::singleton) {
-            dst.send_command(hash_table_cmd_id::unlock, {});
+            dst->send_command(hash_table_cmd_id::unlock, {});
             unlock();
-            dst.recv_response();
+            dst->recv_response();
           } else {
-            src.send_command(hash_table_cmd_id::unlock, {});
-            dst.send_command(hash_table_cmd_id::unlock, {});
-            src.recv_response();
-            dst.recv_response();
+            src->send_command(hash_table_cmd_id::unlock, {});
+            dst->send_command(hash_table_cmd_id::unlock, {});
+            src->recv_response();
+            dst->recv_response();
           }
           break;
         } else if (split_data.size() < split_batch_size) {
@@ -635,7 +665,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         split_data.emplace_back("!redirected");
 
         // Write data to dst partition
-        dst.run_command(hash_table_cmd_id::locked_put, split_data);
+        dst->run_command(hash_table_cmd_id::locked_put, split_data);
         LOG(log_level::trace) << "Sent " << split_keys << " keys";
 
         // Remove data from src partition
@@ -649,19 +679,19 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
           split_data.pop_back();
         }
         assert(remove_keys.size() == split_keys);
-        src.run_command(hash_table_cmd_id::locked_remove, remove_keys);
+        src->run_command(hash_table_cmd_id::locked_remove, remove_keys);
         LOG(log_level::trace) << "Removed " << remove_keys.size() << " split keys";
 
         // Unlock source and destination blocks
         if (role() == chain_role::singleton) {
-          dst.send_command(hash_table_cmd_id::unlock, {});
+          dst->send_command(hash_table_cmd_id::unlock, {});
           unlock();
-          dst.recv_response();
+          dst->recv_response();
         } else {
-          src.send_command(hash_table_cmd_id::unlock, {});
-          dst.send_command(hash_table_cmd_id::unlock, {});
-          src.recv_response();
-          dst.recv_response();
+          src->send_command(hash_table_cmd_id::unlock, {});
+          dst->send_command(hash_table_cmd_id::unlock, {});
+          src->recv_response();
+          dst->recv_response();
         }
       }
 
@@ -670,13 +700,10 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       // Inform the directory_server to remove current block, tell the block(instead of the partition since the partition will die) to wait for response, update dstatus
       // Similar to split slot range, update all the values that might be changed during merge in partition.h chain_module.h, hash_table_partition.cpp
       // Finalize slot range split
-      name_ = std::to_string(split_range_begin) + "_" + std::to_string(split_range_end);
-      metadata_ = "regular";        // TODO: metadata set
-       */
+      //name_ = std::to_string(split_range_begin) + "_" + std::to_string(split_range_end); it's no use to set a single partition name since the whole replica chain name needs to be modified
+      //metadata_ = "regular";        // TODO: metadata set no use to set up for a single partition, needs to set up for the whole replica chain
+      // update new metadata of replication chain and partition
       //TODO update partition bytes
-      // TODO two of them share the same subscription map? What about the client map?
-      // TODO update chain_ in chain_module
-      // TODO update pending operations?
       // TODO how to inform the directory server, change the dstatus
 
 
