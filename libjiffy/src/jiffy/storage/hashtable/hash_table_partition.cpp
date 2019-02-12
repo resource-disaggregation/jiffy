@@ -567,6 +567,10 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
 
       // TODO how to modify the status of the new block from importing to regular
 
+      LOG(log_level::info) << "Exported slot range (" << split_range_begin << ", " << split_range_end << ")";
+      splitting_ = false;
+      merging_ = false;
+
     } catch (std::exception &e) {
       splitting_ = false;
       LOG(log_level::warn) << "Split slot range failed: " << e.what();
@@ -586,8 +590,8 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       merging_ = true;
       LOG(log_level::info) << "Requested slot range merge";
 
-      auto split_range_begin = slot_range_.first;
-      auto split_range_end = slot_range_.second;
+      auto merge_range_begin = slot_range_.first;
+      auto merge_range_end = slot_range_.second;
       auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
       // Find the smallest one in the adjacent partition, search through all dstatus
       auto replica_set = fs->dstatus(path()).data_blocks();
@@ -621,8 +625,8 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       auto src = std::make_shared<replica_chain_client>(fs, path_, chain(), 0);
       auto dst = std::make_shared<replica_chain_client>(fs, path_, merge_target, 0);
       bool has_more = true;
-      std::size_t split_batch_size = 1024;
-      std::size_t tot_split_keys = 0;
+      std::size_t merge_batch_size = 1024;
+      std::size_t tot_merge_keys = 0;
       while (has_more) {
         // Lock source and destination blocks
         if (role() == chain_role::singleton) {
@@ -635,13 +639,13 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
           src->recv_response();
           dst->recv_response();
         }
-        // Read data to split
-        std::vector<std::string> split_data;
-        locked_get_data_in_slot_range(split_data,
-                                      split_range_begin,
-                                      split_range_end,
-                                      static_cast<int32_t>(split_batch_size));
-        if (split_data.size() == 0) {
+        // Read data to merge
+        std::vector<std::string> merge_data;
+        locked_get_data_in_slot_range(merge_data,
+                                      merge_range_begin,
+                                      merge_range_end,
+                                      static_cast<int32_t>(merge_batch_size));
+        if (merge_data.size() == 0) {
           if (role() == chain_role::singleton) {
             dst->send_command(hash_table_cmd_id::unlock, {});
             unlock();
@@ -653,34 +657,34 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
             dst->recv_response();
           }
           break;
-        } else if (split_data.size() < split_batch_size) {
+        } else if (merge_data.size() < merge_batch_size) {
           has_more = false;
         }
 
-        auto split_keys = split_data.size() / 2;
-        tot_split_keys += split_keys;
-        LOG(log_level::trace) << "Read " << split_keys << " keys to split";
+        auto merge_keys = merge_data.size() / 2;
+        tot_merge_keys += merge_keys;
+        LOG(log_level::trace) << "Read " << merge_keys << " keys to merge";
 
         // Add redirected argument so that importing chain does not ignore our request
-        split_data.emplace_back("!redirected");
+        merge_data.emplace_back("!redirected");
 
         // Write data to dst partition
-        dst->run_command(hash_table_cmd_id::locked_put, split_data);
-        LOG(log_level::trace) << "Sent " << split_keys << " keys";
+        dst->run_command(hash_table_cmd_id::locked_put, merge_data);
+        LOG(log_level::trace) << "Sent " << merge_keys << " keys";
 
         // Remove data from src partition
         std::vector<std::string> remove_keys;
-        split_data.pop_back(); // Remove !redirected argument
-        std::size_t n_split_items = split_data.size();
-        for (std::size_t i = 0; i < n_split_items; i++) {
+        merge_data.pop_back(); // Remove !redirected argument
+        std::size_t n_merge_items = merge_data.size();
+        for (std::size_t i = 0; i < n_merge_items; i++) {
           if (i % 2) {
-            remove_keys.push_back(split_data.back());
+            remove_keys.push_back(merge_data.back());
           }
-          split_data.pop_back();
+          merge_data.pop_back();
         }
-        assert(remove_keys.size() == split_keys);
+        assert(remove_keys.size() == merge_keys);
         src->run_command(hash_table_cmd_id::locked_remove, remove_keys);
-        LOG(log_level::trace) << "Removed " << remove_keys.size() << " split keys";
+        LOG(log_level::trace) << "Removed " << remove_keys.size() << " merged keys";
 
         // Unlock source and destination blocks
         if (role() == chain_role::singleton) {
@@ -708,6 +712,9 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       //TODO update partition bytes
       // TODO how to inform the directory server, change the dstatus
 
+      LOG(log_level::info) << "Merged slot range (" << merge_range_begin << ", " << merge_range_end << ")";
+      splitting_ = false;
+      merging_ = false;
 
     } catch (std::exception &e) {
       merging_ = false;
