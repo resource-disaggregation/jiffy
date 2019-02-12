@@ -696,6 +696,8 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       }
 
 
+      // Remove the merged block from directory server, need to catch response? there is no return value for this function currently
+      fs->remove_block(path_, name_);
 
       // Inform the directory_server to remove current block, tell the block(instead of the partition since the partition will die) to wait for response, update dstatus
       // Similar to split slot range, update all the values that might be changed during merge in partition.h chain_module.h, hash_table_partition.cpp
