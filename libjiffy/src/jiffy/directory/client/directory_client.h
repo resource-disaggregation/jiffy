@@ -277,9 +277,25 @@ class directory_client : public directory_interface {
    */
 
   void handle_lease_expiry(const std::string &path) override;
+
+  // TODO return status when adding or removing fails
+
+  /**
+   * @brief Add a new replica chain to the path
+   * @param path File path
+   * @param partition_name Partition name
+   * @param partition_metadata Partition metadata
+   * @return The new replica chain structure
+   */
   replica_chain add_block(const std::string &path,
                           const std::string &partition_name,
                           const std::string &partition_metadata) override;
+
+  /**
+   * @brief Remove a replica chain
+   * @param path File path
+   * @param partition_name Partition name to be removed
+   */
   void remove_block(const std::string &path, const std::string &partition_name) override;
 
  private:
