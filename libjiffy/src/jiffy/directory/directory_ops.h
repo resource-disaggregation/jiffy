@@ -321,6 +321,10 @@ struct replica_chain {
     return !(*this == other);
   }
 
+  /**
+   * @brief Fetch slot range from name
+   * @return Slot range pair
+   */
   slot_range fetch_slot_range() const {
     std::string delimiter = "_";
     int32_t slot_begin = atoi(name.substr(0, name.find(delimiter)).c_str());

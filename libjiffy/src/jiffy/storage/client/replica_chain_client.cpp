@@ -95,6 +95,11 @@ std::vector<std::string> replica_chain_client::run_command_redirected(int32_t cm
   return recv_response();
 }
 
+void replica_chain_client::set_chain_name_metadata(std::string &name, std::string &metadata) {
+  chain_.name = name;
+  chain_.metadata = metadata;
+}
+
 std::shared_ptr<replica_chain_client::locked_client> replica_chain_client::lock() {
   return std::make_shared<replica_chain_client::locked_client>(*this);
 }
