@@ -256,26 +256,6 @@ class Iface(object):
         """
         pass
 
-    def request_partition_data_update(self, path, old_partition_name, new_partition_name, partition_metadata):
-        """
-        Parameters:
-         - path
-         - old_partition_name
-         - new_partition_name
-         - partition_metadata
-
-        """
-        pass
-
-    def get_storage_capacity(self, path, partition_name):
-        """
-        Parameters:
-         - path
-         - partition_name
-
-        """
-        pass
-
 
 class Client(Iface):
     def __init__(self, iprot, oprot=None):

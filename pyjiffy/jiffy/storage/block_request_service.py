@@ -247,9 +247,7 @@ class Client(Iface):
     def unsubscribe(self, block_id, ops):
         """
         Parameters:
-         - block_id
-         - ops
-
+                  - ops
         """
         self.send_unsubscribe(block_id, ops)
 
@@ -1286,5 +1284,8 @@ unsubscribe_args.thrift_spec = (
     (2, TType.LIST, 'ops', (TType.STRING, None, False), None, ),  # 2
 )
 fix_spec(all_structs)
+del all_structs
+
+s)
 del all_structs
 

@@ -37,11 +37,11 @@ add_subdirectory(libjiffy)
 
 if (BUILD_DIRECTORY)
   add_subdirectory(directory)
-endif()
+endif ()
 
 if (BUILD_STORAGE)
   add_subdirectory(storage)
-endif()
+endif ()
 
 if (BUILD_PYTHON_CLIENT)
   add_subdirectory(pyjiffy)
@@ -49,6 +49,10 @@ endif ()
 
 if (BUILD_JAVA_CLIENT)
   add_subdirectory(jiffy4j)
+endif ()
+
+if (BUILD_BENCHMARKS)
+  add_subdirectory(benchmark)
 endif ()
 
 if (BUILD_DOC)

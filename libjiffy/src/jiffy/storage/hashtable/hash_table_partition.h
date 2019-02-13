@@ -453,7 +453,6 @@ class hash_table_partition : public chain_module {
 
   void set_exporting(const std::vector<std::string> &target_block, int32_t slot_begin, int32_t slot_end) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    state_ = hash_partition_state::exporting;
     export_target_ = target_block;
     export_target_str_ = "";
     for (const auto &block: target_block) {
