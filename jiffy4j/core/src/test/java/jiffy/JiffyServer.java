@@ -1,17 +1,17 @@
 package jiffy;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransportException;
 
-class MMuxServer {
+import java.io.File;
+import java.io.IOException;
+
+class JiffyServer {
 
   protected Process handle;
   private String executable;
 
-  MMuxServer(String executable) {
+  JiffyServer(String executable) {
     this.executable = executable;
     handle = null;
   }

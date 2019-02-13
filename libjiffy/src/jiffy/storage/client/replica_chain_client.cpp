@@ -1,7 +1,9 @@
 #include <thrift/transport/TTransportException.h>
 #include "replica_chain_client.h"
-#include "../../utils/string_utils.h"
-#include "../../utils/logger.h"
+#include "jiffy/utils/string_utils.h"
+#include "jiffy/utils/logger.h"
+#include "jiffy/storage/command.h"
+#include "jiffy/storage/manager/detail/block_id_parser.h"
 
 namespace jiffy {
 namespace storage {

@@ -1,9 +1,9 @@
-#include "block_listener.h"
-#include "../../utils/logger.h"
-
 #include <thrift/transport/TBufferTransports.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <iostream>
+
+#include "jiffy/storage/client/block_listener.h"
+#include "jiffy/utils/logger.h"
 
 namespace jiffy {
 namespace storage {

@@ -28,35 +28,9 @@ enum hash_partition_state {
   exporting = 2
 };
 
-extern std::vector<command> KV_OPS;
-/**
- * @brief Key value block supported operations
- */
-enum hash_table_cmd_id : int32_t {
-  exists = 0,
-  get = 1,
-  keys = 2, // TODO: We should not support multi-key operations since we do not provide any guarantees
-  num_keys = 3, // TODO: We should not support multi-key operations since we do not provide any guarantees
-  put = 4,
-  remove = 5,
-  update = 6,
-  lock = 7,
-  unlock = 8,
-  locked_data_in_slot_range = 9,
-  locked_get = 10,
-  locked_put = 11,
-  locked_remove = 12,
-  locked_update = 13,
-  upsert = 14,
-  locked_upsert = 15
-};
-
 /* Key value partition structure class, inherited from chain module */
 class hash_table_partition : public chain_module {
  public:
-  /* Slot range max */
-  static const int32_t SLOT_MAX = 65536;
-
   /**
    * @brief Constructor
    * @param conf Configuration properties

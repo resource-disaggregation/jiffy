@@ -25,7 +25,7 @@ find_path(THRIFT_INCLUDE_DIR
         )
 
 # prefer the thrift version supplied in THRIFT_HOME
-find_library(THRIFT_LIBRARIES
+find_library(THRIFT_LIBRARY
         NAMES
         thrift libthrift
         HINTS
@@ -36,22 +36,7 @@ find_library(THRIFT_LIBRARIES
         /opt/local
         /usr
         PATH_SUFFIXES
-        lib lib64
-        )
-
-find_library(THRIFTNB_LIBRARIES
-        NAMES
-        thriftnb libthriftnb
-        HINTS
-        ${THRIFT_HOME}
-        ENV THRIFT_HOME
-        /usr/local/Cellar
-        /usr/local
-        /opt/local
-        /usr
-        PATH_SUFFIXES
-        lib lib64
-        )
+        lib lib64)
 
 find_program(THRIFT_COMPILER
         NAMES
@@ -64,8 +49,7 @@ find_program(THRIFT_COMPILER
         /opt/local
         /usr
         PATH_SUFFIXES
-        bin bin64
-        )
+        bin bin64)
 
 if (THRIFT_COMPILER)
   exec_program(${THRIFT_COMPILER}
@@ -75,5 +59,5 @@ endif ()
 
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(THRIFT DEFAULT_MSG THRIFT_LIBRARIES THRIFT_INCLUDE_DIR THRIFT_COMPILER)
-mark_as_advanced(THRIFT_LIBRARIES THRIFTNB_LIBRARIES THRIFT_INCLUDE_DIR THRIFT_COMPILER THRIFT_VERSION_STRING)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(THRIFT DEFAULT_MSG THRIFT_LIBRARY THRIFT_INCLUDE_DIR THRIFT_COMPILER)
+mark_as_advanced(THRIFT_LIBRARY THRIFT_INCLUDE_DIR THRIFT_COMPILER THRIFT_VERSION_STRING)

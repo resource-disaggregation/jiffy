@@ -37,6 +37,12 @@ class block {
   std::shared_ptr<chain_module> impl();
 
   /**
+   * @brief Checks if the block stores a non-null implementation.
+   * @return True if the block stores a non-null implementation, false otherwise.
+   */
+  explicit operator bool() const noexcept;
+
+  /**
    * @brief Set the underlying partition implementation.
    * @param type The type of the partition.
    * @param conf Configuration parameters for constructing the partition.
@@ -62,6 +68,12 @@ class block {
    * @return
    */
   size_t used() const;
+
+  /**
+   * @brief Checks if the block stores a non-null implementation.
+   * @return True if the block stores a non-null implementation, false otherwise.
+   */
+  bool valid() const;
 
  private:
   std::string id_;

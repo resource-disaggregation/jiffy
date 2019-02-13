@@ -2,8 +2,8 @@
 #define JIFFY_HASH_TABLE_CLIENT_H
 
 #include "jiffy/directory/client/directory_client.h"
-#include "jiffy/utils/client_cache.h"
 #include "jiffy/storage/client/replica_chain_client.h"
+#include "jiffy/utils/client_cache.h"
 
 namespace jiffy {
 namespace storage {
@@ -12,7 +12,7 @@ namespace storage {
  * Redo whenever exception happens */
 class redo_error : public std::exception {
  public:
-  redo_error() {}
+  redo_error() = default;
 };
 
 /* Hash table client */
@@ -32,7 +32,7 @@ class hash_table_client {
      * @param parent Parent client
      */
 
-    locked_client(hash_table_client &parent);
+    explicit locked_client(hash_table_client &parent);
 
     /**
      * @brief Unlock the key value client

@@ -33,6 +33,7 @@ void block::setup(const std::string &type,
 }
 
 void block::destroy() {
+  LOG(log_level::info) << "Destroying partition " << impl_->name() << " on block " << id_;
   impl_.reset();
   impl_ = nullptr;
 }
@@ -43,6 +44,14 @@ size_t block::capacity() const {
 
 size_t block::used() const {
   return manager_.mb_used();
+}
+
+block::operator bool() const noexcept {
+  return impl_ != nullptr;
+}
+
+bool block::valid() const {
+  return impl_ != nullptr;
 }
 
 }

@@ -98,10 +98,6 @@ int main(int argc, char **argv) {
   std::size_t block_capacity = 134217728;
   double blk_thresh_lo = 0.25;
   double blk_thresh_hi = 0.75;
-  bool non_blocking = false;
-  int io_threads = 1;
-  int work_threads = std::thread::hardware_concurrency();
-  int concurrency = std::thread::hardware_concurrency();
   std::string storage_trace = "";
   try {
     namespace po = boost::program_options;
@@ -127,9 +123,6 @@ int main(int argc, char **argv) {
         ("directory.host", po::value<std::string>(&dir_host)->default_value("127.0.0.1"))
         ("directory.service_port", po::value<int>(&dir_port)->default_value(9090))
         ("directory.block_port", po::value<int>(&block_port)->default_value(9092))
-        ("storage.server.non_blocking", po::bool_switch(&non_blocking))
-        ("storage.server.io_threads", po::value<int>(&io_threads)->default_value(1))
-        ("storage.server.work_threads", po::value<int>(&work_threads)->default_value(concurrency))
         ("storage.block.num_blocks", po::value<size_t>(&num_blocks)->default_value(64))
         ("storage.block.capacity", po::value<size_t>(&block_capacity)->default_value(134217728))
         ("storage.block.capacity_threshold_lo", po::value<double>(&blk_thresh_lo)->default_value(0.25))
@@ -187,9 +180,6 @@ int main(int argc, char **argv) {
     LOG(log_level::info) << "storage.management_port: " << mgmt_port;
     LOG(log_level::info) << "storage.notification_port: " << notf_port;
     LOG(log_level::info) << "storage.chain_port: " << chain_port;
-    LOG(log_level::info) << "storage.server.non_blocking: " << non_blocking;
-    LOG(log_level::info) << "storage.server.io_threads: " << io_threads;
-    LOG(log_level::info) << "storage.server.work_threads: " << work_threads;
     LOG(log_level::info) << "storage.block.num_blocks: " << num_blocks;
     LOG(log_level::info) << "storage.block.capacity: " << block_capacity;
     LOG(log_level::info) << "storage.block.capacity_threshold_lo: " << blk_thresh_lo;
@@ -253,7 +243,7 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Advertised " << num_blocks << " to block allocation server";
 
   std::exception_ptr kv_exception = nullptr;
-  auto storage_server = block_server::create(blocks, address, service_port, non_blocking, io_threads, work_threads);
+  auto storage_server = block_server::create(blocks, address, service_port);
   std::thread storage_serve_thread([&kv_exception, &storage_server, &failing_thread, &failure_condition] {
     try {
       storage_server->serve();
@@ -282,7 +272,7 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Notification server listening on " << address << ":" << notf_port;
 
   std::exception_ptr chain_exception = nullptr;
-  auto chain_server = chain_server::create(blocks, address, chain_port, non_blocking, io_threads, work_threads);
+  auto chain_server = chain_server::create(blocks, address, chain_port);
   std::thread chain_serve_thread([&chain_exception, &chain_server, &failing_thread, &failure_condition] {
     try {
       chain_server->serve();

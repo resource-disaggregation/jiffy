@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.12) # 3.12 allows linking object libs
 project(Jiffy C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -34,8 +34,14 @@ if (BUILD_TESTS)
 endif ()
 
 add_subdirectory(libjiffy)
-add_subdirectory(directory)
-add_subdirectory(storage)
+
+if (BUILD_STORAGE)
+  add_subdirectory(directory)
+endif()
+
+if (BUILD_DIRECTORY)
+  add_subdirectory(storage)
+endif()
 
 if (BUILD_PYTHON_CLIENT)
   add_subdirectory(pyjiffy)

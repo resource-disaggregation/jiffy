@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.thrift.TException;
 import org.ini4j.Ini;
 
-public class DirectoryServer extends MMuxServer {
+public class DirectoryServer extends JiffyServer {
 
   protected String host;
   protected int servicePort;

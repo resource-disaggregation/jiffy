@@ -51,6 +51,8 @@ namespace storage {
 /* Hash slot class */
 class hash_slot {
  public:
+  static constexpr uint32_t MAX = 65536;
+
   /* Return hash number from string key */
   static int32_t get(const std::string &key) {
     return crc16(key.c_str(), key.length());

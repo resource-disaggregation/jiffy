@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import org.ini4j.Ini;
 
-public class StorageServer extends MMuxServer {
+public class StorageServer extends JiffyServer {
   private String host;
   private int servicePort;
   private int managementPort;

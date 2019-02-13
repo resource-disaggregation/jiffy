@@ -5,6 +5,7 @@
 #include "jiffy/utils/logger.h"
 #include "jiffy/persistent/persistent_store.h"
 #include "jiffy/storage/partition_manager.h"
+#include "jiffy/storage/hashtable/hash_table_ops.h"
 #include "jiffy/directory/client/directory_client.h"
 #include "jiffy/directory/directory_ops.h"
 #include "jiffy/storage/manager/detail/block_id_parser.h"
@@ -14,25 +15,6 @@ namespace jiffy {
 namespace storage {
 
 using namespace utils;
-
-std::vector<command> KV_OPS = {command{command_type::accessor, "exists"},
-                               command{command_type::accessor, "get"},
-                               command{command_type::accessor, "keys"},
-                               command{command_type::accessor, "num_keys"},
-                               command{command_type::mutator, "put"},
-                               command{command_type::mutator, "remove"},
-                               command{command_type::mutator, "update"},
-                               command{command_type::mutator, "lock"},
-                               command{command_type::mutator, "unlock"},
-                               command{command_type::accessor, "locked_get_data_in_slot_range"},
-                               command{command_type::accessor, "locked_get"},
-                               command{command_type::mutator, "locked_put"},
-                               command{command_type::mutator, "locked_remove"},
-                               command{command_type::mutator, "locked_update"},
-                               command{command_type::mutator, "upsert"},
-                               command{command_type::mutator, "locked_upsert"}};
-
-const int32_t hash_table_partition::SLOT_MAX;
 
 hash_table_partition::hash_table_partition(block_memory_manager *manager,
                                            const std::string &name,
@@ -585,9 +567,8 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
     }
   }
   expected = false;
-  if (auto_scale_.load() && cmd_id == hash_table_cmd_id::remove && underload()
-      && state() != hash_partition_state::exporting
-      && state() != hash_partition_state::importing && slot_end() != SLOT_MAX && is_tail() && !locked_block_.is_active()
+  if (auto_scale_.load() && cmd_id == hash_table_cmd_id::remove && underload() && state() != hash_partition_state::exporting
+      && state() != hash_partition_state::importing && slot_end() != hash_slot::MAX && is_tail() && !locked_block_.is_active()
       && merging_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
     LOG(log_level::info) << "Underloaded partition; storage = " << bytes_.load() << " capacity = "

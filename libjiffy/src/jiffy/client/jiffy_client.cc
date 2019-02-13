@@ -1,4 +1,5 @@
-#include "jiffy_client.h"
+#include "jiffy/client/jiffy_client.h"
+#include "jiffy/storage/hashtable/hash_slot.h"
 
 namespace jiffy {
 namespace client {
@@ -37,12 +38,12 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::create_hash_table(cons
                                                                                            std::string> &tags) {
   std::vector<std::string> block_names;
   std::vector<std::string> block_metadata;
-  int32_t slot_range = storage::hash_table_partition::SLOT_MAX / num_blocks;
+  int32_t slot_range = storage::hash_slot::MAX / num_blocks;
   for (int32_t i = 0; i < num_blocks; ++i) {
     int32_t begin = i * slot_range;
-    int32_t end = (i == num_blocks - 1) ? storage::hash_table_partition::SLOT_MAX : (i + 1) * slot_range;
+    int32_t end = (i == num_blocks - 1) ? storage::hash_slot::MAX : (i + 1) * slot_range;
     block_names.push_back(std::to_string(begin) + "_" + std::to_string(end));
-    block_metadata.push_back("regular");
+    block_metadata.emplace_back("regular");
   }
   auto s = fs_->create(path, "hashtable", backing_path, num_blocks, chain_length, flags, permissions, block_names,
                        block_metadata, tags);
@@ -66,12 +67,12 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::open_or_create_hash_ta
                                                                                                    std::string> &tags) {
   std::vector<std::string> block_names;
   std::vector<std::string> block_metadata;
-  int32_t slot_range = storage::hash_table_partition::SLOT_MAX / num_blocks;
+  int32_t slot_range = storage::hash_slot::MAX / num_blocks;
   for (int32_t i = 0; i < num_blocks; ++i) {
     int32_t begin = i * slot_range;
-    int32_t end = (i == num_blocks - 1) ? storage::hash_table_partition::SLOT_MAX : (i + 1) * slot_range;
+    int32_t end = (i == num_blocks - 1) ? storage::hash_slot::MAX : (i + 1) * slot_range;
     block_names.push_back(std::to_string(begin) + "_" + std::to_string(end));
-    block_metadata.push_back("regular");
+    block_metadata.emplace_back("regular");
   }
   auto s = fs_->open_or_create(path, "hashtable", backing_path, num_blocks, chain_length, flags, permissions,
                                block_names, block_metadata, tags);

@@ -2,8 +2,10 @@
 
 from setuptools import setup
 import os
+import datetime
 
-jiffy_version = os.getenv('JIFFY_VERSION', 'unstable')
+now = datetime.datetime.now()
+jiffy_version = os.getenv('JIFFY_VERSION', str(now.year) + '.' + str(now.month))
 thrift_version = os.getenv('THRIFT_VERSION', '0.11.0')
 
 setup(name='pyjiffy',
