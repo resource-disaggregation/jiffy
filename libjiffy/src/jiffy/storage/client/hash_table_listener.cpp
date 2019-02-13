@@ -14,7 +14,7 @@ hash_table_listener::hash_table_listener(const std::string &path, const director
   for (const auto &block: status_.data_blocks()) {
     auto t = block_id_parser::parse(block.block_ids.back());
     block_ids_.push_back(t.id);
-    listeners_.push_back(std::make_shared<block_listener>(t.host, t.notification_port, controls_));
+    listeners_.push_back(std::make_shared<block_listener>(t.host, t.service_port, controls_));
     worker_.add_protocol(listeners_.back()->protocol());
   }
   worker_.start();

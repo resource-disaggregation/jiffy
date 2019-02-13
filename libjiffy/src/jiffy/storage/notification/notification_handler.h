@@ -3,7 +3,7 @@
 
 #include <string>
 #include <atomic>
-#include "subscription_service.h"
+#include "jiffy/storage/service/block_response_service.h"
 #include "blocking_queue.h"
 
 namespace jiffy {
@@ -11,7 +11,7 @@ namespace storage {
 
 /* Notification handler class
  * Inherited from subscription_serviceIf */
-class notification_handler : public subscription_serviceIf {
+class notification_handler : public block_response_serviceIf {
  public:
   typedef blocking_queue<std::pair<std::string, std::string>> mailbox_t;
 
@@ -28,7 +28,6 @@ class notification_handler : public subscription_serviceIf {
    * @param op Operation
    * @param data Data
    */
-
   void notification(const std::string &op, const std::string &data) override;
 
   /**
@@ -37,8 +36,11 @@ class notification_handler : public subscription_serviceIf {
    * @param ops Operations
    * @param msg Message
    */
-
   void control(response_type type, const std::vector<std::string> &ops, const std::string &msg) override;
+
+  // Unsupported operations
+  void response(const sequence_id &seq, const std::vector<std::string> &result) override;
+  void chain_ack(const sequence_id &seq) override;
 
  private:
   /* Notification mailbox

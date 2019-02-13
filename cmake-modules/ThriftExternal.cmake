@@ -6,7 +6,7 @@
 #  - THRIFT_INCLUDE_DIR
 #  - THRIFT_LIBRARY
 
-set(THRIFT_VERSION "0.11.0")
+set(THRIFT_VERSION "0.12.0")
 set(THRIFT_BUILD ON)
 
 if (DEFINED ENV{THRIFT_ROOT} AND EXISTS $ENV{THRIFT_ROOT})
@@ -35,7 +35,7 @@ if (THRIFT_BUILD)
           "-DWITH_QT5=OFF"
           "-DWITH_C_GLIB=OFF"
           "-DWITH_HASKELL=OFF"
-          "-DWITH_LIBEVENT=OFF"
+          "-DWITH_LIBEVENT=ON"
           "-DWITH_ZLIB=OFF"
           "-DWITH_JAVA=OFF"
           "-DWITH_PYTHON=OFF"
@@ -43,17 +43,24 @@ if (THRIFT_BUILD)
           "-DWITH_STDTHREADS=OFF"
           "-DWITH_BOOSTTHREADS=OFF"
           "-DWITH_STATIC_LIB=ON"
-          "-DCMAKE_PREFIX_PATH=${OPENSSL_HOME}|${Boost_HOME}")
+          "-DCMAKE_PREFIX_PATH=${OPENSSL_HOME}|${Boost_HOME}|${LIBEVENT_HOME}")
 
   set(THRIFT_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}thrift")
   if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     set(THRIFT_STATIC_LIB_NAME "${THRIFT_STATIC_LIB_NAME}d")
   endif ()
   set(THRIFT_LIBRARY "${THRIFT_PREFIX}/lib/${THRIFT_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  set(THRIFT_COMPILER "${THRIFT_PREFIX}/bin/thrift")
+  set(THRIFTNB_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}thriftnb")
+  if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    set(THRIFTNB_STATIC_LIB_NAME "${THRIFTNB_STATIC_LIB_NAME}d")
+  endif ()
+  set(THRIFTNB_LIBRARY "${THRIFT_PREFIX}/lib/${THRIFTNB_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  if (GENERATE_THRIFT)
+    set(THRIFT_COMPILER "${THRIFT_PREFIX}/bin/thrift")
+  endif ()
   ExternalProject_Add(thrift_ep
           URL "http://archive.apache.org/dist/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
-          DEPENDS boost_ep openssl_ep
+          DEPENDS boost_ep openssl_ep libevent_ep
           CMAKE_ARGS ${THRIFT_CMAKE_ARGS}
           LIST_SEPARATOR |
           LOG_DOWNLOAD ON

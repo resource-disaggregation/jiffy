@@ -22,14 +22,23 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_FIND_LIBR
 # Threads
 find_package(Threads REQUIRED)
 
-# Boost
+# Boost (program_options; headers required for Thrift)
 include(BoostExternal)
 
-# OpenSSL
+# OpenSSL (Required for AWS SDK, Apache Thrift)
 include(OpenSSLExternal)
+
+# Curl (required for AWS SDK)
+include(CurlExternal)
+
+# Zlib (required for AWS SDK)
+include(ZlibExternal)
 
 # AWS SDK
 include(AwsSDKExternal)
+
+# Libevent (Required for thrift)
+include(LibeventExternal)
 
 # Apache Thrift
 include(ThriftExternal)

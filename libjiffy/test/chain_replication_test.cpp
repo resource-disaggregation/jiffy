@@ -4,7 +4,6 @@
 #include "jiffy/storage/service/block_server.h"
 #include "jiffy/storage/manager/storage_manager.h"
 #include "jiffy/directory/fs/directory_server.h"
-#include "jiffy/storage/service/chain_server.h"
 #include "jiffy/storage/client/replica_chain_client.h"
 
 #define HOST "127.0.0.1"
@@ -30,9 +29,7 @@ TEST_CASE("chain_replication_no_failure_test", "[put][get]") {
   for (int32_t i = 0; i < NUM_BLOCKS; i++) {
     block_names[i] = test_utils::init_block_names(1,
                                                   STORAGE_SERVICE_PORT_N(i),
-                                                  STORAGE_MANAGEMENT_PORT_N(i),
-                                                  0,
-                                                  STORAGE_CHAIN_PORT_N(i));
+                                                  STORAGE_MANAGEMENT_PORT_N(i));
     alloc->add_blocks(block_names[i]);
     blocks[i] = test_utils::init_hash_table_blocks(block_names[i]);
 
@@ -40,11 +37,11 @@ TEST_CASE("chain_replication_no_failure_test", "[put][get]") {
     server_threads.emplace_back([i, &management_servers] { management_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT_N(i));
 
-    chain_servers[i] = chain_server::create(blocks[i], HOST, STORAGE_CHAIN_PORT_N(i));
+    chain_servers[i] = block_server::create(blocks[i], STORAGE_CHAIN_PORT_N(i));
     server_threads.emplace_back([i, &chain_servers] { chain_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT_N(i));
 
-    storage_servers[i] = block_server::create(blocks[i], HOST, STORAGE_SERVICE_PORT_N(i));
+    storage_servers[i] = block_server::create(blocks[i], STORAGE_SERVICE_PORT_N(i));
     server_threads.emplace_back([i, &storage_servers] { storage_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT_N(i));
   }
@@ -111,9 +108,7 @@ TEST_CASE("chain_replication_head_failure_test", "[put][get]") {
   for (int32_t i = 0; i < NUM_BLOCKS; i++) {
     block_names[i] = test_utils::init_block_names(1,
                                                   STORAGE_SERVICE_PORT_N(i),
-                                                  STORAGE_MANAGEMENT_PORT_N(i),
-                                                  0,
-                                                  STORAGE_CHAIN_PORT_N(i));
+                                                  STORAGE_MANAGEMENT_PORT_N(i));
     alloc->add_blocks(block_names[i]);
     blocks[i] = test_utils::init_hash_table_blocks(block_names[i]);
 
@@ -121,11 +116,11 @@ TEST_CASE("chain_replication_head_failure_test", "[put][get]") {
     server_threads.emplace_back([i, &management_servers] { management_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT_N(i));
 
-    chain_servers[i] = chain_server::create(blocks[i], HOST, STORAGE_CHAIN_PORT_N(i));
+    chain_servers[i] = block_server::create(blocks[i], STORAGE_CHAIN_PORT_N(i));
     server_threads.emplace_back([i, &chain_servers] { chain_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT_N(i));
 
-    storage_servers[i] = block_server::create(blocks[i], HOST, STORAGE_SERVICE_PORT_N(i));
+    storage_servers[i] = block_server::create(blocks[i], STORAGE_SERVICE_PORT_N(i));
     server_threads.emplace_back([i, &storage_servers] { storage_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT_N(i));
   }
@@ -202,9 +197,7 @@ TEST_CASE("chain_replication_mid_failure_test", "[put][get]") {
   for (int32_t i = 0; i < NUM_BLOCKS; i++) {
     block_names[i] = test_utils::init_block_names(1,
                                                   STORAGE_SERVICE_PORT_N(i),
-                                                  STORAGE_MANAGEMENT_PORT_N(i),
-                                                  0,
-                                                  STORAGE_CHAIN_PORT_N(i));
+                                                  STORAGE_MANAGEMENT_PORT_N(i));
     alloc->add_blocks(block_names[i]);
     blocks[i] = test_utils::init_hash_table_blocks(block_names[i]);
 
@@ -212,11 +205,11 @@ TEST_CASE("chain_replication_mid_failure_test", "[put][get]") {
     server_threads.emplace_back([i, &management_servers] { management_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT_N(i));
 
-    chain_servers[i] = chain_server::create(blocks[i], HOST, STORAGE_CHAIN_PORT_N(i));
+    chain_servers[i] = block_server::create(blocks[i], STORAGE_CHAIN_PORT_N(i));
     server_threads.emplace_back([i, &chain_servers] { chain_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT_N(i));
 
-    storage_servers[i] = block_server::create(blocks[i], HOST, STORAGE_SERVICE_PORT_N(i));
+    storage_servers[i] = block_server::create(blocks[i], STORAGE_SERVICE_PORT_N(i));
     server_threads.emplace_back([i, &storage_servers] { storage_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT_N(i));
   }
@@ -293,9 +286,7 @@ TEST_CASE("chain_replication_tail_failure_test", "[put][get]") {
   for (int32_t i = 0; i < NUM_BLOCKS; i++) {
     block_names[i] = test_utils::init_block_names(1,
                                                   STORAGE_SERVICE_PORT_N(i),
-                                                  STORAGE_MANAGEMENT_PORT_N(i),
-                                                  0,
-                                                  STORAGE_CHAIN_PORT_N(i));
+                                                  STORAGE_MANAGEMENT_PORT_N(i));
     alloc->add_blocks(block_names[i]);
     blocks[i] = test_utils::init_hash_table_blocks(block_names[i]);
 
@@ -303,11 +294,11 @@ TEST_CASE("chain_replication_tail_failure_test", "[put][get]") {
     server_threads.emplace_back([i, &management_servers] { management_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT_N(i));
 
-    chain_servers[i] = chain_server::create(blocks[i], HOST, STORAGE_CHAIN_PORT_N(i));
+    chain_servers[i] = block_server::create(blocks[i], STORAGE_CHAIN_PORT_N(i));
     server_threads.emplace_back([i, &chain_servers] { chain_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT_N(i));
 
-    storage_servers[i] = block_server::create(blocks[i], HOST, STORAGE_SERVICE_PORT_N(i));
+    storage_servers[i] = block_server::create(blocks[i], STORAGE_SERVICE_PORT_N(i));
     server_threads.emplace_back([i, &storage_servers] { storage_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT_N(i));
   }
@@ -384,9 +375,7 @@ TEST_CASE("chain_replication_add_block_test", "[put][get]") {
   for (int32_t i = 0; i < NUM_BLOCKS; i++) {
     block_names[i] = test_utils::init_block_names(1,
                                                   STORAGE_SERVICE_PORT_N(i),
-                                                  STORAGE_MANAGEMENT_PORT_N(i),
-                                                  0,
-                                                  STORAGE_CHAIN_PORT_N(i));
+                                                  STORAGE_MANAGEMENT_PORT_N(i));
     alloc->add_blocks(block_names[i]);
     blocks[i] = test_utils::init_hash_table_blocks(block_names[i]);
 
@@ -394,11 +383,11 @@ TEST_CASE("chain_replication_add_block_test", "[put][get]") {
     server_threads.emplace_back([i, &management_servers] { management_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT_N(i));
 
-    chain_servers[i] = chain_server::create(blocks[i], HOST, STORAGE_CHAIN_PORT_N(i));
+    chain_servers[i] = block_server::create(blocks[i], STORAGE_CHAIN_PORT_N(i));
     server_threads.emplace_back([i, &chain_servers] { chain_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT_N(i));
 
-    storage_servers[i] = block_server::create(blocks[i], HOST, STORAGE_SERVICE_PORT_N(i));
+    storage_servers[i] = block_server::create(blocks[i], STORAGE_SERVICE_PORT_N(i));
     server_threads.emplace_back([i, &storage_servers] { storage_servers[i]->serve(); });
     test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT_N(i));
   }

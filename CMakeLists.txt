@@ -35,11 +35,11 @@ endif ()
 
 add_subdirectory(libjiffy)
 
-if (BUILD_STORAGE)
+if (BUILD_DIRECTORY)
   add_subdirectory(directory)
 endif()
 
-if (BUILD_DIRECTORY)
+if (BUILD_STORAGE)
   add_subdirectory(storage)
 endif()
 

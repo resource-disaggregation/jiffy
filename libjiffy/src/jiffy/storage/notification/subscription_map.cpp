@@ -7,7 +7,7 @@ namespace storage {
 subscription_map::subscription_map() = default;
 
 void subscription_map::add_subscriptions(const std::vector<std::string> &ops,
-                                         std::shared_ptr<subscription_serviceClient> client) {
+                                         std::shared_ptr<notification_response_client> client) {
   std::lock_guard<std::mutex> lock{mtx_};
   for (const auto &op: ops)
     subs_[op].insert(client);
@@ -15,7 +15,7 @@ void subscription_map::add_subscriptions(const std::vector<std::string> &ops,
 }
 
 void subscription_map::remove_subscriptions(const std::vector<std::string> &ops,
-                                            std::shared_ptr<subscription_serviceClient> client,
+                                            std::shared_ptr<notification_response_client> client,
                                             bool inform) {
   std::lock_guard<std::mutex> lock{mtx_};
   for (const auto &op: ops) {

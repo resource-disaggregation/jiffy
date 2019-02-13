@@ -71,6 +71,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/directory/directory_ops.h
           src/jiffy/directory/directory_ops.cpp
           src/jiffy/storage/partition.h
+          src/jiffy/storage/partition.cpp
           src/jiffy/storage/partition_manager.h
           src/jiffy/storage/partition_manager.cpp
           src/jiffy/storage/chain_module.h
@@ -105,14 +106,10 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/client/hash_table_listener.h
           src/jiffy/storage/service/block_request_handler.cpp
           src/jiffy/storage/service/block_request_handler.h
-          src/jiffy/storage/service/chain_request_handler_factory.cpp
-          src/jiffy/storage/service/chain_request_handler_factory.h
-          src/jiffy/storage/service/chain_request_handler.cpp
-          src/jiffy/storage/service/chain_request_handler.h
-          src/jiffy/storage/service/chain_request_client.cpp
-          src/jiffy/storage/service/chain_request_client.h
-          src/jiffy/storage/service/chain_response_client.cpp
-          src/jiffy/storage/service/chain_response_client.h
+          src/jiffy/storage/chain/chain_request_client.cpp
+          src/jiffy/storage/chain/chain_request_client.h
+          src/jiffy/storage/chain/chain_response_client.cpp
+          src/jiffy/storage/chain/chain_response_client.h
           src/jiffy/storage/service/block_response_client_map.cpp
           src/jiffy/storage/service/block_response_client_map.h
           src/jiffy/storage/service/block_request_handler_factory.cpp
@@ -128,18 +125,6 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/service/block_service_types.cpp
           src/jiffy/storage/service/block_service_types.h
           src/jiffy/storage/service/block_service_types.tcc
-          src/jiffy/storage/service/chain_request_service.cpp
-          src/jiffy/storage/service/chain_request_service.h
-          src/jiffy/storage/service/chain_request_service.tcc
-          src/jiffy/storage/service/chain_response_service.cpp
-          src/jiffy/storage/service/chain_response_service.h
-          src/jiffy/storage/service/chain_response_service.tcc
-          src/jiffy/storage/service/chain_server.cpp
-          src/jiffy/storage/service/chain_server.h
-          src/jiffy/storage/partition.cpp
-          src/jiffy/storage/service/server_storage_tracker.cpp
-          src/jiffy/storage/service/server_storage_tracker.h
-          src/jiffy/storage/service/buffered_transport_factory.h
           src/jiffy/storage/manager/detail/block_id_parser.cpp
           src/jiffy/storage/manager/detail/block_id_parser.h
           src/jiffy/storage/manager/storage_management_client.cpp
@@ -163,32 +148,10 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/notification/blocking_queue.h
           src/jiffy/storage/notification/notification_handler.cpp
           src/jiffy/storage/notification/notification_handler.h
-          src/jiffy/storage/notification/notification_server.cpp
-          src/jiffy/storage/notification/notification_server.h
-          src/jiffy/storage/notification/notification_service.cpp
-          src/jiffy/storage/notification/notification_service.h
-          src/jiffy/storage/notification/notification_service.tcc
-          src/jiffy/storage/notification/notification_service_constants.cpp
-          src/jiffy/storage/notification/notification_service_constants.h
-          src/jiffy/storage/notification/notification_service_factory.cpp
-          src/jiffy/storage/notification/notification_service_factory.h
-          src/jiffy/storage/notification/notification_service_handler.cpp
-          src/jiffy/storage/notification/notification_service_handler.h
-          src/jiffy/storage/notification/notification_service_types.cpp
-          src/jiffy/storage/notification/notification_service_types.h
-          src/jiffy/storage/notification/notification_service_types.tcc
           src/jiffy/storage/notification/notification_worker.cpp
           src/jiffy/storage/notification/notification_worker.h
           src/jiffy/storage/notification/subscription_map.cpp
           src/jiffy/storage/notification/subscription_map.h
-          src/jiffy/storage/notification/subscription_service.cpp
-          src/jiffy/storage/notification/subscription_service.h
-          src/jiffy/storage/notification/subscription_service.tcc
-          src/jiffy/storage/notification/subscription_service_constants.cpp
-          src/jiffy/storage/notification/subscription_service_constants.h
-          src/jiffy/storage/notification/subscription_service_types.cpp
-          src/jiffy/storage/notification/subscription_service_types.h
-          src/jiffy/storage/notification/subscription_service_types.tcc
           src/jiffy/storage/storage_management_ops.h
           src/jiffy/persistent/local/local_store.cpp
           src/jiffy/persistent/local/local_store.h
@@ -220,10 +183,12 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/directory/fs/ds_file_node.cpp
           src/jiffy/directory/fs/ds_file_node.h
           src/jiffy/directory/fs/ds_dir_node.cpp
-          src/jiffy/directory/fs/ds_dir_node.h)
+          src/jiffy/directory/fs/ds_dir_node.h src/jiffy/storage/notification/notification_response_client.cpp src/jiffy/storage/notification/notification_response_client.h)
 
   add_dependencies(jiffy thrift_ep awssdk_ep jemalloc_ep)
   target_link_libraries(jiffy ${THRIFT_LIBRARY}
+          ${THRIFTNB_LIBRARY}
+          ${LIBEVENT_LIBRARY}
           ${AWSSDK_LINK_LIBRARIES}
           ${JEMALLOC_LIBRARY}
           ${CMAKE_DL_LIBS}
@@ -329,24 +294,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/notification/blocking_queue.h
           src/jiffy/storage/notification/notification_handler.cpp
           src/jiffy/storage/notification/notification_handler.h
-          src/jiffy/storage/notification/notification_service.cpp
-          src/jiffy/storage/notification/notification_service.h
-          src/jiffy/storage/notification/notification_service.tcc
-          src/jiffy/storage/notification/notification_service_constants.cpp
-          src/jiffy/storage/notification/notification_service_constants.h
-          src/jiffy/storage/notification/notification_service_types.cpp
-          src/jiffy/storage/notification/notification_service_types.h
-          src/jiffy/storage/notification/notification_service_types.tcc
           src/jiffy/storage/notification/notification_worker.cpp
           src/jiffy/storage/notification/notification_worker.h
-          src/jiffy/storage/notification/subscription_service.cpp
-          src/jiffy/storage/notification/subscription_service.h
-          src/jiffy/storage/notification/subscription_service.tcc
-          src/jiffy/storage/notification/subscription_service_constants.cpp
-          src/jiffy/storage/notification/subscription_service_constants.h
-          src/jiffy/storage/notification/subscription_service_types.cpp
-          src/jiffy/storage/notification/subscription_service_types.h
-          src/jiffy/storage/notification/subscription_service_types.tcc
           src/jiffy/utils/client_cache.h
           src/jiffy/utils/cmd_parse.h
           src/jiffy/utils/directory_utils.h
@@ -362,6 +311,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/utils/property_map.h)
   add_dependencies(jiffy_client thrift_ep)
   target_link_libraries(jiffy_client ${THRIFT_LIBRARY}
+          ${THRIFTNB_LIBRARY}
+          ${LIBEVENT_LIBRARY}
           ${CMAKE_DL_LIBS}
           ${CMAKE_THREAD_LIBS_INIT})
   set_target_properties(jiffy_client PROPERTIES LINKER_LANGUAGE CXX)

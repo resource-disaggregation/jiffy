@@ -17,5 +17,29 @@ block_response_service_response_args::~block_response_service_response_args() th
 block_response_service_response_pargs::~block_response_service_response_pargs() throw() {
 }
 
+
+block_response_service_chain_ack_args::~block_response_service_chain_ack_args() throw() {
+}
+
+
+block_response_service_chain_ack_pargs::~block_response_service_chain_ack_pargs() throw() {
+}
+
+
+block_response_service_notification_args::~block_response_service_notification_args() throw() {
+}
+
+
+block_response_service_notification_pargs::~block_response_service_notification_pargs() throw() {
+}
+
+
+block_response_service_control_args::~block_response_service_control_args() throw() {
+}
+
+
+block_response_service_control_pargs::~block_response_service_control_pargs() throw() {
+}
+
 }} // namespace
 

@@ -31,7 +31,7 @@ public class BlockClient {
       this.protocol = protocol;
     }
 
-    CommandResponse recieveResponse() throws TException {
+    CommandResponse receiveResponse() throws TException {
       TMessage message = protocol.readMessageBegin();
       if (message.type == TMessageType.EXCEPTION) {
         TApplicationException exception = new TApplicationException();

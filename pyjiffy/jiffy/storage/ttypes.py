@@ -15,6 +15,21 @@ from thrift.transport import TTransport
 all_structs = []
 
 
+class response_type(object):
+    subscribe = 0
+    unsubscribe = 1
+
+    _VALUES_TO_NAMES = {
+        0: "subscribe",
+        1: "unsubscribe",
+    }
+
+    _NAMES_TO_VALUES = {
+        "subscribe": 0,
+        "unsubscribe": 1,
+    }
+
+
 class block_exception(TException):
     """
     Attributes:

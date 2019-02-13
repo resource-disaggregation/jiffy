@@ -3,7 +3,7 @@
 
 #include <atomic>
 #include <thrift/protocol/TProtocol.h>
-#include "subscription_service.h"
+#include "jiffy/storage/service/block_response_service.h"
 #include "blocking_queue.h"
 
 namespace jiffy {
@@ -12,7 +12,7 @@ namespace storage {
 /* Notification worker class */
 class notification_worker {
  public:
-  typedef subscription_serviceProcessor processor_t;
+  typedef block_response_serviceProcessor processor_t;
   typedef std::shared_ptr<processor_t> processor_ptr_t;
   typedef std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_ptr_t;
   typedef blocking_queue<std::pair<std::string, std::string>> mailbox_t;

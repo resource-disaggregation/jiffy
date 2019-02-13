@@ -20,6 +20,15 @@
 
 namespace jiffy { namespace storage {
 
+enum response_type {
+  subscribe = 0,
+  unsubscribe = 1
+};
+
+extern const std::map<int, const char*> _response_type_VALUES_TO_NAMES;
+
+std::ostream& operator<<(std::ostream& out, const response_type val);
+
 class block_exception;
 
 class chain_failure_exception;

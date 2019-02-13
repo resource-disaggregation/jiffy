@@ -3,7 +3,7 @@
 
 #include <thrift/transport/TSocket.h>
 #include "storage_management_service.h"
-#include "../chain_module.h"
+#include "jiffy/storage/chain_module.h"
 
 namespace jiffy {
 namespace storage {

@@ -9,14 +9,13 @@
 #include <vector>
 #include <libcuckoo/cuckoohash_map.hh>
 #include <shared_mutex>
-#include "client/block_client.h"
+#include "jiffy/storage/client/block_client.h"
 #include "jiffy/storage/manager/detail/block_id_parser.h"
-#include "partition.h"
-#include "service/chain_request_service.h"
-#include "service/chain_request_client.h"
-#include "service/chain_response_client.h"
-#include "notification/subscription_map.h"
-#include "service/block_response_client_map.h"
+#include "jiffy/storage/partition.h"
+#include "jiffy/storage/chain/chain_request_client.h"
+#include "jiffy/storage/chain/chain_response_client.h"
+#include "jiffy/storage/notification/subscription_map.h"
+#include "jiffy/storage/service/block_response_client_map.h"
 
 namespace jiffy {
 namespace storage {
@@ -84,7 +83,7 @@ class next_chain_module_cxn {
     if (block_name != "nil") {
       auto bid = block_id_parser::parse(block_name);
       auto host = bid.host;
-      auto port = bid.chain_port;
+      auto port = bid.service_port;
       auto block_id = bid.id;
       client_.connect(host, port, block_id);
     }
@@ -176,7 +175,7 @@ class chain_module : public partition {
  public:
   /* Class chain response handler
    * Inherited from chain response serviceIf class */
-  class chain_response_handler : public chain_response_serviceIf {
+  class chain_response_handler : public block_response_serviceIf {
    public:
     /**
      * @brief Constructor
@@ -192,6 +191,21 @@ class chain_module : public partition {
 
     void chain_ack(const sequence_id &seq) override {
       module_->ack(seq);
+    }
+
+    /**
+     * @brief Send response
+     * @param seq Operation sequence identifier
+     * @param result Output response.
+     */
+    void response(const sequence_id &, const std::vector<std::string> &) override {
+      throw std::logic_error("Chain handler does not support query responses.");
+    }
+    void notification(const std::string &, const std::string &) override {
+      throw std::logic_error("Chain handler does not support notification responses.");
+    }
+    void control(const response_type, const std::vector<std::string> &, const std::string &) override {
+      throw std::logic_error("Chain handler does not support control responses.");
     }
 
    private:

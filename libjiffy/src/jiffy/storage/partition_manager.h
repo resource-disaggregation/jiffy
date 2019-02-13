@@ -2,7 +2,7 @@
 #define JIFFY_PARTITION_MANAGER_H
 
 #include "jiffy/utils/property_map.h"
-#include "jiffy/storage/chain_module.h"
+#include "chain_module.h"
 
 namespace jiffy {
 namespace storage {

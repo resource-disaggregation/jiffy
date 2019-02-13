@@ -5,15 +5,17 @@ import java.nio.ByteBuffer;
 class JiffyBlock {
   private static final int METADATA_OFFSET = 0;
 
+  private ByteBuffer ref;
   private ByteBuffer data;
 
   JiffyBlock(long blockSize) {
-    data = ByteBuffer.allocate((int) (blockSize + Integer.BYTES));
+    ref = data = ByteBuffer.allocate((int) (blockSize + Integer.BYTES));
     data.putInt(0);
   }
 
   JiffyBlock(ByteBuffer buf) {
-    data = buf;
+    ref = buf;
+    data = ref.slice();
     data.position(Integer.BYTES);
   }
 
@@ -30,7 +32,8 @@ class JiffyBlock {
   }
 
   void setData(ByteBuffer buf) {
-    data = buf;
+    ref = buf;
+    data = ref.slice();
     data.position(Integer.BYTES);
   }
 
