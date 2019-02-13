@@ -179,6 +179,14 @@ class replica_chain_client {
    */
 
   std::vector<std::string> run_command_redirected(int32_t cmd_id, const std::vector<std::string> &args);
+
+  /**
+   * @brief Set replica chain name and metadata
+   * @param name Replica chain name
+   * @param metadata Replica chain metadata
+   */
+  void set_chain_name_metadata(std::string &name, std::string &metadata);
+
  private:
 
   /**

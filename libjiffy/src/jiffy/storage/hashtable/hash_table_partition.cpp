@@ -6,6 +6,10 @@
 #include "jiffy/persistent/persistent_store.h"
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/storage/hashtable/hash_table_ops.h"
+#include "jiffy/directory/client/directory_client.h"
+#include "jiffy/directory/directory_ops.h"
+#include "jiffy/storage/manager/detail/block_id_parser.h"
+#include "jiffy/storage/manager/storage_management_client.h"
 
 namespace jiffy {
 namespace storage {
@@ -15,7 +19,9 @@ using namespace utils;
 hash_table_partition::hash_table_partition(block_memory_manager *manager,
                                            const std::string &name,
                                            const std::string &metadata,
-                                           const utils::property_map &conf)
+                                           const utils::property_map &conf,
+                                           const std::string &directory_host,
+                                           const int directory_port)
     : chain_module(manager, name, metadata, KV_OPS),
       block_(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type(), build_allocator<kv_pair_type>()),
       locked_block_(block_.lock_table()),
@@ -25,7 +31,9 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
       state_(hash_partition_state::regular),
       slot_range_(0, -1),
       export_slot_range_(0, -1),
-      import_slot_range_(0, -1) {
+      import_slot_range_(0, -1),
+      directory_host_(directory_host),
+      directory_port_(directory_port) {
   locked_block_.unlock();
   auto ser = conf.get("hashtable.serializer", "csv");
   if (ser == "binary") {
@@ -439,12 +447,120 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       && state() != hash_partition_state::importing && is_tail() && !locked_block_.is_active()
       && splitting_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
-    LOG(log_level::info) << "Overloaded partition; storage = " << bytes_.load() << " capacity = " << manager_->mb_capacity()
+    LOG(log_level::info) << "Overloaded partition; storage = " << bytes_.load() << " capacity = "
+                         << manager_->mb_capacity()
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
       // TODO: Add logic for splitting slot range
-      splitting_ = false;
+      // TODO: currently the split and merge use similar logic but using redundant coding, should combine them after passing all the test
+      splitting_ = true;
       LOG(log_level::info) << "Requested slot range split";
+      // Setup slot range split
+      //TODO will there be a situation when
+      auto split_range_begin = (slot_range_.first + slot_range_.second) / 2 + 1;
+      auto split_range_end = slot_range_.second;
+      std::string new_partition_name = std::to_string(split_range_begin) + "_" + std::to_string(split_range_end);
+      auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
+      auto dst_replica_chain =
+          fs->add_block(path_, new_partition_name, "importing");
+      // TODO check if add_block succeed, might not be enough capacity in extreme situation
+      auto src = std::make_shared<replica_chain_client>(fs, path_, chain(), 0);
+      auto dst = std::make_shared<replica_chain_client>(fs, path_, dst_replica_chain, 0);
+
+      // set the partition state to be exporting and importing
+      set_exporting(dst_replica_chain.block_ids, split_range_begin, split_range_end);
+      for (auto &block_id : chain()) {
+        auto bid = block_id_parser::parse(block_id);
+        storage_management_client client(bid.host, bid.management_port);
+        //LOG(log_level::trace) << "Setting "
+        //set_importing(dst.chain().block_ids, split_range_end + 1. slot_range_.second); Need a way to set importing for the destination chain state
+      }
+
+      bool has_more = true;
+      std::size_t split_batch_size = 1024;
+      std::size_t tot_split_keys = 0;
+      while (has_more) {
+        // Lock source and destination blocks
+        if (role() == chain_role::singleton) {
+          dst->send_command(hash_table_cmd_id::lock, {});
+          lock();
+          dst->recv_response();
+        } else {
+          src->send_command(hash_table_cmd_id::lock, {});
+          dst->send_command(hash_table_cmd_id::lock, {});
+          src->recv_response();
+          dst->recv_response();
+        }
+        // Read data to split
+        std::vector<std::string> split_data;
+        locked_get_data_in_slot_range(split_data,
+                                      split_range_begin,
+                                      split_range_end,
+                                      static_cast<int32_t>(split_batch_size));
+        if (split_data.size() == 0) {
+          if (role() == chain_role::singleton) {
+            dst->send_command(hash_table_cmd_id::unlock, {});
+            unlock();
+            dst->recv_response();
+          } else {
+            src->send_command(hash_table_cmd_id::unlock, {});
+            dst->send_command(hash_table_cmd_id::unlock, {});
+            src->recv_response();
+            dst->recv_response();
+          }
+          break;
+        } else if (split_data.size() < split_batch_size) {
+          has_more = false;
+        }
+
+        auto split_keys = split_data.size() / 2;
+        tot_split_keys += split_keys;
+        LOG(log_level::trace) << "Read " << split_keys << " keys to split";
+
+        // Add redirected argument so that importing chain does not ignore our request
+        split_data.emplace_back("!redirected");
+
+        // Write data to dst partition
+        dst->run_command(hash_table_cmd_id::locked_put, split_data);
+        LOG(log_level::trace) << "Sent " << split_keys << " keys";
+
+        // Remove data from src partition
+        std::vector<std::string> remove_keys;
+        split_data.pop_back(); // Remove !redirected argument
+        std::size_t n_split_items = split_data.size();
+        for (std::size_t i = 0; i < n_split_items; i++) {
+          if (i % 2) {
+            remove_keys.push_back(split_data.back());
+          }
+          split_data.pop_back();
+        }
+        assert(remove_keys.size() == split_keys);
+        src->run_command(hash_table_cmd_id::locked_remove, remove_keys);
+        LOG(log_level::trace) << "Removed " << remove_keys.size() << " split keys";
+
+        // Unlock source and destination blocks
+        if (role() == chain_role::singleton) {
+          dst->send_command(hash_table_cmd_id::unlock, {});
+          unlock();
+          dst->recv_response();
+        } else {
+          src->send_command(hash_table_cmd_id::unlock, {});
+          dst->send_command(hash_table_cmd_id::unlock, {});
+          src->recv_response();
+          dst->recv_response();
+        }
+      }
+      // Finalize slot range split
+      //need to reset current partition and replica chain name, metadata
+      //set_regular(split_range_begin, split_range_end);
+      //metadata_ = "regular";        // TODO: metadata not actually used till now since partition state is enough
+
+      // TODO how to modify the status of the new block from importing to regular
+
+      LOG(log_level::info) << "Exported slot range (" << split_range_begin << ", " << split_range_end << ")";
+      splitting_ = false;
+      merging_ = false;
+
     } catch (std::exception &e) {
       splitting_ = false;
       LOG(log_level::warn) << "Split slot range failed: " << e.what();
@@ -455,12 +571,140 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       && state() != hash_partition_state::importing && slot_end() != hash_slot::MAX && is_tail() && !locked_block_.is_active()
       && merging_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
-    LOG(log_level::info) << "Underloaded partition; storage = " << bytes_.load() << " capacity = " << manager_->mb_capacity()
+    LOG(log_level::info) << "Underloaded partition; storage = " << bytes_.load() << " capacity = "
+                         << manager_->mb_capacity()
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
       // TODO: Add logic for merging slot range
-      merging_ = false;
+      merging_ = true;
       LOG(log_level::info) << "Requested slot range merge";
+
+      auto merge_range_begin = slot_range_.first;
+      auto merge_range_end = slot_range_.second;
+      auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
+      // Find the smallest one in the adjacent partition, search through all dstatus
+      auto replica_set = fs->dstatus(path()).data_blocks();
+      //TODO : fix when fetching the target replica chain for merging, we need to make sure that the new chain doesn't exceed the merge limit
+      // Calculate size, should fail if merging it would let the other block exceed it's threshold
+      // Need to contact the directory server to get a lot of things, such as the bytes and such kind of stuff
+      // Concurrency issue: when I fetch slot range of another block, what if the slot range continues to change?Keep a lock?
+      // When the server starts up, we should find a way to stop the server from merging since there are just very few?
+      directory::replica_chain merge_target;
+      int32_t find_smallest_slot_range = hash_table_partition::SLOT_MAX + 1;
+      for (auto &i : replica_set) {
+        if (i.fetch_slot_range().first == slot_range_.second + 1
+            || i.fetch_slot_range().second == slot_range_.first - 1) {
+          int32_t slot_range_size = i.fetch_slot_range().second - i.fetch_slot_range().first;
+          if (slot_range_size < find_smallest_slot_range) {
+            find_smallest_slot_range = slot_range_size;
+            merge_target = i;
+          }
+        }
+      }
+      if (merge_target.metadata == "importing" || merge_target.metadata == "exporting") {
+        throw std::logic_error("Replica chain already involved in re-partitioning");
+      }
+      if (find_smallest_slot_range == hash_table_partition::SLOT_MAX + 1) {
+        throw std::logic_error("Cannot find a merge partner");
+      }
+      // TODO  Exceptions, e.g. there are no neighbors to merge with, neighbors don't have enough space need to fetch bytes_
+
+      // Modify new block meta data
+
+      auto src = std::make_shared<replica_chain_client>(fs, path_, chain(), 0);
+      auto dst = std::make_shared<replica_chain_client>(fs, path_, merge_target, 0);
+      bool has_more = true;
+      std::size_t merge_batch_size = 1024;
+      std::size_t tot_merge_keys = 0;
+      while (has_more) {
+        // Lock source and destination blocks
+        if (role() == chain_role::singleton) {
+          dst->send_command(hash_table_cmd_id::lock, {});
+          lock();
+          dst->recv_response();
+        } else {
+          src->send_command(hash_table_cmd_id::lock, {});
+          dst->send_command(hash_table_cmd_id::lock, {});
+          src->recv_response();
+          dst->recv_response();
+        }
+        // Read data to merge
+        std::vector<std::string> merge_data;
+        locked_get_data_in_slot_range(merge_data,
+                                      merge_range_begin,
+                                      merge_range_end,
+                                      static_cast<int32_t>(merge_batch_size));
+        if (merge_data.size() == 0) {
+          if (role() == chain_role::singleton) {
+            dst->send_command(hash_table_cmd_id::unlock, {});
+            unlock();
+            dst->recv_response();
+          } else {
+            src->send_command(hash_table_cmd_id::unlock, {});
+            dst->send_command(hash_table_cmd_id::unlock, {});
+            src->recv_response();
+            dst->recv_response();
+          }
+          break;
+        } else if (merge_data.size() < merge_batch_size) {
+          has_more = false;
+        }
+
+        auto merge_keys = merge_data.size() / 2;
+        tot_merge_keys += merge_keys;
+        LOG(log_level::trace) << "Read " << merge_keys << " keys to merge";
+
+        // Add redirected argument so that importing chain does not ignore our request
+        merge_data.emplace_back("!redirected");
+
+        // Write data to dst partition
+        dst->run_command(hash_table_cmd_id::locked_put, merge_data);
+        LOG(log_level::trace) << "Sent " << merge_keys << " keys";
+
+        // Remove data from src partition
+        std::vector<std::string> remove_keys;
+        merge_data.pop_back(); // Remove !redirected argument
+        std::size_t n_merge_items = merge_data.size();
+        for (std::size_t i = 0; i < n_merge_items; i++) {
+          if (i % 2) {
+            remove_keys.push_back(merge_data.back());
+          }
+          merge_data.pop_back();
+        }
+        assert(remove_keys.size() == merge_keys);
+        src->run_command(hash_table_cmd_id::locked_remove, remove_keys);
+        LOG(log_level::trace) << "Removed " << remove_keys.size() << " merged keys";
+
+        // Unlock source and destination blocks
+        if (role() == chain_role::singleton) {
+          dst->send_command(hash_table_cmd_id::unlock, {});
+          unlock();
+          dst->recv_response();
+        } else {
+          src->send_command(hash_table_cmd_id::unlock, {});
+          dst->send_command(hash_table_cmd_id::unlock, {});
+          src->recv_response();
+          dst->recv_response();
+        }
+      }
+
+
+      // Remove the merged block from directory server, need to catch response? there is no return value for this function currently
+      fs->remove_block(path_, name_);
+
+      // Inform the directory_server to remove current block, tell the block(instead of the partition since the partition will die) to wait for response, update dstatus
+      // Similar to split slot range, update all the values that might be changed during merge in partition.h chain_module.h, hash_table_partition.cpp
+      // Finalize slot range split
+      //name_ = std::to_string(split_range_begin) + "_" + std::to_string(split_range_end); it's no use to set a single partition name since the whole replica chain name needs to be modified
+      //metadata_ = "regular";        // TODO: metadata set no use to set up for a single partition, needs to set up for the whole replica chain
+      // update new metadata of replication chain and partition
+      //TODO update partition bytes
+      // TODO how to inform the directory server, change the dstatus
+
+      LOG(log_level::info) << "Merged slot range (" << merge_range_begin << ", " << merge_range_end << ")";
+      splitting_ = false;
+      merging_ = false;
+
     } catch (std::exception &e) {
       merging_ = false;
       LOG(log_level::warn) << "Merge slot range failed: " << e.what();
@@ -546,7 +790,8 @@ void hash_table_partition::export_slots() {
   if (state() != hash_partition_state::exporting) {
     throw std::logic_error("Source partition is not in exporting state");
   }
-  auto fs = std::make_shared<directory::directory_client>("localhost", 9090); // FIXME: Replace with actual
+  auto fs =
+      std::make_shared<directory::directory_client>(directory_host_, directory_port_); // FIXME: Replace with actual
   replica_chain_client src(fs, path_, chain(), 0);
   replica_chain_client dst(fs, path_, export_target(), 0);
   auto exp_range = export_slot_range();
@@ -588,16 +833,16 @@ void hash_table_partition::export_slots() {
     } else if (export_data.size() < export_batch_size) {  // No more data to export in next iteration
       has_more = false;
     }
-    auto nexport_keys = export_data.size() / 2;
-    tot_export_keys += nexport_keys;
-    LOG(log_level::trace) << "Read " << nexport_keys << " keys to export";
+    auto next_port_keys = export_data.size() / 2;
+    tot_export_keys += next_port_keys;
+    LOG(log_level::trace) << "Read " << next_port_keys << " keys to export";
 
     // Add redirected argument so that importing chain does not ignore our request
     export_data.emplace_back("!redirected");
 
     // Write data to dst partition
     dst.run_command(hash_table_cmd_id::locked_put, export_data);
-    LOG(log_level::trace) << "Sent " << nexport_keys << " keys";
+    LOG(log_level::trace) << "Sent " << next_port_keys << " keys";
 
     // Remove data from src partition
     std::vector<std::string> remove_keys;
@@ -609,7 +854,7 @@ void hash_table_partition::export_slots() {
       }
       export_data.pop_back();
     }
-    assert(remove_keys.size() == nexport_keys);
+    assert(remove_keys.size() == next_port_keys);
     src.run_command(hash_table_cmd_id::locked_remove, remove_keys);
     LOG(log_level::trace) << "Removed " << remove_keys.size() << " exported keys";
 

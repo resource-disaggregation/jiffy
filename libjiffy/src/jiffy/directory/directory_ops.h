@@ -240,14 +240,15 @@ enum storage_mode {
 
 /* Replica chain structure */
 struct replica_chain {
-  /* Chain name */
+  /* Partition name */
   std::string name;
-  /* Block names */
+  /* Block identifier */
   std::vector<std::string> block_ids;
-  /* Chain metadata */
+  /* Partition metadata */
   std::string metadata;
   /* Storage mode */
   storage_mode mode;
+  typedef std::pair<int32_t, int32_t> slot_range;
   /**
    * Default Constructor
    */
@@ -318,6 +319,17 @@ struct replica_chain {
    */
   bool operator!=(const replica_chain &other) const {
     return !(*this == other);
+  }
+
+  /**
+   * @brief Fetch slot range from name
+   * @return Slot range pair
+   */
+  slot_range fetch_slot_range() const {
+    std::string delimiter = "_";
+    int32_t slot_begin = atoi(name.substr(0, name.find(delimiter)).c_str());
+    int32_t slot_end = atoi(name.substr(name.find(delimiter) + 1, name.length()).c_str());
+    return std::make_pair(slot_begin, slot_end);
   }
 };
 

@@ -13,15 +13,17 @@ void partition_manager::register_impl(const std::string &type,
 }
 
 std::shared_ptr<chain_module> partition_manager::build_partition(block_memory_manager *manager,
-                                                                const std::string &type,
-                                                                const std::string &name,
-                                                                const std::string &metadata,
-                                                                const utils::property_map &conf) {
+                                                                 const std::string &type,
+                                                                 const std::string &name,
+                                                                 const std::string &metadata,
+                                                                 const utils::property_map &conf,
+                                                                 const std::string &directory_host,
+                                                                 const int directory_port) {
   auto it = implementations().find(type);
   if (it == implementations().end()) {
     return nullptr;
   }
-  return it->second->build(manager, name, metadata, conf);
+  return it->second->build(manager, name, metadata, conf, directory_host, directory_port);
 }
 
 partition_manager::partition_map &partition_manager::implementations() {
