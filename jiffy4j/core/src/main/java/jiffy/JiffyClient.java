@@ -12,7 +12,7 @@ import jiffy.directory.directory_service.Client;
 import jiffy.directory.rpc_data_status;
 import jiffy.storage.HashTableClient;
 import jiffy.lease.LeaseWorker;
-import jiffy.notification.KVListener;
+import jiffy.notification.HashTableListener;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TSocket;
@@ -140,10 +140,10 @@ public class JiffyClient implements Closeable {
     return new HashTableClient(fs, path, status, timeoutMs);
   }
 
-  public KVListener listen(String path) throws TException {
+  public HashTableListener listen(String path) throws TException {
     rpc_data_status status = fs.open(path);
     beginScope(path);
-    return new KVListener(path, status);
+    return new HashTableListener(path, status);
   }
 
   public void remove(String path) throws TException {

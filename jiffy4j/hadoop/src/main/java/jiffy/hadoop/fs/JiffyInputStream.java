@@ -62,10 +62,12 @@ public class JiffyInputStream extends FSInputStream {
       throw new EOFException("Cannot seek to negative position");
     }
     filePos = targetPos;
+    if (filePos == 0 && fileLength == 0) {
+      return;
+    }
     resetBuf();
     long bufferPos = filePos % blockSize;
     currentBlock.seek(bufferPos);
-
   }
 
   @Override
@@ -93,7 +95,7 @@ public class JiffyInputStream extends FSInputStream {
   }
 
   @Override
-  public synchronized int read(byte buf[], int off, int len) throws IOException {
+  public synchronized int read(byte[] buf, int off, int len) throws IOException {
     if (closed) {
       throw new IOException("Stream closed");
     }
@@ -149,7 +151,7 @@ public class JiffyInputStream extends FSInputStream {
       try {
         currentBlockNum = currentBlockNum();
         ByteBuffer value = client.get(ByteBufferUtils.fromString(String.valueOf(currentBlockNum)));
-        if (value == ByteBufferUtils.fromString("!key_not_found")) {
+        if (ByteBufferUtils.toString(value).equals("!key_not_found")) {
           throw new EOFException("EOF");
         }
         if (currentBlock == null) {

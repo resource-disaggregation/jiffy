@@ -19,13 +19,13 @@ using namespace ::apache::thrift::transport;
 #define MANAGEMENT_PORT 9091
 
 TEST_CASE("manager_setup_chain_test", "[setup_block][path][slot_range]") {
-  static auto blocks = test_utils::init_hash_table_blocks(NUM_BLOCKS, SERVICE_PORT, MANAGEMENT_PORT, 0);
+  static auto blocks = test_utils::init_hash_table_blocks(NUM_BLOCKS, SERVICE_PORT, MANAGEMENT_PORT);
   auto server = storage_management_server::create(blocks, HOST, MANAGEMENT_PORT);
   std::thread serve_thread([&server] { server->serve(); });
   test_utils::wait_till_server_ready(HOST, MANAGEMENT_PORT);
 
   storage_manager manager;
-  auto block_id = block_id_parser::make(HOST, SERVICE_PORT, MANAGEMENT_PORT, 0, 0, 0);
+  auto block_id = block_id_parser::make(HOST, SERVICE_PORT, MANAGEMENT_PORT, 0);
   REQUIRE_NOTHROW(manager.setup_chain(block_id, "/path/to/data", {block_id}, chain_role::singleton, "nil"));
   auto block = blocks.front();
   REQUIRE(block->id() == block_id);
@@ -42,7 +42,7 @@ TEST_CASE("manager_setup_chain_test", "[setup_block][path][slot_range]") {
 }
 
 TEST_CASE("manager_storage_size_test", "[storage_size][storage_size][storage_capacity][reset]") {
-  static auto blocks = test_utils::init_hash_table_blocks(NUM_BLOCKS, SERVICE_PORT, MANAGEMENT_PORT, 0);
+  static auto blocks = test_utils::init_hash_table_blocks(NUM_BLOCKS, SERVICE_PORT, MANAGEMENT_PORT);
   auto server = storage_management_server::create(blocks, HOST, MANAGEMENT_PORT);
   std::thread serve_thread([&server] { server->serve(); });
   test_utils::wait_till_server_ready(HOST, MANAGEMENT_PORT);
@@ -53,7 +53,7 @@ TEST_CASE("manager_storage_size_test", "[storage_size][storage_size][storage_cap
   }
 
   storage_manager manager;
-  auto block_name = block_id_parser::make(HOST, SERVICE_PORT, MANAGEMENT_PORT, 0, 0, 0);
+  auto block_name = block_id_parser::make(HOST, SERVICE_PORT, MANAGEMENT_PORT, 0);
   REQUIRE(manager.storage_size(block_name) == 5780);
   REQUIRE(manager.storage_size(block_name) <= manager.storage_capacity(block_name));
 
@@ -64,7 +64,7 @@ TEST_CASE("manager_storage_size_test", "[storage_size][storage_size][storage_cap
 }
 
 TEST_CASE("manager_sync_load_test", "[put][sync][reset][load][get]") {
-  static auto blocks = test_utils::init_hash_table_blocks(NUM_BLOCKS, SERVICE_PORT, MANAGEMENT_PORT, 0);
+  static auto blocks = test_utils::init_hash_table_blocks(NUM_BLOCKS, SERVICE_PORT, MANAGEMENT_PORT);
   auto server = storage_management_server::create(blocks, HOST, MANAGEMENT_PORT);
   std::thread serve_thread([&server] { server->serve(); });
   test_utils::wait_till_server_ready(HOST, MANAGEMENT_PORT);
@@ -74,7 +74,7 @@ TEST_CASE("manager_sync_load_test", "[put][sync][reset][load][get]") {
   }
 
   storage_manager manager;
-  auto block_name = block_id_parser::make(HOST, SERVICE_PORT, MANAGEMENT_PORT, 0, 0, 0);
+  auto block_name = block_id_parser::make(HOST, SERVICE_PORT, MANAGEMENT_PORT, 0);
   REQUIRE_NOTHROW(manager.sync(block_name, "local://tmp"));
   REQUIRE_NOTHROW(manager.destroy_partition(block_name));
   REQUIRE_NOTHROW(manager.create_partition(block_name, "hashtable", "0_65536", "regular", {}));

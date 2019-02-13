@@ -201,18 +201,12 @@ class test_utils {
     LOG(log_level::info) << "Server @ " << host << ":" << port << " is live";
   }
 
-  static std::vector<std::string> init_block_names(size_t num_blocks,
-                                                   int32_t service_port,
-                                                   int32_t management_port,
-                                                   int32_t notification_port,
-                                                   int32_t chain_port) {
+  static std::vector<std::string> init_block_names(size_t num_blocks, int32_t service_port, int32_t management_port) {
     std::vector<std::string> block_names;
     for (size_t i = 0; i < num_blocks; ++i) {
       std::string block_name = jiffy::storage::block_id_parser::make("127.0.0.1",
                                                                      service_port,
                                                                      management_port,
-                                                                     notification_port,
-                                                                     chain_port,
                                                                      static_cast<int32_t>(i));
       block_names.push_back(block_name);
     }
@@ -220,14 +214,13 @@ class test_utils {
   }
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_hash_table_blocks(size_t num_blocks,
-                                                                                           int32_t service_port,
-                                                                                           int32_t management_port,
-                                                                                           int32_t notification_port) {
+                                                                                    int32_t service_port,
+                                                                                    int32_t management_port) {
     using namespace jiffy::storage;
     std::vector<std::shared_ptr<block>> blks;
     blks.resize(num_blocks);
     for (size_t i = 0; i < num_blocks; ++i) {
-      std::string id = block_id_parser::make("127.0.0.1", service_port, management_port, notification_port, 0,
+      std::string id = block_id_parser::make("127.0.0.1", service_port, management_port,
                                              static_cast<int32_t>(i));
       blks[i] = std::make_shared<block>(id);
       blks[i]->setup("hashtable", "0_65536", "regular", {});
@@ -237,11 +230,11 @@ class test_utils {
   }
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_hash_table_blocks(const std::vector<std::string> &block_ids,
-                                                                                           size_t block_capacity = 134217728,
-                                                                                           double threshold_lo = 0.25,
-                                                                                           double threshold_hi = 0.75,
-                                                                                           const std::string &dir_host = "127.0.0.1",
-                                                                                           int dir_port = 9090) {
+                                                                                    size_t block_capacity = 134217728,
+                                                                                    double threshold_lo = 0.25,
+                                                                                    double threshold_hi = 0.75,
+                                                                                    const std::string &dir_host = "127.0.0.1",
+                                                                                    int dir_port = 9090) {
     jiffy::utils::property_map conf;
     conf.set("hashtable.capacity_threshold_lo", std::to_string(threshold_lo));
     conf.set("hashtable.capacity_threshold_hi", std::to_string(threshold_hi));

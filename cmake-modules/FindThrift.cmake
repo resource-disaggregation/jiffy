@@ -1,7 +1,8 @@
 # - Find Thrift (a cross platform RPC lib/tool)
 # This module defines
 #  THRIFT_VERSION_STRING, version string of Thrift if found
-#  THRIFT_LIBRARIES, libraries to link
+#  THRIFT_LIBRARY, libraries to link
+#  THRIFT_NB_LIBRARY, non-blocking libraries to link
 #  THRIFT_INCLUDE_DIR, where to find THRIFT headers
 #  THRIFT_COMPILER, thrift compiler executable
 #  THRIFT_FOUND, If false, do not try to use Thrift
@@ -22,6 +23,21 @@ find_path(THRIFT_INCLUDE_DIR
         /usr
         PATH_SUFFIXES
         include
+        )
+
+# prefer the thrift version supplied in THRIFT_HOME
+find_library(THRIFTNB_LIBRARY
+        NAMES
+        thriftnb libthriftnb
+        HINTS
+        ${THRIFT_HOME}
+        ENV THRIFT_HOME
+        /usr/local/Cellar
+        /usr/local
+        /opt/local
+        /usr
+        PATH_SUFFIXES
+        lib lib64
         )
 
 # prefer the thrift version supplied in THRIFT_HOME

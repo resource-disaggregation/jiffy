@@ -19,7 +19,7 @@ from unittest import TestCase
 from thrift.transport import TTransport, TSocket
 
 from jiffy import JiffyClient, b, Flags
-from jiffy.subscription.subscriber import Notification
+from jiffy.storage.subscriber import Notification
 
 
 def wait_till_server_ready(host, port):
@@ -50,7 +50,7 @@ def gen_async_kv_ops():
     return tf.name
 
 
-class MMuxServer(object):
+class JiffyServer(object):
     def __init__(self):
         self.handle = None
 
@@ -64,14 +64,12 @@ class MMuxServer(object):
             self.handle = None
 
 
-class StorageServer(MMuxServer):
+class StorageServer(JiffyServer):
     def __init__(self):
         super(StorageServer, self).__init__()
         self.host = None
         self.service_port = None
         self.management_port = None
-        self.notification_port = None
-        self.chain_port = None
 
     def start(self, executable, conf):
         super(StorageServer, self).start(executable, conf)
@@ -80,11 +78,7 @@ class StorageServer(MMuxServer):
         self.host = config.get('storage', 'host')
         self.service_port = int(config.get('storage', 'service_port'))
         self.management_port = int(config.get('storage', 'management_port'))
-        self.notification_port = int(config.get('storage', 'notification_port'))
-        self.chain_port = int(config.get('storage', 'chain_port'))
         wait_till_server_ready(self.host, self.service_port)
-        wait_till_server_ready(self.host, self.management_port)
-        wait_till_server_ready(self.host, self.notification_port)
         wait_till_server_ready(self.host, self.management_port)
 
     def stop(self):
@@ -92,11 +86,9 @@ class StorageServer(MMuxServer):
         self.host = None
         self.service_port = None
         self.management_port = None
-        self.notification_port = None
-        self.chain_port = None
 
 
-class DirectoryServer(MMuxServer):
+class DirectoryServer(JiffyServer):
     def __init__(self):
         super(DirectoryServer, self).__init__()
         self.host = None
@@ -133,10 +125,10 @@ class DirectoryServer(MMuxServer):
 class TestClient(TestCase):
     def __init__(self, *args, **kwargs):
         super(TestClient, self).__init__(*args, **kwargs)
+        self.directory_server = DirectoryServer()
         self.storage_server_1 = StorageServer()
         self.storage_server_2 = StorageServer()
         self.storage_server_3 = StorageServer()
-        self.directory_server = DirectoryServer()
 
     def jiffy_client(self):
         return self.directory_server.connect()

@@ -136,7 +136,7 @@ public class ReplicaChainClient implements Closeable {
   }
 
   List<ByteBuffer> receiveCommandResponse() throws TException {
-    CommandResponse response = responseReader.recieveResponse();
+    CommandResponse response = responseReader.receiveResponse();
 
     if (response.clientSeqNo != seq.getClientSeqNo()) {
       throw new IllegalStateException(
@@ -156,6 +156,7 @@ public class ReplicaChainClient implements Closeable {
   List<ByteBuffer> runCommand(int cmdId, List<ByteBuffer> args) throws TException {
     List<ByteBuffer> response = null;
     boolean retry = false;
+    int numRetriesRemaining = 3;
     while (response == null) {
       try {
         if (CommandType.opType(cmdId) == CommandType.accessor) {
@@ -167,10 +168,15 @@ public class ReplicaChainClient implements Closeable {
           }
         }
       } catch (TTransportException e) {
-        chain = fs.resloveFailures(path, chain);
-        invalidateCache();
-        connect();
-        retry = true;
+        if (numRetriesRemaining > 0) {
+          chain = fs.resloveFailures(path, chain);
+          invalidateCache();
+          connect();
+          retry = true;
+          numRetriesRemaining--;
+        } else {
+          throw e;
+        }
       }
     }
     return response;

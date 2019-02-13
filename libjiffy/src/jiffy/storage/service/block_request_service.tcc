@@ -479,6 +479,661 @@ uint32_t block_request_service_command_request_pargs::write(Protocol_* oprot) co
   return xfer;
 }
 
+
+template <class Protocol_>
+uint32_t block_request_service_chain_request_args::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->seq.read(iprot);
+          this->__isset.seq = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->cmd_id);
+          this->__isset.cmd_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 4:
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            this->arguments.clear();
+            uint32_t _size13;
+            ::apache::thrift::protocol::TType _etype16;
+            xfer += iprot->readListBegin(_etype16, _size13);
+            this->arguments.resize(_size13);
+            uint32_t _i17;
+            for (_i17 = 0; _i17 < _size13; ++_i17)
+            {
+              xfer += iprot->readBinary(this->arguments[_i17]);
+            }
+            xfer += iprot->readListEnd();
+          }
+          this->__isset.arguments = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t block_request_service_chain_request_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("block_request_service_chain_request_args");
+
+  xfer += oprot->writeFieldBegin("seq", ::apache::thrift::protocol::T_STRUCT, 1);
+  xfer += this->seq.write(oprot);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("cmd_id", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32(this->cmd_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("arguments", ::apache::thrift::protocol::T_LIST, 4);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->arguments.size()));
+    std::vector<std::string> ::const_iterator _iter18;
+    for (_iter18 = this->arguments.begin(); _iter18 != this->arguments.end(); ++_iter18)
+    {
+      xfer += oprot->writeBinary((*_iter18));
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t block_request_service_chain_request_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("block_request_service_chain_request_pargs");
+
+  xfer += oprot->writeFieldBegin("seq", ::apache::thrift::protocol::T_STRUCT, 1);
+  xfer += (*(this->seq)).write(oprot);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("cmd_id", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32((*(this->cmd_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("arguments", ::apache::thrift::protocol::T_LIST, 4);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->arguments)).size()));
+    std::vector<std::string> ::const_iterator _iter19;
+    for (_iter19 = (*(this->arguments)).begin(); _iter19 != (*(this->arguments)).end(); ++_iter19)
+    {
+      xfer += oprot->writeBinary((*_iter19));
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t block_request_service_run_command_args::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->cmd_id);
+          this->__isset.cmd_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            this->arguments.clear();
+            uint32_t _size20;
+            ::apache::thrift::protocol::TType _etype23;
+            xfer += iprot->readListBegin(_etype23, _size20);
+            this->arguments.resize(_size20);
+            uint32_t _i24;
+            for (_i24 = 0; _i24 < _size20; ++_i24)
+            {
+              xfer += iprot->readBinary(this->arguments[_i24]);
+            }
+            xfer += iprot->readListEnd();
+          }
+          this->__isset.arguments = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t block_request_service_run_command_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("block_request_service_run_command_args");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("cmd_id", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32(this->cmd_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("arguments", ::apache::thrift::protocol::T_LIST, 3);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->arguments.size()));
+    std::vector<std::string> ::const_iterator _iter25;
+    for (_iter25 = this->arguments.begin(); _iter25 != this->arguments.end(); ++_iter25)
+    {
+      xfer += oprot->writeBinary((*_iter25));
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t block_request_service_run_command_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("block_request_service_run_command_pargs");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("cmd_id", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32((*(this->cmd_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("arguments", ::apache::thrift::protocol::T_LIST, 3);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->arguments)).size()));
+    std::vector<std::string> ::const_iterator _iter26;
+    for (_iter26 = (*(this->arguments)).begin(); _iter26 != (*(this->arguments)).end(); ++_iter26)
+    {
+      xfer += oprot->writeBinary((*_iter26));
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t block_request_service_run_command_result::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            this->success.clear();
+            uint32_t _size27;
+            ::apache::thrift::protocol::TType _etype30;
+            xfer += iprot->readListBegin(_etype30, _size27);
+            this->success.resize(_size27);
+            uint32_t _i31;
+            for (_i31 = 0; _i31 < _size27; ++_i31)
+            {
+              xfer += iprot->readBinary(this->success[_i31]);
+            }
+            xfer += iprot->readListEnd();
+          }
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t block_request_service_run_command_result::write(Protocol_* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("block_request_service_run_command_result");
+
+  if (this->__isset.success) {
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_LIST, 0);
+    {
+      xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->success.size()));
+      std::vector<std::string> ::const_iterator _iter32;
+      for (_iter32 = this->success.begin(); _iter32 != this->success.end(); ++_iter32)
+      {
+        xfer += oprot->writeBinary((*_iter32));
+      }
+      xfer += oprot->writeListEnd();
+    }
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t block_request_service_run_command_presult::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            (*(this->success)).clear();
+            uint32_t _size33;
+            ::apache::thrift::protocol::TType _etype36;
+            xfer += iprot->readListBegin(_etype36, _size33);
+            (*(this->success)).resize(_size33);
+            uint32_t _i37;
+            for (_i37 = 0; _i37 < _size33; ++_i37)
+            {
+              xfer += iprot->readBinary((*(this->success))[_i37]);
+            }
+            xfer += iprot->readListEnd();
+          }
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t block_request_service_subscribe_args::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            this->ops.clear();
+            uint32_t _size38;
+            ::apache::thrift::protocol::TType _etype41;
+            xfer += iprot->readListBegin(_etype41, _size38);
+            this->ops.resize(_size38);
+            uint32_t _i42;
+            for (_i42 = 0; _i42 < _size38; ++_i42)
+            {
+              xfer += iprot->readString(this->ops[_i42]);
+            }
+            xfer += iprot->readListEnd();
+          }
+          this->__isset.ops = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t block_request_service_subscribe_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("block_request_service_subscribe_args");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("ops", ::apache::thrift::protocol::T_LIST, 2);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->ops.size()));
+    std::vector<std::string> ::const_iterator _iter43;
+    for (_iter43 = this->ops.begin(); _iter43 != this->ops.end(); ++_iter43)
+    {
+      xfer += oprot->writeString((*_iter43));
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t block_request_service_subscribe_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("block_request_service_subscribe_pargs");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("ops", ::apache::thrift::protocol::T_LIST, 2);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->ops)).size()));
+    std::vector<std::string> ::const_iterator _iter44;
+    for (_iter44 = (*(this->ops)).begin(); _iter44 != (*(this->ops)).end(); ++_iter44)
+    {
+      xfer += oprot->writeString((*_iter44));
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t block_request_service_unsubscribe_args::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_id);
+          this->__isset.block_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            this->ops.clear();
+            uint32_t _size45;
+            ::apache::thrift::protocol::TType _etype48;
+            xfer += iprot->readListBegin(_etype48, _size45);
+            this->ops.resize(_size45);
+            uint32_t _i49;
+            for (_i49 = 0; _i49 < _size45; ++_i49)
+            {
+              xfer += iprot->readString(this->ops[_i49]);
+            }
+            xfer += iprot->readListEnd();
+          }
+          this->__isset.ops = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t block_request_service_unsubscribe_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("block_request_service_unsubscribe_args");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->block_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("ops", ::apache::thrift::protocol::T_LIST, 2);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->ops.size()));
+    std::vector<std::string> ::const_iterator _iter50;
+    for (_iter50 = this->ops.begin(); _iter50 != this->ops.end(); ++_iter50)
+    {
+      xfer += oprot->writeString((*_iter50));
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t block_request_service_unsubscribe_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("block_request_service_unsubscribe_pargs");
+
+  xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("ops", ::apache::thrift::protocol::T_LIST, 2);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->ops)).size()));
+    std::vector<std::string> ::const_iterator _iter51;
+    for (_iter51 = (*(this->ops)).begin(); _iter51 != (*(this->ops)).end(); ++_iter51)
+    {
+      xfer += oprot->writeString((*_iter51));
+    }
+    xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
 template <class Protocol_>
 int64_t block_request_serviceClientT<Protocol_>::get_client_id()
 {
@@ -613,6 +1268,137 @@ void block_request_serviceClientT<Protocol_>::send_command_request(const sequenc
   args.block_id = &block_id;
   args.cmd_id = &cmd_id;
   args.arguments = &arguments;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+void block_request_serviceClientT<Protocol_>::chain_request(const sequence_id& seq, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments)
+{
+  send_chain_request(seq, block_id, cmd_id, arguments);
+}
+
+template <class Protocol_>
+void block_request_serviceClientT<Protocol_>::send_chain_request(const sequence_id& seq, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("chain_request", ::apache::thrift::protocol::T_ONEWAY, cseqid);
+
+  block_request_service_chain_request_pargs args;
+  args.seq = &seq;
+  args.block_id = &block_id;
+  args.cmd_id = &cmd_id;
+  args.arguments = &arguments;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+void block_request_serviceClientT<Protocol_>::run_command(std::vector<std::string> & _return, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments)
+{
+  send_run_command(block_id, cmd_id, arguments);
+  recv_run_command(_return);
+}
+
+template <class Protocol_>
+void block_request_serviceClientT<Protocol_>::send_run_command(const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("run_command", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  block_request_service_run_command_pargs args;
+  args.block_id = &block_id;
+  args.cmd_id = &cmd_id;
+  args.arguments = &arguments;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+void block_request_serviceClientT<Protocol_>::recv_run_command(std::vector<std::string> & _return)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("run_command") != 0) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  block_request_service_run_command_presult result;
+  result.success = &_return;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+
+  if (result.__isset.success) {
+    // _return pointer has now been filled
+    return;
+  }
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "run_command failed: unknown result");
+}
+
+template <class Protocol_>
+void block_request_serviceClientT<Protocol_>::subscribe(const int32_t block_id, const std::vector<std::string> & ops)
+{
+  send_subscribe(block_id, ops);
+}
+
+template <class Protocol_>
+void block_request_serviceClientT<Protocol_>::send_subscribe(const int32_t block_id, const std::vector<std::string> & ops)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("subscribe", ::apache::thrift::protocol::T_ONEWAY, cseqid);
+
+  block_request_service_subscribe_pargs args;
+  args.block_id = &block_id;
+  args.ops = &ops;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+void block_request_serviceClientT<Protocol_>::unsubscribe(const int32_t block_id, const std::vector<std::string> & ops)
+{
+  send_unsubscribe(block_id, ops);
+}
+
+template <class Protocol_>
+void block_request_serviceClientT<Protocol_>::send_unsubscribe(const int32_t block_id, const std::vector<std::string> & ops)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("unsubscribe", ::apache::thrift::protocol::T_ONEWAY, cseqid);
+
+  block_request_service_unsubscribe_pargs args;
+  args.block_id = &block_id;
+  args.ops = &ops;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -957,6 +1743,350 @@ void block_request_serviceProcessorT<Protocol_>::process_command_request(int32_t
 }
 
 template <class Protocol_>
+void block_request_serviceProcessorT<Protocol_>::process_chain_request(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  (void) seqid;
+  (void) oprot;
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("block_request_service.chain_request", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_request_service.chain_request");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "block_request_service.chain_request");
+  }
+
+  block_request_service_chain_request_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "block_request_service.chain_request", bytes);
+  }
+
+  try {
+    iface_->chain_request(args.seq, args.block_id, args.cmd_id, args.arguments);
+  } catch (const std::exception&) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "block_request_service.chain_request");
+    }
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->asyncComplete(ctx, "block_request_service.chain_request");
+  }
+
+  return;
+}
+
+template <class Protocol_>
+void block_request_serviceProcessorT<Protocol_>::process_chain_request(int32_t, Protocol_* iprot, Protocol_*, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("block_request_service.chain_request", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_request_service.chain_request");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "block_request_service.chain_request");
+  }
+
+  block_request_service_chain_request_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "block_request_service.chain_request", bytes);
+  }
+
+  try {
+    iface_->chain_request(args.seq, args.block_id, args.cmd_id, args.arguments);
+  } catch (const std::exception&) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "block_request_service.chain_request");
+    }
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->asyncComplete(ctx, "block_request_service.chain_request");
+  }
+
+  return;
+}
+
+template <class Protocol_>
+void block_request_serviceProcessorT<Protocol_>::process_run_command(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("block_request_service.run_command", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_request_service.run_command");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "block_request_service.run_command");
+  }
+
+  block_request_service_run_command_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "block_request_service.run_command", bytes);
+  }
+
+  block_request_service_run_command_result result;
+  try {
+    iface_->run_command(result.success, args.block_id, args.cmd_id, args.arguments);
+    result.__isset.success = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "block_request_service.run_command");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("run_command", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "block_request_service.run_command");
+  }
+
+  oprot->writeMessageBegin("run_command", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "block_request_service.run_command", bytes);
+  }
+}
+
+template <class Protocol_>
+void block_request_serviceProcessorT<Protocol_>::process_run_command(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("block_request_service.run_command", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_request_service.run_command");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "block_request_service.run_command");
+  }
+
+  block_request_service_run_command_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "block_request_service.run_command", bytes);
+  }
+
+  block_request_service_run_command_result result;
+  try {
+    iface_->run_command(result.success, args.block_id, args.cmd_id, args.arguments);
+    result.__isset.success = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "block_request_service.run_command");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("run_command", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "block_request_service.run_command");
+  }
+
+  oprot->writeMessageBegin("run_command", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "block_request_service.run_command", bytes);
+  }
+}
+
+template <class Protocol_>
+void block_request_serviceProcessorT<Protocol_>::process_subscribe(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  (void) seqid;
+  (void) oprot;
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("block_request_service.subscribe", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_request_service.subscribe");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "block_request_service.subscribe");
+  }
+
+  block_request_service_subscribe_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "block_request_service.subscribe", bytes);
+  }
+
+  try {
+    iface_->subscribe(args.block_id, args.ops);
+  } catch (const std::exception&) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "block_request_service.subscribe");
+    }
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->asyncComplete(ctx, "block_request_service.subscribe");
+  }
+
+  return;
+}
+
+template <class Protocol_>
+void block_request_serviceProcessorT<Protocol_>::process_subscribe(int32_t, Protocol_* iprot, Protocol_*, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("block_request_service.subscribe", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_request_service.subscribe");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "block_request_service.subscribe");
+  }
+
+  block_request_service_subscribe_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "block_request_service.subscribe", bytes);
+  }
+
+  try {
+    iface_->subscribe(args.block_id, args.ops);
+  } catch (const std::exception&) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "block_request_service.subscribe");
+    }
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->asyncComplete(ctx, "block_request_service.subscribe");
+  }
+
+  return;
+}
+
+template <class Protocol_>
+void block_request_serviceProcessorT<Protocol_>::process_unsubscribe(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  (void) seqid;
+  (void) oprot;
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("block_request_service.unsubscribe", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_request_service.unsubscribe");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "block_request_service.unsubscribe");
+  }
+
+  block_request_service_unsubscribe_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "block_request_service.unsubscribe", bytes);
+  }
+
+  try {
+    iface_->unsubscribe(args.block_id, args.ops);
+  } catch (const std::exception&) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "block_request_service.unsubscribe");
+    }
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->asyncComplete(ctx, "block_request_service.unsubscribe");
+  }
+
+  return;
+}
+
+template <class Protocol_>
+void block_request_serviceProcessorT<Protocol_>::process_unsubscribe(int32_t, Protocol_* iprot, Protocol_*, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("block_request_service.unsubscribe", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "block_request_service.unsubscribe");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "block_request_service.unsubscribe");
+  }
+
+  block_request_service_unsubscribe_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "block_request_service.unsubscribe", bytes);
+  }
+
+  try {
+    iface_->unsubscribe(args.block_id, args.ops);
+  } catch (const std::exception&) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "block_request_service.unsubscribe");
+    }
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->asyncComplete(ctx, "block_request_service.unsubscribe");
+  }
+
+  return;
+}
+
+template <class Protocol_>
 ::apache::thrift::stdcxx::shared_ptr< ::apache::thrift::TProcessor > block_request_serviceProcessorFactoryT<Protocol_>::getProcessor(const ::apache::thrift::TConnectionInfo& connInfo) {
   ::apache::thrift::ReleaseHandler< block_request_serviceIfFactory > cleanup(handlerFactory_);
   ::apache::thrift::stdcxx::shared_ptr< block_request_serviceIf > handler(handlerFactory_->getHandler(connInfo), cleanup);
@@ -1150,6 +2280,172 @@ void block_request_serviceConcurrentClientT<Protocol_>::send_command_request(con
   args.block_id = &block_id;
   args.cmd_id = &cmd_id;
   args.arguments = &arguments;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+}
+
+template <class Protocol_>
+void block_request_serviceConcurrentClientT<Protocol_>::chain_request(const sequence_id& seq, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments)
+{
+  send_chain_request(seq, block_id, cmd_id, arguments);
+}
+
+template <class Protocol_>
+void block_request_serviceConcurrentClientT<Protocol_>::send_chain_request(const sequence_id& seq, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments)
+{
+  int32_t cseqid = 0;
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("chain_request", ::apache::thrift::protocol::T_ONEWAY, cseqid);
+
+  block_request_service_chain_request_pargs args;
+  args.seq = &seq;
+  args.block_id = &block_id;
+  args.cmd_id = &cmd_id;
+  args.arguments = &arguments;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+}
+
+template <class Protocol_>
+void block_request_serviceConcurrentClientT<Protocol_>::run_command(std::vector<std::string> & _return, const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments)
+{
+  int32_t seqid = send_run_command(block_id, cmd_id, arguments);
+  recv_run_command(_return, seqid);
+}
+
+template <class Protocol_>
+int32_t block_request_serviceConcurrentClientT<Protocol_>::send_run_command(const int32_t block_id, const int32_t cmd_id, const std::vector<std::string> & arguments)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("run_command", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  block_request_service_run_command_pargs args;
+  args.block_id = &block_id;
+  args.cmd_id = &cmd_id;
+  args.arguments = &arguments;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+template <class Protocol_>
+void block_request_serviceConcurrentClientT<Protocol_>::recv_run_command(std::vector<std::string> & _return, const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      this->iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(this->iprot_);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("run_command") != 0) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      block_request_service_run_command_presult result;
+      result.success = &_return;
+      result.read(this->iprot_);
+      this->iprot_->readMessageEnd();
+      this->iprot_->getTransport()->readEnd();
+
+      if (result.__isset.success) {
+        // _return pointer has now been filled
+        sentry.commit();
+        return;
+      }
+      // in a bad state, don't commit
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "run_command failed: unknown result");
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+template <class Protocol_>
+void block_request_serviceConcurrentClientT<Protocol_>::subscribe(const int32_t block_id, const std::vector<std::string> & ops)
+{
+  send_subscribe(block_id, ops);
+}
+
+template <class Protocol_>
+void block_request_serviceConcurrentClientT<Protocol_>::send_subscribe(const int32_t block_id, const std::vector<std::string> & ops)
+{
+  int32_t cseqid = 0;
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("subscribe", ::apache::thrift::protocol::T_ONEWAY, cseqid);
+
+  block_request_service_subscribe_pargs args;
+  args.block_id = &block_id;
+  args.ops = &ops;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+}
+
+template <class Protocol_>
+void block_request_serviceConcurrentClientT<Protocol_>::unsubscribe(const int32_t block_id, const std::vector<std::string> & ops)
+{
+  send_unsubscribe(block_id, ops);
+}
+
+template <class Protocol_>
+void block_request_serviceConcurrentClientT<Protocol_>::send_unsubscribe(const int32_t block_id, const std::vector<std::string> & ops)
+{
+  int32_t cseqid = 0;
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("unsubscribe", ::apache::thrift::protocol::T_ONEWAY, cseqid);
+
+  block_request_service_unsubscribe_pargs args;
+  args.block_id = &block_id;
+  args.ops = &ops;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();

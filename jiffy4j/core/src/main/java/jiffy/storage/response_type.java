@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-package jiffy.notification;
+package jiffy.storage;
 
 
 public enum response_type implements org.apache.thrift.TEnum {

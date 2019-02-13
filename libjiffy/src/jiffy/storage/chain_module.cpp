@@ -33,7 +33,7 @@ void chain_module::setup(const std::string &path,
   auto protocol = next_->reset(next_block_id);
   if (protocol && role_ != chain_role::tail) {
     auto handler = std::make_shared<chain_response_handler>(this);
-    auto processor = std::make_shared<chain_response_serviceProcessor>(handler);
+    auto processor = std::make_shared<block_response_serviceProcessor>(handler);
     if (response_processor_.joinable())
       response_processor_.join();
     response_processor_ = std::thread([processor, protocol] {
@@ -81,7 +81,7 @@ void chain_module::reset_next_and_listen(const std::string &next_block) {
   auto protocol = next_->reset(next_block);
   if (protocol) {
     auto handler = std::make_shared<chain_response_handler>(this);
-    auto processor = std::make_shared<chain_response_serviceProcessor>(handler);
+    auto processor = std::make_shared<block_response_serviceProcessor>(handler);
     if (response_processor_.joinable())
       response_processor_.join();
     response_processor_ = std::thread([processor, protocol] {

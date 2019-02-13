@@ -19,9 +19,9 @@ block_request_handler_factory::block_request_handler_factory(std::vector<std::sh
 block_request_serviceIf *block_request_handler_factory::getHandler(const ::apache::thrift::TConnectionInfo &conn_info) {
   std::shared_ptr<TSocket> sock = std::dynamic_pointer_cast<TSocket>(conn_info.transport);
   LOG(log_level::trace) << "Incoming connection from " << sock->getSocketInfo();
-  std::shared_ptr<TTransport> transport(new TBufferedTransport(conn_info.transport));
-  std::shared_ptr<TProtocol> prot(new TBinaryProtocol(transport));
-  return new block_request_handler(std::make_shared<block_response_client>(prot), client_id_gen_, blocks_);
+  auto transport = std::make_shared<TFramedTransport>(conn_info.transport);
+  std::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
+  return new block_request_handler(protocol, client_id_gen_, blocks_);
 }
 
 void block_request_handler_factory::releaseHandler(block_request_serviceIf *handler) {

@@ -1,6 +1,8 @@
 import logging
 import threading
 
+from jiffy.storage import block_request_service, block_response_service
+
 try:
     import Queue as queue
 except ImportError:
@@ -8,9 +10,6 @@ except ImportError:
 
 from thrift.protocol import TBinaryProtocol
 from thrift.transport import TTransport, TSocket
-
-from jiffy.notification import notification_service
-from jiffy.subscription import subscription_service
 
 
 class Notification:
@@ -50,7 +49,7 @@ class Mailbox:
         return self.q.empty()
 
 
-class SubscriptionServiceHandler(subscription_service.Iface):
+class SubscriptionServiceHandler(block_response_service.Iface):
     def __init__(self, notification_callback, success_callback, failure_callback):
         self.notification_callback = notification_callback
         self.success_callback = success_callback
@@ -74,7 +73,7 @@ class SubscriptionWorker(threading.Thread):
         super(SubscriptionWorker, self).__init__()
         self.protocols = protocols
         self.handler = SubscriptionServiceHandler(notification_cb, control_cb, control_cb)
-        self.processor = subscription_service.Processor(self.handler)
+        self.processor = block_response_service.Processor(self.handler)
         self._stop_event = threading.Event()
         self.daemon = True
 
@@ -83,11 +82,8 @@ class SubscriptionWorker(threading.Thread):
             while not self.stopped():
                 for protocol in self.protocols:
                     self.processor.process(protocol, protocol)
-        except TTransport.TTransportException:
+        except Exception:
             logging.info("Thrift transport closed")
-        except Exception as e:
-            logging.error(e)
-            raise
         finally:
             self.stop()
 
@@ -102,9 +98,9 @@ class SubscriptionClient:
     def __init__(self, data_status, callback=Mailbox()):
         self.block_names = [block_chain.block_ids[-1].split(':') for block_chain in data_status.data_blocks]
         self.block_ids = [int(b[-1]) for b in self.block_names]
-        self.transports = [TTransport.TBufferedTransport(TSocket.TSocket(b[0], int(b[3]))) for b in self.block_names]
+        self.transports = [TTransport.TFramedTransport(TSocket.TSocket(b[0], int(b[1]))) for b in self.block_names]
         self.protocols = [TBinaryProtocol.TBinaryProtocolAccelerated(transport) for transport in self.transports]
-        self.clients = [notification_service.Client(protocol) for protocol in self.protocols]
+        self.clients = [block_request_service.Client(protocol) for protocol in self.protocols]
         for transport in self.transports:
             transport.open()
         self.notifications = callback

@@ -24,16 +24,12 @@ thrift_gen(${THRIFT_GEN_CXX} src/block_registration_service.thrift ../libjiffy/s
 thrift_gen(${THRIFT_GEN_CXX} src/block_service.thrift ../libjiffy/src/jiffy/storage/service/)
 thrift_gen(${THRIFT_GEN_CXX} src/directory_service.thrift ../libjiffy/src/jiffy/directory/fs/)
 thrift_gen(${THRIFT_GEN_CXX} src/lease_service.thrift ../libjiffy/src/jiffy/directory/lease/)
-thrift_gen(${THRIFT_GEN_CXX} src/notification_service.thrift ../libjiffy/src/jiffy/storage/notification/)
 thrift_gen(${THRIFT_GEN_CXX} src/storage_management_service.thrift ../libjiffy/src/jiffy/storage/manager/)
-thrift_gen(${THRIFT_GEN_CXX} src/subscription_service.thrift ../libjiffy/src/jiffy/storage/notification/)
 
 # Generate py sources
 thrift_gen(${THRIFT_GEN_PY} src/block_service.thrift ../pyjiffy/)
 thrift_gen(${THRIFT_GEN_PY} src/directory_service.thrift ../pyjiffy/)
 thrift_gen(${THRIFT_GEN_PY} src/lease_service.thrift ../pyjiffy/)
-thrift_gen(${THRIFT_GEN_PY} src/notification_service.thrift ../pyjiffy/)
-thrift_gen(${THRIFT_GEN_PY} src/subscription_service.thrift ../pyjiffy/)
 
 # Remove unwanted generated files
 file(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/../pyjiffy/__init__.py)
@@ -45,12 +41,8 @@ file(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/../pyjiffy/jiffy/storage/block_response_
 file(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/../pyjiffy/jiffy/storage/chain_request_service-remote)
 file(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/../pyjiffy/jiffy/storage/chain_response_service-remote)
 file(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/../pyjiffy/jiffy/lease/lease_service-remote)
-file(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/../pyjiffy/jiffy/notification/notification_service-remote)
-file(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/../pyjiffy/jiffy/subscription/subscription_service-remote)
 
 # Generate java sources
 thrift_gen(${THRIFT_GEN_JAVA} src/block_service.thrift ../jiffy4j/core/src/main/java/)
 thrift_gen(${THRIFT_GEN_JAVA} src/directory_service.thrift ../jiffy4j/core/src/main/java/)
 thrift_gen(${THRIFT_GEN_JAVA} src/lease_service.thrift ../jiffy4j/core/src/main/java/)
-thrift_gen(${THRIFT_GEN_JAVA} src/notification_service.thrift ../jiffy4j/core/src/main/java/)
-thrift_gen(${THRIFT_GEN_JAVA} src/subscription_service.thrift ../jiffy4j/core/src/main/java/)

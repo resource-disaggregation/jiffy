@@ -10,7 +10,7 @@ import jiffy.directory.Flags;
 import jiffy.directory.Permissions;
 import jiffy.storage.HashTableClient;
 import jiffy.storage.HashTableClient.LockedClient;
-import jiffy.notification.KVListener;
+import jiffy.notification.HashTableListener;
 import jiffy.notification.event.Notification;
 import jiffy.util.ByteBufferUtils;
 import org.apache.thrift.TException;
@@ -397,9 +397,9 @@ public class JiffyClientTest {
       ByteBuffer value = ByteBufferUtils.fromString("value1");
 
       client.createHashTable("/a/file.txt", "local://tmp", 1, 1);
-      KVListener n1 = client.listen("/a/file.txt");
-      KVListener n2 = client.listen("/a/file.txt");
-      KVListener n3 = client.listen("/a/file.txt");
+      HashTableListener n1 = client.listen("/a/file.txt");
+      HashTableListener n2 = client.listen("/a/file.txt");
+      HashTableListener n3 = client.listen("/a/file.txt");
 
       n1.subscribe(Collections.singletonList(op1));
       n2.subscribe(Arrays.asList(op1, op2));

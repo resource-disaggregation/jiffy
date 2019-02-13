@@ -1,21 +1,19 @@
 #include <catch.hpp>
 #include <thrift/transport/TTransportException.h>
 #include <thread>
+#include "test_utils.h"
+#include "jiffy/client/jiffy_client.h"
+#include "jiffy/storage/hashtable/hash_slot.h"
+#include "jiffy/storage/hashtable/hash_table_partition.h"
 #include "jiffy/storage/manager/storage_management_server.h"
 #include "jiffy/storage/manager/storage_management_client.h"
 #include "jiffy/storage/manager/storage_manager.h"
-#include "jiffy/storage/hashtable/hash_table_partition.h"
-#include "test_utils.h"
 #include "jiffy/storage/service/block_server.h"
-#include "jiffy/storage/hashtable/hash_slot.h"
 #include "jiffy/directory/fs/directory_tree.h"
 #include "jiffy/directory/fs/directory_server.h"
-#include "jiffy/client/jiffy_client.h"
-#include "jiffy/storage/notification/notification_server.h"
-#include "jiffy/directory/lease/lease_server.h"
-#include "jiffy/storage/service/chain_server.h"
 #include "jiffy/directory/fs/sync_worker.h"
 #include "jiffy/directory/lease/lease_expiry_worker.h"
+#include "jiffy/directory/lease/lease_server.h"
 
 using namespace jiffy::client;
 using namespace jiffy::storage;
@@ -71,29 +69,19 @@ TEST_CASE("jiffy_client_lease_worker_test", "[put][get][update][remove]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS,
                                                   STORAGE_SERVICE_PORT,
-                                                  STORAGE_MANAGEMENT_PORT,
-                                                  STORAGE_NOTIFICATION_PORT,
-                                                  STORAGE_CHAIN_PORT);
+                                                  STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   auto blocks = test_utils::init_hash_table_blocks(block_names);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
+  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
 
   auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
   std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
-
-  auto notif_server = notification_server::create(blocks, HOST, STORAGE_NOTIFICATION_PORT);
-  std::thread notif_serve_thread([&notif_server] { notif_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_NOTIFICATION_PORT);
-
-  auto chain_server = chain_server::create(blocks, HOST, STORAGE_CHAIN_PORT);
-  std::thread chain_serve_thread([&chain_server] { chain_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT);
 
   auto dir_server = directory_server::create(tree, HOST, DIRECTORY_SERVICE_PORT);
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
@@ -129,16 +117,6 @@ TEST_CASE("jiffy_client_lease_worker_test", "[put][get][update][remove]") {
     mgmt_serve_thread.join();
   }
 
-  notif_server->stop();
-  if (notif_serve_thread.joinable()) {
-    notif_serve_thread.join();
-  }
-
-  chain_server->stop();
-  if (chain_serve_thread.joinable()) {
-    chain_serve_thread.join();
-  }
-
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
@@ -154,29 +132,19 @@ TEST_CASE("jiffy_client_create_test", "[put][get][update][remove]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS,
                                                   STORAGE_SERVICE_PORT,
-                                                  STORAGE_MANAGEMENT_PORT,
-                                                  STORAGE_NOTIFICATION_PORT,
-                                                  STORAGE_CHAIN_PORT);
+                                                  STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   auto blocks = test_utils::init_hash_table_blocks(block_names);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
+  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
 
   auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
   std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
-
-  auto notif_server = notification_server::create(blocks, HOST, STORAGE_NOTIFICATION_PORT);
-  std::thread notif_serve_thread([&notif_server] { notif_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_NOTIFICATION_PORT);
-
-  auto chain_server = chain_server::create(blocks, HOST, STORAGE_CHAIN_PORT);
-  std::thread chain_serve_thread([&chain_server] { chain_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT);
 
   auto dir_server = directory_server::create(tree, HOST, DIRECTORY_SERVICE_PORT);
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
@@ -209,16 +177,6 @@ TEST_CASE("jiffy_client_create_test", "[put][get][update][remove]") {
     mgmt_serve_thread.join();
   }
 
-  notif_server->stop();
-  if (notif_serve_thread.joinable()) {
-    notif_serve_thread.join();
-  }
-
-  chain_server->stop();
-  if (chain_serve_thread.joinable()) {
-    chain_serve_thread.join();
-  }
-
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
@@ -234,29 +192,19 @@ TEST_CASE("jiffy_client_open_test", "[put][get][update][remove]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS,
                                                   STORAGE_SERVICE_PORT,
-                                                  STORAGE_MANAGEMENT_PORT,
-                                                  STORAGE_NOTIFICATION_PORT,
-                                                  STORAGE_CHAIN_PORT);
+                                                  STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   auto blocks = test_utils::init_hash_table_blocks(block_names);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
+  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
 
   auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
   std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
-
-  auto notif_server = notification_server::create(blocks, HOST, STORAGE_NOTIFICATION_PORT);
-  std::thread notif_serve_thread([&notif_server] { notif_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_NOTIFICATION_PORT);
-
-  auto chain_server = chain_server::create(blocks, HOST, STORAGE_CHAIN_PORT);
-  std::thread chain_serve_thread([&chain_server] { chain_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT);
 
   auto dir_server = directory_server::create(tree, HOST, DIRECTORY_SERVICE_PORT);
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
@@ -290,16 +238,6 @@ TEST_CASE("jiffy_client_open_test", "[put][get][update][remove]") {
     mgmt_serve_thread.join();
   }
 
-  notif_server->stop();
-  if (notif_serve_thread.joinable()) {
-    notif_serve_thread.join();
-  }
-
-  chain_server->stop();
-  if (chain_serve_thread.joinable()) {
-    chain_serve_thread.join();
-  }
-
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
@@ -315,29 +253,19 @@ TEST_CASE("jiffy_client_flush_remove_test", "[put][get][update][remove]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS,
                                                   STORAGE_SERVICE_PORT,
-                                                  STORAGE_MANAGEMENT_PORT,
-                                                  STORAGE_NOTIFICATION_PORT,
-                                                  STORAGE_CHAIN_PORT);
+                                                  STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   auto blocks = test_utils::init_hash_table_blocks(block_names);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
+  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
 
   auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
   std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
-
-  auto notif_server = notification_server::create(blocks, HOST, STORAGE_NOTIFICATION_PORT);
-  std::thread notif_serve_thread([&notif_server] { notif_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_NOTIFICATION_PORT);
-
-  auto chain_server = chain_server::create(blocks, HOST, STORAGE_CHAIN_PORT);
-  std::thread chain_serve_thread([&chain_server] { chain_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT);
 
   auto dir_server = directory_server::create(tree, HOST, DIRECTORY_SERVICE_PORT);
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
@@ -374,16 +302,6 @@ TEST_CASE("jiffy_client_flush_remove_test", "[put][get][update][remove]") {
     mgmt_serve_thread.join();
   }
 
-  notif_server->stop();
-  if (notif_serve_thread.joinable()) {
-    notif_serve_thread.join();
-  }
-
-  chain_server->stop();
-  if (chain_serve_thread.joinable()) {
-    chain_serve_thread.join();
-  }
-
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
@@ -399,29 +317,19 @@ TEST_CASE("jiffy_client_close_test", "[put][get][update][remove]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS,
                                                   STORAGE_SERVICE_PORT,
-                                                  STORAGE_MANAGEMENT_PORT,
-                                                  STORAGE_NOTIFICATION_PORT,
-                                                  STORAGE_CHAIN_PORT);
+                                                  STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   auto blocks = test_utils::init_hash_table_blocks(block_names);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
+  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
 
   auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
   std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
-
-  auto notif_server = notification_server::create(blocks, HOST, STORAGE_NOTIFICATION_PORT);
-  std::thread notif_serve_thread([&notif_server] { notif_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_NOTIFICATION_PORT);
-
-  auto chain_server = chain_server::create(blocks, HOST, STORAGE_CHAIN_PORT);
-  std::thread chain_serve_thread([&chain_server] { chain_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT);
 
   auto dir_server = directory_server::create(tree, HOST, DIRECTORY_SERVICE_PORT);
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
@@ -471,16 +379,6 @@ TEST_CASE("jiffy_client_close_test", "[put][get][update][remove]") {
     mgmt_serve_thread.join();
   }
 
-  notif_server->stop();
-  if (notif_serve_thread.joinable()) {
-    notif_serve_thread.join();
-  }
-
-  chain_server->stop();
-  if (chain_serve_thread.joinable()) {
-    chain_serve_thread.join();
-  }
-
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
@@ -496,29 +394,19 @@ TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS,
                                                   STORAGE_SERVICE_PORT,
-                                                  STORAGE_MANAGEMENT_PORT,
-                                                  STORAGE_NOTIFICATION_PORT,
-                                                  STORAGE_CHAIN_PORT);
+                                                  STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   auto blocks = test_utils::init_hash_table_blocks(block_names);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
+  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
 
   auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
   std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
-
-  auto notif_server = notification_server::create(blocks, HOST, STORAGE_NOTIFICATION_PORT);
-  std::thread notif_serve_thread([&notif_server] { notif_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_NOTIFICATION_PORT);
-
-  auto chain_server = chain_server::create(blocks, HOST, STORAGE_CHAIN_PORT);
-  std::thread chain_serve_thread([&chain_server] { chain_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT);
 
   auto dir_server = directory_server::create(tree, HOST, DIRECTORY_SERVICE_PORT);
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
@@ -585,16 +473,6 @@ TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
     mgmt_serve_thread.join();
   }
 
-  notif_server->stop();
-  if (notif_serve_thread.joinable()) {
-    notif_serve_thread.join();
-  }
-
-  chain_server->stop();
-  if (chain_serve_thread.joinable()) {
-    chain_serve_thread.join();
-  }
-
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
@@ -610,29 +488,19 @@ TEST_CASE("jiffy_client_chain_replication_test", "[put][get][update][remove]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS,
                                                   STORAGE_SERVICE_PORT,
-                                                  STORAGE_MANAGEMENT_PORT,
-                                                  STORAGE_NOTIFICATION_PORT,
-                                                  STORAGE_CHAIN_PORT);
+                                                  STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   auto blocks = test_utils::init_hash_table_blocks(block_names);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
+  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
 
   auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
   std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
-
-  auto notif_server = notification_server::create(blocks, HOST, STORAGE_NOTIFICATION_PORT);
-  std::thread notif_serve_thread([&notif_server] { notif_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_NOTIFICATION_PORT);
-
-  auto chain_server = chain_server::create(blocks, HOST, STORAGE_CHAIN_PORT);
-  std::thread chain_serve_thread([&chain_server] { chain_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_CHAIN_PORT);
 
   auto dir_server = directory_server::create(tree, HOST, DIRECTORY_SERVICE_PORT);
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
@@ -663,16 +531,6 @@ TEST_CASE("jiffy_client_chain_replication_test", "[put][get][update][remove]") {
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
-  }
-
-  notif_server->stop();
-  if (notif_serve_thread.joinable()) {
-    notif_serve_thread.join();
-  }
-
-  chain_server->stop();
-  if (chain_serve_thread.joinable()) {
-    chain_serve_thread.join();
   }
 
   dir_server->stop();

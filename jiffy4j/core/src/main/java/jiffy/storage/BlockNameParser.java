@@ -7,17 +7,12 @@ public class BlockNameParser {
     private String host;
     private int servicePort;
     private int managementPort;
-    private int notificationPort;
-    private int chainPort;
     private int blockId;
 
-    BlockMetadata(String host, int servicePort, int managementPort, int notificationPort,
-        int chainPort, int blockId) {
+    BlockMetadata(String host, int servicePort, int managementPort, int blockId) {
       this.host = host;
       this.servicePort = servicePort;
       this.managementPort = managementPort;
-      this.notificationPort = notificationPort;
-      this.chainPort = chainPort;
       this.blockId = blockId;
     }
 
@@ -33,14 +28,6 @@ public class BlockNameParser {
       return managementPort;
     }
 
-    public int getNotificationPort() {
-      return notificationPort;
-    }
-
-    public int getChainPort() {
-      return chainPort;
-    }
-
     public int getBlockId() {
       return blockId;
     }
@@ -49,7 +36,7 @@ public class BlockNameParser {
   public static BlockMetadata parse(String blockName) {
     String[] parts = blockName.split(":");
     return new BlockMetadata(parts[0], Integer.parseInt(parts[1]), Integer.parseInt(parts[2]),
-        Integer.parseInt(parts[3]), Integer.parseInt(parts[4]), Integer.parseInt(parts[5]));
+            Integer.parseInt(parts[3]));
   }
 
 }

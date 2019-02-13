@@ -5,7 +5,9 @@ endif ()
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../libjiffy/src
         ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libcuckoo
         ${Boost_INCLUDE_DIRS})
-add_executable(storaged src/storage_server.cpp)
+add_executable(storaged src/storage_server.cpp
+        src/server_storage_tracker.cpp
+        src/server_storage_tracker.h)
 
 add_dependencies(storaged boost_ep jemalloc_ep)
 

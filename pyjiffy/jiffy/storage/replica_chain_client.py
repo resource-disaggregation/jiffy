@@ -60,13 +60,13 @@ class ReplicaChainClient:
 
     def _init(self):
         self.seq = block_request_service.sequence_id(-1, 0, -1)
-        h_host, h_port, _, _, _, h_bid = self.chain.block_ids[0].split(':')
+        h_host, h_port, _, h_bid = self.chain.block_ids[0].split(':')
         self.head = BlockClient(self.client_cache, h_host, int(h_port), int(h_bid))
         self.seq.client_id = self.head.get_client_id()
         if len(self.chain.block_ids) == 1:
             self.tail = self.head
         else:
-            t_host, t_port, _, _, _, t_bid = self.chain.block_ids[-1].split(':')
+            t_host, t_port, _, t_bid = self.chain.block_ids[-1].split(':')
             self.tail = BlockClient(self.client_cache, t_host, int(t_port), int(t_bid))
         self.response_reader = self.tail.get_response_reader(self.seq.client_id)
         self.response_cache = {}
@@ -74,7 +74,7 @@ class ReplicaChainClient:
 
     def _invalidate_cache(self):
         for block in self.chain.block_ids:
-            host, port, _, _, _, _ = block.split(':')
+            host, port, _, _ = block.split(':')
             self.client_cache.remove(host, int(port))
 
     def lock(self):

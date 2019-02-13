@@ -6,7 +6,7 @@ from thrift.transport.TTransport import TTransportException
 
 from jiffy.directory.directory_client import DirectoryClient, Perms
 from jiffy.storage.crc import SLOT_MAX
-from jiffy.subscription.subscriber import SubscriptionClient, Mailbox
+from jiffy.storage.subscriber import SubscriptionClient, Mailbox
 from jiffy.lease.lease_client import LeaseClient
 from jiffy.storage.hash_table_client import HashTableClient
 import logging

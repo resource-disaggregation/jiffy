@@ -13,7 +13,7 @@ import jiffy.notification.event.Notification;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 
-public class KVListener implements Closeable {
+public class HashTableListener implements Closeable {
 
   private Mailbox<Notification> notifications;
   private Mailbox<Control> controls;
@@ -22,7 +22,7 @@ public class KVListener implements Closeable {
   private BlockListener[] listeners;
   private int[] blockIds;
 
-  public KVListener(String path, rpc_data_status status) throws TTransportException {
+  public HashTableListener(String path, rpc_data_status status) throws TTransportException {
     this.notifications = new Mailbox<>();
     this.controls = new Mailbox<>();
     this.blockIds = new int[status.data_blocks.size()];
@@ -32,7 +32,7 @@ public class KVListener implements Closeable {
     for (rpc_replica_chain block: status.data_blocks) {
       BlockMetadata t = BlockNameParser.parse(block.block_ids.get(block.block_ids.size() - 1));
       blockIds[i] = t.getBlockId();
-      listeners[i] = new BlockListener(t.getHost(), t.getNotificationPort(), controls);
+      listeners[i] = new BlockListener(t.getHost(), t.getServicePort(), controls);
       worker.addProtocol(listeners[i].getProtocol());
     }
     workerThread = new Thread(worker);

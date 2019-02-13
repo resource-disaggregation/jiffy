@@ -241,11 +241,11 @@ public class HashTableClient implements Closeable {
       rpc_replica_chain chain = extractChain(resp);
       response = new ReplicaChainClient(fs, path, cache, chain).runCommandRedirected(cmdId, args).get(0);
     }
-    if (ByteBufferUtils.toString(response).equals("!block_moved")) {
+    if (resp.equals("!block_moved")) {
       refresh();
       return null;
     }
-    return (ByteBuffer) response.rewind();
+    return response;
   }
 
   private List<ByteBuffer> handleRedirects(int cmdId, List<ByteBuffer> args,
@@ -261,11 +261,11 @@ public class HashTableClient implements Closeable {
         response = new ReplicaChainClient(fs, path, cache, chain).runCommandRedirected(cmdId, opArgs)
             .get(0);
       }
-      if (ByteBufferUtils.toString(response).equals("!block_moved")) {
+      if (resp.equals("!block_moved")) {
         refresh();
         return null;
       }
-      responses.set(i, (ByteBuffer) response.rewind());
+      responses.set(i, response);
     }
     return responses;
   }

@@ -25,5 +25,13 @@ void notification_handler::control(response_type type, const std::vector<std::st
   }
 }
 
+void notification_handler::response(const sequence_id &, const std::vector<std::string> &) {
+  throw std::logic_error("Notification handler cannot handle query responses.");
+}
+
+void notification_handler::chain_ack(const sequence_id &) {
+  throw std::logic_error("Notification handler cannot handle chain acknowledgements.");
+}
+
 }
 }

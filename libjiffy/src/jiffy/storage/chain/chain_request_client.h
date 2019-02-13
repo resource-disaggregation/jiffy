@@ -2,15 +2,15 @@
 #define JIFFY_CHAIN_REQUEST_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
-#include "chain_request_service.h"
-#include "chain_response_service.h"
+#include "jiffy/storage/service/block_request_service.h"
 
 namespace jiffy {
 namespace storage {
+
 /* Chain request client */
 class chain_request_client {
  public:
-  typedef chain_request_serviceClient thrift_client;
+  typedef block_request_serviceClient thrift_client;
 
   chain_request_client() = default;
 

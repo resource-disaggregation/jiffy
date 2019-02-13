@@ -1,17 +1,17 @@
 package jiffy.notification;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import jiffy.notification.event.Control;
 import jiffy.notification.event.Notification;
-import jiffy.notification.subscription_service.Processor;
-import java.util.function.Consumer;
-import java.util.logging.Logger;
+import jiffy.storage.block_response_service.Processor;
 import org.apache.thrift.TException;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TProtocol;
-import org.apache.thrift.transport.TTransportException;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 public class NotificationWorker implements Runnable {
 
@@ -35,11 +35,8 @@ public class NotificationWorker implements Runnable {
           processor.process(protocol, protocol);
         }
       }
-    } catch (TTransportException ignored) {
-
     } catch (TException e) {
-      logger.severe("Error: " + e.getMessage());
-      throw new RuntimeException(e);
+      logger.info("Notification worker terminating, reason: " + e.getMessage());
     } finally {
       exit.set(true);
     }

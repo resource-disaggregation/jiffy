@@ -12,7 +12,6 @@
 #include "jiffy/storage/manager/storage_management_server.h"
 #include "jiffy/storage/manager/storage_management_client.h"
 #include "jiffy/storage/manager/storage_manager.h"
-#include "jiffy/storage/notification/notification_server.h"
 #include "jiffy/storage/service/block_server.h"
 #include "test_utils.h"
 
@@ -34,23 +33,17 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS,
                                                   STORAGE_SERVICE_PORT,
-                                                  STORAGE_MANAGEMENT_PORT,
-                                                  STORAGE_NOTIFICATION_PORT,
-                                                  0);
+                                                  STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   auto blocks = test_utils::init_hash_table_blocks(block_names);
 
-  auto storage_server = block_server::create(blocks, HOST, STORAGE_SERVICE_PORT);
+  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
 
   auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
   std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
-
-  auto notif_server = notification_server::create(blocks, HOST, STORAGE_NOTIFICATION_PORT);
-  std::thread notif_serve_thread([&notif_server] { notif_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_NOTIFICATION_PORT);
 
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
@@ -106,10 +99,5 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
-  }
-
-  notif_server->stop();
-  if (notif_serve_thread.joinable()) {
-    notif_serve_thread.join();
   }
 }

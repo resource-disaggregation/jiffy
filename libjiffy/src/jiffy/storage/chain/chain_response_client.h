@@ -1,14 +1,14 @@
 #ifndef JIFFY_CHAIN_RESPONSE_CLIENT_H
 #define JIFFY_CHAIN_RESPONSE_CLIENT_H
 
-#include "chain_response_service.h"
+#include "jiffy/storage/service/block_response_service.h"
 
 namespace jiffy {
 namespace storage {
 /* Chain response client */
 class chain_response_client {
  public:
-  typedef chain_response_serviceClient thrift_client;
+  typedef block_response_serviceClient thrift_client;
   chain_response_client() = default;
 
   /**

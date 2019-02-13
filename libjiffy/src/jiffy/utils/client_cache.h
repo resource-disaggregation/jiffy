@@ -52,7 +52,7 @@ class client_cache {
       return it->second;
     }
     auto sock = std::make_shared<transport::TSocket>(host, port);
-    auto transport = std::shared_ptr<transport::TTransport>(new transport::TBufferedTransport(sock));
+    auto transport = std::shared_ptr<transport::TTransport>(new transport::TFramedTransport(sock));
     auto prot = std::shared_ptr<protocol::TProtocol>(new protocol::TBinaryProtocol(transport));
     auto client = std::make_shared<C>(prot);
     transport::TTransportException ex;

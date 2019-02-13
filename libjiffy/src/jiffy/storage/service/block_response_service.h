@@ -22,6 +22,9 @@ class block_response_serviceIf {
  public:
   virtual ~block_response_serviceIf() {}
   virtual void response(const sequence_id& seq, const std::vector<std::string> & result) = 0;
+  virtual void chain_ack(const sequence_id& seq) = 0;
+  virtual void notification(const std::string& op, const std::string& data) = 0;
+  virtual void control(const response_type type, const std::vector<std::string> & ops, const std::string& error) = 0;
 };
 
 class block_response_serviceIfFactory {
@@ -52,6 +55,15 @@ class block_response_serviceNull : virtual public block_response_serviceIf {
  public:
   virtual ~block_response_serviceNull() {}
   void response(const sequence_id& /* seq */, const std::vector<std::string> & /* result */) {
+    return;
+  }
+  void chain_ack(const sequence_id& /* seq */) {
+    return;
+  }
+  void notification(const std::string& /* op */, const std::string& /* data */) {
+    return;
+  }
+  void control(const response_type /* type */, const std::vector<std::string> & /* ops */, const std::string& /* error */) {
     return;
   }
 };
@@ -115,6 +127,183 @@ class block_response_service_response_pargs {
 
 };
 
+typedef struct _block_response_service_chain_ack_args__isset {
+  _block_response_service_chain_ack_args__isset() : seq(false) {}
+  bool seq :1;
+} _block_response_service_chain_ack_args__isset;
+
+class block_response_service_chain_ack_args {
+ public:
+
+  block_response_service_chain_ack_args(const block_response_service_chain_ack_args&);
+  block_response_service_chain_ack_args& operator=(const block_response_service_chain_ack_args&);
+  block_response_service_chain_ack_args() {
+  }
+
+  virtual ~block_response_service_chain_ack_args() throw();
+  sequence_id seq;
+
+  _block_response_service_chain_ack_args__isset __isset;
+
+  void __set_seq(const sequence_id& val);
+
+  bool operator == (const block_response_service_chain_ack_args & rhs) const
+  {
+    if (!(seq == rhs.seq))
+      return false;
+    return true;
+  }
+  bool operator != (const block_response_service_chain_ack_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const block_response_service_chain_ack_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class block_response_service_chain_ack_pargs {
+ public:
+
+
+  virtual ~block_response_service_chain_ack_pargs() throw();
+  const sequence_id* seq;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _block_response_service_notification_args__isset {
+  _block_response_service_notification_args__isset() : op(false), data(false) {}
+  bool op :1;
+  bool data :1;
+} _block_response_service_notification_args__isset;
+
+class block_response_service_notification_args {
+ public:
+
+  block_response_service_notification_args(const block_response_service_notification_args&);
+  block_response_service_notification_args& operator=(const block_response_service_notification_args&);
+  block_response_service_notification_args() : op(), data() {
+  }
+
+  virtual ~block_response_service_notification_args() throw();
+  std::string op;
+  std::string data;
+
+  _block_response_service_notification_args__isset __isset;
+
+  void __set_op(const std::string& val);
+
+  void __set_data(const std::string& val);
+
+  bool operator == (const block_response_service_notification_args & rhs) const
+  {
+    if (!(op == rhs.op))
+      return false;
+    if (!(data == rhs.data))
+      return false;
+    return true;
+  }
+  bool operator != (const block_response_service_notification_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const block_response_service_notification_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class block_response_service_notification_pargs {
+ public:
+
+
+  virtual ~block_response_service_notification_pargs() throw();
+  const std::string* op;
+  const std::string* data;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _block_response_service_control_args__isset {
+  _block_response_service_control_args__isset() : type(false), ops(false), error(false) {}
+  bool type :1;
+  bool ops :1;
+  bool error :1;
+} _block_response_service_control_args__isset;
+
+class block_response_service_control_args {
+ public:
+
+  block_response_service_control_args(const block_response_service_control_args&);
+  block_response_service_control_args& operator=(const block_response_service_control_args&);
+  block_response_service_control_args() : type((response_type)0), error() {
+  }
+
+  virtual ~block_response_service_control_args() throw();
+  response_type type;
+  std::vector<std::string>  ops;
+  std::string error;
+
+  _block_response_service_control_args__isset __isset;
+
+  void __set_type(const response_type val);
+
+  void __set_ops(const std::vector<std::string> & val);
+
+  void __set_error(const std::string& val);
+
+  bool operator == (const block_response_service_control_args & rhs) const
+  {
+    if (!(type == rhs.type))
+      return false;
+    if (!(ops == rhs.ops))
+      return false;
+    if (!(error == rhs.error))
+      return false;
+    return true;
+  }
+  bool operator != (const block_response_service_control_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const block_response_service_control_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class block_response_service_control_pargs {
+ public:
+
+
+  virtual ~block_response_service_control_pargs() throw();
+  const response_type* type;
+  const std::vector<std::string> * ops;
+  const std::string* error;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
 template <class Protocol_>
 class block_response_serviceClientT : virtual public block_response_serviceIf {
  public:
@@ -143,6 +332,12 @@ class block_response_serviceClientT : virtual public block_response_serviceIf {
   }
   void response(const sequence_id& seq, const std::vector<std::string> & result);
   void send_response(const sequence_id& seq, const std::vector<std::string> & result);
+  void chain_ack(const sequence_id& seq);
+  void send_chain_ack(const sequence_id& seq);
+  void notification(const std::string& op, const std::string& data);
+  void send_notification(const std::string& op, const std::string& data);
+  void control(const response_type type, const std::vector<std::string> & ops, const std::string& error);
+  void send_control(const response_type type, const std::vector<std::string> & ops, const std::string& error);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
@@ -173,12 +368,27 @@ class block_response_serviceProcessorT : public ::apache::thrift::TDispatchProce
   ProcessMap processMap_;
   void process_response(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_response(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_chain_ack(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_chain_ack(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_notification(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_notification(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_control(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_control(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
  public:
   block_response_serviceProcessorT(::apache::thrift::stdcxx::shared_ptr<block_response_serviceIf> iface) :
     iface_(iface) {
     processMap_["response"] = ProcessFunctions(
       &block_response_serviceProcessorT::process_response,
       &block_response_serviceProcessorT::process_response);
+    processMap_["chain_ack"] = ProcessFunctions(
+      &block_response_serviceProcessorT::process_chain_ack,
+      &block_response_serviceProcessorT::process_chain_ack);
+    processMap_["notification"] = ProcessFunctions(
+      &block_response_serviceProcessorT::process_notification,
+      &block_response_serviceProcessorT::process_notification);
+    processMap_["control"] = ProcessFunctions(
+      &block_response_serviceProcessorT::process_control,
+      &block_response_serviceProcessorT::process_control);
   }
 
   virtual ~block_response_serviceProcessorT() {}
@@ -221,6 +431,33 @@ class block_response_serviceMultiface : virtual public block_response_serviceIf 
     ifaces_[i]->response(seq, result);
   }
 
+  void chain_ack(const sequence_id& seq) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->chain_ack(seq);
+    }
+    ifaces_[i]->chain_ack(seq);
+  }
+
+  void notification(const std::string& op, const std::string& data) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->notification(op, data);
+    }
+    ifaces_[i]->notification(op, data);
+  }
+
+  void control(const response_type type, const std::vector<std::string> & ops, const std::string& error) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->control(type, ops, error);
+    }
+    ifaces_[i]->control(type, ops, error);
+  }
+
 };
 
 // The 'concurrent' client is a thread safe client that correctly handles
@@ -254,6 +491,12 @@ class block_response_serviceConcurrentClientT : virtual public block_response_se
   }
   void response(const sequence_id& seq, const std::vector<std::string> & result);
   void send_response(const sequence_id& seq, const std::vector<std::string> & result);
+  void chain_ack(const sequence_id& seq);
+  void send_chain_ack(const sequence_id& seq);
+  void notification(const std::string& op, const std::string& data);
+  void send_notification(const std::string& op, const std::string& data);
+  void control(const response_type type, const std::vector<std::string> & ops, const std::string& error);
+  void send_control(const response_type type, const std::vector<std::string> & ops, const std::string& error);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
