@@ -495,6 +495,7 @@ class hash_table_partition : public chain_module {
     import_slot_range_.second = -1;
   }
 
+
  private:
   /**
    * @brief Check if block is overloaded

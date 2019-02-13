@@ -78,6 +78,11 @@ class dummy_storage_manager : public jiffy::storage::storage_management_ops {
   void forward_all(const std::string &block_id) override {
     COMMANDS.push_back("forward_all:" + block_id);
   }
+  void update_partition(const std::string &block_id,
+                        const std::string &partition_name,
+                        const std::string &partition_metadata) override {
+    COMMANDS.push_back("update_partition:" + block_id + ":" + partition_name + ":" + partition_metadata);
+  }
 
   std::vector<std::string> COMMANDS{};
 };

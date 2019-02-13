@@ -129,9 +129,9 @@ service directory_service {
   void remove_data_block(1: string path, 2: string partition_name)
     throws (1: directory_service_exception ex),
 
-  void request_partition_data_update(1: string path, 2: string partition_name, 3: string partition_metadata)
+  void request_partition_data_update(1: string path, 2: string old_partition_name, 3: string new_partition_name, 4: string partition_metadata)
     throws (1: directory_service_exception ex),
 
-  i64 get_storage_capacity(1: string path)
+  i64 get_storage_capacity(1: string path, 2: string partition_name)
     throws (1: directory_service_exception ex),
 }

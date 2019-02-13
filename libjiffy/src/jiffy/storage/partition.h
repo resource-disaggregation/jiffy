@@ -21,7 +21,7 @@ namespace storage {
 /* Partition class */
 class partition {
  public:
-  template <typename T>
+  template<typename T>
   using allocator = block_memory_allocator<T>;
 
   /**
@@ -159,6 +159,13 @@ class partition {
    */
 
   block_response_client_map &clients();
+
+  /**
+   * @brief Set partition name and partition metadata
+   * @param name New partition name
+   * @param metadata New partition metadata
+   */
+  void set_name_and_metadata(const std::string &name, const std::string &metadata);
 
  protected:
   /* Metadata mutex */

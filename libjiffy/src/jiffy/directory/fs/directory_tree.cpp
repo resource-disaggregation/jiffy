@@ -598,5 +598,36 @@ void directory_tree::remove_block(const std::string &path, const std::string &pa
   get_node_as_file(path)->remove_block(partition_name, storage_, allocator_);
 }
 
+void directory_tree::update_partition(const std::string &path,
+                                      const std::string &old_partition_name,
+                                      const std::string &new_partition_name,
+                                      const std::string &partition_metadata) {
+  LOG(log_level::info) << "Updating partition name = " << new_partition_name << " metadata = " << partition_metadata
+                       << " for partition: " << old_partition_name << " of file " << path;
+  auto replica_set = get_node_as_file(path)->dstatus().data_blocks();
+  bool flag = true;
+  for (auto &replica : replica_set) {
+    if (replica.name == old_partition_name) {
+      for (auto &block_name : replica.block_ids)
+        storage_->update_partition(block_name, new_partition_name, partition_metadata);
+      flag = false;
+    }
+  }
+  if (flag)
+    throw directory_ops_exception("Cannot find partition: " + old_partition_name + " under file: " + path);
+  else
+    get_node_as_file(path)->update_data_status_partition(old_partition_name, new_partition_name, partition_metadata);
+}
+
+int64_t directory_tree::get_capacity(const std::string &path, const std::string &partition_name) {
+  LOG(log_level::info) << "Checking partition capacity with partition_name = " << partition_name << " of file " << path;
+  auto replica_set = get_node_as_file(path)->dstatus().data_blocks();
+  for (auto &replica :replica_set) {
+    if (replica.name == partition_name)
+      return storage_->storage_capacity(replica.block_ids.front());
+  }
+  throw directory_ops_exception("Cannot find partition: " + partition_name + " under file: " + path);
+}
+
 }
 }

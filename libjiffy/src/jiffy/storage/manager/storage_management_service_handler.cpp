@@ -108,6 +108,16 @@ void storage_management_service_handler::forward_all(const int32_t block_id) {
   }
 }
 
+void storage_management_service_handler::update_partition_data(const int32_t block_id,
+                                                               const std::string &partition_name,
+                                                               const std::string &partition_metadata) {
+  try {
+    blocks_.at(static_cast<std::size_t>(block_id))->impl()->set_name_and_metadata(partition_name, partition_metadata);
+  } catch (std::exception &e) {
+    throw make_exception(e);
+  }
+}
+
 storage_management_exception storage_management_service_handler::make_exception(std::exception &e) {
   storage_management_exception ex;
   ex.msg = e.what();

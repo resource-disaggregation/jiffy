@@ -62,5 +62,11 @@ block_response_client_map &partition::clients() {
   return client_map_;
 }
 
+void partition::set_name_and_metadata(const std::string &name, const std::string &metadata) {
+  std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+  name_ = name;
+  metadata_ = metadata;
+}
+
 }
 }

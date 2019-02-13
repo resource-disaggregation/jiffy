@@ -94,5 +94,12 @@ void storage_manager::forward_all(const std::string &block_name) {
   client.forward_all(bid.id);
 }
 
+void storage_manager::update_partition(const std::string &block_name, const std::string &partition_name, const std::string &partition_metadata) {
+  auto bid = block_id_parser::parse(block_name);
+  storage_management_client client(bid.host, bid.management_port);
+  LOG(log_level::info) << "Update partition name and metadata on " << bid.host << ":" << bid.management_port;
+  client.update_partition(bid.id, partition_name, partition_metadata);
+}
+
 }
 }

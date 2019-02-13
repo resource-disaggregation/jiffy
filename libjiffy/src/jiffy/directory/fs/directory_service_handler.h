@@ -240,11 +240,44 @@ class directory_service_handler : public directory_serviceIf {
    */
 
   void load(const std::string &path, const std::string &backing_path) override;
+  /**
+   * @brief
+   * @param _return
+   * @param path
+   * @param partition_name
+   * @param partition_metadata
+   */
   void add_data_block(rpc_replica_chain &_return,
                       const std::string &path,
                       const std::string &partition_name,
                       const std::string &partition_metadata) override;
+
+  /**
+   * @brief
+   * @param path
+   * @param partition_name
+   */
   void remove_data_block(const std::string &path, const std::string &partition_name) override;
+
+  /**
+   * @brief
+   * @param path
+   * @param old_partition_name
+   * @param new_partition_name
+   * @param partition_metadata
+   */
+  void request_partition_data_update(const std::string &path,
+                                     const std::string &old_partition_name,
+                                     const std::string &new_partition_name,
+                                     const std::string &partition_metadata) override;
+
+  /**
+   * @brief
+   * @param path
+   * @param partition_name
+   * @return
+   */
+  int64_t get_storage_capacity(const std::string &path, const std::string &partition_name) override;
 
  private:
   /**

@@ -198,5 +198,16 @@ void directory_client::handle_lease_expiry(const std::string &) {
   throw directory_ops_exception("Unsupported operation");
 }
 
+void directory_client::update_partition(const std::string &path,
+                                        const std::string &old_partition_name,
+                                        const std::string &new_partition_name,
+                                        const std::string &partition_metadata) {
+  client_->request_partition_data_update(path, old_partition_name, new_partition_name, partition_metadata);
+}
+
+int64_t directory_client::get_capacity(const std::string &path, const std::string &partition_name) {
+  return client_->get_storage_capacity(path, partition_name);
+}
+
 }
 }

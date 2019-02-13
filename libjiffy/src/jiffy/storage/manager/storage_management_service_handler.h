@@ -114,6 +114,17 @@ class storage_management_service_handler : public storage_management_serviceIf {
 
   void forward_all(int32_t block_id) override;
 
+  /**
+   * @brief Update partition data and metadata
+   * @param block_id Block identifier
+   * @param partition_name New partition name
+   * @param partition_metadata New partition metadata
+   */
+
+  void update_partition_data(const int32_t block_id,
+                             const std::string &partition_name,
+                             const std::string &partition_metadata) override;
+
  private:
 
   /**

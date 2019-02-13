@@ -298,6 +298,25 @@ class directory_client : public directory_interface {
    */
   void remove_block(const std::string &path, const std::string &partition_name) override;
 
+  /**
+   * @brief Update partition name and metadata
+   * @param path File path
+   * @param partition_name New partition name
+   * @param partition_metadata New partition metadata
+   */
+  void update_partition(const std::string &path,
+                        const std::string &old_partition_name,
+                        const std::string &new_partition_name,
+                        const std::string &partition_metadata) override;
+
+  /**
+   * @brief Fetch partition capacity
+   * @param path File path
+   * @param partition_name Partition name
+   * @return Partition capacity
+   */
+  int64_t get_capacity(const std::string &path, const std::string &partition_name) override;
+
  private:
   /* Socket */
   std::shared_ptr<apache::thrift::transport::TSocket> socket_{};
