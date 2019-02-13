@@ -583,7 +583,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       auto merge_range_end = slot_range_.second;
       auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
       // Find the smallest one in the adjacent partition, search through all dstatus
-      auto replica_set = fs->dstatus(path()).data_blocks();
+      auto replica_set = fs->dstatus(path_).data_blocks();
       //TODO : fix when fetching the target replica chain for merging, we need to make sure that the new chain doesn't exceed the merge limit
       // Calculate size, should fail if merging it would let the other block exceed it's threshold
       // Need to contact the directory server to get a lot of things, such as the bytes and such kind of stuff
