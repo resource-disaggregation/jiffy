@@ -7,6 +7,8 @@
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/directory/client/directory_client.h"
 #include "jiffy/directory/directory_ops.h"
+#include "jiffy/storage/manager/detail/block_id_parser.h"
+#include "jiffy/storage/manager/storage_management_client.h"
 
 namespace jiffy {
 namespace storage {
@@ -468,12 +470,14 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
       // TODO: Add logic for splitting slot range
+      // TODO: currently the split and merge use similar logic but using redundant coding, should combine them after passing all the test
       splitting_ = true;
       LOG(log_level::info) << "Requested slot range split";
       // Setup slot range split
-      auto split_range_begin = slot_range_.first;
-      auto split_range_end = (slot_range_.first + slot_range_.second) / 2;
-      std::string new_partition_name = std::to_string(split_range_end + 1) + "_" + std::to_string(slot_range_.second);
+      //TODO will there be a situation when
+      auto split_range_begin = (slot_range_.first + slot_range_.second) / 2 + 1;
+      auto split_range_end = slot_range_.second;
+      std::string new_partition_name = std::to_string(split_range_begin) + "_" + std::to_string(split_range_end);
       auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
       auto dst_replica_chain =
           fs->add_block(path_, new_partition_name, "importing");
@@ -482,9 +486,13 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       auto dst = std::make_shared<replica_chain_client>(fs, path_, dst_replica_chain, 0);
 
       // set the partition state to be exporting and importing
-      set_exporting(dst_replica_chain.block_ids, split_range_end + 1, slot_range_.second);
-      //set_importing(dst.chain().block_ids, split_range_end + 1. slot_range_.second); Need a way to set importing for the destination chain state
-
+      set_exporting(dst_replica_chain.block_ids, split_range_begin, split_range_end);
+      for (auto &block_id : chain()) {
+        auto bid = block_id_parser::parse(block_id);
+        storage_management_client client(bid.host, bid.management_port);
+        //LOG(log_level::trace) << "Setting "
+        //set_importing(dst.chain().block_ids, split_range_end + 1. slot_range_.second); Need a way to set importing for the destination chain state
+      }
 
       bool has_more = true;
       std::size_t split_batch_size = 1024;
@@ -615,7 +623,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       if (merge_target.metadata == "importing" || merge_target.metadata == "exporting") {
         throw std::logic_error("Replica chain already involved in re-partitioning");
       }
-      if(find_smallest_slot_range == hash_table_partition::SLOT_MAX + 1) {
+      if (find_smallest_slot_range == hash_table_partition::SLOT_MAX + 1) {
         throw std::logic_error("Cannot find a merge partner");
       }
       // TODO  Exceptions, e.g. there are no neighbors to merge with, neighbors don't have enough space need to fetch bytes_
