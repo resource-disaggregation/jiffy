@@ -469,12 +469,12 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
 
       // set the partition state to be exporting and importing
       set_exporting(dst_replica_chain.block_ids, split_range_begin, split_range_end);
-      for (auto &block_id : chain()) {
-        auto bid = block_id_parser::parse(block_id);
-        storage_management_client client(bid.host, bid.management_port);
+      //for (auto &block_id : chain()) {
+        //auto bid = block_id_parser::parse(block_id);
+        //storage_management_client client(bid.host, bid.management_port);
         //LOG(log_level::trace) << "Setting "
         //set_importing(dst.chain().block_ids, split_range_end + 1. slot_range_.second); Need a way to set importing for the destination chain state
-      }
+      //}
 
       bool has_more = true;
       std::size_t split_batch_size = 1024;
@@ -590,7 +590,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       // Concurrency issue: when I fetch slot range of another block, what if the slot range continues to change?Keep a lock?
       // When the server starts up, we should find a way to stop the server from merging since there are just very few?
       directory::replica_chain merge_target;
-      int32_t find_smallest_slot_range = hash_table_partition::SLOT_MAX + 1;
+      int32_t find_smallest_slot_range = hash_slot::MAX + 1;
       for (auto &i : replica_set) {
         if (i.fetch_slot_range().first == slot_range_.second + 1
             || i.fetch_slot_range().second == slot_range_.first - 1) {
@@ -604,7 +604,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       if (merge_target.metadata == "importing" || merge_target.metadata == "exporting") {
         throw std::logic_error("Replica chain already involved in re-partitioning");
       }
-      if (find_smallest_slot_range == hash_table_partition::SLOT_MAX + 1) {
+      if (find_smallest_slot_range == hash_slot::MAX + 1) {
         throw std::logic_error("Cannot find a merge partner");
       }
       // TODO  Exceptions, e.g. there are no neighbors to merge with, neighbors don't have enough space need to fetch bytes_
