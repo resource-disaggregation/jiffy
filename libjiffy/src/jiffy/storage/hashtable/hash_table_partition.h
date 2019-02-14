@@ -394,6 +394,22 @@ class hash_table_partition : public chain_module {
   bool empty() const;
 
   /**
+   * @brief Update parition name and metadata
+   * @param new_name New partition name
+   * @param new_metadata New partition metadata
+   */
+
+  std::string update_partition(const std::string new_name, const std::string new_metadata);
+
+  /**
+   * @brief Update partition in locked hash table
+   * @param new_name New partition name
+   * @param new_metadata New partition metadata
+   */
+
+  std::string locked_update_partition(const std::string new_name, const std::string new_metadata);
+
+  /**
    * @brief Run particular command on key value block
    * @param _return Return status to be collected
    * @param cmd_id Operation identifier

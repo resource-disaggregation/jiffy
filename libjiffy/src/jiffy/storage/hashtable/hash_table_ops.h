@@ -28,7 +28,9 @@ enum hash_table_cmd_id : int32_t {
   locked_remove = 12,
   locked_update = 13,
   upsert = 14,
-  locked_upsert = 15
+  locked_upsert = 15,
+  update_partition = 16,
+  locked_update_partition = 17
 };
 
 }

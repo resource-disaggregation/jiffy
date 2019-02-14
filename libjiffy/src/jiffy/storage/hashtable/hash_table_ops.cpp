@@ -18,7 +18,9 @@ std::vector<command> KV_OPS = {command{command_type::accessor, "exists"},
                                command{command_type::mutator, "locked_remove"},
                                command{command_type::mutator, "locked_update"},
                                command{command_type::mutator, "upsert"},
-                               command{command_type::mutator, "locked_upsert"}};
+                               command{command_type::mutator, "locked_upsert"},
+                               command{command_type::mutator, "update_partition"},
+                               command{command_type::mutator, "locked_update_partition"}};
 
 }
 }

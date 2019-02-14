@@ -21,8 +21,18 @@ const std::string &partition::path() const {
   return path_;
 }
 
+void partition::name(const std::string &name) {
+  std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+  name_ = name;
+}
+
 const std::string &partition::name() const {
   return name_;
+}
+
+void partition::metadata(const std::string &metadata) {
+  std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+  metadata_ = metadata;
 }
 
 const std::string &partition::metadata() const {

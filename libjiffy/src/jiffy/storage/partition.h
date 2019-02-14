@@ -67,11 +67,24 @@ class partition {
   const std::string &path() const;
 
   /**
+   * @brief Set partition name
+   * @param name Partition name
+   */
+  void name(const std::string &name);
+
+  /**
    * @brief Fetch partition name
    * @return Partition name
    */
 
   const std::string &name() const;
+
+  /**
+   * @brief Set partition metadata
+   * @param metadata Partition metadata
+   */
+
+  void metadata(const std::string &metadata);
 
   /**
    * @brief Fetch partition metadata

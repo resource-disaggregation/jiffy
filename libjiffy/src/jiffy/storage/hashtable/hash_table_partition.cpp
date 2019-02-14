@@ -317,6 +317,21 @@ std::string hash_table_partition::lock() {
   return "!ok";
 }
 
+std::string hash_table_partition::update_partition(const std::string new_name, const std::string new_metadata) {
+  name(new_name);
+  metadata(new_metadata);
+  return "!ok";
+}
+
+std::string hash_table_partition::locked_update_partition(const std::string new_name, const std::string new_metadata) {
+  if (!locked_block_.is_active()) {
+    return "!block_not_locked";
+  }
+  name(new_name);
+  metadata(new_metadata);
+  return "!ok";
+}
+
 bool hash_table_partition::is_locked() {
   return locked_block_.is_active();
 }
@@ -326,8 +341,8 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
                                        const std::vector<std::string> &args) {
   if (metadata_ == "importing") {
     std::string delimiter = "_";
-    import_slot_range_.first = atoi(name.substr(0, name.find(delimiter)).c_str());
-    import_slot_range_.second = atoi(name.substr(name.find(delimiter) + 1, name.length()).c_str());
+    import_slot_range_.first = atoi(name().substr(0, name().find(delimiter)).c_str());
+    import_slot_range_.second = atoi(name().substr(name().find(delimiter) + 1, name().length()).c_str());
   } else {
     import_slot_range_.first = 0;
     import_slot_range_.second = -1;
@@ -446,6 +461,21 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         locked_get_data_in_slot_range(_return, std::stoi(args[0]), std::stoi(args[1]), std::stoi(args[2]));
       }
       break;
+    case hash_table_cmd_id::update_partition:
+      if (nargs != 2) {
+        _return.emplace_back("!args_error");
+      } else {
+        _return.emplace_back(update_partition(args[0], args[1]));
+      }
+      break;
+    case hash_table_cmd_id::locked_update_partition:
+      if (nargs != 2) {
+        _return.emplace_back("!args_error");
+      } else {
+        _return.emplace_back(locked_update_partition(args[0], args[1]));
+      }
+      break;
+
     default:throw std::invalid_argument("No such operation id " + std::to_string(cmd_id));
   }
   if (is_mutator(cmd_id)) {
@@ -477,10 +507,11 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       auto dst = std::make_shared<replica_chain_client>(fs, path_, dst_replica_chain, 0);
       // set the partition state to be exporting and importing
       export_slot_range(split_range_begin, split_range_end);
-      std::string new_src_partition_name = std::to_string(slot_range_.first) + "_"
+//      std::string
+//      new_src_partition_name = std::to_string(slot_range_.first) + "_"
       std::to_string(split_range_begin - 1);
-      fs->update_partition(path_, name_, new_src_partition_name, "exporting");
-      fs->update_partition(path_, new_partition_name, new_partition_name, "importing");
+//      fs->update_partition(path_, name_, new_src_partition_name, "exporting");
+      //     fs->update_partition(path_, new_partition_name, new_partition_name, "importing");
       bool has_more = true;
       std::size_t split_batch_size = 1024;
       std::size_t tot_split_keys = 0;
@@ -557,8 +588,8 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       }
       // Finalize slot range split
       //need to reset current partition and replica chain name, metadata
-      fs->update_partition(path_, new_src_partition_name, new_src_partition_name, "regular");
-      fs->update_partition(path_, new_partition_name, new_partition_name, "regular");
+//      fs->update_partition(path_, new_src_partition_name, new_src_partition_name, "regular");
+      //     fs->update_partition(path_, new_partition_name, new_partition_name, "regular");
       LOG(log_level::info) << "Exported slot range (" << split_range_begin << ", " << split_range_end << ")";
       splitting_ = false;
       merging_ = false;
@@ -606,10 +637,10 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
             find_smallest_slot_range = slot_range_size;
             merge_target = i;
           }
-          if(flag == 1){
-            merge_target_name =
+          if (flag == 1) {
+            // merge_target_name =
+          } else if (flag == 2) {
           }
-          else if(flag ==2){
         }
       }
       if (merge_target.metadata == "importing" || merge_target.metadata == "exporting") {
@@ -626,7 +657,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       //string merge_target_name =  TODO set merge target name
       export_slot_range(merge_range_begin, merge_range_end);
       fs->update_partition(path_, name_, name_, "exporting");
-      fs->update_partition(path_,)
+      //fs->update_partition(path_,)
       auto src = std::make_shared<replica_chain_client>(fs, path_, chain(), 0);
       auto dst = std::make_shared<replica_chain_client>(fs, path_, merge_target, 0);
       bool has_more = true;
