@@ -9,7 +9,7 @@ namespace jiffy {
 namespace storage {
 
 // The default number of elements in an empty hash table
-constexpr size_t HASH_TABLE_DEFAULT_SIZE = (1U << 18);
+constexpr size_t HASH_TABLE_DEFAULT_SIZE = 0;
 
 // Key/Value definitions
 typedef std::string key_type;

@@ -28,7 +28,7 @@ TEST_CASE("auto_scale_up_test", "[directory_service][storage_server][management_
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(2, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_hash_table_blocks(block_names, 7705);
+  auto blocks = test_utils::init_hash_table_blocks(block_names, 119150);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -45,7 +45,7 @@ TEST_CASE("auto_scale_up_test", "[directory_service][storage_server][management_
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  REQUIRE_NOTHROW(t->create("/sandbox/file.txt", "hashtable", "/tmp"));
+  REQUIRE_NOTHROW(t->create("/sandbox/scale_up.txt", "hashtable", "/tmp", 1, 1, 0, perms::all(), {"0_65536"}, {"regular"}, {}));
 
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -55,7 +55,7 @@ TEST_CASE("auto_scale_up_test", "[directory_service][storage_server][management_
   }
 
   // Busy wait until number of blocks increases
-  while (t->dstatus("/sandbox/file.txt").data_blocks().size() == 1);
+  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
 
   for (std::size_t i = 0; i < 1000; i++) {
     std::string key = std::to_string(i);
@@ -106,7 +106,7 @@ TEST_CASE("auto_scale_down_test", "[directory_service][storage_server][managemen
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  REQUIRE_NOTHROW(t->create("/sandbox/file.txt", "hashtable", "/tmp", 2));
+  REQUIRE_NOTHROW(t->create("/sandbox/scale_down.txt", "hashtable", "/tmp", 2, 1, 0, perms::all(), {"0_32768", "32768_65536"}, {"regular", "regular"}, {}));
 
   // Write some initial data
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -127,7 +127,7 @@ TEST_CASE("auto_scale_down_test", "[directory_service][storage_server][managemen
   REQUIRE(result[0] == "0");
 
   // Busy wait until number of blocks decreases
-  while (t->dstatus("/sandbox/file.txt").data_blocks().size() == 2);
+  while (t->dstatus("/sandbox/scale_down.txt").data_blocks().size() == 2);
 
   for (std::size_t i = 1; i < 1000; i++) {
     std::string key = std::to_string(i);

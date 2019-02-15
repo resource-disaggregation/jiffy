@@ -1021,11 +1021,11 @@ void hash_table_partition::export_slots() {
 }
 
 bool hash_table_partition::overload() {
-  return bytes_.load() > static_cast<size_t>(static_cast<double>(manager_->mb_capacity()) * threshold_hi_);
+  return manager_->mb_used() > static_cast<size_t>(static_cast<double>(manager_->mb_capacity()) * threshold_hi_);
 }
 
 bool hash_table_partition::underload() {
-  return bytes_.load() < static_cast<size_t>(static_cast<double>(manager_->mb_capacity()) * threshold_lo_);
+  return manager_->mb_used() < static_cast<size_t>(static_cast<double>(manager_->mb_capacity()) * threshold_lo_);
 }
 
 REGISTER_IMPLEMENTATION("hashtable", hash_table_partition);

@@ -8,7 +8,7 @@ namespace storage {
 block_memory_manager::block_memory_manager(size_t capacity) : capacity_(capacity), used_(0) {}
 
 void *block_memory_manager::mb_malloc(size_t size) {
-  if (used_.load() + size > capacity_) {
+  if (used_.load() > capacity_) {
     return nullptr;
   }
   auto ptr = mallocx(size, 0);
