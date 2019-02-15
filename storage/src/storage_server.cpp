@@ -54,33 +54,8 @@ std::string dir_host = "127.0.0.1";
 int32_t block_port = 9092;
 std::vector<std::string> block_ids;
 
-void retract_block_names_and_print_stacktrace(int sig_num) {
-  std::string trace = signal_handling::stacktrace();
-  LOG(log_level::info) << "Caught signal " << sig_num << ", cleaning up...";
-  try {
-    block_registration_client client(dir_host, block_port);
-    client.deregister_blocks(block_ids);
-    client.disconnect();
-  } catch (std::exception &e) {
-    LOG(log_level::error) << "Failed to retract blocks: " << e.what()
-                          << "; make sure block allocation server is running\n";
-  }
-
-  fprintf(stderr, "%s\n", trace.c_str());
-  fprintf(stderr, "Exiting...\n");
-  std::exit(0);
-}
-
 int main(int argc, char **argv) {
-  signal_handling::install_signal_handler(retract_block_names_and_print_stacktrace,
-                                          SIGSTOP,
-                                          SIGINT,
-                                          SIGTERM,
-                                          SIGABRT,
-                                          SIGFPE,
-                                          SIGSEGV,
-                                          SIGILL,
-                                          SIGTRAP);
+  signal_handling::install_error_handler(SIGABRT, SIGFPE, SIGSEGV, SIGILL, SIGTRAP);
   GlobalOutput.setOutputFunction(log_utils::log_thrift_msg);
 
   // Parse configuration parameters
