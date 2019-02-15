@@ -22,7 +22,7 @@ class block {
   block(const std::string &id,
         const size_t capacity = 134217728,
         const std::string &directory_host = "localhost",
-        const int directory_port = 9091);
+        const int directory_port = 9090);
 
   /**
    * @brief Get memory block identifier.

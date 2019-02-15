@@ -554,15 +554,21 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       // TODO: currently the split and merge use similar logic but using redundant coding, should combine them after passing all the test
       splitting_ = true;
       LOG(log_level::info) << "Requested slot range split";
+
       auto split_range_begin = (slot_range_.first + slot_range_.second) / 2;
       auto split_range_end = slot_range_.second;
       std::string dst_partition_name = std::to_string(split_range_begin) + "_" + std::to_string(split_range_end);
       auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
+      LOG(log_level::info) << "host !!!!!!!" << directory_host_ << " port " << directory_port_;
       auto dst_replica_chain =
           fs->add_block(path(), dst_partition_name, "importing");
+      
+      LOG(log_level::info) << "Look here!!!!!!!";
+
       // TODO check if add_block succeed, might not be enough capacity in extreme situation
       auto src = std::make_shared<replica_chain_client>(fs, path(), chain(), 0);
       auto dst = std::make_shared<replica_chain_client>(fs, path(), dst_replica_chain, 0);
+
 
       std::string src_partition_name = std::to_string(slot_range_.first) + "_" + std::to_string(split_range_begin);
       set_exporting(dst_replica_chain.block_ids,
@@ -579,7 +585,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       dst->send_command(hash_table_cmd_id::update_partition, dst_before_args);
       src->recv_response();
       dst->recv_response();
-
+      LOG(log_level::info) << "Look here 1";
       bool has_more = true;
       std::size_t split_batch_size = 1024;
       std::size_t tot_split_keys = 0;
@@ -617,6 +623,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
           has_more = false;
         }
 
+        LOG(log_level::info) << "Look here 2";
         auto split_keys = split_data.size() / 2;
         tot_split_keys += split_keys;
         LOG(log_level::trace) << "Read " << split_keys << " keys to split";
@@ -655,7 +662,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         }
       }
       // Finalize slot range split
-
+      LOG(log_level::info) << "Look here 3";
       // Update directory mapping
       std::string old_name = name();
       fs->update_partition(path(), old_name, src_partition_name, "regular");
