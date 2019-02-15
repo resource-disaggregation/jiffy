@@ -20,7 +20,11 @@ std::vector<command> KV_OPS = {command{command_type::accessor, "exists"},
                                command{command_type::mutator, "upsert"},
                                command{command_type::mutator, "locked_upsert"},
                                command{command_type::mutator, "update_partition"},
-                               command{command_type::mutator, "locked_update_partition"}};
+                               command{command_type::mutator, "locked_update_partition"},
+                               command{command_type::mutator, "get_storage_size"},
+                               command{command_type::mutator, "locked_get_storage_size"},
+                               command{command_type::mutator, "get_metadata"},
+                               command{command_type::mutator, "locked_get_metadata"}};
 
 }
 }

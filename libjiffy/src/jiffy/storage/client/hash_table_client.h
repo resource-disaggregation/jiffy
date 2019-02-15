@@ -288,7 +288,7 @@ class hash_table_client {
   std::string path_;
   /* Data status */
   directory::data_status status_;
-  /* Key value blocks, each partition only save a replica chain client */
+  /* Replica chain clients, each partition only save a replica chain client */
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
   /* Slot begin of the blocks */
   std::vector<int32_t> slots_;

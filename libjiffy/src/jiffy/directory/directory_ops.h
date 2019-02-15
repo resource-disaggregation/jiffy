@@ -321,6 +321,10 @@ struct replica_chain {
     return !(*this == other);
   }
 
+  bool operator<(const replica_chain &other) const {
+    return fetch_slot_range().first < other.fetch_slot_range().first;
+  }
+
   /**
    * @brief Fetch slot range from name
    * @return Slot range pair

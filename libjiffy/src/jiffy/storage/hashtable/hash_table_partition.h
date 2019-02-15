@@ -202,6 +202,18 @@ class hash_table_partition : public chain_module {
   }
 
   /**
+   * @brief Set the export target
+   * @param export_target_string Export target string
+   */
+
+  void export_target(const std::string &export_target_string) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    export_target_.clear();
+    export_target_ = utils::string_utils::split(export_target_string, '!');
+    export_target_str_ = export_target_string;
+  }
+
+  /**
    * @brief Fetch export target
    * @return Export target
    */
@@ -408,6 +420,32 @@ class hash_table_partition : public chain_module {
    */
 
   std::string locked_update_partition(const std::string new_name, const std::string new_metadata);
+
+  /**
+   * @brief Fetch storage size
+   * @return Storage size
+   */
+  std::string get_storage_size();
+
+  /**
+   * @brief Fetch storage size of locked hash table
+   * @return Storage size
+   */
+  std::string locked_get_storage_size();
+
+  /**
+   * @brief Fetch partition metadata
+   * @return Partition metadata
+   */
+
+  std::string get_metadata();
+
+  /**
+   * @brief Fetch partition metadata of locked hash table
+   * @return Partition metadata
+   */
+  std::string locked_get_metadata();
+
 
   /**
    * @brief Run particular command on key value block

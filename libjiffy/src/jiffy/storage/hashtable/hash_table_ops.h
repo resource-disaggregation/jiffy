@@ -30,7 +30,11 @@ enum hash_table_cmd_id : int32_t {
   upsert = 14,
   locked_upsert = 15,
   update_partition = 16,
-  locked_update_partition = 17
+  locked_update_partition = 17,
+  get_storage_size = 18,
+  locked_get_storage_size = 19,
+  get_metadata = 20,
+  locked_get_metadata = 21
 };
 
 }
