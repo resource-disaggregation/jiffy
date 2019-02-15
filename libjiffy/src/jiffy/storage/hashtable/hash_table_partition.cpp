@@ -738,12 +738,6 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         dst_partition_name =
             std::to_string(merge_target.fetch_slot_range().first) + "_" + std::to_string(slot_range().second);
 
-
-      // FIXME not using directory metadata anymore
-      if (merge_target.metadata == "importing" || merge_target.metadata == "exporting") {
-        throw std::logic_error("Replica chain already involved in re-partitioning");
-      }
-
       set_exporting(merge_target.block_ids,
                     merge_range_begin,
                     merge_range_end);
