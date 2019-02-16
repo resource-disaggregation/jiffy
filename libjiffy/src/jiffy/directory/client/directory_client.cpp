@@ -3,6 +3,7 @@
 
 #include "directory_client.h"
 #include "../fs/directory_type_conversions.h"
+#include "jiffy/utils/logger.h"
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -10,6 +11,8 @@ using namespace ::apache::thrift::transport;
 
 namespace jiffy {
 namespace directory {
+
+using namespace utils;
 
 directory_client::directory_client(const std::string &host, int port) {
   connect(host, port);
@@ -25,6 +28,7 @@ void directory_client::connect(const std::string &host, int port) {
   transport_ = std::shared_ptr<TTransport>(new TBufferedTransport(socket_));
   protocol_ = std::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
   client_ = std::make_shared<thrift_client>(protocol_);
+  LOG(log_level::info) << "Attempting to connect to " << host << ":" << port;
   transport_->open();
 }
 

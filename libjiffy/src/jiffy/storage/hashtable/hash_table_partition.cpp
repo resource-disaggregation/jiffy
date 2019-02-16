@@ -263,6 +263,7 @@ std::string hash_table_partition::locked_remove(const key_type &key, bool redire
       bytes_.fetch_sub(key.size() + it->second.size());
       old_val = it->second;
       locked_block_.erase(it);
+      // locked_block_.reserve(locked_block_.size());
       return old_val;
     }
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
@@ -626,14 +627,14 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         LOG(log_level::info) << "Look here 2";
         auto split_keys = split_data.size() / 2;
         tot_split_keys += split_keys;
-        LOG(log_level::trace) << "Read " << split_keys << " keys to split";
+        LOG(log_level::info) << "Read " << split_keys << " keys to split";
 
         // Add redirected argument so that importing chain does not ignore our request
         split_data.emplace_back("!redirected");
 
         // Write data to dst partition
         dst->run_command(hash_table_cmd_id::locked_put, split_data);
-        LOG(log_level::trace) << "Sent " << split_keys << " keys";
+        LOG(log_level::info) << "Sent " << split_keys << " keys";
 
         // Remove data from src partition
         std::vector<std::string> remove_keys;
@@ -646,8 +647,9 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
           split_data.pop_back();
         }
         assert(remove_keys.size() == split_keys);
+        LOG(log_level::info) << "Sending " << remove_keys.size() << " split keys to remove";
         src->run_command(hash_table_cmd_id::locked_remove, remove_keys);
-        LOG(log_level::trace) << "Removed " << remove_keys.size() << " split keys";
+        LOG(log_level::info) << "Removed " << remove_keys.size() << " split keys";
 
         // Unlock source and destination blocks
         if (role() == chain_role::singleton) {
@@ -686,6 +688,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       splitting_ = false;
       LOG(log_level::warn) << "Split slot range failed: " << e.what();
     }
+    LOG(log_level::info) << "After split storage: " << manager_->mb_used() << " capacity: " << manager_->mb_capacity();
   }
   expected = false;
   if (auto_scale_.load() && cmd_id == hash_table_cmd_id::remove && underload() && metadata_ != "exporting"
