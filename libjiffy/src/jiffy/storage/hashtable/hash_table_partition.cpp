@@ -9,8 +9,6 @@
 #include "jiffy/storage/hashtable/hash_table_ops.h"
 #include "jiffy/directory/client/directory_client.h"
 #include "jiffy/directory/directory_ops.h"
-#include "jiffy/storage/manager/detail/block_id_parser.h" // TODO remove this
-#include "jiffy/storage/manager/storage_management_client.h"// TODO remove this
 
 namespace jiffy {
 namespace storage {
@@ -563,7 +561,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       LOG(log_level::info) << "host !!!!!!!" << directory_host_ << " port " << directory_port_;
       auto dst_replica_chain =
           fs->add_block(path(), dst_partition_name, "importing");
-      
+
       LOG(log_level::info) << "Look here!!!!!!!";
 
       // TODO check if add_block succeed, might not be enough capacity in extreme situation
