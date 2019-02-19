@@ -10,7 +10,7 @@ namespace storage {
 extern std::vector<command> KV_OPS;
 
 /**
- * @brief Key value block supported operations
+ * @brief Hash table supported operations
  */
 enum hash_table_cmd_id : int32_t {
   exists = 0,
