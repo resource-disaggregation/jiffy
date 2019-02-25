@@ -8,26 +8,26 @@
 namespace jiffy {
 namespace storage {
 
-/* Hash table partition listener */
-class hash_table_listener {
+/* Data structure partition listener */
+class data_structure_listener {
  public:
   typedef std::pair<std::string, std::string> notification_t;
   typedef blocking_queue<notification_t> mailbox_t;
 
   /**
    * @brief Constructor
-   * @param path key value block path
+   * @param path File path
    * @param status Data status
    */
 
-  hash_table_listener(const std::string &path, const directory::data_status &status);
+  data_structure_listener(const std::string &path, const directory::data_status &status);
 
   /**
    * @brief Destructor
    * Close all block listeners
    */
 
-  ~hash_table_listener();
+  ~data_structure_listener();
 
   /**
    * @brief Subscribe for block on operations
@@ -67,7 +67,7 @@ class hash_table_listener {
 
   mailbox_t controls_;
 
-  /* Key value partition path */
+  /* File path path */
   std::string path_;
   /* Data status */
   directory::data_status status_;

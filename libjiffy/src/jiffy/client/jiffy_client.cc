@@ -80,10 +80,10 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::open_or_create_hash_ta
   return std::make_shared<storage::hash_table_client>(fs_, path, s);
 }
 
-std::shared_ptr<storage::hash_table_listener> jiffy_client::listen(const std::string &path) {
+std::shared_ptr<storage::data_structure_listener> jiffy_client::listen(const std::string &path) {
   auto s = fs_->open(path);
   begin_scope(path);
-  return std::make_shared<storage::hash_table_listener>(path, s);
+  return std::make_shared<storage::data_structure_listener>(path, s);
 }
 
 void jiffy_client::remove(const std::string &path) {
