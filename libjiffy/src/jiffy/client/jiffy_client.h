@@ -5,7 +5,7 @@
 #include "jiffy/directory/directory_ops.h"
 #include "jiffy/directory/client/lease_renewal_worker.h"
 #include "jiffy/storage/client/hash_table_client.h"
-#include "jiffy/storage/client/hash_table_listener.h"
+#include "jiffy/storage/client/data_structure_listener.h"
 
 namespace jiffy {
 namespace client {
@@ -104,7 +104,7 @@ class jiffy_client {
    * @return Key value listener
    */
 
-  std::shared_ptr<storage::hash_table_listener> listen(const std::string &path);
+  std::shared_ptr<storage::data_structure_listener> listen(const std::string &path);
 
   /**
    * @brief End scope of file

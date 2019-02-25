@@ -6,7 +6,7 @@
 #include "jiffy/directory/fs/directory_tree.h"
 #include "jiffy/directory/fs/directory_server.h"
 #include "jiffy/storage/client/hash_table_client.h"
-#include "jiffy/storage/client/hash_table_listener.h"
+#include "jiffy/storage/client/data_structure_listener.h"
 #include "jiffy/storage/hashtable/hash_table_partition.h"
 #include "jiffy/storage/hashtable/hash_slot.h"
 #include "jiffy/storage/manager/storage_management_server.h"
@@ -56,9 +56,9 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
   std::string key = "msg1";
 
   {
-    hash_table_listener sub1("/sandbox/file.txt", status);
-    hash_table_listener sub2("/sandbox/file.txt", status);
-    hash_table_listener sub3("/sandbox/file.txt", status);
+    data_structure_listener sub1("/sandbox/file.txt", status);
+    data_structure_listener sub2("/sandbox/file.txt", status);
+    data_structure_listener sub3("/sandbox/file.txt", status);
 
     REQUIRE_NOTHROW(sub1.subscribe({op1}));
     REQUIRE_NOTHROW(sub2.subscribe({op1, op2}));
