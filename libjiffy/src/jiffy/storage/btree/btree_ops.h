@@ -14,7 +14,7 @@ extern std::vector<command> BTREE_OPS;
 enum b_tree_cmd_id : int32_t {
   exists = 0,
   get = 1,
-  num_keys = 2, // TODO: We should not support multi-key operations since we do not provide any guarantees
+  num_keys = 2,
   put = 3,
   range_lookup = 4,
   remove = 5,
