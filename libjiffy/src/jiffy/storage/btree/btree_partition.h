@@ -18,7 +18,7 @@ class btree_partition : public chain_module {
  public:
 
   explicit btree_partition(block_memory_manager *manager,
-                           const std::string &name = "0_65536", //TODO need to fix this name
+                           const std::string &name, //TODO need to fix this name
                            const std::string &metadata = "regular", //TODO need to fix this metadata
                            const utils::property_map &conf = {},
                            const std::string &directory_host = "localhost",
@@ -174,6 +174,31 @@ class btree_partition : public chain_module {
 
   void forward_all() override;
 
+  /**
+   * @brief Set block hash slot range
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
+   */
+
+  void slot_range(std::string &slot_begin, std::string &slot_end) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    slot_range_.first = slot_begin;
+    slot_range_.second = slot_end;
+  }
+
+  /**
+   * @brief Fetch slot range
+   * @return Block slot range
+   */
+
+  const std::pair<std::string, std::string> &slot_range() const {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return slot_range_;
+  }
+
+  const size_t MAX_KEY_LENGTH = 1024;
+
+
  private:
   /* Btree map partition */
   btree_type partition_;
@@ -196,17 +221,17 @@ class btree_partition : public chain_module {
   std::atomic<bool> dirty_;
 
   /* Hash slot range */
-  std::pair<int32_t, int32_t> slot_range_;
+  std::pair<std::string, std::string> slot_range_;
   /* Bool value for auto scaling */
   std::atomic_bool auto_scale_;
   /* Export slot range */
-  std::pair<int32_t, int32_t> export_slot_range_;
+  std::pair<std::string, std::string> export_slot_range_;
   /* Export targets */
   std::vector<std::string> export_target_;
   /* String representation for export target */
   std::string export_target_str_;
   /* Import slot range */
-  std::pair<int32_t, int32_t> import_slot_range_;
+  std::pair<std::string, std::string> import_slot_range_;
 
   /* Directory server hostname */
   std::string directory_host_;

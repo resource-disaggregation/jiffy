@@ -29,9 +29,6 @@ btree_partition::btree_partition(block_memory_manager *manager,
       import_slot_range_(0, -1),
       directory_host_(directory_host),
       directory_port_(directory_port) {
-  std::string delimiter = "_";
-  slot_range_.first = atoi(name.substr(0, name.find(delimiter)).c_str());
-  slot_range_.second = atoi(name.substr(name.find(delimiter) + 1, name.length()).c_str());
   auto ser = conf.get("btree.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>();
@@ -44,8 +41,9 @@ btree_partition::btree_partition(block_memory_manager *manager,
   threshold_lo_ = conf.get_as<double>("btree.capacity_threshold_lo", 0.00);
   auto_scale_ = conf.get_as<bool>("btree.auto_scale", true);
   LOG(log_level::info) << "Partition name: " << name_;
-  auto r = utils::string_utils::split(name_, '_');
-  slot_range(std::stoi(r[0]), std::stoi(r[1]));
+  std::string min_key = "";
+  std::string max_key(MAX_KEY_LENGTH, 0x7f);
+  slot_range(min_key, max_key);// TODO deal with name, this is only a hot fix
 }
 
 std::string btree_partition::put(const key_type &key, const value_type &value, bool redirect) {
@@ -198,35 +196,22 @@ void btree_partition::run_command(std::vector<std::string> &_return,
   bool redirect = !args.empty() && args.back() == "!redirected";
   size_t nargs = redirect ? args.size() - 1 : args.size();
   switch (cmd_id) {
-    case hash_table_cmd_id::exists:
+    case b_tree_cmd_id::exists:
       for (const key_type &key: args)
         _return.push_back(exists(key, redirect));
       break;
-    case hash_table_cmd_id::locked_get:
-      for (const key_type &key: args)
-        _return.emplace_back(locked_get(key, redirect));
-      break;
-    case hash_table_cmd_id::get:
+    case b_tree_cmd_id::get:
       for (const key_type &key: args)
         _return.emplace_back(get(key, redirect));
       break;
-    case hash_table_cmd_id::num_keys:
+    case b_tree_cmd_id::num_keys:
       if (nargs != 0) {
         _return.emplace_back("!args_error");
       } else {
         _return.emplace_back(std::to_string(size()));
       }
       break;
-    case hash_table_cmd_id::locked_put:
-      if (args.size() % 2 != 0 && !redirect) {
-        _return.emplace_back("!args_error");
-      } else {
-        for (size_t i = 0; i < nargs; i += 2) {
-          _return.emplace_back(locked_put(args[i], args[i + 1], redirect));
-        }
-      }
-      break;
-    case hash_table_cmd_id::put:
+    case b_tree_cmd_id::put:
       if (args.size() % 2 != 0 && !redirect) {
         _return.emplace_back("!args_error");
       } else {
@@ -235,44 +220,12 @@ void btree_partition::run_command(std::vector<std::string> &_return,
         }
       }
       break;
-    case hash_table_cmd_id::locked_upsert:
-      if (args.size() % 2 != 0 && !redirect) {
-        _return.emplace_back("!args_error");
-      } else {
-        for (size_t i = 0; i < nargs; i += 2) {
-          _return.emplace_back(locked_upsert(args[i], args[i + 1], redirect));
-        }
-      }
-      break;
-    case hash_table_cmd_id::upsert:
-      if (args.size() % 2 != 0 && !redirect) {
-        _return.emplace_back("!args_error");
-      } else {
-        for (size_t i = 0; i < nargs; i += 2) {
-          _return.emplace_back(upsert(args[i], args[i + 1], redirect));
-        }
-      }
-      break;
-    case hash_table_cmd_id::locked_remove:
-      for (const key_type &key: args) {
-        _return.emplace_back(locked_remove(key, redirect));
-      }
-      break;
-    case hash_table_cmd_id::remove:
+    case b_tree_cmd_id::remove:
       for (const key_type &key: args) {
         _return.emplace_back(remove(key, redirect));
       }
       break;
-    case hash_table_cmd_id::locked_update:
-      if (args.size() % 2 != 0 && !redirect) {
-        _return.emplace_back("!args_error");
-      } else {
-        for (size_t i = 0; i < nargs; i += 2) {
-          _return.emplace_back(locked_update(args[i], args[i + 1], redirect));
-        }
-      }
-      break;
-    case hash_table_cmd_id::update:
+    case b_tree_cmd_id::update:
       if (args.size() % 2 != 0 && !redirect) {
         _return.emplace_back("!args_error");
       } else {
@@ -281,76 +234,36 @@ void btree_partition::run_command(std::vector<std::string> &_return,
         }
       }
       break;
-    case hash_table_cmd_id::keys:
-      if (nargs != 0) {
-        _return.emplace_back("!args_error");
-      } else {
-        keys(_return);
-      }
-      break;
-    case hash_table_cmd_id::lock:
-      if (nargs != 0) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(lock());
-      }
-      break;
-    case hash_table_cmd_id::unlock:
-      if (nargs != 0) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(unlock());
-      }
-      break;
-    case hash_table_cmd_id::locked_data_in_slot_range:
+    case b_tree_cmd_id::range_lookup:
       if (nargs != 3) {
         _return.emplace_back("!args_error");
       } else {
-        locked_get_data_in_slot_range(_return, std::stoi(args[0]), std::stoi(args[1]), std::stoi(args[2]));
+        range_lookup(_return, std::stoi(args[0]), std::stoi(args[1]), std::stoi(args[2]));
       }
       break;
-    case hash_table_cmd_id::update_partition:
+      /* TODO need to add auto scaling function in the future
+    case b_tree_cmd_id::update_partition:
       if (nargs != 2) {
         _return.emplace_back("!args_error");
       } else {
         _return.emplace_back(update_partition(args[0], args[1]));
       }
       break;
-    case hash_table_cmd_id::locked_update_partition:
-      if (nargs != 2) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(locked_update_partition(args[0], args[1]));
-      }
-      break;
-    case hash_table_cmd_id::get_storage_size:
+    case b_tree_cmd_id::get_storage_size:
       if (nargs != 0) {
         _return.emplace_back("!args_error");
       } else {
         _return.emplace_back(get_storage_size());
       }
       break;
-    case hash_table_cmd_id::locked_get_storage_size:
-      if (nargs != 0) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(locked_get_storage_size());
-      }
-      break;
-    case hash_table_cmd_id::get_metadata:
+    case b_tree_cmd_id::get_metadata:
       if (nargs != 0) {
         _return.emplace_back("!args_error");
       } else {
         _return.emplace_back(get_metadata());
       }
       break;
-    case hash_table_cmd_id::locked_get_metadata:
-      if (nargs != 0) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(locked_get_metadata());
-      }
-      break;
+*/
     default:throw std::invalid_argument("No such operation id " + std::to_string(cmd_id));
   }
   if (is_mutator(cmd_id)) {
@@ -365,6 +278,10 @@ void btree_partition::run_command(std::vector<std::string> &_return,
                          << manager_->mb_capacity()
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
+
+      splitting_ = false;
+      LOG(log_level::info) << "Not supporting auto_scaling currently";
+      /* TODO add auto scaling logic for btree here
       // TODO: currently the split and merge use similar logic but using redundant coding, should combine them after passing all the test
       splitting_ = true;
       LOG(log_level::info) << "Requested slot range split";
@@ -496,6 +413,7 @@ void btree_partition::run_command(std::vector<std::string> &_return,
       LOG(log_level::info) << "Exported slot range (" << split_range_begin << ", " << split_range_end << ")";
       splitting_ = false;
       merging_ = false;
+       */
 
     } catch (std::exception &e) {
       splitting_ = false;
@@ -512,6 +430,10 @@ void btree_partition::run_command(std::vector<std::string> &_return,
                          << manager_->mb_capacity()
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
+      merging_ = false;
+      LOG(log_level::info) << "Currently does not support auto_scaling";
+      // TODO add auto_scaling logic here
+      /*
       merging_ = true;
       LOG(log_level::info) << "Requested slot range merge";
 
@@ -664,7 +586,7 @@ void btree_partition::run_command(std::vector<std::string> &_return,
       LOG(log_level::info) << "Merged slot range (" << merge_range_begin << ", " << merge_range_end << ")";
       splitting_ = false;
       merging_ = false;
-
+*/
     } catch (std::exception &e) {
       merging_ = false;
       LOG(log_level::warn) << "Merge slot range failed: " << e.what();
@@ -673,7 +595,7 @@ void btree_partition::run_command(std::vector<std::string> &_return,
 }
 
 std::size_t btree_partition::size() const {
-  return block_.size();
+  return partition_.size();
 }
 
 bool btree_partition::empty() const {
