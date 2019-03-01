@@ -3,7 +3,7 @@
 #include <iostream>
 #include "jiffy/persistent/local/local_store.h"
 #include "jiffy/utils/directory_utils.h"
-#include "jiffy/storage/hashtable/serde/csv_serde.h"
+#include "jiffy/storage/serde/serde_all.h"
 
 using namespace ::jiffy::persistent;
 using namespace ::jiffy::storage;

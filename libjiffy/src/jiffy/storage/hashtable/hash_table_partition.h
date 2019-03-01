@@ -3,13 +3,11 @@
 
 #include <string>
 #include <jiffy/utils/property_map.h>
-#include "jiffy/storage/serde/serde.h"
-#include "jiffy/storage/serde/binary_serde.h"
+#include "jiffy/storage/serde/serde_all.h"
 #include "jiffy/storage/partition.h"
 #include "jiffy/persistent/persistent_service.h"
 #include "jiffy/storage/chain_module.h"
 #include "hash_table_defs.h"
-#include "jiffy/storage/serde/csv_serde.h"
 
 namespace jiffy {
 namespace storage {
