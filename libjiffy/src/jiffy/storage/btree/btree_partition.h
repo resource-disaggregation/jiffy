@@ -25,7 +25,7 @@ class btree_partition : public chain_module {
   /**
    * @brief Virtual destructor
    */
-  virtual ~hash_table_partition() = default;
+  virtual ~btree_partition() = default;
 
   /**
    * @brief Check if hash map contains key
@@ -80,17 +80,17 @@ class btree_partition : public chain_module {
   std::string remove(const key_type &key, bool redirect = false);
 
   /**
-   * @brief Fetch value within the range
+   * @brief Fetch value within the key range
+   * @param data Key value pairs to be fetched
    * @param begin_range Begin range
    * @param end_range End range
    * @param redirect Bool value to choose whether to indirect
-   * @return
+   * @return Range lookup status string
    */
-
-  std::vector<value_type> range_lookup(std::vector<std::string> &data,
-                                       const key_type begin_range,
-                                       const key_type end_range,
-                                       bool redirect = false);
+  std::string range_lookup(std::vector<std::string> &data,
+                           const key_type begin_range,
+                           const key_type end_range,
+                           bool redirect = false);
 
   /**
    * @brief Fetch block size
@@ -178,7 +178,7 @@ class btree_partition : public chain_module {
    * @param slot_end End slot
    */
 
-  void slot_range(std::string &slot_begin, std::string &slot_end) {
+  void slot_range(const std::string &slot_begin, const std::string &slot_end) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     slot_range_.first = slot_begin;
     slot_range_.second = slot_end;
@@ -194,10 +194,83 @@ class btree_partition : public chain_module {
     return slot_range_;
   }
 
-  const size_t MAX_KEY_LENGTH = 1024;
+  /**
+   * @brief Check if key is within slot range
+   * @param key Key
+   * @return Bool value, true if key is in key range
+   */
+  bool in_slot_range(const key_type &key) {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return key >= slot_range_.first && key <= slot_range_.second;
+  }
 
+  /**
+   * @brief Check if key is within import slot range
+   * @param key Key
+   * @return Bool value, true if slot is within the range
+   */
+
+  bool in_import_slot_range(const key_type &key) {
+    return key >= import_slot_range_.first && key <= import_slot_range_.second;
+  }
+
+  /**
+   * @brief Check if key is within export slot range
+   * @param key Key
+   * @return Bool value, true if slot is within the range
+   */
+
+  bool in_export_slot_range(const key_type &key) {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return key >= export_slot_range_.first && key <= export_slot_range_.second;
+  }
+
+  /**
+   * @brief Fetch export target string
+   * @return Export target string
+   */
+
+  const std::string export_target_str() const {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return export_target_str_;
+  }
+
+  /**
+   * @brief Fetch begin slot
+   * @return Begin slot
+   */
+
+  std::string slot_begin() const {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return slot_range_.first;
+  }
+
+  /**
+   * @brief Fetch end slot
+   * @return End slot
+   */
+
+  std::string slot_end() const {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return slot_range_.second;
+  }
 
  private:
+
+  /**
+   * @brief Check if block is overloaded
+   * @return Bool value, true if block size is over the high threshold capacity
+   */
+
+  bool overload();
+
+  /**
+   * @brief Check if block is underloaded
+   * @return Bool value, true if block size is under the low threshold capacity
+   */
+
+  bool underload();
+
   /* Btree map partition */
   btree_type partition_;
 

@@ -93,6 +93,11 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/hashtable/hash_table_ops.cpp
           src/jiffy/storage/hashtable/hash_table_partition.cpp
           src/jiffy/storage/hashtable/hash_table_partition.h
+          src/jiffy/storage/btree/btree_defs.h
+          src/jiffy/storage/btree/btree_ops.h
+          src/jiffy/storage/btree/btree_ops.cpp
+          src/jiffy/storage/btree/btree_partition.h
+          src/jiffy/storage/btree/btree_partition.cpp
           src/jiffy/storage/client/replica_chain_client.cpp
           src/jiffy/storage/client/replica_chain_client.h
           src/jiffy/storage/service/block_response_client.cpp
@@ -269,6 +274,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/hashtable/hash_slot.cpp
           src/jiffy/storage/hashtable/hash_table_ops.h
           src/jiffy/storage/hashtable/hash_table_ops.cpp
+          src/jiffy/storage/btree/btree_ops.h
+          src/jiffy/storage/btree/btree_ops.cpp
           src/jiffy/storage/client/replica_chain_client.cpp
           src/jiffy/storage/client/replica_chain_client.h
           src/jiffy/storage/service/block_response_client.cpp

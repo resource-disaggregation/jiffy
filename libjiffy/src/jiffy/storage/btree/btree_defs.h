@@ -14,17 +14,38 @@ constexpr size_t BTREE_DEFAULT_SIZE = 0;
 // The default number of btree target node size
 const size_t NodeSize = 256;
 
+// The maximum key length
+const size_t MAX_KEY_LENGTH = 1024;
+
+// The min and max keys
+const std::string MIN_KEY = "";
+const std::string MAX_KEY(MAX_KEY_LENGTH, 0x7f);
+
+
+
 // Key/Value definitions
 typedef std::string key_type;
 typedef std::string value_type;
 typedef std::pair<const key_type, value_type> btree_pair_type;
 
 // Custom template arguments
-typedef std::less<std::string> less_type;
-typedef block_memory_allocator<kv_pair_type> allocator_type;
+typedef std::less<key_type> less_type;
+typedef block_memory_allocator<btree_pair_type> allocator_type;
 
 // Btree definitions
-typedef btree_map<key_type, value_type, less_type, allocator_type, NodeSize> btree_type;
+typedef btree::btree_map<key_type, value_type, less_type, allocator_type, NodeSize> btree_type;
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
 }

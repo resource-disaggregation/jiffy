@@ -34,7 +34,7 @@ template <class impl>
 class derived : public impl {
  public:
   template <class... TArgs>
-      derived(TArgs&&... args): Impl(std::forward<TArgs>(args)...)
+      derived(TArgs&&... args): impl(std::forward<TArgs>(args)...)
   {
 
   }
