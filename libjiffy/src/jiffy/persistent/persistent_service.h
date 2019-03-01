@@ -3,7 +3,8 @@
 
 #include <string>
 #include "jiffy/storage/hashtable/hash_table_defs.h"
-#include "jiffy/storage/hashtable/serde/serde.h"
+#include "jiffy/storage/btree/btree_defs.h"
+#include "jiffy/storage/serde/serde_all.h"
 
 namespace jiffy {
 namespace persistent {
@@ -13,7 +14,7 @@ class persistent_service {
   persistent_service(std::shared_ptr<storage::serde> ser): ser_(std::move(ser)) {}
 
   virtual ~persistent_service() = default;
-
+// TODO need to add support for other data structures
   virtual void write(const storage::locked_hash_table_type &table, const std::string &out_path) = 0;
 
   virtual void read(const std::string &in_path, storage::locked_hash_table_type &table) = 0;

@@ -15,52 +15,52 @@ class serde {
   template <typename Datatype>
   std::size_t serialize(const Datatype &table, std::shared_ptr<std::ostream> out)
   {
-    return Vser(table, out);
+    return virtual_serialize(table, out);
   }
   template  <typename Datatype>
   std::size_t deserialize(std::shared_ptr<std::istream> in, Datatype &table)
   {
-    return Vdeser(in, table);
+    return virtual_deserialize(in, table);
   }
 
  private:
-  virtual std::size_t Vser(const locked_hash_table_type &table, std::shared_ptr<std::ostream> out) = 0;
-  virtual std::size_t Vser(const btree_type &table, std::shared_ptr<std::ostream> out) = 0;
-  virtual std::size_t Vdeser(std::shared_ptr<std::istream> in, locked_hash_table_type &table) = 0;
-  virtual std::size_t Vdeser(std::shared_ptr<std::istream> in, btree_type &table) = 0;
+  virtual std::size_t virtual_serialize(const locked_hash_table_type &table, std::shared_ptr<std::ostream> out) = 0;
+  virtual std::size_t virtual_serialize(const btree_type &table, std::shared_ptr<std::ostream> out) = 0;
+  virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, locked_hash_table_type &table) = 0;
+  virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, btree_type &table) = 0;
 };
 
-template <class Impl>
-class Derived : public Impl {
+template <class impl>
+class derived : public impl {
  public:
   template <class... TArgs>
-      Derived(TArgs&&... args): Impl(std::forward<TArgs>(args)...)
+      derived(TArgs&&... args): Impl(std::forward<TArgs>(args)...)
   {
 
   }
  private:
-  std::size_t Vser(const locked_hash_table_type &table, std::shared_ptr<std::ostream> out) {
-    return Impl::Tser(table, out);
+  std::size_t virtual_serialize(const locked_hash_table_type &table, std::shared_ptr<std::ostream> out) final {
+    return impl::serialize_impl(table, out);
   }
-  std::size_t Vser(const btree_type &table, std::shared_ptr<std::ostream> out) {
-    return Impl::Tser(table, out);
+  std::size_t virtual_serialize(const btree_type &table, std::shared_ptr<std::ostream> out) final {
+    return impl::serialize_impl(table, out);
   }
-  std::size_t Vdeser(std::shared_ptr<std::istream> in, locked_hash_table_type &table) {
-    return Impl::Tdeser(in, table);
+  std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, locked_hash_table_type &table) final {
+    return impl::deserialize_impl(in, table);
   }
-  std::size_t Vdeser(std::shared_ptr<std::istream> in, btree_type &table) {
-    return Impl::Tdeser(in, table);
+  std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, btree_type &table) final {
+    return impl::deserialize_impl(in, table);
   }
 };
 
 /* CSV serializer/deserializer class
  * Inherited from serde class */
 
-class csv_serde_Impl : public serde {
+class csv_serde_impl : public serde {
  public:
-  csv_serde() = default;
+  csv_serde_impl() = default;
 
-  virtual ~csv_serde() = default;
+  virtual ~csv_serde_impl() = default;
  protected:
 
   /**
@@ -70,7 +70,7 @@ class csv_serde_Impl : public serde {
    * @return Output stream position after flushing
    */
   template <typename Datatype>
-  std::size_t Tser(const Datatype &table, std::shared_ptr<std::ostream> path) override;
+  std::size_t serialize_impl(const Datatype &table, std::shared_ptr<std::ostream> path);
 
   /**
    * @brief Deserialize Input stream to hash table in CSV format
@@ -79,7 +79,7 @@ class csv_serde_Impl : public serde {
    * @return Input stream position after reading
    */
   template <typename Datatype>
-  std::size_t Tdeser(std::shared_ptr<std::istream> in, Datatype &table) override;
+  std::size_t deserialize_impl(std::shared_ptr<std::istream> in, Datatype &table);
 
  private:
 
@@ -117,15 +117,15 @@ class csv_serde_Impl : public serde {
   }
 };
 
-using csv_serde = Derived<csv_serde_Impl>;
+using csv_serde = derived<csv_serde_impl>;
 
 /* Binary serializer/deserializer class
  * Inherited from serde class */
-class binary_serde_Impl : public serde {
+class binary_serde_impl : public serde {
  public:
-  binary_serde() = default;
+  binary_serde_impl() = default;
 
-  virtual ~binary_serde() = default;
+  virtual ~binary_serde_impl() = default;
 
  protected:
   /**
@@ -135,7 +135,7 @@ class binary_serde_Impl : public serde {
    * @return Output stream position
    */
   template <typename Datatype>
-  size_t Tser(const Datatype &table, std::shared_ptr<std::ostream> out) override;
+  size_t serialize_impl(const Datatype &table, std::shared_ptr<std::ostream> out);
 
   /**
    * @brief Binary deserialization
@@ -144,12 +144,12 @@ class binary_serde_Impl : public serde {
    * @return Input stream position
    */
   template <typename Datatype>
-  size_t Tdeser(std::shared_ptr<std::istream> in, Datatype &table) override;
+  size_t deserialize_impl(std::shared_ptr<std::istream> in, Datatype &table);
 };
 
 
 
-using binary_serde = Derived<binary_serde_Impl>;
+using binary_serde = derived<binary_serde_impl>;
 
 }
 }

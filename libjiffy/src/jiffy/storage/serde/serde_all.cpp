@@ -8,7 +8,7 @@ namespace storage {
 
 
 template <typename Datatype>
-std::size_t csv_serde::Tser(const Datatype &table, std::shared_ptr<std::ostream> out) {
+std::size_t csv_serde_impl::serialize_impl(const Datatype &table, std::shared_ptr<std::ostream> out) {
   for (auto e: table) {
     *out << e.first << "," << e.second << "\n";
   }
@@ -17,7 +17,7 @@ std::size_t csv_serde::Tser(const Datatype &table, std::shared_ptr<std::ostream>
   return static_cast<std::size_t>(sz);
 }
 template <typename Datatype>
-std::size_t csv_serde::Tser(std::shared_ptr<std::istream> in, Datatype &table) {
+std::size_t csv_serde_impl::deserialize_impl(std::shared_ptr<std::istream> in, Datatype &table) {
   while (!in->eof()) {
     std::string line;
     std::getline(*in, line, '\n');
@@ -30,7 +30,7 @@ std::size_t csv_serde::Tser(std::shared_ptr<std::istream> in, Datatype &table) {
   return static_cast<std::size_t>(sz);
 }
 template <typename Datatype>
-std::size_t binary_serde::Tser(const Datatype &table, std::shared_ptr<std::ostream> out) {
+std::size_t binary_serde_impl::serialize_impl(const Datatype &table, std::shared_ptr<std::ostream> out) {
   for (auto e: table) {
     std::size_t key_size = e.first.size();
     std::size_t value_size = e.second.size();
@@ -44,7 +44,7 @@ std::size_t binary_serde::Tser(const Datatype &table, std::shared_ptr<std::ostre
   return static_cast<std::size_t>(sz);
 }
 template <typename Datatype>
-std::size_t binary_serde::Tdeser(std::shared_ptr<std::istream> in, Datatype &table) {
+std::size_t binary_serde_impl::deserialize_impl(std::shared_ptr<std::istream> in, Datatype &table) {
   while (!in->eof()) {
     std::size_t key_size;
     std::size_t value_size;
