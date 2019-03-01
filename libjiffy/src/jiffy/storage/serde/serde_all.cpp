@@ -6,7 +6,9 @@
 namespace jiffy {
 namespace storage {
 
-std::size_t csv_serde::serialize(const block_type &table, std::shared_ptr<std::ostream> out) {
+
+template <typename Datatype>
+std::size_t csv_serde::Tser(const Datatype &table, std::shared_ptr<std::ostream> out) {
   for (auto e: table) {
     *out << e.first << "," << e.second << "\n";
   }
@@ -14,8 +16,8 @@ std::size_t csv_serde::serialize(const block_type &table, std::shared_ptr<std::o
   auto sz = out->tellp();
   return static_cast<std::size_t>(sz);
 }
-
-std::size_t csv_serde::deserialize(std::shared_ptr<std::istream> in, block_type &table) {
+template <typename Datatype>
+std::size_t csv_serde::Tser(std::shared_ptr<std::istream> in, Datatype &table) {
   while (!in->eof()) {
     std::string line;
     std::getline(*in, line, '\n');
@@ -27,8 +29,8 @@ std::size_t csv_serde::deserialize(std::shared_ptr<std::istream> in, block_type 
   auto sz = in->tellg();
   return static_cast<std::size_t>(sz);
 }
-
-std::size_t binary_serde::Tser(const block_type &table, std::shared_ptr<std::ostream> out) {
+template <typename Datatype>
+std::size_t binary_serde::Tser(const Datatype &table, std::shared_ptr<std::ostream> out) {
   for (auto e: table) {
     std::size_t key_size = e.first.size();
     std::size_t value_size = e.second.size();
@@ -41,8 +43,8 @@ std::size_t binary_serde::Tser(const block_type &table, std::shared_ptr<std::ost
   auto sz = out->tellp();
   return static_cast<std::size_t>(sz);
 }
-
-std::size_t binary_serde::Tdeser(std::shared_ptr<std::istream> in, block_type &table) {
+template <typename Datatype>
+std::size_t binary_serde::Tdeser(std::shared_ptr<std::istream> in, Datatype &table) {
   while (!in->eof()) {
     std::size_t key_size;
     std::size_t value_size;
@@ -59,6 +61,8 @@ std::size_t binary_serde::Tdeser(std::shared_ptr<std::istream> in, block_type &t
   auto sz = in->tellg();
   return static_cast<std::size_t>(sz);
 }
+
+
 
 }
 }
