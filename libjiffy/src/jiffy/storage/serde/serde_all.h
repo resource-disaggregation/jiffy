@@ -62,6 +62,7 @@ class csv_serde_Impl : public serde {
 
   virtual ~csv_serde() = default;
  protected:
+
   /**
    * @brief Serialize hash table in CSV format
    * @param table Locked hash table
@@ -69,7 +70,7 @@ class csv_serde_Impl : public serde {
    * @return Output stream position after flushing
    */
   template <typename Datatype>
-  std::size_t serialize(const Datatype &table, std::shared_ptr<std::ostream> path) override;
+  std::size_t Tser(const Datatype &table, std::shared_ptr<std::ostream> path) override;
 
   /**
    * @brief Deserialize Input stream to hash table in CSV format
@@ -78,7 +79,7 @@ class csv_serde_Impl : public serde {
    * @return Input stream position after reading
    */
   template <typename Datatype>
-  std::size_t deserialize(std::shared_ptr<std::istream> in, Datatype &table) override;
+  std::size_t Tdeser(std::shared_ptr<std::istream> in, Datatype &table) override;
 
  private:
 
@@ -116,6 +117,8 @@ class csv_serde_Impl : public serde {
   }
 };
 
+using csv_serde = Derived<csv_serde_Impl>;
+
 /* Binary serializer/deserializer class
  * Inherited from serde class */
 class binary_serde_Impl : public serde {
@@ -132,7 +135,7 @@ class binary_serde_Impl : public serde {
    * @return Output stream position
    */
   template <typename Datatype>
-  size_t serialize(const Datatype &table, std::shared_ptr<std::ostream> out) override;
+  size_t Tser(const Datatype &table, std::shared_ptr<std::ostream> out) override;
 
   /**
    * @brief Binary deserialization
@@ -141,9 +144,11 @@ class binary_serde_Impl : public serde {
    * @return Input stream position
    */
   template <typename Datatype>
-  size_t deserialize(std::shared_ptr<std::istream> in, Datatype &table) override;
+  size_t Tdeser(std::shared_ptr<std::istream> in, Datatype &table) override;
 };
-using csv_serde = Derived<csv_serde_Impl>;
+
+
+
 using binary_serde = Derived<binary_serde_Impl>;
 
 }
