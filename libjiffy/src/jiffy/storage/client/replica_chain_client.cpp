@@ -110,7 +110,7 @@ bool replica_chain_client::is_connected() const {
 }
 
 replica_chain_client::locked_client::locked_client(replica_chain_client &parent) : parent_(parent) {
-  auto res = parent_.run_command(hash_table_cmd_id::lock, {});
+  auto res = parent_.run_command(static_cast<int32_t >(hash_table_cmd_id::lock), {});
   if (res[0] != "!ok") {
     redirecting_ = true;
     redirect_chain_ = utils::string_utils::split(res[0], '!');
@@ -124,7 +124,7 @@ replica_chain_client::locked_client::~locked_client() {
 }
 
 void replica_chain_client::locked_client::unlock() {
-  parent_.run_command(hash_table_cmd_id::unlock, {});
+  parent_.run_command(static_cast<int32_t >(hash_table_cmd_id::unlock), {});
 }
 
 const directory::replica_chain &replica_chain_client::locked_client::chain() {

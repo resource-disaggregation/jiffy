@@ -3,6 +3,7 @@
 
 #include "jiffy/storage/hashtable/hash_table_defs.h"
 #include "jiffy/storage/btree/btree_defs.h"
+#include <sstream>
 
 namespace jiffy {
 namespace storage {

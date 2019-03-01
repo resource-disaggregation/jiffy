@@ -198,22 +198,22 @@ void btree_partition::run_command(std::vector<std::string> &_return,
   bool redirect = !args.empty() && args.back() == "!redirected";
   size_t nargs = redirect ? args.size() - 1 : args.size();
   switch (cmd_id) {
-    case b_tree_cmd_id::exists:
+    case static_cast<int32_t >(b_tree_cmd_id::exists):
       for (const key_type &key: args)
         _return.push_back(exists(key, redirect));
       break;
-    case b_tree_cmd_id::get:
+    case static_cast<int32_t >(b_tree_cmd_id::get):
       for (const key_type &key: args)
         _return.emplace_back(get(key, redirect));
       break;
-    case b_tree_cmd_id::num_keys:
+    case static_cast<int32_t >(b_tree_cmd_id::num_keys):
       if (nargs != 0) {
         _return.emplace_back("!args_error");
       } else {
         _return.emplace_back(std::to_string(size()));
       }
       break;
-    case b_tree_cmd_id::put:
+    case static_cast<int32_t >(b_tree_cmd_id::put):
       if (args.size() % 2 != 0 && !redirect) {
         _return.emplace_back("!args_error");
       } else {
@@ -222,12 +222,12 @@ void btree_partition::run_command(std::vector<std::string> &_return,
         }
       }
       break;
-    case b_tree_cmd_id::remove:
+    case static_cast<int32_t >(b_tree_cmd_id::remove):
       for (const key_type &key: args) {
         _return.emplace_back(remove(key, redirect));
       }
       break;
-    case b_tree_cmd_id::update:
+    case static_cast<int32_t >(b_tree_cmd_id::update):
       if (args.size() % 2 != 0 && !redirect) {
         _return.emplace_back("!args_error");
       } else {
@@ -236,7 +236,7 @@ void btree_partition::run_command(std::vector<std::string> &_return,
         }
       }
       break;
-    case b_tree_cmd_id::range_lookup:
+    case static_cast<int32_t >(b_tree_cmd_id::range_lookup):
       if (nargs != 3) {
         _return.emplace_back("!args_error");
       } else {
@@ -424,7 +424,7 @@ void btree_partition::run_command(std::vector<std::string> &_return,
     LOG(log_level::info) << "After split storage: " << manager_->mb_used() << " capacity: " << manager_->mb_capacity();
   }
   expected = false;
-  if (auto_scale_.load() && cmd_id == hash_table_cmd_id::remove && underload() && metadata_ != "exporting"
+  if (auto_scale_.load() && cmd_id == static_cast<int32_t >(b_tree_cmd_id::remove) && underload() && metadata_ != "exporting"
       && metadata_ != "importing" && slot_end() != MAX_KEY && is_tail()
       && merging_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
@@ -611,7 +611,7 @@ bool btree_partition::is_dirty() const {
 void btree_partition::load(const std::string &path) {
   auto remote = persistent::persistent_store::instance(path, ser_);
   auto decomposed = persistent::persistent_store::decompose_path(path);
-  remote->read(decomposed.second, partition_);
+//  remote->read(decomposed.second, partition_);
 }
 
 bool btree_partition::sync(const std::string &path) {
@@ -619,7 +619,7 @@ bool btree_partition::sync(const std::string &path) {
   if (dirty_.compare_exchange_strong(expected, false)) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    remote->write(partition_, decomposed.second);
+  //  remote->write(partition_, decomposed.second);
     return true;
   }
   return false;
@@ -632,7 +632,7 @@ bool btree_partition::dump(const std::string &path) {
   if (dirty_.compare_exchange_strong(expected, false)) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    remote->write(partition_, decomposed.second);
+  //  remote->write(partition_, decomposed.second);
     flushed = true;
   }
   partition_.clear();
@@ -655,7 +655,7 @@ void btree_partition::forward_all() {
   int64_t i = 0;
   for (auto it = partition_.begin(); it != partition_.end(); it++) {
     std::vector<std::string> result;
-    run_command_on_next(result, hash_table_cmd_id::put, {it.key(), (*it).second});
+    run_command_on_next(result, static_cast<int32_t >(b_tree_cmd_id::put), {it.key(), (*it).second});
     ++i;
   }
 }

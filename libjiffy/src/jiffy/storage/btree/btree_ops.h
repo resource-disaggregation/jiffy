@@ -13,7 +13,7 @@ extern std::vector<command> BTREE_OPS;
  * @brief Btree supported operations
  */
 
-enum b_tree_cmd_id : int32_t {
+enum class b_tree_cmd_id {
   exists = 0,
   get = 1,
   num_keys = 2,

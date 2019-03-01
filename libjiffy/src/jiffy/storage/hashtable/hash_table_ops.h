@@ -12,7 +12,7 @@ extern std::vector<command> KV_OPS;
 /**
  * @brief Hash table supported operations
  */
-enum hash_table_cmd_id : int32_t {
+enum class hash_table_cmd_id {
   exists = 0,
   get = 1,
   keys = 2, // TODO: We should not support multi-key operations since we do not provide any guarantees
