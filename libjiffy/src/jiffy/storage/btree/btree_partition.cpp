@@ -92,7 +92,8 @@ std::string btree_partition::update(const key_type &key, const value_type &value
     auto ret = partition_.find(key);
     if (ret != partition_.end()) {
       old_val = (*ret).second;
-      partition_.insert(ret, value);
+      partition_.erase(ret);
+      partition_.insert(std::make_pair(key, value));//TODO fix this
       return old_val;
     }
     if (metadata_ == "exporting" && in_export_slot_range(key)) {
@@ -124,7 +125,9 @@ std::string btree_partition::remove(const key_type &key, bool redirect) {
 std::string btree_partition::range_lookup(std::vector<std::string> &data,
                                           const key_type begin_range,
                                           const key_type end_range,
+                                          const std::string string_num_keys,
                                           bool redirect) {
+  int num_keys = std::stoi(string_num_keys);
   if (begin_range > end_range) return "!ok"; // TODO fix this
   auto start = partition_.lower_bound(begin_range);
   auto end = (partition_.upper_bound(end_range))--;
@@ -145,14 +148,13 @@ std::string btree_partition::range_lookup(std::vector<std::string> &data,
         }
       }
     }
-    if(flag) return "!ok";
-    if(metadata_ == "exporting" && end.key() >= export_slot_range_.first && start.key() <= export_slot_range_.second) {
+    if (flag) return "!ok";
+    if (metadata_ == "exporting" && end.key() >= export_slot_range_.first && start.key() <= export_slot_range_.second) {
       return "!exporting!" + export_target_str();
     }
   }
   return "!block_moved";
 }
-
 
 std::string btree_partition::update_partition(const std::string new_name, const std::string new_metadata) {
   /* TODO update this when adding auto scaling
@@ -240,7 +242,8 @@ void btree_partition::run_command(std::vector<std::string> &_return,
       if (nargs != 3) {
         _return.emplace_back("!args_error");
       } else {
-        range_lookup(_return, std::stoi(args[0]), std::stoi(args[1]), std::stoi(args[2]));
+        std::vector<std::string> result;
+        _return.emplace_back(range_lookup(result, args[0], args[1], args[2], redirect));
       }
       break;
       /* TODO need to add auto scaling function in the future
@@ -424,7 +427,8 @@ void btree_partition::run_command(std::vector<std::string> &_return,
     LOG(log_level::info) << "After split storage: " << manager_->mb_used() << " capacity: " << manager_->mb_capacity();
   }
   expected = false;
-  if (auto_scale_.load() && cmd_id == static_cast<int32_t >(b_tree_cmd_id::remove) && underload() && metadata_ != "exporting"
+  if (auto_scale_.load() && cmd_id == static_cast<int32_t >(b_tree_cmd_id::remove) && underload()
+      && metadata_ != "exporting"
       && metadata_ != "importing" && slot_end() != MAX_KEY && is_tail()
       && merging_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
@@ -619,7 +623,7 @@ bool btree_partition::sync(const std::string &path) {
   if (dirty_.compare_exchange_strong(expected, false)) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-  //  remote->write(partition_, decomposed.second);
+    //  remote->write(partition_, decomposed.second);
     return true;
   }
   return false;
@@ -632,7 +636,7 @@ bool btree_partition::dump(const std::string &path) {
   if (dirty_.compare_exchange_strong(expected, false)) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-  //  remote->write(partition_, decomposed.second);
+    //  remote->write(partition_, decomposed.second);
     flushed = true;
   }
   partition_.clear();
@@ -640,9 +644,8 @@ bool btree_partition::dump(const std::string &path) {
   path_ = "";
   // clients().clear();
   sub_map_.clear();
-  bytes_.store(0);
-  slot_range_.first = 0;
-  slot_range_.second = -1;
+ // slot_range_.first = ""; TODO fix this
+ // slot_range_.second = "";
   chain_ = {};
   role_ = singleton;
   splitting_ = false;

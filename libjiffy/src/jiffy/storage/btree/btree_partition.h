@@ -90,6 +90,7 @@ class btree_partition : public chain_module {
   std::string range_lookup(std::vector<std::string> &data,
                            const key_type begin_range,
                            const key_type end_range,
+                           const std::string string_num_keys,
                            bool redirect = false);
 
   /**

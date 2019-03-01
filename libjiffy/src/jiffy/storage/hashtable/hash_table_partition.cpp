@@ -923,7 +923,7 @@ void hash_table_partition::forward_all() {
   int64_t i = 0;
   for (const auto &entry: ltable) {
     std::vector<std::string> result;
-    run_command_on_next(result, static_cast<int32_t >((hash_table_cmd_id::put), {entry.first, entry.second});
+    run_command_on_next(result, static_cast<int32_t >(hash_table_cmd_id::put), {entry.first, entry.second});
     ++i;
   }
   ltable.unlock();
