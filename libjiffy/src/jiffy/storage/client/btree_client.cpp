@@ -16,7 +16,7 @@ btree_client::btree_client(std::shared_ptr<directory::directory_interface> fs,
   slots_.clear();
   blocks_.clear();
   for (const auto &block: status.data_blocks()) {
-    slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0]));
+    //slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0])); TODO currently we assume that all the blocks have the key range from MINKEY to MAXKEY
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, timeout_ms_));
   }
 }
@@ -32,7 +32,7 @@ void btree_client::refresh() {
   slots_.clear();
   blocks_.clear();
   for (const auto &block: status_.data_blocks()) {
-    slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0]));
+   // slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0]));
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, timeout_ms_));
   }
 }
@@ -44,7 +44,7 @@ std::string btree_client::put(const std::string &key, const std::string &value) 
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(static_cast<int32_t >(b_tree_cmd_id::put), args).front();
-      handle_redirect(static_cast<int32_t >(b_tree_cmd_id::put), args, _return);
+     // handle_redirect(static_cast<int32_t >(b_tree_cmd_id::put), args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -60,7 +60,7 @@ std::string btree_client::get(const std::string &key) {
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(static_cast<int32_t >(b_tree_cmd_id::get), args).front();
-      handle_redirect(static_cast<int32_t >(b_tree_cmd_id::get), args, _return);
+      //handle_redirect(static_cast<int32_t >(b_tree_cmd_id::get), args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -76,7 +76,7 @@ std::string btree_client::update(const std::string &key, const std::string &valu
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(static_cast<int32_t >(b_tree_cmd_id::update), args).front();
-      handle_redirect(static_cast<int32_t >(b_tree_cmd_id::update), args, _return);
+    //  handle_redirect(static_cast<int32_t >(b_tree_cmd_id::update), args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -92,7 +92,7 @@ std::string btree_client::remove(const std::string &key) {
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(static_cast<int32_t >(b_tree_cmd_id::remove), args).front();
-      handle_redirect(static_cast<int32_t >(b_tree_cmd_id::remove), args, _return);
+   //   handle_redirect(static_cast<int32_t >(b_tree_cmd_id::remove), args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -100,6 +100,22 @@ std::string btree_client::remove(const std::string &key) {
   } while (redo);
   return _return;
 }
+std::vector<std::string> btree_client::range_lookup(const std::string begin_range, const std::string end_range, int num_key) {
+  std::vector<std::string> _return;
+  std::vector<std::string> args{begin_range, end_range, std::to_string(num_key)};
+  bool redo;
+  do {
+    try {
+      _return = blocks_[0]->run_command(static_cast<int32_t >(b_tree_cmd_id::range_lookup), args);// TODO this is a hot fix since we assume that there is only one replica chain currently
+      //   handle_redirect(static_cast<int32_t >(b_tree_cmd_id::remove), args, _return);
+      redo = false;
+    } catch (redo_error &e) {
+      redo = true;
+    }
+  } while (redo);
+  return _return;
+}
+
 
 std::vector<std::string> btree_client::put(const std::vector<std::string> &kvs) {
   if (kvs.size() % 2 != 0) {
@@ -110,7 +126,7 @@ std::vector<std::string> btree_client::put(const std::vector<std::string> &kvs) 
   do {
     try {
       _return = batch_command(b_tree_cmd_id::put, kvs, 2);
-      handle_redirects(static_cast<int32_t >(b_tree_cmd_id::put), kvs, _return);
+    //  handle_redirects(static_cast<int32_t >(b_tree_cmd_id::put), kvs, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -125,7 +141,7 @@ std::vector<std::string> btree_client::get(const std::vector<std::string> &keys)
   do {
     try {
       _return = batch_command(b_tree_cmd_id::get, keys, 1);
-      handle_redirects(static_cast<int32_t >(b_tree_cmd_id::get), keys, _return);
+    //  handle_redirects(static_cast<int32_t >(b_tree_cmd_id::get), keys, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -143,7 +159,7 @@ std::vector<std::string> btree_client::update(const std::vector<std::string> &kv
   do {
     try {
       _return = batch_command(b_tree_cmd_id::update, kvs, 2);
-      handle_redirects(static_cast<int32_t >(b_tree_cmd_id::update), kvs, _return);
+    //  handle_redirects(static_cast<int32_t >(b_tree_cmd_id::update), kvs, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -158,7 +174,7 @@ std::vector<std::string> btree_client::remove(const std::vector<std::string> &ke
   do {
     try {
       _return = batch_command(b_tree_cmd_id::remove, keys, 1);
-      handle_redirects(static_cast<int32_t >(b_tree_cmd_id::remove), keys, _return);
+     // handle_redirects(static_cast<int32_t >(b_tree_cmd_id::remove), keys, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -167,8 +183,28 @@ std::vector<std::string> btree_client::remove(const std::vector<std::string> &ke
   return _return;
 }
 
+std::vector<std::string> btree_client::range_lookup(const std::vector<std::string> args) {
+  if (args.size() % 3 != 0) {
+    throw std::invalid_argument("Incorrect number of arguments");
+  }
+  std::vector<std::string> _return;
+  bool redo;
+  do {
+    try {
+      _return = batch_command(b_tree_cmd_id::range_lookup, args, 3);
+      //  handle_redirects(static_cast<int32_t >(b_tree_cmd_id::get), keys, _return);
+      redo = false;
+    } catch (redo_error &e) {
+      redo = true;
+    }
+  } while (redo);
+  return _return;
+}
+
+//TODO fix this function
 size_t btree_client::block_id(const std::string &key) {
-  return static_cast<size_t>(std::upper_bound(slots_.begin(), slots_.end(), hash_slot::get(key)) - slots_.begin() - 1);
+  return 0;
+  //return static_cast<size_t>(std::upper_bound(slots_.begin(), slots_.end(), hash_slot::get(key)) - slots_.begin() - 1);
 }
 
 std::vector<std::string> btree_client::batch_command(const b_tree_cmd_id &op,
@@ -205,7 +241,7 @@ std::vector<std::string> btree_client::batch_command(const b_tree_cmd_id &op,
 
   return results;
 }
-
+/* Remove for now
 void btree_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
   if (response.substr(0, 10) == "!exporting") {
     typedef std::vector<std::string> list_t;
@@ -249,7 +285,7 @@ void btree_client::handle_redirects(int32_t cmd_id,
     }
   }
 }
-
+*/
 
 }
 }

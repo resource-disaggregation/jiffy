@@ -122,13 +122,13 @@ std::string btree_partition::remove(const key_type &key, bool redirect) {
 }
 
 //TODO this should only happen when it is "locked"
-std::string btree_partition::range_lookup(std::vector<std::string> &data,
-                                          const key_type begin_range,
-                                          const key_type end_range,
-                                          const std::string string_num_keys,
-                                          bool redirect) {
+std::vector<std::string> btree_partition::range_lookup(const key_type begin_range,
+                                                       const key_type end_range,
+                                                       const std::string string_num_keys,
+                                                       bool redirect) {
+  std::vector<std::string> result;
   int num_keys = std::stoi(string_num_keys);
-  if (begin_range > end_range) return "!ok"; // TODO fix this
+ // if (begin_range > end_range) return "!ok"; // TODO fix this
   auto start = partition_.lower_bound(begin_range);
   auto end = (partition_.upper_bound(end_range))--;
   // TODO test on some edge cases, things get pretty tricky for this
@@ -140,20 +140,22 @@ std::string btree_partition::range_lookup(std::vector<std::string> &data,
     for (auto entry = start; entry != end; entry++) {
       if (entry.key() >= begin_range && entry.key() <= end_range) {
         flag = true;
-        data.push_back(entry.key());
-        data.push_back((*entry).second);
+        result.push_back(entry.key());
+        result.push_back((*entry).second);
         ++n_items;
         if (n_items == num_keys) {
-          return "!ok";
+          return result;
         }
       }
     }
+    /* TODO remove autoscaling stuff for now
     if (flag) return "!ok";
     if (metadata_ == "exporting" && end.key() >= export_slot_range_.first && start.key() <= export_slot_range_.second) {
       return "!exporting!" + export_target_str();
     }
+     */
   }
-  return "!block_moved";
+  //return "!block_moved";
 }
 
 std::string btree_partition::update_partition(const std::string new_name, const std::string new_metadata) {
@@ -242,8 +244,8 @@ void btree_partition::run_command(std::vector<std::string> &_return,
       if (nargs != 3) {
         _return.emplace_back("!args_error");
       } else {
-        std::vector<std::string> result;
-        _return.emplace_back(range_lookup(result, args[0], args[1], args[2], redirect));
+        std::vector<std::string> result = range_lookup(args[0], args[1], args[2], redirect);
+        _return.insert(_return.end(), result.begin(), result.end());
       }
       break;
       /* TODO need to add auto scaling function in the future
@@ -644,8 +646,8 @@ bool btree_partition::dump(const std::string &path) {
   path_ = "";
   // clients().clear();
   sub_map_.clear();
- // slot_range_.first = ""; TODO fix this
- // slot_range_.second = "";
+  // slot_range_.first = ""; TODO fix this
+  // slot_range_.second = "";
   chain_ = {};
   role_ = singleton;
   splitting_ = false;

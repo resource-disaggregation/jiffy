@@ -8,8 +8,7 @@ namespace persistent {
 
 /* Local store, inherited persistent_service */
 class local_store_impl : public persistent_service {
- public:
-
+ protected:
   /**
    * @brief Constructor
    * @param ser Custom serializer/deserializer
@@ -17,7 +16,6 @@ class local_store_impl : public persistent_service {
 
   local_store_impl(std::shared_ptr<storage::serde> ser);
 
- protected:
   /**
    * @brief Write data from hash table to persistent storage
    * @param table Hash table
@@ -43,7 +41,7 @@ class local_store_impl : public persistent_service {
   std::string URI() override;
 };
 
-using local_store = derived_persistent<local_store_impl>();
+using local_store = derived_persistent<local_store_impl>;
 
 }
 }

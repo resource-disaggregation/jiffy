@@ -129,7 +129,7 @@ class btree_client {
    * @param num_keys Maximum number of keys to lookup
    * @return Value of keys that are within the key range
    */
-  std::vector<std::string> range_lookup(const std::vector<std::string> begin_ranges, const std::vector<std::string> end_ranges, std::vector<int> num_keys);
+  std::vector<std::string> range_lookup(const std::vector<std::string> args);
 
    private:
   /**
@@ -148,7 +148,7 @@ class btree_client {
    * @return
    */
 
-  std::vector<std::string> batch_command(const hash_table_cmd_id &id, const std::vector<std::string> &args, size_t args_per_op);
+  std::vector<std::string> batch_command(const b_tree_cmd_id &id, const std::vector<std::string> &args, size_t args_per_op);
 
   /**
    * @brief Handle command in redirect case
@@ -157,7 +157,7 @@ class btree_client {
    * @param response Response to be collected
    */
 
-  void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response);
+//  void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response);
 
   /**
    * @brief Handle multiple commands in redirect case
@@ -166,7 +166,8 @@ class btree_client {
    * @param responses Responses to be collected
    */
 
-  void handle_redirects(int32_t cmd_id, const std::vector<std::string> &args, std::vector<std::string> &responses);
+//  void handle_redirects(int32_t cmd_id, const std::vector<std::string> &args, std::vector<std::string> &responses);
+
   /* Directory client */
   std::shared_ptr<directory::directory_interface> fs_;
   /* Key value partition path */

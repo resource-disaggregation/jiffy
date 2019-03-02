@@ -11,18 +11,21 @@ class s3_store_impl : public persistent_service {
  public:
 
   /**
+   * @brief Destructor
+   */
+
+  ~s3_store_impl();
+ protected:
+
+
+  /**
    * @brief Constructor
    * @param ser Custom serializer/deserializer
    */
 
   s3_store_impl(std::shared_ptr<storage::serde> ser);
 
-  /**
-   * @brief Destructor
-   */
 
-  ~s3_store_impl();
- protected:
   /**
    * @brief Write data from hash table to persistent storage
    * @param table Hash table
@@ -56,7 +59,7 @@ class s3_store_impl : public persistent_service {
   Aws::SDKOptions options_;
 };
 
-using s3_store = derived_persistent<s3_store_impl>();
+using s3_store = derived_persistent<s3_store_impl>;
 
 }
 }

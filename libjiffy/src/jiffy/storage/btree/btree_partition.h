@@ -16,7 +16,7 @@ class btree_partition : public chain_module {
  public:
 
   explicit btree_partition(block_memory_manager *manager,
-                           const std::string &name, //TODO need to fix this name
+                           const std::string &name = "0", //TODO need to fix this name
                            const std::string &metadata = "regular", //TODO need to fix this metadata
                            const utils::property_map &conf = {},
                            const std::string &directory_host = "localhost",
@@ -87,11 +87,10 @@ class btree_partition : public chain_module {
    * @param redirect Bool value to choose whether to indirect
    * @return Range lookup status string
    */
-  std::string range_lookup(std::vector<std::string> &data,
-                           const key_type begin_range,
-                           const key_type end_range,
-                           const std::string string_num_keys,
-                           bool redirect = false);
+  std::vector<std::string> range_lookup(const key_type begin_range,
+                                        const key_type end_range,
+                                        const std::string string_num_keys,
+                                        bool redirect = false);
 
   /**
    * @brief Fetch block size
