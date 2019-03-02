@@ -615,7 +615,7 @@ bool btree_partition::is_dirty() const {
 void btree_partition::load(const std::string &path) {
   auto remote = persistent::persistent_store::instance(path, ser_);
   auto decomposed = persistent::persistent_store::decompose_path(path);
-//  remote->read(decomposed.second, partition_);
+  remote->read<btree_type>(decomposed.second, partition_);
 }
 
 bool btree_partition::sync(const std::string &path) {
@@ -623,7 +623,7 @@ bool btree_partition::sync(const std::string &path) {
   if (dirty_.compare_exchange_strong(expected, false)) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    //  remote->write(partition_, decomposed.second);
+    remote->write<btree_type>(partition_, decomposed.second);
     return true;
   }
   return false;
@@ -636,7 +636,7 @@ bool btree_partition::dump(const std::string &path) {
   if (dirty_.compare_exchange_strong(expected, false)) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    //  remote->write(partition_, decomposed.second);
+    remote->write<btree_type>(partition_, decomposed.second);
     flushed = true;
   }
   partition_.clear();

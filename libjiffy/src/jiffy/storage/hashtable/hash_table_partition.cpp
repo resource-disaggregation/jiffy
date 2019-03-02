@@ -872,7 +872,7 @@ void hash_table_partition::load(const std::string &path) {
   locked_hash_table_type ltable = block_.lock_table();
   auto remote = persistent::persistent_store::instance(path, ser_);
   auto decomposed = persistent::persistent_store::decompose_path(path);
-  remote->read(decomposed.second, ltable);
+  remote->read<locked_hash_table_type>(decomposed.second, ltable);
   ltable.unlock();
 }
 
@@ -882,7 +882,7 @@ bool hash_table_partition::sync(const std::string &path) {
     locked_hash_table_type ltable = block_.lock_table();
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    remote->write(ltable, decomposed.second);
+    remote->write<locked_hash_table_type>(ltable, decomposed.second);
     ltable.unlock();
     return true;
   }
@@ -897,7 +897,7 @@ bool hash_table_partition::dump(const std::string &path) {
     locked_hash_table_type ltable = block_.lock_table();
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    remote->write(ltable, decomposed.second);
+    remote->write<locked_hash_table_type>(ltable, decomposed.second);
     ltable.unlock();
     flushed = true;
   }
