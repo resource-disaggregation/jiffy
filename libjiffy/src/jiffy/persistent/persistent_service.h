@@ -6,14 +6,18 @@
 #include "jiffy/storage/btree/btree_defs.h"
 #include "jiffy/storage/serde/serde_all.h"
 
+
 namespace jiffy {
 namespace persistent {
+
 /* Persistent service virtual class */
 class persistent_service {
  public:
   persistent_service(std::shared_ptr<storage::serde> ser) : ser_(std::move(ser)) {}
 
   virtual ~persistent_service() = default;
+
+
   template<typename Datatype>
   void write(const Datatype &table, const std::string &out_path) {
     return virtual_write(table, out_path);
@@ -44,26 +48,26 @@ class persistent_service {
 };
 
 template <class persistent_service_impl>
-class derived : public persistent_service_impl {
+class derived_persistent : public persistent_service_impl {
+ public:
   template<class... TArgs>
-  derived(TArgs &&... args): persistent_service_impl(std::forward<TArgs>(args)...) {
+  derived_persistent(TArgs &&... args): persistent_service_impl(std::forward<TArgs>(args)...) {
 
   }
  private:
-  void virtual_write(const storage::locked_hash_table_type &table, const std::string &out_path) final {
+  void virtual_write(const storage::locked_hash_table_type &table, const std::string &out_path) {
     return persistent_service_impl::write_impl(table, out_path);
   }
-  void virtual_write(const storage::btree_type &table, const std::string &out_path) final {
+  void virtual_write(const storage::btree_type &table, const std::string &out_path) {
     return persistent_service_impl::write_impl(table, out_path);
   }
-  void virtual_read(const std::string &in_path, storage::locked_hash_table_type &table) final {
+  void virtual_read(const std::string &in_path, storage::locked_hash_table_type &table) {
     return persistent_service_impl::read_impl(in_path, table);
   }
-  void virtual_write(const std::string &in_path, storage::btree_type &table) final {
+  void virtual_write(const std::string &in_path, storage::btree_type &table) {
     return persistent_service_impl::read_impl(in_path, table);
   }
 };
-
 
 
 

@@ -225,6 +225,8 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             test/file_size_tracker_test.cpp
             test/hash_table_partition_test.cpp
             test/hash_table_client_test.cpp
+            test/btree_partition_test.cpp
+            test/btree_client_test.cpp
             test/lease_expiry_worker_test.cpp
             test/local_store_test.cpp
             test/jiffy_client_test.cpp
@@ -286,6 +288,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/client/block_listener.h
           src/jiffy/storage/client/hash_table_client.cpp
           src/jiffy/storage/client/hash_table_client.h
+          src/jiffy/storage/client/btree_client.cpp
+          src/jiffy/storage/client/btree_client.h
           src/jiffy/storage/client/data_structure_listener.cpp
           src/jiffy/storage/client/data_structure_listener.h
           src/jiffy/storage/service/block_request_service.cpp

@@ -56,7 +56,7 @@ class s3_store_impl : public persistent_service {
   Aws::SDKOptions options_;
 };
 
-using s3_store = derived<s3_store_impl>;
+using s3_store = derived_persistent<s3_store_impl>();
 
 }
 }

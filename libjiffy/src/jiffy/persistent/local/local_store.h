@@ -2,7 +2,6 @@
 #define JIFFY_LOCAL_STORE_H
 
 #include "jiffy/persistent/persistent_service.h"
-#include "jiffy/storage/hashtable/hash_table_defs.h"
 
 namespace jiffy {
 namespace persistent {
@@ -43,7 +42,8 @@ class local_store_impl : public persistent_service {
 
   std::string URI() override;
 };
-using local_store = derived<local_store_impl>;
+
+using local_store = derived_persistent<local_store_impl>();
 
 }
 }
