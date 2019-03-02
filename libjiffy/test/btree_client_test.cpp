@@ -67,7 +67,7 @@ TEST_CASE("btree_client_put_update_get_test", "[put][update][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_btree_table_blocks(block_names, 134217728, 0, 1);
+  auto blocks = test_utils::init_btree_blocks(block_names, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -116,7 +116,7 @@ TEST_CASE("btree_put_remove_get_test", "[put][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_btree_table_blocks(block_names, 134217728, 0, 1);
+  auto blocks = test_utils::init_btree_blocks(block_names, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -133,7 +133,7 @@ TEST_CASE("btree_put_remove_get_test", "[put][remove][get]") {
   REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "btree", "/tmp", NUM_BLOCKS, 1, 0, 0,
       {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
-  btree_table_client client(tree, "/sandbox/file.txt", status);
+  btree_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -176,7 +176,7 @@ TEST_CASE("btree_client_pipelined_ops_test", "[put][update][remove][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "btreetable", "/tmp", NUM_BLOCKS, 1, 0, 0,
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "btree", "/tmp", NUM_BLOCKS, 1, 0, 0,
       {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
   btree_client client(tree, "/sandbox/file.txt", status);

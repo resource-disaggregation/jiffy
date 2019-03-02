@@ -46,8 +46,8 @@ std::string hash_table_client::put(const std::string &key, const std::string &va
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(static_cast<int32_t >(hash_table_cmd_id::put), args).front();
-      handle_redirect(static_cast<int32_t >(hash_table_cmd_id::put), args, _return);
+      _return = blocks_[block_id(key)]->run_command(hash_table_cmd_id::ht_put, args).front();
+      handle_redirect(hash_table_cmd_id::ht_put, args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -62,8 +62,8 @@ std::string hash_table_client::get(const std::string &key) {
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(static_cast<int32_t >(hash_table_cmd_id::get), args).front();
-      handle_redirect(static_cast<int32_t >(hash_table_cmd_id::get), args, _return);
+      _return = blocks_[block_id(key)]->run_command(hash_table_cmd_id::ht_get, args).front();
+      handle_redirect(hash_table_cmd_id::ht_get, args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -78,8 +78,8 @@ std::string hash_table_client::update(const std::string &key, const std::string 
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(static_cast<int32_t >(hash_table_cmd_id::update), args).front();
-      handle_redirect(static_cast<int32_t >(hash_table_cmd_id::update), args, _return);
+      _return = blocks_[block_id(key)]->run_command(hash_table_cmd_id::ht_update, args).front();
+      handle_redirect(hash_table_cmd_id::ht_update, args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -94,8 +94,8 @@ std::string hash_table_client::remove(const std::string &key) {
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(static_cast<int32_t >(hash_table_cmd_id::remove), args).front();
-      handle_redirect(static_cast<int32_t >(hash_table_cmd_id::remove), args, _return);
+      _return = blocks_[block_id(key)]->run_command(hash_table_cmd_id::ht_remove, args).front();
+      handle_redirect(hash_table_cmd_id::ht_remove, args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -112,8 +112,8 @@ std::vector<std::string> hash_table_client::put(const std::vector<std::string> &
   bool redo;
   do {
     try {
-      _return = batch_command(hash_table_cmd_id::put, kvs, 2);
-      handle_redirects(static_cast<int32_t >(hash_table_cmd_id::put), kvs, _return);
+      _return = batch_command(hash_table_cmd_id::ht_put, kvs, 2);
+      handle_redirects(hash_table_cmd_id::ht_put, kvs, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -127,8 +127,8 @@ std::vector<std::string> hash_table_client::get(const std::vector<std::string> &
   bool redo;
   do {
     try {
-      _return = batch_command(hash_table_cmd_id::get, keys, 1);
-      handle_redirects(static_cast<int32_t >(hash_table_cmd_id::get), keys, _return);
+      _return = batch_command(hash_table_cmd_id::ht_get, keys, 1);
+      handle_redirects(hash_table_cmd_id::ht_get, keys, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -145,8 +145,8 @@ std::vector<std::string> hash_table_client::update(const std::vector<std::string
   bool redo;
   do {
     try {
-      _return = batch_command(hash_table_cmd_id::update, kvs, 2);
-      handle_redirects(static_cast<int32_t >(hash_table_cmd_id::update), kvs, _return);
+      _return = batch_command(hash_table_cmd_id::ht_update, kvs, 2);
+      handle_redirects(hash_table_cmd_id::ht_update, kvs, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -160,8 +160,8 @@ std::vector<std::string> hash_table_client::remove(const std::vector<std::string
   bool redo;
   do {
     try {
-      _return = batch_command(hash_table_cmd_id::remove, keys, 1);
-      handle_redirects(static_cast<int32_t >(hash_table_cmd_id::remove), keys, _return);
+      _return = batch_command(hash_table_cmd_id::ht_remove, keys, 1);
+      handle_redirects(hash_table_cmd_id::ht_remove, keys, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -193,7 +193,7 @@ std::vector<std::string> hash_table_client::batch_command(const hash_table_cmd_i
 
   for (size_t i = 0; i < blocks_.size(); i++) {
     if (!block_args[i].empty())
-      blocks_[i]->send_command(static_cast<int32_t>(op), block_args[i]);
+      blocks_[i]->send_command(op, block_args[i]);
   }
 
   std::vector<std::string> results(num_ops);
@@ -300,9 +300,9 @@ void hash_table_client::locked_client::unlock() {
 
 size_t hash_table_client::locked_client::num_keys() {
   for (size_t i = 0; i < blocks_.size(); i++) {
-    blocks_[i]->send_command(static_cast<int32_t>(hash_table_cmd_id::num_keys), {});
+    blocks_[i]->send_command(hash_table_cmd_id::ht_num_keys, {});
     if (new_blocks_[i] != nullptr) {
-      new_blocks_[i]->send_command(static_cast<int32_t>(hash_table_cmd_id::num_keys), {});
+      new_blocks_[i]->send_command(hash_table_cmd_id::ht_num_keys, {});
     }
   }
   size_t n = 0;
@@ -317,53 +317,53 @@ size_t hash_table_client::locked_client::num_keys() {
 
 std::string hash_table_client::locked_client::put(const std::string &key, const std::string &value) {
   std::vector<std::string> args{key, value};
-  auto _return = blocks_[parent_.block_id(key)]->run_command(static_cast<int32_t>(hash_table_cmd_id::locked_put), args).front();
-  handle_redirect(static_cast<int32_t>(hash_table_cmd_id::locked_put), args, _return);
+  auto _return = blocks_[parent_.block_id(key)]->run_command(hash_table_cmd_id::ht_locked_put, args).front();
+  handle_redirect(hash_table_cmd_id::ht_locked_put, args, _return);
   return _return;
 }
 
 std::string hash_table_client::locked_client::get(const std::string &key) {
   std::vector<std::string> args{key};
-  auto _return = blocks_[parent_.block_id(key)]->run_command(static_cast<int32_t>(hash_table_cmd_id::locked_get), args).front();
-  handle_redirect(static_cast<int32_t>(hash_table_cmd_id::locked_get), args, _return);
+  auto _return = blocks_[parent_.block_id(key)]->run_command(hash_table_cmd_id::ht_locked_get, args).front();
+  handle_redirect(hash_table_cmd_id::ht_locked_get, args, _return);
   return _return;
 }
 
 std::string hash_table_client::locked_client::update(const std::string &key, const std::string &value) {
   std::vector<std::string> args{key, value};
-  auto _return = blocks_[parent_.block_id(key)]->run_command(static_cast<int32_t>(hash_table_cmd_id::locked_update), args).front();
-  handle_redirect(static_cast<int32_t>(hash_table_cmd_id::locked_update), args, _return);
+  auto _return = blocks_[parent_.block_id(key)]->run_command(hash_table_cmd_id::ht_locked_update, args).front();
+  handle_redirect(hash_table_cmd_id::ht_locked_update, args, _return);
   return _return;
 }
 
 std::string hash_table_client::locked_client::remove(const std::string &key) {
   std::vector<std::string> args{key};
-  auto _return = blocks_[parent_.block_id(key)]->run_command(static_cast<int32_t>(hash_table_cmd_id::locked_remove), args).front();
-  handle_redirect(static_cast<int32_t>(hash_table_cmd_id::locked_remove), args, _return);
+  auto _return = blocks_[parent_.block_id(key)]->run_command(hash_table_cmd_id::ht_locked_remove, args).front();
+  handle_redirect(hash_table_cmd_id::ht_locked_remove, args, _return);
   return _return;
 }
 
 std::vector<std::string> hash_table_client::locked_client::put(const std::vector<std::string> &kvs) {
-  auto _return = parent_.batch_command(hash_table_cmd_id::locked_put, kvs, 2);
-  handle_redirects(static_cast<int32_t>(hash_table_cmd_id::locked_put), kvs, _return);
+  auto _return = parent_.batch_command(hash_table_cmd_id::ht_locked_put, kvs, 2);
+  handle_redirects(hash_table_cmd_id::ht_locked_put, kvs, _return);
   return _return;
 }
 
 std::vector<std::string> hash_table_client::locked_client::get(const std::vector<std::string> &keys) {
-  auto _return = parent_.batch_command(hash_table_cmd_id::locked_get, keys, 1);
-  handle_redirects(static_cast<int32_t>(hash_table_cmd_id::locked_get), keys, _return);
+  auto _return = parent_.batch_command(hash_table_cmd_id::ht_locked_get, keys, 1);
+  handle_redirects(hash_table_cmd_id::ht_locked_get, keys, _return);
   return _return;
 }
 
 std::vector<std::string> hash_table_client::locked_client::update(const std::vector<std::string> &kvs) {
-  auto _return = parent_.batch_command(hash_table_cmd_id::locked_update, kvs, 2);
-  handle_redirects(static_cast<int32_t>(hash_table_cmd_id::locked_update), kvs, _return);
+  auto _return = parent_.batch_command(hash_table_cmd_id::ht_locked_update, kvs, 2);
+  handle_redirects(hash_table_cmd_id::ht_locked_update, kvs, _return);
   return _return;
 }
 
 std::vector<std::string> hash_table_client::locked_client::remove(const std::vector<std::string> &keys) {
-  auto _return = parent_.batch_command(hash_table_cmd_id::locked_remove, keys, 1);
-  handle_redirects(static_cast<int32_t>(hash_table_cmd_id::locked_remove), keys, _return);
+  auto _return = parent_.batch_command(hash_table_cmd_id::ht_locked_remove, keys, 1);
+  handle_redirects(hash_table_cmd_id::ht_locked_remove, keys, _return);
   return _return;
 }
 

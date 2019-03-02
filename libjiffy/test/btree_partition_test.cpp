@@ -1,5 +1,6 @@
 #include "catch.hpp"
 #include "jiffy/storage/btree/btree_ops.h"
+#include "jiffy/storage/btree/btree_defs.h"
 #include "jiffy/storage/btree/btree_partition.h"
 
 using namespace ::jiffy::storage;
@@ -43,7 +44,7 @@ TEST_CASE("put_update_get_test", "[put][update][get]") {
 TEST_CASE("put_remove_get_test", "[put][update][get]") {
   block_memory_manager manager;
   btree_partition block(&manager);
-  block.slot_range(0, hash_slot::MAX);
+  block.slot_range(jiffy::storage::MIN_KEY, jiffy::storage::MAX_KEY);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
@@ -74,7 +75,7 @@ TEST_CASE("flush_load_test", "[put][sync][reset][load][get]") {
   btree_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {
     std::vector<std::string> res;
-    block.run_command(res, b_tree_cmd_id::put, {std::to_string(i), std::to_string(i)});
+    block.run_command(res, b_tree_cmd_id::bt_put, {std::to_string(i), std::to_string(i)});
     REQUIRE(res.front() == "!ok");
   }
   REQUIRE(block.is_dirty());

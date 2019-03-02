@@ -155,11 +155,12 @@ std::vector<std::string> btree_partition::range_lookup(const key_type begin_rang
     }
      */
   }
-  //return "!block_moved";
+  std::vector<std::string> ret{"!block_moved"};
+  return ret;
 }
-
+/* TODO update this when adding auto scaling
 std::string btree_partition::update_partition(const std::string new_name, const std::string new_metadata) {
-  /* TODO update this when adding auto scaling
+
   name(new_name);
   auto s = utils::string_utils::split(new_metadata, '$');
   std::string status = s.front();
@@ -183,18 +184,19 @@ std::string btree_partition::update_partition(const std::string new_name, const 
   }
   metadata(status);
   return "!ok";
-   */
-}
 
+}
+//TODO change this function
 std::string btree_partition::get_storage_size() {
-  /* TODO change this function
+
   return std::to_string(bytes_.load());
-   */
+
 }
 
 std::string btree_partition::get_metadata() {
   return metadata();
 }
+  */
 
 void btree_partition::run_command(std::vector<std::string> &_return,
                                   int32_t cmd_id,
@@ -202,22 +204,22 @@ void btree_partition::run_command(std::vector<std::string> &_return,
   bool redirect = !args.empty() && args.back() == "!redirected";
   size_t nargs = redirect ? args.size() - 1 : args.size();
   switch (cmd_id) {
-    case static_cast<int32_t >(b_tree_cmd_id::exists):
+    case b_tree_cmd_id::bt_exists:
       for (const key_type &key: args)
         _return.push_back(exists(key, redirect));
       break;
-    case static_cast<int32_t >(b_tree_cmd_id::get):
+    case b_tree_cmd_id::bt_get:
       for (const key_type &key: args)
         _return.emplace_back(get(key, redirect));
       break;
-    case static_cast<int32_t >(b_tree_cmd_id::num_keys):
+    case b_tree_cmd_id::bt_num_keys:
       if (nargs != 0) {
         _return.emplace_back("!args_error");
       } else {
         _return.emplace_back(std::to_string(size()));
       }
       break;
-    case static_cast<int32_t >(b_tree_cmd_id::put):
+    case b_tree_cmd_id::bt_put:
       if (args.size() % 2 != 0 && !redirect) {
         _return.emplace_back("!args_error");
       } else {
@@ -226,12 +228,12 @@ void btree_partition::run_command(std::vector<std::string> &_return,
         }
       }
       break;
-    case static_cast<int32_t >(b_tree_cmd_id::remove):
+    case b_tree_cmd_id::bt_remove:
       for (const key_type &key: args) {
         _return.emplace_back(remove(key, redirect));
       }
       break;
-    case static_cast<int32_t >(b_tree_cmd_id::update):
+    case b_tree_cmd_id::bt_update:
       if (args.size() % 2 != 0 && !redirect) {
         _return.emplace_back("!args_error");
       } else {
@@ -240,7 +242,7 @@ void btree_partition::run_command(std::vector<std::string> &_return,
         }
       }
       break;
-    case static_cast<int32_t >(b_tree_cmd_id::range_lookup):
+    case b_tree_cmd_id::bt_range_lookup:
       if (nargs != 3) {
         _return.emplace_back("!args_error");
       } else {
@@ -429,7 +431,7 @@ void btree_partition::run_command(std::vector<std::string> &_return,
     LOG(log_level::info) << "After split storage: " << manager_->mb_used() << " capacity: " << manager_->mb_capacity();
   }
   expected = false;
-  if (auto_scale_.load() && cmd_id == static_cast<int32_t >(b_tree_cmd_id::remove) && underload()
+  if (auto_scale_.load() && cmd_id == b_tree_cmd_id::bt_remove && underload()
       && metadata_ != "exporting"
       && metadata_ != "importing" && slot_end() != MAX_KEY && is_tail()
       && merging_.compare_exchange_strong(expected, true)) {
@@ -660,7 +662,7 @@ void btree_partition::forward_all() {
   int64_t i = 0;
   for (auto it = partition_.begin(); it != partition_.end(); it++) {
     std::vector<std::string> result;
-    run_command_on_next(result, static_cast<int32_t >(b_tree_cmd_id::put), {it.key(), (*it).second});
+    run_command_on_next(result, b_tree_cmd_id::bt_put, {it.key(), (*it).second});
     ++i;
   }
 }

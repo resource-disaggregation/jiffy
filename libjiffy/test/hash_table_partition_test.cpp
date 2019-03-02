@@ -91,7 +91,7 @@ TEST_CASE("flush_load_test", "[put][sync][reset][load][get]") {
   hash_table_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {
     std::vector<std::string> res;
-    block.run_command(res, hash_table_cmd_id::put, {std::to_string(i), std::to_string(i)});
+    block.run_command(res, hash_table_cmd_id::ht_put, {std::to_string(i), std::to_string(i)});
     REQUIRE(res.front() == "!ok");
   }
   REQUIRE(block.is_dirty());

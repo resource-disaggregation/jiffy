@@ -254,7 +254,7 @@ class test_utils {
     return blks;
   }
 
-  static std::vector<std::shared_ptr<jiffy::storage::block>> init_b_tree_blocks(size_t num_blocks,
+  static std::vector<std::shared_ptr<jiffy::storage::block>> init_btree_blocks(size_t num_blocks,
                                                                                 int32_t service_port,
                                                                                 int32_t management_port) {
     using namespace jiffy::storage;
@@ -270,7 +270,7 @@ class test_utils {
     return blks;
   }
 
-  static std::vector<std::shared_ptr<jiffy::storage::block>> init_b_tree_blocks(const std::vector<std::string> &block_ids,
+  static std::vector<std::shared_ptr<jiffy::storage::block>> init_btree_blocks(const std::vector<std::string> &block_ids,
                                                                                 size_t block_capacity = 134217728,
                                                                                 double threshold_lo = 0.25,
                                                                                 double threshold_hi = 0.75,

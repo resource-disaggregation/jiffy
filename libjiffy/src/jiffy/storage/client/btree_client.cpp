@@ -43,8 +43,8 @@ std::string btree_client::put(const std::string &key, const std::string &value) 
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(static_cast<int32_t >(b_tree_cmd_id::put), args).front();
-     // handle_redirect(static_cast<int32_t >(b_tree_cmd_id::put), args, _return);
+      _return = blocks_[block_id(key)]->run_command(b_tree_cmd_id::bt_put, args).front();
+     // handle_redirect(b_tree_cmd_id::bt_put, args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -59,8 +59,8 @@ std::string btree_client::get(const std::string &key) {
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(static_cast<int32_t >(b_tree_cmd_id::get), args).front();
-      //handle_redirect(static_cast<int32_t >(b_tree_cmd_id::get), args, _return);
+      _return = blocks_[block_id(key)]->run_command(static_cast<int32_t >(b_tree_cmd_id::bt_get), args).front();
+      //handle_redirect(b_tree_cmd_id::bt_get, args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -75,8 +75,8 @@ std::string btree_client::update(const std::string &key, const std::string &valu
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(static_cast<int32_t >(b_tree_cmd_id::update), args).front();
-    //  handle_redirect(static_cast<int32_t >(b_tree_cmd_id::update), args, _return);
+      _return = blocks_[block_id(key)]->run_command(b_tree_cmd_id::bt_update, args).front();
+    //  handle_redirect(b_tree_cmd_id::bt_update, args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -91,8 +91,8 @@ std::string btree_client::remove(const std::string &key) {
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(static_cast<int32_t >(b_tree_cmd_id::remove), args).front();
-   //   handle_redirect(static_cast<int32_t >(b_tree_cmd_id::remove), args, _return);
+      _return = blocks_[block_id(key)]->run_command(b_tree_cmd_id::bt_remove, args).front();
+   //   handle_redirect(b_tree_cmd_id::bt_remove, args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -106,8 +106,8 @@ std::vector<std::string> btree_client::range_lookup(const std::string begin_rang
   bool redo;
   do {
     try {
-      _return = blocks_[0]->run_command(static_cast<int32_t >(b_tree_cmd_id::range_lookup), args);// TODO this is a hot fix since we assume that there is only one replica chain currently
-      //   handle_redirect(static_cast<int32_t >(b_tree_cmd_id::remove), args, _return);
+      _return = blocks_[0]->run_command(b_tree_cmd_id::bt_range_lookup, args);// TODO this is a hot fix since we assume that there is only one replica chain currently
+      //   handle_redirect(b_tree_cmd_id::bt_remove, args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -125,8 +125,8 @@ std::vector<std::string> btree_client::put(const std::vector<std::string> &kvs) 
   bool redo;
   do {
     try {
-      _return = batch_command(b_tree_cmd_id::put, kvs, 2);
-    //  handle_redirects(static_cast<int32_t >(b_tree_cmd_id::put), kvs, _return);
+      _return = batch_command(b_tree_cmd_id::bt_put, kvs, 2);
+    //  handle_redirects(b_tree_cmd_id::bt_put, kvs, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -140,8 +140,8 @@ std::vector<std::string> btree_client::get(const std::vector<std::string> &keys)
   bool redo;
   do {
     try {
-      _return = batch_command(b_tree_cmd_id::get, keys, 1);
-    //  handle_redirects(static_cast<int32_t >(b_tree_cmd_id::get), keys, _return);
+      _return = batch_command(b_tree_cmd_id::bt_get, keys, 1);
+    //  handle_redirects(b_tree_cmd_id::bt_get, keys, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -158,8 +158,8 @@ std::vector<std::string> btree_client::update(const std::vector<std::string> &kv
   bool redo;
   do {
     try {
-      _return = batch_command(b_tree_cmd_id::update, kvs, 2);
-    //  handle_redirects(static_cast<int32_t >(b_tree_cmd_id::update), kvs, _return);
+      _return = batch_command(b_tree_cmd_id::bt_update, kvs, 2);
+    //  handle_redirects(b_tree_cmd_id::bt_update, kvs, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -173,8 +173,8 @@ std::vector<std::string> btree_client::remove(const std::vector<std::string> &ke
   bool redo;
   do {
     try {
-      _return = batch_command(b_tree_cmd_id::remove, keys, 1);
-     // handle_redirects(static_cast<int32_t >(b_tree_cmd_id::remove), keys, _return);
+      _return = batch_command(b_tree_cmd_id::bt_remove, keys, 1);
+     // handle_redirects(b_tree_cmd_id::bt_remove, keys, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -191,8 +191,8 @@ std::vector<std::string> btree_client::range_lookup(const std::vector<std::strin
   bool redo;
   do {
     try {
-      _return = batch_command(b_tree_cmd_id::range_lookup, args, 3);
-      //  handle_redirects(static_cast<int32_t >(b_tree_cmd_id::get), keys, _return);
+      _return = batch_command(b_tree_cmd_id::bt_range_lookup, args, 3);
+      //  handle_redirects(b_tree_cmd_id::bt_range_lookup, keys, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;

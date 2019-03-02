@@ -16,7 +16,7 @@ class redo_error : public std::exception {
 };
 
 class btree_client {
-
+ public:
   /**
    * @brief Constructor
    * Store all replica chain and their begin slot

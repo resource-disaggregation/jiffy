@@ -2,7 +2,7 @@
 #define JIFFY_B_TREE_H
 
 #include <functional>
-#include "cpp-btree-1.0.1/btree_map.h" //TODO cannot find this header file
+#include "btree/btree_map.h" //TODO cannot find this header file
 #include "jiffy/storage/block_memory_allocator.h"
 
 namespace jiffy {

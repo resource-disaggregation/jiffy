@@ -411,7 +411,7 @@ struct btree_binary_search_plain_compare {
 template <typename K, typename N, typename CompareTo>
 struct btree_binary_search_compare_to {
   static int lower_bound(const K &k, const N &n, CompareTo comp)  {
-
+    (void)comp;
     return n.binary_search_compare_to(k, 0, n.count(), CompareTo());
   }
   static int upper_bound(const K &k, const N &n, CompareTo comp)  {
