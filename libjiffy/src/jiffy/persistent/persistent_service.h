@@ -55,16 +55,16 @@ class derived_persistent : public persistent_service_impl {
 
   }
  private:
-  void virtual_write(const storage::locked_hash_table_type &table, const std::string &out_path) {
+  void virtual_write(const storage::locked_hash_table_type &table, const std::string &out_path) final {
     return persistent_service_impl::write_impl(table, out_path);
   }
-  void virtual_write(const storage::btree_type &table, const std::string &out_path) {
+  void virtual_write(const storage::btree_type &table, const std::string &out_path) final {
     return persistent_service_impl::write_impl(table, out_path);
   }
-  void virtual_read(const std::string &in_path, storage::locked_hash_table_type &table) {
+  void virtual_read(const std::string &in_path, storage::locked_hash_table_type &table) final {
     return persistent_service_impl::read_impl(in_path, table);
   }
-  void virtual_read(const std::string &in_path, storage::btree_type &table) {
+  void virtual_read(const std::string &in_path, storage::btree_type &table) final {
     return persistent_service_impl::read_impl(in_path, table);
   }
 };

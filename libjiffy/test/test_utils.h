@@ -277,8 +277,8 @@ class test_utils {
                                                                                 const std::string &dir_host = "127.0.0.1",
                                                                                 int dir_port = 9090) {
     jiffy::utils::property_map conf;
-    conf.set("hashtable.capacity_threshold_lo", std::to_string(threshold_lo));
-    conf.set("hashtable.capacity_threshold_hi", std::to_string(threshold_hi));
+    conf.set("btree.capacity_threshold_lo", std::to_string(threshold_lo));
+    conf.set("btree.capacity_threshold_hi", std::to_string(threshold_hi));
     conf.set("directory.host", dir_host);
     conf.set("directory.port", std::to_string(dir_port));
     std::vector<std::shared_ptr<jiffy::storage::block>> blks;

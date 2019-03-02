@@ -39,7 +39,7 @@ TEST_CASE("btree_client_put_get_test", "[put][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status = tree->create("/sandbox/file.txt", "btree", "/tmp", NUM_BLOCKS, 1, 0, 0,
-      {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"});
+      {"0"}, {"regular"}); //TODO we do not use metadata for now
 
   btree_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -82,7 +82,7 @@ TEST_CASE("btree_client_put_update_get_test", "[put][update][get]") {
 
   data_status status;
   REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "btree", "/tmp", NUM_BLOCKS, 1, 0, 0,
-      {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
+      {"0"}, {"regular"}));
 
   btree_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -131,7 +131,7 @@ TEST_CASE("btree_put_remove_get_test", "[put][remove][get]") {
 
   data_status status;
   REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "btree", "/tmp", NUM_BLOCKS, 1, 0, 0,
-      {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
+      {"0"}, {"regular"}));
 
   btree_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -177,7 +177,7 @@ TEST_CASE("btree_client_pipelined_ops_test", "[put][update][remove][get]") {
 
   data_status status;
   REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "btree", "/tmp", NUM_BLOCKS, 1, 0, 0,
-      {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
+      {"0"}, {"regular"}));
 
   btree_client client(tree, "/sandbox/file.txt", status);
   std::vector<std::string> key_value_batch;

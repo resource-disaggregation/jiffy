@@ -2,7 +2,7 @@
 #define JIFFY_S3_STORE_H
 
 #include <aws/core/Aws.h>
-#include "../persistent_service.h"
+#include "jiffy/persistent/persistent_service.h"
 
 namespace jiffy {
 namespace persistent {
