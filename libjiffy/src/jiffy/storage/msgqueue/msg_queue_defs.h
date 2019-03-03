@@ -1,8 +1,7 @@
-#ifndef JIFFY_B_TREE_H
-#define JIFFY_B_TREE_H
+#ifndef JIFFY_MSG_QUEUE_H
+#define JIFFY_MSG_QUEUE_H
 
 #include <functional>
-#include "btree/btree_map.h"
 #include "jiffy/storage/block_memory_allocator.h"
 
 namespace jiffy {
@@ -34,18 +33,6 @@ typedef block_memory_allocator<btree_pair_type> allocator_type;
 
 // Btree definitions
 typedef btree::btree_map<key_type, value_type, less_type, allocator_type, NodeSize> btree_type;
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
 }
