@@ -230,16 +230,11 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             test/hash_table_client_test.cpp
             test/btree_partition_test.cpp
             test/btree_client_test.cpp
-
-
-
-
             test/lease_expiry_worker_test.cpp
             test/local_store_test.cpp
             #test/jiffy_client_test.cpp  TODO some error
             #test/notification_test.cpp  TODO some error
             #test/storage_manager_test.cpp TODO some error
-
             test/sync_worker_test.cpp
             test/test_utils.h
             )
