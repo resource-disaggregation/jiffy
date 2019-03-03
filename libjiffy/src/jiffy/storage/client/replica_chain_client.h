@@ -4,6 +4,7 @@
 #include <map>
 #include "block_client.h"
 #include "jiffy/storage/hashtable/hash_table_ops.h"
+#include "jiffy/storage/btree/btree_ops.h"
 #include "jiffy/directory/client/directory_client.h"
 
 namespace jiffy {

@@ -2,6 +2,7 @@
 #define JIFFY_B_TREE_OPS_H
 
 #include <vector>
+#include <string>
 #include "jiffy/storage/command.h"
 
 namespace jiffy {
@@ -11,15 +12,18 @@ extern std::vector<command> BTREE_OPS;
 /**
  * @brief Btree supported operations
  */
-enum b_tree_cmd_id : int32_t {
-  exists = 0,
-  get = 1,
-  num_keys = 2, // TODO: We should not support multi-key operations since we do not provide any guarantees
-  put = 3,
-  range_lookup = 4,
-  remove = 5,
-  update = 6,
+
+enum b_tree_cmd_id {
+  bt_exists = 0,
+  bt_get = 1,
+  bt_num_keys = 2,
+  bt_put = 3,
+  bt_range_lookup = 4,
+  bt_remove = 5,
+  bt_update = 6,
 };
+
+
 
 }
 }

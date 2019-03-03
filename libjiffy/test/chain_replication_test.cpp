@@ -58,14 +58,14 @@ TEST_CASE("chain_replication_no_failure_test", "[put][get]") {
 
   replica_chain_client client(t, "/file", chain, 100);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+    REQUIRE(client.run_command(hash_table_cmd_id::ht_put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == std::to_string(i));
+    REQUIRE(client.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == "!key_not_found");
+    REQUIRE(client.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
@@ -147,14 +147,14 @@ TEST_CASE("chain_replication_head_failure_test", "[put][get]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+    REQUIRE(client.run_command(hash_table_cmd_id::ht_put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == std::to_string(i));
+    REQUIRE(client.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == "!key_not_found");
+    REQUIRE(client.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
@@ -235,14 +235,14 @@ TEST_CASE("chain_replication_mid_failure_test", "[put][get]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+    REQUIRE(client.run_command(hash_table_cmd_id::ht_put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == std::to_string(i));
+    REQUIRE(client.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == "!key_not_found");
+    REQUIRE(client.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
@@ -325,14 +325,14 @@ TEST_CASE("chain_replication_tail_failure_test", "[put][get]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+    REQUIRE(client.run_command(hash_table_cmd_id::ht_put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == std::to_string(i));
+    REQUIRE(client.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == "!key_not_found");
+    REQUIRE(client.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
@@ -404,7 +404,7 @@ TEST_CASE("chain_replication_add_block_test", "[put][get]") {
   {
     replica_chain_client client(t, "/file", chain, 100);
     for (std::size_t i = 0; i < 1000; ++i) {
-      REQUIRE(client.run_command(hash_table_cmd_id::put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+      REQUIRE(client.run_command(hash_table_cmd_id::ht_put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
     }
   }
 
@@ -413,10 +413,10 @@ TEST_CASE("chain_replication_add_block_test", "[put][get]") {
   {
     replica_chain_client client2(t, "/file", fixed_chain, 100);
     for (std::size_t i = 0; i < 1000; ++i) {
-      REQUIRE(client2.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == std::to_string(i));
+      REQUIRE(client2.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == std::to_string(i));
     }
     for (std::size_t i = 1000; i < 2000; ++i) {
-      REQUIRE(client2.run_command(hash_table_cmd_id::get, {std::to_string(i)}).front() == "!key_not_found");
+      REQUIRE(client2.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == "!key_not_found");
     }
   }
 

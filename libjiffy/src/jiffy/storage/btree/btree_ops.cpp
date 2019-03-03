@@ -3,12 +3,12 @@
 namespace jiffy {
 namespace storage {
 
-std::vector<command> BTREE_OPS = {command{command_type::accessor, "exists"},
-                                  command{command_type::accessor, "get"},
-                                  command{command_type::accessor, "num_keys"},
-                                  command{command_type::mutator, "put"},
-                                  command{command_type::accessor, "range_lookup"},
-                                  command{command_type::mutator, "remove"},
-                                  command{command_type::mutator, "update"}};
+std::vector<command> BTREE_OPS = {command{command_type::accessor, "bt_exists"},
+                                  command{command_type::accessor, "bt_get"},
+                                  command{command_type::accessor, "bt_num_keys"},
+                                  command{command_type::mutator, "bt_put"},
+                                  command{command_type::accessor, "bt_range_lookup"},
+                                  command{command_type::mutator, "bt_remove"},
+                                  command{command_type::mutator, "bt_update"}};
 }
 }

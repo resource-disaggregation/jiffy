@@ -16,16 +16,16 @@ namespace persistent {
 
 using namespace utils;
 
-s3_store::s3_store(std::shared_ptr<storage::serde> ser) : persistent_service(std::move(ser)), options_{} {
+s3_store_impl::s3_store_impl(std::shared_ptr<storage::serde> ser) : persistent_service(std::move(ser)), options_{} {
   options_.loggingOptions.logLevel = Aws::Utils::Logging::LogLevel::Warn;
   Aws::InitAPI(options_);
 }
 
-s3_store::~s3_store() {
+s3_store_impl::~s3_store_impl() {
   Aws::ShutdownAPI(options_);
 }
-
-void s3_store::write(const storage::locked_hash_table_type &table, const std::string &out_path) {
+template <typename Datatype>
+void s3_store_impl::write_impl(const Datatype &table, const std::string &out_path) {
   auto path_elements = extract_path_elements(out_path);
   auto bucket_name = path_elements.first.c_str();
   auto key = path_elements.second.c_str();
@@ -38,7 +38,7 @@ void s3_store::write(const storage::locked_hash_table_type &table, const std::st
 
   Aws::Utils::Stream::SimpleStreamBuf sbuf;
   auto out = Aws::MakeShared<Aws::IOStream>("StreamBuf", &sbuf);
-  serde()->serialize(table, out);
+  serde()->serialize<Datatype>(table, out);
   out->seekg(0, std::ios_base::beg);
 
   object_request.SetBody(out);
@@ -51,8 +51,8 @@ void s3_store::write(const storage::locked_hash_table_type &table, const std::st
     throw std::runtime_error("Error in writing data to S3");
   }
 }
-
-void s3_store::read(const std::string &in_path, storage::locked_hash_table_type &table) {
+template <typename Datatype>
+void s3_store_impl::read_impl(const std::string &in_path, Datatype &table) {
   auto path_elements = extract_path_elements(in_path);
   auto bucket_name = path_elements.first.c_str();
   auto key = path_elements.second.c_str();
@@ -67,7 +67,7 @@ void s3_store::read(const std::string &in_path, storage::locked_hash_table_type 
   if (get_object_outcome.IsSuccess()) {
     Aws::OFStream local_file;
     auto in = std::make_shared<Aws::IOStream>(get_object_outcome.GetResult().GetBody().rdbuf());
-    serde()->deserialize(in, table);
+    serde()->deserialize<Datatype>(in, table);
     LOG(log_level::info) << "Successfully read table from " << in_path;
   } else {
     LOG(log_level::error) << "S3 GetObject error: " << get_object_outcome.GetError().GetExceptionName() << " " <<
@@ -76,7 +76,7 @@ void s3_store::read(const std::string &in_path, storage::locked_hash_table_type 
   }
 }
 
-std::pair<std::string, std::string> s3_store::extract_path_elements(const std::string &s3_path) {
+std::pair<std::string, std::string> s3_store_impl::extract_path_elements(const std::string &s3_path) {
   utils::directory_utils::check_path(s3_path);
 
   auto bucket_end = std::find(s3_path.begin() + 1, s3_path.end(), '/');
@@ -85,7 +85,7 @@ std::pair<std::string, std::string> s3_store::extract_path_elements(const std::s
   return std::make_pair(bucket_name, key);
 }
 
-std::string s3_store::URI() {
+std::string s3_store_impl::URI() {
   return "s3";
 }
 
