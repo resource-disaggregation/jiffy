@@ -21,7 +21,7 @@ btree_partition::btree_partition(block_memory_manager *manager,
                                  const std::string &directory_host,
                                  const int directory_port)
     : chain_module(manager, name, metadata, BTREE_OPS),
-      partition_(), // TODO currently don't need any further specification
+      partition_(std::less<std::string>(), build_allocator<btree_pair_type>()), // TODO currently don't need any further specification const allocator_type &alloc = allocator_type())
       splitting_(false),
       merging_(false),
       dirty_(false),
@@ -45,6 +45,7 @@ btree_partition::btree_partition(block_memory_manager *manager,
 }
 
 std::string btree_partition::put(const key_type &key, const value_type &value, bool redirect) {
+
   if (in_slot_range(key) || (in_import_slot_range(key) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(key)) {
       return "!exporting!" + export_target_str();
@@ -128,18 +129,23 @@ std::vector<std::string> btree_partition::range_lookup(const key_type begin_rang
                                                        bool redirect) {
   std::vector<std::string> result;
   int num_keys = std::stoi(string_num_keys);
- // if (begin_range > end_range) return "!ok"; // TODO fix this
+  //if (begin_range > end_range) return "!ok"; // TODO fix this
   auto start = partition_.lower_bound(begin_range);
-  auto end = (partition_.upper_bound(end_range))--;
+  auto end = --(partition_.upper_bound(end_range));
+  LOG(log_level::info) << "Range lookup from " << start.key() << " to " << end.key() << " for " << num_keys << "keys";
   // TODO test on some edge cases, things get pretty tricky for this
+
   if ((end.key() >= slot_range_.first && start.key() <= slot_range_.second)
       || (end.key() >= min(import_slot_range_.first, slot_range_.first)
           && start.key() <= max(import_slot_range_.second, slot_range_.second) && redirect)) {
+    LOG(log_level::info) << "In the range" << start.key() << " to " << end.key();
     auto n_items = 0;
     bool flag = false;
+    end++;
     for (auto entry = start; entry != end; entry++) {
       if (entry.key() >= begin_range && entry.key() <= end_range) {
         flag = true;
+        LOG(log_level::info) << "Pushing Key" << entry.key() << " and value " << (*entry).second;
         result.push_back(entry.key());
         result.push_back((*entry).second);
         ++n_items;
@@ -148,15 +154,16 @@ std::vector<std::string> btree_partition::range_lookup(const key_type begin_rang
         }
       }
     }
-    /* TODO remove autoscaling stuff for now
+  }
+  /* TODO remove autoscaling stuff for now
     if (flag) return "!ok";
     if (metadata_ == "exporting" && end.key() >= export_slot_range_.first && start.key() <= export_slot_range_.second) {
       return "!exporting!" + export_target_str();
     }
-     */
-  }
-  std::vector<std::string> ret{"!block_moved"};
-  return ret;
+
+  }*/
+  //std::vector<std::string> ret{"!block_moved"};
+  return result;
 }
 /* TODO update this when adding auto scaling
 std::string btree_partition::update_partition(const std::string new_name, const std::string new_metadata) {

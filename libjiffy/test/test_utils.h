@@ -285,7 +285,7 @@ class test_utils {
     blks.resize(block_ids.size());
     for (size_t i = 0; i < block_ids.size(); ++i) {
       blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
-      blks[i]->setup("b_tree", std::to_string(i), "regular", conf);
+      blks[i]->setup("btree", std::to_string(i), "regular", conf);
     }
     return blks;
   }

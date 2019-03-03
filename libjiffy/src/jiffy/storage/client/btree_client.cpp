@@ -59,7 +59,7 @@ std::string btree_client::get(const std::string &key) {
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(static_cast<int32_t >(b_tree_cmd_id::bt_get), args).front();
+      _return = blocks_[block_id(key)]->run_command(b_tree_cmd_id::bt_get, args).front();
       //handle_redirect(b_tree_cmd_id::bt_get, args, _return);
       redo = false;
     } catch (redo_error &e) {
@@ -226,7 +226,7 @@ std::vector<std::string> btree_client::batch_command(const b_tree_cmd_id &op,
 
   for (size_t i = 0; i < blocks_.size(); i++) {
     if (!block_args[i].empty())
-      blocks_[i]->send_command(static_cast<int32_t>(op), block_args[i]);
+      blocks_[i]->send_command(op, block_args[i]);
   }
 
   std::vector<std::string> results(num_ops);

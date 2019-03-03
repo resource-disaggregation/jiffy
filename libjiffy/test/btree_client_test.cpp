@@ -63,6 +63,7 @@ TEST_CASE("btree_client_put_get_test", "[put][get]") {
   }
 }
 
+
 TEST_CASE("btree_client_put_update_get_test", "[put][update][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -112,7 +113,51 @@ TEST_CASE("btree_client_put_update_get_test", "[put][update][get]") {
   }
 }
 
-TEST_CASE("btree_put_remove_get_test", "[put][remove][get]") {
+TEST_CASE("btree_client_put_range_lookup_test", "[put][range_lookup]") {
+  auto alloc = std::make_shared<sequential_block_allocator>();
+  auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
+  alloc->add_blocks(block_names);
+  auto blocks = test_utils::init_btree_blocks(block_names, 134217728, 0, 1);
+
+  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
+  std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
+
+  auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
+  std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
+
+  auto sm = std::make_shared<storage_manager>();
+  auto tree = std::make_shared<directory_tree>(alloc, sm);
+
+  data_status status;
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "btree", "/tmp", NUM_BLOCKS, 1, 0, 0,
+      {"0"}, {"regular"}));
+
+  btree_client client(tree, "/sandbox/file.txt", status);
+
+  for (std::size_t i = 0; i < 10; ++i) {
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
+  }
+  std::vector<std::string> ret = client.range_lookup(std::to_string(0), std::to_string(9), 1000);
+  for(std::size_t i = 0; i < 20; i += 2) {
+    REQUIRE(ret.at(i) == std::to_string(i/2));
+    REQUIRE(ret.at(i + 1) == std::to_string(i/2));
+  }
+
+  storage_server->stop();
+  if (storage_serve_thread.joinable()) {
+    storage_serve_thread.join();
+  }
+
+  mgmt_server->stop();
+  if (mgmt_serve_thread.joinable()) {
+    mgmt_serve_thread.join();
+  }
+}
+
+
+TEST_CASE("btree_client_put_remove_get_test", "[put][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
