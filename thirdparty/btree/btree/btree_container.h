@@ -189,6 +189,9 @@ class btree_unique_container : public btree_container<Tree> {
     return this->tree_.count_unique(key);
   }
 
+  std::pair<iterator,bool> insert(const key_type &key, const std::string &data) {
+    return this->tree_.insert_unique(std::make_pair(key, data));
+  }
   // Insertion routines.
   std::pair<iterator,bool> insert(const value_type &x) {
     return this->tree_.insert_unique(x);

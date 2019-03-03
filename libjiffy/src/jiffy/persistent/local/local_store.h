@@ -1,7 +1,7 @@
 #ifndef JIFFY_LOCAL_STORE_H
 #define JIFFY_LOCAL_STORE_H
 
-#include "jiffy/persistent/persistent_service.h"
+//#include "jiffy/persistent/persistent_service.h"
 
 namespace jiffy {
 namespace persistent {
