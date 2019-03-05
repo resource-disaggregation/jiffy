@@ -4,6 +4,7 @@
 #include "jiffy/directory/client/directory_client.h"
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/client_cache.h"
+#include "jiffy/storage/msgqueue/msg_queue_ops.h"
 
 namespace jiffy {
 namespace storage {
@@ -46,92 +47,49 @@ class msg_queue_client {
   directory::data_status &status();
 
   /**
-   * @brief Put key value pair
-   * @param key Key
-   * @param value Value
+   * @brief Send message
+   * @param msg New message
    * @return Response of the command
    */
 
-  std::string put(const std::string &key, const std::string &value);
+  std::string send(const std::string &msg);
 
   /**
-   * @brief Get value for specified key
-   * @param key Key
+   * @brief Receive message at the end position
    * @return Response of the command
    */
 
-  std::string get(const std::string &key);
+  std::string receive();
 
   /**
-   * @brief Update key value pair
-   * @param key Key
-   * @param value Value
-   * @return Response of the command
+   * @brief Send message in batch
+   * @param msgs New messages
+   * @return Response of the commands
    */
 
-  std::string update(const std::string &key, const std::string &value);
+  std::vector<std::string> send(const std::vector<std::string> &msgs);
+
 
   /**
-   * @brief Remove key value pair
-   * @param key Key
-   * @return Response of the command
-   */
-
-  std::string remove(const std::string &key);
-
-  /**
-   * @brief Look up values within key range
-   * @param begin_range Key begin range
-   * @param end_range Key end range
-   * @param num_key Maximum number of keys to lookup
-   * @return Value of keys that are within the key range
-   */
-  std::vector<std::string> range_lookup(const std::string begin_range, const std::string end_range, int num_key);
-
-  /**
-   * @brief Put in batch
-   * @param kvs Key value batch
+   * @brief Receive message in batch
+   * @param num_msg Number of message to be read in batch
    * @return Response of batch command
    */
 
-  std::vector<std::string> put(const std::vector<std::string> &kvs);
+  std::vector<std::string> receive(std::size_t num_msg);
 
-
-  /**
-   * @brief Get in batch
-   * @param keys Key batch
-   * @return Response of batch command
-   */
-
-  std::vector<std::string> get(const std::vector<std::string> &keys);
-
-  /**
-   * @brief Update in batch
-   * @param kvs Key value batch
-   * @return Response of batch command
-   */
-
-  std::vector<std::string> update(const std::vector<std::string> &kvs);
-
-  /**
-   * @brief Remove in batch
-   * @param keys Key batch
-   * @return Response of batch command
-   */
-
-  std::vector<std::string> remove(const std::vector<std::string> &keys);
-
-
-  /**
-   * @brief Look up values within key range in batch
-   * @param begin_ranges Key begin range
-   * @param end_ranges Key end range
-   * @param num_keys Maximum number of keys to lookup
-   * @return Value of keys that are within the key range
-   */
-  std::vector<std::string> range_lookup(const std::vector<std::string> args);
 
  private:
+  /**
+   * @brief Get the receive start position and increase it by one
+   * @return Start position in string
+   */
+  std::string get_inc_receive_pos() {
+    auto old_val = rstart_;
+    rstart_++;
+    return std::to_string(old_val);
+  }
+
   /**
    * @brief Fetch block identifier for particular key
    * @param key Key
@@ -172,12 +130,14 @@ class msg_queue_client {
   std::shared_ptr<directory::directory_interface> fs_;
   /* Key value partition path */
   std::string path_;
+  /* Read start */
+  std::size_t rstart_; // TODO add usage
+  /* Read End */
+  std::size_t rend_;   // TODO add usage
   /* Data status */
   directory::data_status status_;
   /* Replica chain clients, each partition only save a replica chain client */
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
-  /* Slot begin of the blocks */
-  std::vector<int32_t> slots_;
   /* Time out*/
   int timeout_ms_;
 
