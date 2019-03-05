@@ -46,14 +46,21 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
 
 
 std::string msg_queue_partition::send(const msg_type &message, bool indirect) {
+  //LOG(log_level::info) << "Sending new message = " << message;
   std::unique_lock<std::shared_mutex> lock(operation_mtx_);
-  partition_.push_front(message);
+  partition_.push_back(message);
   return "!ok";
 }
 
 msg_type msg_queue_partition::receive(std::string position, bool indirect) {
-  std::unique_lock<std::shared_mutex> lock(operation_mtx_);
-  return partition_[std::stoi(position)];
+  auto pos = std::stoi(position);
+  if(pos < 0) throw std::invalid_argument("receive position invalid");
+  if(pos < size()) {
+    std::unique_lock<std::shared_mutex> lock(operation_mtx_);
+    return partition_[pos];
+  }
+  return "!key_not_found";
+
 }
 
 std::string msg_queue_partition::clear() {

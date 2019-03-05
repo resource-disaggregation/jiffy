@@ -13,6 +13,7 @@ msg_queue_client::msg_queue_client(std::shared_ptr<directory::directory_interfac
                            const directory::data_status &status,
                            int timeout_ms)
     : fs_(std::move(fs)), path_(path), status_(status), timeout_ms_(timeout_ms) {
+  rstart_ = 0;
   blocks_.clear();
   for (const auto &block: status.data_blocks()) {
     //slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0])); TODO currently we assume that all the blocks have the key range from MINKEY to MAXKEY
@@ -40,7 +41,7 @@ std::string msg_queue_client::send(const std::string &msg) {
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(0)]->run_command(msg_queue_cmd_id::mq_send, args).front(); // TODO hot fix, should use block id
+      _return = blocks_[block_id("0")]->run_command(msg_queue_cmd_id::mq_send, args).front(); // TODO hot fix, should use block id
       // handle_redirect(b_tree_cmd_id::bt_put, args, _return);
       redo = false;
     } catch (redo_error &e) {
@@ -48,6 +49,7 @@ std::string msg_queue_client::send(const std::string &msg) {
     }
   } while (redo);
   return _return;
+
 }
 
 std::string msg_queue_client::receive() {

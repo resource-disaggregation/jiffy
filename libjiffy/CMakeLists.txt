@@ -227,8 +227,8 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             test/hash_table_client_test.cpp
             test/btree_partition_test.cpp
             test/btree_client_test.cpp
-            #test/msg_queue_partition_test.cpp
-            #test/msg_queue_client_test.cpp
+            test/msg_queue_partition_test.cpp
+            test/msg_queue_client_test.cpp
             test/lease_expiry_worker_test.cpp
             test/local_store_test.cpp
             #test/jiffy_client_test.cpp  TODO some error
@@ -295,6 +295,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/client/hash_table_client.h
           src/jiffy/storage/client/btree_client.cpp
           src/jiffy/storage/client/btree_client.h
+          src/jiffy/storage/client/msg_queue_client.cpp
+          src/jiffy/storage/client/msg_queue_client.h
           src/jiffy/storage/client/data_structure_listener.cpp
           src/jiffy/storage/client/data_structure_listener.h
           src/jiffy/storage/service/block_request_service.cpp
