@@ -21,7 +21,8 @@ btree_partition::btree_partition(block_memory_manager *manager,
                                  const std::string &directory_host,
                                  const int directory_port)
     : chain_module(manager, name, metadata, BTREE_OPS),
-      partition_(std::less<std::string>(), build_allocator<btree_pair_type>()), // TODO currently don't need any further specification const allocator_type &alloc = allocator_type())
+      partition_(std::less<std::string>(),
+                 build_allocator<btree_pair_type>()), // TODO currently don't need any further specification const allocator_type &alloc = allocator_type())
       splitting_(false),
       merging_(false),
       dirty_(false),
@@ -250,11 +251,13 @@ void btree_partition::run_command(std::vector<std::string> &_return,
       }
       break;
     case b_tree_cmd_id::bt_range_lookup:
-      if (nargs != 3) {
+      if (args.size() % 3 != 0 && !redirect) {
         _return.emplace_back("!args_error");
       } else {
-        std::vector<std::string> result = range_lookup(args[0], args[1], args[2], redirect);
-        _return.insert(_return.end(), result.begin(), result.end());
+        for (size_t i = 0; i < nargs; i += 3) {
+          std::vector<std::string> result = range_lookup(args[i], args[i + 1], args[i + 2], redirect);
+          _return.insert(_return.end(), result.begin(), result.end());
+        }
       }
       break;
       /* TODO need to add auto scaling function in the future
