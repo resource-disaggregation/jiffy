@@ -3,6 +3,7 @@
 
 #include "jiffy/storage/hashtable/hash_table_defs.h"
 #include "jiffy/storage/btree/btree_defs.h"
+#include "jiffy/storage/msgqueue/msg_queue_defs.h"
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -27,8 +28,10 @@ class serde {
  private:
   virtual std::size_t virtual_serialize(const locked_hash_table_type &table, std::shared_ptr<std::ostream> out) = 0;
   virtual std::size_t virtual_serialize(const btree_type &table, std::shared_ptr<std::ostream> out) = 0;
+  //virtual std::size_t virtual_serialize(const msg_queue_type &table, std::shared_ptr<std::ostream> out) = 0;
   virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, locked_hash_table_type &table) = 0;
   virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, btree_type &table) = 0;
+  //virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, msg_queue_type &table) = 0;
 };
 
 template<class impl>
@@ -45,12 +48,18 @@ class derived : public impl {
   std::size_t virtual_serialize(const btree_type &table, std::shared_ptr<std::ostream> out) final {
     return impl::serialize_impl(table, out);
   }
+  //std::size_t virtual_serialize(const msg_queue_type &table, std::shared_ptr<std::ostream> out) final {
+  //  return impl::serialize_impl(table, out);
+  //}
   std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, locked_hash_table_type &table) final {
     return impl::deserialize_impl(in, table);
   }
   std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, btree_type &table) final {
     return impl::deserialize_impl(in, table);
   }
+  //std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, msg_queue_type &table) final {
+  //  return impl::deserialize_impl(in, table);
+  //}
 };
 
 /* CSV serializer/deserializer class

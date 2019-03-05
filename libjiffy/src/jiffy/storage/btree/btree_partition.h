@@ -28,7 +28,7 @@ class btree_partition : public chain_module {
   virtual ~btree_partition() = default;
 
   /**
-   * @brief Check if hash map contains key
+   * @brief Check if tree contains key
    * @param key Key
    * @param redirect Bool value to choose whether to indirect to the destination
    * block when block is in repartitioning
@@ -173,7 +173,7 @@ class btree_partition : public chain_module {
   void forward_all() override;
 
   /**
-   * @brief Set block hash slot range
+   * @brief Set block slot range
    * @param slot_begin Begin slot
    * @param slot_end End slot
    */
@@ -282,16 +282,16 @@ class btree_partition : public chain_module {
   /* High threshold */
   double threshold_hi_;
 
-  /* Atomic bool for partition hash slot range splitting */
+  /* Atomic bool for partition slot range splitting */
   std::atomic<bool> splitting_;
 
-  /* Atomic bool for partition hash slot range merging */
+  /* Atomic bool for partition slot range merging */
   std::atomic<bool> merging_;
 
   /* Atomic partition dirty bit */
   std::atomic<bool> dirty_;
 
-  /* Hash slot range */
+  /* Slot range */
   std::pair<std::string, std::string> slot_range_;
   /* Bool value for auto scaling */
   std::atomic_bool auto_scale_;

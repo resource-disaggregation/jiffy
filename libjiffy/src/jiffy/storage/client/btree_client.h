@@ -4,6 +4,7 @@
 #include "jiffy/directory/client/directory_client.h"
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/client_cache.h"
+#include "jiffy/storage/btree/btree_ops.h"
 
 namespace jiffy {
 namespace storage {

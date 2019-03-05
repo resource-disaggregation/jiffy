@@ -2,7 +2,7 @@
 #define JIFFY_B_TREE_H
 
 #include <functional>
-#include "btree/btree_map.h" //TODO cannot find this header file
+#include "btree/btree_map.h"
 #include "jiffy/storage/block_memory_allocator.h"
 
 namespace jiffy {
@@ -30,10 +30,10 @@ typedef std::pair<const key_type, value_type> btree_pair_type;
 
 // Custom template arguments
 typedef std::less<key_type> less_type;
-typedef block_memory_allocator<btree_pair_type> allocator_type;
+typedef block_memory_allocator<btree_pair_type> bt_allocator_type;
 
 // Btree definitions
-typedef btree::btree_map<key_type, value_type, less_type, allocator_type, NodeSize> btree_type;
+typedef btree::btree_map<key_type, value_type, less_type, bt_allocator_type, NodeSize> btree_type;
 
 
 
