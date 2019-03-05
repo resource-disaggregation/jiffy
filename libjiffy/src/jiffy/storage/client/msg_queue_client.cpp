@@ -40,7 +40,7 @@ std::string msg_queue_client::send(const std::string &msg) {
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(msg_queue_cmd_id::mq_send, args).front();
+      _return = blocks_[block_id(0)]->run_command(msg_queue_cmd_id::mq_send, args).front(); // TODO hot fix, should use block id
       // handle_redirect(b_tree_cmd_id::bt_put, args, _return);
       redo = false;
     } catch (redo_error &e) {
@@ -57,7 +57,7 @@ std::string msg_queue_client::receive() {
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(msg_queue_cmd_id::mq_receive, args).front();
+      _return = blocks_[0]->run_command(msg_queue_cmd_id::mq_receive, args).front();// TODO hot fix, should use block id
       // handle_redirect(b_tree_cmd_id::bt_put, args, _return);
       redo = false;
     } catch (redo_error &e) {
@@ -89,7 +89,7 @@ std::vector<std::string>  msg_queue_client::receive(std::size_t num_msg) {
   //if (kvs.size() % 2 != 0) {  TODO add check here with rend, the client cannot read beyond the latest message
   //  throw std::invalid_argument("Incorrect number of arguments");
   //}
-  std::vector<std::string> &args;
+  std::vector<std::string> args;
   std::vector<std::string> _return;
   for(std::size_t i = 0; i < num_msg; i++) {
     args.push_back(get_inc_receive_pos());

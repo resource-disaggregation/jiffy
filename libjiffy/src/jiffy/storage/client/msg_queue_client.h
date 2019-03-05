@@ -106,7 +106,7 @@ class msg_queue_client {
    * @return
    */
 
-  std::vector<std::string> batch_command(const b_tree_cmd_id &id, const std::vector<std::string> &args, size_t args_per_op);
+  std::vector<std::string> batch_command(const msg_queue_cmd_id &id, const std::vector<std::string> &args, size_t args_per_op);
 
   /**
    * @brief Handle command in redirect case
