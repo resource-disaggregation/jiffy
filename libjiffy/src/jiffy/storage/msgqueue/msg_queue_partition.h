@@ -42,6 +42,27 @@ class msg_queue_partition : public chain_module {
   bool empty() const;
 
   /**
+   * @brief Send a new message to the message queue
+   * @param message New message
+   * @param indirect Indirect boolean
+   * @return Send return status string
+   */
+  std::string send(const msg_type &message, bool indirect = false);
+
+  /**
+   * @brief Receive a new message from the message queue
+   * @param indirect
+   * @return Receive return status string
+   */
+  msg_type receive(std::size_t position, bool indirect = false);
+
+  /**
+   * @brief Clear the message queue
+   * @return Clear return status
+   */
+  std::string clear();
+
+  /**
    * @brief Update partition name and metadata
    * @param new_name New partition name
    * @param new_metadata New partition metadata
@@ -124,8 +145,11 @@ class msg_queue_partition : public chain_module {
 
   bool underload();
 
-  /* Btree map partition */
-  btree_type partition_;
+  /* Operation mutex */
+  mutable std::shared_mutex operation_mtx_;
+
+  /* Message queue partition */
+  msg_queue_type partition_;
 
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
@@ -145,23 +169,26 @@ class msg_queue_partition : public chain_module {
   std::atomic<bool> dirty_;
 
   /* Slot range */
-  std::pair<std::string, std::string> slot_range_;
+  //std::pair<std::string, std::string> slot_range_;
   /* Bool value for auto scaling */
   std::atomic_bool auto_scale_;
   /* Export slot range */
-  std::pair<std::string, std::string> export_slot_range_;
+  //std::pair<std::string, std::string> export_slot_range_;
   /* Export targets */
-  std::vector<std::string> export_target_;
+  //std::vector<std::string> export_target_;
   /* String representation for export target */
-  std::string export_target_str_;
+  //std::string export_target_str_;
   /* Import slot range */
-  std::pair<std::string, std::string> import_slot_range_;
+  //std::pair<std::string, std::string> import_slot_range_;
 
   /* Directory server hostname */
   std::string directory_host_;
 
   /* Directory server port number */
   int directory_port_;
+
+  /* Next partition pointer */
+  std::shared_ptr<msg_queue_partition> next_partition_;
 
 };
 
