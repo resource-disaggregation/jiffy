@@ -54,7 +54,7 @@ class msg_queue_partition : public chain_module {
    * @param indirect
    * @return Receive return status string
    */
-  msg_type receive(std::size_t position, bool indirect = false);
+  msg_type receive(std::string position, bool indirect = false);
 
   /**
    * @brief Clear the message queue
@@ -128,7 +128,6 @@ class msg_queue_partition : public chain_module {
 
   void forward_all() override;
 
-
  private:
 
   /**
@@ -195,4 +194,4 @@ class msg_queue_partition : public chain_module {
 }
 }
 
-#endif //JIFFY_BTREE_SERVICE_SHARD_H
+#endif //JIFFY_MSG_QUEUE_SERVICE_SHARD_H

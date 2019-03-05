@@ -79,13 +79,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/chain_module.cpp
           src/jiffy/storage/command.h
           src/jiffy/storage/command.cpp
-          #src/jiffy/storage/serde/csv_serde.cpp
-          #src/jiffy/storage/serde/csv_serde.h
-          #src/jiffy/storage/serde/serde.h
-          #src/jiffy/storage/serde/binary_serde.cpp
-          #src/jiffy/storage/serde/binary_serde.h
           src/jiffy/storage/serde/serde_all.h
-          #src/jiffy/storage/serde/serde_all.cpp
           src/jiffy/storage/hashtable/hash_slot.h
           src/jiffy/storage/hashtable/hash_slot.cpp
           src/jiffy/storage/hashtable/hash_table_defs.h
@@ -98,6 +92,11 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/btree/btree_ops.cpp
           src/jiffy/storage/btree/btree_partition.h
           src/jiffy/storage/btree/btree_partition.cpp
+          src/jiffy/storage/msgqueue/msg_queue_defs.h
+          src/jiffy/storage/msgqueue/msg_queue_ops.h
+          src/jiffy/storage/msgqueue/msg_queue_ops.cpp
+          src/jiffy/storage/msgqueue/msg_queue_partition.h
+          src/jiffy/storage/msgqueue/msg_queue_partition.cpp
           src/jiffy/storage/client/replica_chain_client.cpp
           src/jiffy/storage/client/replica_chain_client.h
           src/jiffy/storage/service/block_response_client.cpp
@@ -163,10 +162,6 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/notification/subscription_map.cpp
           src/jiffy/storage/notification/subscription_map.h
           src/jiffy/storage/storage_management_ops.h
-          #src/jiffy/persistent/local/local_store.cpp
-          #src/jiffy/persistent/local/local_store.h
-          #src/jiffy/persistent/s3/s3_store.cpp
-          #src/jiffy/persistent/s3/s3_store.h
           src/jiffy/persistent/persistent_service.cpp
           src/jiffy/persistent/persistent_service.h
           src/jiffy/persistent/persistent_store.cpp
@@ -282,6 +277,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/hashtable/hash_table_ops.cpp
           src/jiffy/storage/btree/btree_ops.h
           src/jiffy/storage/btree/btree_ops.cpp
+          src/jiffy/storage/msgqueue/msg_queue_ops.h
+          src/jiffy/storage/msgqueue/msg_queue_ops.cpp
           src/jiffy/storage/client/replica_chain_client.cpp
           src/jiffy/storage/client/replica_chain_client.h
           src/jiffy/storage/service/block_response_client.cpp

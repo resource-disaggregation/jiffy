@@ -20,8 +20,7 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
                                          const std::string &directory_host,
                                          const int directory_port)
     : chain_module(manager, name, metadata, MSG_QUEUE_OPS),
-      partition_(std::less<std::string>(),
-                 build_allocator<msg_type>()), // TODO currently don't need any further specification const allocator_type &alloc = allocator_type())
+      partition_(build_allocator<msg_type>()),
       splitting_(false),
       merging_(false),
       dirty_(false),
@@ -43,53 +42,28 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
   LOG(log_level::info) << "Partition name: " << name_;
 }
 
-std::string msg_queue_partition::put(const key_type &key, const value_type &value, bool redirect) {
 
-  if (in_slot_range(key) || (in_import_slot_range(key) && redirect)) {
-    if (metadata_ == "exporting" && in_export_slot_range(key)) {
-      return "!exporting!" + export_target_str();
-    }
-    if (partition_.insert(std::make_pair(key, value)).second) {
-      return "!ok";
-    } else {
-      return "!duplicate_key";
-    }
-  }
-  return "!block_moved";
-}
 
-std::string msg_queue::exists(const key_type &key, bool redirect) {
-  if (in_slot_range(key) || (in_import_slot_range(key) && redirect)) {
-    if (partition_.find(key) != partition_.end()) {
-      return "true";
-    }
-    if (metadata_ == "exporting" && in_export_slot_range(key)) {
-      return "!exporting!" + export_target_str();
-    }
-    return "!key_not_found";
-  }
-  return "!block_moved";
-}
 
-std::string msg_partition::send(const msg_type &message, bool indirect) {
+std::string msg_queue_partition::send(const msg_type &message, bool indirect) {
   std::unique_lock<std::shared_mutex> lock(operation_mtx_);
   partition_.push_front(message);
   return "!ok";
 }
 
-msg_type msg_partition::receive(std::size_t position, bool indirect) {
+msg_type msg_queue_partition::receive(std::string position, bool indirect) {
   std::unique_lock<std::shared_mutex> lock(operation_mtx_);
-  return partition_[position];
+  return partition_[std::stoi(position)];
 }
 
-std::string msg_partition::clear() {
+std::string msg_queue_partition::clear() {
   std::unique_lock<std::shared_mutex> lock(operation_mtx_);
   partition_.clear();
   return "!ok";
 }
 
 /* TODO update this when adding auto scaling
-std::string btree_partition::update_partition(const std::string new_name, const std::string new_metadata) {
+std::string msg_queue_partition::update_partition(const std::string new_name, const std::string new_metadata) {
 
   name(new_name);
   auto s = utils::string_utils::split(new_metadata, '$');
@@ -139,7 +113,7 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
         _return.emplace_back(send(msg, redirect));
       break;
     case msg_queue_cmd_id::mq_receive:
-      for (const std::size_t &pos: args)
+      for (const auto &pos: args)
         _return.emplace_back(receive(pos, redirect));
       break;
     case msg_queue_cmd_id::mq_clear:
@@ -188,7 +162,7 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
 
       splitting_ = false;
       LOG(log_level::info) << "Not supporting auto_scaling currently";
-      /* TODO add auto scaling logic for btree here
+      /* TODO add auto scaling logic for msg queue here
       // TODO: currently the split and merge use similar logic but using redundant coding, should combine them after passing all the test
       splitting_ = true;
       LOG(log_level::info) << "Requested slot range split";
@@ -337,8 +311,7 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
       && merging_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
     LOG(log_level::info) << "Underloaded partition; storage = " << bytes_.load() << " capacity = "
-                         << manager_->mb_capacity()
-                         << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
+                         << manager_->mb_capacity();
     try {
       merging_ = false;
       LOG(log_level::info) << "Currently does not support auto_scaling";
@@ -519,7 +492,7 @@ bool msg_queue_partition::is_dirty() const {
 void msg_queue_partition::load(const std::string &path) {
   auto remote = persistent::persistent_store::instance(path, ser_);
   auto decomposed = persistent::persistent_store::decompose_path(path);
-  remote->read<msg_queue_type>(decomposed.second, partition_);
+  //remote->read<msg_queue_type>(decomposed.second, partition_); TODO fix this, currently template function only supports hash tables
 }
 
 bool msg_queue_partition::sync(const std::string &path) {
@@ -527,7 +500,7 @@ bool msg_queue_partition::sync(const std::string &path) {
   if (dirty_.compare_exchange_strong(expected, false)) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    remote->write<msg_queue_type>(partition_, decomposed.second);
+    //remote->write<msg_queue_type>(partition_, decomposed.second); TODO fix this, currently template function only supports hash tables
     return true;
   }
   return false;
@@ -540,7 +513,7 @@ bool msg_queue_partition::dump(const std::string &path) {
   if (dirty_.compare_exchange_strong(expected, false)) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    remote->write<msg_queue_type>(partition_, decomposed.second);
+    //remote->write<msg_queue_type>(partition_, decomposed.second); TODO fix this, currently template function only supports hash tables
     flushed = true;
   }
   partition_.clear();
@@ -560,7 +533,7 @@ void msg_queue_partition::forward_all() {
   int64_t i = 0;
   for (auto it = partition_.begin(); it != partition_.end(); it++) {
     std::vector<std::string> result;
-    run_command_on_next(result, msg_queue_cmd_id::bt_put, {it.key(), (*it).second});
+   // run_command_on_next(result, msg_queue_cmd_id::_put, {it.key(), (*it).second}); TODO fix this
     ++i;
   }
 }

@@ -16,6 +16,7 @@ extern std::vector<command> MSG_QUEUE_OPS;
 enum msg_queue_cmd_id {
   mq_send = 0,
   mq_receive = 1,
+  mq_clear = 2,
 };
 
 }

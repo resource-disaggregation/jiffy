@@ -1,5 +1,4 @@
 #include <jiffy/utils/string_utils.h>
-#include <queue>
 #include "btree_partition.h"
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/logger.h"
@@ -22,7 +21,7 @@ btree_partition::btree_partition(block_memory_manager *manager,
                                  const int directory_port)
     : chain_module(manager, name, metadata, BTREE_OPS),
       partition_(std::less<std::string>(),
-                 build_allocator<btree_pair_type>()), // TODO currently don't need any further specification const allocator_type &alloc = allocator_type())
+                 build_allocator<btree_pair_type>()),
       splitting_(false),
       merging_(false),
       dirty_(false),
