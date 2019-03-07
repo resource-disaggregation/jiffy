@@ -65,7 +65,6 @@ TEST_CASE("msg_queue_client_send_receive_test", "[send][receive]") {
   }
 }
 
-
 TEST_CASE("msg_queue_client_pipelined_ops_test", "[put][update][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);

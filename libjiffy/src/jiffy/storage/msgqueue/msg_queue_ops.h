@@ -10,7 +10,7 @@ namespace storage {
 extern std::vector<command> MSG_QUEUE_OPS;
 
 /**
- * @brief Btree supported operations
+ * @brief Message queue supported operations
  */
 
 enum msg_queue_cmd_id {

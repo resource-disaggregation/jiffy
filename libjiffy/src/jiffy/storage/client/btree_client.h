@@ -28,10 +28,9 @@ class btree_client {
    */
 
   btree_client(std::shared_ptr<directory::directory_interface> fs,
-            const std::string &path,
-            const directory::data_status &status,
-            int timeout_ms = 1000);
-
+               const std::string &path,
+               const directory::data_status &status,
+               int timeout_ms = 1000);
 
   /**
    * @brief Refresh the slot and blocks from directory service
@@ -97,7 +96,6 @@ class btree_client {
 
   std::vector<std::string> put(const std::vector<std::string> &kvs);
 
-
   /**
    * @brief Get in batch
    * @param keys Key batch
@@ -122,7 +120,6 @@ class btree_client {
 
   std::vector<std::string> remove(const std::vector<std::string> &keys);
 
-
   /**
    * @brief Look up values within key range in batch
    * @param begin_ranges Key begin range
@@ -132,7 +129,7 @@ class btree_client {
    */
   std::vector<std::string> range_lookup(const std::vector<std::string> args);
 
-   private:
+ private:
   /**
    * @brief Fetch block identifier for particular key
    * @param key Key
@@ -149,25 +146,9 @@ class btree_client {
    * @return
    */
 
-  std::vector<std::string> batch_command(const b_tree_cmd_id &id, const std::vector<std::string> &args, size_t args_per_op);
-
-  /**
-   * @brief Handle command in redirect case
-   * @param cmd_id Command identifier
-   * @param args Command arguments
-   * @param response Response to be collected
-   */
-
-//  void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response);
-
-  /**
-   * @brief Handle multiple commands in redirect case
-   * @param cmd_id Command identifier
-   * @param args Command arguments
-   * @param responses Responses to be collected
-   */
-
-//  void handle_redirects(int32_t cmd_id, const std::vector<std::string> &args, std::vector<std::string> &responses);
+  std::vector<std::string> batch_command(const b_tree_cmd_id &id,
+                                         const std::vector<std::string> &args,
+                                         size_t args_per_op);
 
   /* Directory client */
   std::shared_ptr<directory::directory_interface> fs_;
@@ -181,8 +162,6 @@ class btree_client {
   std::vector<int32_t> slots_;
   /* Time out*/
   int timeout_ms_;
-
-
 
 };
 

@@ -9,9 +9,9 @@ namespace storage {
 using namespace jiffy::utils;
 
 hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interface> fs,
-                     const std::string &path,
-                     const directory::data_status &status,
-                     int timeout_ms)
+                                     const std::string &path,
+                                     const directory::data_status &status,
+                                     int timeout_ms)
     : fs_(std::move(fs)), path_(path), status_(status), timeout_ms_(timeout_ms) {
   slots_.clear();
   blocks_.clear();
@@ -175,8 +175,8 @@ size_t hash_table_client::block_id(const std::string &key) {
 }
 
 std::vector<std::string> hash_table_client::batch_command(const hash_table_cmd_id &op,
-                                                  const std::vector<std::string> &args,
-                                                  size_t args_per_op) {
+                                                          const std::vector<std::string> &args,
+                                                          size_t args_per_op) {
   // Split arguments
   if (args.size() % args_per_op != 0)
     throw std::invalid_argument("Incorrect number of arguments");
@@ -228,8 +228,8 @@ void hash_table_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
 }
 
 void hash_table_client::handle_redirects(int32_t cmd_id,
-                                 const std::vector<std::string> &args,
-                                 std::vector<std::string> &responses) {
+                                         const std::vector<std::string> &args,
+                                         std::vector<std::string> &responses) {
   size_t n_ops = responses.size();
   size_t n_op_args = args.size() / n_ops;
   for (size_t i = 0; i < responses.size(); i++) {
@@ -368,8 +368,8 @@ std::vector<std::string> hash_table_client::locked_client::remove(const std::vec
 }
 
 void hash_table_client::locked_client::handle_redirect(int32_t cmd_id,
-                                               const std::vector<std::string> &args,
-                                               std::string &response) {
+                                                       const std::vector<std::string> &args,
+                                                       std::string &response) {
   if (response.substr(0, 10) == "!exporting") {
     typedef std::vector<std::string> list_t;
     do {
@@ -397,8 +397,8 @@ void hash_table_client::locked_client::handle_redirect(int32_t cmd_id,
 }
 
 void hash_table_client::locked_client::handle_redirects(int32_t cmd_id,
-                                                const std::vector<std::string> &args,
-                                                std::vector<std::string> &responses) {
+                                                        const std::vector<std::string> &args,
+                                                        std::vector<std::string> &responses) {
   size_t n_ops = responses.size();
   size_t n_op_args = args.size() / n_ops;
   for (size_t i = 0; i < responses.size(); i++) {

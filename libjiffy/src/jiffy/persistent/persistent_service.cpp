@@ -10,12 +10,16 @@
 #include <aws/core/utils/logging/AWSLogging.h>
 #include <fstream>
 
-
-
 namespace jiffy {
 namespace persistent {
 
 using namespace utils;
+
+local_store_impl::local_store_impl(std::shared_ptr<storage::serde> ser) : persistent_service(std::move(ser)) {}
+
+std::string local_store_impl::URI() {
+  return "local";
+}
 
 s3_store_impl::s3_store_impl(std::shared_ptr<storage::serde> ser) : persistent_service(std::move(ser)), options_{} {
   options_.loggingOptions.logLevel = Aws::Utils::Logging::LogLevel::Warn;
@@ -25,7 +29,6 @@ s3_store_impl::s3_store_impl(std::shared_ptr<storage::serde> ser) : persistent_s
 s3_store_impl::~s3_store_impl() {
   Aws::ShutdownAPI(options_);
 }
-
 
 std::pair<std::string, std::string> s3_store_impl::extract_path_elements(const std::string &s3_path) {
   utils::directory_utils::check_path(s3_path);
@@ -39,16 +42,6 @@ std::pair<std::string, std::string> s3_store_impl::extract_path_elements(const s
 std::string s3_store_impl::URI() {
   return "s3";
 }
-
-local_store_impl::local_store_impl(std::shared_ptr<storage::serde> ser) : persistent_service(std::move(ser)) {}
-
-std::string local_store_impl::URI() {
-  return "local";
-}
-
-
-
-
 
 }
 }

@@ -28,10 +28,10 @@ class serde {
  private:
   virtual std::size_t virtual_serialize(const locked_hash_table_type &table, std::shared_ptr<std::ostream> out) = 0;
   virtual std::size_t virtual_serialize(const btree_type &table, std::shared_ptr<std::ostream> out) = 0;
-  //virtual std::size_t virtual_serialize(const msg_queue_type &table, std::shared_ptr<std::ostream> out) = 0;
+  virtual std::size_t virtual_serialize(const msg_queue_type &table, std::shared_ptr<std::ostream> out) = 0;
   virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, locked_hash_table_type &table) = 0;
   virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, btree_type &table) = 0;
-  //virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, msg_queue_type &table) = 0;
+  virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, msg_queue_type &table) = 0;
 };
 
 template<class impl>
@@ -48,22 +48,23 @@ class derived : public impl {
   std::size_t virtual_serialize(const btree_type &table, std::shared_ptr<std::ostream> out) final {
     return impl::serialize_impl(table, out);
   }
-  //std::size_t virtual_serialize(const msg_queue_type &table, std::shared_ptr<std::ostream> out) final {
-  //  return impl::serialize_impl(table, out);
-  //}
+  std::size_t virtual_serialize(const msg_queue_type &table, std::shared_ptr<std::ostream> out) final {
+    return impl::serialize_impl(table, out);
+  }
   std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, locked_hash_table_type &table) final {
     return impl::deserialize_impl(in, table);
   }
   std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, btree_type &table) final {
     return impl::deserialize_impl(in, table);
   }
-  //std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, msg_queue_type &table) final {
-  //  return impl::deserialize_impl(in, table);
-  //}
+  std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, msg_queue_type &table) final {
+    return impl::deserialize_impl(in, table);
+  }
 };
 
 /* CSV serializer/deserializer class
- * Inherited from serde class */
+ * Inherited from serde class
+ */
 
 class csv_serde_impl : public serde {
  public:
@@ -74,7 +75,7 @@ class csv_serde_impl : public serde {
 
   /**
    * @brief Serialize hash table in CSV format
-   * @param table Locked hash table
+   * @param table Hash table
    * @param path Output stream
    * @return Output stream position after flushing
    */
@@ -82,6 +83,21 @@ class csv_serde_impl : public serde {
   std::size_t serialize_impl(const Datatype &table, std::shared_ptr<std::ostream> out) {
     for (auto e: table) {
       *out << e.first << "," << e.second << "\n";
+    }
+    out->flush();
+    auto sz = out->tellp();
+    return static_cast<std::size_t>(sz);
+  }
+
+  /**
+   * @brief Serialize message queue in CSV format
+   * @param table Message queue
+   * @param path Output stream
+   * @return Output stream position after flushing
+   */
+  std::size_t serialize_impl(const msg_queue_type &table, std::shared_ptr<std::ostream> out) {
+    for (auto e: table) {
+      *out << e << "\n";
     }
     out->flush();
     auto sz = out->tellp();
@@ -103,6 +119,24 @@ class csv_serde_impl : public serde {
         break;
       auto ret = split(line, ',', 2);
       table.insert(ret[0], ret[1]);
+    }
+    auto sz = in->tellg();
+    return static_cast<std::size_t>(sz);
+  }
+
+  /**
+   * @brief Deserialize Input stream to message queue in CSV format
+   * @param in Input stream
+   * @param table Message queue
+   * @return Input stream position after reading
+   */
+  std::size_t deserialize_impl(std::shared_ptr<std::istream> in, msg_queue_type &table) {
+    while (!in->eof()) {
+      std::string line;
+      std::getline(*in, line, '\n');
+      if (line == "")
+        break;
+      table.push_back(line);
     }
     auto sz = in->tellg();
     return static_cast<std::size_t>(sz);
@@ -147,7 +181,8 @@ class csv_serde_impl : public serde {
 using csv_serde = derived<csv_serde_impl>;
 
 /* Binary serializer/deserializer class
- * Inherited from serde class */
+ * Inherited from serde class
+ */
 class binary_serde_impl : public serde {
  public:
   binary_serde_impl() = default;
@@ -157,7 +192,7 @@ class binary_serde_impl : public serde {
  protected:
   /**
    * @brief Binary serialization
-   * @param table Locked hash table
+   * @param table Hash table
    * @param out Output stream
    * @return Output stream position
    */
@@ -177,9 +212,26 @@ class binary_serde_impl : public serde {
   }
 
   /**
+   * @brief Binary serialization
+   * @param table Message queue
+   * @param out Output stream
+   * @return Output stream position
+   */
+  size_t serialize_impl(const msg_queue_type &table, std::shared_ptr<std::ostream> out) {
+    for (auto e: table) {
+      std::size_t msg_size = e.size();
+      out->write(reinterpret_cast<const char *>(&msg_size), sizeof(size_t))
+          .write(e.data(), msg_size);
+    }
+    out->flush();
+    auto sz = out->tellp();
+    return static_cast<std::size_t>(sz);
+  }
+
+  /**
    * @brief Binary deserialization
    * @param in Input stream
-   * @param table Locked hash table
+   * @param table Hash table
    * @return Input stream position
    */
   template<typename Datatype>
@@ -196,6 +248,25 @@ class binary_serde_impl : public serde {
       value.resize(value_size);
       in->read(&value[0], value_size);
       table.insert(key, value);
+    }
+    auto sz = in->tellg();
+    return static_cast<std::size_t>(sz);
+  }
+
+  /**
+   * @brief Binary deserialization
+   * @param in Input stream
+   * @param table Message queue
+   * @return Input stream position
+   */
+  size_t deserialize_impl(std::shared_ptr<std::istream> in, msg_queue_type &table) {
+    while (!in->eof()) {
+      std::size_t msg_size;
+      in->read(reinterpret_cast<char *>(&msg_size), sizeof(msg_size));
+      std::string msg;
+      msg.resize(msg_size);
+      in->read(&msg[0], msg_size);
+      table.push_back(msg);
     }
     auto sz = in->tellg();
     return static_cast<std::size_t>(sz);
