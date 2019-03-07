@@ -157,9 +157,9 @@ class hash_table_client {
    */
 
   hash_table_client(std::shared_ptr<directory::directory_interface> fs,
-            const std::string &path,
-            const directory::data_status &status,
-            int timeout_ms = 1000);
+                    const std::string &path,
+                    const directory::data_status &status,
+                    int timeout_ms = 1000);
 
   /**
    * @brief Refresh the slot and blocks from directory service
@@ -263,7 +263,9 @@ class hash_table_client {
    * @return
    */
 
-  std::vector<std::string> batch_command(const hash_table_cmd_id &id, const std::vector<std::string> &args, size_t args_per_op);
+  std::vector<std::string> batch_command(const hash_table_cmd_id &id,
+                                         const std::vector<std::string> &args,
+                                         size_t args_per_op);
 
   /**
    * @brief Handle command in redirect case

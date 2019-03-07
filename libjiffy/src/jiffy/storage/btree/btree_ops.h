@@ -23,8 +23,6 @@ enum b_tree_cmd_id {
   bt_update = 6,
 };
 
-
-
 }
 }
 

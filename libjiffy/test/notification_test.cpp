@@ -52,7 +52,7 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
       {"regular"});
   hash_table_client table(tree, "/sandbox/file.txt", status);
 
-  std::string op1 = "put", op2 = "get";
+  std::string op1 = "ht_put", op2 = "ht_get";
   std::string key = "msg1";
 
   {

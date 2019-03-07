@@ -28,10 +28,9 @@ class msg_queue_client {
    */
 
   msg_queue_client(std::shared_ptr<directory::directory_interface> fs,
-               const std::string &path,
-               const directory::data_status &status,
-               int timeout_ms = 1000);
-
+                   const std::string &path,
+                   const directory::data_status &status,
+                   int timeout_ms = 1000);
 
   /**
    * @brief Refresh the slot and blocks from directory service
@@ -69,7 +68,6 @@ class msg_queue_client {
 
   std::vector<std::string> send(const std::vector<std::string> &msgs);
 
-
   /**
    * @brief Receive message in batch
    * @param num_msg Number of message to be read in batch
@@ -78,15 +76,14 @@ class msg_queue_client {
 
   std::vector<std::string> receive(std::size_t num_msg);
 
-
  private:
   /**
    * @brief Get the receive start position and increase it by one
    * @return Start position in string
    */
   std::string get_inc_receive_pos() {
-    auto old_val = rstart_;
-    rstart_++;
+    auto old_val = read_start_;
+    read_start_++;
     return std::to_string(old_val);
   }
 
@@ -106,7 +103,9 @@ class msg_queue_client {
    * @return
    */
 
-  std::vector<std::string> batch_command(const msg_queue_cmd_id &id, const std::vector<std::string> &args, size_t args_per_op);
+  std::vector<std::string> batch_command(const msg_queue_cmd_id &id,
+                                         const std::vector<std::string> &args,
+                                         size_t args_per_op);
 
   /**
    * @brief Handle command in redirect case
@@ -115,33 +114,20 @@ class msg_queue_client {
    * @param response Response to be collected
    */
 
-//  void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response);
-
-  /**
-   * @brief Handle multiple commands in redirect case
-   * @param cmd_id Command identifier
-   * @param args Command arguments
-   * @param responses Responses to be collected
-   */
-
-//  void handle_redirects(int32_t cmd_id, const std::vector<std::string> &args, std::vector<std::string> &responses);
-
   /* Directory client */
   std::shared_ptr<directory::directory_interface> fs_;
   /* Key value partition path */
   std::string path_;
   /* Read start */
-  std::size_t rstart_; // TODO add usage
+  std::size_t read_start_;
   /* Read End */
-  std::size_t rend_;   // TODO add usage
+  std::size_t read_end_;   // TODO add usage
   /* Data status */
   directory::data_status status_;
   /* Replica chain clients, each partition only save a replica chain client */
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
   /* Time out*/
   int timeout_ms_;
-
-
 
 };
 

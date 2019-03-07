@@ -11,16 +11,14 @@ namespace storage {
 // The default number of elements in a msg queue
 constexpr size_t MSG_QUEUE_DEFAULT_SIZE = 0;
 
-
 // Key/Value definitions
 typedef std::string msg_type;
 
 // Custom template arguments
 typedef block_memory_allocator<msg_type> mq_allocator_type;
 
-
 // Msg queue definitions
-typedef std::deque<msg_type, mq_allocator_type> msg_queue_type;
+typedef std::vector<msg_type, mq_allocator_type> msg_queue_type;
 
 }
 }

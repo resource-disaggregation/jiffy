@@ -231,9 +231,9 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             test/msg_queue_client_test.cpp
             test/lease_expiry_worker_test.cpp
             test/local_store_test.cpp
-            #test/jiffy_client_test.cpp  TODO some error
-            #test/notification_test.cpp  TODO some error
-            #test/storage_manager_test.cpp TODO some error
+            test/jiffy_client_test.cpp
+            test/notification_test.cpp
+            test/storage_manager_test.cpp
             test/sync_worker_test.cpp
             test/test_utils.h
             )

@@ -8,9 +8,6 @@
 namespace jiffy {
 namespace storage {
 
-// The default number of elements in an empty btree
-constexpr size_t BTREE_DEFAULT_SIZE = 0;
-
 // The default number of btree target node size
 const size_t NodeSize = 256;
 
@@ -20,8 +17,6 @@ const size_t MAX_KEY_LENGTH = 1024;
 // The min and max keys
 const std::string MIN_KEY = "";
 const std::string MAX_KEY(MAX_KEY_LENGTH, 0x7f);
-
-
 
 // Key/Value definitions
 typedef std::string key_type;
@@ -34,18 +29,6 @@ typedef block_memory_allocator<btree_pair_type> bt_allocator_type;
 
 // Btree definitions
 typedef btree::btree_map<key_type, value_type, less_type, bt_allocator_type, NodeSize> btree_type;
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
 }

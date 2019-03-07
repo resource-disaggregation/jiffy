@@ -63,27 +63,6 @@ class msg_queue_partition : public chain_module {
   std::string clear();
 
   /**
-   * @brief Update partition name and metadata
-   * @param new_name New partition name
-   * @param new_metadata New partition metadata
-   */
-
-  //std::string update_partition(const std::string new_name, const std::string new_metadata);
-
-  /**
-   * @brief Fetch storage size
-   * @return Storage size
-   */
-  //std::string get_storage_size();
-
-  /**
-   * @brief Fetch partition metadata
-   * @return Partition metadata
-   */
-
-  //std::string get_metadata();
-
-  /**
    * @brief Run particular command on key value block
    * @param _return Return status to be collected
    * @param cmd_id Operation identifier
@@ -167,18 +146,8 @@ class msg_queue_partition : public chain_module {
   /* Atomic partition dirty bit */
   std::atomic<bool> dirty_;
 
-  /* Slot range */
-  //std::pair<std::string, std::string> slot_range_;
   /* Bool value for auto scaling */
   std::atomic_bool auto_scale_;
-  /* Export slot range */
-  //std::pair<std::string, std::string> export_slot_range_;
-  /* Export targets */
-  //std::vector<std::string> export_target_;
-  /* String representation for export target */
-  //std::string export_target_str_;
-  /* Import slot range */
-  //std::pair<std::string, std::string> import_slot_range_;
 
   /* Directory server hostname */
   std::string directory_host_;

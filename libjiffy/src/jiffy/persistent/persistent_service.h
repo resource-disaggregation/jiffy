@@ -28,7 +28,6 @@ class persistent_service {
 
   virtual ~persistent_service() = default;
 
-
   template<typename Datatype>
   void write(const Datatype &table, const std::string &out_path) {
     return virtual_write(table, out_path);
@@ -54,13 +53,13 @@ class persistent_service {
   std::shared_ptr<storage::serde> ser_;
   virtual void virtual_write(const storage::locked_hash_table_type &table, const std::string &out_path) = 0;
   virtual void virtual_write(const storage::btree_type &table, const std::string &out_path) = 0;
-  //virtual void virtual_write(const storage::msg_queue_type &table, const std::string &out_path) = 0;
+  virtual void virtual_write(const storage::msg_queue_type &table, const std::string &out_path) = 0;
   virtual void virtual_read(const std::string &in_path, storage::locked_hash_table_type &table) = 0;
   virtual void virtual_read(const std::string &in_path, storage::btree_type &table) = 0;
-  //virtual void virtual_read(const std::string &in_path, storage::msg_queue_type &table) = 0;
+  virtual void virtual_read(const std::string &in_path, storage::msg_queue_type &table) = 0;
 };
 
-template <class persistent_service_impl>
+template<class persistent_service_impl>
 class derived_persistent : public persistent_service_impl {
  public:
   template<class... TArgs>
@@ -74,21 +73,19 @@ class derived_persistent : public persistent_service_impl {
   void virtual_write(const storage::btree_type &table, const std::string &out_path) final {
     return persistent_service_impl::write_impl(table, out_path);
   }
-  //void virtual_write(const storage::msg_queue_type &table, const std::string &out_path) final {
-  //  return persistent_service_impl::write_impl(table, out_path);
-  //}
+  void virtual_write(const storage::msg_queue_type &table, const std::string &out_path) final {
+    return persistent_service_impl::write_impl(table, out_path);
+  }
   void virtual_read(const std::string &in_path, storage::locked_hash_table_type &table) final {
     return persistent_service_impl::read_impl(in_path, table);
   }
   void virtual_read(const std::string &in_path, storage::btree_type &table) final {
     return persistent_service_impl::read_impl(in_path, table);
   }
-  //void virtual_read(const std::string &in_path, storage::msg_queue_type &table) final {
-  //  return persistent_service_impl::read_impl(in_path, table);
-  //}
+  void virtual_read(const std::string &in_path, storage::msg_queue_type &table) final {
+    return persistent_service_impl::read_impl(in_path, table);
+  }
 };
-
-
 
 /* Local store, inherited persistent_service */
 class local_store_impl : public persistent_service {
@@ -105,7 +102,7 @@ class local_store_impl : public persistent_service {
    * @param table Hash table
    * @param out_path Output persistent storage path
    */
-  template <typename Datatype>
+  template<typename Datatype>
   void write_impl(const Datatype &table, const std::string &out_path) {
     size_t found = out_path.find_last_of("/\\");
     auto dir = out_path.substr(0, found);
@@ -120,7 +117,7 @@ class local_store_impl : public persistent_service {
    * @param in_path Input persistent storage path
    * @param table Hash table
    */
-  template <typename Datatype>
+  template<typename Datatype>
   void read_impl(const std::string &in_path, Datatype &table) {
     auto in = std::make_shared<std::ifstream>(in_path.c_str(), std::fstream::in);
     serde()->deserialize<Datatype>(in, table);
@@ -138,7 +135,6 @@ class local_store_impl : public persistent_service {
 
 using local_store = derived_persistent<local_store_impl>;
 
-
 /* s3_store class, inherited from persistent_service class */
 class s3_store_impl : public persistent_service {
  public:
@@ -150,7 +146,6 @@ class s3_store_impl : public persistent_service {
   ~s3_store_impl();
  protected:
 
-
   /**
    * @brief Constructor
    * @param ser Custom serializer/deserializer
@@ -158,13 +153,12 @@ class s3_store_impl : public persistent_service {
 
   s3_store_impl(std::shared_ptr<storage::serde> ser);
 
-
   /**
    * @brief Write data from hash table to persistent storage
    * @param table Hash table
    * @param out_path Output persistent storage path
    */
-  template <typename Datatype>
+  template<typename Datatype>
   void write_impl(const Datatype &table, const std::string &out_path) {
     auto path_elements = extract_path_elements(out_path);
     auto bucket_name = path_elements.first.c_str();
@@ -197,7 +191,7 @@ class s3_store_impl : public persistent_service {
    * @param in_path Input persistent storage path
    * @param table Hash table
    */
-  template <typename Datatype>
+  template<typename Datatype>
   void read_impl(const std::string &in_path, Datatype &table) {
     auto path_elements = extract_path_elements(in_path);
     auto bucket_name = path_elements.first.c_str();
@@ -240,12 +234,6 @@ class s3_store_impl : public persistent_service {
 };
 
 using s3_store = derived_persistent<s3_store_impl>;
-
-
-
-
-
-
 
 }
 }
