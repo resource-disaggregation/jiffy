@@ -89,9 +89,18 @@ class btree_partition : public chain_module {
    */
   std::vector<std::string> range_lookup(const key_type begin_range,
                                         const key_type end_range,
-                                        const std::string string_num_keys,
                                         bool redirect = false);
 
+  /**
+   * @brief Counts the key number within the key range
+   * @param begin_range Key begin range
+   * @param end_range Key end range
+   * @param redirect Redirect boolean
+   * @return Keys count within the key range
+   */
+  std::string range_count(const key_type begin_range,
+                          const key_type end_range,
+                          bool redirect = false);
   /**
    * @brief Fetch block size
    * @return Block size

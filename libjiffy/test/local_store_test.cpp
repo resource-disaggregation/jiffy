@@ -1,7 +1,6 @@
 #include <fstream>
 #include <catch.hpp>
 #include <iostream>
-//#include "jiffy/persistent/local/local_store.h"
 #include "jiffy/persistent/persistent_service.h"
 #include "jiffy/utils/directory_utils.h"
 #include "jiffy/storage/serde/serde_all.h"
@@ -15,7 +14,6 @@ TEST_CASE("local_write_test", "[write]") {
   hash_table_type table(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type(), allocator);
   auto ltable = table.lock_table();
   ltable.insert("key", "value");
-
   auto ser = std::make_shared<csv_serde>();
   local_store store(ser);
   REQUIRE_NOTHROW(store.write(ltable, "/tmp/a.txt"));
@@ -31,7 +29,6 @@ TEST_CASE("local_read_test", "[read]") {
   std::ofstream out("/tmp/a.txt", std::ofstream::out);
   out << "key,value\n";
   out.close();
-
   auto ser = std::make_shared<csv_serde>();
   local_store store(ser);
   block_memory_manager manager;

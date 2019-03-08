@@ -47,9 +47,9 @@ std::string msg_queue_partition::send(const msg_type &message, bool indirect) {
   return "!ok";
 }
 
-msg_type msg_queue_partition::receive(std::string position, bool indirect) {
+msg_type msg_queue_partition::read(std::string position, bool indirect) {
   auto pos = std::stoi(position);
-  if (pos < 0) throw std::invalid_argument("receive position invalid");
+  if (pos < 0) throw std::invalid_argument("read position invalid");
   if (pos < size()) {
     std::unique_lock<std::shared_mutex> lock(operation_mtx_);
     return partition_[pos];
@@ -74,9 +74,9 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
       for (const msg_type &msg: args)
         _return.emplace_back(send(msg, redirect));
       break;
-    case msg_queue_cmd_id::mq_receive:
+    case msg_queue_cmd_id::mq_read:
       for (const auto &pos: args)
-        _return.emplace_back(receive(pos, redirect));
+        _return.emplace_back(read(pos, redirect));
       break;
     case msg_queue_cmd_id::mq_clear:
       if (nargs != 0) {

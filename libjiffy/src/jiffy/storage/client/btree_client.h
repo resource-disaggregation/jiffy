@@ -86,8 +86,15 @@ class btree_client {
    * @param num_key Maximum number of keys to lookup
    * @return Value of keys that are within the key range
    */
-  std::vector<std::string> range_lookup(const std::string begin_range, const std::string end_range, int num_key);
+  std::vector<std::string> range_lookup(const std::string begin_range, const std::string end_range);
 
+  /**
+   * @brief Count keys within the key range
+   * @param begin_range Key range begin
+   * @param end_range Key range end
+   * @return Keys count within the range
+   */
+  std::string range_count(const std::string begin_range, const std::string end_range);
   /**
    * @brief Put in batch
    * @param kvs Key value batch
@@ -129,6 +136,14 @@ class btree_client {
    */
   std::vector<std::string> range_lookup(const std::vector<std::string> args);
 
+  /**
+    * @brief Count keys within the key range in batch
+    * @param begin_range Key range begin
+    * @param end_range Key range end
+    * @return Keys count within the range
+    */
+  std::vector<std::string>  range_count(const std::vector<std::string> args);
+
  private:
   /**
    * @brief Fetch block identifier for particular key
@@ -146,7 +161,7 @@ class btree_client {
    * @return
    */
 
-  std::vector<std::string> batch_command(const b_tree_cmd_id &id,
+  std::vector<std::string> batch_command(const btree_cmd_id &id,
                                          const std::vector<std::string> &args,
                                          size_t args_per_op);
 

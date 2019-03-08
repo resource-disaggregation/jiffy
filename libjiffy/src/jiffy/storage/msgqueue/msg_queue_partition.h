@@ -44,17 +44,17 @@ class msg_queue_partition : public chain_module {
   /**
    * @brief Send a new message to the message queue
    * @param message New message
-   * @param indirect Indirect boolean
+   * @param redirect Redirect boolean
    * @return Send return status string
    */
-  std::string send(const msg_type &message, bool indirect = false);
+  std::string send(const msg_type &message, bool redirect = false);
 
   /**
-   * @brief Receive a new message from the message queue
-   * @param indirect
-   * @return Receive return status string
+   * @brief Read a new message from the message queue
+   * @param redirect Redirect boolean
+   * @return Read return status string
    */
-  msg_type receive(std::string position, bool indirect = false);
+  msg_type read(std::string position, bool redirect = false);
 
   /**
    * @brief Clear the message queue

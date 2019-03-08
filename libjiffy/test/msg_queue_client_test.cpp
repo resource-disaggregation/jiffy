@@ -21,7 +21,7 @@ using namespace ::apache::thrift::transport;
 #define STORAGE_SERVICE_PORT 9091
 #define STORAGE_MANAGEMENT_PORT 9092
 
-TEST_CASE("msg_queue_client_send_receive_test", "[send][receive]") {
+TEST_CASE("msg_queue_client_send_read_test", "[send][read]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
@@ -48,10 +48,10 @@ TEST_CASE("msg_queue_client_send_receive_test", "[send][receive]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.receive() == std::to_string(i));
+    REQUIRE(client.read() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.receive() == "!key_not_found");
+    REQUIRE(client.read() == "!key_not_found");
   }
 
   storage_server->stop();
@@ -96,12 +96,12 @@ TEST_CASE("msg_queue_client_pipelined_ops_test", "[put][update][remove][get]") {
     REQUIRE(res[i] == "!ok");
   }
 
-  auto res2 = client.receive(1000);
+  auto res2 = client.read(1000);
   for (size_t i = 0; i < 1000; i++) {
     REQUIRE(res2[i] == std::to_string(i));
   }
 
-  auto res3 = client.receive(1000);
+  auto res3 = client.read(1000);
   for (size_t i = 0; i < 1000; i++) {
     REQUIRE(res3[i] == "!key_not_found");
   }

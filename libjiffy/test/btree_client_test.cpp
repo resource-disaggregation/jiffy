@@ -113,7 +113,7 @@ TEST_CASE("btree_client_put_update_get_test", "[put][update][get]") {
   }
 }
 
-TEST_CASE("btree_client_put_range_lookup_test", "[put][range_lookup]") {
+TEST_CASE("btree_client_put_range_lookup_range_count_test", "[put][range_lookup][range_count]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
@@ -139,11 +139,13 @@ TEST_CASE("btree_client_put_range_lookup_test", "[put][range_lookup]") {
   for (std::size_t i = 0; i < 10; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
-  std::vector<std::string> ret = client.range_lookup(std::to_string(0), std::to_string(9), 1000);
+  std::vector<std::string> ret = client.range_lookup(std::to_string(0), std::to_string(9));
   for(std::size_t i = 0; i < 20; i += 2) {
     REQUIRE(ret.at(i) == std::to_string(i/2));
     REQUIRE(ret.at(i + 1) == std::to_string(i/2));
   }
+  auto count = std::stoi(client.range_count(std::to_string(0), std::to_string(9)));
+  REQUIRE(count == ret.size()/2);
 
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
