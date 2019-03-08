@@ -50,11 +50,11 @@ class msg_queue_partition : public chain_module {
   std::string send(const msg_type &message, bool redirect = false);
 
   /**
-   * @brief Receive a new message from the message queue
+   * @brief Read a new message from the message queue
    * @param redirect Redirect boolean
-   * @return Receive return status string
+   * @return Read return status string
    */
-  msg_type receive(std::string position, bool redirect = false);
+  msg_type read(std::string position, bool redirect = false);
 
   /**
    * @brief Clear the message queue

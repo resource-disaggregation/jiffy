@@ -144,23 +144,30 @@ std::vector<std::string> btree_partition::range_lookup(const key_type begin_rang
         result.push_back((*entry).second);
       }
     }
+    return result;
   }
-  /* TODO remove autoscaling stuff for now
-    if (flag) return "!ok";
-    if (metadata_ == "exporting" && end.key() >= export_slot_range_.first && start.key() <= export_slot_range_.second) {
-      return "!exporting!" + export_target_str();
-    }
-
-  }*/
-  //std::vector<std::string> ret{"!block_moved"};
-  return result;
+  return std::vector<std::string>{"!Incorrect key range"};
 }
 
 std::string btree_partition::range_count(const key_type begin_range,
                                          const key_type end_range,
                                          bool redirect) {
-
-
+  auto start = partition_.lower_bound(begin_range);
+  auto end = --(partition_.upper_bound(end_range));
+  if ((end.key() >= slot_range_.first && start.key() <= slot_range_.second)
+      || (end.key() >= min(import_slot_range_.first, slot_range_.first)
+          && start.key() <= max(import_slot_range_.second, slot_range_.second) && redirect)) {
+    LOG(log_level::info) << "In the range" << start.key() << " to " << end.key();
+    end++;
+    std::size_t ret = 0;
+    for (auto entry = start; entry != end; entry++) {
+      if (entry.key() >= begin_range && entry.key() <= end_range) {
+        ret++;
+      }
+    }
+    return std::to_string(ret);
+  }
+  return std::string{"!Incorrect key range"};
 }
 
 void btree_partition::run_command(std::vector<std::string> &_return,
@@ -169,22 +176,22 @@ void btree_partition::run_command(std::vector<std::string> &_return,
   bool redirect = !args.empty() && args.back() == "!redirected";
   size_t nargs = redirect ? args.size() - 1 : args.size();
   switch (cmd_id) {
-    case b_tree_cmd_id::bt_exists:
+    case btree_cmd_id::bt_exists:
       for (const key_type &key: args)
         _return.push_back(exists(key, redirect));
       break;
-    case b_tree_cmd_id::bt_get:
+    case btree_cmd_id::bt_get:
       for (const key_type &key: args)
         _return.emplace_back(get(key, redirect));
       break;
-    case b_tree_cmd_id::bt_num_keys:
+    case btree_cmd_id::bt_num_keys:
       if (nargs != 0) {
         _return.emplace_back("!args_error");
       } else {
         _return.emplace_back(std::to_string(size()));
       }
       break;
-    case b_tree_cmd_id::bt_put:
+    case btree_cmd_id::bt_put:
       if (args.size() % 2 != 0 && !redirect) {
         _return.emplace_back("!args_error");
       } else {
@@ -193,12 +200,12 @@ void btree_partition::run_command(std::vector<std::string> &_return,
         }
       }
       break;
-    case b_tree_cmd_id::bt_remove:
+    case btree_cmd_id::bt_remove:
       for (const key_type &key: args) {
         _return.emplace_back(remove(key, redirect));
       }
       break;
-    case b_tree_cmd_id::bt_update:
+    case btree_cmd_id::bt_update:
       if (args.size() % 2 != 0 && !redirect) {
         _return.emplace_back("!args_error");
       } else {
@@ -207,7 +214,7 @@ void btree_partition::run_command(std::vector<std::string> &_return,
         }
       }
       break;
-    case b_tree_cmd_id::bt_range_lookup:
+    case btree_cmd_id::bt_range_lookup:
       if (args.size() % 2 != 0 && !redirect) {
         _return.emplace_back("!args_error");
       } else {
@@ -217,7 +224,7 @@ void btree_partition::run_command(std::vector<std::string> &_return,
         }
       }
       break;
-    case b_tree_cmd_id::bt_range_count:
+    case btree_cmd_id::bt_range_count:
       if (args.size() % 2 != 0 && !redirect) {
         _return.emplace_back("!args_error");
       } else {
@@ -251,7 +258,7 @@ void btree_partition::run_command(std::vector<std::string> &_return,
     LOG(log_level::info) << "After split storage: " << manager_->mb_used() << " capacity: " << manager_->mb_capacity();
   }
   expected = false;
-  if (auto_scale_.load() && cmd_id == b_tree_cmd_id::bt_remove && underload()
+  if (auto_scale_.load() && cmd_id == btree_cmd_id::bt_remove && underload()
       && metadata_ != "exporting"
       && metadata_ != "importing" && slot_end() != MAX_KEY && is_tail()
       && merging_.compare_exchange_strong(expected, true)) {
@@ -327,7 +334,7 @@ void btree_partition::forward_all() {
   int64_t i = 0;
   for (auto it = partition_.begin(); it != partition_.end(); it++) {
     std::vector<std::string> result;
-    run_command_on_next(result, b_tree_cmd_id::bt_put, {it.key(), (*it).second});
+    run_command_on_next(result, btree_cmd_id::bt_put, {it.key(), (*it).second});
     ++i;
   }
 }

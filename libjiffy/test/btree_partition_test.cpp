@@ -64,7 +64,7 @@ TEST_CASE("btree_put_remove_get_test", "[put][update][get]") {
   }
 }
 
-TEST_CASE("btree_put_range_lookup_test", "[put][range_lookup]") {
+TEST_CASE("btree_put_range_lookup_range_count_test", "[put][range_lookup][range_count]") {
   block_memory_manager manager;
   btree_partition block(&manager);
 
@@ -76,6 +76,8 @@ TEST_CASE("btree_put_range_lookup_test", "[put][range_lookup]") {
     REQUIRE(ret.at(i) == std::to_string(i/2));
     REQUIRE(ret.at(i + 1) == std::to_string(i/2));
   }
+  auto count = std::stoi(block.range_count(std::to_string(0), std::to_string(9)));
+  REQUIRE(count == ret.size()/2);
 }
 
 TEST_CASE("btree_storage_size_test", "[put][size][storage_size][reset]") {
@@ -94,7 +96,7 @@ TEST_CASE("btree_flush_load_test", "[put][sync][reset][load][get]") {
   btree_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {
     std::vector<std::string> res;
-    block.run_command(res, b_tree_cmd_id::bt_put, {std::to_string(i), std::to_string(i)});
+    block.run_command(res, btree_cmd_id::bt_put, {std::to_string(i), std::to_string(i)});
     REQUIRE(res.front() == "!ok");
   }
   REQUIRE(block.is_dirty());

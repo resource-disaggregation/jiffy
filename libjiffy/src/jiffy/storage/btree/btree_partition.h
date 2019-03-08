@@ -96,7 +96,7 @@ class btree_partition : public chain_module {
    * @param begin_range Key begin range
    * @param end_range Key end range
    * @param redirect Redirect boolean
-   * @return
+   * @return Keys count within the key range
    */
   std::string range_count(const key_type begin_range,
                           const key_type end_range,

@@ -15,7 +15,6 @@ msg_queue_client::msg_queue_client(std::shared_ptr<directory::directory_interfac
   read_start_ = 0;
   blocks_.clear();
   for (const auto &block: status.data_blocks()) {
-    //slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0])); TODO currently we assume that all the blocks have the key range from MINKEY to MAXKEY
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, timeout_ms_));
   }
 }
@@ -41,7 +40,7 @@ std::string msg_queue_client::send(const std::string &msg) {
     try {
       _return = blocks_[block_id("0")]->run_command(msg_queue_cmd_id::mq_send,
                                                     args).front(); // TODO hot fix, should use block id
-      // handle_redirect(b_tree_cmd_id::bt_put, args, _return);
+      // handle_redirect(btree_cmd_id::bt_put, args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -51,15 +50,15 @@ std::string msg_queue_client::send(const std::string &msg) {
 
 }
 
-std::string msg_queue_client::receive() {
+std::string msg_queue_client::read() {
   std::string _return;
   std::vector<std::string> args;
-  args.push_back(get_inc_receive_pos());
+  args.push_back(get_inc_read_pos());
   bool redo;
   do {
     try {
-      _return = blocks_[0]->run_command(msg_queue_cmd_id::mq_receive, args).front();// TODO hot fix, should use block id
-      // handle_redirect(b_tree_cmd_id::bt_put, args, _return);
+      _return = blocks_[0]->run_command(msg_queue_cmd_id::mq_read, args).front();// TODO hot fix, should use block id
+      // handle_redirect(btree_cmd_id::bt_put, args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -77,7 +76,7 @@ std::vector<std::string> msg_queue_client::send(const std::vector<std::string> &
   do {
     try {
       _return = batch_command(msg_queue_cmd_id::mq_send, msgs, 1);
-      //  handle_redirects(b_tree_cmd_id::bt_put, kvs, _return);
+      //  handle_redirects(btree_cmd_id::bt_put, kvs, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -86,20 +85,20 @@ std::vector<std::string> msg_queue_client::send(const std::vector<std::string> &
   return _return;
 }
 
-std::vector<std::string> msg_queue_client::receive(std::size_t num_msg) {
-  //if (kvs.size() % 2 != 0) {  TODO add check here with rend, the client cannot read beyond the latest message
+std::vector<std::string> msg_queue_client::read(std::size_t num_msg) {
+  //if (kvs.size() % 2 != 0) {  TODO add check here with read_end_, the client cannot read beyond the latest message
   //  throw std::invalid_argument("Incorrect number of arguments");
   //}
   std::vector<std::string> args;
   std::vector<std::string> _return;
   for (std::size_t i = 0; i < num_msg; i++) {
-    args.push_back(get_inc_receive_pos());
+    args.push_back(get_inc_read_pos());
   }
   bool redo;
   do {
     try {
-      _return = batch_command(msg_queue_cmd_id::mq_receive, args, 1);
-      //  handle_redirects(b_tree_cmd_id::bt_put, kvs, _return);
+      _return = batch_command(msg_queue_cmd_id::mq_read, args, 1);
+      //  handle_redirects(btree_cmd_id::bt_put, kvs, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;

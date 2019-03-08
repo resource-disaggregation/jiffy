@@ -54,11 +54,11 @@ class msg_queue_client {
   std::string send(const std::string &msg);
 
   /**
-   * @brief Receive message at the end position
+   * @brief Read message at the end position
    * @return Response of the command
    */
 
-  std::string receive();
+  std::string read();
 
   /**
    * @brief Send message in batch
@@ -69,19 +69,19 @@ class msg_queue_client {
   std::vector<std::string> send(const std::vector<std::string> &msgs);
 
   /**
-   * @brief Receive message in batch
+   * @brief Read message in batch
    * @param num_msg Number of message to be read in batch
    * @return Response of batch command
    */
 
-  std::vector<std::string> receive(std::size_t num_msg);
+  std::vector<std::string> read(std::size_t num_msg);
 
  private:
   /**
-   * @brief Get the receive start position and increase it by one
+   * @brief Get the read start position and increase it by one
    * @return Start position in string
    */
-  std::string get_inc_receive_pos() {
+  std::string get_inc_read_pos() {
     auto old_val = read_start_;
     read_start_++;
     return std::to_string(old_val);
