@@ -120,24 +120,20 @@ std::string btree_partition::remove(const key_type &key, bool redirect) {
   return "!block_moved";
 }
 
-//TODO this should only happen when it is "locked"
 std::vector<std::string> btree_partition::range_lookup(const key_type begin_range,
                                                        const key_type end_range,
-                                                       const std::string string_num_keys,
                                                        bool redirect) {
   std::vector<std::string> result;
-  int num_keys = std::stoi(string_num_keys);
   //if (begin_range > end_range) return "!ok"; // TODO fix this
   auto start = partition_.lower_bound(begin_range);
   auto end = --(partition_.upper_bound(end_range));
-  LOG(log_level::info) << "Range lookup from " << start.key() << " to " << end.key() << " for " << num_keys << "keys";
+  LOG(log_level::info) << "Range lookup from " << start.key() << " to " << end.key();
   // TODO test on some edge cases, things get pretty tricky for this
 
   if ((end.key() >= slot_range_.first && start.key() <= slot_range_.second)
       || (end.key() >= min(import_slot_range_.first, slot_range_.first)
           && start.key() <= max(import_slot_range_.second, slot_range_.second) && redirect)) {
     LOG(log_level::info) << "In the range" << start.key() << " to " << end.key();
-    auto n_items = 0;
     bool flag = false;
     end++;
     for (auto entry = start; entry != end; entry++) {
@@ -146,10 +142,6 @@ std::vector<std::string> btree_partition::range_lookup(const key_type begin_rang
         LOG(log_level::info) << "Pushing Key" << entry.key() << " and value " << (*entry).second;
         result.push_back(entry.key());
         result.push_back((*entry).second);
-        ++n_items;
-        if (n_items == num_keys) {
-          return result;
-        }
       }
     }
   }
@@ -162,6 +154,13 @@ std::vector<std::string> btree_partition::range_lookup(const key_type begin_rang
   }*/
   //std::vector<std::string> ret{"!block_moved"};
   return result;
+}
+
+std::string btree_partition::range_count(const key_type begin_range,
+                                         const key_type end_range,
+                                         bool redirect) {
+
+
 }
 
 void btree_partition::run_command(std::vector<std::string> &_return,
@@ -209,12 +208,21 @@ void btree_partition::run_command(std::vector<std::string> &_return,
       }
       break;
     case b_tree_cmd_id::bt_range_lookup:
-      if (args.size() % 3 != 0 && !redirect) {
+      if (args.size() % 2 != 0 && !redirect) {
         _return.emplace_back("!args_error");
       } else {
-        for (size_t i = 0; i < nargs; i += 3) {
-          std::vector<std::string> result = range_lookup(args[i], args[i + 1], args[i + 2], redirect);
+        for (size_t i = 0; i < nargs; i += 2) {
+          std::vector<std::string> result = range_lookup(args[i], args[i + 1], redirect);
           _return.insert(_return.end(), result.begin(), result.end());
+        }
+      }
+      break;
+    case b_tree_cmd_id::bt_range_count:
+      if (args.size() % 2 != 0 && !redirect) {
+        _return.emplace_back("!args_error");
+      } else {
+        for (size_t i = 0; i < nargs; i += 2) {
+          _return.emplace_back(range_count(args[i], args[i + 1], redirect));
         }
       }
       break;

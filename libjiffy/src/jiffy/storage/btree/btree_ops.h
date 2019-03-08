@@ -21,6 +21,7 @@ enum b_tree_cmd_id {
   bt_range_lookup = 4,
   bt_remove = 5,
   bt_update = 6,
+  bt_range_count = 7
 };
 
 }

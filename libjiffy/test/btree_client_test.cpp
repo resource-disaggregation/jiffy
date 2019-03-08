@@ -139,7 +139,7 @@ TEST_CASE("btree_client_put_range_lookup_test", "[put][range_lookup]") {
   for (std::size_t i = 0; i < 10; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
-  std::vector<std::string> ret = client.range_lookup(std::to_string(0), std::to_string(9), 1000);
+  std::vector<std::string> ret = client.range_lookup(std::to_string(0), std::to_string(9));
   for(std::size_t i = 0; i < 20; i += 2) {
     REQUIRE(ret.at(i) == std::to_string(i/2));
     REQUIRE(ret.at(i + 1) == std::to_string(i/2));

@@ -86,7 +86,7 @@ class btree_client {
    * @param num_key Maximum number of keys to lookup
    * @return Value of keys that are within the key range
    */
-  std::vector<std::string> range_lookup(const std::string begin_range, const std::string end_range, int num_key);
+  std::vector<std::string> range_lookup(const std::string begin_range, const std::string end_range);
 
   /**
    * @brief Put in batch

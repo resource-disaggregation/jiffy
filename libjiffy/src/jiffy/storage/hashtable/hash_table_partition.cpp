@@ -34,9 +34,9 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
   locked_block_.unlock();
   auto ser = conf.get("hashtable.serializer", "csv");
   if (ser == "binary") {
-    ser_ = std::make_shared<csv_serde>();
-  } else if (ser == "csv") {
     ser_ = std::make_shared<binary_serde>();
+  } else if (ser == "csv") {
+    ser_ = std::make_shared<csv_serde>();
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
@@ -837,13 +837,9 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       std::vector<std::string> src_after_args;
       std::vector<std::string> dst_after_args;
       // We don't need to update the src partition cause it will be deleted anyway
-      //src_after_args.push_back(src_partition_name);
-      //src_after_args.emplace_back("regular");
       dst_after_args.push_back(dst_partition_name);
       dst_after_args.emplace_back("regular$" + name());
-      //src->send_command(hash_table_cmd_id::update_partition, src_after_args);
       dst->send_command(hash_table_cmd_id::ht_update_partition, dst_after_args);
-      //src->recv_response();
       dst->recv_response();
       LOG(log_level::info) << "Merged slot range (" << merge_range_begin << ", " << merge_range_end << ")";
       splitting_ = false;
@@ -869,6 +865,7 @@ bool hash_table_partition::is_dirty() const {
 }
 
 void hash_table_partition::load(const std::string &path) {
+  LOG(log_level::info) << "Load happening for path " << path;
   locked_hash_table_type ltable = block_.lock_table();
   auto remote = persistent::persistent_store::instance(path, ser_);
   auto decomposed = persistent::persistent_store::decompose_path(path);

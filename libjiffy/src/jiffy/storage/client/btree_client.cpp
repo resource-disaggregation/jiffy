@@ -99,10 +99,9 @@ std::string btree_client::remove(const std::string &key) {
   return _return;
 }
 std::vector<std::string> btree_client::range_lookup(const std::string begin_range,
-                                                    const std::string end_range,
-                                                    int num_key) {
+                                                    const std::string end_range) {
   std::vector<std::string> _return;
-  std::vector<std::string> args{begin_range, end_range, std::to_string(num_key)};
+  std::vector<std::string> args{begin_range, end_range};
   bool redo;
   do {
     try {
@@ -184,14 +183,14 @@ std::vector<std::string> btree_client::remove(const std::vector<std::string> &ke
 }
 
 std::vector<std::string> btree_client::range_lookup(const std::vector<std::string> args) {
-  if (args.size() % 3 != 0) {
+  if (args.size() % 2 != 0) {
     throw std::invalid_argument("Incorrect number of arguments");
   }
   std::vector<std::string> _return;
   bool redo;
   do {
     try {
-      _return = batch_command(b_tree_cmd_id::bt_range_lookup, args, 3);
+      _return = batch_command(b_tree_cmd_id::bt_range_lookup, args, 2);
       //  handle_redirects(b_tree_cmd_id::bt_range_lookup, keys, _return);
       redo = false;
     } catch (redo_error &e) {
