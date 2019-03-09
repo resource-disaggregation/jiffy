@@ -12,3 +12,12 @@ target_link_libraries(hash_table_bench jiffy_client ${JEMALLOC_LIBRARY} ${Boost_
 
 install(TARGETS hash_table_bench
         RUNTIME DESTINATION bin)
+
+add_executable(msg_queue_bench src/msg_queue_benchmark.cpp)
+
+add_dependencies(msg_queue_bench boost_ep jemalloc_ep)
+
+target_link_libraries(msg_queue jiffy_client ${JEMALLOC_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+install(TARGETS msg_queue_bench
+        RUNTIME DESTINATION bin)
