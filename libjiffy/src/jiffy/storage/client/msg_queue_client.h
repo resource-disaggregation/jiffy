@@ -5,18 +5,12 @@
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/client_cache.h"
 #include "jiffy/storage/msgqueue/msg_queue_ops.h"
+#include "jiffy/storage/client/data_structure_client.h"
 
 namespace jiffy {
 namespace storage {
 
-/* Redo when exception class
- * Redo whenever exception happens */
-class redo_error : public std::exception {
- public:
-  redo_error() = default;
-};
-
-class msg_queue_client {
+class msg_queue_client : data_structure_client {
  public:
   /**
    * @brief Constructor
@@ -32,18 +26,12 @@ class msg_queue_client {
                    const directory::data_status &status,
                    int timeout_ms = 1000);
 
+  virtual ~msg_queue_client() = default;
   /**
    * @brief Refresh the slot and blocks from directory service
    */
 
-  void refresh();
-
-  /**
-   * @brief Fetch data status
-   * @return Data status
-   */
-
-  directory::data_status &status();
+  void refresh() override;
 
   /**
    * @brief Send message
@@ -110,24 +98,27 @@ class msg_queue_client {
   /**
    * @brief Handle command in redirect case
    * @param cmd_id Command identifier
-   * @param args Command arguments
    * @param response Response to be collected
    */
 
-  /* Directory client */
-  std::shared_ptr<directory::directory_interface> fs_;
-  /* Key value partition path */
-  std::string path_;
+  void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) override;
+
+  /**
+   * @brief Handle multiple commands in redirect case
+   * @param cmd_id Command identifier
+   * @param args Command arguments
+   * @param responses Responses to be collected
+   */
+
+  void handle_redirects(int32_t cmd_id,
+                        const std::vector<std::string> &args,
+                        std::vector<std::string> &responses) override;
+
   /* Read start */
   std::size_t read_start_;
   /* Read End */
   std::size_t read_end_;   // TODO add usage
-  /* Data status */
-  directory::data_status status_;
-  /* Replica chain clients, each partition only save a replica chain client */
-  std::vector<std::shared_ptr<replica_chain_client>> blocks_;
-  /* Time out*/
-  int timeout_ms_;
+
 
 };
 

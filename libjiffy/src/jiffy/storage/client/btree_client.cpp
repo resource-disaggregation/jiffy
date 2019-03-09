@@ -11,17 +11,8 @@ btree_client::btree_client(std::shared_ptr<directory::directory_interface> fs,
                            const std::string &path,
                            const directory::data_status &status,
                            int timeout_ms)
-    : fs_(std::move(fs)), path_(path), status_(status), timeout_ms_(timeout_ms) {
+    : data_structure_client(fs, path, status, timeout_ms) {
   slots_.clear();
-  blocks_.clear();
-  for (const auto &block: status.data_blocks()) {
-    //slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0])); TODO currently we assume that all the blocks have the key range from MINKEY to MAXKEY
-    blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, timeout_ms_));
-  }
-}
-
-directory::data_status &btree_client::status() {
-  return status_;
 }
 
 void btree_client::refresh() {
@@ -274,6 +265,50 @@ std::vector<std::string> btree_client::batch_command(const btree_cmd_id &op,
   }
 
   return results;
+}
+
+void btree_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
+  if (response.substr(0, 10) == "!exporting") {
+    typedef std::vector<std::string> list_t;
+    do {
+      auto parts = string_utils::split(response, '!');
+      auto chain = list_t(parts.begin() + 2, parts.end());
+      response = replica_chain_client(fs_,
+                                      path_,
+                                      directory::replica_chain(chain),
+                                      0).run_command_redirected(cmd_id, args).front();
+    } while (response.substr(0, 10) == "!exporting");
+  }
+  if (response == "!block_moved") {
+    refresh();
+    throw redo_error();
+  }
+}
+
+void btree_client::handle_redirects(int32_t cmd_id,
+                                    const std::vector<std::string> &args,
+                                    std::vector<std::string> &responses) {
+  size_t n_ops = responses.size();
+  size_t n_op_args = args.size() / n_ops;
+  for (size_t i = 0; i < responses.size(); i++) {
+    auto &response = responses[i];
+    if (response.substr(0, 10) == "!exporting") {
+      typedef std::vector<std::string> list_t;
+      list_t op_args(args.begin() + i * n_op_args, args.begin() + (i + 1) * n_op_args);
+      do {
+        auto parts = string_utils::split(response, '!');
+        auto chain = list_t(parts.begin() + 2, parts.end());
+        response = replica_chain_client(fs_,
+                                        path_,
+                                        directory::replica_chain(chain),
+                                        0).run_command_redirected(cmd_id, op_args).front();
+      } while (response.substr(0, 10) == "!exporting");
+    }
+    if (response == "!block_moved") {
+      refresh();
+      throw redo_error();
+    }
+  }
 }
 
 }

@@ -11,16 +11,8 @@ msg_queue_client::msg_queue_client(std::shared_ptr<directory::directory_interfac
                                    const std::string &path,
                                    const directory::data_status &status,
                                    int timeout_ms)
-    : fs_(std::move(fs)), path_(path), status_(status), timeout_ms_(timeout_ms) {
+    : data_structure_client(fs, path, status, timeout_ms) {
   read_start_ = 0;
-  blocks_.clear();
-  for (const auto &block: status.data_blocks()) {
-    blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, timeout_ms_));
-  }
-}
-
-directory::data_status &msg_queue_client::status() {
-  return status_;
 }
 
 void msg_queue_client::refresh() {
@@ -145,6 +137,50 @@ std::vector<std::string> msg_queue_client::batch_command(const msg_queue_cmd_id 
   }
 
   return results;
+}
+
+void msg_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
+  if (response.substr(0, 10) == "!exporting") {
+    typedef std::vector<std::string> list_t;
+    do {
+      auto parts = string_utils::split(response, '!');
+      auto chain = list_t(parts.begin() + 2, parts.end());
+      response = replica_chain_client(fs_,
+                                      path_,
+                                      directory::replica_chain(chain),
+                                      0).run_command_redirected(cmd_id, args).front();
+    } while (response.substr(0, 10) == "!exporting");
+  }
+  if (response == "!block_moved") {
+    refresh();
+    throw redo_error();
+  }
+}
+
+void msg_queue_client::handle_redirects(int32_t cmd_id,
+                                        const std::vector<std::string> &args,
+                                        std::vector<std::string> &responses) {
+  size_t n_ops = responses.size();
+  size_t n_op_args = args.size() / n_ops;
+  for (size_t i = 0; i < responses.size(); i++) {
+    auto &response = responses[i];
+    if (response.substr(0, 10) == "!exporting") {
+      typedef std::vector<std::string> list_t;
+      list_t op_args(args.begin() + i * n_op_args, args.begin() + (i + 1) * n_op_args);
+      do {
+        auto parts = string_utils::split(response, '!');
+        auto chain = list_t(parts.begin() + 2, parts.end());
+        response = replica_chain_client(fs_,
+                                        path_,
+                                        directory::replica_chain(chain),
+                                        0).run_command_redirected(cmd_id, op_args).front();
+      } while (response.substr(0, 10) == "!exporting");
+    }
+    if (response == "!block_moved") {
+      refresh();
+      throw redo_error();
+    }
+  }
 }
 
 }

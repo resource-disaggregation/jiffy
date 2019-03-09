@@ -8,7 +8,6 @@
 #include <iostream>
 #include <fstream>
 
-
 namespace jiffy {
 namespace storage {
 /* Virtual class for Custom serializer/deserializer */
