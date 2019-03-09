@@ -25,7 +25,6 @@ message(STATUS "  Build Python client:                    ${BUILD_PYTHON_CLIENT}
 message(STATUS "  Build Java client:                      ${BUILD_JAVA_CLIENT}")
 message(STATUS "  Build benchmarks:                       ${BUILD_BENCHMARKS}")
 message(STATUS "  Build unit tests:                       ${BUILD_TESTS}")
-message(STATUS "  Build benchmarks:                       ${BUILD_BENCHMARKS}")
 message(STATUS "  Build documentation:                    ${BUILD_DOC}")
 message(STATUS "  Use system thrift library:              ${USE_SYSTEM_THRIFT}")
 message(STATUS "  Use system AWS SDK:                     ${USE_SYSTEM_AWSSDK}")

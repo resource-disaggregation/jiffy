@@ -13,6 +13,7 @@ using namespace ::jiffy::utils;
 
 using namespace ::apache::thrift;
 
+
 typedef std::shared_ptr<msg_queue_client> client_ptr;
 typedef std::vector<client_ptr> client_list;
 
@@ -22,6 +23,7 @@ class msg_queue_benchmark {
                       size_t data_size,
                       size_t num_clients,
                       size_t num_ops)
+
       : data_(data_size, 'x'),
         num_clients_(num_clients),
         num_ops_(num_ops / num_clients),
@@ -138,9 +140,7 @@ int main() {
   LOG(log_level::info) << "test: " << op_type;
   LOG(log_level::info) << "path: " << path;
   LOG(log_level::info) << "backing-path: " << backing_path;
-
   jiffy_client client(address, service_port, lease_port);
-
   std::vector<std::shared_ptr<msg_queue_client>> mq_clients(static_cast<size_t>(num_clients), nullptr);
   for (int i = 0; i < num_clients; ++i) {
     mq_clients[i] = client.open_or_create_msg_queue(path, backing_path, num_blocks, chain_length);

@@ -7,6 +7,7 @@
 #include <cstdint>
 
 #include "jiffy/storage/hashtable/hash_table_ops.h"
+#include "jiffy/storage/msgqueue/msg_queue_ops.h"
 
 namespace jiffy {
 namespace benchmark {

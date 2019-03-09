@@ -120,6 +120,7 @@ class jiffy_client {
                                                                       int32_t permissions = directory::perms::all(),
                                                                       const std::map<std::string,
                                                                                      std::string> &tags = {});
+  
   /**
    * @brief Open or create btree
    * @param path File path
@@ -140,7 +141,7 @@ class jiffy_client {
                                                               int32_t permissions = directory::perms::all(),
                                                               const std::map<std::string,
                                                                              std::string> &tags = {});
-
+  
   /**
    * @brief Open a file and start key value listener
    * @param path File path
