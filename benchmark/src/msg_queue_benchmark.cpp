@@ -19,9 +19,9 @@ typedef std::vector<client_ptr> client_list;
 class msg_queue_benchmark {
  public:
   msg_queue_benchmark(client_list &clients,
-                       size_t data_size,
-                       size_t num_clients,
-                       size_t num_ops)
+                      size_t data_size,
+                      size_t num_clients,
+                      size_t num_ops)
       : data_(data_size, 'x'),
         num_clients_(num_clients),
         num_ops_(num_ops / num_clients),
@@ -60,9 +60,9 @@ class msg_queue_benchmark {
 class send_benchmark : public msg_queue_benchmark {
  public:
   send_benchmark(client_list &clients,
-                size_t data_size,
-                size_t num_clients,
-                size_t num_ops): msg_queue_benchmark(clients, data_size, num_clients, num_ops) {
+                 size_t data_size,
+                 size_t num_clients,
+                 size_t num_ops) : msg_queue_benchmark(clients, data_size, num_clients, num_ops) {
   }
 
   void run() override {
@@ -87,9 +87,9 @@ class send_benchmark : public msg_queue_benchmark {
 class read_benchmark : public msg_queue_benchmark {
  public:
   read_benchmark(client_list &clients,
-                size_t data_size,
-                size_t num_clients,
-                size_t num_ops): msg_queue_benchmark(clients, data_size, num_clients, num_ops) {
+                 size_t data_size,
+                 size_t num_clients,
+                 size_t num_ops) : msg_queue_benchmark(clients, data_size, num_clients, num_ops) {
   }
 
   void run() override {
@@ -114,83 +114,30 @@ class read_benchmark : public msg_queue_benchmark {
   }
 };
 
-int main(int argc, char **argv) {
-  signal_handling::install_error_handler(SIGABRT, SIGFPE, SIGSEGV, SIGILL, SIGTRAP);
-
-  GlobalOutput.setOutputFunction(log_utils::log_thrift_msg);
-
-  // Parse configuration parameters
-  // First set defaults
+int main() {
   std::string address = "127.0.0.1";
   int service_port = 9090;
   int lease_port = 9091;
-  int num_clients = 2;
+  int num_clients = 1;
   int num_blocks = 1;
   int chain_length = 1;
   int num_ops = 100000;
   int data_size = 64;
-  std::string op_type = "read";
+  std::string op_type = "send";
   std::string path = "/tmp";
   std::string backing_path = "local://tmp";
-  try {
-    namespace po = boost::program_options;
-    std::string config_file = "";
-    po::options_description generic("options");
-    generic.add_options()
-        ("version,v", "Print version string")
-        ("help,h", "Print help message")
-        ("host", po::value<std::string>(&address)->default_value("127.0.0.1"))
-        ("service-port", po::value<int>(&service_port)->default_value(9090))
-        ("lease-port", po::value<int>(&lease_port)->default_value(9091))
-        ("num-clients", po::value<int>(&num_clients)->default_value(2))
-        ("num-blocks", po::value<int>(&num_blocks)->default_value(1))
-        ("chain-length", po::value<int>(&chain_length)->default_value(1))
-        ("num-ops", po::value<int>(&num_ops)->default_value(100000))
-        ("data-size", po::value<int>(&data_size)->default_value(64))
-        ("test", po::value<std::string>(&op_type)->default_value("read"))
-        ("path", po::value<std::string>(&path)->default_value("/tmp"))
-        ("backing-path", po::value<std::string>(&backing_path)->default_value("local://tmp"));
-
-    po::options_description cmdline_options;
-    cmdline_options.add(generic);
-
-    po::options_description visible;
-    visible.add(generic);
-
-    po::variables_map vm;
-
-    // Commandline args have highest priority
-    store(po::command_line_parser(argc, argv).options(cmdline_options).run(), vm);
-    notify(vm);
-
-    if (vm.count("help")) {
-      std::cout << "Directory service daemon" << std::endl;
-      std::cout << visible << std::endl;
-      return 0;
-    }
-
-    if (vm.count("version")) {
-      std::cout << "Jiffy Message Queue Benchmark, Version 0.1.0" << std::endl; // TODO: Configure version string
-      return 0;
-    }
-
-    // Output all the configuration parameters:
-    LOG(log_level::info) << "host: " << address;
-    LOG(log_level::info) << "service-port: " << service_port;
-    LOG(log_level::info) << "lease-port: " << lease_port;
-    LOG(log_level::info) << "num-clients: " << num_clients;
-    LOG(log_level::info) << "num-blocks: " << num_blocks;
-    LOG(log_level::info) << "chain-length: " << chain_length;
-    LOG(log_level::info) << "num-ops: " << num_ops;
-    LOG(log_level::info) << "data-size: " << data_size;
-    LOG(log_level::info) << "test: " << op_type;
-    LOG(log_level::info) << "path: " << path;
-    LOG(log_level::info) << "backing-path: " << backing_path;
-
-  } catch (std::exception &e) {
-    std::cerr << e.what() << std::endl;
-    return 1;
-  }
+  // Output all the configuration parameters:
+  LOG(log_level::info) << "host: " << address;
+  LOG(log_level::info) << "service-port: " << service_port;
+  LOG(log_level::info) << "lease-port: " << lease_port;
+  LOG(log_level::info) << "num-clients: " << num_clients;
+  LOG(log_level::info) << "num-blocks: " << num_blocks;
+  LOG(log_level::info) << "chain-length: " << chain_length;
+  LOG(log_level::info) << "num-ops: " << num_ops;
+  LOG(log_level::info) << "data-size: " << data_size;
+  LOG(log_level::info) << "test: " << op_type;
+  LOG(log_level::info) << "path: " << path;
+  LOG(log_level::info) << "backing-path: " << backing_path;
 
   jiffy_client client(address, service_port, lease_port);
 
@@ -202,8 +149,11 @@ int main(int argc, char **argv) {
   std::shared_ptr<msg_queue_benchmark> benchmark = nullptr;
   if (op_type == "send") {
     benchmark = std::make_shared<send_benchmark>(mq_clients, data_size, num_clients, num_ops);
-  } else {
+  } else if (op_type == "read") {
     benchmark = std::make_shared<read_benchmark>(mq_clients, data_size, num_clients, num_ops);
+  } else {
+    LOG(log_level::info) << "Incorrect operation type for message queue: " << op_type;
+    return 0;
   }
   benchmark->run();
   auto result = benchmark->wait();
