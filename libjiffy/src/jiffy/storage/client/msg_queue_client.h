@@ -10,7 +10,6 @@
 namespace jiffy {
 namespace storage {
 
-
 class msg_queue_client : data_structure_client {
  public:
   /**
@@ -95,6 +94,25 @@ class msg_queue_client : data_structure_client {
   std::vector<std::string> batch_command(const msg_queue_cmd_id &id,
                                          const std::vector<std::string> &args,
                                          size_t args_per_op);
+
+  /**
+   * @brief Handle command in redirect case
+   * @param cmd_id Command identifier
+   * @param response Response to be collected
+   */
+
+  void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) override;
+
+  /**
+   * @brief Handle multiple commands in redirect case
+   * @param cmd_id Command identifier
+   * @param args Command arguments
+   * @param responses Responses to be collected
+   */
+
+  void handle_redirects(int32_t cmd_id,
+                        const std::vector<std::string> &args,
+                        std::vector<std::string> &responses) override;
 
   /* Read start */
   std::size_t read_start_;

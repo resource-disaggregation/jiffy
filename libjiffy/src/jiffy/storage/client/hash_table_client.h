@@ -270,7 +270,9 @@ class hash_table_client : public data_structure_client {
    * @param responses Responses to be collected
    */
 
-  void handle_redirects(int32_t cmd_id, const std::vector<std::string> &args, std::vector<std::string> &responses) override;
+  void handle_redirects(int32_t cmd_id,
+                        const std::vector<std::string> &args,
+                        std::vector<std::string> &responses) override;
 
   /* Slot begin of the blocks */
   std::vector<int32_t> slots_;

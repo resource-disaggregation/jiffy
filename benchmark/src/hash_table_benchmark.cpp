@@ -62,7 +62,7 @@ class put_benchmark : public hash_table_benchmark {
   put_benchmark(client_list &clients,
                 size_t data_size,
                 size_t num_clients,
-                size_t num_ops): hash_table_benchmark(clients, data_size, num_clients, num_ops) {
+                size_t num_ops) : hash_table_benchmark(clients, data_size, num_clients, num_ops) {
   }
 
   void run() override {
@@ -89,7 +89,7 @@ class get_benchmark : public hash_table_benchmark {
   get_benchmark(client_list &clients,
                 size_t data_size,
                 size_t num_clients,
-                size_t num_ops): hash_table_benchmark(clients, data_size, num_clients, num_ops) {
+                size_t num_ops) : hash_table_benchmark(clients, data_size, num_clients, num_ops) {
   }
 
   void run() override {

@@ -10,7 +10,6 @@
 namespace jiffy {
 namespace storage {
 
-
 class btree_client : data_structure_client {
  public:
   /**
@@ -32,7 +31,6 @@ class btree_client : data_structure_client {
    */
 
   void refresh() override;
-
 
   /**
    * @brief Put key value pair
@@ -131,7 +129,7 @@ class btree_client : data_structure_client {
     * @param end_range Key range end
     * @return Keys count within the range
     */
-  std::vector<std::string>  range_count(const std::vector<std::string> args);
+  std::vector<std::string> range_count(const std::vector<std::string> args);
 
  private:
   /**
@@ -153,6 +151,26 @@ class btree_client : data_structure_client {
   std::vector<std::string> batch_command(const btree_cmd_id &id,
                                          const std::vector<std::string> &args,
                                          size_t args_per_op);
+
+  /**
+   * @brief Handle command in redirect case
+   * @param cmd_id Command identifier
+   * @param args Command arguments
+   * @param response Response to be collected
+   */
+
+  void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) override;
+
+  /**
+   * @brief Handle multiple commands in redirect case
+   * @param cmd_id Command identifier
+   * @param args Command arguments
+   * @param responses Responses to be collected
+   */
+
+  void handle_redirects(int32_t cmd_id,
+                        const std::vector<std::string> &args,
+                        std::vector<std::string> &responses) override;
 
   /* Slot begin of the blocks */
   std::vector<int32_t> slots_;

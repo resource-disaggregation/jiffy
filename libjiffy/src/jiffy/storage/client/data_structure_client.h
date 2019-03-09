@@ -28,14 +28,10 @@ class data_structure_client {
    */
 
   data_structure_client(std::shared_ptr<directory::directory_interface> fs,
-                    const std::string &path,
-                    const directory::data_status &status,
-                    int timeout_ms = 1000);
+                        const std::string &path,
+                        const directory::data_status &status,
+                        int timeout_ms = 1000);
 
-  /**
-   * @brief Virtual destructor
-   */
-  virtual ~data_structure_client() = 0;
   /**
    * @brief Refresh the slot and blocks from directory service
    */
@@ -67,7 +63,9 @@ class data_structure_client {
    * @param responses Responses to be collected
    */
 
-  virtual void handle_redirects(int32_t cmd_id, const std::vector<std::string> &args, std::vector<std::string> &responses) = 0;
+  virtual void handle_redirects(int32_t cmd_id,
+                                const std::vector<std::string> &args,
+                                std::vector<std::string> &responses) = 0;
 
   /* Directory client */
   std::shared_ptr<directory::directory_interface> fs_;

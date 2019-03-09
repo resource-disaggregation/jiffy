@@ -19,7 +19,6 @@ hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interf
   }
 }
 
-
 std::shared_ptr<hash_table_client::locked_client> hash_table_client::lock() {
   return std::make_shared<hash_table_client::locked_client>(*this);
 }

@@ -15,7 +15,6 @@ msg_queue_client::msg_queue_client(std::shared_ptr<directory::directory_interfac
   read_start_ = 0;
 }
 
-
 void msg_queue_client::refresh() {
   status_ = fs_->dstatus(path_);
   LOG(log_level::info) << "Refreshing partition mappings to " << status_.to_string();
@@ -138,6 +137,50 @@ std::vector<std::string> msg_queue_client::batch_command(const msg_queue_cmd_id 
   }
 
   return results;
+}
+
+void msg_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
+  if (response.substr(0, 10) == "!exporting") {
+    typedef std::vector<std::string> list_t;
+    do {
+      auto parts = string_utils::split(response, '!');
+      auto chain = list_t(parts.begin() + 2, parts.end());
+      response = replica_chain_client(fs_,
+                                      path_,
+                                      directory::replica_chain(chain),
+                                      0).run_command_redirected(cmd_id, args).front();
+    } while (response.substr(0, 10) == "!exporting");
+  }
+  if (response == "!block_moved") {
+    refresh();
+    throw redo_error();
+  }
+}
+
+void msg_queue_client::handle_redirects(int32_t cmd_id,
+                                        const std::vector<std::string> &args,
+                                        std::vector<std::string> &responses) {
+  size_t n_ops = responses.size();
+  size_t n_op_args = args.size() / n_ops;
+  for (size_t i = 0; i < responses.size(); i++) {
+    auto &response = responses[i];
+    if (response.substr(0, 10) == "!exporting") {
+      typedef std::vector<std::string> list_t;
+      list_t op_args(args.begin() + i * n_op_args, args.begin() + (i + 1) * n_op_args);
+      do {
+        auto parts = string_utils::split(response, '!');
+        auto chain = list_t(parts.begin() + 2, parts.end());
+        response = replica_chain_client(fs_,
+                                        path_,
+                                        directory::replica_chain(chain),
+                                        0).run_command_redirected(cmd_id, op_args).front();
+      } while (response.substr(0, 10) == "!exporting");
+    }
+    if (response == "!block_moved") {
+      refresh();
+      throw redo_error();
+    }
+  }
 }
 
 }

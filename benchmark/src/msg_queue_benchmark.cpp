@@ -13,7 +13,6 @@ using namespace ::jiffy::utils;
 
 using namespace ::apache::thrift;
 
-
 typedef std::shared_ptr<msg_queue_client> client_ptr;
 typedef std::vector<client_ptr> client_list;
 
