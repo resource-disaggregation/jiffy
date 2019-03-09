@@ -11,17 +11,8 @@ btree_client::btree_client(std::shared_ptr<directory::directory_interface> fs,
                            const std::string &path,
                            const directory::data_status &status,
                            int timeout_ms)
-    : fs_(std::move(fs)), path_(path), status_(status), timeout_ms_(timeout_ms) {
+    : data_structure_client(fs, path, status, timeout_ms) {
   slots_.clear();
-  blocks_.clear();
-  for (const auto &block: status.data_blocks()) {
-    //slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0])); TODO currently we assume that all the blocks have the key range from MINKEY to MAXKEY
-    blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, timeout_ms_));
-  }
-}
-
-directory::data_status &btree_client::status() {
-  return status_;
 }
 
 void btree_client::refresh() {

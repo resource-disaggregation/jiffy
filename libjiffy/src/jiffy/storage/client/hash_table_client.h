@@ -4,19 +4,13 @@
 #include "jiffy/directory/client/directory_client.h"
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/client_cache.h"
+#include "jiffy/storage/client/data_structure_client.h"
 
 namespace jiffy {
 namespace storage {
 
-/* Redo when exception class
- * Redo whenever exception happens */
-class redo_error : public std::exception {
- public:
-  redo_error() = default;
-};
-
 /* Hash table client */
-class hash_table_client {
+class hash_table_client : public data_structure_client {
  public:
   /* Locked client class */
   class locked_client {
@@ -160,19 +154,12 @@ class hash_table_client {
                     const std::string &path,
                     const directory::data_status &status,
                     int timeout_ms = 1000);
-
+  virtual ~hash_table_client() = default;
   /**
    * @brief Refresh the slot and blocks from directory service
    */
 
-  void refresh();
-
-  /**
-   * @brief Fetch data status
-   * @return Data status
-   */
-
-  directory::data_status &status();
+  void refresh() override;
 
   /**
    * @brief Lock key value client
@@ -274,7 +261,7 @@ class hash_table_client {
    * @param response Response to be collected
    */
 
-  void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response);
+  void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) override;
 
   /**
    * @brief Handle multiple commands in redirect case
@@ -283,19 +270,11 @@ class hash_table_client {
    * @param responses Responses to be collected
    */
 
-  void handle_redirects(int32_t cmd_id, const std::vector<std::string> &args, std::vector<std::string> &responses);
-  /* Directory client */
-  std::shared_ptr<directory::directory_interface> fs_;
-  /* Key value partition path */
-  std::string path_;
-  /* Data status */
-  directory::data_status status_;
-  /* Replica chain clients, each partition only save a replica chain client */
-  std::vector<std::shared_ptr<replica_chain_client>> blocks_;
+  void handle_redirects(int32_t cmd_id, const std::vector<std::string> &args, std::vector<std::string> &responses) override;
+
   /* Slot begin of the blocks */
   std::vector<int32_t> slots_;
-  /* Time out*/
-  int timeout_ms_;
+
 };
 
 }

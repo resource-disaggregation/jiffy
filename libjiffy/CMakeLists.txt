@@ -107,6 +107,8 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/client/block_client.h
           src/jiffy/storage/client/block_listener.cpp
           src/jiffy/storage/client/block_listener.h
+          src/jiffy/storage/client/data_structure_client.cpp
+          src/jiffy/storage/client/data_structure_client.h
           src/jiffy/storage/client/hash_table_client.cpp
           src/jiffy/storage/client/hash_table_client.h
           src/jiffy/storage/client/btree_client.cpp
@@ -291,6 +293,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/client/block_client.h
           src/jiffy/storage/client/block_listener.cpp
           src/jiffy/storage/client/block_listener.h
+          src/jiffy/storage/client/data_structure_client.cpp
+          src/jiffy/storage/client/data_structure_client.h
           src/jiffy/storage/client/hash_table_client.cpp
           src/jiffy/storage/client/hash_table_client.h
           src/jiffy/storage/client/btree_client.cpp
