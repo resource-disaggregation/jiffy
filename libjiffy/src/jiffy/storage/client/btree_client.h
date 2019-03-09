@@ -5,16 +5,10 @@
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/client_cache.h"
 #include "jiffy/storage/btree/btree_ops.h"
-
+#include "jiffy/storage/client/tmp.h"
 namespace jiffy {
 namespace storage {
 
-/* Redo when exception class
- * Redo whenever exception happens */
-class redo_error : public std::exception {
- public:
-  redo_error() = default;
-};
 
 class btree_client {
  public:

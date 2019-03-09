@@ -13,12 +13,12 @@ using namespace ::jiffy::utils;
 
 using namespace ::apache::thrift;
 
-typedef std::shared_ptr<msg_queue_client> client_ptr;
+typedef std::shared_ptr<btree_client> client_ptr;
 typedef std::vector<client_ptr> client_list;
 
-class msg_queue_benchmark {
+class btree_benchmark {
  public:
-  msg_queue_benchmark(client_list &clients,
+  btree_benchmark(client_list &clients,
                        size_t data_size,
                        size_t num_clients,
                        size_t num_ops)
@@ -31,7 +31,7 @@ class msg_queue_benchmark {
         latency_(num_clients) {
   }
 
-  virtual ~msg_queue_benchmark() = default;
+  virtual ~btree_benchmark() = default;
 
   virtual void run() = 0;
 
@@ -51,18 +51,18 @@ class msg_queue_benchmark {
   std::string data_;
   size_t num_clients_;
   size_t num_ops_;
-  std::vector<std::shared_ptr<msg_queue_client>> &clients_;
+  std::vector<std::shared_ptr<btree_client>> &clients_;
   std::vector<std::thread> workers_;
   std::vector<double> throughput_;
   std::vector<double> latency_;
 };
 
-class send_benchmark : public msg_queue_benchmark {
+class put_benchmark : public btree_benchmark {
  public:
-  send_benchmark(client_list &clients,
+  put_benchmark(client_list &clients,
                 size_t data_size,
                 size_t num_clients,
-                size_t num_ops): msg_queue_benchmark(clients, data_size, num_clients, num_ops) {
+                size_t num_ops): btree_benchmark(clients, data_size, num_clients, num_ops) {
   }
 
   void run() override {
@@ -73,7 +73,7 @@ class send_benchmark : public msg_queue_benchmark {
         size_t j;
         for (j = 0; j < num_ops_; ++j) {
           t0 = time_utils::now_us();
-          clients_[i]->send(data_);
+          clients_[i]->put(std::to_string(j), data_);
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);
         }
@@ -84,26 +84,56 @@ class send_benchmark : public msg_queue_benchmark {
   }
 };
 
-class read_benchmark : public msg_queue_benchmark {
+class get_benchmark : public btree_benchmark {
  public:
-  read_benchmark(client_list &clients,
+  get_benchmark(client_list &clients,
                 size_t data_size,
                 size_t num_clients,
-                size_t num_ops): msg_queue_benchmark(clients, data_size, num_clients, num_ops) {
+                size_t num_ops): btree_benchmark(clients, data_size, num_clients, num_ops) {
   }
 
   void run() override {
     for (size_t i = 0; i < num_clients_; ++i) {
       workers_[i] = std::thread([i, this]() {
         for (size_t j = 0; j < num_ops_; ++j) {
-          clients_[i]->send(data_);
+          clients_[i]->put(std::to_string(j), data_);
         }
         auto bench_begin = time_utils::now_us();
         uint64_t tot_time = 0, t0, t1 = bench_begin;
         size_t j;
         for (j = 0; j < num_ops_; ++j) {
           t0 = time_utils::now_us();
-          clients_[i]->read();
+          clients_[i]->get(std::to_string(j));
+          t1 = time_utils::now_us();
+          tot_time += (t1 - t0);
+        }
+        latency_[i] = (double) tot_time / (double) j;
+        throughput_[i] = (double) j / (double) (t1 - bench_begin);
+      });
+    }
+  }
+};
+
+class range_lookup_benchmark : public btree_benchmark {
+ public:
+  range_lookup_benchmark(client_list &clients,
+                size_t data_size,
+                size_t num_clients,
+                size_t num_ops): btree_benchmark(clients, data_size, num_clients, num_ops) {
+  }
+
+  void run() override {
+    for (size_t i = 0; i < num_clients_; ++i) {
+      workers_[i] = std::thread([i, this]() {
+        for (size_t j = 0; j < num_ops_; ++j) {
+          clients_[i]->put(std::to_string(j), data_);
+        }
+        auto bench_begin = time_utils::now_us();
+        uint64_t tot_time = 0, t0, t1 = bench_begin;
+        size_t j;
+        for (j = 0; j < num_ops_; ++j) {
+          t0 = time_utils::now_us();
+          clients_[i]->range_lookup(std::to_string(0), std::to_string(num_ops_ - 1));
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);
         }
@@ -124,12 +154,12 @@ int main(int argc, char **argv) {
   std::string address = "127.0.0.1";
   int service_port = 9090;
   int lease_port = 9091;
-  int num_clients = 2;
+  int num_clients = 1;
   int num_blocks = 1;
   int chain_length = 1;
   int num_ops = 100000;
   int data_size = 64;
-  std::string op_type = "read";
+  std::string op_type = "range_lookup";
   std::string path = "/tmp";
   std::string backing_path = "local://tmp";
   try {
@@ -142,12 +172,12 @@ int main(int argc, char **argv) {
         ("host", po::value<std::string>(&address)->default_value("127.0.0.1"))
         ("service-port", po::value<int>(&service_port)->default_value(9090))
         ("lease-port", po::value<int>(&lease_port)->default_value(9091))
-        ("num-clients", po::value<int>(&num_clients)->default_value(2))
+        ("num-clients", po::value<int>(&num_clients)->default_value(1))
         ("num-blocks", po::value<int>(&num_blocks)->default_value(1))
         ("chain-length", po::value<int>(&chain_length)->default_value(1))
         ("num-ops", po::value<int>(&num_ops)->default_value(100000))
-        ("data-size", po::value<int>(&data_size)->default_value(64))
-        ("test", po::value<std::string>(&op_type)->default_value("read"))
+        ("data-size", po::value<int>(&data_size)->default_value(8))
+        ("test", po::value<std::string>(&op_type)->default_value("range_lookup"))
         ("path", po::value<std::string>(&path)->default_value("/tmp"))
         ("backing-path", po::value<std::string>(&backing_path)->default_value("local://tmp"));
 
@@ -170,7 +200,7 @@ int main(int argc, char **argv) {
     }
 
     if (vm.count("version")) {
-      std::cout << "Jiffy Message Queue Benchmark, Version 0.1.0" << std::endl; // TODO: Configure version string
+      std::cout << "Jiffy Btree Benchmark, Version 0.1.0" << std::endl; // TODO: Configure version string
       return 0;
     }
 
@@ -194,16 +224,19 @@ int main(int argc, char **argv) {
 
   jiffy_client client(address, service_port, lease_port);
 
-  std::vector<std::shared_ptr<msg_queue_client>> mq_clients(static_cast<size_t>(num_clients), nullptr);
+  std::vector<std::shared_ptr<btree_client>> bt_clients(static_cast<size_t>(num_clients), nullptr);
   for (int i = 0; i < num_clients; ++i) {
-    mq_clients[i] = client.open_or_create_msg_queue(path, backing_path, num_blocks, chain_length);
+    bt_clients[i] = client.open_or_create_btree(path, backing_path, num_blocks, chain_length);
   }
 
-  std::shared_ptr<msg_queue_benchmark> benchmark = nullptr;
-  if (op_type == "send") {
-    benchmark = std::make_shared<send_benchmark>(mq_clients, data_size, num_clients, num_ops);
+  std::shared_ptr<btree_benchmark> benchmark = nullptr;
+  if (op_type == "put") {
+    benchmark = std::make_shared<put_benchmark>(bt_clients, data_size, num_clients, num_ops);
+  } else if (op_type == "get") {
+    benchmark = std::make_shared<get_benchmark>(bt_clients, data_size, num_clients, num_ops);
   } else {
-    benchmark = std::make_shared<read_benchmark>(mq_clients, data_size, num_clients, num_ops);
+    LOG(log_level::info) << "Look here: " << address;
+    benchmark = std::make_shared<range_lookup_benchmark>(bt_clients, data_size, num_clients, num_ops);
   }
   benchmark->run();
   auto result = benchmark->wait();

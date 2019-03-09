@@ -4,16 +4,11 @@
 #include "jiffy/directory/client/directory_client.h"
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/client_cache.h"
+#include "jiffy/storage/client/tmp.h"
 
 namespace jiffy {
 namespace storage {
 
-/* Redo when exception class
- * Redo whenever exception happens */
-class redo_error : public std::exception {
- public:
-  redo_error() = default;
-};
 
 /* Hash table client */
 class hash_table_client {
