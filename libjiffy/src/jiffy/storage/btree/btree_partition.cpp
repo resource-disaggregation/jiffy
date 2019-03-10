@@ -127,19 +127,15 @@ std::vector<std::string> btree_partition::range_lookup(const key_type begin_rang
   //if (begin_range > end_range) return "!ok"; // TODO fix this
   auto start = partition_.lower_bound(begin_range);
   auto end = --(partition_.upper_bound(end_range));
-  LOG(log_level::info) << "Range lookup from " << start.key() << " to " << end.key();
-  // TODO test on some edge cases, things get pretty tricky for this
 
   if ((end.key() >= slot_range_.first && start.key() <= slot_range_.second)
       || (end.key() >= min(import_slot_range_.first, slot_range_.first)
           && start.key() <= max(import_slot_range_.second, slot_range_.second) && redirect)) {
-    LOG(log_level::info) << "In the range" << start.key() << " to " << end.key();
     bool flag = false;
     end++;
     for (auto entry = start; entry != end; entry++) {
       if (entry.key() >= begin_range && entry.key() <= end_range) {
         flag = true;
-        LOG(log_level::info) << "Pushing Key" << entry.key() << " and value " << (*entry).second;
         result.push_back(entry.key());
         result.push_back((*entry).second);
       }
