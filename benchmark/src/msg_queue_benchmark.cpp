@@ -159,11 +159,11 @@ int main() {
   client.remove(path);
 
   LOG(log_level::info) << "===== " << op_type << " ======";
-  LOG(log_level::info) << "\t" << num_ops << " requests completed in " << ((double) num_ops / result.first) << " s";
+  LOG(log_level::info) << "\t" << num_ops << " requests completed in " << ((double) num_ops / result.first) << " us";
   LOG(log_level::info) << "\t" << num_clients << " parallel clients";
   LOG(log_level::info) << "\t" << data_size << " payload";
   LOG(log_level::info) << "\tAverage latency: " << result.second;
-  LOG(log_level::info) << "\tThroughput: " << result.first << " requests per second";
+  LOG(log_level::info) << "\tThroughput: " << result.first << " requests per microsecond";
 
   return 0;
 }

@@ -1,5 +1,6 @@
 #include <vector>
 #include <thread>
+#include <fstream>
 #include <boost/program_options.hpp>
 #include <jiffy/client/jiffy_client.h>
 #include <jiffy/utils/logger.h>
@@ -15,6 +16,7 @@ using namespace ::apache::thrift;
 
 typedef std::shared_ptr<btree_client> client_ptr;
 typedef std::vector<client_ptr> client_list;
+std::vector<std::string> keys;
 
 class btree_benchmark {
  public:
@@ -73,7 +75,7 @@ class put_benchmark : public btree_benchmark {
         size_t j;
         for (j = 0; j < num_ops_; ++j) {
           t0 = time_utils::now_us();
-          clients_[i]->put(std::to_string(j), data_);
+          clients_[i]->put(keys[j], data_);
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);
         }
@@ -96,14 +98,14 @@ class get_benchmark : public btree_benchmark {
     for (size_t i = 0; i < num_clients_; ++i) {
       workers_[i] = std::thread([i, this]() {
         for (size_t j = 0; j < num_ops_; ++j) {
-          clients_[i]->put(std::to_string(j), data_);
+          clients_[i]->put(keys[j], data_);
         }
         auto bench_begin = time_utils::now_us();
         uint64_t tot_time = 0, t0, t1 = bench_begin;
         size_t j;
         for (j = 0; j < num_ops_; ++j) {
           t0 = time_utils::now_us();
-          clients_[i]->get(std::to_string(j));
+          clients_[i]->get(keys[j]);
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);
         }
@@ -126,14 +128,14 @@ class range_lookup_benchmark : public btree_benchmark {
     for (size_t i = 0; i < num_clients_; ++i) {
       workers_[i] = std::thread([i, this]() {
         for (size_t j = 0; j < num_ops_; ++j) {
-          clients_[i]->put(std::to_string(j), data_);
+          clients_[i]->put(keys[j], data_);
         }
         auto bench_begin = time_utils::now_us();
         uint64_t tot_time = 0, t0, t1 = bench_begin;
         size_t j;
         for (j = 0; j < num_ops_; ++j) {
           t0 = time_utils::now_us();
-          clients_[i]->range_lookup(std::to_string(0), std::to_string(9));
+          clients_[i]->range_lookup(keys[0], keys[19]);
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);
         }
@@ -148,11 +150,30 @@ int main() {
   std::string address = "127.0.0.1";
   int service_port = 9090;
   int lease_port = 9091;
-  int num_clients = 1;
+  int num_clients = 2;
   int num_blocks = 1;
   int chain_length = 1;
-  int num_ops = 10;
+  int num_ops = 100000;
   int data_size = 64;
+  // Get keys from file
+  std::string fileName = "../../benchmark/src/word_alpha.txt";
+  std::ifstream in(fileName.c_str());
+  // Check if object is valid
+  if(!in)
+  {
+    std::cerr << "Cannot open the File : "<< fileName << std::endl;
+    return 0;
+  }
+  std::string str;
+  // Read the next line from File until it reaches the end.
+  while (std::getline(in, str))
+  {
+    if(str.size() > 0)
+      keys.push_back(str);
+  }
+  //Close The File
+  in.close();
+
   std::string op_type = "range_lookup";
   std::string path = "/tmp";
   std::string backing_path = "local://tmp";
@@ -181,7 +202,6 @@ int main() {
   } else if (op_type == "get") {
     benchmark = std::make_shared<get_benchmark>(bt_clients, data_size, num_clients, num_ops);
   } else if (op_type == "range_lookup") {
-    LOG(log_level::info) << "Look here: " << address;
     benchmark = std::make_shared<range_lookup_benchmark>(bt_clients, data_size, num_clients, num_ops);
   } else {
     LOG(log_level::info) << "Incorrect operation type for btree: " << op_type;
@@ -192,11 +212,11 @@ int main() {
   client.remove(path);
 
   LOG(log_level::info) << "===== " << op_type << " ======";
-  LOG(log_level::info) << "\t" << num_ops << " requests completed in " << ((double) num_ops / result.first) << " s";
+  LOG(log_level::info) << "\t" << num_ops << " requests completed in " << ((double) num_ops / result.first) << " us";
   LOG(log_level::info) << "\t" << num_clients << " parallel clients";
   LOG(log_level::info) << "\t" << data_size << " payload";
   LOG(log_level::info) << "\tAverage latency: " << result.second;
-  LOG(log_level::info) << "\tThroughput: " << result.first << " requests per second";
+  LOG(log_level::info) << "\tThroughput: " << result.first << " requests per microsecond";
 
   return 0;
 }
