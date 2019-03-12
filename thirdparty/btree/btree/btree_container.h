@@ -151,6 +151,7 @@ class btree_unique_container : public btree_container<Tree> {
  public:
   typedef typename Tree::key_type key_type;
   typedef typename Tree::value_type value_type;
+  typedef typename Tree::mapped_type mapped_type;
   typedef typename Tree::size_type size_type;
   typedef typename Tree::key_compare key_compare;
   typedef typename Tree::allocator_type allocator_type;
@@ -159,7 +160,7 @@ class btree_unique_container : public btree_container<Tree> {
 
  public:
   // Default constructor.
-  btree_unique_container(const key_compare &comp = key_compare(),
+  explicit btree_unique_container(const key_compare &comp = key_compare(),
                          const allocator_type &alloc = allocator_type())
       : super_type(comp, alloc) {
   }
@@ -189,7 +190,7 @@ class btree_unique_container : public btree_container<Tree> {
     return this->tree_.count_unique(key);
   }
 
-  std::pair<iterator,bool> insert(const key_type &key, const std::string &data) {
+  std::pair<iterator,bool> insert(const key_type &key, const mapped_type &data) {
     return this->tree_.insert_unique(std::make_pair(key, data));
   }
   // Insertion routines.

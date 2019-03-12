@@ -193,7 +193,11 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/directory/fs/ds_file_node.cpp
           src/jiffy/directory/fs/ds_file_node.h
           src/jiffy/directory/fs/ds_dir_node.cpp
-          src/jiffy/directory/fs/ds_dir_node.h src/jiffy/storage/notification/notification_response_client.cpp src/jiffy/storage/notification/notification_response_client.h)
+          src/jiffy/directory/fs/ds_dir_node.h
+          src/jiffy/storage/notification/notification_response_client.cpp
+          src/jiffy/storage/notification/notification_response_client.h
+          src/jiffy/storage/types/binary.h
+          src/jiffy/storage/types/binary.cpp)
 
   add_dependencies(jiffy thrift_ep awssdk_ep jemalloc_ep)
   target_link_libraries(jiffy ${THRIFT_LIBRARY}
