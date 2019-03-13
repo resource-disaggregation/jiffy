@@ -82,7 +82,7 @@ class send_benchmark : public msg_queue_benchmark {
         latency_[i] = (double) tot_time / (double) j;
         throughput_[i] = j * 1E6 / (t1 - bench_begin);
       });
-      //thread_utils::set_core_affinity(workers_[i], i);
+      thread_utils::set_core_affinity(workers_[i], i);
     }
   }
 };
@@ -113,6 +113,7 @@ class read_benchmark : public msg_queue_benchmark {
         latency_[i] = (double) tot_time / (double) j;
         throughput_[i] = (double) j / (double) (t1 - bench_begin);
       });
+      thread_utils::set_core_affinity(workers_[i], i);
     }
   }
 };

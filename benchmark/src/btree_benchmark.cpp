@@ -6,7 +6,7 @@
 #include <jiffy/utils/logger.h>
 #include <jiffy/utils/signal_handling.h>
 #include <jiffy/utils/time_utils.h>
-
+#include <jiffy/utils/thread_utils.h>
 using namespace ::jiffy::client;
 using namespace ::jiffy::directory;
 using namespace ::jiffy::storage;
@@ -82,6 +82,7 @@ class put_benchmark : public btree_benchmark {
         latency_[i] = (double) tot_time / (double) j;
         throughput_[i] = j * 1E6 / (t1 - bench_begin);
       });
+      thread_utils::set_core_affinity(workers_[i], i);
     }
   }
 };
@@ -112,6 +113,7 @@ class get_benchmark : public btree_benchmark {
         latency_[i] = (double) tot_time / (double) j;
         throughput_[i] = (double) j / (double) (t1 - bench_begin);
       });
+      thread_utils::set_core_affinity(workers_[i], i);
     }
   }
 };
@@ -142,6 +144,7 @@ class range_lookup_benchmark : public btree_benchmark {
         latency_[i] = (double) tot_time / (double) j;
         throughput_[i] = (double) j / (double) (t1 - bench_begin);
       });
+      thread_utils::set_core_affinity(workers_[i], i);
     }
   }
 };
