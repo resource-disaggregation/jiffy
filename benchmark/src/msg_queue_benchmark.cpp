@@ -5,6 +5,7 @@
 #include <jiffy/utils/logger.h>
 #include <jiffy/utils/signal_handling.h>
 #include <jiffy/utils/time_utils.h>
+#include <jiffy/utils/thread_utils.h>
 
 using namespace ::jiffy::client;
 using namespace ::jiffy::directory;
@@ -81,6 +82,7 @@ class send_benchmark : public msg_queue_benchmark {
         latency_[i] = (double) tot_time / (double) j;
         throughput_[i] = j * 1E6 / (t1 - bench_begin);
       });
+      //thread_utils::set_core_affinity(workers_[i], i);
     }
   }
 };
@@ -126,7 +128,7 @@ int main() {
   std::string op_type = "send";
   std::string path = "/tmp";
   std::string backing_path = "local://tmp";
-  for (int i = 1; i <= 32; i++) {
+  for (int i = 1; i <= 2; i *= 2) {
     int num_clients = i;
     // Output all the configuration parameters:
     LOG(log_level::info) << "host: " << address;

@@ -174,7 +174,7 @@ int main() {
   std::string path = "/tmp";
   std::string backing_path = "local://tmp";
 
-  for (int i = 1; i <= 32; i++) {
+  for (int i = 1; i <= 32; i *= 2) {
     int num_clients = i;
     // Output all the configuration parameters:
     LOG(log_level::info) << "host: " << address;

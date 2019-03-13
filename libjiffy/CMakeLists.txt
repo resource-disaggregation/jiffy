@@ -181,6 +181,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/utils/time_utils.h
           src/jiffy/utils/retry_utils.h
           src/jiffy/utils/string_utils.h
+          src/jiffy/utils/thread_utils.h
           src/jiffy/storage/block.cpp
           src/jiffy/storage/block.h
           src/jiffy/utils/property_map.cpp
@@ -333,7 +334,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/utils/retry_utils.h
           src/jiffy/utils/string_utils.h
           src/jiffy/utils/property_map.cpp
-          src/jiffy/utils/property_map.h)
+          src/jiffy/utils/property_map.h
+          src/jiffy/utils/thread_utils.h)
   add_dependencies(jiffy_client thrift_ep)
   target_link_libraries(jiffy_client ${THRIFT_LIBRARY}
           ${THRIFTNB_LIBRARY}
