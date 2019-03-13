@@ -6,7 +6,7 @@
 #  - Boost_<C>_LIBRARY (for each component <C>)
 #  - Boost_LIBRARIES
 
-set(Boost_VERSION 1.69.0)
+set(Boost_VERSION 1.67.0)
 set(Boost_BUILD ON)
 set(Boost_COMPONENTS "program_options")
 

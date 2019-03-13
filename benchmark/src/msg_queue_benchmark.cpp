@@ -116,17 +116,18 @@ class read_benchmark : public msg_queue_benchmark {
 };
 
 int main() {
-  std::string address = "127.0.0.1";
+  //std::string address = "127.0.0.1";
+  std::string address = "172.31.15.160";
   int service_port = 9090;
   int lease_port = 9091;
   int num_blocks = 1;
   int chain_length = 1;
   int num_ops = 100000;
   int data_size = 64;
-  std::string op_type = "send";
+  std::string op_type = "read";
   std::string path = "/tmp";
   std::string backing_path = "local://tmp";
-  for (int i = 1; i <= 32; i++) {
+  for (int i = 1; i <= 64; i *= 2) {
     int num_clients = i;
     // Output all the configuration parameters:
     LOG(log_level::info) << "host: " << address;
