@@ -119,8 +119,7 @@ class read_benchmark : public msg_queue_benchmark {
 };
 
 int main() {
-  //std::string address = "127.0.0.1";
-  std::string address = "172.31.15.160";
+  std::string address = "127.0.0.1";
   int service_port = 9090;
   int lease_port = 9091;
   int num_blocks = 1;
