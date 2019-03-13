@@ -68,7 +68,6 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  block_memory_manager manager;
   hash_table_partition block(&manager);
   block.slot_range(0, hash_slot::MAX);
 
