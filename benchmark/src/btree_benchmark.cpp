@@ -147,7 +147,7 @@ class range_lookup_benchmark : public btree_benchmark {
 };
 
 int main() {
-  std::string address = "127.0.0.1";
+  std::string address = "172.31.15.160";
   int service_port = 9090;
   int lease_port = 9091;
   int num_blocks = 1;
@@ -174,7 +174,7 @@ int main() {
   std::string path = "/tmp";
   std::string backing_path = "local://tmp";
 
-  for (int i = 1; i <= 32; i *= 2) {
+  for (int i = 1; i <= 64; i*=2) {
     int num_clients = i;
     // Output all the configuration parameters:
     LOG(log_level::info) << "host: " << address;

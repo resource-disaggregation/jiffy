@@ -5,6 +5,8 @@
 #include <vector>
 #include <iostream>
 #include <cstdint>
+#include <fstream>
+#include <iterator>
 
 #include "jiffy/storage/hashtable/hash_table_ops.h"
 #include "jiffy/storage/msgqueue/msg_queue_ops.h"
