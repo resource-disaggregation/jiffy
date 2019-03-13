@@ -1,6 +1,7 @@
 include_directories(${THRIFT_INCLUDE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libcuckoo)
+        ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libcuckoo
+        ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/btree)
 
 if (BUILD_STORAGE OR BUILD_DIRECTORY)
   add_library(jiffy OBJECT
@@ -78,11 +79,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/chain_module.cpp
           src/jiffy/storage/command.h
           src/jiffy/storage/command.cpp
-          src/jiffy/storage/hashtable/serde/csv_serde.cpp
-          src/jiffy/storage/hashtable/serde/csv_serde.h
-          src/jiffy/storage/hashtable/serde/serde.h
-          src/jiffy/storage/hashtable/serde/binary_serde.cpp
-          src/jiffy/storage/hashtable/serde/binary_serde.h
+          src/jiffy/storage/serde/serde_all.h
           src/jiffy/storage/hashtable/hash_slot.h
           src/jiffy/storage/hashtable/hash_slot.cpp
           src/jiffy/storage/hashtable/hash_table_defs.h
@@ -90,6 +87,16 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/hashtable/hash_table_ops.cpp
           src/jiffy/storage/hashtable/hash_table_partition.cpp
           src/jiffy/storage/hashtable/hash_table_partition.h
+          src/jiffy/storage/btree/btree_defs.h
+          src/jiffy/storage/btree/btree_ops.h
+          src/jiffy/storage/btree/btree_ops.cpp
+          src/jiffy/storage/btree/btree_partition.h
+          src/jiffy/storage/btree/btree_partition.cpp
+          src/jiffy/storage/msgqueue/msg_queue_defs.h
+          src/jiffy/storage/msgqueue/msg_queue_ops.h
+          src/jiffy/storage/msgqueue/msg_queue_ops.cpp
+          src/jiffy/storage/msgqueue/msg_queue_partition.h
+          src/jiffy/storage/msgqueue/msg_queue_partition.cpp
           src/jiffy/storage/client/replica_chain_client.cpp
           src/jiffy/storage/client/replica_chain_client.h
           src/jiffy/storage/service/block_response_client.cpp
@@ -100,10 +107,16 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/client/block_client.h
           src/jiffy/storage/client/block_listener.cpp
           src/jiffy/storage/client/block_listener.h
+          src/jiffy/storage/client/data_structure_client.cpp
+          src/jiffy/storage/client/data_structure_client.h
           src/jiffy/storage/client/hash_table_client.cpp
           src/jiffy/storage/client/hash_table_client.h
-          src/jiffy/storage/client/hash_table_listener.cpp
-          src/jiffy/storage/client/hash_table_listener.h
+          src/jiffy/storage/client/btree_client.cpp
+          src/jiffy/storage/client/btree_client.h
+          src/jiffy/storage/client/msg_queue_client.cpp
+          src/jiffy/storage/client/msg_queue_client.h
+          src/jiffy/storage/client/data_structure_listener.cpp
+          src/jiffy/storage/client/data_structure_listener.h
           src/jiffy/storage/service/block_request_handler.cpp
           src/jiffy/storage/service/block_request_handler.h
           src/jiffy/storage/chain/chain_request_client.cpp
@@ -153,10 +166,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/notification/subscription_map.cpp
           src/jiffy/storage/notification/subscription_map.h
           src/jiffy/storage/storage_management_ops.h
-          src/jiffy/persistent/local/local_store.cpp
-          src/jiffy/persistent/local/local_store.h
-          src/jiffy/persistent/s3/s3_store.cpp
-          src/jiffy/persistent/s3/s3_store.h
+          src/jiffy/persistent/persistent_service.cpp
           src/jiffy/persistent/persistent_service.h
           src/jiffy/persistent/persistent_store.cpp
           src/jiffy/persistent/persistent_store.h
@@ -171,6 +181,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/utils/time_utils.h
           src/jiffy/utils/retry_utils.h
           src/jiffy/utils/string_utils.h
+          src/jiffy/utils/thread_utils.h
           src/jiffy/storage/block.cpp
           src/jiffy/storage/block.h
           src/jiffy/utils/property_map.cpp
@@ -183,7 +194,11 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/directory/fs/ds_file_node.cpp
           src/jiffy/directory/fs/ds_file_node.h
           src/jiffy/directory/fs/ds_dir_node.cpp
-          src/jiffy/directory/fs/ds_dir_node.h src/jiffy/storage/notification/notification_response_client.cpp src/jiffy/storage/notification/notification_response_client.h)
+          src/jiffy/directory/fs/ds_dir_node.h
+          src/jiffy/storage/notification/notification_response_client.cpp
+          src/jiffy/storage/notification/notification_response_client.h
+          src/jiffy/storage/types/binary.h
+          src/jiffy/storage/types/binary.cpp)
 
   add_dependencies(jiffy thrift_ep awssdk_ep jemalloc_ep)
   target_link_libraries(jiffy ${THRIFT_LIBRARY}
@@ -207,7 +222,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
     include_directories(${CATCH_INCLUDE_DIR})
     add_executable(jiffy_tests
             test/jiffy_tests.cpp
-            test/auto_scaling_test.cpp
+            #test/auto_scaling_test.cpp
             test/block_allocation_service_test.cpp
             test/block_allocator_test.cpp
             test/chain_replication_test.cpp
@@ -217,13 +232,18 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             test/file_size_tracker_test.cpp
             test/hash_table_partition_test.cpp
             test/hash_table_client_test.cpp
+            test/btree_partition_test.cpp
+            test/btree_client_test.cpp
+            test/msg_queue_partition_test.cpp
+            test/msg_queue_client_test.cpp
             test/lease_expiry_worker_test.cpp
             test/local_store_test.cpp
             test/jiffy_client_test.cpp
             test/notification_test.cpp
             test/storage_manager_test.cpp
             test/sync_worker_test.cpp
-            test/test_utils.h)
+            test/test_utils.h
+            )
     target_link_libraries(jiffy_tests jiffy)
     add_dependencies(jiffy_tests catch_ep)
     # Register test
@@ -266,6 +286,10 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/hashtable/hash_slot.cpp
           src/jiffy/storage/hashtable/hash_table_ops.h
           src/jiffy/storage/hashtable/hash_table_ops.cpp
+          src/jiffy/storage/btree/btree_ops.h
+          src/jiffy/storage/btree/btree_ops.cpp
+          src/jiffy/storage/msgqueue/msg_queue_ops.h
+          src/jiffy/storage/msgqueue/msg_queue_ops.cpp
           src/jiffy/storage/client/replica_chain_client.cpp
           src/jiffy/storage/client/replica_chain_client.h
           src/jiffy/storage/service/block_response_client.cpp
@@ -274,10 +298,16 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/client/block_client.h
           src/jiffy/storage/client/block_listener.cpp
           src/jiffy/storage/client/block_listener.h
+          src/jiffy/storage/client/data_structure_client.cpp
+          src/jiffy/storage/client/data_structure_client.h
           src/jiffy/storage/client/hash_table_client.cpp
           src/jiffy/storage/client/hash_table_client.h
-          src/jiffy/storage/client/hash_table_listener.cpp
-          src/jiffy/storage/client/hash_table_listener.h
+          src/jiffy/storage/client/btree_client.cpp
+          src/jiffy/storage/client/btree_client.h
+          src/jiffy/storage/client/msg_queue_client.cpp
+          src/jiffy/storage/client/msg_queue_client.h
+          src/jiffy/storage/client/data_structure_listener.cpp
+          src/jiffy/storage/client/data_structure_listener.h
           src/jiffy/storage/service/block_request_service.cpp
           src/jiffy/storage/service/block_request_service.h
           src/jiffy/storage/service/block_request_service.tcc
@@ -308,7 +338,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/utils/retry_utils.h
           src/jiffy/utils/string_utils.h
           src/jiffy/utils/property_map.cpp
-          src/jiffy/utils/property_map.h)
+          src/jiffy/utils/property_map.h
+          src/jiffy/utils/thread_utils.h)
   add_dependencies(jiffy_client thrift_ep)
   target_link_libraries(jiffy_client ${THRIFT_LIBRARY}
           ${THRIFTNB_LIBRARY}

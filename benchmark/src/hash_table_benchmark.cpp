@@ -62,7 +62,7 @@ class put_benchmark : public hash_table_benchmark {
   put_benchmark(client_list &clients,
                 size_t data_size,
                 size_t num_clients,
-                size_t num_ops): hash_table_benchmark(clients, data_size, num_clients, num_ops) {
+                size_t num_ops) : hash_table_benchmark(clients, data_size, num_clients, num_ops) {
   }
 
   void run() override {
@@ -89,7 +89,7 @@ class get_benchmark : public hash_table_benchmark {
   get_benchmark(client_list &clients,
                 size_t data_size,
                 size_t num_clients,
-                size_t num_ops): hash_table_benchmark(clients, data_size, num_clients, num_ops) {
+                size_t num_ops) : hash_table_benchmark(clients, data_size, num_clients, num_ops) {
   }
 
   void run() override {
@@ -210,11 +210,11 @@ int main(int argc, char **argv) {
   client.remove(path);
 
   LOG(log_level::info) << "===== " << op_type << " ======";
-  LOG(log_level::info) << "\t" << num_ops << " requests completed in " << ((double) num_ops / result.first) << " s";
+  LOG(log_level::info) << "\t" << num_ops << " requests completed in " << ((double) num_ops / result.first) << " us";
   LOG(log_level::info) << "\t" << num_clients << " parallel clients";
   LOG(log_level::info) << "\t" << data_size << " payload";
   LOG(log_level::info) << "\tAverage latency: " << result.second;
-  LOG(log_level::info) << "\tThroughput: " << result.first << " requests per second";
+  LOG(log_level::info) << "\tThroughput: " << result.first << " requests per microsecond";
 
   return 0;
 }

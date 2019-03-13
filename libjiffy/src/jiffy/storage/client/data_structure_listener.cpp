@@ -1,5 +1,5 @@
 #include <thrift/transport/TTransportException.h>
-#include "jiffy/storage/client/hash_table_listener.h"
+#include "jiffy/storage/client/data_structure_listener.h"
 #include "jiffy/storage/manager/detail/block_id_parser.h"
 #include "jiffy/utils/logger.h"
 
@@ -9,7 +9,7 @@ using namespace jiffy::utils;
 namespace jiffy {
 namespace storage {
 
-hash_table_listener::hash_table_listener(const std::string &path, const directory::data_status &status)
+data_structure_listener::data_structure_listener(const std::string &path, const directory::data_status &status)
     : path_(path), status_(status), worker_(notifications_, controls_) {
   for (const auto &block: status_.data_blocks()) {
     auto t = block_id_parser::parse(block.block_ids.back());
@@ -20,7 +20,7 @@ hash_table_listener::hash_table_listener(const std::string &path, const director
   worker_.start();
 }
 
-hash_table_listener::~hash_table_listener() {
+data_structure_listener::~data_structure_listener() {
   try {
     for (auto &listener: listeners_) {
       listener->disconnect();
@@ -31,19 +31,19 @@ hash_table_listener::~hash_table_listener() {
   }
 }
 
-void hash_table_listener::subscribe(const std::vector<std::string> &ops) {
+void data_structure_listener::subscribe(const std::vector<std::string> &ops) {
   for (size_t i = 0; i < listeners_.size(); i++) {
     listeners_[i]->subscribe(block_ids_[i], ops);
   }
 }
 
-void hash_table_listener::unsubscribe(const std::vector<std::string> &ops) {
+void data_structure_listener::unsubscribe(const std::vector<std::string> &ops) {
   for (size_t i = 0; i < listeners_.size(); i++) {
     listeners_[i]->unsubscribe(block_ids_[i], ops);
   }
 }
 
-hash_table_listener::notification_t hash_table_listener::get_notification(int64_t timeout_ms) {
+data_structure_listener::notification_t data_structure_listener::get_notification(int64_t timeout_ms) {
   return notifications_.pop(timeout_ms);
 }
 

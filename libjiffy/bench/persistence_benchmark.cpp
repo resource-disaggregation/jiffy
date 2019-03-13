@@ -7,6 +7,7 @@
 #include "jiffy/utils/cmd_parse.h"
 #include "jiffy/storage/hashtable/hash_table_partition.h"
 #include "jiffy/storage/hashtable/hash_slot.h"
+#include "jiffy/storage/block_memory_allocator.h"
 #include "benchmark_utils.h"
 
 using namespace jiffy::storage;
@@ -54,18 +55,19 @@ int main(int argc, char **argv) {
     return -1;
   }
   std::shared_ptr<serde> fmt{};
+  block_memory_manager manager;
+  block_memory_allocator<uint8_t> binary_allocator(&manager);
   if (format == "csv") {
     LOG(log_level::info) << "Serialization/deserialization format: csv";
-    fmt = std::make_shared<csv_serde>();
+    fmt = std::make_shared<csv_serde>(binary_allocator);
   } else if (format == "binary") {
     LOG(log_level::info) << "Serialization/deserialization format: binary";
-    fmt = std::make_shared<binary_serde>();
+    fmt = std::make_shared<binary_serde>(binary_allocator);
   } else {
     LOG(log_level::error) << "Unknown Serialization/deserialization format " << format << "; terminating...";
     return -1;
   }
 
-  block_memory_manager manager;
   hash_table_partition block(&manager);
   block.slot_range(0, hash_slot::MAX);
 

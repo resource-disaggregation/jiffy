@@ -3,20 +3,14 @@
 
 #include <string>
 #include <jiffy/utils/property_map.h>
-#include "serde/serde.h"
-#include "serde/binary_serde.h"
+#include "jiffy/storage/serde/serde_all.h"
 #include "jiffy/storage/partition.h"
 #include "jiffy/persistent/persistent_service.h"
 #include "jiffy/storage/chain_module.h"
 #include "hash_table_defs.h"
-#include "serde/csv_serde.h"
 
 namespace jiffy {
 namespace storage {
-
-typedef std::string binary; // Since thrift translates binary to string
-typedef binary key_type;
-typedef binary value_type;
 
 /**
  * Hash partition state
@@ -41,12 +35,12 @@ class hash_table_partition : public chain_module {
                                 const std::string &metadata = "regular",
                                 const utils::property_map &conf = {},
                                 const std::string &directory_host = "localhost",
-                                const int directory_port = 9091);
+                                int directory_port = 9091);
 
   /**
    * @brief Virtual destructor
    */
-  virtual ~hash_table_partition() = default;
+  ~hash_table_partition() override = default;
 
   /**
    * @brief Set block hash slot range
@@ -241,7 +235,7 @@ class hash_table_partition : public chain_module {
    * @return String of key status
    */
 
-  std::string exists(const key_type &key, bool redirect = false);
+  std::string exists(const std::string &key, bool redirect = false);
 
   /**
    * @brief Put new key value pair
@@ -252,7 +246,7 @@ class hash_table_partition : public chain_module {
    * @return Put status string
    */
 
-  std::string put(const key_type &key, const value_type &value, bool redirect = false);
+  std::string put(const std::string &key, const std::string &value, bool redirect = false);
 
   /**
    * @brief Put new key value pair in locked block
@@ -263,7 +257,7 @@ class hash_table_partition : public chain_module {
    * @return Put status string
    */
 
-  std::string locked_put(const key_type &key, const value_type &value, bool redirect = false);
+  std::string locked_put(const std::string &key, const std::string &value, bool redirect = false);
 
   /**
    * @brief Insert with the maximum value for specified key
@@ -274,7 +268,7 @@ class hash_table_partition : public chain_module {
    * @return Upsert status string
    */
 
-  std::string upsert(const key_type &key, const value_type &value, bool redirect = false);
+  std::string upsert(const std::string &key, const std::string &value, bool redirect = false);
 
   /**
    * @brief Insert with the maximum value for specified key in locked block
@@ -285,7 +279,7 @@ class hash_table_partition : public chain_module {
    * @return Upsert status string
    */
 
-  std::string locked_upsert(const key_type &key, const value_type &value, bool redirect = false);
+  std::string locked_upsert(const std::string &key, const std::string &value, bool redirect = false);
 
   /**
    * @brief Get value for specified key
@@ -295,7 +289,7 @@ class hash_table_partition : public chain_module {
    * @return Get status string
    */
 
-  value_type get(const key_type &key, bool redirect = false);
+  std::string get(const std::string &key, bool redirect = false);
 
   /**
    * @brief Get value for specified key in locked block
@@ -305,7 +299,7 @@ class hash_table_partition : public chain_module {
    * @return Get status string
    */
 
-  std::string locked_get(const key_type &key, bool redirect = false);
+  std::string locked_get(const std::string &key, bool redirect = false);
 
   /**
    * @brief Update the value for specified key
@@ -316,7 +310,7 @@ class hash_table_partition : public chain_module {
    * @return Update status string
    */
 
-  std::string update(const key_type &key, const value_type &value, bool redirect = false);
+  std::string update(const std::string &key, const std::string &value, bool redirect = false);
 
   /**
    * @brief Update the value for specified key in locked block
@@ -327,7 +321,7 @@ class hash_table_partition : public chain_module {
    * @return Update status string
    */
 
-  std::string locked_update(const key_type &key, const value_type &value, bool redirect = false);
+  std::string locked_update(const std::string &key, const std::string &value, bool redirect = false);
 
   /**
    * @brief Remove value for specified key
@@ -337,7 +331,7 @@ class hash_table_partition : public chain_module {
    * @return Remove status string
    */
 
-  std::string remove(const key_type &key, bool redirect = false);
+  std::string remove(const std::string &key, bool redirect = false);
 
   /**
    * @brief Remove value for specified key in locked block
@@ -347,7 +341,7 @@ class hash_table_partition : public chain_module {
    * @return Remove status
    */
 
-  std::string locked_remove(const key_type &key, bool redirect = false);
+  std::string locked_remove(const std::string &key, bool redirect = false);
 
   /**
    * @brief Return keys
@@ -406,12 +400,12 @@ class hash_table_partition : public chain_module {
   bool empty() const;
 
   /**
-   * @brief Update parition name and metadata
+   * @brief Update partition name and metadata
    * @param new_name New partition name
    * @param new_metadata New partition metadata
    */
 
-  std::string update_partition(const std::string new_name, const std::string new_metadata);
+  std::string update_partition(const std::string& new_name, const std::string& new_metadata);
 
   /**
    * @brief Update partition in locked hash table
@@ -419,7 +413,7 @@ class hash_table_partition : public chain_module {
    * @param new_metadata New partition metadata
    */
 
-  std::string locked_update_partition(const std::string new_name, const std::string new_metadata);
+  std::string locked_update_partition(const std::string& new_name, const std::string& new_metadata);
 
   /**
    * @brief Fetch storage size

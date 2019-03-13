@@ -50,7 +50,7 @@ TEST_CASE("auto_scale_up_test", "[directory_service][storage_server][management_
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 1000; ++i) {
     std::vector<std::string> result;
-    REQUIRE_NOTHROW(std::dynamic_pointer_cast<hash_table_partition>(blocks[0]->impl())->run_command(result, hash_table_cmd_id::put,{std::to_string(i), std::to_string(i)}));
+    REQUIRE_NOTHROW(std::dynamic_pointer_cast<hash_table_partition>(blocks[0]->impl())->run_command(result, hash_table_cmd_id::ht_put,{std::to_string(i), std::to_string(i)}));
     REQUIRE(result[0] == "!ok");
   }
 
@@ -122,7 +122,7 @@ TEST_CASE("auto_scale_down_test", "[directory_service][storage_server][managemen
   // A single remove should trigger scale down
   std::vector<std::string> result;
   REQUIRE_NOTHROW(std::dynamic_pointer_cast<hash_table_partition>(blocks[0]->impl())->run_command(result,
-                                                                              hash_table_cmd_id::remove,
+                                                                              hash_table_cmd_id::ht_remove,
                                                                               {std::to_string(0)}));
   REQUIRE(result[0] == "0");
 

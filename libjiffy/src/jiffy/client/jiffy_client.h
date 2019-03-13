@@ -5,7 +5,9 @@
 #include "jiffy/directory/directory_ops.h"
 #include "jiffy/directory/client/lease_renewal_worker.h"
 #include "jiffy/storage/client/hash_table_client.h"
-#include "jiffy/storage/client/hash_table_listener.h"
+#include "jiffy/storage/client/msg_queue_client.h"
+#include "jiffy/storage/client/btree_client.h"
+#include "jiffy/storage/client/data_structure_listener.h"
 
 namespace jiffy {
 namespace client {
@@ -79,7 +81,7 @@ class jiffy_client {
   std::shared_ptr<storage::hash_table_client> open(const std::string &path);
 
   /**
-   * @brief Open or create, begin lease
+   * @brief Open or create hash table
    * @param path File path
    * @param backing_path File backing path
    * @param num_blocks Number of blocks
@@ -87,7 +89,7 @@ class jiffy_client {
    * @param flags Flags
    * @param permissions Permissions
    * @param tags Tags
-   * @return Key value client
+   * @return Hash table client
    */
 
   std::shared_ptr<storage::hash_table_client> open_or_create_hash_table(const std::string &path,
@@ -99,12 +101,54 @@ class jiffy_client {
                                                                         const std::map<std::string,
                                                                                        std::string> &tags = {});
   /**
+   * @brief Open or create message queue
+   * @param path File path
+   * @param backing_path File backing path
+   * @param num_blocks Number of blocks
+   * @param chain_length Replication chain length
+   * @param flags Flags
+   * @param permissions Permissions
+   * @param tags Tags
+   * @return Message queue client
+   */
+
+  std::shared_ptr<storage::msg_queue_client> open_or_create_msg_queue(const std::string &path,
+                                                                      const std::string &backing_path,
+                                                                      int32_t num_blocks = 1,
+                                                                      int32_t chain_length = 1,
+                                                                      int32_t flags = 0,
+                                                                      int32_t permissions = directory::perms::all(),
+                                                                      const std::map<std::string,
+                                                                                     std::string> &tags = {});
+  
+  /**
+   * @brief Open or create btree
+   * @param path File path
+   * @param backing_path File backing path
+   * @param num_blocks Number of blocks
+   * @param chain_length Replication chain length
+   * @param flags Flags
+   * @param permissions Permissions
+   * @param tags Tags
+   * @return Message queue client
+   */
+
+  std::shared_ptr<storage::btree_client> open_or_create_btree(const std::string &path,
+                                                              const std::string &backing_path,
+                                                              int32_t num_blocks = 1,
+                                                              int32_t chain_length = 1,
+                                                              int32_t flags = 0,
+                                                              int32_t permissions = directory::perms::all(),
+                                                              const std::map<std::string,
+                                                                             std::string> &tags = {});
+  
+  /**
    * @brief Open a file and start key value listener
    * @param path File path
    * @return Key value listener
    */
 
-  std::shared_ptr<storage::hash_table_listener> listen(const std::string &path);
+  std::shared_ptr<storage::data_structure_listener> listen(const std::string &path);
 
   /**
    * @brief End scope of file
