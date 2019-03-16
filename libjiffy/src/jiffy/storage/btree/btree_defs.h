@@ -4,6 +4,7 @@
 #include <functional>
 #include "btree/btree_map.h"
 #include "jiffy/storage/block_memory_allocator.h"
+#include "jiffy/storage/types/binary.h"
 
 namespace jiffy {
 namespace storage {
@@ -15,16 +16,21 @@ const size_t NODE_SIZE = 256;
 const size_t MAX_KEY_LENGTH = 1024;
 
 // The min and max keys
-const std::string MIN_KEY = "";
+const std::string MIN_KEY;
 const std::string MAX_KEY(MAX_KEY_LENGTH, 0x7f);
 
 // Key/Value definitions
-typedef std::string key_type;
-typedef std::string value_type;
+typedef binary key_type;
+typedef binary value_type;
 typedef std::pair<const key_type, value_type> btree_pair_type;
 
 // Custom template arguments
-typedef std::less<key_type> less_type;
+struct less_type {
+  template<typename KeyType1, typename KeyType2>
+  bool operator()(const KeyType1& lhs, const KeyType2& rhs) const {
+    return strcmp(reinterpret_cast<const char*>(lhs.data()), reinterpret_cast<const char*>(rhs.data())) < 0;
+  }
+};
 typedef block_memory_allocator<btree_pair_type> bt_allocator_type;
 
 // Btree definitions

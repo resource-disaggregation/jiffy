@@ -4,6 +4,7 @@
 #include <functional>
 #include <deque>
 #include "jiffy/storage/block_memory_allocator.h"
+#include "jiffy/storage/types/binary.h"
 
 namespace jiffy {
 namespace storage {
@@ -12,7 +13,7 @@ namespace storage {
 constexpr size_t MSG_QUEUE_DEFAULT_SIZE = 0;
 
 // Key/Value definitions
-typedef std::string msg_type;
+typedef binary msg_type;
 
 // Custom template arguments
 typedef block_memory_allocator<msg_type> mq_allocator_type;

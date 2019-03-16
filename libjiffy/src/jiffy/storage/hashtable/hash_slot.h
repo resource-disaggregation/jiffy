@@ -45,6 +45,7 @@
 #define JIFFY_HASH_SLOT_H
 
 #include <string>
+#include "jiffy/storage/types/binary.h"
 
 namespace jiffy {
 namespace storage {
@@ -56,6 +57,10 @@ class hash_slot {
   /* Return hash number from string key */
   static int32_t get(const std::string &key) {
     return crc16(key.c_str(), key.length());
+  }
+
+  static int32_t get(const binary& key) {
+    return crc16(reinterpret_cast<const char*>(key.data()), key.length());
   }
 
  private:

@@ -28,9 +28,9 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
       directory_port_(directory_port) {
   auto ser = conf.get("msgqueue.serializer", "csv");
   if (ser == "binary") {
-    ser_ = std::make_shared<csv_serde>();
+    ser_ = std::make_shared<csv_serde>(binary_allocator_);
   } else if (ser == "csv") {
-    ser_ = std::make_shared<binary_serde>();
+    ser_ = std::make_shared<binary_serde>(binary_allocator_);
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
@@ -40,19 +40,19 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
   LOG(log_level::info) << "Partition name: " << name_;
 }
 
-std::string msg_queue_partition::send(const msg_type &message, bool indirect) {
+std::string msg_queue_partition::send(const std::string &message, bool) {
   //LOG(log_level::info) << "Sending new message = " << message;
   std::unique_lock<std::shared_mutex> lock(operation_mtx_);
-  partition_.push_back(message);
+  partition_.push_back(make_binary(message));
   return "!ok";
 }
 
-msg_type msg_queue_partition::read(std::string position, bool indirect) {
+std::string msg_queue_partition::read(std::string position, bool) {
   auto pos = std::stoi(position);
   if (pos < 0) throw std::invalid_argument("read position invalid");
-  if (pos < size()) {
+  if (pos < static_cast<int>(size())) {
     std::unique_lock<std::shared_mutex> lock(operation_mtx_);
-    return partition_[pos];
+    return to_string(partition_[pos]);
   }
   return "!key_not_found";
 
@@ -71,7 +71,7 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
   size_t nargs = redirect ? args.size() - 1 : args.size();
   switch (cmd_id) {
     case msg_queue_cmd_id::mq_send:
-      for (const msg_type &msg: args)
+      for (const std::string &msg: args)
         _return.emplace_back(send(msg, redirect));
       break;
     case msg_queue_cmd_id::mq_read:
@@ -94,8 +94,8 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
   if (auto_scale_.load() && is_mutator(cmd_id) && overload() && metadata_ != "exporting"
       && metadata_ != "importing" && is_tail()
       && splitting_.compare_exchange_strong(expected, true)) {
-    LOG(log_level::info) << "Overloaded partition; storage = " << bytes_.load() << " capacity = "
-                         << manager_->mb_capacity();
+    LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
+                         << storage_capacity();
     try {
 
       splitting_ = false;
@@ -105,14 +105,14 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
       splitting_ = false;
       LOG(log_level::warn) << "Split slot range failed: " << e.what();
     }
-    LOG(log_level::info) << "After split storage: " << manager_->mb_used() << " capacity: " << manager_->mb_capacity();
+    LOG(log_level::info) << "After split storage: " << storage_size() << " capacity: " << storage_capacity();
   }
   expected = false;
   if (auto_scale_.load() && underload() && metadata_ != "exporting"
       && metadata_ != "importing" && is_tail()
       && merging_.compare_exchange_strong(expected, true)) {
-    LOG(log_level::info) << "Underloaded partition; storage = " << bytes_.load() << " capacity = "
-                         << manager_->mb_capacity();
+    LOG(log_level::info) << "Underloaded partition; storage = " << storage_size() << " capacity = "
+                         << storage_capacity();
     try {
       merging_ = false;
       LOG(log_level::info) << "Currently does not support auto_scaling";
@@ -183,17 +183,17 @@ void msg_queue_partition::forward_all() {
   int64_t i = 0;
   for (auto it = partition_.begin(); it != partition_.end(); it++) {
     std::vector<std::string> result;
-    run_command_on_next(result, msg_queue_cmd_id::mq_send, {*it});
+    run_command_on_next(result, msg_queue_cmd_id::mq_send, {to_string(*it)});
     ++i;
   }
 }
 
 bool msg_queue_partition::overload() {
-  return manager_->mb_used() > static_cast<size_t>(static_cast<double>(manager_->mb_capacity()) * threshold_hi_);
+  return storage_size() > static_cast<size_t>(static_cast<double>(storage_capacity()) * threshold_hi_);
 }
 
 bool msg_queue_partition::underload() {
-  return manager_->mb_used() < static_cast<size_t>(static_cast<double>(manager_->mb_capacity()) * threshold_lo_);
+  return storage_size() < static_cast<size_t>(static_cast<double>(storage_capacity()) * threshold_lo_);
 }
 
 REGISTER_IMPLEMENTATION("msgqueue", msg_queue_partition);
