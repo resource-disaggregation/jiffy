@@ -186,7 +186,9 @@ replica_chain directory_client::add_block(const std::string &path,
                                           const std::string &partition_name,
                                           const std::string &partition_metadata) {
   rpc_replica_chain out;
+  LOG(log_level::info) << "adding block";
   client_->add_data_block(out, path, partition_name, partition_metadata);
+  LOG(log_level::info) << "add block finish";
   return directory_type_conversions::from_rpc(out);
 }
 

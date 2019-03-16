@@ -555,7 +555,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       auto split_range_end = slot_range_.second;
       std::string dst_partition_name = std::to_string(split_range_begin) + "_" + std::to_string(split_range_end);
       auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
-      LOG(log_level::info) << "host !!!!!!!" << directory_host_ << " port " << directory_port_;
+      LOG(log_level::info) << "host " << directory_host_ << " port " << directory_port_;
       auto dst_replica_chain =
           fs->add_block(path(), dst_partition_name, "importing");
 
