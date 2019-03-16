@@ -7,8 +7,11 @@ partition::partition(block_memory_manager *manager,
                      const std::string &name,
                      const std::string &metadata,
                      const std::vector<command> &supported_commands)
-    : name_(name), metadata_(metadata), supported_commands_(supported_commands), manager_(manager) {
-  bytes_ = 0;
+    : name_(name),
+      metadata_(metadata),
+      supported_commands_(supported_commands),
+      manager_(manager),
+      binary_allocator_(build_allocator<uint8_t>()) {
 }
 
 void partition::path(const std::string &path) {
@@ -59,7 +62,7 @@ std::size_t partition::storage_capacity() {
 }
 
 std::size_t partition::storage_size() {
-  return bytes_.load();
+  return manager_->mb_used();
 }
 
 subscription_map &partition::subscriptions() {
@@ -76,6 +79,10 @@ void partition::set_name_and_metadata(const std::string &name, const std::string
   std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
   name_ = name;
   metadata_ = metadata;
+}
+
+binary partition::make_binary(const std::string &str) {
+  return binary(reinterpret_cast<const uint8_t *>(str.data()), str.size(), binary_allocator_);
 }
 
 }

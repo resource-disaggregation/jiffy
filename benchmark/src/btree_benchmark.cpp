@@ -6,7 +6,7 @@
 #include <jiffy/utils/logger.h>
 #include <jiffy/utils/signal_handling.h>
 #include <jiffy/utils/time_utils.h>
-
+#include <jiffy/utils/thread_utils.h>
 using namespace ::jiffy::client;
 using namespace ::jiffy::directory;
 using namespace ::jiffy::storage;
@@ -82,6 +82,7 @@ class put_benchmark : public btree_benchmark {
         latency_[i] = (double) tot_time / (double) j;
         throughput_[i] = j * 1E6 / (t1 - bench_begin);
       });
+      thread_utils::set_core_affinity(workers_[i], i);
     }
   }
 };
@@ -112,6 +113,7 @@ class get_benchmark : public btree_benchmark {
         latency_[i] = (double) tot_time / (double) j;
         throughput_[i] = (double) j / (double) (t1 - bench_begin);
       });
+      thread_utils::set_core_affinity(workers_[i], i);
     }
   }
 };
@@ -142,6 +144,7 @@ class range_lookup_benchmark : public btree_benchmark {
         latency_[i] = (double) tot_time / (double) j;
         throughput_[i] = (double) j / (double) (t1 - bench_begin);
       });
+      thread_utils::set_core_affinity(workers_[i], i);
     }
   }
 };
@@ -150,7 +153,6 @@ int main() {
   std::string address = "127.0.0.1";
   int service_port = 9090;
   int lease_port = 9091;
-  int num_clients = 2;
   int num_blocks = 1;
   int chain_length = 1;
   int num_ops = 100000;
@@ -159,64 +161,65 @@ int main() {
   std::string fileName = "../../benchmark/src/word_alpha.txt";
   std::ifstream in(fileName.c_str());
   // Check if object is valid
-  if(!in)
-  {
-    std::cerr << "Cannot open the File : "<< fileName << std::endl;
+  if (!in) {
+    std::cerr << "Cannot open the File : " << fileName << std::endl;
     return 0;
   }
   std::string str;
   // Read the next line from File until it reaches the end.
-  while (std::getline(in, str))
-  {
-    if(str.size() > 0)
+  while (std::getline(in, str)) {
+    if (str.size() > 0)
       keys.push_back(str);
   }
   //Close The File
   in.close();
-
   std::string op_type = "range_lookup";
   std::string path = "/tmp";
   std::string backing_path = "local://tmp";
-  // Output all the configuration parameters:
-  LOG(log_level::info) << "host: " << address;
-  LOG(log_level::info) << "service-port: " << service_port;
-  LOG(log_level::info) << "lease-port: " << lease_port;
-  LOG(log_level::info) << "num-clients: " << num_clients;
-  LOG(log_level::info) << "num-blocks: " << num_blocks;
-  LOG(log_level::info) << "chain-length: " << chain_length;
-  LOG(log_level::info) << "num-ops: " << num_ops;
-  LOG(log_level::info) << "data-size: " << data_size;
-  LOG(log_level::info) << "test: " << op_type;
-  LOG(log_level::info) << "path: " << path;
-  LOG(log_level::info) << "backing-path: " << backing_path;
-  jiffy_client client(address, service_port, lease_port);
 
-  std::vector<std::shared_ptr<btree_client>> bt_clients(static_cast<size_t>(num_clients), nullptr);
-  for (int i = 0; i < num_clients; ++i) {
-    bt_clients[i] = client.open_or_create_btree(path, backing_path, num_blocks, chain_length);
+  for (int i = 1; i <= 64; i *= 2) {
+    int num_clients = i;
+    // Output all the configuration parameters:
+    LOG(log_level::info) << "host: " << address;
+    LOG(log_level::info) << "service-port: " << service_port;
+    LOG(log_level::info) << "lease-port: " << lease_port;
+    LOG(log_level::info) << "num-clients: " << num_clients;
+    LOG(log_level::info) << "num-blocks: " << num_blocks;
+    LOG(log_level::info) << "chain-length: " << chain_length;
+    LOG(log_level::info) << "num-ops: " << num_ops;
+    LOG(log_level::info) << "data-size: " << data_size;
+    LOG(log_level::info) << "test: " << op_type;
+    LOG(log_level::info) << "path: " << path;
+    LOG(log_level::info) << "backing-path: " << backing_path;
+    jiffy_client client(address, service_port, lease_port);
+
+    std::vector<std::shared_ptr<btree_client>> bt_clients(static_cast<size_t>(num_clients), nullptr);
+    for (int i = 0; i < num_clients; ++i) {
+      bt_clients[i] = client.open_or_create_btree(path, backing_path, num_blocks, chain_length);
+    }
+
+    std::shared_ptr<btree_benchmark> benchmark = nullptr;
+    if (op_type == "put") {
+      benchmark = std::make_shared<put_benchmark>(bt_clients, data_size, num_clients, num_ops);
+    } else if (op_type == "get") {
+      benchmark = std::make_shared<get_benchmark>(bt_clients, data_size, num_clients, num_ops);
+    } else if (op_type == "range_lookup") {
+      benchmark = std::make_shared<range_lookup_benchmark>(bt_clients, data_size, num_clients, num_ops);
+    } else {
+      LOG(log_level::info) << "Incorrect operation type for btree: " << op_type;
+      return 0;
+    }
+    benchmark->run();
+    auto result = benchmark->wait();
+    client.remove(path);
+
+    LOG(log_level::info) << "===== " << op_type << " ======";
+    LOG(log_level::info) << "\t" << num_ops << " requests completed in " << ((double) num_ops / result.first) << " us";
+    LOG(log_level::info) << "\t" << num_clients << " parallel clients";
+    LOG(log_level::info) << "\t" << data_size << " payload";
+    LOG(log_level::info) << "\tAverage latency: " << result.second;
+    LOG(log_level::info) << "\tThroughput: " << result.first << " requests per microsecond";
+
   }
-
-  std::shared_ptr<btree_benchmark> benchmark = nullptr;
-  if (op_type == "put") {
-    benchmark = std::make_shared<put_benchmark>(bt_clients, data_size, num_clients, num_ops);
-  } else if (op_type == "get") {
-    benchmark = std::make_shared<get_benchmark>(bt_clients, data_size, num_clients, num_ops);
-  } else if (op_type == "range_lookup") {
-    benchmark = std::make_shared<range_lookup_benchmark>(bt_clients, data_size, num_clients, num_ops);
-  } else {
-    LOG(log_level::info) << "Incorrect operation type for btree: " << op_type;
-    return 0;
-  }
-  benchmark->run();
-  auto result = benchmark->wait();
-  client.remove(path);
-
-  LOG(log_level::info) << "===== " << op_type << " ======";
-  LOG(log_level::info) << "\t" << num_ops << " requests completed in " << ((double) num_ops / result.first) << " us";
-  LOG(log_level::info) << "\t" << num_clients << " parallel clients";
-  LOG(log_level::info) << "\t" << data_size << " payload";
-  LOG(log_level::info) << "\tAverage latency: " << result.second;
-  LOG(log_level::info) << "\tThroughput: " << result.first << " requests per microsecond";
-
   return 0;
 }

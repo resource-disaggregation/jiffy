@@ -4,6 +4,7 @@
 #include <functional>
 #include "libcuckoo/cuckoohash_map.hh"
 #include "jiffy/storage/block_memory_allocator.h"
+#include "jiffy/storage/types/binary.h"
 
 namespace jiffy {
 namespace storage {
@@ -12,13 +13,31 @@ namespace storage {
 constexpr size_t HASH_TABLE_DEFAULT_SIZE = 0;
 
 // Key/Value definitions
-typedef std::string key_type;
-typedef std::string value_type;
+typedef binary key_type;
+typedef binary value_type;
 typedef std::pair<const key_type, value_type> kv_pair_type;
 
 // Custom template arguments
-typedef std::hash<key_type> hash_type;
-typedef std::equal_to<std::string> equal_type;
+struct hash_type {
+  template<typename KeyType>
+  std::size_t operator()(const KeyType &k) const {
+    std::size_t result = 0;
+    for (unsigned char c : k) {
+      result = c + (result * 31);
+    }
+    return result;
+  }
+};
+
+struct equal_type {
+  template<typename KeyType1, typename KeyType2>
+  bool operator()(const KeyType1 &lhs, const KeyType2 &rhs) const {
+    return lhs.size() == rhs.size() && memcmp(lhs.data(), rhs.data(), lhs.size()) == 0;
+  }
+};
+
+//typedef std::hash<key_type> hash_type;
+//typedef std::equal_to<binary> equal_type;
 typedef block_memory_allocator<kv_pair_type> ht_allocator_type;
 
 // Hash table definitions

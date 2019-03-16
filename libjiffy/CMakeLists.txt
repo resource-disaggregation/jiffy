@@ -181,6 +181,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/utils/time_utils.h
           src/jiffy/utils/retry_utils.h
           src/jiffy/utils/string_utils.h
+          src/jiffy/utils/thread_utils.h
           src/jiffy/storage/block.cpp
           src/jiffy/storage/block.h
           src/jiffy/utils/property_map.cpp
@@ -193,7 +194,11 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/directory/fs/ds_file_node.cpp
           src/jiffy/directory/fs/ds_file_node.h
           src/jiffy/directory/fs/ds_dir_node.cpp
-          src/jiffy/directory/fs/ds_dir_node.h src/jiffy/storage/notification/notification_response_client.cpp src/jiffy/storage/notification/notification_response_client.h)
+          src/jiffy/directory/fs/ds_dir_node.h
+          src/jiffy/storage/notification/notification_response_client.cpp
+          src/jiffy/storage/notification/notification_response_client.h
+          src/jiffy/storage/types/binary.h
+          src/jiffy/storage/types/binary.cpp)
 
   add_dependencies(jiffy thrift_ep awssdk_ep jemalloc_ep)
   target_link_libraries(jiffy ${THRIFT_LIBRARY}
@@ -333,7 +338,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/utils/retry_utils.h
           src/jiffy/utils/string_utils.h
           src/jiffy/utils/property_map.cpp
-          src/jiffy/utils/property_map.h)
+          src/jiffy/utils/property_map.h
+          src/jiffy/utils/thread_utils.h)
   add_dependencies(jiffy_client thrift_ep)
   target_link_libraries(jiffy_client ${THRIFT_LIBRARY}
           ${THRIFTNB_LIBRARY}

@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <shared_mutex>
+#include <jiffy/storage/types/binary.h>
 #include "jiffy/storage/notification/subscription_map.h"
 #include "jiffy/storage/service/block_response_client_map.h"
 #include "jiffy/storage/command.h"
@@ -181,6 +182,8 @@ class partition {
   void set_name_and_metadata(const std::string &name, const std::string &metadata);
 
  protected:
+  binary make_binary(const std::string& str);
+
   /* Metadata mutex */
   mutable std::shared_mutex metadata_mtx_;
   /* Partition name */
@@ -191,14 +194,14 @@ class partition {
   std::string path_;
   /* Supported commands */
   const std::vector<command> &supported_commands_;
-  /* Atomic value to collect the sum of key size and value size */
-  std::atomic<size_t> bytes_;
   /* Subscription map */
   subscription_map sub_map_{};
   /* Block response client map */
   block_response_client_map client_map_{};
   /* Block memory manager */
   block_memory_manager *manager_;
+  /* Binary allocator */
+  allocator<uint8_t> binary_allocator_;
 };
 
 }

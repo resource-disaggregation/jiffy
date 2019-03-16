@@ -35,7 +35,7 @@ class btree_partition : public chain_module {
    * @return String of key status
    */
 
-  std::string exists(const key_type &key, bool redirect = false);
+  std::string exists(const std::string &key, bool redirect = false);
 
   /**
    * @brief Put new key value pair
@@ -46,7 +46,7 @@ class btree_partition : public chain_module {
    * @return Put status string
    */
 
-  std::string put(const key_type &key, const value_type &value, bool redirect = false);
+  std::string put(const std::string &key, const std::string &value, bool redirect = false);
 
   /**
    * @brief Get value for specified key
@@ -56,7 +56,7 @@ class btree_partition : public chain_module {
    * @return Get status string
    */
 
-  value_type get(const key_type &key, bool redirect = false);
+  std::string get(const std::string &key, bool redirect = false);
 
   /**
    * @brief Update the value for specified key
@@ -67,7 +67,7 @@ class btree_partition : public chain_module {
    * @return Update status string
    */
 
-  std::string update(const key_type &key, const value_type &value, bool redirect = false);
+  std::string update(const std::string &key, const std::string &value, bool redirect = false);
 
   /**
    * @brief Remove value for specified key
@@ -77,7 +77,7 @@ class btree_partition : public chain_module {
    * @return Remove status string
    */
 
-  std::string remove(const key_type &key, bool redirect = false);
+  std::string remove(const std::string &key, bool redirect = false);
 
   /**
    * @brief Fetch value within the key range
@@ -87,8 +87,8 @@ class btree_partition : public chain_module {
    * @param redirect Bool value to choose whether to indirect
    * @return Range lookup status string
    */
-  std::vector<std::string> range_lookup(const key_type begin_range,
-                                        const key_type end_range,
+  std::vector<std::string> range_lookup(const std::string &begin_range,
+                                        const std::string &end_range,
                                         bool redirect = false);
 
   /**
@@ -98,8 +98,8 @@ class btree_partition : public chain_module {
    * @param redirect Redirect boolean
    * @return Keys count within the key range
    */
-  std::string range_count(const key_type begin_range,
-                          const key_type end_range,
+  std::string range_count(const std::string &begin_range,
+                          const std::string &end_range,
                           bool redirect = false);
   /**
    * @brief Fetch block size
@@ -187,7 +187,7 @@ class btree_partition : public chain_module {
    * @param key Key
    * @return Bool value, true if key is in key range
    */
-  bool in_slot_range(const key_type &key) {
+  bool in_slot_range(const std::string &key) {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return key >= slot_range_.first && key <= slot_range_.second;
   }
@@ -198,7 +198,7 @@ class btree_partition : public chain_module {
    * @return Bool value, true if slot is within the range
    */
 
-  bool in_import_slot_range(const key_type &key) {
+  bool in_import_slot_range(const std::string &key) {
     return key >= import_slot_range_.first && key <= import_slot_range_.second;
   }
 
@@ -208,7 +208,7 @@ class btree_partition : public chain_module {
    * @return Bool value, true if slot is within the range
    */
 
-  bool in_export_slot_range(const key_type &key) {
+  bool in_export_slot_range(const std::string &key) {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return key >= export_slot_range_.first && key <= export_slot_range_.second;
   }
