@@ -17,6 +17,7 @@ enum msg_queue_cmd_id {
   mq_send = 0,
   mq_read = 1,
   mq_clear = 2,
+  mq_update_partition = 3,
 };
 
 }

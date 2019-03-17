@@ -51,7 +51,7 @@ TEST_CASE("msg_queue_client_send_read_test", "[send][read]") {
     REQUIRE(client.read() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.read() == "!key_not_found");
+    REQUIRE(client.read() == "!msg_not_found");
   }
 
   storage_server->stop();
@@ -103,7 +103,7 @@ TEST_CASE("msg_queue_client_pipelined_ops_test", "[put][update][remove][get]") {
 
   auto res3 = client.read(1000);
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(res3[i] == "!key_not_found");
+    REQUIRE(res3[i] == "!msg_not_found");
   }
 
   storage_server->stop();
