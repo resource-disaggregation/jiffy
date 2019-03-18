@@ -599,6 +599,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
 
         // Write data to dst partition
         dst->run_command(hash_table_cmd_id::ht_locked_put, split_data);
+        dst->recv_response();
         LOG(log_level::info) << "Sent " << split_keys << " keys";
 
         // Remove data from src partition
@@ -614,6 +615,10 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         assert(remove_keys.size() == split_keys);
         LOG(log_level::info) << "Sending " << remove_keys.size() << " split keys to remove";
         src->run_command(hash_table_cmd_id::ht_locked_remove, remove_keys);
+        auto ret = src->recv_response();
+        for(const auto &x:ret) {
+          LOG(log_level::info) << x;
+        }
         LOG(log_level::info) << "Removed " << remove_keys.size() << " split keys";
 
         // Unlock source and destination blocks

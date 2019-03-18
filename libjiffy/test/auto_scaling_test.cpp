@@ -158,12 +158,12 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
     dir_serve_thread.join();
   }
 }
-*/
 
+*/
 
 TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
-  auto block_names = test_utils::init_block_names(2, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
+  auto block_names = test_utils::init_block_names(10, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   auto blocks = test_utils::init_msg_queue_blocks(block_names, 512, 0, 0.7);
 
@@ -186,19 +186,19 @@ TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][mana
 
   msg_queue_client client(t, "/sandbox/scale_up.txt", status);
   // Write data until auto scaling is triggered
-  //for (std::size_t i = 0; i < 20; ++i) {
-    //std::vector<std::string> result;
-    //REQUIRE_NOTHROW(std::dynamic_pointer_cast<msg_queue_partition>(blocks[0]->impl())->run_command(result, msg_queue_cmd_id::mq_send,{std::to_string(i)}));
-  //}
-  for (std::size_t i = 0; i < 20; ++i) {
-    REQUIRE_NOTHROW(client.send(std::to_string(i)));
+  for (std::size_t i = 0; i < 158; ++i) {
+    REQUIRE(client.send(std::to_string(i)) == "!ok");
+  }
+  for (std::size_t i = 0; i < 158; ++i) {
+    REQUIRE(client.read() == std::to_string(i));
   }
 
   // Busy wait until number of blocks increases
-  //while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
-  //for (std::size_t i = 500; i < 1000; i++) {
-  //  REQUIRE(std::dynamic_pointer_cast<msg_queue_partition>(blocks[1]->impl())->read(std::to_string(i - 500)) == std::to_string(i));
-  //}
+  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
+
+  for (std::size_t i = 0; i < 158; ++i) {
+    REQUIRE(client.read() == "!msg_not_found");
+  }
 
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
@@ -216,8 +216,8 @@ TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][mana
   }
 }
 
-
 /*
+
 #define NUM_BLOCKS 2
 #define HOST "127.0.0.1"
 #define DIRECTORY_SERVICE_PORT 9090

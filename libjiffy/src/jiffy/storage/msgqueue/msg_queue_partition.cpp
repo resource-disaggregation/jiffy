@@ -6,6 +6,7 @@
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/storage/msgqueue/msg_queue_ops.h"
 #include "jiffy/directory/client/directory_client.h"
+#include <thread>
 
 namespace jiffy {
 namespace storage {
@@ -59,6 +60,7 @@ std::string msg_queue_partition::send(const std::string &message) {
 }
 
 std::string msg_queue_partition::read(std::string position) {
+  LOG(log_level::info) << "Reading at this position " << position << "with full size" << size();
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   auto pos = std::stoi(position);
   if (pos < 0) throw std::invalid_argument("read position invalid");
@@ -66,7 +68,7 @@ std::string msg_queue_partition::read(std::string position) {
     return to_string(partition_[pos]);
   }
   if (!next_target_str().empty())
-    return "!msg_not_in_partition" + next_target_str();
+    return "!msg_not_in_partition!" + next_target_str();
   else return "!msg_not_found";
 }
 
@@ -143,14 +145,24 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
       std::string chain_test;
       chain_to_string(chain_test);
       LOG(log_level::info) << "Trying to connect to current replica chain client path: " << path() << "chain " << chain_test;
-      auto src = std::make_shared<replica_chain_client>(fs, path(), chain());
-      LOG(log_level::info) << "Replica chain client connected";
+      auto path_current = path();
+      auto chain_current = chain();
       std::vector<std::string> src_before_args;
       src_before_args.push_back(next_target_str());
+      //std::thread update_worker([fs, path_current,chain_current,src_before_args]() {
+      //  auto src = std::make_shared<replica_chain_client>(fs, path_current, chain_current);
+      //  src->send_command(msg_queue_cmd_id::mq_update_partition, src_before_args);
+      //  src->recv_response();
+      //});
+      //update_worker.join();
+      LOG(log_level::info) << "Trying to connect to the currently replica chain";
+      //auto src = std::make_shared<replica_chain_client>(fs, path(), directory::replica_chain(dst_replica_chain));
+      LOG(log_level::info) << "Replica chain client connected";
+      update_partition(src_before_args.front());
       LOG(log_level::info) << "Sending update partition";
-      src->send_command(msg_queue_cmd_id::mq_update_partition, src_before_args);
+      //src->send_command(msg_queue_cmd_id::mq_update_partition, src_before_args);
       LOG(log_level::info) << "Receiving response";
-      src->recv_response();
+      //src->recv_response();
       LOG(log_level::info) << "Finish adding new queue";
     } catch (std::exception &e) {
       overload_ = false;

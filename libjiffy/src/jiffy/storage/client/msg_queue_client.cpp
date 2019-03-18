@@ -111,7 +111,6 @@ std::size_t msg_queue_client::block_id(const msg_queue_cmd_id &op) {
 }
 
 void msg_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
-  std::vector<std::string> modified_args;
   if (response.substr(0, 5) == "!full") {
     typedef std::vector<std::string> list_t;
     do {
@@ -123,17 +122,20 @@ void msg_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::st
       response = blocks_[block_id(static_cast<msg_queue_cmd_id >(cmd_id))]->run_command(cmd_id, args).front();
     } while (response.substr(0, 5) == "!full");
   }
-  if (response.substr(0, 5) == "!msg_not_in_partition") {
+  if (response.substr(0, 21) == "!msg_not_in_partition") {
     typedef std::vector<std::string> list_t;
     do {
       auto parts = string_utils::split(response, '!');
       auto chain = list_t(parts.begin() + 2, parts.end());
-      blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, directory::replica_chain(chain), 0));
+      LOG(log_level::info) << "Adding next replica chain client for the read";
+      blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, directory::replica_chain(chain)));
+      LOG(log_level::info) << "Next read replica chain client successfully added";
       read_partition_++;
       read_offset_ = 0;
+      std::vector<std::string> modified_args;
       modified_args.push_back(get_inc_read_pos());
       response = blocks_[block_id(static_cast<msg_queue_cmd_id >(cmd_id))]->run_command(cmd_id, modified_args).front();
-    } while (response.substr(0, 5) == "!msg_not_in_partition");
+    } while (response.substr(0, 21) == "!msg_not_in_partition");
   }
   if (response == "!msg_not_found") {
     read_offset_--;

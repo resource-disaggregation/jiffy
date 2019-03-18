@@ -16,8 +16,9 @@ replica_chain_client::replica_chain_client(std::shared_ptr<directory::directory_
                                            int timeout_ms) : fs_(fs), path_(path), in_flight_(false) {
   seq_.client_id = -1;
   seq_.client_seq_no = 0;
-  LOG(log_level::info) << "connecting to the client";
+  LOG(log_level::info) << "Connecting to the client";
   connect(chain, timeout_ms);
+  LOG(log_level::info) << "Replica chain client connected";
   for (auto &op: KV_OPS) {
     cmd_client_.push_back(op.type == command_type::accessor ? &tail_ : &head_);
   }
