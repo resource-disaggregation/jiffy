@@ -13,6 +13,7 @@ msg_queue_client::msg_queue_client(std::shared_ptr<directory::directory_interfac
                                    const directory::data_status &status,
                                    int timeout_ms)
     : data_structure_client(fs, path, status, timeout_ms) {
+  LOG(log_level::info) << "Creating the msg queue client " << status_.to_string();
   read_offset_ = 0;
   read_partition_ = 0;
   send_partition_ = 0;
@@ -33,6 +34,7 @@ std::string msg_queue_client::send(const std::string &msg) {
   bool redo;
   do {
     try {
+      LOG(log_level::info) << "running send on partition " << block_id(msg_queue_cmd_id::mq_send);
       _return = blocks_[block_id(msg_queue_cmd_id::mq_send)]->run_command(msg_queue_cmd_id::mq_send, args).front();
       handle_redirect(msg_queue_cmd_id::mq_send, args, _return);
       redo = false;
@@ -116,6 +118,7 @@ void msg_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::st
       auto parts = string_utils::split(response, '!');
       auto chain = list_t(parts.begin() + 2, parts.end());
       blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, directory::replica_chain(chain), 0));
+      LOG(log_level::info) << "Increasing send partition number under";
       send_partition_++;
       response = blocks_[block_id(static_cast<msg_queue_cmd_id >(cmd_id))]->run_command(cmd_id, args).front();
     } while (response.substr(0, 5) == "!full");
