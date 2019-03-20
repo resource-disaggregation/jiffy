@@ -85,7 +85,7 @@ std::string hash_table_partition::upsert(const std::string &key, const std::stri
     }
     block_.upsert(make_binary(key), [&](value_type &v) {
       v = make_binary(value);
-    }, reinterpret_cast<const uint8_t*>(value.data()), value.length(), binary_allocator_);
+    }, reinterpret_cast<const uint8_t *>(value.data()), value.length(), binary_allocator_);
     return "!ok";
   }
   return "!block_moved";
@@ -526,15 +526,15 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       auto split_range_end = slot_range_.second;
       std::string dst_partition_name = std::to_string(split_range_begin) + "_" + std::to_string(split_range_end);
       auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
-      LOG(log_level::info) << "host !!!!!!!" << directory_host_ << " port " << directory_port_;
+      LOG(log_level::info) << "host " << directory_host_ << " port " << directory_port_;
       auto dst_replica_chain =
           fs->add_block(path(), dst_partition_name, "importing");
 
       LOG(log_level::info) << "Look here!!!!!!!";
 
       // TODO check if add_block succeed, might not be enough capacity in extreme situation
-      auto src = std::make_shared<replica_chain_client>(fs, path(), chain(), 0);
-      auto dst = std::make_shared<replica_chain_client>(fs, path(), dst_replica_chain, 0);
+      auto src = std::make_shared<replica_chain_client>(fs, path(), chain());
+      auto dst = std::make_shared<replica_chain_client>(fs, path(), dst_replica_chain);
 
       std::string src_partition_name = std::to_string(slot_range_.first) + "_" + std::to_string(split_range_begin);
       set_exporting(dst_replica_chain.block_ids,
@@ -599,6 +599,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
 
         // Write data to dst partition
         dst->run_command(hash_table_cmd_id::ht_locked_put, split_data);
+        dst->recv_response();
         LOG(log_level::info) << "Sent " << split_keys << " keys";
 
         // Remove data from src partition
@@ -614,6 +615,10 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         assert(remove_keys.size() == split_keys);
         LOG(log_level::info) << "Sending " << remove_keys.size() << " split keys to remove";
         src->run_command(hash_table_cmd_id::ht_locked_remove, remove_keys);
+        auto ret = src->recv_response();
+        for (const auto &x:ret) {
+          LOG(log_level::info) << x;
+        }
         LOG(log_level::info) << "Removed " << remove_keys.size() << " split keys";
 
         // Unlock source and destination blocks

@@ -226,6 +226,7 @@ replica_chain ds_file_node::add_data_block(const std::string &path,
                                            const std::string &partition_metadata,
                                            const std::shared_ptr<storage::storage_management_ops> &storage,
                                            const std::shared_ptr<block_allocator> &allocator) {
+  using namespace utils;
   std::unique_lock<std::shared_mutex> lock(mtx_);
   replica_chain chain(allocator->allocate(static_cast<size_t>(dstatus_.chain_length()), {}), storage_mode::in_memory);
   chain.name = partition_name;

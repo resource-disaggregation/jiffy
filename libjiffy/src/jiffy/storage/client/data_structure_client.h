@@ -15,7 +15,7 @@ class redo_error : public std::exception {
   redo_error() = default;
 };
 
-/* Hash table client */
+/* Data structure client */
 class data_structure_client {
  public:
   /**

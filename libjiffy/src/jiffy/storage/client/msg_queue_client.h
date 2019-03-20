@@ -70,30 +70,18 @@ class msg_queue_client : data_structure_client {
    * @return Start position in string
    */
   std::string get_inc_read_pos() {
-    auto old_val = read_start_;
-    read_start_++;
+    auto old_val = read_offset_;
+    read_offset_++;
     return std::to_string(old_val);
   }
 
   /**
-   * @brief Fetch block identifier for particular key
-   * @param key Key
+   * @brief Fetch block identifier for specified operation
+   * @param op Operation
    * @return Block identifier
    */
 
-  size_t block_id(const std::string &key);
-
-  /**
-   * @brief Run same operation in batch
-   * @param id Operation identifier
-   * @param args Operation arguments
-   * @param args_per_op Argument per operation
-   * @return
-   */
-
-  std::vector<std::string> batch_command(const msg_queue_cmd_id &id,
-                                         const std::vector<std::string> &args,
-                                         size_t args_per_op);
+  std::size_t block_id(const msg_queue_cmd_id &op);
 
   /**
    * @brief Handle command in redirect case
@@ -115,11 +103,9 @@ class msg_queue_client : data_structure_client {
                         std::vector<std::string> &responses) override;
 
   /* Read start */
-  std::size_t read_start_;
-  /* Read End */
-  std::size_t read_end_;   // TODO add usage
-
-
+  std::size_t read_partition_;
+  std::size_t read_offset_;
+  std::size_t send_partition_;
 };
 
 }

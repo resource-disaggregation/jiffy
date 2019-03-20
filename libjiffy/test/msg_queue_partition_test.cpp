@@ -20,7 +20,7 @@ TEST_CASE("msg_queue_send_read_test", "[send][read]") {
     REQUIRE(block.read(std::to_string(i)) == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(block.read(std::to_string(i)) == "!key_not_found");
+    REQUIRE(block.read(std::to_string(i)) == "!msg_not_found");
   }
 }
 
@@ -35,7 +35,7 @@ TEST_CASE("msg_queue_send_clear_read_test", "[send][read]") {
   REQUIRE(block.clear() == "!ok");
   REQUIRE(block.size() == 0);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(block.read(std::to_string(i)) == "!key_not_found");
+    REQUIRE(block.read(std::to_string(i)) == "!msg_not_found");
   }
 }
 

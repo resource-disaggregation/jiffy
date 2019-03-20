@@ -86,7 +86,7 @@ class dummy_storage_manager : public jiffy::storage::storage_management_ops {
 
   std::vector<std::string> COMMANDS{};
 };
-
+using namespace jiffy::utils;
 class sequential_block_allocator : public jiffy::directory::block_allocator {
  public:
   sequential_block_allocator() {}

@@ -8,6 +8,7 @@
 #include "jiffy/persistent/persistent_service.h"
 #include "jiffy/storage/chain_module.h"
 #include "msg_queue_defs.h"
+#include "jiffy/directory/directory_ops.h"
 
 namespace jiffy {
 namespace storage {
@@ -44,23 +45,28 @@ class msg_queue_partition : public chain_module {
   /**
    * @brief Send a new message to the message queue
    * @param message New message
-   * @param redirect Redirect boolean
    * @return Send return status string
    */
-  std::string send(const std::string &message, bool redirect = false);
+  std::string send(const std::string &message);
 
   /**
    * @brief Read a new message from the message queue
-   * @param redirect Redirect boolean
    * @return Read return status string
    */
-  std::string read(std::string position, bool redirect = false);
+  std::string read(std::string position);
 
   /**
    * @brief Clear the message queue
    * @return Clear return status
    */
   std::string clear();
+
+  /**
+   * @brief Update partition with next target partition
+   * @param next_target Next target partition string
+   * @return Update status string
+   */
+  std::string update_partition(const std::string &next_target);
 
   /**
    * @brief Run particular command on key value block
@@ -107,6 +113,32 @@ class msg_queue_partition : public chain_module {
 
   void forward_all() override;
 
+  /**
+   * @brief Set next target string
+   * @param block_ids Next target replica chain data blocks
+   */
+  void next_target(std::vector<std::string> &target) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    next_target_string = "";
+    for(const auto &block: target) {
+      next_target_string += (block + "!");
+    }
+    next_target_string.pop_back();
+  }
+
+  void next_target(const std::string &target_str) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    next_target_string = target_str;
+  }
+  /**
+   * @brief Fetch next target string
+   * @return Next target string
+   */
+  std::string next_target_str() {
+    return next_target_string;
+  }
+
+
  private:
 
   /**
@@ -115,16 +147,6 @@ class msg_queue_partition : public chain_module {
    */
 
   bool overload();
-
-  /**
-   * @brief Check if block is underloaded
-   * @return Bool value, true if block size is under the low threshold capacity
-   */
-
-  bool underload();
-
-  /* Operation mutex */
-  mutable std::shared_mutex operation_mtx_;
 
   /* Message queue partition */
   msg_queue_type partition_;
@@ -138,10 +160,7 @@ class msg_queue_partition : public chain_module {
   double threshold_hi_;
 
   /* Atomic bool for partition slot range splitting */
-  std::atomic<bool> splitting_;
-
-  /* Atomic bool for partition slot range merging */
-  std::atomic<bool> merging_;
+  std::atomic<bool> overload_;
 
   /* Atomic partition dirty bit */
   std::atomic<bool> dirty_;
@@ -155,8 +174,8 @@ class msg_queue_partition : public chain_module {
   /* Directory server port number */
   int directory_port_;
 
-  /* Next partition pointer */
-  std::shared_ptr<msg_queue_partition> next_partition_;
+  /* Next partition target string */
+  std::string next_target_string;
 
 };
 

@@ -405,7 +405,7 @@ class hash_table_partition : public chain_module {
    * @param new_metadata New partition metadata
    */
 
-  std::string update_partition(const std::string& new_name, const std::string& new_metadata);
+  std::string update_partition(const std::string &new_name, const std::string &new_metadata);
 
   /**
    * @brief Update partition in locked hash table
@@ -413,7 +413,7 @@ class hash_table_partition : public chain_module {
    * @param new_metadata New partition metadata
    */
 
-  std::string locked_update_partition(const std::string& new_name, const std::string& new_metadata);
+  std::string locked_update_partition(const std::string &new_name, const std::string &new_metadata);
 
   /**
    * @brief Fetch storage size
@@ -439,7 +439,6 @@ class hash_table_partition : public chain_module {
    * @return Partition metadata
    */
   std::string locked_get_metadata();
-
 
   /**
    * @brief Run particular command on key value block
@@ -510,38 +509,6 @@ class hash_table_partition : public chain_module {
     export_slot_range_.first = slot_begin;
     export_slot_range_.second = slot_end;
   }
-
-  /**
-   * @brief Set block to be importing
-   * @param slot_begin Begin slot
-   * @param slot_end End slot
-   */
-
-  void set_importing(int32_t slot_begin, int32_t slot_end) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    state_ = hash_partition_state::importing;
-    import_slot_range_.first = slot_begin;
-    import_slot_range_.second = slot_end;
-  }
-
-  /**
-   * @brief Set block to regular after exporting slot
-   * @param slot_begin Begin slot
-   * @param slot_end End slot
-   */
-
-  void set_regular(int32_t slot_begin, int32_t slot_end) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    state_ = hash_partition_state::regular;
-    name_ = std::to_string(slot_begin) + "_" + std::to_string(slot_end);
-    slot_range_.first = slot_begin;
-    slot_range_.second = slot_end;
-    export_slot_range_.first = 0;
-    export_slot_range_.second = -1;
-    import_slot_range_.first = 0;
-    import_slot_range_.second = -1;
-  }
-
 
  private:
   /**

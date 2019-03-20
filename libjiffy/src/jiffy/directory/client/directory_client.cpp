@@ -28,7 +28,6 @@ void directory_client::connect(const std::string &host, int port) {
   transport_ = std::shared_ptr<TTransport>(new TBufferedTransport(socket_));
   protocol_ = std::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
   client_ = std::make_shared<thrift_client>(protocol_);
-  LOG(log_level::info) << "Attempting to connect to " << host << ":" << port;
   transport_->open();
 }
 

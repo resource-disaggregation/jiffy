@@ -1,6 +1,7 @@
 #include "msg_queue_client.h"
 #include "jiffy/utils/logger.h"
 #include "jiffy/utils/string_utils.h"
+#include <algorithm>
 
 namespace jiffy {
 namespace storage {
@@ -12,7 +13,9 @@ msg_queue_client::msg_queue_client(std::shared_ptr<directory::directory_interfac
                                    const directory::data_status &status,
                                    int timeout_ms)
     : data_structure_client(fs, path, status, timeout_ms) {
-  read_start_ = 0;
+  read_offset_ = 0;
+  read_partition_ = 0;
+  send_partition_ = 0;
 }
 
 void msg_queue_client::refresh() {
@@ -30,9 +33,8 @@ std::string msg_queue_client::send(const std::string &msg) {
   bool redo;
   do {
     try {
-      _return = blocks_[block_id("0")]->run_command(msg_queue_cmd_id::mq_send,
-                                                    args).front(); // TODO hot fix, should use block id
-      // handle_redirect(btree_cmd_id::bt_put, args, _return);
+      _return = blocks_[block_id(msg_queue_cmd_id::mq_send)]->run_command(msg_queue_cmd_id::mq_send, args).front();
+      handle_redirect(msg_queue_cmd_id::mq_send, args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -49,8 +51,8 @@ std::string msg_queue_client::read() {
   bool redo;
   do {
     try {
-      _return = blocks_[0]->run_command(msg_queue_cmd_id::mq_read, args).front();// TODO hot fix, should use block id
-      // handle_redirect(btree_cmd_id::bt_put, args, _return);
+      _return = blocks_[block_id(msg_queue_cmd_id::mq_read)]->run_command(msg_queue_cmd_id::mq_read, args).front();
+      handle_redirect(msg_queue_cmd_id::mq_read, args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -67,8 +69,8 @@ std::vector<std::string> msg_queue_client::send(const std::vector<std::string> &
   bool redo;
   do {
     try {
-      _return = batch_command(msg_queue_cmd_id::mq_send, msgs, 1);
-      //  handle_redirects(btree_cmd_id::bt_put, kvs, _return);
+      _return = blocks_[block_id(msg_queue_cmd_id::mq_send)]->run_command(msg_queue_cmd_id::mq_send, msgs);
+      handle_redirects(msg_queue_cmd_id::mq_send, msgs, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -78,9 +80,6 @@ std::vector<std::string> msg_queue_client::send(const std::vector<std::string> &
 }
 
 std::vector<std::string> msg_queue_client::read(std::size_t num_msg) {
-  //if (kvs.size() % 2 != 0) {  TODO add check here with read_end_, the client cannot read beyond the latest message
-  //  throw std::invalid_argument("Incorrect number of arguments");
-  //}
   std::vector<std::string> args;
   std::vector<std::string> _return;
   for (std::size_t i = 0; i < num_msg; i++) {
@@ -89,8 +88,8 @@ std::vector<std::string> msg_queue_client::read(std::size_t num_msg) {
   bool redo;
   do {
     try {
-      _return = batch_command(msg_queue_cmd_id::mq_read, args, 1);
-      //  handle_redirects(btree_cmd_id::bt_put, kvs, _return);
+      _return = blocks_[block_id(msg_queue_cmd_id::mq_read)]->run_command(msg_queue_cmd_id::mq_read, args);
+      handle_redirects(msg_queue_cmd_id::mq_read, args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -99,86 +98,96 @@ std::vector<std::string> msg_queue_client::read(std::size_t num_msg) {
   return _return;
 }
 
-//TODO fix this function
-size_t msg_queue_client::block_id(const std::string &key) {
-  return 0;
-}
-
-std::vector<std::string> msg_queue_client::batch_command(const msg_queue_cmd_id &op,
-                                                         const std::vector<std::string> &args,
-                                                         size_t args_per_op) {
-  // Split arguments
-  if (args.size() % args_per_op != 0)
-    throw std::invalid_argument("Incorrect number of arguments");
-
-  std::vector<std::vector<std::string>> block_args(blocks_.size());
-  std::vector<std::vector<size_t>> positions(blocks_.size());
-  size_t num_ops = args.size() / args_per_op;
-  for (size_t i = 0; i < num_ops; i++) {
-    auto id = block_id(args[i * args_per_op]);
-    for (size_t j = 0; j < args_per_op; j++)
-      block_args[id].push_back(args[i * args_per_op + j]);
-    positions[id].push_back(i);
+std::size_t msg_queue_client::block_id(const msg_queue_cmd_id &op) {
+  if (op == msg_queue_cmd_id::mq_send) {
+    return send_partition_;
+  } else if (op == msg_queue_cmd_id::mq_read) {
+    return read_partition_;
+  } else {
+    throw std::invalid_argument("Incorrect operation of message queue");
   }
-
-  for (size_t i = 0; i < blocks_.size(); i++) {
-    if (!block_args[i].empty())
-      blocks_[i]->send_command(op, block_args[i]);
-  }
-
-  std::vector<std::string> results(num_ops);
-  for (size_t i = 0; i < blocks_.size(); i++) {
-    if (!block_args[i].empty()) {
-      auto res = blocks_[i]->recv_response();
-      for (size_t j = 0; j < res.size(); j++) {
-        results[positions[i][j]] = res[j];
-      }
-    }
-  }
-
-  return results;
 }
 
 void msg_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
-  if (response.substr(0, 10) == "!exporting") {
+  if (response.substr(0, 5) == "!full") {
     typedef std::vector<std::string> list_t;
     do {
       auto parts = string_utils::split(response, '!');
       auto chain = list_t(parts.begin() + 2, parts.end());
-      response = replica_chain_client(fs_,
-                                      path_,
-                                      directory::replica_chain(chain),
-                                      0).run_command_redirected(cmd_id, args).front();
-    } while (response.substr(0, 10) == "!exporting");
+      blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, directory::replica_chain(chain), 0));
+      send_partition_++;
+      response = blocks_[block_id(static_cast<msg_queue_cmd_id >(cmd_id))]->run_command(cmd_id, args).front();
+    } while (response.substr(0, 5) == "!full");
   }
-  if (response == "!block_moved") {
-    refresh();
-    throw redo_error();
+  if (response.substr(0, 21) == "!msg_not_in_partition") {
+    typedef std::vector<std::string> list_t;
+    do {
+      auto parts = string_utils::split(response, '!');
+      auto chain = list_t(parts.begin() + 2, parts.end());
+      blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, directory::replica_chain(chain)));
+      read_partition_++;
+      read_offset_ = 0;
+      std::vector<std::string> modified_args;
+      modified_args.push_back(get_inc_read_pos());
+      response = blocks_[block_id(static_cast<msg_queue_cmd_id >(cmd_id))]->run_command(cmd_id, modified_args).front();
+    } while (response.substr(0, 21) == "!msg_not_in_partition");
+  }
+  if (response == "!msg_not_found") {
+    read_offset_--;
   }
 }
 
 void msg_queue_client::handle_redirects(int32_t cmd_id,
                                         const std::vector<std::string> &args,
                                         std::vector<std::string> &responses) {
+  std::vector<std::string> modified_args = args;
+  typedef std::vector<std::string> list_t;
   size_t n_ops = responses.size();
   size_t n_op_args = args.size() / n_ops;
+  bool send_flag_all = false;
+  bool read_flag_all = false;
   for (size_t i = 0; i < responses.size(); i++) {
     auto &response = responses[i];
-    if (response.substr(0, 10) == "!exporting") {
-      typedef std::vector<std::string> list_t;
-      list_t op_args(args.begin() + i * n_op_args, args.begin() + (i + 1) * n_op_args);
+    if (response.substr(0, 5) == "!full") {
+      list_t op_args(modified_args.begin() + i * n_op_args, modified_args.begin() + (i + 1) * n_op_args);
+      bool send_flag = true;
       do {
         auto parts = string_utils::split(response, '!');
         auto chain = list_t(parts.begin() + 2, parts.end());
-        response = replica_chain_client(fs_,
-                                        path_,
-                                        directory::replica_chain(chain),
-                                        0).run_command_redirected(cmd_id, op_args).front();
-      } while (response.substr(0, 10) == "!exporting");
+        blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, directory::replica_chain(chain), 0));
+        if (!send_flag_all || !send_flag) {
+          send_partition_++;
+        }
+        send_flag = false;
+        response = blocks_[block_id(static_cast<msg_queue_cmd_id >(cmd_id))]->run_command(cmd_id, op_args).front();
+      } while (response.substr(0, 5) == "!full");
+      send_flag_all = true;
     }
-    if (response == "!block_moved") {
-      refresh();
-      throw redo_error();
+    if (response.substr(0, 5) == "!msg_not_in_partition") {
+      list_t op_args(modified_args.begin() + i * n_op_args, modified_args.begin() + (i + 1) * n_op_args);
+      bool read_flag = true;
+      do {
+        auto parts = string_utils::split(response, '!');
+        auto chain = list_t(parts.begin() + 2, parts.end());
+        blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, directory::replica_chain(chain), 0));
+        if (!read_flag_all || !read_flag) {
+          read_partition_++;
+          auto old_value = std::stoi(op_args.front());
+          for (auto it = modified_args.begin() + i; it != modified_args.end(); it++) {
+            *it = std::to_string(std::stoi(*it) - old_value);
+          }
+          op_args.clear();
+          op_args.push_back("0");
+        }
+        read_flag = false;
+        response = blocks_[block_id(static_cast<msg_queue_cmd_id >(cmd_id))]->run_command(cmd_id, op_args).front();
+      } while (response.substr(0, 5) == "!msg_not_in_partition");
+      read_flag_all = true;
+    }
+    if (response == "!msg_not_found") {
+      list_t op_args(modified_args.begin() + i * n_op_args, modified_args.begin() + (i + 1) * n_op_args);
+      read_offset_ = static_cast<std::size_t>(std::stoi(op_args.front()));
+      break;
     }
   }
 }
