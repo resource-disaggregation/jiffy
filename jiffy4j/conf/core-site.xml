@@ -17,12 +17,12 @@
 <configuration>
   <!-- HDFS Configuration -->
   <property>
-   <name>fs.hdfs.impl</name>
-   <value>org.apache.hadoop.hdfs.DistributedFileSystem</value>
+    <name>fs.hdfs.impl</name>
+    <value>org.apache.hadoop.hdfs.DistributedFileSystem</value>
   </property>
   <property>
-   <name>fs.AbstractFileSystem.hdfs.impl</name>
-   <value>org.apache.hadoop.fs.Hdfs</value>
+    <name>fs.AbstractFileSystem.hdfs.impl</name>
+    <value>org.apache.hadoop.fs.Hdfs</value>
   </property>
   <property>
     <name>fs.hdfs.impl.disable.cache</name>
@@ -31,8 +31,8 @@
 
   <!-- JFS Configuration -->
   <property>
-   <name>fs.jfs.impl</name>
-   <value>jiffy.hadoop.fs.JiffyFileSystem</value>
+    <name>fs.jfs.impl</name>
+    <value>jiffy.hadoop.fs.JiffyFileSystem</value>
   </property>
   <property>
     <name>fs.AbstractFileSystem.jfs.impl</name>
@@ -45,26 +45,26 @@
 
   <!-- S3 Configuration -->
   <property>
-   <name>fs.s3a.impl</name>
-   <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
+    <name>fs.s3a.impl</name>
+    <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
   </property>
   <property>
-   <name>fs.AbstractFileSystem.s3a.impl</name>
-   <value>org.apache.hadoop.fs.s3a.S3A</value>
+    <name>fs.AbstractFileSystem.s3a.impl</name>
+    <value>org.apache.hadoop.fs.s3a.S3A</value>
   </property>
   <property>
-   <name>fs.s3a.access.key</name>
-   <value>${AWS_ACCESS_KEY}</value>
+    <name>fs.s3a.access.key</name>
+    <value>${AWS_ACCESS_KEY}</value>
   </property>
   <property>
-   <name>fs.s3a.secret.key</name>
-   <value>${AWS_SECRET_KEY}</value>
+    <name>fs.s3a.secret.key</name>
+    <value>${AWS_SECRET_KEY}</value>
   </property>
 
   <!-- SplitFS Configuration -->
   <property>
-   <name>fs.splitfs.impl</name>
-   <value>jiffy.hadop.fs.SplitFileSystem</value>
+    <name>fs.splitfs.impl</name>
+    <value>jiffy.hadoop.fs.SplitFileSystem</value>
   </property>
   <property>
     <name>fs.AbstractFileSystem.splitfs.impl</name>
@@ -88,18 +88,19 @@
     <name>fs.defaultFS</name>
     <value>splitfs://localhost:9090</value>
   </property>
+
   <!--
   <property>
-   <name>fs.defaultFS</name>
-   <value>hdfs://localhost:9000</value>
+    <name>fs.defaultFS</name>
+    <value>hdfs://localhost:9000</value>
   </property>
   <property>
-   <name>fs.defaultFS</name>
-   <value>jfs://localhost:9090</value>
+    <name>fs.defaultFS</name>
+    <value>jfs://localhost:9090</value>
   </property>
   <property>
-   <name>fs.defaultFS</name>
-   <value>s3a://my-bucket</value>
+    <name>fs.defaultFS</name>
+    <value>s3a://my-bucket</value>
   </property>
   -->
 </configuration>

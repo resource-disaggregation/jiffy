@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+bin=`which $0`
+bin=`dirname ${bin}`
+bin=`cd "$bin"; pwd`
+
+JAVA=$JAVA_HOME/bin/java
+
+function print_usage(){
+  echo "Usage: jiffy COMMAND"
+  echo "       where COMMAND is one of:"
+  echo "  namenode             run the Jiffy namenode"
+  echo "  datanode             run a Jiffy datanode"
+  echo "  fs                   run a Jiffy shell command"
+}
+
+if [ $# = 0 ]; then
+  print_usage
+  exit
+fi
+
+COMMAND=$1
+shift
+
+if [ "$COMMAND" = "namenode" ] ; then
+  echo "Not yet implemented"
+  exit
+elif [ "$COMMAND" = "datanode" ] ; then
+  echo "Not yet implemented"
+  exit
+elif [ "$COMMAND" = "fs" ] ; then
+  CLASS=org.apache.hadoop.fs.FsShell
+fi
+
+CONF_PATH="$bin"/../conf
+export CLASSPATH="$bin"/../target/*:${CONF_PATH}:.
+
+if [ -f "${CONF_PATH}/jiffy-env.sh" ]; then
+  # Promote all variable declarations to environment (exported) variables
+  set -a
+  . "${CONF_PATH}/jiffy-env.sh"
+  set +a
+fi
+
+cmd="exec $JAVA -Dproc_$COMMAND -Dsun.nio.PageAlignDirectMemory=true $JIFFY_EXTRA_JAVA_OPTIONS $CLASS $@"
+echo $cmd
+$cmd
