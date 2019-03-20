@@ -13,7 +13,6 @@ msg_queue_client::msg_queue_client(std::shared_ptr<directory::directory_interfac
                                    const directory::data_status &status,
                                    int timeout_ms)
     : data_structure_client(fs, path, status, timeout_ms) {
-  LOG(log_level::info) << "Creating the msg queue client " << status_.to_string();
   read_offset_ = 0;
   read_partition_ = 0;
   send_partition_ = 0;

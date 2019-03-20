@@ -183,8 +183,8 @@ TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][mana
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
   data_status status = t->create("/sandbox/scale_up.txt", "msgqueue", "/tmp", 1, 4, 0, perms::all(), {"0"}, {"regular"}, {});
-
   msg_queue_client client(t, "/sandbox/scale_up.txt", status);
+
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 158; ++i) {
     REQUIRE(client.send(std::to_string(i)) == "!ok");
@@ -195,10 +195,6 @@ TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][mana
 
   // Busy wait until number of blocks increases
   while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
-
-  for (std::size_t i = 0; i < 158; ++i) {
-    REQUIRE(client.read() == "!msg_not_found");
-  }
 
   storage_server->stop();
   if (storage_serve_thread1.joinable()) {
