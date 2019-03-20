@@ -15,6 +15,7 @@
 #include "jiffy/storage/hashtable/hash_table_ops.h"
 #include "jiffy/storage/msgqueue/msg_queue_ops.h"
 #include "jiffy/storage/client/msg_queue_client.h"
+#include "jiffy/storage/client/hash_table_client.h"
 #include "jiffy/client/jiffy_client.h"
 #include "jiffy/directory/fs/sync_worker.h"
 #include "jiffy/directory/lease/lease_expiry_worker.h"
@@ -31,7 +32,7 @@ using namespace ::apache::thrift::transport;
 #define STORAGE_SERVICE_PORT 9091
 #define STORAGE_MANAGEMENT_PORT 9092
 
-/*
+
 TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(2, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -53,18 +54,16 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  REQUIRE_NOTHROW(t->create("/sandbox/scale_up.txt", "hashtable", "/tmp", 1, 1, 0, perms::all(), {"0_65536"}, {"regular"}, {}));
-
+  data_status status = t->create("/sandbox/scale_up.txt", "hashtable", "/tmp", 1, 1, 0, perms::all(), {"0_65536"}, {"regular"}, {});
+  hash_table_client client(t, "/sandbox/scale_up.txt", status);
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 1000; ++i) {
-    std::vector<std::string> result;
-    REQUIRE_NOTHROW(std::dynamic_pointer_cast<hash_table_partition>(blocks[0]->impl())->run_command(result, hash_table_cmd_id::ht_put,{std::to_string(i), std::to_string(i)}));
-    REQUIRE(result[0] == "!ok");
+    REQUIRE_NOTHROW(client.put(std::to_string(i), std::to_string(i)));
   }
 
   // Busy wait until number of blocks increases
   while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
-
+/*
   for (std::size_t i = 0; i < 1000; i++) {
     std::string key = std::to_string(i);
     auto h = hash_slot::get(key);
@@ -76,7 +75,7 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
       REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[1]->impl())->get(key) == key);
     }
   }
-
+*/
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -92,7 +91,7 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
     dir_serve_thread.join();
   }
 }
-
+/*
 TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(2, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
