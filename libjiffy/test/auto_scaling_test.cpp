@@ -163,12 +163,12 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
 
 TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
-  auto block_names = test_utils::init_block_names(10, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
+  auto block_names = test_utils::init_block_names(100, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   auto blocks = test_utils::init_msg_queue_blocks(block_names, 512, 0, 0.7);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
-  std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
+  std::thread storage_serve_thread1([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
 
   auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
@@ -182,7 +182,7 @@ TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][mana
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  data_status status = t->create("/sandbox/scale_up.txt", "msgqueue", "/tmp", 1, 1, 0, perms::all(), {"0"}, {"regular"}, {});
+  data_status status = t->create("/sandbox/scale_up.txt", "msgqueue", "/tmp", 1, 4, 0, perms::all(), {"0"}, {"regular"}, {});
 
   msg_queue_client client(t, "/sandbox/scale_up.txt", status);
   // Write data until auto scaling is triggered
@@ -201,8 +201,8 @@ TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][mana
   }
 
   storage_server->stop();
-  if (storage_serve_thread.joinable()) {
-    storage_serve_thread.join();
+  if (storage_serve_thread1.joinable()) {
+    storage_serve_thread1.join();
   }
 
   mgmt_server->stop();
@@ -215,79 +215,3 @@ TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][mana
     dir_serve_thread.join();
   }
 }
-
-/*
-
-#define NUM_BLOCKS 2
-#define HOST "127.0.0.1"
-#define DIRECTORY_SERVICE_PORT 9090
-#define DIRECTORY_LEASE_PORT 9091
-#define STORAGE_SERVICE_PORT 9092
-#define STORAGE_MANAGEMENT_PORT 9093
-#define STORAGE_NOTIFICATION_PORT 9094
-#define STORAGE_CHAIN_PORT 9095
-#define LEASE_PERIOD_MS 100
-#define LEASE_PERIOD_US (LEASE_PERIOD_MS * 1000)
-
-TEST_CASE("jiffy_client_create_test", "[put][get][update][remove]") {
-  auto alloc = std::make_shared<sequential_block_allocator>();
-  auto block_names = test_utils::init_block_names(NUM_BLOCKS,
-                                                  STORAGE_SERVICE_PORT,
-                                                  STORAGE_MANAGEMENT_PORT);
-  alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_msg_queue_blocks(block_names, 512, 0 ,0.7);
-  auto sm = std::make_shared<storage_manager>();
-  auto tree = std::make_shared<directory_tree>(alloc, sm);
-
-  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
-  std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
-
-  auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
-  std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
-
-  auto dir_server = directory_server::create(tree, HOST, DIRECTORY_SERVICE_PORT);
-  std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
-
-  auto lease_server = lease_server::create(tree, LEASE_PERIOD_MS, HOST, DIRECTORY_LEASE_PORT);
-  std::thread lease_serve_thread([&lease_server] { lease_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, DIRECTORY_LEASE_PORT);
-
-  lease_expiry_worker lmgr(tree, LEASE_PERIOD_MS, LEASE_PERIOD_MS);
-  lmgr.start();
-
-  //sync_worker syncer(tree, 1000);
-  //syncer.start();
-
-  {
-    jiffy_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-    auto table = client.open_or_create_msg_queue("/a/file.txt", "/tmp");
-    REQUIRE(client.fs()->exists("/a/file.txt"));
-    for (std::size_t i = 0; i < 20; ++i) {
-      REQUIRE_NOTHROW(table->send(std::to_string(i)));
-    }
-  }
-
-  storage_server->stop();
-  if (storage_serve_thread.joinable()) {
-    storage_serve_thread.join();
-  }
-
-  mgmt_server->stop();
-  if (mgmt_serve_thread.joinable()) {
-    mgmt_serve_thread.join();
-  }
-
-  dir_server->stop();
-  if (dir_serve_thread.joinable()) {
-    dir_serve_thread.join();
-  }
-
-  lease_server->stop();
-  if (lease_serve_thread.joinable()) {
-    lease_serve_thread.join();
-  }
-}
-*/

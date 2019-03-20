@@ -405,7 +405,7 @@ class hash_table_partition : public chain_module {
    * @param new_metadata New partition metadata
    */
 
-  std::string update_partition(const std::string& new_name, const std::string& new_metadata);
+  std::string update_partition(const std::string &new_name, const std::string &new_metadata);
 
   /**
    * @brief Update partition in locked hash table
@@ -413,7 +413,7 @@ class hash_table_partition : public chain_module {
    * @param new_metadata New partition metadata
    */
 
-  std::string locked_update_partition(const std::string& new_name, const std::string& new_metadata);
+  std::string locked_update_partition(const std::string &new_name, const std::string &new_metadata);
 
   /**
    * @brief Fetch storage size
@@ -439,7 +439,6 @@ class hash_table_partition : public chain_module {
    * @return Partition metadata
    */
   std::string locked_get_metadata();
-
 
   /**
    * @brief Run particular command on key value block

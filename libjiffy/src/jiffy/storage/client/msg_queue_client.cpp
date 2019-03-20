@@ -34,7 +34,6 @@ std::string msg_queue_client::send(const std::string &msg) {
   bool redo;
   do {
     try {
-      LOG(log_level::info) << "running send on partition " << block_id(msg_queue_cmd_id::mq_send);
       _return = blocks_[block_id(msg_queue_cmd_id::mq_send)]->run_command(msg_queue_cmd_id::mq_send, args).front();
       handle_redirect(msg_queue_cmd_id::mq_send, args, _return);
       redo = false;
@@ -117,7 +116,6 @@ void msg_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::st
       auto parts = string_utils::split(response, '!');
       auto chain = list_t(parts.begin() + 2, parts.end());
       blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, directory::replica_chain(chain), 0));
-      LOG(log_level::info) << "Increasing send partition number under";
       send_partition_++;
       response = blocks_[block_id(static_cast<msg_queue_cmd_id >(cmd_id))]->run_command(cmd_id, args).front();
     } while (response.substr(0, 5) == "!full");
@@ -127,9 +125,7 @@ void msg_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::st
     do {
       auto parts = string_utils::split(response, '!');
       auto chain = list_t(parts.begin() + 2, parts.end());
-      LOG(log_level::info) << "Adding next replica chain client for the read";
       blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, directory::replica_chain(chain)));
-      LOG(log_level::info) << "Next read replica chain client successfully added";
       read_partition_++;
       read_offset_ = 0;
       std::vector<std::string> modified_args;
@@ -160,7 +156,7 @@ void msg_queue_client::handle_redirects(int32_t cmd_id,
         auto parts = string_utils::split(response, '!');
         auto chain = list_t(parts.begin() + 2, parts.end());
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, directory::replica_chain(chain), 0));
-        if(!send_flag_all || !send_flag) {
+        if (!send_flag_all || !send_flag) {
           send_partition_++;
         }
         send_flag = false;
@@ -175,10 +171,10 @@ void msg_queue_client::handle_redirects(int32_t cmd_id,
         auto parts = string_utils::split(response, '!');
         auto chain = list_t(parts.begin() + 2, parts.end());
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, directory::replica_chain(chain), 0));
-        if(!read_flag_all || !read_flag) {
+        if (!read_flag_all || !read_flag) {
           read_partition_++;
           auto old_value = std::stoi(op_args.front());
-          for(auto it = modified_args.begin() + i; it != modified_args.end(); it++) {
+          for (auto it = modified_args.begin() + i; it != modified_args.end(); it++) {
             *it = std::to_string(std::stoi(*it) - old_value);
           }
           op_args.clear();

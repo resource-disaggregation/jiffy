@@ -227,23 +227,17 @@ replica_chain ds_file_node::add_data_block(const std::string &path,
                                            const std::shared_ptr<storage::storage_management_ops> &storage,
                                            const std::shared_ptr<block_allocator> &allocator) {
   using namespace utils;
-  LOG(log_level::info) << "look here 0";
   std::unique_lock<std::shared_mutex> lock(mtx_);
   replica_chain chain(allocator->allocate(static_cast<size_t>(dstatus_.chain_length()), {}), storage_mode::in_memory);
-  LOG(log_level::info) << "allocator should be working";
   chain.name = partition_name;
   chain.metadata = partition_metadata;
   assert(chain.block_ids.size() == chain_length);
   dstatus_.add_data_block(chain);
   using namespace storage;
-  LOG(log_level::info) << "look here 1";
   if (dstatus_.chain_length() == 1) {
-    LOG(log_level::info) << "look here 2";
     storage->create_partition(chain.block_ids[0], dstatus_.type(), chain.name, chain.metadata, dstatus_.get_tags());
     storage->setup_chain(chain.block_ids[0], path, chain.block_ids, chain_role::singleton, "nil");
-    LOG(log_level::info) << "look here 3";
   } else {
-    LOG(log_level::info) << "look here 4";
     for (size_t j = 0; j < dstatus_.chain_length(); ++j) {
       std::string block_id = chain.block_ids[j];
       std::string next_block_id = (j == dstatus_.chain_length() - 1) ? "nil" : chain.block_ids[j + 1];
@@ -251,7 +245,6 @@ replica_chain ds_file_node::add_data_block(const std::string &path,
           role = (j == 0) ? chain_role::head : (j == dstatus_.chain_length() - 1) ? chain_role::tail : chain_role::mid;
       storage->create_partition(block_id, dstatus_.type(), chain.name, chain.metadata, dstatus_.get_tags());
       storage->setup_chain(block_id, path, chain.block_ids, role, next_block_id);
-      LOG(log_level::info) << "look here 5";
     }
   }
   return chain;

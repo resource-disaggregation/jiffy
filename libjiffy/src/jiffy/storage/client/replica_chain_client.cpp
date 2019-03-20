@@ -16,9 +16,7 @@ replica_chain_client::replica_chain_client(std::shared_ptr<directory::directory_
                                            int timeout_ms) : fs_(fs), path_(path), in_flight_(false) {
   seq_.client_id = -1;
   seq_.client_seq_no = 0;
-  LOG(log_level::info) << "Connecting to the client";
   connect(chain, timeout_ms);
-  LOG(log_level::info) << "Replica chain client connected";
   for (auto &op: KV_OPS) {
     cmd_client_.push_back(op.type == command_type::accessor ? &tail_ : &head_);
   }
@@ -41,22 +39,15 @@ void replica_chain_client::connect(const directory::replica_chain &chain, int ti
   chain_ = chain;
   timeout_ms_ = timeout_ms;
   auto h = block_id_parser::parse(chain_.block_ids.front());
-  LOG(log_level::info) << "connecting to the client 2";
   head_.connect(h.host, h.service_port, h.id, timeout_ms);
-  LOG(log_level::info) << "connecting to the client 3";
   seq_.client_id = head_.get_client_id();
-  LOG(log_level::info) << "connecting to the client 4";
   if (chain_.block_ids.size() == 1) {
     tail_ = head_;
   } else {
     auto t = block_id_parser::parse(chain_.block_ids.back());
-    LOG(log_level::info) << "connecting to the client 5";
     tail_.connect(t.host, t.service_port, t.id, timeout_ms);
-    LOG(log_level::info) << "connecting to the client 6";
   }
-  LOG(log_level::info) << "connecting to the client 7";
   response_reader_ = tail_.get_command_response_reader(seq_.client_id);
-  LOG(log_level::info) << "connecting to the client 8";
   in_flight_ = false;
 }
 

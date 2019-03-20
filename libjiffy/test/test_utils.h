@@ -94,15 +94,12 @@ class sequential_block_allocator : public jiffy::directory::block_allocator {
   virtual ~sequential_block_allocator() = default;
 
   std::vector<std::string> allocate(std::size_t count, const std::vector<std::string> &) override {
-    LOG(log_level::info) << "Into allocate function";
     std::vector<std::string> allocated;
-    LOG(log_level::info) << "Free blocks: " << free_.size() << " need to allocate: " << count;
     for (std::size_t i = 0; i < count; i++) {
       allocated.push_back(free_.front());
       alloc_.push_back(free_.front());
       free_.erase(free_.begin());
     }
-    LOG(log_level::info) << "exit allocate function";
     return allocated;
   }
   void free(const std::vector<std::string> &block_names) override {
@@ -113,7 +110,6 @@ class sequential_block_allocator : public jiffy::directory::block_allocator {
   }
   void add_blocks(const std::vector<std::string> &block_names) override {
     free_.insert(free_.end(), block_names.begin(), block_names.end());
-    LOG(log_level::info) << "adding " << free_.size() << "blocks";
   }
   void remove_blocks(const std::vector<std::string> &block_names) override {
     for (const auto &block_name: block_names) {

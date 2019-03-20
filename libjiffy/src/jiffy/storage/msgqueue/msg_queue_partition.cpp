@@ -22,7 +22,6 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
     : chain_module(manager, name, metadata, MSG_QUEUE_OPS),
       partition_(build_allocator<msg_type>()),
       overload_(false),
-      full_(false),
       dirty_(false),
       directory_host_(directory_host),
       directory_port_(directory_port) {
@@ -37,17 +36,11 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
   threshold_hi_ = conf.get_as<double>("msgqueue.capacity_threshold_hi", 0.95);
   threshold_lo_ = conf.get_as<double>("msgqueue.capacity_threshold_lo", 0.00);
   auto_scale_ = conf.get_as<bool>("msgqueue.auto_scale", true);
-  LOG(log_level::info) << "Partition name: " << name_;
 }
 
 std::string msg_queue_partition::send(const std::string &message) {
-  LOG(log_level::info) << "sending message: " << message << " full " << full_;
-  LOG(log_level::info) << "partition size is " << partition_.size();
-  LOG(log_level::info) << "partition capacity is " << partition_.capacity();
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-  //bool expected = false;
-  if (storage_size() >=  storage_capacity() && partition_.size() >= partition_.capacity()) {
-    LOG(log_level::info) << "I'm in this loop ";
+  if (storage_size() >= storage_capacity() && partition_.size() >= partition_.capacity()) {
     if (!next_target_str().empty()) {
       return "!full!" + next_target_str();
     } else {
@@ -55,12 +48,10 @@ std::string msg_queue_partition::send(const std::string &message) {
     }
   }
   partition_.push_back(make_binary(message));
-  LOG(log_level::info) << "Message sent: " << message;
   return "!ok";
 }
 
 std::string msg_queue_partition::read(std::string position) {
-  LOG(log_level::info) << "Reading at this position " << position << "with full size" << size();
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   auto pos = std::stoi(position);
   if (pos < 0) throw std::invalid_argument("read position invalid");
@@ -86,17 +77,6 @@ std::string msg_queue_partition::update_partition(const std::string &next) {
 void msg_queue_partition::run_command(std::vector<std::string> &_return,
                                       int32_t cmd_id,
                                       const std::vector<std::string> &args) {
-  /*
-  std::string chain_test;
-  chain_to_string(chain_test);
-  LOG(log_level::info) << "chain is::::" << chain_test;
-  auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
-  LOG(log_level::info) << "host " << directory_host_ << " port " << directory_port_;
-  auto src = std::make_shared<replica_chain_client>(fs, path(), chain());
-  LOG(log_level::info) << "Successfully connect to this current replica chain client";
-*/
-
-  LOG(log_level::info) << "Storage = " << storage_size() << " capacity = " << storage_capacity();
   size_t nargs = args.size();
   switch (cmd_id) {
     case msg_queue_cmd_id::mq_send:
@@ -133,37 +113,17 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
                          << storage_capacity();
     try {
       overload_ = true;
-      LOG(log_level::info) << "Requested new message queue partition";
-      std::string dst_partition_name = std::to_string(std::stoi(name()) + 1);
+      std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
       auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
       LOG(log_level::info) << "host " << directory_host_ << " port " << directory_port_;
-      //TODO will we use the other stuff in replica chain?
       auto dst_replica_chain =
           fs->add_block(path(), dst_partition_name, "regular");
-      LOG(log_level::info) << "New replica chain added";
       next_target(dst_replica_chain.block_ids);
-      std::string chain_test;
-      chain_to_string(chain_test);
-      LOG(log_level::info) << "Trying to connect to current replica chain client path: " << path() << "chain " << chain_test;
       auto path_current = path();
       auto chain_current = chain();
       std::vector<std::string> src_before_args;
       src_before_args.push_back(next_target_str());
-      //std::thread update_worker([fs, path_current,chain_current,src_before_args]() {
-      //  auto src = std::make_shared<replica_chain_client>(fs, path_current, chain_current);
-      //  src->send_command(msg_queue_cmd_id::mq_update_partition, src_before_args);
-      //  src->recv_response();
-      //});
-      //update_worker.join();
-      LOG(log_level::info) << "Trying to connect to the currently replica chain";
-      //auto src = std::make_shared<replica_chain_client>(fs, path(), directory::replica_chain(dst_replica_chain));
-      LOG(log_level::info) << "Replica chain client connected";
       update_partition(src_before_args.front());
-      LOG(log_level::info) << "Sending update partition";
-      //src->send_command(msg_queue_cmd_id::mq_update_partition, src_before_args);
-      LOG(log_level::info) << "Receiving response";
-      //src->recv_response();
-      LOG(log_level::info) << "Finish adding new queue";
     } catch (std::exception &e) {
       overload_ = false;
       LOG(log_level::warn) << "Split slot range failed: " << e.what();
@@ -219,7 +179,6 @@ bool msg_queue_partition::dump(const std::string &path) {
   chain_ = {};
   role_ = singleton;
   overload_ = false;
-  full_ = false;
   dirty_ = false;
   return flushed;
 }
@@ -234,7 +193,7 @@ void msg_queue_partition::forward_all() {
 }
 
 bool msg_queue_partition::overload() {
-  if(storage_size() < storage_capacity())
+  if (storage_size() < storage_capacity())
     return false;
   return partition_.size() > static_cast<size_t>(static_cast<double>(partition_.capacity()) * threshold_hi_);
 }

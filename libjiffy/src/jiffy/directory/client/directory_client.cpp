@@ -28,7 +28,6 @@ void directory_client::connect(const std::string &host, int port) {
   transport_ = std::shared_ptr<TTransport>(new TBufferedTransport(socket_));
   protocol_ = std::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
   client_ = std::make_shared<thrift_client>(protocol_);
-  LOG(log_level::info) << "Attempting to connect to " << host << ":" << port;
   transport_->open();
 }
 
@@ -186,9 +185,7 @@ replica_chain directory_client::add_block(const std::string &path,
                                           const std::string &partition_name,
                                           const std::string &partition_metadata) {
   rpc_replica_chain out;
-  LOG(log_level::info) << "adding block";
   client_->add_data_block(out, path, partition_name, partition_metadata);
-  LOG(log_level::info) << "add block finish";
   return directory_type_conversions::from_rpc(out);
 }
 

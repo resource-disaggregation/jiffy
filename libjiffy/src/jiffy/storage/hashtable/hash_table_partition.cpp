@@ -85,7 +85,7 @@ std::string hash_table_partition::upsert(const std::string &key, const std::stri
     }
     block_.upsert(make_binary(key), [&](value_type &v) {
       v = make_binary(value);
-    }, reinterpret_cast<const uint8_t*>(value.data()), value.length(), binary_allocator_);
+    }, reinterpret_cast<const uint8_t *>(value.data()), value.length(), binary_allocator_);
     return "!ok";
   }
   return "!block_moved";
@@ -616,7 +616,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         LOG(log_level::info) << "Sending " << remove_keys.size() << " split keys to remove";
         src->run_command(hash_table_cmd_id::ht_locked_remove, remove_keys);
         auto ret = src->recv_response();
-        for(const auto &x:ret) {
+        for (const auto &x:ret) {
           LOG(log_level::info) << x;
         }
         LOG(log_level::info) << "Removed " << remove_keys.size() << " split keys";

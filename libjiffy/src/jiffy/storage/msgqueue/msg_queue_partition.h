@@ -162,8 +162,6 @@ class msg_queue_partition : public chain_module {
   /* Atomic bool for partition slot range splitting */
   std::atomic<bool> overload_;
 
-  /* Atomic bool for partition full, no client could write data anymore */
-  std::atomic<bool> full_;
   /* Atomic partition dirty bit */
   std::atomic<bool> dirty_;
 
