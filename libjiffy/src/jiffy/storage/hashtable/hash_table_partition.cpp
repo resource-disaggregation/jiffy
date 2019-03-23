@@ -141,7 +141,7 @@ std::string hash_table_partition::remove(const std::string &key, bool redirect) 
 }
 
 void hash_table_partition::keys(std::vector<std::string> &keys) { // Remove this operation
-  for (const auto &entry: block_) {
+  for (const auto &entry: block_.lock_table()) {
     keys.push_back(to_string(entry.first));
   }
 }
@@ -151,7 +151,7 @@ void hash_table_partition::get_data_in_slot_range(std::vector<std::string> &data
                                                          int32_t slot_end,
                                                          int32_t num_keys) {
   auto n_items = 0;
-  for (const auto &entry: block_) {
+  for (const auto &entry: block_.lock_table()) {
     auto slot = hash_slot::get(entry.first);
     if (slot >= slot_begin && slot <= slot_end) {
       data.push_back(to_string(entry.first));

@@ -288,9 +288,8 @@ TEST_CASE("hash_table_client_locked_ops_test", "[put][update][remove][get]") {
   REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
                                         {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
-  hash_table_client table(tree, "/sandbox/file.txt", status);
+  auto client = std::make_shared<hash_table_client>(tree, "/sandbox/file.txt", status);
   {
-    auto client = table.lock();
     REQUIRE(client->num_keys() == 0);
     for (std::size_t i = 0; i < 1000; ++i) {
       REQUIRE(client->put(std::to_string(i), std::to_string(i)) == "!ok");
@@ -352,9 +351,8 @@ TEST_CASE("hash_table_client_locked_pipelined_ops_test", "[put][update][remove][
   REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
                                         {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
 
-  hash_table_client table(tree, "/sandbox/file.txt", status);
+  auto client = std::make_shared<hash_table_client>(tree, "/sandbox/file.txt", status);
   {
-    auto client = table.lock();
     std::vector<std::string> key_value_batch;
     for (size_t i = 0; i < 1000; i++) {
       key_value_batch.push_back(std::to_string(i));
