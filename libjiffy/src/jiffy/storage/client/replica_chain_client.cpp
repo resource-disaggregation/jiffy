@@ -102,59 +102,8 @@ void replica_chain_client::set_chain_name_metadata(std::string &name, std::strin
   chain_.metadata = metadata;
 }
 
-std::shared_ptr<replica_chain_client::locked_client> replica_chain_client::lock() {
-  return std::make_shared<replica_chain_client::locked_client>(*this);
-}
 bool replica_chain_client::is_connected() const {
   return head_.is_connected() && tail_.is_connected();
-}
-
-replica_chain_client::locked_client::locked_client(replica_chain_client &parent) : parent_(parent) {
-  auto res = parent_.run_command(hash_table_cmd_id::ht_lock, {});
-  if (res[0] != "!ok") {
-    redirecting_ = true;
-    redirect_chain_ = utils::string_utils::split(res[0], '!');
-  } else {
-    redirecting_ = false;
-  }
-}
-
-replica_chain_client::locked_client::~locked_client() {
-  unlock();
-}
-
-void replica_chain_client::locked_client::unlock() {
-  parent_.run_command(hash_table_cmd_id::ht_unlock, {});
-}
-
-const directory::replica_chain &replica_chain_client::locked_client::chain() {
-  return parent_.chain();
-}
-
-bool replica_chain_client::locked_client::redirecting() const {
-  return redirecting_;
-}
-
-const std::vector<std::string> &replica_chain_client::locked_client::redirect_chain() {
-  return redirect_chain_;
-}
-
-void replica_chain_client::locked_client::send_command(int32_t cmd_id, const std::vector<std::string> &args) {
-  parent_.send_command(cmd_id, args);
-}
-
-std::vector<std::string> replica_chain_client::locked_client::recv_response() {
-  return parent_.recv_response();
-}
-
-std::vector<std::string> replica_chain_client::locked_client::run_command(int32_t cmd_id,
-                                                                          const std::vector<std::string> &args) {
-  return parent_.run_command(cmd_id, args);
-}
-
-std::vector<std::string> replica_chain_client::locked_client::run_command_redirected(int32_t cmd_id,
-                                                                                     const std::vector<std::string> &args) {
-  return parent_.run_command_redirected(cmd_id, args);
 }
 
 }
