@@ -5,6 +5,9 @@
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/persistent/persistent_store.h"
 #include "jiffy/storage/partition_manager.h"
+#include <chrono>
+#include <thread>
+
 
 namespace jiffy {
 namespace storage {
@@ -19,7 +22,6 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
                                            const int directory_port)
     : chain_module(manager, name, metadata, KV_OPS),
       block_(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type(), build_allocator<kv_pair_type>()),
-      locked_block_(block_.lock_table()),
       splitting_(false),
       merging_(false),
       dirty_(false),
@@ -27,7 +29,6 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
       import_slot_range_(0, -1),
       directory_host_(directory_host),
       directory_port_(directory_port) {
-  locked_block_.unlock();
   auto ser = conf.get("hashtable.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<binary_serde>(binary_allocator_);
@@ -59,23 +60,6 @@ std::string hash_table_partition::put(const std::string &key, const std::string 
   return "!block_moved";
 }
 
-std::string hash_table_partition::locked_put(const std::string &key, const std::string &value, bool redirect) {
-  if (!is_locked()) {
-    return "!block_not_locked";
-  }
-  auto hash = hash_slot::get(key);
-  if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
-    if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      return "!exporting!" + export_target_str();
-    }
-    if (locked_block_.insert(make_binary(key), make_binary(value)).second) {
-      return "!ok";
-    } else {
-      return "!duplicate_key";
-    }
-  }
-  return "!block_moved";
-}
 
 std::string hash_table_partition::upsert(const std::string &key, const std::string &value, bool redirect) {
   auto hash = hash_slot::get(key);
@@ -86,29 +70,6 @@ std::string hash_table_partition::upsert(const std::string &key, const std::stri
     block_.upsert(make_binary(key), [&](value_type &v) {
       v = make_binary(value);
     }, reinterpret_cast<const uint8_t *>(value.data()), value.length(), binary_allocator_);
-    return "!ok";
-  }
-  return "!block_moved";
-}
-
-std::string hash_table_partition::locked_upsert(const std::string &key, const std::string &value, bool redirect) {
-  if (!is_locked()) {
-    return "!block_not_locked";
-  }
-  auto hash = hash_slot::get(key);
-  if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
-    if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      return "!exporting!" + export_target_str();
-    }
-    locked_hash_table_type::iterator it;
-    auto bkey = make_binary(key);
-    auto bval = make_binary(value);
-    if ((it = locked_block_.find(bkey)) == locked_block_.end()) {
-      locked_block_.insert(bkey, bval);
-      return "!ok";
-    } else {
-      locked_block_[bkey] = bval;
-    }
     return "!ok";
   }
   return "!block_moved";
@@ -143,24 +104,6 @@ std::string hash_table_partition::get(const std::string &key, bool redirect) {
   return "!block_moved";
 }
 
-std::string hash_table_partition::locked_get(const std::string &key, bool redirect) {
-  if (!is_locked()) {
-    return "!block_not_locked";
-  }
-  auto hash = hash_slot::get(key);
-  if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
-    auto it = locked_block_.find(key);
-    if (it != locked_block_.end()) {
-      return to_string(it->second);
-    }
-    if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      return "!exporting!" + export_target_str();
-    }
-    return "!key_not_found";
-  }
-  return "!block_moved";
-}
-
 std::string hash_table_partition::update(const std::string &key, const std::string &value, bool redirect) {
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
@@ -169,27 +112,6 @@ std::string hash_table_partition::update(const std::string &key, const std::stri
       old_val = to_string(v);
       v = make_binary(value);
     })) {
-      return old_val;
-    }
-    if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      return "!exporting!" + export_target_str();
-    }
-    return "!key_not_found";
-  }
-  return "!block_moved";
-}
-
-std::string hash_table_partition::locked_update(const std::string &key, const std::string &value, bool redirect) {
-  if (!is_locked()) {
-    return "!block_not_locked";
-  }
-  auto hash = hash_slot::get(key);
-  if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
-    std::string old_val;
-    auto it = locked_block_.find(key);
-    if (it != locked_block_.end()) {
-      old_val = to_string(it->second);
-      it->second = make_binary(value);
       return old_val;
     }
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
@@ -218,47 +140,18 @@ std::string hash_table_partition::remove(const std::string &key, bool redirect) 
   return "!block_moved";
 }
 
-std::string hash_table_partition::locked_remove(const std::string &key, bool redirect) {
-  if (!is_locked()) {
-    return "!block_not_locked";
-  }
-  auto hash = hash_slot::get(key);
-  if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
-    std::string old_val;
-    auto it = locked_block_.find(key);
-    if (it != locked_block_.end()) {
-      old_val = to_string(it->second);
-      locked_block_.erase(it);
-      return old_val;
-    }
-    if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      return "!exporting!" + export_target_str();
-    }
-    return "!key_not_found";
-  }
-  return "!block_moved";
-}
-
 void hash_table_partition::keys(std::vector<std::string> &keys) { // Remove this operation
-  if (!is_locked()) {
-    keys.emplace_back("!block_not_locked");
-    return;
-  }
-  for (const auto &entry: locked_block_) {
+  for (const auto &entry: block_) {
     keys.push_back(to_string(entry.first));
   }
 }
 
-void hash_table_partition::locked_get_data_in_slot_range(std::vector<std::string> &data,
+void hash_table_partition::get_data_in_slot_range(std::vector<std::string> &data,
                                                          int32_t slot_begin,
                                                          int32_t slot_end,
                                                          int32_t num_keys) {
-  if (!is_locked()) {
-    data.emplace_back("!block_not_locked");
-    return;
-  }
   auto n_items = 0;
-  for (const auto &entry: locked_block_) {
+  for (const auto &entry: block_) {
     auto slot = hash_slot::get(entry.first);
     if (slot >= slot_begin && slot <= slot_end) {
       data.push_back(to_string(entry.first));
@@ -271,18 +164,6 @@ void hash_table_partition::locked_get_data_in_slot_range(std::vector<std::string
   }
 }
 
-std::string hash_table_partition::unlock() {
-  locked_block_.unlock();
-  return "!ok";
-}
-
-std::string hash_table_partition::lock() {
-  locked_block_ = block_.lock_table();
-  if (metadata_ == "exporting") {
-    return "!" + export_target_str();
-  }
-  return "!ok";
-}
 
 std::string hash_table_partition::update_partition(const std::string &new_name, const std::string &new_metadata) {
   name(new_name);
@@ -310,39 +191,12 @@ std::string hash_table_partition::update_partition(const std::string &new_name, 
   return "!ok";
 }
 
-std::string hash_table_partition::locked_update_partition(const std::string &new_name,
-                                                          const std::string &new_metadata) {
-  if (!is_locked()) {
-    return "!block_not_locked";
-  }
-  update(new_name, new_metadata);
-  return "!ok";
-}
-
 std::string hash_table_partition::get_storage_size() {
-  return std::to_string(storage_size());
-}
-
-std::string hash_table_partition::locked_get_storage_size() {
-  if (!is_locked()) {
-    return "!block_not_locked";
-  }
   return std::to_string(storage_size());
 }
 
 std::string hash_table_partition::get_metadata() {
   return metadata();
-}
-
-std::string hash_table_partition::locked_get_metadata() {
-  if (!is_locked()) {
-    return "!block_not_locked";
-  }
-  return metadata();
-}
-
-bool hash_table_partition::is_locked() {
-  return locked_block_.is_active();
 }
 
 void hash_table_partition::run_command(std::vector<std::string> &_return,
@@ -355,10 +209,6 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       for (const std::string &key: args)
         _return.push_back(exists(key, redirect));
       break;
-    case hash_table_cmd_id::ht_locked_get:
-      for (const std::string &key: args)
-        _return.emplace_back(locked_get(key, redirect));
-      break;
     case hash_table_cmd_id::ht_get:
       for (const std::string &key: args)
         _return.emplace_back(get(key, redirect));
@@ -370,30 +220,12 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         _return.emplace_back(std::to_string(size()));
       }
       break;
-    case hash_table_cmd_id::ht_locked_put:
-      if (args.size() % 2 != 0 && !redirect) {
-        _return.emplace_back("!args_error");
-      } else {
-        for (size_t i = 0; i < nargs; i += 2) {
-          _return.emplace_back(locked_put(args[i], args[i + 1], redirect));
-        }
-      }
-      break;
     case hash_table_cmd_id::ht_put:
       if (args.size() % 2 != 0 && !redirect) {
         _return.emplace_back("!args_error");
       } else {
         for (size_t i = 0; i < nargs; i += 2) {
           _return.emplace_back(put(args[i], args[i + 1], redirect));
-        }
-      }
-      break;
-    case hash_table_cmd_id::ht_locked_upsert:
-      if (args.size() % 2 != 0 && !redirect) {
-        _return.emplace_back("!args_error");
-      } else {
-        for (size_t i = 0; i < nargs; i += 2) {
-          _return.emplace_back(locked_upsert(args[i], args[i + 1], redirect));
         }
       }
       break;
@@ -406,23 +238,9 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         }
       }
       break;
-    case hash_table_cmd_id::ht_locked_remove:
-      for (const std::string &key: args) {
-        _return.emplace_back(locked_remove(key, redirect));
-      }
-      break;
     case hash_table_cmd_id::ht_remove:
       for (const std::string &key: args) {
         _return.emplace_back(remove(key, redirect));
-      }
-      break;
-    case hash_table_cmd_id::ht_locked_update:
-      if (args.size() % 2 != 0 && !redirect) {
-        _return.emplace_back("!args_error");
-      } else {
-        for (size_t i = 0; i < nargs; i += 2) {
-          _return.emplace_back(locked_update(args[i], args[i + 1], redirect));
-        }
       }
       break;
     case hash_table_cmd_id::ht_update:
@@ -441,25 +259,11 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         keys(_return);
       }
       break;
-    case hash_table_cmd_id::ht_lock:
-      if (nargs != 0) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(lock());
-      }
-      break;
-    case hash_table_cmd_id::ht_unlock:
-      if (nargs != 0) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(unlock());
-      }
-      break;
-    case hash_table_cmd_id::ht_locked_data_in_slot_range:
+    case hash_table_cmd_id::ht_data_in_slot_range:
       if (nargs != 3) {
         _return.emplace_back("!args_error");
       } else {
-        locked_get_data_in_slot_range(_return, std::stoi(args[0]), std::stoi(args[1]), std::stoi(args[2]));
+        get_data_in_slot_range(_return, std::stoi(args[0]), std::stoi(args[1]), std::stoi(args[2]));
       }
       break;
     case hash_table_cmd_id::ht_update_partition:
@@ -469,25 +273,11 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         _return.emplace_back(update_partition(args[0], args[1]));
       }
       break;
-    case hash_table_cmd_id::ht_locked_update_partition:
-      if (nargs != 2) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(locked_update_partition(args[0], args[1]));
-      }
-      break;
     case hash_table_cmd_id::ht_get_storage_size:
       if (nargs != 0) {
         _return.emplace_back("!args_error");
       } else {
         _return.emplace_back(get_storage_size());
-      }
-      break;
-    case hash_table_cmd_id::ht_locked_get_storage_size:
-      if (nargs != 0) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(locked_get_storage_size());
       }
       break;
     case hash_table_cmd_id::ht_get_metadata:
@@ -497,13 +287,6 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         _return.emplace_back(get_metadata());
       }
       break;
-    case hash_table_cmd_id::ht_locked_get_metadata:
-      if (nargs != 0) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(locked_get_metadata());
-      }
-      break;
     default:throw std::invalid_argument("No such operation id " + std::to_string(cmd_id));
   }
   if (is_mutator(cmd_id)) {
@@ -511,7 +294,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
   }
   bool expected = false;
   if (auto_scale_.load() && is_mutator(cmd_id) && overload() && metadata_ != "exporting"
-      && metadata_ != "importing" && is_tail() && !is_locked()
+      && metadata_ != "importing" && is_tail()
       && splitting_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
     LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
@@ -531,128 +314,103 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
           fs->add_block(path(), dst_partition_name, "importing");
 
       LOG(log_level::info) << "Look here!!!!!!!";
-
+      //forward_all();
       // TODO check if add_block succeed, might not be enough capacity in extreme situation
-      auto src = std::make_shared<replica_chain_client>(fs, path(), chain());
-      auto dst = std::make_shared<replica_chain_client>(fs, path(), dst_replica_chain);
-
       std::string src_partition_name = std::to_string(slot_range_.first) + "_" + std::to_string(split_range_begin);
       set_exporting(dst_replica_chain.block_ids,
                     split_range_begin,
                     split_range_end);
-
       std::vector<std::string> src_before_args;
       std::vector<std::string> dst_before_args;
       src_before_args.push_back(name());
       src_before_args.emplace_back("exporting$" + dst_partition_name + "$" + export_target_str());
       dst_before_args.push_back(dst_partition_name);
       dst_before_args.emplace_back("importing$" + dst_partition_name);
-      src->send_command(hash_table_cmd_id::ht_update_partition, src_before_args);
-      dst->send_command(hash_table_cmd_id::ht_update_partition, dst_before_args);
-      src->recv_response();
-      dst->recv_response();
-      LOG(log_level::info) << "Look here 1";
-      bool has_more = true;
-      std::size_t split_batch_size = 1024;
-      std::size_t tot_split_keys = 0;
-      while (has_more) {
-        // Lock source and destination blocks
-        if (role() == chain_role::singleton) {
-          dst->send_command(hash_table_cmd_id::ht_lock, {});
-          lock();
-          dst->recv_response();
-        } else {
-          src->send_command(hash_table_cmd_id::ht_lock, {});
-          dst->send_command(hash_table_cmd_id::ht_lock, {});
-          src->recv_response();
-          dst->recv_response();
-        }
-        // Read data to split
-        std::vector<std::string> split_data;
-        locked_get_data_in_slot_range(split_data,
-                                      split_range_begin,
-                                      split_range_end,
-                                      static_cast<int32_t>(split_batch_size));
-        if (split_data.empty()) {
-          if (role() == chain_role::singleton) {
-            dst->send_command(hash_table_cmd_id::ht_unlock, {});
-            unlock();
-            dst->recv_response();
-          } else {
-            src->send_command(hash_table_cmd_id::ht_unlock, {});
-            dst->send_command(hash_table_cmd_id::ht_unlock, {});
-            src->recv_response();
-            dst->recv_response();
-          }
-          break;
-        } else if (split_data.size() < split_batch_size) {
-          has_more = false;
-        }
+      LOG(log_level::info) << "sending command to update the partition";
 
-        LOG(log_level::info) << "Look here 2";
-        auto split_keys = split_data.size() / 2;
-        tot_split_keys += split_keys;
-        LOG(log_level::info) << "Read " << split_keys << " keys to split";
+      std::thread([&]() {
+        LOG(log_level::info) << "start connecting src";
+        auto src = std::make_shared<replica_chain_client>(fs, path(), chain());
+        LOG(log_level::info) << "Look here!!!!!!! 3";
+        src->send_command(hash_table_cmd_id::ht_update_partition, src_before_args);
+        src->recv_response();
 
-        // Add redirected argument so that importing chain does not ignore our request
-        split_data.emplace_back("!redirected");
-
-        // Write data to dst partition
-        dst->run_command(hash_table_cmd_id::ht_locked_put, split_data);
+        auto dst = std::make_shared<replica_chain_client>(fs, path(), dst_replica_chain);
+        LOG(log_level::info) << "Look here!!!!!!! 4";
+        dst->send_command(hash_table_cmd_id::ht_update_partition, dst_before_args);
         dst->recv_response();
-        LOG(log_level::info) << "Sent " << split_keys << " keys";
-
-        // Remove data from src partition
-        std::vector<std::string> remove_keys;
-        split_data.pop_back(); // Remove !redirected argument
-        std::size_t n_split_items = split_data.size();
-        for (std::size_t i = 0; i < n_split_items; i++) {
-          if (i % 2) {
-            remove_keys.push_back(split_data.back());
+        LOG(log_level::info) << "Look here 1";
+        bool has_more = true;
+        std::size_t split_batch_size = 1024;
+        std::size_t tot_split_keys = 0;
+        while (has_more) {
+          // Read data to split
+          std::vector<std::string> split_data;
+          get_data_in_slot_range(split_data,
+                                        split_range_begin,
+                                        split_range_end,
+                                        static_cast<int32_t>(split_batch_size));
+          if (split_data.empty()) {
+            break;
+          } else if (split_data.size() < split_batch_size) {
+            has_more = false;
           }
-          split_data.pop_back();
-        }
-        assert(remove_keys.size() == split_keys);
-        LOG(log_level::info) << "Sending " << remove_keys.size() << " split keys to remove";
-        src->run_command(hash_table_cmd_id::ht_locked_remove, remove_keys);
-        auto ret = src->recv_response();
-        for (const auto &x:ret) {
-          LOG(log_level::info) << x;
-        }
-        LOG(log_level::info) << "Removed " << remove_keys.size() << " split keys";
 
-        // Unlock source and destination blocks
-        if (role() == chain_role::singleton) {
-          dst->send_command(hash_table_cmd_id::ht_unlock, {});
-          unlock();
-          dst->recv_response();
-        } else {
-          src->send_command(hash_table_cmd_id::ht_unlock, {});
-          dst->send_command(hash_table_cmd_id::ht_unlock, {});
-          src->recv_response();
-          dst->recv_response();
-        }
-      }
-      // Finalize slot range split
-      LOG(log_level::info) << "Look here 3";
-      // Update directory mapping
-      std::string old_name = name();
-      fs->update_partition(path(), old_name, src_partition_name, "regular");
+          LOG(log_level::info) << "Look here 2";
+          auto split_keys = split_data.size() / 2;
+          tot_split_keys += split_keys;
+          LOG(log_level::info) << "Read " << split_keys << " keys to split";
 
-      //Setting name and metadata for src and dst
-      std::vector<std::string> src_after_args;
-      std::vector<std::string> dst_after_args;
-      src_after_args.push_back(src_partition_name);
-      src_after_args.emplace_back("regular");
-      dst_after_args.push_back(dst_partition_name);
-      dst_after_args.emplace_back("regular");
-      src->send_command(hash_table_cmd_id::ht_update_partition, src_after_args);
-      dst->send_command(hash_table_cmd_id::ht_update_partition, dst_after_args);
-      src->recv_response();
-      dst->recv_response();
-      LOG(log_level::info) << "Exported slot range (" << split_range_begin << ", " << split_range_end << ")";
-      splitting_ = false;
-      merging_ = false;
+          // Add redirected argument so that importing chain does not ignore our request
+          split_data.emplace_back("!redirected");
+
+          // Write data to dst partition
+          dst->run_command(hash_table_cmd_id::ht_put, split_data);
+          dst->recv_response();
+          LOG(log_level::info) << "Sent " << split_keys << " keys";
+
+          // Remove data from src partition
+          std::vector<std::string> remove_keys;
+          split_data.pop_back(); // Remove !redirected argument
+          std::size_t n_split_items = split_data.size();
+          for (std::size_t i = 0; i < n_split_items; i++) {
+            if (i % 2) {
+              remove_keys.push_back(split_data.back());
+            }
+            split_data.pop_back();
+          }
+          assert(remove_keys.size() == split_keys);
+          LOG(log_level::info) << "Sending " << remove_keys.size() << " split keys to remove";
+          src->run_command(hash_table_cmd_id::ht_remove, remove_keys);
+          auto ret = src->recv_response();
+          for (const auto &x:ret) {
+            LOG(log_level::info) << x;
+          }
+          LOG(log_level::info) << "Removed " << remove_keys.size() << " split keys";
+        }
+        // Finalize slot range split
+        LOG(log_level::info) << "Look here 3";
+        // Update directory mapping
+        std::string old_name = name();
+        fs->update_partition(path(), old_name, src_partition_name, "regular");
+
+        //Setting name and metadata for src and dst
+        std::vector<std::string> src_after_args;
+        std::vector<std::string> dst_after_args;
+        src_after_args.push_back(src_partition_name);
+        src_after_args.emplace_back("regular");
+        dst_after_args.push_back(dst_partition_name);
+        dst_after_args.emplace_back("regular");
+        src->send_command(hash_table_cmd_id::ht_update_partition, src_after_args);
+        dst->send_command(hash_table_cmd_id::ht_update_partition, dst_after_args);
+        src->recv_response();
+        dst->recv_response();
+
+        //std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        LOG(log_level::info) << "Exported slot range (" << split_range_begin << ", " << split_range_end << ")";
+        splitting_ = false;
+        merging_ = false;
+      }).detach();
 
     } catch (std::exception &e) {
       splitting_ = false;
@@ -663,7 +421,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
   expected = false;
   if (auto_scale_.load() && cmd_id == hash_table_cmd_id::ht_remove && underload()
       && metadata_ != "exporting"
-      && metadata_ != "importing" && slot_end() != hash_slot::MAX && is_tail() && !is_locked()
+      && metadata_ != "importing" && slot_end() != hash_slot::MAX && is_tail()
       && merging_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
     LOG(log_level::info) << "Underloaded partition; storage = " << storage_size() << " capacity = "
@@ -732,34 +490,13 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       std::size_t merge_batch_size = 1024;
       std::size_t tot_merge_keys = 0;
       while (has_more) {
-        // Lock source and destination blocks
-        if (role() == chain_role::singleton) {
-          dst->send_command(hash_table_cmd_id::ht_lock, {});
-          lock();
-          dst->recv_response();
-        } else {
-          src->send_command(hash_table_cmd_id::ht_lock, {});
-          dst->send_command(hash_table_cmd_id::ht_lock, {});
-          src->recv_response();
-          dst->recv_response();
-        }
         // Read data to merge
         std::vector<std::string> merge_data;
-        locked_get_data_in_slot_range(merge_data,
+        get_data_in_slot_range(merge_data,
                                       merge_range_begin,
                                       merge_range_end,
                                       static_cast<int32_t>(merge_batch_size));
         if (merge_data.empty()) {
-          if (role() == chain_role::singleton) {
-            dst->send_command(hash_table_cmd_id::ht_unlock, {});
-            unlock();
-            dst->recv_response();
-          } else {
-            src->send_command(hash_table_cmd_id::ht_unlock, {});
-            dst->send_command(hash_table_cmd_id::ht_unlock, {});
-            src->recv_response();
-            dst->recv_response();
-          }
           break;
         } else if (merge_data.size() < merge_batch_size) {
           has_more = false;
@@ -773,7 +510,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         merge_data.emplace_back("!redirected");
 
         // Write data to dst partition
-        dst->run_command(hash_table_cmd_id::ht_locked_put, merge_data);
+        dst->run_command(hash_table_cmd_id::ht_put, merge_data);
         LOG(log_level::trace) << "Sent " << merge_keys << " keys";
 
         // Remove data from src partition
@@ -787,24 +524,11 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
           merge_data.pop_back();
         }
         assert(remove_keys.size() == merge_keys);
-        src->run_command(hash_table_cmd_id::ht_locked_remove, remove_keys);
+        src->run_command(hash_table_cmd_id::ht_remove, remove_keys);
         LOG(log_level::trace) << "Removed " << remove_keys.size() << " merged keys";
-
-        // Unlock source and destination blocks
-        if (role() == chain_role::singleton) {
-          dst->send_command(hash_table_cmd_id::ht_unlock, {});
-          unlock();
-          dst->recv_response();
-        } else {
-          src->send_command(hash_table_cmd_id::ht_unlock, {});
-          dst->send_command(hash_table_cmd_id::ht_unlock, {});
-          src->recv_response();
-          dst->recv_response();
-        }
       }
 
       // Finalize slot range split
-
       // Update directory mapping
       fs->update_partition(path(), merge_target.name, dst_partition_name, "regular");
 
@@ -892,9 +616,12 @@ bool hash_table_partition::dump(const std::string &path) {
 void hash_table_partition::forward_all() {
   locked_hash_table_type ltable = block_.lock_table();
   int64_t i = 0;
+  LOG(log_level::info) << "In forward all function";
   for (const auto &entry: ltable) {
     std::vector<std::string> result;
+    LOG(log_level::info) << "Running put one next partition";
     run_command_on_next(result, hash_table_cmd_id::ht_put, {to_string(entry.first), to_string(entry.second)});
+    LOG(log_level::info) << "Successfully put";
     ++i;
   }
   ltable.unlock();
@@ -915,35 +642,13 @@ void hash_table_partition::export_slots() {
   bool has_more = true;
   while (has_more) {
     // Lock source and destination blocks
-    if (role() == chain_role::singleton) {
-      dst.send_command(hash_table_cmd_id::ht_lock, {});
-      lock();
-      dst.recv_response();
-    } else {
-      src.send_command(hash_table_cmd_id::ht_lock, {});
-      dst.send_command(hash_table_cmd_id::ht_lock, {});
-      src.recv_response();
-      dst.recv_response();
-    }
-
     // Read data to export
     std::vector<std::string> export_data;
-    locked_get_data_in_slot_range(export_data,
+    get_data_in_slot_range(export_data,
                                   exp_range.first,
                                   exp_range.second,
                                   static_cast<int32_t>(export_batch_size));
     if (export_data.empty()) {  // No more data to export
-      // Unlock source and destination blocks
-      if (role() == chain_role::singleton) {
-        dst.send_command(hash_table_cmd_id::ht_unlock, {});
-        unlock();
-        dst.recv_response();
-      } else {
-        src.send_command(hash_table_cmd_id::ht_unlock, {});
-        dst.send_command(hash_table_cmd_id::ht_unlock, {});
-        src.recv_response();
-        dst.recv_response();
-      }
       break;
     } else if (export_data.size() < export_batch_size) {  // No more data to export in next iteration
       has_more = false;
@@ -956,7 +661,7 @@ void hash_table_partition::export_slots() {
     export_data.emplace_back("!redirected");
 
     // Write data to dst partition
-    dst.run_command(hash_table_cmd_id::ht_locked_put, export_data);
+    dst.run_command(hash_table_cmd_id::ht_put, export_data);
     LOG(log_level::trace) << "Sent " << next_port_keys << " keys";
 
     // Remove data from src partition
@@ -970,20 +675,8 @@ void hash_table_partition::export_slots() {
       export_data.pop_back();
     }
     assert(remove_keys.size() == next_port_keys);
-    src.run_command(hash_table_cmd_id::ht_locked_remove, remove_keys);
+    src.run_command(hash_table_cmd_id::ht_remove, remove_keys);
     LOG(log_level::trace) << "Removed " << remove_keys.size() << " exported keys";
-
-    // Unlock source and destination blocks
-    if (role() == chain_role::singleton) {
-      dst.send_command(hash_table_cmd_id::ht_unlock, {});
-      unlock();
-      dst.recv_response();
-    } else {
-      src.send_command(hash_table_cmd_id::ht_unlock, {});
-      dst.send_command(hash_table_cmd_id::ht_unlock, {});
-      src.recv_response();
-      dst.recv_response();
-    }
   }
 
   LOG(log_level::info) << "Exported slot range (" << exp_range.first << ", " << exp_range.second << ")";
