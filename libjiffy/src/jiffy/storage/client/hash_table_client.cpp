@@ -43,6 +43,7 @@ std::string hash_table_client::put(const std::string &key, const std::string &va
       redo = true;
     }
   } while (redo);
+  LOG(log_level::info) << "Ready to return from put";
   return _return;
 }
 
@@ -213,6 +214,7 @@ std::vector<std::string> hash_table_client::batch_command(const hash_table_cmd_i
 
 void hash_table_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
   if (response.substr(0, 10) == "!exporting") {
+    LOG(log_level::info) << "exporting redirect";
     typedef std::vector<std::string> list_t;
     do {
       auto parts = string_utils::split(response, '!');

@@ -53,6 +53,15 @@ class hash_table_partition : public chain_module {
     slot_range_.first = slot_begin;
     slot_range_.second = slot_end;
   }
+  /**
+   * @brief Set slot range based on the partition name
+   * @param new_name New partition name
+   */
+  void slot_range(const std::string &new_name) {
+    auto slots = utils::string_utils::split(new_name, '_', 2);
+    slot_range_.first = std::stoi(slots[0]);
+    slot_range_.second = std::stoi(slots[1]);
+  }
 
   /**
    * @brief Fetch slot range

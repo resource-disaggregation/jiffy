@@ -8,7 +8,6 @@
 #include <chrono>
 #include <thread>
 
-
 namespace jiffy {
 namespace storage {
 
@@ -47,10 +46,23 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
 
 std::string hash_table_partition::put(const std::string &key, const std::string &value, bool redirect) {
   auto hash = hash_slot::get(key);
+  LOG(log_level::info) << "Putting key: " << key << " Value: " << value << " Hash: " << hash <<" On partition: " << name();
+  if(key == "408")
+    LOG(log_level::info) << "Found you 1!!";
+  if(key == "409")
+    LOG(log_level::info) << "Found you 1!!";
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
+    if(key == "408")
+      LOG(log_level::info) << "Found you 2!!";
+    if(key == "409")
+      LOG(log_level::info) << "Found you 2!!";
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
     }
+    if(key == "408")
+      LOG(log_level::info) << "Found you!!";
+    if(key == "409")
+      LOG(log_level::info) << "Found you!!";
     if (block_.insert(make_binary(key), make_binary(value))) {
       return "!ok";
     } else {
@@ -59,7 +71,6 @@ std::string hash_table_partition::put(const std::string &key, const std::string 
   }
   return "!block_moved";
 }
-
 
 std::string hash_table_partition::upsert(const std::string &key, const std::string &value, bool redirect) {
   auto hash = hash_slot::get(key);
@@ -147,9 +158,9 @@ void hash_table_partition::keys(std::vector<std::string> &keys) { // Remove this
 }
 
 void hash_table_partition::get_data_in_slot_range(std::vector<std::string> &data,
-                                                         int32_t slot_begin,
-                                                         int32_t slot_end,
-                                                         int32_t num_keys) {
+                                                  int32_t slot_begin,
+                                                  int32_t slot_end,
+                                                  int32_t num_keys) {
   auto n_items = 0;
   for (const auto &entry: block_.lock_table()) {
     auto slot = hash_slot::get(entry.first);
@@ -164,8 +175,8 @@ void hash_table_partition::get_data_in_slot_range(std::vector<std::string> &data
   }
 }
 
-
 std::string hash_table_partition::update_partition(const std::string &new_name, const std::string &new_metadata) {
+  LOG(log_level::info) << "Updating partition of " << name() << " to be " << new_name << new_metadata;
   name(new_name);
   auto s = utils::string_utils::split(new_metadata, '$');
   std::string status = s.front();
@@ -188,6 +199,8 @@ std::string hash_table_partition::update_partition(const std::string &new_name, 
     import_slot_range(0, -1);
   }
   metadata(status);
+  slot_range(new_name);
+  LOG(log_level::info) << "Partition updated";
   return "!ok";
 }
 
@@ -326,20 +339,17 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       src_before_args.emplace_back("exporting$" + dst_partition_name + "$" + export_target_str());
       dst_before_args.push_back(dst_partition_name);
       dst_before_args.emplace_back("importing$" + dst_partition_name);
-      LOG(log_level::info) << "sending command to update the partition";
-
-      std::thread([&]() {
-        LOG(log_level::info) << "start connecting src";
+      LOG(log_level::info) << "src before argument is";
+      for(const auto &x:src_before_args)
+        LOG(log_level::info) << x;
+      std::thread([=]() {
         auto src = std::make_shared<replica_chain_client>(fs, path(), chain());
-        LOG(log_level::info) << "Look here!!!!!!! 3";
         src->send_command(hash_table_cmd_id::ht_update_partition, src_before_args);
         src->recv_response();
-
         auto dst = std::make_shared<replica_chain_client>(fs, path(), dst_replica_chain);
-        LOG(log_level::info) << "Look here!!!!!!! 4";
         dst->send_command(hash_table_cmd_id::ht_update_partition, dst_before_args);
         dst->recv_response();
-        LOG(log_level::info) << "Look here 1";
+        LOG(log_level::info) << "Dst replica chain successfully updated";
         bool has_more = true;
         std::size_t split_batch_size = 1024;
         std::size_t tot_split_keys = 0;
@@ -347,9 +357,9 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
           // Read data to split
           std::vector<std::string> split_data;
           get_data_in_slot_range(split_data,
-                                        split_range_begin,
-                                        split_range_end,
-                                        static_cast<int32_t>(split_batch_size));
+                                 split_range_begin,
+                                 split_range_end,
+                                 static_cast<int32_t>(split_batch_size));
           if (split_data.empty()) {
             break;
           } else if (split_data.size() < split_batch_size) {
@@ -365,7 +375,9 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
           split_data.emplace_back("!redirected");
 
           // Write data to dst partition
-          dst->run_command(hash_table_cmd_id::ht_put, split_data);
+          LOG(log_level::info) << "Sending keys to dst ";
+          dst->send_command(hash_table_cmd_id::ht_put, split_data);
+          LOG(log_level::info) << "Finish sending ";
           dst->recv_response();
           LOG(log_level::info) << "Sent " << split_keys << " keys";
 
@@ -381,7 +393,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
           }
           assert(remove_keys.size() == split_keys);
           LOG(log_level::info) << "Sending " << remove_keys.size() << " split keys to remove";
-          src->run_command(hash_table_cmd_id::ht_remove, remove_keys);
+          src->send_command(hash_table_cmd_id::ht_remove, remove_keys);
           auto ret = src->recv_response();
           for (const auto &x:ret) {
             LOG(log_level::info) << x;
@@ -402,11 +414,9 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         dst_after_args.push_back(dst_partition_name);
         dst_after_args.emplace_back("regular");
         src->send_command(hash_table_cmd_id::ht_update_partition, src_after_args);
-        dst->send_command(hash_table_cmd_id::ht_update_partition, dst_after_args);
         src->recv_response();
+        dst->send_command(hash_table_cmd_id::ht_update_partition, dst_after_args);
         dst->recv_response();
-
-        //std::this_thread::sleep_for(std::chrono::milliseconds(100));
         LOG(log_level::info) << "Exported slot range (" << split_range_begin << ", " << split_range_end << ")";
         splitting_ = false;
         merging_ = false;
@@ -493,9 +503,9 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         // Read data to merge
         std::vector<std::string> merge_data;
         get_data_in_slot_range(merge_data,
-                                      merge_range_begin,
-                                      merge_range_end,
-                                      static_cast<int32_t>(merge_batch_size));
+                               merge_range_begin,
+                               merge_range_end,
+                               static_cast<int32_t>(merge_batch_size));
         if (merge_data.empty()) {
           break;
         } else if (merge_data.size() < merge_batch_size) {
@@ -645,9 +655,9 @@ void hash_table_partition::export_slots() {
     // Read data to export
     std::vector<std::string> export_data;
     get_data_in_slot_range(export_data,
-                                  exp_range.first,
-                                  exp_range.second,
-                                  static_cast<int32_t>(export_batch_size));
+                           exp_range.first,
+                           exp_range.second,
+                           static_cast<int32_t>(export_batch_size));
     if (export_data.empty()) {  // No more data to export
       break;
     } else if (export_data.size() < export_batch_size) {  // No more data to export in next iteration
