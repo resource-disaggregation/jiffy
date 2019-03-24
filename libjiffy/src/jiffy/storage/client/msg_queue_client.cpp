@@ -109,6 +109,8 @@ std::size_t msg_queue_client::block_id(const msg_queue_cmd_id &op) {
 }
 
 void msg_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
+  if(response == "!redo")
+    throw redo_error();
   if (response.substr(0, 5) == "!full") {
     typedef std::vector<std::string> list_t;
     do {
@@ -148,6 +150,8 @@ void msg_queue_client::handle_redirects(int32_t cmd_id,
   bool read_flag_all = false;
   for (size_t i = 0; i < responses.size(); i++) {
     auto &response = responses[i];
+    if(response == "!redo")
+      throw redo_error();
     if (response.substr(0, 5) == "!full") {
       list_t op_args(modified_args.begin() + i * n_op_args, modified_args.begin() + (i + 1) * n_op_args);
       bool send_flag = true;

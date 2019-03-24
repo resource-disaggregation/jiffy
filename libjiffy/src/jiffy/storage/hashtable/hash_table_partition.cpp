@@ -327,7 +327,6 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
           fs->add_block(path(), dst_partition_name, "importing");
 
       LOG(log_level::info) << "Look here!!!!!!!";
-      //forward_all();
       // TODO check if add_block succeed, might not be enough capacity in extreme situation
       std::string src_partition_name = std::to_string(slot_range_.first) + "_" + std::to_string(split_range_begin);
       set_exporting(dst_replica_chain.block_ids,

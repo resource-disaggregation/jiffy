@@ -39,12 +39,13 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
 }
 
 std::string msg_queue_partition::send(const std::string &message) {
+  LOG(log_level::info) << "Sending message " << message << "on partition " << name();
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   if (storage_size() >= storage_capacity() && partition_.size() >= partition_.capacity()) {
     if (!next_target_str().empty()) {
       return "!full!" + next_target_str();
     } else {
-      throw std::logic_error("The message queue should already allocate next partition when overload");
+      return "!redo";
     }
   }
   partition_.push_back(make_binary(message));
@@ -60,7 +61,9 @@ std::string msg_queue_partition::read(std::string position) {
   }
   if (!next_target_str().empty())
     return "!msg_not_in_partition!" + next_target_str();
-  else return "!msg_not_found";
+  else if(storage_size() >= storage_capacity() && partition_.size() >= partition_.capacity())
+    return "!redo";
+  else return "msg_not_found";
 }
 
 std::string msg_queue_partition::clear() {
@@ -119,16 +122,16 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
       auto dst_replica_chain =
           fs->add_block(path(), dst_partition_name, "regular");
       next_target(dst_replica_chain.block_ids);
-      auto path_current = path();
-      auto chain_current = chain();
-      std::vector<std::string> src_before_args;
-      src_before_args.push_back(next_target_str());
-      update_partition(src_before_args.front());
+      std::vector<std::string> args;
+      args.emplace_back(next_target_str());
+      std::thread([=]() {
+        auto src = std::make_shared<replica_chain_client>(fs, path(), chain());
+        src->send_command(hash_table_cmd_id::ht_update_partition, args);
+      }).detach();
     } catch (std::exception &e) {
       overload_ = false;
-      LOG(log_level::warn) << "Split slot range failed: " << e.what();
+      LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();
     }
-    LOG(log_level::info) << "After split storage: " << storage_size() << " capacity: " << storage_capacity();
   }
 }
 
