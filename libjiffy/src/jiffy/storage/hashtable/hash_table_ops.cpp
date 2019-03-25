@@ -12,7 +12,7 @@ std::vector<command> KV_OPS = {command{command_type::accessor, "ht_exists"},
                                command{command_type::mutator, "ht_update"},
                                command{command_type::mutator, "ht_upsert"},
                                command{command_type::mutator, "ht_update_partition"},
-                               command{command_type::mutator, "ht_get_storage_size"},
-                               command{command_type::mutator, "ht_get_metadata"}};
+                               command{command_type::accessor, "ht_get_storage_size"},
+                               command{command_type::accessor, "ht_get_metadata"}};
 }
 }

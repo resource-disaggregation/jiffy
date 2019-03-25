@@ -141,6 +141,12 @@ std::string hash_table_partition::remove(const std::string &key, bool redirect) 
       old_val = to_string(value);
       return true;
     })) {
+      try {
+        auto test =  to_string(block_.find(key));
+        LOG(log_level::info) << "This should be removed!!!!!!!!!!!!!!!!***************";
+      } catch (std::out_of_range &e) {
+        LOG(log_level::info) << "Correctly removed!!!!!!!!!!!!!!!!***************";
+      }
       return old_val;
     }
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
@@ -272,13 +278,6 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         keys(_return);
       }
       break;
-    case hash_table_cmd_id::ht_data_in_slot_range:
-      if (nargs != 3) {
-        _return.emplace_back("!args_error");
-      } else {
-        get_data_in_slot_range(_return, std::stoi(args[0]), std::stoi(args[1]), std::stoi(args[2]));
-      }
-      break;
     case hash_table_cmd_id::ht_update_partition:
       if (nargs != 2) {
         _return.emplace_back("!args_error");
@@ -338,9 +337,13 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       src_before_args.emplace_back("exporting$" + dst_partition_name + "$" + export_target_str());
       dst_before_args.push_back(dst_partition_name);
       dst_before_args.emplace_back("importing$" + dst_partition_name);
-      LOG(log_level::info) << "src before argument is";
-      for(const auto &x:src_before_args)
-        LOG(log_level::info) << x;
+      //Setting name and metadata for src and dst
+      std::vector<std::string> src_after_args;
+      std::vector<std::string> dst_after_args;
+      src_after_args.push_back(src_partition_name);
+      src_after_args.emplace_back("regular");
+      dst_after_args.push_back(dst_partition_name);
+      dst_after_args.emplace_back("regular");
       std::thread([=]() {
         auto src = std::make_shared<replica_chain_client>(fs, path(), chain(), KV_OPS);
         src->run_command(hash_table_cmd_id::ht_update_partition, src_before_args);
@@ -392,7 +395,9 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
           }
           assert(remove_keys.size() == split_keys);
           LOG(log_level::info) << "Sending " << remove_keys.size() << " split keys to remove";
+          LOG(log_level::info) << "Before remove storage size: " << storage_size();
           auto ret = src->run_command(hash_table_cmd_id::ht_remove, remove_keys);
+          LOG(log_level::info) << "After remove storage size: " << storage_size();
           //auto ret = src->recv_response();
           for (const auto &x:ret) {
             LOG(log_level::info) << x;
@@ -403,15 +408,8 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         LOG(log_level::info) << "Look here 3";
         // Update directory mapping
         std::string old_name = name();
-        //fs->update_partition(path(), old_name, src_partition_name, "regular");
+        fs->update_partition(path(), old_name, src_partition_name, "regular");
         LOG(log_level::info) << "Update partition name and metadata on directory server";
-        //Setting name and metadata for src and dst
-        std::vector<std::string> src_after_args;
-        std::vector<std::string> dst_after_args;
-        src_after_args.push_back(src_partition_name);
-        src_after_args.emplace_back("regular");
-        dst_after_args.push_back(dst_partition_name);
-        dst_after_args.emplace_back("regular");
         src->run_command(hash_table_cmd_id::ht_update_partition, src_after_args);
         //src->recv_response();
         LOG(log_level::info) << "Src updated";
@@ -440,7 +438,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
     try {
       merging_ = true;
       LOG(log_level::info) << "Requested slot range merge";
-
+/*
       auto merge_range_begin = slot_range_.first;
       auto merge_range_end = slot_range_.second;
       auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
@@ -554,7 +552,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       LOG(log_level::info) << "Merged slot range (" << merge_range_begin << ", " << merge_range_end << ")";
       splitting_ = false;
       merging_ = false;
-
+*/
     } catch (std::exception &e) {
       merging_ = false;
       LOG(log_level::warn) << "Merge slot range failed: " << e.what();

@@ -20,11 +20,10 @@ enum hash_table_cmd_id {
   ht_put = 4,
   ht_remove = 5,
   ht_update = 6,
-  ht_data_in_slot_range = 7,
-  ht_upsert = 8,
-  ht_update_partition = 9,
-  ht_get_storage_size = 10,
-  ht_get_metadata = 11,
+  ht_upsert = 7,
+  ht_update_partition = 8,
+  ht_get_storage_size = 9,
+  ht_get_metadata = 10,
 };
 
 }
