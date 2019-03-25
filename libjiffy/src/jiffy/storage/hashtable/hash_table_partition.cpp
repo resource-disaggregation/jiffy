@@ -403,8 +403,8 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         LOG(log_level::info) << "Look here 3";
         // Update directory mapping
         std::string old_name = name();
-        fs->update_partition(path(), old_name, src_partition_name, "regular");
-
+        //fs->update_partition(path(), old_name, src_partition_name, "regular");
+        LOG(log_level::info) << "Update partition name and metadata on directory server";
         //Setting name and metadata for src and dst
         std::vector<std::string> src_after_args;
         std::vector<std::string> dst_after_args;
@@ -414,8 +414,10 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         dst_after_args.emplace_back("regular");
         src->send_command(hash_table_cmd_id::ht_update_partition, src_after_args);
         src->recv_response();
+        LOG(log_level::info) << "Src updated";
         dst->send_command(hash_table_cmd_id::ht_update_partition, dst_after_args);
         dst->recv_response();
+        LOG(log_level::info) << "Dst updated";
         LOG(log_level::info) << "Exported slot range (" << split_range_begin << ", " << split_range_end << ")";
         splitting_ = false;
         merging_ = false;

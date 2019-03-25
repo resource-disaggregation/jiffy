@@ -5,6 +5,7 @@
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/client_cache.h"
 #include "jiffy/storage/client/data_structure_client.h"
+#include "jiffy/storage/hashtable/hash_table_ops.h"
 
 namespace jiffy {
 namespace storage {
