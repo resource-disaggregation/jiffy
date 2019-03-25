@@ -12,7 +12,7 @@ msg_queue_client::msg_queue_client(std::shared_ptr<directory::directory_interfac
                                    const std::string &path,
                                    const directory::data_status &status,
                                    int timeout_ms)
-    : data_structure_client(fs, path, status, timeout_ms) {
+    : data_structure_client(fs, path, status, MSG_QUEUE_OPS, timeout_ms) {
   read_offset_ = 0;
   read_partition_ = 0;
   send_partition_ = 0;
@@ -23,7 +23,7 @@ void msg_queue_client::refresh() {
   LOG(log_level::info) << "Refreshing partition mappings to " << status_.to_string();
   blocks_.clear();
   for (const auto &block: status_.data_blocks()) {
-    blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, timeout_ms_));
+    blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, MSG_QUEUE_OPS, timeout_ms_));
   }
 }
 
@@ -109,14 +109,18 @@ std::size_t msg_queue_client::block_id(const msg_queue_cmd_id &op) {
 }
 
 void msg_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
-  if(response == "!redo")
+  if (response == "!redo")
     throw redo_error();
   if (response.substr(0, 5) == "!full") {
     typedef std::vector<std::string> list_t;
     do {
       auto parts = string_utils::split(response, '!');
       auto chain = list_t(parts.begin() + 2, parts.end());
-      blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, directory::replica_chain(chain), 0));
+      blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
+                                                               path_,
+                                                               directory::replica_chain(chain),
+                                                               MSG_QUEUE_OPS,
+                                                               0));
       send_partition_++;
       response = blocks_[block_id(static_cast<msg_queue_cmd_id >(cmd_id))]->run_command(cmd_id, args).front();
     } while (response.substr(0, 5) == "!full");
@@ -126,7 +130,10 @@ void msg_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::st
     do {
       auto parts = string_utils::split(response, '!');
       auto chain = list_t(parts.begin() + 2, parts.end());
-      blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, directory::replica_chain(chain)));
+      blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
+                                                               path_,
+                                                               directory::replica_chain(chain),
+                                                               MSG_QUEUE_OPS));
       read_partition_++;
       read_offset_ = 0;
       std::vector<std::string> modified_args;
@@ -150,7 +157,7 @@ void msg_queue_client::handle_redirects(int32_t cmd_id,
   bool read_flag_all = false;
   for (size_t i = 0; i < responses.size(); i++) {
     auto &response = responses[i];
-    if(response == "!redo")
+    if (response == "!redo")
       throw redo_error();
     if (response.substr(0, 5) == "!full") {
       list_t op_args(modified_args.begin() + i * n_op_args, modified_args.begin() + (i + 1) * n_op_args);
@@ -158,7 +165,11 @@ void msg_queue_client::handle_redirects(int32_t cmd_id,
       do {
         auto parts = string_utils::split(response, '!');
         auto chain = list_t(parts.begin() + 2, parts.end());
-        blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, directory::replica_chain(chain), 0));
+        blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
+                                                                 path_,
+                                                                 directory::replica_chain(chain),
+                                                                 MSG_QUEUE_OPS,
+                                                                 0));
         if (!send_flag_all || !send_flag) {
           send_partition_++;
         }
@@ -173,7 +184,11 @@ void msg_queue_client::handle_redirects(int32_t cmd_id,
       do {
         auto parts = string_utils::split(response, '!');
         auto chain = list_t(parts.begin() + 2, parts.end());
-        blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, directory::replica_chain(chain), 0));
+        blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
+                                                                 path_,
+                                                                 directory::replica_chain(chain),
+                                                                 MSG_QUEUE_OPS,
+                                                                 0));
         if (!read_flag_all || !read_flag) {
           read_partition_++;
           auto old_value = std::stoi(op_args.front());

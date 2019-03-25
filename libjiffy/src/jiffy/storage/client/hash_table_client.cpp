@@ -12,7 +12,7 @@ hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interf
                                      const std::string &path,
                                      const directory::data_status &status,
                                      int timeout_ms)
-    : data_structure_client(fs, path, status, timeout_ms) {
+    : data_structure_client(fs, path, status, KV_OPS, timeout_ms) {
   slots_.clear();
   for (const auto &block: status.data_blocks()) {
     slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0]));
@@ -26,7 +26,7 @@ void hash_table_client::refresh() {
   blocks_.clear();
   for (const auto &block: status_.data_blocks()) {
     slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0]));
-    blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, timeout_ms_));
+    blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, KV_OPS, timeout_ms_));
   }
 }
 
@@ -172,7 +172,6 @@ std::size_t hash_table_client::num_keys() {
   return n;
 }
 
-
 size_t hash_table_client::block_id(const std::string &key) {
   return static_cast<size_t>(std::upper_bound(slots_.begin(), slots_.end(), hash_slot::get(key)) - slots_.begin() - 1);
 }
@@ -222,6 +221,7 @@ void hash_table_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
       response = replica_chain_client(fs_,
                                       path_,
                                       directory::replica_chain(chain),
+                                      KV_OPS,
                                       0).run_command_redirected(cmd_id, args).front();
     } while (response.substr(0, 10) == "!exporting");
   }
@@ -247,6 +247,7 @@ void hash_table_client::handle_redirects(int32_t cmd_id,
         response = replica_chain_client(fs_,
                                         path_,
                                         directory::replica_chain(chain),
+                                        KV_OPS,
                                         0).run_command_redirected(cmd_id, op_args).front();
       } while (response.substr(0, 10) == "!exporting");
     }

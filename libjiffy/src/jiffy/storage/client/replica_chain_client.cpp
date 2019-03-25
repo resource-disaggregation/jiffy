@@ -13,11 +13,12 @@ using namespace utils;
 replica_chain_client::replica_chain_client(std::shared_ptr<directory::directory_interface> fs,
                                            const std::string &path,
                                            const directory::replica_chain &chain,
+                                           std::vector<command> OPS,
                                            int timeout_ms) : fs_(fs), path_(path), in_flight_(false) {
   seq_.client_id = -1;
   seq_.client_seq_no = 0;
   connect(chain, timeout_ms);
-  for (auto &op: KV_OPS) {
+  for (auto &op: OPS) {
     cmd_client_.push_back(op.type == command_type::accessor ? &tail_ : &head_);
   }
 }

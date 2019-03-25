@@ -30,6 +30,7 @@ class data_structure_client {
   data_structure_client(std::shared_ptr<directory::directory_interface> fs,
                         const std::string &path,
                         const directory::data_status &status,
+                        std::vector<command> OPS,
                         int timeout_ms = 1000);
 
   /**

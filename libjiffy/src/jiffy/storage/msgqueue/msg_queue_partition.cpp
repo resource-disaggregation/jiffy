@@ -62,7 +62,7 @@ std::string msg_queue_partition::read(std::string position) {
     return "!msg_not_in_partition!" + next_target_str();
   else if(storage_size() >= storage_capacity() && partition_.size() >= partition_.capacity())
     return "!redo";
-  else return "msg_not_found";
+  else return "!msg_not_found";
 }
 
 std::string msg_queue_partition::clear() {
@@ -123,7 +123,7 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
       std::vector<std::string> args;
       args.emplace_back(next_target_str());
       std::thread([=]() {
-        auto src = std::make_shared<replica_chain_client>(fs, path(), chain());
+        auto src = std::make_shared<replica_chain_client>(fs, path(), chain(), MSG_QUEUE_OPS);
         src->run_command(msg_queue_cmd_id::mq_update_partition, args);
       }).detach();
     } catch (std::exception &e) {

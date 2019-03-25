@@ -11,7 +11,7 @@ btree_client::btree_client(std::shared_ptr<directory::directory_interface> fs,
                            const std::string &path,
                            const directory::data_status &status,
                            int timeout_ms)
-    : data_structure_client(fs, path, status, timeout_ms) {
+    : data_structure_client(fs, path, status, BTREE_OPS, timeout_ms) {
   slots_.clear();
 }
 
@@ -22,7 +22,7 @@ void btree_client::refresh() {
   blocks_.clear();
   for (const auto &block: status_.data_blocks()) {
     // slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0]));
-    blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, timeout_ms_));
+    blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, BTREE_OPS, timeout_ms_));
   }
 }
 
@@ -276,6 +276,7 @@ void btree_client::handle_redirect(int32_t cmd_id, const std::vector<std::string
       response = replica_chain_client(fs_,
                                       path_,
                                       directory::replica_chain(chain),
+                                      BTREE_OPS,
                                       0).run_command_redirected(cmd_id, args).front();
     } while (response.substr(0, 10) == "!exporting");
   }
@@ -301,6 +302,7 @@ void btree_client::handle_redirects(int32_t cmd_id,
         response = replica_chain_client(fs_,
                                         path_,
                                         directory::replica_chain(chain),
+                                        BTREE_OPS,
                                         0).run_command_redirected(cmd_id, op_args).front();
       } while (response.substr(0, 10) == "!exporting");
     }

@@ -7,6 +7,7 @@
 #include "jiffy/storage/partition.h"
 #include "jiffy/persistent/persistent_service.h"
 #include "jiffy/storage/chain_module.h"
+#include "jiffy/storage/hashtable/hash_table_ops.h"
 #include "hash_table_defs.h"
 
 namespace jiffy {

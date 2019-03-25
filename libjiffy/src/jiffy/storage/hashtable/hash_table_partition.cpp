@@ -342,12 +342,12 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       for(const auto &x:src_before_args)
         LOG(log_level::info) << x;
       std::thread([=]() {
-        auto src = std::make_shared<replica_chain_client>(fs, path(), chain());
+        auto src = std::make_shared<replica_chain_client>(fs, path(), chain(), KV_OPS);
         src->run_command(hash_table_cmd_id::ht_update_partition, src_before_args);
         //src->recv_response();
-        auto dst = std::make_shared<replica_chain_client>(fs, path(), dst_replica_chain);
-        dst->send_command(hash_table_cmd_id::ht_update_partition, dst_before_args);
-        dst->recv_response();
+        auto dst = std::make_shared<replica_chain_client>(fs, path(), dst_replica_chain, KV_OPS);
+        dst->run_command(hash_table_cmd_id::ht_update_partition, dst_before_args);
+        //dst->recv_response();
         LOG(log_level::info) << "Dst replica chain successfully updated";
         bool has_more = true;
         std::size_t split_batch_size = 1024;
@@ -375,9 +375,9 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
 
           // Write data to dst partition
           LOG(log_level::info) << "Sending keys to dst ";
-          dst->send_command(hash_table_cmd_id::ht_put, split_data);
+          dst->run_command(hash_table_cmd_id::ht_put, split_data);
           LOG(log_level::info) << "Finish sending ";
-          dst->recv_response();
+          //dst->recv_response();
           LOG(log_level::info) << "Sent " << split_keys << " keys";
 
           // Remove data from src partition
@@ -392,8 +392,8 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
           }
           assert(remove_keys.size() == split_keys);
           LOG(log_level::info) << "Sending " << remove_keys.size() << " split keys to remove";
-          src->send_command(hash_table_cmd_id::ht_remove, remove_keys);
-          auto ret = src->recv_response();
+          auto ret = src->run_command(hash_table_cmd_id::ht_remove, remove_keys);
+          //auto ret = src->recv_response();
           for (const auto &x:ret) {
             LOG(log_level::info) << x;
           }
@@ -412,22 +412,22 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         src_after_args.emplace_back("regular");
         dst_after_args.push_back(dst_partition_name);
         dst_after_args.emplace_back("regular");
-        src->send_command(hash_table_cmd_id::ht_update_partition, src_after_args);
-        src->recv_response();
+        src->run_command(hash_table_cmd_id::ht_update_partition, src_after_args);
+        //src->recv_response();
         LOG(log_level::info) << "Src updated";
-        dst->send_command(hash_table_cmd_id::ht_update_partition, dst_after_args);
-        dst->recv_response();
+        dst->run_command(hash_table_cmd_id::ht_update_partition, dst_after_args);
+        //dst->recv_response();
         LOG(log_level::info) << "Dst updated";
         LOG(log_level::info) << "Exported slot range (" << split_range_begin << ", " << split_range_end << ")";
         splitting_ = false;
         merging_ = false;
+        LOG(log_level::info) << "After split storage: " << storage_size() << " capacity: " << storage_capacity();
       }).detach();
 
     } catch (std::exception &e) {
       splitting_ = false;
       LOG(log_level::warn) << "Split slot range failed: " << e.what();
     }
-    LOG(log_level::info) << "After split storage: " << storage_size() << " capacity: " << storage_capacity();
   }
   expected = false;
   if (auto_scale_.load() && cmd_id == hash_table_cmd_id::ht_remove && underload()
@@ -451,7 +451,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       size_t find_min_size = static_cast<size_t>(static_cast<double>(storage_capacity())) + 1;
       for (auto &i : replica_set) {
         if (i.fetch_slot_range().first == slot_range().second || i.fetch_slot_range().second == slot_range().first) {
-          auto client = std::make_shared<replica_chain_client>(fs, path_, i, 0);
+          auto client = std::make_shared<replica_chain_client>(fs, path_, i, KV_OPS, 0);
           auto size =
               static_cast<size_t>(std::stoi(client->run_command(hash_table_cmd_id::ht_get_storage_size,
                                                                 {}).front()));
@@ -472,8 +472,8 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       }
 
       // Connect two replica chains
-      auto src = std::make_shared<replica_chain_client>(fs, path_, chain(), 0);
-      auto dst = std::make_shared<replica_chain_client>(fs, path_, merge_target, 0);
+      auto src = std::make_shared<replica_chain_client>(fs, path_, chain(), KV_OPS, 0);
+      auto dst = std::make_shared<replica_chain_client>(fs, path_, merge_target, KV_OPS, 0);
       std::string dst_partition_name;
       if (merge_target.fetch_slot_range().first == slot_range().second)
         dst_partition_name =
@@ -645,8 +645,8 @@ void hash_table_partition::export_slots() {
   }
   auto fs =
       std::make_shared<directory::directory_client>(directory_host_, directory_port_); // FIXME: Replace with actual
-  replica_chain_client src(fs, path_, chain(), 0);
-  replica_chain_client dst(fs, path_, export_target(), 0);
+  replica_chain_client src(fs, path_, chain(), KV_OPS, 0);
+  replica_chain_client dst(fs, path_, export_target(), KV_OPS, 0);
   auto exp_range = export_slot_range();
   size_t export_batch_size = 1024;
   size_t tot_export_keys = 0;

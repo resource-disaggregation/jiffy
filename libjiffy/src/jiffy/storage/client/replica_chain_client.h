@@ -4,6 +4,7 @@
 #include <map>
 #include "block_client.h"
 #include "jiffy/directory/client/directory_client.h"
+#include "jiffy/storage/command.h"
 
 namespace jiffy {
 namespace storage {
@@ -25,6 +26,7 @@ class replica_chain_client {
   explicit replica_chain_client(std::shared_ptr<directory::directory_interface> fs,
                                 const std::string &path,
                                 const directory::replica_chain &chain,
+                                std::vector<command> OPS,
                                 int timeout_ms = 1000);
 
   /**
