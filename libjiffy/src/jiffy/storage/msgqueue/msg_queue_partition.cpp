@@ -39,7 +39,6 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
 }
 
 std::string msg_queue_partition::send(const std::string &message) {
-  LOG(log_level::info) << "Sending message " << message << "on partition " << name();
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   if (storage_size() >= storage_capacity() && partition_.size() >= partition_.capacity()) {
     if (!next_target_str().empty()) {
@@ -113,12 +112,11 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
   if (auto_scale_.load() && is_mutator(cmd_id) && overload() && is_tail()
       && overload_.compare_exchange_strong(expected, true)) {
     LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
-                         << storage_capacity();
+                         << storage_capacity() << " partition size = " << size() << "partition capacity " << partition_.capacity();
     try {
       overload_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
       auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
-      LOG(log_level::info) << "host " << directory_host_ << " port " << directory_port_;
       auto dst_replica_chain =
           fs->add_block(path(), dst_partition_name, "regular");
       next_target(dst_replica_chain.block_ids);
@@ -126,7 +124,7 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
       args.emplace_back(next_target_str());
       std::thread([=]() {
         auto src = std::make_shared<replica_chain_client>(fs, path(), chain());
-        src->send_command(hash_table_cmd_id::ht_update_partition, args);
+        src->run_command(msg_queue_cmd_id::mq_update_partition, args);
       }).detach();
     } catch (std::exception &e) {
       overload_ = false;

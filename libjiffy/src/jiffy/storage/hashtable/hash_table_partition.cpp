@@ -343,8 +343,8 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         LOG(log_level::info) << x;
       std::thread([=]() {
         auto src = std::make_shared<replica_chain_client>(fs, path(), chain());
-        src->send_command(hash_table_cmd_id::ht_update_partition, src_before_args);
-        src->recv_response();
+        src->run_command(hash_table_cmd_id::ht_update_partition, src_before_args);
+        //src->recv_response();
         auto dst = std::make_shared<replica_chain_client>(fs, path(), dst_replica_chain);
         dst->send_command(hash_table_cmd_id::ht_update_partition, dst_before_args);
         dst->recv_response();
