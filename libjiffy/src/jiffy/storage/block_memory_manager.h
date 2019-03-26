@@ -38,6 +38,13 @@ class block_memory_manager {
   void mb_free(void *ptr);
 
   /**
+   * @brief Free memory.
+   * @param ptr Pointer to memory allocation.
+   * @param size Number of bytes to free.
+   */
+  void mb_free(void *ptr, size_t size);
+
+  /**
    * @brief Get capacity of memory block.
    * @return Capacity of memory block.
    */

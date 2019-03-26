@@ -9,14 +9,15 @@ using namespace ::jiffy::persistent;
 using namespace ::jiffy::storage;
 
 binary make_binary(const std::string& str, block_memory_allocator<uint8_t> allocator) {
-  return binary(reinterpret_cast<const uint8_t *>(str.data()), str.size(), allocator);
+  return binary(str, allocator);
 }
 
 TEST_CASE("local_write_test", "[write]") {
   block_memory_manager manager;
   block_memory_allocator<kv_pair_type> allocator(&manager);
   block_memory_allocator<uint8_t> binary_allocator(&manager);
-  hash_table_type table(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type(), allocator);
+  //hash_table_type table(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type(), allocator);
+  hash_table_type table(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type());
   auto ltable = table.lock_table();
   auto bkey = make_binary("key", binary_allocator);
   auto bval = make_binary("value", binary_allocator);
@@ -41,7 +42,8 @@ TEST_CASE("local_read_test", "[read]") {
   block_memory_allocator<uint8_t> binary_allocator(&manager);
   auto ser = std::make_shared<csv_serde>(binary_allocator);
   local_store store(ser);
-  hash_table_type table(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type(), allocator);
+  //hash_table_type table(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type(), allocator);
+  hash_table_type table(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type());
   auto ltable = table.lock_table();
   auto bkey = make_binary("key", binary_allocator);
   auto bval = make_binary("value", binary_allocator);

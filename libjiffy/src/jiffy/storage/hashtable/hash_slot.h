@@ -60,7 +60,7 @@ class hash_slot {
   }
 
   static int32_t get(const binary& key) {
-    return crc16(reinterpret_cast<const char*>(key.data()), key.length());
+    return crc16(reinterpret_cast<const char*>(key.data()), key.size());
   }
 
  private:

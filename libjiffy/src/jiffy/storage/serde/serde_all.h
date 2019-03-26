@@ -29,7 +29,7 @@ class serde {
   }
 
   binary make_binary(const std::string &str) {
-    return binary(reinterpret_cast<const uint8_t *>(str.data()), str.size(), allocator_);
+    return binary(str, allocator_);
   }
 
  private:

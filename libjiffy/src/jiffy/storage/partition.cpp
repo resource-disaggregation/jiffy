@@ -82,7 +82,7 @@ void partition::set_name_and_metadata(const std::string &name, const std::string
 }
 
 binary partition::make_binary(const std::string &str) {
-  return binary(reinterpret_cast<const uint8_t *>(str.data()), str.size(), binary_allocator_);
+  return binary(str, binary_allocator_);
 }
 
 }

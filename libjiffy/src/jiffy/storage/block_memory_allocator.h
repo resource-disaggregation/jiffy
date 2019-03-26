@@ -53,7 +53,7 @@ class block_memory_allocator {
   block_memory_allocator(const block_memory_allocator<U> &other)
       : manager_(other.manager_) {}
 
-  ~block_memory_allocator() {}
+  ~block_memory_allocator() = default;
 
   // return maximum number of elements that can be allocated
   size_type max_size() const {
@@ -92,8 +92,8 @@ class block_memory_allocator {
   }
 
   // deallocate storage p of deleted elements
-  void deallocate(pointer p, size_type) {
-    manager_->mb_free(p);
+  void deallocate(pointer p, size_type size) {
+    manager_->mb_free(p, size);
   }
 
   template<typename U>

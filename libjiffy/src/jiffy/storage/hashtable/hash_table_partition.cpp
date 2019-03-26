@@ -20,7 +20,7 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
                                            const std::string &directory_host,
                                            const int directory_port)
     : chain_module(manager, name, metadata, KV_OPS),
-      block_(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type(), build_allocator<kv_pair_type>()),
+      block_(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type()),
       splitting_(false),
       merging_(false),
       dirty_(false),
@@ -45,27 +45,19 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
 }
 
 std::string hash_table_partition::put(const std::string &key, const std::string &value, bool redirect) {
+  LOG(log_level::info) << "Putting key: " << key << " storage_size " << storage_size() << "storage_capacity " << storage_capacity();
   auto hash = hash_slot::get(key);
-  LOG(log_level::info) << "Putting key: " << key << " Value: " << value << " Hash: " << hash <<" On partition: " << name();
-  if(key == "408")
-    LOG(log_level::info) << "Found you 1!!";
-  if(key == "409")
-    LOG(log_level::info) << "Found you 1!!";
+  //LOG(log_level::info) << "Putting key: " << key << " Value: " << value << " Hash: " << hash <<" On partition: " << name();
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
-    if(key == "408")
-      LOG(log_level::info) << "Found you 2!!";
-    if(key == "409")
-      LOG(log_level::info) << "Found you 2!!";
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
     }
-    if(key == "408")
-      LOG(log_level::info) << "Found you!!";
-    if(key == "409")
-      LOG(log_level::info) << "Found you!!";
+    LOG(log_level::info) << "Look here 1";
     if (block_.insert(make_binary(key), make_binary(value))) {
+      LOG(log_level::info) << "Look here 2";
       return "!ok";
     } else {
+      LOG(log_level::info) << "Look here 3";
       return "!duplicate_key";
     }
   }
@@ -80,7 +72,7 @@ std::string hash_table_partition::upsert(const std::string &key, const std::stri
     }
     block_.upsert(make_binary(key), [&](value_type &v) {
       v = make_binary(value);
-    }, reinterpret_cast<const uint8_t *>(value.data()), value.length(), binary_allocator_);
+    }, value, binary_allocator_);
     return "!ok";
   }
   return "!block_moved";
@@ -104,6 +96,8 @@ std::string hash_table_partition::get(const std::string &key, bool redirect) {
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     try {
+      auto v = block_.find(key);
+      auto s = to_string(v);
       return to_string(block_.find(key));
     } catch (std::out_of_range &e) {
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
@@ -141,12 +135,7 @@ std::string hash_table_partition::remove(const std::string &key, bool redirect) 
       old_val = to_string(value);
       return true;
     })) {
-      try {
-        auto test =  to_string(block_.find(key));
-        LOG(log_level::info) << "This should be removed!!!!!!!!!!!!!!!!***************";
-      } catch (std::out_of_range &e) {
-        LOG(log_level::info) << "Correctly removed!!!!!!!!!!!!!!!!***************";
-      }
+      LOG(log_level::info) << "Removing stuff";
       return old_val;
     }
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
@@ -324,6 +313,8 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       LOG(log_level::info) << "host " << directory_host_ << " port " << directory_port_;
       auto dst_replica_chain =
           fs->add_block(path(), dst_partition_name, "importing");
+      LOG(log_level::info) << "src replica chain " << chain().front();
+      LOG(log_level::info) << "dst replica chain " << dst_replica_chain.block_ids[0];
 
       LOG(log_level::info) << "Look here!!!!!!!";
       // TODO check if add_block succeed, might not be enough capacity in extreme situation
@@ -347,10 +338,8 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       std::thread([=]() {
         auto src = std::make_shared<replica_chain_client>(fs, path(), chain(), KV_OPS);
         src->run_command(hash_table_cmd_id::ht_update_partition, src_before_args);
-        //src->recv_response();
         auto dst = std::make_shared<replica_chain_client>(fs, path(), dst_replica_chain, KV_OPS);
         dst->run_command(hash_table_cmd_id::ht_update_partition, dst_before_args);
-        //dst->recv_response();
         LOG(log_level::info) << "Dst replica chain successfully updated";
         bool has_more = true;
         std::size_t split_batch_size = 1024;
@@ -378,10 +367,10 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
 
           // Write data to dst partition
           LOG(log_level::info) << "Sending keys to dst ";
+          LOG(log_level::info) << "Before dst put storage size: " << dst->run_command(hash_table_cmd_id::ht_get_storage_size, {}).front();
           dst->run_command(hash_table_cmd_id::ht_put, split_data);
-          LOG(log_level::info) << "Finish sending ";
-          //dst->recv_response();
           LOG(log_level::info) << "Sent " << split_keys << " keys";
+          LOG(log_level::info) << "After dst put storage size: " << dst->run_command(hash_table_cmd_id::ht_get_storage_size, {}).front();
 
           // Remove data from src partition
           std::vector<std::string> remove_keys;
@@ -395,13 +384,10 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
           }
           assert(remove_keys.size() == split_keys);
           LOG(log_level::info) << "Sending " << remove_keys.size() << " split keys to remove";
-          LOG(log_level::info) << "Before remove storage size: " << storage_size();
+          LOG(log_level::info) << "Before remove storage size: " << src->run_command(hash_table_cmd_id::ht_get_storage_size, {}).front();
           auto ret = src->run_command(hash_table_cmd_id::ht_remove, remove_keys);
-          LOG(log_level::info) << "After remove storage size: " << storage_size();
+          LOG(log_level::info) << "After remove storage size: " << src->run_command(hash_table_cmd_id::ht_get_storage_size, {}).front();
           //auto ret = src->recv_response();
-          for (const auto &x:ret) {
-            LOG(log_level::info) << x;
-          }
           LOG(log_level::info) << "Removed " << remove_keys.size() << " split keys";
         }
         // Finalize slot range split

@@ -42,14 +42,23 @@ btree_partition::btree_partition(block_memory_manager *manager,
 }
 
 std::string btree_partition::put(const std::string &key, const std::string &value, bool redirect) {
-
+  LOG(log_level::info) << "Putting " << key << " with storage size " << storage_size() << " and capacity " << storage_capacity();
   if (in_slot_range(key) || (in_import_slot_range(key) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(key)) {
       return "!exporting!" + export_target_str();
     }
-    if (partition_.insert(std::make_pair(make_binary(key), make_binary(value))).second) {
+    LOG(log_level::info) << "Putting 1";
+    auto k = make_binary(key);
+    LOG(log_level::info) << "Putting 2";
+    auto v = make_binary(value);
+    LOG(log_level::info) << "Putting 3";
+    auto p = std::make_pair(k, v);
+    LOG(log_level::info) << "Putting 4";
+    if (partition_.insert(p).second) {
+      LOG(log_level::info) << "Putting 5";
       return "!ok";
     } else {
+      LOG(log_level::info) << "Putting 6";
       return "!duplicate_key";
     }
   }

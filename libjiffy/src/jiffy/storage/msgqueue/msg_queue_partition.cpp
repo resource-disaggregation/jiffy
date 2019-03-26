@@ -33,12 +33,14 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
-  threshold_hi_ = conf.get_as<double>("msgqueue.capacity_threshold_hi", 0.95);
+  threshold_hi_ = conf.get_as<double>("msgqueue.capacity_threshold_hi", 0.7);
   threshold_lo_ = conf.get_as<double>("msgqueue.capacity_threshold_lo", 0.00);
   auto_scale_ = conf.get_as<bool>("msgqueue.auto_scale", true);
 }
 
 std::string msg_queue_partition::send(const std::string &message) {
+  LOG(log_level::info) << "Sending " << message << " Storage size " << storage_size() << " Storage capacity " << storage_capacity();
+  LOG(log_level::info) << "partition size " << partition_.size() << " partition capacity " << partition_.capacity();
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   if (storage_size() >= storage_capacity() && partition_.size() >= partition_.capacity()) {
     if (!next_target_str().empty()) {
@@ -47,7 +49,9 @@ std::string msg_queue_partition::send(const std::string &message) {
       return "!redo";
     }
   }
+  LOG(log_level::info) << "Come here 1";
   partition_.push_back(make_binary(message));
+  LOG(log_level::info) << "Come here 2";
   return "!ok";
 }
 
@@ -194,9 +198,10 @@ void msg_queue_partition::forward_all() {
 }
 
 bool msg_queue_partition::overload() {
-  if (storage_size() < storage_capacity())
-    return false;
-  return partition_.size() > static_cast<size_t>(static_cast<double>(partition_.capacity()) * threshold_hi_);
+  //if (storage_size() < storage_capacity())
+    //return false;
+  //return partition_.size() > static_cast<size_t>(static_cast<double>(partition_.capacity()) * threshold_hi_);
+  return storage_size() > static_cast<size_t>(static_cast<double>(storage_capacity()) * threshold_hi_);
 }
 
 REGISTER_IMPLEMENTATION("msgqueue", msg_queue_partition);

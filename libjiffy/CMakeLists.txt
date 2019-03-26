@@ -170,6 +170,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/persistent/persistent_service.h
           src/jiffy/persistent/persistent_store.cpp
           src/jiffy/persistent/persistent_store.h
+          src/jiffy/utils/byte_utils.h
           src/jiffy/utils/client_cache.h
           src/jiffy/utils/cmd_parse.h
           src/jiffy/utils/directory_utils.h
@@ -198,7 +199,9 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/notification/notification_response_client.cpp
           src/jiffy/storage/notification/notification_response_client.h
           src/jiffy/storage/types/binary.h
-          src/jiffy/storage/types/binary.cpp)
+          src/jiffy/storage/types/binary.cpp
+          src/jiffy/storage/types/byte_string.h
+          src/jiffy/storage/types/byte_string.cc)
 
   add_dependencies(jiffy thrift_ep awssdk_ep jemalloc_ep)
   target_link_libraries(jiffy ${THRIFT_LIBRARY}
@@ -326,6 +329,7 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/notification/notification_handler.h
           src/jiffy/storage/notification/notification_worker.cpp
           src/jiffy/storage/notification/notification_worker.h
+          src/jiffy/utils/byte_utils.h
           src/jiffy/utils/client_cache.h
           src/jiffy/utils/cmd_parse.h
           src/jiffy/utils/directory_utils.h
