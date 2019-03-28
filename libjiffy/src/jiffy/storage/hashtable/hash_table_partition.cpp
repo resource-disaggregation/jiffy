@@ -47,6 +47,7 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
 std::string hash_table_partition::put(const std::string &key, const std::string &value, bool redirect) {
   LOG(log_level::info) << "Putting key: " << key << " storage_size " << storage_size() << "storage_capacity " << storage_capacity();
   auto hash = hash_slot::get(key);
+  LOG(log_level::info) << "Put hash " << hash << " in partition " << name();
   //LOG(log_level::info) << "Putting key: " << key << " Value: " << value << " Hash: " << hash <<" On partition: " << name();
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
@@ -96,8 +97,6 @@ std::string hash_table_partition::get(const std::string &key, bool redirect) {
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     try {
-      auto v = block_.find(key);
-      auto s = to_string(v);
       return to_string(block_.find(key));
     } catch (std::out_of_range &e) {
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
@@ -135,7 +134,6 @@ std::string hash_table_partition::remove(const std::string &key, bool redirect) 
       old_val = to_string(value);
       return true;
     })) {
-      LOG(log_level::info) << "Removing stuff";
       return old_val;
     }
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
@@ -384,23 +382,22 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
           }
           assert(remove_keys.size() == split_keys);
           LOG(log_level::info) << "Sending " << remove_keys.size() << " split keys to remove";
-          LOG(log_level::info) << "Before remove storage size: " << src->run_command(hash_table_cmd_id::ht_get_storage_size, {}).front();
+          //LOG(log_level::info) << "Before remove storage size: " << src->run_command(hash_table_cmd_id::ht_get_storage_size, {}).front();
           auto ret = src->run_command(hash_table_cmd_id::ht_remove, remove_keys);
-          LOG(log_level::info) << "After remove storage size: " << src->run_command(hash_table_cmd_id::ht_get_storage_size, {}).front();
-          //auto ret = src->recv_response();
+          //LOG(log_level::info) << "After remove storage size: " << src->run_command(hash_table_cmd_id::ht_get_storage_size, {}).front();
           LOG(log_level::info) << "Removed " << remove_keys.size() << " split keys";
         }
         // Finalize slot range split
         LOG(log_level::info) << "Look here 3";
         // Update directory mapping
         std::string old_name = name();
-        fs->update_partition(path(), old_name, src_partition_name, "regular");
         LOG(log_level::info) << "Update partition name and metadata on directory server";
+        fs->update_partition(path(), old_name, src_partition_name, "regular");
+        LOG(log_level::info) << "Update src partition name and metadata ";
         src->run_command(hash_table_cmd_id::ht_update_partition, src_after_args);
-        //src->recv_response();
         LOG(log_level::info) << "Src updated";
+        LOG(log_level::info) << "Update dst partition name and metadata ";
         dst->run_command(hash_table_cmd_id::ht_update_partition, dst_after_args);
-        //dst->recv_response();
         LOG(log_level::info) << "Dst updated";
         LOG(log_level::info) << "Exported slot range (" << split_range_begin << ", " << split_range_end << ")";
         splitting_ = false;

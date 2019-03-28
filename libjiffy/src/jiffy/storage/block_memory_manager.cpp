@@ -14,7 +14,8 @@ void *block_memory_manager::mb_malloc(size_t size) {
     return nullptr;
   }
   auto ptr = mallocx(size, 0);
-  used_ += sallocx(ptr, 0);
+  //used_ += sallocx(ptr, 0);
+  used_ += size;
   return ptr;
 }
 

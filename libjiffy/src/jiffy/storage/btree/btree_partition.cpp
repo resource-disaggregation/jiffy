@@ -20,7 +20,7 @@ btree_partition::btree_partition(block_memory_manager *manager,
                                  const std::string &directory_host,
                                  const int directory_port)
     : chain_module(manager, name, metadata, BTREE_OPS),
-      partition_(less_type(), build_allocator<btree_pair_type>()),
+      partition_(less_type()),
       splitting_(false),
       merging_(false),
       dirty_(false),

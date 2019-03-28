@@ -25,6 +25,9 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
       dirty_(false),
       directory_host_(directory_host),
       directory_port_(directory_port) {
+  // TODO find the max size
+  LOG(log_level::info) << "max size is: " << partition_.max_size();
+  partition_.reserve(10);
   auto ser = conf.get("msgqueue.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
@@ -42,7 +45,7 @@ std::string msg_queue_partition::send(const std::string &message) {
   LOG(log_level::info) << "Sending " << message << " Storage size " << storage_size() << " Storage capacity " << storage_capacity();
   LOG(log_level::info) << "partition size " << partition_.size() << " partition capacity " << partition_.capacity();
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-  if (storage_size() >= storage_capacity() && partition_.size() >= partition_.capacity()) {
+  if (storage_size() * 2 >= storage_capacity() && partition_.size() >= partition_.capacity()) {
     if (!next_target_str().empty()) {
       return "!full!" + next_target_str();
     } else {
@@ -201,7 +204,8 @@ bool msg_queue_partition::overload() {
   //if (storage_size() < storage_capacity())
     //return false;
   //return partition_.size() > static_cast<size_t>(static_cast<double>(partition_.capacity()) * threshold_hi_);
-  return storage_size() > static_cast<size_t>(static_cast<double>(storage_capacity()) * threshold_hi_);
+  return partition_.size() > static_cast<size_t>(static_cast<double>(partition_.capacity()) * threshold_hi_);
+  //return storage_size() > static_cast<size_t>(static_cast<double>(storage_capacity()) * threshold_hi_);
 }
 
 REGISTER_IMPLEMENTATION("msgqueue", msg_queue_partition);

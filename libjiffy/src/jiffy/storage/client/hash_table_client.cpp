@@ -26,6 +26,7 @@ void hash_table_client::refresh() {
   blocks_.clear();
   for (const auto &block: status_.data_blocks()) {
     slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0]));
+    LOG(log_level::info) << std::stoull(utils::string_utils::split(block.name, '_')[0]);
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, KV_OPS, timeout_ms_));
   }
 }
@@ -172,7 +173,17 @@ std::size_t hash_table_client::num_keys() {
 }
 
 size_t hash_table_client::block_id(const std::string &key) {
-  return static_cast<size_t>(std::upper_bound(slots_.begin(), slots_.end(), hash_slot::get(key)) - slots_.begin() - 1);
+  auto hash = hash_slot::get(key);
+  int max_value = -1;
+  size_t idx;
+  for(auto x = slots_.begin(); x != slots_.end(); x++) {
+    if(*x <= hash && *x > max_value) {
+      max_value = *x;
+      idx = static_cast<size_t>(x - slots_.begin());
+    }
+  }
+  return idx;
+ // return static_cast<size_t>(std::upper_bound(slots_.begin(), slots_.end(), hash_slot::get(key)) - slots_.begin() - 1);
 }
 
 std::vector<std::string> hash_table_client::batch_command(const hash_table_cmd_id &op,
