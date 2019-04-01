@@ -14,13 +14,13 @@ binary make_binary(const std::string& str, const block_memory_allocator<uint8_t>
 
 TEST_CASE("local_write_test", "[write]") {
   block_memory_manager manager;
-  block_memory_allocator<kv_pair_type> allocator(&manager);
+  //block_memory_allocator<kv_pair_type> allocator(&manager);
   block_memory_allocator<uint8_t> binary_allocator(&manager);
   //hash_table_type table(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type(), allocator);
   hash_table_type table(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type());
   auto ltable = table.lock_table();
-  auto bkey = make_binary("key", binary_allocator);
-  auto bval = make_binary("value", binary_allocator);
+  auto bkey = binary("key", binary_allocator);
+  auto bval = binary("value", binary_allocator);
   ltable.insert(bkey, bval);
   auto ser = std::make_shared<csv_serde>(binary_allocator);
   local_store store(ser);
@@ -28,9 +28,7 @@ TEST_CASE("local_write_test", "[write]") {
   ltable.unlock();
   std::ifstream in("/tmp/a.txt", std::ifstream::in);
   std::string data;
-  //binary data;
   in >> data;
-  //REQUIRE(to_string(data) == "key,value");
   REQUIRE(data == "key,value");
   std::remove("/tmp/a.txt");
 }

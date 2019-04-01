@@ -45,20 +45,17 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
 }
 
 std::string hash_table_partition::put(const std::string &key, const std::string &value, bool redirect) {
-  LOG(log_level::info) << "Putting key: " << key << " storage_size " << storage_size() << "storage_capacity " << storage_capacity();
+  //LOG(log_level::info) << "Putting key: " << key << " storage_size " << storage_size() << "storage_capacity " << storage_capacity();
   auto hash = hash_slot::get(key);
-  LOG(log_level::info) << "Put hash " << hash << " in partition " << name();
+  //LOG(log_level::info) << "Put hash " << hash << " in partition " << name();
   //LOG(log_level::info) << "Putting key: " << key << " Value: " << value << " Hash: " << hash <<" On partition: " << name();
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
     }
-    LOG(log_level::info) << "Look here 1";
     if (block_.insert(make_binary(key), make_binary(value))) {
-      LOG(log_level::info) << "Look here 2";
       return "!ok";
     } else {
-      LOG(log_level::info) << "Look here 3";
       return "!duplicate_key";
     }
   }
@@ -97,7 +94,7 @@ std::string hash_table_partition::get(const std::string &key, bool redirect) {
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     try {
-      return to_string(block_.find(key));
+      return to_string(block_.find(make_binary(key)));
     } catch (std::out_of_range &e) {
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
         return "!exporting!" + export_target_str();

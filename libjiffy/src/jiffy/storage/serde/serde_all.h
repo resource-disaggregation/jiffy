@@ -94,11 +94,8 @@ class csv_serde_impl : public serde {
   template<typename DataType>
   std::size_t serialize_impl(const DataType &table, const std::shared_ptr<std::ostream> &out) {
     for (auto e: table) {
-      *out << reinterpret_cast<const char *>(e.first.data()) << "," << reinterpret_cast<const char *>(e.second.data())
+      *out << to_string(e.first) << "," << to_string(e.second)
            << "\n";
-      LOG(log_level::info) <<reinterpret_cast<const char *>(e.first.data()) << "," << reinterpret_cast<const char *>(e.second.data())
-                           << "\n";
-
     }
     out->flush();
     auto sz = out->tellp();
