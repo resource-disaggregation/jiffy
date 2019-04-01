@@ -8,7 +8,7 @@
 using namespace ::jiffy::persistent;
 using namespace ::jiffy::storage;
 
-binary make_binary(const std::string& str, block_memory_allocator<uint8_t> allocator) {
+binary make_binary(const std::string& str, const block_memory_allocator<uint8_t>& allocator) {
   return binary(str, allocator);
 }
 
@@ -28,7 +28,9 @@ TEST_CASE("local_write_test", "[write]") {
   ltable.unlock();
   std::ifstream in("/tmp/a.txt", std::ifstream::in);
   std::string data;
+  //binary data;
   in >> data;
+  //REQUIRE(to_string(data) == "key,value");
   REQUIRE(data == "key,value");
   std::remove("/tmp/a.txt");
 }

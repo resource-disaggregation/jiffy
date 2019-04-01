@@ -5,9 +5,12 @@
 #include "jiffy/storage/btree/btree_defs.h"
 #include "jiffy/storage/msgqueue/msg_queue_defs.h"
 #include "jiffy/storage/types/binary.h"
+#include "jiffy/utils/logger.h"
 #include <sstream>
 #include <iostream>
 #include <fstream>
+
+using namespace jiffy::utils;
 
 namespace jiffy {
 namespace storage {
@@ -93,6 +96,9 @@ class csv_serde_impl : public serde {
     for (auto e: table) {
       *out << reinterpret_cast<const char *>(e.first.data()) << "," << reinterpret_cast<const char *>(e.second.data())
            << "\n";
+      LOG(log_level::info) <<reinterpret_cast<const char *>(e.first.data()) << "," << reinterpret_cast<const char *>(e.second.data())
+                           << "\n";
+
     }
     out->flush();
     auto sz = out->tellp();

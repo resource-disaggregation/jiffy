@@ -27,7 +27,7 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
       directory_port_(directory_port) {
   // TODO find the max size
   LOG(log_level::info) << "max size is: " << partition_.max_size();
-  partition_.reserve(10);
+//  partition_.reserve(10);
   auto ser = conf.get("msgqueue.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
@@ -42,7 +42,8 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
 }
 
 std::string msg_queue_partition::send(const std::string &message) {
-  LOG(log_level::info) << "Sending " << message << " Storage size " << storage_size() << " Storage capacity " << storage_capacity();
+  LOG(log_level::info) << "Sending " << message << " Storage size " << storage_size() << " Storage capacity "
+                       << storage_capacity();
   LOG(log_level::info) << "partition size " << partition_.size() << " partition capacity " << partition_.capacity();
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   if (storage_size() * 2 >= storage_capacity() && partition_.size() >= partition_.capacity()) {
@@ -67,7 +68,7 @@ std::string msg_queue_partition::read(std::string position) {
   }
   if (!next_target_str().empty())
     return "!msg_not_in_partition!" + next_target_str();
-  else if(storage_size() >= storage_capacity() && partition_.size() >= partition_.capacity())
+  else if (storage_size() >= storage_capacity() && partition_.size() >= partition_.capacity())
     return "!redo";
   else return "!msg_not_found";
 }
@@ -119,7 +120,8 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
   if (auto_scale_.load() && is_mutator(cmd_id) && overload() && is_tail()
       && overload_.compare_exchange_strong(expected, true)) {
     LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
-                         << storage_capacity() << " partition size = " << size() << "partition capacity " << partition_.capacity();
+                         << storage_capacity() << " partition size = " << size() << "partition capacity "
+                         << partition_.capacity();
     try {
       overload_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
@@ -202,9 +204,9 @@ void msg_queue_partition::forward_all() {
 
 bool msg_queue_partition::overload() {
   //if (storage_size() < storage_capacity())
-    //return false;
+  //return false;
   //return partition_.size() > static_cast<size_t>(static_cast<double>(partition_.capacity()) * threshold_hi_);
-  return partition_.size() > static_cast<size_t>(static_cast<double>(partition_.capacity()) * threshold_hi_);
+  return partition_.size() > static_cast<size_t>(static_cast<double>(storage_capacity() / 64) * threshold_hi_);
   //return storage_size() > static_cast<size_t>(static_cast<double>(storage_capacity()) * threshold_hi_);
 }
 

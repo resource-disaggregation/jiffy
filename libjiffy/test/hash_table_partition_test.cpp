@@ -85,7 +85,7 @@ TEST_CASE("hash_table_storage_size_test", "[put][size][storage_size][reset]") {
   //REQUIRE(block.storage_size() == 311712);
   REQUIRE(block.storage_size() <= block.storage_capacity());
 }
-
+/*
 TEST_CASE("hash_table_flush_load_test", "[put][sync][reset][load][get]") {
   block_memory_manager manager;
   hash_table_partition block(&manager);
@@ -103,3 +103,4 @@ TEST_CASE("hash_table_flush_load_test", "[put][sync][reset][load][get]") {
     REQUIRE(block.get(std::to_string(i)) == std::to_string(i));
   }
 }
+*/
