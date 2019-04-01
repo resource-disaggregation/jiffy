@@ -2,10 +2,9 @@
 #define JIFFY_AUTO_SCALING_RPC_SERVER_H
 
 #include <thrift/server/TThreadedServer.h>
-#include "jiffy/storage/block.h"
 
 namespace jiffy {
-namespace storage {
+namespace auto_scaling {
 /* Storage management server class */
 class auto_scaling_server {
  public:
@@ -16,7 +15,8 @@ class auto_scaling_server {
    * @param port Socket port number
    * @return Server
    */
-  static std::shared_ptr<apache::thrift::server::TThreadedServer> create(std::vector<std::shared_ptr<block>> &blocks,
+  static std::shared_ptr<apache::thrift::server::TThreadedServer> create(const std::string directory_host,
+                                                                         int directory_port,
                                                                          const std::string &address,
                                                                          int port);
 

@@ -14,10 +14,12 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
-std::shared_ptr<TThreadedServer> auto_scaling_server::create(std::vector<std::shared_ptr<block>> &blocks,
-                                                                   const std::string &address,
-                                                                   int port) {
-  std::shared_ptr<auto_scaling_serviceIfFactory> clone_factory(new auto_scaling_service_factory(blocks));
+std::shared_ptr<TThreadedServer> auto_scaling_server::create(const std::string directory_host,
+                                                             int directory_port,
+                                                             const std::string &address,
+                                                             int port) {
+  std::shared_ptr<auto_scaling_serviceIfFactory>
+      clone_factory(new auto_scaling_service_factory(directory_host, directory_port));
   std::shared_ptr<auto_scaling_serviceProcessorFactory>
       proc_factory(new auto_scaling_serviceProcessorFactory(clone_factory));
   std::shared_ptr<TServerSocket> sock(new TServerSocket(address, port));

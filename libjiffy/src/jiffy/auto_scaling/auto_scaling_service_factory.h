@@ -1,7 +1,6 @@
 #ifndef JIFFY_AUTO_SCALING_RPC_SERVICE_FACTORY_H
 #define JIFFY_AUTO_SCALING_RPC_SERVICE_FACTORY_H
 
-#include "jiffy/storage/block.h"
 #include "auto_scaling_service.h"
 
 namespace jiffy {
@@ -16,7 +15,7 @@ class auto_scaling_service_factory : public auto_scaling_serviceIfFactory {
    * @param blocks Blocks
    */
 
-  explicit auto_scaling_factory(std::vector<std::shared_ptr<block>> &blocks);
+  explicit auto_scaling_service_factory(const std::string directory_host, int directory_port);
 
   /**
    * @brief Fetch storage management service handler
@@ -32,10 +31,12 @@ class auto_scaling_service_factory : public auto_scaling_serviceIfFactory {
    */
 
   void releaseHandler(auto_scaling_serviceIf *anIf) override;
- private:
 
-  /* Chain blocks */
-  std::vector<std::shared_ptr<block>> &blocks_;
+
+ private:
+  std::string directory_host_;
+  int directory_port_;
+
 };
 
 }
