@@ -6,7 +6,7 @@
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/storage/msgqueue/msg_queue_ops.h"
 #include "jiffy/directory/client/directory_client.h"
-#include "jiffy/auto_scaling/auto_scaling_client.h"
+//#include "jiffy/auto_scaling/auto_scaling_client.h"
 #include <thread>
 
 namespace jiffy {
@@ -140,10 +140,10 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
       std::map<std::string, std::string> scale_conf;
       scale_conf.emplace(std::make_pair(std::string("type"), std::string("msg_queue")));
       scale_conf.emplace(std::make_pair(std::string("next_partition_name"), dst_partition_name));
-      auto scale = std::make_shared<auto_scaling::auto_scaling_client>("127.0.0.1", 9093);
+      //auto scale = std::make_shared<auto_scaling::auto_scaling_client>("127.0.0.1", 9093);
       std::string ret;
       LOG(log_level::info) << "current thread 1" << std::this_thread::get_id();
-      scale->auto_scaling(chain(), path(), scale_conf);
+      //scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
       overload_ = false;
       LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();

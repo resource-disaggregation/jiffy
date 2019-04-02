@@ -21,8 +21,8 @@
 #include "jiffy/directory/fs/sync_worker.h"
 #include "jiffy/directory/lease/lease_expiry_worker.h"
 #include "jiffy/directory/lease/lease_server.h"
-#include "jiffy/auto_scaling/auto_scaling_client.h"
-#include "jiffy/auto_scaling/auto_scaling_server.h"
+//#include "jiffy/auto_scaling/auto_scaling_client.h"
+//#include "jiffy/auto_scaling/auto_scaling_server.h"
 
 using namespace jiffy::client;
 using namespace ::jiffy::storage;
@@ -101,9 +101,9 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
     dir_serve_thread.join();
   }
 }
-*/
 
-/*
+
+
 TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(2, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -169,8 +169,8 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
     dir_serve_thread.join();
   }
 }
-
 */
+
 
 TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();

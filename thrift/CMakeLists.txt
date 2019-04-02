@@ -27,6 +27,7 @@ thrift_gen(${THRIFT_GEN_CXX} src/lease_service.thrift ../libjiffy/src/jiffy/dire
 thrift_gen(${THRIFT_GEN_CXX} src/storage_management_service.thrift ../libjiffy/src/jiffy/storage/manager/)
 thrift_gen(${THRIFT_GEN_CXX} src/auto_scaling_service.thrift ../libjiffy/src/jiffy/auto_scaling/)
 
+
 # Generate py sources
 thrift_gen(${THRIFT_GEN_PY} src/block_service.thrift ../pyjiffy/)
 thrift_gen(${THRIFT_GEN_PY} src/directory_service.thrift ../pyjiffy/)
