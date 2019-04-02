@@ -18,7 +18,7 @@ class auto_scaling_service_handler : public auto_scaling_serviceIf {
 
   explicit auto_scaling_service_handler(const std::string directory_host, int directory_port);
 
-  void auto_scaling(std::string& _return, const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf) override;
+  void auto_scaling(const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf) override;
 
  private:
 

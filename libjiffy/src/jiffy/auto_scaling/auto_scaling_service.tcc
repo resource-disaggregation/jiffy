@@ -201,14 +201,6 @@ uint32_t auto_scaling_service_auto_scaling_result::read(Protocol_* iprot) {
     }
     switch (fid)
     {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->success);
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -236,11 +228,7 @@ uint32_t auto_scaling_service_auto_scaling_result::write(Protocol_* oprot) const
 
   xfer += oprot->writeStructBegin("auto_scaling_service_auto_scaling_result");
 
-  if (this->__isset.success) {
-    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_STRING, 0);
-    xfer += oprot->writeString(this->success);
-    xfer += oprot->writeFieldEnd();
-  } else if (this->__isset.ex) {
+  if (this->__isset.ex) {
     xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
     xfer += this->ex.write(oprot);
     xfer += oprot->writeFieldEnd();
@@ -273,14 +261,6 @@ uint32_t auto_scaling_service_auto_scaling_presult::read(Protocol_* iprot) {
     }
     switch (fid)
     {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString((*(this->success)));
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -302,10 +282,10 @@ uint32_t auto_scaling_service_auto_scaling_presult::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-void auto_scaling_serviceClientT<Protocol_>::auto_scaling(std::string& _return, const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf)
+void auto_scaling_serviceClientT<Protocol_>::auto_scaling(const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf)
 {
   send_auto_scaling(current_replica_chain, path, conf);
-  recv_auto_scaling(_return);
+  recv_auto_scaling();
 }
 
 template <class Protocol_>
@@ -326,7 +306,7 @@ void auto_scaling_serviceClientT<Protocol_>::send_auto_scaling(const std::vector
 }
 
 template <class Protocol_>
-void auto_scaling_serviceClientT<Protocol_>::recv_auto_scaling(std::string& _return)
+void auto_scaling_serviceClientT<Protocol_>::recv_auto_scaling()
 {
 
   int32_t rseqid = 0;
@@ -352,19 +332,14 @@ void auto_scaling_serviceClientT<Protocol_>::recv_auto_scaling(std::string& _ret
     this->iprot_->getTransport()->readEnd();
   }
   auto_scaling_service_auto_scaling_presult result;
-  result.success = &_return;
   result.read(this->iprot_);
   this->iprot_->readMessageEnd();
   this->iprot_->getTransport()->readEnd();
 
-  if (result.__isset.success) {
-    // _return pointer has now been filled
-    return;
-  }
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "auto_scaling failed: unknown result");
+  return;
 }
 
 template <class Protocol_>
@@ -431,8 +406,7 @@ void auto_scaling_serviceProcessorT<Protocol_>::process_auto_scaling(int32_t seq
 
   auto_scaling_service_auto_scaling_result result;
   try {
-    iface_->auto_scaling(result.success, args.current_replica_chain, args.path, args.conf);
-    result.__isset.success = true;
+    iface_->auto_scaling(args.current_replica_chain, args.path, args.conf);
   } catch (auto_scaling_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -489,8 +463,7 @@ void auto_scaling_serviceProcessorT<Protocol_>::process_auto_scaling(int32_t seq
 
   auto_scaling_service_auto_scaling_result result;
   try {
-    iface_->auto_scaling(result.success, args.current_replica_chain, args.path, args.conf);
-    result.__isset.success = true;
+    iface_->auto_scaling(args.current_replica_chain, args.path, args.conf);
   } catch (auto_scaling_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -532,10 +505,10 @@ template <class Protocol_>
 }
 
 template <class Protocol_>
-void auto_scaling_serviceConcurrentClientT<Protocol_>::auto_scaling(std::string& _return, const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf)
+void auto_scaling_serviceConcurrentClientT<Protocol_>::auto_scaling(const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf)
 {
   int32_t seqid = send_auto_scaling(current_replica_chain, path, conf);
-  recv_auto_scaling(_return, seqid);
+  recv_auto_scaling(seqid);
 }
 
 template <class Protocol_>
@@ -560,7 +533,7 @@ int32_t auto_scaling_serviceConcurrentClientT<Protocol_>::send_auto_scaling(cons
 }
 
 template <class Protocol_>
-void auto_scaling_serviceConcurrentClientT<Protocol_>::recv_auto_scaling(std::string& _return, const int32_t seqid)
+void auto_scaling_serviceConcurrentClientT<Protocol_>::recv_auto_scaling(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -599,22 +572,16 @@ void auto_scaling_serviceConcurrentClientT<Protocol_>::recv_auto_scaling(std::st
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
       auto_scaling_service_auto_scaling_presult result;
-      result.success = &_return;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
       this->iprot_->getTransport()->readEnd();
 
-      if (result.__isset.success) {
-        // _return pointer has now been filled
-        sentry.commit();
-        return;
-      }
       if (result.__isset.ex) {
         sentry.commit();
         throw result.ex;
       }
-      // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "auto_scaling failed: unknown result");
+      sentry.commit();
+      return;
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);

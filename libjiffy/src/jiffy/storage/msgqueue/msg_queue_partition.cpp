@@ -6,6 +6,7 @@
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/storage/msgqueue/msg_queue_ops.h"
 #include "jiffy/directory/client/directory_client.h"
+#include "jiffy/auto_scaling/auto_scaling_client.h"
 #include <thread>
 
 namespace jiffy {
@@ -125,20 +126,29 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
     try {
       overload_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
-      auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
-      auto dst_replica_chain =
-          fs->add_block(path(), dst_partition_name, "regular");
-      next_target(dst_replica_chain.block_ids);
-      std::vector<std::string> args;
-      args.emplace_back(next_target_str());
-      std::thread([=]() {
-        auto src = std::make_shared<replica_chain_client>(fs, path(), chain(), MSG_QUEUE_OPS);
-        src->run_command(msg_queue_cmd_id::mq_update_partition, args);
-      }).detach();
+      //auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
+      //auto dst_replica_chain =
+          //fs->add_block(path(), dst_partition_name, "regular");
+      //next_target(dst_replica_chain.block_ids);
+      //std::vector<std::string> args;
+      //args.emplace_back(next_target_str());
+      //std::thread([=]() {
+      //  auto src = std::make_shared<replica_chain_client>(fs, path(), chain(), MSG_QUEUE_OPS);
+      //  src->run_command(msg_queue_cmd_id::mq_update_partition, args);
+      //}).detach();
+
+      std::map<std::string, std::string> scale_conf;
+      scale_conf.emplace(std::make_pair(std::string("type"), std::string("msg_queue")));
+      scale_conf.emplace(std::make_pair(std::string("next_partition_name"), dst_partition_name));
+      auto scale = std::make_shared<auto_scaling::auto_scaling_client>("127.0.0.1", 9093);
+      std::string ret;
+      LOG(log_level::info) << "current thread 1" << std::this_thread::get_id();
+      scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
       overload_ = false;
       LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();
     }
+    LOG(log_level::info) << "exit run command function";
   }
 }
 

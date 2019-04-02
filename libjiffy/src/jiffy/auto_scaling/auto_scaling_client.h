@@ -41,7 +41,7 @@ class auto_scaling_client {
 
   void disconnect();
 
-  void auto_scaling(std::string& _return, const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf);
+  void auto_scaling(const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf);
 
  private:
   /* Socket */

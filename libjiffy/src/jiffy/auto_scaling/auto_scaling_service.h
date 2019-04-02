@@ -21,7 +21,7 @@ namespace jiffy { namespace auto_scaling {
 class auto_scaling_serviceIf {
  public:
   virtual ~auto_scaling_serviceIf() {}
-  virtual void auto_scaling(std::string& _return, const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf) = 0;
+  virtual void auto_scaling(const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf) = 0;
 };
 
 class auto_scaling_serviceIfFactory {
@@ -51,7 +51,7 @@ class auto_scaling_serviceIfSingletonFactory : virtual public auto_scaling_servi
 class auto_scaling_serviceNull : virtual public auto_scaling_serviceIf {
  public:
   virtual ~auto_scaling_serviceNull() {}
-  void auto_scaling(std::string& /* _return */, const std::vector<std::string> & /* current_replica_chain */, const std::string& /* path */, const std::map<std::string, std::string> & /* conf */) {
+  void auto_scaling(const std::vector<std::string> & /* current_replica_chain */, const std::string& /* path */, const std::map<std::string, std::string> & /* conf */) {
     return;
   }
 };
@@ -123,8 +123,7 @@ class auto_scaling_service_auto_scaling_pargs {
 };
 
 typedef struct _auto_scaling_service_auto_scaling_result__isset {
-  _auto_scaling_service_auto_scaling_result__isset() : success(false), ex(false) {}
-  bool success :1;
+  _auto_scaling_service_auto_scaling_result__isset() : ex(false) {}
   bool ex :1;
 } _auto_scaling_service_auto_scaling_result__isset;
 
@@ -133,23 +132,18 @@ class auto_scaling_service_auto_scaling_result {
 
   auto_scaling_service_auto_scaling_result(const auto_scaling_service_auto_scaling_result&);
   auto_scaling_service_auto_scaling_result& operator=(const auto_scaling_service_auto_scaling_result&);
-  auto_scaling_service_auto_scaling_result() : success() {
+  auto_scaling_service_auto_scaling_result() {
   }
 
   virtual ~auto_scaling_service_auto_scaling_result() throw();
-  std::string success;
   auto_scaling_exception ex;
 
   _auto_scaling_service_auto_scaling_result__isset __isset;
-
-  void __set_success(const std::string& val);
 
   void __set_ex(const auto_scaling_exception& val);
 
   bool operator == (const auto_scaling_service_auto_scaling_result & rhs) const
   {
-    if (!(success == rhs.success))
-      return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
@@ -168,8 +162,7 @@ class auto_scaling_service_auto_scaling_result {
 };
 
 typedef struct _auto_scaling_service_auto_scaling_presult__isset {
-  _auto_scaling_service_auto_scaling_presult__isset() : success(false), ex(false) {}
-  bool success :1;
+  _auto_scaling_service_auto_scaling_presult__isset() : ex(false) {}
   bool ex :1;
 } _auto_scaling_service_auto_scaling_presult__isset;
 
@@ -178,7 +171,6 @@ class auto_scaling_service_auto_scaling_presult {
 
 
   virtual ~auto_scaling_service_auto_scaling_presult() throw();
-  std::string* success;
   auto_scaling_exception ex;
 
   _auto_scaling_service_auto_scaling_presult__isset __isset;
@@ -214,9 +206,9 @@ class auto_scaling_serviceClientT : virtual public auto_scaling_serviceIf {
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void auto_scaling(std::string& _return, const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf);
+  void auto_scaling(const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf);
   void send_auto_scaling(const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf);
-  void recv_auto_scaling(std::string& _return);
+  void recv_auto_scaling();
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
@@ -286,14 +278,13 @@ class auto_scaling_serviceMultiface : virtual public auto_scaling_serviceIf {
     ifaces_.push_back(iface);
   }
  public:
-  void auto_scaling(std::string& _return, const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf) {
+  void auto_scaling(const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->auto_scaling(_return, current_replica_chain, path, conf);
+      ifaces_[i]->auto_scaling(current_replica_chain, path, conf);
     }
-    ifaces_[i]->auto_scaling(_return, current_replica_chain, path, conf);
-    return;
+    ifaces_[i]->auto_scaling(current_replica_chain, path, conf);
   }
 
 };
@@ -327,9 +318,9 @@ class auto_scaling_serviceConcurrentClientT : virtual public auto_scaling_servic
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void auto_scaling(std::string& _return, const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf);
+  void auto_scaling(const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf);
   int32_t send_auto_scaling(const std::vector<std::string> & current_replica_chain, const std::string& path, const std::map<std::string, std::string> & conf);
-  void recv_auto_scaling(std::string& _return, const int32_t seqid);
+  void recv_auto_scaling(const int32_t seqid);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
