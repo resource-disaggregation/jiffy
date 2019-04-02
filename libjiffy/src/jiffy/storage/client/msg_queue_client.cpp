@@ -2,6 +2,7 @@
 #include "jiffy/utils/logger.h"
 #include "jiffy/utils/string_utils.h"
 #include <algorithm>
+#include <thread>
 
 namespace jiffy {
 namespace storage {
@@ -109,8 +110,9 @@ std::size_t msg_queue_client::block_id(const msg_queue_cmd_id &op) {
 }
 
 void msg_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
-  if (response == "!redo")
+  if (response == "!redo") {
     throw redo_error();
+  }
   if (response.substr(0, 5) == "!full") {
     typedef std::vector<std::string> list_t;
     do {

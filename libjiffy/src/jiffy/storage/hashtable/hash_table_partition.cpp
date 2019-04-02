@@ -5,7 +5,7 @@
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/persistent/persistent_store.h"
 #include "jiffy/storage/partition_manager.h"
-//#include "jiffy/auto_scaling/auto_scaling_client.h"
+#include "jiffy/auto_scaling/auto_scaling_client.h"
 #include <chrono>
 #include <thread>
 

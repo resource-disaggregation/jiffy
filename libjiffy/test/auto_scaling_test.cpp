@@ -21,8 +21,8 @@
 #include "jiffy/directory/fs/sync_worker.h"
 #include "jiffy/directory/lease/lease_expiry_worker.h"
 #include "jiffy/directory/lease/lease_server.h"
-//#include "jiffy/auto_scaling/auto_scaling_client.h"
-//#include "jiffy/auto_scaling/auto_scaling_server.h"
+#include "jiffy/auto_scaling/auto_scaling_client.h"
+#include "jiffy/auto_scaling/auto_scaling_server.h"
 
 using namespace jiffy::client;
 using namespace ::jiffy::storage;

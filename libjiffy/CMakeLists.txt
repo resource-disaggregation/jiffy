@@ -166,22 +166,22 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/notification/subscription_map.cpp
           src/jiffy/storage/notification/subscription_map.h
           src/jiffy/storage/storage_management_ops.h
-#          src/jiffy/auto_scaling/auto_scaling_client.cpp
-#          src/jiffy/auto_scaling/auto_scaling_client.h
-#          src/jiffy/auto_scaling/auto_scaling_server.cpp
-#          src/jiffy/auto_scaling/auto_scaling_server.h
-#          src/jiffy/auto_scaling/auto_scaling_service.cpp
-#          src/jiffy/auto_scaling/auto_scaling_service.h
-#          src/jiffy/auto_scaling/auto_scaling_service.tcc
-#          src/jiffy/auto_scaling/auto_scaling_service_constants.cpp
-#          src/jiffy/auto_scaling/auto_scaling_service_constants.h
-#          src/jiffy/auto_scaling/auto_scaling_service_factory.cpp
-#          src/jiffy/auto_scaling/auto_scaling_service_factory.h
-#          src/jiffy/auto_scaling/auto_scaling_service_handler.cpp
-#          src/jiffy/auto_scaling/auto_scaling_service_handler.h
-#          src/jiffy/auto_scaling/auto_scaling_service_types.cpp
-#          src/jiffy/auto_scaling/auto_scaling_service_types.h
-#          src/jiffy/auto_scaling/auto_scaling_service_types.tcc
+          src/jiffy/auto_scaling/auto_scaling_client.cpp
+          src/jiffy/auto_scaling/auto_scaling_client.h
+          src/jiffy/auto_scaling/auto_scaling_server.cpp
+          src/jiffy/auto_scaling/auto_scaling_server.h
+          src/jiffy/auto_scaling/auto_scaling_service.cpp
+          src/jiffy/auto_scaling/auto_scaling_service.h
+          src/jiffy/auto_scaling/auto_scaling_service.tcc
+          src/jiffy/auto_scaling/auto_scaling_service_constants.cpp
+          src/jiffy/auto_scaling/auto_scaling_service_constants.h
+          src/jiffy/auto_scaling/auto_scaling_service_factory.cpp
+          src/jiffy/auto_scaling/auto_scaling_service_factory.h
+          src/jiffy/auto_scaling/auto_scaling_service_handler.cpp
+          src/jiffy/auto_scaling/auto_scaling_service_handler.h
+          src/jiffy/auto_scaling/auto_scaling_service_types.cpp
+          src/jiffy/auto_scaling/auto_scaling_service_types.h
+          src/jiffy/auto_scaling/auto_scaling_service_types.tcc
           src/jiffy/persistent/persistent_service.cpp
           src/jiffy/persistent/persistent_service.h
           src/jiffy/persistent/persistent_store.cpp
@@ -241,7 +241,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
     include_directories(${CATCH_INCLUDE_DIR})
     add_executable(jiffy_tests
             test/jiffy_tests.cpp
-            #test/auto_scaling_test.cpp
+            test/auto_scaling_test.cpp
 #            test/block_allocation_service_test.cpp
 #            test/block_allocator_test.cpp
 #            test/chain_replication_test.cpp
