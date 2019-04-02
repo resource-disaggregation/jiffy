@@ -2,11 +2,14 @@
 #include "jiffy/utils/logger.h"
 #include "jiffy/utils/string_utils.h"
 #include "jiffy/storage/hashtable/hash_slot.h"
+#include <thread>
+#include <cmath>
 
 namespace jiffy {
 namespace storage {
 
 using namespace jiffy::utils;
+std::size_t redo_times = 0;
 
 hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interface> fs,
                                      const std::string &path,
@@ -21,12 +24,10 @@ hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interf
 
 void hash_table_client::refresh() {
   status_ = fs_->dstatus(path_);
-  LOG(log_level::info) << "Refreshing partition mappings to " << status_.to_string();
   slots_.clear();
   blocks_.clear();
   for (const auto &block: status_.data_blocks()) {
     slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0]));
-    LOG(log_level::info) << std::stoull(utils::string_utils::split(block.name, '_')[0]);
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, KV_OPS, timeout_ms_));
   }
 }
@@ -40,7 +41,9 @@ std::string hash_table_client::put(const std::string &key, const std::string &va
       _return = blocks_[block_id(key)]->run_command(hash_table_cmd_id::ht_put, args).front();
       handle_redirect(hash_table_cmd_id::ht_put, args, _return);
       redo = false;
+      redo_times = 0;
     } catch (redo_error &e) {
+      redo_times++;
       redo = true;
     }
   } while (redo);
@@ -239,6 +242,10 @@ void hash_table_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
     refresh();
     throw redo_error();
   }
+  if(response == "!full") {
+    std::this_thread::sleep_for(std::chrono::milliseconds((int)(std::pow(2, redo_times))));
+    throw redo_error();
+  }
 }
 
 void hash_table_client::handle_redirects(int32_t cmd_id,
@@ -263,6 +270,10 @@ void hash_table_client::handle_redirects(int32_t cmd_id,
     }
     if (response == "!block_moved") {
       refresh();
+      throw redo_error();
+    }
+    if(response == "!full") {
+      std::this_thread::sleep_for(std::chrono::milliseconds((int)(std::pow(2, redo_times))));
       throw redo_error();
     }
   }

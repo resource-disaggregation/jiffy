@@ -26,9 +26,6 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
       dirty_(false),
       directory_host_(directory_host),
       directory_port_(directory_port) {
-  // TODO find the max size
-  LOG(log_level::info) << "max size is: " << partition_.max_size();
-//  partition_.reserve(10);
   auto ser = conf.get("msgqueue.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
@@ -130,7 +127,6 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
       scale_conf.emplace(std::make_pair(std::string("type"), std::string("msg_queue")));
       scale_conf.emplace(std::make_pair(std::string("next_partition_name"), dst_partition_name));
       auto scale = std::make_shared<auto_scaling::auto_scaling_client>("127.0.0.1", 9093);
-      std::string ret;
       scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
       overload_ = false;

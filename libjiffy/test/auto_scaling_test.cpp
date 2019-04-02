@@ -37,7 +37,7 @@ using namespace ::apache::thrift::transport;
 #define STORAGE_MANAGEMENT_PORT 9092
 #define AUTO_SCALING_SERVICE_PORT 9093
 
-/*
+
 TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(100, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -51,6 +51,10 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
   auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
   std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
+
+  auto as_server = auto_scaling_server::create(HOST, DIRECTORY_SERVICE_PORT, HOST, AUTO_SCALING_SERVICE_PORT);
+  std::thread auto_scaling_thread([&as_server]{as_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, AUTO_SCALING_SERVICE_PORT);
 
   auto sm = std::make_shared<storage_manager>();
   auto t = std::make_shared<directory_tree>(alloc, sm);
@@ -74,18 +78,6 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
     REQUIRE(client.get(key) == key);
   }
 
-  for (std::size_t i = 0; i < 1000; i++) {
-    std::string key = std::to_string(i);
-    auto h = hash_slot::get(key);
-    if (h >= 0 && h < 32768) {
-      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[0]->impl())->get(key) == key);
-      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[1]->impl())->get(key) == "!block_moved");
-    } else {
-      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[0]->impl())->get(key) == "!block_moved");
-      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[1]->impl())->get(key) == key);
-    }
-  }
-
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -96,12 +88,17 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
     mgmt_serve_thread.join();
   }
 
+  as_server->stop();
+  if(auto_scaling_thread.joinable()) {
+    auto_scaling_thread.join();
+  }
+
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
   }
 }
-
+/*
 
 
 TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server][management_server]") {
@@ -169,9 +166,9 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
     dir_serve_thread.join();
   }
 }
+
+
 */
-
-
 TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(21, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);

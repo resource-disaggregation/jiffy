@@ -24,6 +24,7 @@ enum hash_table_cmd_id {
   ht_update_partition = 8,
   ht_get_storage_size = 9,
   ht_get_metadata = 10,
+  ht_get_range_data = 11,
 };
 
 }

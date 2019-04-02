@@ -46,7 +46,8 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
 }
 
 std::string hash_table_partition::put(const std::string &key, const std::string &value, bool redirect) {
-  //LOG(log_level::info) << "Putting key: " << key << " storage_size " << storage_size() << "storage_capacity " << storage_capacity();
+  //LOG(log_level::info) << "Putting key: " << key << " storage_size " << storage_size() << "storage_capacity "
+      //                 << storage_capacity();
   auto hash = hash_slot::get(key);
   //LOG(log_level::info) << "Put hash " << hash << " in partition " << name();
   //LOG(log_level::info) << "Putting key: " << key << " Value: " << value << " Hash: " << hash <<" On partition: " << name();
@@ -55,6 +56,10 @@ std::string hash_table_partition::put(const std::string &key, const std::string 
       return "!exporting!" + export_target_str();
     }
     if (block_.insert(make_binary(key), make_binary(value))) {
+      if (overload()) {
+        LOG(log_level::info) << "this partition is full now !!!!";
+        return "!full";
+      }
       return "!ok";
     } else {
       return "!duplicate_key";
@@ -152,14 +157,14 @@ void hash_table_partition::get_data_in_slot_range(std::vector<std::string> &data
                                                   int32_t slot_begin,
                                                   int32_t slot_end,
                                                   int32_t num_keys) {
-  auto n_items = 0;
+  std::size_t n_items = 0;
   for (const auto &entry: block_.lock_table()) {
     auto slot = hash_slot::get(entry.first);
     if (slot >= slot_begin && slot <= slot_end) {
       data.push_back(to_string(entry.first));
       data.push_back(to_string(entry.second));
       ++n_items;
-      if (n_items == num_keys) {
+      if (n_items == static_cast<std::size_t>(num_keys)) {
         return;
       }
     }
@@ -188,6 +193,8 @@ std::string hash_table_partition::update_partition(const std::string &new_name, 
     }
     export_slot_range(0, -1);
     import_slot_range(0, -1);
+    splitting_ = false;
+    merging_ = false;
   }
   metadata(status);
   slot_range(new_name);
@@ -284,6 +291,16 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         _return.emplace_back(get_metadata());
       }
       break;
+    case hash_table_cmd_id::ht_get_range_data:
+      if (nargs != 3) {
+        _return.emplace_back("!args_error");
+      } else {
+        std::vector<std::string> data;
+        get_data_in_slot_range(data, std::stoi(args[0]), std::stoi(args[1]), std::stoi(args[2]));
+        _return.insert(_return.end(), data.begin(), data.end());
+      }
+      break;
+      //TODO no one catches this error
     default:throw std::invalid_argument("No such operation id " + std::to_string(cmd_id));
   }
   if (is_mutator(cmd_id)) {
@@ -301,96 +318,12 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       // TODO: currently the split and merge use similar logic but using redundant coding, should combine them after passing all the test
       splitting_ = true;
       LOG(log_level::info) << "Requested slot range split";
-
-      auto split_range_begin = (slot_range_.first + slot_range_.second) / 2;
-      auto split_range_end = slot_range_.second;
-      std::string dst_partition_name = std::to_string(split_range_begin) + "_" + std::to_string(split_range_end);
-      auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
-      LOG(log_level::info) << "host " << directory_host_ << " port " << directory_port_;
-      auto dst_replica_chain =
-          fs->add_block(path(), dst_partition_name, "importing");
-      LOG(log_level::info) << "src replica chain " << chain().front();
-      LOG(log_level::info) << "dst replica chain " << dst_replica_chain.block_ids[0];
-
-      LOG(log_level::info) << "Look here!!!!!!!";
-      // TODO check if add_block succeed, might not be enough capacity in extreme situation
-      std::string src_partition_name = std::to_string(slot_range_.first) + "_" + std::to_string(split_range_begin);
-      set_exporting(dst_replica_chain.block_ids,
-                    split_range_begin,
-                    split_range_end);
-      std::vector<std::string> src_before_args;
-      std::vector<std::string> dst_before_args;
-      src_before_args.push_back(name());
-      src_before_args.emplace_back("exporting$" + dst_partition_name + "$" + export_target_str());
-      dst_before_args.push_back(dst_partition_name);
-      dst_before_args.emplace_back("importing$" + dst_partition_name);
-      //Setting name and metadata for src and dst
-      std::vector<std::string> src_after_args;
-      std::vector<std::string> dst_after_args;
-      src_after_args.push_back(src_partition_name);
-      src_after_args.emplace_back("regular");
-      dst_after_args.push_back(dst_partition_name);
-      dst_after_args.emplace_back("regular");
-      std::thread([=]() {
-        auto src = std::make_shared<replica_chain_client>(fs, path(), chain(), KV_OPS);
-        src->run_command(hash_table_cmd_id::ht_update_partition, src_before_args);
-        auto dst = std::make_shared<replica_chain_client>(fs, path(), dst_replica_chain, KV_OPS);
-        dst->run_command(hash_table_cmd_id::ht_update_partition, dst_before_args);
-        LOG(log_level::info) << "Dst replica chain successfully updated";
-        bool has_more = true;
-        std::size_t split_batch_size = 1024;
-        std::size_t tot_split_keys = 0;
-        while (has_more) {
-          // Read data to split
-          std::vector<std::string> split_data;
-          // Todo make this thread safe
-          get_data_in_slot_range(split_data,
-                                 split_range_begin,
-                                 split_range_end,
-                                 static_cast<int32_t>(split_batch_size));
-          if (split_data.empty()) {
-            break;
-          } else if (split_data.size() < split_batch_size) {
-            has_more = false;
-          }
-
-          LOG(log_level::info) << "Look here 2";
-          auto split_keys = split_data.size() / 2;
-          tot_split_keys += split_keys;
-          LOG(log_level::info) << "Read " << split_keys << " keys to split";
-
-          // Add redirected argument so that importing chain does not ignore our request
-          split_data.emplace_back("!redirected");
-
-          // Write data to dst partition
-          dst->run_command(hash_table_cmd_id::ht_put, split_data);
-
-          // Remove data from src partition
-          std::vector<std::string> remove_keys;
-          split_data.pop_back(); // Remove !redirected argument
-          std::size_t n_split_items = split_data.size();
-          for (std::size_t i = 0; i < n_split_items; i++) {
-            if (i % 2) {
-              remove_keys.push_back(split_data.back());
-            }
-            split_data.pop_back();
-          }
-          assert(remove_keys.size() == split_keys);
-          LOG(log_level::info) << "Sending " << remove_keys.size() << " split keys to remove";
-          auto ret = src->run_command(hash_table_cmd_id::ht_remove, remove_keys);
-          LOG(log_level::info) << "Removed " << remove_keys.size() << " split keys";
-        }
-        // Finalize slot range split
-        std::string old_name = name();
-        fs->update_partition(path(), old_name, src_partition_name, "regular");
-        src->run_command(hash_table_cmd_id::ht_update_partition, src_after_args);
-        dst->run_command(hash_table_cmd_id::ht_update_partition, dst_after_args);
-        LOG(log_level::info) << "Exported slot range (" << split_range_begin << ", " << split_range_end << ")";
-        splitting_ = false;
-        merging_ = false;
-        LOG(log_level::info) << "After split storage: " << storage_size() << " capacity: " << storage_capacity();
-      }).detach();
-
+      std::map<std::string, std::string> scale_conf;
+      scale_conf.emplace(std::make_pair(std::string("slot_range_begin"), std::to_string(slot_range_.first)));
+      scale_conf.emplace(std::make_pair(std::string("slot_range_end"), std::to_string(slot_range_.second)));
+      scale_conf.emplace(std::make_pair(std::string("type"), std::string("hash_table_split")));
+      auto scale = std::make_shared<auto_scaling::auto_scaling_client>("127.0.0.1", 9093);
+      scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
       splitting_ = false;
       LOG(log_level::warn) << "Split slot range failed: " << e.what();
