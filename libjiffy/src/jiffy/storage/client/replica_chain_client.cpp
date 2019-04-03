@@ -96,7 +96,7 @@ std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const
 std::vector<std::string> replica_chain_client::run_command_redirected(int32_t cmd_id,
                                                                       const std::vector<std::string> &args) {
   auto args_copy = args;
-  if(args.back() != "!redirected")
+  if(args_copy.back() != "!redirected")
     args_copy.push_back("!redirected");
   send_command(cmd_id, args_copy);
   return recv_response();

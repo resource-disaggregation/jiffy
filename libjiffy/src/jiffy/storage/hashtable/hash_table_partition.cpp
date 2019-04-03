@@ -256,8 +256,8 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       }
       break;
     case hash_table_cmd_id::ht_remove:
-      for (const std::string &key: args) {
-        _return.emplace_back(remove(key, redirect));
+      for (size_t i = 0; i < nargs; i += 1) {
+        _return.emplace_back(remove(args[i], redirect));
       }
       break;
     case hash_table_cmd_id::ht_update:
