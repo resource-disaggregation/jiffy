@@ -319,7 +319,7 @@ class hash_table_partition : public chain_module {
   void get_data_in_slot_range(std::vector<std::string> &data,
                                      int32_t slot_begin,
                                      int32_t slot_end,
-                                     int32_t num_keys);
+                                     int32_t batch_size);
 
   /**
    * @brief Fetch block size
@@ -347,7 +347,7 @@ class hash_table_partition : public chain_module {
    * @brief Fetch storage size
    * @return Storage size
    */
-  std::string get_storage_size();
+  std::vector<std::string> get_storage_size();
 
   /**
    * @brief Fetch partition metadata
