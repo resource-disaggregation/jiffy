@@ -179,6 +179,8 @@ size_t hash_table_client::block_id(const std::string &key) {
   auto hash = hash_slot::get(key);
   int max_value = -1;
   size_t idx;
+
+  // TODO fix this
   for(auto x = slots_.begin(); x != slots_.end(); x++) {
     if(*x <= hash && *x > max_value) {
       max_value = *x;
