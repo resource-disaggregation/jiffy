@@ -36,7 +36,9 @@ class hash_table_partition : public chain_module {
                                 const std::string &metadata = "regular",
                                 const utils::property_map &conf = {},
                                 const std::string &directory_host = "localhost",
-                                int directory_port = 9091);
+                                int directory_port = 9091,
+                                const std::string &auto_scaling_host = "localhost",
+                                int auto_scaling_port = 9095);
 
   /**
    * @brief Virtual destructor
@@ -487,6 +489,12 @@ class hash_table_partition : public chain_module {
 
   /* Directory server port number */
   int directory_port_;
+
+  /* Auto scaling server hostname */
+  std::string auto_scaling_host_;
+
+  /* Auto scaling server port number */
+  int auto_scaling_port_;
 
 };
 

@@ -19,13 +19,17 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
                                          const std::string &metadata,
                                          const utils::property_map &conf,
                                          const std::string &directory_host,
-                                         const int directory_port)
+                                         const int directory_port,
+                                         const std::string &auto_scaling_host,
+                                         const int auto_scaling_port)
     : chain_module(manager, name, metadata, MSG_QUEUE_OPS),
       partition_(build_allocator<msg_type>()),
       overload_(false),
       dirty_(false),
       directory_host_(directory_host),
-      directory_port_(directory_port) {
+      directory_port_(directory_port),
+      auto_scaling_host_(auto_scaling_host),
+      auto_scaling_port_(auto_scaling_port){
   auto ser = conf.get("msgqueue.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
@@ -126,7 +130,7 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
       std::map<std::string, std::string> scale_conf;
       scale_conf.emplace(std::make_pair(std::string("type"), std::string("msg_queue")));
       scale_conf.emplace(std::make_pair(std::string("next_partition_name"), dst_partition_name));
-      auto scale = std::make_shared<auto_scaling::auto_scaling_client>("127.0.0.1", 9093);
+      auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
       scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
       overload_ = false;

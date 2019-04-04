@@ -19,7 +19,9 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
                                            const std::string &metadata,
                                            const utils::property_map &conf,
                                            const std::string &directory_host,
-                                           const int directory_port)
+                                           const int directory_port,
+                                           const std::string& auto_scaling_host,
+                                           const int auto_scaling_port)
     : chain_module(manager, name, metadata, KV_OPS),
       block_(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type()),
       splitting_(false),
@@ -28,7 +30,9 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
       export_slot_range_(0, -1),
       import_slot_range_(0, -1),
       directory_host_(directory_host),
-      directory_port_(directory_port) {
+      directory_port_(directory_port),
+      auto_scaling_host_(auto_scaling_host),
+      auto_scaling_port_(auto_scaling_port){
   auto ser = conf.get("hashtable.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<binary_serde>(binary_allocator_);
@@ -352,7 +356,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       scale_conf.emplace(std::make_pair(std::string("slot_range_begin"), std::to_string(slot_range_.first)));
       scale_conf.emplace(std::make_pair(std::string("slot_range_end"), std::to_string(slot_range_.second)));
       scale_conf.emplace(std::make_pair(std::string("type"), std::string("hash_table_split")));
-      auto scale = std::make_shared<auto_scaling::auto_scaling_client>("127.0.0.1", 9093);
+      auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
       scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
       splitting_ = false;
@@ -370,132 +374,11 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
     try {
       merging_ = true;
       LOG(log_level::info) << "Requested slot range merge";
-
       std::map<std::string, std::string> scale_conf;
       scale_conf.emplace(std::make_pair(std::string("type"), std::string("hash_table_merge")));
       scale_conf.emplace(std::make_pair(std::string("threshold_hi_"), std::to_string(threshold_hi_)));
-      auto scale = std::make_shared<auto_scaling::auto_scaling_client>("127.0.0.1", 9093);
+      auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
       scale->auto_scaling(chain(), path(), scale_conf);
-      //auto merge_range_begin = slot_range_.first;
-      //auto merge_range_end = slot_range_.second;
-      //auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
-      //auto replica_set = fs->dstatus(path()).data_blocks();
-
-
-      //std::thread([=]() {
-      //directory::replica_chain merge_target;
-      //bool able_to_merge = true;
-      /*
-      size_t find_min_size = static_cast<size_t>(static_cast<double>(storage_capacity())) + 1;
-      for (auto &i : replica_set) {
-        if (i.fetch_slot_range().first == slot_range().second || i.fetch_slot_range().second == slot_range().first) {
-          auto client = std::make_shared<replica_chain_client>(fs, path_, i, KV_OPS, 0);
-          auto size =
-              static_cast<size_t>(std::stoi(client->run_command(hash_table_cmd_id::ht_get_storage_size,
-                                                                {}).front()));
-          auto
-              metadata_status = client->run_command(hash_table_cmd_id::ht_get_metadata, {}).front();
-          if (size + storage_size() < static_cast<size_t>(static_cast<double>(storage_capacity()) * threshold_hi_)
-              && size < find_min_size) {
-            if (metadata_status == "importing" || metadata_status == "exporting") {
-              LOG(log_level::info) << "This should be throwing an error";
-              throw std::logic_error("Replica chain already involved in re-partitioning");
-            }
-            merge_target = i;
-            find_min_size = size;
-            able_to_merge = false;
-          }
-        }
-      }
-      if (able_to_merge) {
-        throw std::logic_error("Adjacent partitions are not found or full");
-      }
-
-      // Connect two replica chains
-        auto src = std::make_shared<replica_chain_client>(fs, path_, chain(), KV_OPS, 0);
-        auto dst = std::make_shared<replica_chain_client>(fs, path_, merge_target, KV_OPS, 0);
-        std::string dst_partition_name;
-        if (merge_target.fetch_slot_range().first == slot_range().second)
-          dst_partition_name =
-              std::to_string(slot_range().first) + "_" + std::to_string(merge_target.fetch_slot_range().second);
-        else
-          dst_partition_name =
-              std::to_string(merge_target.fetch_slot_range().first) + "_" + std::to_string(slot_range().second);
-
-        set_exporting(merge_target.block_ids,
-                      merge_range_begin,
-                      merge_range_end);
-
-        std::vector<std::string> src_before_args;
-        std::vector<std::string> dst_before_args;
-        src_before_args.push_back(name());
-        src_before_args.emplace_back("exporting$" + dst_partition_name + "$" + export_target_str());
-        dst_before_args.push_back(merge_target.name);
-        dst_before_args.emplace_back("importing$" + name());
-        src->send_command(hash_table_cmd_id::ht_update_partition, src_before_args);
-        dst->send_command(hash_table_cmd_id::ht_update_partition, dst_before_args);
-        src->recv_response();
-        dst->recv_response();
-
-        bool has_more = true;
-        std::size_t merge_batch_size = 1024;
-        std::size_t tot_merge_keys = 0;
-        while (has_more) {
-          // Read data to merge
-          std::vector<std::string> merge_data;
-          get_data_in_slot_range(merge_data,
-                                 merge_range_begin,
-                                 merge_range_end,
-                                 static_cast<int32_t>(merge_batch_size));
-          if (merge_data.empty()) {
-            break;
-          } else if (merge_data.size() < merge_batch_size) {
-            has_more = false;
-          }
-
-          auto merge_keys = merge_data.size() / 2;
-          tot_merge_keys += merge_keys;
-          LOG(log_level::trace) << "Read " << merge_keys << " keys to merge";
-
-          // Add redirected argument so that importing chain does not ignore our request
-          merge_data.emplace_back("!redirected");
-
-          // Write data to dst partition
-          dst->run_command(hash_table_cmd_id::ht_put, merge_data);
-          LOG(log_level::trace) << "Sent " << merge_keys << " keys";
-
-          // Remove data from src partition
-          std::vector<std::string> remove_keys;
-          merge_data.pop_back(); // Remove !redirected argument
-          std::size_t n_merge_items = merge_data.size();
-          for (std::size_t i = 0; i < n_merge_items; i++) {
-            if (i % 2) {
-              remove_keys.push_back(merge_data.back());
-            }
-            merge_data.pop_back();
-          }
-          assert(remove_keys.size() == merge_keys);
-          src->run_command(hash_table_cmd_id::ht_remove, remove_keys);
-          LOG(log_level::trace) << "Removed " << remove_keys.size() << " merged keys";
-        }
-
-        // Finalize slot range split
-        // Update directory mapping
-        fs->update_partition(path(), merge_target.name, dst_partition_name, "regular");
-
-        //Setting name and metadata for src and dst
-        std::vector<std::string> src_after_args;
-        std::vector<std::string> dst_after_args;
-        // We don't need to update the src partition cause it will be deleted anyway
-        dst_after_args.push_back(dst_partition_name);
-        dst_after_args.emplace_back("regular$" + name());
-        dst->send_command(hash_table_cmd_id::ht_update_partition, dst_after_args);
-        dst->recv_response();
-        LOG(log_level::info) << "Merged slot range (" << merge_range_begin << ", " << merge_range_end << ")";
-        splitting_ = false;
-        merging_ = false;
-      }).detach();
-*/
     } catch (std::exception &e) {
       merging_ = false;
       LOG(log_level::warn) << "Merge slot range failed: " << e.what();
