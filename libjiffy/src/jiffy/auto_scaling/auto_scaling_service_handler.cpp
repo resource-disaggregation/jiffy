@@ -108,7 +108,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       }
       assert(remove_keys.size() == split_keys);
       LOG(log_level::info) << "Sending " << remove_keys.size() << " split keys to remove";
-      auto ret = src->run_command(storage::hash_table_cmd_id::ht_remove, remove_keys);
+      auto ret = src->run_command(storage::hash_table_cmd_id::ht_scale_remove, remove_keys);
       LOG(log_level::info) << "Removed " << remove_keys.size() << " split keys";
     }
     // Finalize slot range split
@@ -131,7 +131,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       if(i.block_ids == current_replica_chain)
         name = i.name;
     }
-    LOG(log_level::info) << "INTO THIS FUNCTION  2 *****************************";
+    LOG(log_level::info) << "INTO THIS FUNCTION  2 ***************************** " << name;
     auto src = std::make_shared<storage::replica_chain_client>(fs, path, current_replica_chain, storage::KV_OPS);
     LOG(log_level::info) << "INTO THIS FUNCTION  3 *****************************";
     if(name == "0_65536") {
@@ -244,7 +244,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
         merge_data.pop_back();
       }
       assert(remove_keys.size() == merge_keys);
-      src->run_command(storage::hash_table_cmd_id::ht_remove, remove_keys);
+      src->run_command(storage::hash_table_cmd_id::ht_scale_remove, remove_keys);
       LOG(log_level::info) << "Removed " << remove_keys.size() << " merged keys";
     }
     LOG(log_level::info) << "Look here 4";

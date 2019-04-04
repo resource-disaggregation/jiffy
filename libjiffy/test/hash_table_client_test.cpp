@@ -25,7 +25,7 @@ using namespace ::apache::thrift::transport;
 #define STORAGE_SERVICE_PORT 9091
 #define STORAGE_MANAGEMENT_PORT 9092
 #define AUTO_SCALING_SERVICE_PORT 9093
-/*
+
 TEST_CASE("hash_table_client_put_get_test", "[put][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -120,7 +120,7 @@ TEST_CASE("hash_table_client_put_update_get_test", "[put][update][get]") {
   }
 
 }
-*/
+
 
 TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -186,7 +186,8 @@ TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
     dir_serve_thread.join();
   }
 }
-/*
+
+/* TODO need to fix batch operations
 TEST_CASE("hash_table_client_pipelined_ops_test", "[put][update][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -313,4 +314,4 @@ TEST_CASE("hash_table_client_pipelined_ops_test", "[put][update][remove][get]") 
     dir_serve_thread.join();
   }
 }
-*/
+ */

@@ -300,6 +300,8 @@ class hash_table_partition : public chain_module {
 
   std::string remove(const std::string &key, bool redirect = false);
 
+  std::string scale_remove(const std::string &key);
+
   /**
    * @brief Return keys
    * @param keys Keys
