@@ -85,11 +85,11 @@ std::string hash_table_partition::upsert(const std::string &key, const std::stri
 std::string hash_table_partition::exists(const std::string &key, bool redirect) {
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
-    if (block_.contains(key)) {
-      return "true";
-    }
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
+    }
+    if (block_.contains(key)) {
+      return "true";
     }
     return "!key_not_found";
   }
@@ -99,12 +99,12 @@ std::string hash_table_partition::exists(const std::string &key, bool redirect) 
 std::string hash_table_partition::get(const std::string &key, bool redirect) {
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
+    if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+      return "!exporting!" + export_target_str();
+    }
     try {
       return to_string(block_.find(make_binary(key)));
     } catch (std::out_of_range &e) {
-      if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-        return "!exporting!" + export_target_str();
-      }
       return "!key_not_found";
     }
   }
@@ -114,15 +114,16 @@ std::string hash_table_partition::get(const std::string &key, bool redirect) {
 std::string hash_table_partition::update(const std::string &key, const std::string &value, bool redirect) {
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
+    if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+      return "!exporting!" + export_target_str();
+    }
     std::string old_val;
     if (block_.update_fn(key, [&](value_type &v) {
       old_val = to_string(v);
       v = make_binary(value);
     })) {
+      LOG(log_level::info) << "successfully removed";
       return old_val;
-    }
-    if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      return "!exporting!" + export_target_str();
     }
     return "!key_not_found";
   }
@@ -134,6 +135,9 @@ std::string hash_table_partition::remove(const std::string &key, bool redirect) 
   auto hash = hash_slot::get(key);
   LOG(log_level::info) << "Removing hash" << hash;
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
+    if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+      return "!exporting!" + export_target_str();
+    }
     std::string old_val;
     if (block_.erase_fn(key, [&](value_type &value) {
       old_val = to_string(value);
@@ -141,12 +145,25 @@ std::string hash_table_partition::remove(const std::string &key, bool redirect) 
     })) {
       return old_val;
     }
-    if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      return "!exporting!" + export_target_str();
-    }
+    if(metadata_ == "importing")
+      return "!block_moved";
     return "!key_not_found";
   }
   return "!block_moved";
+}
+
+std::string hash_table_partition::scale_remove(const std::string &key) {
+  auto hash = hash_slot::get(key);
+  if (in_slot_range(hash)) {
+    std::string old_val;
+    if (block_.erase_fn(key, [&](value_type &value) {
+      old_val = to_string(value);
+      return true;
+    })) {
+      return old_val;
+    }
+  }
+  else throw std::logic_error("this should be in the slot range");
 }
 
 void hash_table_partition::keys(std::vector<std::string> &keys) { // Remove this operation
@@ -193,11 +210,12 @@ std::string hash_table_partition::update_partition(const std::string &new_name, 
         auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
         fs->remove_block(path(), s[1]);
       }
+    } else {
+      splitting_ = false;
+      merging_ = false;
     }
     export_slot_range(0, -1);
     import_slot_range(0, -1);
-    splitting_ = false;
-    merging_ = false;
   }
   metadata(status);
   slot_range(new_name);
@@ -305,6 +323,11 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         std::vector<std::string> data;
         get_data_in_slot_range(data, std::stoi(args[0]), std::stoi(args[1]), std::stoi(args[2]));
         _return.insert(_return.end(), data.begin(), data.end());
+      }
+      break;
+    case hash_table_cmd_id::ht_scale_remove:
+      for (size_t i = 0; i < nargs; i += 1) {
+        _return.emplace_back(scale_remove(args[i]));
       }
       break;
       //TODO no one catches this error

@@ -234,4 +234,6 @@ TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][mana
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
   }
+
 }
+
