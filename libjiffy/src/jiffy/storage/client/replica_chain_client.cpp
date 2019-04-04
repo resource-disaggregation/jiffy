@@ -83,9 +83,16 @@ std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const
       }
     } catch (apache::thrift::transport::TTransportException &e) {
       LOG(log_level::info) << "Error in connection to chain: " << e.what();
+      if(std::string(e.what()) ==  "THRIFT_EAGAIN (timed out)") {
+        LOG(log_level::info) << "The error message is correct";
+        response.clear();
+        response.push_back("!block_moved");
+        break;
+      }
       LOG(log_level::info) << "Command id is " << cmd_id;
       for(const auto &x:args)
         LOG(log_level::info) << x;
+      LOG(log_level::info) << "replica chain is: " << chain_.to_string();
       connect(fs_->resolve_failures(path_, chain_), timeout_ms_);
       retry = true;
     }
@@ -96,7 +103,8 @@ std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const
 std::vector<std::string> replica_chain_client::run_command_redirected(int32_t cmd_id,
                                                                       const std::vector<std::string> &args) {
   auto args_copy = args;
-  args_copy.push_back("!redirected");
+  if(args_copy.back() != "!redirected")
+    args_copy.push_back("!redirected");
   send_command(cmd_id, args_copy);
   return recv_response();
 }

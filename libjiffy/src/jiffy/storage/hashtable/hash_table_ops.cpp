@@ -14,6 +14,7 @@ std::vector<command> KV_OPS = {command{command_type::accessor, "ht_exists"},
                                command{command_type::mutator, "ht_update_partition"},
                                command{command_type::accessor, "ht_get_storage_size"},
                                command{command_type::accessor, "ht_get_metadata"},
-                               command{command_type::accessor, "ht_get_range_data"}};
+                               command{command_type::accessor, "ht_get_range_data"},
+                               command{command_type::mutator, "ht_scale_remove"}};
 }
 }
