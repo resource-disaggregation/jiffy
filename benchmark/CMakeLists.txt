@@ -30,3 +30,12 @@ target_link_libraries(btree_bench jiffy_client ${JEMALLOC_LIBRARY} ${Boost_PROGR
 
 install(TARGETS btree_bench
         RUNTIME DESTINATION bin)
+
+add_executable(msg_queue_auto_scaling_bench src/msg_queue_auto_scaling_benchmark.cpp)
+
+add_dependencies(msg_queue_auto_scaling_bench boost_ep jemalloc_ep)
+
+target_link_libraries(msg_queue_auto_scaling_bench jiffy_client ${JEMALLOC_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+install(TARGETS msg_queue_auto_scaling_bench
+        RUNTIME DESTINATION bin)
