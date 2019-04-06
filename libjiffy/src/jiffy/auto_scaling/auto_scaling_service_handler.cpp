@@ -71,7 +71,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     auto dst = std::make_shared<storage::replica_chain_client>(fs, path, dst_replica_chain, storage::KV_OPS);
     dst->run_command(storage::hash_table_cmd_id::ht_update_partition, dst_before_args);
     bool has_more = true;
-    std::size_t split_batch_size = 1024;
+    std::size_t split_batch_size = 4;
     std::size_t tot_split_keys = 0;
     std::vector<std::string> args;
     args.emplace_back(std::to_string(split_range_begin));
@@ -79,9 +79,13 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     args.emplace_back(std::to_string(split_batch_size));
     while (has_more) {
       // Read data to split
+      LOG(log_level::info) << "INTO THIS FUNCTION 1 *****************************";
       std::vector<std::string> split_data;
+      LOG(log_level::info) << "INTO THIS FUNCTION 2 *****************************";
       split_data = src->run_command(storage::hash_table_cmd_id::ht_get_range_data, args);
-      if (split_data.empty()) {
+      LOG(log_level::info) << "INTO THIS FUNCTION 3 *****************************";
+      if (split_data.back() == "!empty") {
+        LOG(log_level::info) << "INTO THIS FUNCTION 4 *****************************";
         break;
       } else if (split_data.size() < split_batch_size) {
         has_more = false;
@@ -113,9 +117,9 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     }
     // Finalize slot range split
     std::string old_name = current_name;
-    fs->update_partition(path, old_name, src_partition_name, "regular");
     src->run_command(storage::hash_table_cmd_id::ht_update_partition, src_after_args);
     dst->run_command(storage::hash_table_cmd_id::ht_update_partition, dst_after_args);
+    fs->update_partition(path, old_name, src_partition_name, "regular");
     LOG(log_level::info) << "Exported slot range (" << split_range_begin << ", " << split_range_end << ")";
 
 
@@ -204,7 +208,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     src->run_command(storage::hash_table_cmd_id::ht_update_partition, src_before_args);
     dst->run_command(storage::hash_table_cmd_id::ht_update_partition, dst_before_args);
     bool has_more = true;
-    std::size_t merge_batch_size = 1024;
+    std::size_t merge_batch_size = 4;
     std::size_t tot_merge_keys = 0;
     std::vector<std::string> args;
     args.emplace_back(std::to_string(merge_range_begin));
@@ -216,7 +220,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       LOG(log_level::info) << "Look here 1";
       merge_data = src->run_command(storage::hash_table_cmd_id::ht_get_range_data, args);
       LOG(log_level::info) << "Look here 2 " << " merge_data_size: " << merge_data.size();
-      if (merge_data.empty()) {
+      if (merge_data.back() == "!empty") {
         break;
       } else if (merge_data.size() < merge_batch_size) {
         has_more = false;

@@ -16,10 +16,10 @@ int main() {
   std::string address = "127.0.0.1";
   int service_port = 9090;
   int lease_port = 9091;
-  int num_blocks = 64;
+  int num_blocks = 1;
   int chain_length = 1;
   // TODO change this to 64GB / 100KB each chunk
-  size_t num_ops = 100000;
+  size_t num_ops = 671088;
   // TODO change this to 100KB, should have 64GB in total
   size_t data_size = 102400;
   std::string op_type = "msg_queue_auto_scaling";

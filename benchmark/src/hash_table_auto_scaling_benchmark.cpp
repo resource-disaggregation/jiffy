@@ -55,22 +55,15 @@ std::vector<std::string> keygenerator(std::size_t num_keys, double theta, int nu
   for(std::size_t i = 0; i < num_keys; i++) {
     bucket_dist.push_back(zipf.next());
   }
-  int i = 0;
+  int count = 1;
   std::vector<std::string> keys;
   while(keys.size() != num_keys) {
     char key[8];
-    key[4] = 0x00;
-    key[5] = 0x00;
-    key[6] = 0x00;
-    key[7] = 0x00;
-    unsigned char* key_begin = reinterpret_cast<unsigned char*>(&i);
-    for(int k = 0; k < 4; k++)
-      key[k] = (char)*(key_begin + k);
-    std::ostringstream convert;
-    for(int j = 0; j < 8; j++) {
-      convert << key[j];
+    memcpy((char*)key, (char*)&count, 8);
+    std::string key_string = std::string(8, '1');
+    for(int p = 0;p < 8; p++) {
+      key_string[p] = key[p];
     }
-    std::string key_string = convert.str();
     auto bucket = std::uint64_t(hashslot.crc16(key, 8) / bucket_size);
     auto it = std::find (bucket_dist.begin(), bucket_dist.end(), bucket);
     if(it != bucket_dist.end()) {
@@ -81,15 +74,15 @@ std::vector<std::string> keygenerator(std::size_t num_keys, double theta, int nu
         it = bucket_dist.erase(it);
       }
     }
-  i++;
+  count++;
   }
   return keys;
 }
 
 int main() {
-
-  LOG(log_level::info) << "Look here!";
-  std::vector<std::string> keys = keygenerator(671088, 1);
+  size_t num_ops = 1501;
+  //size_t num_ops = 100;
+  std::vector<std::string> keys = keygenerator(num_ops, 0.5);
 
   std::string address = "127.0.0.1";
   int service_port = 9090;
@@ -97,7 +90,8 @@ int main() {
   int num_blocks = 1;
   int chain_length = 1;
   // TODO change this to 64GB / 100KB each chunk
-  size_t num_ops = 671088;
+  //size_t num_ops = 671088;
+
   // TODO change this to 100KB, should have 64GB in total
   size_t data_size = 102392;
   std::string op_type = "hash_table_auto_scaling";
@@ -118,7 +112,7 @@ int main() {
 
   jiffy_client client(address, service_port, lease_port);
   std::shared_ptr<hash_table_client>
-      mq_client = client.open_or_create_hash_table(path, backing_path, num_blocks, chain_length);
+      ht_client = client.open_or_create_hash_table(path, backing_path, num_blocks, chain_length);
   std::string data_(data_size, 'x');
   double put_throughput_;
   double put_latency_;
@@ -126,7 +120,8 @@ int main() {
   auto put_bench_begin = time_utils::now_us();
   for (size_t j = 0; j < num_ops; ++j) {
     put_t0 = time_utils::now_us();
-    mq_client->put(keys[j], data_);
+    ht_client->put(keys[j], data_);
+    //ht_client->put(std::to_string(j), data_);
     put_t1 = time_utils::now_us();
     put_tot_time += (put_t1 - put_t0);
   }
@@ -136,10 +131,15 @@ int main() {
   double remove_throughput_;
   double remove_latency_;
   uint64_t remove_tot_time = 0, remove_t0 = 0, remove_t1 = 0;
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   auto remove_bench_begin = time_utils::now_us();
   for (size_t j = 0; j < num_ops; ++j) {
     remove_t0 = time_utils::now_us();
-    mq_client->remove(keys[j]);
+    LOG(log_level::info) << "********************************************************************";
+    LOG(log_level::info) << "attempting to remove" << keys[j];
+    LOG(log_level::info) << "********************************************************************";
+    ht_client->remove(keys[j]);
+    //ht_client->remove(std::to_string(j));
     remove_t1 = time_utils::now_us();
     remove_tot_time += (remove_t1 - remove_t0);
   }
@@ -159,7 +159,7 @@ int main() {
   LOG(log_level::info) << "\t" << num_ops << " remove requests completed in " << ((double) num_ops / remove_result.first) << " us";
   LOG(log_level::info) << "\t" << data_size << " payload";
   LOG(log_level::info) << "\tAverage put latency: " << remove_result.second;
-  LOG(log_level::info) << "\tput throughput: " << remove_result.first << " requests per microsecond";
+  LOG(log_level::info) << "\tremove throughput: " << remove_result.first << " requests per microsecond";
 
   return 0;
 }

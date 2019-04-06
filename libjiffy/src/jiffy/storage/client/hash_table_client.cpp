@@ -59,6 +59,7 @@ std::string hash_table_client::get(const std::string &key) {
       _return = blocks_[block_id(key)]->run_command(hash_table_cmd_id::ht_get, args).front();
       handle_redirect(hash_table_cmd_id::ht_get, args, _return);
       redo = false;
+      redo_times = 0;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -75,6 +76,7 @@ std::string hash_table_client::update(const std::string &key, const std::string 
       _return = blocks_[block_id(key)]->run_command(hash_table_cmd_id::ht_update, args).front();
       handle_redirect(hash_table_cmd_id::ht_update, args, _return);
       redo = false;
+      redo_times = 0;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -89,8 +91,10 @@ std::string hash_table_client::remove(const std::string &key) {
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(hash_table_cmd_id::ht_remove, args).front();
+      LOG(log_level::info) << "The return value is" << _return;
       handle_redirect(hash_table_cmd_id::ht_remove, args, _return);
       redo = false;
+      redo_times = 0;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -241,11 +245,14 @@ void hash_table_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
     } while (response.substr(0, 10) == "!exporting");
   }
   if (response == "!block_moved") {
+    LOG(log_level::info) << "block_moved, refreshing";
     refresh();
     throw redo_error();
   }
   if(response == "!full") {
+    LOG(log_level::info) << "putting the client to sleep to let auto_scaling run first for 2^" << redo_times << " milliseconds";
     std::this_thread::sleep_for(std::chrono::milliseconds((int)(std::pow(2, redo_times))));
+    redo_times++;
     throw redo_error();
   }
 }

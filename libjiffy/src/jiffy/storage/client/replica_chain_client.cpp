@@ -38,7 +38,8 @@ const directory::replica_chain &replica_chain_client::chain() const {
 
 void replica_chain_client::connect(const directory::replica_chain &chain, int timeout_ms) {
   chain_ = chain;
-  timeout_ms_ = timeout_ms;
+  //timeout_ms_ = timeout_ms;
+  timeout_ms_ = 10000;
   auto h = block_id_parser::parse(chain_.block_ids.front());
   head_.connect(h.host, h.service_port, h.id, timeout_ms);
   seq_.client_id = head_.get_client_id();
@@ -83,16 +84,17 @@ std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const
       }
     } catch (apache::thrift::transport::TTransportException &e) {
       LOG(log_level::info) << "Error in connection to chain: " << e.what();
+      LOG(log_level::info) << "Command id is " << cmd_id;
+      for(const auto &x:args)
+        LOG(log_level::info) << x;
+      LOG(log_level::info) << "replica chain is: " << chain_.to_string();
       if(std::string(e.what()) ==  "THRIFT_EAGAIN (timed out)") {
         LOG(log_level::info) << "The error message is correct";
         response.clear();
         response.push_back("!block_moved");
         break;
       }
-      LOG(log_level::info) << "Command id is " << cmd_id;
-      for(const auto &x:args)
-        LOG(log_level::info) << x;
-      LOG(log_level::info) << "replica chain is: " << chain_.to_string();
+
       connect(fs_->resolve_failures(path_, chain_), timeout_ms_);
       retry = true;
     }
