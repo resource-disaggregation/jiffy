@@ -11,41 +11,12 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+
 using namespace ::jiffy::client;
 using namespace ::jiffy::directory;
 using namespace ::jiffy::storage;
 using namespace ::jiffy::utils;
 using namespace ::apache::thrift;
-/*
-std::vector<std::uint64_t> get_dist(double alpha, int max_val, int n) {
-  std::vector<double> values;
-  for (int value = 1; value <= max_val; value += 1)
-    values.push_back(value);
-  std::for_each(values.begin(), values.end(), [](double &n){ n = std::pow(n, -alpha);});
-  std::vector<double> sum_;
-  std::partial_sum(values.begin(), values.end(), sum_.begin(), std::plus<double>());
-  auto back_value = sum_.back();
-  sum_.insert(sum_.begin(), 0.0);
-  std::for_each(sum_.begin(), sum_.end(), [](double &n){ n = n / back_value;});
-  double rand_;
-  srand(time(NULL));
-  std::vector<std::uint64_t> ret;
-  for(int i = 0;i < n; i++) {
-    rand_= rand() % (1000)/float(1000);
-    for(auto it = sum_.begin(); it != sum.end();it++) {
-      if(*it <= rand)
-        continue;
-      else
-
-    }
-  }
-
-
-
-  return values;
-}
- */
-
 
 std::vector<std::string> keygenerator(std::size_t num_keys, double theta, int num_buckets = 512) {
   int bucket_size = 65536 / num_buckets;
@@ -135,9 +106,6 @@ int main() {
   auto remove_bench_begin = time_utils::now_us();
   for (size_t j = 0; j < num_ops; ++j) {
     remove_t0 = time_utils::now_us();
-    LOG(log_level::info) << "********************************************************************";
-    LOG(log_level::info) << "attempting to remove" << keys[j];
-    LOG(log_level::info) << "********************************************************************";
     ht_client->remove(keys[j]);
     //ht_client->remove(std::to_string(j));
     remove_t1 = time_utils::now_us();
@@ -146,8 +114,6 @@ int main() {
   remove_latency_ = (double) remove_tot_time / (double) num_ops;
   remove_throughput_ = (double) num_ops * 1E6 / (double) (remove_t1 - remove_bench_begin);
   std::pair<double, double> remove_result = std::make_pair(remove_throughput_, remove_latency_);
-
-
   client.remove(path);
   LOG(log_level::info) << "===== " << op_type << " ======";
   LOG(log_level::info) << "\t" << num_ops << " put requests completed in " << ((double) num_ops / put_result.first) << " us";

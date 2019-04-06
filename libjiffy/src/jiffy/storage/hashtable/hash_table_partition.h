@@ -320,7 +320,7 @@ class hash_table_partition : public chain_module {
    * @param num_keys Key numbers to be fetched
    */
 
-  bool get_data_in_slot_range(std::vector<std::string> &data,
+  void get_data_in_slot_range(std::vector<std::string> &data,
                                      int32_t slot_begin,
                                      int32_t slot_end,
                                      int32_t batch_size);
