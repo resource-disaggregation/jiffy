@@ -21,7 +21,9 @@ class msg_queue_partition : public chain_module {
                                const std::string &metadata = "regular", //TODO need to fix this metadata
                                const utils::property_map &conf = {},
                                const std::string &directory_host = "localhost",
-                               const int directory_port = 9091);
+                               const int directory_port = 9091,
+                               const std::string &auto_scaling_host = "localhost",
+                               const int auto_scaling_port = 9095);
 
   /**
    * @brief Virtual destructor
@@ -173,6 +175,11 @@ class msg_queue_partition : public chain_module {
 
   /* Directory server port number */
   int directory_port_;
+
+  /* Auto scaling server hostname */
+  std::string auto_scaling_host_;
+  /* Auto scaling server port number */
+  int auto_scaling_port_;
 
   /* Next partition target string */
   std::string next_target_string;

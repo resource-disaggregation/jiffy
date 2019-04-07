@@ -19,13 +19,17 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
                                          const std::string &metadata,
                                          const utils::property_map &conf,
                                          const std::string &directory_host,
-                                         const int directory_port)
+                                         const int directory_port,
+                                         const std::string &auto_scaling_host,
+                                         const int auto_scaling_port)
     : chain_module(manager, name, metadata, MSG_QUEUE_OPS),
       partition_(build_allocator<msg_type>()),
       overload_(false),
       dirty_(false),
       directory_host_(directory_host),
-      directory_port_(directory_port) {
+      directory_port_(directory_port),
+      auto_scaling_host_(auto_scaling_host),
+      auto_scaling_port_(auto_scaling_port){
   auto ser = conf.get("msgqueue.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
@@ -40,9 +44,10 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
 }
 
 std::string msg_queue_partition::send(const std::string &message) {
-  LOG(log_level::info) << "Sending " << message << " Storage size " << storage_size() << " Storage capacity "
-                       << storage_capacity();
-  LOG(log_level::info) << "partition size " << partition_.size() << " partition capacity " << partition_.capacity();
+  //<< "Sending " << message
+  //LOG(log_level::info) << " Storage size " << storage_size() << " Storage capacity "
+   //                    << storage_capacity();
+  //LOG(log_level::info) << "partition size " << partition_.size() << " partition capacity " << partition_.capacity();
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   if (storage_size() * 2 >= storage_capacity() && partition_.size() >= partition_.capacity()) {
     if (!next_target_str().empty()) {
@@ -51,9 +56,9 @@ std::string msg_queue_partition::send(const std::string &message) {
       return "!redo";
     }
   }
-  LOG(log_level::info) << "Come here 1";
+  //LOG(log_level::info) << "Come here 1";
   partition_.push_back(make_binary(message));
-  LOG(log_level::info) << "Come here 2";
+  //LOG(log_level::info) << "Come here 2";
   return "!ok";
 }
 
@@ -126,7 +131,7 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
       std::map<std::string, std::string> scale_conf;
       scale_conf.emplace(std::make_pair(std::string("type"), std::string("msg_queue")));
       scale_conf.emplace(std::make_pair(std::string("next_partition_name"), dst_partition_name));
-      auto scale = std::make_shared<auto_scaling::auto_scaling_client>("127.0.0.1", 9093);
+      auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
       scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
       overload_ = false;
@@ -199,7 +204,8 @@ bool msg_queue_partition::overload() {
   //if (storage_size() < storage_capacity())
   //return false;
   //return partition_.size() > static_cast<size_t>(static_cast<double>(partition_.capacity()) * threshold_hi_);
-  return partition_.size() > static_cast<size_t>(static_cast<double>(storage_capacity() / 64) * threshold_hi_);
+  //TODO this is a hot fix
+  return partition_.size() > static_cast<size_t>(static_cast<double>(1024) * threshold_hi_);
   //return storage_size() > static_cast<size_t>(static_cast<double>(storage_capacity()) * threshold_hi_);
 }
 

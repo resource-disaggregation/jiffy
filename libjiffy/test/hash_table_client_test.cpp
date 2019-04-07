@@ -24,7 +24,7 @@ using namespace ::apache::thrift::transport;
 #define DIRECTORY_SERVICE_PORT 9090
 #define STORAGE_SERVICE_PORT 9091
 #define STORAGE_MANAGEMENT_PORT 9092
-#define AUTO_SCALING_SERVICE_PORT 9093
+#define AUTO_SCALING_SERVICE_PORT 9095
 
 TEST_CASE("hash_table_client_put_get_test", "[put][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();

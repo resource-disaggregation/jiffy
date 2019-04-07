@@ -32,6 +32,8 @@ struct hash_type {
 struct equal_type {
   template<typename KeyType1, typename KeyType2>
   bool operator()(const KeyType1 &lhs, const KeyType2 &rhs) const {
+    //std::cout << "size comparation: " << (lhs.size() == rhs.size()) << std::endl;
+    //std::cout << "data comparation: " << memcmp(lhs.data(), rhs.data(), lhs.size()) << std::endl;
     return lhs.size() == rhs.size() && memcmp(lhs.data(), rhs.data(), lhs.size()) == 0;
   }
 };

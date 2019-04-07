@@ -18,14 +18,18 @@ btree_partition::btree_partition(block_memory_manager *manager,
                                  const std::string &metadata,
                                  const utils::property_map &conf,
                                  const std::string &directory_host,
-                                 const int directory_port)
+                                 const int directory_port,
+                                 const std::string &auto_scaling_host,
+                                 const int auto_scaling_port)
     : chain_module(manager, name, metadata, BTREE_OPS),
       partition_(less_type()),
       splitting_(false),
       merging_(false),
       dirty_(false),
       directory_host_(directory_host),
-      directory_port_(directory_port) {
+      directory_port_(directory_port),
+      auto_scaling_host_(auto_scaling_host),
+      auto_scaling_port_(auto_scaling_port) {
   auto ser = conf.get("btree.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
