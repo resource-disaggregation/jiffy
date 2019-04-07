@@ -27,7 +27,7 @@ class replica_chain_client {
                                 const std::string &path,
                                 const directory::replica_chain &chain,
                                 std::vector<command> OPS,
-                                int timeout_ms = 100000);
+                                int timeout_ms = 10000);
 
   /**
    * @brief Destructor

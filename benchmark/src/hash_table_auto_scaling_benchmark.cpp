@@ -56,7 +56,7 @@ std::vector<std::string> keygenerator(std::size_t num_keys, double theta, int nu
 }
 
 int main() {
-  size_t num_ops = 1501;
+  //size_t num_ops = 1501;
   //size_t num_ops = 100;
   //std::vector<std::string> keys = keygenerator(num_ops, 0.5);
 
@@ -66,7 +66,7 @@ int main() {
   int num_blocks = 1;
   int chain_length = 1;
   // TODO change this to 64GB / 100KB each chunk
-  //size_t num_ops = 671088;
+  size_t num_ops = 671088;
 
   // TODO change this to 100KB, should have 64GB in total
   size_t data_size = 102392;
@@ -124,7 +124,7 @@ int main() {
     //ht_client->put(keys[j], data_);
     ht_client->put(std::to_string(j), data_);
     put_t1 = time_utils::now_us();
-    put_tot_time += (put_t1 - put_t0);
+    put_tot_time = (put_t1 - put_t0);
     auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
     LOG(log_level::info) << "Latency for time: " << cur_epoch << " is " << put_tot_time << " us";
   }
@@ -135,7 +135,7 @@ int main() {
     //ht_client->remove(keys[j]);
     ht_client->remove(std::to_string(j));
     remove_t1 = time_utils::now_us();
-    remove_tot_time += (remove_t1 - remove_t0);
+    remove_tot_time = (remove_t1 - remove_t0);
     auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
     LOG(log_level::info) << "Latency for time: " << cur_epoch << " is " << remove_tot_time << " us";
   }
