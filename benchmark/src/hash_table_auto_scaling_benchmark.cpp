@@ -11,6 +11,9 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+#include <fstream>
+#include <atomic>
+#include <chrono>
 
 using namespace ::jiffy::client;
 using namespace ::jiffy::directory;
@@ -23,21 +26,23 @@ std::vector<std::string> keygenerator(std::size_t num_keys, double theta, int nu
   hash_slot hashslot;
   zipfgenerator zipf(theta, num_keys);
   std::vector<std::uint64_t> bucket_dist;
-  for(std::size_t i = 0; i < num_keys; i++) {
+  for (std::size_t i = 0; i < num_keys; i++) {
     bucket_dist.push_back(zipf.next());
   }
-  int count = 1;
+  std::uint64_t count = 1;
   std::vector<std::string> keys;
-  while(keys.size() != num_keys) {
+  while (keys.size() != num_keys) {
     char key[8];
-    memcpy((char*)key, (char*)&count, 8);
+    memcpy((char *) key, (char *) &count, 8);
     std::string key_string = std::string(8, '1');
-    for(int p = 0;p < 8; p++) {
+    for (int p = 0; p < 8; p++) {
       key_string[p] = key[p];
+      if ((int) ((std::uint8_t) key[p]) == 0)
+        key_string[p] = 1;
     }
     auto bucket = std::uint64_t(hashslot.crc16(key, 8) / bucket_size);
-    auto it = std::find (bucket_dist.begin(), bucket_dist.end(), bucket);
-    if(it != bucket_dist.end()) {
+    auto it = std::find(bucket_dist.begin(), bucket_dist.end(), bucket);
+    if (it != bucket_dist.end()) {
       *it = *it - 1;
       keys.push_back(key_string);
       LOG(log_level::info) << "Found key" << keys.size();
@@ -45,7 +50,7 @@ std::vector<std::string> keygenerator(std::size_t num_keys, double theta, int nu
         it = bucket_dist.erase(it);
       }
     }
-  count++;
+    count++;
   }
   return keys;
 }
@@ -53,7 +58,7 @@ std::vector<std::string> keygenerator(std::size_t num_keys, double theta, int nu
 int main() {
   size_t num_ops = 1501;
   //size_t num_ops = 100;
-  std::vector<std::string> keys = keygenerator(num_ops, 0.5);
+  //std::vector<std::string> keys = keygenerator(num_ops, 0.5);
 
   std::string address = "127.0.0.1";
   int service_port = 9090;
@@ -87,12 +92,40 @@ int main() {
   std::string data_(data_size, 'x');
   double put_throughput_;
   double put_latency_;
+  std::chrono::milliseconds periodicity_ms_(1000);
   uint64_t put_tot_time = 0, put_t0 = 0, put_t1 = 0;
+  /* Atomic stop bool */
+
+  std::atomic_bool stop_{false};
+  std::size_t j = 0;
+  auto worker_ = std::thread([&] {
+    std::ofstream out("dataset.trace");
+    while (!stop_.load()) {
+      auto start = std::chrono::steady_clock::now();
+      try {
+        namespace ts = std::chrono;
+        auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
+        out << cur_epoch;
+        out << "\t" << j * 100; // KB
+        out << std::endl;
+      } catch (std::exception &e) {
+        LOG(log_level::error) << "Exception: " << e.what();
+      }
+      auto end = std::chrono::steady_clock::now();
+      auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+      auto time_to_wait = std::chrono::duration_cast<std::chrono::milliseconds>(periodicity_ms_ - elapsed);
+      if (time_to_wait > std::chrono::milliseconds::zero()) {
+        std::this_thread::sleep_for(time_to_wait);
+      }
+    }
+    out.close();
+  });
   auto put_bench_begin = time_utils::now_us();
-  for (size_t j = 0; j < num_ops; ++j) {
+  for (j = 0; j < num_ops; ++j) {
     put_t0 = time_utils::now_us();
-    ht_client->put(keys[j], data_);
-    //ht_client->put(std::to_string(j), data_);
+    //ht_client->put(keys[j], data_);
+    ht_client->put(std::to_string(j), data_);
     put_t1 = time_utils::now_us();
     put_tot_time += (put_t1 - put_t0);
   }
@@ -104,25 +137,30 @@ int main() {
   uint64_t remove_tot_time = 0, remove_t0 = 0, remove_t1 = 0;
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   auto remove_bench_begin = time_utils::now_us();
-  for (size_t j = 0; j < num_ops; ++j) {
+  for (j = 0; j < num_ops; ++j) {
     remove_t0 = time_utils::now_us();
-    ht_client->remove(keys[j]);
-    //ht_client->remove(std::to_string(j));
+    //ht_client->remove(keys[j]);
+    ht_client->remove(std::to_string(j));
     remove_t1 = time_utils::now_us();
     remove_tot_time += (remove_t1 - remove_t0);
   }
   remove_latency_ = (double) remove_tot_time / (double) num_ops;
   remove_throughput_ = (double) num_ops * 1E6 / (double) (remove_t1 - remove_bench_begin);
   std::pair<double, double> remove_result = std::make_pair(remove_throughput_, remove_latency_);
+  stop_.store(true);
+  if (worker_.joinable())
+    worker_.join();
   client.remove(path);
   LOG(log_level::info) << "===== " << op_type << " ======";
-  LOG(log_level::info) << "\t" << num_ops << " put requests completed in " << ((double) num_ops / put_result.first) << " us";
+  LOG(log_level::info) << "\t" << num_ops << " put requests completed in " << ((double) num_ops / put_result.first)
+                       << " us";
   LOG(log_level::info) << "\t" << data_size << " payload";
   LOG(log_level::info) << "\tAverage put latency: " << put_result.second;
   LOG(log_level::info) << "\tput throughput: " << put_result.first << " requests per microsecond";
 
   LOG(log_level::info) << "===== " << op_type << " ======";
-  LOG(log_level::info) << "\t" << num_ops << " remove requests completed in " << ((double) num_ops / remove_result.first) << " us";
+  LOG(log_level::info) << "\t" << num_ops << " remove requests completed in "
+                       << ((double) num_ops / remove_result.first) << " us";
   LOG(log_level::info) << "\t" << data_size << " payload";
   LOG(log_level::info) << "\tAverage put latency: " << remove_result.second;
   LOG(log_level::info) << "\tremove throughput: " << remove_result.first << " requests per microsecond";

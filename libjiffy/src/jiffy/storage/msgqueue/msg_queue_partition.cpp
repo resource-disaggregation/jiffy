@@ -44,9 +44,10 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
 }
 
 std::string msg_queue_partition::send(const std::string &message) {
-  LOG(log_level::info) << "Sending " << message << " Storage size " << storage_size() << " Storage capacity "
-                       << storage_capacity();
-  LOG(log_level::info) << "partition size " << partition_.size() << " partition capacity " << partition_.capacity();
+  //<< "Sending " << message
+  //LOG(log_level::info) << " Storage size " << storage_size() << " Storage capacity "
+   //                    << storage_capacity();
+  //LOG(log_level::info) << "partition size " << partition_.size() << " partition capacity " << partition_.capacity();
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   if (storage_size() * 2 >= storage_capacity() && partition_.size() >= partition_.capacity()) {
     if (!next_target_str().empty()) {
@@ -55,9 +56,9 @@ std::string msg_queue_partition::send(const std::string &message) {
       return "!redo";
     }
   }
-  LOG(log_level::info) << "Come here 1";
+  //LOG(log_level::info) << "Come here 1";
   partition_.push_back(make_binary(message));
-  LOG(log_level::info) << "Come here 2";
+  //LOG(log_level::info) << "Come here 2";
   return "!ok";
 }
 
@@ -203,7 +204,8 @@ bool msg_queue_partition::overload() {
   //if (storage_size() < storage_capacity())
   //return false;
   //return partition_.size() > static_cast<size_t>(static_cast<double>(partition_.capacity()) * threshold_hi_);
-  return partition_.size() > static_cast<size_t>(static_cast<double>(storage_capacity() / 64) * threshold_hi_);
+  //TODO this is a hot fix
+  return partition_.size() > static_cast<size_t>(static_cast<double>(1024) * threshold_hi_);
   //return storage_size() > static_cast<size_t>(static_cast<double>(storage_capacity()) * threshold_hi_);
 }
 
