@@ -92,26 +92,28 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     args.emplace_back(std::to_string(split_batch_size));
     while (has_more) {
       // Read data to split
-      //LOG(log_level::info) << "INTO THIS FUNCTION 1 *****************************";
+      LOG(log_level::info) << "INTO THIS FUNCTION 1 *****************************";
       std::vector<std::string> split_data;
-      //LOG(log_level::info) << "INTO THIS FUNCTION 2 *****************************";
+      LOG(log_level::info) << "INTO THIS FUNCTION 2 *****************************";
       split_data = src->run_command(storage::hash_table_cmd_id::ht_get_range_data, args);
-      //LOG(log_level::info) << "INTO THIS FUNCTION 3 *****************************";
+      LOG(log_level::info) << "INTO THIS FUNCTION 3 *****************************";
       if (split_data.back() == "!empty") {
-       // LOG(log_level::info) << "INTO THIS FUNCTION 4 *****************************";
+        LOG(log_level::info) << "INTO THIS FUNCTION 4 *****************************";
         break;
       } else if (split_data.size() < split_batch_size) {
         has_more = false;
       }
+      LOG(log_level::info) << "INTO THIS FUNCTION 5 *****************************";
       auto split_keys = split_data.size() / 2;
       tot_split_keys += split_keys;
       //LOG(log_level::info) << "Read " << split_keys << " keys to split";
 
       // Add redirected argument so that importing chain does not ignore our request
       split_data.emplace_back("!redirected");
-
+      LOG(log_level::info) << "INTO THIS FUNCTION 6 *****************************";
       // Write data to dst partition
       dst->run_command(storage::hash_table_cmd_id::ht_put, split_data);
+      LOG(log_level::info) << "INTO THIS FUNCTION 7 *****************************";
 
       // Remove data from src partition
       std::vector<std::string> remove_keys;
@@ -124,10 +126,14 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
         split_data.pop_back();
       }
       assert(remove_keys.size() == split_keys);
-      //LOG(log_level::info) << "Sending " << remove_keys.size() << " split keys to remove";
+      LOG(log_level::info) << "INTO THIS FUNCTION 8 *****************************";
+
+      LOG(log_level::info) << "Sending " << remove_keys.size() << " split keys to remove";
       auto ret = src->run_command(storage::hash_table_cmd_id::ht_scale_remove, remove_keys);
-      //LOG(log_level::info) << "Removed " << remove_keys.size() << " split keys";
+      LOG(log_level::info) << "INTO THIS FUNCTION 9 *****************************";
+      LOG(log_level::info) << "Removed " << remove_keys.size() << " split keys";
     }
+    LOG(log_level::info) << "INTO THIS FUNCTION 10 *****************************";
     auto finish_data_transmission = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     //LOG(log_level::info) << "Finish data transmission: " << finish_data_transmission;
     // Finalize slot range split

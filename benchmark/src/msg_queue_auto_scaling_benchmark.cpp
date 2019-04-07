@@ -22,8 +22,8 @@ int main() {
   int num_blocks = 1;
   int chain_length = 1;
   // TODO change this to 64GB / 100KB each chunk
-  size_t num_ops = 671088;
-  //size_t num_ops = 1500;
+  //size_t num_ops = 671088;
+  size_t num_ops = 3000;
   // TODO change this to 100KB, should have 64GB in total
   size_t data_size = 102400;
   std::string op_type = "msg_queue_auto_scaling";

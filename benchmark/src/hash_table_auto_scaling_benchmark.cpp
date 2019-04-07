@@ -162,7 +162,7 @@ int main() {
   LOG(log_level::info) << "\t" << num_ops << " remove requests completed in "
                        << ((double) num_ops / remove_result.first) << " us";
   LOG(log_level::info) << "\t" << data_size << " payload";
-  LOG(log_level::info) << "\tAverage put latency: " << remove_result.second;
+  LOG(log_level::info) << "\tAverage remove latency: " << remove_result.second;
   LOG(log_level::info) << "\tremove throughput: " << remove_result.first << " requests per microsecond";
 
   return 0;
