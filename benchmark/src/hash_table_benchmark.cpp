@@ -108,7 +108,7 @@ class get_benchmark : public hash_table_benchmark {
           tot_time += (t1 - t0);
         }
         latency_[i] = (double) tot_time / (double) j;
-        throughput_[i] = (double) j / (double) (t1 - bench_begin);
+        throughput_[i] = (double) j * 1E6 / (double) (t1 - bench_begin);
       });
     }
   }
@@ -138,7 +138,7 @@ class remove_benchmark : public hash_table_benchmark {
           tot_time += (t1 - t0);
         }
         latency_[i] = (double) tot_time / (double) j;
-        throughput_[i] = (double) j / (double) (t1 - bench_begin);
+        throughput_[i] = (double) j * 1E6 / (double) (t1 - bench_begin);
       });
     }
   }

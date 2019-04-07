@@ -111,7 +111,7 @@ class get_benchmark : public btree_benchmark {
           tot_time += (t1 - t0);
         }
         latency_[i] = (double) tot_time / (double) j;
-        throughput_[i] = (double) j / (double) (t1 - bench_begin);
+        throughput_[i] = (double) j * 1E6/ (double) (t1 - bench_begin);
       });
       thread_utils::set_core_affinity(workers_[i], i);
     }
@@ -142,7 +142,7 @@ class range_lookup_benchmark : public btree_benchmark {
           tot_time += (t1 - t0);
         }
         latency_[i] = (double) tot_time / (double) j;
-        throughput_[i] = (double) j / (double) (t1 - bench_begin);
+        throughput_[i] = (double) j * 1E6 / (double) (t1 - bench_begin);
       });
       thread_utils::set_core_affinity(workers_[i], i);
     }

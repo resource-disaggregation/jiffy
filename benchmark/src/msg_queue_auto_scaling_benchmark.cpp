@@ -14,7 +14,7 @@ using namespace ::jiffy::directory;
 using namespace ::jiffy::storage;
 using namespace ::jiffy::utils;
 using namespace ::apache::thrift;
-
+namespace ts = std::chrono;
 int main() {
   std::string address = "127.0.0.1";
   int service_port = 9090;
@@ -49,7 +49,6 @@ int main() {
     while (!stop_.load()) {
       auto start = std::chrono::steady_clock::now();
       try {
-        namespace ts = std::chrono;
         auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
         out << cur_epoch;
         out << "\t" << j * 100; // KB
@@ -71,28 +70,18 @@ int main() {
   std::shared_ptr<msg_queue_client>
       mq_client = client.open_or_create_msg_queue(path, backing_path, num_blocks, chain_length);
   std::string data_(data_size, 'x');
-  double send_throughput_;
-  double send_latency_;
   uint64_t send_tot_time = 0, send_t0 = 0, send_t1 = 0;
-  auto send_bench_begin = time_utils::now_us();
   for (j = 0; j < num_ops; ++j) {
     send_t0 = time_utils::now_us();
     mq_client->send(data_);
     send_t1 = time_utils::now_us();
-    send_tot_time += (send_t1 - send_t0);
+    send_tot_time = send_t1 - send_t0;
+    auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
+    LOG(log_level::info) << "Latency for time: " << cur_epoch << " is " << send_tot_time << " us";
   }
-  send_latency_ = (double) send_tot_time / (double) num_ops;
-  send_throughput_ = (double) num_ops * 1E6 / (double) (send_t1 - send_bench_begin);
-  std::pair<double, double> send_result = std::make_pair(send_throughput_, send_latency_);
   stop_.store(true);
   if (worker_.joinable())
     worker_.join();
   client.remove(path);
-  LOG(log_level::info) << "===== " << op_type << " ======";
-  LOG(log_level::info) << "\t" << num_ops << " send requests completed in " << ((double) num_ops / send_result.first)
-                       << " us";
-  LOG(log_level::info) << "\t" << data_size << " payload";
-  LOG(log_level::info) << "\tAverage send latency: " << send_result.second;
-  LOG(log_level::info) << "\tSend throughput: " << send_result.first << " requests per microsecond";
   return 0;
 }

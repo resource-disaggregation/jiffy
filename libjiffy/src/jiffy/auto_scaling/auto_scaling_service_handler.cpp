@@ -84,7 +84,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     auto finish_updating_partition_before = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     //LOG(log_level::info) << "Finish updating partition for hash table before splitting: " << finish_updating_partition_before;
     bool has_more = true;
-    std::size_t split_batch_size = 4;
+    std::size_t split_batch_size = 2;
     std::size_t tot_split_keys = 0;
     std::vector<std::string> args;
     args.emplace_back(std::to_string(split_range_begin));

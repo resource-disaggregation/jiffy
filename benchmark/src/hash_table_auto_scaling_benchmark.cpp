@@ -20,7 +20,7 @@ using namespace ::jiffy::directory;
 using namespace ::jiffy::storage;
 using namespace ::jiffy::utils;
 using namespace ::apache::thrift;
-
+namespace ts = std::chrono;
 std::vector<std::string> keygenerator(std::size_t num_keys, double theta, int num_buckets = 512) {
   int bucket_size = 65536 / num_buckets;
   hash_slot hashslot;
@@ -90,8 +90,6 @@ int main() {
   std::shared_ptr<hash_table_client>
       ht_client = client.open_or_create_hash_table(path, backing_path, num_blocks, chain_length);
   std::string data_(data_size, 'x');
-  double put_throughput_;
-  double put_latency_;
   std::chrono::milliseconds periodicity_ms_(1000);
   uint64_t put_tot_time = 0, put_t0 = 0, put_t1 = 0;
   /* Atomic stop bool */
@@ -121,49 +119,29 @@ int main() {
     }
     out.close();
   });
-  auto put_bench_begin = time_utils::now_us();
   for (j = 0; j < num_ops; ++j) {
     put_t0 = time_utils::now_us();
     //ht_client->put(keys[j], data_);
     ht_client->put(std::to_string(j), data_);
     put_t1 = time_utils::now_us();
     put_tot_time += (put_t1 - put_t0);
+    auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
+    LOG(log_level::info) << "Latency for time: " << cur_epoch << " is " << put_tot_time << " us";
   }
-  put_latency_ = (double) put_tot_time / (double) num_ops;
-  put_throughput_ = (double) num_ops * 1E6 / (double) (put_t1 - put_bench_begin);
-  std::pair<double, double> put_result = std::make_pair(put_throughput_, put_latency_);
-  double remove_throughput_;
-  double remove_latency_;
   uint64_t remove_tot_time = 0, remove_t0 = 0, remove_t1 = 0;
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  auto remove_bench_begin = time_utils::now_us();
   for (j = 0; j < num_ops; ++j) {
     remove_t0 = time_utils::now_us();
     //ht_client->remove(keys[j]);
     ht_client->remove(std::to_string(j));
     remove_t1 = time_utils::now_us();
     remove_tot_time += (remove_t1 - remove_t0);
+    auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
+    LOG(log_level::info) << "Latency for time: " << cur_epoch << " is " << remove_tot_time << " us";
   }
-  remove_latency_ = (double) remove_tot_time / (double) num_ops;
-  remove_throughput_ = (double) num_ops * 1E6 / (double) (remove_t1 - remove_bench_begin);
-  std::pair<double, double> remove_result = std::make_pair(remove_throughput_, remove_latency_);
   stop_.store(true);
   if (worker_.joinable())
     worker_.join();
   client.remove(path);
-  LOG(log_level::info) << "===== " << op_type << " ======";
-  LOG(log_level::info) << "\t" << num_ops << " put requests completed in " << ((double) num_ops / put_result.first)
-                       << " us";
-  LOG(log_level::info) << "\t" << data_size << " payload";
-  LOG(log_level::info) << "\tAverage put latency: " << put_result.second;
-  LOG(log_level::info) << "\tput throughput: " << put_result.first << " requests per microsecond";
-
-  LOG(log_level::info) << "===== " << op_type << " ======";
-  LOG(log_level::info) << "\t" << num_ops << " remove requests completed in "
-                       << ((double) num_ops / remove_result.first) << " us";
-  LOG(log_level::info) << "\t" << data_size << " payload";
-  LOG(log_level::info) << "\tAverage remove latency: " << remove_result.second;
-  LOG(log_level::info) << "\tremove throughput: " << remove_result.first << " requests per microsecond";
-
   return 0;
 }
