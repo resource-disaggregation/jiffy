@@ -76,7 +76,7 @@ std::size_t storage_manager::storage_capacity(const std::string &block_name) {
 std::size_t storage_manager::storage_size(const std::string &block_name) {
   auto bid = block_id_parser::parse(block_name);
   storage_management_client client(bid.host, bid.management_port);
-  LOG(log_level::info) << "storage size on " << bid.host << ":" << bid.management_port;
+  //LOG(log_level::info) << "storage size on " << bid.host << ":" << bid.management_port;
   return static_cast<std::size_t>(client.storage_size(bid.id));
 }
 
