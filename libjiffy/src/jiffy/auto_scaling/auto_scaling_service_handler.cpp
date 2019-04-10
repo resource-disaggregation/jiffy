@@ -169,6 +169,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       src_after_args.push_back(name);
       src_after_args.emplace_back("regular$" + name);
       src->run_command(storage::hash_table_cmd_id::ht_update_partition, src_after_args);
+      mtx.unlock();
       return;
     }
     std::vector<std::string> ret = src->run_command(storage::hash_table_cmd_id::ht_get_storage_size, {});
