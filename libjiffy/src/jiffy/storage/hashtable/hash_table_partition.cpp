@@ -50,13 +50,13 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
 }
 
 std::string hash_table_partition::put(const std::string &key, const std::string &value, bool redirect) {
-  //LOG(log_level::info) << "Putting key: " << key << " storage_size " << storage_size() << "storage_capacity "
-    //                   << storage_capacity();
+  LOG(log_level::info) << "Putting key: " << key << " storage_size " << storage_size() << "storage_capacity "
+                       << storage_capacity();
   //LOG(log_level::info) << "Putting: ";
   //for(int p = 0; p < key.length(); p++)
   //LOG(log_level::info) << (int)((std::uint8_t)key[p]);
   auto hash = hash_slot::get(key);
-  //LOG(log_level::info) << "Put hash " << hash << " in partition " << name();
+  LOG(log_level::info) << "Put hash " << hash << " in partition " << name();
   //LOG(log_level::info) << "Putting key: " << key << " Value: " << value << " Hash: " << hash <<" On partition: " << name();
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
@@ -137,9 +137,9 @@ std::string hash_table_partition::update(const std::string &key, const std::stri
 }
 
 std::string hash_table_partition::remove(const std::string &key, bool redirect) {
-  //LOG(log_level::info) << "Removing this key" << key << " Size " << storage_size() << " Cap " << storage_capacity() << " name " << name();
+  LOG(log_level::info) << "Removing this key" << key << " Size " << storage_size() << " Cap " << storage_capacity() << " name " << name();
   auto hash = hash_slot::get(key);
-  //LOG(log_level::info) << "Removing hash" << hash;
+  LOG(log_level::info) << "Removing hash" << hash;
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
@@ -162,7 +162,7 @@ std::string hash_table_partition::remove(const std::string &key, bool redirect) 
 }
 
 std::string hash_table_partition::scale_remove(const std::string &key) {
-  //LOG(log_level::info) << "scale removing";
+  LOG(log_level::info) << "scale removing";
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash)) {
     std::string old_val;
@@ -170,7 +170,7 @@ std::string hash_table_partition::scale_remove(const std::string &key) {
       old_val = to_string(value);
       return true;
     })) {
-      //LOG(log_level::info) << "now the storage is " << storage_size();
+      LOG(log_level::info) << "now the storage is " << storage_size();
       return old_val;
     }
     else
@@ -219,15 +219,25 @@ void hash_table_partition::get_data_in_slot_range(std::vector<std::string> &data
 
 std::string hash_table_partition::update_partition(const std::string &new_name, const std::string &new_metadata) {
   //LOG(log_level::info) << "Updating partition of " << name() << " to be " << new_name << new_metadata;
-  name(new_name);
+  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+  if(new_name == "merging" && new_metadata == "merging") {
+    if(metadata() == "regular" && name() != "0_65536") {
+      metadata("exporting");
+      return name();
+    }
+    return "!fail";
+  }
   auto s = utils::string_utils::split(new_metadata, '$');
   std::string status = s.front();
 
   if (status == "exporting") {
+    // When we meet exporting, the original state must be regular
     export_target(s[2]);
     auto range = utils::string_utils::split(s[1], '_');
     export_slot_range(std::stoi(range[0]), std::stoi(range[1]));
   } else if (status == "importing") {
+    if(metadata() != "regular")
+      return "!fail";
     auto range = utils::string_utils::split(s[1], '_');
     import_slot_range(std::stoi(range[0]), std::stoi(range[1]));
   } else {
@@ -242,7 +252,10 @@ std::string hash_table_partition::update_partition(const std::string &new_name, 
     }
     export_slot_range(0, -1);
     import_slot_range(0, -1);
+    export_target_str_.clear();
+    export_target_.clear();
   }
+  name(new_name);
   metadata(status);
   slot_range(new_name);
   //LOG(log_level::info) << "Partition updated";
@@ -399,7 +412,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       //LOG(log_level::info) << "Requested slot range merge";
       std::map<std::string, std::string> scale_conf;
       scale_conf.emplace(std::make_pair(std::string("type"), std::string("hash_table_merge")));
-      scale_conf.emplace(std::make_pair(std::string("threshold_hi_"), std::to_string(threshold_hi_)));
+      scale_conf.emplace(std::make_pair(std::string("storage_capacity"), std::to_string(storage_capacity())));
       auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
       scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {

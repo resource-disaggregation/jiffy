@@ -56,7 +56,7 @@ std::vector<std::string> keygenerator(std::size_t num_keys, double theta, int nu
 }
 
 int main() {
-  //size_t num_ops = 1501;
+  size_t num_ops = 1501;
   //size_t num_ops = 100;
   //std::vector<std::string> keys = keygenerator(num_ops, 0.5);
 
@@ -66,7 +66,7 @@ int main() {
   int num_blocks = 1;
   int chain_length = 1;
   // TODO change this to 64GB / 100KB each chunk
-  size_t num_ops = 671088;
+  //size_t num_ops = 671088;
 
   // TODO change this to 100KB, should have 64GB in total
   size_t data_size = 102392;
