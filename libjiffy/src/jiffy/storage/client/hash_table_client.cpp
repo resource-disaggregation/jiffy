@@ -249,7 +249,7 @@ void hash_table_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
     throw redo_error();
   }
   if(response == "!full") {
-    //LOG(log_level::info) << "putting the client to sleep to let auto_scaling run first for 2^" << redo_times << " milliseconds";
+    LOG(log_level::info) << "putting the client to sleep to let auto_scaling run first for 2^" << redo_times << " milliseconds";
     std::this_thread::sleep_for(std::chrono::milliseconds((int)(std::pow(2, redo_times))));
     redo_times++;
     throw redo_error();

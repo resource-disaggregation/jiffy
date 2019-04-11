@@ -174,7 +174,7 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
 }
 
 
-
+/*
 TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(21, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -236,4 +236,4 @@ TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][mana
   }
 
 }
-
+*/

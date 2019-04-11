@@ -51,6 +51,10 @@ int main() {
       try {
         auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
         out << cur_epoch;
+        // TODO change this to bytes
+        // TODO make microseconds
+        // Create TSV
+        // Add timestamp to separate files
         out << "\t" << j * 100; // KB
         out << std::endl;
       } catch (std::exception &e) {
