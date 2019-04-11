@@ -66,7 +66,9 @@ std::string hash_table_partition::put(const std::string &key, const std::string 
       //LOG(log_level::info) << "this partition is full now !!!!";
       return "!full";
     }
+
     if (block_.insert(make_binary(key), make_binary(value))) {
+      LOG(log_level::info) << "Put success";
       return "!ok";
     } else {
       return "!duplicate_key";
@@ -141,28 +143,35 @@ std::string hash_table_partition::remove(const std::string &key, bool redirect) 
   auto hash = hash_slot::get(key);
   LOG(log_level::info) << "Removing hash" << hash;
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
+    LOG(log_level::info) << "Look here 1";
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+      LOG(log_level::info) << "Look here 2";
       return "!exporting!" + export_target_str();
     }
+    LOG(log_level::info) << "Look here 3";
     std::string old_val;
     if (block_.erase_fn(key, [&](value_type &value) {
       old_val = to_string(value);
       return true;
     })) {
+      LOG(log_level::info) << "Look here 4";
       return old_val;
     }
     //LOG(log_level::info) << "how come you are not removing??";
     if(metadata_ == "importing" && in_import_slot_range(hash)) {
+      LOG(log_level::info) << "Look here 5";
       //LOG(log_level::info) << "now you are telling the client that block is removed";
-      return "!block_moved";
+      return "!full";
     }
+    LOG(log_level::info) << "Look here 6";
     return "!key_not_found";
   }
+  LOG(log_level::info) << "Look here 7";
   return "!block_moved";
 }
 
 std::string hash_table_partition::scale_remove(const std::string &key) {
-  LOG(log_level::info) << "scale removing";
+  LOG(log_level::info) << "scale removing " << key;
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash)) {
     std::string old_val;
@@ -194,12 +203,12 @@ void hash_table_partition::get_data_in_slot_range(std::vector<std::string> &data
                                                   int32_t slot_begin,
                                                   int32_t slot_end,
                                                   int32_t batch_size) {
-  //LOG(log_level::info) << "INTO THIS FUNCTION 4 *****************************";
+  LOG(log_level::info) << "INTO THIS FUNCTION 4 *****************************";
   if(block_.empty()) {
-    //LOG(log_level::info) << "INTO THIS FUNCTION 5 *****************************";
+    LOG(log_level::info) << "INTO THIS FUNCTION 5 *****************************";
     return;
   }
-  //LOG(log_level::info) << "INTO THIS FUNCTION 6 *****************************";
+  LOG(log_level::info) << "INTO THIS FUNCTION 6 *****************************";
   std::size_t n_items = 0;
   for (const auto &entry: block_.lock_table()) {
     auto slot = hash_slot::get(entry.first);
@@ -207,19 +216,19 @@ void hash_table_partition::get_data_in_slot_range(std::vector<std::string> &data
       data.push_back(to_string(entry.first));
       data.push_back(to_string(entry.second));
       n_items = n_items + 2;
-      //LOG(log_level::info) <<"$$$$$$$$$$$$$$$" << n_items;
+      LOG(log_level::info) <<"$$$$$$$$$$$$$$$" << n_items;
       if (n_items == static_cast<std::size_t>(batch_size)) {
-        //LOG(log_level::info) << "Returning from this function";
+        LOG(log_level::info) << "Returning from this function";
         return;
       }
     }
   }
-  //LOG(log_level::info) << "If the lock table is empty, it should directly get to this line" << data.size();
+  LOG(log_level::info) << "If the lock table is empty, it should directly get to this line" << data.size();
 }
 
 std::string hash_table_partition::update_partition(const std::string &new_name, const std::string &new_metadata) {
-  //LOG(log_level::info) << "Updating partition of " << name() << " to be " << new_name << new_metadata;
-  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+  LOG(log_level::info) << "Updating partition of " << name() << " to be " << new_name << new_metadata;
+  //std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
   if(new_name == "merging" && new_metadata == "merging") {
     if(metadata() == "regular" && name() != "0_65536") {
       metadata("exporting");
@@ -229,7 +238,7 @@ std::string hash_table_partition::update_partition(const std::string &new_name, 
   }
   auto s = utils::string_utils::split(new_metadata, '$');
   std::string status = s.front();
-
+  LOG(log_level::info) << "the partition status to be updated is: " << status;
   if (status == "exporting") {
     // When we meet exporting, the original state must be regular
     export_target(s[2]);
@@ -241,12 +250,18 @@ std::string hash_table_partition::update_partition(const std::string &new_name, 
     auto range = utils::string_utils::split(s[1], '_');
     import_slot_range(std::stoi(range[0]), std::stoi(range[1]));
   } else {
+    LOG(log_level::info) << "Look here 1";
     if (metadata() == "importing") {
+      LOG(log_level::info) << "Look here 2";
+      LOG(log_level::info) << "import begin: " << import_slot_range().first << " slot begin: " << slot_range().first << " import end: " << import_slot_range().second << " slot end: " << slot_range().second;
       if (import_slot_range().first != slot_range().first || import_slot_range().second != slot_range().second) {
+        LOG(log_level::info) << "Look here 5";
         auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
         fs->remove_block(path(), s[1]);
       }
+      LOG(log_level::info) << "Look here 3";
     } else {
+      LOG(log_level::info) << "Look here 4";
       splitting_ = false;
       merging_ = false;
     }
@@ -258,7 +273,7 @@ std::string hash_table_partition::update_partition(const std::string &new_name, 
   name(new_name);
   metadata(status);
   slot_range(new_name);
-  //LOG(log_level::info) << "Partition updated";
+  LOG(log_level::info) << "Partition updated";
   return "!ok";
 }
 

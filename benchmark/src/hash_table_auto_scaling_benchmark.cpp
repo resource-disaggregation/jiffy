@@ -56,7 +56,7 @@ std::vector<std::string> keygenerator(std::size_t num_keys, double theta, int nu
 }
 
 int main() {
-  size_t num_ops = 1501;
+  size_t num_ops = 5000;
   //size_t num_ops = 100;
   //std::vector<std::string> keys = keygenerator(num_ops, 0.5);
 
