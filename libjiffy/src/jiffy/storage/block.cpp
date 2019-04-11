@@ -33,7 +33,7 @@ void block::setup(const std::string &type,
 }
 
 void block::destroy() {
-  LOG(log_level::info) << "Destroying partition " << impl_->name() << " on block " << id_;
+  //LOG(log_level::info) << "Destroying partition " << impl_->name() << " on block " << id_;
   impl_.reset();
   impl_ = nullptr;
 }

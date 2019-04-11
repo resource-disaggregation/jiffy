@@ -22,8 +22,8 @@ int main() {
   int num_blocks = 1;
   int chain_length = 1;
   // TODO change this to 64GB / 100KB each chunk
-  //size_t num_ops = 671088;
-  size_t num_ops = 3000;
+  size_t num_ops = 671088;
+  //size_t num_ops = 3000;
   // TODO change this to 100KB, should have 64GB in total
   size_t data_size = 102400;
   std::string op_type = "msg_queue_auto_scaling";
@@ -51,10 +51,6 @@ int main() {
       try {
         auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
         out << cur_epoch;
-        // TODO change this to bytes
-        // TODO make microseconds
-        // Create TSV
-        // Add timestamp to separate files
         out << "\t" << j * 100 * 1024;
         out << std::endl;
       } catch (std::exception &e) {
