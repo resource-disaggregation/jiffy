@@ -122,9 +122,9 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
   bool expected = false;
   if (auto_scale_.load() && is_mutator(cmd_id) && overload() && is_tail()
       && overload_.compare_exchange_strong(expected, true)) {
-    LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
-                         << storage_capacity() << " partition size = " << size() << "partition capacity "
-                         << partition_.capacity();
+    //LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
+    //                     << storage_capacity() << " partition size = " << size() << "partition capacity "
+    //                     << partition_.capacity();
     try {
       overload_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
@@ -135,7 +135,7 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
       scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
       overload_ = false;
-      LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();
+   //   LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();
     }
   }
 }

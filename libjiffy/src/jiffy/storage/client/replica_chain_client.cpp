@@ -82,11 +82,11 @@ std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const
         response[0] = "!ok";
       }
     } catch (apache::thrift::transport::TTransportException &e) {
-      LOG(log_level::info) << "Error in connection to chain: " << e.what();
-      LOG(log_level::info) << "Command id is " << cmd_id;
-      for(const auto &x:args)
-        LOG(log_level::info) << x;
-      LOG(log_level::info) << "replica chain is: " << chain_.to_string();
+      //LOG(log_level::info) << "Error in connection to chain: " << e.what();
+      //LOG(log_level::info) << "Command id is " << cmd_id;
+      //for(const auto &x:args)
+      //  LOG(log_level::info) << x;
+      //LOG(log_level::info) << "replica chain is: " << chain_.to_string();
       //TODO add a default partition implementation that always return a block remove
       if(std::string(e.what()) ==  "THRIFT_EAGAIN (timed out)") {
       //  LOG(log_level::info) << "The error message is correct";

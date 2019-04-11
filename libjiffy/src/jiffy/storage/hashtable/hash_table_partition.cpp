@@ -397,9 +397,9 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       && metadata_ != "importing" && is_tail()
       && splitting_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
-    LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
-                         << storage_capacity()
-                         << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
+    //LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
+    //                     << storage_capacity()
+    //                     << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
       splitting_ = true;
       //LOG(log_level::info) << "Requested slot range split";
@@ -411,7 +411,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
       splitting_ = false;
-      LOG(log_level::warn) << "Split slot range failed: " << e.what();
+      //LOG(log_level::warn) << "Split slot range failed: " << e.what();
     }
   }
   expected = false;
@@ -420,8 +420,8 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       && metadata_ != "importing" && name() != "0_65536" && is_tail()
       && merging_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
-    LOG(log_level::info) << "Underloaded partition; storage = " << storage_size() << " capacity = "
-                         << storage_capacity() << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
+    //LOG(log_level::info) << "Underloaded partition; storage = " << storage_size() << " capacity = "
+    //                     << storage_capacity() << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
       merging_ = true;
       //LOG(log_level::info) << "Requested slot range merge";
@@ -432,7 +432,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
       merging_ = false;
-      LOG(log_level::warn) << "Merge slot range failed: " << e.what();
+      //LOG(log_level::warn) << "Merge slot range failed: " << e.what();
     }
   }
 }
