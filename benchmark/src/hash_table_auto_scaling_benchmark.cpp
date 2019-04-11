@@ -104,7 +104,7 @@ int main() {
         namespace ts = std::chrono;
         auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
         out << cur_epoch;
-        out << "\t" << j * 100; // KB
+        out << "\t" << j * 100 * 1024;
         out << std::endl;
       } catch (std::exception &e) {
         LOG(log_level::error) << "Exception: " << e.what();
