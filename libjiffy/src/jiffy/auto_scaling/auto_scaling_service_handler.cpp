@@ -41,9 +41,9 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     src->run_command(storage::msg_queue_cmd_id::mq_update_partition, args);
     auto finish_updating_partition = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     LOG(log_level::info) << "===== " << "Message queue auto_scaling" << " ======";
-    LOG(log_level::info) << "\t Total_time: " << finish_updating_partition - start << " us";
-    LOG(log_level::info) << "\t Add_replica_chain: " << finish_adding_replica_chain - start << " us";
-    LOG(log_level::info) << "\t Update_partition: " << finish_updating_partition - finish_adding_replica_chain << " us";
+    LOG(log_level::info) << "\t Start " << start;
+    LOG(log_level::info) << "\t Add_replica_chain: " << finish_adding_replica_chain;
+    LOG(log_level::info) << "\t Update_partition: " << finish_updating_partition;
 
   } else if (scaling_type == "hash_table_split") {
     //LOG(log_level::info) << "Look here 1";
@@ -147,12 +147,12 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     //LOG(log_level::info) << "Finish updating mapping on directory server for hash table after splitting: " << finish_updating_partition_dir;
     //LOG(log_level::info) << "Exported slot range (" << split_range_begin << ", " << split_range_end << ")";
     LOG(log_level::info) << "===== " << "Hash table splitting" << " ======";
-    LOG(log_level::info) << "\t Total_time: " << finish_updating_partition_dir - start << " us";
-    LOG(log_level::info) << "\t Add_replica_chain: " << finish_adding_replica_chain - start << " us";
-    LOG(log_level::info) << "\t Update_partition_before_splitting: " << finish_updating_partition_before - finish_adding_replica_chain << " us";
-    LOG(log_level::info) << "\t Finish_data_transmission: " << finish_data_transmission - finish_updating_partition_before  << " us";
-    LOG(log_level::info) << "\t Update_partition_after_splitting: " << finish_updating_partition_after - finish_data_transmission << " us";
-    LOG(log_level::info) << "\t Update_mapping_on_directory_server " << finish_updating_partition_dir - finish_updating_partition_after << " us";
+    LOG(log_level::info) << "\t start: " << start;
+    LOG(log_level::info) << "\t Add_replica_chain: " << finish_adding_replica_chain;
+    LOG(log_level::info) << "\t Update_partition_before_splitting: " << finish_updating_partition_before;
+    LOG(log_level::info) << "\t Finish_data_transmission: " << finish_data_transmission;
+    LOG(log_level::info) << "\t Update_partition_after_splitting: " << finish_updating_partition_after;
+    LOG(log_level::info) << "\t Update_mapping_on_directory_server " << finish_updating_partition_dir;
 
 
 
@@ -319,12 +319,12 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     //LOG(log_level::info) << "Finish updating partition after hash table merge: " << finish_update_partition_after;
     //LOG(log_level::info) << "Merged slot range (" << merge_range_begin << ", " << merge_range_end << ")";
     LOG(log_level::info) << "===== " << "Hash table merging" << " ======";
-    LOG(log_level::info) << "\t Total_time: " << finish_update_partition_after - start << " us";
-    LOG(log_level::info) << "Found_replica_chain_to_merge: " << finish_finding_chain_to_merge - start << " us";
-    LOG(log_level::info) << "\t Update_partition_before_splitting: " << finish_update_partition_before - finish_finding_chain_to_merge << " us";
-    LOG(log_level::info) << "\t Finish_data_transmission: " << finish_data_transmission - finish_update_partition_before  << " us";
-    LOG(log_level::info) << "\t Update_mapping_on_directory_server: " << finish_update_partition_dir - finish_data_transmission << " us";
-    LOG(log_level::info) << "\t Update_partition_after_splitting: " << finish_update_partition_after - finish_data_transmission << " us";
+    LOG(log_level::info) << "\t Start: " << start;
+    LOG(log_level::info) << "Found_replica_chain_to_merge: " << finish_finding_chain_to_merge;
+    LOG(log_level::info) << "\t Update_partition_before_splitting: " << finish_update_partition_before;
+    LOG(log_level::info) << "\t Finish_data_transmission: " << finish_data_transmission;
+    LOG(log_level::info) << "\t Update_mapping_on_directory_server: " << finish_update_partition_dir;
+    LOG(log_level::info) << "\t Update_partition_after_splitting: " << finish_update_partition_after;
 
 
   } else if (scaling_type == "btree_split") {
