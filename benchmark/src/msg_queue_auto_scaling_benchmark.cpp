@@ -70,6 +70,7 @@ int main() {
     }
     out.close();
   });
+  std::ofstream out("latency.trace");
   jiffy_client client(address, service_port, lease_port);
   std::shared_ptr<msg_queue_client>
       mq_client = client.open_or_create_msg_queue(path, backing_path, num_blocks, chain_length);
@@ -81,7 +82,8 @@ int main() {
     send_t1 = time_utils::now_us();
     send_tot_time = send_t1 - send_t0;
     auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
-    LOG(log_level::info) << "Latency for time: " << cur_epoch << " is " << send_tot_time << " us";
+    out << cur_epoch << " " << send_tot_time << " us";
+    out << std::endl;
   }
   stop_.store(true);
   if (worker_.joinable())

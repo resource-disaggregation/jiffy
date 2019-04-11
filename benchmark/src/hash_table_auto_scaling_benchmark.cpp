@@ -45,7 +45,7 @@ std::vector<std::string> keygenerator(std::size_t num_keys, double theta, int nu
     if (it != bucket_dist.end()) {
       *it = *it - 1;
       keys.push_back(key_string);
-      LOG(log_level::info) << "Found key" << keys.size();
+      //LOG(log_level::info) << "Found key" << keys.size();
       if (*it == 0) {
         it = bucket_dist.erase(it);
       }
@@ -56,9 +56,9 @@ std::vector<std::string> keygenerator(std::size_t num_keys, double theta, int nu
 }
 
 int main() {
-  size_t num_ops = 5000;
+  size_t num_ops = 2000;
   //size_t num_ops = 100;
-  //std::vector<std::string> keys = keygenerator(num_ops, 0.5);
+  std::vector<std::string> keys = keygenerator(num_ops, 0.5);
 
   std::string address = "127.0.0.1";
   int service_port = 9090;
@@ -119,25 +119,30 @@ int main() {
     }
     out.close();
   });
+  std::ofstream out("latency.trace");
   for (j = 0; j < num_ops; ++j) {
+    //auto key = std::to_string(j);
+    //std::string data_(102400 - key.size(), 'x');
     put_t0 = time_utils::now_us();
-    //ht_client->put(keys[j], data_);
-    ht_client->put(std::to_string(j), data_);
+    ht_client->put(keys[j], data_);
+    //ht_client->put(std::to_string(j), data_);
     put_t1 = time_utils::now_us();
     put_tot_time = (put_t1 - put_t0);
     auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
-    LOG(log_level::info) << "Latency for time: " << cur_epoch << " is " << put_tot_time << " us";
+    out << cur_epoch << " " << put_tot_time << " put" << std::endl;
   }
   uint64_t remove_tot_time = 0, remove_t0 = 0, remove_t1 = 0;
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   for (j = 0; j < num_ops; ++j) {
+    //auto key = std::to_string(j);
+    //std::string data_(102400 - key.size(), 'x');
     remove_t0 = time_utils::now_us();
-    //ht_client->remove(keys[j]);
-    ht_client->remove(std::to_string(j));
+    ht_client->remove(keys[j]);
+    //ht_client->remove(std::to_string(j));
     remove_t1 = time_utils::now_us();
     remove_tot_time = (remove_t1 - remove_t0);
     auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
-    LOG(log_level::info) << "Latency for time: " << cur_epoch << " is " << remove_tot_time << " us";
+    out << cur_epoch << " " << remove_tot_time << " remove" << std::endl;
   }
   stop_.store(true);
   if (worker_.joinable())
