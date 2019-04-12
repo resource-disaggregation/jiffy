@@ -38,7 +38,7 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
-  threshold_hi_ = conf.get_as<double>("msgqueue.capacity_threshold_hi", 0.7);
+  threshold_hi_ = conf.get_as<double>("msgqueue.capacity_threshold_hi", 0.95);
   threshold_lo_ = conf.get_as<double>("msgqueue.capacity_threshold_lo", 0.00);
   auto_scale_ = conf.get_as<bool>("msgqueue.auto_scale", true);
 }

@@ -41,8 +41,7 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
-  //threshold_hi_ = conf.get_as<double>("hashtable.capacity_threshold_hi", 0.95);
-  threshold_hi_ = 0.7;
+  threshold_hi_ = conf.get_as<double>("hashtable.capacity_threshold_hi", 0.95);
   threshold_lo_ = conf.get_as<double>("hashtable.capacity_threshold_lo", 0.05);
   auto_scale_ = conf.get_as<bool>("hashtable.auto_scale", true);
   auto r = utils::string_utils::split(name_, '_');

@@ -22,26 +22,27 @@ using namespace ::jiffy::utils;
 using namespace ::apache::thrift;
 namespace ts = std::chrono;
 
-std::vector<std::string> keygenerator(std::size_t num_keys, double theta, int num_buckets = 512) {
+std::vector<std::string> keygenerator(std::size_t num_keys, double theta = 0, int num_buckets = 512) {
   int bucket_size = 65536 / num_buckets;
   hash_slot hashslot;
-  zipfgenerator zipf(theta, num_keys);
-  std::vector<std::uint64_t> bucket_dist;
+  zipfgenerator zipf(theta, num_buckets);
+  std::vector<uint64_t> zipfresult;
+  std::map<uint64_t, uint64_t> bucket_dist;
   for (std::size_t i = 0; i < num_keys; i++) {
-    bucket_dist.push_back(zipf.next());
+    bucket_dist[zipf.next()]++;
   }
+
   std::uint64_t count = 1;
   std::vector<std::string> keys;
   while (keys.size() != num_keys) {
     auto key = std::to_string(count);
     auto bucket = std::uint64_t(hashslot.get(key) / bucket_size);
-    auto it = std::find(bucket_dist.begin(), bucket_dist.end(), bucket);
+    auto it = bucket_dist.find(bucket);
     if (it != bucket_dist.end()) {
-      *it = *it - 1;
+      it->second = it->second - 1;
       keys.push_back(key);
-      //LOG(log_level::info) << "Found key" << keys.size();
-      if (*it == 0) {
-        it = bucket_dist.erase(it);
+      if (it->second == 0) {
+        bucket_dist.erase(it);
       }
     }
     count++;
@@ -50,8 +51,9 @@ std::vector<std::string> keygenerator(std::size_t num_keys, double theta, int nu
 }
 
 int main() {
-  size_t num_ops = 671088;
-  std::vector<std::string> keys = keygenerator(num_ops, 0.5);
+  //size_t num_ops = 671088;
+  size_t num_ops = 4000;
+  std::vector<std::string> keys = keygenerator(num_ops);
   std::string address = "127.0.0.1";
   int service_port = 9090;
   int lease_port = 9091;
@@ -110,23 +112,26 @@ int main() {
     std::string data_(102400 - key.size(), 'x');
     put_t0 = time_utils::now_us();
     ht_client->put(key, data_);
-    //ht_client->put(std::to_string(j), data_);
     put_t1 = time_utils::now_us();
     put_tot_time = (put_t1 - put_t0);
     auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
     out << cur_epoch << " " << put_tot_time << " put" << std::endl;
   }
+
   uint64_t remove_tot_time = 0, remove_t0 = 0, remove_t1 = 0;
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  for (j = 0; j < num_ops; ++j) {
-    auto key = keys[j];
+  for (j = num_ops - 1; j >= 0; --j) {
+    auto key = keys[num_ops - 1 - j];
+  //for(j = 0; j < num_ops; ++j) {
+  //  auto key = keys[j];
     remove_t0 = time_utils::now_us();
     ht_client->remove(key);
-    //ht_client->remove(std::to_string(j));
     remove_t1 = time_utils::now_us();
     remove_tot_time = (remove_t1 - remove_t0);
     auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
     out << cur_epoch << " " << remove_tot_time << " remove" << std::endl;
+    if(j == 0)
+      break;
   }
   stop_.store(true);
   if (worker_.joinable())

@@ -26,10 +26,12 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
   std::string scaling_type = conf.find("type")->second;
   auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
   if (scaling_type == "msg_queue") {
-    auto start = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto start =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     std::string dst_partition_name = conf.find("next_partition_name")->second;
     auto dst_replica_chain = fs->add_block(path, dst_partition_name, "regular");
-    auto finish_adding_replica_chain = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto finish_adding_replica_chain =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     std::string next_target_string = "";
     for (const auto &block: dst_replica_chain.block_ids) {
       next_target_string += (block + "!");
@@ -39,15 +41,20 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     std::vector<std::string> args;
     args.emplace_back(next_target_string);
     src->run_command(storage::msg_queue_cmd_id::mq_update_partition, args);
-    auto finish_updating_partition = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    LOG(log_level::info) << "===== " << "Message queue auto_scaling" << " ======";
-    LOG(log_level::info) << "\t Start " << start;
-    LOG(log_level::info) << "\t Add_replica_chain: " << finish_adding_replica_chain;
-    LOG(log_level::info) << "\t Update_partition: " << finish_updating_partition;
+    auto finish_updating_partition =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    //LOG(log_level::info) << "===== " << "Message queue auto_scaling" << " ======";
+    //LOG(log_level::info) << "\t Start " << start;
+    //LOG(log_level::info) << "\t Add_replica_chain: " << finish_adding_replica_chain;
+    //LOG(log_level::info) << "\t Update_partition: " << finish_updating_partition;
+    LOG(log_level::info) << " " << start << " " << finish_updating_partition - start << " "
+                         << finish_adding_replica_chain - start << " "
+                         << finish_updating_partition - finish_adding_replica_chain;
 
   } else if (scaling_type == "hash_table_split") {
     //LOG(log_level::info) << "Look here 1";
-    auto start = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto start =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     std::int32_t slot_range_begin = std::stoi(conf.find("slot_range_begin")->second);
     std::int32_t slot_range_end = std::stoi(conf.find("slot_range_end")->second);
     auto split_range_begin = (slot_range_begin + slot_range_end) / 2;
@@ -57,7 +64,8 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     //LOG(log_level::info) << "Look here 2";
     auto dst_replica_chain = fs->add_block(path, dst_partition_name, "regular");
     //LOG(log_level::info) << "Block successfully added";
-    auto finish_adding_replica_chain = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto finish_adding_replica_chain =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     std::string export_target_str_ = "";
     for (const auto &block: dst_replica_chain.block_ids) {
       export_target_str_ += (block + "!");
@@ -82,7 +90,8 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     auto dst = std::make_shared<storage::replica_chain_client>(fs, path, dst_replica_chain, storage::KV_OPS);
     dst->run_command(storage::hash_table_cmd_id::ht_update_partition, dst_before_args);
     //LOG(log_level::info) << "Dst partition successfully updated";
-    auto finish_updating_partition_before = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto finish_updating_partition_before =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     bool has_more = true;
     std::size_t split_batch_size = 2;
     std::size_t tot_split_keys = 0;
@@ -98,7 +107,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       split_data = src->run_command(storage::hash_table_cmd_id::ht_get_range_data, args);
       //LOG(log_level::info) << "INTO THIS FUNCTION 3 *****************************";
       if (split_data.back() == "!empty") {
-       // LOG(log_level::info) << "INTO THIS FUNCTION 4 *****************************";
+        // LOG(log_level::info) << "INTO THIS FUNCTION 4 *****************************";
         break;
       } else if (split_data.size() < split_batch_size) {
         has_more = false;
@@ -134,36 +143,46 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       //LOG(log_level::info) << "Removed " << remove_keys.size() << " split keys";
     }
     //LOG(log_level::info) << "INTO THIS FUNCTION 10 *****************************";
-    auto finish_data_transmission = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto finish_data_transmission =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     //LOG(log_level::info) << "Finish data transmission: " << finish_data_transmission;
     // Finalize slot range split
     std::string old_name = current_name;
+    fs->update_partition(path, old_name, src_partition_name, "regular");
+    auto finish_updating_partition_dir =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
     src->run_command(storage::hash_table_cmd_id::ht_update_partition, src_after_args);
     dst->run_command(storage::hash_table_cmd_id::ht_update_partition, dst_after_args);
-    auto finish_updating_partition_after = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto finish_updating_partition_after =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     //LOG(log_level::info) << "Finish updating partition for hash table after splitting: " << finish_updating_partition_after;
-    fs->update_partition(path, old_name, src_partition_name, "regular");
-    auto finish_updating_partition_dir = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
     //LOG(log_level::info) << "Finish updating mapping on directory server for hash table after splitting: " << finish_updating_partition_dir;
     //LOG(log_level::info) << "Exported slot range (" << split_range_begin << ", " << split_range_end << ")";
-    LOG(log_level::info) << "===== " << "Hash table splitting" << " ======";
-    LOG(log_level::info) << "\t start: " << start;
-    LOG(log_level::info) << "\t Add_replica_chain: " << finish_adding_replica_chain;
-    LOG(log_level::info) << "\t Update_partition_before_splitting: " << finish_updating_partition_before;
-    LOG(log_level::info) << "\t Finish_data_transmission: " << finish_data_transmission;
-    LOG(log_level::info) << "\t Update_partition_after_splitting: " << finish_updating_partition_after;
-    LOG(log_level::info) << "\t Update_mapping_on_directory_server " << finish_updating_partition_dir;
-
-
+    //LOG(log_level::info) << "===== " << "Hash table splitting" << " ======";
+    //LOG(log_level::info) << "\t start: " << start;
+    //LOG(log_level::info) << "\t Add_replica_chain: " << finish_adding_replica_chain;
+    //LOG(log_level::info) << "\t Update_partition_before_splitting: " << finish_updating_partition_before;
+    //LOG(log_level::info) << "\t Finish_data_transmission: " << finish_data_transmission;
+    //LOG(log_level::info) << "\t Update_mapping_on_directory_server " << finish_updating_partition_dir;
+    //LOG(log_level::info) << "\t Update_partition_after_splitting: " << finish_updating_partition_after;
+    LOG(log_level::info) << " S " << start << " " << finish_updating_partition_after - start << " "
+                         << finish_adding_replica_chain - start << " "
+                         << finish_updating_partition_before - finish_adding_replica_chain << " "
+                         << finish_data_transmission - finish_updating_partition_before << " "
+                         << finish_updating_partition_dir - finish_data_transmission << " "
+                         << finish_updating_partition_after - finish_updating_partition_dir;
 
   } else if (scaling_type == "hash_table_merge") {
-    auto start = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto start =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     auto src = std::make_shared<storage::replica_chain_client>(fs, path, current_replica_chain, storage::KV_OPS);
     std::vector<std::string> init_args;
     init_args.emplace_back("merging");
     init_args.emplace_back("merging");
     std::string name = src->run_command(storage::hash_table_cmd_id::ht_update_partition, init_args).front();
-    if(name == "!fail") {
+    if (name == "!fail") {
       mtx.unlock();
       throw make_exception("Partition is under auto_scaling");
     }
@@ -217,11 +236,12 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       mtx.unlock();
       throw make_exception("Adjacent partitions are not found or full");
     }
-    auto finish_finding_chain_to_merge = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto finish_finding_chain_to_merge =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     //LOG(log_level::info) << "Found replica chain to merge: " << finish_finding_chain_to_merge;
 
     // Connect two replica chains
-   // auto src = std::make_shared<storage::replica_chain_client>(fs, path, current_replica_chain, storage::KV_OPS);
+    // auto src = std::make_shared<storage::replica_chain_client>(fs, path, current_replica_chain, storage::KV_OPS);
     auto dst = std::make_shared<storage::replica_chain_client>(fs, path, merge_target, storage::KV_OPS);
     std::string dst_partition_name;
     if (merge_target.fetch_slot_range().first == merge_range_end)
@@ -243,7 +263,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     dst_before_args.push_back(merge_target.name);
     dst_before_args.emplace_back("importing$" + name);
     auto ret = dst->run_command(storage::hash_table_cmd_id::ht_update_partition, dst_before_args).front();
-    if(ret == "!fail") {
+    if (ret == "!fail") {
       std::vector<std::string> src_fail_args;
       // We don't need to update the src partition cause it will be deleted anyway
       src_fail_args.push_back(name);
@@ -253,7 +273,8 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       return;
     }
     src->run_command(storage::hash_table_cmd_id::ht_update_partition, src_before_args);
-    auto finish_update_partition_before = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto finish_update_partition_before =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     //LOG(log_level::info) << "Finish updating partition before hash table merge: " << finish_update_partition_before;
     bool has_more = true;
     std::size_t merge_batch_size = 2;
@@ -302,10 +323,12 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     //LOG(log_level::info) << "Look here 4";
     // Finalize slot range split
     // Update directory mapping
-    auto finish_data_transmission = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto finish_data_transmission =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     //LOG(log_level::info) << "Finish data transmission for hash table merge: " << finish_data_transmission;
     fs->update_partition(path, merge_target.name, dst_partition_name, "regular");
-    auto finish_update_partition_dir = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto finish_update_partition_dir =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     //LOG(log_level::info) << "Finish updating mapping on directory server after hash table merge: " << finish_update_partition_dir;
     //LOG(log_level::info) << "Look here 5";
     //Setting name and metadata for src and dst
@@ -315,18 +338,23 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     dst_after_args.push_back(dst_partition_name);
     dst_after_args.emplace_back("regular$" + name);
     dst->run_command(storage::hash_table_cmd_id::ht_update_partition, dst_after_args);
-    auto finish_update_partition_after = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto finish_update_partition_after =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     //LOG(log_level::info) << "Finish updating partition after hash table merge: " << finish_update_partition_after;
     //LOG(log_level::info) << "Merged slot range (" << merge_range_begin << ", " << merge_range_end << ")";
-    LOG(log_level::info) << "===== " << "Hash table merging" << " ======";
-    LOG(log_level::info) << "\t Start: " << start;
-    LOG(log_level::info) << "Found_replica_chain_to_merge: " << finish_finding_chain_to_merge;
-    LOG(log_level::info) << "\t Update_partition_before_splitting: " << finish_update_partition_before;
-    LOG(log_level::info) << "\t Finish_data_transmission: " << finish_data_transmission;
-    LOG(log_level::info) << "\t Update_mapping_on_directory_server: " << finish_update_partition_dir;
-    LOG(log_level::info) << "\t Update_partition_after_splitting: " << finish_update_partition_after;
-
-
+    //LOG(log_level::info) << "===== " << "Hash table merging" << " ======";
+    //LOG(log_level::info) << "\t Start: " << start;
+    //LOG(log_level::info) << "Found_replica_chain_to_merge: " << finish_finding_chain_to_merge;
+    //LOG(log_level::info) << "\t Update_partition_before_splitting: " << finish_update_partition_before;
+    //LOG(log_level::info) << "\t Finish_data_transmission: " << finish_data_transmission;
+    //LOG(log_level::info) << "\t Update_mapping_on_directory_server: " << finish_update_partition_dir;
+    //LOG(log_level::info) << "\t Update_partition_after_splitting: " << finish_update_partition_after;
+    LOG(log_level::info) << " M " << start << " " << finish_update_partition_after - start << " "
+                         << finish_finding_chain_to_merge - start << " "
+                         << finish_update_partition_before - finish_finding_chain_to_merge << " "
+                         << finish_data_transmission - finish_update_partition_before << " "
+                         << finish_update_partition_dir - finish_data_transmission << " "
+                         << finish_update_partition_after - finish_update_partition_dir;
   } else if (scaling_type == "btree_split") {
 
   } else if (scaling_type == "btree_merge") {
