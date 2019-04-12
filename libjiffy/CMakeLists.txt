@@ -261,7 +261,6 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
 #            test/notification_test.cpp
 #            test/storage_manager_test.cpp
 #            test/sync_worker_test.cpp
-#            #test/zipf_keys_test.cpp
             test/test_utils.h
             )
     target_link_libraries(jiffy_tests jiffy)
