@@ -36,23 +36,8 @@ typedef std::pair<const key_type, value_type> btree_pair_type;
 struct less_type {
   template<typename KeyType1, typename KeyType2>
   bool operator()(const KeyType1& lhs, const KeyType2& rhs) const {
-    /*
-    LOG(log_level::info) << "Into the less type";
-    char l[lhs.size() + 1];
-    char r[rhs.size() + 1];
-    l[lhs.size()] = '\0';
-    r[rhs.size()] = '\0';
-    memcpy(l, lhs.data(), lhs.size());
-    std::string left(l);
-    LOG(log_level::info) << "left string" << left;
-    memcpy(r, rhs.data(), rhs.size());
-    std::string right(r);
-    LOG(log_level::info) << "right string" << right;
-    LOG(log_level::info) << "Compare result" << (strcmp(l, r) < 0);
-    return strcmp(l, r) < 0;
-     */
-    //LOG(log_level::info) << (strcmp(reinterpret_cast<const char*>(lhs.data()), reinterpret_cast<const char*>(rhs.data())) < 0);
-    return strcmp(reinterpret_cast<const char*>(lhs.data()), reinterpret_cast<const char*>(rhs.data())) < 0;
+    auto ret = strncmp(reinterpret_cast<const char*>(lhs.data()), reinterpret_cast<const char*>(rhs.data()), std::min(lhs.size(), rhs.size()));
+    return ret == 0 ? lhs.size() < rhs.size() : ret < 0;
   }
 };
 typedef block_memory_allocator<btree_pair_type> bt_allocator_type;
