@@ -359,25 +359,22 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
         std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     std::string slot_range_begin = conf.find("slot_range_begin")->second;
     std::string slot_range_end = conf.find("slot_range_end")->second;
-
-    // TODO find split range here
-    auto split_range_begin = (slot_range_begin + slot_range_end) / 2;
+    auto split_range_begin = conf.find("split_range_begin")->second;
     auto split_range_end = slot_range_end;
-    //TODO change partition_name
-    //std::string dst_partition_name = std::to_string(split_range_begin) + "_" + std::to_string(split_range_end);
-    //std::string src_partition_name = std::to_string(slot_range_begin) + "_" + std::to_string(split_range_begin);
+    std::string dst_partition_name = split_range_begin + "_" + split_range_end;
+    std::string src_partition_name = slot_range_begin + "_" + split_range_begin;
     //LOG(log_level::info) << "Look here 2";
     auto dst_replica_chain = fs->add_block(path, dst_partition_name, "regular");
     //LOG(log_level::info) << "Block successfully added";
     auto finish_adding_replica_chain =
         std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    std::string export_target_str_ = "";
+    std::string export_target_str_;
     for (const auto &block: dst_replica_chain.block_ids) {
       export_target_str_ += (block + "!");
     }
     export_target_str_.pop_back();
     // TODO change current name
-    std::string current_name = std::to_string(slot_range_begin) + "_" + std::to_string(slot_range_end);
+    std::string current_name = slot_range_begin + "_" + slot_range_end;
     std::vector<std::string> src_before_args;
     std::vector<std::string> dst_before_args;
     src_before_args.push_back(current_name);
@@ -390,10 +387,10 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     src_after_args.emplace_back("regular");
     dst_after_args.push_back(dst_partition_name);
     dst_after_args.emplace_back("regular");
-    auto src = std::make_shared<storage::replica_chain_client>(fs, path, current_replica_chain, storage::KV_OPS);
+    auto src = std::make_shared<storage::replica_chain_client>(fs, path, current_replica_chain, storage::BTREE_OPS);
     src->run_command(storage::btree_cmd_id::bt_update_partition, src_before_args);
     //LOG(log_level::info) << "Src partition successfully updated";
-    auto dst = std::make_shared<storage::replica_chain_client>(fs, path, dst_replica_chain, storage::KV_OPS);
+    auto dst = std::make_shared<storage::replica_chain_client>(fs, path, dst_replica_chain, storage::BTREE_OPS);
     dst->run_command(storage::btree_cmd_id::bt_update_partition, dst_before_args);
     //LOG(log_level::info) << "Dst partition successfully updated";
     auto finish_updating_partition_before =
@@ -402,15 +399,15 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     std::size_t split_batch_size = 2;
     std::size_t tot_split_keys = 0;
     std::vector<std::string> args;
-    args.emplace_back(std::to_string(split_range_begin));
-    args.emplace_back(std::to_string(split_range_end));
+    args.emplace_back(split_range_begin);
+    args.emplace_back(split_range_end);
     args.emplace_back(std::to_string(split_batch_size));
     while (has_more) {
       // Read data to split
       //LOG(log_level::info) << "INTO THIS FUNCTION 1 *****************************";
       std::vector<std::string> split_data;
       //LOG(log_level::info) << "INTO THIS FUNCTION 2 *****************************";
-      split_data = src->run_command(storage::hash_table_cmd_id::bt_get_range_data, args);
+      split_data = src->run_command(storage::btree_cmd_id::bt_range_lookup_batches, args);
       //LOG(log_level::info) << "INTO THIS FUNCTION 3 *****************************";
       if (split_data.back() == "!empty") {
         // LOG(log_level::info) << "INTO THIS FUNCTION 4 *****************************";
@@ -508,7 +505,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
   } else if (scaling_type == "btree_merge") {
     auto start =
         std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    auto src = std::make_shared<storage::replica_chain_client>(fs, path, current_replica_chain, storage::KV_OPS);
+    auto src = std::make_shared<storage::replica_chain_client>(fs, path, current_replica_chain, storage::BTREE_OPS);
     std::vector<std::string> init_args;
     init_args.emplace_back("merging");
     init_args.emplace_back("merging");
@@ -540,7 +537,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     size_t find_min_size = static_cast<size_t>(static_cast<double>(storage_capacity)) + 1;
     for (auto &i : replica_set) {
       if (i.fetch_slot_range().first == merge_range_end || i.fetch_slot_range().second == merge_range_begin) {
-        auto client = std::make_shared<storage::replica_chain_client>(fs, path, i, storage::KV_OPS, 0);
+        auto client = std::make_shared<storage::replica_chain_client>(fs, path, i, storage::BTREE_OPS);
         auto size =
             static_cast<size_t>(std::stoi(client->run_command(storage::btree_cmd_id::bt_get_storage_size,
                                                               {}).front()));
@@ -560,8 +557,8 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     //LOG(log_level::info) << "Found replica chain to merge: " << finish_finding_chain_to_merge;
 
     // Connect two replica chains
-    // auto src = std::make_shared<storage::replica_chain_client>(fs, path, current_replica_chain, storage::KV_OPS);
-    auto dst = std::make_shared<storage::replica_chain_client>(fs, path, merge_target, storage::KV_OPS);
+    // auto src = std::make_shared<storage::replica_chain_client>(fs, path, current_replica_chain, storage::BTREE_OPS);
+    auto dst = std::make_shared<storage::replica_chain_client>(fs, path, merge_target, storage::BTREE_OPS);
     std::string dst_partition_name;
     if (merge_target.fetch_slot_range().first == merge_range_end)
       dst_partition_name =
@@ -606,7 +603,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       // Read data to merge
       std::vector<std::string> merge_data;
       //LOG(log_level::info) << "Look here 1";
-      merge_data = src->run_command(storage::btree_cmd_id::bt_get_range_data, args);
+      merge_data = src->run_command(storage::btree_cmd_id::bt_range_lookup_batches, args);
       //LOG(log_level::info) << "Look here 2 " << " merge_data_size: " << merge_data.size();
       if (merge_data.back() == "!empty") {
         break;

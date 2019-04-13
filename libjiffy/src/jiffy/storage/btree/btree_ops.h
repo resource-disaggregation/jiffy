@@ -22,7 +22,10 @@ enum btree_cmd_id {
   bt_remove = 5,
   bt_update = 6,
   bt_range_count = 7,
-  bt_update_partition = 8
+  bt_update_partition = 8,
+  bt_range_lookup_batches = 9,
+  bt_scale_remove = 10,
+  bt_get_storage_size = 11
 };
 
 }

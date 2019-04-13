@@ -87,11 +87,33 @@ class btree_partition : public chain_module {
    * @param begin_range Begin range
    * @param end_range End range
    * @param redirect Bool value to choose whether to indirect
-   * @return Range lookup status string
    */
-  std::vector<std::string> range_lookup(const std::string &begin_range,
-                                        const std::string &end_range,
-                                        bool redirect = false);
+  void range_lookup(std::vector<std::string> &data,
+                    const std::string &begin_range,
+                    const std::string &end_range,
+                    bool redirect = false);
+
+  /**
+   * @brief Fetch value within the key range
+   * @param data Key value pairs to be fetched
+   * @param begin_range Begin range
+   * @param end_range End range
+   * @param batch_size Collect data batch size
+   */
+  void range_lookup_batches(std::vector<std::string> &data,
+                            const std::string &begin_range,
+                            const std::string &end_range,
+                            size_t batch_size = 1024);
+
+  /**
+   * @brief Fetch keys within the key range
+   * @param data Keys to be fetched
+   * @param begin_range Begin range
+   * @param end_range End range
+   */
+  void range_lookup_keys(std::vector<std::string> &data,
+                         const std::string &begin_range,
+                         const std::string &end_range);
 
   /**
    * @brief Counts the key number within the key range
@@ -111,6 +133,14 @@ class btree_partition : public chain_module {
    * @return Status
    */
   std::string update_partition(const std::string &new_name, const std::string &new_metadata);
+
+  /**
+   * @brief Remove partition data during auto scaling
+   * @param key Keys to be removed
+   * @return Removed value
+   */
+  std::string scale_remove(const std::string &key);
+
   /**
    * @brief Fetch block size
    * @return Block size

@@ -11,6 +11,9 @@ std::vector<command> BTREE_OPS = {command{command_type::accessor, "bt_exists"},
                                   command{command_type::mutator, "bt_remove"},
                                   command{command_type::mutator, "bt_update"},
                                   command{command_type::accessor, "bt_range_count"},
-                                  command{command_type::mutator, "bt_update_partition"}};
+                                  command{command_type::mutator, "bt_update_partition"},
+                                  command{command_type::accessor, "bt_range_lookup_batches"},
+                                  command{command_type::mutator, "bt_scale_remove"},
+                                  command{command_type::accessor, "bt_get_storage_size"}};
 }
 }
