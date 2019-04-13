@@ -43,8 +43,8 @@ struct less_type {
 typedef block_memory_allocator<btree_pair_type> bt_allocator_type;
 
 // Btree definitions
-typedef btree::btree_map<key_type, value_type, less_type, bt_allocator_type, NODE_SIZE> btree_type;
-//typedef btree::btree_map<key_type, value_type, less_type> btree_type;
+//typedef btree::btree_map<key_type, value_type, less_type, bt_allocator_type, NODE_SIZE> btree_type;
+typedef btree::btree_map<key_type, value_type, less_type> btree_type;
 
 }
 }

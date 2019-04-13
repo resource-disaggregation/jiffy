@@ -67,7 +67,7 @@ void file_size_tracker::report_file_sizes(std::ofstream &out,
   directory_utils::push_path_element(child_path, node->name());
   if (node->is_regular_file()) {
     auto file = std::dynamic_pointer_cast<ds_file_node>(node);
-    std::size_t file_size = 0;
+    //std::size_t file_size = 0;
     // TODO fix storage size
     //for (const auto &chain: file->data_blocks()) {
       //file_size += storage_->storage_size(chain.tail());
