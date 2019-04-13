@@ -6,6 +6,7 @@
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/storage/btree/btree_ops.h"
 #include "jiffy/directory/client/directory_client.h"
+#include "jiffy/auto_scaling/auto_scaling_client.h"
 #include "jiffy/directory/directory_ops.h"
 
 namespace jiffy {
@@ -18,11 +19,11 @@ btree_partition::btree_partition(block_memory_manager *manager,
                                  const std::string &metadata,
                                  const utils::property_map &conf,
                                  const std::string &directory_host,
-                                 const int directory_port,
+                                 int directory_port,
                                  const std::string &auto_scaling_host,
-                                 const int auto_scaling_port)
+                                 int auto_scaling_port)
     : chain_module(manager, name, metadata, BTREE_OPS),
-      partition_(less_type()),
+      partition_(less_type(), build_allocator<btree_pair_type>()),
       splitting_(false),
       merging_(false),
       dirty_(false),
@@ -30,6 +31,8 @@ btree_partition::btree_partition(block_memory_manager *manager,
       directory_port_(directory_port),
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port) {
+  auto range = string_utils::split(name, '_', 2);
+  slot_range(range[0], range[1]);
   auto ser = conf.get("btree.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
@@ -39,14 +42,14 @@ btree_partition::btree_partition(block_memory_manager *manager,
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
   threshold_hi_ = conf.get_as<double>("btree.capacity_threshold_hi", 0.95);
-  threshold_lo_ = conf.get_as<double>("btree.capacity_threshold_lo", 0.00);
+  threshold_lo_ = conf.get_as<double>("btree.capacity_threshold_lo", 0.05);
   auto_scale_ = conf.get_as<bool>("btree.auto_scale", true);
   LOG(log_level::info) << "Partition name: " << name_;
-  slot_range(MIN_KEY, MAX_KEY);// TODO deal with name, this is only a hot fix
 }
 
 std::string btree_partition::put(const std::string &key, const std::string &value, bool redirect) {
-  LOG(log_level::info) << "Putting " << key << " with storage size " << storage_size() << " and capacity " << storage_capacity();
+  LOG(log_level::info) << "Putting " << key << " with storage size " << storage_size() << " and capacity "
+                       << storage_capacity();
   if (in_slot_range(key) || (in_import_slot_range(key) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(key)) {
       return "!exporting!" + export_target_str();
@@ -134,8 +137,8 @@ std::string btree_partition::remove(const std::string &key, bool redirect) {
   return "!block_moved";
 }
 
-std::vector<std::string> btree_partition::range_lookup(const std::string& begin_range,
-                                                       const std::string& end_range,
+std::vector<std::string> btree_partition::range_lookup(const std::string &begin_range,
+                                                       const std::string &end_range,
                                                        bool redirect) {
   std::vector<std::string> result;
   //if (begin_range > end_range) return "!ok"; // TODO fix this
@@ -159,8 +162,8 @@ std::vector<std::string> btree_partition::range_lookup(const std::string& begin_
   return std::vector<std::string>{"!Incorrect key range"};
 }
 
-std::string btree_partition::range_count(const std::string& begin_range,
-                                         const std::string& end_range,
+std::string btree_partition::range_count(const std::string &begin_range,
+                                         const std::string &end_range,
                                          bool redirect) {
   auto start = partition_.lower_bound(make_binary(begin_range));
   auto end = --(partition_.upper_bound(make_binary(end_range)));
@@ -177,6 +180,63 @@ std::string btree_partition::range_count(const std::string& begin_range,
     return std::to_string(ret);
   }
   return std::string{"!Incorrect key range"};
+}
+
+std::string btree_partition::update_partition(const std::string &new_name, const std::string &new_metadata) {
+  //LOG(log_level::info) << "Updating partition of " << name() << " to be " << new_name << new_metadata;
+  //std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+  update_lock.lock();
+  if (new_name == "merging" && new_metadata == "merging") {
+    if (metadata() == "regular" && name() != "0_65536") {
+      metadata("exporting");
+      update_lock.unlock();
+      return name();
+    }
+    update_lock.unlock();
+    return "!fail";
+  }
+  auto s = utils::string_utils::split(new_metadata, '$');
+  std::string status = s.front();
+  //LOG(log_level::info) << "the partition status to be updated is: " << status;
+  if (status == "exporting") {
+    // When we meet exporting, the original state must be regular
+    export_target(s[2]);
+    auto range = utils::string_utils::split(s[1], '_');
+    export_slot_range(std::stoi(range[0]), std::stoi(range[1]));
+  } else if (status == "importing") {
+    if (metadata() != "regular") {
+      update_lock.unlock();
+      return "!fail";
+    }
+    auto range = utils::string_utils::split(s[1], '_');
+    import_slot_range(std::stoi(range[0]), std::stoi(range[1]));
+  } else {
+    // LOG(log_level::info) << "Look here 1";
+    if (metadata() == "importing") {
+      // LOG(log_level::info) << "Look here 2";
+      // LOG(log_level::info) << "import begin: " << import_slot_range().first << " slot begin: " << slot_range().first << " import end: " << import_slot_range().second << " slot end: " << slot_range().second;
+      if (import_slot_range().first != slot_range().first || import_slot_range().second != slot_range().second) {
+        //  LOG(log_level::info) << "Look here 5";
+        auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
+        fs->remove_block(path(), s[1]);
+      }
+      // LOG(log_level::info) << "Look here 3";
+    } else {
+      // LOG(log_level::info) << "Look here 4";
+      splitting_ = false;
+      merging_ = false;
+    }
+    export_slot_range(0, -1);
+    import_slot_range(0, -1);
+    export_target_str_.clear();
+    export_target_.clear();
+  }
+  name(new_name);
+  metadata(status);
+  slot_range(new_name);
+  //LOG(log_level::info) << "Partition updated";
+  update_lock.unlock();
+  return "!ok";
 }
 
 void btree_partition::run_command(std::vector<std::string> &_return,
@@ -242,6 +302,13 @@ void btree_partition::run_command(std::vector<std::string> &_return,
         }
       }
       break;
+    case btree_cmd_id::bt_update_partition:
+      if (nargs != 2) {
+        _return.emplace_back("!args_error");
+      } else {
+        _return.emplace_back(update_partition(args[0], args[1]));
+      }
+      break;
     default:throw std::invalid_argument("No such operation id " + std::to_string(cmd_id));
   }
   if (is_mutator(cmd_id)) {
@@ -255,9 +322,15 @@ void btree_partition::run_command(std::vector<std::string> &_return,
     LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
                          << storage_capacity() << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
+      splitting_ = true;
 
-      splitting_ = false;
-      LOG(log_level::info) << "Not supporting auto_scaling currently";
+      //LOG(log_level::info) << "Requested slot range split";
+      std::map<std::string, std::string> scale_conf;
+      scale_conf.emplace(std::make_pair(std::string("slot_range_begin"), slot_range_.first));
+      scale_conf.emplace(std::make_pair(std::string("slot_range_end"), slot_range_.second));
+      scale_conf.emplace(std::make_pair(std::string("type"), std::string("btree_split")));
+      auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
+      scale->auto_scaling(chain(), path(), scale_conf);
 
     } catch (std::exception &e) {
       splitting_ = false;
@@ -274,8 +347,15 @@ void btree_partition::run_command(std::vector<std::string> &_return,
     LOG(log_level::info) << "Underloaded partition; storage = " << storage_size() << " capacity = "
                          << storage_capacity() << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
-      merging_ = false;
-      LOG(log_level::info) << "Currently does not support auto_scaling";
+      merging_ = true;
+      //LOG(log_level::info) << "Requested slot range merge";
+
+      std::map<std::string, std::string> scale_conf;
+      scale_conf.emplace(std::make_pair(std::string("type"), std::string("btree_merge")));
+      scale_conf.emplace(std::make_pair(std::string("storage_capacity"), std::to_string(storage_capacity())));
+      auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
+      scale->auto_scaling(chain(), path(), scale_conf);
+
     } catch (std::exception &e) {
       merging_ = false;
       LOG(log_level::warn) << "Merge slot range failed: " << e.what();

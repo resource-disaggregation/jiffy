@@ -496,6 +496,7 @@ class hash_table_partition : public chain_module {
   /* Auto scaling server port number */
   int auto_scaling_port_;
 
+  /* Data update mutex */
   std::mutex update_lock;
 
 };
