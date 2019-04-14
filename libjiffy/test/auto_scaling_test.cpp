@@ -245,7 +245,7 @@ TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][mana
 TEST_CASE("btree_auto_scale_up_test", "[directory_service][storage_server][management_server]") {
   std::vector<std::string> keys;
   //std::string fileName = "../../benchmark/src/word_alpha.txt";
-  std::string fileName = "../../benchmark/src/sorted";
+  std::string fileName = "../../benchmark/src/random_keys.txt";
   std::ifstream in(fileName.c_str());
   // Check if object is valid
   if (!in) {

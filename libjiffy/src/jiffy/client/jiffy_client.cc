@@ -113,7 +113,7 @@ std::shared_ptr<storage::btree_client> jiffy_client::open_or_create_btree(const 
   std::vector<std::string> block_names;
   std::vector<std::string> block_metadata;
   for (int32_t i = 0; i < num_blocks; ++i) {
-    block_names.push_back(std::to_string(i));
+    block_names.push_back(jiffy::storage::default_name);
     block_metadata.emplace_back("regular");
   }
   auto s = fs_->open_or_create(path, "btree", backing_path, num_blocks, chain_length, flags, permissions,
