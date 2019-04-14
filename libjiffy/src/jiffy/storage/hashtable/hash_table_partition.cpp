@@ -93,11 +93,14 @@ std::string hash_table_partition::upsert(const std::string &key, const std::stri
 std::string hash_table_partition::exists(const std::string &key, bool redirect) {
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
+    if (block_.contains(key)) {
+      return "true";
+    }
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
     }
-    if (block_.contains(key)) {
-      return "true";
+    if (metadata_ == "importing" && in_import_slot_range(hash)) {
+      return "!full";
     }
     return "!key_not_found";
   }
@@ -113,6 +116,10 @@ std::string hash_table_partition::get(const std::string &key, bool redirect) {
     try {
       return to_string(block_.find(key));
     } catch (std::out_of_range &e) {
+      if (metadata_ == "importing" && in_import_slot_range(hash)) {
+        // Should change full to a better name, this full basically means that the data might be in transition and haven't arrived
+        return "!full";
+      }
       return "!key_not_found";
     }
   }
@@ -131,6 +138,9 @@ std::string hash_table_partition::update(const std::string &key, const std::stri
       v = make_binary(value);
     })) {
       return old_val;
+    }
+    if (metadata_ == "importing" && in_import_slot_range(hash)) {
+      return "!full";
     }
     return "!key_not_found";
   }
@@ -183,7 +193,7 @@ std::string hash_table_partition::scale_remove(const std::string &key) {
     } else {
       //for(int p = 0; p < key.length(); p++)
       //  LOG(log_level::info) << (int)((std::uint8_t)key[p]);
-      //LOG(log_level::info) << "Not successful scale remove";
+      LOG(log_level::info) << "Not successful scale remove";
     }
   }
   //LOG(log_level::info) << "This should never happen *************";
@@ -209,7 +219,7 @@ void hash_table_partition::get_data_in_slot_range(std::vector<std::string> &data
   std::size_t n_items = 0;
   for (const auto &entry: block_.lock_table()) {
     auto slot = hash_slot::get(entry.first);
-    if (slot >= slot_begin && slot <= slot_end) {
+    if (slot >= slot_begin && slot < slot_end) {
       data.push_back(to_string(entry.first));
       data.push_back(to_string(entry.second));
       n_items = n_items + 2;
@@ -298,12 +308,12 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
   size_t nargs = redirect ? args.size() - 1 : args.size();
   switch (cmd_id) {
     case hash_table_cmd_id::ht_exists:
-      for (const std::string &key: args)
-        _return.push_back(exists(key, redirect));
+      for (size_t i = 0; i < nargs; i++)
+        _return.push_back(exists(args[i], redirect));
       break;
     case hash_table_cmd_id::ht_get:
-      for (const std::string &key: args)
-        _return.emplace_back(get(key, redirect));
+      for (size_t i = 0; i < nargs; i++)
+        _return.push_back(get(args[i], redirect));
       break;
     case hash_table_cmd_id::ht_num_keys:
       if (nargs != 0) {

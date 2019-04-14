@@ -9,7 +9,7 @@ namespace jiffy {
 namespace storage {
 
 using namespace jiffy::utils;
-std::size_t redo_times = 0;
+
 
 hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interface> fs,
                                      const std::string &path,

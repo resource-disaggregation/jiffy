@@ -104,7 +104,7 @@ class hash_table_partition : public chain_module {
 
   bool in_slot_range(int32_t slot) {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
-    return slot >= slot_range_.first && slot <= slot_range_.second;
+    return slot >= slot_range_.first && slot < slot_range_.second;
   }
 
   /**
@@ -157,7 +157,7 @@ class hash_table_partition : public chain_module {
 
   bool in_export_slot_range(int32_t slot) {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
-    return slot >= export_slot_range_.first && slot <= export_slot_range_.second;
+    return slot >= export_slot_range_.first && slot < export_slot_range_.second;
   }
 
   /**
@@ -189,7 +189,7 @@ class hash_table_partition : public chain_module {
    */
 
   bool in_import_slot_range(int32_t slot) {
-    return slot >= import_slot_range_.first && slot <= import_slot_range_.second;
+    return slot >= import_slot_range_.first && slot < import_slot_range_.second;
   }
 
   /**

@@ -229,7 +229,7 @@ class btree_partition : public chain_module {
    */
   bool in_slot_range(const std::string &key) {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
-    return key >= slot_range_.first && key <= slot_range_.second;
+    return key >= slot_range_.first && key < slot_range_.second;
   }
 
   /**
@@ -239,7 +239,7 @@ class btree_partition : public chain_module {
    */
 
   bool in_import_slot_range(const std::string &key) {
-    return key >= import_slot_range_.first && key <= import_slot_range_.second;
+    return key >= import_slot_range_.first && key < import_slot_range_.second;
   }
 
   /**
@@ -250,7 +250,7 @@ class btree_partition : public chain_module {
 
   bool in_export_slot_range(const std::string &key) {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
-    return key >= export_slot_range_.first && key <= export_slot_range_.second;
+    return key >= export_slot_range_.first && key < export_slot_range_.second;
   }
 
   /**
@@ -281,6 +281,62 @@ class btree_partition : public chain_module {
   std::string slot_end() const {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot_range_.second;
+  }
+
+  /**
+   * @brief Set the export target
+   * @param export_target_string Export target string
+   */
+
+  void export_target(const std::string &export_target_string) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    export_target_.clear();
+    export_target_ = utils::string_utils::split(export_target_string, '!');
+    export_target_str_ = export_target_string;
+  }
+
+  /**
+   * @brief Set export slot range
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
+   */
+
+  void export_slot_range(std::string slot_begin, std::string slot_end) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    export_slot_range_.first = slot_begin;
+    export_slot_range_.second = slot_end;
+  }
+
+  /**
+   * @brief Set import slot range
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
+   */
+
+  void import_slot_range(std::string slot_begin, std::string slot_end) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    import_slot_range_.first = slot_begin;
+    import_slot_range_.second = slot_end;
+  }
+
+  /**
+   * @brief Fetch import slot range
+   * @return Import slot range
+   */
+
+  const std::pair<std::string, std::string> &import_slot_range() {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return import_slot_range_;
+  };
+
+  /**
+   * @brief Set slot range based on the partition name
+   * @param new_name New partition name
+   */
+  void slot_range(const std::string &new_name) {
+    auto slots = utils::string_utils::split(new_name, '_', 2);
+    slot_range_.first = slots[0];
+    slot_range_.second = slots[1];
   }
 
  private:

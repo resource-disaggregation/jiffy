@@ -10,6 +10,7 @@
 #include "jiffy/directory/block/block_allocator.h"
 #include "jiffy/storage/block.h"
 #include "jiffy/storage/hashtable/hash_table_partition.h"
+#include "jiffy/storage/btree/btree_defs.h"
 #include "jiffy/storage/notification/subscription_map.h"
 #include "jiffy/utils/logger.h"
 #include "jiffy/directory/directory_ops.h"
@@ -284,7 +285,7 @@ class test_utils {
     blks.resize(block_ids.size());
     for (size_t i = 0; i < block_ids.size(); ++i) {
       blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
-      blks[i]->setup("btree", std::to_string(i), "regular", conf);
+      blks[i]->setup("btree", jiffy::storage::default_name, "regular", conf);
     }
     return blks;
   }
