@@ -3,15 +3,16 @@ package jiffy.hadoop.fs;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import org.apache.hadoop.fs.*;
-import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.UnsupportedFileSystemException;
+import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.util.Progressable;
 import org.apache.hadoop.util.ReflectionUtils;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* SplitFS allows a filesystem to split their IO between two separate file systems. One for
  * persistent files and one for ephemeral files.
@@ -35,12 +36,6 @@ public class SplitFileSystem extends FileSystem {
   private final static String EPHEMERAL_PREFIX = "tmp";
   private final static String SCHEME = "splitfs";
 
-  /**
-   * The SLF4J logger to use in logging within the FileSystem class itself.
-   */
-  private static final Logger LOGGER =
-      LoggerFactory.getLogger(SplitFileSystem.class);
-
   private FileSystem initializeFS(URI uri, Configuration conf)
       throws IOException {
     FileSystem fs;
@@ -51,26 +46,46 @@ public class SplitFileSystem extends FileSystem {
     return fs;
   }
 
+  private FileSystem ephemeralFS() throws IOException {
+    if (ephemeralFileSystem == null) {
+      Configuration conf = getConf();
+      try {
+        ephemeralFileSystem = initializeFS(new URI(conf.get("splitfs.ephemeral.fs")), conf);
+      } catch (URISyntaxException e) {
+        throw new IOException(e);
+      }
+    }
+    return ephemeralFileSystem;
+  }
+
+  private FileSystem persistentFS() throws IOException {
+    if (persistentFileSystem == null) {
+      Configuration conf = getConf();
+      try {
+        persistentFileSystem = initializeFS(new URI(conf.get("splitfs.persistent.fs")), conf);
+      } catch (URISyntaxException e) {
+        throw new IOException(e);
+      }
+    }
+    return persistentFileSystem;
+  }
+
+  private FileSystem getFS(Path path) throws IOException {
+    if (isEphemeralPath(path)) {
+      return ephemeralFS();
+    } else {
+      return persistentFS();
+    }
+  }
+
   @Override
   public void initialize(URI uri, Configuration conf) throws IOException {
     super.initialize(uri, conf);
     setConf(conf);
 
     this.uri = uri;
-
-    try {
-      URI persistentUri = new URI(conf.get("splitfs.persistent.fs"));
-      persistentFileSystem = initializeFS(persistentUri, conf);
-    } catch (URISyntaxException e) {
-      throw new IOException(e);
-    }
-
-    try {
-      URI ephemeralUri = new URI(conf.get("splitfs.ephemeral.fs"));
-      ephemeralFileSystem = initializeFS(ephemeralUri, conf);
-    } catch (URISyntaxException e) {
-      throw new IOException(e);
-    }
+    persistentFileSystem = null;
+    ephemeralFileSystem = null;
   }
 
   @Override
@@ -93,121 +108,96 @@ public class SplitFileSystem extends FileSystem {
   @Override
   public FSDataInputStream open(Path path, int bufferSize) throws IOException {
     path = prefixWithFsURI(path);
-    if (isEphemeralPath(path)) {
-      return ephemeralFileSystem.open(path, bufferSize);
-    } else {
-      return persistentFileSystem.open(path, bufferSize);
-    }
+    return getFS(path).open(path, bufferSize);
   }
 
   @Override
   public FSDataOutputStream create(Path path, FsPermission fsPermission, boolean overwrite,
       int bufferSize, short replication, long blockSize, Progressable progress) throws IOException {
     path = prefixWithFsURI(path);
-    if (ephemeralFileSystem == null || persistentFileSystem == null) {
-      System.out.println("One of the filesystems is null");
-    }
-    if (isEphemeralPath(path)) {
-      return ephemeralFileSystem
-          .create(path, fsPermission, overwrite, bufferSize, replication, blockSize, progress);
-    } else {
-      return persistentFileSystem
-          .create(path, fsPermission, overwrite, bufferSize, replication, blockSize, progress);
-    }
+    return getFS(path)
+        .create(path, fsPermission, overwrite, bufferSize, replication, blockSize, progress);
   }
 
   @Override
   public FSDataOutputStream append(Path path, int i, Progressable progressable) throws IOException {
     path = prefixWithFsURI(path);
-    if (isEphemeralPath(path)) {
-      return ephemeralFileSystem.append(path, i, progressable);
-    } else {
-      return persistentFileSystem.append(path, i, progressable);
-    }
+    return getFS(path).append(path, i, progressable);
   }
 
   @Override
   public boolean rename(Path path, Path path1) throws IOException {
     path = prefixWithFsURI(path);
-    if (isEphemeralPath(path)) {
-      return ephemeralFileSystem.rename(path, path1);
-    } else {
-      return persistentFileSystem.rename(path, path1);
-    }
+    return getFS(path).rename(path, path1);
   }
 
   @Override
   public boolean delete(Path path, boolean recursive) throws IOException {
     path = prefixWithFsURI(path);
-    if (isEphemeralPath(path)) {
-      return ephemeralFileSystem.delete(path, recursive);
-    } else {
-      return persistentFileSystem.delete(path, recursive);
-    }
+    return getFS(path).delete(path, recursive);
   }
 
   @Override
   public FileStatus[] listStatus(Path path) throws IOException {
     path = prefixWithFsURI(path);
-    if (isEphemeralPath(path)) {
-      return ephemeralFileSystem.listStatus(path);
-    } else {
-      return persistentFileSystem.listStatus(path);
-    }
+    return getFS(path).listStatus(path);
   }
 
   @Override
   public void setWorkingDirectory(Path path) {
     path = prefixWithFsURI(path);
-    if (isEphemeralPath(path)) {
-      ephemeralFileSystem.setWorkingDirectory(path);
-    } else {
-      persistentFileSystem.setWorkingDirectory(path);
+    try {
+      getFS(path).setWorkingDirectory(path);
+    } catch (IOException ignored) {
     }
   }
 
-  public void setEphemeralWorkingDirectory(Path path) throws IOException {
+  void setEphemeralWorkingDirectory(Path path) throws IOException {
     path = prefixWithFsURI(path);
-    ephemeralFileSystem.setWorkingDirectory(path);
+    ephemeralFS().setWorkingDirectory(path);
   }
 
-  public void setPersistentWorkingDirectory(Path path) throws IOException {
+  void setPersistentWorkingDirectory(Path path) throws IOException {
     path = prefixWithFsURI(path);
-    persistentFileSystem.setWorkingDirectory(path);
+    persistentFS().setWorkingDirectory(path);
   }
 
-  public Path getEphemeralWorkingDirectory() {
-    return ephemeralFileSystem.getWorkingDirectory();
+  Path getEphemeralWorkingDirectory() {
+    try {
+      return ephemeralFS().getWorkingDirectory();
+    } catch (IOException e) {
+      return null;
+    }
   }
 
-  public Path getPersistentWorkingDirectory() {
-    return persistentFileSystem.getWorkingDirectory();
+  Path getPersistentWorkingDirectory() {
+    try {
+      return persistentFS().getWorkingDirectory();
+    } catch (IOException e) {
+      return null;
+    }
   }
 
   @Override
   public Path getWorkingDirectory() {
     // What working directory to return here?
-    return persistentFileSystem.getWorkingDirectory();
+    try {
+      return persistentFS().getWorkingDirectory();
+    } catch (IOException ignored) {
+      return null;
+    }
   }
 
   @Override
   public boolean mkdirs(Path path, FsPermission fsPermission) throws IOException {
     path = prefixWithFsURI(path);
-    if (isEphemeralPath(path)) {
-      return ephemeralFileSystem.mkdirs(path, fsPermission);
-    } else {
-      return persistentFileSystem.mkdirs(path, fsPermission);
-    }
+    return getFS(path).mkdirs(path, fsPermission);
   }
 
   @Override
   public FileStatus getFileStatus(Path path) throws IOException {
     path = prefixWithFsURI(path);
-    if (isEphemeralPath(path)) {
-      return ephemeralFileSystem.getFileStatus(path);
-    } else {
-      return persistentFileSystem.getFileStatus(path);
-    }
+    return getFS(path).getFileStatus(path);
   }
 
   @SuppressWarnings("unchecked")
@@ -237,19 +227,18 @@ public class SplitFileSystem extends FileSystem {
       String path = uri.getPath();
       if (isEphemeralPath(input)) {
         if (input.isAbsolute()) {
-          System.out.println(ephemeralFileSystem.getUri().toString() + path);
-          return new Path(ephemeralFileSystem.getUri().toString() + path);
+          return new Path(ephemeralFS().getUri().toString() + path);
         } else {
-          return new Path(ephemeralFileSystem.getWorkingDirectory() + "/" + path);
+          return new Path(ephemeralFS().getWorkingDirectory() + "/" + path);
         }
       } else {
         if (input.isAbsolute()) {
-          return new Path(persistentFileSystem.getUri().toString() + path);
+          return new Path(persistentFS().getUri().toString() + path);
         } else {
-          return new Path(persistentFileSystem.getWorkingDirectory() + "/" + path);
+          return new Path(persistentFS().getWorkingDirectory() + "/" + path);
         }
       }
-    } catch (URISyntaxException ignored) {
+    } catch (URISyntaxException | IOException ignored) {
       return input;
     }
   }
