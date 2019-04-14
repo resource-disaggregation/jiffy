@@ -140,16 +140,13 @@ std::vector<std::string> btree_partition::range_lookup(const std::string& begin_
   std::vector<std::string> result;
   //if (begin_range > end_range) return "!ok"; // TODO fix this
   auto start = partition_.lower_bound(make_binary(begin_range));
-  auto end = --(partition_.upper_bound(make_binary(end_range)));
-
+  auto edge = partition_.upper_bound(make_binary(end_range));
+  auto end = std::prev(edge);
   if ((end->first >= slot_range_.first && start->first <= slot_range_.second)
       || (end->first >= std::min(import_slot_range_.first, slot_range_.first)
           && start->first <= std::max(import_slot_range_.second, slot_range_.second) && redirect)) {
-    bool flag = false;
-    end++;
-    for (auto entry = start; entry != end; entry++) {
-      if (entry.key() >= begin_range && entry.key() <= end_range) {
-        flag = true;
+    for (auto entry = start; entry != edge; entry++) {
+      if (to_string(entry->first) >= begin_range && to_string(entry->first) <= end_range) {
         result.push_back(to_string(entry->first));
         result.push_back(to_string(entry->second));
       }
@@ -163,14 +160,14 @@ std::string btree_partition::range_count(const std::string& begin_range,
                                          const std::string& end_range,
                                          bool redirect) {
   auto start = partition_.lower_bound(make_binary(begin_range));
-  auto end = --(partition_.upper_bound(make_binary(end_range)));
+  auto edge = partition_.upper_bound(make_binary(end_range));
+  auto end = std::prev(edge);
   if ((end.key() >= slot_range_.first && start.key() <= slot_range_.second)
       || (end.key() >= min(import_slot_range_.first, slot_range_.first)
           && start.key() <= max(import_slot_range_.second, slot_range_.second) && redirect)) {
-    end++;
     std::size_t ret = 0;
-    for (auto entry = start; entry != end; entry++) {
-      if (entry.key() >= begin_range && entry.key() <= end_range) {
+    for (auto entry = start; entry != edge; entry++) {
+      if (to_string(entry->first) >= begin_range && to_string(entry->first) <= end_range) {
         ret++;
       }
     }

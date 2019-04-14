@@ -28,7 +28,8 @@ typedef std::pair<const key_type, value_type> btree_pair_type;
 struct less_type {
   template<typename KeyType1, typename KeyType2>
   bool operator()(const KeyType1& lhs, const KeyType2& rhs) const {
-    return strcmp(reinterpret_cast<const char*>(lhs.data()), reinterpret_cast<const char*>(rhs.data())) < 0;
+    auto ret = strncmp(reinterpret_cast<const char*>(lhs.data()), reinterpret_cast<const char*>(rhs.data()), std::min(lhs.size(), rhs.size()));
+    return ret == 0 ? lhs.size() < rhs.size() : ret < 0;
   }
 };
 typedef block_memory_allocator<btree_pair_type> bt_allocator_type;
