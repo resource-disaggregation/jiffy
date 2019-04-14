@@ -33,7 +33,7 @@ public class SplitFileSystem extends FileSystem {
 
   private URI uri;
 
-  private final static String EPHEMERAL_PREFIX = "tmp";
+  private final static String EPHEMERAL_PREFIX = "/tmp";
   private final static String SCHEME = "splitfs";
 
   private FileSystem initializeFS(URI uri, Configuration conf)
@@ -90,8 +90,12 @@ public class SplitFileSystem extends FileSystem {
 
   @Override
   public void close() throws IOException {
-    persistentFileSystem.close();
-    ephemeralFileSystem.close();
+    if (persistentFileSystem != null) {
+      persistentFileSystem.close();
+    }
+    if (ephemeralFileSystem != null) {
+      ephemeralFileSystem.close();
+    }
     super.close();
   }
 
@@ -217,7 +221,7 @@ public class SplitFileSystem extends FileSystem {
     if (p.getParent() == null) {
       return false;
     } else {
-      return p.getParent().toUri().getPath().startsWith(EPHEMERAL_PREFIX);
+      return p.toUri().getPath().startsWith(EPHEMERAL_PREFIX);
     }
   }
 
