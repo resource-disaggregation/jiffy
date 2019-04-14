@@ -251,7 +251,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
 #            test/file_size_tracker_test.cpp
 #            test/hash_table_partition_test.cpp
 #            test/hash_table_client_test.cpp
-            test/btree_partition_test.cpp
+#            test/btree_partition_test.cpp
 #            test/btree_client_test.cpp
 #            test/msg_queue_partition_test.cpp
 #            test/msg_queue_client_test.cpp
