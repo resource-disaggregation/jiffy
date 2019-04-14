@@ -289,21 +289,19 @@ TEST_CASE("btree_auto_scale_up_test", "[directory_service][storage_server][manag
   for (std::size_t i = 0; i < 3000; ++i) {
     REQUIRE_NOTHROW(client.put(keys[i], std::string(102400, '1')));
   }
-  std::cout << "Look here!!!!!!!!!!!!!!" << std::endl;
   // Busy wait until number of blocks increases
   while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
-/*
+
   for (std::size_t i = 0; i < 3000; i++) {
     std::string key = keys[i];
     REQUIRE(client.get(key) == std::string(102400, '1'));
   }
-  */
 
   for (std::size_t i = 0; i < 3000; i++) {
     std::string key = keys[i];
     REQUIRE(client.remove(key) == std::string(102400, '1'));
   }
-  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() > 1);
+  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() > 2);
 
   as_server->stop();
   if(auto_scaling_thread.joinable()) {
