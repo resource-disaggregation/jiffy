@@ -2,23 +2,31 @@
 #define JIFFY_B_TREE_H
 
 #include <functional>
+#include <jiffy/utils/logger.h>
 #include "btree/btree_map.h"
 #include "jiffy/storage/block_memory_allocator.h"
 #include "jiffy/storage/types/binary.h"
+#include "jiffy/utils/logger.h"
 
 namespace jiffy {
 namespace storage {
-
+using namespace utils;
 // The default number of btree target node size
 const size_t NODE_SIZE = 256;
-
+/*
 // The maximum key length
 const size_t MAX_KEY_LENGTH = 1024;
 
 // The min and max keys
 const std::string MIN_KEY;
 const std::string MAX_KEY(MAX_KEY_LENGTH, 0x7f);
+*/
 
+// TODO make it general
+const size_t MAX_KEY_LENGTH = 32;
+const std::string MIN_KEY = "a";
+const std::string MAX_KEY(MAX_KEY_LENGTH, 'z');
+const std::string default_name = MIN_KEY + "_" + MAX_KEY;
 // Key/Value definitions
 typedef binary key_type;
 typedef binary value_type;
