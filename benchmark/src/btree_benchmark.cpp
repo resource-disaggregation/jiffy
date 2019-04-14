@@ -158,7 +158,7 @@ int main() {
   int num_ops = 100000;
   int data_size = 64;
   // Get keys from file
-  std::string fileName = "../../benchmark/src/word_alpha.txt";
+  std::string fileName = "../benchmark/src/word_alpha.txt";
   std::ifstream in(fileName.c_str());
   // Check if object is valid
   if (!in) {

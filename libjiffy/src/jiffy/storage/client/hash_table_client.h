@@ -147,7 +147,8 @@ class hash_table_client : public data_structure_client {
 
   /* Slot begin of the blocks */
   std::vector<int32_t> slots_;
-
+  /* Redo times */
+  std::size_t redo_times = 0;
 };
 
 }

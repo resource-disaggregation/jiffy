@@ -49,3 +49,12 @@ target_link_libraries(hash_table_auto_scaling_bench jiffy_client ${JEMALLOC_LIBR
 
 install(TARGETS hash_table_auto_scaling_bench
         RUNTIME DESTINATION bin)
+
+add_executable(btree_auto_scaling_bench src/btree_auto_scaling_benchmark.cpp)
+
+add_dependencies(btree_auto_scaling_bench boost_ep jemalloc_ep)
+
+target_link_libraries(btree_auto_scaling_bench jiffy_client ${JEMALLOC_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+install(TARGETS btree_auto_scaling_bench
+        RUNTIME DESTINATION bin)
