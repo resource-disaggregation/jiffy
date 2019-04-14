@@ -61,10 +61,10 @@ class file_size_tracker {
    * @param epoch Time epoch
    */
 
-  void report_file_sizes(std::ofstream &out,
-                         std::shared_ptr<ds_node> node,
-                         const std::string &parent_path,
-                         uint64_t epoch);
+  size_t report_file_sizes(std::ofstream &out,
+                           std::shared_ptr<ds_node> node,
+                           const std::string &parent_path,
+                           uint64_t epoch);
   /* Working period */
   std::chrono::milliseconds periodicity_ms_;
   /* Stop bool */
