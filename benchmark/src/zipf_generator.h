@@ -5,6 +5,15 @@
 #include <cstdio>
 #include <cmath>
 #include <ctime>
+#include <vector>
+#include <thread>
+#include <sstream>
+#include <algorithm>
+#include <cstdlib>
+#include <fstream>
+#include <atomic>
+#include <chrono>
+#include <map>
 
 class zipfgenerator {
  public:
@@ -138,5 +147,35 @@ const uint16_t hash_slot::crc16tab[256] = {
     0xef1f, 0xff3e, 0xcf5d, 0xdf7c, 0xaf9b, 0xbfba, 0x8fd9, 0x9ff8,
     0x6e17, 0x7e36, 0x4e55, 0x5e74, 0x2e93, 0x3eb2, 0x0ed1, 0x1ef0
 };
+
+
+void alpha_key_generator(std::size_t num_keys, double theta = 0, int num_buckets = 512) {
+  zipfgenerator zipf(theta, num_buckets);
+  std::vector<uint64_t> zipfresult;
+  std::map<uint64_t, uint64_t> bucket_dist;
+  std::string fileName = "../benchmark/src/sorted_full.txt";
+  std::ifstream in(fileName.c_str());
+  std::ofstream out("zipfkeys.txt");
+  std::string str;
+  if (!in) {
+    std::cerr << "Cannot open the File : " << fileName << std::endl;
+  }
+  for (std::size_t i = 0; i < num_keys; i++) {
+    bucket_dist[zipf.next()]++;
+  }
+  for(uint64_t i = 0; i < 512;i++)
+  {
+    for(uint64_t j = 0; j < 78125;j++) {
+      in >> str;
+      if(j < bucket_dist[i]) {
+        out << str << std::endl;
+      }
+    }
+  }
+  in.close();
+  out.close();
+}
+
+
 
 #endif // JIFFY_ZIPF_GENERATOR_HPP
