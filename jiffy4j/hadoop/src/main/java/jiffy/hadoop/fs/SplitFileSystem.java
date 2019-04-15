@@ -99,12 +99,6 @@ public class SplitFileSystem extends FileSystem {
 
   @Override
   public void close() throws IOException {
-    if (persistentFileSystem != null) {
-      persistentFileSystem.close();
-    }
-    if (ephemeralFileSystem != null) {
-      ephemeralFileSystem.close();
-    }
     super.close();
   }
 
