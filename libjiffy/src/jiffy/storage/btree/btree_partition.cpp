@@ -90,16 +90,13 @@ std::string btree_partition::exists(const std::string &key, bool redirect) {
 std::string btree_partition::get(const std::string &key, bool redirect) {
   //LOG(log_level::info) << "Trying to get key: " << key << " from partition: " << name();
   if (in_slot_range(key) || (in_import_slot_range(key) && redirect)) {
-    if (metadata_ == "exporting" && in_export_slot_range(key)) {
-      return "!exporting!" + export_target_str();
-    }
     value_type value;
     auto ret = partition_.find(make_binary(key));
     if (ret != partition_.end()) {
       return to_string(ret->second);
     }
-    if (metadata_ == "importing" && in_import_slot_range(key)) {
-      return "!full";
+    if (metadata_ == "exporting" && in_export_slot_range(key)) {
+      return "!exporting!" + export_target_str();
     }
     return "!key_not_found";
   }

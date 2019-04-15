@@ -51,7 +51,7 @@ std::vector<std::string> keygenerator(std::size_t num_keys, double theta = 0, in
 }
 
 int main() {
-  size_t num_ops = 671088;
+  size_t num_ops = 419430;
   //size_t num_ops = 4000;
   std::vector<std::string> keys = keygenerator(num_ops);
   std::string address = "127.0.0.1";
@@ -82,6 +82,7 @@ int main() {
   uint64_t put_tot_time = 0, put_t0 = 0, put_t1 = 0;
 
   std::atomic_bool stop_{false};
+  std::atomic_bool stop2_{false};
   std::size_t j = 0;
   auto worker_ = std::thread([&] {
     std::ofstream out("dataset.trace");
@@ -105,6 +106,24 @@ int main() {
       }
     }
     out.close();
+  });
+  auto get_worker_ = std::thread([&] {
+    uint64_t get_tot_time = 0, get_t0 = 0, get_t1 = 0;
+    std::shared_ptr<hash_table_client>
+        ht_client2 = client.open(path);
+    std::ofstream out2("get_latency.trace");
+    while (!stop2_.load()) {
+      for (size_t k = 0; k < num_ops; ++k) {
+        auto key = keys[k];
+        get_t0 = time_utils::now_us();
+        ht_client2->get(key);
+        get_t1 = time_utils::now_us();
+        get_tot_time = (get_t1 - get_t0);
+        auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
+        out2 << cur_epoch << " " << get_tot_time << " get" << std::endl;
+      }
+    }
+    out2.close();
   });
   std::ofstream out("latency.trace");
   for (j = 0; j < num_ops; ++j) {
@@ -134,6 +153,9 @@ int main() {
   stop_.store(true);
   if (worker_.joinable())
     worker_.join();
+  stop2_.store(true);
+  if (get_worker_.joinable())
+    get_worker_.join();
   client.remove(path);
   return 0;
 }

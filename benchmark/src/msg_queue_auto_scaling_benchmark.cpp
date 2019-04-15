@@ -21,10 +21,9 @@ int main() {
   int lease_port = 9091;
   int num_blocks = 1;
   int chain_length = 1;
-  // TODO change this to 64GB / 100KB each chunk
-  size_t num_ops = 671088;
+  size_t num_ops = 419430;
+  //size_t num_ops = 671088;
   //size_t num_ops = 3000;
-  // TODO change this to 100KB, should have 64GB in total
   size_t data_size = 102400;
   std::string op_type = "msg_queue_auto_scaling";
   std::string path = "/tmp";
@@ -41,8 +40,14 @@ int main() {
   LOG(log_level::info) << "test: " << op_type;
   LOG(log_level::info) << "path: " << path;
   LOG(log_level::info) << "backing-path: " << backing_path;
+
+  jiffy_client client(address, service_port, lease_port);
+  std::shared_ptr<msg_queue_client>
+      mq_client = client.open_or_create_msg_queue(path, backing_path, num_blocks, chain_length);
+  std::string data_(data_size, 'x');
   std::chrono::milliseconds periodicity_ms_(1000);
   std::atomic_bool stop_{false};
+  std::atomic_bool stop2_{false};
   std::size_t j = 0;
   auto worker_ = std::thread([&] {
     std::ofstream out("dataset.trace");
@@ -66,11 +71,25 @@ int main() {
     }
     out.close();
   });
+  auto read_worker_ = std::thread([&] {
+    uint64_t read_tot_time = 0, read_t0 = 0, read_t1 = 0;
+    std::shared_ptr<msg_queue_client>
+        mq_client2 = client.open_msg_queue(path);
+    std::ofstream out2("read_latency.trace");
+    while (!stop2_.load()) {
+      for (size_t k = 0; k < num_ops; ++k) {
+        read_t0 = time_utils::now_us();
+        mq_client2->read();
+        read_t1 = time_utils::now_us();
+        read_tot_time = (read_t1 - read_t0);
+        auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
+        out2 << cur_epoch << " " << read_tot_time << " read" << std::endl;
+      }
+    }
+    out2.close();
+  });
+
   std::ofstream out("latency.trace");
-  jiffy_client client(address, service_port, lease_port);
-  std::shared_ptr<msg_queue_client>
-      mq_client = client.open_or_create_msg_queue(path, backing_path, num_blocks, chain_length);
-  std::string data_(data_size, 'x');
   uint64_t send_tot_time = 0, send_t0 = 0, send_t1 = 0;
   for (j = 0; j < num_ops; ++j) {
     send_t0 = time_utils::now_us();
@@ -84,6 +103,9 @@ int main() {
   stop_.store(true);
   if (worker_.joinable())
     worker_.join();
+  stop2_.store(true);
+  if (read_worker_.joinable())
+    read_worker_.join();
   client.remove(path);
   return 0;
 }

@@ -52,11 +52,23 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::create_hash_table(cons
   begin_scope(path);
   return std::make_shared<storage::hash_table_client>(fs_, path, s);
 }
-// TODO needs to be fixed, this is only for hash_table
+//TODO fix this
 std::shared_ptr<storage::hash_table_client> jiffy_client::open(const std::string &path) {
   auto s = fs_->open(path);
   begin_scope(path);
   return std::make_shared<storage::hash_table_client>(fs_, path, s);
+}
+
+std::shared_ptr<storage::btree_client> jiffy_client::open_btree(const std::string &path) {
+  auto s = fs_->open(path);
+  begin_scope(path);
+  return std::make_shared<storage::btree_client>(fs_, path, s);
+}
+
+std::shared_ptr<storage::msg_queue_client> jiffy_client::open_msg_queue(const std::string &path) {
+  auto s = fs_->open(path);
+  begin_scope(path);
+  return std::make_shared<storage::msg_queue_client>(fs_, path, s);
 }
 
 std::shared_ptr<storage::hash_table_client> jiffy_client::open_or_create_hash_table(const std::string &path,

@@ -81,6 +81,22 @@ class jiffy_client {
   std::shared_ptr<storage::hash_table_client> open(const std::string &path);
 
   /**
+   * @brief Open file, begin lease
+   * @param path File path
+   * @return Btree client
+   */
+
+  std::shared_ptr<storage::btree_client> open_btree(const std::string &path);
+
+  /**
+ * @brief Open file, begin lease
+ * @param path File path
+ * @return Message queue client
+ */
+
+  std::shared_ptr<storage::msg_queue_client> open_msg_queue(const std::string &path);
+
+  /**
    * @brief Open or create hash table
    * @param path File path
    * @param backing_path File backing path

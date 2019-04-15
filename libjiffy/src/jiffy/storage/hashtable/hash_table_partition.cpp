@@ -110,15 +110,11 @@ std::string hash_table_partition::exists(const std::string &key, bool redirect) 
 std::string hash_table_partition::get(const std::string &key, bool redirect) {
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
-    if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      return "!exporting!" + export_target_str();
-    }
     try {
       return to_string(block_.find(key));
     } catch (std::out_of_range &e) {
-      if (metadata_ == "importing" && in_import_slot_range(hash)) {
-        // Should change full to a better name, this full basically means that the data might be in transition and haven't arrived
-        return "!full";
+      if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+        return "!exporting!" + export_target_str();
       }
       return "!key_not_found";
     }

@@ -39,6 +39,6 @@ void keygenerator(std::size_t num_keys, double theta = 0, int num_buckets = 512)
 
 
 int main() {
-  size_t num_ops = 440000;
+  size_t num_ops = 419430;
   keygenerator(num_ops);
 }
