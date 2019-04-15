@@ -5,6 +5,7 @@
 #include <jiffy/utils/logger.h>
 #include <jiffy/utils/signal_handling.h>
 #include <jiffy/utils/time_utils.h>
+#include "./zipf_generator.h"
 #include <sstream>
 #include <algorithm>
 #include <cmath>
@@ -23,24 +24,22 @@ namespace ts = std::chrono;
 
 
 int main() {
-  std::vector<std::string> keys;
-  std::string fileName = "../benchmark/src/random_keys.txt";
+  std::string fileName = "../benchmark/src/zipfkeys.txt";
   std::ifstream in(fileName.c_str());
-  // Check if object is valid
   if (!in) {
     std::cerr << "Cannot open the File : " << fileName << std::endl;
   }
-  std::string str;
-  // Read the next line from File until it reaches the end.
-  while (in >> str) {
-    if (str.size() > 0)
-      keys.push_back(str);
-  }
-  //Close The File
-  in.close();
-  std::cout << "read key success " << keys.size() << std::endl;
   size_t num_ops = 440000;
   //size_t num_ops = 4000;
+  std::vector<std::string> keys;
+  for(size_t j = 0; j < num_ops; j++) {
+    std::string str;
+    in >> str;
+    if(str.size() > 0)
+      keys.push_back(str);
+  }
+  in.close();
+
   std::string address = "127.0.0.1";
   int service_port = 9090;
   int lease_port = 9091;
