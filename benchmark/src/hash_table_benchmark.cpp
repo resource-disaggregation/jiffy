@@ -152,51 +152,59 @@ int main() {
   int chain_length = 1;
   int num_ops = 100000;
   int data_size = 64;
-  std::string op_type = "remove";
+  std::vector<std::string> op_type_set;
+  op_type_set.push_back("put");
+  op_type_set.push_back("get");
+  op_type_set.push_back("remove");
   std::string path = "/tmp";
   std::string backing_path = "local://tmp";
-  for (int i = 1; i <= 64; i *= 2) {
-    int num_clients = i;
-    // Output all the configuration parameters:
-    LOG(log_level::info) << "host: " << address;
-    LOG(log_level::info) << "service-port: " << service_port;
-    LOG(log_level::info) << "lease-port: " << lease_port;
-    LOG(log_level::info) << "num-clients: " << num_clients;
-    LOG(log_level::info) << "num-blocks: " << num_blocks;
-    LOG(log_level::info) << "chain-length: " << chain_length;
-    LOG(log_level::info) << "num-ops: " << num_ops;
-    LOG(log_level::info) << "data-size: " << data_size;
-    LOG(log_level::info) << "test: " << op_type;
-    LOG(log_level::info) << "path: " << path;
-    LOG(log_level::info) << "backing-path: " << backing_path;
-    jiffy_client client(address, service_port, lease_port);
+  // Output all the configuration parameters:
+  LOG(log_level::info) << "host: " << address;
+  LOG(log_level::info) << "service-port: " << service_port;
+  LOG(log_level::info) << "lease-port: " << lease_port;
+  LOG(log_level::info) << "num-blocks: " << num_blocks;
+  LOG(log_level::info) << "chain-length: " << chain_length;
+  LOG(log_level::info) << "num-ops: " << num_ops;
+  LOG(log_level::info) << "data-size: " << data_size;
+  LOG(log_level::info) << "path: " << path;
+  LOG(log_level::info) << "backing-path: " << backing_path;
+  for (const auto &op_type:op_type_set) {
 
-    std::vector<std::shared_ptr<hash_table_client>> ht_clients(static_cast<size_t>(num_clients), nullptr);
-    for (int i = 0; i < num_clients; ++i) {
-      ht_clients[i] = client.open_or_create_hash_table(path, backing_path, num_blocks, chain_length);
+    for (int i = 1; i <= 64; i *= 2) {
+      int num_clients = i;
+
+      jiffy_client client(address, service_port, lease_port);
+
+      std::vector<std::shared_ptr<hash_table_client>> ht_clients(static_cast<size_t>(num_clients), nullptr);
+      for (int i = 0; i < num_clients; ++i) {
+        ht_clients[i] = client.open_or_create_hash_table(path, backing_path, num_blocks, chain_length);
+      }
+
+      std::shared_ptr<hash_table_benchmark> benchmark = nullptr;
+      if (op_type == "put") {
+        benchmark = std::make_shared<put_benchmark>(ht_clients, data_size, num_clients, num_ops);
+      } else if (op_type == "get") {
+        benchmark = std::make_shared<get_benchmark>(ht_clients, data_size, num_clients, num_ops);
+      } else if (op_type == "remove") {
+        benchmark = std::make_shared<remove_benchmark>(ht_clients, data_size, num_clients, num_ops);
+      } else {
+        LOG(log_level::info) << "Incorrect operation type for hash table: " << op_type;
+        return 0;
+      }
+      benchmark->run();
+      auto result = benchmark->wait();
+      client.remove(path);
+      LOG(log_level::info) << op_type << " " << num_clients << " " << result.second << " " << result.first;
+      /*
+      LOG(log_level::info) << "===== " << op_type << " ======";
+      LOG(log_level::info) << "\t" << num_ops << " requests completed in " << ((double) num_ops / result.first)
+                           << " us";
+      LOG(log_level::info) << "\t" << num_clients << " parallel clients";
+      LOG(log_level::info) << "\t" << data_size << " payload";
+      LOG(log_level::info) << "\tAverage latency: " << result.second;
+      LOG(log_level::info) << "\tThroughput: " << result.first << " requests per microsecond";
+       */
     }
-
-    std::shared_ptr<hash_table_benchmark> benchmark = nullptr;
-    if (op_type == "put") {
-      benchmark = std::make_shared<put_benchmark>(ht_clients, data_size, num_clients, num_ops);
-    } else if(op_type == "get") {
-      benchmark = std::make_shared<get_benchmark>(ht_clients, data_size, num_clients, num_ops);
-    } else if(op_type == "remove") {
-      benchmark = std::make_shared<remove_benchmark>(ht_clients, data_size, num_clients, num_ops);
-    } else {
-      LOG(log_level::info) << "Incorrect operation type for hash table: " << op_type;
-      return 0;
-    }
-    benchmark->run();
-    auto result = benchmark->wait();
-    client.remove(path);
-
-    LOG(log_level::info) << "===== " << op_type << " ======";
-    LOG(log_level::info) << "\t" << num_ops << " requests completed in " << ((double) num_ops / result.first) << " us";
-    LOG(log_level::info) << "\t" << num_clients << " parallel clients";
-    LOG(log_level::info) << "\t" << data_size << " payload";
-    LOG(log_level::info) << "\tAverage latency: " << result.second;
-    LOG(log_level::info) << "\tThroughput: " << result.first << " requests per microsecond";
   }
   return 0;
 }

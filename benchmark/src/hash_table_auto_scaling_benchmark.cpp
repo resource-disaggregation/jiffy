@@ -51,8 +51,8 @@ std::vector<std::string> keygenerator(std::size_t num_keys, double theta = 0, in
 }
 
 int main() {
-  //size_t num_ops = 671088;
-  size_t num_ops = 4000;
+  size_t num_ops = 671088;
+  //size_t num_ops = 4000;
   std::vector<std::string> keys = keygenerator(num_ops);
   std::string address = "127.0.0.1";
   int service_port = 9090;
@@ -122,8 +122,6 @@ int main() {
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   for (j = num_ops - 1; j >= 0; --j) {
     auto key = keys[num_ops - 1 - j];
-  //for(j = 0; j < num_ops; ++j) {
-  //  auto key = keys[j];
     remove_t0 = time_utils::now_us();
     ht_client->remove(key);
     remove_t1 = time_utils::now_us();

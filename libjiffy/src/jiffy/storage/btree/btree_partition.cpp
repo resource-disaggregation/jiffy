@@ -63,8 +63,6 @@ std::string btree_partition::put(const std::string &key, const std::string &valu
     }
     auto p = std::make_pair(make_binary(key), make_binary(value));
     if (partition_.insert(p).second) {
-      if(key == "ac")
-        //LOG(log_level::info) << "Successfully put!!!!!!*******************************";
       return "!ok";
     } else {
       return "!duplicate_key";
