@@ -21,7 +21,7 @@ btree_client::btree_client(std::shared_ptr<directory::directory_interface> fs,
 
 void btree_client::refresh() {
   status_ = fs_->dstatus(path_);
-  LOG(log_level::info) << "Refreshing partition mappings";
+  //LOG(log_level::info) << "Refreshing partition mappings";
   slots_.clear();
   blocks_.clear();
   for (const auto &block: status_.data_blocks()) {
@@ -243,7 +243,7 @@ size_t btree_client::block_id(const std::string &key) {
   std::string max_value;
   size_t idx = 0;
 
-  // TODO fix this
+  // TODO fix this for range functions
   for (auto x = slots_.begin(); x != slots_.end(); x++) {
     if (*x <= key && *x > max_value) {
       max_value = *x;
@@ -306,7 +306,7 @@ void btree_client::handle_redirect(int32_t cmd_id, const std::vector<std::string
     throw redo_error();
   }
   if (response == "!full") {
-    LOG(log_level::info) << "putting the client to sleep to let auto_scaling run first for 2^" << redo_times << " milliseconds";
+    //LOG(log_level::info) << "putting the client to sleep to let auto_scaling run first for 2^" << redo_times << " milliseconds";
     std::this_thread::sleep_for(std::chrono::milliseconds((int) (std::pow(2, redo_times))));
     redo_times++;
     throw redo_error();

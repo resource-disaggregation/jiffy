@@ -45,26 +45,26 @@ btree_partition::btree_partition(block_memory_manager *manager,
   threshold_hi_ = conf.get_as<double>("btree.capacity_threshold_hi", 0.95);
   threshold_lo_ = conf.get_as<double>("btree.capacity_threshold_lo", 0.05);
   auto_scale_ = conf.get_as<bool>("btree.auto_scale", true);
-  LOG(log_level::info) << "Partition name: " << name_;
+  //LOG(log_level::info) << "Partition name: " << name_;
 }
 
 std::string btree_partition::put(const std::string &key, const std::string &value, bool redirect) {
-  LOG(log_level::info) << "Putting " << key << " on " << name();
-  LOG(log_level::info) << "storage size " << storage_size() << " and capacity "
-                       << storage_capacity();
+  //LOG(log_level::info) << "Putting " << key << " on " << name();
+  //LOG(log_level::info) << "storage size " << storage_size() << " and capacity "
+  //                     << storage_capacity();
 
   if (in_slot_range(key) || (in_import_slot_range(key) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(key)) {
       return "!exporting!" + export_target_str();
     }
     if (overload()) {
-      LOG(log_level::info) << "this partition is full now !!!!";
+      //LOG(log_level::info) << "this partition is full now !!!!";
       return "!full";
     }
     auto p = std::make_pair(make_binary(key), make_binary(value));
     if (partition_.insert(p).second) {
       if(key == "ac")
-        LOG(log_level::info) << "Successfully put!!!!!!*******************************";
+        //LOG(log_level::info) << "Successfully put!!!!!!*******************************";
       return "!ok";
     } else {
       return "!duplicate_key";
@@ -90,7 +90,7 @@ std::string btree_partition::exists(const std::string &key, bool redirect) {
 }
 
 std::string btree_partition::get(const std::string &key, bool redirect) {
-  LOG(log_level::info) << "Trying to get key: " << key << " from partition: " << name();
+  //LOG(log_level::info) << "Trying to get key: " << key << " from partition: " << name();
   if (in_slot_range(key) || (in_import_slot_range(key) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(key)) {
       return "!exporting!" + export_target_str();
@@ -131,7 +131,7 @@ std::string btree_partition::update(const std::string &key, const std::string &v
 }
 
 std::string btree_partition::remove(const std::string &key, bool redirect) {
-  LOG(log_level::info) << "Trying to remove: " << key << " from partition "<< name();
+  //LOG(log_level::info) << "Trying to remove: " << key << " from partition "<< name();
   if (in_slot_range(key) || (in_import_slot_range(key) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(key)) {
       return "!exporting!" + export_target_str();
@@ -179,7 +179,7 @@ void btree_partition::range_lookup_batches(std::vector<std::string> &data,
                                            const std::string &begin_range,
                                            const std::string &end_range,
                                            size_t batch_size) {
-  LOG(log_level::info) << "into this range lookup function";
+  //LOG(log_level::info) << "into this range lookup function";
   auto start = partition_.lower_bound(make_binary(begin_range));
   auto edge = partition_.upper_bound(make_binary(end_range));
   for (auto entry = start; entry != edge; entry++) {
@@ -187,7 +187,7 @@ void btree_partition::range_lookup_batches(std::vector<std::string> &data,
       data.push_back(to_string(entry->first));
       data.push_back(to_string(entry->second));
       if (data.size() == batch_size) {
-        LOG(log_level::info) << "reach batch_size";
+        //LOG(log_level::info) << "reach batch_size";
         break;
       }
     }
@@ -232,7 +232,7 @@ std::string btree_partition::range_count(const std::string &begin_range,
 
 std::string btree_partition::update_partition(const std::string &new_name, const std::string &new_metadata) {
 
-  LOG(log_level::info) << "Updating partition of " << name() << " to be " << new_name << new_metadata;
+  //LOG(log_level::info) << "Updating partition of " << name() << " to be " << new_name << new_metadata;
   update_lock.lock();
   if (new_name == "merging" && new_metadata == "merging") {
     if (metadata() == "regular" && name() != default_name) {
@@ -289,7 +289,7 @@ std::string btree_partition::update_partition(const std::string &new_name, const
 }
 
 std::string btree_partition::scale_remove(const std::string &key) {
-  LOG(log_level::info) << "scale removing " << key << " from partition "<< name();
+  //LOG(log_level::info) << "scale removing " << key << " from partition "<< name();
   if (in_slot_range(key) || (in_import_slot_range(key))) {
     std::string old_val;
     auto bkey = make_binary(key);
@@ -411,8 +411,8 @@ void btree_partition::run_command(std::vector<std::string> &_return,
       && metadata_ != "importing" && is_tail()
       && splitting_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
-    LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
-                         << storage_capacity() << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
+    //LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
+    //                     << storage_capacity() << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
       splitting_ = true;
 
@@ -439,8 +439,8 @@ void btree_partition::run_command(std::vector<std::string> &_return,
       && metadata_ != "importing" && slot_end() != MAX_KEY && is_tail()
       && merging_.compare_exchange_strong(expected, true)) {
     // Ask directory server to split this slot range
-    LOG(log_level::info) << "Underloaded partition; storage = " << storage_size() << " capacity = "
-                         << storage_capacity() << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
+    //LOG(log_level::info) << "Underloaded partition; storage = " << storage_size() << " capacity = "
+    //                     << storage_capacity() << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
       merging_ = true;
       //LOG(log_level::info) << "Requested slot range merge";
@@ -453,7 +453,7 @@ void btree_partition::run_command(std::vector<std::string> &_return,
 
     } catch (std::exception &e) {
       merging_ = false;
-      LOG(log_level::warn) << "Merge slot range failed: " << e.what();
+     // LOG(log_level::warn) << "Merge slot range failed: " << e.what();
     }
   }
 }
