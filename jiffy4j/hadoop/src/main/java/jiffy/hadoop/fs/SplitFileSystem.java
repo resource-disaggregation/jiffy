@@ -26,10 +26,12 @@ import org.apache.hadoop.util.ReflectionUtils;
 public class SplitFileSystem extends FileSystem {
 
   // Filesystem used for persistently stored (non temporary) files.
-  private FileSystem persistentFileSystem;
+  private static URI persistentURI = null;
+  private static FileSystem persistentFileSystem = null;
 
   // Filesystem used for ephemeral (temporary) files.
-  private FileSystem ephemeralFileSystem;
+  private static URI ephemeralURI = null;
+  private static FileSystem ephemeralFileSystem = null;
 
   private URI uri;
 
@@ -48,24 +50,14 @@ public class SplitFileSystem extends FileSystem {
 
   private FileSystem ephemeralFS() throws IOException {
     if (ephemeralFileSystem == null) {
-      Configuration conf = getConf();
-      try {
-        ephemeralFileSystem = initializeFS(new URI(conf.get("splitfs.ephemeral.fs")), conf);
-      } catch (URISyntaxException e) {
-        throw new IOException(e);
-      }
+      ephemeralFileSystem = initializeFS(ephemeralURI, getConf());
     }
     return ephemeralFileSystem;
   }
 
   private FileSystem persistentFS() throws IOException {
     if (persistentFileSystem == null) {
-      Configuration conf = getConf();
-      try {
-        persistentFileSystem = initializeFS(new URI(conf.get("splitfs.persistent.fs")), conf);
-      } catch (URISyntaxException e) {
-        throw new IOException(e);
-      }
+      persistentFileSystem = initializeFS(persistentURI, getConf());
     }
     return persistentFileSystem;
   }
@@ -84,8 +76,25 @@ public class SplitFileSystem extends FileSystem {
     setConf(conf);
 
     this.uri = uri;
-    persistentFileSystem = null;
-    ephemeralFileSystem = null;
+    try {
+      URI newEphemeralURI = new URI(conf.get("splitfs.ephemeral.fs"));
+      if (ephemeralURI == null || !(ephemeralURI.getHost().equals(newEphemeralURI.getHost())
+          && ephemeralURI.getPort() == newEphemeralURI.getPort()
+          && ephemeralURI.getScheme().equals(newEphemeralURI.getScheme()))) {
+        ephemeralURI = newEphemeralURI;
+        ephemeralFileSystem = null;
+      }
+
+      URI newPersistentURI = new URI(conf.get("splitfs.persistent.fs"));
+      if (persistentURI == null || !(persistentURI.getHost().equals(newPersistentURI.getHost())
+          && persistentURI.getPort() == newPersistentURI.getPort()
+          && persistentURI.getScheme().equals(newPersistentURI.getScheme()))) {
+        persistentURI = newPersistentURI;
+        persistentFileSystem = null;
+      }
+    } catch (URISyntaxException e) {
+      throw new IOException(e);
+    }
   }
 
   @Override
