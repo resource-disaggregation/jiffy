@@ -230,7 +230,9 @@ public class SplitFileSystem extends FileSystem {
     if (p.getParent() == null) {
       return false;
     } else {
-      return p.toUri().getPath().startsWith(EPHEMERAL_PREFIX);
+      return p.toUri().getPath().startsWith(EPHEMERAL_PREFIX)
+          && !p.toUri().getPath().endsWith("jar")
+          && !p.toUri().getPath().endsWith("xml");
     }
   }
 
