@@ -277,6 +277,7 @@ class directory_service_handler : public directory_serviceIf {
   directory_service_exception make_exception(directory_ops_exception &ex) const;
   /* Directory tree */
   std::shared_ptr<directory_tree> shard_;
+  std::mutex mtx_;
 };
 }
 }

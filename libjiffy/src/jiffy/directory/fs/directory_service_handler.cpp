@@ -9,6 +9,7 @@ directory_service_handler::directory_service_handler(std::shared_ptr<directory_t
 
 void directory_service_handler::create_directory(const std::string &path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     shard_->create_directory(path);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -17,6 +18,7 @@ void directory_service_handler::create_directory(const std::string &path) {
 
 void directory_service_handler::create_directories(const std::string &path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     shard_->create_directories(path);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -25,6 +27,7 @@ void directory_service_handler::create_directories(const std::string &path) {
 
 void directory_service_handler::open(rpc_data_status &_return, const std::string &path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     _return = directory_type_conversions::to_rpc(shard_->open(path));
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -40,6 +43,7 @@ void directory_service_handler::create(rpc_data_status &_return,
                                        int32_t permissions,
                                        const std::map<std::string, std::string> &tags) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     _return = directory_type_conversions::to_rpc(shard_->create(path,
                                                                 backing_path,
                                                                 (size_t) num_blocks,
@@ -61,6 +65,7 @@ void directory_service_handler::open_or_create(rpc_data_status &_return,
                                                int32_t permissions,
                                                const std::map<std::string, std::string> &tags) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     _return = directory_type_conversions::to_rpc(shard_->open_or_create(path,
                                                                         backing_path,
                                                                         (size_t) num_blocks,
@@ -75,6 +80,7 @@ void directory_service_handler::open_or_create(rpc_data_status &_return,
 
 bool directory_service_handler::exists(const std::string &path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     return shard_->exists(path);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -83,6 +89,7 @@ bool directory_service_handler::exists(const std::string &path) {
 
 int64_t directory_service_handler::last_write_time(const std::string &path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     return static_cast<int64_t>(shard_->last_write_time(path));
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -93,6 +100,7 @@ void directory_service_handler::set_permissions(const std::string &path,
                                                 rpc_perms prms,
                                                 rpc_perm_options opts) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     shard_->permissions(path, perms((uint16_t) prms), (perm_options) opts);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -101,6 +109,7 @@ void directory_service_handler::set_permissions(const std::string &path,
 
 rpc_perms directory_service_handler::get_permissions(const std::string &path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     return static_cast<rpc_perms>(shard_->permissions(path)());
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -109,6 +118,7 @@ rpc_perms directory_service_handler::get_permissions(const std::string &path) {
 
 void directory_service_handler::remove(const std::string &path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     shard_->remove(path);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -117,6 +127,7 @@ void directory_service_handler::remove(const std::string &path) {
 
 void directory_service_handler::remove_all(const std::string &path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     shard_->remove_all(path);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -125,6 +136,7 @@ void directory_service_handler::remove_all(const std::string &path) {
 
 void directory_service_handler::sync(const std::string &path, const std::string &backing_path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     shard_->sync(path, backing_path);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -133,6 +145,7 @@ void directory_service_handler::sync(const std::string &path, const std::string 
 
 void directory_service_handler::dump(const std::string &path, const std::string &backing_path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     shard_->dump(path, backing_path);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -141,6 +154,7 @@ void directory_service_handler::dump(const std::string &path, const std::string 
 
 void directory_service_handler::load(const std::string &path, const std::string &backing_path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     shard_->load(path, backing_path);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -149,6 +163,7 @@ void directory_service_handler::load(const std::string &path, const std::string 
 
 void directory_service_handler::rename(const std::string &old_path, const std::string &new_path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     shard_->rename(old_path, new_path);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -157,6 +172,7 @@ void directory_service_handler::rename(const std::string &old_path, const std::s
 
 void directory_service_handler::status(rpc_file_status &_return, const std::string &path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     _return = directory_type_conversions::to_rpc(shard_->status(path));
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -165,6 +181,7 @@ void directory_service_handler::status(rpc_file_status &_return, const std::stri
 
 void directory_service_handler::directory_entries(std::vector<rpc_dir_entry> &_return, const std::string &path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     auto out = shard_->directory_entries(path);
     for (const auto &o: out)
       _return.push_back(directory_type_conversions::to_rpc(o));
@@ -176,6 +193,7 @@ void directory_service_handler::directory_entries(std::vector<rpc_dir_entry> &_r
 void directory_service_handler::recursive_directory_entries(std::vector<rpc_dir_entry> &_return,
                                                             const std::string &path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     auto out = shard_->recursive_directory_entries(path);
     for (const auto &o: out)
       _return.push_back(directory_type_conversions::to_rpc(o));
@@ -186,6 +204,7 @@ void directory_service_handler::recursive_directory_entries(std::vector<rpc_dir_
 
 void directory_service_handler::dstatus(rpc_data_status &_return, const std::string &path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     _return = directory_type_conversions::to_rpc(shard_->dstatus(path));
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -194,6 +213,7 @@ void directory_service_handler::dstatus(rpc_data_status &_return, const std::str
 
 void directory_service_handler::add_tags(const std::string &path, const std::map<std::string, std::string> &tags) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     shard_->add_tags(path, tags);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -202,6 +222,7 @@ void directory_service_handler::add_tags(const std::string &path, const std::map
 
 bool directory_service_handler::is_regular_file(const std::string &path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     return shard_->is_regular_file(path);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -210,6 +231,7 @@ bool directory_service_handler::is_regular_file(const std::string &path) {
 
 bool directory_service_handler::is_directory(const std::string &path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     return shard_->is_directory(path);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -220,6 +242,7 @@ void directory_service_handler::reslove_failures(rpc_replica_chain &_return,
                                                  const std::string &path,
                                                  const rpc_replica_chain &chain) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     auto ret = shard_->resolve_failures(path, directory_type_conversions::from_rpc(chain));
     _return = directory_type_conversions::to_rpc(ret);
   } catch (directory_ops_exception &e) {
@@ -230,6 +253,7 @@ void directory_service_handler::reslove_failures(rpc_replica_chain &_return,
 void directory_service_handler::add_replica_to_chain(rpc_replica_chain &_return, const std::string &path,
                                                      const rpc_replica_chain &chain) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     auto ret = shard_->add_replica_to_chain(path, directory_type_conversions::from_rpc(chain));
     _return = directory_type_conversions::to_rpc(ret);
   } catch (directory_ops_exception &e) {
@@ -239,6 +263,7 @@ void directory_service_handler::add_replica_to_chain(rpc_replica_chain &_return,
 
 void directory_service_handler::add_block_to_file(const std::string &path) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     shard_->add_block_to_file(path);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -249,6 +274,7 @@ void directory_service_handler::split_slot_range(const std::string &path,
                                                  const int32_t slot_begin,
                                                  const int32_t slot_end) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     shard_->split_slot_range(path, slot_begin, slot_end);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
@@ -259,6 +285,7 @@ void directory_service_handler::merge_slot_range(const std::string &path,
                                                  const int32_t slot_begin,
                                                  const int32_t slot_end) {
   try {
+    std::lock_guard<std::mutex> guard(mtx_);
     shard_->merge_slot_range(path, slot_begin, slot_end);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
