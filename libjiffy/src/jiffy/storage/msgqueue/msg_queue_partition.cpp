@@ -69,11 +69,15 @@ std::string msg_queue_partition::read(std::string position) {
   if (static_cast<std::size_t>(pos) < size()) {
     return to_string(partition_[pos]);
   }
-  if (!next_target_str().empty())
-    return "!msg_not_in_partition!" + next_target_str();
-  else if (storage_size() >= storage_capacity() && partition_.size() >= partition_.capacity())
-    return "!redo";
-  else return "!msg_not_found";
+  if(storage_size() * 2 >= storage_capacity() && partition_.size() >= partition_.capacity()) {
+    if(static_cast<std::size_t>(pos) == size()) {
+      if (!next_target_str().empty())
+        return "!msg_not_in_partition!" + next_target_str();
+      else
+        return "!redo";
+    }
+  }
+  return "!msg_not_found";
 }
 
 std::string msg_queue_partition::clear() {
