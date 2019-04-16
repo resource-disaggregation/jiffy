@@ -26,12 +26,12 @@ import org.apache.hadoop.util.ReflectionUtils;
 public class SplitFileSystem extends FileSystem {
 
   // Filesystem used for persistently stored (non temporary) files.
-  private static URI persistentURI = null;
-  private static FileSystem persistentFileSystem = null;
+  private URI persistentURI = null;
+  private FileSystem persistentFileSystem = null;
 
   // Filesystem used for ephemeral (temporary) files.
-  private static URI ephemeralURI = null;
-  private static FileSystem ephemeralFileSystem = null;
+  private URI ephemeralURI = null;
+  private FileSystem ephemeralFileSystem = null;
 
   private URI uri;
 
@@ -77,21 +77,11 @@ public class SplitFileSystem extends FileSystem {
 
     this.uri = uri;
     try {
-      URI newEphemeralURI = new URI(conf.get("splitfs.ephemeral.fs"));
-      if (ephemeralURI == null || !(ephemeralURI.getHost().equals(newEphemeralURI.getHost())
-          && ephemeralURI.getPort() == newEphemeralURI.getPort()
-          && ephemeralURI.getScheme().equals(newEphemeralURI.getScheme()))) {
-        ephemeralURI = newEphemeralURI;
-        ephemeralFileSystem = null;
-      }
+      ephemeralURI = new URI(conf.get("splitfs.ephemeral.fs"));
+      ephemeralFileSystem = null;
 
-      URI newPersistentURI = new URI(conf.get("splitfs.persistent.fs"));
-      if (persistentURI == null || !(persistentURI.getHost().equals(newPersistentURI.getHost())
-          && persistentURI.getPort() == newPersistentURI.getPort()
-          && persistentURI.getScheme().equals(newPersistentURI.getScheme()))) {
-        persistentURI = newPersistentURI;
-        persistentFileSystem = null;
-      }
+      persistentURI = new URI(conf.get("splitfs.persistent.fs"));
+      persistentFileSystem = null;
     } catch (URISyntaxException e) {
       throw new IOException(e);
     }
@@ -100,6 +90,14 @@ public class SplitFileSystem extends FileSystem {
   @Override
   public void close() throws IOException {
     super.close();
+
+    if (ephemeralFileSystem != null) {
+      ephemeralFileSystem.close();
+    }
+
+    if (persistentFileSystem != null) {
+      persistentFileSystem.close();
+    }
   }
 
   @Override
