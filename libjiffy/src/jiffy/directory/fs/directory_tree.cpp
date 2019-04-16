@@ -704,5 +704,9 @@ void directory_tree::clear_storage(std::vector<std::string> &cleared_blocks, std
   }
 }
 
+size_t directory_tree::num_blocks() const {
+  return allocator_->num_allocated_blocks();
+}
+
 }
 }

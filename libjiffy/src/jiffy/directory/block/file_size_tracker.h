@@ -50,21 +50,8 @@ class file_size_tracker {
    * @brief Report file size starting from root
    * @param out Output file stream
    */
-
   void report_file_sizes(std::ofstream &out);
 
-  /**
-   * @brief Report file size recursively
-   * @param out Output file stream
-   * @param node File node
-   * @param parent_path Parent path
-   * @param epoch Time epoch
-   */
-
-  size_t report_file_sizes(std::ofstream &out,
-                           std::shared_ptr<ds_node> node,
-                           const std::string &parent_path,
-                           uint64_t epoch);
   /* Working period */
   std::chrono::milliseconds periodicity_ms_;
   /* Stop bool */

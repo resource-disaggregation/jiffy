@@ -1459,6 +1459,8 @@ class directory_tree : public directory_interface {
 
   void touch(std::shared_ptr<ds_node> node, std::uint64_t time);
 
+  size_t num_blocks() const;
+
   /* Root directory */
   std::shared_ptr<ds_dir_node> root_;
   /* Block allocator */

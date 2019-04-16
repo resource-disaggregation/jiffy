@@ -52,32 +52,7 @@ void file_size_tracker::stop() {
 void file_size_tracker::report_file_sizes(std::ofstream &out) {
   namespace ts = std::chrono;
   auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
-
-  auto node = std::dynamic_pointer_cast<ds_dir_node>(tree_->root_);
-  size_t num_blocks = 0;
-  for (const auto &cname: node->children()) {
-    num_blocks += report_file_sizes(out, node->get_child(cname), "", static_cast<uint64_t>(cur_epoch));
-  }
-  out << cur_epoch << "\t" << num_blocks << std::endl;
-}
-
-size_t file_size_tracker::report_file_sizes(std::ofstream &out,
-                                            std::shared_ptr<ds_node> node,
-                                            const std::string &parent_path,
-                                            uint64_t epoch) {
-  auto child_path = parent_path;
-  size_t num_blocks = 0;
-  directory_utils::push_path_element(child_path, node->name());
-  if (node->is_regular_file()) {
-    auto file = std::dynamic_pointer_cast<ds_file_node>(node);
-    num_blocks = file->num_blocks() * file->chain_length();
-  } else {
-    auto dir = std::dynamic_pointer_cast<ds_dir_node>(node);
-    for (const auto &cname: dir->children()) {
-      num_blocks += report_file_sizes(out, dir->get_child(cname), child_path, static_cast<uint64_t>(epoch));
-    }
-  }
-  return num_blocks;
+  out << cur_epoch << "\t" << tree_->get_allocator()->num_allocated_blocks() << std::endl;
 }
 
 }
