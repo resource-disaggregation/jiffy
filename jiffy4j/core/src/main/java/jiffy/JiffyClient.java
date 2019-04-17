@@ -22,7 +22,7 @@ public class JiffyClient implements Closeable {
   private static final int DEFAULT_NUM_BLOCKS = 1;
   private static final int DEFAULT_CHAIN_LENGTH = 1;
   private static final int DEFAULT_FLAGS = 0;
-  private static final int DEFAULT_TIMEOUT_MS = 5000;
+  private static final int DEFAULT_TIMEOUT_MS = 60000;
   private static final int DEFAULT_PERMISSIONS = Permissions.all;
   private static final Map<String, String> DEFAULT_TAGS = Collections.emptyMap();
 
