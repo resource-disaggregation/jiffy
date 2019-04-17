@@ -174,30 +174,6 @@ public class SplitFileSystem extends FileSystem {
     this.workingDir = path;
   }
 
-  void setEphemeralWorkingDirectory(Path path) throws IOException {
-    ephemeralFS().setWorkingDirectory(path);
-  }
-
-  void setPersistentWorkingDirectory(Path path) throws IOException {
-    persistentFS().setWorkingDirectory(path);
-  }
-
-  Path getEphemeralWorkingDirectory() {
-    try {
-      return ephemeralFS().getWorkingDirectory();
-    } catch (IOException e) {
-      return null;
-    }
-  }
-
-  Path getPersistentWorkingDirectory() {
-    try {
-      return persistentFS().getWorkingDirectory();
-    } catch (IOException e) {
-      return null;
-    }
-  }
-
   @Override
   public Path getWorkingDirectory() {
     return workingDir;
@@ -245,15 +221,15 @@ public class SplitFileSystem extends FileSystem {
   }
 
   private Path makeAbsoluteEphemeral(Path input) {
-    return input.makeQualified(ephemeralURI, getEphemeralWorkingDirectory());
+    return Path.getPathWithoutSchemeAndAuthority(input).makeQualified(ephemeralURI, workingDir);
   }
 
   private Path makeAbsolutePersistent(Path input) {
-    return input.makeQualified(persistentURI, getPersistentWorkingDirectory());
+    return Path.getPathWithoutSchemeAndAuthority(input).makeQualified(persistentURI, workingDir);
   }
 
   private Path makeAbsolute(Path input) {
-    return input.makeQualified(uri, workingDir);
+    return Path.getPathWithoutSchemeAndAuthority(input).makeQualified(uri, workingDir);
   }
 
   private FileStatus makeStatus(FileStatus status) throws IOException {
