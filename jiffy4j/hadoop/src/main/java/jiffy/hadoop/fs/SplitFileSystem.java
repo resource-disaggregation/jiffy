@@ -94,6 +94,8 @@ public class SplitFileSystem extends FileSystem {
 
       persistentURI = new URI(conf.get("splitfs.persistent.fs"));
       persistentFileSystem = null;
+
+      workingDir = Path.getPathWithoutSchemeAndAuthority(persistentFS().getWorkingDirectory());
     } catch (URISyntaxException e) {
       throw new IOException(e);
     }
