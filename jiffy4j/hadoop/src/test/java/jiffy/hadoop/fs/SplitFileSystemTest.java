@@ -47,22 +47,12 @@ public class SplitFileSystemTest {
 
     splitFS.mkdirs(new Path(EPHEMERAL_BASE_DIR));
     splitFS.mkdirs(new Path(PERSISTENT_BASE_DIR));
-    splitFS.setEphemeralWorkingDirectory(new Path(EPHEMERAL_BASE_DIR));
-    splitFS.setPersistentWorkingDirectory(new Path(PERSISTENT_BASE_DIR));
   }
 
   @After
   public void tearDown() throws IOException {
     splitFS.delete(new Path("tmp"), true);
     splitFS.delete(new Path("test"), true);
-  }
-
-  @Test
-  public void testWorkingDirectories() {
-    Assert.assertEquals(new Path(EPHEMERAL_BASE_DIR).getName(),
-        splitFS.getEphemeralWorkingDirectory().getName());
-    Assert.assertEquals(new Path(PERSISTENT_BASE_DIR).getName(),
-        splitFS.getPersistentWorkingDirectory().getName());
   }
 
   @Test
