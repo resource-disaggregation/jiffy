@@ -133,6 +133,10 @@ public class SplitFileSystem extends FileSystem {
   @Override
   public boolean rename(Path path, Path path1) throws IOException {
     path = prefixWithFsURI(path);
+    path1 = prefixWithFsURI(path1);
+    if (getFS(path) != getFS(path1)) {
+      throw new IOException("Cannot rename path from one FS to another");
+    }
     return getFS(path).rename(path, path1);
   }
 
