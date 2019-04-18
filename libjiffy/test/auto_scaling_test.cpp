@@ -175,14 +175,14 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
     dir_serve_thread.join();
   }
 }
-
+*/
 
 
 TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(21, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_msg_queue_blocks(block_names, 512, 0, 0.7);
+  auto blocks = test_utils::init_msg_queue_blocks(block_names);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread1([&storage_server] { storage_server->serve(); });
@@ -207,11 +207,11 @@ TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][mana
   msg_queue_client client(t, "/sandbox/scale_up.txt", status);
 
   // Write data until auto scaling is triggered
-  for (std::size_t i = 0; i < 158; ++i) {
-    REQUIRE(client.send(std::to_string(i)) == "!ok");
+  for (std::size_t i = 0; i < 2000; ++i) {
+    REQUIRE(client.send(std::string(102400, (std::to_string(i)).c_str()[0])) == "!ok");
   }
-  for (std::size_t i = 0; i < 158; ++i) {
-    REQUIRE(client.read() == std::to_string(i));
+  for (std::size_t i = 0; i < 2000; ++i) {
+    REQUIRE(client.read() == std::string(102400, (std::to_string(i)).c_str()[0]));
   }
   // Busy wait until number of blocks increases
   while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
@@ -240,7 +240,7 @@ TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][mana
 
 }
 
-*/
+/*
 
 TEST_CASE("btree_auto_scale_up_test", "[directory_service][storage_server][management_server]") {
   std::vector<std::string> keys;
@@ -326,7 +326,6 @@ TEST_CASE("btree_auto_scale_up_test", "[directory_service][storage_server][manag
 }
 
 
-/*
 TEST_CASE("btree_auto_scale_down_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(3, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);

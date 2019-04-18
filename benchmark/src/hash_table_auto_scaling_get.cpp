@@ -78,62 +78,17 @@ int main() {
   jiffy_client client(address, service_port, lease_port);
   std::shared_ptr<hash_table_client>
       ht_client = client.open_or_create_hash_table(path, backing_path, num_blocks, chain_length);
-  std::chrono::milliseconds periodicity_ms_(1000);
-  uint64_t put_tot_time = 0, put_t0 = 0, put_t1 = 0;
-
-  std::atomic_bool stop_{false};
-  std::size_t j = 0;
-  auto worker_ = std::thread([&] {
-    std::ofstream out("dataset.trace");
-    while (!stop_.load()) {
-      auto start = std::chrono::steady_clock::now();
-      try {
-        namespace ts = std::chrono;
-        auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
-        out << cur_epoch;
-        out << "\t" << j * 100 * 1024;
-        out << std::endl;
-      } catch (std::exception &e) {
-        LOG(log_level::error) << "Exception: " << e.what();
-      }
-      auto end = std::chrono::steady_clock::now();
-      auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-
-      auto time_to_wait = std::chrono::duration_cast<std::chrono::milliseconds>(periodicity_ms_ - elapsed);
-      if (time_to_wait > std::chrono::milliseconds::zero()) {
-        std::this_thread::sleep_for(time_to_wait);
-      }
+  uint64_t get_tot_time = 0, get_t0 = 0, get_t1 = 0;
+  std::ofstream out("get_latency.trace");
+  while (1) {
+    for (size_t k = 0; k < num_ops; ++k) {
+      auto key = keys[k];
+      get_t0 = time_utils::now_us();
+      ht_client->get(key);
+      get_t1 = time_utils::now_us();
+      get_tot_time = (get_t1 - get_t0);
+      auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
+      out << cur_epoch << " " << get_tot_time << " get" << std::endl;
     }
-    out.close();
-  });
-  std::ofstream out("latency.trace");
-  for (j = 0; j < num_ops; ++j) {
-    auto key = keys[j];
-    std::string data_(102400 - key.size(), 'x');
-    put_t0 = time_utils::now_us();
-    ht_client->put(key, data_);
-    put_t1 = time_utils::now_us();
-    put_tot_time = (put_t1 - put_t0);
-    auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
-    out << cur_epoch << " " << put_tot_time << " put" << std::endl;
   }
-
-  uint64_t remove_tot_time = 0, remove_t0 = 0, remove_t1 = 0;
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  for (j = num_ops - 1; j >= 0; --j) {
-    auto key = keys[num_ops - 1 - j];
-    remove_t0 = time_utils::now_us();
-    ht_client->remove(key);
-    remove_t1 = time_utils::now_us();
-    remove_tot_time = (remove_t1 - remove_t0);
-    auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
-    out << cur_epoch << " " << remove_tot_time << " remove" << std::endl;
-    if(j == 0)
-      break;
-  }
-  stop_.store(true);
-  if (worker_.joinable())
-    worker_.join();
-  client.remove(path);
-  return 0;
 }

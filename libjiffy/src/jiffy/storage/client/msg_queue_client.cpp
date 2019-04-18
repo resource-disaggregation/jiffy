@@ -113,6 +113,7 @@ void msg_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::st
   if (response == "!redo") {
     throw redo_error();
   }
+  // TODO merge these two into one
   if (response.substr(0, 5) == "!full") {
     typedef std::vector<std::string> list_t;
     do {

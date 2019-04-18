@@ -58,3 +58,21 @@ target_link_libraries(btree_auto_scaling_bench jiffy_client ${JEMALLOC_LIBRARY} 
 
 install(TARGETS btree_auto_scaling_bench
         RUNTIME DESTINATION bin)
+
+add_executable(hash_table_auto_scaling_get src/hash_table_auto_scaling_get.cpp src/zipf_generator.h)
+
+add_dependencies(hash_table_auto_scaling_get boost_ep jemalloc_ep)
+
+target_link_libraries(hash_table_auto_scaling_get jiffy_client ${JEMALLOC_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+install(TARGETS hash_table_auto_scaling_get
+        RUNTIME DESTINATION bin)
+
+add_executable(btree_auto_scaling_get src/btree_auto_scaling_get.cpp src/zipf_generator.h)
+
+add_dependencies(btree_auto_scaling_get boost_ep jemalloc_ep)
+
+target_link_libraries(btree_auto_scaling_get jiffy_client ${JEMALLOC_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+install(TARGETS btree_auto_scaling_get
+        RUNTIME DESTINATION bin)
