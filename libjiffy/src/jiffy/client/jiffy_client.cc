@@ -75,6 +75,7 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::open_or_create_hash_ta
                                                                                     const std::string &backing_path,
                                                                                     int32_t num_blocks,
                                                                                     int32_t chain_length,
+                                                                                    int timeout_ms,
                                                                                     int32_t flags,
                                                                                     int32_t permissions,
                                                                                     const std::map<std::string,
@@ -91,7 +92,7 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::open_or_create_hash_ta
   auto s = fs_->open_or_create(path, "hashtable", backing_path, num_blocks, chain_length, flags, permissions,
                                block_names, block_metadata, tags);
   begin_scope(path);
-  return std::make_shared<storage::hash_table_client>(fs_, path, s);
+  return std::make_shared<storage::hash_table_client>(fs_, path, s, timeout_ms);
 }
 
 std::shared_ptr<storage::msg_queue_client> jiffy_client::open_or_create_msg_queue(const std::string &path,

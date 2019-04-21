@@ -49,9 +49,9 @@ btree_partition::btree_partition(block_memory_manager *manager,
 }
 
 std::string btree_partition::put(const std::string &key, const std::string &value, bool redirect) {
-  //LOG(log_level::info) << "Putting " << key << " on " << name();
-  //LOG(log_level::info) << "storage size " << storage_size() << " and capacity "
-  //                     << storage_capacity();
+  LOG(log_level::info) << "Putting " << key << " on " << name();
+  LOG(log_level::info) << "storage size " << storage_size() << " and capacity "
+                       << storage_capacity();
 
   if (in_slot_range(key) || (in_import_slot_range(key) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(key)) {
@@ -88,7 +88,9 @@ std::string btree_partition::exists(const std::string &key, bool redirect) {
 }
 
 std::string btree_partition::get(const std::string &key, bool redirect) {
-  //LOG(log_level::info) << "Trying to get key: " << key << " from partition: " << name();
+  //auto start1 =  std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+  //std::cout << start1 << " " << key << std::endl;
+  LOG(log_level::info) << "Trying to get key: " << key << " from partition: " << name();
   if (in_slot_range(key) || (in_import_slot_range(key) && redirect)) {
     value_type value;
     auto ret = partition_.find(make_binary(key));
@@ -174,7 +176,8 @@ void btree_partition::range_lookup_batches(std::vector<std::string> &data,
                                            const std::string &begin_range,
                                            const std::string &end_range,
                                            size_t batch_size) {
-  //LOG(log_level::info) << "into this range lookup function";
+  LOG(log_level::info) << "into this range lookup function";
+  auto start1 =  std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
   auto start = partition_.lower_bound(make_binary(begin_range));
   auto edge = partition_.upper_bound(make_binary(end_range));
   for (auto entry = start; entry != edge; entry++) {
@@ -187,6 +190,8 @@ void btree_partition::range_lookup_batches(std::vector<std::string> &data,
       }
     }
   }
+  auto start2 =  std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+  std::cout << " range lookup function takes time: " << start2 - start1 << std::endl;
 }
 
 void btree_partition::range_lookup_keys(std::vector<std::string> &data,
@@ -227,7 +232,7 @@ std::string btree_partition::range_count(const std::string &begin_range,
 
 std::string btree_partition::update_partition(const std::string &new_name, const std::string &new_metadata) {
 
-  //LOG(log_level::info) << "Updating partition of " << name() << " to be " << new_name << new_metadata;
+  LOG(log_level::info) << "Updating partition of " << name() << " to be " << new_name << new_metadata;
   update_lock.lock();
   if (new_name == "merging" && new_metadata == "merging") {
     if (metadata() == "regular" && name() != default_name) {
@@ -284,7 +289,7 @@ std::string btree_partition::update_partition(const std::string &new_name, const
 }
 
 std::string btree_partition::scale_remove(const std::string &key) {
-  //LOG(log_level::info) << "scale removing " << key << " from partition "<< name();
+  LOG(log_level::info) << "scale removing " << key << " from partition "<< name();
   if (in_slot_range(key) || (in_import_slot_range(key))) {
     std::string old_val;
     auto bkey = make_binary(key);

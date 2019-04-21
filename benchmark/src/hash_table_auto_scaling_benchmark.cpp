@@ -51,8 +51,8 @@ std::vector<std::string> keygenerator(std::size_t num_keys, double theta = 0, in
 }
 
 int main() {
-  size_t num_ops = 419430;
-  //size_t num_ops = 4000;
+  //size_t num_ops = 419430;
+  size_t num_ops = 40000;
   std::vector<std::string> keys = keygenerator(num_ops);
   std::string address = "127.0.0.1";
   int service_port = 9090;
@@ -115,11 +115,10 @@ int main() {
     put_t1 = time_utils::now_us();
     put_tot_time = (put_t1 - put_t0);
     auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
-    out << cur_epoch << " " << put_tot_time << " put" << std::endl;
+    out << cur_epoch << " " << put_tot_time << " put" << key << std::endl;
   }
 
   uint64_t remove_tot_time = 0, remove_t0 = 0, remove_t1 = 0;
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   for (j = num_ops - 1; j >= 0; --j) {
     auto key = keys[num_ops - 1 - j];
     remove_t0 = time_utils::now_us();
@@ -127,10 +126,11 @@ int main() {
     remove_t1 = time_utils::now_us();
     remove_tot_time = (remove_t1 - remove_t0);
     auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
-    out << cur_epoch << " " << remove_tot_time << " remove" << std::endl;
+    out << cur_epoch << " " << remove_tot_time << " remove " << key << std::endl;
     if(j == 0)
       break;
   }
+
   stop_.store(true);
   if (worker_.joinable())
     worker_.join();

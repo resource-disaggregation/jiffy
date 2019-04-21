@@ -89,7 +89,7 @@ std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const
       //LOG(log_level::info) << "replica chain is: " << chain_.to_string();
       //TODO add a default partition implementation that always return a block remove
       if(std::string(e.what()) ==  "THRIFT_EAGAIN (timed out)") {
-      //  LOG(log_level::info) << "The error message is correct";
+        LOG(log_level::info) << "The error message is correct " << cmd_id << " " << args[0];
         response.clear();
         response.push_back("!block_moved");
         break;

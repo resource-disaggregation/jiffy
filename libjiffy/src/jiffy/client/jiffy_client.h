@@ -112,6 +112,7 @@ class jiffy_client {
                                                                         const std::string &backing_path,
                                                                         int32_t num_blocks = 1,
                                                                         int32_t chain_length = 1,
+                                                                        int timeout_ms = 1000,
                                                                         int32_t flags = 0,
                                                                         int32_t permissions = directory::perms::all(),
                                                                         const std::map<std::string,
@@ -136,7 +137,7 @@ class jiffy_client {
                                                                       int32_t permissions = directory::perms::all(),
                                                                       const std::map<std::string,
                                                                                      std::string> &tags = {});
-  
+
   /**
    * @brief Open or create btree
    * @param path File path
@@ -157,7 +158,7 @@ class jiffy_client {
                                                               int32_t permissions = directory::perms::all(),
                                                               const std::map<std::string,
                                                                              std::string> &tags = {});
-  
+
   /**
    * @brief Open a file and start key value listener
    * @param path File path

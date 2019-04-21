@@ -50,17 +50,33 @@ std::string btree_client::put(const std::string &key, const std::string &value) 
 std::string btree_client::get(const std::string &key) {
   std::string _return;
   std::vector<std::string> args{key};
+  //auto start1 =  std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+  //std::cout << start1 << " " << key << std::endl;
   bool redo;
   do {
     try {
+      //auto start2 =  std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
       _return = blocks_[block_id(key)]->run_command(btree_cmd_id::bt_get, args).front();
+      //auto stop2 =  std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+      //LOG(log_level::info) << "run command:: " << stop2 - start2;
+      //if(stop2 - start2 > 20)
+      //  std::cout << "1 " << stop2 - start2 << std::endl;
+      //auto start3 =  std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
       handle_redirect(btree_cmd_id::bt_get, args, _return);
+      //auto stop3 =  std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+      //LOG(log_level::info) << "handling redirect " << stop3 - start3;
+      //if(stop3 - start3 > 20)
+    //    std::cout << "2 " << stop3 - start3 << std::endl;
       redo = false;
       redo_times = 0;
     } catch (redo_error &e) {
       redo = true;
     }
   } while (redo);
+  //auto stop1 =  std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+  //LOG(log_level::info) << "Takes time for client:: " << stop1 - start1;
+  //if(stop1 - start1 > 20)
+    //std::cout << "3 " << stop1 - start1 << std::endl;
   return _return;
 }
 
