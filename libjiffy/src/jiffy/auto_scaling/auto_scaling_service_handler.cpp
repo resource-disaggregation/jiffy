@@ -109,6 +109,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       std::vector<std::string> split_data;
       //LOG(log_level::info) << "INTO THIS FUNCTION 2 *****************************";
       split_data = src->run_command(storage::hash_table_cmd_id::ht_get_range_data, args);
+      //std::this_thread::sleep_for(std::chrono::microseconds(10));
       //LOG(log_level::info) << "INTO THIS FUNCTION 3 *****************************";
       if (split_data.back() == "!empty") {
         // LOG(log_level::info) << "INTO THIS FUNCTION 4 *****************************";
@@ -126,6 +127,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       //LOG(log_level::info) << "INTO THIS FUNCTION 6 *****************************";
       // Write data to dst partition
       dst->run_command(storage::hash_table_cmd_id::ht_put, split_data);
+      //std::this_thread::sleep_for(std::chrono::microseconds(10));
       //LOG(log_level::info) << "INTO THIS FUNCTION 7 *****************************";
 
       // Remove data from src partition
@@ -143,6 +145,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
 
       //LOG(log_level::info) << "Sending " << remove_keys.size() << " split keys to remove";
       auto ret = src->run_command(storage::hash_table_cmd_id::ht_scale_remove, remove_keys);
+      //std::this_thread::sleep_for(std::chrono::microseconds(10));
       //LOG(log_level::info) << "INTO THIS FUNCTION 9 *****************************";
       //LOG(log_level::info) << "Removed " << remove_keys.size() << " split keys";
     }
@@ -277,6 +280,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       std::vector<std::string> merge_data;
       //LOG(log_level::info) << "Look here 1";
       merge_data = src->run_command(storage::hash_table_cmd_id::ht_get_range_data, args);
+      //std::this_thread::sleep_for(std::chrono::microseconds(10));
       //LOG(log_level::info) << "Look here 2 " << " merge_data_size: " << merge_data.size();
       if (merge_data.back() == "!empty") {
         break;
@@ -293,6 +297,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       merge_data.emplace_back("!redirected");
       // Write data to dst partition
       dst->run_command(storage::hash_table_cmd_id::ht_put, merge_data);
+      //std::this_thread::sleep_for(std::chrono::microseconds(10));
       //LOG(log_level::info) << "Sent " << merge_keys << " keys";
 
       // Remove data from src partition
@@ -307,6 +312,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       }
       assert(remove_keys.size() == merge_keys);
       src->run_command(storage::hash_table_cmd_id::ht_scale_remove, remove_keys);
+      //std::this_thread::sleep_for(std::chrono::microseconds(10));
       //LOG(log_level::info) << "Removed " << remove_keys.size() << " merged keys";
     }
     //LOG(log_level::info) << "Look here 4";

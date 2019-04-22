@@ -29,8 +29,9 @@ int main() {
   if (!in) {
     std::cerr << "Cannot open the File : " << fileName << std::endl;
   }
-  size_t num_ops = 419430;
-  //size_t num_ops = 4000;
+  //size_t num_ops = 419430;
+  //size_t num_ops = 900;
+  size_t num_ops = 70000;
   std::vector<std::string> keys;
   for(size_t j = 0; j < num_ops; j++) {
     std::string str;
@@ -65,8 +66,8 @@ int main() {
   std::shared_ptr<btree_client>
       bt_client = client.open_or_create_btree(path, backing_path, num_blocks, chain_length);
   std::chrono::milliseconds periodicity_ms_(1000);
+  std::chrono::milliseconds periodicity_(50);
   uint64_t put_tot_time = 0, put_t0 = 0, put_t1 = 0;
-
   std::atomic_bool stop_{false};
   std::size_t j = 0;
   auto worker_ = std::thread([&] {
@@ -94,6 +95,7 @@ int main() {
   });
   std::ofstream out("latency.trace");
   for (j = 0; j < num_ops; ++j) {
+    auto start = std::chrono::steady_clock::now();
     auto key = keys[j];
     std::string data_(102400 - key.size(), 'x');
     put_t0 = time_utils::now_us();
@@ -102,11 +104,18 @@ int main() {
     put_tot_time = (put_t1 - put_t0);
     auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
     out << cur_epoch << " " << put_tot_time << " put" << std::endl;
+    auto end = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    auto time_to_wait = std::chrono::duration_cast<std::chrono::milliseconds>(periodicity_ - elapsed);
+    if (time_to_wait > std::chrono::milliseconds::zero()) {
+      //std::this_thread::sleep_for(time_to_wait);
+    }
   }
 
   uint64_t remove_tot_time = 0, remove_t0 = 0, remove_t1 = 0;
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   for (j = num_ops - 1; j >= 0; --j) {
+    auto start = std::chrono::steady_clock::now();
     auto key = keys[num_ops - 1 - j];
     remove_t0 = time_utils::now_us();
     bt_client->remove(key);
@@ -114,8 +123,15 @@ int main() {
     remove_tot_time = (remove_t1 - remove_t0);
     auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
     out << cur_epoch << " " << remove_tot_time << " remove" << std::endl;
-    if(j == 0)
+    if (j == 0)
       break;
+    auto end = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    auto time_to_wait = std::chrono::duration_cast<std::chrono::milliseconds>(periodicity_ - elapsed);
+    if (time_to_wait > std::chrono::milliseconds::zero()) {
+      //std::this_thread::sleep_for(time_to_wait);
+    }
   }
   stop_.store(true);
   if (worker_.joinable())
@@ -123,3 +139,5 @@ int main() {
   client.remove(path);
   return 0;
 }
+
+

@@ -51,8 +51,8 @@ std::vector<std::string> keygenerator(std::size_t num_keys, double theta = 0, in
 }
 
 int main() {
-  size_t num_ops = 419430;
-  //size_t num_ops = 4000;
+  //size_t num_ops = 419430;
+  size_t num_ops = 40000;
   std::vector<std::string> keys = keygenerator(num_ops);
   std::string address = "127.0.0.1";
   int service_port = 9090;
@@ -81,14 +81,19 @@ int main() {
   uint64_t get_tot_time = 0, get_t0 = 0, get_t1 = 0;
   std::ofstream out("get_latency.trace");
   while (1) {
-    for (size_t k = 0; k < num_ops; ++k) {
-      auto key = keys[k];
-      get_t0 = time_utils::now_us();
-      ht_client->get(key);
-      get_t1 = time_utils::now_us();
-      get_tot_time = (get_t1 - get_t0);
-      auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
-      out << cur_epoch << " " << get_tot_time << " get" << std::endl;
+    try {
+      for (size_t k = 0; k < num_ops; ++k) {
+        auto key = keys[k];
+        get_t0 = time_utils::now_us();
+        ht_client->get(key);
+        get_t1 = time_utils::now_us();
+        get_tot_time = (get_t1 - get_t0);
+        auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
+        out << cur_epoch << " " << get_tot_time << " get " << key << std::endl;
+      }
+    } catch (jiffy::directory::directory_service_exception &e) {
+      break;
     }
   }
+  return 0;
 }

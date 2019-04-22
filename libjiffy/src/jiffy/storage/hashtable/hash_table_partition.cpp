@@ -108,17 +108,21 @@ std::string hash_table_partition::exists(const std::string &key, bool redirect) 
 }
 
 std::string hash_table_partition::get(const std::string &key, bool redirect) {
+  //LOG(log_level::info) << "Getting " << key;
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     try {
       return to_string(block_.find(key));
     } catch (std::out_of_range &e) {
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+        //LOG(log_level::info) << "redirect getting " << key;
         return "!exporting!" + export_target_str();
       }
+      //LOG(log_level::info) << "key is not found " << key;
       return "!key_not_found";
     }
   }
+  //LOG(log_level::info) << "block moved " << key;
   return "!block_moved";
 }
 

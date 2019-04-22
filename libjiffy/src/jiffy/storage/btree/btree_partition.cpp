@@ -88,6 +88,8 @@ std::string btree_partition::exists(const std::string &key, bool redirect) {
 }
 
 std::string btree_partition::get(const std::string &key, bool redirect) {
+  //auto start1 =  std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+  //std::cout << start1 << " " << key << std::endl;
   //LOG(log_level::info) << "Trying to get key: " << key << " from partition: " << name();
   if (in_slot_range(key) || (in_import_slot_range(key) && redirect)) {
     value_type value;
@@ -175,6 +177,7 @@ void btree_partition::range_lookup_batches(std::vector<std::string> &data,
                                            const std::string &end_range,
                                            size_t batch_size) {
   //LOG(log_level::info) << "into this range lookup function";
+  auto start1 =  std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
   auto start = partition_.lower_bound(make_binary(begin_range));
   auto edge = partition_.upper_bound(make_binary(end_range));
   for (auto entry = start; entry != edge; entry++) {
@@ -187,6 +190,8 @@ void btree_partition::range_lookup_batches(std::vector<std::string> &data,
       }
     }
   }
+  auto start2 =  std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+  std::cout << " range lookup function takes time: " << start2 - start1 << std::endl;
 }
 
 void btree_partition::range_lookup_keys(std::vector<std::string> &data,
@@ -425,7 +430,7 @@ void btree_partition::run_command(std::vector<std::string> &_return,
 
     } catch (std::exception &e) {
       splitting_ = false;
-      LOG(log_level::warn) << "Split slot range failed: " << e.what();
+      //LOG(log_level::warn) << "Split slot range failed: " << e.what();
     }
   }
   expected = false;
