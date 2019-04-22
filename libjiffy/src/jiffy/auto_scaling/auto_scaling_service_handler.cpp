@@ -4,6 +4,7 @@
 #include "jiffy/storage/msgqueue/msg_queue_ops.h"
 #include "jiffy/storage/hashtable/hash_table_ops.h"
 #include "jiffy/storage/btree/btree_ops.h"
+#include "jiffy/storage/fifoqueue/fifo_queue_ops.h"
 #include "jiffy/utils/logger.h"
 #include "jiffy/utils/string_utils.h"
 #include <thread>
@@ -699,6 +700,43 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
 
 
 
+  } else if(scaling_type == "fifo_queue_add") {
+    auto start =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    std::string dst_partition_name = conf.find("next_partition_name")->second;
+    auto dst_replica_chain = fs->add_block(path, dst_partition_name, "regular");
+    auto finish_adding_replica_chain =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    std::string next_target_string = "";
+    for (const auto &block: dst_replica_chain.block_ids) {
+      next_target_string += (block + "!");
+    }
+    next_target_string.pop_back();
+    auto src = std::make_shared<storage::replica_chain_client>(fs, path, current_replica_chain, storage::FIFO_QUEUE_OPS);
+    std::vector<std::string> args;
+    args.emplace_back(next_target_string);
+    src->run_command(storage::fifo_queue_cmd_id::fq_update_partition, args);
+    auto finish_updating_partition =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    //LOG(log_level::info) << "===== " << "Message queue auto_scaling" << " ======";
+    //LOG(log_level::info) << "\t Start " << start;
+    //LOG(log_level::info) << "\t Add_replica_chain: " << finish_adding_replica_chain;
+    //LOG(log_level::info) << "\t Update_partition: " << finish_updating_partition;
+    LOG(log_level::info) << "A " << start << " " << finish_updating_partition - start << " "
+                         << finish_adding_replica_chain - start << " "
+                         << finish_updating_partition - finish_adding_replica_chain;
+
+
+
+
+  } else if(scaling_type == "fifo_queue_delete") {
+    auto start =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    std::string current_partition_name = conf.find("current_partition_name")->second;
+    fs->remove_block(path, current_partition_name);
+    auto finish_removing_replica_chain =
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    LOG(log_level::info) << "D " << start << " " << finish_removing_replica_chain - start;
   }
   mtx.unlock(); // Using global lock because we want to avoid merging and splitting happening in the same time
 }

@@ -55,7 +55,7 @@ class fifo_queue_partition : public chain_module {
    * @brief Read a new message from the message queue
    * @return Read return status string
    */
-  std::string dequeue(std::string position);
+  std::string dequeue();
 
   /**
    * @brief Clear the message queue
@@ -161,8 +161,14 @@ class fifo_queue_partition : public chain_module {
   /* High threshold */
   double threshold_hi_;
 
-  /* Atomic bool for partition slot range splitting */
+  /* Atomic bool for overload partition */
   std::atomic<bool> overload_;
+
+  /* Atomic bool for underload partition */
+  std::atomic<bool> underload_;
+
+  /* Atomic bool for new block available */
+  std::atomic<bool> new_block_available_;
 
   /* Atomic partition dirty bit */
   std::atomic<bool> dirty_;
@@ -183,6 +189,9 @@ class fifo_queue_partition : public chain_module {
 
   /* Next partition target string */
   std::string next_target_string;
+
+  /* Head position of queue */
+  std::size_t head_;
 
 };
 

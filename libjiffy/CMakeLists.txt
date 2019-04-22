@@ -263,6 +263,8 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
 #            test/btree_client_test.cpp
 #            test/msg_queue_partition_test.cpp
 #            test/msg_queue_client_test.cpp
+#             test/fifo_queue_client_test.cpp
+#             test/fifo_queue_partition_test.cpp
 #            test/lease_expiry_worker_test.cpp
 #            test/local_store_test.cpp
 #            test/jiffy_client_test.cpp

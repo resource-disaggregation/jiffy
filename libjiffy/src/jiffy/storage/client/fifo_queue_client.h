@@ -65,15 +65,6 @@ class fifo_queue_client : data_structure_client {
   std::vector<std::string> dequeue(std::size_t num_msg);
 
  private:
-  /**
-   * @brief Get the read start position and increase it by one
-   * @return Start position in string
-   */
-  std::string get_inc_read_pos() {
-    auto old_val = read_offset_;
-    read_offset_++;
-    return std::to_string(old_val);
-  }
 
   /**
    * @brief Fetch block identifier for specified operation
@@ -102,10 +93,10 @@ class fifo_queue_client : data_structure_client {
                         const std::vector<std::string> &args,
                         std::vector<std::string> &responses) override;
 
-  /* Read start */
-  std::size_t read_partition_;
-  std::size_t read_offset_;
-  std::size_t send_partition_;
+  /* Dequeue partition id */
+  std::size_t dequeue_partition_;
+  /* Enqueue partition id */
+  std::size_t enqueue_partition_;
 };
 
 }

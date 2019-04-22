@@ -15,9 +15,8 @@ fifo_queue_client::fifo_queue_client(std::shared_ptr<directory::directory_interf
                                    const directory::data_status &status,
                                    int timeout_ms)
     : data_structure_client(fs, path, status, FIFO_QUEUE_OPS, timeout_ms) {
-  read_offset_ = 0;
-  read_partition_ = 0;
-  send_partition_ = 0;
+  dequeue_partition_ = 0;
+  enqueue_partition_ = 0;
 }
 
 void fifo_queue_client::refresh() {
@@ -48,13 +47,11 @@ std::string fifo_queue_client::enqueue(const std::string &msg) {
 
 std::string fifo_queue_client::dequeue() {
   std::string _return;
-  std::vector<std::string> args;
-  args.push_back(get_inc_read_pos());
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(fifo_queue_cmd_id::fq_dequeue)]->run_command(fifo_queue_cmd_id::fq_dequeue, args).front();
-      handle_redirect(fifo_queue_cmd_id::fq_dequeue, args, _return);
+      _return = blocks_[block_id(fifo_queue_cmd_id::fq_dequeue)]->run_command(fifo_queue_cmd_id::fq_dequeue, {}).front();
+      handle_redirect(fifo_queue_cmd_id::fq_dequeue, {}, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
@@ -80,13 +77,10 @@ std::vector<std::string> fifo_queue_client::enqueue(const std::vector<std::strin
   } while (redo);
   return _return;
 }
-
+// TODO fix this function
 std::vector<std::string> fifo_queue_client::dequeue(std::size_t num_msg) {
   std::vector<std::string> args;
   std::vector<std::string> _return;
-  for (std::size_t i = 0; i < num_msg; i++) {
-    args.push_back(get_inc_read_pos());
-  }
   bool redo;
   do {
     try {
@@ -102,9 +96,9 @@ std::vector<std::string> fifo_queue_client::dequeue(std::size_t num_msg) {
 // TODO fix this function
 std::size_t fifo_queue_client::block_id(const fifo_queue_cmd_id &op) {
   if (op == fifo_queue_cmd_id::fq_enqueue) {
-    return send_partition_;
+    return enqueue_partition_;
   } else if (op == fifo_queue_cmd_id::fq_dequeue) {
-    return read_partition_;
+    return dequeue_partition_;
   } else {
     throw std::invalid_argument("Incorrect operation of message queue");
   }
@@ -125,7 +119,7 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
                                                                directory::replica_chain(chain),
                                                                FIFO_QUEUE_OPS,
                                                                0));
-      send_partition_++;
+      enqueue_partition_++;
       response = blocks_[block_id(static_cast<fifo_queue_cmd_id >(cmd_id))]->run_command(cmd_id, args).front();
     } while (response.substr(0, 5) == "!full");
   }
@@ -138,21 +132,17 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
                                                                path_,
                                                                directory::replica_chain(chain),
                                                                FIFO_QUEUE_OPS));
-      read_partition_++;
-      read_offset_ = 0;
-      std::vector<std::string> modified_args;
-      modified_args.push_back(get_inc_read_pos());
-      response = blocks_[block_id(static_cast<fifo_queue_cmd_id >(cmd_id))]->run_command(cmd_id, modified_args).front();
+      dequeue_partition_++;
+      response = blocks_[block_id(static_cast<fifo_queue_cmd_id >(cmd_id))]->run_command(cmd_id, {}).front();
     } while (response.substr(0, 21) == "!msg_not_in_partition");
   }
-  if (response == "!msg_not_found") {
-    read_offset_--;
-  }
 }
+// TODO fix this since we don't consider batch command for benchmarks
 
 void fifo_queue_client::handle_redirects(int32_t cmd_id,
                                         const std::vector<std::string> &args,
                                         std::vector<std::string> &responses) {
+  /*
   std::vector<std::string> modified_args = args;
   typedef std::vector<std::string> list_t;
   size_t n_ops = responses.size();
@@ -213,6 +203,7 @@ void fifo_queue_client::handle_redirects(int32_t cmd_id,
       break;
     }
   }
+   */
 }
 
 }

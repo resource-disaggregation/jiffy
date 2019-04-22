@@ -8,6 +8,7 @@
 #include "jiffy/storage/manager/storage_manager.h"
 #include "jiffy/storage/hashtable/hash_table_partition.h"
 #include "jiffy/storage/msgqueue/msg_queue_partition.h"
+#include "jiffy/storage/fifoqueue/fifo_queue_partition.h"
 #include "jiffy/storage/btree/btree_partition.h"
 #include "jiffy/storage/hashtable/hash_slot.h"
 #include "test_utils.h"
@@ -18,6 +19,7 @@
 #include "jiffy/storage/msgqueue/msg_queue_ops.h"
 #include "jiffy/storage/client/msg_queue_client.h"
 #include "jiffy/storage/client/hash_table_client.h"
+#include "jiffy/storage/client/fifo_queue_client.h"
 #include "jiffy/storage/client/btree_client.h"
 #include "jiffy/client/jiffy_client.h"
 #include "jiffy/directory/fs/sync_worker.h"
@@ -175,7 +177,7 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
     dir_serve_thread.join();
   }
 }
-*/
+
 
 
 TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][management_server]") {
@@ -240,7 +242,6 @@ TEST_CASE("msg_queue_auto_scale_test", "[directory_service][storage_server][mana
 
 }
 
-/*
 
 TEST_CASE("btree_auto_scale_up_test", "[directory_service][storage_server][management_server]") {
   std::vector<std::string> keys;
@@ -397,3 +398,69 @@ TEST_CASE("btree_auto_scale_down_test", "[directory_service][storage_server][man
   }
 }
  */
+
+
+TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][management_server]") {
+  auto alloc = std::make_shared<sequential_block_allocator>();
+  auto block_names = test_utils::init_block_names(21, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
+  alloc->add_blocks(block_names);
+  auto blocks = test_utils::init_fifo_queue_blocks(block_names);
+
+  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
+  std::thread storage_serve_thread1([&storage_server] { storage_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
+
+  auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
+  std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
+
+  auto as_server = auto_scaling_server::create(HOST, DIRECTORY_SERVICE_PORT, HOST, AUTO_SCALING_SERVICE_PORT);
+  std::thread auto_scaling_thread([&as_server]{as_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, AUTO_SCALING_SERVICE_PORT);
+
+  auto sm = std::make_shared<storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
+
+  auto dir_server = directory_server::create(t, HOST, DIRECTORY_SERVICE_PORT);
+  std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
+
+  data_status status = t->create("/sandbox/scale_up.txt", "fifoqueue", "/tmp", 1, 1, 0, perms::all(), {"0"}, {"regular"}, {});
+  fifo_queue_client client(t, "/sandbox/scale_up.txt", status);
+
+  // Write data until auto scaling is triggered
+  for (std::size_t i = 0; i < 2100; ++i) {
+    REQUIRE(client.enqueue(std::string(102400, (std::to_string(i)).c_str()[0])) == "!ok");
+  }
+  // Busy wait until number of blocks increases
+  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
+
+  for (std::size_t i = 0; i < 2100; ++i) {
+    REQUIRE(client.dequeue() == std::string(102400, (std::to_string(i)).c_str()[0]));
+  }
+  // Busy wait until number of blocks increases
+  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() > 1);
+
+  as_server->stop();
+  if(auto_scaling_thread.joinable()) {
+    auto_scaling_thread.join();
+  }
+
+  storage_server->stop();
+  if (storage_serve_thread1.joinable()) {
+    storage_serve_thread1.join();
+  }
+  mgmt_server->stop();
+  if (mgmt_serve_thread.joinable()) {
+    mgmt_serve_thread.join();
+  }
+  as_server->stop();
+  if(auto_scaling_thread.joinable()) {
+    auto_scaling_thread.join();
+  }
+  dir_server->stop();
+  if (dir_serve_thread.joinable()) {
+    dir_serve_thread.join();
+  }
+
+}

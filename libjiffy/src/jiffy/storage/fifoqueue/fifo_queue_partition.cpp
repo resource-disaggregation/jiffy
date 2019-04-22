@@ -38,19 +38,22 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
+  head_ = 0;
+  new_block_available_ = false;
   threshold_hi_ = conf.get_as<double>("fifoqueue.capacity_threshold_hi", 0.95);
   threshold_lo_ = conf.get_as<double>("fifoqueue.capacity_threshold_lo", 0.00);
   auto_scale_ = conf.get_as<bool>("fifoqueue.auto_scale", true);
 }
 
 std::string fifo_queue_partition::enqueue(const std::string &message) {
-  //<< "Sending " << message
+  //LOG(log_level::info) << "Enqueue ";
   //LOG(log_level::info) << " Storage size " << storage_size() << " Storage capacity "
-   //                    << storage_capacity();
+  //                     << storage_capacity();
   //LOG(log_level::info) << "partition size " << partition_.size() << " partition capacity " << partition_.capacity();
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   if (storage_size() * 2 >= storage_capacity() && partition_.size() >= partition_.capacity()) {
     if (!next_target_str().empty()) {
+      new_block_available_ = true;
       return "!full!" + next_target_str();
     } else {
       return "!redo";
@@ -62,20 +65,20 @@ std::string fifo_queue_partition::enqueue(const std::string &message) {
   return "!ok";
 }
 
-std::string fifo_queue_partition::dequeue(std::string position) {
+std::string fifo_queue_partition::dequeue() {
+  //LOG(log_level::info) << "Dequeueing " << head_;
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-  auto pos = std::stoi(position);
-  if (pos < 0) throw std::invalid_argument("read position invalid");
-  if (static_cast<std::size_t>(pos) < size()) {
-    return to_string(partition_[pos]);
+  if (head_ < partition_.size()) {
+    return to_string(partition_[head_++]);
   }
   if(storage_size() * 2 >= storage_capacity() && partition_.size() >= partition_.capacity()) {
-    if(static_cast<std::size_t>(pos) == size()) {
-      if (!next_target_str().empty())
+      if (!next_target_str().empty()) {
+        new_block_available_ = true;
         return "!msg_not_in_partition!" + next_target_str();
-      else
+      } else {
+        new_block_available_ = false;
         return "!redo";
-    }
+      }
   }
   return "!msg_not_found";
 }
@@ -101,8 +104,11 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
         _return.emplace_back(enqueue(msg));
       break;
     case fifo_queue_cmd_id::fq_dequeue:
-      for (const auto &pos: args)
-        _return.emplace_back(dequeue(pos));
+      if (nargs != 0) {
+        _return.emplace_back("!args_error");
+      } else {
+        _return.emplace_back(dequeue());
+      }
       break;
     case fifo_queue_cmd_id::fq_clear:
       if (nargs != 0) {
@@ -133,13 +139,32 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
       overload_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
       std::map<std::string, std::string> scale_conf;
-      scale_conf.emplace(std::make_pair(std::string("type"), std::string("fifo_queue")));
+      scale_conf.emplace(std::make_pair(std::string("type"), std::string("fifo_queue_add")));
       scale_conf.emplace(std::make_pair(std::string("next_partition_name"), dst_partition_name));
       auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
       scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
       overload_ = false;
-   //   LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();
+      LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();
+    }
+  }
+  expected = false;
+  if (auto_scale_.load() && cmd_id == fifo_queue_cmd_id::fq_dequeue && head_ >= partition_.size() && is_tail()
+      && underload_.compare_exchange_strong(expected, true) && new_block_available_ == true) {
+    try {
+      //LOG(log_level::info) << "Underloaded partition; storage = " << storage_size() << " capacity = "
+      //                     << storage_capacity() << " partition size = " << size() << "partition capacity "
+      //                     << partition_.capacity();
+      underload_ = true;
+      std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
+      std::map<std::string, std::string> scale_conf;
+      scale_conf.emplace(std::make_pair(std::string("type"), std::string("fifo_queue_delete")));
+      scale_conf.emplace(std::make_pair(std::string("current_partition_name"), name()));
+      auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
+      scale->auto_scaling(chain(), path(), scale_conf);
+    } catch (std::exception &e) {
+      underload_ = false;
+      LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();
     }
   }
 }
