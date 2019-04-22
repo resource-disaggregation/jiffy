@@ -7,6 +7,7 @@
 #include "jiffy/storage/client/hash_table_client.h"
 #include "jiffy/storage/client/msg_queue_client.h"
 #include "jiffy/storage/client/btree_client.h"
+#include "jiffy/storage/client/fifo_queue_client.h"
 #include "jiffy/storage/client/data_structure_listener.h"
 
 namespace jiffy {
@@ -89,12 +90,20 @@ class jiffy_client {
   std::shared_ptr<storage::btree_client> open_btree(const std::string &path);
 
   /**
- * @brief Open file, begin lease
- * @param path File path
- * @return Message queue client
- */
+   * @brief Open file, begin lease
+   * @param path File path
+   * @return Message queue client
+   */
 
   std::shared_ptr<storage::msg_queue_client> open_msg_queue(const std::string &path);
+
+  /**
+   * @brief Open file, begin lease
+   * @param path File path
+   * @return Fifo queue client
+   */
+
+  std::shared_ptr<storage::fifo_queue_client> open_fifo_queue(const std::string &path);
 
   /**
    * @brief Open or create hash table
@@ -137,6 +146,27 @@ class jiffy_client {
                                                                       int32_t permissions = directory::perms::all(),
                                                                       const std::map<std::string,
                                                                                      std::string> &tags = {});
+
+  /**
+   * @brief Open or create message queue
+   * @param path File path
+   * @param backing_path File backing path
+   * @param num_blocks Number of blocks
+   * @param chain_length Replication chain length
+   * @param flags Flags
+   * @param permissions Permissions
+   * @param tags Tags
+   * @return Message queue client
+   */
+
+  std::shared_ptr<storage::fifo_queue_client> open_or_create_fifo_queue(const std::string &path,
+                                                                        const std::string &backing_path,
+                                                                        int32_t num_blocks = 1,
+                                                                        int32_t chain_length = 1,
+                                                                        int32_t flags = 0,
+                                                                        int32_t permissions = directory::perms::all(),
+                                                                        const std::map<std::string,
+                                                                                       std::string> &tags = {});
 
   /**
    * @brief Open or create btree

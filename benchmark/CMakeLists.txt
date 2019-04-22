@@ -41,6 +41,15 @@ target_link_libraries(msg_queue_auto_scaling_bench jiffy_client ${JEMALLOC_LIBRA
 install(TARGETS msg_queue_auto_scaling_bench
         RUNTIME DESTINATION bin)
 
+add_executable(fifo_queue_auto_scaling_bench src/fifo_queue_auto_scaling_benchmark.cpp)
+
+add_dependencies(fifo_queue_auto_scaling_bench boost_ep jemalloc_ep)
+
+target_link_libraries(fifo_queue_auto_scaling_bench jiffy_client ${JEMALLOC_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+install(TARGETS fifo_queue_auto_scaling_bench
+        RUNTIME DESTINATION bin)
+
 add_executable(hash_table_auto_scaling_bench src/hash_table_auto_scaling_benchmark.cpp  src/zipf_generator.h)
 
 add_dependencies(hash_table_auto_scaling_bench boost_ep jemalloc_ep)
