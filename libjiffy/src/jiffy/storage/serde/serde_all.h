@@ -4,6 +4,7 @@
 #include "jiffy/storage/hashtable/hash_table_defs.h"
 #include "jiffy/storage/btree/btree_defs.h"
 #include "jiffy/storage/msgqueue/msg_queue_defs.h"
+#include "jiffy/storage/fifoqueue/fifo_queue_defs.h"
 #include "jiffy/storage/types/binary.h"
 #include "jiffy/utils/logger.h"
 #include <sstream>

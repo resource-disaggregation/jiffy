@@ -98,6 +98,11 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/msgqueue/msg_queue_ops.cpp
           src/jiffy/storage/msgqueue/msg_queue_partition.h
           src/jiffy/storage/msgqueue/msg_queue_partition.cpp
+          src/jiffy/storage/fifoqueue/fifo_queue_defs.h
+          src/jiffy/storage/fifoqueue/fifo_queue_ops.h
+          src/jiffy/storage/fifoqueue/fifo_queue_ops.cpp
+          src/jiffy/storage/fifoqueue/fifo_queue_partition.h
+          src/jiffy/storage/fifoqueue/fifo_queue_partition.cpp
           src/jiffy/storage/client/replica_chain_client.cpp
           src/jiffy/storage/client/replica_chain_client.h
           src/jiffy/storage/service/block_response_client.cpp
@@ -116,6 +121,8 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/client/btree_client.h
           src/jiffy/storage/client/msg_queue_client.cpp
           src/jiffy/storage/client/msg_queue_client.h
+          src/jiffy/storage/client/fifo_queue_client.cpp
+          src/jiffy/storage/client/fifo_queue_client.h
           src/jiffy/storage/client/data_structure_listener.cpp
           src/jiffy/storage/client/data_structure_listener.h
           src/jiffy/storage/service/block_request_handler.cpp
@@ -311,6 +318,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/btree/btree_ops.cpp
           src/jiffy/storage/msgqueue/msg_queue_ops.h
           src/jiffy/storage/msgqueue/msg_queue_ops.cpp
+          src/jiffy/storage/fifoqueue/fifo_queue_ops.h
+          src/jiffy/storage/fifoqueue/fifo_queue_ops.cpp
           src/jiffy/storage/client/replica_chain_client.cpp
           src/jiffy/storage/client/replica_chain_client.h
           src/jiffy/storage/service/block_response_client.cpp
@@ -327,6 +336,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/client/btree_client.h
           src/jiffy/storage/client/msg_queue_client.cpp
           src/jiffy/storage/client/msg_queue_client.h
+          src/jiffy/storage/client/fifo_queue_client.cpp
+          src/jiffy/storage/client/fifo_queue_client.h
           src/jiffy/storage/client/data_structure_listener.cpp
           src/jiffy/storage/client/data_structure_listener.h
           src/jiffy/storage/service/block_request_service.cpp
