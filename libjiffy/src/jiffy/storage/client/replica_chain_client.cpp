@@ -97,6 +97,10 @@ std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const
 
       connect(fs_->resolve_failures(path_, chain_), timeout_ms_);
       retry = true;
+    } catch(std::exception &e) {
+      response.clear();
+      response.push_back("!block_moved");
+      break;
     }
   }
   return response;

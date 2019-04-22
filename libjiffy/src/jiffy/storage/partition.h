@@ -40,7 +40,11 @@ class partition {
   /**
    * @brief Destructor
    */
-  virtual ~partition() = default;
+  virtual ~partition() {
+    client_map_.send_failure();
+    // TODO add similar logic for sub_map_
+  }
+  //virtual ~partition() = default;
 
   /**
    * @brief Virtual function for running a command on a block

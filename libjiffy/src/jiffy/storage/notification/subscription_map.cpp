@@ -42,6 +42,15 @@ void subscription_map::clear() {
   std::lock_guard<std::mutex> lock{mtx_};
   subs_.clear();
 }
+// TODO fix this
+void subscription_map::send_failure() {
+  std::lock_guard<std::mutex> lock(mtx_);
+  for(const auto &x: subs_) {
+    for(const auto &y: x.second) {
+
+    }
+  }
+}
 
 }
 }

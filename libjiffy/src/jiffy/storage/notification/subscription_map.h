@@ -55,6 +55,8 @@ class subscription_map {
 
   void clear();
 
+  void send_failure();
+
  private:
   /* Subscription map operation mutex */
   std::mutex mtx_{};

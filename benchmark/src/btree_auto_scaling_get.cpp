@@ -69,15 +69,19 @@ int main() {
   size_t k = 0;
   std::ofstream out("get_latency.trace");
   while (1) {
-    for (k = 0; k < num_ops; k++) {
-      auto key = keys[k];
-      //std::cout << k << std::endl;
-      get_t0 = time_utils::now_us();
-      bt_client->get(key);
-      get_t1 = time_utils::now_us();
-      get_tot_time = (get_t1 - get_t0);
-      auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
-      out << cur_epoch << " " << get_tot_time << " get" << std::endl;
+    try {
+      for (k = 0; k < num_ops; k++) {
+        auto key = keys[k];
+        get_t0 = time_utils::now_us();
+        bt_client->get(key);
+        get_t1 = time_utils::now_us();
+        get_tot_time = (get_t1 - get_t0);
+        auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
+        out << cur_epoch << " " << get_tot_time << " get" << std::endl;
+      }
+    } catch (jiffy::directory::directory_service_exception &e) {
+      break;
     }
   }
+  return 0;
 }
