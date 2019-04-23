@@ -23,7 +23,7 @@ int main() {
   int chain_length = 1;
   //size_t num_ops = 419430;
   //size_t num_ops = 671088;
-  size_t num_ops = 30000;
+  size_t num_ops = 100000;
   size_t data_size = 102400;
   std::string op_type = "fifo_queue_auto_scaling";
   std::string path = "/tmp";
@@ -47,7 +47,6 @@ int main() {
   std::string data_(data_size, 'x');
   std::chrono::milliseconds periodicity_ms_(1000);
   std::atomic_bool stop_{false};
-  std::atomic_bool stop2_{false};
   std::size_t j = 0;
   auto worker_ = std::thread([&] {
     std::ofstream out("dataset.trace");
@@ -71,24 +70,6 @@ int main() {
     }
     out.close();
   });
-  auto dequeue_worker_ = std::thread([&] {
-    uint64_t dequeue_tot_time = 0, dequeue_t0 = 0, dequeue_t1 = 0;
-    std::shared_ptr<fifo_queue_client>
-        fq_client2 = client.open_fifo_queue(path);
-    std::ofstream out2("dequeue_latency.trace");
-    while (!stop2_.load()) {
-      for (size_t k = 0; k < num_ops; ++k) {
-        dequeue_t0 = time_utils::now_us();
-        fq_client2->dequeue();
-        dequeue_t1 = time_utils::now_us();
-        dequeue_tot_time = (dequeue_t1 - dequeue_t0);
-        auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
-        out2 << cur_epoch << " " << dequeue_tot_time << " dequeue" << std::endl;
-      }
-    }
-    out2.close();
-  });
-
   std::ofstream out("latency.trace");
   uint64_t enqueue_tot_time = 0, enqueue_t0 = 0, enqueue_t1 = 0;
   for (j = 0; j < num_ops; ++j) {
@@ -100,12 +81,18 @@ int main() {
     out << cur_epoch << " " << enqueue_tot_time << " enqueue";
     out << std::endl;
   }
+  uint64_t dequeue_tot_time = 0, dequeue_t0 = 0, dequeue_t1 = 0;
+  for (size_t k = 0; k < num_ops; ++k) {
+    dequeue_t0 = time_utils::now_us();
+    fq_client->dequeue();
+    dequeue_t1 = time_utils::now_us();
+    dequeue_tot_time = (dequeue_t1 - dequeue_t0);
+    auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
+    out << cur_epoch << " " << dequeue_tot_time << " dequeue" << std::endl;
+  }
   stop_.store(true);
   if (worker_.joinable())
     worker_.join();
-  stop2_.store(true);
-  if (dequeue_worker_.joinable())
-    dequeue_worker_.join();
   client.remove(path);
   return 0;
 }
