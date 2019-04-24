@@ -21,9 +21,9 @@ int main() {
   int lease_port = 9091;
   int num_blocks = 1;
   int chain_length = 1;
-  //size_t num_ops = 419430;
+  size_t num_ops = 419430;
   //size_t num_ops = 671088;
-  size_t num_ops = 100000;
+  //size_t num_ops = 120000;
   size_t data_size = 102400;
   std::string op_type = "fifo_queue_auto_scaling";
   std::string path = "/tmp";
@@ -82,7 +82,7 @@ int main() {
     out << std::endl;
   }
   uint64_t dequeue_tot_time = 0, dequeue_t0 = 0, dequeue_t1 = 0;
-  for (size_t k = 0; k < num_ops; ++k) {
+  for (j = num_ops; j > 0; --j) {
     dequeue_t0 = time_utils::now_us();
     fq_client->dequeue();
     dequeue_t1 = time_utils::now_us();

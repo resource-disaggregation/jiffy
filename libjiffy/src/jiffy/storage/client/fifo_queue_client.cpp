@@ -120,7 +120,7 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
                                                                FIFO_QUEUE_OPS,
                                                                0));
       enqueue_partition_++;
-      response = blocks_[block_id(static_cast<fifo_queue_cmd_id >(cmd_id))]->run_command(cmd_id, args).front();
+      response = blocks_[block_id(static_cast<fifo_queue_cmd_id>(cmd_id))]->run_command(cmd_id, args).front();
     } while (response.substr(0, 5) == "!full");
   }
   if (response.substr(0, 21) == "!msg_not_in_partition") {
@@ -128,10 +128,10 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
     do {
       auto parts = string_utils::split(response, '!');
       auto chain = list_t(parts.begin() + 2, parts.end());
-      blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
-                                                               path_,
-                                                               directory::replica_chain(chain),
-                                                               FIFO_QUEUE_OPS));
+      //blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
+      //                                                         path_,
+      //                                                         directory::replica_chain(chain),
+      //                                                         FIFO_QUEUE_OPS));
       dequeue_partition_++;
       response = blocks_[block_id(static_cast<fifo_queue_cmd_id >(cmd_id))]->run_command(cmd_id, {}).front();
     } while (response.substr(0, 21) == "!msg_not_in_partition");

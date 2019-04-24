@@ -25,6 +25,7 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
     : chain_module(manager, name, metadata, FIFO_QUEUE_OPS),
       partition_(build_allocator<element_type>()),
       overload_(false),
+      underload_(false),
       dirty_(false),
       directory_host_(directory_host),
       directory_port_(directory_port),
@@ -50,12 +51,12 @@ std::string fifo_queue_partition::enqueue(const std::string &message) {
   //LOG(log_level::info) << " Storage size " << storage_size() << " Storage capacity "
   //                     << storage_capacity();
   //LOG(log_level::info) << "partition size " << partition_.size() << " partition capacity " << partition_.capacity();
-  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   if (storage_size() * 2 >= storage_capacity() && partition_.size() >= partition_.capacity()) {
     if (!next_target_str().empty()) {
       new_block_available_ = true;
       return "!full!" + next_target_str();
     } else {
+      new_block_available_ = false;
       return "!redo";
     }
   }
@@ -67,16 +68,15 @@ std::string fifo_queue_partition::enqueue(const std::string &message) {
 
 std::string fifo_queue_partition::dequeue() {
   //LOG(log_level::info) << "Dequeueing " << head_;
-  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   if (head_ < partition_.size()) {
     return to_string(partition_[head_++]);
   }
   if(storage_size() * 2 >= storage_capacity() && partition_.size() >= partition_.capacity()) {
       if (!next_target_str().empty()) {
+        head_++;
         new_block_available_ = true;
         return "!msg_not_in_partition!" + next_target_str();
       } else {
-        new_block_available_ = false;
         return "!redo";
       }
   }
@@ -84,7 +84,6 @@ std::string fifo_queue_partition::dequeue() {
 }
 
 std::string fifo_queue_partition::clear() {
-  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   partition_.clear();
   return "!ok";
 }
@@ -149,7 +148,7 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
     }
   }
   expected = false;
-  if (auto_scale_.load() && cmd_id == fifo_queue_cmd_id::fq_dequeue && head_ >= partition_.size() && is_tail()
+  if (auto_scale_.load() && cmd_id == fifo_queue_cmd_id::fq_dequeue && head_ > partition_.capacity() && is_tail()
       && underload_.compare_exchange_strong(expected, true) && new_block_available_ == true) {
     try {
       //LOG(log_level::info) << "Underloaded partition; storage = " << storage_size() << " capacity = "
@@ -199,7 +198,6 @@ bool fifo_queue_partition::sync(const std::string &path) {
 }
 
 bool fifo_queue_partition::dump(const std::string &path) {
-  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   bool expected = true;
   bool flushed = false;
   if (dirty_.compare_exchange_strong(expected, false)) {
