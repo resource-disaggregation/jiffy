@@ -11,9 +11,9 @@ block_response_client_map::block_response_client_map() : clients_(0) {
 }
 
 void block_response_client_map::add_client(int64_t client_id, std::shared_ptr<block_response_client> client) {
-  if(!delete_.load()) {
+ // if(!delete_.load()) {
     clients_.insert(client_id, client);
-  }
+ // }
 }
 
 void block_response_client_map::remove_client(int64_t client_id) {
@@ -35,7 +35,7 @@ void block_response_client_map::clear() {
 }
 
 void block_response_client_map::send_failure() {
-  delete_ = true;
+  //delete_ = true;
   sequence_id fail;
   fail.__set_client_id(-1);
   fail.__set_client_seq_no(-1);

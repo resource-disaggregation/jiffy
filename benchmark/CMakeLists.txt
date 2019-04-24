@@ -23,6 +23,15 @@ target_link_libraries(msg_queue_bench jiffy_client ${JEMALLOC_LIBRARY} ${Boost_P
 install(TARGETS msg_queue_bench
         RUNTIME DESTINATION bin)
 
+add_executable(fifo_queue_bench src/fifo_queue_benchmark.cpp)
+
+add_dependencies(fifo_queue_bench boost_ep jemalloc_ep)
+
+target_link_libraries(fifo_queue_bench jiffy_client ${JEMALLOC_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+install(TARGETS fifo_queue_bench
+        RUNTIME DESTINATION bin)
+
 add_executable(btree_bench src/btree_benchmark.cpp)
 
 add_dependencies(btree_bench boost_ep jemalloc_ep)

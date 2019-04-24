@@ -15,10 +15,11 @@
 #include "jiffy/storage/command.h"
 #include "jiffy/storage/block_memory_manager.h"
 #include "jiffy/storage/block_memory_allocator.h"
+#include "jiffy/utils/logger.h"
 
 namespace jiffy {
 namespace storage {
-
+using namespace utils;
 /* Partition class */
 class partition {
  public:
@@ -41,7 +42,9 @@ class partition {
    * @brief Destructor
    */
   virtual ~partition() {
+    LOG(log_level::info) << "Into this destructor";
     client_map_.send_failure();
+    LOG(log_level::info) << "Finish sending failure messages";
     // TODO add similar logic for sub_map_
   }
   //virtual ~partition() = default;

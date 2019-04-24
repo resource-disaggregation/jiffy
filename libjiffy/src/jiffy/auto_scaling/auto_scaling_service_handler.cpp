@@ -194,7 +194,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       mtx.unlock();
       throw make_exception("Partition is under auto_scaling");
     }
-    //LOG(log_level::info) << "Start hash table merge auto_scaling: " << start;
+    LOG(log_level::info) << "Start hash table merge auto_scaling: " << start;
     std::size_t storage_capacity = static_cast<std::size_t>(std::stoi(conf.find("storage_capacity")->second));
     auto replica_set = fs->dstatus(path).data_blocks();
     //LOG(log_level::info) << "INTO THIS FUNCTION  3 *****************************";
@@ -215,9 +215,15 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     for (auto &i : replica_set) {
       if (i.fetch_slot_range().first == merge_range_end || i.fetch_slot_range().second == merge_range_begin) {
         auto client = std::make_shared<storage::replica_chain_client>(fs, path, i, storage::KV_OPS, 0);
-        auto size =
-            static_cast<size_t>(std::stoi(client->run_command(storage::hash_table_cmd_id::ht_get_storage_size,
-                                                              {}).front()));
+        auto ret =
+            client->run_command(storage::hash_table_cmd_id::ht_get_storage_size,
+                                                              {}).front();
+        if(ret == "!block_moved") {
+          LOG(log_level::info) << "I think it breaks here";
+          continue;
+        }
+
+        auto size = static_cast<size_t>(std::stoi(ret));
         if (size < static_cast<size_t>(storage_capacity * 0.5) && size < find_min_size) {
           merge_target = i;
           find_min_size = size;
@@ -231,7 +237,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     }
     auto finish_finding_chain_to_merge =
         std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    //LOG(log_level::info) << "Found replica chain to merge: " << finish_finding_chain_to_merge;
+    LOG(log_level::info) << "Found replica chain to merge: " << finish_finding_chain_to_merge;
 
     // Connect two replica chains
     // auto src = std::make_shared<storage::replica_chain_client>(fs, path, current_replica_chain, storage::KV_OPS);
@@ -321,11 +327,11 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     // Update directory mapping
     auto finish_data_transmission =
         std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    //LOG(log_level::info) << "Finish data transmission for hash table merge: " << finish_data_transmission;
+    LOG(log_level::info) << "Finish data transmission for hash table merge: " << finish_data_transmission;
     fs->update_partition(path, merge_target.name, dst_partition_name, "regular");
     auto finish_update_partition_dir =
         std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    //LOG(log_level::info) << "Finish updating mapping on directory server after hash table merge: " << finish_update_partition_dir;
+    LOG(log_level::info) << "Finish updating mapping on directory server after hash table merge: " << finish_update_partition_dir;
     //LOG(log_level::info) << "Look here 5";
     //Setting name and metadata for src and dst
     std::vector<std::string> src_after_args;
@@ -336,7 +342,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     dst->run_command(storage::hash_table_cmd_id::ht_update_partition, dst_after_args);
     auto finish_update_partition_after =
         std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    //LOG(log_level::info) << "Finish updating partition after hash table merge: " << finish_update_partition_after;
+    LOG(log_level::info) << "Finish updating partition after hash table merge: " << finish_update_partition_after;
     //LOG(log_level::info) << "Merged slot range (" << merge_range_begin << ", " << merge_range_end << ")";
     //LOG(log_level::info) << "===== " << "Hash table merging" << " ======";
     //LOG(log_level::info) << "\t Start: " << start;

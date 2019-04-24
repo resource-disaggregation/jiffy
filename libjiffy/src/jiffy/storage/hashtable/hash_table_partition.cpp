@@ -49,8 +49,8 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
 }
 
 std::string hash_table_partition::put(const std::string &key, const std::string &value, bool redirect) {
-  //LOG(log_level::info) << "Putting key: " << key << " storage_size " << storage_size() << "storage_capacity "
-  //                     << storage_capacity();
+  LOG(log_level::info) << "Putting key: " << key << " storage_size " << storage_size() << "storage_capacity "
+                       << storage_capacity();
   //LOG(log_level::info) << "Putting: ";
   //for(int p = 0; p < key.length(); p++)
   //LOG(log_level::info) << (int)((std::uint8_t)key[p]);
@@ -108,7 +108,7 @@ std::string hash_table_partition::exists(const std::string &key, bool redirect) 
 }
 
 std::string hash_table_partition::get(const std::string &key, bool redirect) {
-  //LOG(log_level::info) << "Getting " << key;
+  LOG(log_level::info) << "Getting " << key;
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     try {
@@ -148,7 +148,7 @@ std::string hash_table_partition::update(const std::string &key, const std::stri
 }
 
 std::string hash_table_partition::remove(const std::string &key, bool redirect) {
-  //LOG(log_level::info) << "Removing this key" << key << " Size " << storage_size() << " Cap " << storage_capacity() << " name " << name();
+  LOG(log_level::info) << "Removing this key" << key << " Size " << storage_size() << " Cap " << storage_capacity() << " name " << name();
   auto hash = hash_slot::get(key);
   //LOG(log_level::info) << "Removing hash" << hash;
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
@@ -234,7 +234,7 @@ void hash_table_partition::get_data_in_slot_range(std::vector<std::string> &data
 }
 
 std::string hash_table_partition::update_partition(const std::string &new_name, const std::string &new_metadata) {
-  //LOG(log_level::info) << "Updating partition of " << name() << " to be " << new_name << new_metadata;
+  LOG(log_level::info) << "Updating partition of " << name() << " to be " << new_name << new_metadata;
   //std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
   update_lock.lock();
   if (new_name == "merging" && new_metadata == "merging") {

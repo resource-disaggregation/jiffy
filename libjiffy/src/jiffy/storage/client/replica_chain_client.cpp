@@ -88,7 +88,7 @@ std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const
       //  LOG(log_level::info) << x;
       //LOG(log_level::info) << "replica chain is: " << chain_.to_string();
       //TODO add a default partition implementation that always return a block remove
-      if(std::string(e.what()) ==  "THRIFT_EAGAIN (timed out)") {
+      if (std::string(e.what()) == "THRIFT_EAGAIN (timed out)") {
         LOG(log_level::info) << "The error message is correct " << cmd_id << " " << args[0];
         response.clear();
         response.push_back("!block_moved");
@@ -97,7 +97,7 @@ std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const
 
       connect(fs_->resolve_failures(path_, chain_), timeout_ms_);
       retry = true;
-    } catch(std::exception &e) {
+    } catch (std::exception &e) {
       response.clear();
       response.push_back("!block_moved");
       break;
@@ -109,7 +109,7 @@ std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const
 std::vector<std::string> replica_chain_client::run_command_redirected(int32_t cmd_id,
                                                                       const std::vector<std::string> &args) {
   auto args_copy = args;
-  if(args_copy.back() != "!redirected")
+  if (args_copy.back() != "!redirected")
     args_copy.push_back("!redirected");
   send_command(cmd_id, args_copy);
   return recv_response();

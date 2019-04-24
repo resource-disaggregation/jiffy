@@ -28,6 +28,9 @@ block::block(const std::string &id,
       directory_port_(directory_port),
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port) {
+  if (impl_ == nullptr) {
+    throw std::invalid_argument("No such type ");
+  }
 }
 
 const std::string &block::id() const {
@@ -69,6 +72,8 @@ void block::destroy() {
   int directory_port_ = 0;
   int auto_scaling_port_ = 0;
   utils::property_map conf;
+  impl_.reset();
+  LOG(log_level::info) << "Finish resetting impl";
   impl_ = partition_manager::build_partition(&manager_,
                                              type,
                                              name,
@@ -78,6 +83,10 @@ void block::destroy() {
                                              directory_port_,
                                              auto_scaling_host_,
                                              auto_scaling_port_);
+  LOG(log_level::info) << "Finish building new impl";
+  if (impl_ == nullptr) {
+    throw std::invalid_argument("No such type ");
+  }
 }
 
 size_t block::capacity() const {

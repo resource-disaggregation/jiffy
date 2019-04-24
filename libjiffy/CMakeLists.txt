@@ -81,6 +81,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/command.cpp
           src/jiffy/storage/serde/serde_all.h
           src/jiffy/storage/default/default_partition.h
+          src/jiffy/storage/default/default_partition.cpp
           src/jiffy/storage/hashtable/hash_slot.h
           src/jiffy/storage/hashtable/hash_slot.cpp
           src/jiffy/storage/hashtable/hash_table_defs.h
@@ -312,6 +313,7 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/command.h
           src/jiffy/storage/command.cpp
           src/jiffy/storage/default/default_partition.h
+          src/jiffy/storage/default/default_partition.cpp
           src/jiffy/storage/hashtable/hash_slot.h
           src/jiffy/storage/hashtable/hash_slot.cpp
           src/jiffy/storage/hashtable/hash_table_ops.h
