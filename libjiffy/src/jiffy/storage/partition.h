@@ -42,9 +42,7 @@ class partition {
    * @brief Destructor
    */
   virtual ~partition() {
-    LOG(log_level::info) << "Into this destructor";
     client_map_.send_failure();
-    LOG(log_level::info) << "Finish sending failure messages";
     // TODO add similar logic for sub_map_
   }
   //virtual ~partition() = default;
