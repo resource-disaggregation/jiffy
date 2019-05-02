@@ -42,15 +42,12 @@ class partition {
    * @brief Destructor
    */
   virtual ~partition() {
-    LOG(log_level::info) << "Into this destructor";
     client_map_.send_failure();
     client_map_.clear();
     // TODO need to figure out if we want to notify an error to the subscripted clients after a delete of partition
     sub_map_.clear();
-    LOG(log_level::info) << "Finish sending failure messages";
-    // TODO add similar logic for sub_map_
   }
-  //virtual ~partition() = default;
+
 
   /**
    * @brief Virtual function for running a command on a block
