@@ -34,7 +34,7 @@ void default_partition::run_command(std::vector<std::string> &_return,
                                        const std::vector<std::string> &args) {
       (void)cmd_id;
       (void)args;
-      LOG(log_level::info) << "Into default partition function";
+      //LOG(log_level::info) << "Into default partition function";
       _return.emplace_back("!block_moved");
 }
 

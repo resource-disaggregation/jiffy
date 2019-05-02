@@ -31,7 +31,7 @@ int main() {
   }
   //size_t num_ops = 419430;
   //size_t num_ops = 900;
-  size_t num_ops = 70000;
+  //size_t num_ops = 70000;
   std::vector<std::string> keys;
   for(size_t j = 0; j < num_ops; j++) {
     std::string str;
