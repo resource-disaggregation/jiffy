@@ -7,6 +7,7 @@
 #include "jiffy/storage/partition.h"
 #include "jiffy/persistent/persistent_service.h"
 #include "jiffy/storage/chain_module.h"
+#include "jiffy/storage/hashtable/hash_table_ops.h"
 #include "hash_table_defs.h"
 
 namespace jiffy {
@@ -35,7 +36,9 @@ class hash_table_partition : public chain_module {
                                 const std::string &metadata = "regular",
                                 const utils::property_map &conf = {},
                                 const std::string &directory_host = "localhost",
-                                int directory_port = 9091);
+                                int directory_port = 9091,
+                                const std::string &auto_scaling_host = "localhost",
+                                int auto_scaling_port = 9095);
 
   /**
    * @brief Virtual destructor
@@ -52,6 +55,15 @@ class hash_table_partition : public chain_module {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     slot_range_.first = slot_begin;
     slot_range_.second = slot_end;
+  }
+  /**
+   * @brief Set slot range based on the partition name
+   * @param new_name New partition name
+   */
+  void slot_range(const std::string &new_name) {
+    auto slots = utils::string_utils::split(new_name, '_', 2);
+    slot_range_.first = std::stoi(slots[0]);
+    slot_range_.second = std::stoi(slots[1]);
   }
 
   /**
@@ -92,7 +104,7 @@ class hash_table_partition : public chain_module {
 
   bool in_slot_range(int32_t slot) {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
-    return slot >= slot_range_.first && slot <= slot_range_.second;
+    return slot >= slot_range_.first && slot < slot_range_.second;
   }
 
   /**
@@ -145,7 +157,7 @@ class hash_table_partition : public chain_module {
 
   bool in_export_slot_range(int32_t slot) {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
-    return slot >= export_slot_range_.first && slot <= export_slot_range_.second;
+    return slot >= export_slot_range_.first && slot < export_slot_range_.second;
   }
 
   /**
@@ -177,7 +189,7 @@ class hash_table_partition : public chain_module {
    */
 
   bool in_import_slot_range(int32_t slot) {
-    return slot >= import_slot_range_.first && slot <= import_slot_range_.second;
+    return slot >= import_slot_range_.first && slot < import_slot_range_.second;
   }
 
   /**
@@ -249,17 +261,6 @@ class hash_table_partition : public chain_module {
   std::string put(const std::string &key, const std::string &value, bool redirect = false);
 
   /**
-   * @brief Put new key value pair in locked block
-   * @param key Key
-   * @param value Value
-   * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning
-   * @return Put status string
-   */
-
-  std::string locked_put(const std::string &key, const std::string &value, bool redirect = false);
-
-  /**
    * @brief Insert with the maximum value for specified key
    * @param key Key
    * @param value Value
@@ -271,17 +272,6 @@ class hash_table_partition : public chain_module {
   std::string upsert(const std::string &key, const std::string &value, bool redirect = false);
 
   /**
-   * @brief Insert with the maximum value for specified key in locked block
-   * @param key Key
-   * @param value Value
-   * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning
-   * @return Upsert status string
-   */
-
-  std::string locked_upsert(const std::string &key, const std::string &value, bool redirect = false);
-
-  /**
    * @brief Get value for specified key
    * @param key Key
    * @param redirect Bool value to choose whether to indirect to the destination
@@ -290,16 +280,6 @@ class hash_table_partition : public chain_module {
    */
 
   std::string get(const std::string &key, bool redirect = false);
-
-  /**
-   * @brief Get value for specified key in locked block
-   * @param key Key
-   * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning
-   * @return Get status string
-   */
-
-  std::string locked_get(const std::string &key, bool redirect = false);
 
   /**
    * @brief Update the value for specified key
@@ -313,17 +293,6 @@ class hash_table_partition : public chain_module {
   std::string update(const std::string &key, const std::string &value, bool redirect = false);
 
   /**
-   * @brief Update the value for specified key in locked block
-   * @param key Key
-   * @param value Value
-   * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning
-   * @return Update status string
-   */
-
-  std::string locked_update(const std::string &key, const std::string &value, bool redirect = false);
-
-  /**
    * @brief Remove value for specified key
    * @param key Key
    * @param redirect Bool value to choose whether to indirect to the destination
@@ -333,15 +302,7 @@ class hash_table_partition : public chain_module {
 
   std::string remove(const std::string &key, bool redirect = false);
 
-  /**
-   * @brief Remove value for specified key in locked block
-   * @param key Key
-   * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning
-   * @return Remove status
-   */
-
-  std::string locked_remove(const std::string &key, bool redirect = false);
+  std::string scale_remove(const std::string &key);
 
   /**
    * @brief Return keys
@@ -359,31 +320,10 @@ class hash_table_partition : public chain_module {
    * @param num_keys Key numbers to be fetched
    */
 
-  void locked_get_data_in_slot_range(std::vector<std::string> &data,
+  void get_data_in_slot_range(std::vector<std::string> &data,
                                      int32_t slot_begin,
                                      int32_t slot_end,
-                                     int32_t num_keys);
-
-  /**
-   * @brief Active lock block
-   * @return Lock status string
-   */
-
-  std::string lock();
-
-  /**
-   * @brief Unlock the locked block
-   * @return Unlock status string
-   */
-
-  std::string unlock();
-
-  /**
-   * @brief Check if key value block is locked
-   * @return Bool value, true if locked
-   */
-
-  bool is_locked();
+                                     int32_t batch_size);
 
   /**
    * @brief Fetch block size
@@ -408,24 +348,10 @@ class hash_table_partition : public chain_module {
   std::string update_partition(const std::string &new_name, const std::string &new_metadata);
 
   /**
-   * @brief Update partition in locked hash table
-   * @param new_name New partition name
-   * @param new_metadata New partition metadata
-   */
-
-  std::string locked_update_partition(const std::string &new_name, const std::string &new_metadata);
-
-  /**
    * @brief Fetch storage size
    * @return Storage size
    */
-  std::string get_storage_size();
-
-  /**
-   * @brief Fetch storage size of locked hash table
-   * @return Storage size
-   */
-  std::string locked_get_storage_size();
+  std::vector<std::string> get_storage_size();
 
   /**
    * @brief Fetch partition metadata
@@ -433,12 +359,6 @@ class hash_table_partition : public chain_module {
    */
 
   std::string get_metadata();
-
-  /**
-   * @brief Fetch partition metadata of locked hash table
-   * @return Partition metadata
-   */
-  std::string locked_get_metadata();
 
   /**
    * @brief Run particular command on key value block
@@ -528,9 +448,6 @@ class hash_table_partition : public chain_module {
   /* Cuckoo hash map partition */
   hash_table_type block_;
 
-  /* Locked cuckoo hash map partition */
-  locked_hash_table_type locked_block_;
-
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
 
@@ -572,6 +489,15 @@ class hash_table_partition : public chain_module {
 
   /* Directory server port number */
   int directory_port_;
+
+  /* Auto scaling server hostname */
+  std::string auto_scaling_host_;
+
+  /* Auto scaling server port number */
+  int auto_scaling_port_;
+
+  /* Data update mutex */
+  std::mutex update_lock;
 
 };
 

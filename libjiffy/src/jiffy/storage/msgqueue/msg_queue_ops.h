@@ -23,4 +23,4 @@ enum msg_queue_cmd_id {
 }
 }
 
-#endif //JIFFY_B_TREE_OPS_H
+#endif //JIFFY_MSG_QUEUE_OPS_H

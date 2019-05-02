@@ -52,17 +52,36 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::create_hash_table(cons
   begin_scope(path);
   return std::make_shared<storage::hash_table_client>(fs_, path, s);
 }
-// TODO needs to be fixed, this is only for hash_table
+//TODO fix this
 std::shared_ptr<storage::hash_table_client> jiffy_client::open(const std::string &path) {
   auto s = fs_->open(path);
   begin_scope(path);
   return std::make_shared<storage::hash_table_client>(fs_, path, s);
 }
 
+std::shared_ptr<storage::btree_client> jiffy_client::open_btree(const std::string &path) {
+  auto s = fs_->open(path);
+  begin_scope(path);
+  return std::make_shared<storage::btree_client>(fs_, path, s);
+}
+
+std::shared_ptr<storage::msg_queue_client> jiffy_client::open_msg_queue(const std::string &path) {
+  auto s = fs_->open(path);
+  begin_scope(path);
+  return std::make_shared<storage::msg_queue_client>(fs_, path, s);
+}
+
+std::shared_ptr<storage::fifo_queue_client> jiffy_client::open_fifo_queue(const std::string &path) {
+  auto s = fs_->open(path);
+  begin_scope(path);
+  return std::make_shared<storage::fifo_queue_client>(fs_, path, s);
+}
+
 std::shared_ptr<storage::hash_table_client> jiffy_client::open_or_create_hash_table(const std::string &path,
                                                                                     const std::string &backing_path,
                                                                                     int32_t num_blocks,
                                                                                     int32_t chain_length,
+                                                                                    int timeout_ms,
                                                                                     int32_t flags,
                                                                                     int32_t permissions,
                                                                                     const std::map<std::string,
@@ -79,7 +98,7 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::open_or_create_hash_ta
   auto s = fs_->open_or_create(path, "hashtable", backing_path, num_blocks, chain_length, flags, permissions,
                                block_names, block_metadata, tags);
   begin_scope(path);
-  return std::make_shared<storage::hash_table_client>(fs_, path, s);
+  return std::make_shared<storage::hash_table_client>(fs_, path, s, timeout_ms);
 }
 
 std::shared_ptr<storage::msg_queue_client> jiffy_client::open_or_create_msg_queue(const std::string &path,
@@ -102,6 +121,26 @@ std::shared_ptr<storage::msg_queue_client> jiffy_client::open_or_create_msg_queu
   return std::make_shared<storage::msg_queue_client>(fs_, path, s);
 }
 
+std::shared_ptr<storage::fifo_queue_client> jiffy_client::open_or_create_fifo_queue(const std::string &path,
+                                                                                    const std::string &backing_path,
+                                                                                    int32_t num_blocks,
+                                                                                    int32_t chain_length,
+                                                                                    int32_t flags,
+                                                                                    int32_t permissions,
+                                                                                    const std::map<std::string,
+                                                                                                   std::string> &tags) {
+  std::vector<std::string> block_names;
+  std::vector<std::string> block_metadata;
+  for (int32_t i = 0; i < num_blocks; ++i) {
+    block_names.push_back(std::to_string(i));
+    block_metadata.emplace_back("regular");
+  }
+  auto s = fs_->open_or_create(path, "fifoqueue", backing_path, num_blocks, chain_length, flags, permissions,
+                               block_names, block_metadata, tags);
+  begin_scope(path);
+  return std::make_shared<storage::fifo_queue_client>(fs_, path, s);
+}
+
 std::shared_ptr<storage::btree_client> jiffy_client::open_or_create_btree(const std::string &path,
                                                                           const std::string &backing_path,
                                                                           int32_t num_blocks,
@@ -113,7 +152,7 @@ std::shared_ptr<storage::btree_client> jiffy_client::open_or_create_btree(const 
   std::vector<std::string> block_names;
   std::vector<std::string> block_metadata;
   for (int32_t i = 0; i < num_blocks; ++i) {
-    block_names.push_back(std::to_string(i));
+    block_names.push_back(jiffy::storage::default_name);
     block_metadata.emplace_back("regular");
   }
   auto s = fs_->open_or_create(path, "btree", backing_path, num_blocks, chain_length, flags, permissions,

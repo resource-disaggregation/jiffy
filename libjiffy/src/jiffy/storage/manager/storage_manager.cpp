@@ -16,7 +16,7 @@ void storage_manager::create_partition(const std::string &block_id,
                                        const std::map<std::string, std::string> &conf) {
   auto bid = block_id_parser::parse(block_id);
   storage_management_client client(bid.host, bid.management_port);
-  LOG(log_level::info) << "Creating partition name : " << name << " on " << bid.host << ":" << bid.management_port;
+  //LOG(log_level::info) << "Creating partition name : " << name << " on " << bid.host << ":" << bid.management_port;
   client.create_partition(bid.id, type, name, metadata, conf);
 }
 
@@ -27,21 +27,21 @@ void storage_manager::setup_chain(const std::string &block_id,
                                   const std::string &next_block_id) {
   auto bid = block_id_parser::parse(block_id);
   storage_management_client client(bid.host, bid.management_port);
-  LOG(log_level::info) << "setup partition on " << bid.host << ":" << bid.management_port;
+  //LOG(log_level::info) << "setup partition on " << bid.host << ":" << bid.management_port;
   client.setup_chain(bid.id, path, chain, role, next_block_id);
 }
 
 void storage_manager::destroy_partition(const std::string &block_name) {
   auto bid = block_id_parser::parse(block_name);
   storage_management_client client(bid.host, bid.management_port);
-  LOG(log_level::info) << "reset on " << bid.host << ":" << bid.management_port;
+  //LOG(log_level::info) << "reset on " << bid.host << ":" << bid.management_port;
   client.destroy_partition(bid.id);
 }
 
 std::string storage_manager::path(const std::string &block_name) {
   auto bid = block_id_parser::parse(block_name);
   storage_management_client client(bid.host, bid.management_port);
-  LOG(log_level::info) << "path on " << bid.host << ":" << bid.management_port;
+  //LOG(log_level::info) << "path on " << bid.host << ":" << bid.management_port;
   return client.path(bid.id);
 }
 
@@ -69,14 +69,14 @@ void storage_manager::dump(const std::string &block_name, const std::string &bac
 std::size_t storage_manager::storage_capacity(const std::string &block_name) {
   auto bid = block_id_parser::parse(block_name);
   storage_management_client client(bid.host, bid.management_port);
-  LOG(log_level::info) << "storage capacity on " << bid.host << ":" << bid.management_port;
+  //LOG(log_level::info) << "storage capacity on " << bid.host << ":" << bid.management_port;
   return static_cast<std::size_t>(client.storage_capacity(bid.id));
 }
 
 std::size_t storage_manager::storage_size(const std::string &block_name) {
   auto bid = block_id_parser::parse(block_name);
   storage_management_client client(bid.host, bid.management_port);
-  LOG(log_level::info) << "storage size on " << bid.host << ":" << bid.management_port;
+  //LOG(log_level::info) << "storage size on " << bid.host << ":" << bid.management_port;
   return static_cast<std::size_t>(client.storage_size(bid.id));
 }
 
@@ -99,7 +99,7 @@ void storage_manager::update_partition(const std::string &block_name,
                                        const std::string &partition_metadata) {
   auto bid = block_id_parser::parse(block_name);
   storage_management_client client(bid.host, bid.management_port);
-  LOG(log_level::info) << "Update partition name and metadata on " << bid.host << ":" << bid.management_port;
+  //LOG(log_level::info) << "Update partition name and metadata on " << bid.host << ":" << bid.management_port;
   client.update_partition(bid.id, partition_name, partition_metadata);
 }
 

@@ -16,11 +16,13 @@ class btree_partition : public chain_module {
  public:
 
   explicit btree_partition(block_memory_manager *manager,
-                           const std::string &name = "0", //TODO need to fix this name
+                           const std::string &name = default_name, //TODO need to fix this name
                            const std::string &metadata = "regular", //TODO need to fix this metadata
                            const utils::property_map &conf = {},
                            const std::string &directory_host = "localhost",
-                           const int directory_port = 9091);
+                           int directory_port = 9091,
+                           const std::string &auto_scaling_host = "localhost",
+                           int auto_scaling_port = 9095);
 
   /**
    * @brief Virtual destructor
@@ -85,11 +87,33 @@ class btree_partition : public chain_module {
    * @param begin_range Begin range
    * @param end_range End range
    * @param redirect Bool value to choose whether to indirect
-   * @return Range lookup status string
    */
-  std::vector<std::string> range_lookup(const std::string &begin_range,
-                                        const std::string &end_range,
-                                        bool redirect = false);
+  void range_lookup(std::vector<std::string> &data,
+                    const std::string &begin_range,
+                    const std::string &end_range,
+                    bool redirect = false);
+
+  /**
+   * @brief Fetch value within the key range
+   * @param data Key value pairs to be fetched
+   * @param begin_range Begin range
+   * @param end_range End range
+   * @param batch_size Collect data batch size
+   */
+  void range_lookup_batches(std::vector<std::string> &data,
+                            const std::string &begin_range,
+                            const std::string &end_range,
+                            size_t batch_size = 1024);
+
+  /**
+   * @brief Fetch keys within the key range
+   * @param data Keys to be fetched
+   * @param begin_range Begin range
+   * @param end_range End range
+   */
+  void range_lookup_keys(std::vector<std::string> &data,
+                         const std::string &begin_range,
+                         const std::string &end_range);
 
   /**
    * @brief Counts the key number within the key range
@@ -101,6 +125,22 @@ class btree_partition : public chain_module {
   std::string range_count(const std::string &begin_range,
                           const std::string &end_range,
                           bool redirect = false);
+
+  /**
+   * @brief Update partition
+   * @param new_name New partition name
+   * @param new_metadata New metadata
+   * @return Status
+   */
+  std::string update_partition(const std::string &new_name, const std::string &new_metadata);
+
+  /**
+   * @brief Remove partition data during auto scaling
+   * @param key Keys to be removed
+   * @return Removed value
+   */
+  std::string scale_remove(const std::string &key);
+
   /**
    * @brief Fetch block size
    * @return Block size
@@ -189,7 +229,7 @@ class btree_partition : public chain_module {
    */
   bool in_slot_range(const std::string &key) {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
-    return key >= slot_range_.first && key <= slot_range_.second;
+    return key >= slot_range_.first && key < slot_range_.second;
   }
 
   /**
@@ -199,7 +239,7 @@ class btree_partition : public chain_module {
    */
 
   bool in_import_slot_range(const std::string &key) {
-    return key >= import_slot_range_.first && key <= import_slot_range_.second;
+    return key >= import_slot_range_.first && key < import_slot_range_.second;
   }
 
   /**
@@ -210,7 +250,7 @@ class btree_partition : public chain_module {
 
   bool in_export_slot_range(const std::string &key) {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
-    return key >= export_slot_range_.first && key <= export_slot_range_.second;
+    return key >= export_slot_range_.first && key < export_slot_range_.second;
   }
 
   /**
@@ -241,6 +281,62 @@ class btree_partition : public chain_module {
   std::string slot_end() const {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot_range_.second;
+  }
+
+  /**
+   * @brief Set the export target
+   * @param export_target_string Export target string
+   */
+
+  void export_target(const std::string &export_target_string) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    export_target_.clear();
+    export_target_ = utils::string_utils::split(export_target_string, '!');
+    export_target_str_ = export_target_string;
+  }
+
+  /**
+   * @brief Set export slot range
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
+   */
+
+  void export_slot_range(std::string slot_begin, std::string slot_end) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    export_slot_range_.first = slot_begin;
+    export_slot_range_.second = slot_end;
+  }
+
+  /**
+   * @brief Set import slot range
+   * @param slot_begin Begin slot
+   * @param slot_end End slot
+   */
+
+  void import_slot_range(std::string slot_begin, std::string slot_end) {
+    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+    import_slot_range_.first = slot_begin;
+    import_slot_range_.second = slot_end;
+  }
+
+  /**
+   * @brief Fetch import slot range
+   * @return Import slot range
+   */
+
+  const std::pair<std::string, std::string> &import_slot_range() {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    return import_slot_range_;
+  };
+
+  /**
+   * @brief Set slot range based on the partition name
+   * @param new_name New partition name
+   */
+  void slot_range(const std::string &new_name) {
+    auto slots = utils::string_utils::split(new_name, '_', 2);
+    slot_range_.first = slots[0];
+    slot_range_.second = slots[1];
   }
 
  private:
@@ -298,6 +394,14 @@ class btree_partition : public chain_module {
   /* Directory server port number */
   int directory_port_;
 
+  /* Auto scaling server host name */
+  std::string auto_scaling_host_;
+
+  /* Auto scaling server port number */
+  int auto_scaling_port_;
+
+  /* Data update mutex */
+  std::mutex update_lock;
 };
 
 }

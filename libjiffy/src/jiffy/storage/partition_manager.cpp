@@ -18,12 +18,14 @@ std::shared_ptr<chain_module> partition_manager::build_partition(block_memory_ma
                                                                  const std::string &metadata,
                                                                  const utils::property_map &conf,
                                                                  const std::string &directory_host,
-                                                                 const int directory_port) {
+                                                                 const int directory_port,
+                                                                 const std::string &auto_scaling_host,
+                                                                 const int auto_scaling_port) {
   auto it = implementations().find(type);
   if (it == implementations().end()) {
     return nullptr;
   }
-  return it->second->build(manager, name, metadata, conf, directory_host, directory_port);
+  return it->second->build(manager, name, metadata, conf, directory_host, directory_port, auto_scaling_host, auto_scaling_port);
 }
 
 partition_manager::partition_map &partition_manager::implementations() {

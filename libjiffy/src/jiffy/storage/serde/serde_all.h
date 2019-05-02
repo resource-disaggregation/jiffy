@@ -4,10 +4,14 @@
 #include "jiffy/storage/hashtable/hash_table_defs.h"
 #include "jiffy/storage/btree/btree_defs.h"
 #include "jiffy/storage/msgqueue/msg_queue_defs.h"
+#include "jiffy/storage/fifoqueue/fifo_queue_defs.h"
 #include "jiffy/storage/types/binary.h"
+#include "jiffy/utils/logger.h"
 #include <sstream>
 #include <iostream>
 #include <fstream>
+
+using namespace jiffy::utils;
 
 namespace jiffy {
 namespace storage {
@@ -29,7 +33,7 @@ class serde {
   }
 
   binary make_binary(const std::string &str) {
-    return binary(reinterpret_cast<const uint8_t *>(str.data()), str.size(), allocator_);
+    return binary(str, allocator_);
   }
 
  private:
@@ -91,7 +95,7 @@ class csv_serde_impl : public serde {
   template<typename DataType>
   std::size_t serialize_impl(const DataType &table, const std::shared_ptr<std::ostream> &out) {
     for (auto e: table) {
-      *out << reinterpret_cast<const char *>(e.first.data()) << "," << reinterpret_cast<const char *>(e.second.data())
+      *out << to_string(e.first) << "," << to_string(e.second)
            << "\n";
     }
     out->flush();

@@ -6,6 +6,7 @@
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/storage/msgqueue/msg_queue_ops.h"
 #include "jiffy/directory/client/directory_client.h"
+#include "jiffy/auto_scaling/auto_scaling_client.h"
 #include <thread>
 
 namespace jiffy {
@@ -18,13 +19,17 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
                                          const std::string &metadata,
                                          const utils::property_map &conf,
                                          const std::string &directory_host,
-                                         const int directory_port)
+                                         const int directory_port,
+                                         const std::string &auto_scaling_host,
+                                         const int auto_scaling_port)
     : chain_module(manager, name, metadata, MSG_QUEUE_OPS),
       partition_(build_allocator<msg_type>()),
       overload_(false),
       dirty_(false),
       directory_host_(directory_host),
-      directory_port_(directory_port) {
+      directory_port_(directory_port),
+      auto_scaling_host_(auto_scaling_host),
+      auto_scaling_port_(auto_scaling_port){
   auto ser = conf.get("msgqueue.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
@@ -39,15 +44,21 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
 }
 
 std::string msg_queue_partition::send(const std::string &message) {
+  //<< "Sending " << message
+  //LOG(log_level::info) << " Storage size " << storage_size() << " Storage capacity "
+   //                    << storage_capacity();
+  //LOG(log_level::info) << "partition size " << partition_.size() << " partition capacity " << partition_.capacity();
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-  if (storage_size() >= storage_capacity() && partition_.size() >= partition_.capacity()) {
+  if (storage_size() * 2 >= storage_capacity() && partition_.size() >= partition_.capacity()) {
     if (!next_target_str().empty()) {
       return "!full!" + next_target_str();
     } else {
-      throw std::logic_error("The message queue should already allocate next partition when overload");
+      return "!redo";
     }
   }
+  //LOG(log_level::info) << "Come here 1";
   partition_.push_back(make_binary(message));
+  //LOG(log_level::info) << "Come here 2";
   return "!ok";
 }
 
@@ -58,9 +69,15 @@ std::string msg_queue_partition::read(std::string position) {
   if (static_cast<std::size_t>(pos) < size()) {
     return to_string(partition_[pos]);
   }
-  if (!next_target_str().empty())
-    return "!msg_not_in_partition!" + next_target_str();
-  else return "!msg_not_found";
+  if(storage_size() * 2 >= storage_capacity() && partition_.size() >= partition_.capacity()) {
+    if(static_cast<std::size_t>(pos) == size()) {
+      if (!next_target_str().empty())
+        return "!msg_not_in_partition!" + next_target_str();
+      else
+        return "!redo";
+    }
+  }
+  return "!msg_not_found";
 }
 
 std::string msg_queue_partition::clear() {
@@ -109,26 +126,21 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
   bool expected = false;
   if (auto_scale_.load() && is_mutator(cmd_id) && overload() && is_tail()
       && overload_.compare_exchange_strong(expected, true)) {
-    LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
-                         << storage_capacity();
+    //LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
+    //                     << storage_capacity() << " partition size = " << size() << "partition capacity "
+    //                     << partition_.capacity();
     try {
       overload_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
-      auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
-      LOG(log_level::info) << "host " << directory_host_ << " port " << directory_port_;
-      auto dst_replica_chain =
-          fs->add_block(path(), dst_partition_name, "regular");
-      next_target(dst_replica_chain.block_ids);
-      auto path_current = path();
-      auto chain_current = chain();
-      std::vector<std::string> src_before_args;
-      src_before_args.push_back(next_target_str());
-      update_partition(src_before_args.front());
+      std::map<std::string, std::string> scale_conf;
+      scale_conf.emplace(std::make_pair(std::string("type"), std::string("msg_queue")));
+      scale_conf.emplace(std::make_pair(std::string("next_partition_name"), dst_partition_name));
+      auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
+      scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
       overload_ = false;
-      LOG(log_level::warn) << "Split slot range failed: " << e.what();
+   //   LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();
     }
-    LOG(log_level::info) << "After split storage: " << storage_size() << " capacity: " << storage_capacity();
   }
 }
 
@@ -193,9 +205,12 @@ void msg_queue_partition::forward_all() {
 }
 
 bool msg_queue_partition::overload() {
-  if (storage_size() < storage_capacity())
-    return false;
-  return partition_.size() > static_cast<size_t>(static_cast<double>(partition_.capacity()) * threshold_hi_);
+  //if (storage_size() < storage_capacity())
+  //return false;
+  //return partition_.size() > static_cast<size_t>(static_cast<double>(partition_.capacity()) * threshold_hi_);
+  //TODO this is a hot fix
+  return partition_.size() > static_cast<size_t>(static_cast<double>(1024) * threshold_hi_);
+  //return storage_size() > static_cast<size_t>(static_cast<double>(storage_capacity()) * threshold_hi_);
 }
 
 REGISTER_IMPLEMENTATION("msgqueue", msg_queue_partition);

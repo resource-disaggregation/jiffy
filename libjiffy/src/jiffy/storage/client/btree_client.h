@@ -73,7 +73,7 @@ class btree_client : data_structure_client {
    * @param num_key Maximum number of keys to lookup
    * @return Value of keys that are within the key range
    */
-  std::vector<std::string> range_lookup(const std::string begin_range, const std::string end_range);
+  std::vector<std::string> range_lookup(const std::string &begin_range, const std::string &end_range);
 
   /**
    * @brief Count keys within the key range
@@ -81,7 +81,7 @@ class btree_client : data_structure_client {
    * @param end_range Key range end
    * @return Keys count within the range
    */
-  std::string range_count(const std::string begin_range, const std::string end_range);
+  std::string range_count(const std::string &begin_range, const std::string &end_range);
   /**
    * @brief Put in batch
    * @param kvs Key value batch
@@ -173,7 +173,9 @@ class btree_client : data_structure_client {
                         std::vector<std::string> &responses) override;
 
   /* Slot begin of the blocks */
-  std::vector<int32_t> slots_;
+  std::vector<std::string> slots_;
+  /* Redo times */
+  std::size_t redo_times = 0;
 
 };
 

@@ -12,6 +12,7 @@ partition::partition(block_memory_manager *manager,
       supported_commands_(supported_commands),
       manager_(manager),
       binary_allocator_(build_allocator<uint8_t>()) {
+  default_ = supported_commands_.empty();
 }
 
 void partition::path(const std::string &path) {
@@ -53,8 +54,9 @@ bool partition::is_mutator(int i) const {
 }
 
 std::string partition::command_name(int cmd_id) {
-  // Does not require lock since block_ops don't change
-  return supported_commands_[cmd_id].name;
+  if(!default_.load())
+    return supported_commands_[cmd_id].name;
+  else return "default_partition";
 }
 
 std::size_t partition::storage_capacity() {
@@ -82,7 +84,7 @@ void partition::set_name_and_metadata(const std::string &name, const std::string
 }
 
 binary partition::make_binary(const std::string &str) {
-  return binary(reinterpret_cast<const uint8_t *>(str.data()), str.size(), binary_allocator_);
+  return binary(str, binary_allocator_);
 }
 
 }

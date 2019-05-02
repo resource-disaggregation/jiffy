@@ -10,6 +10,7 @@
 #include "jiffy/directory/block/block_allocator.h"
 #include "jiffy/storage/block.h"
 #include "jiffy/storage/hashtable/hash_table_partition.h"
+#include "jiffy/storage/btree/btree_defs.h"
 #include "jiffy/storage/notification/subscription_map.h"
 #include "jiffy/utils/logger.h"
 #include "jiffy/directory/directory_ops.h"
@@ -284,7 +285,7 @@ class test_utils {
     blks.resize(block_ids.size());
     for (size_t i = 0; i < block_ids.size(); ++i) {
       blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
-      blks[i]->setup("btree", std::to_string(i), "regular", conf);
+      blks[i]->setup("btree", jiffy::storage::default_name, "regular", conf);
     }
     return blks;
   }
@@ -320,6 +321,41 @@ class test_utils {
     for (size_t i = 0; i < block_ids.size(); ++i) {
       blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
       blks[i]->setup("msgqueue", std::to_string(i), "regular", conf);
+    }
+    return blks;
+  }
+
+  static std::vector<std::shared_ptr<jiffy::storage::block>> init_fifo_queue_blocks(size_t num_blocks,
+                                                                                   int32_t service_port,
+                                                                                   int32_t management_port) {
+    using namespace jiffy::storage;
+    std::vector<std::shared_ptr<block>> blks;
+    blks.resize(num_blocks);
+    for (size_t i = 0; i < num_blocks; ++i) {
+      std::string id = block_id_parser::make("127.0.0.1", service_port, management_port,
+                                             static_cast<int32_t>(i));
+      blks[i] = std::make_shared<block>(id);
+      blks[i]->setup("fifoqueue", std::to_string(i), "regular", {});
+    }
+    return blks;
+  }
+
+  static std::vector<std::shared_ptr<jiffy::storage::block>> init_fifo_queue_blocks(const std::vector<std::string> &block_ids,
+                                                                                   size_t block_capacity = 134217728,
+                                                                                   double threshold_lo = 0.25,
+                                                                                   double threshold_hi = 0.75,
+                                                                                   const std::string &dir_host = "127.0.0.1",
+                                                                                   int dir_port = 9090) {
+    jiffy::utils::property_map conf;
+    conf.set("fifoqueue.capacity_threshold_lo", std::to_string(threshold_lo));
+    conf.set("fifoqueue.capacity_threshold_hi", std::to_string(threshold_hi));
+    conf.set("directory.host", dir_host);
+    conf.set("directory.port", std::to_string(dir_port));
+    std::vector<std::shared_ptr<jiffy::storage::block>> blks;
+    blks.resize(block_ids.size());
+    for (size_t i = 0; i < block_ids.size(); ++i) {
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
+      blks[i]->setup("fifoqueue", std::to_string(i), "regular", conf);
     }
     return blks;
   }

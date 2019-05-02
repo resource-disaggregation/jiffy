@@ -1,6 +1,8 @@
 #include <jemalloc/jemalloc.h>
 #include <new>
 #include "block_memory_manager.h"
+#include "jiffy/utils/logger.h"
+using namespace jiffy::utils;
 
 namespace jiffy {
 namespace storage {
@@ -12,12 +14,21 @@ void *block_memory_manager::mb_malloc(size_t size) {
     return nullptr;
   }
   auto ptr = mallocx(size, 0);
-  used_ += sallocx(ptr, 0);
+  //used_ += sallocx(ptr, 0);
+  used_ += size;
   return ptr;
 }
 
 void block_memory_manager::mb_free(void *ptr) {
   auto size = sallocx(ptr, 0);
+  //LOG(log_level::info) << "The size to be free is:*************  " << size;
+  //LOG(log_level::info) << "Used before free is:*************  " << used_;
+  free(ptr);
+  used_ -= size;
+  //LOG(log_level::info) << "Used after free is:*************  " << used_;
+}
+
+void block_memory_manager::mb_free(void *ptr, size_t size) {
   free(ptr);
   used_ -= size;
 }

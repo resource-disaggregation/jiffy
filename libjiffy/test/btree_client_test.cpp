@@ -102,6 +102,7 @@ TEST_CASE("btree_client_put_update_get_test", "[put][update][get]") {
     REQUIRE(client.get(std::to_string(i)) == std::to_string(i + 1000));
   }
 
+  client.remove("/sandbox/file.txt");
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -131,18 +132,18 @@ TEST_CASE("btree_client_put_range_lookup_range_count_test", "[put][range_lookup]
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "btree", "/tmp", NUM_BLOCKS, 1, 0, 0,
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file2.txt", "btree", "/tmp", NUM_BLOCKS, 1, 0, 0,
       {"0"}, {"regular"}));
 
-  btree_client client(tree, "/sandbox/file.txt", status);
+  btree_client client(tree, "/sandbox/file2.txt", status);
 
   for (std::size_t i = 0; i < 10; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
   std::vector<std::string> ret = client.range_lookup(std::to_string(0), std::to_string(9));
   for(std::size_t i = 0; i < 20; i += 2) {
-    REQUIRE(ret.at(i) == std::to_string(i/2));
-    REQUIRE(ret.at(i + 1) == std::to_string(i/2));
+    REQUIRE(ret[i] == std::to_string(i/2));
+    REQUIRE(std::to_string(i/2) == ret[i + 1]);
   }
   auto count = std::stoi(client.range_count(std::to_string(0), std::to_string(9)));
   REQUIRE(count == ret.size()/2);
@@ -312,4 +313,3 @@ TEST_CASE("btree_client_pipelined_ops_test", "[put][update][remove][get]") {
     mgmt_serve_thread.join();
   }
 }
-

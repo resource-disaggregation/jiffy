@@ -2,35 +2,33 @@
 #include "jiffy/utils/logger.h"
 #include "jiffy/utils/string_utils.h"
 #include "jiffy/storage/hashtable/hash_slot.h"
+#include <thread>
+#include <cmath>
 
 namespace jiffy {
 namespace storage {
 
 using namespace jiffy::utils;
 
+
 hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interface> fs,
                                      const std::string &path,
                                      const directory::data_status &status,
                                      int timeout_ms)
-    : data_structure_client(fs, path, status, timeout_ms) {
+    : data_structure_client(fs, path, status, KV_OPS, timeout_ms) {
   slots_.clear();
   for (const auto &block: status.data_blocks()) {
     slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0]));
   }
 }
 
-std::shared_ptr<hash_table_client::locked_client> hash_table_client::lock() {
-  return std::make_shared<hash_table_client::locked_client>(*this);
-}
-
 void hash_table_client::refresh() {
   status_ = fs_->dstatus(path_);
-  LOG(log_level::info) << "Refreshing partition mappings to " << status_.to_string();
   slots_.clear();
   blocks_.clear();
   for (const auto &block: status_.data_blocks()) {
     slots_.push_back(std::stoull(utils::string_utils::split(block.name, '_')[0]));
-    blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, timeout_ms_));
+    blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, KV_OPS, timeout_ms_));
   }
 }
 
@@ -43,6 +41,7 @@ std::string hash_table_client::put(const std::string &key, const std::string &va
       _return = blocks_[block_id(key)]->run_command(hash_table_cmd_id::ht_put, args).front();
       handle_redirect(hash_table_cmd_id::ht_put, args, _return);
       redo = false;
+      redo_times = 0;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -59,6 +58,7 @@ std::string hash_table_client::get(const std::string &key) {
       _return = blocks_[block_id(key)]->run_command(hash_table_cmd_id::ht_get, args).front();
       handle_redirect(hash_table_cmd_id::ht_get, args, _return);
       redo = false;
+      redo_times = 0;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -75,6 +75,7 @@ std::string hash_table_client::update(const std::string &key, const std::string 
       _return = blocks_[block_id(key)]->run_command(hash_table_cmd_id::ht_update, args).front();
       handle_redirect(hash_table_cmd_id::ht_update, args, _return);
       redo = false;
+      redo_times = 0;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -89,8 +90,10 @@ std::string hash_table_client::remove(const std::string &key) {
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(hash_table_cmd_id::ht_remove, args).front();
+      //LOG(log_level::info) << "The return value is" << _return;
       handle_redirect(hash_table_cmd_id::ht_remove, args, _return);
       redo = false;
+      redo_times = 0;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -164,8 +167,31 @@ std::vector<std::string> hash_table_client::remove(const std::vector<std::string
   return _return;
 }
 
+std::size_t hash_table_client::num_keys() {
+  for (size_t i = 0; i < blocks_.size(); i++) {
+    blocks_[i]->send_command(hash_table_cmd_id::ht_num_keys, {});
+  }
+  size_t n = 0;
+  for (size_t i = 0; i < blocks_.size(); i++) {
+    n += std::stoll(blocks_[i]->recv_response().front());
+  }
+  return n;
+}
+
 size_t hash_table_client::block_id(const std::string &key) {
-  return static_cast<size_t>(std::upper_bound(slots_.begin(), slots_.end(), hash_slot::get(key)) - slots_.begin() - 1);
+  auto hash = hash_slot::get(key);
+  int max_value = -1;
+  size_t idx;
+
+  // TODO fix this
+  for(auto x = slots_.begin(); x != slots_.end(); x++) {
+    if(*x <= hash && *x > max_value) {
+      max_value = *x;
+      idx = static_cast<size_t>(x - slots_.begin());
+    }
+  }
+  return idx;
+ // return static_cast<size_t>(std::upper_bound(slots_.begin(), slots_.end(), hash_slot::get(key)) - slots_.begin() - 1);
 }
 
 std::vector<std::string> hash_table_client::batch_command(const hash_table_cmd_id &op,
@@ -205,6 +231,7 @@ std::vector<std::string> hash_table_client::batch_command(const hash_table_cmd_i
 
 void hash_table_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
   if (response.substr(0, 10) == "!exporting") {
+    //LOG(log_level::info) << "exporting redirect";
     typedef std::vector<std::string> list_t;
     do {
       auto parts = string_utils::split(response, '!');
@@ -212,11 +239,19 @@ void hash_table_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
       response = replica_chain_client(fs_,
                                       path_,
                                       directory::replica_chain(chain),
+                                      KV_OPS,
                                       0).run_command_redirected(cmd_id, args).front();
     } while (response.substr(0, 10) == "!exporting");
   }
   if (response == "!block_moved") {
+    //LOG(log_level::info) << "block_moved, refreshing";
     refresh();
+    throw redo_error();
+  }
+  if(response == "!full") {
+    //LOG(log_level::info) << "putting the client to sleep to let auto_scaling run first for 2^" << redo_times << " milliseconds";
+    std::this_thread::sleep_for(std::chrono::milliseconds((int)(std::pow(2, redo_times))));
+    redo_times++;
     throw redo_error();
   }
 }
@@ -237,6 +272,7 @@ void hash_table_client::handle_redirects(int32_t cmd_id,
         response = replica_chain_client(fs_,
                                         path_,
                                         directory::replica_chain(chain),
+                                        KV_OPS,
                                         0).run_command_redirected(cmd_id, op_args).front();
       } while (response.substr(0, 10) == "!exporting");
     }
@@ -244,185 +280,11 @@ void hash_table_client::handle_redirects(int32_t cmd_id,
       refresh();
       throw redo_error();
     }
-  }
-}
-
-hash_table_client::locked_client::locked_client(hash_table_client &parent) : parent_(parent) {
-  blocks_.resize(parent_.blocks_.size());
-  redirect_blocks_.resize(parent_.blocks_.size());
-  locked_redirect_blocks_.resize(parent_.blocks_.size());
-  new_blocks_.resize(parent_.blocks_.size());
-  for (size_t i = 0; i < blocks_.size(); i++) {
-    blocks_[i] = parent_.blocks_[i]->lock();
-  }
-  for (size_t i = 0; i < blocks_.size(); i++) {
-    if (blocks_[i]->redirecting()) {
-      bool new_block = true;
-      for (size_t j = 0; j < blocks_.size(); j++) {
-        if (blocks_[i]->redirect_chain() == blocks_[j]->chain().block_ids) {
-          new_block = false;
-          redirect_blocks_[i] = parent_.blocks_[j];
-          locked_redirect_blocks_[i] = blocks_[j];
-          new_blocks_[i] = nullptr;
-          break;
-        }
-      }
-      if (new_block) {
-        redirect_blocks_[i] =
-            std::make_shared<replica_chain_client>(parent_.fs_,
-                                                   parent_.path_,
-                                                   blocks_[i]->chain(),
-                                                   parent_.timeout_ms_);
-        locked_redirect_blocks_[i] = redirect_blocks_[i]->lock();
-        new_blocks_[i] = locked_redirect_blocks_[i];
-      }
-    } else {
-      new_blocks_[i] = nullptr;
-      redirect_blocks_[i] = nullptr;
-      locked_redirect_blocks_[i] = nullptr;
+    if(response == "!full") {
+      std::this_thread::sleep_for(std::chrono::milliseconds((int)(std::pow(2, redo_times))));
+      throw redo_error();
     }
   }
-}
-
-void hash_table_client::locked_client::unlock() {
-  for (size_t i = 0; i < blocks_.size(); i++) {
-    blocks_[i]->unlock();
-    if (new_blocks_[i] != nullptr)
-      new_blocks_[i]->unlock();
-  }
-}
-
-size_t hash_table_client::locked_client::num_keys() {
-  for (size_t i = 0; i < blocks_.size(); i++) {
-    blocks_[i]->send_command(hash_table_cmd_id::ht_num_keys, {});
-    if (new_blocks_[i] != nullptr) {
-      new_blocks_[i]->send_command(hash_table_cmd_id::ht_num_keys, {});
-    }
-  }
-  size_t n = 0;
-  for (size_t i = 0; i < blocks_.size(); i++) {
-    n += std::stoll(blocks_[i]->recv_response().front());
-    if (new_blocks_[i] != nullptr) {
-      n += std::stoll(new_blocks_[i]->recv_response().front());
-    }
-  }
-  return n;
-}
-
-std::string hash_table_client::locked_client::put(const std::string &key, const std::string &value) {
-  std::vector<std::string> args{key, value};
-  auto _return = blocks_[parent_.block_id(key)]->run_command(hash_table_cmd_id::ht_locked_put, args).front();
-  handle_redirect(hash_table_cmd_id::ht_locked_put, args, _return);
-  return _return;
-}
-
-std::string hash_table_client::locked_client::get(const std::string &key) {
-  std::vector<std::string> args{key};
-  auto _return = blocks_[parent_.block_id(key)]->run_command(hash_table_cmd_id::ht_locked_get, args).front();
-  handle_redirect(hash_table_cmd_id::ht_locked_get, args, _return);
-  return _return;
-}
-
-std::string hash_table_client::locked_client::update(const std::string &key, const std::string &value) {
-  std::vector<std::string> args{key, value};
-  auto _return = blocks_[parent_.block_id(key)]->run_command(hash_table_cmd_id::ht_locked_update, args).front();
-  handle_redirect(hash_table_cmd_id::ht_locked_update, args, _return);
-  return _return;
-}
-
-std::string hash_table_client::locked_client::remove(const std::string &key) {
-  std::vector<std::string> args{key};
-  auto _return = blocks_[parent_.block_id(key)]->run_command(hash_table_cmd_id::ht_locked_remove, args).front();
-  handle_redirect(hash_table_cmd_id::ht_locked_remove, args, _return);
-  return _return;
-}
-
-std::vector<std::string> hash_table_client::locked_client::put(const std::vector<std::string> &kvs) {
-  auto _return = parent_.batch_command(hash_table_cmd_id::ht_locked_put, kvs, 2);
-  handle_redirects(hash_table_cmd_id::ht_locked_put, kvs, _return);
-  return _return;
-}
-
-std::vector<std::string> hash_table_client::locked_client::get(const std::vector<std::string> &keys) {
-  auto _return = parent_.batch_command(hash_table_cmd_id::ht_locked_get, keys, 1);
-  handle_redirects(hash_table_cmd_id::ht_locked_get, keys, _return);
-  return _return;
-}
-
-std::vector<std::string> hash_table_client::locked_client::update(const std::vector<std::string> &kvs) {
-  auto _return = parent_.batch_command(hash_table_cmd_id::ht_locked_update, kvs, 2);
-  handle_redirects(hash_table_cmd_id::ht_locked_update, kvs, _return);
-  return _return;
-}
-
-std::vector<std::string> hash_table_client::locked_client::remove(const std::vector<std::string> &keys) {
-  auto _return = parent_.batch_command(hash_table_cmd_id::ht_locked_remove, keys, 1);
-  handle_redirects(hash_table_cmd_id::ht_locked_remove, keys, _return);
-  return _return;
-}
-
-void hash_table_client::locked_client::handle_redirect(int32_t cmd_id,
-                                                       const std::vector<std::string> &args,
-                                                       std::string &response) {
-  if (response.substr(0, 10) == "!exporting") {
-    typedef std::vector<std::string> list_t;
-    do {
-      auto parts = string_utils::split(response, '!');
-      auto chain = list_t(parts.begin() + 2, parts.end());
-      bool found = false;
-      for (size_t i = 0; i < blocks_.size(); i++) {
-        const auto &client_chain = parent_.blocks_[i]->chain();
-        if (client_chain.block_ids == chain) {
-          found = true;
-          response = blocks_[i]->run_command_redirected(cmd_id, args).front();
-          break;
-        }
-      }
-      if (!found)
-        response = replica_chain_client(parent_.fs_,
-                                        parent_.path_,
-                                        directory::replica_chain(chain),
-                                        0).run_command_redirected(cmd_id, args).front();
-    } while (response.substr(0, 10) == "!exporting");
-  }
-  // There can be !block_moved response, since:
-  // (1) No new exports can start while the storage is locked
-  // (2) Ongoing exports cannot finish while the storage is locked
-}
-
-void hash_table_client::locked_client::handle_redirects(int32_t cmd_id,
-                                                        const std::vector<std::string> &args,
-                                                        std::vector<std::string> &responses) {
-  size_t n_ops = responses.size();
-  size_t n_op_args = args.size() / n_ops;
-  for (size_t i = 0; i < responses.size(); i++) {
-    auto &response = responses[i];
-    if (response.substr(0, 10) == "!exporting") {
-      typedef std::vector<std::string> list_t;
-      list_t op_args(args.begin() + i * n_op_args, args.begin() + (i + 1) * n_op_args);
-      do {
-        auto parts = string_utils::split(response, '!');
-        auto chain = list_t(parts.begin() + 2, parts.end());
-        bool found = false;
-        for (size_t j = 0; j < blocks_.size(); j++) {
-          const auto &client_chain = parent_.blocks_[j]->chain();
-          if (client_chain.block_ids == chain) {
-            found = true;
-            response = blocks_[j]->run_command_redirected(cmd_id, args).front();
-            break;
-          }
-        }
-        if (!found)
-          response = replica_chain_client(parent_.fs_,
-                                          parent_.path_,
-                                          directory::replica_chain(chain),
-                                          0).run_command_redirected(cmd_id, op_args).front();
-      } while (response.substr(0, 10) == "!exporting");
-    }
-  }
-  // There can be !block_moved response, since:
-  // (1) No new exports can start while the storage is locked
-  // (2) Ongoing exports cannot finish while the storage is locked
 }
 
 }

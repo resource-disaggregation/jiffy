@@ -15,10 +15,11 @@
 #include "jiffy/storage/command.h"
 #include "jiffy/storage/block_memory_manager.h"
 #include "jiffy/storage/block_memory_allocator.h"
+#include "jiffy/utils/logger.h"
 
 namespace jiffy {
 namespace storage {
-
+using namespace utils;
 /* Partition class */
 class partition {
  public:
@@ -40,7 +41,13 @@ class partition {
   /**
    * @brief Destructor
    */
-  virtual ~partition() = default;
+  virtual ~partition() {
+    client_map_.send_failure();
+    client_map_.clear();
+    // TODO need to figure out if we want to notify an error to the subscripted clients after a delete of partition
+    sub_map_.clear();
+  }
+
 
   /**
    * @brief Virtual function for running a command on a block
@@ -202,6 +209,8 @@ class partition {
   block_memory_manager *manager_;
   /* Binary allocator */
   allocator<uint8_t> binary_allocator_;
+  /* Atomic bool to indicate that the partition is a default one */
+  std::atomic<bool> default_;
 };
 
 }

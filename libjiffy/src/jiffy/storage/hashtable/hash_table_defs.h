@@ -22,8 +22,8 @@ struct hash_type {
   template<typename KeyType>
   std::size_t operator()(const KeyType &k) const {
     std::size_t result = 0;
-    for (unsigned char c : k) {
-      result = c + (result * 31);
+    for (size_t i = 0; i < k.size(); i++) {
+      result = k[i] + (result * 31);
     }
     return result;
   }
@@ -32,16 +32,14 @@ struct hash_type {
 struct equal_type {
   template<typename KeyType1, typename KeyType2>
   bool operator()(const KeyType1 &lhs, const KeyType2 &rhs) const {
+    //std::cout << "size comparation: " << (lhs.size() == rhs.size()) << std::endl;
+    //std::cout << "data comparation: " << memcmp(lhs.data(), rhs.data(), lhs.size()) << std::endl;
     return lhs.size() == rhs.size() && memcmp(lhs.data(), rhs.data(), lhs.size()) == 0;
   }
 };
 
-//typedef std::hash<key_type> hash_type;
-//typedef std::equal_to<binary> equal_type;
-typedef block_memory_allocator<kv_pair_type> ht_allocator_type;
-
 // Hash table definitions
-typedef cuckoohash_map<key_type, value_type, hash_type, equal_type, ht_allocator_type> hash_table_type;
+typedef cuckoohash_map<key_type, value_type, hash_type, equal_type> hash_table_type;
 typedef hash_table_type::locked_table locked_hash_table_type;
 
 }

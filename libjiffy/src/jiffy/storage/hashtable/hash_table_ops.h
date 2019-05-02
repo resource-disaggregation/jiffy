@@ -20,21 +20,12 @@ enum hash_table_cmd_id {
   ht_put = 4,
   ht_remove = 5,
   ht_update = 6,
-  ht_lock = 7,
-  ht_unlock = 8,
-  ht_locked_data_in_slot_range = 9,
-  ht_locked_get = 10,
-  ht_locked_put = 11,
-  ht_locked_remove = 12,
-  ht_locked_update = 13,
-  ht_upsert = 14,
-  ht_locked_upsert = 15,
-  ht_update_partition = 16,
-  ht_locked_update_partition = 17,
-  ht_get_storage_size = 18,
-  ht_locked_get_storage_size = 19,
-  ht_get_metadata = 20,
-  ht_locked_get_metadata = 21
+  ht_upsert = 7,
+  ht_update_partition = 8,
+  ht_get_storage_size = 9,
+  ht_get_metadata = 10,
+  ht_get_range_data = 11,
+  ht_scale_remove = 12,
 };
 
 }

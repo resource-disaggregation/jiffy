@@ -5,6 +5,7 @@
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/client_cache.h"
 #include "jiffy/storage/client/data_structure_client.h"
+#include "jiffy/storage/hashtable/hash_table_ops.h"
 
 namespace jiffy {
 namespace storage {
@@ -12,135 +13,6 @@ namespace storage {
 /* Hash table client */
 class hash_table_client : public data_structure_client {
  public:
-  /* Locked client class */
-  class locked_client {
-   public:
-    typedef replica_chain_client::locked_client locked_block_t;
-    typedef std::shared_ptr<locked_block_t> locked_block_ptr_t;
-
-    typedef replica_chain_client block_t;
-    typedef std::shared_ptr<block_t> block_ptr_t;
-
-    /**
-     * @brief Constructor
-     * @param parent Parent client
-     */
-
-    explicit locked_client(hash_table_client &parent);
-
-    /**
-     * @brief Unlock the key value client
-     */
-
-    void unlock();
-
-    /**
-     * @brief Put
-     * @param key Key
-     * @param value Value
-     * @return Response of the command
-     */
-
-    std::string put(const std::string &key, const std::string &value);
-
-    /**
-     * @brief Get
-     * @param key Key
-     * @return Response of the command
-     */
-
-    std::string get(const std::string &key);
-
-    /**
-     * @brief Update
-     * @param key Key
-     * @param value Value
-     * @return Response of the command
-     */
-
-
-    std::string update(const std::string &key, const std::string &value);
-
-    /**
-     * @brief Remove
-     * @param key Key
-     * @return Response of the command
-     */
-
-
-    std::string remove(const std::string &key);
-
-    /**
-     * @brief Put in batch
-     * @param kvs Key value batch
-     * @return Responses of the batch commands
-     */
-
-    std::vector<std::string> put(const std::vector<std::string> &kvs);
-
-    /**
-     * @brief Get in batch
-     * @param keys Key batch
-     * @return Responses of the batch commands
-     */
-
-    std::vector<std::string> get(const std::vector<std::string> &keys);
-
-    /**
-     * @brief Update in batch
-     * @param kvs Key value batch
-     * @return Responses of the batch commands
-     */
-
-    std::vector<std::string> update(const std::vector<std::string> &kvs);
-
-    /**
-     * @brief Remove in batch
-     * @param keys Key batch
-     * @return Responses of the batch commands
-     */
-
-    std::vector<std::string> remove(const std::vector<std::string> &keys);
-
-    /**
-     * @brief Fetch number of keys
-     * @return Key number
-     */
-
-    size_t num_keys();
-   private:
-
-    /**
-     * @brief Handle command in redirect case
-     * @param cmd_id Command identifier
-     * @param args Command arguments
-     * @param response Response to be collected
-     */
-
-    void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response);
-
-    /**
-     * @brief Handle batch commands in redirect case
-     * @param cmd_id Command identifier
-     * @param args Command arguments
-     * @param response Response to be collected
-     */
-
-
-    void handle_redirects(int32_t cmd_id, const std::vector<std::string> &args, std::vector<std::string> &responses);
-
-    /* Parent key value client */
-    hash_table_client &parent_;
-    /* Blocks */
-    std::vector<locked_block_ptr_t> blocks_;
-    /* Redirect blocks */
-    std::vector<block_ptr_t> redirect_blocks_;
-    /* Locked redirect blocks */
-    std::vector<locked_block_ptr_t> locked_redirect_blocks_;
-    /* New partition */
-    std::vector<locked_block_ptr_t> new_blocks_;
-  };
-
   /**
    * @brief Constructor
    * Store all replica chain and their begin slot
@@ -160,13 +32,6 @@ class hash_table_client : public data_structure_client {
    */
 
   void refresh() override;
-
-  /**
-   * @brief Lock key value client
-   * @return Locked client
-   */
-
-  std::shared_ptr<locked_client> lock();
 
   /**
    * @brief Put key value pair
@@ -233,6 +98,12 @@ class hash_table_client : public data_structure_client {
    */
 
   std::vector<std::string> remove(const std::vector<std::string> &keys);
+
+  /**
+   * @brief Fetch number of keys
+   * @return Number of keys
+   */
+  std::size_t num_keys();
  private:
   /**
    * @brief Fetch block identifier for particular key
@@ -276,7 +147,8 @@ class hash_table_client : public data_structure_client {
 
   /* Slot begin of the blocks */
   std::vector<int32_t> slots_;
-
+  /* Redo times */
+  std::size_t redo_times = 0;
 };
 
 }

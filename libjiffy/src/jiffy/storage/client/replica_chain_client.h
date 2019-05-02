@@ -3,8 +3,8 @@
 
 #include <map>
 #include "block_client.h"
-#include "jiffy/storage/hashtable/hash_table_ops.h"
 #include "jiffy/directory/client/directory_client.h"
+#include "jiffy/storage/command.h"
 
 namespace jiffy {
 namespace storage {
@@ -15,93 +15,6 @@ namespace storage {
 class replica_chain_client {
  public:
   typedef block_client *client_ref;
-  /* Locked client class */
-  class locked_client {
-   public:
-    /**
-     * @brief Constructor
-     * Lock parent, if needs redirect, set redirecting true and
-     * take down redirect chain
-     * @param parent Replica chain to be locked
-     */
-
-    explicit locked_client(replica_chain_client &parent);
-
-    /**
-     * @brief Destructor, unlock the client
-     */
-
-    ~locked_client();
-
-    /**
-     * @brief Unlock the client
-     */
-
-    void unlock();
-
-    /**
-     * @brief Fetch directory replica chain
-     * @return Directory replica chain class
-     */
-
-    const directory::replica_chain &chain();
-
-    /**
-     * @brief Check redirecting boolean
-     * @return Bool value, true if redirected
-     */
-
-    bool redirecting() const;
-
-    /**
-     * @brief Fetch redirect chain block names
-     * @return Redirect chain block names
-     */
-
-    const std::vector<std::string> &redirect_chain();
-
-    /**
-     * @brief Send command
-     * @param cmd_id Command identifier
-     * @param args Command arguments
-     */
-
-    void send_command(int32_t cmd_id, const std::vector<std::string> &args);
-
-    /**
-     * @brief Receive response
-     * @return Response
-     */
-
-    std::vector<std::string> recv_response();
-
-    /**
-     * @brief Run command on replica chain
-     * @param cmd_id Command identifier
-     * @param args Command arguments
-     * @return Response of the command
-     */
-
-    std::vector<std::string> run_command(int32_t cmd_id, const std::vector<std::string> &args);
-
-    /**
-     * @brief Run command on redirect replica chain
-     * @param cmd_id Command identifier
-     * @param args Command arguments
-     * @return Response of the command
-     */
-
-    std::vector<std::string> run_command_redirected(int32_t cmd_id, const std::vector<std::string> &args);
-
-   private:
-    /* Parent replica chain client */
-    replica_chain_client &parent_;
-    /* Bool value, true if redirecting */
-    bool redirecting_;
-    /* Redirect chain name */
-    std::vector<std::string> redirect_chain_;
-  };
-
   /**
    * @brief Constructor
    * @param fs Directory interface
@@ -113,6 +26,7 @@ class replica_chain_client {
   explicit replica_chain_client(std::shared_ptr<directory::directory_interface> fs,
                                 const std::string &path,
                                 const directory::replica_chain &chain,
+                                std::vector<command> OPS,
                                 int timeout_ms = 1000);
 
   /**
@@ -127,13 +41,6 @@ class replica_chain_client {
    */
 
   const directory::replica_chain &chain() const;
-
-  /**
-   * @brief Lock this replica chain client
-   * @return Locked client
-   */
-
-  std::shared_ptr<locked_client> lock();
 
   /**
    * @brief Check if head and tail of replica chain is connected
