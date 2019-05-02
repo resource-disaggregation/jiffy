@@ -29,7 +29,7 @@ int main() {
   if (!in) {
     std::cerr << "Cannot open the File : " << fileName << std::endl;
   }
-  //size_t num_ops = 419430;
+  size_t num_ops = 419430;
   //size_t num_ops = 900;
   //size_t num_ops = 70000;
   std::vector<std::string> keys;
