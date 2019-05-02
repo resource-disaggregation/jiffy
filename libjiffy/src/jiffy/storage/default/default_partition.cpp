@@ -21,22 +21,35 @@ default_partition::default_partition(block_memory_manager *manager,
                                            const int directory_port,
                                            const std::string &auto_scaling_host,
                                            const int auto_scaling_port)
-    : chain_module(manager, name, metadata, {}){}
+    : chain_module(manager, name, metadata, {}){
+      (void)directory_host;
+      (void)directory_port;
+      (void)conf;
+      (void)auto_scaling_host;
+      (void)auto_scaling_port;
+}
 
 void default_partition::run_command(std::vector<std::string> &_return,
                                        int32_t cmd_id,
                                        const std::vector<std::string> &args) {
+      (void)cmd_id;
+      (void)args;
       LOG(log_level::info) << "Into default partition function";
       _return.emplace_back("!block_moved");
 }
 
 void default_partition::load(const std::string &path) {
+      (void)path;
 }
 
 bool default_partition::sync(const std::string &path) {
+      (void)path;
+      return false;
 }
 
 bool default_partition::dump(const std::string &path) {
+      (void)path;
+      return false;
 }
 
 void default_partition::forward_all() {

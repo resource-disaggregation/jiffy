@@ -32,6 +32,7 @@ void subscription_map::remove_subscriptions(const std::vector<std::string> &ops,
 }
 
 void subscription_map::notify(const std::string &op, const std::string &msg) {
+  if(op == "default_partition") return;
   std::lock_guard<std::mutex> lock{mtx_};
   for (const auto &client: subs_[op]) {
     client->notification(op, msg);

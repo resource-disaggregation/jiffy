@@ -44,6 +44,9 @@ class partition {
   virtual ~partition() {
     LOG(log_level::info) << "Into this destructor";
     client_map_.send_failure();
+    client_map_.clear();
+    // TODO need to figure out if we want to notify an error to the subscripted clients after a delete of partition
+    sub_map_.clear();
     LOG(log_level::info) << "Finish sending failure messages";
     // TODO add similar logic for sub_map_
   }
@@ -209,6 +212,8 @@ class partition {
   block_memory_manager *manager_;
   /* Binary allocator */
   allocator<uint8_t> binary_allocator_;
+  /* Atomic bool to indicate that the partition is a default one */
+  std::atomic<bool> default_;
 };
 
 }
