@@ -27,7 +27,7 @@ TEST_CASE("fifo_queue_enqueue_dequeue_test", "[enqueue][dequeue]") {
 /*
 TEST_CASE("fifo_queue_send_clear_read_test", "[send][read]") {
   block_memory_manager manager;
-  msg_queue_partition block(&manager);
+  file_partition block(&manager);
 
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.send(std::to_string(i)) == "!ok");
@@ -39,9 +39,9 @@ TEST_CASE("fifo_queue_send_clear_read_test", "[send][read]") {
   }
 }
 
-TEST_CASE("msg_queue_storage_size_test", "[put][size][storage_size][reset]") {
+TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
   block_memory_manager manager;
-  msg_queue_partition block(&manager);
+  file_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.send(std::to_string(i)) == "!ok");
   }
@@ -50,12 +50,12 @@ TEST_CASE("msg_queue_storage_size_test", "[put][size][storage_size][reset]") {
   REQUIRE(block.storage_size() <= block.storage_capacity());
 }
 
-TEST_CASE("msg_queue_flush_load_test", "[send][sync][reset][load][read]") {
+TEST_CASE("file_flush_load_test", "[send][sync][reset][load][read]") {
   block_memory_manager manager;
-  msg_queue_partition block(&manager);
+  file_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {
     std::vector<std::string> res;
-    block.run_command(res, msg_queue_cmd_id::mq_send, {std::to_string(i)});
+    block.run_command(res, file_cmd_id::mq_send, {std::to_string(i)});
     REQUIRE(res.front() == "!ok");
   }
   REQUIRE(block.is_dirty());

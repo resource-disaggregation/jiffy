@@ -7,9 +7,9 @@
 #include "jiffy/storage/manager/storage_management_server.h"
 #include "jiffy/storage/manager/storage_management_client.h"
 #include "jiffy/storage/manager/storage_manager.h"
-#include "jiffy/storage/msgqueue/msg_queue_partition.h"
+#include "jiffy/storage/file/file_partition.h"
 #include "jiffy/storage/service/block_server.h"
-#include "jiffy/storage/client/msg_queue_client.h"
+#include "jiffy/storage/client/file_client.h"
 
 using namespace ::jiffy::storage;
 using namespace ::jiffy::directory;
@@ -21,11 +21,11 @@ using namespace ::apache::thrift::transport;
 #define STORAGE_SERVICE_PORT 9091
 #define STORAGE_MANAGEMENT_PORT 9092
 
-TEST_CASE("msg_queue_client_send_read_test", "[send][read]") {
+TEST_CASE("file_client_write_read_test", "[write][read]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_msg_queue_blocks(block_names, 134217728, 0, 1);
+  auto blocks = test_utils::init_file_blocks(block_names, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -38,13 +38,13 @@ TEST_CASE("msg_queue_client_send_read_test", "[send][read]") {
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
-  data_status status = tree->create("/sandbox/file.txt", "msgqueue", "/tmp", NUM_BLOCKS, 1, 0, 0,
+  data_status status = tree->create("/sandbox/file.txt", "file", "/tmp", NUM_BLOCKS, 1, 0, 0,
                                   {"0"}, {"regular"}); //TODO we do not use metadata for now
 
-  msg_queue_client client(tree, "/sandbox/file.txt", status);
+  file_client client(tree, "/sandbox/file.txt", status);
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.send(std::to_string(i)) == "!ok");
+    REQUIRE(client.write(std::to_string(i)) == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -65,11 +65,11 @@ TEST_CASE("msg_queue_client_send_read_test", "[send][read]") {
   }
 }
 
-TEST_CASE("msg_queue_client_pipelined_ops_test", "[put][update][remove][get]") {
+TEST_CASE("file_client_pipelined_ops_test", "[put][update][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_msg_queue_blocks(block_names, 134217728, 0, 1);
+  auto blocks = test_utils::init_file_blocks(block_names, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -83,15 +83,15 @@ TEST_CASE("msg_queue_client_pipelined_ops_test", "[put][update][remove][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "msgqueue", "/tmp", NUM_BLOCKS, 1, 0, 0,
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "file", "/tmp", NUM_BLOCKS, 1, 0, 0,
                                       {"0"}, {"regular"}));
 
-  msg_queue_client client(tree, "/sandbox/file.txt", status);
+  file_client client(tree, "/sandbox/file.txt", status);
   std::vector<std::string> message_batch;
   for (size_t i = 0; i < 1000; i++) {
     message_batch.push_back(std::to_string(i));
   }
-  auto res = client.send(message_batch);
+  auto res = client.write(message_batch);
   for (size_t i = 0; i < 1000; i++) {
     REQUIRE(res[i] == "!ok");
   }

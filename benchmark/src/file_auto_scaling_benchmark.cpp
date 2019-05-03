@@ -25,7 +25,7 @@ int main() {
   //size_t num_ops = 671088;
   //size_t num_ops = 3000;
   size_t data_size = 102400;
-  std::string op_type = "msg_queue_auto_scaling";
+  std::string op_type = "file_auto_scaling";
   std::string path = "/tmp";
   std::string backing_path = "local://tmp";
 
@@ -42,8 +42,8 @@ int main() {
   LOG(log_level::info) << "backing-path: " << backing_path;
 
   jiffy_client client(address, service_port, lease_port);
-  std::shared_ptr<msg_queue_client>
-      mq_client = client.open_or_create_msg_queue(path, backing_path, num_blocks, chain_length);
+  std::shared_ptr<file_client>
+      file_client_1 = client.open_or_create_file(path, backing_path, num_blocks, chain_length);
   std::string data_(data_size, 'x');
   std::chrono::milliseconds periodicity_ms_(1000);
   std::atomic_bool stop_{false};
@@ -73,13 +73,13 @@ int main() {
   });
   auto read_worker_ = std::thread([&] {
     uint64_t read_tot_time = 0, read_t0 = 0, read_t1 = 0;
-    std::shared_ptr<msg_queue_client>
-        mq_client2 = client.open_msg_queue(path);
+    std::shared_ptr<file_client>
+        file_client_2 = client.open_file(path);
     std::ofstream out2("read_latency.trace");
     while (!stop2_.load()) {
       for (size_t k = 0; k < num_ops; ++k) {
         read_t0 = time_utils::now_us();
-        mq_client2->read();
+        file_client_2->read();
         read_t1 = time_utils::now_us();
         read_tot_time = (read_t1 - read_t0);
         auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
@@ -90,14 +90,14 @@ int main() {
   });
 
   std::ofstream out("latency.trace");
-  uint64_t send_tot_time = 0, send_t0 = 0, send_t1 = 0;
+  uint64_t write_tot_time = 0, write_t0 = 0, write_t1 = 0;
   for (j = 0; j < num_ops; ++j) {
-    send_t0 = time_utils::now_us();
-    mq_client->send(data_);
-    send_t1 = time_utils::now_us();
-    send_tot_time = send_t1 - send_t0;
+    write_t0 = time_utils::now_us();
+    file_client_1->write(data_);
+    write_t1 = time_utils::now_us();
+    write_tot_time = write_t1 - write_t0;
     auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
-    out << cur_epoch << " " << send_tot_time << " us";
+    out << cur_epoch << " " << write_tot_time << " us";
     out << std::endl;
   }
   stop_.store(true);

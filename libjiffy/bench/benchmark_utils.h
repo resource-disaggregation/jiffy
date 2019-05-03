@@ -9,7 +9,7 @@
 #include <iterator>
 
 #include "jiffy/storage/hashtable/hash_table_ops.h"
-#include "jiffy/storage/msgqueue/msg_queue_ops.h"
+#include "jiffy/storage/file/file_ops.h"
 
 namespace jiffy {
 namespace benchmark {

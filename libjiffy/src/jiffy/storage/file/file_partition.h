@@ -1,5 +1,5 @@
-#ifndef JIFFY_MSG_QUEUE_SERVICE_SHARD_H
-#define JIFFY_MSG_QUEUE_SERVICE_SHARD_H
+#ifndef JIFFY_FILE_SERVICE_SHARD_H
+#define JIFFY_FILE_SERVICE_SHARD_H
 
 #include <string>
 #include <jiffy/utils/property_map.h>
@@ -7,28 +7,28 @@
 #include "jiffy/storage/partition.h"
 #include "jiffy/persistent/persistent_service.h"
 #include "jiffy/storage/chain_module.h"
-#include "msg_queue_defs.h"
+#include "file_defs.h"
 #include "jiffy/directory/directory_ops.h"
 
 namespace jiffy {
 namespace storage {
 
-class msg_queue_partition : public chain_module {
+class file_partition : public chain_module {
  public:
 
-  explicit msg_queue_partition(block_memory_manager *manager,
-                               const std::string &name = "0", //TODO need to fix this name
-                               const std::string &metadata = "regular", //TODO need to fix this metadata
-                               const utils::property_map &conf = {},
-                               const std::string &directory_host = "localhost",
-                               const int directory_port = 9091,
-                               const std::string &auto_scaling_host = "localhost",
-                               const int auto_scaling_port = 9095);
+  explicit file_partition(block_memory_manager *manager,
+                          const std::string &name = "0",
+                          const std::string &metadata = "regular",
+                          const utils::property_map &conf = {},
+                          const std::string &directory_host = "localhost",
+                          const int directory_port = 9091,
+                          const std::string &auto_scaling_host = "localhost",
+                          const int auto_scaling_port = 9095);
 
   /**
    * @brief Virtual destructor
    */
-  virtual ~msg_queue_partition() = default;
+  virtual ~file_partition() = default;
 
   /**
    * @brief Fetch block size
@@ -45,20 +45,20 @@ class msg_queue_partition : public chain_module {
   bool empty() const;
 
   /**
-   * @brief Send a new message to the message queue
+   * @brief Write to the file
    * @param message New message
-   * @return Send return status string
+   * @return Write return status string
    */
-  std::string send(const std::string &message);
+  std::string write(const std::string &message);
 
   /**
-   * @brief Read a new message from the message queue
+   * @brief Read a new message from the file
    * @return Read return status string
    */
   std::string read(std::string position);
 
   /**
-   * @brief Clear the message queue
+   * @brief Clear the file
    * @return Clear return status
    */
   std::string clear();
@@ -71,7 +71,7 @@ class msg_queue_partition : public chain_module {
   std::string update_partition(const std::string &next_target);
 
   /**
-   * @brief Run particular command on key value block
+   * @brief Run particular command on file
    * @param _return Return status to be collected
    * @param cmd_id Operation identifier
    * @param args Command arguments
@@ -122,16 +122,21 @@ class msg_queue_partition : public chain_module {
   void next_target(std::vector<std::string> &target) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     next_target_string = "";
-    for(const auto &block: target) {
+    for (const auto &block: target) {
       next_target_string += (block + "!");
     }
     next_target_string.pop_back();
   }
 
+  /**
+   * @brief Set next target string
+   * @param target_str Next target replica chain in string format
+   */
   void next_target(const std::string &target_str) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     next_target_string = target_str;
   }
+
   /**
    * @brief Fetch next target string
    * @return Next target string
@@ -139,7 +144,6 @@ class msg_queue_partition : public chain_module {
   std::string next_target_str() {
     return next_target_string;
   }
-
 
  private:
 
@@ -150,8 +154,8 @@ class msg_queue_partition : public chain_module {
 
   bool overload();
 
-  /* Message queue partition */
-  msg_queue_type partition_;
+  /* File partition */
+  file_type partition_;
 
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
@@ -189,4 +193,4 @@ class msg_queue_partition : public chain_module {
 }
 }
 
-#endif //JIFFY_MSG_QUEUE_SERVICE_SHARD_H
+#endif //JIFFY_FILE_SERVICE_SHARD_H

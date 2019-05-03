@@ -85,7 +85,7 @@ TEST_CASE("fifo_queue_client_enqueue_dequeue_test", "[enqueue][dequeue]") {
   }
 }
 /*
-TEST_CASE("msg_queue_client_pipelined_ops_test", "[put][update][remove][get]") {
+TEST_CASE("file_client_pipelined_ops_test", "[put][update][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
@@ -103,10 +103,10 @@ TEST_CASE("msg_queue_client_pipelined_ops_test", "[put][update][remove][get]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status;
-  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "msgqueue", "/tmp", NUM_BLOCKS, 1, 0, 0,
+  REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "file", "/tmp", NUM_BLOCKS, 1, 0, 0,
                                       {"0"}, {"regular"}));
 
-  msg_queue_client client(tree, "/sandbox/file.txt", status);
+  file_client client(tree, "/sandbox/file.txt", status);
   std::vector<std::string> message_batch;
   for (size_t i = 0; i < 1000; i++) {
     message_batch.push_back(std::to_string(i));

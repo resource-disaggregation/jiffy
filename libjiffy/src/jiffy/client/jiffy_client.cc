@@ -65,10 +65,10 @@ std::shared_ptr<storage::btree_client> jiffy_client::open_btree(const std::strin
   return std::make_shared<storage::btree_client>(fs_, path, s);
 }
 
-std::shared_ptr<storage::msg_queue_client> jiffy_client::open_msg_queue(const std::string &path) {
+std::shared_ptr<storage::file_client> jiffy_client::open_file(const std::string &path) {
   auto s = fs_->open(path);
   begin_scope(path);
-  return std::make_shared<storage::msg_queue_client>(fs_, path, s);
+  return std::make_shared<storage::file_client>(fs_, path, s);
 }
 
 std::shared_ptr<storage::fifo_queue_client> jiffy_client::open_fifo_queue(const std::string &path) {
@@ -101,7 +101,7 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::open_or_create_hash_ta
   return std::make_shared<storage::hash_table_client>(fs_, path, s, timeout_ms);
 }
 
-std::shared_ptr<storage::msg_queue_client> jiffy_client::open_or_create_msg_queue(const std::string &path,
+std::shared_ptr<storage::file_client> jiffy_client::open_or_create_file(const std::string &path,
                                                                                   const std::string &backing_path,
                                                                                   int32_t num_blocks,
                                                                                   int32_t chain_length,
@@ -115,10 +115,10 @@ std::shared_ptr<storage::msg_queue_client> jiffy_client::open_or_create_msg_queu
     block_names.push_back(std::to_string(i));
     block_metadata.emplace_back("regular");
   }
-  auto s = fs_->open_or_create(path, "msgqueue", backing_path, num_blocks, chain_length, flags, permissions,
+  auto s = fs_->open_or_create(path, "file", backing_path, num_blocks, chain_length, flags, permissions,
                                block_names, block_metadata, tags);
   begin_scope(path);
-  return std::make_shared<storage::msg_queue_client>(fs_, path, s);
+  return std::make_shared<storage::file_client>(fs_, path, s);
 }
 
 std::shared_ptr<storage::fifo_queue_client> jiffy_client::open_or_create_fifo_queue(const std::string &path,

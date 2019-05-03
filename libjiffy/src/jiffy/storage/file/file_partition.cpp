@@ -1,10 +1,10 @@
 #include <jiffy/utils/string_utils.h>
-#include "msg_queue_partition.h"
+#include "file_partition.h"
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/logger.h"
 #include "jiffy/persistent/persistent_store.h"
 #include "jiffy/storage/partition_manager.h"
-#include "jiffy/storage/msgqueue/msg_queue_ops.h"
+#include "jiffy/storage/file/file_ops.h"
 #include "jiffy/directory/client/directory_client.h"
 #include "jiffy/auto_scaling/auto_scaling_client.h"
 #include <thread>
@@ -14,7 +14,7 @@ namespace storage {
 
 using namespace utils;
 
-msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
+file_partition::file_partition(block_memory_manager *manager,
                                          const std::string &name,
                                          const std::string &metadata,
                                          const utils::property_map &conf,
@@ -22,7 +22,7 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
                                          const int directory_port,
                                          const std::string &auto_scaling_host,
                                          const int auto_scaling_port)
-    : chain_module(manager, name, metadata, MSG_QUEUE_OPS),
+    : chain_module(manager, name, metadata, file_OPS),
       partition_(build_allocator<msg_type>()),
       overload_(false),
       dirty_(false),
@@ -30,7 +30,7 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
       directory_port_(directory_port),
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port){
-  auto ser = conf.get("msgqueue.serializer", "csv");
+  auto ser = conf.get("file.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
   } else if (ser == "csv") {
@@ -38,12 +38,12 @@ msg_queue_partition::msg_queue_partition(block_memory_manager *manager,
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
-  threshold_hi_ = conf.get_as<double>("msgqueue.capacity_threshold_hi", 0.95);
-  threshold_lo_ = conf.get_as<double>("msgqueue.capacity_threshold_lo", 0.00);
-  auto_scale_ = conf.get_as<bool>("msgqueue.auto_scale", true);
+  threshold_hi_ = conf.get_as<double>("file.capacity_threshold_hi", 0.95);
+  threshold_lo_ = conf.get_as<double>("file.capacity_threshold_lo", 0.00);
+  auto_scale_ = conf.get_as<bool>("file.auto_scale", true);
 }
 
-std::string msg_queue_partition::send(const std::string &message) {
+std::string file_partition::write(const std::string &message) {
   //<< "Sending " << message
   //LOG(log_level::info) << " Storage size " << storage_size() << " Storage capacity "
    //                    << storage_capacity();
@@ -62,7 +62,7 @@ std::string msg_queue_partition::send(const std::string &message) {
   return "!ok";
 }
 
-std::string msg_queue_partition::read(std::string position) {
+std::string file_partition::read(std::string position) {
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   auto pos = std::stoi(position);
   if (pos < 0) throw std::invalid_argument("read position invalid");
@@ -80,38 +80,38 @@ std::string msg_queue_partition::read(std::string position) {
   return "!msg_not_found";
 }
 
-std::string msg_queue_partition::clear() {
+std::string file_partition::clear() {
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   partition_.clear();
   return "!ok";
 }
 
-std::string msg_queue_partition::update_partition(const std::string &next) {
+std::string file_partition::update_partition(const std::string &next) {
   next_target(next);
   return "!ok";
 }
 
-void msg_queue_partition::run_command(std::vector<std::string> &_return,
+void file_partition::run_command(std::vector<std::string> &_return,
                                       int32_t cmd_id,
                                       const std::vector<std::string> &args) {
   size_t nargs = args.size();
   switch (cmd_id) {
-    case msg_queue_cmd_id::mq_send:
+    case file_cmd_id::file_write:
       for (const std::string &msg: args)
-        _return.emplace_back(send(msg));
+        _return.emplace_back(write(msg));
       break;
-    case msg_queue_cmd_id::mq_read:
+    case file_cmd_id::file_read:
       for (const auto &pos: args)
         _return.emplace_back(read(pos));
       break;
-    case msg_queue_cmd_id::mq_clear:
+    case file_cmd_id::file_clear:
       if (nargs != 0) {
         _return.emplace_back("!args_error");
       } else {
         _return.emplace_back(clear());
       }
       break;
-    case msg_queue_cmd_id::mq_update_partition:
+    case file_cmd_id::file_update_partition:
       if (nargs != 1) {
         _return.emplace_back("!args_error");
       } else {
@@ -133,7 +133,7 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
       overload_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
       std::map<std::string, std::string> scale_conf;
-      scale_conf.emplace(std::make_pair(std::string("type"), std::string("msg_queue")));
+      scale_conf.emplace(std::make_pair(std::string("type"), std::string("file")));
       scale_conf.emplace(std::make_pair(std::string("next_partition_name"), dst_partition_name));
       auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
       scale->auto_scaling(chain(), path(), scale_conf);
@@ -144,43 +144,43 @@ void msg_queue_partition::run_command(std::vector<std::string> &_return,
   }
 }
 
-std::size_t msg_queue_partition::size() const {
+std::size_t file_partition::size() const {
   return partition_.size();
 }
 
-bool msg_queue_partition::empty() const {
+bool file_partition::empty() const {
   return partition_.empty();
 }
 
-bool msg_queue_partition::is_dirty() const {
+bool file_partition::is_dirty() const {
   return dirty_.load();
 }
 
-void msg_queue_partition::load(const std::string &path) {
+void file_partition::load(const std::string &path) {
   auto remote = persistent::persistent_store::instance(path, ser_);
   auto decomposed = persistent::persistent_store::decompose_path(path);
-  remote->read<msg_queue_type>(decomposed.second, partition_);
+  remote->read<file_type>(decomposed.second, partition_);
 }
 
-bool msg_queue_partition::sync(const std::string &path) {
+bool file_partition::sync(const std::string &path) {
   bool expected = true;
   if (dirty_.compare_exchange_strong(expected, false)) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    remote->write<msg_queue_type>(partition_, decomposed.second);
+    remote->write<file_type>(partition_, decomposed.second);
     return true;
   }
   return false;
 }
 
-bool msg_queue_partition::dump(const std::string &path) {
+bool file_partition::dump(const std::string &path) {
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   bool expected = true;
   bool flushed = false;
   if (dirty_.compare_exchange_strong(expected, false)) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    remote->write<msg_queue_type>(partition_, decomposed.second);
+    remote->write<file_type>(partition_, decomposed.second);
     flushed = true;
   }
   partition_.clear();
@@ -195,16 +195,16 @@ bool msg_queue_partition::dump(const std::string &path) {
   return flushed;
 }
 
-void msg_queue_partition::forward_all() {
+void file_partition::forward_all() {
   int64_t i = 0;
   for (auto it = partition_.begin(); it != partition_.end(); it++) {
     std::vector<std::string> result;
-    run_command_on_next(result, msg_queue_cmd_id::mq_send, {to_string(*it)});
+    run_command_on_next(result, file_cmd_id::file_write, {to_string(*it)});
     ++i;
   }
 }
 
-bool msg_queue_partition::overload() {
+bool file_partition::overload() {
   //if (storage_size() < storage_capacity())
   //return false;
   //return partition_.size() > static_cast<size_t>(static_cast<double>(partition_.capacity()) * threshold_hi_);
@@ -213,7 +213,7 @@ bool msg_queue_partition::overload() {
   //return storage_size() > static_cast<size_t>(static_cast<double>(storage_capacity()) * threshold_hi_);
 }
 
-REGISTER_IMPLEMENTATION("msgqueue", msg_queue_partition);
+REGISTER_IMPLEMENTATION("file", file_partition);
 
 }
 }
