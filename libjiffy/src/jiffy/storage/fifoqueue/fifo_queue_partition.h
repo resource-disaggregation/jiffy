@@ -17,8 +17,8 @@ class fifo_queue_partition : public chain_module {
  public:
 
   explicit fifo_queue_partition(block_memory_manager *manager,
-                               const std::string &name = "0", //TODO need to fix this name
-                               const std::string &metadata = "regular", //TODO need to fix this metadata
+                               const std::string &name = "0",
+                               const std::string &metadata = "regular",
                                const utils::property_map &conf = {},
                                const std::string &directory_host = "localhost",
                                const int directory_port = 9091,
@@ -156,8 +156,6 @@ class fifo_queue_partition : public chain_module {
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
 
-  /* Low threshold */
-  double threshold_lo_;
   /* High threshold */
   double threshold_hi_;
 
@@ -175,6 +173,9 @@ class fifo_queue_partition : public chain_module {
 
   /* Bool value for auto scaling */
   std::atomic_bool auto_scale_;
+
+  /* Bool value for split string */
+  std::atomic_bool split_string_;
 
   /* Directory server hostname */
   std::string directory_host_;

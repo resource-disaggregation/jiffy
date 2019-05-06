@@ -22,7 +22,7 @@ file_partition::file_partition(block_memory_manager *manager,
                                const int directory_port,
                                const std::string &auto_scaling_host,
                                const int auto_scaling_port)
-    : chain_module(manager, name, metadata, file_OPS),
+    : chain_module(manager, name, metadata, FILE_OPS),
       partition_(manager->mb_capacity(), build_allocator<char>()),
       overload_(false),
       dirty_(false),
@@ -38,6 +38,7 @@ file_partition::file_partition(block_memory_manager *manager,
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
+  split_string_ = false;
   threshold_hi_ = conf.get_as<double>("file.capacity_threshold_hi", 0.95);
   auto_scale_ = conf.get_as<bool>("file.auto_scale", true);
 }
@@ -45,7 +46,7 @@ file_partition::file_partition(block_memory_manager *manager,
 std::string file_partition::write(const std::string &message) {
   //LOG(log_level::info) << "Writing to file: " << message;
   //LOG(log_level::info) << "partition size: " << partition_.size() << " partition capacity: " << partition_.capacity();
-  if (partition_.size() > partition_.capacity()) {
+  if (partition_.size() > partition_.capacity() && !split_string_.load()) {
     if (!next_target_str().empty()) {
       return "!full!" + next_target_str();
     } else {
@@ -54,6 +55,7 @@ std::string file_partition::write(const std::string &message) {
   }
   auto ret = partition_.push_back(message);
   if(!ret.first) {
+    split_string_ = true;
     //TODO at this point we assume that next_target_str is always set before the last string to write, this could cause error when the last string is bigger than 6.4MB
     return "!split_write!" + next_target_str() + "!" + std::to_string(ret.second.size());
   }
@@ -82,6 +84,7 @@ std::string file_partition::read(std::string position) {
 
 std::string file_partition::clear() {
   partition_.clear();
+  split_string_ = false;
   return "!ok";
 }
 

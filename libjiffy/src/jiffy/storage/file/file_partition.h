@@ -171,6 +171,8 @@ class file_partition : public chain_module {
 
   /* Bool value for auto scaling */
   std::atomic_bool auto_scale_;
+  /* Bool value for split string at end of partition */
+  std::atomic<bool> split_string_;
 
   /* Directory server hostname */
   std::string directory_host_;

@@ -7,7 +7,7 @@
 
 namespace jiffy {
 namespace storage {
-extern std::vector<command> file_OPS;
+extern std::vector<command> FILE_OPS;
 
 /**
  * @brief File supported operations

@@ -39,7 +39,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       next_target_string += (block + "!");
     }
     next_target_string.pop_back();
-    auto src = std::make_shared<storage::replica_chain_client>(fs, path, current_replica_chain, storage::file_OPS);
+    auto src = std::make_shared<storage::replica_chain_client>(fs, path, current_replica_chain, storage::FILE_OPS);
     std::vector<std::string> args;
     args.emplace_back(next_target_string);
     src->run_command(storage::file_cmd_id::file_update_partition, args);
