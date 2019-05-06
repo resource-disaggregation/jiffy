@@ -178,7 +178,7 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
 */
 
 
-/*
+
 TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(21, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -215,11 +215,11 @@ TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][managemen
     REQUIRE(client.write(std::string(102400, (std::to_string(i)).c_str()[0])) == "!ok");
   }
 
-  for (std::size_t i = 0; i < 900; ++i) {
-    REQUIRE(client.read() == std::string(102400, (std::to_string(i)).c_str()[0]));
+  for (std::size_t i = 0; i < 5000; ++i) {
+    REQUIRE(client.read() == std::string(512, (std::to_string(i)).c_str()[0]));
   }
   for (std::size_t i = 0; i < 2000; ++i) {
-    REQUIRE(client.read() == std::string(51200, (std::to_string(i)).c_str()[0]));
+    REQUIRE(client.read() == std::string(102400, (std::to_string(i)).c_str()[0]));
   }
 
   // Busy wait until number of blocks increases
@@ -248,9 +248,9 @@ TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][managemen
   }
 
 }
-*/
 
 
+/*
 TEST_CASE("btree_auto_scale_up_test", "[directory_service][storage_server][management_server]") {
   std::vector<std::string> keys;
   std::string fileName = "../../benchmark/src/word_alpha.txt";
@@ -333,7 +333,7 @@ TEST_CASE("btree_auto_scale_up_test", "[directory_service][storage_server][manag
   }
 }
 
-/*
+
 TEST_CASE("btree_auto_scale_down_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(3, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -405,7 +405,7 @@ TEST_CASE("btree_auto_scale_down_test", "[directory_service][storage_server][man
   }
 }
 */
-/*
+
 
 TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -437,13 +437,13 @@ TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][man
 
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 2100; ++i) {
-    REQUIRE(client.enqueue(std::string(102400, (std::to_string(i)).c_str()[0])) == "!ok");
+    REQUIRE(client.enqueue(std::string(100000, (std::to_string(i)).c_str()[0])) == "!ok");
   }
   // Busy wait until number of blocks increases
   while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
 
   for (std::size_t i = 0; i < 2100; ++i) {
-    REQUIRE(client.dequeue() == std::string(102400, (std::to_string(i)).c_str()[0]));
+    REQUIRE(client.dequeue() == std::string(100000, (std::to_string(i)).c_str()[0]));
   }
   // Busy wait until number of blocks increases
   while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() > 1);
@@ -471,4 +471,3 @@ TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][man
   }
 
 }
- */

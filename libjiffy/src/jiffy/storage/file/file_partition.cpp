@@ -26,6 +26,7 @@ file_partition::file_partition(block_memory_manager *manager,
       partition_(manager->mb_capacity(), build_allocator<char>()),
       overload_(false),
       dirty_(false),
+      split_string_(false),
       directory_host_(directory_host),
       directory_port_(directory_port),
       auto_scaling_host_(auto_scaling_host),
@@ -38,7 +39,6 @@ file_partition::file_partition(block_memory_manager *manager,
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
-  split_string_ = false;
   threshold_hi_ = conf.get_as<double>("file.capacity_threshold_hi", 0.95);
   auto_scale_ = conf.get_as<bool>("file.auto_scale", true);
 }
@@ -63,7 +63,7 @@ std::string file_partition::write(const std::string &message) {
 }
 
 std::string file_partition::read(std::string position) {
-  LOG(log_level::info) << "Reading at position " << position;
+  //LOG(log_level::info) << "Reading at position " << position;
   auto pos = std::stoi(position);
   if (pos < 0) throw std::invalid_argument("read position invalid");
   auto ret = partition_.at(static_cast<std::size_t>(pos));
@@ -84,6 +84,9 @@ std::string file_partition::read(std::string position) {
 
 std::string file_partition::clear() {
   partition_.clear();
+  split_string_ = false;
+  overload_ = false;
+  dirty_ = false;
   split_string_ = false;
   return "!ok";
 }
