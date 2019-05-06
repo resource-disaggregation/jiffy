@@ -110,8 +110,8 @@ class csv_serde_impl : public serde {
    * @return Output stream position after flushing
    */
   std::size_t serialize_impl(const file_type &table, const std::shared_ptr<std::ostream> &out) {
-    for (const auto &e: table) {
-      *out << to_string(e) << "\n";
+    for (auto e = table.begin(); e != table.end(); e++) {
+      *out << *e << "\n";
     }
     out->flush();
     auto sz = out->tellp();
@@ -150,7 +150,7 @@ class csv_serde_impl : public serde {
       std::getline(*in, line, '\n');
       if (line.empty())
         break;
-      data.push_back(make_binary(line));
+      data.push_back(line);
     }
     auto sz = in->tellg();
     return static_cast<std::size_t>(sz);
@@ -232,10 +232,10 @@ class binary_serde_impl : public serde {
    * @return Output stream position
    */
   size_t serialize_impl(const file_type &table, const std::shared_ptr<std::ostream> &out) {
-    for (const auto &e: table) {
-      std::size_t msg_size = e.size();
+    for (auto e = table.begin(); e != table.end(); e++) {
+      std::size_t msg_size = (*e).size();
       out->write(reinterpret_cast<const char *>(&msg_size), sizeof(size_t))
-          .write(reinterpret_cast<const char *>(e.data()), msg_size);
+          .write(reinterpret_cast<const char *>((*e).data()), msg_size);
     }
     out->flush();
     auto sz = out->tellp();
@@ -280,7 +280,7 @@ class binary_serde_impl : public serde {
       std::string msg;
       msg.resize(msg_size);
       in->read(&msg[0], msg_size);
-      table.push_back(make_binary(msg));
+      table.push_back(msg);
     }
     auto sz = in->tellg();
     return static_cast<std::size_t>(sz);

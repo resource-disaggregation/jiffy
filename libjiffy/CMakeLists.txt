@@ -94,6 +94,8 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/btree/btree_ops.cpp
           src/jiffy/storage/btree/btree_partition.h
           src/jiffy/storage/btree/btree_partition.cpp
+          src/jiffy/storage/string_array.h
+          src/jiffy/storage/string_array.cpp
           src/jiffy/storage/file/file_defs.h
           src/jiffy/storage/file/file_ops.h
           src/jiffy/storage/file/file_ops.cpp
@@ -250,7 +252,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
     include_directories(${CATCH_INCLUDE_DIR})
     add_executable(jiffy_tests
             test/jiffy_tests.cpp
-            test/auto_scaling_test.cpp
+#            test/auto_scaling_test.cpp
 #            test/block_allocation_service_test.cpp
 #            test/block_allocator_test.cpp
 #            test/chain_replication_test.cpp
@@ -262,8 +264,8 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
 #            test/hash_table_client_test.cpp
 #            test/btree_partition_test.cpp
 #            test/btree_client_test.cpp
-#            test/file_partition_test.cpp
-#            test/file_client_test.cpp
+            test/file_partition_test.cpp
+            test/file_client_test.cpp
 #             test/fifo_queue_client_test.cpp
 #             test/fifo_queue_partition_test.cpp
 #            test/lease_expiry_worker_test.cpp
@@ -320,6 +322,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/hashtable/hash_table_ops.cpp
           src/jiffy/storage/btree/btree_ops.h
           src/jiffy/storage/btree/btree_ops.cpp
+          src/jiffy/storage/string_array.h
+          src/jiffy/storage/string_array.cpp
           src/jiffy/storage/file/file_ops.h
           src/jiffy/storage/file/file_ops.cpp
           src/jiffy/storage/fifoqueue/fifo_queue_ops.h

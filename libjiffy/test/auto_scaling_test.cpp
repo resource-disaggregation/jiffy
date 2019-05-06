@@ -42,7 +42,7 @@ using namespace ::apache::thrift::transport;
 #define STORAGE_MANAGEMENT_PORT 9092
 #define AUTO_SCALING_SERVICE_PORT 9095
 
-
+/*
 TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(100, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -104,9 +104,9 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
     dir_serve_thread.join();
   }
 }
+*/
 
-
-
+/*
 TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(3, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -135,7 +135,7 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
   data_status status = t->create("/sandbox/scale_down.txt", "hashtable", "/tmp", 3, 1, 0, perms::all(), {"0_16384","16384_32768", "32768_65536"}, {"regular", "regular", "regular"}, {});
   hash_table_client client(t, "/sandbox/scale_down.txt", status);
 
-  for(std::size_t i = 0; i < 1000; ++i) {
+  for(std::size_t i = 0; i <= 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
 
@@ -152,9 +152,7 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
 
   for (std::size_t i = 1; i < 1000; i++) {
     std::string key = std::to_string(i);
-    REQUIRE_THROWS(std::dynamic_pointer_cast<hash_table_partition>(blocks[0]->impl())->get(key) == "!block_moved");
     REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[1]->impl())->get(key) == key);
-    REQUIRE_THROWS(std::dynamic_pointer_cast<hash_table_partition>(blocks[2]->impl())->get(key) == "!block_moved");
   }
 
   as_server->stop();
@@ -177,9 +175,10 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
     dir_serve_thread.join();
   }
 }
+*/
 
 
-
+/*
 TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(21, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -209,12 +208,20 @@ TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][managemen
   file_client client(t, "/sandbox/scale_up.txt", status);
 
   // Write data until auto scaling is triggered
-  for (std::size_t i = 0; i < 2000; ++i) {
+  for (std::size_t i = 0; i < 5000; ++i) {
+    REQUIRE(client.write(std::string(512, (std::to_string(i)).c_str()[0])) == "!ok");
+  }
+  for(std::size_t i = 0; i < 2000; ++i) {
     REQUIRE(client.write(std::string(102400, (std::to_string(i)).c_str()[0])) == "!ok");
   }
-  for (std::size_t i = 0; i < 2000; ++i) {
+
+  for (std::size_t i = 0; i < 900; ++i) {
     REQUIRE(client.read() == std::string(102400, (std::to_string(i)).c_str()[0]));
   }
+  for (std::size_t i = 0; i < 2000; ++i) {
+    REQUIRE(client.read() == std::string(51200, (std::to_string(i)).c_str()[0]));
+  }
+
   // Busy wait until number of blocks increases
   while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
 
@@ -241,12 +248,12 @@ TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][managemen
   }
 
 }
+*/
 
 
 TEST_CASE("btree_auto_scale_up_test", "[directory_service][storage_server][management_server]") {
   std::vector<std::string> keys;
-  //std::string fileName = "../../benchmark/src/word_alpha.txt";
-  std::string fileName = "../../benchmark/src/random_keys.txt";
+  std::string fileName = "../../benchmark/src/word_alpha.txt";
   std::ifstream in(fileName.c_str());
   // Check if object is valid
   if (!in) {
@@ -326,7 +333,7 @@ TEST_CASE("btree_auto_scale_up_test", "[directory_service][storage_server][manag
   }
 }
 
-
+/*
 TEST_CASE("btree_auto_scale_down_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(3, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -397,8 +404,8 @@ TEST_CASE("btree_auto_scale_down_test", "[directory_service][storage_server][man
     dir_serve_thread.join();
   }
 }
-
-
+*/
+/*
 
 TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -464,3 +471,4 @@ TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][man
   }
 
 }
+ */

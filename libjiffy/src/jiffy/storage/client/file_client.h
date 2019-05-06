@@ -54,7 +54,7 @@ class file_client : data_structure_client {
    * @return Response of the commands
    */
 
-  std::vector<std::string> write(const std::vector<std::string> &msgs);
+  //std::vector<std::string> write(const std::vector<std::string> &msgs);
 
   /**
    * @brief Read message in batch
@@ -62,18 +62,9 @@ class file_client : data_structure_client {
    * @return Response of batch command
    */
 
-  std::vector<std::string> read(std::size_t num_msg);
+  //std::vector<std::string> read(std::size_t num_msg);
 
  private:
-  /**
-   * @brief Get the read start position and increase it by one
-   * @return Start position in string
-   */
-  std::string get_inc_read_pos() {
-    auto old_val = read_offset_;
-    read_offset_++;
-    return std::to_string(old_val);
-  }
 
   /**
    * @brief Fetch block identifier for specified operation

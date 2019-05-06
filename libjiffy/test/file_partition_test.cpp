@@ -12,16 +12,15 @@ using namespace ::jiffy::persistent;
 TEST_CASE("file_write_read_test", "[write][read]") {
   block_memory_manager manager;
   file_partition block(&manager);
-
+  int read_pos = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.write(std::to_string(i)) == "!ok");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(block.read(std::to_string(i)) == std::to_string(i));
+    REQUIRE(block.read(std::to_string(read_pos)) == std::to_string(i));
+    read_pos += (metadata_length + std::to_string(i).size());
   }
-  for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(block.read(std::to_string(i)) == "!msg_not_found");
-  }
+  REQUIRE(block.read(std::to_string(read_pos + 1)) == "!msg_not_found");
 }
 
 
@@ -45,8 +44,6 @@ TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.write(std::to_string(i)) == "!ok");
   }
-  REQUIRE(block.size() == 1000);
-  //REQUIRE(block.storage_size() == 5780); Remove this test since we don't use bytes_ as storage size anymore
   REQUIRE(block.storage_size() <= block.storage_capacity());
 }
 
@@ -63,8 +60,10 @@ TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
   REQUIRE(!block.is_dirty());
   REQUIRE_FALSE(block.sync("local://tmp/test"));
   REQUIRE_NOTHROW(block.load("local://tmp/test"));
+  int read_pos = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(block.read(std::to_string(i)) == std::to_string(i));
+    REQUIRE(block.read(std::to_string(read_pos)) == std::to_string(i));
+    read_pos += (metadata_length + std::to_string(i).size());
   }
 }
 

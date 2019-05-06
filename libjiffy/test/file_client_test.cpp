@@ -64,7 +64,7 @@ TEST_CASE("file_client_write_read_test", "[write][read]") {
     mgmt_serve_thread.join();
   }
 }
-
+/*
 TEST_CASE("file_client_pipelined_ops_test", "[put][update][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -116,3 +116,4 @@ TEST_CASE("file_client_pipelined_ops_test", "[put][update][remove][get]") {
     mgmt_serve_thread.join();
   }
 }
+*/

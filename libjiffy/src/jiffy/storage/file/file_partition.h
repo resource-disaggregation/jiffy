@@ -160,8 +160,6 @@ class file_partition : public chain_module {
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
 
-  /* Low threshold */
-  double threshold_lo_;
   /* High threshold */
   double threshold_hi_;
 

@@ -181,23 +181,27 @@ bool fifo_queue_partition::is_dirty() const {
 }
 
 void fifo_queue_partition::load(const std::string &path) {
+  /*
   auto remote = persistent::persistent_store::instance(path, ser_);
   auto decomposed = persistent::persistent_store::decompose_path(path);
   remote->read<fifo_queue_type>(decomposed.second, partition_);
+   */
 }
 
 bool fifo_queue_partition::sync(const std::string &path) {
+  /*
   bool expected = true;
   if (dirty_.compare_exchange_strong(expected, false)) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
     remote->write<fifo_queue_type>(partition_, decomposed.second);
     return true;
-  }
+  }*/
   return false;
 }
 
 bool fifo_queue_partition::dump(const std::string &path) {
+  /*
   bool expected = true;
   bool flushed = false;
   if (dirty_.compare_exchange_strong(expected, false)) {
@@ -216,6 +220,7 @@ bool fifo_queue_partition::dump(const std::string &path) {
   overload_ = false;
   dirty_ = false;
   return flushed;
+   */
 }
 
 void fifo_queue_partition::forward_all() {

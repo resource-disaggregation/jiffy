@@ -15,21 +15,21 @@ namespace storage {
 using namespace utils;
 
 file_partition::file_partition(block_memory_manager *manager,
-                                         const std::string &name,
-                                         const std::string &metadata,
-                                         const utils::property_map &conf,
-                                         const std::string &directory_host,
-                                         const int directory_port,
-                                         const std::string &auto_scaling_host,
-                                         const int auto_scaling_port)
+                               const std::string &name,
+                               const std::string &metadata,
+                               const utils::property_map &conf,
+                               const std::string &directory_host,
+                               const int directory_port,
+                               const std::string &auto_scaling_host,
+                               const int auto_scaling_port)
     : chain_module(manager, name, metadata, file_OPS),
-      partition_(build_allocator<msg_type>()),
+      partition_(manager->mb_capacity(), build_allocator<char>()),
       overload_(false),
       dirty_(false),
       directory_host_(directory_host),
       directory_port_(directory_port),
       auto_scaling_host_(auto_scaling_host),
-      auto_scaling_port_(auto_scaling_port){
+      auto_scaling_port_(auto_scaling_port) {
   auto ser = conf.get("file.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
@@ -39,49 +39,48 @@ file_partition::file_partition(block_memory_manager *manager,
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
   threshold_hi_ = conf.get_as<double>("file.capacity_threshold_hi", 0.95);
-  threshold_lo_ = conf.get_as<double>("file.capacity_threshold_lo", 0.00);
   auto_scale_ = conf.get_as<bool>("file.auto_scale", true);
 }
 
 std::string file_partition::write(const std::string &message) {
-  //<< "Sending " << message
-  //LOG(log_level::info) << " Storage size " << storage_size() << " Storage capacity "
-   //                    << storage_capacity();
-  //LOG(log_level::info) << "partition size " << partition_.size() << " partition capacity " << partition_.capacity();
-  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-  if (storage_size() * 2 >= storage_capacity() && partition_.size() >= partition_.capacity()) {
+  //LOG(log_level::info) << "Writing to file: " << message;
+  //LOG(log_level::info) << "partition size: " << partition_.size() << " partition capacity: " << partition_.capacity();
+  if (partition_.size() > partition_.capacity()) {
     if (!next_target_str().empty()) {
       return "!full!" + next_target_str();
     } else {
       return "!redo";
     }
   }
-  //LOG(log_level::info) << "Come here 1";
-  partition_.push_back(make_binary(message));
-  //LOG(log_level::info) << "Come here 2";
+  auto ret = partition_.push_back(message);
+  if(!ret.first) {
+    //TODO at this point we assume that next_target_str is always set before the last string to write, this could cause error when the last string is bigger than 6.4MB
+    return "!split_write!" + next_target_str() + "!" + std::to_string(ret.second.size());
+  }
   return "!ok";
 }
 
 std::string file_partition::read(std::string position) {
-  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+  LOG(log_level::info) << "Reading at position " << position;
   auto pos = std::stoi(position);
   if (pos < 0) throw std::invalid_argument("read position invalid");
-  if (static_cast<std::size_t>(pos) < size()) {
-    return to_string(partition_[pos]);
+  auto ret = partition_.at(static_cast<std::size_t>(pos));
+  if(ret.first) {
+    return ret.second;
+  } else if(ret.second == "!reach_end") {
+    if (!next_target_str().empty())
+      return "!msg_not_in_partition";
+    else
+      return "!redo";
+  } else if(ret.second == "!not_available") {
+    return "!msg_not_found";
+  } else {
+    // This next target string is always set cause it needs to write first and then read
+      return "!split_read!" + ret.second;
   }
-  if(storage_size() * 2 >= storage_capacity() && partition_.size() >= partition_.capacity()) {
-    if(static_cast<std::size_t>(pos) == size()) {
-      if (!next_target_str().empty())
-        return "!msg_not_in_partition!" + next_target_str();
-      else
-        return "!redo";
-    }
-  }
-  return "!msg_not_found";
 }
 
 std::string file_partition::clear() {
-  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   partition_.clear();
   return "!ok";
 }
@@ -92,8 +91,8 @@ std::string file_partition::update_partition(const std::string &next) {
 }
 
 void file_partition::run_command(std::vector<std::string> &_return,
-                                      int32_t cmd_id,
-                                      const std::vector<std::string> &args) {
+                                 int32_t cmd_id,
+                                 const std::vector<std::string> &args) {
   size_t nargs = args.size();
   switch (cmd_id) {
     case file_cmd_id::file_write:
@@ -126,9 +125,9 @@ void file_partition::run_command(std::vector<std::string> &_return,
   bool expected = false;
   if (auto_scale_.load() && is_mutator(cmd_id) && overload() && is_tail()
       && overload_.compare_exchange_strong(expected, true)) {
-    //LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
-    //                     << storage_capacity() << " partition size = " << size() << "partition capacity "
-    //                     << partition_.capacity();
+    LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
+                         << storage_capacity() << " partition size = " << size() << "partition capacity "
+                         << partition_.capacity();
     try {
       overload_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
@@ -139,7 +138,7 @@ void file_partition::run_command(std::vector<std::string> &_return,
       scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
       overload_ = false;
-   //   LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();
+      LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();
     }
   }
 }
@@ -171,6 +170,7 @@ bool file_partition::sync(const std::string &path) {
     return true;
   }
   return false;
+
 }
 
 bool file_partition::dump(const std::string &path) {
@@ -199,18 +199,13 @@ void file_partition::forward_all() {
   int64_t i = 0;
   for (auto it = partition_.begin(); it != partition_.end(); it++) {
     std::vector<std::string> result;
-    run_command_on_next(result, file_cmd_id::file_write, {to_string(*it)});
+    run_command_on_next(result, file_cmd_id::file_write, {*it});
     ++i;
   }
 }
 
 bool file_partition::overload() {
-  //if (storage_size() < storage_capacity())
-  //return false;
-  //return partition_.size() > static_cast<size_t>(static_cast<double>(partition_.capacity()) * threshold_hi_);
-  //TODO this is a hot fix
-  return partition_.size() > static_cast<size_t>(static_cast<double>(1024) * threshold_hi_);
-  //return storage_size() > static_cast<size_t>(static_cast<double>(storage_capacity()) * threshold_hi_);
+  return partition_.size() >= static_cast<size_t>(static_cast<double>(partition_.capacity()) * threshold_hi_);
 }
 
 REGISTER_IMPLEMENTATION("file", file_partition);
