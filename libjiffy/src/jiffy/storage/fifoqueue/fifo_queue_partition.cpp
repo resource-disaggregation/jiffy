@@ -15,22 +15,24 @@ namespace storage {
 using namespace utils;
 
 fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
-                                         const std::string &name,
-                                         const std::string &metadata,
-                                         const utils::property_map &conf,
-                                         const std::string &directory_host,
-                                         const int directory_port,
-                                         const std::string &auto_scaling_host,
-                                         const int auto_scaling_port)
+                                           const std::string &name,
+                                           const std::string &metadata,
+                                           const utils::property_map &conf,
+                                           const std::string &directory_host,
+                                           const int directory_port,
+                                           const std::string &auto_scaling_host,
+                                           const int auto_scaling_port)
     : chain_module(manager, name, metadata, FIFO_QUEUE_OPS),
-      partition_(build_allocator<element_type>()),
+      partition_(manager->mb_capacity(), build_allocator<char>()),
       overload_(false),
       underload_(false),
+      new_block_available_(false),
       dirty_(false),
+      split_string_(false),
       directory_host_(directory_host),
       directory_port_(directory_port),
       auto_scaling_host_(auto_scaling_host),
-      auto_scaling_port_(auto_scaling_port){
+      auto_scaling_port_(auto_scaling_port) {
   auto ser = conf.get("fifoqueue.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
@@ -40,18 +42,13 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
   head_ = 0;
-  new_block_available_ = false;
   threshold_hi_ = conf.get_as<double>("fifoqueue.capacity_threshold_hi", 0.95);
-  threshold_lo_ = conf.get_as<double>("fifoqueue.capacity_threshold_lo", 0.00);
   auto_scale_ = conf.get_as<bool>("fifoqueue.auto_scale", true);
 }
 
 std::string fifo_queue_partition::enqueue(const std::string &message) {
-  //LOG(log_level::info) << "Enqueue ";
-  //LOG(log_level::info) << " Storage size " << storage_size() << " Storage capacity "
-  //                     << storage_capacity();
-  //LOG(log_level::info) << "partition size " << partition_.size() << " partition capacity " << partition_.capacity();
-  if (storage_size() * 2 >= storage_capacity() && partition_.size() >= partition_.capacity()) {
+  //LOG(log_level::info) << "Enqueue " << message << "partition size " << partition_.size() << " partition capacity " << partition_.capacity();
+  if (partition_.size() > partition_.capacity() && !split_string_.load()) {
     if (!next_target_str().empty()) {
       new_block_available_ = true;
       return "!full!" + next_target_str();
@@ -60,31 +57,45 @@ std::string fifo_queue_partition::enqueue(const std::string &message) {
       return "!redo";
     }
   }
-  //LOG(log_level::info) << "Come here 1";
-  partition_.push_back(make_binary(message));
-  //LOG(log_level::info) << "Come here 2";
+  auto ret = partition_.push_back(message);
+  if (!ret.first) {
+    split_string_ = true;
+    //TODO at this point we assume that next_target_str is always set before the last string to write, this could cause error when the last string is bigger than 6.4MB
+    new_block_available_ = true;
+    return "!split_enqueue!" + next_target_str() + "!" + std::to_string(ret.second.size());
+  }
   return "!ok";
 }
 
 std::string fifo_queue_partition::dequeue() {
   //LOG(log_level::info) << "Dequeueing " << head_;
-  if (head_ < partition_.size()) {
-    return to_string(partition_[head_++]);
+  auto ret = partition_.at(head_);
+  if (ret.first) {
+    head_ += (metadata_length + ret.second.size());
+    return ret.second;
+  } else if (ret.second == "!reach_end") {
+    if (!next_target_str().empty()) {
+      new_block_available_ = true;
+      return "!msg_not_in_partition";
+    } else {
+      return "!redo";
+    }
+  } else if (ret.second == "!not_available") {
+    return "!msg_not_found";
+  } else {
+    // This next target string is always set cause it needs to write first and then read
+    head_ += (metadata_length + ret.second.size());
+    return "!split_dequeue!" + ret.second;
   }
-  if(storage_size() * 2 >= storage_capacity() && partition_.size() >= partition_.capacity()) {
-      if (!next_target_str().empty()) {
-        head_++;
-        new_block_available_ = true;
-        return "!msg_not_in_partition!" + next_target_str();
-      } else {
-        return "!redo";
-      }
-  }
-  return "!msg_not_found";
 }
 
 std::string fifo_queue_partition::clear() {
   partition_.clear();
+  split_string_ = false;
+  head_ = 0;
+  overload_ = false;
+  underload_ = false;
+  dirty_ = false;
   return "!ok";
 }
 
@@ -94,8 +105,8 @@ std::string fifo_queue_partition::update_partition(const std::string &next) {
 }
 
 void fifo_queue_partition::run_command(std::vector<std::string> &_return,
-                                      int32_t cmd_id,
-                                      const std::vector<std::string> &args) {
+                                       int32_t cmd_id,
+                                       const std::vector<std::string> &args) {
   size_t nargs = args.size();
   switch (cmd_id) {
     case fifo_queue_cmd_id::fq_enqueue:
@@ -131,9 +142,9 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
   bool expected = false;
   if (auto_scale_.load() && is_mutator(cmd_id) && overload() && is_tail()
       && overload_.compare_exchange_strong(expected, true)) {
-    //LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
-    //                     << storage_capacity() << " partition size = " << size() << "partition capacity "
-    //                     << partition_.capacity();
+    LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
+                         << storage_capacity() << " partition size = " << size() << "partition capacity "
+                         << partition_.capacity();
     try {
       overload_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
@@ -151,9 +162,9 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
   if (auto_scale_.load() && cmd_id == fifo_queue_cmd_id::fq_dequeue && head_ > partition_.capacity() && is_tail()
       && underload_.compare_exchange_strong(expected, true) && new_block_available_ == true) {
     try {
-      //LOG(log_level::info) << "Underloaded partition; storage = " << storage_size() << " capacity = "
-      //                     << storage_capacity() << " partition size = " << size() << "partition capacity "
-      //                     << partition_.capacity();
+      LOG(log_level::info) << "Underloaded partition; storage = " << storage_size() << " capacity = "
+                           << storage_capacity() << " partition size = " << size() << "partition capacity "
+                           << partition_.capacity();
       underload_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
       std::map<std::string, std::string> scale_conf;
@@ -222,18 +233,13 @@ void fifo_queue_partition::forward_all() {
   int64_t i = 0;
   for (auto it = partition_.begin(); it != partition_.end(); it++) {
     std::vector<std::string> result;
-    run_command_on_next(result, fifo_queue_cmd_id::fq_enqueue, {to_string(*it)});
+    run_command_on_next(result, fifo_queue_cmd_id::fq_enqueue, {*it});
     ++i;
   }
 }
 
 bool fifo_queue_partition::overload() {
-  //if (storage_size() < storage_capacity())
-  //return false;
-  //return partition_.size() > static_cast<size_t>(static_cast<double>(partition_.capacity()) * threshold_hi_);
-  //TODO this is a hot fix
-  return partition_.size() > static_cast<size_t>(static_cast<double>(1024) * threshold_hi_);
-  //return storage_size() > static_cast<size_t>(static_cast<double>(storage_capacity()) * threshold_hi_);
+  return partition_.size() >= static_cast<size_t>(static_cast<double>(partition_.capacity()) * threshold_hi_);
 }
 
 REGISTER_IMPLEMENTATION("fifoqueue", fifo_queue_partition);

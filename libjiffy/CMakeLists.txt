@@ -94,11 +94,13 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/btree/btree_ops.cpp
           src/jiffy/storage/btree/btree_partition.h
           src/jiffy/storage/btree/btree_partition.cpp
-          src/jiffy/storage/msgqueue/msg_queue_defs.h
-          src/jiffy/storage/msgqueue/msg_queue_ops.h
-          src/jiffy/storage/msgqueue/msg_queue_ops.cpp
-          src/jiffy/storage/msgqueue/msg_queue_partition.h
-          src/jiffy/storage/msgqueue/msg_queue_partition.cpp
+          src/jiffy/storage/string_array.h
+          src/jiffy/storage/string_array.cpp
+          src/jiffy/storage/file/file_defs.h
+          src/jiffy/storage/file/file_ops.h
+          src/jiffy/storage/file/file_ops.cpp
+          src/jiffy/storage/file/file_partition.h
+          src/jiffy/storage/file/file_partition.cpp
           src/jiffy/storage/fifoqueue/fifo_queue_defs.h
           src/jiffy/storage/fifoqueue/fifo_queue_ops.h
           src/jiffy/storage/fifoqueue/fifo_queue_ops.cpp
@@ -120,8 +122,8 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/client/hash_table_client.h
           src/jiffy/storage/client/btree_client.cpp
           src/jiffy/storage/client/btree_client.h
-          src/jiffy/storage/client/msg_queue_client.cpp
-          src/jiffy/storage/client/msg_queue_client.h
+          src/jiffy/storage/client/file_client.cpp
+          src/jiffy/storage/client/file_client.h
           src/jiffy/storage/client/fifo_queue_client.cpp
           src/jiffy/storage/client/fifo_queue_client.h
           src/jiffy/storage/client/data_structure_listener.cpp
@@ -262,10 +264,10 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
 #            test/hash_table_client_test.cpp
 #            test/btree_partition_test.cpp
 #            test/btree_client_test.cpp
-#            test/msg_queue_partition_test.cpp
-#            test/msg_queue_client_test.cpp
-#             test/fifo_queue_client_test.cpp
-#             test/fifo_queue_partition_test.cpp
+#            test/file_partition_test.cpp
+#            test/file_client_test.cpp
+#            test/fifo_queue_client_test.cpp
+#            test/fifo_queue_partition_test.cpp
 #            test/lease_expiry_worker_test.cpp
 #            test/local_store_test.cpp
 #            test/jiffy_client_test.cpp
@@ -320,8 +322,10 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/hashtable/hash_table_ops.cpp
           src/jiffy/storage/btree/btree_ops.h
           src/jiffy/storage/btree/btree_ops.cpp
-          src/jiffy/storage/msgqueue/msg_queue_ops.h
-          src/jiffy/storage/msgqueue/msg_queue_ops.cpp
+          src/jiffy/storage/string_array.h
+          src/jiffy/storage/string_array.cpp
+          src/jiffy/storage/file/file_ops.h
+          src/jiffy/storage/file/file_ops.cpp
           src/jiffy/storage/fifoqueue/fifo_queue_ops.h
           src/jiffy/storage/fifoqueue/fifo_queue_ops.cpp
           src/jiffy/storage/client/replica_chain_client.cpp
@@ -338,8 +342,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/client/hash_table_client.h
           src/jiffy/storage/client/btree_client.cpp
           src/jiffy/storage/client/btree_client.h
-          src/jiffy/storage/client/msg_queue_client.cpp
-          src/jiffy/storage/client/msg_queue_client.h
+          src/jiffy/storage/client/file_client.cpp
+          src/jiffy/storage/client/file_client.h
           src/jiffy/storage/client/fifo_queue_client.cpp
           src/jiffy/storage/client/fifo_queue_client.h
           src/jiffy/storage/client/data_structure_listener.cpp

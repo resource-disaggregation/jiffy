@@ -24,38 +24,36 @@ TEST_CASE("fifo_queue_enqueue_dequeue_test", "[enqueue][dequeue]") {
   }
 }
 
-/*
+
 TEST_CASE("fifo_queue_send_clear_read_test", "[send][read]") {
   block_memory_manager manager;
-  msg_queue_partition block(&manager);
+  fifo_queue_partition block(&manager);
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(block.send(std::to_string(i)) == "!ok");
+    REQUIRE(block.enqueue(std::to_string(i)) == "!ok");
   }
   REQUIRE(block.clear() == "!ok");
   REQUIRE(block.size() == 0);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(block.read(std::to_string(i)) == "!msg_not_found");
+    REQUIRE(block.dequeue() == "!msg_not_found");
   }
 }
 
-TEST_CASE("msg_queue_storage_size_test", "[put][size][storage_size][reset]") {
+TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
   block_memory_manager manager;
-  msg_queue_partition block(&manager);
+  fifo_queue_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(block.send(std::to_string(i)) == "!ok");
+    REQUIRE(block.enqueue(std::to_string(i)) == "!ok");
   }
-  REQUIRE(block.size() == 1000);
-  //REQUIRE(block.storage_size() == 5780); Remove this test since we don't use bytes_ as storage size anymore
   REQUIRE(block.storage_size() <= block.storage_capacity());
 }
 
-TEST_CASE("msg_queue_flush_load_test", "[send][sync][reset][load][read]") {
+TEST_CASE("file_flush_load_test", "[send][sync][reset][load][read]") {
   block_memory_manager manager;
-  msg_queue_partition block(&manager);
+  fifo_queue_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {
     std::vector<std::string> res;
-    block.run_command(res, msg_queue_cmd_id::mq_send, {std::to_string(i)});
+    block.run_command(res, fifo_queue_cmd_id::fq_enqueue, {std::to_string(i)});
     REQUIRE(res.front() == "!ok");
   }
   REQUIRE(block.is_dirty());
@@ -64,9 +62,9 @@ TEST_CASE("msg_queue_flush_load_test", "[send][sync][reset][load][read]") {
   REQUIRE_FALSE(block.sync("local://tmp/test"));
   REQUIRE_NOTHROW(block.load("local://tmp/test"));
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(block.read(std::to_string(i)) == std::to_string(i));
+    REQUIRE(block.dequeue() == std::to_string(i));
   }
 }
-*/
+
 
 

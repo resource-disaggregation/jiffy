@@ -14,12 +14,12 @@ using namespace ::jiffy::utils;
 
 using namespace ::apache::thrift;
 
-typedef std::shared_ptr<msg_queue_client> client_ptr;
+typedef std::shared_ptr<file_client> client_ptr;
 typedef std::vector<client_ptr> client_list;
 
-class msg_queue_benchmark {
+class file_benchmark {
  public:
-  msg_queue_benchmark(client_list &clients,
+  file_benchmark(client_list &clients,
                       size_t data_size,
                       size_t num_clients,
                       size_t num_ops)
@@ -33,7 +33,7 @@ class msg_queue_benchmark {
         latency_(num_clients) {
   }
 
-  virtual ~msg_queue_benchmark() = default;
+  virtual ~file_benchmark() = default;
 
   virtual void run() = 0;
 
@@ -53,18 +53,18 @@ class msg_queue_benchmark {
   std::string data_;
   size_t num_clients_;
   size_t num_ops_;
-  std::vector<std::shared_ptr<msg_queue_client>> &clients_;
+  std::vector<std::shared_ptr<file_client>> &clients_;
   std::vector<std::thread> workers_;
   std::vector<double> throughput_;
   std::vector<double> latency_;
 };
 
-class send_benchmark : public msg_queue_benchmark {
+class write_benchmark : public file_benchmark {
  public:
-  send_benchmark(client_list &clients,
+  write_benchmark(client_list &clients,
                  size_t data_size,
                  size_t num_clients,
-                 size_t num_ops) : msg_queue_benchmark(clients, data_size, num_clients, num_ops) {
+                 size_t num_ops) : file_benchmark(clients, data_size, num_clients, num_ops) {
   }
 
   void run() override {
@@ -75,7 +75,7 @@ class send_benchmark : public msg_queue_benchmark {
         size_t j;
         for (j = 0; j < num_ops_; ++j) {
           t0 = time_utils::now_us();
-          clients_[i]->send(data_);
+          clients_[i]->write(data_);
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);
         }
@@ -87,19 +87,19 @@ class send_benchmark : public msg_queue_benchmark {
   }
 };
 
-class read_benchmark : public msg_queue_benchmark {
+class read_benchmark : public file_benchmark {
  public:
   read_benchmark(client_list &clients,
                  size_t data_size,
                  size_t num_clients,
-                 size_t num_ops) : msg_queue_benchmark(clients, data_size, num_clients, num_ops) {
+                 size_t num_ops) : file_benchmark(clients, data_size, num_clients, num_ops) {
   }
 
   void run() override {
     for (size_t i = 0; i < num_clients_; ++i) {
       workers_[i] = std::thread([i, this]() {
         for (size_t j = 0; j < num_ops_; ++j) {
-          clients_[i]->send(data_);
+          clients_[i]->write(data_);
         }
         auto bench_begin = time_utils::now_us();
         uint64_t tot_time = 0, t0, t1 = bench_begin;
@@ -127,7 +127,7 @@ int main() {
   int num_ops = 100000;
   int data_size = 64;
   std::vector<std::string> op_type_set;
-  op_type_set.push_back("send");
+  op_type_set.push_back("write");
   op_type_set.push_back("read");
   std::string path = "/tmp";
   std::string backing_path = "local://tmp";
@@ -149,16 +149,16 @@ int main() {
       int num_clients = i;
 
       jiffy_client client(address, service_port, lease_port);
-      std::vector<std::shared_ptr<msg_queue_client>> mq_clients(static_cast<size_t>(num_clients), nullptr);
+      std::vector<std::shared_ptr<file_client>> file_clients(static_cast<size_t>(num_clients), nullptr);
       for (int i = 0; i < num_clients; ++i) {
-        mq_clients[i] = client.open_or_create_msg_queue(path, backing_path, num_blocks, chain_length);
+        file_clients[i] = client.open_or_create_file(path, backing_path, num_blocks, chain_length);
       }
 
-      std::shared_ptr<msg_queue_benchmark> benchmark = nullptr;
-      if (op_type == "send") {
-        benchmark = std::make_shared<send_benchmark>(mq_clients, data_size, num_clients, num_ops);
+      std::shared_ptr<file_benchmark> benchmark = nullptr;
+      if (op_type == "write") {
+        benchmark = std::make_shared<write_benchmark>(file_clients, data_size, num_clients, num_ops);
       } else if (op_type == "read") {
-        benchmark = std::make_shared<read_benchmark>(mq_clients, data_size, num_clients, num_ops);
+        benchmark = std::make_shared<read_benchmark>(file_clients, data_size, num_clients, num_ops);
       } else {
         LOG(log_level::info) << "Incorrect operation type for message queue: " << op_type;
         return 0;

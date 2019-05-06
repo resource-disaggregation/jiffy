@@ -79,3 +79,6 @@ test-driver
 .DS_Store
 /Debug/
 target
+word_alpha.txt
+zipf_random.txt
+zipfkeys.txt

@@ -1,7 +1,7 @@
 #include "auto_scaling_service_handler.h"
 #include "jiffy/utils/logger.h"
 #include "jiffy/directory/client/directory_client.h"
-#include "jiffy/storage/msgqueue/msg_queue_ops.h"
+#include "jiffy/storage/file/file_ops.h"
 #include "jiffy/storage/hashtable/hash_table_ops.h"
 #include "jiffy/storage/btree/btree_ops.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_ops.h"
@@ -27,7 +27,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
   //LOG(log_level::info) << "Into this auto_scaling function ";
   std::string scaling_type = conf.find("type")->second;
   auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
-  if (scaling_type == "msg_queue") {
+  if (scaling_type == "file") {
     auto start =
         std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     std::string dst_partition_name = conf.find("next_partition_name")->second;
@@ -39,10 +39,10 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       next_target_string += (block + "!");
     }
     next_target_string.pop_back();
-    auto src = std::make_shared<storage::replica_chain_client>(fs, path, current_replica_chain, storage::MSG_QUEUE_OPS);
+    auto src = std::make_shared<storage::replica_chain_client>(fs, path, current_replica_chain, storage::FILE_OPS);
     std::vector<std::string> args;
     args.emplace_back(next_target_string);
-    src->run_command(storage::msg_queue_cmd_id::mq_update_partition, args);
+    src->run_command(storage::file_cmd_id::file_update_partition, args);
     auto finish_updating_partition =
         std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     //LOG(log_level::info) << "===== " << "Message queue auto_scaling" << " ======";

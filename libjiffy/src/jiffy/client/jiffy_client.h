@@ -5,7 +5,7 @@
 #include "jiffy/directory/directory_ops.h"
 #include "jiffy/directory/client/lease_renewal_worker.h"
 #include "jiffy/storage/client/hash_table_client.h"
-#include "jiffy/storage/client/msg_queue_client.h"
+#include "jiffy/storage/client/file_client.h"
 #include "jiffy/storage/client/btree_client.h"
 #include "jiffy/storage/client/fifo_queue_client.h"
 #include "jiffy/storage/client/data_structure_listener.h"
@@ -95,7 +95,7 @@ class jiffy_client {
    * @return Message queue client
    */
 
-  std::shared_ptr<storage::msg_queue_client> open_msg_queue(const std::string &path);
+  std::shared_ptr<storage::file_client> open_file(const std::string &path);
 
   /**
    * @brief Open file, begin lease
@@ -138,7 +138,7 @@ class jiffy_client {
    * @return Message queue client
    */
 
-  std::shared_ptr<storage::msg_queue_client> open_or_create_msg_queue(const std::string &path,
+  std::shared_ptr<storage::file_client> open_or_create_file(const std::string &path,
                                                                       const std::string &backing_path,
                                                                       int32_t num_blocks = 1,
                                                                       int32_t chain_length = 1,
