@@ -5,8 +5,11 @@
 #include <vector>
 #include <iostream>
 #include <cstdint>
+#include <fstream>
+#include <iterator>
 
 #include "jiffy/storage/hashtable/hash_table_ops.h"
+#include "jiffy/storage/file/file_ops.h"
 
 namespace jiffy {
 namespace benchmark {
@@ -32,13 +35,13 @@ class benchmark_utils {
                                       std::istream_iterator<std::string>{}};
       int32_t cmd_id = -1;
       if (tokens[0] == "get") {
-        cmd_id = hash_table_cmd_id::get;
+        cmd_id = hash_table_cmd_id::ht_get;
       } else if (tokens[0] == "put") {
-        cmd_id = hash_table_cmd_id::put;
+        cmd_id = hash_table_cmd_id::ht_put;
       } else if (tokens[0] == "remove") {
-        cmd_id = hash_table_cmd_id::remove;
+        cmd_id = hash_table_cmd_id::ht_remove;
       } else if (tokens[0] == "update") {
-        cmd_id = hash_table_cmd_id::update;
+        cmd_id = hash_table_cmd_id::ht_update;
       } else if (tokens[0] == "wait") {
         continue;
       } else {

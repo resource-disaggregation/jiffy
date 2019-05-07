@@ -9,7 +9,7 @@
 #include "jiffy/directory/client/directory_client.h"
 #include "benchmark_utils.h"
 #include "jiffy/storage/client/block_listener.h"
-#include "jiffy/storage/client/hash_table_listener.h"
+#include "jiffy/storage/client/data_structure_listener.h"
 #include "jiffy/storage/client/hash_table_client.h"
 #include "jiffy/client/jiffy_client.h"
 
@@ -77,7 +77,7 @@ class notification_listener {
 
  private:
   std::thread worker_;
-  std::shared_ptr<hash_table_listener> listener_;
+  std::shared_ptr<data_structure_listener> listener_;
   std::size_t num_ops_;
   std::vector<std::uint64_t> timestamps_{};
 };

@@ -8,6 +8,7 @@
 #include "jiffy/utils/logger.h"
 #include "jiffy/utils/cmd_parse.h"
 #include "benchmark_utils.h"
+#include "jiffy/storage/hashtable/hash_table_ops.h"
 
 using namespace jiffy::storage;
 using namespace jiffy::utils;
@@ -139,7 +140,7 @@ int main(int argc, char **argv) {
       auto thread_ops = num_ops / num_threads;
       benchmark.push_back(new throughput_benchmark(workload_path,
                                                    workload_offset + i * thread_ops,
-                                                   std::make_shared<replica_chain_client>(client, file, chain),
+                                                   std::make_shared<replica_chain_client>(client, file, chain, KV_OPS),
                                                    thread_ops));
     }
 
@@ -159,7 +160,7 @@ int main(int argc, char **argv) {
     }
   } else if (benchmark_type == "latency") {
     latency_benchmark
-        benchmark(workload_path, workload_offset, std::make_shared<replica_chain_client>(client, file, chain), num_ops);
+        benchmark(workload_path, workload_offset, std::make_shared<replica_chain_client>(client, file, chain, KV_OPS), num_ops);
     benchmark.run();
   }
   client->remove(file);
