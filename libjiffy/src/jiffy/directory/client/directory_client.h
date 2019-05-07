@@ -277,10 +277,45 @@ class directory_client : public directory_interface {
    */
 
   void handle_lease_expiry(const std::string &path) override;
+
+  // TODO return status when adding or removing fails
+
+  /**
+   * @brief Add a new replica chain to the path
+   * @param path File path
+   * @param partition_name Partition name
+   * @param partition_metadata Partition metadata
+   * @return The new replica chain structure
+   */
   replica_chain add_block(const std::string &path,
                           const std::string &partition_name,
                           const std::string &partition_metadata) override;
+
+  /**
+   * @brief Remove a replica chain
+   * @param path File path
+   * @param partition_name Partition name to be removed
+   */
   void remove_block(const std::string &path, const std::string &partition_name) override;
+
+  /**
+   * @brief Update partition name and metadata
+   * @param path File path
+   * @param partition_name New partition name
+   * @param partition_metadata New partition metadata
+   */
+  void update_partition(const std::string &path,
+                        const std::string &old_partition_name,
+                        const std::string &new_partition_name,
+                        const std::string &partition_metadata) override;
+
+  /**
+   * @brief Fetch partition capacity
+   * @param path File path
+   * @param partition_name Partition name
+   * @return Partition capacity
+   */
+  int64_t get_capacity(const std::string &path, const std::string &partition_name) override;
 
  private:
   /* Socket */
