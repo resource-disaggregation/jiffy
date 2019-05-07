@@ -3,8 +3,6 @@
 
 #include <memory>
 #include "persistent_service.h"
-#include "local/local_store.h"
-#include "s3/s3_store.h"
 
 namespace jiffy {
 namespace persistent {
