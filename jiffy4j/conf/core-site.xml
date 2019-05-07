@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. See accompanying LICENSE file.
+-->
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+  <!-- HDFS Configuration -->
+  <property>
+    <name>fs.hdfs.impl</name>
+    <value>org.apache.hadoop.hdfs.DistributedFileSystem</value>
+  </property>
+  <property>
+    <name>fs.AbstractFileSystem.hdfs.impl</name>
+    <value>org.apache.hadoop.fs.Hdfs</value>
+  </property>
+  <property>
+    <name>fs.hdfs.impl.disable.cache</name>
+    <value>true</value>
+  </property>
+
+  <!-- JFS Configuration -->
+  <property>
+    <name>fs.jfs.impl</name>
+    <value>jiffy.hadoop.fs.JiffyFileSystem</value>
+  </property>
+  <property>
+    <name>fs.AbstractFileSystem.jfs.impl</name>
+    <value>jiffy.hadoop.fs.JiffyFS</value>
+  </property>
+  <property>
+    <name>fs.jfs.impl.disable.cache</name>
+    <value>true</value>
+  </property>
+
+  <!-- S3 Configuration -->
+  <property>
+    <name>fs.s3a.impl</name>
+    <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
+  </property>
+  <property>
+    <name>fs.AbstractFileSystem.s3a.impl</name>
+    <value>org.apache.hadoop.fs.s3a.S3A</value>
+  </property>
+  <property>
+    <name>fs.s3a.access.key</name>
+    <value>${AWS_ACCESS_KEY}</value>
+  </property>
+  <property>
+    <name>fs.s3a.secret.key</name>
+    <value>${AWS_SECRET_KEY}</value>
+  </property>
+
+  <!-- SplitFS Configuration -->
+  <property>
+    <name>fs.splitfs.impl</name>
+    <value>jiffy.hadoop.fs.SplitFileSystem</value>
+  </property>
+  <property>
+    <name>fs.AbstractFileSystem.splitfs.impl</name>
+    <value>jiffy.hadoop.fs.SplitFS</value>
+  </property>
+  <property>
+    <name>splitfs.persistent.fs</name>
+    <value>hdfs://localhost:9000</value>
+  </property>
+  <property>
+    <name>splitfs.ephemeral.fs</name>
+    <value>jfs://localhost:9090</value>
+  </property>
+  <property>
+    <name>fs.splitfs.impl.disable.cache</name>
+    <value>true</value>
+  </property>
+
+  <!-- Set Default FS-->
+  <property>
+    <name>fs.defaultFS</name>
+    <value>splitfs://localhost:9090</value>
+  </property>
+
+  <!--
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://localhost:9000</value>
+  </property>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>jfs://localhost:9090</value>
+  </property>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>s3a://my-bucket</value>
+  </property>
+  -->
+</configuration>

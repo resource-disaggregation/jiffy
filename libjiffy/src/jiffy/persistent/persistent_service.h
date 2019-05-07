@@ -2,8 +2,8 @@
 #define JIFFY_PERSISTENT_SERVICE_H
 
 #include <string>
-#include "../storage/kv/kv_hash.h"
-#include "../storage/kv/serde/serde.h"
+#include "jiffy/storage/hashtable/hash_table_defs.h"
+#include "jiffy/storage/hashtable/serde/serde.h"
 
 namespace jiffy {
 namespace persistent {

@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import jiffy.notification.event.Control;
 import jiffy.notification.event.Error;
-import jiffy.notification.notification_service.Client;
+import jiffy.storage.block_request_service.Client;
+import jiffy.storage.block_request_service;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
@@ -20,10 +22,10 @@ public class BlockListener implements Closeable {
 
   private TTransport transport;
   private TProtocol protocol;
-  private notification_service.Client client;
+  private block_request_service.Client client;
 
   BlockListener(String host, int port, Mailbox<Control> controls) throws TTransportException {
-    this.transport = new TSocket(host, port);
+    this.transport = new TFramedTransport(new TSocket(host, port));
     this.protocol = new TBinaryProtocol(transport);
     this.client = new Client(protocol);
     this.controls = controls;

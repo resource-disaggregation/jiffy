@@ -4,10 +4,11 @@ import time
 
 from thrift.transport.TTransport import TTransportException
 
-from jiffy.directory.directory_client import DirectoryClient
-from jiffy.subscription.subscriber import SubscriptionClient, Mailbox
+from jiffy.directory.directory_client import DirectoryClient, Perms
+from jiffy.storage.crc import SLOT_MAX
+from jiffy.storage.subscriber import SubscriptionClient, Mailbox
 from jiffy.lease.lease_client import LeaseClient
-from jiffy.kv.kv_client import KVClient
+from jiffy.storage.hash_table_client import HashTableClient
 import logging
 
 logging.basicConfig(level=logging.WARN,
@@ -101,20 +102,30 @@ class JiffyClient:
         if path in self.to_renew:
             self.to_renew.remove(path)
 
-    def create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
-        s = self.fs.create(path, persistent_store_prefix, num_blocks, chain_length, flags)
+    def create_hash_table(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+        slot_range = int(SLOT_MAX / num_blocks)
+        block_names = ['{}_{}'.format(i * slot_range, SLOT_MAX if i == num_blocks - 1 else (i + 1) * slot_range)
+                       for i in range(num_blocks)]
+        block_metadata = ['regular' for _ in range(num_blocks)]
+        s = self.fs.create(path, "hashtable", persistent_store_prefix, num_blocks, chain_length, flags, Perms.all,
+                           block_names, block_metadata)
         self.begin_scope(path)
-        return KVClient(self.fs, path, s)
+        return HashTableClient(self.fs, path, s)
 
     def open(self, path):
         s = self.fs.open(path)
         self.begin_scope(path)
-        return KVClient(self.fs, path, s)
+        return HashTableClient(self.fs, path, s)
 
     def open_or_create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
-        s = self.fs.open_or_create(path, persistent_store_prefix, num_blocks, chain_length, flags)
+        slot_range = int(SLOT_MAX / num_blocks)
+        block_names = ['{}_{}'.format(i * slot_range, SLOT_MAX if i == num_blocks - 1 else (i + 1) * slot_range)
+                       for i in range(num_blocks)]
+        block_metadata = ['regular' for _ in range(num_blocks)]
+        s = self.fs.open_or_create(path, "hashtable", persistent_store_prefix, num_blocks, chain_length, flags,
+                                   Perms.all, block_names, block_metadata)
         self.begin_scope(path)
-        return KVClient(self.fs, path, s)
+        return HashTableClient(self.fs, path, s)
 
     def close(self, path):
         self.end_scope(path)

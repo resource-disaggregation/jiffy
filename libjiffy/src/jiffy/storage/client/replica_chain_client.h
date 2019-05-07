@@ -3,11 +3,12 @@
 
 #include <map>
 #include "block_client.h"
-#include "../kv/kv_block.h"
-#include "../../directory/client/directory_client.h"
+#include "jiffy/storage/hashtable/hash_table_ops.h"
+#include "jiffy/directory/client/directory_client.h"
 
 namespace jiffy {
 namespace storage {
+
 /* Replica chain client class
  * This class only considers the two most important
  * blocks in the chain(i.e. head and tail)*/
@@ -24,7 +25,7 @@ class replica_chain_client {
      * @param parent Replica chain to be locked
      */
 
-    locked_client(replica_chain_client &parent);
+    explicit locked_client(replica_chain_client &parent);
 
     /**
      * @brief Destructor, unlock the client

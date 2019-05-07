@@ -1,4 +1,5 @@
-#include "jiffy_client.h"
+#include "jiffy/client/jiffy_client.h"
+#include "jiffy/storage/hashtable/hash_slot.h"
 
 namespace jiffy {
 namespace client {
@@ -27,40 +28,62 @@ void jiffy_client::end_scope(const std::string &path) {
   lease_worker_.remove_path(path);
 }
 
-std::shared_ptr<storage::kv_client> jiffy_client::create(const std::string &path,
-                                                        const std::string &backing_path,
-                                                        size_t num_blocks,
-                                                        size_t chain_length,
-                                                        int32_t flags,
-                                                        int32_t permissions,
-                                                        const std::map<std::string, std::string> &tags) {
-  auto s = fs_->create(path, backing_path, num_blocks, chain_length, flags, permissions, tags);
+std::shared_ptr<storage::hash_table_client> jiffy_client::create_hash_table(const std::string &path,
+                                                                            const std::string &backing_path,
+                                                                            int32_t num_blocks,
+                                                                            int32_t chain_length,
+                                                                            int32_t flags,
+                                                                            int32_t permissions,
+                                                                            const std::map<std::string,
+                                                                                           std::string> &tags) {
+  std::vector<std::string> block_names;
+  std::vector<std::string> block_metadata;
+  int32_t slot_range = storage::hash_slot::MAX / num_blocks;
+  for (int32_t i = 0; i < num_blocks; ++i) {
+    int32_t begin = i * slot_range;
+    int32_t end = (i == num_blocks - 1) ? storage::hash_slot::MAX : (i + 1) * slot_range;
+    block_names.push_back(std::to_string(begin) + "_" + std::to_string(end));
+    block_metadata.emplace_back("regular");
+  }
+  auto s = fs_->create(path, "hashtable", backing_path, num_blocks, chain_length, flags, permissions, block_names,
+                       block_metadata, tags);
   begin_scope(path);
-  return std::make_shared<storage::kv_client>(fs_, path, s);
+  return std::make_shared<storage::hash_table_client>(fs_, path, s);
 }
 
-std::shared_ptr<storage::kv_client> jiffy_client::open(const std::string &path) {
+std::shared_ptr<storage::hash_table_client> jiffy_client::open(const std::string &path) {
   auto s = fs_->open(path);
   begin_scope(path);
-  return std::make_shared<storage::kv_client>(fs_, path, s);
+  return std::make_shared<storage::hash_table_client>(fs_, path, s);
 }
 
-std::shared_ptr<storage::kv_client> jiffy_client::open_or_create(const std::string &path,
-                                                                const std::string &backing_path,
-                                                                size_t num_blocks,
-                                                                size_t chain_length,
-                                                                int32_t flags,
-                                                                int32_t permissions,
-                                                                const std::map<std::string, std::string> &tags) {
-  auto s = fs_->open_or_create(path, backing_path, num_blocks, chain_length, flags, permissions, tags);
+std::shared_ptr<storage::hash_table_client> jiffy_client::open_or_create_hash_table(const std::string &path,
+                                                                                    const std::string &backing_path,
+                                                                                    int32_t num_blocks,
+                                                                                    int32_t chain_length,
+                                                                                    int32_t flags,
+                                                                                    int32_t permissions,
+                                                                                    const std::map<std::string,
+                                                                                                   std::string> &tags) {
+  std::vector<std::string> block_names;
+  std::vector<std::string> block_metadata;
+  int32_t slot_range = storage::hash_slot::MAX / num_blocks;
+  for (int32_t i = 0; i < num_blocks; ++i) {
+    int32_t begin = i * slot_range;
+    int32_t end = (i == num_blocks - 1) ? storage::hash_slot::MAX : (i + 1) * slot_range;
+    block_names.push_back(std::to_string(begin) + "_" + std::to_string(end));
+    block_metadata.emplace_back("regular");
+  }
+  auto s = fs_->open_or_create(path, "hashtable", backing_path, num_blocks, chain_length, flags, permissions,
+                               block_names, block_metadata, tags);
   begin_scope(path);
-  return std::make_shared<storage::kv_client>(fs_, path, s);
+  return std::make_shared<storage::hash_table_client>(fs_, path, s);
 }
 
-std::shared_ptr<storage::kv_listener> jiffy_client::listen(const std::string &path) {
+std::shared_ptr<storage::hash_table_listener> jiffy_client::listen(const std::string &path) {
   auto s = fs_->open(path);
   begin_scope(path);
-  return std::make_shared<storage::kv_listener>(path, s);
+  return std::make_shared<storage::hash_table_listener>(path, s);
 }
 
 void jiffy_client::remove(const std::string &path) {

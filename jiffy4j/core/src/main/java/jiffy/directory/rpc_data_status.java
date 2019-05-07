@@ -11,15 +11,17 @@ package jiffy.directory;
 public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status, rpc_data_status._Fields>, java.io.Serializable, Cloneable, Comparable<rpc_data_status> {
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("rpc_data_status");
 
-  private static final org.apache.thrift.protocol.TField BACKING_PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("backing_path", org.apache.thrift.protocol.TType.STRING, (short)1);
-  private static final org.apache.thrift.protocol.TField CHAIN_LENGTH_FIELD_DESC = new org.apache.thrift.protocol.TField("chain_length", org.apache.thrift.protocol.TType.I32, (short)2);
-  private static final org.apache.thrift.protocol.TField DATA_BLOCKS_FIELD_DESC = new org.apache.thrift.protocol.TField("data_blocks", org.apache.thrift.protocol.TType.LIST, (short)3);
-  private static final org.apache.thrift.protocol.TField FLAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("flags", org.apache.thrift.protocol.TType.I32, (short)4);
-  private static final org.apache.thrift.protocol.TField TAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("tags", org.apache.thrift.protocol.TType.MAP, (short)5);
+  private static final org.apache.thrift.protocol.TField TYPE_FIELD_DESC = new org.apache.thrift.protocol.TField("type", org.apache.thrift.protocol.TType.STRING, (short)1);
+  private static final org.apache.thrift.protocol.TField BACKING_PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("backing_path", org.apache.thrift.protocol.TType.STRING, (short)2);
+  private static final org.apache.thrift.protocol.TField CHAIN_LENGTH_FIELD_DESC = new org.apache.thrift.protocol.TField("chain_length", org.apache.thrift.protocol.TType.I32, (short)3);
+  private static final org.apache.thrift.protocol.TField DATA_BLOCKS_FIELD_DESC = new org.apache.thrift.protocol.TField("data_blocks", org.apache.thrift.protocol.TType.LIST, (short)4);
+  private static final org.apache.thrift.protocol.TField FLAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("flags", org.apache.thrift.protocol.TType.I32, (short)5);
+  private static final org.apache.thrift.protocol.TField TAGS_FIELD_DESC = new org.apache.thrift.protocol.TField("tags", org.apache.thrift.protocol.TType.MAP, (short)6);
 
   private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new rpc_data_statusStandardSchemeFactory();
   private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new rpc_data_statusTupleSchemeFactory();
 
+  public java.lang.String type; // required
   public java.lang.String backing_path; // required
   public int chain_length; // required
   public java.util.List<rpc_replica_chain> data_blocks; // required
@@ -28,11 +30,12 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-    BACKING_PATH((short)1, "backing_path"),
-    CHAIN_LENGTH((short)2, "chain_length"),
-    DATA_BLOCKS((short)3, "data_blocks"),
-    FLAGS((short)4, "flags"),
-    TAGS((short)5, "tags");
+    TYPE((short)1, "type"),
+    BACKING_PATH((short)2, "backing_path"),
+    CHAIN_LENGTH((short)3, "chain_length"),
+    DATA_BLOCKS((short)4, "data_blocks"),
+    FLAGS((short)5, "flags"),
+    TAGS((short)6, "tags");
 
     private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
 
@@ -47,15 +50,17 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
      */
     public static _Fields findByThriftId(int fieldId) {
       switch(fieldId) {
-        case 1: // BACKING_PATH
+        case 1: // TYPE
+          return TYPE;
+        case 2: // BACKING_PATH
           return BACKING_PATH;
-        case 2: // CHAIN_LENGTH
+        case 3: // CHAIN_LENGTH
           return CHAIN_LENGTH;
-        case 3: // DATA_BLOCKS
+        case 4: // DATA_BLOCKS
           return DATA_BLOCKS;
-        case 4: // FLAGS
+        case 5: // FLAGS
           return FLAGS;
-        case 5: // TAGS
+        case 6: // TAGS
           return TAGS;
         default:
           return null;
@@ -103,6 +108,8 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
   public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+    tmpMap.put(_Fields.TYPE, new org.apache.thrift.meta_data.FieldMetaData("type", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.BACKING_PATH, new org.apache.thrift.meta_data.FieldMetaData("backing_path", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.CHAIN_LENGTH, new org.apache.thrift.meta_data.FieldMetaData("chain_length", org.apache.thrift.TFieldRequirementType.REQUIRED, 
@@ -124,6 +131,7 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
   }
 
   public rpc_data_status(
+    java.lang.String type,
     java.lang.String backing_path,
     int chain_length,
     java.util.List<rpc_replica_chain> data_blocks,
@@ -131,6 +139,7 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
     java.util.Map<java.lang.String,java.lang.String> tags)
   {
     this();
+    this.type = type;
     this.backing_path = backing_path;
     this.chain_length = chain_length;
     setChainLengthIsSet(true);
@@ -145,6 +154,9 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
    */
   public rpc_data_status(rpc_data_status other) {
     __isset_bitfield = other.__isset_bitfield;
+    if (other.isSetType()) {
+      this.type = other.type;
+    }
     if (other.isSetBackingPath()) {
       this.backing_path = other.backing_path;
     }
@@ -169,6 +181,7 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
 
   @Override
   public void clear() {
+    this.type = null;
     this.backing_path = null;
     setChainLengthIsSet(false);
     this.chain_length = 0;
@@ -176,6 +189,30 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
     setFlagsIsSet(false);
     this.flags = 0;
     this.tags = null;
+  }
+
+  public java.lang.String getType() {
+    return this.type;
+  }
+
+  public rpc_data_status setType(java.lang.String type) {
+    this.type = type;
+    return this;
+  }
+
+  public void unsetType() {
+    this.type = null;
+  }
+
+  /** Returns true if field type is set (has been assigned a value) and false otherwise */
+  public boolean isSetType() {
+    return this.type != null;
+  }
+
+  public void setTypeIsSet(boolean value) {
+    if (!value) {
+      this.type = null;
+    }
   }
 
   public java.lang.String getBackingPath() {
@@ -324,6 +361,14 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
 
   public void setFieldValue(_Fields field, java.lang.Object value) {
     switch (field) {
+    case TYPE:
+      if (value == null) {
+        unsetType();
+      } else {
+        setType((java.lang.String)value);
+      }
+      break;
+
     case BACKING_PATH:
       if (value == null) {
         unsetBackingPath();
@@ -369,6 +414,9 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
 
   public java.lang.Object getFieldValue(_Fields field) {
     switch (field) {
+    case TYPE:
+      return getType();
+
     case BACKING_PATH:
       return getBackingPath();
 
@@ -395,6 +443,8 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
     }
 
     switch (field) {
+    case TYPE:
+      return isSetType();
     case BACKING_PATH:
       return isSetBackingPath();
     case CHAIN_LENGTH:
@@ -423,6 +473,15 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
       return false;
     if (this == that)
       return true;
+
+    boolean this_present_type = true && this.isSetType();
+    boolean that_present_type = true && that.isSetType();
+    if (this_present_type || that_present_type) {
+      if (!(this_present_type && that_present_type))
+        return false;
+      if (!this.type.equals(that.type))
+        return false;
+    }
 
     boolean this_present_backing_path = true && this.isSetBackingPath();
     boolean that_present_backing_path = true && that.isSetBackingPath();
@@ -476,6 +535,10 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
   public int hashCode() {
     int hashCode = 1;
 
+    hashCode = hashCode * 8191 + ((isSetType()) ? 131071 : 524287);
+    if (isSetType())
+      hashCode = hashCode * 8191 + type.hashCode();
+
     hashCode = hashCode * 8191 + ((isSetBackingPath()) ? 131071 : 524287);
     if (isSetBackingPath())
       hashCode = hashCode * 8191 + backing_path.hashCode();
@@ -503,6 +566,16 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
 
     int lastComparison = 0;
 
+    lastComparison = java.lang.Boolean.valueOf(isSetType()).compareTo(other.isSetType());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetType()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.type, other.type);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     lastComparison = java.lang.Boolean.valueOf(isSetBackingPath()).compareTo(other.isSetBackingPath());
     if (lastComparison != 0) {
       return lastComparison;
@@ -573,6 +646,14 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
     java.lang.StringBuilder sb = new java.lang.StringBuilder("rpc_data_status(");
     boolean first = true;
 
+    sb.append("type:");
+    if (this.type == null) {
+      sb.append("null");
+    } else {
+      sb.append(this.type);
+    }
+    first = false;
+    if (!first) sb.append(", ");
     sb.append("backing_path:");
     if (this.backing_path == null) {
       sb.append("null");
@@ -610,6 +691,9 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
 
   public void validate() throws org.apache.thrift.TException {
     // check for required fields
+    if (type == null) {
+      throw new org.apache.thrift.protocol.TProtocolException("Required field 'type' was not present! Struct: " + toString());
+    }
     if (backing_path == null) {
       throw new org.apache.thrift.protocol.TProtocolException("Required field 'backing_path' was not present! Struct: " + toString());
     }
@@ -660,7 +744,15 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
           break;
         }
         switch (schemeField.id) {
-          case 1: // BACKING_PATH
+          case 1: // TYPE
+            if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+              struct.type = iprot.readString();
+              struct.setTypeIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 2: // BACKING_PATH
             if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
               struct.backing_path = iprot.readString();
               struct.setBackingPathIsSet(true);
@@ -668,7 +760,7 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 2: // CHAIN_LENGTH
+          case 3: // CHAIN_LENGTH
             if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
               struct.chain_length = iprot.readI32();
               struct.setChainLengthIsSet(true);
@@ -676,7 +768,7 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 3: // DATA_BLOCKS
+          case 4: // DATA_BLOCKS
             if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
               {
                 org.apache.thrift.protocol.TList _list8 = iprot.readListBegin();
@@ -695,7 +787,7 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 4: // FLAGS
+          case 5: // FLAGS
             if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
               struct.flags = iprot.readI32();
               struct.setFlagsIsSet(true);
@@ -703,7 +795,7 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 5: // TAGS
+          case 6: // TAGS
             if (schemeField.type == org.apache.thrift.protocol.TType.MAP) {
               {
                 org.apache.thrift.protocol.TMap _map11 = iprot.readMapBegin();
@@ -744,6 +836,11 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
       struct.validate();
 
       oprot.writeStructBegin(STRUCT_DESC);
+      if (struct.type != null) {
+        oprot.writeFieldBegin(TYPE_FIELD_DESC);
+        oprot.writeString(struct.type);
+        oprot.writeFieldEnd();
+      }
       if (struct.backing_path != null) {
         oprot.writeFieldBegin(BACKING_PATH_FIELD_DESC);
         oprot.writeString(struct.backing_path);
@@ -797,6 +894,7 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
     @Override
     public void write(org.apache.thrift.protocol.TProtocol prot, rpc_data_status struct) throws org.apache.thrift.TException {
       org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+      oprot.writeString(struct.type);
       oprot.writeString(struct.backing_path);
       oprot.writeI32(struct.chain_length);
       {
@@ -820,6 +918,8 @@ public class rpc_data_status implements org.apache.thrift.TBase<rpc_data_status,
     @Override
     public void read(org.apache.thrift.protocol.TProtocol prot, rpc_data_status struct) throws org.apache.thrift.TException {
       org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+      struct.type = iprot.readString();
+      struct.setTypeIsSet(true);
       struct.backing_path = iprot.readString();
       struct.setBackingPathIsSet(true);
       struct.chain_length = iprot.readI32();

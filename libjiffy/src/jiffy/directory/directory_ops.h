@@ -223,6 +223,7 @@ enum perm_options {
   add = 1,
   remove = 2
 };
+
 /* File types */
 enum file_type {
   none = 0,
@@ -237,20 +238,14 @@ enum storage_mode {
   on_disk = 2
 };
 
-/* Chain status */
-enum chain_status {
-  stable = 0,
-  exporting = 1,
-  importing = 2
-};
 /* Replica chain structure */
 struct replica_chain {
+  /* Chain name */
+  std::string name;
   /* Block names */
-  std::vector<std::string> block_names;
-  /* Slot range */
-  std::pair<int32_t, int32_t> slot_range;
-  /* Chain status */
-  chain_status status;
+  std::vector<std::string> block_ids;
+  /* Chain metadata */
+  std::string metadata;
   /* Storage mode */
   storage_mode mode;
   /**
@@ -260,38 +255,20 @@ struct replica_chain {
 
   /**
    * Constructor
-   * @param block_names Block names
-   * @param slot_begin Begin slot
-   * @param slot_end End slot
-   * @param status Chain status
+   * @param block_ids Block IDs
    * @param mode Storage mode
    */
-  replica_chain(const std::vector<std::string> &block_names,
-                int32_t slot_begin,
-                int32_t slot_end,
-                chain_status status,
-                storage_mode mode) {
-    this->block_names = block_names;
-    this->slot_range.first = slot_begin;
-    this->slot_range.second = slot_end;
-    this->status = status;
+  replica_chain(const std::vector<std::string> &block_ids, storage_mode mode) {
+    this->block_ids = block_ids;
     this->mode = mode;
   }
 
   /**
    * Constructor
-   * @param block_names Block names
+   * @param block_ids Block IDs
    */
-  replica_chain(const std::vector<std::string> block_names) : mode(storage_mode::in_memory) {
-    this->block_names = block_names;
-  }
-
-  /**
-   * Fetch slot range string
-   * @return Slot range string
-   */
-  const std::string slot_range_string() const {
-    return std::to_string(slot_range.first) + "_" + std::to_string(slot_range.second);
+  replica_chain(const std::vector<std::string> block_ids) : mode(storage_mode::in_memory) {
+    this->block_ids = block_ids;
   }
 
   /**
@@ -299,7 +276,7 @@ struct replica_chain {
    * @return Head block name
    */
   const std::string &head() const {
-    return block_names.front();
+    return block_ids.front();
   }
 
   /**
@@ -307,23 +284,7 @@ struct replica_chain {
    * @return Tail block name
    */
   const std::string &tail() const {
-    return block_names.back();
-  }
-
-  /**
-   * Fetch begin slot
-   * @return Begin slot
-   */
-  int32_t slot_begin() const {
-    return slot_range.first;
-  }
-
-  /**
-   * Fetch end slot
-   * @return End slot
-   */
-  int32_t slot_end() const {
-    return slot_range.second;
+    return block_ids.back();
   }
 
   /**
@@ -332,13 +293,12 @@ struct replica_chain {
    */
   std::string to_string() const {
     std::string out = "<";
-    for (const auto &name: block_names) {
+    for (const auto &name: block_ids) {
       out += name + ", ";
     }
     out.pop_back();
     out.pop_back();
-    out += "> :: (" + std::to_string(slot_begin()) + ", " + std::to_string(slot_end()) + ") :: { mode : "
-        + std::to_string(mode) + " }";
+    out += "> :: { mode : " + std::to_string(mode) + " }";
     return out;
   }
 
@@ -348,7 +308,7 @@ struct replica_chain {
    * @return Bool value, true if equal
    */
   bool operator==(const replica_chain &other) const {
-    return block_names == other.block_names && slot_range == other.slot_range;
+    return block_ids == other.block_ids;
   }
 
   /**
@@ -492,6 +452,8 @@ class data_status {
   static const std::int32_t PINNED = 0x01;
   static const std::int32_t STATIC_PROVISIONED = 0x02;
   static const std::int32_t MAPPED = 0x04;
+  static const std::size_t MAX_NAME_LEN = 256;
+  static const std::size_t MAX_METADATA_LEN = 8192;
   static const std::size_t MAX_TAG_KEYLEN = 256;
   static const std::size_t MAX_TAG_VALLEN = 256;
   static const std::size_t MAX_NUM_TAGS = 256;
@@ -503,23 +465,34 @@ class data_status {
 
   /**
    * Constructor
+   * @param type Data type
    * @param backing_path File backing path
    * @param chain_length Chain length
    * @param blocks Data blocks
    * @param flags Flags
    * @param tags Tags
    */
-  data_status(std::string backing_path,
+  data_status(std::string type,
+              std::string backing_path,
               std::size_t chain_length,
               std::vector<replica_chain> blocks,
-              int32_t flags = 0,
-              const std::map<std::string, std::string> &tags = {})
-      : backing_path_(std::move(backing_path)),
+              int32_t flags,
+              const std::map<std::string, std::string> &tags)
+      : type_(type),
+        backing_path_(std::move(backing_path)),
         chain_length_(chain_length),
         data_blocks_(std::move(blocks)),
         tags_(tags),
-        flags_(flags) {}
+        flags_(flags) {
+  }
 
+  /**
+   * @brief Get data type
+   * @return The data type
+   */
+  const std::string &type() const {
+    return type_;
+  }
   /**
    * @brief Fetch data blocks
    * @return Data blocks
@@ -573,8 +546,8 @@ class data_status {
 
   std::vector<std::string> mark_dumped(size_t block_id) {
     data_blocks_.at(block_id).mode = storage_mode::on_disk;
-    std::vector<std::string> chain = data_blocks_.at(block_id).block_names;
-    data_blocks_.at(block_id).block_names.clear();
+    std::vector<std::string> chain = data_blocks_.at(block_id).block_ids;
+    data_blocks_.at(block_id).block_ids.clear();
     return chain;
   }
 
@@ -586,7 +559,7 @@ class data_status {
 
   void mark_loaded(size_t block_id, const std::vector<std::string> chain) {
     data_blocks_.at(block_id).mode = storage_mode::in_memory;
-    data_blocks_.at(block_id).block_names = chain;
+    data_blocks_.at(block_id).block_ids = chain;
   }
 
   /**
@@ -648,13 +621,20 @@ class data_status {
   }
 
   /**
-   * @brief Add data blocks
-   * @param block Blocks
+   * @brief Add data block
+   * @param block Block
    * @param i Data block offset
    */
-
   void add_data_block(const replica_chain &block, std::size_t i) {
     data_blocks_.insert(data_blocks_.begin() + i, block);
+  }
+
+  /**
+   * @brief Add data block
+   * @param block Block
+   */
+  void add_data_block(const replica_chain &block) {
+    data_blocks_.push_back(block);
   }
 
   /**
@@ -664,6 +644,26 @@ class data_status {
 
   void remove_data_block(std::size_t i) {
     data_blocks_.erase(data_blocks_.begin() + i);
+  }
+
+  /**
+   * @brief Remove data block by partition name
+   * @param partition_name Name of partition at data block.
+   * @return True if removal was successful, false otherwise
+   */
+  bool remove_data_block(const std::string &partition_name, replica_chain &block) {
+    std::vector<replica_chain>::iterator it;
+    for (it = data_blocks_.begin(); it != data_blocks_.end(); ++it) {
+      if (it->name == partition_name) {
+        break;
+      }
+    }
+    if (it != data_blocks_.end()) {
+      block = *it;
+      data_blocks_.erase(it);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -687,45 +687,49 @@ class data_status {
   }
 
   /**
-   * @brief Update data block slot
+   * @brief Get data block name.
    * @param i Data block offset
-   * @param slot_begin Slot begin
-   * @param slot_end Slot end
+   * @return Data block name
    */
 
-  void update_data_block_slots(std::size_t i, int32_t slot_begin, int32_t slot_end) {
-    data_blocks_[i].slot_range.first = slot_begin;
-    data_blocks_[i].slot_range.second = slot_end;
+  const std::string &get_data_block_name(std::size_t i) const {
+    return data_blocks_[i].name;
   }
 
   /**
-   * @brief Fetch data block status
+   * @brief Set data block name
    * @param i Data block offset
-   * @return Data block
+   * @param name Data block name
    */
 
-  chain_status get_data_block_status(std::size_t i) const {
-    return data_blocks_[i].status;
+  void set_data_block_name(std::size_t i, const std::string &name) {
+    if (name.size() > MAX_NAME_LEN) {
+      throw directory_ops_exception("Data block name size > " + std::to_string(MAX_NAME_LEN));
+    }
+    data_blocks_[i].name = name;
   }
 
   /**
-   * @brief Set data block status
+   * @brief Fetch data block metadata
    * @param i Data block offset
-   * @param status Chain status
+   * @return Data block metadata
    */
 
-  void set_data_block_status(std::size_t i, chain_status status) {
-    data_blocks_[i].status = status;
+  const std::string &get_data_block_metadata(std::size_t i) const {
+    return data_blocks_[i].metadata;
   }
 
   /**
-   * @brief Count block slot numbers
+   * @brief Set data block metadata
    * @param i Data block offset
-   * @return Number of slots
+   * @param metadata Data block metadata
    */
 
-  int32_t num_slots(std::size_t i) {
-    return data_blocks_[i].slot_range.second - data_blocks_[i].slot_range.second;
+  void set_data_block_metadata(std::size_t i, const std::string &metadata) {
+    if (metadata.size() > MAX_METADATA_LEN) {
+      throw directory_ops_exception("Data block metadata size > " + std::to_string(MAX_METADATA_LEN));
+    }
+    data_blocks_[i].metadata = metadata;
   }
 
   /**
@@ -775,8 +779,9 @@ class data_status {
     throw new directory_ops_exception("tag " + key + " not found");
   }
 
-  /*
-   * Fetch all tags
+  /**
+   * @brief Fetch all tags
+   * @return Tags
    */
 
   const std::map<std::string, std::string> &get_tags() const {
@@ -878,6 +883,8 @@ class data_status {
   }
 
  private:
+  /* Type data type */
+  std::string type_;
   /* Backing path */
   std::string backing_path_;
   /* Replica chain */
@@ -900,18 +907,24 @@ class directory_ops {
 
   virtual data_status open(const std::string &path) = 0;
   virtual data_status create(const std::string &path,
+                             const std::string &type,
                              const std::string &backing_path,
-                             std::size_t num_blocks,
-                             std::size_t chain_length,
-                             std::int32_t flags,
-                             std::int32_t permissions,
+                             int32_t num_blocks,
+                             int32_t chain_length,
+                             int32_t flags,
+                             int32_t permissions,
+                             const std::vector<std::string> &block_names,
+                             const std::vector<std::string> &block_metadata,
                              const std::map<std::string, std::string> &tags) = 0;
   virtual data_status open_or_create(const std::string &path,
+                                     const std::string &type,
                                      const std::string &backing_path,
-                                     std::size_t num_blocks,
-                                     std::size_t chain_length,
-                                     std::int32_t flags,
-                                     std::int32_t permissions,
+                                     int32_t num_blocks,
+                                     int32_t chain_length,
+                                     int32_t flags,
+                                     int32_t permissions,
+                                     const std::vector<std::string> &block_names,
+                                     const std::vector<std::string> &block_metadata,
                                      const std::map<std::string, std::string> &tags) = 0;
 
   virtual bool exists(const std::string &path) const = 0;
@@ -943,16 +956,23 @@ class directory_ops {
   virtual bool is_regular_file(const std::string &path) = 0;
   virtual bool is_directory(const std::string &path) = 0;
 };
+
 /* Directory management operations virtual class */
 class directory_management_ops {
  public:
+  // Lease management
   virtual void touch(const std::string &path) = 0;
+  virtual void handle_lease_expiry(const std::string &path) = 0;
+
+  // Chain replication
   virtual replica_chain resolve_failures(const std::string &path, const replica_chain &chain) = 0;
   virtual replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) = 0;
-  virtual void add_block_to_file(const std::string &path) = 0;
-  virtual void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) = 0;
-  virtual void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) = 0;
-  virtual void handle_lease_expiry(const std::string &path) = 0;
+
+  // Block allocation
+  virtual replica_chain add_block(const std::string &path,
+                                  const std::string &partition_name,
+                                  const std::string &partition_metadata) = 0;
+  virtual void remove_block(const std::string &path, const std::string &block_name) = 0;
 };
 
 class directory_interface : public directory_ops, public directory_management_ops {};

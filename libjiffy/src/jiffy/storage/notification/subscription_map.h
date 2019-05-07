@@ -4,12 +4,14 @@
 #include <string>
 #include <unordered_map>
 #include <mutex>
-#include "subscription_service.h"
+#include "notification_response_client.h"
+
 namespace jiffy {
 namespace storage {
+
 /* Subscription map class
  * This map records all the clients that are waiting for a specific operation
- *  on the block. When the operation is done, the block will send a notification
+ *  on the partition. When the operation is done, the partition will send a notification
  *  in order to let the client get the right data at right time
  */
 class subscription_map {
@@ -26,7 +28,7 @@ class subscription_map {
    * @param client Subscription service client
    */
 
-  void add_subscriptions(const std::vector<std::string> &ops, std::shared_ptr<subscription_serviceClient> client);
+  void add_subscriptions(const std::vector<std::string> &ops, std::shared_ptr<notification_response_client> client);
 
   /**
    * @brief Remove a subscription from subscription map
@@ -36,7 +38,7 @@ class subscription_map {
    */
 
   void remove_subscriptions(const std::vector<std::string> &ops,
-                            std::shared_ptr<subscription_serviceClient> client,
+                            std::shared_ptr<notification_response_client> client,
                             bool inform = true);
 
   /**
@@ -57,7 +59,7 @@ class subscription_map {
   /* Subscription map operation mutex */
   std::mutex mtx_{};
   /* Subscription map */
-  std::map<std::string, std::set<std::shared_ptr<subscription_serviceClient>>> subs_{};
+  std::map<std::string, std::set<std::shared_ptr<notification_response_client>>> subs_{};
 };
 
 }

@@ -79,11 +79,14 @@ class directory_client : public directory_interface {
    */
 
   data_status create(const std::string &path,
+                     const std::string &type,
                      const std::string &backing_path = "",
-                     std::size_t num_blocks = 1,
-                     std::size_t chain_length = 1,
-                     std::int32_t flags = 0,
-                     std::int32_t permissions = perms::all(),
+                     int32_t num_blocks = 1,
+                     int32_t chain_length = 1,
+                     int32_t flags = 0,
+                     int32_t permissions = perms::all(),
+                     const std::vector<std::string> &block_names = {"0"},
+                     const std::vector<std::string> &block_metadata = {""},
                      const std::map<std::string, std::string> &tags = {}) override;
 
   /**
@@ -99,11 +102,14 @@ class directory_client : public directory_interface {
    */
 
   data_status open_or_create(const std::string &path,
+                             const std::string &type,
                              const std::string &backing_path = "",
-                             std::size_t num_blocks = 1,
-                             std::size_t chain_length = 1,
-                             std::int32_t flags = 0,
-                             std::int32_t permissions = perms::all(),
+                             int32_t num_blocks = 1,
+                             int32_t chain_length = 1,
+                             int32_t flags = 0,
+                             int32_t permissions = perms::all(),
+                             const std::vector<std::string> &block_names = {"0"},
+                             const std::vector<std::string> &block_metadata = {""},
                              const std::map<std::string, std::string> &tags = {}) override;
 
   /**
@@ -245,31 +251,6 @@ class directory_client : public directory_interface {
   replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) override;
 
   /**
-   * @brief Add block to file
-   * @param path File path
-   */
-
-  void add_block_to_file(const std::string &path) override;
-
-  /**
-   * @brief Split block hash range
-   * @param path File path
-   * @param slot_begin Split begin range
-   * @param slot_end Split end range
-   */
-
-  void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) override;
-
-  /**
-   * @brief Merge slot hash range
-   * @param path File path
-   * @param slot_begin Merge begin range
-   * @param slot_end Merge end range
-   */
-
-  void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) override;
-
-  /**
    * @brief Write all dirty blocks back to persistent storage and clear the block
    * @param path File path
    * @param backing_path File backing path
@@ -289,13 +270,17 @@ class directory_client : public directory_interface {
    * @brief Touch -> unsupported operation
    */
 
-  virtual void touch(const std::string &path) override;
+  void touch(const std::string &path) override;
 
   /**
    * @brief Handle lease expiry -> unsupported operation
    */
 
-  virtual void handle_lease_expiry(const std::string &path) override;
+  void handle_lease_expiry(const std::string &path) override;
+  replica_chain add_block(const std::string &path,
+                          const std::string &partition_name,
+                          const std::string &partition_metadata) override;
+  void remove_block(const std::string &path, const std::string &partition_name) override;
 
  private:
   /* Socket */

@@ -2,18 +2,16 @@ if (NOT APPLE AND UNIX)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-as-needed -ldl")
 endif ()
 
-include_directories(../libjiffy/src ${Boost_INCLUDE_DIRS})
-add_executable(storaged src/storage_server.cpp)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../libjiffy/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libcuckoo
+        ${Boost_INCLUDE_DIRS})
+add_executable(storaged src/storage_server.cpp
+        src/server_storage_tracker.cpp
+        src/server_storage_tracker.h)
 
-if (NOT USE_SYSTEM_BOOST)
-  add_dependencies(directoryd boost)
-endif ()
+add_dependencies(storaged boost_ep jemalloc_ep)
 
-if (NOT USE_SYSTEM_JEMALLOC)
-  add_dependencies(storaged jemalloc)
-endif ()
-
-target_link_libraries(storaged jiffy ${JEMALLOC_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(storaged jiffy ${JEMALLOC_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 install(TARGETS storaged
         RUNTIME DESTINATION bin

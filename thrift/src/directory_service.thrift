@@ -23,9 +23,9 @@ enum rpc_storage_mode {
 }
 
 struct rpc_replica_chain {
-  1: required list<string> block_names,
-  2: required i32 slot_begin,
-  3: required i32 slot_end,
+  1: required list<string> block_ids,
+  2: required string name,
+  3: required string metadata,
   4: required rpc_storage_mode storage_mode
 }
 
@@ -36,11 +36,12 @@ struct rpc_file_status {
 }
 
 struct rpc_data_status {
-  1: required string backing_path,
-  2: required i32 chain_length,
-  3: required list<rpc_replica_chain> data_blocks,
-  4: required i32 flags,
-  5: required map<string, string> tags,
+  1: required string type,
+  2: required string backing_path,
+  3: required i32 chain_length,
+  4: required list<rpc_replica_chain> data_blocks,
+  5: required i32 flags,
+  6: required map<string, string> tags,
 }
 
 struct rpc_dir_entry {
@@ -60,9 +61,13 @@ service directory_service {
 
   rpc_data_status open(1: string path)
     throws (1: directory_service_exception ex),
-  rpc_data_status create(1: string path, 2: string backing_path, 3: i32 num_blocks, 4: i32 chain_length, 5: i32 flags, 6: i32 permissions, 7: map<string, string> tags)
+  rpc_data_status create(1: string path, 2: string type, 3: string backing_path, 4: i32 num_blocks, 5: i32 chain_length,
+                         6: i32 flags, 7: i32 permissions, 8: list<string> block_ids, 9: list<string> block_metadata,
+                         10: map<string, string> tags)
     throws (1: directory_service_exception ex),
-  rpc_data_status open_or_create(1: string path, 2: string backing_path, 3: i32 num_blocks, 4: i32 chain_length, 5: i32 flags, 6: i32 permissions, 7: map<string, string> tags)
+  rpc_data_status open_or_create(1: string path, 2: string type, 3: string backing_path, 4: i32 num_blocks,
+                                 5: i32 chain_length, 6: i32 flags, 7: i32 permissions, 8: list<string> block_ids,
+                                 9: list<string> block_metadata, 10: map<string, string> tags)
     throws (1: directory_service_exception ex),
 
   bool exists(1: string path)
@@ -118,12 +123,9 @@ service directory_service {
   rpc_replica_chain add_replica_to_chain(1: string path, 2: rpc_replica_chain chain) // TODO: We should pass in chain id...
     throws (1: directory_service_exception ex),
 
-  void add_block_to_file(1: string path)
+  rpc_replica_chain add_data_block(1: string path, 2: string partition_name, 3: string partition_metadata)
     throws (1: directory_service_exception ex),
 
-  void split_slot_range(1: string path, 2: i32 slot_begin, 3: i32 slot_end)
-      throws (1: directory_service_exception ex),
-
-  void merge_slot_range(1: string path, 2: i32 slot_begin, 3: i32 slot_end)
-        throws (1: directory_service_exception ex),
+  void remove_data_block(1: string path, 2: string partition_name)
+    throws (1: directory_service_exception ex)
 }

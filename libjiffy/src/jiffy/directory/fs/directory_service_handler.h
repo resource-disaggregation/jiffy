@@ -47,22 +47,21 @@ class directory_service_handler : public directory_serviceIf {
    * @brief Create file
    * @param _return RPC data status to be collected
    * @param path File path
+   * @param type Data type
    * @param backing_path File backing path
    * @param num_blocks Number of blocks
    * @param chain_length Replica chain length
    * @param flags Flags
    * @param permissions File permissions
+   * @param block_names Block names
+   * @param block_metadata Block metadata
    * @param tags Tags
    */
 
-  void create(rpc_data_status &_return,
-              const std::string &path,
-              const std::string &backing_path,
-              int32_t num_blocks,
-              int32_t chain_length,
-              int32_t flags,
-              int32_t permissions,
-              const std::map<std::string, std::string> &tags) override;
+  void create(rpc_data_status &_return, const std::string &path, const std::string &type,
+              const std::string &backing_path, int32_t num_blocks, int32_t chain_length, int32_t flags,
+              int32_t permissions, const std::vector<std::string> &block_names,
+              const std::vector<std::string> &block_metadata, const std::map<std::string, std::string> &tags) override;
 
   /**
    * @brief Open or create a file
@@ -70,21 +69,21 @@ class directory_service_handler : public directory_serviceIf {
    * If not, create it
    * @param _return RPC data status to be collected
    * @param path File path
+   * @param type Data type
    * @param backing_path File backing path
    * @param num_blocks Number of blocks
    * @param chain_length Replica chain length
    * @param flags Flags
    * @param permissions File permissions
+   * @param block_names Block names
+   * @param block_metadata Block metadata
    * @param tags Tags
    */
 
-  void open_or_create(rpc_data_status &_return,
-                      const std::string &path,
-                      const std::string &backing_path,
-                      int32_t num_blocks,
-                      int32_t chain_length,
-                      int32_t flags,
-                      int32_t permissions,
+  void open_or_create(rpc_data_status &_return, const std::string &path, const std::string &type,
+                      const std::string &backing_path, int32_t num_blocks, int32_t chain_length, int32_t flags,
+                      int32_t permissions, const std::vector<std::string> &block_names,
+                      const std::vector<std::string> &block_metadata,
                       const std::map<std::string, std::string> &tags) override;
 
   /**
@@ -219,31 +218,6 @@ class directory_service_handler : public directory_serviceIf {
                             const rpc_replica_chain &chain) override;
 
   /**
-   * @brief Add block to file
-   * @param path File path
-   */
-
-  void add_block_to_file(const std::string &path) override;
-
-  /**
-   * @brief Split block hash range
-   * @param path File path
-   * @param slot_begin Split begin range
-   * @param slot_end Split end range
-   */
-
-  void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) override;
-
-  /**
-   * @brief Merge slot hash range
-   * @param path File path
-   * @param slot_begin Merge begin range
-   * @param slot_end Merge end range
-   */
-
-  void merge_slot_range(const std::string &path, const int32_t slot_begin, const int32_t slot_end) override;
-
-  /**
    * @brief Write all dirty blocks back to persistent storage
    * @param path File path
    * @param backing_path File backing path
@@ -266,6 +240,11 @@ class directory_service_handler : public directory_serviceIf {
    */
 
   void load(const std::string &path, const std::string &backing_path) override;
+  void add_data_block(rpc_replica_chain &_return,
+                      const std::string &path,
+                      const std::string &partition_name,
+                      const std::string &partition_metadata) override;
+  void remove_data_block(const std::string &path, const std::string &partition_name) override;
 
  private:
   /**

@@ -21,9 +21,9 @@ class directory_type_conversions {
 
   static rpc_replica_chain to_rpc(const replica_chain &chain) {
     rpc_replica_chain rpc;
-    rpc.block_names = chain.block_names;
-    rpc.slot_begin = chain.slot_begin();
-    rpc.slot_end = chain.slot_end();
+    rpc.block_ids = chain.block_ids;
+    rpc.name = chain.name;
+    rpc.metadata = chain.metadata;
     rpc.storage_mode = (rpc_storage_mode) chain.mode;
     return rpc;
   }
@@ -35,11 +35,10 @@ class directory_type_conversions {
    */
 
   static replica_chain from_rpc(const rpc_replica_chain &rpc) {
-    return replica_chain(rpc.block_names,
-                         rpc.slot_begin,
-                         rpc.slot_end,
-                         chain_status::stable,
-                         static_cast<storage_mode>(rpc.storage_mode));
+    replica_chain chain(rpc.block_ids, static_cast<storage_mode>(rpc.storage_mode));
+    chain.name = rpc.name;
+    chain.metadata = rpc.metadata;
+    return chain;
   }
 
   /**
@@ -50,6 +49,7 @@ class directory_type_conversions {
 
   static rpc_data_status to_rpc(const data_status &status) {
     rpc_data_status rpc;
+    rpc.type = status.type();
     rpc.backing_path = status.backing_path();
     rpc.chain_length = static_cast<int32_t>(status.chain_length());
     rpc.flags = status.flags();
@@ -100,7 +100,12 @@ class directory_type_conversions {
     for (const auto &blk: rpc.data_blocks) {
       data_blocks.push_back(from_rpc(blk));
     }
-    return data_status(rpc.backing_path, static_cast<size_t>(rpc.chain_length), data_blocks, rpc.flags, rpc.tags);
+    return data_status(rpc.type,
+                       rpc.backing_path,
+                       static_cast<size_t>(rpc.chain_length),
+                       data_blocks,
+                       rpc.flags,
+                       rpc.tags);
   }
 
   /**

@@ -1,7 +1,7 @@
-#include <iostream>
 #include <thrift/transport/TTransportException.h>
-#include "notification_worker.h"
-#include "../../utils/logger.h"
+#include "jiffy/storage/notification/notification_worker.h"
+#include "jiffy/storage/notification/notification_handler.h"
+#include "jiffy/utils/logger.h"
 
 using namespace ::apache::thrift::transport;
 using namespace ::jiffy::utils;
@@ -26,7 +26,7 @@ void notification_worker::start() {
   worker_ = std::thread([&] {
     while (!stop_.load()) {
       try {
-        for (auto protocol: protocols_) {
+        for (const auto &protocol: protocols_) {
           if (!processor_->process(protocol, protocol, nullptr)) {
             return;
           }

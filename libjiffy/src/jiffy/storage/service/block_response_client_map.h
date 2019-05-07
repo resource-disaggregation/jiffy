@@ -8,8 +8,8 @@
 namespace jiffy {
 namespace storage {
 /* Block response client map class
- * This map records all the client that sent request to the block.
- * It maps data from client identifier to block response client
+ * This map records all the client that sent request to the partition.
+ * It maps data from client identifier to partition response client
  */
 class block_response_client_map {
  public:

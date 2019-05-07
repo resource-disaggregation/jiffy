@@ -7,17 +7,16 @@
 #include <thrift/transport/TTransport.h>
 #include <thrift/protocol/TProtocol.h>
 #include <thrift/protocol/TMultiplexedProtocol.h>
-#include "../notification/notification_service.h"
-#include "../notification/subscription_service.h"
-#include "../notification/blocking_queue.h"
-#include "../notification/subscription_service.h"
+#include "jiffy/storage/service/block_request_service.h"
+#include "jiffy/storage/notification/blocking_queue.h"
 
 namespace jiffy {
 namespace storage {
+
 /* Block listener class */
 class block_listener {
  public:
-  typedef notification_serviceClient thrift_client;
+  typedef block_request_serviceClient thrift_client;
 
   typedef std::pair<std::string, std::string> notification_t;
   typedef blocking_queue<notification_t> mailbox_t;

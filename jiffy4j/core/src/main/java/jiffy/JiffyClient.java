@@ -2,19 +2,23 @@ package jiffy;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import jiffy.directory.Permissions;
 import jiffy.directory.directory_service;
 import jiffy.directory.directory_service.Client;
 import jiffy.directory.rpc_data_status;
-import jiffy.kv.KVClient;
+import jiffy.storage.HashTableClient;
 import jiffy.lease.LeaseWorker;
-import jiffy.notification.KVListener;
+import jiffy.notification.HashTableListener;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
+
+import static jiffy.storage.HashSlot.SLOT_MAX;
 
 public class JiffyClient implements Closeable {
 
@@ -64,62 +68,82 @@ public class JiffyClient implements Closeable {
     worker.removePath(path);
   }
 
-  public KVClient create(String path) throws TException {
-    return create(path, DEFAULT_BACKING_PATH);
+  public HashTableClient createHashTable(String path) throws TException {
+    return createHashTable(path, DEFAULT_BACKING_PATH);
   }
 
-  public KVClient create(String path, String backingPath) throws TException {
-    return create(path, backingPath, DEFAULT_NUM_BLOCKS, DEFAULT_CHAIN_LENGTH);
+  public HashTableClient createHashTable(String path, String backingPath) throws TException {
+    return createHashTable(path, backingPath, DEFAULT_NUM_BLOCKS, DEFAULT_CHAIN_LENGTH);
   }
 
-  public KVClient create(String path, String backingPath, int numBlocks, int chainLength)
+  public HashTableClient createHashTable(String path, String backingPath, int numBlocks, int chainLength)
       throws TException {
-    return create(path, backingPath, numBlocks, chainLength, DEFAULT_FLAGS, DEFAULT_PERMISSIONS,
+    return createHashTable(path, backingPath, numBlocks, chainLength, DEFAULT_FLAGS, DEFAULT_PERMISSIONS,
         DEFAULT_TAGS);
   }
 
-  public KVClient create(String path, String backingPath, int numBlocks, int chainLength, int flags,
-      int permissions, Map<String, String> tags)
+  public HashTableClient createHashTable(String path, String backingPath, int numBlocks, int chainLength, int flags,
+                                         int permissions, Map<String, String> tags)
       throws TException {
+    List<String> partitionNames = new ArrayList<>(numBlocks);
+    List<String> partitionMetadata = new ArrayList<>(numBlocks);
+    int hashRange = SLOT_MAX / numBlocks;
+    for (int i = 0; i < numBlocks; ++i) {
+      int begin = i * hashRange;
+      int end = (i == numBlocks - 1) ? SLOT_MAX : (i + 1) * hashRange;
+      partitionNames.add(i, begin + "_" + end);
+      partitionMetadata.add(i, "regular");
+    }
     rpc_data_status status = fs
-        .create(path, backingPath, numBlocks, chainLength, flags, permissions, tags);
+        .create(path, "hashtable", backingPath, numBlocks, chainLength, flags, permissions, partitionNames,
+                partitionMetadata, tags);
     beginScope(path);
-    return new KVClient(fs, path, status, timeoutMs);
+    return new HashTableClient(fs, path, status, timeoutMs);
   }
 
-  public KVClient open(String path) throws TException {
+  public HashTableClient open(String path) throws TException {
     rpc_data_status status = fs.open(path);
     beginScope(path);
-    return new KVClient(fs, path, status, timeoutMs);
+    return new HashTableClient(fs, path, status, timeoutMs);
   }
 
-  public KVClient openOrCreate(String path) throws TException {
-    return openOrCreate(path, DEFAULT_BACKING_PATH);
+  public HashTableClient openOrCreateHashTable(String path) throws TException {
+    return openOrCreateHashTable(path, DEFAULT_BACKING_PATH);
   }
 
-  public KVClient openOrCreate(String path, String backingPath) throws TException {
-    return openOrCreate(path, backingPath, DEFAULT_NUM_BLOCKS, DEFAULT_CHAIN_LENGTH);
+  public HashTableClient openOrCreateHashTable(String path, String backingPath) throws TException {
+    return openOrCreateHashTable(path, backingPath, DEFAULT_NUM_BLOCKS, DEFAULT_CHAIN_LENGTH);
   }
 
-  public KVClient openOrCreate(String path, String backingPath, int numBlocks, int chainLength)
+  public HashTableClient openOrCreateHashTable(String path, String backingPath, int numBlocks, int chainLength)
       throws TException {
-    return openOrCreate(path, backingPath, numBlocks, chainLength, DEFAULT_FLAGS,
+    return openOrCreateHashTable(path, backingPath, numBlocks, chainLength, DEFAULT_FLAGS,
         DEFAULT_PERMISSIONS, DEFAULT_TAGS);
   }
 
-  public KVClient openOrCreate(String path, String backingPath, int numBlocks,
-      int chainLength, int flags, int permissions,
-      Map<String, String> tags) throws TException {
+  public HashTableClient openOrCreateHashTable(String path, String backingPath, int numBlocks,
+                                               int chainLength, int flags, int permissions,
+                                               Map<String, String> tags) throws TException {
+    List<String> partitionNames = new ArrayList<>(numBlocks);
+    List<String> partitionMetadata = new ArrayList<>(numBlocks);
+    int hashRange = SLOT_MAX / numBlocks;
+    for (int i = 0; i < numBlocks; ++i) {
+      int begin = i * hashRange;
+      int end = (i == numBlocks - 1) ? SLOT_MAX : (i + 1) * hashRange;
+      partitionNames.add(i, begin + "_" + end);
+      partitionMetadata.add(i, "regular");
+    }
     rpc_data_status status = fs
-        .openOrCreate(path, backingPath, numBlocks, chainLength, flags, permissions, tags);
+        .openOrCreate(path, "hashtable", backingPath, numBlocks, chainLength, flags, permissions, partitionNames, partitionMetadata,
+                tags);
     beginScope(path);
-    return new KVClient(fs, path, status, timeoutMs);
+    return new HashTableClient(fs, path, status, timeoutMs);
   }
 
-  public KVListener listen(String path) throws TException {
+  public HashTableListener listen(String path) throws TException {
     rpc_data_status status = fs.open(path);
     beginScope(path);
-    return new KVListener(path, status);
+    return new HashTableListener(path, status);
   }
 
   public void remove(String path) throws TException {
