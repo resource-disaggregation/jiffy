@@ -1,7 +1,6 @@
 include_directories(${THRIFT_INCLUDE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libcuckoo
-        ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/btree)
+        ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libcuckoo)
 
 if (BUILD_STORAGE OR BUILD_DIRECTORY)
   add_library(jiffy OBJECT
@@ -89,11 +88,6 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/hashtable/hash_table_ops.cpp
           src/jiffy/storage/hashtable/hash_table_partition.cpp
           src/jiffy/storage/hashtable/hash_table_partition.h
-          src/jiffy/storage/btree/btree_defs.h
-          src/jiffy/storage/btree/btree_ops.h
-          src/jiffy/storage/btree/btree_ops.cpp
-          src/jiffy/storage/btree/btree_partition.h
-          src/jiffy/storage/btree/btree_partition.cpp
           src/jiffy/storage/string_array.h
           src/jiffy/storage/string_array.cpp
           src/jiffy/storage/file/file_defs.h
@@ -120,8 +114,6 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/client/data_structure_client.h
           src/jiffy/storage/client/hash_table_client.cpp
           src/jiffy/storage/client/hash_table_client.h
-          src/jiffy/storage/client/btree_client.cpp
-          src/jiffy/storage/client/btree_client.h
           src/jiffy/storage/client/file_client.cpp
           src/jiffy/storage/client/file_client.h
           src/jiffy/storage/client/fifo_queue_client.cpp
@@ -262,8 +254,6 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
 #            test/file_size_tracker_test.cpp
             test/hash_table_partition_test.cpp
             test/hash_table_client_test.cpp
-#            test/btree_partition_test.cpp
-#            test/btree_client_test.cpp
             test/file_partition_test.cpp
             test/file_client_test.cpp
             test/fifo_queue_client_test.cpp
@@ -320,8 +310,6 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/hashtable/hash_slot.cpp
           src/jiffy/storage/hashtable/hash_table_ops.h
           src/jiffy/storage/hashtable/hash_table_ops.cpp
-          src/jiffy/storage/btree/btree_ops.h
-          src/jiffy/storage/btree/btree_ops.cpp
           src/jiffy/storage/string_array.h
           src/jiffy/storage/string_array.cpp
           src/jiffy/storage/file/file_ops.h
@@ -340,8 +328,6 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/client/data_structure_client.h
           src/jiffy/storage/client/hash_table_client.cpp
           src/jiffy/storage/client/hash_table_client.h
-          src/jiffy/storage/client/btree_client.cpp
-          src/jiffy/storage/client/btree_client.h
           src/jiffy/storage/client/file_client.cpp
           src/jiffy/storage/client/file_client.h
           src/jiffy/storage/client/fifo_queue_client.cpp
