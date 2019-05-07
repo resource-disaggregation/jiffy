@@ -31,7 +31,6 @@ class storage_manager : public storage_management_ops {
                         const std::string &metadata,
                         const std::map<std::string, std::string> &conf) override;
 
-
   /**
    * @brief Destroy partition
    * @param block_name Block name
@@ -99,11 +98,31 @@ class storage_manager : public storage_management_ops {
    */
 
   void forward_all(const std::string &block_name) override;
+
+  /**
+   * @brief Setup a replica chian
+   * @param block_id Block identifier
+   * @param path File path
+   * @param chain Replica chain
+   * @param role Chain role
+   * @param next_block_id Next block identifier
+   */
   void setup_chain(const std::string &block_id,
                    const std::string &path,
                    const std::vector<std::string> &chain,
                    int32_t role,
                    const std::string &next_block_id) override;
+
+  /**
+   * @brief Update partition data and metadata
+   * @param block_name Block name
+   * @param partition_name New partition name
+   * @param partition_metadata New partition metadata
+   */
+
+  void update_partition(const std::string &block_name,
+                        const std::string &partition_name,
+                        const std::string &partition_metadata) override;
 };
 
 }
