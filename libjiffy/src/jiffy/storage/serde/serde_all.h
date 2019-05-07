@@ -2,7 +2,6 @@
 #define JIFFY_SERDE_H
 
 #include "jiffy/storage/hashtable/hash_table_defs.h"
-#include "jiffy/storage/btree/btree_defs.h"
 #include "jiffy/storage/file/file_defs.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_defs.h"
 #include "jiffy/storage/types/binary.h"
@@ -38,10 +37,8 @@ class serde {
 
  private:
   virtual std::size_t virtual_serialize(const locked_hash_table_type &table, std::shared_ptr<std::ostream> out) = 0;
-  virtual std::size_t virtual_serialize(const btree_type &table, std::shared_ptr<std::ostream> out) = 0;
   virtual std::size_t virtual_serialize(const file_type &table, std::shared_ptr<std::ostream> out) = 0;
   virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, locked_hash_table_type &table) = 0;
-  virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, btree_type &table) = 0;
   virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, file_type &table) = 0;
 
   block_memory_allocator<uint8_t> allocator_;
@@ -58,16 +55,10 @@ class derived : public impl {
   std::size_t virtual_serialize(const locked_hash_table_type &table, std::shared_ptr<std::ostream> out) final {
     return impl::serialize_impl(table, out);
   }
-  std::size_t virtual_serialize(const btree_type &table, std::shared_ptr<std::ostream> out) final {
-    return impl::serialize_impl(table, out);
-  }
   std::size_t virtual_serialize(const file_type &table, std::shared_ptr<std::ostream> out) final {
     return impl::serialize_impl(table, out);
   }
   std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, locked_hash_table_type &table) final {
-    return impl::deserialize_impl(in, table);
-  }
-  std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, btree_type &table) final {
     return impl::deserialize_impl(in, table);
   }
   std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, file_type &table) final {
