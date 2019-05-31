@@ -4,7 +4,7 @@
 #include <functional>
 #include "jiffy/storage/block_memory_allocator.h"
 #include "jiffy/storage/types/binary.h"
-#include "jiffy/storage/string_array.h"
+#include "string_array.h"
 
 namespace jiffy {
 namespace storage {

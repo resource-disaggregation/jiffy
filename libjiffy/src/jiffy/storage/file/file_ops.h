@@ -18,6 +18,7 @@ enum file_cmd_id {
   file_read = 1,
   file_clear = 2,
   file_update_partition = 3,
+  file_seek = 4
 };
 
 }
