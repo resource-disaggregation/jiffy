@@ -26,7 +26,7 @@ file_partition::file_partition(block_memory_manager *manager,
       partition_(manager->mb_capacity(), build_allocator<char>()),
       overload_(false),
       dirty_(false),
-      split_string_(false),
+      allocate_new_block_(false),
       directory_host_(directory_host),
       directory_port_(directory_port),
       auto_scaling_host_(auto_scaling_host),
@@ -46,33 +46,40 @@ file_partition::file_partition(block_memory_manager *manager,
 }
 
 std::string file_partition::write(const std::string &message) {
-  if (partition_.size() > partition_.capacity() && !split_string_.load()) {
-    if (!next_target_str().empty()) {
-      return "!full!" + next_target_str();
-    } else {
-      return "!redo";
+  if (partition_.size() > partition_.capacity())
+  { 
+    if (!allocate_new_block_.load()) 
+    {
+      if (!next_target_str().empty()) {
+        return "!full!" + next_target_str();
+      } else if(!auto_scale_) {
+        return "!next_partition";
+      } 
     }
+      return "!redo";
   }
   auto ret = partition_.push_back(message);
   if (!ret.first) {
-    split_string_ = true;
+    allocate_new_block_ = true;
     //TODO at this point we assume that next_target_str is always set before the last string to write, this could cause error when the last string is bigger than 6.4MB
     return "!split_write!" + next_target_str() + "!" + std::to_string(ret.second.size());
   }
   return "!ok";
 }
 
-std::string file_partition::read(std::string position) {
+std::string file_partition::read(std::string position, std::string size) {
   auto pos = std::stoi(position);
+  auto read_size = std::stoi(size); 
   if (pos < 0) throw std::invalid_argument("read position invalid");
-  auto ret = partition_.at(static_cast<std::size_t>(pos));
+  auto ret = partition_.read(static_cast<std::size_t>(pos), static_cast<std::size_t>(read_size));
   if (ret.first) {
     return ret.second;
   } else if (ret.second == "!reach_end") {
-    if (!next_target_str().empty())
+    if (!next_target_str().empty() || !auto_scale_)
       return "!msg_not_in_partition";
-    else
+    else {
       return "!redo";
+    }
   } else if (ret.second == "!not_available") {
     return "!msg_not_found";
   } else {
@@ -81,12 +88,18 @@ std::string file_partition::read(std::string position) {
   }
 }
 
+void file_partition::seek(std::vector<std::string> &ret) {
+  ret.emplace_back(std::to_string(partition_.size());
+  ret.emplace_back(std::to_string(partition_.capacity()));
+  return ret;
+}
+
 std::string file_partition::clear() {
   partition_.clear();
-  split_string_ = false;
+  allocate_new_block_ = false;
   overload_ = false;
   dirty_ = false;
-  split_string_ = false;
+  allocate_new_block_ = false;
   return "!ok";
 }
 
@@ -105,8 +118,11 @@ void file_partition::run_command(std::vector<std::string> &_return,
         _return.emplace_back(write(msg));
       break;
     case file_cmd_id::file_read:
-      for (const auto &pos: args)
-        _return.emplace_back(read(pos));
+      if(nargs % 2 != 0) {
+        _return.emplace_back("!args_error");
+      }
+      for (size_t i = 0; i < nargs; i += 2)
+        _return.emplace_back(read(args[i], args[i + 1]));
       break;
     case file_cmd_id::file_clear:
       if (nargs != 0) {
@@ -120,6 +136,16 @@ void file_partition::run_command(std::vector<std::string> &_return,
         _return.emplace_back("!args_error");
       } else {
         _return.emplace_back(update_partition(args[0]));
+      }
+      break;
+    case file_cmd_id::file_seek:
+      if(nargs != 0) {
+        _return.emplace_back("!args_error");
+      } else {
+        std::vector<std::string> ret;
+        seek(ret);
+        _return.emplace_back(ret[0]);
+        _return.emplace_back(ret[1]);
       }
       break;
     default:throw std::invalid_argument("No such operation id " + std::to_string(cmd_id));

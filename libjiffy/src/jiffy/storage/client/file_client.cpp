@@ -3,7 +3,7 @@
 #include "jiffy/utils/string_utils.h"
 #include <algorithm>
 #include <thread>
-#include <jiffy/storage/string_array.h>
+
 
 namespace jiffy {
 namespace storage {
@@ -48,10 +48,11 @@ std::string file_client::write(const std::string &msg) {
 
 }
 
-std::string file_client::read() {
+std::string file_client::read(const std::size_t size) {
   std::string _return;
   std::vector<std::string> args;
   args.push_back(std::to_string(read_offset_));
+  args.push_back(std::to_string(size));
   bool redo;
   do {
     try {
@@ -65,14 +66,37 @@ std::string file_client::read() {
   return _return;
 }
 
-std::size_t file_client::block_id(const file_cmd_id &op) {
-  if (op == file_cmd_id::file_write) {
-    return write_partition_;
-  } else if (op == file_cmd_id::file_read) {
-    return read_partition_;
+bool file_client::seek(const std::size_t offset) {
+  std::vector<std::string> ret;
+  auto seek_partition = block_id(file_cmd_id::file_seek);
+  ret = blocks_[seek_partition]->run_command(file_cmd_id::file_seek, {}).front();
+  std::size_t size = std::stoi(ret[0]);
+  std::size_t cap = std::stoi(ret[1]);
+  if(offset >= seek_partition * cap + size) {
+    return false;
   } else {
-    throw std::invalid_argument("Incorrect operation of message queue");
+    read_partition = offset / cap;
+    read_offset_ = offset % cap;
+    return true;
   }
+}
+
+std::size_t file_client::block_id(const file_cmd_id &op) {
+  switch(op) {
+    case file_cmd_id::file_write:
+      if(!check_valid_id(write_partition_)) {
+        throw std::logic_error("Blocks are insufficient, need to add more");
+      }
+      return write_partition_;
+    case file_cmd_id::file_read:
+      if(!check_valid_id(read_partition_)) {
+        throw std::logic_error("Blocks are insufficient, need to add more");
+      }
+      return read_partition_;
+    case file_cmd_id::file_seek:
+      return std::max(read_partition_, write_partition_);
+    }
+  throw std::invalid_argument("Incorrect operation of message queue");
 }
 
 void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
@@ -80,6 +104,12 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
   typedef std::vector<std::string> list_t;
   if (response == "!redo") {
     throw redo_error();
+  }
+  if(response.substr(0, 15) == "!next_partition") {
+    do {
+      write_partition_++;
+      response = blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, args).front();
+    } while(response.substr(0, 15) == "!next_partition");
   }
   if (response.substr(0, 5) == "!full") {
     do {
@@ -99,9 +129,10 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
       read_offset_ = 0;
       std::vector<std::string> modified_args;
       modified_args.push_back(std::to_string(read_offset_));
+      modified_args.push_back(args[1]);
       response = blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, modified_args).front();
       if (response != "!msg_not_found") {
-        read_offset_ += (response.size() + metadata_length);
+        read_offset_ += response.size();
         read_flag = false;
       }
     } while (response.substr(0, 21) == "!msg_not_in_partition");
@@ -130,17 +161,20 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
       read_offset_ = 0;
       std::vector<std::string> modified_args;
       modified_args.push_back(std::to_string(read_offset_));
+      modified_args.push_back(args[1] - first_part_string.size());
       auto second_part_string =
           blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, modified_args).front();
-      response = first_part_string + second_part_string;
-      if (response != "!msg_not_found") {
-        read_offset_ += (second_part_string.size() + metadata_length);
+      if (second_part_string != "!msg_not_found") {
+        read_offset_ += second_part_string.size());
         read_flag = false;
+        response = first_part_string + second_part_string;
+      } else {
+        response = second_part_string;
       }
     } while (response.substr(0, 11) == "!split_write");
   }
   if (response != "!msg_not_found" && cmd_id == static_cast<int32_t>(file_cmd_id::file_read) && read_flag) {
-    read_offset_ += (response.size() + metadata_length);
+    read_offset_ += response.size();
   }
 }
 

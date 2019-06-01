@@ -38,20 +38,20 @@ std::pair<bool, std::string> string_array::push_back(const std::string &msg) {
   std::size_t len = msg.size();
   if (len + tail_ + metadata_length <= max_) {
     char metadata[metadata_length];
-    memset(metadata, 0, metadata_length);
-    memcpy(data_ + tail_, (char *) &len, metadata_length);
+    std::memset(metadata, 0, metadata_length);
+    std::memcpy(data_ + tail_, (char *) &len, metadata_length);
     last_element_offset_ = tail_;
     tail_ += metadata_length;
-    memcpy(data_ + tail_, msg.c_str(), len);
+    std::memcpy(data_ + tail_, msg.c_str(), len);
     tail_ += len;
     return std::make_pair(true, std::string("!success"));
   } else if (max_ - tail_ >= metadata_length) {
     split_string_ = true;
     std::size_t remain_len = max_ - tail_ - metadata_length;
-    memcpy(data_ + tail_, (char *) &len, metadata_length);
+    std::memcpy(data_ + tail_, (char *) &len, metadata_length);
     last_element_offset_ = tail_;
     tail_ += metadata_length;
-    memcpy(data_ + tail_, msg.c_str(), remain_len);
+    std::memcpy(data_ + tail_, msg.c_str(), remain_len);
     tail_ += remain_len;
     return std::make_pair(false, msg.substr(remain_len, msg.size() - remain_len));
   } else {

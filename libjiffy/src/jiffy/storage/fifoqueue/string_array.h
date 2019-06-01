@@ -2,6 +2,7 @@
 #define JIFFY_STRING_ARRAY_H
 
 #include <string>
+#include <cstring>
 #include <vector>
 #include <map>
 #include <iterator>
