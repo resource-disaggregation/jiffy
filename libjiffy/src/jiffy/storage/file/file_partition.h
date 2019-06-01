@@ -74,7 +74,7 @@ class file_partition : public chain_module {
    *@brief Fetch the metadata for seek
    *@param ret Metadata to be returned
    */
-  void file_partition::seek(std::vector<std::string> &ret);
+  void seek(std::vector<std::string> &ret);
 
   /**
    * @brief Clear the file

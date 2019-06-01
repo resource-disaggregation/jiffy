@@ -29,7 +29,7 @@ dummy_block &dummy_block::operator=(const dummy_block &other) {
   return *this;
 }
 bool dummy_block::operator==(const dummy_block &other) const {
-  return data_ == other.data_ && tail_ == other.tail_ && alloc_ == other.alloc_ && max_ == other.max_ && extend_ = other.extend_;
+  return data_ == other.data_ && tail_ == other.tail_ && alloc_ == other.alloc_ && max_ == other.max_ && extend_ == other.extend_;
 }
 std::pair<bool, std::string> dummy_block::push_back(const std::string &msg) {
   std::size_t len = msg.size();
@@ -60,7 +60,7 @@ const std::pair<bool, std::string> dummy_block::read(std::size_t offset, std::si
     return std::make_pair(false, std::string("!not_available"));
   }
   if (offset + size <= max_) {
-    return std::make_pair(true, std::string((const char *) (data_ + offset), len));
+    return std::make_pair(true, std::string((const char *) (data_ + offset), size));
   } else if (extend_) {
     return std::make_pair(false,
                           std::string((const char *) (data_ + offset),
@@ -74,9 +74,6 @@ std::size_t dummy_block::size() const {
 }
 std::size_t dummy_block::capacity() {
   return max_;
-}
-bool dummy_block::split_last_string() {
-  return split_string_.load();
 }
 void dummy_block::clear() {
   tail_ = 0;

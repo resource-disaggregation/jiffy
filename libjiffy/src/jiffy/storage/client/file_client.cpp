@@ -69,13 +69,13 @@ std::string file_client::read(const std::size_t size) {
 bool file_client::seek(const std::size_t offset) {
   std::vector<std::string> ret;
   auto seek_partition = block_id(file_cmd_id::file_seek);
-  ret = blocks_[seek_partition]->run_command(file_cmd_id::file_seek, {}).front();
+  ret = blocks_[seek_partition]->run_command(file_cmd_id::file_seek, {});
   std::size_t size = std::stoi(ret[0]);
   std::size_t cap = std::stoi(ret[1]);
   if(offset >= seek_partition * cap + size) {
     return false;
   } else {
-    read_partition = offset / cap;
+    read_partition_ = offset / cap;
     read_offset_ = offset % cap;
     return true;
   }
@@ -95,8 +95,9 @@ std::size_t file_client::block_id(const file_cmd_id &op) {
       return read_partition_;
     case file_cmd_id::file_seek:
       return std::max(read_partition_, write_partition_);
+    default:
+      throw std::invalid_argument("Incorrect operation of message queue");
     }
-  throw std::invalid_argument("Incorrect operation of message queue");
 }
 
 void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
@@ -161,11 +162,11 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
       read_offset_ = 0;
       std::vector<std::string> modified_args;
       modified_args.push_back(std::to_string(read_offset_));
-      modified_args.push_back(args[1] - first_part_string.size());
+      modified_args.push_back(std::to_string(std::stoi(args[1]) - first_part_string.size()));
       auto second_part_string =
           blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, modified_args).front();
       if (second_part_string != "!msg_not_found") {
-        read_offset_ += second_part_string.size());
+        read_offset_ += second_part_string.size();
         read_flag = false;
         response = first_part_string + second_part_string;
       } else {

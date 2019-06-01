@@ -89,9 +89,8 @@ std::string file_partition::read(std::string position, std::string size) {
 }
 
 void file_partition::seek(std::vector<std::string> &ret) {
-  ret.emplace_back(std::to_string(partition_.size());
+  ret.emplace_back(std::to_string(partition_.size()));
   ret.emplace_back(std::to_string(partition_.capacity()));
-  return ret;
 }
 
 std::string file_partition::clear() {
@@ -187,51 +186,51 @@ bool file_partition::is_dirty() const {
 }
 
 void file_partition::load(const std::string &path) {
-  auto remote = persistent::persistent_store::instance(path, ser_);
-  auto decomposed = persistent::persistent_store::decompose_path(path);
-  remote->read<file_type>(decomposed.second, partition_);
+  // auto remote = persistent::persistent_store::instance(path, ser_);
+  // auto decomposed = persistent::persistent_store::decompose_path(path);
+  // remote->read<file_type>(decomposed.second, partition_);
 }
 
 bool file_partition::sync(const std::string &path) {
-  bool expected = true;
-  if (dirty_.compare_exchange_strong(expected, false)) {
-    auto remote = persistent::persistent_store::instance(path, ser_);
-    auto decomposed = persistent::persistent_store::decompose_path(path);
-    remote->write<file_type>(partition_, decomposed.second);
-    return true;
-  }
-  return false;
+  // bool expected = true;
+  // if (dirty_.compare_exchange_strong(expected, false)) {
+  //   auto remote = persistent::persistent_store::instance(path, ser_);
+  //   auto decomposed = persistent::persistent_store::decompose_path(path);
+  //   remote->write<file_type>(partition_, decomposed.second);
+  //   return true;
+  // }
+  // return false;
 
 }
 
 bool file_partition::dump(const std::string &path) {
-  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-  bool expected = true;
-  bool flushed = false;
-  if (dirty_.compare_exchange_strong(expected, false)) {
-    auto remote = persistent::persistent_store::instance(path, ser_);
-    auto decomposed = persistent::persistent_store::decompose_path(path);
-    remote->write<file_type>(partition_, decomposed.second);
-    flushed = true;
-  }
-  partition_.clear();
-  next_->reset("nil");
-  path_ = "";
-  sub_map_.clear();
-  chain_ = {};
-  role_ = singleton;
-  overload_ = false;
-  dirty_ = false;
-  return flushed;
+  // std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+  // bool expected = true;
+  // bool flushed = false;
+  // if (dirty_.compare_exchange_strong(expected, false)) {
+  //   auto remote = persistent::persistent_store::instance(path, ser_);
+  //   auto decomposed = persistent::persistent_store::decompose_path(path);
+  //   remote->write<file_type>(partition_, decomposed.second);
+  //   flushed = true;
+  // }
+  // partition_.clear();
+  // next_->reset("nil");
+  // path_ = "";
+  // sub_map_.clear();
+  // chain_ = {};
+  // role_ = singleton;
+  // overload_ = false;
+  // dirty_ = false;
+  // return flushed;
 }
 
 void file_partition::forward_all() {
-  int64_t i = 0;
-  for (auto it = partition_.begin(); it != partition_.end(); it++) {
-    std::vector<std::string> result;
-    run_command_on_next(result, file_cmd_id::file_write, {*it});
-    ++i;
-  }
+  // int64_t i = 0;
+  // for (auto it = partition_.begin(); it != partition_.end(); it++) {
+  //   std::vector<std::string> result;
+  //   run_command_on_next(result, file_cmd_id::file_write, {*it});
+  //   ++i;
+  // }
 }
 
 bool file_partition::overload() {

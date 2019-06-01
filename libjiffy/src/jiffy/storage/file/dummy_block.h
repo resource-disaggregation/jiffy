@@ -28,10 +28,9 @@ class dummy_block {
   dummy_block &operator=(const dummy_block &other);
   bool operator==(const dummy_block &other) const;
   std::pair<bool, std::string> push_back(const std::string &msg);
-  const std::pair<bool, std::string> at(std::size_t offset) const;
+  const std::pair<bool, std::string> read(std::size_t offset, std::size_t size) const;
   std::size_t size() const;
   std::size_t capacity();
-  bool split_last_string();
   void clear();
   bool empty() const;
   std::size_t max_offset() const;
