@@ -29,12 +29,13 @@ dummy_block &dummy_block::operator=(const dummy_block &other) {
   return *this;
 }
 bool dummy_block::operator==(const dummy_block &other) const {
-  return data_ == other.data_ && tail_ == other.tail_ && alloc_ == other.alloc_ && max_ == other.max_ && extend_ == other.extend_;
+  return data_ == other.data_ && tail_ == other.tail_ && alloc_ == other.alloc_ && max_ == other.max_
+      && extend_ == other.extend_;
 }
 std::pair<bool, std::string> dummy_block::push_back(const std::string &msg) {
   std::size_t len = msg.size();
-  if(len == 0) {
-      return std::make_pair(true, std::string("!success"));
+  if (len == 0) {
+    return std::make_pair(true, std::string("!success"));
   }
   if (len + tail_ <= max_) {
     std::memcpy(data_ + tail_, msg.c_str(), len);
@@ -53,10 +54,10 @@ std::pair<bool, std::string> dummy_block::push_back(const std::string &msg) {
 }
 
 const std::pair<bool, std::string> dummy_block::read(std::size_t offset, std::size_t size) const {
-  if (offset > max_) {
+  if (offset >= max_) {
     return std::make_pair(false, std::string("!reach_end"));
   }
-  if (offset > tail_ || empty()) {
+  if (offset >= tail_ || empty()) {
     return std::make_pair(false, std::string("!not_available"));
   }
   if (offset + size <= max_) {
@@ -84,6 +85,9 @@ bool dummy_block::empty() const {
 }
 std::size_t dummy_block::max_offset() const {
   return max_;
+}
+char *dummy_block::data() const {
+  return data_;
 }
 
 }

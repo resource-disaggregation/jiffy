@@ -48,7 +48,7 @@ TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
   REQUIRE(block.storage_size() <= block.storage_capacity());
 }
 
-/*
+
 TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
   block_memory_manager manager;
   file_partition block(&manager);
@@ -64,10 +64,10 @@ TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
   REQUIRE_NOTHROW(block.load("local://tmp/test"));
   int read_pos = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(block.read(std::to_string(read_pos)) == std::to_string(i));
-    read_pos += (metadata_length + std::to_string(i).size());
+    REQUIRE(block.read(std::to_string(read_pos), std::to_string(std::to_string(i).size())) == std::to_string(i));
+    read_pos += std::to_string(i).size();
   }
 }
-*/
+
 
 

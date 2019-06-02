@@ -39,7 +39,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status = tree->create("/sandbox/file.txt", "file", "/tmp", NUM_BLOCKS, 1, 0, 0,
-                                  {"0"}, {"regular"}); //TODO we do not use metadata for now
+                                  {"0"}, {"regular"});
 
   file_client client(tree, "/sandbox/file.txt", status);
 
@@ -52,6 +52,11 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
     REQUIRE(client.read(std::to_string(i).size()) == "!msg_not_found");
+  }
+
+  REQUIRE(client.seek(0) == true);
+  for (std::size_t i = 0; i < 1000; ++i) {
+  //  REQUIRE(client.read(std::to_string(i).size()) == std::to_string(i));
   }
 
   storage_server->stop();

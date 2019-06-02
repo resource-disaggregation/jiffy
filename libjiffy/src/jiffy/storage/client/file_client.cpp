@@ -69,7 +69,9 @@ std::string file_client::read(const std::size_t size) {
 bool file_client::seek(const std::size_t offset) {
   std::vector<std::string> ret;
   auto seek_partition = block_id(file_cmd_id::file_seek);
+  std::cout << seek_partition << " ################## " << std::endl;
   ret = blocks_[seek_partition]->run_command(file_cmd_id::file_seek, {});
+  std::cout << ret[0] << " *************************** " << ret[1] << std::endl;
   std::size_t size = std::stoi(ret[0]);
   std::size_t cap = std::stoi(ret[1]);
   if(offset >= seek_partition * cap + size) {
@@ -94,10 +96,14 @@ std::size_t file_client::block_id(const file_cmd_id &op) {
       }
       return read_partition_;
     case file_cmd_id::file_seek:
-      return std::max(read_partition_, write_partition_);
+      if (read_partition_ > write_partition_) {
+        return read_partition_;
+      } else {
+        return write_partition_;
+      }
     default:
       throw std::invalid_argument("Incorrect operation of message queue");
-    }
+  }
 }
 
 void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {

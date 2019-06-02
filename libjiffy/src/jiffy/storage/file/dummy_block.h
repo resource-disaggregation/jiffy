@@ -34,7 +34,7 @@ class dummy_block {
   void clear();
   bool empty() const;
   std::size_t max_offset() const;
-
+  char* data() const;
  private:
   block_memory_allocator<char> alloc_;
   std::size_t max_{};
