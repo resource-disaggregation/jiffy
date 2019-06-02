@@ -58,6 +58,9 @@ TEST_CASE("fifo_queue_client_enqueue_dequeue_test", "[enqueue][dequeue]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.enqueue(std::to_string(i)) == "!ok");
   }
+  for (std::size_t i = 0; i < 1000; ++i) {
+    REQUIRE(client.readnext() == std::to_string(i));
+  }
 
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.dequeue() == std::to_string(i));

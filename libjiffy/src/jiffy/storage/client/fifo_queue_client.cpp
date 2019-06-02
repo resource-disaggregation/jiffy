@@ -17,6 +17,8 @@ fifo_queue_client::fifo_queue_client(std::shared_ptr<directory::directory_interf
     : data_structure_client(fs, path, status, FIFO_QUEUE_OPS, timeout_ms) {
   dequeue_partition_ = 0;
   enqueue_partition_ = 0;
+  read_partition_ = 0;
+  read_offset_ = 0;
   for (const auto &block: status.data_blocks()) {
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FIFO_QUEUE_OPS, timeout_ms_));
   }
@@ -45,7 +47,6 @@ std::string fifo_queue_client::enqueue(const std::string &msg) {
     }
   } while (redo);
   return _return;
-
 }
 
 std::string fifo_queue_client::dequeue() {
@@ -64,18 +65,39 @@ std::string fifo_queue_client::dequeue() {
   return _return;
 }
 
+std::string fifo_queue_client::readnext() {
+  std::string _return;
+  std::vector<std::string> args{std::to_string(read_offset_)};
+  bool redo;
+  do {
+    try {
+      _return =
+          blocks_[block_id(fifo_queue_cmd_id::fq_readnext)]->run_command(fifo_queue_cmd_id::fq_readnext, args).front();
+      handle_redirect(fifo_queue_cmd_id::fq_readnext, {}, _return);
+      redo = false;
+    } catch (redo_error &e) {
+      redo = true;
+    }
+  } while (redo);
+  return _return;
+}
+
 std::size_t fifo_queue_client::block_id(const fifo_queue_cmd_id &op) {
-  if (op == fifo_queue_cmd_id::fq_enqueue) {
-    return enqueue_partition_;
-  } else if (op == fifo_queue_cmd_id::fq_dequeue) {
-    return dequeue_partition_;
-  } else {
-    throw std::invalid_argument("Incorrect operation of message queue");
+  switch(op) {
+    case fifo_queue_cmd_id::fq_enqueue:
+      return enqueue_partition_;
+    case fifo_queue_cmd_id::fq_dequeue:
+      return dequeue_partition_;
+    case fifo_queue_cmd_id::fq_readnext:
+      return read_partition_;
+    default:
+      throw std::invalid_argument("Incorrect operation of message queue");
   }
 }
 
 void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
   typedef std::vector<std::string> list_t;
+  bool read_flag = false;
   if (response == "!redo") {
     throw redo_error();
   }
@@ -93,7 +115,10 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
   }
   if (response.substr(0, 21) == "!msg_not_in_partition") {
     do {
-      dequeue_partition_++;
+      if(cmd_id == fifo_queue_cmd_id::fq_dequeue)
+        dequeue_partition_++;
+      else
+        read_partition_++;
       response = blocks_[block_id(static_cast<fifo_queue_cmd_id >(cmd_id))]->run_command(cmd_id, {}).front();
     } while (response.substr(0, 21) == "!msg_not_in_partition");
   }
@@ -123,10 +148,22 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
       response = first_part_string + second_part_string;
     } while (response.substr(0, 14) == "!split_dequeue");
   }
+  if (response.substr(0, 15) == "!split_readnext") {
+    do {
+      auto parts = string_utils::split(response, '!', 3);
+      auto first_part_string = parts[2];
+      read_partition_++;
+      auto second_part_string =
+          blocks_[block_id(static_cast<fifo_queue_cmd_id >(cmd_id))]->run_command(cmd_id, {std::to_string(0)}).front();
+      response = first_part_string + second_part_string;
+      read_flag = true;
+      read_offset_ = (metadata_length + second_part_string.size());
+    } while (response.substr(0, 15) == "!split_readnext");
+  }
+  if(!read_flag && cmd_id == fifo_queue_cmd_id::fq_readnext && response != "!msg_not_found") {
+    read_offset_ += (metadata_length + response.size());
+  } 
 }
-
-
-// Remove batch commands
 
 void fifo_queue_client::handle_redirects(int32_t cmd_id,
                                          std::vector<std::string> &args,

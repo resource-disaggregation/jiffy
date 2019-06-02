@@ -6,6 +6,7 @@
 #include "jiffy/utils/client_cache.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_ops.h"
 #include "jiffy/storage/client/data_structure_client.h"
+#include "jiffy/storage/fifoqueue/string_array.h"
 
 namespace jiffy {
 namespace storage {
@@ -47,6 +48,12 @@ class fifo_queue_client : data_structure_client {
 
   std::string dequeue();
 
+  /**
+   * @brief Read next message without dequeue
+   * @return Read next result
+   */ 
+  std::string readnext();
+
  private:
 
   /**
@@ -82,6 +89,11 @@ class fifo_queue_client : data_structure_client {
   std::size_t enqueue_partition_;
   /* Replica chain clients, each partition only save a replica chain client */
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
+  /* Read offset */
+  std::size_t read_offset_;
+  /* Read next partition */
+  std::size_t read_partition_;
+   
 };
 
 }

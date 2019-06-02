@@ -11,7 +11,7 @@
 namespace jiffy {
 namespace storage {
 
-const int metadata_length = 8; // C++ std::size_t is 8 bytes
+const int metadata_length = 8;
 class string_array_iterator;
 class string_array;
 class const_string_array_iterator;
@@ -70,18 +70,12 @@ class string_array_iterator {
   typedef typename string_array::reference reference;
   typedef typename string_array::const_reference const_reference;
  public:
-
   string_array_iterator(string_array &impl, std::size_t pos);
   value_type operator*() const;
-
   const string_array_iterator operator++(int);
-
   bool operator==(string_array_iterator other) const;
-
   bool operator!=(string_array_iterator other) const;
-
   string_array_iterator &operator=(const string_array_iterator &other);
-
  private:
   string_array &impl_;
   std::size_t pos_;
@@ -97,16 +91,11 @@ class const_string_array_iterator {
   typedef typename string_array::reference reference;
   typedef typename string_array::const_reference const_reference;
  public:
-
   const_string_array_iterator(const string_array &impl, std::size_t pos);
   value_type operator*() const;
-
   const const_string_array_iterator operator++(int);
-
   bool operator==(const_string_array_iterator other) const;
-
   bool operator!=(const_string_array_iterator other) const;
-
  private:
   const string_array &impl_;
   std::size_t pos_;

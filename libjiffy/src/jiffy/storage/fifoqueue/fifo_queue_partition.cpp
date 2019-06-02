@@ -89,9 +89,8 @@ std::string fifo_queue_partition::dequeue() {
   }
 }
 
-// TODO fix this function
-std::string fifo_queue_partition::readnext() {
-  auto ret = partition_.at(head_);
+std::string fifo_queue_partition::readnext(std::string pos) {
+  auto ret = partition_.at(std::stoi(pos));
   if (ret.first) {
     return ret.second;
   } else if (ret.second == "!reach_end") {
@@ -155,10 +154,10 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
       }
       break;
     case fifo_queue_cmd_id::fq_readnext:
-      if (nargs != 0) {
+      if (nargs != 1) {
         _return.emplace_back("!args_error");
       } else {
-        _return.emplace_back(readnext());
+        _return.emplace_back(readnext(args[0]));
       }
       break;
     default:throw std::invalid_argument("No such operation id " + std::to_string(cmd_id));
