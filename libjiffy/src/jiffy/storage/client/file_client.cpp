@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <thread>
 
-
 namespace jiffy {
 namespace storage {
 
@@ -69,12 +68,10 @@ std::string file_client::read(const std::size_t size) {
 bool file_client::seek(const std::size_t offset) {
   std::vector<std::string> ret;
   auto seek_partition = block_id(file_cmd_id::file_seek);
-  std::cout << seek_partition << " ################## " << std::endl;
   ret = blocks_[seek_partition]->run_command(file_cmd_id::file_seek, {});
-  std::cout << ret[0] << " *************************** " << ret[1] << std::endl;
-  std::size_t size = std::stoi(ret[0]);
-  std::size_t cap = std::stoi(ret[1]);
-  if(offset >= seek_partition * cap + size) {
+  auto size = static_cast<std::size_t>(std::stoi(ret[0]));
+  auto cap = static_cast<std::size_t>(std::stoi(ret[1]));
+  if (offset >= seek_partition * cap + size) {
     return false;
   } else {
     read_partition_ = offset / cap;
@@ -84,14 +81,14 @@ bool file_client::seek(const std::size_t offset) {
 }
 
 std::size_t file_client::block_id(const file_cmd_id &op) {
-  switch(op) {
+  switch (op) {
     case file_cmd_id::file_write:
-      if(!check_valid_id(write_partition_)) {
+      if (!check_valid_id(write_partition_)) {
         throw std::logic_error("Blocks are insufficient, need to add more");
       }
       return write_partition_;
     case file_cmd_id::file_read:
-      if(!check_valid_id(read_partition_)) {
+      if (!check_valid_id(read_partition_)) {
         throw std::logic_error("Blocks are insufficient, need to add more");
       }
       return read_partition_;
@@ -101,8 +98,7 @@ std::size_t file_client::block_id(const file_cmd_id &op) {
       } else {
         return write_partition_;
       }
-    default:
-      throw std::invalid_argument("Incorrect operation of message queue");
+    default:throw std::invalid_argument("Incorrect operation of message queue");
   }
 }
 
@@ -112,11 +108,11 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
   if (response == "!redo") {
     throw redo_error();
   }
-  if(response.substr(0, 15) == "!next_partition") {
+  if (response.substr(0, 15) == "!next_partition") {
     do {
       write_partition_++;
       response = blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, args).front();
-    } while(response.substr(0, 15) == "!next_partition");
+    } while (response.substr(0, 15) == "!next_partition");
   }
   if (response.substr(0, 5) == "!full") {
     do {
@@ -179,6 +175,18 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
         response = second_part_string;
       }
     } while (response.substr(0, 11) == "!split_write");
+  }
+  if (response.substr(0, 19) == "!direct_split_write") {
+    do {
+      auto parts = string_utils::split(response, '!');
+      auto remain_string_length = std::stoi(list_t(parts.end() - 1, parts.end()).front());
+      auto msg = args.front();
+      std::vector<std::string> remain_string;
+      remain_string = std::vector<std::string>{msg.substr(msg.size() - remain_string_length,
+                                                          static_cast<unsigned long>(remain_string_length))};
+      write_partition_++;
+      response = blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, remain_string).front();
+    } while (response.substr(0, 19) == "!direct_split_write");
   }
   if (response != "!msg_not_found" && cmd_id == static_cast<int32_t>(file_cmd_id::file_read) && read_flag) {
     read_offset_ += response.size();
