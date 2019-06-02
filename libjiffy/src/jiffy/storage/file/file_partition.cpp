@@ -26,7 +26,7 @@ file_partition::file_partition(block_memory_manager *manager,
       partition_(manager->mb_capacity(), build_allocator<char>()),
       overload_(false),
       dirty_(false),
-      allocate_new_block_(false),
+      redirect_new_block_(false),
       directory_host_(directory_host),
       directory_port_(directory_port),
       auto_scaling_host_(auto_scaling_host),
@@ -47,7 +47,7 @@ file_partition::file_partition(block_memory_manager *manager,
 
 std::string file_partition::write(const std::string &message) {
   if (partition_.size() > partition_.capacity()) {
-    if (!allocate_new_block_.load()) {
+    if (!redirect_new_block_.load()) {
       if (!next_target_str().empty()) {
         return "!full!" + next_target_str();
       } else if (!auto_scale_) {
@@ -58,8 +58,10 @@ std::string file_partition::write(const std::string &message) {
   }
   auto ret = partition_.push_back(message);
   if (!ret.first) {
-    allocate_new_block_ = true;
-    //TODO at this point we assume that next_target_str is always set before the last string to write, this could cause error when the last string is bigger than 6.4MB
+    // TODO add logic for non-auto_scaling code, split_write to just the next block
+    redirect_new_block_ = true;
+    //TODO at this point we assume that next_target_str is always set before the last string to write
+    //There could be error when the last string is bigger than 6.4MB
     return "!split_write!" + next_target_str() + "!" + std::to_string(ret.second.size());
   }
   return "!ok";
@@ -93,10 +95,10 @@ void file_partition::seek(std::vector<std::string> &ret) {
 
 std::string file_partition::clear() {
   partition_.clear();
-  allocate_new_block_ = false;
+  redirect_new_block_ = false;
   overload_ = false;
   dirty_ = false;
-  allocate_new_block_ = false;
+  redirect_new_block_ = false;
   return "!ok";
 }
 

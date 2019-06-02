@@ -186,7 +186,7 @@ class fifo_queue_partition : public chain_module {
   /* Atomic bool for underload partition */
   std::atomic<bool> underload_;
 
-  /* Atomic bool for new block available */
+  /* Atomic bool for new block available, this bool basically prevents the fifo queue to erase all the blocks when size = 0 */
   std::atomic<bool> new_block_available_;
 
   /* Atomic partition dirty bit */

@@ -54,14 +54,14 @@ std::string fifo_queue_partition::enqueue(const std::string &message) {
       new_block_available_ = true;
       return "!full!" + next_target_str();
     } else {
-      new_block_available_ = false;
       return "!redo";
     }
   }
   auto ret = partition_.push_back(message);
   if (!ret.first) {
     split_string_ = true;
-    // TODO at this point we assume that next_target_str is always set before the last string to write, this could cause error when the last string is bigger than 6.4MB
+    // TODO at this point we assume that next_target_str is always set before the last string to write
+    // There could be error when the last string is bigger than 6.4MB
     new_block_available_ = true;
     return "!split_enqueue!" + next_target_str() + "!" + std::to_string(ret.second.size());
   }
@@ -83,7 +83,6 @@ std::string fifo_queue_partition::dequeue() {
   } else if (ret.second == "!not_available") {
     return "!msg_not_found";
   } else {
-    // This next target string is always set cause it needs to write first and then read
     head_ += (metadata_length + ret.second.size());
     return "!split_dequeue!" + ret.second;
   }
@@ -103,7 +102,6 @@ std::string fifo_queue_partition::readnext(std::string pos) {
   } else if (ret.second == "!not_available") {
     return "!msg_not_found";
   } else {
-    // This next target string is always set cause it needs to write first and then read
     return "!split_readnext!" + ret.second;
   }
 }
