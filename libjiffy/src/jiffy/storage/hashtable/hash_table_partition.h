@@ -454,21 +454,21 @@ class hash_table_partition : public chain_module {
   /* High threshold */
   double threshold_hi_;
 
-  /* Atomic bool for partition hash slot range splitting */
-  std::atomic<bool> splitting_;
+  /* Bool for partition hash slot range splitting */
+  bool splitting_;
 
-  /* Atomic bool for partition hash slot range merging */
-  std::atomic<bool> merging_;
+  /* Bool for partition hash slot range merging */
+  bool merging_;
 
-  /* Atomic partition dirty bit */
-  std::atomic<bool> dirty_;
+  /* Bool partition dirty bit */
+  bool dirty_;
 
   /* Block state, regular, importing or exporting */
   hash_partition_state state_;
   /* Hash slot range */
   std::pair<int32_t, int32_t> slot_range_;
   /* Bool value for auto scaling */
-  std::atomic_bool auto_scale_;
+  bool auto_scale_;
   /* Export slot range */
   std::pair<int32_t, int32_t> export_slot_range_;
   /* Export targets */
@@ -490,7 +490,7 @@ class hash_table_partition : public chain_module {
   /* Auto scaling server port number */
   int auto_scaling_port_;
 
-  /* Data update mutex */
+  /* Data update mutex, we want only one update function happen at a time */
   std::mutex update_lock;
 
 };

@@ -360,10 +360,8 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
   if (is_mutator(cmd_id)) {
     dirty_ = true;
   }
-  bool expected = false;
-  if (auto_scale_.load() && is_mutator(cmd_id) && overload() && metadata_ != "exporting"
-      && metadata_ != "importing" && is_tail()
-      && splitting_.compare_exchange_strong(expected, true) && merging_ == false) {
+  if (auto_scale_ && is_mutator(cmd_id) && overload() && metadata_ != "exporting"
+      && metadata_ != "importing" && is_tail() && !splitting_ && merging_ == false) {
     LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
                          << storage_capacity()
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
@@ -380,11 +378,10 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       LOG(log_level::warn) << "Split slot range failed: " << e.what();
     }
   }
-  expected = false;
-  if (auto_scale_.load() && cmd_id == hash_table_cmd_id::ht_remove && underload()
+  if (auto_scale_ && cmd_id == hash_table_cmd_id::ht_remove && underload()
       && metadata_ != "exporting"
       && metadata_ != "importing" && name() != "0_65536" && is_tail()
-      && merging_.compare_exchange_strong(expected, true) && splitting_ == false) {
+      && !merging_ && splitting_ == false) {
     LOG(log_level::info) << "Underloaded partition; storage = " << storage_size() << " capacity = "
                          << storage_capacity() << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
     try {
@@ -410,7 +407,7 @@ bool hash_table_partition::empty() const {
 }
 
 bool hash_table_partition::is_dirty() const {
-  return dirty_.load();
+  return dirty_;
 }
 
 void hash_table_partition::load(const std::string &path) {
@@ -422,13 +419,13 @@ void hash_table_partition::load(const std::string &path) {
 }
 
 bool hash_table_partition::sync(const std::string &path) {
-  bool expected = true;
-  if (dirty_.compare_exchange_strong(expected, false)) {
+  if (dirty_) {
     locked_hash_table_type ltable = block_.lock_table();
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
     remote->write<locked_hash_table_type>(ltable, decomposed.second);
     ltable.unlock();
+    dirty_ = false;
     return true;
   }
   return false;
@@ -436,9 +433,8 @@ bool hash_table_partition::sync(const std::string &path) {
 
 bool hash_table_partition::dump(const std::string &path) {
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-  bool expected = true;
   bool flushed = false;
-  if (dirty_.compare_exchange_strong(expected, false)) {
+  if (dirty_) {
     locked_hash_table_type ltable = block_.lock_table();
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
