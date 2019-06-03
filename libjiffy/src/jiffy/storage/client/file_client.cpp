@@ -170,7 +170,7 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
   if (response.substr(0, 12) == "!split_write") {
     do {
       auto parts = string_utils::split(response, '!');
-      auto remain_string_length = std::stoi(list_t(parts.end() - 1, parts.end()).front());
+      auto remain_string_length = std::stoi(*(parts.end() - 1));
       auto msg = args.front();
       auto
           remain_string = std::vector<std::string>{msg.substr(msg.size() - remain_string_length, remain_string_length)};
@@ -188,7 +188,7 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
   if (response.substr(0, 11) == "!split_read") {
     do {
       auto parts = string_utils::split(response, '!');
-      auto first_part_string = list_t(parts.end() - 1, parts.end()).front();
+      auto first_part_string = *(parts.end() - 1);
       if(add_chain(static_cast<file_cmd_id>(cmd_id))) {
           auto chain = list_t(parts.begin() + 2, parts.end() - 1);
           blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
