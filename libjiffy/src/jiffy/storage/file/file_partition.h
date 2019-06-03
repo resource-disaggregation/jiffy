@@ -64,9 +64,17 @@ class file_partition : public chain_module {
 
   /**
    * @brief Read a new message from the file
+   * @param position Read position
+   * @param size Number of bytes to be read
    * @return Read return status string
    */
-  std::string read(std::string position);
+  std::string read(std::string position, std::string size);
+
+  /**
+   *@brief Fetch the metadata for seek
+   *@param ret Metadata to be returned
+   */
+  void seek(std::vector<std::string> &ret);
 
   /**
    * @brief Clear the file
@@ -174,16 +182,14 @@ class file_partition : public chain_module {
   /* High threshold */
   double threshold_hi_;
 
-  /* Atomic bool for partition slot range splitting */
-  std::atomic<bool> overload_;
+  /* Bool for partition slot range splitting */
+  bool overload_;
 
-  /* Atomic partition dirty bit */
-  std::atomic<bool> dirty_;
+  /* Partition dirty bit */
+  bool dirty_;
 
   /* Bool value for auto scaling */
-  std::atomic_bool auto_scale_;
-  /* Bool value for split string at end of partition */
-  std::atomic<bool> split_string_;
+  bool auto_scale_;
 
   /* Directory server hostname */
   std::string directory_host_;

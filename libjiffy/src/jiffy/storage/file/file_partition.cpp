@@ -26,13 +26,12 @@ file_partition::file_partition(block_memory_manager *manager,
       partition_(manager->mb_capacity(), build_allocator<char>()),
       overload_(false),
       dirty_(false),
-      split_string_(false),
       directory_host_(directory_host),
       directory_port_(directory_port),
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port) {
-  (void)directory_host_;
-  (void)directory_port_;
+  (void) directory_host_;
+  (void) directory_port_;
   auto ser = conf.get("file.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
@@ -46,47 +45,58 @@ file_partition::file_partition(block_memory_manager *manager,
 }
 
 std::string file_partition::write(const std::string &message) {
-  if (partition_.size() > partition_.capacity() && !split_string_.load()) {
+  if (partition_.size() > partition_.capacity()) {
     if (!next_target_str().empty()) {
       return "!full!" + next_target_str();
-    } else {
-      return "!redo";
+    } else if (!auto_scale_) {
+      return "!next_partition";
     }
+    return "!redo";
   }
   auto ret = partition_.push_back(message);
   if (!ret.first) {
-    split_string_ = true;
-    //TODO at this point we assume that next_target_str is always set before the last string to write, this could cause error when the last string is bigger than 6.4MB
+    if (!auto_scale_) {
+      return "!split_write!" + std::to_string(ret.second.size());
+    }
     return "!split_write!" + next_target_str() + "!" + std::to_string(ret.second.size());
   }
   return "!ok";
 }
 
-std::string file_partition::read(std::string position) {
+std::string file_partition::read(std::string position, std::string size) {
   auto pos = std::stoi(position);
+  auto read_size = std::stoi(size);
   if (pos < 0) throw std::invalid_argument("read position invalid");
-  auto ret = partition_.at(static_cast<std::size_t>(pos));
+  auto ret = partition_.read(static_cast<std::size_t>(pos), static_cast<std::size_t>(read_size));
   if (ret.first) {
     return ret.second;
   } else if (ret.second == "!reach_end") {
     if (!next_target_str().empty())
-      return "!msg_not_in_partition";
-    else
+      return "!msg_not_in_partition!" + next_target_str();
+    else if (!auto_scale_) {
+      return "!next_partition";
+    } else {
       return "!redo";
+    }
   } else if (ret.second == "!not_available") {
     return "!msg_not_found";
   } else {
-    // This next target string is always set cause it needs to write first and then read
-    return "!split_read!" + ret.second;
+    if(!auto_scale_) {
+      return "!split_read!" + ret.second;
+    }
+    return "!split_read!" + next_target_str() + "!" + ret.second;
   }
+}
+
+void file_partition::seek(std::vector<std::string> &ret) {
+  ret.emplace_back(std::to_string(partition_.size()));
+  ret.emplace_back(std::to_string(partition_.capacity()));
 }
 
 std::string file_partition::clear() {
   partition_.clear();
-  split_string_ = false;
   overload_ = false;
   dirty_ = false;
-  split_string_ = false;
   return "!ok";
 }
 
@@ -105,8 +115,11 @@ void file_partition::run_command(std::vector<std::string> &_return,
         _return.emplace_back(write(msg));
       break;
     case file_cmd_id::file_read:
-      for (const auto &pos: args)
-        _return.emplace_back(read(pos));
+      if (nargs % 2 != 0) {
+        _return.emplace_back("!args_error");
+      }
+      for (size_t i = 0; i < nargs; i += 2)
+        _return.emplace_back(read(args[i], args[i + 1]));
       break;
     case file_cmd_id::file_clear:
       if (nargs != 0) {
@@ -122,14 +135,22 @@ void file_partition::run_command(std::vector<std::string> &_return,
         _return.emplace_back(update_partition(args[0]));
       }
       break;
+    case file_cmd_id::file_seek:
+      if (nargs != 0) {
+        _return.emplace_back("!args_error");
+      } else {
+        std::vector<std::string> ret;
+        seek(ret);
+        _return.emplace_back(ret[0]);
+        _return.emplace_back(ret[1]);
+      }
+      break;
     default:throw std::invalid_argument("No such operation id " + std::to_string(cmd_id));
   }
   if (is_mutator(cmd_id)) {
     dirty_ = true;
   }
-  bool expected = false;
-  if (auto_scale_.load() && is_mutator(cmd_id) && overload() && is_tail()
-      && overload_.compare_exchange_strong(expected, true)) {
+  if (auto_scale_ && is_mutator(cmd_id) && overload() && is_tail() && !overload_) {
     LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
                          << storage_capacity() << " partition size = " << size() << "partition capacity "
                          << partition_.capacity();
@@ -157,7 +178,7 @@ bool file_partition::empty() const {
 }
 
 bool file_partition::is_dirty() const {
-  return dirty_.load();
+  return dirty_;
 }
 
 void file_partition::load(const std::string &path) {
@@ -167,22 +188,20 @@ void file_partition::load(const std::string &path) {
 }
 
 bool file_partition::sync(const std::string &path) {
-  bool expected = true;
-  if (dirty_.compare_exchange_strong(expected, false)) {
+  if (dirty_) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
     remote->write<file_type>(partition_, decomposed.second);
+    dirty_ = false;
     return true;
   }
   return false;
-
 }
 
 bool file_partition::dump(const std::string &path) {
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-  bool expected = true;
   bool flushed = false;
-  if (dirty_.compare_exchange_strong(expected, false)) {
+  if (dirty_) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
     remote->write<file_type>(partition_, decomposed.second);
@@ -200,12 +219,8 @@ bool file_partition::dump(const std::string &path) {
 }
 
 void file_partition::forward_all() {
-  int64_t i = 0;
-  for (auto it = partition_.begin(); it != partition_.end(); it++) {
-    std::vector<std::string> result;
-    run_command_on_next(result, file_cmd_id::file_write, {*it});
-    ++i;
-  }
+  std::vector<std::string> result;
+  run_command_on_next(result, file_cmd_id::file_write, {std::string(partition_.data(), partition_.size())});
 }
 
 bool file_partition::overload() {

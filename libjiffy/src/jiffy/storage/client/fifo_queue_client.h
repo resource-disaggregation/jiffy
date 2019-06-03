@@ -6,6 +6,7 @@
 #include "jiffy/utils/client_cache.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_ops.h"
 #include "jiffy/storage/client/data_structure_client.h"
+#include "jiffy/storage/fifoqueue/string_array.h"
 
 namespace jiffy {
 namespace storage {
@@ -47,8 +48,20 @@ class fifo_queue_client : data_structure_client {
 
   std::string dequeue();
 
+  /**
+   * @brief Read next message without dequeue
+   * @return Read next result
+   */ 
+  std::string readnext();
+
  private:
 
+  /**
+   * @brief Check if new chain needs to be added
+   * @param op Operation
+   * @return Boolean, true if new chain needs to be added
+   */
+  bool add_chain(const fifo_queue_cmd_id &op);
   /**
    * @brief Fetch block identifier for specified operation
    * @param op Operation
@@ -57,6 +70,16 @@ class fifo_queue_client : data_structure_client {
 
   std::size_t block_id(const fifo_queue_cmd_id &op);
 
+  /**
+   * @brief Check if partition number is valid
+   * @param partition_num Partition number
+   * @return Boolean, true if valid
+   */
+  bool check_valid_id(std::size_t partition_num) {
+    if(partition_num < blocks_.size())
+      return true;
+    else return false;
+  }
   /**
    * @brief Handle command in redirect case
    * @param cmd_id Command identifier
@@ -82,6 +105,11 @@ class fifo_queue_client : data_structure_client {
   std::size_t enqueue_partition_;
   /* Replica chain clients, each partition only save a replica chain client */
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
+  /* Read offset */
+  std::size_t read_offset_;
+  /* Read next partition */
+  std::size_t read_partition_;
+   
 };
 
 }

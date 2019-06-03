@@ -21,7 +21,7 @@ using namespace ::apache::thrift::transport;
 #define STORAGE_SERVICE_PORT 9091
 #define STORAGE_MANAGEMENT_PORT 9092
 
-TEST_CASE("file_client_write_read_test", "[write][read]") {
+TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
@@ -39,7 +39,7 @@ TEST_CASE("file_client_write_read_test", "[write][read]") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   data_status status = tree->create("/sandbox/file.txt", "file", "/tmp", NUM_BLOCKS, 1, 0, 0,
-                                  {"0"}, {"regular"}); //TODO we do not use metadata for now
+                                  {"0"}, {"regular"});
 
   file_client client(tree, "/sandbox/file.txt", status);
 
@@ -48,10 +48,15 @@ TEST_CASE("file_client_write_read_test", "[write][read]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.read() == std::to_string(i));
+    REQUIRE(client.read(std::to_string(i).size()) == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.read() == "!msg_not_found");
+    REQUIRE(client.read(std::to_string(i).size()) == "!msg_not_found");
+  }
+
+  REQUIRE(client.seek(0) == true);
+  for (std::size_t i = 0; i < 1000; ++i) {
+  //  REQUIRE(client.read(std::to_string(i).size()) == std::to_string(i));
   }
 
   storage_server->stop();

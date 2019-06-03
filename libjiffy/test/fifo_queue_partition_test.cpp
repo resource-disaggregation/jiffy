@@ -25,7 +25,7 @@ TEST_CASE("fifo_queue_enqueue_dequeue_test", "[enqueue][dequeue]") {
 }
 
 
-TEST_CASE("fifo_queue_send_clear_read_test", "[send][read]") {
+TEST_CASE("fifo_queue_enqueue_clear_dequeue_test", "[enqueue][dequeue]") {
   block_memory_manager manager;
   fifo_queue_partition block(&manager);
 
@@ -39,6 +39,22 @@ TEST_CASE("fifo_queue_send_clear_read_test", "[send][read]") {
   }
 }
 
+TEST_CASE("fifo_queue_enqueue_readnext_dequeue", "[enqueue][readnext][dequeue]") {
+  block_memory_manager manager;
+  fifo_queue_partition block(&manager);
+  for(std::size_t i = 0; i < 1000; ++i) {
+    REQUIRE(block.enqueue(std::to_string(i)) == "!ok");
+  }
+  std::size_t pos = 0;
+  for(std::size_t i = 0; i < 1000; ++i) {
+    REQUIRE(block.readnext(std::to_string(pos)) == std::to_string(i));
+    pos += (std::to_string(i).size() + metadata_length);
+  }
+  for(std::size_t i = 0; i < 1000; ++i) {
+    REQUIRE(block.dequeue() == std::to_string(i));
+  }
+}
+
 TEST_CASE("fifo_queue_storage_size_test", "[put][size][storage_size][reset]") {
   block_memory_manager manager;
   fifo_queue_partition block(&manager);
@@ -48,7 +64,7 @@ TEST_CASE("fifo_queue_storage_size_test", "[put][size][storage_size][reset]") {
   REQUIRE(block.storage_size() <= block.storage_capacity());
 }
 
-TEST_CASE("fifo_queue_flush_load_test", "[send][sync][reset][load][read]") {
+TEST_CASE("fifo_queue_flush_load_test", "[enqueue][sync][reset][load][dequeue]") {
   block_memory_manager manager;
   fifo_queue_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {

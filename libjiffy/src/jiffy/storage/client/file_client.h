@@ -43,13 +43,27 @@ class file_client : data_structure_client {
 
   /**
    * @brief Read message from file
+   * @param size Size to be read
    * @return Response of the command
    */
 
-  std::string read();
+  std::string read(const std::size_t size);
+
+  /**
+   * @brief Seek to a location of the file
+   * @param offset File offset to seek
+   * @return Boolean, true if offset is within file range
+   */
+  bool seek(const std::size_t offset); 
 
  private:
 
+  /**
+   * @brief Check if new chain needs to be added
+   * @param op Operation
+   * @return Boolean, true if new chain needs to be added
+   */ 
+  bool add_chain(const file_cmd_id &op);
   /**
    * @brief Fetch block identifier for specified operation
    * @param op Operation
@@ -57,6 +71,17 @@ class file_client : data_structure_client {
    */
 
   std::size_t block_id(const file_cmd_id &op);
+
+  /**
+   * @brief Check if partition number is valid
+   * @param partition_num Partition number
+   * @return Boolean, true if valid
+   */
+  bool check_valid_id(std::size_t partition_num) {
+    if(partition_num < blocks_.size())
+      return true;
+    else return false;
+  }
 
   /**
    * @brief Handle command in redirect case

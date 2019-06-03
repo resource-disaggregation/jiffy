@@ -28,13 +28,12 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
       underload_(false),
       new_block_available_(false),
       dirty_(false),
-      split_string_(false),
       directory_host_(directory_host),
       directory_port_(directory_port),
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port) {
-  (void)directory_host_;
-  (void)directory_port_;
+  (void) directory_host_;
+  (void) directory_port_;
   auto ser = conf.get("fifoqueue.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
@@ -49,20 +48,21 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
 }
 
 std::string fifo_queue_partition::enqueue(const std::string &message) {
-  if (partition_.size() > partition_.capacity() && !split_string_.load()) {
+  if (partition_.size() > partition_.capacity() - metadata_length) {
     if (!next_target_str().empty()) {
       new_block_available_ = true;
       return "!full!" + next_target_str();
-    } else {
-      new_block_available_ = false;
-      return "!redo";
+    } else if(!auto_scale_) {
+        return "!next_partition";
     }
+    return "!redo";
   }
   auto ret = partition_.push_back(message);
   if (!ret.first) {
-    split_string_ = true;
-    // TODO at this point we assume that next_target_str is always set before the last string to write, this could cause error when the last string is bigger than 6.4MB
     new_block_available_ = true;
+    if(!auto_scale_) {
+      return "!split_enqueue!" + std::to_string(ret.second.size());
+    }
     return "!split_enqueue!" + next_target_str() + "!" + std::to_string(ret.second.size());
   }
   return "!ok";
@@ -76,42 +76,48 @@ std::string fifo_queue_partition::dequeue() {
   } else if (ret.second == "!reach_end") {
     if (!next_target_str().empty()) {
       new_block_available_ = true;
-      return "!msg_not_in_partition";
+      return "!msg_not_in_partition!" + next_target_str();
+    } else if(!auto_scale_) {
+      return "!next_partition";
     } else {
       return "!redo";
     }
   } else if (ret.second == "!not_available") {
     return "!msg_not_found";
   } else {
-    // This next target string is always set cause it needs to write first and then read
     head_ += (metadata_length + ret.second.size());
-    return "!split_dequeue!" + ret.second;
+    if(!auto_scale_) {
+      return "!split_dequeue!" + ret.second;
+    }
+    return "!split_dequeue!" + next_target_str() + "!" + ret.second;
   }
 }
 
-// TODO fix this function
-std::string fifo_queue_partition::readnext() {
-  auto ret = partition_.at(head_);
+std::string fifo_queue_partition::readnext(std::string pos) {
+  auto ret = partition_.at(std::stoi(pos));
   if (ret.first) {
     return ret.second;
   } else if (ret.second == "!reach_end") {
     if (!next_target_str().empty()) {
       new_block_available_ = true;
-      return "!msg_not_in_partition";
+      return "!msg_not_in_partition" + next_target_str();
+    } else if (!auto_scale_) {
+      return "!next_partition";
     } else {
       return "!redo";
     }
   } else if (ret.second == "!not_available") {
     return "!msg_not_found";
   } else {
-    // This next target string is always set cause it needs to write first and then read
-    return "!split_readnext!" + ret.second;
+    if(!auto_scale_) {
+      return "!split_readnext!" + ret.second;
+    }
+    return "!split_readnext!" + next_target_str() + "!" + ret.second;
   }
 }
 
 std::string fifo_queue_partition::clear() {
   partition_.clear();
-  split_string_ = false;
   head_ = 0;
   overload_ = false;
   underload_ = false;
@@ -155,10 +161,10 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
       }
       break;
     case fifo_queue_cmd_id::fq_readnext:
-      if (nargs != 0) {
+      if (nargs != 1) {
         _return.emplace_back("!args_error");
       } else {
-        _return.emplace_back(readnext());
+        _return.emplace_back(readnext(args[0]));
       }
       break;
     default:throw std::invalid_argument("No such operation id " + std::to_string(cmd_id));
@@ -166,9 +172,7 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
   if (is_mutator(cmd_id)) {
     dirty_ = true;
   }
-  bool expected = false;
-  if (auto_scale_.load() && is_mutator(cmd_id) && overload() && is_tail()
-      && overload_.compare_exchange_strong(expected, true)) {
+  if (auto_scale_ && is_mutator(cmd_id) && overload() && is_tail() && !overload_) {
     LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
                          << storage_capacity() << " partition size = " << size() << "partition capacity "
                          << partition_.capacity();
@@ -185,9 +189,8 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
       LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();
     }
   }
-  expected = false;
-  if (auto_scale_.load() && cmd_id == fifo_queue_cmd_id::fq_dequeue && head_ > partition_.capacity() && is_tail()
-      && underload_.compare_exchange_strong(expected, true) && new_block_available_ == true) {
+  if (auto_scale_ && cmd_id == fifo_queue_cmd_id::fq_dequeue && head_ > partition_.capacity() && is_tail()
+      && !underload_ && new_block_available_ == true) {
     try {
       LOG(log_level::info) << "Underloaded partition; storage = " << storage_size() << " capacity = "
                            << storage_capacity() << " partition size = " << size() << "partition capacity "
@@ -215,7 +218,7 @@ bool fifo_queue_partition::empty() const {
 }
 
 bool fifo_queue_partition::is_dirty() const {
-  return dirty_.load();
+  return dirty_;
 }
 
 void fifo_queue_partition::load(const std::string &path) {
@@ -225,20 +228,19 @@ void fifo_queue_partition::load(const std::string &path) {
 }
 
 bool fifo_queue_partition::sync(const std::string &path) {
-  bool expected = true;
-  if (dirty_.compare_exchange_strong(expected, false)) {
+  if (dirty_) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
     remote->write<fifo_queue_type>(partition_, decomposed.second);
+    dirty_ = false;
     return true;
   }
   return false;
 }
 
 bool fifo_queue_partition::dump(const std::string &path) {
-  bool expected = true;
   bool flushed = false;
-  if (dirty_.compare_exchange_strong(expected, false)) {
+  if (dirty_) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
     remote->write<fifo_queue_type>(partition_, decomposed.second);

@@ -3,7 +3,6 @@
 #include "jiffy/utils/string_utils.h"
 #include <algorithm>
 #include <thread>
-#include <jiffy/storage/string_array.h>
 
 namespace jiffy {
 namespace storage {
@@ -48,10 +47,11 @@ std::string file_client::write(const std::string &msg) {
 
 }
 
-std::string file_client::read() {
+std::string file_client::read(const std::size_t size) {
   std::string _return;
   std::vector<std::string> args;
   args.push_back(std::to_string(read_offset_));
+  args.push_back(std::to_string(size));
   bool redo;
   do {
     try {
@@ -65,13 +65,50 @@ std::string file_client::read() {
   return _return;
 }
 
-std::size_t file_client::block_id(const file_cmd_id &op) {
-  if (op == file_cmd_id::file_write) {
-    return write_partition_;
-  } else if (op == file_cmd_id::file_read) {
-    return read_partition_;
+bool file_client::seek(const std::size_t offset) {
+  std::vector<std::string> ret;
+  auto seek_partition = block_id(file_cmd_id::file_seek);
+  ret = blocks_[seek_partition]->run_command(file_cmd_id::file_seek, {});
+  auto size = static_cast<std::size_t>(std::stoi(ret[0]));
+  auto cap = static_cast<std::size_t>(std::stoi(ret[1]));
+  if (offset >= seek_partition * cap + size) {
+    return false;
   } else {
-    throw std::invalid_argument("Incorrect operation of message queue");
+    read_partition_ = offset / cap;
+    read_offset_ = offset % cap;
+    return true;
+  }
+}
+
+bool file_client::add_chain(const file_cmd_id &op) {
+  if(op == file_cmd_id::file_write) {
+    return write_partition_ >= blocks_.size() - 1; 
+  } else if (op == file_cmd_id::file_read){
+    return read_partition_ >= blocks_.size() - 1;
+  } else {
+    throw std::logic_error("Adding chain should only happen in write and read");
+  }
+}
+
+std::size_t file_client::block_id(const file_cmd_id &op) {
+  switch (op) {
+    case file_cmd_id::file_write:
+      if (!check_valid_id(write_partition_)) {
+        throw std::logic_error("Blocks are insufficient, need to add more");
+      }
+      return write_partition_;
+    case file_cmd_id::file_read:
+      if (!check_valid_id(read_partition_)) {
+        throw std::logic_error("Blocks are insufficient, need to add more");
+      }
+      return read_partition_;
+    case file_cmd_id::file_seek:
+      if (read_partition_ > write_partition_) {
+        return read_partition_;
+      } else {
+        return write_partition_;
+      }
+    default:throw std::invalid_argument("Incorrect operation of message queue");
   }
 }
 
@@ -79,29 +116,53 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
   bool read_flag = true;
   typedef std::vector<std::string> list_t;
   if (response == "!redo") {
+    if(cmd_id == file_cmd_id::file_write && write_partition_ < blocks_.size() - 1) {
+      write_partition_++;
+    } else if(cmd_id == file_cmd_id::file_read && read_partition_ < blocks_.size() - 1) {
+      read_partition_++;
+      read_offset_ = 0;
+    }
     throw redo_error();
+  }
+  if (response.substr(0, 15) == "!next_partition") {
+    do {
+      if(cmd_id == file_cmd_id::file_read) read_partition_++;
+      else write_partition_++;
+      response = blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, args).front();
+    } while (response.substr(0, 15) == "!next_partition");
   }
   if (response.substr(0, 5) == "!full") {
     do {
       auto parts = string_utils::split(response, '!');
       auto chain = list_t(parts.begin() + 2, parts.end());
-      blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
-                                                               path_,
-                                                               directory::replica_chain(chain),
-                                                               FILE_OPS));
+      if(add_chain(static_cast<file_cmd_id>(cmd_id))) {
+        blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
+                                                                 path_,
+                                                                 directory::replica_chain(chain),
+                                                                 FILE_OPS));
+      }
       write_partition_++;
       response = blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, args).front();
     } while (response.substr(0, 5) == "!full");
   }
   if (response.substr(0, 21) == "!msg_not_in_partition") {
     do {
+      auto parts = string_utils::split(response, '!');
+      auto chain = list_t(parts.begin() + 2, parts.end());
+      if(add_chain(static_cast<file_cmd_id>(cmd_id))) {
+        blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
+                                                                 path_,
+                                                                 directory::replica_chain(chain),
+                                                                 FILE_OPS));
+      }
       read_partition_++;
       read_offset_ = 0;
       std::vector<std::string> modified_args;
       modified_args.push_back(std::to_string(read_offset_));
+      modified_args.push_back(args[1]);
       response = blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, modified_args).front();
       if (response != "!msg_not_found") {
-        read_offset_ += (response.size() + metadata_length);
+        read_offset_ += response.size();
         read_flag = false;
       }
     } while (response.substr(0, 21) == "!msg_not_in_partition");
@@ -109,38 +170,50 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
   if (response.substr(0, 12) == "!split_write") {
     do {
       auto parts = string_utils::split(response, '!');
-      auto chain = list_t(parts.begin() + 2, parts.end() - 1);
-      auto remain_string_length = std::stoi(list_t(parts.end() - 1, parts.end()).front());
+      auto remain_string_length = std::stoi(*(parts.end() - 1));
       auto msg = args.front();
       auto
           remain_string = std::vector<std::string>{msg.substr(msg.size() - remain_string_length, remain_string_length)};
-      blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
-                                                               path_,
-                                                               directory::replica_chain(chain),
-                                                               FILE_OPS));
+      if(add_chain(static_cast<file_cmd_id>(cmd_id))) {
+        auto chain = list_t(parts.begin() + 2, parts.end() - 1);
+        blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
+                                                                 path_,
+                                                                 directory::replica_chain(chain),
+                                                                 FILE_OPS));
+      }
       write_partition_++;
       response = blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, remain_string).front();
     } while (response.substr(0, 12) == "!split_write");
   }
   if (response.substr(0, 11) == "!split_read") {
     do {
-      auto parts = string_utils::split(response, '!', 3);
-      auto first_part_string = parts[2];
+      auto parts = string_utils::split(response, '!');
+      auto first_part_string = *(parts.end() - 1);
+      if(add_chain(static_cast<file_cmd_id>(cmd_id))) {
+          auto chain = list_t(parts.begin() + 2, parts.end() - 1);
+          blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
+                                                                   path_,
+                                                                   directory::replica_chain(chain),
+                                                                   FILE_OPS));
+      }
       read_partition_++;
       read_offset_ = 0;
       std::vector<std::string> modified_args;
       modified_args.push_back(std::to_string(read_offset_));
+      modified_args.push_back(std::to_string(std::stoi(args[1]) - first_part_string.size()));
       auto second_part_string =
           blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, modified_args).front();
-      response = first_part_string + second_part_string;
-      if (response != "!msg_not_found") {
-        read_offset_ += (second_part_string.size() + metadata_length);
+      if (second_part_string != "!msg_not_found") {
+        read_offset_ += second_part_string.size();
         read_flag = false;
+        response = first_part_string + second_part_string;
+      } else {
+        response = second_part_string;
       }
     } while (response.substr(0, 11) == "!split_write");
   }
   if (response != "!msg_not_found" && cmd_id == static_cast<int32_t>(file_cmd_id::file_read) && read_flag) {
-    read_offset_ += (response.size() + metadata_length);
+    read_offset_ += response.size();
   }
 }
 

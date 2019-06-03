@@ -160,7 +160,7 @@ int main() {
       } else if (op_type == "read") {
         benchmark = std::make_shared<read_benchmark>(file_clients, data_size, num_clients, num_ops);
       } else {
-        LOG(log_level::info) << "Incorrect operation type for message queue: " << op_type;
+        LOG(log_level::info) << "Incorrect operation type for file: " << op_type;
         return 0;
       }
       benchmark->run();
