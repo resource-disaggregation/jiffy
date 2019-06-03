@@ -150,9 +150,7 @@ void file_partition::run_command(std::vector<std::string> &_return,
   if (is_mutator(cmd_id)) {
     dirty_ = true;
   }
-  bool expected = false;
-  if (auto_scale_.load() && is_mutator(cmd_id) && overload() && is_tail()
-      && overload_.compare_exchange_strong(expected, true)) {
+  if (auto_scale_ && is_mutator(cmd_id) && overload() && is_tail() && !overload_) {
     LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
                          << storage_capacity() << " partition size = " << size() << "partition capacity "
                          << partition_.capacity();
@@ -180,7 +178,7 @@ bool file_partition::empty() const {
 }
 
 bool file_partition::is_dirty() const {
-  return dirty_.load();
+  return dirty_;
 }
 
 void file_partition::load(const std::string &path) {
@@ -190,11 +188,11 @@ void file_partition::load(const std::string &path) {
 }
 
 bool file_partition::sync(const std::string &path) {
-  bool expected = true;
-  if (dirty_.compare_exchange_strong(expected, false)) {
+  if (dirty_) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
     remote->write<file_type>(partition_, decomposed.second);
+    dirty_ = false;
     return true;
   }
   return false;
@@ -202,9 +200,8 @@ bool file_partition::sync(const std::string &path) {
 
 bool file_partition::dump(const std::string &path) {
   std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-  bool expected = true;
   bool flushed = false;
-  if (dirty_.compare_exchange_strong(expected, false)) {
+  if (dirty_) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
     remote->write<file_type>(partition_, decomposed.second);

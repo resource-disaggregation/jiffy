@@ -118,7 +118,7 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
   if (response == "!redo") {
     if(cmd_id == file_cmd_id::file_write && write_partition_ < blocks_.size() - 1) {
       write_partition_++;
-    } else if(cmd_id == file_cmd_id::file_read && read_partition_ < blocks_.size - 1) {
+    } else if(cmd_id == file_cmd_id::file_read && read_partition_ < blocks_.size() - 1) {
       read_partition_++;
       read_offset_ = 0;
     }
