@@ -82,13 +82,34 @@ std::string fifo_queue_client::readnext() {
   return _return;
 }
 
+bool fifo_queue_client::add_chain(const fifo_queue_cmd_id &op) {
+  switch(op) {
+    case fifo_queue_cmd_id::fq_enqueue:
+      return enqueue_partition_ >= blocks_.size() - 1;
+    case fifo_queue_cmd_id::fq_dequeue:
+      return dequeue_partition_ >= blocks_.size() - 1;
+    case fifo_queue_cmd_id::fq_readnext:
+      return read_partition_ >= blocks_.size() - 1;
+    default:
+      throw std::logic_error("Adding chain should only happen in the three operations");    }
+}
+
 std::size_t fifo_queue_client::block_id(const fifo_queue_cmd_id &op) {
   switch(op) {
     case fifo_queue_cmd_id::fq_enqueue:
+      if (!check_valid_id(enqueue_partition_)) {
+        throw std::logic_error("Blocks are insufficient, need to add more");
+      }
       return enqueue_partition_;
     case fifo_queue_cmd_id::fq_dequeue:
+      if (!check_valid_id(dequeue_partition_)) {
+        throw std::logic_error("Blocks are insufficient, need to add more");
+      }
       return dequeue_partition_;
     case fifo_queue_cmd_id::fq_readnext:
+      if (!check_valid_id(read_partition_)) {
+        throw std::logic_error("Blocks are insufficient, need to add more");
+      }
       return read_partition_;
     default:
       throw std::invalid_argument("Incorrect operation of message queue");
@@ -97,51 +118,78 @@ std::size_t fifo_queue_client::block_id(const fifo_queue_cmd_id &op) {
 
 void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
   typedef std::vector<std::string> list_t;
-  bool read_flag = false;
+  bool read_flag = true;
   if (response == "!redo") {
+      if(cmd_id == fifo_queue_cmd_id::fq_enqueue && enqueue_partition_ < blocks_.size() - 1) {
+        enqueue_partition_++;
+      } else if(cmd_id == fifo_queue_cmd_id::fq_dequeue && dequeue_partition_ < blocks_.size() - 1) {
+        dequeue_partition_++;
+      } else if(cmd_id == fifo_queue_cmd_id::fq_readnext && read_partition_ < blocks_.size() - 1) {
+        read_partition_++;
+        read_offset_ = 0;
+      }
     throw redo_error();
   }
   if (response.substr(0, 5) == "!full") {
     do {
       auto parts = string_utils::split(response, '!');
       auto chain = list_t(parts.begin() + 2, parts.end());
-      blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
-                                                               path_,
-                                                               directory::replica_chain(chain),
-                                                               FIFO_QUEUE_OPS));
+      if(add_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
+        blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
+                                                                 path_,
+                                                                 directory::replica_chain(chain),
+                                                                 FIFO_QUEUE_OPS));
+      }
       enqueue_partition_++;
       response = blocks_[block_id(static_cast<fifo_queue_cmd_id>(cmd_id))]->run_command(cmd_id, args).front();
     } while (response.substr(0, 5) == "!full");
   }
   if (response.substr(0, 21) == "!msg_not_in_partition") {
     do {
+      auto parts = string_utils::split(response, '!');
+      auto chain = list_t(parts.begin() + 2, parts.end());
+      if(add_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
+        blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
+                                                                 path_,
+                                                                 directory::replica_chain(chain),
+                                                                 FIFO_QUEUE_OPS));
+      }
       if(cmd_id == fifo_queue_cmd_id::fq_dequeue)
         dequeue_partition_++;
       else
         read_partition_++;
-      response = blocks_[block_id(static_cast<fifo_queue_cmd_id >(cmd_id))]->run_command(cmd_id, {}).front();
+      response = blocks_[block_id(static_cast<fifo_queue_cmd_id >(cmd_id))]->run_command(cmd_id, args).front();
     } while (response.substr(0, 21) == "!msg_not_in_partition");
   }
   if (response.substr(0, 14) == "!split_enqueue") {
     do {
       auto parts = string_utils::split(response, '!');
-      auto chain = list_t(parts.begin() + 2, parts.end() - 1);
-      auto remain_string_length = std::stoi(list_t(parts.end() - 1, parts.end()).front());
+      auto remain_string_length = std::stoi(*(parts.end() - 1));
       auto msg = args.front();
       auto
           remain_string = std::vector<std::string>{msg.substr(msg.size() - remain_string_length, remain_string_length)};
-      blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
-                                                               path_,
-                                                               directory::replica_chain(chain),
-                                                               FIFO_QUEUE_OPS));
+      if(add_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
+        auto chain = list_t(parts.begin() + 2, parts.end() - 1);
+        blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
+                                                                 path_,
+                                                                 directory::replica_chain(chain),
+                                                                 FIFO_QUEUE_OPS));
+      }
       enqueue_partition_++;
       response = blocks_[block_id(static_cast<fifo_queue_cmd_id >(cmd_id))]->run_command(cmd_id, remain_string).front();
     } while (response.substr(0, 12) == "!split_enqueue");
   }
   if (response.substr(0, 14) == "!split_dequeue") {
     do {
-      auto parts = string_utils::split(response, '!', 3);
-      auto first_part_string = parts[2];
+      auto parts = string_utils::split(response, '!');
+      auto first_part_string = *(parts.end() - 1);
+      if(add_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
+        auto chain = list_t(parts.begin() + 2, parts.end() - 1);
+        blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
+                                                                 path_,
+                                                                 directory::replica_chain(chain),
+                                                                 FIFO_QUEUE_OPS));
+      }
       dequeue_partition_++;
       auto second_part_string =
           blocks_[block_id(static_cast<fifo_queue_cmd_id >(cmd_id))]->run_command(cmd_id, {}).front();
@@ -150,17 +198,29 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
   }
   if (response.substr(0, 15) == "!split_readnext") {
     do {
-      auto parts = string_utils::split(response, '!', 3);
-      auto first_part_string = parts[2];
+      auto parts = string_utils::split(response, '!');
+      auto first_part_string = *(parts.end() - 1);
+      if(add_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
+        auto chain = list_t(parts.begin() + 2, parts.end() - 1);
+        blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
+                                                                 path_,
+                                                                 directory::replica_chain(chain),
+                                                                 FIFO_QUEUE_OPS));
+      }
       read_partition_++;
+      read_offset_ = 0;
       auto second_part_string =
           blocks_[block_id(static_cast<fifo_queue_cmd_id >(cmd_id))]->run_command(cmd_id, {std::to_string(0)}).front();
-      response = first_part_string + second_part_string;
-      read_flag = true;
-      read_offset_ = (metadata_length + second_part_string.size());
+      if(second_part_string != "msg_not_found") {
+        read_offset_ += (metadata_length + second_part_string.size());
+        read_flag = false;
+        response = first_part_string + second_part_string;
+      } else {
+        response = second_part_string;
+      }
     } while (response.substr(0, 15) == "!split_readnext");
   }
-  if(!read_flag && cmd_id == fifo_queue_cmd_id::fq_readnext && response != "!msg_not_found") {
+  if(read_flag && cmd_id == fifo_queue_cmd_id::fq_readnext && response != "!msg_not_found") {
     read_offset_ += (metadata_length + response.size());
   } 
 }

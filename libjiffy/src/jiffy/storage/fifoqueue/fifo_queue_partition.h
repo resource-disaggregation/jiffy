@@ -180,20 +180,20 @@ class fifo_queue_partition : public chain_module {
   /* High threshold */
   double threshold_hi_;
 
-  /* Atomic bool for overload partition */
-  std::atomic<bool> overload_;
+  /* Bool for overload partition */
+  bool overload_;
 
-  /* Atomic bool for underload partition */
-  std::atomic<bool> underload_;
+  /* Bool for underload partition */
+  bool underload_;
 
-  /* Atomic bool for new block available, this bool basically prevents the fifo queue to erase all the blocks when size = 0 */
-  std::atomic<bool> new_block_available_;
+  /* Bool for new block available, this bool basically prevents the fifo queue to erase all the blocks when size = 0 */
+  bool new_block_available_;
 
-  /* Atomic partition dirty bit */
-  std::atomic<bool> dirty_;
+  /* Partition dirty bit */
+  bool dirty_;
 
   /* Bool value for auto scaling */
-  std::atomic_bool auto_scale_;
+  bool auto_scale_;
 
   /* Directory server hostname */
   std::string directory_host_;
@@ -203,6 +203,7 @@ class fifo_queue_partition : public chain_module {
 
   /* Auto scaling server hostname */
   std::string auto_scaling_host_;
+  
   /* Auto scaling server port number */
   int auto_scaling_port_;
 

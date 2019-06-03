@@ -182,14 +182,14 @@ class file_partition : public chain_module {
   /* High threshold */
   double threshold_hi_;
 
-  /* Atomic bool for partition slot range splitting */
-  std::atomic<bool> overload_;
+  /* Bool for partition slot range splitting */
+  bool overload_;
 
-  /* Atomic partition dirty bit */
-  std::atomic<bool> dirty_;
+  /* Partition dirty bit */
+  bool dirty_;
 
   /* Bool value for auto scaling */
-  std::atomic_bool auto_scale_;
+  bool auto_scale_;
 
   /* Directory server hostname */
   std::string directory_host_;
