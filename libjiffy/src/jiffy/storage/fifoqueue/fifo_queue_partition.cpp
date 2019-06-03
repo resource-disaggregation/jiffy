@@ -28,7 +28,6 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
       underload_(false),
       new_block_available_(false),
       dirty_(false),
-      split_string_(false),
       directory_host_(directory_host),
       directory_port_(directory_port),
       auto_scaling_host_(auto_scaling_host),
@@ -49,20 +48,21 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
 }
 
 std::string fifo_queue_partition::enqueue(const std::string &message) {
-  if (partition_.size() > partition_.capacity() && !split_string_.load()) {
+  if (partition_.size() > partition_.capacity() - metadata_length) {
     if (!next_target_str().empty()) {
       new_block_available_ = true;
       return "!full!" + next_target_str();
-    } else {
-      return "!redo";
+    } else if(!auto_scale_) {
+        return "!next_partition";
     }
+    return "!redo";
   }
   auto ret = partition_.push_back(message);
   if (!ret.first) {
-    split_string_ = true;
-    // TODO at this point we assume that next_target_str is always set before the last string to write
-    // There could be error when the last string is bigger than 6.4MB
     new_block_available_ = true;
+    if(!auto_scale_) {
+      return "!direct_split_enqueue!" + std::to_string(ret.second.size());
+    }
     return "!split_enqueue!" + next_target_str() + "!" + std::to_string(ret.second.size());
   }
   return "!ok";
@@ -74,7 +74,7 @@ std::string fifo_queue_partition::dequeue() {
     head_ += (metadata_length + ret.second.size());
     return ret.second;
   } else if (ret.second == "!reach_end") {
-    if (!next_target_str().empty()) {
+    if (!next_target_str().empty() || !auto_scale_) {
       new_block_available_ = true;
       return "!msg_not_in_partition";
     } else {
@@ -84,7 +84,10 @@ std::string fifo_queue_partition::dequeue() {
     return "!msg_not_found";
   } else {
     head_ += (metadata_length + ret.second.size());
-    return "!split_dequeue!" + ret.second;
+    if(!auto_scale_) {
+      return "!direct_split_dequeue!" + ret.second;
+    }
+    return "!split_dequeue!" + next_target_str() + "!" + ret.second;
   }
 }
 
@@ -93,7 +96,7 @@ std::string fifo_queue_partition::readnext(std::string pos) {
   if (ret.first) {
     return ret.second;
   } else if (ret.second == "!reach_end") {
-    if (!next_target_str().empty()) {
+    if (!next_target_str().empty() || !auto_scale_) {
       new_block_available_ = true;
       return "!msg_not_in_partition";
     } else {
@@ -102,13 +105,15 @@ std::string fifo_queue_partition::readnext(std::string pos) {
   } else if (ret.second == "!not_available") {
     return "!msg_not_found";
   } else {
-    return "!split_readnext!" + ret.second;
+    if(!auto_scale_) {
+      return "!direct_split_readnext!" + ret.second;
+    }
+    return "!split_readnext!" + next_target_str() + "!" + ret.second;
   }
 }
 
 std::string fifo_queue_partition::clear() {
   partition_.clear();
-  split_string_ = false;
   head_ = 0;
   overload_ = false;
   underload_ = false;

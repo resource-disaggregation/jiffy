@@ -59,6 +59,12 @@ class file_client : data_structure_client {
  private:
 
   /**
+   * @brief Check if new chain needs to be added
+   * @param op Operation
+   * @return Boolean, true if new chain needs to be added
+   */ 
+  bool add_chain(const file_cmd_id &op);
+  /**
    * @brief Fetch block identifier for specified operation
    * @param op Operation
    * @return Block identifier
