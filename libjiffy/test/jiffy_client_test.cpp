@@ -424,7 +424,7 @@ TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
 
   {
     jiffy_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-    std::string op1 = "put", op2 = "remove";
+    std::string op1 = "ht_put", op2 = "ht_remove";
     std::string key = "key1", value = "value1";
 
     client.fs()->create("/a/file.txt", "hashtable", "/tmp", 1, 1, 0, 0, {"0_65536"}, {"regular"});
