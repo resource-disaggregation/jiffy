@@ -38,4 +38,7 @@ service storage_management_service {
 
   void forward_all(1: i32 block_id)
     throws (1: storage_management_exception ex),
+
+  void update_partition_data(1: i32 block_id, 2: string partition_name, 3: string partition_metadata)
+    throws (1: storage_management_exception ex),
 }
