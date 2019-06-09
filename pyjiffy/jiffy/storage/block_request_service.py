@@ -247,7 +247,9 @@ class Client(Iface):
     def unsubscribe(self, block_id, ops):
         """
         Parameters:
-                  - ops
+         - block_id
+         - ops
+
         """
         self.send_unsubscribe(block_id, ops)
 
@@ -461,6 +463,7 @@ class get_client_id_result(object):
     """
     Attributes:
      - success
+
     """
 
     __slots__ = (
@@ -533,6 +536,7 @@ class register_client_id_args(object):
     Attributes:
      - block_id
      - client_id
+
     """
 
     __slots__ = (
@@ -673,6 +677,7 @@ class command_request_args(object):
      - block_id
      - cmd_id
      - arguments
+
     """
 
     __slots__ = (
@@ -793,6 +798,7 @@ class chain_request_args(object):
      - block_id
      - cmd_id
      - arguments
+
     """
 
     __slots__ = (
@@ -912,6 +918,7 @@ class run_command_args(object):
      - block_id
      - cmd_id
      - arguments
+
     """
 
     __slots__ = (
@@ -1016,6 +1023,7 @@ class run_command_result(object):
     """
     Attributes:
      - success
+
     """
 
     __slots__ = (
@@ -1096,6 +1104,7 @@ class subscribe_args(object):
     Attributes:
      - block_id
      - ops
+
     """
 
     __slots__ = (
@@ -1189,6 +1198,7 @@ class unsubscribe_args(object):
     Attributes:
      - block_id
      - ops
+
     """
 
     __slots__ = (
@@ -1276,8 +1286,5 @@ unsubscribe_args.thrift_spec = (
     (2, TType.LIST, 'ops', (TType.STRING, None, False), None, ),  # 2
 )
 fix_spec(all_structs)
-del all_structs
-
-s)
 del all_structs
 

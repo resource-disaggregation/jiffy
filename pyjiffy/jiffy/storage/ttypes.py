@@ -177,7 +177,9 @@ class sequence_id(object):
     Attributes:
      - client_id
      - client_seq_no
-     - server_seq_n    """
+     - server_seq_no
+
+    """
 
     __slots__ = (
         'client_id',
@@ -285,4 +287,3 @@ sequence_id.thrift_spec = (
 )
 fix_spec(all_structs)
 del all_structs
-ts
