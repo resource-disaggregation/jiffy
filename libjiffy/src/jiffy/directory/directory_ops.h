@@ -240,14 +240,15 @@ enum storage_mode {
 
 /* Replica chain structure */
 struct replica_chain {
-  /* Chain name */
+  /* Partition name */
   std::string name;
-  /* Block names */
+  /* Block identifier */
   std::vector<std::string> block_ids;
-  /* Chain metadata */
+  /* Partition metadata */
   std::string metadata;
   /* Storage mode */
   storage_mode mode;
+  typedef std::pair<int32_t, int32_t> slot_range;
   /**
    * Default Constructor
    */
@@ -318,6 +319,21 @@ struct replica_chain {
    */
   bool operator!=(const replica_chain &other) const {
     return !(*this == other);
+  }
+
+  bool operator<(const replica_chain &other) const {
+    return fetch_slot_range().first < other.fetch_slot_range().first;
+  }
+
+  /**
+   * @brief Fetch slot range from name
+   * @return Slot range pair
+   */
+  slot_range fetch_slot_range() const {
+    std::string delimiter = "_";
+    int32_t slot_begin = atoi(name.substr(0, name.find(delimiter)).c_str());
+    int32_t slot_end = atoi(name.substr(name.find(delimiter) + 1, name.length()).c_str());
+    return std::make_pair(slot_begin, slot_end);
   }
 };
 
@@ -710,6 +726,21 @@ class data_status {
   }
 
   /**
+   * @brief Set new name for partition
+   * @param old_name Old partition name
+   * @param new_name New partition name
+   */
+  void set_partition_name(const std::string &old_name, const std::string &new_name) {
+    for (auto &replica : data_blocks_) {
+      if (replica.name == old_name) {
+        replica.name = new_name;
+        return;
+      }
+    }
+    throw directory_ops_exception("Partition not found: " + old_name);
+  }
+
+  /**
    * @brief Fetch data block metadata
    * @param i Data block offset
    * @return Data block metadata
@@ -732,6 +763,20 @@ class data_status {
     data_blocks_[i].metadata = metadata;
   }
 
+  /**
+   * @brief Set new metadata for partition
+   * @param name Partition name
+   * @param metadata New partition metadata
+   */
+  void set_partition_metadata(const std::string &name, const std::string &metadata) {
+    for (auto &replica : data_blocks_) {
+      if (replica.name == name) {
+        replica.metadata = metadata;
+        return;
+      }
+    }
+    throw directory_ops_exception("Partition not found: " + name);
+  }
   /**
    * @brief Add tag
    * @param key Key
@@ -973,6 +1018,11 @@ class directory_management_ops {
                                   const std::string &partition_name,
                                   const std::string &partition_metadata) = 0;
   virtual void remove_block(const std::string &path, const std::string &block_name) = 0;
+  virtual void update_partition(const std::string &path,
+                                const std::string &old_partition_name,
+                                const std::string &new_partition_name,
+                                const std::string &partition_metadata) = 0;
+  virtual int64_t get_capacity(const std::string &path, const std::string &partition_name) = 0;
 };
 
 class directory_interface : public directory_ops, public directory_management_ops {};

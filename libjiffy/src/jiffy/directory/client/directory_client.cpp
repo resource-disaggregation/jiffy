@@ -3,6 +3,7 @@
 
 #include "directory_client.h"
 #include "../fs/directory_type_conversions.h"
+#include "jiffy/utils/logger.h"
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -10,6 +11,8 @@ using namespace ::apache::thrift::transport;
 
 namespace jiffy {
 namespace directory {
+
+using namespace utils;
 
 directory_client::directory_client(const std::string &host, int port) {
   connect(host, port);
@@ -196,6 +199,17 @@ void directory_client::touch(const std::string &) {
 
 void directory_client::handle_lease_expiry(const std::string &) {
   throw directory_ops_exception("Unsupported operation");
+}
+
+void directory_client::update_partition(const std::string &path,
+                                        const std::string &old_partition_name,
+                                        const std::string &new_partition_name,
+                                        const std::string &partition_metadata) {
+  client_->request_partition_data_update(path, old_partition_name, new_partition_name, partition_metadata);
+}
+
+int64_t directory_client::get_capacity(const std::string &path, const std::string &partition_name) {
+  return client_->get_storage_capacity(path, partition_name);
 }
 
 }
