@@ -64,8 +64,8 @@ class storage_management_client {
    * @param next_block_id Identifier for the next block in the chain
    */
   void setup_chain(int32_t block_id, const std::string &path,
-                   const std::vector<std::string>& chain, int32_t role,
-                   const std::string& next_block_id);
+                   const std::vector<std::string> &chain, int32_t role,
+                   const std::string &next_block_id);
 
   /**
    * @brief Reset block
@@ -135,6 +135,17 @@ class storage_management_client {
    */
 
   void forward_all(int32_t block_id);
+
+  /**
+   * @brief Update partition data and metadata
+   * @param block_id Block identifier
+   * @param partition_name New partition name
+   * @param partition_metadata New partition metadata
+   */
+
+  void update_partition(const int32_t block_id,
+                        const std::string &partition_name,
+                        const std::string &partition_metadata);
 
  private:
   /* Socket */

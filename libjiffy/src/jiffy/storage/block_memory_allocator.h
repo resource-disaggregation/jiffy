@@ -46,14 +46,14 @@ class block_memory_allocator {
 
   block_memory_allocator() : manager_(nullptr) {};
 
-  block_memory_allocator(block_memory_manager *manager)
+  explicit block_memory_allocator(block_memory_manager *manager)
       : manager_(manager) {}
 
   template<class U>
-  block_memory_allocator(const block_memory_allocator<U> &other)
+  explicit block_memory_allocator(const block_memory_allocator<U> &other)
       : manager_(other.manager_) {}
 
-  ~block_memory_allocator() {}
+  ~block_memory_allocator() = default;
 
   // return maximum number of elements that can be allocated
   size_type max_size() const {
@@ -63,7 +63,8 @@ class block_memory_allocator {
   // allocate but don't initialize num elements of type T
   pointer allocate(size_type num, const void * = 0) {
     size_t requested_bytes = num * sizeof(T);
-    pointer p = static_cast<pointer>(manager_->mb_malloc(num * sizeof(T)));
+    if (requested_bytes == 0) return nullptr;
+    auto p = static_cast<pointer>(manager_->mb_malloc(num * sizeof(T)));
     if (p == nullptr) {
       if (manager_->mb_used() + requested_bytes > manager_->mb_capacity()) {
         throw memory_block_overflow();
@@ -82,7 +83,7 @@ class block_memory_allocator {
 
   template<class U, class... Args>
   void construct(U *p, Args &&... args) {
-    ::new((void *)p) U(std::forward<Args>(args)...);
+    ::new((void *) p) U(std::forward<Args>(args)...);
   }
 
   // destroy elements of initialized storage p
@@ -92,8 +93,10 @@ class block_memory_allocator {
   }
 
   // deallocate storage p of deleted elements
-  void deallocate(pointer p, size_type) {
-    manager_->mb_free(p);
+  void deallocate(pointer p, size_type size) {
+    if (p == nullptr)
+      return;
+    manager_->mb_free(p, size);
   }
 
   template<typename U>
