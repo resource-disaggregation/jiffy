@@ -3,22 +3,18 @@
 namespace jiffy {
 namespace storage {
 
-std::vector<command> KV_OPS = {command{command_type::accessor, "exists"},
-                               command{command_type::accessor, "get"},
-                               command{command_type::accessor, "keys"},
-                               command{command_type::accessor, "num_keys"},
-                               command{command_type::mutator, "put"},
-                               command{command_type::mutator, "remove"},
-                               command{command_type::mutator, "update"},
-                               command{command_type::mutator, "lock"},
-                               command{command_type::mutator, "unlock"},
-                               command{command_type::accessor, "locked_get_data_in_slot_range"},
-                               command{command_type::accessor, "locked_get"},
-                               command{command_type::mutator, "locked_put"},
-                               command{command_type::mutator, "locked_remove"},
-                               command{command_type::mutator, "locked_update"},
-                               command{command_type::mutator, "upsert"},
-                               command{command_type::mutator, "locked_upsert"}};
-
+std::vector<command> KV_OPS = {command{command_type::accessor, "ht_exists"},
+                               command{command_type::accessor, "ht_get"},
+                               command{command_type::accessor, "ht_keys"},
+                               command{command_type::accessor, "ht_num_keys"},
+                               command{command_type::mutator, "ht_put"},
+                               command{command_type::mutator, "ht_remove"},
+                               command{command_type::mutator, "ht_update"},
+                               command{command_type::mutator, "ht_upsert"},
+                               command{command_type::mutator, "ht_update_partition"},
+                               command{command_type::accessor, "ht_get_storage_size"},
+                               command{command_type::accessor, "ht_get_metadata"},
+                               command{command_type::accessor, "ht_get_range_data"},
+                               command{command_type::mutator, "ht_scale_remove"}};
 }
 }

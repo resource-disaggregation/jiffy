@@ -10,25 +10,22 @@ namespace storage {
 extern std::vector<command> KV_OPS;
 
 /**
- * @brief Key value block supported operations
+ * @brief Hash table supported operations
  */
-enum hash_table_cmd_id : int32_t {
-  exists = 0,
-  get = 1,
-  keys = 2, // TODO: We should not support multi-key operations since we do not provide any guarantees
-  num_keys = 3, // TODO: We should not support multi-key operations since we do not provide any guarantees
-  put = 4,
-  remove = 5,
-  update = 6,
-  lock = 7,
-  unlock = 8,
-  locked_data_in_slot_range = 9,
-  locked_get = 10,
-  locked_put = 11,
-  locked_remove = 12,
-  locked_update = 13,
-  upsert = 14,
-  locked_upsert = 15
+enum hash_table_cmd_id {
+  ht_exists = 0,
+  ht_get = 1,
+  ht_keys = 2, // TODO: We should not support multi-key operations since we do not provide any guarantees
+  ht_num_keys = 3, // TODO: We should not support multi-key operations since we do not provide any guarantees
+  ht_put = 4,
+  ht_remove = 5,
+  ht_update = 6,
+  ht_upsert = 7,
+  ht_update_partition = 8,
+  ht_get_storage_size = 9,
+  ht_get_metadata = 10,
+  ht_get_range_data = 11,
+  ht_scale_remove = 12,
 };
 
 }
