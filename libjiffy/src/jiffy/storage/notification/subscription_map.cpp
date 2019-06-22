@@ -43,7 +43,8 @@ void subscription_map::clear() {
   std::lock_guard<std::mutex> lock{mtx_};
   subs_.clear();
 }
-// TODO fix this
+// TODO fix this function so that we could let the
+// subscibed blocks know whenever the partition is destroyed
 void subscription_map::send_failure() {
   std::lock_guard<std::mutex> lock(mtx_);
 }

@@ -44,10 +44,8 @@ class partition {
   virtual ~partition() {
     client_map_.send_failure();
     client_map_.clear();
-    // TODO need to figure out if we want to notify an error to the subscripted clients after a delete of partition
     sub_map_.clear();
   }
-
 
   /**
    * @brief Virtual function for running a command on a block
@@ -194,7 +192,7 @@ class partition {
    * @param str String
    * @return Binary string
    */
-  binary make_binary(const std::string& str);
+  binary make_binary(const std::string &str);
 
   /* Metadata mutex */
   mutable std::shared_mutex metadata_mtx_;
