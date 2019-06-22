@@ -73,7 +73,7 @@ class hash_table_client : public data_structure_client {
    * @return Response of batch command
    */
 
-  std::vector<std::string> put(std::vector<std::string> &kvs);
+  std::vector<std::string> put(const std::vector<std::string> &kvs);
 
   /**
    * @brief Get in batch
@@ -81,7 +81,7 @@ class hash_table_client : public data_structure_client {
    * @return Response of batch command
    */
 
-  std::vector<std::string> get(std::vector<std::string> &keys);
+  std::vector<std::string> get(const std::vector<std::string> &keys);
 
   /**
    * @brief Update in batch
@@ -89,7 +89,7 @@ class hash_table_client : public data_structure_client {
    * @return Response of batch command
    */
 
-  std::vector<std::string> update(std::vector<std::string> &kvs);
+  std::vector<std::string> update(const std::vector<std::string> &kvs);
 
   /**
    * @brief Remove in batch
@@ -97,7 +97,7 @@ class hash_table_client : public data_structure_client {
    * @return Response of batch command
    */
 
-  std::vector<std::string> remove(std::vector<std::string> &keys);
+  std::vector<std::string> remove(const std::vector<std::string> &keys);
 
   /**
    * @brief Fetch number of keys
@@ -142,7 +142,7 @@ class hash_table_client : public data_structure_client {
    */
 
   void handle_redirects(int32_t cmd_id,
-                        std::vector<std::string> &args,
+                        const std::vector<std::string> &args,
                         std::vector<std::string> &responses) override;
 
   /* Redo times */

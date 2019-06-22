@@ -101,7 +101,7 @@ std::string hash_table_client::remove(const std::string &key) {
   return _return;
 }
 
-std::vector<std::string> hash_table_client::put(std::vector<std::string> &kvs) {
+std::vector<std::string> hash_table_client::put(const std::vector<std::string> &kvs) {
   if (kvs.size() % 2 != 0) {
     throw std::invalid_argument("Incorrect number of arguments");
   }
@@ -112,7 +112,7 @@ std::vector<std::string> hash_table_client::put(std::vector<std::string> &kvs) {
   return _return;
 }
 
-std::vector<std::string> hash_table_client::get(std::vector<std::string> &keys) {
+std::vector<std::string> hash_table_client::get(const std::vector<std::string> &keys) {
   std::vector<std::string> _return;
   for (auto &key : keys) {
     _return.emplace_back(get(key));
@@ -120,7 +120,7 @@ std::vector<std::string> hash_table_client::get(std::vector<std::string> &keys) 
   return _return;
 }
 
-std::vector<std::string> hash_table_client::update(std::vector<std::string> &kvs) {
+std::vector<std::string> hash_table_client::update(const std::vector<std::string> &kvs) {
   if (kvs.size() % 2 != 0) {
     throw std::invalid_argument("Incorrect number of arguments");
   }
@@ -131,7 +131,7 @@ std::vector<std::string> hash_table_client::update(std::vector<std::string> &kvs
   return _return;
 }
 
-std::vector<std::string> hash_table_client::remove(std::vector<std::string> &keys) {
+std::vector<std::string> hash_table_client::remove(const std::vector<std::string> &keys) {
   std::vector<std::string> _return;
   for (auto &key :keys) {
     _return.emplace_back(remove(key));
@@ -220,7 +220,7 @@ void hash_table_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
 }
 
 void hash_table_client::handle_redirects(int32_t cmd_id,
-                                         std::vector<std::string> &args,
+                                         const std::vector<std::string> &args,
                                          std::vector<std::string> &responses) {
   size_t n_ops = responses.size();
   size_t n_op_args = args.size() / n_ops;
@@ -258,7 +258,6 @@ void hash_table_client::handle_redirects(int32_t cmd_id,
     if (refresh_flag) {
       refresh();
     }
-    args = redo_args;
     throw redo_error();
   }
 }
