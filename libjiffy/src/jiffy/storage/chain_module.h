@@ -286,7 +286,7 @@ class chain_module : public partition {
 
   void chain_to_string(std::string &ret) {
     std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
-    for (const auto &x:chain()) {
+    for (const auto &x : chain()) {
       ret += x;
     }
   }
