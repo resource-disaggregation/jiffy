@@ -51,7 +51,7 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::create_hash_table(cons
   begin_scope(path);
   return std::make_shared<storage::hash_table_client>(fs_, path, s);
 }
-//TODO fix this
+
 std::shared_ptr<storage::hash_table_client> jiffy_client::open(const std::string &path) {
   auto s = fs_->open(path);
   begin_scope(path);

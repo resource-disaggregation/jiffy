@@ -4,7 +4,6 @@ endif ()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../libjiffy/src
         ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libcuckoo
-        ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/btree
         ${Boost_INCLUDE_DIRS})
 add_executable(storaged src/storage_server.cpp
         src/server_storage_tracker.cpp
