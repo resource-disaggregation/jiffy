@@ -217,12 +217,9 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
   }
 }
 
-void file_client::handle_redirects(int32_t cmd_id,
-                                   std::vector<std::string> &args,
-                                   std::vector<std::string> &responses) {
-  (void) cmd_id;
-  (void) args;
-  (void) responses;
+void file_client::handle_redirects(int32_t,
+                                   std::vector<std::string> &,
+                                   std::vector<std::string> &) {
 }
 
 }
