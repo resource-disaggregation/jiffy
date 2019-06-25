@@ -23,24 +23,47 @@ using namespace utils;
 /* Persistent service virtual class */
 class persistent_service {
  public:
+  /**
+   * @brief Constructor
+   * @param Custom serializer/deserializer
+   */
   persistent_service(std::shared_ptr<storage::serde> ser) : ser_(std::move(ser)) {}
 
+  /**
+   * @brief Destructor
+   */
   virtual ~persistent_service() = default;
+
+  /**
+   * @brief Write to persistent store
+   * @param table Data structure
+   * @param out_path Persistent store path
+   */
 
   template<typename Datatype>
   void write(const Datatype &table, const std::string &out_path) {
     return virtual_write(table, out_path);
   }
 
+  /**
+   * @brief Read from persistent store
+   * @param in_path Persistent store path
+   * @param table Data structure
+   */
+
   template<typename Datatype>
   void read(const std::string &in_path, Datatype &table) {
     return virtual_read(in_path, table);
   }
 
+  /**
+   * @brief Fetch URI
+   * @return URI
+   */
   virtual std::string URI() = 0;
 
   /**
-   * @brief  Fetch custom serializer/deserializer
+   * @brief Fetch custom serializer/deserializer
    * @return Custom serializer/deserializer
    */
   std::shared_ptr<storage::serde> serde() {
@@ -50,37 +73,128 @@ class persistent_service {
  private:
   /* Custom serializer/deserializer */
   std::shared_ptr<storage::serde> ser_;
+
+  /**
+   * @brief Virtual write for lock hash table
+   * @param table Lock hash table
+   * @param out_path Persistent store path
+   */
+
   virtual void virtual_write(const storage::locked_hash_table_type &table, const std::string &out_path) = 0;
+
+  /**
+   * @brief Virtual write for fifo queue
+   * @param table Fifo queue
+   * @param out_path Persistent store path
+   */
+
   virtual void virtual_write(const storage::fifo_queue_type &table, const std::string &out_path) = 0;
+
+  /**
+   * @brief Virtual write for file
+   * @param table File
+   * @param out_path Persistent store path
+   */
+
   virtual void virtual_write(const storage::file_type &table, const std::string &out_path) = 0;
+
+  /**
+   * @brief Virtual read for lock hash table
+   * @param in_path Persistent store path
+   * @param table Lock hash table
+   */
+
   virtual void virtual_read(const std::string &in_path, storage::locked_hash_table_type &table) = 0;
+
+  /**
+   * @brief Virtual read for fifo queue
+   * @param in_path Persistent store path
+   * @param table Fifo queue
+   */
+
   virtual void virtual_read(const std::string &in_path, storage::fifo_queue_type &table) = 0;
+
+  /**
+   * @brief Virtual read for file
+   * @param in_path Persistent store path
+   * @param table File
+   */
+
   virtual void virtual_read(const std::string &in_path, storage::file_type &table) = 0;
 };
 
+/**
+ * Derviced persistent service class
+ */
 template<class persistent_service_impl>
 class derived_persistent : public persistent_service_impl {
  public:
+  /**
+   * @brief Constructor
+   */
+
   template<class... TArgs>
   derived_persistent(TArgs &&... args): persistent_service_impl(std::forward<TArgs>(args)...) {
-
   }
  private:
+
+  /**
+   * @brief Virtual write for lock hash table
+   * @param table Lock hash table
+   * @param out_path Persistent store path
+   */
+
   void virtual_write(const storage::locked_hash_table_type &table, const std::string &out_path) final {
     return persistent_service_impl::write_impl(table, out_path);
   }
+
+  /**
+   * @brief Virtual write for fifo queue
+   * @param table Fifo queue
+   * @param out_path Persistent store path
+   */
+
+
   void virtual_write(const storage::fifo_queue_type &table, const std::string &out_path) final {
     return persistent_service_impl::write_impl(table, out_path);
   }
+
+  /**
+   * @brief Virtual write for file
+   * @param table File
+   * @param out_path Persistent store path
+   */
+
   void virtual_write(const storage::file_type &table, const std::string &out_path) final {
     return persistent_service_impl::write_impl(table, out_path);
   }
+
+  /**
+   * @brief Virtual read for lock hash table
+   * @param in_path Persistent store path
+   * @param table Lock hash table
+   */
+
   void virtual_read(const std::string &in_path, storage::locked_hash_table_type &table) final {
     return persistent_service_impl::read_impl(in_path, table);
   }
+
+  /**
+   * @brief Virtual read for fifo queue
+   * @param in_path Persistent store path
+   * @param table Fifo queue
+   */
+
   void virtual_read(const std::string &in_path, storage::fifo_queue_type &table) final {
     return persistent_service_impl::read_impl(in_path, table);
   }
+
+  /**
+   * @brief Virtual read for file
+   * @param in_path Persistent store path
+   * @param table File
+   */
+
   void virtual_read(const std::string &in_path, storage::file_type &table) final {
     return persistent_service_impl::read_impl(in_path, table);
   }
@@ -157,6 +271,7 @@ class s3_store_impl : public persistent_service {
    * @param table Hash table
    * @param out_path Output persistent storage path
    */
+  
   template<typename Datatype>
   void write_impl(const Datatype &table, const std::string &out_path) {
     auto path_elements = extract_path_elements(out_path);
@@ -190,6 +305,7 @@ class s3_store_impl : public persistent_service {
    * @param in_path Input persistent storage path
    * @param table Hash table
    */
+
   template<typename Datatype>
   void read_impl(const std::string &in_path, Datatype &table) {
     auto path_elements = extract_path_elements(in_path);
@@ -227,6 +343,7 @@ class s3_store_impl : public persistent_service {
    * @param s3_path s3 path
    * @return Pair of bucket name and key
    */
+
   std::pair<std::string, std::string> extract_path_elements(const std::string &s3_path);
   /* AWS SDK options */
   Aws::SDKOptions options_;
