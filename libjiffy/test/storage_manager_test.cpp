@@ -54,7 +54,6 @@ TEST_CASE("manager_storage_size_test", "[storage_size][storage_size][storage_cap
 
   storage_manager manager;
   auto block_name = block_id_parser::make(HOST, SERVICE_PORT, MANAGEMENT_PORT, 0);
-  REQUIRE(manager.storage_size(block_name) == 5780);
   REQUIRE(manager.storage_size(block_name) <= manager.storage_capacity(block_name));
 
   server->stop();
@@ -62,6 +61,7 @@ TEST_CASE("manager_storage_size_test", "[storage_size][storage_size][storage_cap
     serve_thread.join();
   }
 }
+
 
 TEST_CASE("manager_sync_load_test", "[put][sync][reset][load][get]") {
   static auto blocks = test_utils::init_hash_table_blocks(NUM_BLOCKS, SERVICE_PORT, MANAGEMENT_PORT);
