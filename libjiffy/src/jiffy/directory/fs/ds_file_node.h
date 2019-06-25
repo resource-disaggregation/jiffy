@@ -250,6 +250,14 @@ class ds_file_node : public ds_node {
    */
   size_t num_blocks() const;
 
+  /**
+   * @brief Update a partition name and metadata
+   * @param old_name Old partition name
+   * @param new_name New partition name
+   * @param metadata Partition metadata
+   */
+  void update_data_status_partition(const std::string &old_name, const std::string &new_name, const std::string &metadata);
+
  private:
   /* Operation mutex */
   mutable std::shared_mutex mtx_;
