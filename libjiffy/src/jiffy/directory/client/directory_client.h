@@ -278,8 +278,6 @@ class directory_client : public directory_interface {
 
   void handle_lease_expiry(const std::string &path) override;
 
-  // TODO return status when adding or removing fails
-
   /**
    * @brief Add a new replica chain to the path
    * @param path File path
