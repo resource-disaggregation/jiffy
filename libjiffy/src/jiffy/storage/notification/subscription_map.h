@@ -55,6 +55,11 @@ class subscription_map {
 
   void clear();
 
+  /**
+   * @brief Send failure message to end the connection
+   */
+  void send_failure();
+
  private:
   /* Subscription map operation mutex */
   std::mutex mtx_{};

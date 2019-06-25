@@ -32,6 +32,7 @@ void subscription_map::remove_subscriptions(const std::vector<std::string> &ops,
 }
 
 void subscription_map::notify(const std::string &op, const std::string &msg) {
+  if (op == "default_partition") return;
   std::lock_guard<std::mutex> lock{mtx_};
   for (const auto &client: subs_[op]) {
     client->notification(op, msg);
@@ -41,6 +42,11 @@ void subscription_map::notify(const std::string &op, const std::string &msg) {
 void subscription_map::clear() {
   std::lock_guard<std::mutex> lock{mtx_};
   subs_.clear();
+}
+// TODO fix this function so that we could let the
+// subscibed blocks know whenever the partition is destroyed
+void subscription_map::send_failure() {
+  std::lock_guard<std::mutex> lock(mtx_);
 }
 
 }

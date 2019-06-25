@@ -284,6 +284,13 @@ class chain_module : public partition {
     return chain_;
   }
 
+  void chain_to_string(std::string &ret) {
+    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+    for (const auto &x : chain()) {
+      ret += x;
+    }
+  }
+
   /**
    * @brief Check if chain module role is head
    * @return Bool value, true if chain role is head or singleton

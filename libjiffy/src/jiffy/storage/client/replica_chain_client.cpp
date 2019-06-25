@@ -13,11 +13,12 @@ using namespace utils;
 replica_chain_client::replica_chain_client(std::shared_ptr<directory::directory_interface> fs,
                                            const std::string &path,
                                            const directory::replica_chain &chain,
+                                           std::vector<command> OPS,
                                            int timeout_ms) : fs_(fs), path_(path), in_flight_(false) {
   seq_.client_id = -1;
   seq_.client_seq_no = 0;
   connect(chain, timeout_ms);
-  for (auto &op: KV_OPS) {
+  for (auto &op: OPS) {
     cmd_client_.push_back(op.type == command_type::accessor ? &tail_ : &head_);
   }
 }
@@ -84,6 +85,10 @@ std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const
       LOG(log_level::info) << "Error in connection to chain: " << e.what();
       connect(fs_->resolve_failures(path_, chain_), timeout_ms_);
       retry = true;
+    } catch (std::logic_error &e) {
+      response.clear();
+      response.push_back("!block_moved");
+      break;
     }
   }
   return response;
@@ -92,64 +97,19 @@ std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const
 std::vector<std::string> replica_chain_client::run_command_redirected(int32_t cmd_id,
                                                                       const std::vector<std::string> &args) {
   auto args_copy = args;
-  args_copy.push_back("!redirected");
+  if (args_copy.back() != "!redirected")
+    args_copy.push_back("!redirected");
   send_command(cmd_id, args_copy);
   return recv_response();
 }
 
-std::shared_ptr<replica_chain_client::locked_client> replica_chain_client::lock() {
-  return std::make_shared<replica_chain_client::locked_client>(*this);
+void replica_chain_client::set_chain_name_metadata(std::string &name, std::string &metadata) {
+  chain_.name = name;
+  chain_.metadata = metadata;
 }
+
 bool replica_chain_client::is_connected() const {
   return head_.is_connected() && tail_.is_connected();
-}
-
-replica_chain_client::locked_client::locked_client(replica_chain_client &parent) : parent_(parent) {
-  auto res = parent_.run_command(hash_table_cmd_id::lock, {});
-  if (res[0] != "!ok") {
-    redirecting_ = true;
-    redirect_chain_ = utils::string_utils::split(res[0], '!');
-  } else {
-    redirecting_ = false;
-  }
-}
-
-replica_chain_client::locked_client::~locked_client() {
-  unlock();
-}
-
-void replica_chain_client::locked_client::unlock() {
-  parent_.run_command(hash_table_cmd_id::unlock, {});
-}
-
-const directory::replica_chain &replica_chain_client::locked_client::chain() {
-  return parent_.chain();
-}
-
-bool replica_chain_client::locked_client::redirecting() const {
-  return redirecting_;
-}
-
-const std::vector<std::string> &replica_chain_client::locked_client::redirect_chain() {
-  return redirect_chain_;
-}
-
-void replica_chain_client::locked_client::send_command(int32_t cmd_id, const std::vector<std::string> &args) {
-  parent_.send_command(cmd_id, args);
-}
-
-std::vector<std::string> replica_chain_client::locked_client::recv_response() {
-  return parent_.recv_response();
-}
-
-std::vector<std::string> replica_chain_client::locked_client::run_command(int32_t cmd_id,
-                                                                          const std::vector<std::string> &args) {
-  return parent_.run_command(cmd_id, args);
-}
-
-std::vector<std::string> replica_chain_client::locked_client::run_command_redirected(int32_t cmd_id,
-                                                                                     const std::vector<std::string> &args) {
-  return parent_.run_command_redirected(cmd_id, args);
 }
 
 }

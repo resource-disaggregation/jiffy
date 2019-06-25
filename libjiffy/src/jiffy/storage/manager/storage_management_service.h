@@ -32,6 +32,7 @@ class storage_management_serviceIf {
   virtual int64_t storage_size(const int32_t block_id) = 0;
   virtual void resend_pending(const int32_t block_id) = 0;
   virtual void forward_all(const int32_t block_id) = 0;
+  virtual void update_partition_data(const int32_t block_id, const std::string& partition_name, const std::string& partition_metadata) = 0;
 };
 
 class storage_management_serviceIfFactory {
@@ -94,6 +95,9 @@ class storage_management_serviceNull : virtual public storage_management_service
     return;
   }
   void forward_all(const int32_t /* block_id */) {
+    return;
+  }
+  void update_partition_data(const int32_t /* block_id */, const std::string& /* partition_name */, const std::string& /* partition_metadata */) {
     return;
   }
 };
@@ -1409,6 +1413,130 @@ class storage_management_service_forward_all_presult {
 
 };
 
+typedef struct _storage_management_service_update_partition_data_args__isset {
+  _storage_management_service_update_partition_data_args__isset() : block_id(false), partition_name(false), partition_metadata(false) {}
+  bool block_id :1;
+  bool partition_name :1;
+  bool partition_metadata :1;
+} _storage_management_service_update_partition_data_args__isset;
+
+class storage_management_service_update_partition_data_args {
+ public:
+
+  storage_management_service_update_partition_data_args(const storage_management_service_update_partition_data_args&);
+  storage_management_service_update_partition_data_args& operator=(const storage_management_service_update_partition_data_args&);
+  storage_management_service_update_partition_data_args() : block_id(0), partition_name(), partition_metadata() {
+  }
+
+  virtual ~storage_management_service_update_partition_data_args() throw();
+  int32_t block_id;
+  std::string partition_name;
+  std::string partition_metadata;
+
+  _storage_management_service_update_partition_data_args__isset __isset;
+
+  void __set_block_id(const int32_t val);
+
+  void __set_partition_name(const std::string& val);
+
+  void __set_partition_metadata(const std::string& val);
+
+  bool operator == (const storage_management_service_update_partition_data_args & rhs) const
+  {
+    if (!(block_id == rhs.block_id))
+      return false;
+    if (!(partition_name == rhs.partition_name))
+      return false;
+    if (!(partition_metadata == rhs.partition_metadata))
+      return false;
+    return true;
+  }
+  bool operator != (const storage_management_service_update_partition_data_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const storage_management_service_update_partition_data_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class storage_management_service_update_partition_data_pargs {
+ public:
+
+
+  virtual ~storage_management_service_update_partition_data_pargs() throw();
+  const int32_t* block_id;
+  const std::string* partition_name;
+  const std::string* partition_metadata;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _storage_management_service_update_partition_data_result__isset {
+  _storage_management_service_update_partition_data_result__isset() : ex(false) {}
+  bool ex :1;
+} _storage_management_service_update_partition_data_result__isset;
+
+class storage_management_service_update_partition_data_result {
+ public:
+
+  storage_management_service_update_partition_data_result(const storage_management_service_update_partition_data_result&);
+  storage_management_service_update_partition_data_result& operator=(const storage_management_service_update_partition_data_result&);
+  storage_management_service_update_partition_data_result() {
+  }
+
+  virtual ~storage_management_service_update_partition_data_result() throw();
+  storage_management_exception ex;
+
+  _storage_management_service_update_partition_data_result__isset __isset;
+
+  void __set_ex(const storage_management_exception& val);
+
+  bool operator == (const storage_management_service_update_partition_data_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const storage_management_service_update_partition_data_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const storage_management_service_update_partition_data_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _storage_management_service_update_partition_data_presult__isset {
+  _storage_management_service_update_partition_data_presult__isset() : ex(false) {}
+  bool ex :1;
+} _storage_management_service_update_partition_data_presult__isset;
+
+class storage_management_service_update_partition_data_presult {
+ public:
+
+
+  virtual ~storage_management_service_update_partition_data_presult() throw();
+  storage_management_exception ex;
+
+  _storage_management_service_update_partition_data_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
 template <class Protocol_>
 class storage_management_serviceClientT : virtual public storage_management_serviceIf {
  public:
@@ -1468,6 +1596,9 @@ class storage_management_serviceClientT : virtual public storage_management_serv
   void forward_all(const int32_t block_id);
   void send_forward_all(const int32_t block_id);
   void recv_forward_all();
+  void update_partition_data(const int32_t block_id, const std::string& partition_name, const std::string& partition_metadata);
+  void send_update_partition_data(const int32_t block_id, const std::string& partition_name, const std::string& partition_metadata);
+  void recv_update_partition_data();
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
@@ -1518,6 +1649,8 @@ class storage_management_serviceProcessorT : public ::apache::thrift::TDispatchP
   void process_resend_pending(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_forward_all(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_forward_all(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_update_partition_data(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_update_partition_data(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
  public:
   storage_management_serviceProcessorT(::apache::thrift::stdcxx::shared_ptr<storage_management_serviceIf> iface) :
     iface_(iface) {
@@ -1554,6 +1687,9 @@ class storage_management_serviceProcessorT : public ::apache::thrift::TDispatchP
     processMap_["forward_all"] = ProcessFunctions(
       &storage_management_serviceProcessorT::process_forward_all,
       &storage_management_serviceProcessorT::process_forward_all);
+    processMap_["update_partition_data"] = ProcessFunctions(
+      &storage_management_serviceProcessorT::process_update_partition_data,
+      &storage_management_serviceProcessorT::process_update_partition_data);
   }
 
   virtual ~storage_management_serviceProcessorT() {}
@@ -1687,6 +1823,15 @@ class storage_management_serviceMultiface : virtual public storage_management_se
     ifaces_[i]->forward_all(block_id);
   }
 
+  void update_partition_data(const int32_t block_id, const std::string& partition_name, const std::string& partition_metadata) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->update_partition_data(block_id, partition_name, partition_metadata);
+    }
+    ifaces_[i]->update_partition_data(block_id, partition_name, partition_metadata);
+  }
+
 };
 
 // The 'concurrent' client is a thread safe client that correctly handles
@@ -1751,6 +1896,9 @@ class storage_management_serviceConcurrentClientT : virtual public storage_manag
   void forward_all(const int32_t block_id);
   int32_t send_forward_all(const int32_t block_id);
   void recv_forward_all(const int32_t seqid);
+  void update_partition_data(const int32_t block_id, const std::string& partition_name, const std::string& partition_metadata);
+  int32_t send_update_partition_data(const int32_t block_id, const std::string& partition_name, const std::string& partition_metadata);
+  void recv_update_partition_data(const int32_t seqid);
  protected:
   apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
   apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
