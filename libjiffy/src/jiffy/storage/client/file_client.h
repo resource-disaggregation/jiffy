@@ -70,7 +70,7 @@ class file_client : data_structure_client {
    * @return Block identifier
    */
 
-  std::size_t block_id(const file_cmd_id &op);
+  std::size_t block_id(const file_cmd_id &op) const;
 
   /**
    * @brief Check if partition number is valid

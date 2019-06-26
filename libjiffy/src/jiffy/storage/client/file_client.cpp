@@ -80,7 +80,7 @@ bool file_client::seek(const std::size_t offset) {
   }
 }
 
-bool file_client::need_chain(const file_cmd_id &op) {
+bool file_client::need_chain(const file_cmd_id &op) const {
   if(op == file_cmd_id::file_write) {
     return write_partition_ >= blocks_.size() - 1; 
   } else if (op == file_cmd_id::file_read){
@@ -90,7 +90,7 @@ bool file_client::need_chain(const file_cmd_id &op) {
   }
 }
 
-std::size_t file_client::block_id(const file_cmd_id &op) {
+std::size_t file_client::block_id(const file_cmd_id &op) const {
   switch (op) {
     case file_cmd_id::file_write:
       if (!is_valid(write_partition_)) {
