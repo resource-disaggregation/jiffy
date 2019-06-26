@@ -80,7 +80,7 @@ bool file_client::seek(const std::size_t offset) {
   }
 }
 
-bool file_client::add_chain(const file_cmd_id &op) {
+bool file_client::need_chain(const file_cmd_id &op) {
   if(op == file_cmd_id::file_write) {
     return write_partition_ >= blocks_.size() - 1; 
   } else if (op == file_cmd_id::file_read){
@@ -93,12 +93,12 @@ bool file_client::add_chain(const file_cmd_id &op) {
 std::size_t file_client::block_id(const file_cmd_id &op) {
   switch (op) {
     case file_cmd_id::file_write:
-      if (!check_valid_id(write_partition_)) {
+      if (!is_valid(write_partition_)) {
         throw std::logic_error("Blocks are insufficient, need to add more");
       }
       return write_partition_;
     case file_cmd_id::file_read:
-      if (!check_valid_id(read_partition_)) {
+      if (!is_valid(read_partition_)) {
         throw std::logic_error("Blocks are insufficient, need to add more");
       }
       return read_partition_;
@@ -135,7 +135,7 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
     do {
       auto parts = string_utils::split(response, '!');
       auto chain = list_t(parts.begin() + 2, parts.end());
-      if(add_chain(static_cast<file_cmd_id>(cmd_id))) {
+      if(need_chain(static_cast<file_cmd_id>(cmd_id))) {
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
                                                                  path_,
                                                                  directory::replica_chain(chain),
@@ -149,7 +149,7 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
     do {
       auto parts = string_utils::split(response, '!');
       auto chain = list_t(parts.begin() + 2, parts.end());
-      if(add_chain(static_cast<file_cmd_id>(cmd_id))) {
+      if(need_chain(static_cast<file_cmd_id>(cmd_id))) {
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
                                                                  path_,
                                                                  directory::replica_chain(chain),
@@ -174,7 +174,7 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
       auto msg = args.front();
       auto
           remain_string = std::vector<std::string>{msg.substr(msg.size() - remain_string_length, remain_string_length)};
-      if(add_chain(static_cast<file_cmd_id>(cmd_id))) {
+      if(need_chain(static_cast<file_cmd_id>(cmd_id))) {
         auto chain = list_t(parts.begin() + 2, parts.end() - 1);
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
                                                                  path_,
@@ -189,7 +189,7 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
     do {
       auto parts = string_utils::split(response, '!');
       auto first_part_string = *(parts.end() - 1);
-      if(add_chain(static_cast<file_cmd_id>(cmd_id))) {
+      if(need_chain(static_cast<file_cmd_id>(cmd_id))) {
           auto chain = list_t(parts.begin() + 2, parts.end() - 1);
           blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
                                                                    path_,

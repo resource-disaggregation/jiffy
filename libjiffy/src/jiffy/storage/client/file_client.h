@@ -63,7 +63,7 @@ class file_client : data_structure_client {
    * @param op Operation
    * @return Boolean, true if new chain needs to be added
    */ 
-  bool add_chain(const file_cmd_id &op);
+  bool need_chain(const file_cmd_id &op);
   /**
    * @brief Fetch block identifier for specified operation
    * @param op Operation
@@ -77,7 +77,7 @@ class file_client : data_structure_client {
    * @param partition_num Partition number
    * @return Boolean, true if valid
    */
-  bool check_valid_id(std::size_t partition_num) {
+  bool is_valid(std::size_t partition_num) {
     if(partition_num < blocks_.size())
       return true;
     else return false;
