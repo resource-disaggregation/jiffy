@@ -82,7 +82,7 @@ std::string fifo_queue_client::readnext() {
   return _return;
 }
 
-bool fifo_queue_client::add_chain(const fifo_queue_cmd_id &op) {
+bool fifo_queue_client::need_chain(const fifo_queue_cmd_id &op) const {
   switch(op) {
     case fifo_queue_cmd_id::fq_enqueue:
       return enqueue_partition_ >= blocks_.size() - 1;
@@ -94,20 +94,20 @@ bool fifo_queue_client::add_chain(const fifo_queue_cmd_id &op) {
       throw std::logic_error("Adding chain should only happen in the three operations");    }
 }
 
-std::size_t fifo_queue_client::block_id(const fifo_queue_cmd_id &op) {
+std::size_t fifo_queue_client::block_id(const fifo_queue_cmd_id &op) const {
   switch(op) {
     case fifo_queue_cmd_id::fq_enqueue:
-      if (!check_valid_id(enqueue_partition_)) {
+      if (!is_valid(enqueue_partition_)) {
         throw std::logic_error("Blocks are insufficient, need to add more");
       }
       return enqueue_partition_;
     case fifo_queue_cmd_id::fq_dequeue:
-      if (!check_valid_id(dequeue_partition_)) {
+      if (!is_valid(dequeue_partition_)) {
         throw std::logic_error("Blocks are insufficient, need to add more");
       }
       return dequeue_partition_;
     case fifo_queue_cmd_id::fq_readnext:
-      if (!check_valid_id(read_partition_)) {
+      if (!is_valid(read_partition_)) {
         throw std::logic_error("Blocks are insufficient, need to add more");
       }
       return read_partition_;
@@ -134,7 +134,7 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
     do {
       auto parts = string_utils::split(response, '!');
       auto chain = list_t(parts.begin() + 2, parts.end());
-      if(add_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
+      if(need_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
                                                                  path_,
                                                                  directory::replica_chain(chain),
@@ -148,7 +148,7 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
     do {
       auto parts = string_utils::split(response, '!');
       auto chain = list_t(parts.begin() + 2, parts.end());
-      if(add_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
+      if(need_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
                                                                  path_,
                                                                  directory::replica_chain(chain),
@@ -168,7 +168,7 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
       auto msg = args.front();
       auto
           remain_string = std::vector<std::string>{msg.substr(msg.size() - remain_string_length, remain_string_length)};
-      if(add_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
+      if(need_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
         auto chain = list_t(parts.begin() + 2, parts.end() - 1);
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
                                                                  path_,
@@ -183,7 +183,7 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
     do {
       auto parts = string_utils::split(response, '!');
       auto first_part_string = *(parts.end() - 1);
-      if(add_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
+      if(need_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
         auto chain = list_t(parts.begin() + 2, parts.end() - 1);
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
                                                                  path_,
@@ -200,7 +200,7 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
     do {
       auto parts = string_utils::split(response, '!');
       auto first_part_string = *(parts.end() - 1);
-      if(add_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
+      if(need_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
         auto chain = list_t(parts.begin() + 2, parts.end() - 1);
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
                                                                  path_,

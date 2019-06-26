@@ -61,21 +61,21 @@ class fifo_queue_client : data_structure_client {
    * @param op Operation
    * @return Boolean, true if new chain needs to be added
    */
-  bool add_chain(const fifo_queue_cmd_id &op);
+  bool need_chain(const fifo_queue_cmd_id &op) const;
   /**
    * @brief Fetch block identifier for specified operation
    * @param op Operation
    * @return Block identifier
    */
 
-  std::size_t block_id(const fifo_queue_cmd_id &op);
+  std::size_t block_id(const fifo_queue_cmd_id &op) const;
 
   /**
    * @brief Check if partition number is valid
    * @param partition_num Partition number
    * @return Boolean, true if valid
    */
-  bool check_valid_id(std::size_t partition_num) {
+  bool is_valid(std::size_t partition_num) const {
     if(partition_num < blocks_.size())
       return true;
     else return false;
