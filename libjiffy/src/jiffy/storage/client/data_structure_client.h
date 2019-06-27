@@ -65,7 +65,7 @@ class data_structure_client {
    */
 
   virtual void handle_redirects(int32_t cmd_id,
-                                std::vector<std::string> &args,
+                                const std::vector<std::string> &args,
                                 std::vector<std::string> &responses) = 0;
 
   /* Directory client */

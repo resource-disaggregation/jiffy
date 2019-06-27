@@ -218,7 +218,7 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
 }
 
 void file_client::handle_redirects(int32_t,
-                                   std::vector<std::string> &,
+                                   const std::vector<std::string> &,
                                    std::vector<std::string> &) {
 }
 
