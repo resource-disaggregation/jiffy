@@ -9,19 +9,21 @@
 #include <stdexcept>
 #include <iostream>
 #include <shared_mutex>
+#include <jiffy/storage/types/binary.h>
 #include "jiffy/storage/notification/subscription_map.h"
 #include "jiffy/storage/service/block_response_client_map.h"
 #include "jiffy/storage/command.h"
 #include "jiffy/storage/block_memory_manager.h"
 #include "jiffy/storage/block_memory_allocator.h"
+#include "jiffy/utils/logger.h"
 
 namespace jiffy {
 namespace storage {
-
+using namespace utils;
 /* Partition class */
 class partition {
  public:
-  template <typename T>
+  template<typename T>
   using allocator = block_memory_allocator<T>;
 
   /**
@@ -39,7 +41,11 @@ class partition {
   /**
    * @brief Destructor
    */
-  virtual ~partition() = default;
+  virtual ~partition() {
+    client_map_.send_failure();
+    client_map_.clear();
+    sub_map_.clear();
+  }
 
   /**
    * @brief Virtual function for running a command on a block
@@ -67,11 +73,24 @@ class partition {
   const std::string &path() const;
 
   /**
+   * @brief Set partition name
+   * @param name Partition name
+   */
+  void name(const std::string &name);
+
+  /**
    * @brief Fetch partition name
    * @return Partition name
    */
 
   const std::string &name() const;
+
+  /**
+   * @brief Set partition metadata
+   * @param metadata Partition metadata
+   */
+
+  void metadata(const std::string &metadata);
 
   /**
    * @brief Fetch partition metadata
@@ -160,7 +179,21 @@ class partition {
 
   block_response_client_map &clients();
 
+  /**
+   * @brief Set partition name and partition metadata
+   * @param name New partition name
+   * @param metadata New partition metadata
+   */
+  void set_name_and_metadata(const std::string &name, const std::string &metadata);
+
  protected:
+  /**
+   * @brief Construct binary string
+   * @param str String
+   * @return Binary string
+   */
+  binary make_binary(const std::string &str);
+
   /* Metadata mutex */
   mutable std::shared_mutex metadata_mtx_;
   /* Partition name */
@@ -171,14 +204,16 @@ class partition {
   std::string path_;
   /* Supported commands */
   const std::vector<command> &supported_commands_;
-  /* Atomic value to collect the sum of key size and value size */
-  std::atomic<size_t> bytes_;
   /* Subscription map */
   subscription_map sub_map_{};
   /* Block response client map */
   block_response_client_map client_map_{};
   /* Block memory manager */
   block_memory_manager *manager_;
+  /* Binary allocator */
+  allocator<uint8_t> binary_allocator_;
+  /* Atomic bool to indicate that the partition is a default one */
+  std::atomic<bool> default_;
 };
 
 }

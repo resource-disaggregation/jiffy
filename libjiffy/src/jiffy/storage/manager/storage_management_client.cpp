@@ -90,5 +90,11 @@ void storage_management_client::forward_all(int32_t block_id) {
   client_->forward_all(block_id);
 }
 
+void storage_management_client::update_partition(const int32_t block_id,
+                                                 const std::string &partition_name,
+                                                 const std::string &partition_metadata) {
+  client_->update_partition_data(block_id, partition_name, partition_metadata);
+}
+
 }
 }

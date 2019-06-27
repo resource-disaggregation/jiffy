@@ -45,6 +45,7 @@
 #define JIFFY_HASH_SLOT_H
 
 #include <string>
+#include "jiffy/storage/types/binary.h"
 
 namespace jiffy {
 namespace storage {
@@ -58,6 +59,9 @@ class hash_slot {
     return crc16(key.c_str(), key.length());
   }
 
+  static int32_t get(const binary &key) {
+    return crc16(reinterpret_cast<const char *>(key.data()), key.size());
+  }
  private:
   /* Hash function */
   static uint16_t crc16(const char *buf, size_t len) {
@@ -67,6 +71,7 @@ class hash_slot {
       crc = (crc << 8) ^ crc16tab[((crc >> 8) ^ *buf++) & 0x00FF];
     return crc;
   }
+
   /* Hash function table */
   static const uint16_t crc16tab[256];
 

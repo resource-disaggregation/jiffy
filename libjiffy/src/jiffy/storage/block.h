@@ -19,10 +19,12 @@ class block {
    * @param directory_host The directory host.
    * @param directory_port The directory port.
    */
-  block(const std::string &id,
+  explicit block(const std::string &id,
         const size_t capacity = 134217728,
-        const std::string &directory_host = "localhost",
-        int directory_port = 9091);
+        const std::string &directory_host = "127.0.0.1",
+        const int directory_port = 9090,
+        const std::string &auto_scaling_host = "127.0.0.1",
+        const int auto_scaling_port = 9095);
 
   /**
    * @brief Get memory block identifier.
@@ -82,6 +84,9 @@ class block {
 
   std::string directory_host_;
   int directory_port_;
+
+  std::string auto_scaling_host_;
+  int auto_scaling_port_;
 };
 
 }

@@ -425,5 +425,37 @@ directory_service_remove_data_block_result::~directory_service_remove_data_block
 directory_service_remove_data_block_presult::~directory_service_remove_data_block_presult() throw() {
 }
 
+
+directory_service_request_partition_data_update_args::~directory_service_request_partition_data_update_args() throw() {
+}
+
+
+directory_service_request_partition_data_update_pargs::~directory_service_request_partition_data_update_pargs() throw() {
+}
+
+
+directory_service_request_partition_data_update_result::~directory_service_request_partition_data_update_result() throw() {
+}
+
+
+directory_service_request_partition_data_update_presult::~directory_service_request_partition_data_update_presult() throw() {
+}
+
+
+directory_service_get_storage_capacity_args::~directory_service_get_storage_capacity_args() throw() {
+}
+
+
+directory_service_get_storage_capacity_pargs::~directory_service_get_storage_capacity_pargs() throw() {
+}
+
+
+directory_service_get_storage_capacity_result::~directory_service_get_storage_capacity_result() throw() {
+}
+
+
+directory_service_get_storage_capacity_presult::~directory_service_get_storage_capacity_presult() throw() {
+}
+
 }} // namespace
 

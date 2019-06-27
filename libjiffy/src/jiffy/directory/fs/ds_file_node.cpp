@@ -226,6 +226,7 @@ replica_chain ds_file_node::add_data_block(const std::string &path,
                                            const std::string &partition_metadata,
                                            const std::shared_ptr<storage::storage_management_ops> &storage,
                                            const std::shared_ptr<block_allocator> &allocator) {
+  using namespace utils;
   std::unique_lock<std::shared_mutex> lock(mtx_);
   replica_chain chain(allocator->allocate(static_cast<size_t>(dstatus_.chain_length()), {}), storage_mode::in_memory);
   chain.name = partition_name;
@@ -257,10 +258,17 @@ void ds_file_node::remove_block(const std::string &partition_name,
   if (!dstatus_.remove_data_block(partition_name, block)) {
     throw directory_ops_exception("No partition with name " + partition_name);
   }
-  for (const auto& id: block.block_ids) {
+  for (const auto &id: block.block_ids) {
     storage->destroy_partition(id);
   }
   allocator->free(block.block_ids);
+}
+
+void ds_file_node::update_data_status_partition(const std::string &old_name,
+                                                const std::string &new_name,
+                                                const std::string &metadata) {
+  dstatus_.set_partition_name(old_name, new_name);
+  dstatus_.set_partition_metadata(new_name, metadata);
 }
 
 }

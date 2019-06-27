@@ -3,6 +3,7 @@
 #include <jiffy/directory/block/block_registration_client.h>
 #include <jiffy/storage/hashtable/hash_table_partition.h>
 #include <jiffy/storage/manager/storage_management_server.h>
+#include <jiffy/auto_scaling/auto_scaling_server.h>
 #include <jiffy/storage/service/block_server.h>
 #include <jiffy/utils/signal_handling.h>
 #include <jiffy/utils/logger.h>
@@ -12,6 +13,7 @@
 
 using namespace ::jiffy::directory;
 using namespace ::jiffy::storage;
+using namespace ::jiffy::auto_scaling;
 using namespace ::jiffy::utils;
 
 using namespace ::apache::thrift;
@@ -64,6 +66,7 @@ int main(int argc, char **argv) {
   std::string address = "127.0.0.1";
   int32_t service_port = 9093;
   int32_t mgmt_port = 9094;
+  int32_t auto_scaling_port = 9095;
   int32_t dir_port = 9090;
   std::size_t num_blocks = 64;
   std::size_t num_block_groups = 4;
@@ -90,6 +93,7 @@ int main(int argc, char **argv) {
         ("storage.host", po::value<std::string>(&address)->default_value("127.0.0.1"))
         ("storage.management_port", po::value<int>(&mgmt_port)->default_value(9093))
         ("storage.service_port", po::value<int>(&service_port)->default_value(9094))
+        ("storage.auto_scaling_port", po::value<int>(&auto_scaling_port)->default_value(9095))
         ("directory.host", po::value<std::string>(&dir_host)->default_value("127.0.0.1"))
         ("directory.service_port", po::value<int>(&dir_port)->default_value(9090))
         ("directory.block_port", po::value<int>(&block_port)->default_value(9092))
@@ -148,6 +152,7 @@ int main(int argc, char **argv) {
     LOG(log_level::info) << "storage.host: " << address;
     LOG(log_level::info) << "storage.service_port: " << service_port;
     LOG(log_level::info) << "storage.management_port: " << mgmt_port;
+    LOG(log_level::info) << "storage.auto_scaling_port" << auto_scaling_port;
     LOG(log_level::info) << "storage.block.num_blocks: " << num_block_groups;
     LOG(log_level::info) << "storage.block.num_blocks: " << num_blocks;
     LOG(log_level::info) << "storage.block.capacity: " << block_capacity;
@@ -163,7 +168,7 @@ int main(int argc, char **argv) {
 
   std::mutex failure_mtx;
   std::condition_variable failure_condition;
-  std::atomic<int> failing_thread(-1); // management -> 0, service -> 1, notification -> 2, chain -> 3
+  std::atomic<int> failing_thread(-1); // management -> 0, service -> 1, notification -> 2, chain -> 3, auto_scaling -> 4
 
   std::string hostname;
   if (address == "0.0.0.0") {
@@ -181,9 +186,21 @@ int main(int argc, char **argv) {
   std::vector<std::shared_ptr<block>> blocks;
   blocks.resize(num_blocks);
   for (size_t i = 0; i < blocks.size(); ++i) {
-    blocks[i] = std::make_shared<block>(block_ids[i], block_capacity, dir_host, dir_port);
+    blocks[i] = std::make_shared<block>(block_ids[i], block_capacity, dir_host, dir_port, address, auto_scaling_port);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
+
+  std::exception_ptr auto_scaling_exception = nullptr;
+  auto scaling_server = auto_scaling_server::create(dir_host, dir_port, address, auto_scaling_port);
+  std::thread scaling_serve_thread([&auto_scaling_exception, &scaling_server, &failing_thread, & failure_condition] {
+    try {
+      scaling_server->serve();
+    } catch (...) {
+      auto_scaling_exception = std::current_exception();
+      failing_thread = 4;
+      failure_condition.notify_all();
+    }
+  });
 
   std::exception_ptr management_exception = nullptr;
   auto management_server = storage_management_server::create(blocks, address, mgmt_port);
@@ -258,6 +275,17 @@ int main(int argc, char **argv) {
         }
       }
       break;
+    }
+    case 4: {
+      LOG(log_level::error) << "Auto_scaling server failed";
+      if(auto_scaling_exception) {
+        try {
+          std::rethrow_exception(auto_scaling_exception);
+        } catch (std::exception &e) {
+          LOG(log_level::error) << "ERROR: " << e.what();
+          std::exit(-1);
+        }
+      }
     }
     default:break;
   }

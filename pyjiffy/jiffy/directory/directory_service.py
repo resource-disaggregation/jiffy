@@ -256,6 +256,26 @@ class Iface(object):
         """
         pass
 
+    def request_partition_data_update(self, path, old_partition_name, new_partition_name, partition_metadata):
+        """
+        Parameters:
+         - path
+         - old_partition_name
+         - new_partition_name
+         - partition_metadata
+
+        """
+        pass
+
+    def get_storage_capacity(self, path, partition_name):
+        """
+        Parameters:
+         - path
+         - partition_name
+
+        """
+        pass
+
 
 class Client(Iface):
     def __init__(self, iprot, oprot=None):
@@ -1186,6 +1206,80 @@ class Client(Iface):
             raise result.ex
         return
 
+    def request_partition_data_update(self, path, old_partition_name, new_partition_name, partition_metadata):
+        """
+        Parameters:
+         - path
+         - old_partition_name
+         - new_partition_name
+         - partition_metadata
+
+        """
+        self.send_request_partition_data_update(path, old_partition_name, new_partition_name, partition_metadata)
+        self.recv_request_partition_data_update()
+
+    def send_request_partition_data_update(self, path, old_partition_name, new_partition_name, partition_metadata):
+        self._oprot.writeMessageBegin('request_partition_data_update', TMessageType.CALL, self._seqid)
+        args = request_partition_data_update_args()
+        args.path = path
+        args.old_partition_name = old_partition_name
+        args.new_partition_name = new_partition_name
+        args.partition_metadata = partition_metadata
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_request_partition_data_update(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = request_partition_data_update_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def get_storage_capacity(self, path, partition_name):
+        """
+        Parameters:
+         - path
+         - partition_name
+
+        """
+        self.send_get_storage_capacity(path, partition_name)
+        return self.recv_get_storage_capacity()
+
+    def send_get_storage_capacity(self, path, partition_name):
+        self._oprot.writeMessageBegin('get_storage_capacity', TMessageType.CALL, self._seqid)
+        args = get_storage_capacity_args()
+        args.path = path
+        args.partition_name = partition_name
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_get_storage_capacity(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = get_storage_capacity_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.ex is not None:
+            raise result.ex
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "get_storage_capacity failed: unknown result")
+
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
@@ -1217,6 +1311,8 @@ class Processor(Iface, TProcessor):
         self._processMap["add_replica_to_chain"] = Processor.process_add_replica_to_chain
         self._processMap["add_data_block"] = Processor.process_add_data_block
         self._processMap["remove_data_block"] = Processor.process_remove_data_block
+        self._processMap["request_partition_data_update"] = Processor.process_request_partition_data_update
+        self._processMap["get_storage_capacity"] = Processor.process_get_storage_capacity
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -1905,6 +2001,58 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("remove_data_block", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_request_partition_data_update(self, seqid, iprot, oprot):
+        args = request_partition_data_update_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = request_partition_data_update_result()
+        try:
+            self._handler.request_partition_data_update(args.path, args.old_partition_name, args.new_partition_name, args.partition_metadata)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except directory_service_exception as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("request_partition_data_update", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_get_storage_capacity(self, seqid, iprot, oprot):
+        args = get_storage_capacity_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = get_storage_capacity_result()
+        try:
+            result.success = self._handler.get_storage_capacity(args.path, args.partition_name)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except directory_service_exception as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("get_storage_capacity", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -6390,6 +6538,364 @@ class remove_data_block_result(object):
 all_structs.append(remove_data_block_result)
 remove_data_block_result.thrift_spec = (
     None,  # 0
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
+)
+
+
+class request_partition_data_update_args(object):
+    """
+    Attributes:
+     - path
+     - old_partition_name
+     - new_partition_name
+     - partition_metadata
+
+    """
+
+    __slots__ = (
+        'path',
+        'old_partition_name',
+        'new_partition_name',
+        'partition_metadata',
+    )
+
+
+    def __init__(self, path=None, old_partition_name=None, new_partition_name=None, partition_metadata=None,):
+        self.path = path
+        self.old_partition_name = old_partition_name
+        self.new_partition_name = new_partition_name
+        self.partition_metadata = partition_metadata
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.path = iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.old_partition_name = iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.new_partition_name = iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.partition_metadata = iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('request_partition_data_update_args')
+        if self.path is not None:
+            oprot.writeFieldBegin('path', TType.STRING, 1)
+            oprot.writeString(self.path)
+            oprot.writeFieldEnd()
+        if self.old_partition_name is not None:
+            oprot.writeFieldBegin('old_partition_name', TType.STRING, 2)
+            oprot.writeString(self.old_partition_name)
+            oprot.writeFieldEnd()
+        if self.new_partition_name is not None:
+            oprot.writeFieldBegin('new_partition_name', TType.STRING, 3)
+            oprot.writeString(self.new_partition_name)
+            oprot.writeFieldEnd()
+        if self.partition_metadata is not None:
+            oprot.writeFieldBegin('partition_metadata', TType.STRING, 4)
+            oprot.writeString(self.partition_metadata)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(request_partition_data_update_args)
+request_partition_data_update_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'path', None, None, ),  # 1
+    (2, TType.STRING, 'old_partition_name', None, None, ),  # 2
+    (3, TType.STRING, 'new_partition_name', None, None, ),  # 3
+    (4, TType.STRING, 'partition_metadata', None, None, ),  # 4
+)
+
+
+class request_partition_data_update_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+    __slots__ = (
+        'ex',
+    )
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = directory_service_exception()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('request_partition_data_update_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(request_partition_data_update_result)
+request_partition_data_update_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
+)
+
+
+class get_storage_capacity_args(object):
+    """
+    Attributes:
+     - path
+     - partition_name
+
+    """
+
+    __slots__ = (
+        'path',
+        'partition_name',
+    )
+
+
+    def __init__(self, path=None, partition_name=None,):
+        self.path = path
+        self.partition_name = partition_name
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.path = iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.partition_name = iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('get_storage_capacity_args')
+        if self.path is not None:
+            oprot.writeFieldBegin('path', TType.STRING, 1)
+            oprot.writeString(self.path)
+            oprot.writeFieldEnd()
+        if self.partition_name is not None:
+            oprot.writeFieldBegin('partition_name', TType.STRING, 2)
+            oprot.writeString(self.partition_name)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(get_storage_capacity_args)
+get_storage_capacity_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'path', None, None, ),  # 1
+    (2, TType.STRING, 'partition_name', None, None, ),  # 2
+)
+
+
+class get_storage_capacity_result(object):
+    """
+    Attributes:
+     - success
+     - ex
+
+    """
+
+    __slots__ = (
+        'success',
+        'ex',
+    )
+
+
+    def __init__(self, success=None, ex=None,):
+        self.success = success
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.I64:
+                    self.success = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = directory_service_exception()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('get_storage_capacity_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.I64, 0)
+            oprot.writeI64(self.success)
+            oprot.writeFieldEnd()
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, getattr(self, key))
+             for key in self.__slots__]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        for attr in self.__slots__:
+            my_val = getattr(self, attr)
+            other_val = getattr(other, attr)
+            if my_val != other_val:
+                return False
+        return True
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(get_storage_capacity_result)
+get_storage_capacity_result.thrift_spec = (
+    (0, TType.I64, 'success', None, None, ),  # 0
     (1, TType.STRUCT, 'ex', [directory_service_exception, None], None, ),  # 1
 )
 fix_spec(all_structs)

@@ -44,6 +44,9 @@ class storage_management_ops {
 
   virtual void forward_all(const std::string &block_id) = 0;
 
+  virtual void update_partition(const std::string &block_id,
+                                const std::string &partition_name,
+                                const std::string &partition_metadata) = 0;
 };
 
 }

@@ -1,3 +1,4 @@
+
 #include "jiffy/client/jiffy_client.h"
 #include "jiffy/storage/hashtable/hash_slot.h"
 
@@ -57,10 +58,23 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::open(const std::string
   return std::make_shared<storage::hash_table_client>(fs_, path, s);
 }
 
+std::shared_ptr<storage::file_client> jiffy_client::open_file(const std::string &path) {
+  auto s = fs_->open(path);
+  begin_scope(path);
+  return std::make_shared<storage::file_client>(fs_, path, s);
+}
+
+std::shared_ptr<storage::fifo_queue_client> jiffy_client::open_fifo_queue(const std::string &path) {
+  auto s = fs_->open(path);
+  begin_scope(path);
+  return std::make_shared<storage::fifo_queue_client>(fs_, path, s);
+}
+
 std::shared_ptr<storage::hash_table_client> jiffy_client::open_or_create_hash_table(const std::string &path,
                                                                                     const std::string &backing_path,
                                                                                     int32_t num_blocks,
                                                                                     int32_t chain_length,
+                                                                                    int timeout_ms,
                                                                                     int32_t flags,
                                                                                     int32_t permissions,
                                                                                     const std::map<std::string,
@@ -77,13 +91,53 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::open_or_create_hash_ta
   auto s = fs_->open_or_create(path, "hashtable", backing_path, num_blocks, chain_length, flags, permissions,
                                block_names, block_metadata, tags);
   begin_scope(path);
-  return std::make_shared<storage::hash_table_client>(fs_, path, s);
+  return std::make_shared<storage::hash_table_client>(fs_, path, s, timeout_ms);
 }
 
-std::shared_ptr<storage::hash_table_listener> jiffy_client::listen(const std::string &path) {
+std::shared_ptr<storage::file_client> jiffy_client::open_or_create_file(const std::string &path,
+                                                                        const std::string &backing_path,
+                                                                        int32_t num_blocks,
+                                                                        int32_t chain_length,
+                                                                        int32_t flags,
+                                                                        int32_t permissions,
+                                                                        const std::map<std::string,
+                                                                                       std::string> &tags) {
+  std::vector<std::string> block_names;
+  std::vector<std::string> block_metadata;
+  for (int32_t i = 0; i < num_blocks; ++i) {
+    block_names.push_back(std::to_string(i));
+    block_metadata.emplace_back("regular");
+  }
+  auto s = fs_->open_or_create(path, "file", backing_path, num_blocks, chain_length, flags, permissions,
+                               block_names, block_metadata, tags);
+  begin_scope(path);
+  return std::make_shared<storage::file_client>(fs_, path, s);
+}
+
+std::shared_ptr<storage::fifo_queue_client> jiffy_client::open_or_create_fifo_queue(const std::string &path,
+                                                                                    const std::string &backing_path,
+                                                                                    int32_t num_blocks,
+                                                                                    int32_t chain_length,
+                                                                                    int32_t flags,
+                                                                                    int32_t permissions,
+                                                                                    const std::map<std::string,
+                                                                                                   std::string> &tags) {
+  std::vector<std::string> block_names;
+  std::vector<std::string> block_metadata;
+  for (int32_t i = 0; i < num_blocks; ++i) {
+    block_names.push_back(std::to_string(i));
+    block_metadata.emplace_back("regular");
+  }
+  auto s = fs_->open_or_create(path, "fifoqueue", backing_path, num_blocks, chain_length, flags, permissions,
+                               block_names, block_metadata, tags);
+  begin_scope(path);
+  return std::make_shared<storage::fifo_queue_client>(fs_, path, s);
+}
+
+std::shared_ptr<storage::data_structure_listener> jiffy_client::listen(const std::string &path) {
   auto s = fs_->open(path);
   begin_scope(path);
-  return std::make_shared<storage::hash_table_listener>(path, s);
+  return std::make_shared<storage::data_structure_listener>(path, s);
 }
 
 void jiffy_client::remove(const std::string &path) {
@@ -109,3 +163,4 @@ void jiffy_client::close(const std::string &path) {
 
 }
 }
+

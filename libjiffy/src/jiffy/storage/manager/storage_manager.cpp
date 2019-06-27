@@ -16,7 +16,7 @@ void storage_manager::create_partition(const std::string &block_id,
                                        const std::map<std::string, std::string> &conf) {
   auto bid = block_id_parser::parse(block_id);
   storage_management_client client(bid.host, bid.management_port);
-  LOG(log_level::info) << "setup partition on " << bid.host << ":" << bid.management_port;
+  LOG(log_level::info) << "Creating partition name : " << name << " on " << bid.host << ":" << bid.management_port;
   client.create_partition(bid.id, type, name, metadata, conf);
 }
 
@@ -69,7 +69,7 @@ void storage_manager::dump(const std::string &block_name, const std::string &bac
 std::size_t storage_manager::storage_capacity(const std::string &block_name) {
   auto bid = block_id_parser::parse(block_name);
   storage_management_client client(bid.host, bid.management_port);
-  LOG(log_level::info) << "storage capacity on " << bid.host << ":" << bid.management_port;
+  //LOG(log_level::info) << "storage capacity on " << bid.host << ":" << bid.management_port;
   return static_cast<std::size_t>(client.storage_capacity(bid.id));
 }
 
@@ -92,6 +92,14 @@ void storage_manager::forward_all(const std::string &block_name) {
   storage_management_client client(bid.host, bid.management_port);
   LOG(log_level::info) << "forward all on " << bid.host << ":" << bid.management_port;
   client.forward_all(bid.id);
+}
+
+void storage_manager::update_partition(const std::string &block_name,
+                                       const std::string &partition_name,
+                                       const std::string &partition_metadata) {
+  auto bid = block_id_parser::parse(block_name);
+  storage_management_client client(bid.host, bid.management_port);
+  client.update_partition(bid.id, partition_name, partition_metadata);
 }
 
 }
