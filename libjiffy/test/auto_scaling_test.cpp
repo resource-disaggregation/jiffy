@@ -347,8 +347,9 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
   auto dir_server = directory_server::create(t, HOST, DIRECTORY_SERVICE_PORT);
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
-
-  data_status status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 5, 1, 0, perms::all(), {"0", "1", "2", "3", "4"}, {"regular", "regular", "regular", "regular", "regular"}, {});
+  property_map conf;
+  conf.set("file.auto_scale", std::to_string(false));
+  data_status status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 5, 1, 0, perms::all(), {"0", "1", "2", "3", "4"}, {"regular", "regular", "regular", "regular", "regular"}, conf);
   file_client client(t, "/sandbox/scale_up.txt", status);
 
   // Write data until auto scaling is triggered
