@@ -608,8 +608,6 @@ void directory_tree::update_partition(const std::string &path,
   bool flag = true;
   for (auto &replica : replica_set) {
     if (replica.name == old_partition_name) {
-      for (auto &block_name : replica.block_ids)
-        storage_->update_partition(block_name, new_partition_name, partition_metadata);
       flag = false;
     }
   }
