@@ -44,7 +44,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     src->run_command(storage::file_cmd_id::file_update_partition, args);
     auto finish_updating_partition =
         std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    LOG(log_level::info) << "===== " << "Message queue auto_scaling" << " ======";
+    LOG(log_level::info) << "===== " << "File auto_scaling" << " ======";
     LOG(log_level::info) << "\t Start " << start;
     LOG(log_level::info) << "\t Add_replica_chain: " << finish_adding_replica_chain;
     LOG(log_level::info) << "\t Update_partition: " << finish_updating_partition;
@@ -314,7 +314,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     src->run_command(storage::fifo_queue_cmd_id::fq_update_partition, args);
     auto finish_updating_partition =
         std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    LOG(log_level::info) << "===== " << "Message queue auto_scaling" << " ======";
+    LOG(log_level::info) << "===== " << "Fifo queue auto_scaling" << " ======";
     LOG(log_level::info) << "\t Start " << start;
     LOG(log_level::info) << "\t Add_replica_chain: " << finish_adding_replica_chain;
     LOG(log_level::info) << "\t Update_partition: " << finish_updating_partition;
