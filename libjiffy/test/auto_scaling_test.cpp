@@ -348,21 +348,21 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  data_status status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 10, 1, 0, perms::all(), {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}, {"regular", "regular", "regular", "regular", "regular", "regular", "regular", "regular", "regular", "regular"}, {});
+  data_status status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 5, 1, 0, perms::all(), {"0", "1", "2", "3", "4"}, {"regular", "regular", "regular", "regular", "regular"}, {});
   file_client client(t, "/sandbox/scale_up.txt", status);
 
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 5000; ++i) {
     REQUIRE(client.write(std::string(512, (std::to_string(i)).c_str()[0])) == "!ok");
   }
-  for(std::size_t i = 0; i < 6000; ++i) {
+  for(std::size_t i = 0; i < 10000; ++i) {
     REQUIRE(client.write(std::string(102400, (std::to_string(i)).c_str()[0])) == "!ok");
   }
 
   for (std::size_t i = 0; i < 5000; ++i) {
     REQUIRE(client.read(512) == std::string(512, (std::to_string(i)).c_str()[0]));
   }
-  for (std::size_t i = 0; i < 6000; ++i) {
+  for (std::size_t i = 0; i < 10000; ++i) {
     REQUIRE(client.read(102400) == std::string(102400, (std::to_string(i)).c_str()[0]));
   }
 
@@ -431,7 +431,7 @@ TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][man
   for (std::size_t i = 0; i < 2100; ++i) {
     REQUIRE(client.dequeue() == std::string(100000, (std::to_string(i)).c_str()[0]));
   }
-  // Busy wait until number of blocks increases
+  // Busy wait until number of blocks decreases
   while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() > 1);
 
 
