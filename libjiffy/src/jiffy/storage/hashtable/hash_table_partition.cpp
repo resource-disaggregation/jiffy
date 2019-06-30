@@ -60,7 +60,7 @@ std::string hash_table_partition::put(const std::string &key, const std::string 
     }
 
     if (block_.insert(make_binary(key), make_binary(value))) {
-      LOG(log_level::info) << "put " << key << " in partition: " << name();
+      LOG(log_level::info) << "put " << key << " hash " << hash << " in partition: " << name();
       return "!ok";
     } else {
       return "!duplicate_key";
