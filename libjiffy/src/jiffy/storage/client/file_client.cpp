@@ -175,7 +175,6 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
       auto
           remain_string = std::vector<std::string>{msg.substr(msg.size() - remain_string_length, remain_string_length)};
       if(need_chain(static_cast<file_cmd_id>(cmd_id))) {
-        jiffy::utils::LOG(log_level::info) << "Need new chain " << write_partition_ << " " << blocks_.size();
         auto chain = list_t(parts.begin() + 2, parts.end() - 1);
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
                                                                  path_,

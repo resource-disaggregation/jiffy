@@ -348,9 +348,6 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
   std::map<std::string, std::string> conf;
-  //std::string test = "false";
-  //bool a = jiffy::utils::string_utils::lexical_cast<bool>(test);
-  //jiffy::utils::LOG(log_level::info) << a;
   conf.emplace("file.auto_scale", "false");
   data_status status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 8, 1, 0, perms::all(), {"0", "1", "2", "3", "4", "5", "6", "7"}, {"regular", "regular", "regular", "regular", "regular", "regular", "regular", "regular"}, conf);
   file_client client(t, "/sandbox/scale_up.txt", status);
