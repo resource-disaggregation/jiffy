@@ -146,7 +146,7 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
   //                                                                             hash_table_cmd_id::ht_remove,
   //                                                                             {std::to_string(0)}));
   // REQUIRE(result[0] == "0");
-  REQUIRE_NOTHROW(client.remove(std::to_string(1000)));
+  REQUIRE_NOTHROW(client.remove(std::to_string(0)));
   REQUIRE_NOTHROW(client.remove(std::to_string(1000)));
 
   // Busy wait until number of blocks decreases
