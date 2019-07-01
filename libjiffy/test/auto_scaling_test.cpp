@@ -25,6 +25,7 @@
 #include "jiffy/directory/lease/lease_server.h"
 #include "jiffy/auto_scaling/auto_scaling_client.h"
 #include "jiffy/auto_scaling/auto_scaling_server.h"
+#include "jiffy/utils/rand_utils.h"
 
 using namespace jiffy::client;
 using namespace ::jiffy::storage;
@@ -142,10 +143,6 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
   });
   // A single remove should trigger scale down
   std::vector<std::string> result;
-  // REQUIRE_NOTHROW(std::dynamic_pointer_cast<hash_table_partition>(blocks[0]->impl())->run_command(result,
-  //                                                                             hash_table_cmd_id::ht_remove,
-  //                                                                             {std::to_string(0)}));
-  // REQUIRE(result[0] == "0");
   REQUIRE_NOTHROW(client.remove(std::to_string(0)));
   REQUIRE_NOTHROW(client.remove(std::to_string(1000)));
 
@@ -217,41 +214,43 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
   data_status status = t->create("/sandbox/scale_down.txt", "hashtable", "/tmp", 3, 5, 0, perms::all(), {"0_16384","16384_32768", "32768_65536"}, {"regular", "regular", "regular"}, {});
   hash_table_client client(t, "/sandbox/scale_down.txt", status);
   std::vector<int> remain_keys;
-  auto put_worker_ = std::thread([&] {
-    for(std::size_t i = 0; i <= 5000; ++i) {
-      REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
-    }
-  });
-  auto update_worker_ = std::thread([&] {
-      for(std::size_t i = 0; i <= 5000; ++i) {
-        REQUIRE_NOTHROW(client.update(std::to_string(i), std::to_string(5000 - i)));
-      }
-  });
-  auto get_worker_ = std::thread([&] {
-      for(std::size_t i = 0; i <= 5000; ++i) {
-        REQUIRE_NOTHROW(client.get(std::to_string(i)));
-      }
-  });
-  auto remove_worker_ = std::thread([&] {
-      for(std::size_t i = 0; i <= 5000; ++i) {
-        std::string ret;
-        REQUIRE_NOTHROW(ret = client.remove(std::to_string(i)));
+  std::size_t iter = 10000;
+  const std::size_t max_key = 500;
+  int bitmap[max_key] = { 0 };
+  for(std::size_t i = 0; i < iter; i++) {
+    std::size_t j = rand_utils::rand_uint32(0, 3);
+    std::string ret;
+    switch(j) {
+      case 0:
+        std::size_t key = rand_utils::rand_uint32(0, max_key - 1);
+        REQUIRE_NOTHROW(ret = client.put(std::to_string(key), std::to_string(key)));
+        if(ret == "!ok")
+          bitmap[key] = 1;
+        break;
+      case 1:
+        std::size_t key = rand_utils::rand_uint32(0, max_key - 1);
+        REQUIRE_NOTHROW(ret = client.update(std::to_string(key), std::to_string(max_key - key)));
         if(ret != "!key_not_found")
-          remain_keys.push_back(i);
-      }
-  });
- 
-  if(put_worker_.joinable())
-    put_worker_.join();
-  if(update_worker_.joinable())
-    update_worker_.join();
-  if(remove_worker_.joinable())
-    remove_worker_.join();
-  if(get_worker_.joinable())
-    get_worker_.join();
+          bitmap[key] = 2;
+        break;
+      case 2:
+        std::size_t key = rand_utils::rand_uint32(0, max_key - 1);
+        REQUIRE_NOTHROW(client.get(std::to_string(key)));
+        break;
+      case 3:
+        std::size_t key = rand_utils::rand_uint32(0, max_key - 1);
+        REQUIRE_NOTHROW(ret = client.remove(std::to_string(key)));
+        if(ret != "!key_not_found")
+          bitmap[key] = 0;
+        break;
+    }
+  }
 
-  for(const auto & key : remain_keys) {
-    REQUIRE(client.get(std::to_string(key)) == std::to_string(5000 - key));
+  for(std::size_t k = 0; k < max_key; k++) {
+    if(bitmap[k] == 1)
+      REQUIRE(client.get(std::to_string(k)) == std::to_string(k));
+    else if(bitmap[k] == 2)
+      REQUIRE(client.get(std::to_string(k)) == std::to_string(max_key - k));
   }
 
   as_server->stop();
