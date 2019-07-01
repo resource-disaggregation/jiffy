@@ -215,7 +215,7 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
 
   data_status status = t->create("/sandbox/scale_down.txt", "hashtable", "/tmp", 3, 5, 0, perms::all(), {"0_16384","16384_32768", "32768_65536"}, {"regular", "regular", "regular"}, {});
   hash_table_client client(t, "/sandbox/scale_down.txt", status);
-
+  std::vector<int> remain_keys;
   auto put_worker_ = std::thread([&] {
     for(std::size_t i = 0; i <= 5000; ++i) {
       REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
@@ -226,7 +226,11 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
         REQUIRE_NOTHROW(client.update(std::to_string(i), std::to_string(5000 - i)));
       }
   });
-  std::vector<int> remain_keys;
+  auto get_worker_ = std::thread([&] {
+      for(std::size_t i = 0; i <= 5000; ++i) {
+        REQUIRE_NOTHROW(client.get(std::to_string(i)));
+      }
+  });
   auto remove_worker_ = std::thread([&] {
       for(std::size_t i = 0; i <= 5000; ++i) {
         std::string ret;
@@ -242,6 +246,8 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
     update_worker_.join();
   if(remove_worker_.joinable())
     remove_worker_.join();
+  if(get_worker_.joinable())
+    get_worker_.join();
 
   for(const auto & key : remain_keys) {
     REQUIRE(client.get(std::to_string(key)) == std::to_string(5000 - key));
