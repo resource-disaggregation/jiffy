@@ -129,7 +129,7 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  data_status status = t->create("/sandbox/scale_down.txt", "hashtable", "/tmp", 3, 1, 0, perms::all(), {"0_16384","16384_32768", "32768_65536"}, {"regular", "regular", "regular"}, {});
+  data_status status = t->create("/sandbox/scale_down.txt", "hashtable", "/tmp", 3, 5, 0, perms::all(), {"0_16384","16384_32768", "32768_65536"}, {"regular", "regular", "regular"}, {});
   hash_table_client client(t, "/sandbox/scale_down.txt", status);
 
   for(std::size_t i = 0; i <= 1000; ++i) {
