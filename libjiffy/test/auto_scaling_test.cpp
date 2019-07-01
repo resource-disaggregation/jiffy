@@ -69,14 +69,14 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_NOTHROW(client.put(std::to_string(i), std::to_string(i)));
+    REQUIRE_NOTHROW(client.update(std::to_string(i), std::to_string(1000 - i)));
   }
 
   // Busy wait until number of blocks increases
   while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
 
   for (std::size_t i = 0; i < 1000; i++) {
-    std::string key = std::to_string(i);
-    REQUIRE(client.get(key) == key);
+    REQUIRE(client.get(std::to_string(i)) == std::to_string(1000 - i));
   }
 
 
