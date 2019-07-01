@@ -220,25 +220,26 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
   for(std::size_t i = 0; i < iter; i++) {
     std::size_t j = rand_utils::rand_uint32(0, 3);
     std::string ret;
+    std::size_t key;
     switch(j) {
       case 0:
-        std::size_t key = rand_utils::rand_uint32(0, max_key - 1);
+        key = rand_utils::rand_uint32(0, max_key - 1);
         REQUIRE_NOTHROW(ret = client.put(std::to_string(key), std::to_string(key)));
         if(ret == "!ok")
           bitmap[key] = 1;
         break;
       case 1:
-        std::size_t key = rand_utils::rand_uint32(0, max_key - 1);
+        key = rand_utils::rand_uint32(0, max_key - 1);
         REQUIRE_NOTHROW(ret = client.update(std::to_string(key), std::to_string(max_key - key)));
         if(ret != "!key_not_found")
           bitmap[key] = 2;
         break;
       case 2:
-        std::size_t key = rand_utils::rand_uint32(0, max_key - 1);
+        key = rand_utils::rand_uint32(0, max_key - 1);
         REQUIRE_NOTHROW(client.get(std::to_string(key)));
         break;
       case 3:
-        std::size_t key = rand_utils::rand_uint32(0, max_key - 1);
+        key = rand_utils::rand_uint32(0, max_key - 1);
         REQUIRE_NOTHROW(ret = client.remove(std::to_string(key)));
         if(ret != "!key_not_found")
           bitmap[key] = 0;
