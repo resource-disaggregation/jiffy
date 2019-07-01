@@ -64,19 +64,19 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  data_status status = t->create("/sandbox/scale_up.txt", "hashtable", "/tmp", 1, 1, 0, perms::all(), {"0_65536"}, {"regular"}, {});
+  data_status status = t->create("/sandbox/scale_up.txt", "hashtable", "/tmp", 3, 3, 0, perms::all(), {"0_32768", "32768_49152", "49152_65536"}, {"regular", "regular", "regular"}, {});
   hash_table_client client(t, "/sandbox/scale_up.txt", status);
   // Write data until auto scaling is triggered
-  for (std::size_t i = 0; i < 1000; ++i) {
+  for (std::size_t i = 0; i < 2000; ++i) {
     REQUIRE_NOTHROW(client.put(std::to_string(i), std::to_string(i)));
-    REQUIRE_NOTHROW(client.update(std::to_string(i), std::to_string(1000 - i)));
+    REQUIRE_NOTHROW(client.update(std::to_string(i), std::to_string(2000 - i)));
   }
 
   // Busy wait until number of blocks increases
   while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
 
-  for (std::size_t i = 0; i < 1000; i++) {
-    REQUIRE(client.get(std::to_string(i)) == std::to_string(1000 - i));
+  for (std::size_t i = 0; i < 2000; i++) {
+    REQUIRE(client.get(std::to_string(i)) == std::to_string(2000 - i));
   }
 
 
@@ -187,8 +187,90 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
   }
 }
 
+/* 
+TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server][management_server]") {
+  auto alloc = std::make_shared<sequential_block_allocator>();
+  auto block_names = test_utils::init_block_names(100, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
+  alloc->add_blocks(block_names);
+  auto blocks = test_utils::init_hash_table_blocks(block_names);
 
+  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
+  std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
 
+  auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
+  std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
+
+  auto as_server = auto_scaling_server::create(HOST, DIRECTORY_SERVICE_PORT, HOST, AUTO_SCALING_SERVICE_PORT);
+  std::thread auto_scaling_thread([&as_server]{as_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, AUTO_SCALING_SERVICE_PORT);
+
+  auto sm = std::make_shared<storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
+
+  auto dir_server = directory_server::create(t, HOST, DIRECTORY_SERVICE_PORT);
+  std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
+
+  data_status status = t->create("/sandbox/scale_down.txt", "hashtable", "/tmp", 3, 1, 0, perms::all(), {"0_16384","16384_32768", "32768_65536"}, {"regular", "regular", "regular"}, {});
+  hash_table_client client(t, "/sandbox/scale_down.txt", status);
+
+  for(std::size_t i = 0; i <= 1000; ++i) {
+    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
+  }
+  auto worker_ = std::thread([&] {
+      for(std::size_t i = 0; i <= 1000; ++i) {
+        REQUIRE_NOTHROW(client.update(std::to_string(i), std::to_string(1000 - i)));
+      }
+  });
+  // A single remove should trigger scale down
+  std::vector<std::string> result;
+  REQUIRE_NOTHROW(std::dynamic_pointer_cast<hash_table_partition>(blocks[0]->impl())->run_command(result,
+                                                                              hash_table_cmd_id::ht_remove,
+                                                                              {std::to_string(0)}));
+  REQUIRE(result[0] == "0");
+  REQUIRE_NOTHROW(client.remove(std::to_string(1000)));
+
+  // Busy wait until number of blocks decreases
+  while (t->dstatus("/sandbox/scale_down.txt").data_blocks().size() >= 2);
+
+  if(worker_.joinable())
+    worker_.join();
+
+  for (std::size_t i = 1; i < 1000; i++) {
+    std::string key = std::to_string(i);
+    std::vector<std::string> ret;
+    REQUIRE_NOTHROW(blocks[0]->impl()->run_command(ret, 0, {}));
+    REQUIRE(ret.front() == "!block_moved");
+    REQUIRE_NOTHROW(blocks[2]->impl()->run_command(ret, 0, {}));
+    REQUIRE(ret.front() == "!block_moved");
+  }
+  for (std::size_t i = 1; i < 1000; i++) {
+    REQUIRE(client.get(std::to_string(i)) == std::to_string(1000 - i));
+  }
+
+  as_server->stop();
+  if(auto_scaling_thread.joinable()) {
+    auto_scaling_thread.join();
+  }
+
+  storage_server->stop();
+  if (storage_serve_thread.joinable()) {
+    storage_serve_thread.join();
+  }
+
+  mgmt_server->stop();
+  if (mgmt_serve_thread.joinable()) {
+    mgmt_serve_thread.join();
+  }
+
+  dir_server->stop();
+  if (dir_serve_thread.joinable()) {
+    dir_serve_thread.join();
+  }
+}
+*/
 
 
 TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][management_server]") {
