@@ -142,10 +142,11 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
   });
   // A single remove should trigger scale down
   std::vector<std::string> result;
-  REQUIRE_NOTHROW(std::dynamic_pointer_cast<hash_table_partition>(blocks[0]->impl())->run_command(result,
-                                                                              hash_table_cmd_id::ht_remove,
-                                                                              {std::to_string(0)}));
-  REQUIRE(result[0] == "0");
+  // REQUIRE_NOTHROW(std::dynamic_pointer_cast<hash_table_partition>(blocks[0]->impl())->run_command(result,
+  //                                                                             hash_table_cmd_id::ht_remove,
+  //                                                                             {std::to_string(0)}));
+  // REQUIRE(result[0] == "0");
+  REQUIRE_NOTHROW(client.remove(std::to_string(1000)));
   REQUIRE_NOTHROW(client.remove(std::to_string(1000)));
 
   // Busy wait until number of blocks decreases
