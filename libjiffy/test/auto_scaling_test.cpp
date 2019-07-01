@@ -214,7 +214,7 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
   data_status status = t->create("/sandbox/scale_down.txt", "hashtable", "/tmp", 3, 5, 0, perms::all(), {"0_16384","16384_32768", "32768_65536"}, {"regular", "regular", "regular"}, {});
   hash_table_client client(t, "/sandbox/scale_down.txt", status);
   std::vector<int> remain_keys;
-  std::size_t iter = 10000;
+  std::size_t iter = 1;
   const std::size_t max_key = 500;
   int bitmap[max_key] = { 0 };
   for(std::size_t i = 0; i < iter; i++) {
