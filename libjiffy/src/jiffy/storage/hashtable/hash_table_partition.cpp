@@ -49,6 +49,7 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
 }
 
 std::string hash_table_partition::put(const std::string &key, const std::string &value, bool redirect) {
+  LOG(log_level::info) << "put " << storage_size() << " " << storage_capacity() << " " << splitting_ << " " << merging_; 
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
@@ -231,6 +232,9 @@ std::string hash_table_partition::update_partition(const std::string &new_name, 
       if ((import_slot_range().first != slot_range().first || import_slot_range().second != slot_range().second) && is_tail()) {
         auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
         fs->remove_block(path(), s[1]);
+      }
+      if(!underload()) {
+	      merging_ = false;
       }
     } else { 
     	splitting_ = false;
