@@ -39,7 +39,7 @@ using namespace ::apache::thrift::transport;
 #define STORAGE_SERVICE_PORT 9091
 #define STORAGE_MANAGEMENT_PORT 9092
 #define AUTO_SCALING_SERVICE_PORT 9095
-
+/*
 
 TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -188,13 +188,13 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
     dir_serve_thread.join();
   }
 }
-
+*/
 
 TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(500, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_hash_table_blocks(block_names, 2048);
+  auto blocks = test_utils::init_hash_table_blocks(block_names);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -218,8 +218,9 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
   data_status status = t->create("/sandbox/scale_down.txt", "hashtable", "/tmp", 3, 5, 0, perms::all(), {"0_16384","16384_32768", "32768_65536"}, {"regular", "regular", "regular"}, {});
   hash_table_client client(t, "/sandbox/scale_down.txt", status);
   std::vector<int> remain_keys;
-  std::size_t iter = 5000;
-  const std::size_t max_key = 500;
+  std::size_t iter = 20000;
+  const std::size_t max_key = 100;
+  const std::size_t string_size = 102400;
   int bitmap[max_key] = { 0 };
   for(std::size_t i = 0; i < iter; i++) {
     std::size_t j = rand_utils::rand_uint32(0, 3);
@@ -227,14 +228,16 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
     std::size_t key;
     switch(j) {
       case 0:
-        key = rand_utils::rand_uint32(0, max_key - 1);
-        REQUIRE_NOTHROW(ret = client.put(std::to_string(key), std::to_string(key)));
-        if(ret == "!ok")
-          bitmap[key] = 1;
+	if(i % 2) {
+          key = rand_utils::rand_uint32(0, max_key - 1);
+          REQUIRE_NOTHROW(ret = client.put(std::to_string(key), std::string(string_size, 'a')));
+          if(ret == "!ok")
+            bitmap[key] = 1;
+	}
         break;
       case 1:
         key = rand_utils::rand_uint32(0, max_key - 1);
-        REQUIRE_NOTHROW(ret = client.update(std::to_string(key), std::to_string(max_key - key)));
+        REQUIRE_NOTHROW(ret = client.update(std::to_string(key), std::string(string_size, 'b')));
         if(ret != "!key_not_found")
           bitmap[key] = 2;
         break;
@@ -253,9 +256,9 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
 
   for(std::size_t k = 0; k < max_key; k++) {
     if(bitmap[k] == 1)
-      REQUIRE(client.get(std::to_string(k)) == std::to_string(k));
+      REQUIRE(client.get(std::to_string(k)) == std::string(string_size,'a'));
     else if(bitmap[k] == 2)
-      REQUIRE(client.get(std::to_string(k)) == std::to_string(max_key - k));
+      REQUIRE(client.get(std::to_string(k)) == std::string(string_size, 'b'));
   }
 
   as_server->stop();
@@ -279,7 +282,7 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
   }
 }
 
-
+/*
 
 TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -555,3 +558,4 @@ TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][man
   }
 
 }
+*/
