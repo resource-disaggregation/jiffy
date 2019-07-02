@@ -287,7 +287,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     LOG(log_level::info) << "Merged slot range (" << merge_range_begin << ", " << merge_range_end << ")";
     LOG(log_level::info) << "===== " << "Hash table merging" << " ======";
     LOG(log_level::info) << "\t Start: " << start;
-    LOG(log_level::info) << "Found_replica_chain_to_merge: " << finish_finding_chain_to_merge;
+    LOG(log_level::info) << "\t Found_replica_chain_to_merge: " << finish_finding_chain_to_merge;
     LOG(log_level::info) << "\t Update_partition_before_splitting: " << finish_update_partition_before;
     LOG(log_level::info) << "\t Finish_data_transmission: " << finish_data_transmission;
     LOG(log_level::info) << "\t Update_mapping_on_directory_server: " << finish_update_partition_dir;

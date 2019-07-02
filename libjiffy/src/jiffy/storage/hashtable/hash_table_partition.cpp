@@ -49,8 +49,6 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
 }
 
 std::string hash_table_partition::put(const std::string &key, const std::string &value, bool redirect) {
-  //if(is_tail())
-  //  LOG(log_level::info) << "put " << storage_size() << " " << storage_capacity() << " " << splitting_ << " " << merging_ << " on " << name() << " " << metadata(); 
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
@@ -201,8 +199,6 @@ void hash_table_partition::get_data_in_slot_range(std::vector<std::string> &data
 }
 
 std::string hash_table_partition::update_partition(const std::string &new_name, const std::string &new_metadata) {
-  //if(is_tail())
-  //  LOG(log_level::info) << " Update partition from " << name() << " " << metadata() << " to " << new_name << " " << new_metadata;
   update_lock.lock();
   if (new_name == "merging" && new_metadata == "merging") {
     if (metadata() == "regular" && name() != "0_65536") {
