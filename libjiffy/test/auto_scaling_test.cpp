@@ -136,22 +136,20 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
   for(std::size_t i = 0; i <= 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
-  auto worker_ = std::thread([&] {
-      for(std::size_t i = 0; i <= 1000; ++i) {
-        REQUIRE_NOTHROW(client.update(std::to_string(i), std::to_string(1000 - i)));
-      }
-  });
+  for(std::size_t i = 0; i <= 1000; ++i) {
+    REQUIRE_NOTHROW(client.update(std::to_string(i), std::to_string(1000 - i)));
+  }
   // A single remove should trigger scale down
   std::vector<std::string> result;
   REQUIRE_NOTHROW(client.remove(std::to_string(0)));
+  REQUIRE_NOTHROW(client.update(std::to_string(0), std::string(102400, 'x')));
   REQUIRE_NOTHROW(client.remove(std::to_string(600)));
+  REQUIRE_NOTHROW(client.update(std::to_string(600), std::string(102400, 'x')));
   REQUIRE_NOTHROW(client.remove(std::to_string(1000)));
+  REQUIRE_NOTHROW(client.update(std::to_string(1000), std::string(102400, 'x')));
 
   // Busy wait until number of blocks decreases
   while (t->dstatus("/sandbox/scale_down.txt").data_blocks().size() >= 2);
-
-  if(worker_.joinable())
-    worker_.join();
 
   for (std::size_t i = 1; i < 1000; i++) {
     std::string key = std::to_string(i);
@@ -281,7 +279,6 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
     dir_serve_thread.join();
   }
 }
-
 
 
 TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][management_server]") {
@@ -558,4 +555,3 @@ TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][man
   }
 
 }
-
