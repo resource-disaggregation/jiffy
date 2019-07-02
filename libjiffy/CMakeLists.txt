@@ -247,16 +247,16 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
     add_executable(jiffy_tests
             test/jiffy_tests.cpp
             test/auto_scaling_test.cpp
-            test/block_allocation_service_test.cpp
-            test/block_allocator_test.cpp
-            test/chain_replication_test.cpp
+	    test/block_allocation_service_test.cpp
+	    test/block_allocator_test.cpp
+	    test/chain_replication_test.cpp
             test/directory_lease_test.cpp
             test/directory_tree_test.cpp
             test/directory_service_test.cpp
-#            test/file_size_tracker_test.cpp
-            test/hash_table_partition_test.cpp
-            test/hash_table_client_test.cpp
-            test/file_partition_test.cpp
+	    #test/file_size_tracker_test.cpp
+	    test/hash_table_partition_test.cpp
+	    test/hash_table_client_test.cpp
+	    test/file_partition_test.cpp
             test/file_client_test.cpp
             test/fifo_queue_client_test.cpp
             test/fifo_queue_partition_test.cpp
@@ -384,18 +384,4 @@ if (BUILD_CPP_CLIENT)
           ARCHIVE DESTINATION lib
           LIBRARY DESTINATION lib)
 
-  if (BUILD_BENCHMARKS)
-    add_executable(hash_table_benchmark
-            bench/hash_table_benchmark.cpp
-            bench/benchmark_utils.h)
-    add_executable(hash_table_notification_benchmark
-            bench/hash_table_notification_benchmark.cpp
-            bench/benchmark_utils.h)
-    add_executable(persistence_benchmark
-            bench/persistence_benchmark.cpp
-            bench/benchmark_utils.h)
-    target_link_libraries(hash_table_benchmark jiffy_client)
-    target_link_libraries(hash_table_notification_benchmark jiffy_client)
-    target_link_libraries(persistence_benchmark jiffy)
-  endif ()
 endif ()
