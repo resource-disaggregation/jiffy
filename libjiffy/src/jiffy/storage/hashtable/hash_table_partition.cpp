@@ -49,7 +49,6 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
 }
 
 std::string hash_table_partition::put(const std::string &key, const std::string &value, bool redirect) {
-  LOG(log_level::info) << "put " << key << " " << value << " " << storage_size() << " " << storage_capacity();
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
@@ -200,6 +199,7 @@ void hash_table_partition::get_data_in_slot_range(std::vector<std::string> &data
 }
 
 std::string hash_table_partition::update_partition(const std::string &new_name, const std::string &new_metadata) {
+  //LOG(log_level::info) << " Update partition from " << name() << " " << metadata() << " to " << new_name << " " << new_metadata;
   update_lock.lock();
   if (new_name == "merging" && new_metadata == "merging") {
     if (metadata() == "regular" && name() != "0_65536") {
@@ -207,6 +207,8 @@ std::string hash_table_partition::update_partition(const std::string &new_name, 
       update_lock.unlock();
       return name();
     }
+    splitting_ = false;
+    merging_ = false;
     update_lock.unlock();
     return "!fail";
   }
@@ -230,9 +232,9 @@ std::string hash_table_partition::update_partition(const std::string &new_name, 
         auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
         fs->remove_block(path(), s[1]);
       }
-    } else {
-      splitting_ = false;
-      merging_ = false;
+    } else { 
+    	splitting_ = false;
+    	merging_ = false;
     }
     export_slot_range(0, -1);
     import_slot_range(0, -1);

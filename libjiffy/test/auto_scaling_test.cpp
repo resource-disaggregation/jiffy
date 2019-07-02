@@ -107,7 +107,7 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
 
 TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
-  auto block_names = test_utils::init_block_names(15, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
+  auto block_names = test_utils::init_block_names(100, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   auto blocks = test_utils::init_hash_table_blocks(block_names);
 
@@ -144,6 +144,7 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
   // A single remove should trigger scale down
   std::vector<std::string> result;
   REQUIRE_NOTHROW(client.remove(std::to_string(0)));
+  REQUIRE_NOTHROW(client.remove(std::to_string(600)));
   REQUIRE_NOTHROW(client.remove(std::to_string(1000)));
 
   // Busy wait until number of blocks decreases
@@ -160,10 +161,13 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
     REQUIRE_NOTHROW(blocks[2]->impl()->run_command(ret, 0, {}));
     REQUIRE(ret.front() == "!block_moved");
   }
-  for (std::size_t i = 1; i < 1000; i++) {
+  for (std::size_t i = 1; i < 1000 && i != 600; i++) {
     REQUIRE(client.get(std::to_string(i)) == std::to_string(1000 - i));
   }
 
+  for(std::size_t i = 1000; i < 4000; i++) {
+    REQUIRE(client.put(std::to_string(i), std::string(102400, 'x')) == "!ok");
+  } 
   as_server->stop();
   if(auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();
@@ -219,7 +223,6 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
   int bitmap[max_key] = { 0 };
   for(std::size_t i = 0; i < iter; i++) {
     std::size_t j = rand_utils::rand_uint32(0, 3);
-    LOG(log_level::info) << "operation " << j;
     std::string ret;
     std::size_t key;
     switch(j) {
@@ -246,7 +249,6 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
           bitmap[key] = 0;
         break;
     }
-    LOG(log_level::info) << "key " << key;
   }
 
   for(std::size_t k = 0; k < max_key; k++) {
