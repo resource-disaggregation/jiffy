@@ -236,8 +236,8 @@ class test_utils {
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_hash_table_blocks(const std::vector<std::string> &block_ids,
                                                                                     size_t block_capacity = 134217728,
-                                                                                    double threshold_lo = 0.25,
-                                                                                    double threshold_hi = 0.75,
+                                                                                    double threshold_lo = 0.05,
+                                                                                    double threshold_hi = 0.95,
                                                                                     const std::string &dir_host = "127.0.0.1",
                                                                                     int dir_port = 9090) {
     jiffy::utils::property_map conf;
@@ -271,8 +271,8 @@ class test_utils {
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_file_blocks(const std::vector<std::string> &block_ids,
                                                                               size_t block_capacity = 134217728,
-                                                                              double threshold_lo = 0.25,
-                                                                              double threshold_hi = 0.75,
+                                                                              double threshold_lo = 0.05,
+                                                                              double threshold_hi = 0.95,
                                                                               const std::string &dir_host = "127.0.0.1",
                                                                               int dir_port = 9090) {
     jiffy::utils::property_map conf;
@@ -306,8 +306,8 @@ class test_utils {
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_fifo_queue_blocks(const std::vector<std::string> &block_ids,
                                                                                     size_t block_capacity = 134217728,
-                                                                                    double threshold_lo = 0.25,
-                                                                                    double threshold_hi = 0.75,
+                                                                                    double threshold_lo = 0.05,
+                                                                                    double threshold_hi = 0.95,
                                                                                     const std::string &dir_host = "127.0.0.1",
                                                                                     int dir_port = 9090) {
     jiffy::utils::property_map conf;
