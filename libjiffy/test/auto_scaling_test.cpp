@@ -553,25 +553,30 @@ TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][manag
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  data_status status = t->create("/sandbox/scale_mix.txt", "hashtable", "/tmp", 1, 5, 0, perms::all(), {"0"}, {"regular"}, {});
+  data_status status = t->create("/sandbox/scale_mix.txt", "file", "/tmp", 1, 5, 0, perms::all(), {"0"}, {"regular"}, {});
   file_client client(t, "/sandbox/scale_mix.txt", status);
   std::size_t file_size = 0;
   std::size_t iter = 15000;
-
+  std::size_t current_offset = 0;
   for(std::size_t i = 0; i < iter; i++) {
     std::size_t j = rand_utils::rand_uint32(0, 1);
     std::string ret;
+    bool seek_ret;
     std::size_t string_size = rand_utils::rand_uint32(0, 102400);
     switch(j) {
       case 0:
-        REQUIRE_NOTHROW(ret = client.write(std::string(string_size, 'a')));
-        file_size += string_size;
+        REQUIRE_NOTHROW(client.write(std::string(string_size, 'a')));
+	current_offset += string_size;
+	if(current_offset > file_size) {
+		file_size = current_offset;
+	}
         break;
       case 1:
-        REQUIRE_NOTHROW(ret = client.read(string_size));
+        REQUIRE_NOTHROW(ret = client.read(string_size));	
+	break;
       case 3:
         std::size_t seek_offset = rand_utils::rand_uint32(0, file_size);
-        REQUIRE_NOTHROW(client.seek(seek_offset));
+        REQUIRE_NOTHROW(seek_ret = client.seek(seek_offset));
         break;
     }
   }
