@@ -553,7 +553,7 @@ TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][manag
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  data_status status = t->create("/sandbox/scale_mix.txt", "hashtable", "/tmp", 1, 5, 0, perms::all(), {"0"}, {"regular"}, {});
+  data_status status = t->create("/sandbox/scale_mix.txt", "file", "/tmp", 1, 5, 0, perms::all(), {"0"}, {"regular"}, {});
   file_client client(t, "/sandbox/scale_mix.txt", status);
   std::size_t file_size = 0;
   std::size_t iter = 15000;

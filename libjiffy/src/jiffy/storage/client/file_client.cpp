@@ -196,6 +196,7 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
                                                                    directory::replica_chain(chain),
                                                                    FILE_OPS));
       }
+      std::size_t read_old_offset = read_offset_;
       read_partition_++;
       read_offset_ = 0;
       std::vector<std::string> modified_args;
@@ -209,8 +210,11 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
         response = first_part_string + second_part_string;
       } else {
         response = second_part_string;
+        read_flag = false;
+        read_partition_--;
+        read_offset_ = read_old_offset;
       }
-    } while (response.substr(0, 11) == "!split_write");
+    } while (response.substr(0, 11) == "!split_read");
   }
   if (response != "!msg_not_found" && cmd_id == static_cast<int32_t>(file_cmd_id::file_read) && read_flag) {
     read_offset_ += response.size();
