@@ -246,7 +246,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
     include_directories(${CATCH_INCLUDE_DIR})
     add_executable(jiffy_tests
             test/jiffy_tests.cpp
-            test/auto_scaling_test.cpp
+	    test/auto_scaling_test.cpp
 	    test/block_allocation_service_test.cpp
 	    test/block_allocator_test.cpp
 	    test/chain_replication_test.cpp
@@ -264,7 +264,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             test/local_store_test.cpp
             test/jiffy_client_test.cpp
             test/notification_test.cpp
-            test/storage_manager_test.cpp
+	    test/storage_manager_test.cpp
             test/sync_worker_test.cpp
             test/test_utils.h
             )

@@ -264,7 +264,7 @@ class test_utils {
       std::string id = block_id_parser::make("127.0.0.1", service_port, management_port,
                                              static_cast<int32_t>(i));
       blks[i] = std::make_shared<block>(id);
-      blks[i]->setup("file", std::to_string(i), "regular", {});
+      blks[i]->setup("file", "", "regular", {});
     }
     return blks;
   }
@@ -284,7 +284,7 @@ class test_utils {
     blks.resize(block_ids.size());
     for (size_t i = 0; i < block_ids.size(); ++i) {
       blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
-      blks[i]->setup("file", std::to_string(i), "regular", conf);
+      blks[i]->setup("file", "", "regular", conf);
     }
     return blks;
   }
@@ -299,7 +299,7 @@ class test_utils {
       std::string id = block_id_parser::make("127.0.0.1", service_port, management_port,
                                              static_cast<int32_t>(i));
       blks[i] = std::make_shared<block>(id);
-      blks[i]->setup("fifoqueue", std::to_string(i), "regular", {});
+      blks[i]->setup("fifoqueue", "", "regular", {});
     }
     return blks;
   }
@@ -319,7 +319,7 @@ class test_utils {
     blks.resize(block_ids.size());
     for (size_t i = 0; i < block_ids.size(); ++i) {
       blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
-      blks[i]->setup("fifoqueue", std::to_string(i), "regular", conf);
+      blks[i]->setup("fifoqueue", "", "regular", conf);
     }
     return blks;
   }
