@@ -286,7 +286,7 @@ TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][managemen
   auto blocks = test_utils::init_file_blocks(block_names);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
-  std::thread storage_serve_thread1([&storage_server] { storage_server->serve(); });
+  std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
 
   auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
@@ -311,6 +311,7 @@ TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][managemen
   for (std::size_t i = 0; i < 5000; ++i) {
     REQUIRE(client.write(std::string(512, (std::to_string(i)).c_str()[0])) == "!ok");
   }
+
   for(std::size_t i = 0; i < 6000; ++i) {
     REQUIRE(client.write(std::string(102400, (std::to_string(i)).c_str()[0])) == "!ok");
   }
@@ -318,10 +319,22 @@ TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][managemen
   for (std::size_t i = 0; i < 5000; ++i) {
     REQUIRE(client.read(512) == std::string(512, (std::to_string(i)).c_str()[0]));
   }
+
+  REQUIRE_NOTHROW(client.seek(0));
+
+  for (std::size_t i = 0; i < 5000; ++i) {
+    REQUIRE(client.read(512) == std::string(512, (std::to_string(i)).c_str()[0]));
+  }
+
   for (std::size_t i = 0; i < 6000; ++i) {
     REQUIRE(client.read(102400) == std::string(102400, (std::to_string(i)).c_str()[0]));
   }
 
+  REQUIRE_NOTHROW(client.seek(5000 * 512));
+
+  for (std::size_t i = 0; i < 6000; ++i) {
+    REQUIRE(client.read(102400) == std::string(102400, (std::to_string(i)).c_str()[0]));
+  }
   // Busy wait until number of blocks increases
   while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
 
@@ -331,8 +344,8 @@ TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][managemen
   }
 
   storage_server->stop();
-  if (storage_serve_thread1.joinable()) {
-    storage_serve_thread1.join();
+  if (storage_serve_thread.joinable()) {
+    storage_serve_thread.join();
   }
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
@@ -355,7 +368,7 @@ TEST_CASE("file_auto_scale_chain_replica_test", "[directory_service][storage_ser
   auto blocks = test_utils::init_file_blocks(block_names);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
-  std::thread storage_serve_thread1([&storage_server] { storage_server->serve(); });
+  std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
 
   auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
@@ -376,10 +389,12 @@ TEST_CASE("file_auto_scale_chain_replica_test", "[directory_service][storage_ser
   data_status status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 1, 3, 0, perms::all(), {"0"}, {"regular"}, {});
   file_client client(t, "/sandbox/scale_up.txt", status);
 
+
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 5000; ++i) {
     REQUIRE(client.write(std::string(512, (std::to_string(i)).c_str()[0])) == "!ok");
   }
+
   for(std::size_t i = 0; i < 6000; ++i) {
     REQUIRE(client.write(std::string(102400, (std::to_string(i)).c_str()[0])) == "!ok");
   }
@@ -387,10 +402,22 @@ TEST_CASE("file_auto_scale_chain_replica_test", "[directory_service][storage_ser
   for (std::size_t i = 0; i < 5000; ++i) {
     REQUIRE(client.read(512) == std::string(512, (std::to_string(i)).c_str()[0]));
   }
+
+  REQUIRE_NOTHROW(client.seek(0));
+
+  for (std::size_t i = 0; i < 5000; ++i) {
+    REQUIRE(client.read(512) == std::string(512, (std::to_string(i)).c_str()[0]));
+  }
+
   for (std::size_t i = 0; i < 6000; ++i) {
     REQUIRE(client.read(102400) == std::string(102400, (std::to_string(i)).c_str()[0]));
   }
 
+  REQUIRE_NOTHROW(client.seek(5000 * 512));
+
+  for (std::size_t i = 0; i < 6000; ++i) {
+    REQUIRE(client.read(102400) == std::string(102400, (std::to_string(i)).c_str()[0]));
+  }
   // Busy wait until number of blocks increases
   while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
 
@@ -400,8 +427,8 @@ TEST_CASE("file_auto_scale_chain_replica_test", "[directory_service][storage_ser
   }
 
   storage_server->stop();
-  if (storage_serve_thread1.joinable()) {
-    storage_serve_thread1.join();
+  if (storage_serve_thread.joinable()) {
+    storage_serve_thread.join();
   }
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
@@ -424,7 +451,7 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
   auto blocks = test_utils::init_file_blocks(block_names);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
-  std::thread storage_serve_thread1([&storage_server] { storage_server->serve(); });
+  std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
 
   auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
@@ -450,6 +477,7 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
   for (std::size_t i = 0; i < 5000; ++i) {
     REQUIRE(client.write(std::string(512, (std::to_string(i)).c_str()[0])) == "!ok");
   }
+
   for(std::size_t i = 0; i < 10000; ++i) {
     REQUIRE(client.write(std::string(102400, (std::to_string(i)).c_str()[0])) == "!ok");
   }
@@ -457,10 +485,23 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
   for (std::size_t i = 0; i < 5000; ++i) {
     REQUIRE(client.read(512) == std::string(512, (std::to_string(i)).c_str()[0]));
   }
+
+  REQUIRE_NOTHROW(client.seek(0));
+
+  for (std::size_t i = 0; i < 5000; ++i) {
+    REQUIRE(client.read(512) == std::string(512, (std::to_string(i)).c_str()[0]));
+  }
+
   for (std::size_t i = 0; i < 10000; ++i) {
     REQUIRE(client.read(102400) == std::string(102400, (std::to_string(i)).c_str()[0]));
   }
 
+  REQUIRE_NOTHROW(client.seek(5000 * 512));
+
+  for (std::size_t i = 0; i < 10000; ++i) {
+    REQUIRE(client.read(102400) == std::string(102400, (std::to_string(i)).c_str()[0]));
+  }
+  
   // Busy wait until number of blocks increases
   while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
 
@@ -470,8 +511,8 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
   }
 
   storage_server->stop();
-  if (storage_serve_thread1.joinable()) {
-    storage_serve_thread1.join();
+  if (storage_serve_thread.joinable()) {
+    storage_serve_thread.join();
   }
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
@@ -481,6 +522,77 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
   if(auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();
   }
+  dir_server->stop();
+  if (dir_serve_thread.joinable()) {
+    dir_serve_thread.join();
+  }
+}
+
+TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][management_server]") {
+  auto alloc = std::make_shared<sequential_block_allocator>();
+  auto block_names = test_utils::init_block_names(64, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
+  alloc->add_blocks(block_names);
+  auto blocks = test_utils::init_file_blocks(block_names);
+
+  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
+  std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
+
+  auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
+  std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
+
+  auto as_server = auto_scaling_server::create(HOST, DIRECTORY_SERVICE_PORT, HOST, AUTO_SCALING_SERVICE_PORT);
+  std::thread auto_scaling_thread([&as_server]{as_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, AUTO_SCALING_SERVICE_PORT);
+
+  auto sm = std::make_shared<storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
+
+  auto dir_server = directory_server::create(t, HOST, DIRECTORY_SERVICE_PORT);
+  std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
+
+  data_status status = t->create("/sandbox/scale_mix.txt", "hashtable", "/tmp", 1, 5, 0, perms::all(), {"0"}, {"regular"}, {});
+  file_client client(t, "/sandbox/scale_mix.txt", status);
+  std::size_t file_size = 0;
+  std::size_t iter = 15000;
+
+  for(std::size_t i = 0; i < iter; i++) {
+    std::size_t j = rand_utils::rand_uint32(0, 1);
+    std::string ret;
+    std::size_t string_size = rand_utils::rand_uint32(0, 102400);
+    switch(j) {
+      case 0:
+        REQUIRE_NOTHROW(ret = client.write(std::string(string_size, 'a')));
+        file_size += string_size;
+        break;
+      case 1:
+        REQUIRE_NOTHROW(ret = client.read(string_size));
+      case 3:
+        std::size_t seek_offset = rand_utils::rand_uint32(0, file_size);
+        REQUIRE_NOTHROW(client.seek(seek_offset));
+        break;
+    }
+  }
+  REQUIRE_NOTHROW(client.seek(0));
+  REQUIRE(client.read(file_size) == std::string(file_size,'a'));
+
+  as_server->stop();
+  if(auto_scaling_thread.joinable()) {
+    auto_scaling_thread.join();
+  }
+
+  storage_server->stop();
+  if (storage_serve_thread.joinable()) {
+    storage_serve_thread.join();
+  }
+
+  mgmt_server->stop();
+  if (mgmt_serve_thread.joinable()) {
+    mgmt_serve_thread.join();
+  }
+
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();

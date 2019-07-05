@@ -60,14 +60,14 @@ const std::pair<bool, std::string> dummy_block::read(std::size_t offset, std::si
   if (offset >= tail_ || empty()) {
     return std::make_pair(false, std::string("!not_available"));
   }
-  if (offset + size <= max_) {
+  if (offset + size <= tail_) {
     return std::make_pair(true, std::string((const char *) (data_ + offset), size));
   } else if (extend_) {
     return std::make_pair(false,
                           std::string((const char *) (data_ + offset),
                                       max_ - offset));
   } else {
-    throw std::logic_error("Invalid offset");
+    return std::make_pair(false, std::string("!not_available"));
   }
 }
 std::size_t dummy_block::size() const {
