@@ -139,8 +139,12 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
       }
       write_partition_++;
       write_offset_ = 0;
+      remain_string.push_back(std::to_string(write_offset_));
       response = blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, remain_string).front();
+      write_offset_ += remain_string[0].size();
+      write_flag = false;
     } while (response.substr(0, 12) == "!split_write");
+
   }
   if (response.substr(0, 11) == "!split_read") {
     do {
