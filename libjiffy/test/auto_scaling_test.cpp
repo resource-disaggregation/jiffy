@@ -531,7 +531,7 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
     dir_serve_thread.join();
   }
 }
-/*
+
 TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(64, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -570,17 +570,17 @@ TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][manag
     switch(j) {
       case 0:
         REQUIRE_NOTHROW(client.write(std::string(string_size, 'a')));
-	current_offset += string_size;
-	if(current_offset > file_size) {
-		file_size = current_offset;
-	}
+	      current_offset += string_size;
+	      if(current_offset > file_size) {
+		      file_size = current_offset;
+	      }
         break;
       case 1:
         REQUIRE_NOTHROW(ret = client.read(string_size));	
-	break;
+	      break;
       case 3:
         std::size_t seek_offset = rand_utils::rand_uint32(0, file_size);
-        REQUIRE_NOTHROW(seek_ret = client.seek(seek_offset));
+        REQUIRE_NOTHROW(client.seek(seek_offset));
         break;
     }
   }
@@ -674,4 +674,4 @@ TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][man
   }
 
 }
-*/
+
