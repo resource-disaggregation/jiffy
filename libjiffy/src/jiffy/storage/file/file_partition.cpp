@@ -103,8 +103,11 @@ void file_partition::run_command(std::vector<std::string> &_return,
   size_t nargs = args.size();
   switch (cmd_id) {
     case file_cmd_id::file_write:
-      for (const std::string &msg: args)
-        _return.emplace_back(write(msg));
+      if (nargs % 2 != 0) {
+        _return.emplace_back("!args_error");
+      }
+      for (size_t i = 0; i < nargs; i += 2)
+        _return.emplace_back(write(args[i], args[i + 1]));
       break;
     case file_cmd_id::file_read:
       if (nargs % 2 != 0) {
