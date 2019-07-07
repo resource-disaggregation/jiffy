@@ -58,9 +58,10 @@ class file_partition : public chain_module {
   /**
    * @brief Write to the file
    * @param message New message
+   * @param offset Offset
    * @return Write return status string
    */
-  std::string write(const std::string &message);
+  std::string write(const std::string &message, std::string offset);
 
   /**
    * @brief Read a new message from the file

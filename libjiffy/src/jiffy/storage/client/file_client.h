@@ -104,10 +104,12 @@ class file_client : data_structure_client {
 
   /* Read partition number */
   std::size_t read_partition_;
-  /* Read offset number in a partition */
+  /* Read offset in a partition */
   std::size_t read_offset_;
   /* Write partition number */
   std::size_t write_partition_;
+  /* Write offset in a partition */
+  std::size_t write_offset_;
   /* Replica chain clients, each partition only save a replica chain client */
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
 };

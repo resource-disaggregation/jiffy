@@ -17,6 +17,7 @@ file_client::file_client(std::shared_ptr<directory::directory_interface> fs,
   read_offset_ = 0;
   read_partition_ = 0;
   write_partition_ = 0;
+  write_offset_ = 0;
   for (const auto &block: status.data_blocks()) {
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FILE_OPS, timeout_ms_));
   }
@@ -33,6 +34,7 @@ void file_client::refresh() {
 std::string file_client::write(const std::string &msg) {
   std::string _return;
   std::vector<std::string> args{msg};
+  args.push_back(std::to_string(write_offset_));
   bool redo;
   do {
     try {
@@ -76,6 +78,8 @@ bool file_client::seek(const std::size_t offset) {
   } else {
     read_partition_ = offset / cap;
     read_offset_ = offset % cap;
+    write_partition_ = offset / cap;
+    write_offset_ = offset % cap;
     return true;
   }
 }
@@ -114,58 +118,10 @@ std::size_t file_client::block_id(const file_cmd_id &op) const {
 
 void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
   bool read_flag = true;
+  bool write_flag = true;
   typedef std::vector<std::string> list_t;
   if (response == "!redo") {
-    if(cmd_id == file_cmd_id::file_write && write_partition_ < blocks_.size() - 1) {
-      write_partition_++;
-    } else if(cmd_id == file_cmd_id::file_read && read_partition_ < blocks_.size() - 1) {
-      read_partition_++;
-      read_offset_ = 0;
-    }
     throw redo_error();
-  }
-  if (response.substr(0, 15) == "!next_partition") {
-    do {
-      if(cmd_id == file_cmd_id::file_read) read_partition_++;
-      else write_partition_++;
-      response = blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, args).front();
-    } while (response.substr(0, 15) == "!next_partition");
-  }
-  if (response.substr(0, 5) == "!full") {
-    do {
-      auto parts = string_utils::split(response, '!');
-      auto chain = list_t(parts.begin() + 2, parts.end());
-      if(need_chain(static_cast<file_cmd_id>(cmd_id))) {
-        blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
-                                                                 path_,
-                                                                 directory::replica_chain(chain),
-                                                                 FILE_OPS));
-      }
-      write_partition_++;
-      response = blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, args).front();
-    } while (response.substr(0, 5) == "!full");
-  }
-  if (response.substr(0, 21) == "!msg_not_in_partition") {
-    do {
-      auto parts = string_utils::split(response, '!');
-      auto chain = list_t(parts.begin() + 2, parts.end());
-      if(need_chain(static_cast<file_cmd_id>(cmd_id))) {
-        blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
-                                                                 path_,
-                                                                 directory::replica_chain(chain),
-                                                                 FILE_OPS));
-      }
-      read_partition_++;
-      read_offset_ = 0;
-      std::vector<std::string> modified_args;
-      modified_args.push_back(std::to_string(read_offset_));
-      modified_args.push_back(args[1]);
-      response = blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, modified_args).front();
-      if (response != "!msg_not_found") {
-        read_offset_ += response.size();
-        read_flag = false;
-      }
-    } while (response.substr(0, 21) == "!msg_not_in_partition");
   }
   if (response.substr(0, 12) == "!split_write") {
     do {
@@ -182,6 +138,7 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
                                                                  FILE_OPS));
       }
       write_partition_++;
+      write_offset_ = 0;
       response = blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, remain_string).front();
     } while (response.substr(0, 12) == "!split_write");
   }
@@ -196,7 +153,6 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
                                                                    directory::replica_chain(chain),
                                                                    FILE_OPS));
       }
-      std::size_t read_old_offset = read_offset_;
       read_partition_++;
       read_offset_ = 0;
       std::vector<std::string> modified_args;
@@ -209,15 +165,16 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
         read_flag = false;
         response = first_part_string + second_part_string;
       } else {
-        response = second_part_string;
+        response = first_part_string;
         read_flag = false;
-        read_partition_--;
-        read_offset_ = read_old_offset;
       }
     } while (response.substr(0, 11) == "!split_read");
   }
   if (response != "!msg_not_found" && cmd_id == static_cast<int32_t>(file_cmd_id::file_read) && read_flag) {
     read_offset_ += response.size();
+  }
+  if (cmd_id == static_cast<int32_t>(file_cmd_id::file_write) && write_flag) {
+    write_offset_ += args[0].size();
   }
 }
 

@@ -42,21 +42,18 @@ file_partition::file_partition(block_memory_manager *manager,
   auto_scale_ = conf.get_as<bool>("file.auto_scale", true);
 }
 
-std::string file_partition::write(const std::string &message) {
-  if (partition_.size() > partition_.capacity()) {
-    if (!next_target_str().empty()) {
-      return "!full!" + next_target_str();
-    } else if (!auto_scale_) {
-      return "!next_partition";
-    }
-    return "!redo";
-  }
-  auto ret = partition_.push_back(message);
+std::string file_partition::write(const std::string &message, std::string offset) {
+  auto off = std::stoi(offset);
+  auto ret = partition_.write(message, off);
   if (!ret.first) {
     if (!auto_scale_) {
       return "!split_write!" + std::to_string(ret.second.size());
+    }    
+    if (!next_target_str().empty()) {
+      return "!split_write!" + next_target_str() + "!" + std::to_string(ret.second.size());
+    } else {
+      return "!redo";
     }
-    return "!split_write!" + next_target_str() + "!" + std::to_string(ret.second.size());
   }
   return "!ok";
 }
@@ -68,21 +65,18 @@ std::string file_partition::read(std::string position, std::string size) {
   auto ret = partition_.read(static_cast<std::size_t>(pos), static_cast<std::size_t>(read_size));
   if (ret.first) {
     return ret.second;
-  } else if (ret.second == "!reach_end") {
-    if (!next_target_str().empty())
-      return "!msg_not_in_partition!" + next_target_str();
-    else if (!auto_scale_) {
-      return "!next_partition";
-    } else {
-      return "!redo";
-    }
-  } else if (ret.second == "!not_available") {
+  } 
+  if (ret.second == "!not_available") {
     return "!msg_not_found";
   } else {
     if(!auto_scale_) {
       return "!split_read!" + ret.second;
     }
-    return "!split_read!" + next_target_str() + "!" + ret.second;
+    if (!next_target_str().empty()) {
+     return "!split_read!" + next_target_str() + "!" + ret.second;
+    } else {
+      return "!redo";
+    }
   }
 }
 
@@ -148,7 +142,7 @@ void file_partition::run_command(std::vector<std::string> &_return,
   if (is_mutator(cmd_id)) {
     dirty_ = true;
   }
-  if (auto_scale_ && is_mutator(cmd_id) && overload() && is_tail() && !overload_) {
+  if (auto_scale_ && is_mutator(cmd_id) && overload() && is_tail() && !overload_ && next_target_str().empty()) {
     LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
                          << storage_capacity() << " partition size = " << size() << "partition capacity "
                          << partition_.capacity();
