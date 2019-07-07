@@ -56,7 +56,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
 
   REQUIRE(client.seek(0) == true);
   for (std::size_t i = 0; i < 1000; ++i) {
-  //  REQUIRE(client.read(std::to_string(i).size()) == std::to_string(i));
+    REQUIRE(client.read(std::to_string(i).size()) == std::to_string(i));
   }
 
   storage_server->stop();

@@ -12,8 +12,10 @@ using namespace ::jiffy::persistent;
 TEST_CASE("file_write_read_test", "[write][read]") {
   block_memory_manager manager;
   file_partition block(&manager);
+  std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(block.write(std::to_string(i)) == "!ok");
+    REQUIRE(block.write(std::to_string(i), std::to_string(offset)) == "!ok");
+    offset += std::to_string(i).size();
   }
   int read_pos = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -26,9 +28,10 @@ TEST_CASE("file_write_read_test", "[write][read]") {
 TEST_CASE("file_write_clear_read_test", "[write][read]") {
   block_memory_manager manager;
   file_partition block(&manager);
-
+  std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(block.write(std::to_string(i)) == "!ok");
+    REQUIRE(block.write(std::to_string(i), std::to_string(offset)) == "!ok");
+    offset += std::to_string(i).size();
   }
   REQUIRE(block.clear() == "!ok");
   REQUIRE(block.size() == 0);
@@ -42,8 +45,10 @@ TEST_CASE("file_write_clear_read_test", "[write][read]") {
 TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
   block_memory_manager manager;
   file_partition block(&manager);
+  std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(block.write(std::to_string(i)) == "!ok");
+    REQUIRE(block.write(std::to_string(i), std::to_string(offset)) == "!ok");
+    offset += std::to_string(i).size();
   }
   REQUIRE(block.storage_size() <= block.storage_capacity());
 }
@@ -52,9 +57,11 @@ TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
 TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
   block_memory_manager manager;
   file_partition block(&manager);
+  std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
     std::vector<std::string> res;
-    block.run_command(res, file_cmd_id::file_write, {std::to_string(i)});
+    block.run_command(res, file_cmd_id::file_write, {std::to_string(i), std::to_string(offset)});
+    offset += std::to_string(i).size();
     REQUIRE(res.front() == "!ok");
   }
   REQUIRE(block.is_dirty());
