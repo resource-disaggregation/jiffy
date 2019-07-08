@@ -43,18 +43,16 @@ std::pair<bool, std::string> dummy_block::write(const std::string &msg, std::siz
     return std::make_pair(true, std::string("!success"));
   }
   if (len + offset <= max_) {
-    std::memcpy(data_ + tail_, msg.c_str(), len);
+    std::memcpy(data_ + offset, msg.c_str(), len);
     if(len + offset > tail_)
       tail_ = len + offset;
     return std::make_pair(true, std::string("!success"));
-  } else if (max_ > tail_) {
-    std::size_t remain_len = max_ - tail_;
-    std::memcpy(data_ + tail_, msg.c_str(), remain_len);
+  } else {
+    std::size_t remain_len = max_ - offset;
+    std::memcpy(data_ + offset, msg.c_str(), remain_len);
     tail_ = max_;
     extend_ = true;
     return std::make_pair(false, msg.substr(remain_len, msg.size() - remain_len));
-  } else {
-    return std::make_pair(false, msg);
   }
 }
 

@@ -147,7 +147,7 @@ void file_partition::run_command(std::vector<std::string> &_return,
   }
   if (auto_scale_ && is_mutator(cmd_id) && overload() && is_tail() && !overload_ && next_target_str().empty()) {
     LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
-                         << storage_capacity() << " partition size = " << size() << "partition capacity "
+                         << storage_capacity() << " partition size = " << size() << " partition capacity = "
                          << partition_.capacity();
     try {
       overload_ = true;

@@ -18,6 +18,7 @@ file_client::file_client(std::shared_ptr<directory::directory_interface> fs,
   read_partition_ = 0;
   write_partition_ = 0;
   write_offset_ = 0;
+  last_partition_ = 0;
   for (const auto &block: status.data_blocks()) {
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FILE_OPS, timeout_ms_));
   }
@@ -73,7 +74,7 @@ bool file_client::seek(const std::size_t offset) {
   ret = blocks_[seek_partition]->run_command(file_cmd_id::file_seek, {});
   auto size = static_cast<std::size_t>(std::stoi(ret[0]));
   auto cap = static_cast<std::size_t>(std::stoi(ret[1]));
-  if (offset >= seek_partition * cap + size) {
+  if (offset > seek_partition * cap + size) {
     return false;
   } else {
     read_partition_ = offset / cap;
@@ -107,11 +108,7 @@ std::size_t file_client::block_id(const file_cmd_id &op) const {
       }
       return read_partition_;
     case file_cmd_id::file_seek:
-      if (read_partition_ > write_partition_) {
-        return read_partition_;
-      } else {
-        return write_partition_;
-      }
+      return last_partition_;
     default:throw std::invalid_argument("Incorrect operation of message queue");
   }
 }
@@ -138,18 +135,23 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
                                                                  FILE_OPS));
       }
       write_partition_++;
+      update_last_partition(write_partition_);
       write_offset_ = 0;
       remain_string.push_back(std::to_string(write_offset_));
-      response = blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, remain_string).front();
+      do {
+      	response = blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, remain_string).front();
+      }	while(response == "!redo");
       write_offset_ += remain_string[0].size();
       write_flag = false;
     } while (response.substr(0, 12) == "!split_write");
 
   }
   if (response.substr(0, 11) == "!split_read") {
+    std::string result;
     do {
       auto parts = string_utils::split(response, '!');
       auto first_part_string = *(parts.end() - 1);
+      result += first_part_string;
       if(need_chain(static_cast<file_cmd_id>(cmd_id))) {
           auto chain = list_t(parts.begin() + 2, parts.end() - 1);
           blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
@@ -158,21 +160,26 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
                                                                    FILE_OPS));
       }
       read_partition_++;
+      update_last_partition(read_partition_);
       read_offset_ = 0;
       std::vector<std::string> modified_args;
       modified_args.push_back(std::to_string(read_offset_));
-      modified_args.push_back(std::to_string(std::stoi(args[1]) - first_part_string.size()));
-      auto second_part_string =
+      modified_args.push_back(std::to_string(std::stoi(args[1]) - result.size()));
+      response =
           blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, modified_args).front();
-      if (second_part_string != "!msg_not_found") {
-        read_offset_ += second_part_string.size();
-        read_flag = false;
-        response = first_part_string + second_part_string;
-      } else {
-        response = first_part_string;
-        read_flag = false;
+      if (response != "!msg_not_found") {
+	  if (response.substr(0, 11) == "!split_read")
+		  continue;
+        read_offset_ += response.size();
+	result += response;
       }
     } while (response.substr(0, 11) == "!split_read");
+    response = result;
+    read_flag = false;
+  }
+
+  if (response == "!redo") {
+    throw redo_error();
   }
   if (response != "!msg_not_found" && cmd_id == static_cast<int32_t>(file_cmd_id::file_read) && read_flag) {
     read_offset_ += response.size();
@@ -180,6 +187,7 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
   if (cmd_id == static_cast<int32_t>(file_cmd_id::file_write) && write_flag) {
     write_offset_ += args[0].size();
   }
+
 }
 
 void file_client::handle_redirects(int32_t,

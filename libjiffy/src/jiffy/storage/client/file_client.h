@@ -84,6 +84,14 @@ class file_client : data_structure_client {
   }
 
   /**
+   * @brief Track the last partition of the file
+   * @brief partition Partition 
+   */
+  void update_last_partition(std::size_t partition) {
+    if(last_partition_ < partition) 
+      last_partition_ = partition;
+  }
+  /**
    * @brief Handle command in redirect case
    * @param cmd_id Command identifier
    * @param response Response to be collected
@@ -110,6 +118,8 @@ class file_client : data_structure_client {
   std::size_t write_partition_;
   /* Write offset in a partition */
   std::size_t write_offset_;
+  /* Last partition of the file */
+  std::size_t last_partition_;
   /* Replica chain clients, each partition only save a replica chain client */
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
 };
