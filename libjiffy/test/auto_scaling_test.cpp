@@ -749,7 +749,7 @@ TEST_CASE("fifo_queue_auto_scale_multi_block_test", "[directory_service][storage
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
   std::map<std::string, std::string> conf;
-  conf.emplace("fifo_queue.auto_scale", "false");
+  conf.emplace("fifoqueue.auto_scale", "false");
   data_status status = t->create("/sandbox/scale_up.txt", "fifoqueue", "/tmp", 4, 1, 0, perms::all(), {"0", "1", "2", "3"}, {"regular", "regular", "regular", "regular"}, conf);
   fifo_queue_client client(t, "/sandbox/scale_up.txt", status);
 
@@ -757,16 +757,11 @@ TEST_CASE("fifo_queue_auto_scale_multi_block_test", "[directory_service][storage
   for (std::size_t i = 0; i < 2100; ++i) {
     REQUIRE(client.enqueue(std::string(100000, (std::to_string(i)).c_str()[0])) == "!ok");
   }
-  // Busy wait until number of blocks increases
-  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
 
   for (std::size_t i = 0; i < 2100; ++i) {
     REQUIRE(client.dequeue() == std::string(100000, (std::to_string(i)).c_str()[0]));
   }
-  // Busy wait until number of blocks decreases
-  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() > 1);
-
-
+  
   as_server->stop();
   if(auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();

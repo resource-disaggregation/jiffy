@@ -154,7 +154,7 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
     dirty_ = true;
   }
   if (auto_scale_ && is_mutator(cmd_id) && overload() && is_tail() && !overload_) {
-    LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
+    LOG(log_level::info) << "Overloaded partition: " << name() << " storage = " << storage_size() << " capacity = "
                          << storage_capacity() << " partition size = " << size() << "partition capacity "
                          << partition_.capacity();
     try {
@@ -173,7 +173,7 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
   if (auto_scale_ && cmd_id == fifo_queue_cmd_id::fq_dequeue && head_ > partition_.capacity() && is_tail()
       && !underload_ && !next_target_str().empty()) {
     try {
-      LOG(log_level::info) << "Underloaded partition; storage = " << storage_size() << " capacity = "
+      LOG(log_level::info) << "Underloaded partition: " << name() << " storage = " << storage_size() << " capacity = "
                            << storage_capacity() << " partition size = " << size() << "partition capacity "
                            << partition_.capacity();
       underload_ = true;
