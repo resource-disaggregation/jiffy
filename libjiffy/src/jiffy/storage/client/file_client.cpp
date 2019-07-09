@@ -168,18 +168,14 @@ void file_client::handle_redirect(int32_t cmd_id, const std::vector<std::string>
       response =
           blocks_[block_id(static_cast<file_cmd_id >(cmd_id))]->run_command(cmd_id, modified_args).front();
       if (response != "!msg_not_found") {
-	  if (response.substr(0, 11) == "!split_read")
-		  continue;
+	      if (response.substr(0, 11) == "!split_read")
+		      continue;
         read_offset_ += response.size();
-	result += response;
+	      result += response;
       }
     } while (response.substr(0, 11) == "!split_read");
     response = result;
     read_flag = false;
-  }
-
-  if (response == "!redo") {
-    throw redo_error();
   }
   if (response != "!msg_not_found" && cmd_id == static_cast<int32_t>(file_cmd_id::file_read) && read_flag) {
     read_offset_ += response.size();

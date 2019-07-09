@@ -73,7 +73,7 @@ std::string file_partition::read(std::string position, std::string size) {
       return "!split_read!" + ret.second;
     }
     if (!next_target_str().empty()) {
-     return "!split_read!" + next_target_str() + "!" + ret.second;
+      return "!split_read!" + next_target_str() + "!" + ret.second;
     } else {
       return "!redo";
     }

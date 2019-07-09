@@ -6,7 +6,6 @@ namespace storage {
 using namespace utils;
 
 string_array::string_array(std::size_t max_size, block_memory_allocator<char> alloc) : alloc_(alloc), max_(max_size) {
-  split_string_ = false;
   data_ = alloc_.allocate(max_);
   tail_ = 0;
   last_element_offset_ = 0;
@@ -17,7 +16,6 @@ string_array::~string_array() {
 }
 
 string_array::string_array(const string_array &other) {
-  split_string_ = other.split_string_.load();
   alloc_ = other.alloc_;
   max_ = other.max_;
   data_ = other.data_;
@@ -26,7 +24,6 @@ string_array::string_array(const string_array &other) {
 }
 
 string_array &string_array::operator=(const string_array &other) {
-  split_string_ = other.split_string_.load();
   alloc_ = other.alloc_;
   max_ = other.max_;
   data_ = other.data_;
@@ -52,7 +49,6 @@ std::pair<bool, std::string> string_array::push_back(const std::string &msg) {
     tail_ += len;
     return std::make_pair(true, std::string("!success"));
   } else if (max_ - tail_ >= metadata_length) {
-    split_string_ = true;
     std::size_t remain_len = max_ - tail_ - metadata_length;
     std::memcpy(data_ + tail_, (char *) &len, metadata_length);
     last_element_offset_ = tail_;
@@ -66,21 +62,16 @@ std::pair<bool, std::string> string_array::push_back(const std::string &msg) {
 }
 
 const std::pair<bool, std::string> string_array::at(std::size_t offset) const {
-  if (offset > max_ - metadata_length) {
-    return std::make_pair(false, std::string("!reach_end"));
-  }
   if (offset > last_element_offset_ || empty()) {
     return std::make_pair(false, std::string("!not_available"));
   }
   std::size_t len = *((std::size_t *) (data_ + offset));
   if (offset + metadata_length + len <= max_) {
     return std::make_pair(true, std::string((const char *) (data_ + offset + metadata_length), len));
-  } else if (split_string_.load()) {
+  } else {
     return std::make_pair(false,
                           std::string((const char *) (data_ + offset + metadata_length),
                                       max_ - offset - metadata_length));
-  } else {
-    throw std::logic_error("Invalid offset");
   }
 }
 
@@ -92,6 +83,10 @@ std::size_t string_array::find_next(std::size_t offset) const {
   return offset + len + metadata_length;
 }
 
+void string_array::recover(std::size_t len) {
+  tail_ -= (len + metadata_length);
+}
+
 std::size_t string_array::size() const {
   return tail_;
 }
@@ -100,14 +95,9 @@ std::size_t string_array::capacity() {
   return max_ - metadata_length;
 }
 
-bool string_array::split_last_string() {
-  return split_string_.load();
-}
-
 void string_array::clear() {
   tail_ = 0;
   last_element_offset_ = 0;
-  split_string_ = false;
 }
 
 bool string_array::empty() const {
