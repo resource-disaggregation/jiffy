@@ -316,12 +316,14 @@ class csv_serde_impl : public serde {
    */
 
   std::size_t deserialize_impl(const std::shared_ptr<std::istream> &in, file_type &data) {
+    std::size_t offset = 0;
     while (!in->eof()) {
       std::string line;
       std::getline(*in, line, '\n');
       if (line.empty())
         break;
-      data.push_back(line);
+      data.write(line, offset);
+      offset += line.size();
     }
     auto sz = in->tellg();
     return static_cast<std::size_t>(sz);
@@ -489,13 +491,15 @@ class binary_serde_impl : public serde {
    */
   
   size_t deserialize_impl(const std::shared_ptr<std::istream> &in, file_type &table) {
+    std::size_t offset = 0;
     while (!in->eof()) {
       std::size_t msg_size;
       in->read(reinterpret_cast<char *>(&msg_size), sizeof(msg_size));
       std::string msg;
       msg.resize(msg_size);
       in->read(&msg[0], msg_size);
-      table.push_back(msg);
+      table.write(msg, offset);
+      offset += msg.size();
     }
     auto sz = in->tellg();
     return static_cast<std::size_t>(sz);

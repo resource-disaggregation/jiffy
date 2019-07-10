@@ -236,8 +236,8 @@ class test_utils {
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_hash_table_blocks(const std::vector<std::string> &block_ids,
                                                                                     size_t block_capacity = 134217728,
-                                                                                    double threshold_lo = 0.25,
-                                                                                    double threshold_hi = 0.75,
+                                                                                    double threshold_lo = 0.05,
+                                                                                    double threshold_hi = 0.95,
                                                                                     const std::string &dir_host = "127.0.0.1",
                                                                                     int dir_port = 9090) {
     jiffy::utils::property_map conf;
@@ -264,15 +264,15 @@ class test_utils {
       std::string id = block_id_parser::make("127.0.0.1", service_port, management_port,
                                              static_cast<int32_t>(i));
       blks[i] = std::make_shared<block>(id);
-      blks[i]->setup("file", std::to_string(i), "regular", {});
+      blks[i]->setup("file", "", "regular", {});
     }
     return blks;
   }
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_file_blocks(const std::vector<std::string> &block_ids,
                                                                               size_t block_capacity = 134217728,
-                                                                              double threshold_lo = 0.25,
-                                                                              double threshold_hi = 0.75,
+                                                                              double threshold_lo = 0.05,
+                                                                              double threshold_hi = 0.95,
                                                                               const std::string &dir_host = "127.0.0.1",
                                                                               int dir_port = 9090) {
     jiffy::utils::property_map conf;
@@ -284,7 +284,7 @@ class test_utils {
     blks.resize(block_ids.size());
     for (size_t i = 0; i < block_ids.size(); ++i) {
       blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
-      blks[i]->setup("file", std::to_string(i), "regular", conf);
+      blks[i]->setup("file", "", "regular", conf);
     }
     return blks;
   }
@@ -299,15 +299,15 @@ class test_utils {
       std::string id = block_id_parser::make("127.0.0.1", service_port, management_port,
                                              static_cast<int32_t>(i));
       blks[i] = std::make_shared<block>(id);
-      blks[i]->setup("fifoqueue", std::to_string(i), "regular", {});
+      blks[i]->setup("fifoqueue", "", "regular", {});
     }
     return blks;
   }
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_fifo_queue_blocks(const std::vector<std::string> &block_ids,
                                                                                     size_t block_capacity = 134217728,
-                                                                                    double threshold_lo = 0.25,
-                                                                                    double threshold_hi = 0.75,
+                                                                                    double threshold_lo = 0.05,
+                                                                                    double threshold_hi = 0.95,
                                                                                     const std::string &dir_host = "127.0.0.1",
                                                                                     int dir_port = 9090) {
     jiffy::utils::property_map conf;
@@ -319,7 +319,7 @@ class test_utils {
     blks.resize(block_ids.size());
     for (size_t i = 0; i < block_ids.size(); ++i) {
       blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
-      blks[i]->setup("fifoqueue", std::to_string(i), "regular", conf);
+      blks[i]->setup("fifoqueue", "", "regular", conf);
     }
     return blks;
   }

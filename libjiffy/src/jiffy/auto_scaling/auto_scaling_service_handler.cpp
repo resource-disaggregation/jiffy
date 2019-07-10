@@ -44,7 +44,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     src->run_command(storage::file_cmd_id::file_update_partition, args);
     auto finish_updating_partition =
         std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    LOG(log_level::info) << "===== " << "Message queue auto_scaling" << " ======";
+    LOG(log_level::info) << "===== " << "File auto_scaling" << " ======";
     LOG(log_level::info) << "\t Start " << start;
     LOG(log_level::info) << "\t Add_replica_chain: " << finish_adding_replica_chain;
     LOG(log_level::info) << "\t Update_partition: " << finish_updating_partition;
@@ -191,6 +191,10 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       }
     }
     if (able_to_merge) {
+      std::vector<std::string> src_fail_args;
+      src_fail_args.push_back(name);
+      src_fail_args.emplace_back("regular$" + name);
+      src->run_command(storage::hash_table_cmd_id::ht_update_partition, src_fail_args);
       mtx_.unlock();
       throw make_exception("Adjacent partitions are not found or full");
     }
@@ -219,9 +223,9 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     dst_before_args.push_back(merge_target.name);
     dst_before_args.emplace_back("importing$" + name);
     auto ret = dst->run_command(storage::hash_table_cmd_id::ht_update_partition, dst_before_args).front();
+    // We don't need to update the src partition cause it will be deleted anyway
     if (ret == "!fail") {
       std::vector<std::string> src_fail_args;
-      // We don't need to update the src partition cause it will be deleted anyway
       src_fail_args.push_back(name);
       src_fail_args.emplace_back("regular$" + name);
       src->run_command(storage::hash_table_cmd_id::ht_update_partition, src_fail_args);
@@ -283,7 +287,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     LOG(log_level::info) << "Merged slot range (" << merge_range_begin << ", " << merge_range_end << ")";
     LOG(log_level::info) << "===== " << "Hash table merging" << " ======";
     LOG(log_level::info) << "\t Start: " << start;
-    LOG(log_level::info) << "Found_replica_chain_to_merge: " << finish_finding_chain_to_merge;
+    LOG(log_level::info) << "\t Found_replica_chain_to_merge: " << finish_finding_chain_to_merge;
     LOG(log_level::info) << "\t Update_partition_before_splitting: " << finish_update_partition_before;
     LOG(log_level::info) << "\t Finish_data_transmission: " << finish_data_transmission;
     LOG(log_level::info) << "\t Update_mapping_on_directory_server: " << finish_update_partition_dir;
@@ -314,7 +318,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     src->run_command(storage::fifo_queue_cmd_id::fq_update_partition, args);
     auto finish_updating_partition =
         std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    LOG(log_level::info) << "===== " << "Message queue auto_scaling" << " ======";
+    LOG(log_level::info) << "===== " << "Fifo queue auto_scaling" << " ======";
     LOG(log_level::info) << "\t Start " << start;
     LOG(log_level::info) << "\t Add_replica_chain: " << finish_adding_replica_chain;
     LOG(log_level::info) << "\t Update_partition: " << finish_updating_partition;

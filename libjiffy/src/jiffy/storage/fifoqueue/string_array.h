@@ -99,6 +99,13 @@ class string_array {
   std::size_t find_next(std::size_t offset) const;
 
   /**
+   * @brief Recover last write
+   * @param len Length of bytes to recover
+   */
+
+  void recover(std::size_t len);
+
+  /**
    * @brief Fetch total size of the string array
    * @return Size
    */
@@ -111,13 +118,6 @@ class string_array {
    */
 
   std::size_t capacity();
-
-  /**
-   * @brief Check if last string is split
-   * @return Boolean, true if last string is split across blocks
-   */
-
-  bool split_last_string();
 
   /**
    * @brief Clear the content of string array
@@ -169,9 +169,6 @@ class string_array {
 
 
  private:
-  /* Boolean, indicating if the last string is split */
-  std::atomic<bool> split_string_{};
-
   /* Block memory allocator */
   block_memory_allocator<char> alloc_;
 

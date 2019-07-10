@@ -83,7 +83,7 @@ void block::destroy() {
                                              auto_scaling_host_,
                                              auto_scaling_port_);
   if (impl_ == nullptr) {
-    throw std::invalid_argument("No such type ");
+    throw std::invalid_argument("Fail to set default partition");
   }
 }
 

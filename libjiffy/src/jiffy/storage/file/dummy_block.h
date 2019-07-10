@@ -66,11 +66,12 @@ class dummy_block {
   bool operator==(const dummy_block &other) const;
 
   /**
-   * @brief Push new message at the end of the block
+   * @brief Write new message to the block
+   * @param offset Offset
    * @param msg Message
    * @return Pair, a status boolean and the remain string
    */
-  std::pair<bool, std::string> push_back(const std::string &msg);
+  std::pair<bool, std::string> write(const std::string &msg, std::size_t offset); 
 
   /**
    * @brief Read string at offset with given size
