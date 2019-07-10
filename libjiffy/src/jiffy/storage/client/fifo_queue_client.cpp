@@ -140,12 +140,14 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
       do {
         response = blocks_[block_id(static_cast<fifo_queue_cmd_id >(cmd_id))]->run_command(cmd_id, remain_string).front();
       } while(response == "!redo");
-    } while (response.substr(0, 12) == "!split_enqueue");
+    } while (response.substr(0, 14) == "!split_enqueue");
   }
   if (response.substr(0, 14) == "!split_dequeue") {
     std::string result;
     do {
       auto parts = string_utils::split(response, '!');
+      if(response[response.size() - 1] == '!')
+	      parts.push_back(std::string(""));
       auto first_part_string = *(parts.end() - 1);
       result += first_part_string;
       if(need_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
@@ -171,6 +173,8 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
     std::string result;
     do {
       auto parts = string_utils::split(response, '!');
+      if(response[response.size() - 1] == '!')
+	      parts.push_back(std::string(""));
       auto first_part_string = *(parts.end() - 1);
       result += first_part_string;
       if(need_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
@@ -189,7 +193,7 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
           continue;
         read_offset_ += (metadata_length + response.size());
         read_flag = false;
-        response += response;
+        result += response;
       } 
     } while (response.substr(0, 15) == "!split_readnext");
     response = result;

@@ -184,6 +184,12 @@ class string_array {
   /* Tail position */
   std::size_t tail_{};
 
+  /* Max position */
+  std::size_t max_tail_;
+
+  /* Bool for split string */
+  bool split_string_;
+
 };
 
 /**

@@ -39,7 +39,7 @@ using namespace ::apache::thrift::transport;
 #define STORAGE_SERVICE_PORT 9091
 #define STORAGE_MANAGEMENT_PORT 9092
 #define AUTO_SCALING_SERVICE_PORT 9095
-
+/*
 TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(100, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -596,12 +596,12 @@ TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][manag
     dir_serve_thread.join();
   }
 }
-
+*/
 TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
-  auto block_names = test_utils::init_block_names(21, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
+  auto block_names = test_utils::init_block_names(500, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_fifo_queue_blocks(block_names);
+  auto blocks = test_utils::init_fifo_queue_blocks(block_names, 500);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread1([&storage_server] { storage_server->serve(); });
@@ -626,17 +626,22 @@ TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][man
   fifo_queue_client client(t, "/sandbox/scale_up.txt", status);
 
   // Write data until auto scaling is triggered
-  for (std::size_t i = 0; i < 2100; ++i) {
-    REQUIRE(client.enqueue(std::string(100000, (std::to_string(i)).c_str()[0])) == "!ok");
+  for (std::size_t i = 0; i < 100; ++i) {
+    REQUIRE(client.enqueue(std::string(1024, (std::to_string(i)).c_str()[0])) == "!ok");
   }
   // Busy wait until number of blocks increases
-  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
+  while (t->dstatus("/sandbox/scale_up.txt").data_blocks_size() == 1);
 
-  for (std::size_t i = 0; i < 2100; ++i) {
-    REQUIRE(client.dequeue() == std::string(100000, (std::to_string(i)).c_str()[0]));
+  for (std::size_t i = 0; i < 100; ++i) {
+	  std::cout << i << std::endl;
+    REQUIRE(client.readnext() == std::string(1024, (std::to_string(i)).c_str()[0]));
+  }
+  
+  for (std::size_t i = 0; i < 100; ++i) {
+    REQUIRE(client.dequeue() == std::string(1024, (std::to_string(i)).c_str()[0]));
   }
   // Busy wait until number of blocks decreases
-  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() > 1);
+  while (t->dstatus("/sandbox/scale_up.txt").data_blocks_size() > 1);
 
 
   as_server->stop();
@@ -689,17 +694,22 @@ TEST_CASE("fifo_queue_auto_scale_replica_chain_test", "[directory_service][stora
   fifo_queue_client client(t, "/sandbox/scale_up.txt", status);
 
   // Write data until auto scaling is triggered
-  for (std::size_t i = 0; i < 2100; ++i) {
+  for (std::size_t i = 0; i < 4000; ++i) {
     REQUIRE(client.enqueue(std::string(100000, (std::to_string(i)).c_str()[0])) == "!ok");
   }
   // Busy wait until number of blocks increases
-  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
+  while (t->dstatus("/sandbox/scale_up.txt").data_blocks_size() == 1);
 
-  for (std::size_t i = 0; i < 2100; ++i) {
+
+  for (std::size_t i = 0; i < 4000; ++i) {
+    REQUIRE(client.readnext() == std::string(100000, (std::to_string(i)).c_str()[0]));
+  }
+
+  for (std::size_t i = 0; i < 4000; ++i) {
     REQUIRE(client.dequeue() == std::string(100000, (std::to_string(i)).c_str()[0]));
   }
   // Busy wait until number of blocks decreases
-  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() > 1);
+  while (t->dstatus("/sandbox/scale_up.txt").data_blocks_size() > 1);
 
 
   as_server->stop();
@@ -756,6 +766,10 @@ TEST_CASE("fifo_queue_auto_scale_multi_block_test", "[directory_service][storage
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 2100; ++i) {
     REQUIRE(client.enqueue(std::string(100000, (std::to_string(i)).c_str()[0])) == "!ok");
+  }
+
+  for (std::size_t i = 0; i < 2100; ++i) {
+    REQUIRE(client.readnext() == std::string(100000, (std::to_string(i)).c_str()[0]));
   }
 
   for (std::size_t i = 0; i < 2100; ++i) {
