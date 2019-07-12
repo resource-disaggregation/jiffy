@@ -147,7 +147,7 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
     do {
       auto parts = string_utils::split(response, '!');
       if(response[response.size() - 1] == '!')
-	      parts.push_back(std::string(""));
+        parts.push_back(std::string(""));
       auto first_part_string = *(parts.end() - 1);
       result += first_part_string;
       if(need_chain(static_cast<fifo_queue_cmd_id>(cmd_id))) {
@@ -188,7 +188,7 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
       read_offset_ = 0;
       response =
           blocks_[block_id(static_cast<fifo_queue_cmd_id >(cmd_id))]->run_command(cmd_id, {std::to_string(0)}).front();
-      if(response != "msg_not_found") {
+      if(response != "!msg_not_found") {
         if(response.substr(0, 15) == "!split_readnext")
           continue;
         read_offset_ += (metadata_length + response.size());
