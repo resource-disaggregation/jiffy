@@ -1,6 +1,6 @@
 #ifndef JIFFY_DIRECTORY_OPS_H
 #define JIFFY_DIRECTORY_OPS_H
-#include <mutex>
+
 #include <exception>
 #include <string>
 #include <algorithm>
@@ -668,8 +668,6 @@ class data_status {
    * @return True if removal was successful, false otherwise
    */
   bool remove_data_block(const std::string &partition_name, replica_chain &block) {
-    //std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    mtx_.lock();
     std::vector<replica_chain>::iterator it;
     for (it = data_blocks_.begin(); it != data_blocks_.end(); ++it) {
       if (it->name == partition_name) {
@@ -679,10 +677,8 @@ class data_status {
     if (it != data_blocks_.end()) {
       block = *it;
       data_blocks_.erase(it);
-      mtx_.unlock();
       return true;
     }
-    mtx_.unlock();
     return false;
   }
 
@@ -931,17 +927,6 @@ class data_status {
     return (flags_ & MAPPED) == MAPPED;
   }
 
-  /**
-   * @brief Fetch replica chain number
-   * @return Replica chain number
-   */
-  std::size_t data_blocks_size() {
-    //std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    mtx_.lock();
-    auto ret = data_blocks_.size();
-    mtx_.unlock();
-    return ret; 
-  }
  private:
   /* Type data type */
   std::string type_;
@@ -955,9 +940,6 @@ class data_status {
   std::map<std::string, std::string> tags_;
   /* Flags */
   std::int32_t flags_;
-  /* Metadata atomic bool */
-  //mutable std::shared_mutex metadata_mtx_;
-  std::mutex mtx_;
 };
 
 /* Directory operations virtual class */
