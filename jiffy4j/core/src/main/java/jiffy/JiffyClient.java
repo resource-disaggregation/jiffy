@@ -10,6 +10,8 @@ import jiffy.directory.Permissions;
 import jiffy.directory.directory_service;
 import jiffy.directory.directory_service.Client;
 import jiffy.directory.rpc_data_status;
+import jiffy.partition.PartitionNameBuilder;
+import jiffy.storage.FileClient;
 import jiffy.storage.HashTableClient;
 import jiffy.lease.LeaseWorker;
 import jiffy.notification.HashTableListener;
@@ -68,6 +70,35 @@ public class JiffyClient implements Closeable {
     worker.removePath(path);
   }
 
+  private static class InitType {
+
+    static int CREATE = 0;
+    static int OPEN_OR_CREATE = 1;
+  }
+
+  private rpc_data_status initDataStructure(int initType, String path, String type,
+      String backingPath,
+      int numBlocks, int chainLength, int flags, int permissions, Map<String, String> tags)
+      throws TException {
+    List<String> partitionNames = new ArrayList<>(numBlocks);
+    List<String> partitionMetadata = new ArrayList<>(numBlocks);
+    PartitionNameBuilder builder = PartitionNameBuilder.get(type, numBlocks);
+    for (int i = 0; i < numBlocks; ++i) {
+      partitionNames.add(i, builder.partitionName(i));
+      partitionMetadata.add(i, "regular");
+    }
+    rpc_data_status status = null;
+    if (initType == InitType.CREATE) {
+      status = fs.create(path, type, backingPath, numBlocks, chainLength, flags, permissions,
+          partitionNames, partitionMetadata, tags);
+    } else if (initType == InitType.OPEN_OR_CREATE) {
+      status = fs.openOrCreate(path, type, backingPath, numBlocks, chainLength, flags, permissions,
+          partitionNames, partitionMetadata, tags);
+    }
+    beginScope(path);
+    return status;
+  }
+
   public HashTableClient createHashTable(String path) throws TException {
     return createHashTable(path, DEFAULT_BACKING_PATH);
   }
@@ -76,32 +107,20 @@ public class JiffyClient implements Closeable {
     return createHashTable(path, backingPath, DEFAULT_NUM_BLOCKS, DEFAULT_CHAIN_LENGTH);
   }
 
-  public HashTableClient createHashTable(String path, String backingPath, int numBlocks, int chainLength)
-      throws TException {
-    return createHashTable(path, backingPath, numBlocks, chainLength, DEFAULT_FLAGS, DEFAULT_PERMISSIONS,
-        DEFAULT_TAGS);
+  public HashTableClient createHashTable(String path, String backingPath, int numBlocks,
+      int chainLength) throws TException {
+    return createHashTable(path, backingPath, numBlocks, chainLength, DEFAULT_FLAGS,
+        DEFAULT_PERMISSIONS, DEFAULT_TAGS);
   }
 
-  public HashTableClient createHashTable(String path, String backingPath, int numBlocks, int chainLength, int flags,
-                                         int permissions, Map<String, String> tags)
-      throws TException {
-    List<String> partitionNames = new ArrayList<>(numBlocks);
-    List<String> partitionMetadata = new ArrayList<>(numBlocks);
-    int hashRange = SLOT_MAX / numBlocks;
-    for (int i = 0; i < numBlocks; ++i) {
-      int begin = i * hashRange;
-      int end = (i == numBlocks - 1) ? SLOT_MAX : (i + 1) * hashRange;
-      partitionNames.add(i, begin + "_" + end);
-      partitionMetadata.add(i, "regular");
-    }
-    rpc_data_status status = fs
-        .create(path, "hashtable", backingPath, numBlocks, chainLength, flags, permissions, partitionNames,
-                partitionMetadata, tags);
-    beginScope(path);
+  public HashTableClient createHashTable(String path, String backingPath, int numBlocks,
+      int chainLength, int flags, int permissions, Map<String, String> tags) throws TException {
+    rpc_data_status status = initDataStructure(InitType.CREATE, path, "hashtable", backingPath,
+        numBlocks, chainLength, flags, permissions, tags);
     return new HashTableClient(fs, path, status, timeoutMs);
   }
 
-  public HashTableClient open(String path) throws TException {
+  public HashTableClient openHashTable(String path) throws TException {
     rpc_data_status status = fs.open(path);
     beginScope(path);
     return new HashTableClient(fs, path, status, timeoutMs);
@@ -115,32 +134,72 @@ public class JiffyClient implements Closeable {
     return openOrCreateHashTable(path, backingPath, DEFAULT_NUM_BLOCKS, DEFAULT_CHAIN_LENGTH);
   }
 
-  public HashTableClient openOrCreateHashTable(String path, String backingPath, int numBlocks, int chainLength)
+  public HashTableClient openOrCreateHashTable(String path, String backingPath, int numBlocks,
+      int chainLength)
       throws TException {
     return openOrCreateHashTable(path, backingPath, numBlocks, chainLength, DEFAULT_FLAGS,
         DEFAULT_PERMISSIONS, DEFAULT_TAGS);
   }
 
   public HashTableClient openOrCreateHashTable(String path, String backingPath, int numBlocks,
-                                               int chainLength, int flags, int permissions,
-                                               Map<String, String> tags) throws TException {
-    List<String> partitionNames = new ArrayList<>(numBlocks);
-    List<String> partitionMetadata = new ArrayList<>(numBlocks);
-    int hashRange = SLOT_MAX / numBlocks;
-    for (int i = 0; i < numBlocks; ++i) {
-      int begin = i * hashRange;
-      int end = (i == numBlocks - 1) ? SLOT_MAX : (i + 1) * hashRange;
-      partitionNames.add(i, begin + "_" + end);
-      partitionMetadata.add(i, "regular");
-    }
-    rpc_data_status status = fs
-        .openOrCreate(path, "hashtable", backingPath, numBlocks, chainLength, flags, permissions, partitionNames, partitionMetadata,
-                tags);
-    beginScope(path);
+      int chainLength, int flags, int permissions,
+      Map<String, String> tags) throws TException {
+    rpc_data_status status = initDataStructure(InitType.OPEN_OR_CREATE, path, "hashtable",
+        backingPath, numBlocks, chainLength, flags, permissions, tags);
     return new HashTableClient(fs, path, status, timeoutMs);
   }
 
-  public HashTableListener listen(String path) throws TException {
+  public FileClient createFile(String path) throws TException {
+    return createFile(path, DEFAULT_BACKING_PATH);
+  }
+
+  public FileClient createFile(String path, String backingPath) throws TException {
+    return createFile(path, backingPath, DEFAULT_NUM_BLOCKS, DEFAULT_CHAIN_LENGTH);
+  }
+
+  public FileClient createFile(String path, String backingPath, int numBlocks,
+      int chainLength) throws TException {
+    return createFile(path, backingPath, numBlocks, chainLength, DEFAULT_FLAGS,
+        DEFAULT_PERMISSIONS, DEFAULT_TAGS);
+  }
+
+  public FileClient createFile(String path, String backingPath, int numBlocks,
+      int chainLength, int flags, int permissions, Map<String, String> tags) throws TException {
+    rpc_data_status status = initDataStructure(InitType.CREATE, path, "file", backingPath,
+        numBlocks, chainLength, flags, permissions, tags);
+    return new FileClient(fs, path, status, timeoutMs);
+  }
+
+  public FileClient openFile(String path) throws TException {
+    rpc_data_status status = fs.open(path);
+    beginScope(path);
+    return new FileClient(fs, path, status, timeoutMs);
+  }
+
+  public FileClient openOrCreateFile(String path) throws TException {
+    return openOrCreateFile(path, DEFAULT_BACKING_PATH);
+  }
+
+  public FileClient openOrCreateFile(String path, String backingPath) throws TException {
+    return openOrCreateFile(path, backingPath, DEFAULT_NUM_BLOCKS, DEFAULT_CHAIN_LENGTH);
+  }
+
+  public FileClient openOrCreateFile(String path, String backingPath, int numBlocks,
+      int chainLength)
+      throws TException {
+    return openOrCreateFile(path, backingPath, numBlocks, chainLength, DEFAULT_FLAGS,
+        DEFAULT_PERMISSIONS, DEFAULT_TAGS);
+  }
+
+  public FileClient openOrCreateFile(String path, String backingPath, int numBlocks,
+      int chainLength, int flags, int permissions,
+      Map<String, String> tags) throws TException {
+    rpc_data_status status = initDataStructure(InitType.OPEN_OR_CREATE, path, "file",
+        backingPath, numBlocks, chainLength, flags, permissions, tags);
+    return new FileClient(fs, path, status, timeoutMs);
+  }
+
+  public HashTableListener listenOnHashTable(String path) throws TException {
     rpc_data_status status = fs.open(path);
     beginScope(path);
     return new HashTableListener(path, status);

@@ -8,8 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import jiffy.directory.Flags;
 import jiffy.directory.Permissions;
+import jiffy.storage.FileClient;
 import jiffy.storage.HashTableClient;
-import jiffy.storage.HashTableClient.LockedClient;
 import jiffy.notification.HashTableListener;
 import jiffy.notification.event.Notification;
 import jiffy.util.ByteBufferUtils;
@@ -163,79 +163,25 @@ public class JiffyClientTest {
     Assert
         .assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.remove(invalidKeys));
     Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.get(validKeys));
-
-    LockedClient lkv = kv.lock();
-    lockedKVOps(lkv);
-    lkv.close();
   }
 
-  private void lockedKVOps(HashTableClient.LockedClient kv) throws TException {
-    System.out.println("==> Testing locked KV ops");
-    Assert.assertEquals(0, kv.numKeys());
+  private void fileOps(FileClient f) throws TException {
     for (int i = 0; i < 1000; i++) {
-      Assert.assertEquals(makeBB("!ok"), kv.put(makeBB(i), makeBB(i)));
-    }
-    Assert.assertEquals(1000, kv.numKeys());
-
-    for (int i = 0; i < 1000; i++) {
-      Assert.assertEquals(makeBB(i), kv.get(makeBB(i)));
-    }
-
-    for (int i = 1000; i < 2000; i++) {
-      Assert.assertEquals(makeBB("!key_not_found"), kv.get(makeBB(i)));
+      Assert.assertEquals(makeBB("!ok"), f.write(makeBB(i)));
     }
 
     for (int i = 0; i < 1000; i++) {
-      Assert.assertEquals(makeBB(i), kv.update(makeBB(i), makeBB(i + 1000)));
+      Assert.assertEquals(makeBB(i), f.read(String.valueOf(i).length()));
     }
 
-    Assert.assertEquals(1000, kv.numKeys());
-
-    for (int i = 1000; i < 2000; i++) {
-      Assert.assertEquals(makeBB("!key_not_found"), kv.update(makeBB(i), makeBB(i + 1000)));
+    for (int i = 0; i < 2000; i++) {
+      Assert.assertEquals(makeBB("!msg_not_found"), f.read(String.valueOf(i).length()));
     }
 
+    Assert.assertTrue(f.seek(0));
     for (int i = 0; i < 1000; i++) {
-      Assert.assertEquals(makeBB(i + 1000), kv.get(makeBB(i)));
+      Assert.assertEquals(makeBB(i), f.read(String.valueOf(i).length()));
     }
-
-    for (int i = 0; i < 1000; i++) {
-      Assert.assertEquals(makeBB(i + 1000), kv.remove(makeBB(i)));
-    }
-
-    Assert.assertEquals(0, kv.numKeys());
-
-    for (int i = 1000; i < 2000; i++) {
-      Assert.assertEquals(makeBB("!key_not_found"), kv.remove(makeBB(i)));
-    }
-
-    for (int i = 0; i < 1000; i++) {
-      Assert.assertEquals(makeBB("!key_not_found"), kv.get(makeBB(i)));
-    }
-
-    List<ByteBuffer> validKeys = new ArrayList<>(1000);
-    List<ByteBuffer> invalidKeys = new ArrayList<>(1000);
-    List<ByteBuffer> originalValues = new ArrayList<>(1000);
-    List<ByteBuffer> updatedValues = new ArrayList<>(1000);
-    List<ByteBuffer> originalKVs = new ArrayList<>(2000);
-    List<ByteBuffer> updatedKVs = new ArrayList<>(2000);
-    List<ByteBuffer> invalidKVs = new ArrayList<>(2000);
-    initBatchOps(validKeys, invalidKeys, originalValues, updatedValues, originalKVs, updatedKVs,
-        invalidKVs);
-
-    Assert.assertEquals(Collections.nCopies(1000, makeBB("!ok")), kv.put(originalKVs));
-    Assert.assertEquals(1000, kv.numKeys());
-    Assert.assertEquals(originalValues, kv.get(validKeys));
-    Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.get(invalidKeys));
-    Assert.assertEquals(originalValues, kv.update(updatedKVs));
-    Assert.assertEquals(1000, kv.numKeys());
-    Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.update(invalidKVs));
-    Assert.assertEquals(updatedValues, kv.get(validKeys));
-    Assert.assertEquals(updatedValues, kv.remove(validKeys));
-    Assert.assertEquals(0, kv.numKeys());
-    Assert
-        .assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.remove(invalidKeys));
-    Assert.assertEquals(Collections.nCopies(1000, makeBB("!key_not_found")), kv.get(validKeys));
   }
 
   private void initBatchOps(List<ByteBuffer> validKeys, List<ByteBuffer> invalidKeys,
@@ -271,25 +217,26 @@ public class JiffyClientTest {
   }
 
   @Test
-  public void testCreate() throws InterruptedException, TException, IOException {
+  public void testHashTable() throws InterruptedException, TException, IOException {
     startServers(false, false);
     try (JiffyClient client = directoryServer.connect()) {
-      HashTableClient kv = client.createHashTable("/a/file.txt", "local://tmp", 1, 1);
-      kvOps(kv);
+      client.createHashTable("/a/file.txt", "local://tmp", 1, 1);
       Assert.assertTrue(client.fs().exists("/a/file.txt"));
+      HashTableClient kv = client.openHashTable("/a/file.txt");
+      kvOps(kv);
     } finally {
       stopServers();
     }
   }
 
   @Test
-  public void testOpen() throws InterruptedException, TException, IOException {
+  public void testFile() throws InterruptedException, TException, IOException {
     startServers(false, false);
     try (JiffyClient client = directoryServer.connect()) {
-      client.createHashTable("/a/file.txt", "local://tmp", 1, 1);
+      client.createFile("/a/file.txt", "local://tmp", 1, 1);
       Assert.assertTrue(client.fs().exists("/a/file.txt"));
-      HashTableClient kv = client.open("/a/file.txt");
-      kvOps(kv);
+      FileClient f = client.openFile("/a/file.txt");
+      fileOps(f);
     } finally {
       stopServers();
     }
@@ -388,58 +335,58 @@ public class JiffyClientTest {
 //    }
 //  }
 
-  @Test
-  public void testNotifications() throws InterruptedException, IOException, TException {
-    startServers(false, false);
-    try (JiffyClient client = directoryServer.connect()) {
-      String op1 = "put", op2 = "remove";
-      ByteBuffer key = ByteBufferUtils.fromString("key1");
-      ByteBuffer value = ByteBufferUtils.fromString("value1");
-
-      client.createHashTable("/a/file.txt", "local://tmp", 1, 1);
-      HashTableListener n1 = client.listen("/a/file.txt");
-      HashTableListener n2 = client.listen("/a/file.txt");
-      HashTableListener n3 = client.listen("/a/file.txt");
-
-      n1.subscribe(Collections.singletonList(op1));
-      n2.subscribe(Arrays.asList(op1, op2));
-      n3.subscribe(Collections.singletonList(op2));
-
-      HashTableClient kv = client.open("/a/file.txt");
-      kv.put(key, value);
-      kv.remove(key);
-
-      Notification N1 = n1.getNotification();
-      Assert.assertEquals(key, N1.getData());
-      Assert.assertEquals(op1, N1.kind().name());
-
-      Notification N2 = n2.getNotification();
-      Assert.assertEquals(key, N2.getData());
-      Assert.assertEquals(op1, N2.kind().name());
-
-      Notification N3 = n2.getNotification();
-      Assert.assertEquals(key, N3.getData());
-      Assert.assertEquals(op2, N3.kind().name());
-
-      Notification N4 = n3.getNotification();
-      Assert.assertEquals(key, N4.getData());
-      Assert.assertEquals(op2, N4.kind().name());
-
-      n1.unsubscribe(Collections.singletonList(op1));
-      n2.unsubscribe(Collections.singletonList(op2));
-
-      kv.put(key, value);
-      kv.remove(key);
-
-      Notification N5 = n2.getNotification();
-      Assert.assertEquals(key, N5.getData());
-      Assert.assertEquals(op1, N5.kind().name());
-
-      Notification N6 = n3.getNotification();
-      Assert.assertEquals(key, N6.getData());
-      Assert.assertEquals(op2, N6.kind().name());
-    } finally {
-      stopServers();
-    }
-  }
+//  @Test
+//  public void testNotifications() throws InterruptedException, IOException, TException {
+//    startServers(false, false);
+//    try (JiffyClient client = directoryServer.connect()) {
+//      String op1 = "put", op2 = "remove";
+//      ByteBuffer key = ByteBufferUtils.fromString("key1");
+//      ByteBuffer value = ByteBufferUtils.fromString("value1");
+//
+//      client.createHashTable("/a/file.txt", "local://tmp", 1, 1);
+//      HashTableListener n1 = client.listenOnHashTable("/a/file.txt");
+//      HashTableListener n2 = client.listenOnHashTable("/a/file.txt");
+//      HashTableListener n3 = client.listenOnHashTable("/a/file.txt");
+//
+//      n1.subscribe(Collections.singletonList(op1));
+//      n2.subscribe(Arrays.asList(op1, op2));
+//      n3.subscribe(Collections.singletonList(op2));
+//
+//      HashTableClient kv = client.openHashTable("/a/file.txt");
+//      kv.put(key, value);
+//      kv.remove(key);
+//
+//      Notification N1 = n1.getNotification();
+//      Assert.assertEquals(key, N1.getData());
+//      Assert.assertEquals(op1, N1.kind().name());
+//
+//      Notification N2 = n2.getNotification();
+//      Assert.assertEquals(key, N2.getData());
+//      Assert.assertEquals(op1, N2.kind().name());
+//
+//      Notification N3 = n2.getNotification();
+//      Assert.assertEquals(key, N3.getData());
+//      Assert.assertEquals(op2, N3.kind().name());
+//
+//      Notification N4 = n3.getNotification();
+//      Assert.assertEquals(key, N4.getData());
+//      Assert.assertEquals(op2, N4.kind().name());
+//
+//      n1.unsubscribe(Collections.singletonList(op1));
+//      n2.unsubscribe(Collections.singletonList(op2));
+//
+//      kv.put(key, value);
+//      kv.remove(key);
+//
+//      Notification N5 = n2.getNotification();
+//      Assert.assertEquals(key, N5.getData());
+//      Assert.assertEquals(op1, N5.kind().name());
+//
+//      Notification N6 = n3.getNotification();
+//      Assert.assertEquals(key, N6.getData());
+//      Assert.assertEquals(op2, N6.kind().name());
+//    } finally {
+//      stopServers();
+//    }
+//  }
 }

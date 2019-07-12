@@ -2,14 +2,10 @@ package jiffy.storage;
 
 import java.io.Closeable;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import jiffy.directory.directory_service.Client;
 import jiffy.directory.rpc_replica_chain;
-import jiffy.directory.rpc_storage_mode;
 import jiffy.storage.BlockClient.CommandResponse;
 import jiffy.storage.BlockClient.CommandResponseReader;
 import jiffy.storage.BlockNameParser.BlockMetadata;
@@ -18,69 +14,6 @@ import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 
 public class ReplicaChainClient implements Closeable {
-
-  public class LockedClient implements Closeable {
-
-    private ReplicaChainClient parent;
-    private boolean redirecting;
-    private rpc_replica_chain redirectChain;
-
-    LockedClient(ReplicaChainClient parent) throws TException {
-      this.parent = parent;
-      String response = StandardCharsets.UTF_8
-          .decode(runCommand(HashTableOps.LOCK, Collections.emptyList()).get(0)).toString();
-      if (!response.equals("!ok")) {
-        this.redirecting = true;
-        String[] parts = response.split("!");
-        this.redirectChain = new rpc_replica_chain(new ArrayList<>(parts.length - 1), parent.getChain().getName(), parent.getChain().getMetadata(),
-            rpc_storage_mode.rpc_in_memory);
-        this.redirectChain.block_ids.addAll(Arrays.asList(parts).subList(2, parts.length));
-      } else {
-        this.redirecting = false;
-        this.redirectChain = null;
-      }
-    }
-
-    void unlock() throws TException {
-      runCommand(HashTableOps.UNLOCK, Collections.emptyList());
-    }
-
-    void sendCommandRequest(int cmdId, List<ByteBuffer> args) throws TException {
-      parent.sendCommandRequest(cmdId, args);
-    }
-
-    List<ByteBuffer> receiveCommandResponse() throws TException {
-      return parent.receiveCommandResponse();
-    }
-
-    List<ByteBuffer> runCommand(int cmdId, List<ByteBuffer> args) throws TException {
-      return parent.runCommand(cmdId, args);
-    }
-
-    List<ByteBuffer> runCommandRedirected(int cmdId, List<ByteBuffer> args) throws TException {
-      return parent.runCommandRedirected(cmdId, args);
-    }
-
-    boolean isRedirecting() {
-      return redirecting;
-    }
-
-    rpc_replica_chain getRedirectChain() {
-      return redirectChain;
-    }
-
-    public rpc_replica_chain getChain() {
-      return parent.getChain();
-    }
-
-    @Override
-    public void close() {
-      try {
-        unlock();
-      } catch (TException ignored) {
-      }
-    }
-  }
 
   private Client fs;
   private String path;
@@ -112,10 +45,6 @@ public class ReplicaChainClient implements Closeable {
 
   public rpc_replica_chain getChain() {
     return chain;
-  }
-
-  public LockedClient lock() throws TException {
-    return new LockedClient(this);
   }
 
   private void sendCommandRequest(BlockClient client, int cmdId, List<ByteBuffer> args)
