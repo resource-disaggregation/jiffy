@@ -3,6 +3,7 @@
 #include <thrift/transport/TTransportException.h>
 #include <thread>
 #include <chrono>
+#include <queue>
 #include "jiffy/storage/manager/storage_management_server.h"
 #include "jiffy/storage/manager/storage_management_client.h"
 #include "jiffy/storage/manager/storage_manager.h"
@@ -225,12 +226,12 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
     std::size_t key;
     switch(j) {
       case 0:
-	if(i % 2) {
-          key = rand_utils::rand_uint32(0, max_key - 1);
-          REQUIRE_NOTHROW(ret = client.put(std::to_string(key), std::string(string_size, 'a')));
-          if(ret == "!ok")
-            bitmap[key] = 1;
-	}
+	    if(i % 2) {
+	      key = rand_utils::rand_uint32(0, max_key - 1);
+	      REQUIRE_NOTHROW(ret = client.put(std::to_string(key), std::string(string_size, 'a')));
+	      if(ret == "!ok")
+	        bitmap[key] = 1;
+	    }
         break;
       case 1:
         key = rand_utils::rand_uint32(0, max_key - 1);
@@ -557,18 +558,18 @@ TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][manag
     switch(j) {
       case 0:
         REQUIRE_NOTHROW(client.write(std::string(string_size, 'a')));
-	      current_offset += string_size;
-	      if(current_offset > file_size) {
-		      file_size = current_offset;
-	      }
+        current_offset += string_size;
+        if(current_offset > file_size) {
+          file_size = current_offset;
+        }
         break;
       case 1:
         REQUIRE_NOTHROW(client.read(string_size));	
-	      break;
+        break;
       case 2:
         std::size_t seek_offset = rand_utils::rand_uint32(0, file_size);
         REQUIRE(client.seek(seek_offset) == true);
-	current_offset = seek_offset;
+	    current_offset = seek_offset;
         break;
     }
   }
@@ -576,6 +577,7 @@ TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][manag
   for(std::size_t i = 0; i < (std::size_t)(file_size / 102400); i++)
   	REQUIRE(client.read(102400) == std::string(102400, 'a'));
   REQUIRE(client.read(file_size % 102400) == std::string(file_size % 102400, 'a'));
+
   as_server->stop();
   if(auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();
@@ -599,9 +601,9 @@ TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][manag
 
 TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
-  auto block_names = test_utils::init_block_names(21, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
+  auto block_names = test_utils::init_block_names(50, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_fifo_queue_blocks(block_names);
+  auto blocks = test_utils::init_fifo_queue_blocks(block_names, 5000);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread1([&storage_server] { storage_server->serve(); });
@@ -626,17 +628,21 @@ TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][man
   fifo_queue_client client(t, "/sandbox/scale_up.txt", status);
 
   // Write data until auto scaling is triggered
-  for (std::size_t i = 0; i < 2100; ++i) {
-    REQUIRE(client.enqueue(std::string(100000, (std::to_string(i)).c_str()[0])) == "!ok");
+  for (std::size_t i = 0; i < 100; ++i) {
+    REQUIRE(client.enqueue(std::string(1024, (std::to_string(i)).c_str()[0])) == "!ok");
   }
   // Busy wait until number of blocks increases
-  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
+  //while (t->dstatus("/sandbox/scale_up.txt").data_blocks_size() == 1);
 
-  for (std::size_t i = 0; i < 2100; ++i) {
-    REQUIRE(client.dequeue() == std::string(100000, (std::to_string(i)).c_str()[0]));
+  for (std::size_t i = 0; i < 100; ++i) {
+    REQUIRE(client.readnext() == std::string(1024, (std::to_string(i)).c_str()[0]));
+  }
+  
+  for (std::size_t i = 0; i < 100; ++i) {
+    REQUIRE(client.dequeue() == std::string(1024, (std::to_string(i)).c_str()[0]));
   }
   // Busy wait until number of blocks decreases
-  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() > 1);
+  //while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() > 1);
 
 
   as_server->stop();
@@ -658,7 +664,6 @@ TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][man
   }
 
 }
-
 
 TEST_CASE("fifo_queue_auto_scale_replica_chain_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -689,17 +694,23 @@ TEST_CASE("fifo_queue_auto_scale_replica_chain_test", "[directory_service][stora
   fifo_queue_client client(t, "/sandbox/scale_up.txt", status);
 
   // Write data until auto scaling is triggered
-  for (std::size_t i = 0; i < 2100; ++i) {
+  for (std::size_t i = 0; i < 4000; ++i) {
     REQUIRE(client.enqueue(std::string(100000, (std::to_string(i)).c_str()[0])) == "!ok");
   }
   // Busy wait until number of blocks increases
-  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
+  //while (t->dstatus("/sandbox/scale_up.txt").data_blocks_size() == 1);
 
-  for (std::size_t i = 0; i < 2100; ++i) {
+
+  for (std::size_t i = 0; i < 4000; ++i) {
+    REQUIRE(client.readnext() == std::string(100000, (std::to_string(i)).c_str()[0]));
+  }
+
+  for (std::size_t i = 0; i < 4000; ++i) {
     REQUIRE(client.dequeue() == std::string(100000, (std::to_string(i)).c_str()[0]));
   }
   // Busy wait until number of blocks decreases
-  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() > 1);
+  //while (t->dstatus("/sandbox/scale_up.txt").data_blocks_size() > 1);
+
 
 
   as_server->stop();
@@ -759,6 +770,10 @@ TEST_CASE("fifo_queue_auto_scale_multi_block_test", "[directory_service][storage
   }
 
   for (std::size_t i = 0; i < 2100; ++i) {
+    REQUIRE(client.readnext() == std::string(100000, (std::to_string(i)).c_str()[0]));
+  }
+
+  for (std::size_t i = 0; i < 2100; ++i) {
     REQUIRE(client.dequeue() == std::string(100000, (std::to_string(i)).c_str()[0]));
   }
   
@@ -782,11 +797,9 @@ TEST_CASE("fifo_queue_auto_scale_multi_block_test", "[directory_service][storage
 
 }
 
-
-/*
 TEST_CASE("fifo_queue_auto_scale_mix_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
-  auto block_names = test_utils::init_block_names(21, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
+  auto block_names = test_utils::init_block_names(50, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   auto blocks = test_utils::init_fifo_queue_blocks(block_names);
 
@@ -808,24 +821,43 @@ TEST_CASE("fifo_queue_auto_scale_mix_test", "[directory_service][storage_server]
   auto dir_server = directory_server::create(t, HOST, DIRECTORY_SERVICE_PORT);
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
-
   data_status status = t->create("/sandbox/scale_up.txt", "fifoqueue", "/tmp", 1, 1, 0, perms::all(), {"0"}, {"regular"}, {});
   fifo_queue_client client(t, "/sandbox/scale_up.txt", status);
-
-  // Write data until auto scaling is triggered
-  for (std::size_t i = 0; i < 2100; ++i) {
-    REQUIRE(client.enqueue(std::string(100000, (std::to_string(i)).c_str()[0])) == "!ok");
+  std::queue<std::pair<std::size_t, char>> result;
+  const std::size_t dict_size = 11;
+  char dict[dict_size] = "abcdefghij";
+  const std::size_t string_max_size = 102400;
+  std::size_t iter = 50000;
+  for(std::size_t i = 0; i < iter; i++) {
+    std::size_t j = rand_utils::rand_uint32(0, 2);
+    std::size_t char_offset = rand_utils::rand_uint32(0, dict_size - 2);
+    std::string ret;
+    std::size_t string_size = rand_utils::rand_uint32(0, string_max_size);
+    switch(j) {
+      case 0:
+        REQUIRE_NOTHROW(client.enqueue(std::string(string_size, dict[char_offset])));
+        result.push(std::make_pair(string_size, dict[char_offset]));
+        break;
+      case 1:
+        REQUIRE_NOTHROW(ret = client.dequeue());	
+	    if(ret != "!msg_not_found") {
+	      auto str = result.front();
+		  result.pop();
+		  REQUIRE(ret == std::string(str.first, str.second));
+	    }
+	    break;
+      case 2:
+        REQUIRE_NOTHROW(client.readnext());
+        break;
+    }
   }
-  // Busy wait until number of blocks increases
-  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
 
-  for (std::size_t i = 0; i < 2100; ++i) {
-    REQUIRE(client.dequeue() == std::string(100000, (std::to_string(i)).c_str()[0]));
+  for(std::size_t i = 0; i < result.size(); i++) {
+	auto str = result.front();
+  	REQUIRE(client.dequeue() == std::string(str.first, str.second));
+	result.pop();
   }
-  // Busy wait until number of blocks decreases
-  while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() > 1);
-
-
+	
   as_server->stop();
   if(auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();
@@ -845,4 +877,3 @@ TEST_CASE("fifo_queue_auto_scale_mix_test", "[directory_service][storage_server]
   }
 
 }
-*/

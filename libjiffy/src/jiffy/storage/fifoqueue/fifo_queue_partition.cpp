@@ -48,7 +48,7 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
 std::string fifo_queue_partition::enqueue(const std::string &message) {
   auto ret = partition_.push_back(message);
   if (!ret.first) {
-    if(!auto_scale_) {
+    if (!auto_scale_) {
       return "!split_enqueue!" + std::to_string(ret.second.size());
     }
     if (!next_target_str().empty()) {
@@ -66,11 +66,11 @@ std::string fifo_queue_partition::dequeue() {
   if (ret.first) {
     head_ += (metadata_length + ret.second.size());
     return ret.second;
-  } 
-  if (ret.second == "!not_available") 
+  }
+  if (ret.second == "!not_available")
     return "!msg_not_found";
   head_ += (metadata_length + ret.second.size());
-  if(!auto_scale_) {
+  if (!auto_scale_) {
     return "!split_dequeue!" + ret.second;
   }
   if (!next_target_str().empty()) {
@@ -84,11 +84,11 @@ std::string fifo_queue_partition::readnext(std::string pos) {
   auto ret = partition_.at(std::stoi(pos));
   if (ret.first) {
     return ret.second;
-  } 
+  }
   if (ret.second == "!not_available") {
     return "!msg_not_found";
-  } 
-  if(!auto_scale_) {
+  }
+  if (!auto_scale_) {
     return "!split_readnext!" + ret.second;
   }
   if (!next_target_str().empty()) {

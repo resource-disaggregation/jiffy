@@ -9,6 +9,8 @@ string_array::string_array(std::size_t max_size, block_memory_allocator<char> al
   data_ = alloc_.allocate(max_);
   tail_ = 0;
   last_element_offset_ = 0;
+  max_tail_ = 0;
+  split_string_ = false;
 }
 
 string_array::~string_array() {
@@ -20,6 +22,8 @@ string_array::string_array(const string_array &other) {
   max_ = other.max_;
   data_ = other.data_;
   tail_ = other.tail_;
+  max_tail_ = other.max_tail_;
+  split_string_ = other.split_string_;
   last_element_offset_ = other.last_element_offset_;
 }
 
@@ -29,12 +33,15 @@ string_array &string_array::operator=(const string_array &other) {
   data_ = other.data_;
   tail_ = other.tail_;
   last_element_offset_ = other.last_element_offset_;
+  max_tail_ = other.max_tail_;
+  split_string_ = other.split_string_;
   return *this;
 }
 
 bool string_array::operator==(const string_array &other) const {
   return data_ == other.data_ && tail_ == other.tail_ && alloc_ == other.alloc_ && max_ == other.max_
-      && last_element_offset_ == other.last_element_offset_;
+      && last_element_offset_ == other.last_element_offset_ && max_tail_ == other.max_tail_
+      && split_string_ == other.split_string_;
 }
 
 std::pair<bool, std::string> string_array::push_back(const std::string &msg) {
@@ -47,6 +54,8 @@ std::pair<bool, std::string> string_array::push_back(const std::string &msg) {
     tail_ += metadata_length;
     std::memcpy(data_ + tail_, msg.c_str(), len);
     tail_ += len;
+    if (tail_ > max_tail_)
+      max_tail_ = tail_;
     return std::make_pair(true, std::string("!success"));
   } else if (max_ - tail_ >= metadata_length) {
     std::size_t remain_len = max_ - tail_ - metadata_length;
@@ -55,14 +64,20 @@ std::pair<bool, std::string> string_array::push_back(const std::string &msg) {
     tail_ += metadata_length;
     std::memcpy(data_ + tail_, msg.c_str(), remain_len);
     tail_ += remain_len;
+    if (tail_ > max_tail_)
+      max_tail_ = tail_;
+    split_string_ = true;
     return std::make_pair(false, msg.substr(remain_len, msg.size() - remain_len));
   } else {
+    split_string_ = true;
     return std::make_pair(false, msg);
   }
 }
 
 const std::pair<bool, std::string> string_array::at(std::size_t offset) const {
   if (offset > last_element_offset_ || empty()) {
+    if (max_ - offset < metadata_length && split_string_)
+      return std::make_pair(false, "");
     return std::make_pair(false, std::string("!not_available"));
   }
   std::size_t len = *((std::size_t *) (data_ + offset));
@@ -76,7 +91,7 @@ const std::pair<bool, std::string> string_array::at(std::size_t offset) const {
 }
 
 std::size_t string_array::find_next(std::size_t offset) const {
-  if (offset >= last_element_offset_) {
+  if (offset >= last_element_offset_ || offset >= tail_) {
     return 0;
   }
   std::size_t len = *((std::size_t *) (data_ + offset));
@@ -88,7 +103,7 @@ void string_array::recover(std::size_t len) {
 }
 
 std::size_t string_array::size() const {
-  return tail_;
+  return max_tail_;
 }
 
 std::size_t string_array::capacity() {
@@ -98,6 +113,7 @@ std::size_t string_array::capacity() {
 void string_array::clear() {
   tail_ = 0;
   last_element_offset_ = 0;
+  max_tail_ = 0;
 }
 
 bool string_array::empty() const {

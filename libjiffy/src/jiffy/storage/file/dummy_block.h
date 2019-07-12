@@ -71,7 +71,7 @@ class dummy_block {
    * @param msg Message
    * @return Pair, a status boolean and the remain string
    */
-  std::pair<bool, std::string> write(const std::string &msg, std::size_t offset); 
+  std::pair<bool, std::string> write(const std::string &msg, std::size_t offset);
 
   /**
    * @brief Read string at offset with given size
@@ -88,7 +88,6 @@ class dummy_block {
    */
 
   std::size_t size() const;
-
 
   /**
    * @brief Fetch capacity of the block
@@ -121,7 +120,7 @@ class dummy_block {
    * @return Data pointer of the block
    */
 
-  char* data() const;
+  char *data() const;
 
  private:
   /* Block memory allocator */

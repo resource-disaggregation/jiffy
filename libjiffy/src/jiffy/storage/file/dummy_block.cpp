@@ -44,7 +44,7 @@ std::pair<bool, std::string> dummy_block::write(const std::string &msg, std::siz
   }
   if (len + offset <= max_) {
     std::memcpy(data_ + offset, msg.c_str(), len);
-    if(len + offset > tail_)
+    if (len + offset > tail_)
       tail_ = len + offset;
     return std::make_pair(true, std::string("!success"));
   } else {
