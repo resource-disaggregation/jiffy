@@ -48,7 +48,7 @@ std::string file_partition::write(const std::string &message, std::string offset
   if (!ret.first) {
     if (!auto_scale_) {
       return "!split_write!" + std::to_string(ret.second.size());
-    }    
+    }
     if (!next_target_str().empty()) {
       return "!split_write!" + next_target_str() + "!" + std::to_string(ret.second.size());
     } else {
@@ -65,11 +65,11 @@ std::string file_partition::read(std::string position, std::string size) {
   auto ret = partition_.read(static_cast<std::size_t>(pos), static_cast<std::size_t>(read_size));
   if (ret.first) {
     return ret.second;
-  } 
+  }
   if (ret.second == "!not_available") {
     return "!msg_not_found";
   } else {
-    if(!auto_scale_) {
+    if (!auto_scale_) {
       return "!split_read!" + ret.second;
     }
     if (!next_target_str().empty()) {

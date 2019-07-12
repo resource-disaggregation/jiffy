@@ -193,7 +193,7 @@ class derived : public impl {
   std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, fifo_queue_type &table) final {
     return impl::deserialize_impl(in, table);
   }
-  
+
   /**
    * @brief Virtual deserialize function for file
    * @param in Input stream
@@ -436,7 +436,6 @@ class binary_serde_impl : public serde {
     return static_cast<std::size_t>(sz);
   }
 
-
   /**
    * @brief Binary deserialization
    * @param in Input stream
@@ -489,7 +488,7 @@ class binary_serde_impl : public serde {
    * @param table File
    * @return Input stream position
    */
-  
+
   size_t deserialize_impl(const std::shared_ptr<std::istream> &in, file_type &table) {
     std::size_t offset = 0;
     while (!in->eof()) {

@@ -227,16 +227,17 @@ std::string hash_table_partition::update_partition(const std::string &new_name, 
     import_slot_range(std::stoi(range[0]), std::stoi(range[1]));
   } else {
     if (metadata() == "importing") {
-      if ((import_slot_range().first != slot_range().first || import_slot_range().second != slot_range().second) && is_tail()) {
+      if ((import_slot_range().first != slot_range().first || import_slot_range().second != slot_range().second)
+          && is_tail()) {
         auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
         fs->remove_block(path(), s[1]);
       }
-      if(!underload()) {
-	      merging_ = false;
+      if (!underload()) {
+        merging_ = false;
       }
-    } else { 
-    	splitting_ = false;
-    	merging_ = false;
+    } else {
+      splitting_ = false;
+      merging_ = false;
     }
     export_slot_range(0, -1);
     import_slot_range(0, -1);

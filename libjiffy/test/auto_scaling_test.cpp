@@ -226,12 +226,12 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
     std::size_t key;
     switch(j) {
       case 0:
-	if(i % 2) {
-          key = rand_utils::rand_uint32(0, max_key - 1);
-          REQUIRE_NOTHROW(ret = client.put(std::to_string(key), std::string(string_size, 'a')));
-          if(ret == "!ok")
-            bitmap[key] = 1;
-	}
+	    if(i % 2) {
+	      key = rand_utils::rand_uint32(0, max_key - 1);
+	      REQUIRE_NOTHROW(ret = client.put(std::to_string(key), std::string(string_size, 'a')));
+	      if(ret == "!ok")
+	        bitmap[key] = 1;
+	    }
         break;
       case 1:
         key = rand_utils::rand_uint32(0, max_key - 1);
@@ -558,18 +558,18 @@ TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][manag
     switch(j) {
       case 0:
         REQUIRE_NOTHROW(client.write(std::string(string_size, 'a')));
-	      current_offset += string_size;
-	      if(current_offset > file_size) {
-		      file_size = current_offset;
-	      }
+        current_offset += string_size;
+        if(current_offset > file_size) {
+          file_size = current_offset;
+        }
         break;
       case 1:
         REQUIRE_NOTHROW(client.read(string_size));	
-	      break;
+        break;
       case 2:
         std::size_t seek_offset = rand_utils::rand_uint32(0, file_size);
         REQUIRE(client.seek(seek_offset) == true);
-	current_offset = seek_offset;
+	    current_offset = seek_offset;
         break;
     }
   }
@@ -577,6 +577,7 @@ TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][manag
   for(std::size_t i = 0; i < (std::size_t)(file_size / 102400); i++)
   	REQUIRE(client.read(102400) == std::string(102400, 'a'));
   REQUIRE(client.read(file_size % 102400) == std::string(file_size % 102400, 'a'));
+
   as_server->stop();
   if(auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();
@@ -839,13 +840,12 @@ TEST_CASE("fifo_queue_auto_scale_mix_test", "[directory_service][storage_server]
         break;
       case 1:
         REQUIRE_NOTHROW(ret = client.dequeue());	
-	if(ret != "!msg_not_found") {
-		auto str = result.front();
-		result.pop();
-		REQUIRE(ret == std::string(str.first, str.second));
-	}
-		
-	break;
+	    if(ret != "!msg_not_found") {
+	      auto str = result.front();
+		  result.pop();
+		  REQUIRE(ret == std::string(str.first, str.second));
+	    }
+	    break;
       case 2:
         REQUIRE_NOTHROW(client.readnext());
         break;

@@ -167,7 +167,6 @@ class string_array {
 
   std::size_t max_offset() const;
 
-
  private:
   /* Block memory allocator */
   block_memory_allocator<char> alloc_;

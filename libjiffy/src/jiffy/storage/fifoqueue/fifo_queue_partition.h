@@ -203,7 +203,7 @@ class fifo_queue_partition : public chain_module {
 
   /* Auto scaling server hostname */
   std::string auto_scaling_host_;
-  
+
   /* Auto scaling server port number */
   int auto_scaling_port_;
 
