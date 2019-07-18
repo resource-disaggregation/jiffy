@@ -32,6 +32,9 @@ class thread_utils {
     CPU_SET(core_id, &cpuset);
 
     ret = pthread_setaffinity_np(thread_handle, sizeof(cpu_set_t), &cpuset);
+#else
+    (void) thread_handle;
+    (void) core_id;
 #endif
     return ret;
   }

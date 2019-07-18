@@ -52,7 +52,7 @@ class fifo_queue_client : data_structure_client {
    * @brief Read next message without dequeue
    * @return Read next result
    */ 
-  std::string readnext();
+  std::string read_next();
 
  private:
 
@@ -76,9 +76,7 @@ class fifo_queue_client : data_structure_client {
    * @return Boolean, true if valid
    */
   bool is_valid(std::size_t partition_num) const {
-    if(partition_num < blocks_.size())
-      return true;
-    else return false;
+    return partition_num < blocks_.size();
   }
   /**
    * @brief Handle command in redirect case

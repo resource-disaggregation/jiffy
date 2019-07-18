@@ -40,7 +40,7 @@ int main() {
   LOG(log_level::info) << "backing-path: " << backing_path;
 
   jiffy_client client(address, service_port, lease_port);
-  std::shared_ptr<file_client>
+  std::shared_ptr<file_writer>
       file_client_1 = client.open_or_create_file(path, backing_path, num_blocks, chain_length);
   std::string data_(data_size, 'x');
   std::chrono::milliseconds periodicity_ms_(1000);
@@ -71,8 +71,8 @@ int main() {
   });
   auto read_worker_ = std::thread([&] {
     uint64_t read_tot_time = 0, read_t0 = 0, read_t1 = 0;
-    std::shared_ptr<file_client>
-        file_client_2 = client.open_file(path);
+    std::shared_ptr<file_reader>
+        file_client_2 = client.open_file_reader(path);
     std::ofstream out2("read_latency.trace");
     while (!stop2_.load()) {
       for (size_t k = 0; k < num_ops; ++k) {

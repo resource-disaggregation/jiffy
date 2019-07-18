@@ -9,7 +9,8 @@
 #include "jiffy/storage/manager/storage_manager.h"
 #include "jiffy/storage/file/file_partition.h"
 #include "jiffy/storage/service/block_server.h"
-#include "jiffy/storage/client/file_client.h"
+#include "jiffy/storage/client/file_reader.h"
+#include "jiffy/storage/client/file_writer.h"
 
 using namespace ::jiffy::storage;
 using namespace ::jiffy::directory;
@@ -41,22 +42,23 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   data_status status = tree->create("/sandbox/file.txt", "file", "/tmp", NUM_BLOCKS, 1, 0, 0,
                                   {"0"}, {"regular"});
 
-  file_client client(tree, "/sandbox/file.txt", status);
+  file_reader reader(tree, "/sandbox/file.txt", status);
+  file_writer writer(tree, "/sandbox/file.txt", status);
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.write(std::to_string(i)) == "!ok");
+    REQUIRE(writer.write(std::to_string(i)) == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.read(std::to_string(i).size()) == std::to_string(i));
+    REQUIRE(reader.read(std::to_string(i).size()) == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.read(std::to_string(i).size()) == "!msg_not_found");
+    REQUIRE(reader.read(std::to_string(i).size()) == "!msg_not_found");
   }
 
-  REQUIRE(client.seek(0) == true);
+  REQUIRE(reader.seek(0) == true);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.read(std::to_string(i).size()) == std::to_string(i));
+    REQUIRE(reader.read(std::to_string(i).size()) == std::to_string(i));
   }
 
   storage_server->stop();

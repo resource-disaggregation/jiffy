@@ -65,7 +65,7 @@ std::string fifo_queue_client::dequeue() {
   return _return;
 }
 
-std::string fifo_queue_client::readnext() {
+std::string fifo_queue_client::read_next() {
   std::string _return;
   std::vector<std::string> args{std::to_string(read_offset_)};
   bool redo;
@@ -192,7 +192,6 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
         if(response.substr(0, 15) == "!split_readnext")
           continue;
         read_offset_ += (metadata_length + response.size());
-        read_flag = false;
         result += response;
       } 
     } while (response.substr(0, 15) == "!split_readnext");

@@ -224,7 +224,7 @@ TEST_CASE("jiffy_client_open_test", "[put][get][update][remove]") {
     jiffy_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
     client.create_hash_table("/a/file.txt", "/tmp");
     REQUIRE(client.fs()->exists("/a/file.txt"));
-    auto table = client.open("/a/file.txt");
+    auto table = client.open_hash_table("/a/file.txt");
     test_hash_table_ops(table);
   }
 
@@ -436,7 +436,7 @@ TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
     n2->subscribe({op1, op2});
     n3->subscribe({op2});
 
-    auto table = client.open("/a/file.txt");
+    auto table = client.open_hash_table("/a/file.txt");
     table->put(key, value);
     table->remove(key);
 

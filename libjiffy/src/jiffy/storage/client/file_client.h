@@ -10,7 +10,7 @@
 namespace jiffy {
 namespace storage {
 
-class file_client : data_structure_client {
+class file_client : public data_structure_client {
  public:
   /**
    * @brief Constructor
@@ -26,62 +26,38 @@ class file_client : data_structure_client {
               const directory::data_status &status,
               int timeout_ms = 1000);
 
+  /**
+   * @brief Destructor
+   */
   virtual ~file_client() = default;
+
   /**
    * @brief Refresh the slot and blocks from directory service
    */
-
   void refresh() override;
-
-  /**
-   * @brief Write message to file
-   * @param msg New message
-   * @return Response of the command
-   */
-
-  std::string write(const std::string &msg);
-
-  /**
-   * @brief Read message from file
-   * @param size Size to be read
-   * @return Response of the command
-   */
-
-  std::string read(const std::size_t size);
 
   /**
    * @brief Seek to a location of the file
    * @param offset File offset to seek
    * @return Boolean, true if offset is within file range
    */
-  bool seek(const std::size_t offset); 
+  bool seek(const std::size_t offset);
 
- private:
+ protected:
 
   /**
    * @brief Check if new chain needs to be added
    * @param op Operation
    * @return Boolean, true if new chain needs to be added
-   */ 
-  bool need_chain(const file_cmd_id &op) const;
+   */
+  bool need_chain() const;
+
   /**
    * @brief Fetch block identifier for specified operation
    * @param op Operation
    * @return Block identifier
    */
-
-  std::size_t block_id(const file_cmd_id &op) const;
-
-  /**
-   * @brief Check if partition number is valid
-   * @param partition_num Partition number
-   * @return Boolean, true if valid
-   */
-  bool is_valid(std::size_t partition_num) const {
-    if(partition_num < blocks_.size())
-      return true;
-    else return false;
-  }
+  std::size_t block_id() const;
 
   /**
    * @brief Track the last partition of the file
@@ -91,33 +67,11 @@ class file_client : data_structure_client {
     if(last_partition_ < partition) 
       last_partition_ = partition;
   }
-  /**
-   * @brief Handle command in redirect case
-   * @param cmd_id Command identifier
-   * @param response Response to be collected
-   */
 
-  void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) override;
-
-  /**
-   * @brief Handle multiple commands in redirect case
-   * @param cmd_id Command identifier
-   * @param args Command arguments
-   * @param responses Responses to be collected
-   */
-
-  void handle_redirects(int32_t cmd_id,
-                        const std::vector<std::string> &args,
-                        std::vector<std::string> &responses) override;
-
-  /* Read partition number */
-  std::size_t read_partition_;
-  /* Read offset in a partition */
-  std::size_t read_offset_;
-  /* Write partition number */
-  std::size_t write_partition_;
-  /* Write offset in a partition */
-  std::size_t write_offset_;
+  /* Current partition number */
+  std::size_t cur_partition_;
+  /* Current offset in a partition */
+  std::size_t cur_offset_;
   /* Last partition of the file */
   std::size_t last_partition_;
   /* Replica chain clients, each partition only save a replica chain client */

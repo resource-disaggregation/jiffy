@@ -39,7 +39,7 @@ TEST_CASE("fifo_queue_enqueue_clear_dequeue_test", "[enqueue][dequeue]") {
   }
 }
 
-TEST_CASE("fifo_queue_enqueue_readnext_dequeue", "[enqueue][readnext][dequeue]") {
+TEST_CASE("fifo_queue_enqueue_readnext_dequeue", "[enqueue][read_next][dequeue]") {
   block_memory_manager manager;
   fifo_queue_partition block(&manager);
   for(std::size_t i = 0; i < 1000; ++i) {
