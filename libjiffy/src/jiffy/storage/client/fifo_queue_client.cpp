@@ -203,10 +203,5 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
   } 
 }
 
-void fifo_queue_client::handle_redirects(int32_t,
-                                         const std::vector<std::string> &,
-                                         std::vector<std::string> &) {
-}
-
 }
 }

@@ -171,12 +171,6 @@ std::string hash_table_partition::scale_remove(const std::string &key) {
   return "!ok";
 }
 
-void hash_table_partition::keys(std::vector<std::string> &keys) { // Remove this operation
-  for (const auto &entry: block_.lock_table()) {
-    keys.push_back(to_string(entry.first));
-  }
-}
-
 void hash_table_partition::get_data_in_slot_range(std::vector<std::string> &data,
                                                   int32_t slot_begin,
                                                   int32_t slot_end,
@@ -276,13 +270,6 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       for (size_t i = 0; i < nargs; i++)
         _return.push_back(get(args[i], redirect));
       break;
-    case hash_table_cmd_id::ht_num_keys:
-      if (nargs != 0) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(std::to_string(size()));
-      }
-      break;
     case hash_table_cmd_id::ht_put:
       if (args.size() % 2 != 0 && !redirect) {
         _return.emplace_back("!args_error");
@@ -313,13 +300,6 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
         for (size_t i = 0; i < nargs; i += 2) {
           _return.emplace_back(update(args[i], args[i + 1], redirect));
         }
-      }
-      break;
-    case hash_table_cmd_id::ht_keys:
-      if (nargs != 0) {
-        _return.emplace_back("!args_error");
-      } else {
-        keys(_return);
       }
       break;
     case hash_table_cmd_id::ht_update_partition:

@@ -310,14 +310,6 @@ class hash_table_partition : public chain_module {
   std::string scale_remove(const std::string &key);
 
   /**
-   * @brief Return keys
-   * @param keys Keys
-   * TODO to be removed?
-   */
-
-  void keys(std::vector<std::string> &keys);
-
-  /**
    * @brief Fetch data from keys which lie in slot range
    * @param data Data to be fetched
    * @param slot_begin Slot begin value

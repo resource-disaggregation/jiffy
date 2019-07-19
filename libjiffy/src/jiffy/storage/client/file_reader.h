@@ -45,17 +45,6 @@ class file_reader: public file_client {
    * @param response Response to be collected
    */
   void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) override;
-
-  /**
-   * @brief Handle multiple commands in redirect case
-   * @param cmd_id Command identifier
-   * @param args Command arguments
-   * @param responses Responses to be collected
-   */
-
-  void handle_redirects(int32_t cmd_id,
-                        const std::vector<std::string> &args,
-                        std::vector<std::string> &responses) override;
 };
 
 }

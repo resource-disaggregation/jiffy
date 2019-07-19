@@ -57,17 +57,6 @@ class data_structure_client {
 
   virtual void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) = 0;
 
-  /**
-   * @brief Handle multiple commands in redirect case
-   * @param cmd_id Command identifier
-   * @param args Command arguments
-   * @param responses Responses to be collected
-   */
-
-  virtual void handle_redirects(int32_t cmd_id,
-                                const std::vector<std::string> &args,
-                                std::vector<std::string> &responses) = 0;
-
   /* Directory client */
   std::shared_ptr<directory::directory_interface> fs_;
   /* Key value partition path */

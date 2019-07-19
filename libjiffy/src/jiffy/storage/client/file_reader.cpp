@@ -75,11 +75,5 @@ void file_reader::handle_redirect(int32_t cmd_id,
   }
 }
 
-void file_reader::handle_redirects(int32_t,
-                                   const std::vector<std::string> &,
-                                   std::vector<std::string> &) {
-  // No-op
-}
-
 }
 }

@@ -49,16 +49,6 @@ class file_writer : public file_client {
    */
   void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) override;
 
-  /**
-   * @brief Handle multiple commands in redirect case
-   * @param cmd_id Command identifier
-   * @param args Command arguments
-   * @param responses Responses to be collected
-   */
-
-  void handle_redirects(int32_t cmd_id,
-                        const std::vector<std::string> &args,
-                        std::vector<std::string> &responses) override;
 };
 
 }

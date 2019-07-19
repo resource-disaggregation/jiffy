@@ -15,8 +15,6 @@ extern std::vector<command> KV_OPS;
 enum hash_table_cmd_id {
   ht_exists = 0,
   ht_get = 1,
-  ht_keys = 2, // TODO: We should not support multi-key operations since we do not provide any guarantees
-  ht_num_keys = 3, // TODO: We should not support multi-key operations since we do not provide any guarantees
   ht_put = 4,
   ht_remove = 5,
   ht_update = 6,
