@@ -64,7 +64,7 @@ class file_client : public data_structure_client {
    * @brief partition Partition 
    */
   void update_last_partition(std::size_t partition) {
-    if(last_partition_ < partition) 
+    if (last_partition_ < partition)
       last_partition_ = partition;
   }
 

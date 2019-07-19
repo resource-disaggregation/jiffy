@@ -441,8 +441,10 @@ class hash_table_partition : public chain_module {
 
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
+
   /* Low threshold */
   double threshold_lo_;
+
   /* High threshold */
   double threshold_hi_;
 
@@ -457,16 +459,22 @@ class hash_table_partition : public chain_module {
 
   /* Block state, regular, importing or exporting */
   hash_partition_state state_;
+
   /* Hash slot range */
   std::pair<int32_t, int32_t> slot_range_;
+
   /* Bool value for auto scaling */
   bool auto_scale_;
+
   /* Export slot range */
   std::pair<int32_t, int32_t> export_slot_range_;
+
   /* Export targets */
   std::vector<std::string> export_target_;
+
   /* String representation for export target */
   std::string export_target_str_;
+
   /* Import slot range */
   std::pair<int32_t, int32_t> import_slot_range_;
 
@@ -483,7 +491,7 @@ class hash_table_partition : public chain_module {
   int auto_scaling_port_;
 
   /* Data update mutex, we want only one update function happen at a time */
-  std::mutex update_lock;
+  std::mutex update_lock_;
 
 };
 

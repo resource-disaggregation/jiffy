@@ -45,14 +45,12 @@ class file_partition : public chain_module {
    * @brief Fetch block size
    * @return Block size
    */
-
   std::size_t size() const;
 
   /**
    * @brief Check if block is empty
    * @return Bool value, true if empty
    */
-
   bool empty() const;
 
   /**
@@ -96,21 +94,18 @@ class file_partition : public chain_module {
    * @param cmd_id Operation identifier
    * @param args Command arguments
    */
-
   void run_command(std::vector<std::string> &_return, int cmd_id, const std::vector<std::string> &args) override;
 
   /**
    * @brief Atomically check dirty bit
    * @return Bool value, true if block is dirty
    */
-
   bool is_dirty() const;
 
   /**
    * @brief Load persistent data into the block
    * @param path Persistent storage path
    */
-
   void load(const std::string &path) override;
 
   /**
@@ -118,7 +113,6 @@ class file_partition : public chain_module {
    * @param path Persistent storage path
    * @return Bool value, true if block successfully synchronized
    */
-
   bool sync(const std::string &path) override;
 
   /**
@@ -126,13 +120,11 @@ class file_partition : public chain_module {
    * @param path Persistent storage path
    * @return Bool value, true if block successfully dumped
    */
-
   bool dump(const std::string &path) override;
 
   /**
    * @brief Send all key and value to the next block
    */
-
   void forward_all() override;
 
   /**
@@ -141,11 +133,11 @@ class file_partition : public chain_module {
    */
   void next_target(std::vector<std::string> &target) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    next_target_string = "";
+    next_target_str_ = "";
     for (const auto &block: target) {
-      next_target_string += (block + "!");
+      next_target_str_ += (block + "!");
     }
-    next_target_string.pop_back();
+    next_target_str_.pop_back();
   }
 
   /**
@@ -154,15 +146,15 @@ class file_partition : public chain_module {
    */
   void next_target(const std::string &target_str) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    next_target_string = target_str;
+    next_target_str_ = target_str;
   }
 
   /**
    * @brief Fetch next target string
    * @return Next target string
    */
-  std::string next_target_str() {
-    return next_target_string;
+  std::string next_target_str() const {
+    return next_target_str_;
   }
 
  private:
@@ -171,7 +163,6 @@ class file_partition : public chain_module {
    * @brief Check if block is overloaded
    * @return Bool value, true if block size is over the high threshold capacity
    */
-
   bool overload();
 
   /* File partition */
@@ -200,11 +191,12 @@ class file_partition : public chain_module {
 
   /* Auto scaling server hostname */
   std::string auto_scaling_host_;
+
   /* Auto scaling server port number */
   int auto_scaling_port_;
 
   /* Next partition target string */
-  std::string next_target_string;
+  std::string next_target_str_;
 
 };
 

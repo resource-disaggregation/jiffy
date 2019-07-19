@@ -6,6 +6,7 @@
 
 namespace jiffy {
 namespace auto_scaling {
+
 /* Auto scaling service handler class */
 class auto_scaling_service_handler : public auto_scaling_serviceIf {
  public:

@@ -22,8 +22,6 @@ class fifo_queue_partition : public chain_module {
    * @param name Partition name
    * @param metadata Partition metadata
    * @param conf Property map
-   * @param directory_host Directory server host name
-   * @param directory_port Directory server port number
    * @param auto_scaling_host Auto scaling server host name
    * @param auto_scaling_port Auto scaling server port number
    */
@@ -139,11 +137,11 @@ class fifo_queue_partition : public chain_module {
    */
   void next_target(std::vector<std::string> &target) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    next_target_string = "";
+    next_target_str_ = "";
     for (const auto &block: target) {
-      next_target_string += (block + "!");
+      next_target_str_ += (block + "!");
     }
-    next_target_string.pop_back();
+    next_target_str_.pop_back();
   }
 
   /**
@@ -152,14 +150,14 @@ class fifo_queue_partition : public chain_module {
    */
   void next_target(const std::string &target_str) {
     std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    next_target_string = target_str;
+    next_target_str_ = target_str;
   }
   /**
    * @brief Fetch next target string
    * @return Next target string
    */
-  std::string next_target_str() {
-    return next_target_string;
+  std::string next_target_str() const {
+    return next_target_str_;
   }
 
  private:
@@ -186,9 +184,6 @@ class fifo_queue_partition : public chain_module {
   /* Bool for underload partition */
   bool underload_;
 
-  /* Bool for new block available, this bool basically prevents the fifo queue to erase all the blocks when size = 0 */
-  bool new_block_available_;
-
   /* Partition dirty bit */
   bool dirty_;
 
@@ -208,7 +203,7 @@ class fifo_queue_partition : public chain_module {
   int auto_scaling_port_;
 
   /* Next partition target string */
-  std::string next_target_string;
+  std::string next_target_str_;
 
   /* Head position of queue */
   std::size_t head_;
