@@ -11,13 +11,15 @@
 namespace jiffy {
 namespace storage {
 
-const int metadata_length = 8;
 class string_array_iterator;
 class string_array;
 class const_string_array_iterator;
+
 /**
  * @brief String array class
- * This data structure store strings in "length | string" format and support storing big strings between different data blocks
+ *
+ * This data structure store strings in "length | string" format
+ * and supports storing big strings between different data blocks.
  */
 class string_array {
   friend class string_array_iterator;
@@ -30,11 +32,13 @@ class string_array {
   typedef std::string *pointer;
   typedef std::string &reference;
   typedef const std::string &const_reference;
+
  public:
+  static const int METADATA_LEN = 8;
+
   /**
    * @brief Constructor
    */
-
   string_array() = default;
 
   /**
@@ -42,20 +46,17 @@ class string_array {
    * @param max_size Max size for the string array
    * @param alloc Block memory allocator
    */
-
   string_array(std::size_t max_size, block_memory_allocator<char> alloc);
 
   /**
    * @brief Destructor
    */
-
   ~string_array();
 
   /**
    * @brief Copy constructor
    * @param other Another string array
    */
-
   string_array(const string_array &other);
 
   /**
@@ -63,7 +64,6 @@ class string_array {
    * @param other Another string array
    * @return String array
    */
-
   string_array &operator=(const string_array &other);
 
   /**
@@ -71,23 +71,20 @@ class string_array {
    * @param other Another string array
    * @return Boolean, true if equal
    */
-
   bool operator==(const string_array &other) const;
 
   /**
    * @brief Push new message at the end of the array
-   * @param msg Message
+   * @param item Message
    * @return Pair, a status boolean and the remain string
    */
-
-  std::pair<bool, std::string> push_back(const std::string &msg);
+  std::pair<bool, std::string> push_back(const std::string &item);
 
   /**
    * @brief Read string at offset
    * @param offset Read offset
    * @param Pair, a status boolean and the read string
    */
-
   const std::pair<bool, std::string> at(std::size_t offset) const;
 
   /**
@@ -95,76 +92,65 @@ class string_array {
    * @param offset Offset of the current string
    * @return Offset of the next string
    */
-
   std::size_t find_next(std::size_t offset) const;
 
   /**
    * @brief Recover last write
    * @param len Length of bytes to recover
    */
-
   void recover(std::size_t len);
 
   /**
    * @brief Fetch total size of the string array
    * @return Size
    */
-
   std::size_t size() const;
 
   /**
    * @brief Fetch capacity of the string array
    * @return Capacity
    */
-
   std::size_t capacity();
 
   /**
    * @brief Clear the content of string array
    */
-
   void clear();
 
   /**
    * @brief Check if string array is empty
    * @return Boolean, true if empty
    */
-
   bool empty() const;
 
   /**
    * @brief Fetch begin iterator
    * @return Begin iterator
    */
-
   iterator begin();
 
   /**
    * @brief Fetch end iterator
    * @return End iterator
    */
-
   iterator end();
 
   /**
    * @brief Fetch const begin iterator
    * @return Const begin iterator
    */
-
   const_iterator begin() const;
 
   /**
    * @brief Fetch const end iterator
    * @return Const end iterator
    */
-
   const_iterator end() const;
 
   /**
    * @brief Fetch the maximum offset of the strings
    * @return Maximum offset of the strings
    */
-
   std::size_t max_offset() const;
 
  private:
@@ -207,21 +193,18 @@ class string_array_iterator {
    * @param impl String array reference
    * @param pos Position
    */
-
   string_array_iterator(string_array &impl, std::size_t pos);
 
   /**
    * @brief Operator *
    * @return Value
    */
-
   value_type operator*() const;
 
   /**
    * @brief Operator ++
    * @return string array iterator
    */
-
   const string_array_iterator operator++(int);
 
   /**
@@ -229,7 +212,6 @@ class string_array_iterator {
    * @param other Another string array iterator
    * @return Boolean, true if equal
    */
-
   bool operator==(string_array_iterator other) const;
 
   /**
@@ -237,7 +219,6 @@ class string_array_iterator {
    * @param other Another string array iterator
    * @return Boolean, true if not equal
    */
-
   bool operator!=(string_array_iterator other) const;
 
   /**
@@ -245,7 +226,6 @@ class string_array_iterator {
    * @param other Another string array iterator
    * @return string array iterator
    */
-
   string_array_iterator &operator=(const string_array_iterator &other);
 
  private:
@@ -272,21 +252,18 @@ class const_string_array_iterator {
    * @param impl String array reference
    * @param pos Position
    */
-
   const_string_array_iterator(const string_array &impl, std::size_t pos);
 
   /**
    * @brief Operator *
    * @return Value
    */
-
   value_type operator*() const;
 
   /**
    * @brief Operator ++
    * @return const string array iterator
    */
-
   const const_string_array_iterator operator++(int);
 
   /**
@@ -294,7 +271,6 @@ class const_string_array_iterator {
    * @param other Another const string array iterator
    * @return Boolean, true if equal
    */
-
   bool operator==(const_string_array_iterator other) const;
 
   /**

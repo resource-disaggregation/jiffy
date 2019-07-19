@@ -47,8 +47,8 @@ TEST_CASE("fifo_queue_enqueue_readnext_dequeue", "[enqueue][read_next][dequeue]"
   }
   std::size_t pos = 0;
   for(std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(block.readnext(std::to_string(pos)) == std::to_string(i));
-    pos += (std::to_string(i).size() + metadata_length);
+    REQUIRE(block.read_next(std::to_string(pos)) == std::to_string(i));
+    pos += (std::to_string(i).size() + string_array::METADATA_LEN);
   }
   for(std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(block.dequeue() == std::to_string(i));

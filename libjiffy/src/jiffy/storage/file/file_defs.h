@@ -4,12 +4,12 @@
 #include <functional>
 #include "jiffy/storage/block_memory_allocator.h"
 #include "jiffy/storage/types/binary.h"
-#include "jiffy/storage/file/dummy_block.h"
+#include "jiffy/storage/file/file_block.h"
 
 namespace jiffy {
 namespace storage {
 // File definition
-typedef dummy_block file_type;
+typedef file_block file_type;
 
 }
 }

@@ -71,7 +71,7 @@ class fifo_queue_partition : public chain_module {
    * @param Read next position
    * @return Read next return status string
    */
-  std::string readnext(std::string pos);
+  std::string read_next(std::string pos);
 
   /**
    * @brief Clear the fifo queue

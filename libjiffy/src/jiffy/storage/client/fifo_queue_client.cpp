@@ -191,7 +191,7 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
       if(response != "!msg_not_found") {
         if(response.substr(0, 15) == "!split_readnext")
           continue;
-        read_offset_ += (metadata_length + response.size());
+        read_offset_ += (string_array::METADATA_LEN + response.size());
         result += response;
       } 
     } while (response.substr(0, 15) == "!split_readnext");
@@ -199,7 +199,7 @@ void fifo_queue_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
     read_flag = false;
   }
   if(read_flag && cmd_id == fifo_queue_cmd_id::fq_readnext && response != "!msg_not_found") {
-    read_offset_ += (metadata_length + response.size());
+    read_offset_ += (string_array::METADATA_LEN + response.size());
   } 
 }
 

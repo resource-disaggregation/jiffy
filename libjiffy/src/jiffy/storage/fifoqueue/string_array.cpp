@@ -44,62 +44,61 @@ bool string_array::operator==(const string_array &other) const {
       && split_string_ == other.split_string_;
 }
 
-std::pair<bool, std::string> string_array::push_back(const std::string &msg) {
-  std::size_t len = msg.size();
-  if (len + tail_ + metadata_length <= max_) {
-    char metadata[metadata_length];
-    std::memset(metadata, 0, metadata_length);
-    std::memcpy(data_ + tail_, (char *) &len, metadata_length);
+std::pair<bool, std::string> string_array::push_back(const std::string &item) {
+  auto len = item.size();
+  if (len + tail_ + METADATA_LEN <= max_) { // Complete item will be written
+    // Write length
+    std::memcpy(data_ + tail_, (char *) &len, METADATA_LEN);
     last_element_offset_ = tail_;
-    tail_ += metadata_length;
-    std::memcpy(data_ + tail_, msg.c_str(), len);
+    tail_ += METADATA_LEN;
+
+    // Write data
+    std::memcpy(data_ + tail_, item.c_str(), len);
     tail_ += len;
-    if (tail_ > max_tail_)
-      max_tail_ = tail_;
+
+    max_tail_ = std::max(tail_, max_tail_);
     return std::make_pair(true, std::string("!success"));
-  } else if (max_ - tail_ >= metadata_length) {
-    std::size_t remain_len = max_ - tail_ - metadata_length;
-    std::memcpy(data_ + tail_, (char *) &len, metadata_length);
+  } else if (max_ - tail_ >= METADATA_LEN) { // Item will be partially written, remaining part will be returned
+    // Write length
+    auto remain_len = max_ - tail_ - METADATA_LEN;
+    std::memcpy(data_ + tail_, (char *) &len, METADATA_LEN);
     last_element_offset_ = tail_;
-    tail_ += metadata_length;
-    std::memcpy(data_ + tail_, msg.c_str(), remain_len);
+    tail_ += METADATA_LEN;
+
+    // Write data
+    std::memcpy(data_ + tail_, item.c_str(), remain_len);
     tail_ += remain_len;
-    if (tail_ > max_tail_)
-      max_tail_ = tail_;
+
+    max_tail_ = std::max(tail_, max_tail_);
     split_string_ = true;
-    return std::make_pair(false, msg.substr(remain_len, msg.size() - remain_len));
-  } else {
+    return std::make_pair(false, item.substr(remain_len, item.size() - remain_len));
+  } else { // Item will not be written, full item will be returned
     split_string_ = true;
-    return std::make_pair(false, msg);
+    return std::make_pair(false, item);
   }
 }
 
 const std::pair<bool, std::string> string_array::at(std::size_t offset) const {
   if (offset > last_element_offset_ || empty()) {
-    if (max_ - offset < metadata_length && split_string_)
+    if (max_ - offset < METADATA_LEN && split_string_)
       return std::make_pair(false, "");
     return std::make_pair(false, std::string("!not_available"));
   }
-  std::size_t len = *((std::size_t *) (data_ + offset));
-  if (offset + metadata_length + len <= max_) {
-    return std::make_pair(true, std::string((const char *) (data_ + offset + metadata_length), len));
+  auto len = *((std::size_t *) (data_ + offset));
+  if (offset + METADATA_LEN + len <= max_) {
+    return std::make_pair(true, std::string(data_ + offset + METADATA_LEN, len));
   } else {
-    return std::make_pair(false,
-                          std::string((const char *) (data_ + offset + metadata_length),
-                                      max_ - offset - metadata_length));
+    return std::make_pair(false, std::string(data_ + offset + METADATA_LEN, max_ - offset - METADATA_LEN));
   }
 }
 
 std::size_t string_array::find_next(std::size_t offset) const {
-  if (offset >= last_element_offset_ || offset >= tail_) {
-    return 0;
-  }
-  std::size_t len = *((std::size_t *) (data_ + offset));
-  return offset + len + metadata_length;
+  if (offset >= last_element_offset_ || offset >= tail_) return 0;
+  return offset + *reinterpret_cast<size_t*>(data_ + offset) + METADATA_LEN;
 }
 
 void string_array::recover(std::size_t len) {
-  tail_ -= (len + metadata_length);
+  tail_ -= (len + METADATA_LEN);
 }
 
 std::size_t string_array::size() const {
@@ -107,7 +106,7 @@ std::size_t string_array::size() const {
 }
 
 std::size_t string_array::capacity() {
-  return max_ - metadata_length;
+  return max_ - METADATA_LEN;
 }
 
 void string_array::clear() {
