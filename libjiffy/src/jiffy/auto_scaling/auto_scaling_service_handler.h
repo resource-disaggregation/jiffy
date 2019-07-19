@@ -19,22 +19,28 @@ class auto_scaling_service_handler : public auto_scaling_serviceIf {
 
   /**
    * @brief Auto scaling handling function
-   * @param current_replica_chain Current replica chain
+   * @param cur_chain Current replica chain
    * @param path Path
    * @param conf Configuration map
    */
-  void auto_scaling(const std::vector<std::string> &current_replica_chain,
+  void auto_scaling(const std::vector<std::string> &cur_chain,
                     const std::string &path,
                     const std::map<std::string, std::string> &conf) override;
 
  private:
   /**
+   * @brief Packs chain into a single string
+   * @param chain Replica chain
+   * @return Packed string
+   */
+  static std::string pack(const directory::replica_chain &chain);
+
+  /**
    * @brief Make exceptions
    * @param e exception
    * @return Auto scaling exceptions
    */
-
-  auto_scaling_exception make_exception(std::exception &e);
+  static auto_scaling_exception make_exception(std::exception &e);
 
   /**
    * @brief Make exceptions
@@ -42,13 +48,11 @@ class auto_scaling_service_handler : public auto_scaling_serviceIf {
    * @return Auto scaling exceptions
    */
 
-  auto_scaling_exception make_exception(const std::string &msg);
+  static auto_scaling_exception make_exception(const std::string &msg);
   /* Directory server host name */
   std::string directory_host_;
   /* Directory server port number */
   int directory_port_;
-
-
 };
 
 }
