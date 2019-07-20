@@ -1,5 +1,5 @@
-#ifndef JIFFY_DUMMY_BLOCK_H
-#define JIFFY_DUMMY_BLOCK_H
+#ifndef JIFFY_FILE_BLOCK_H
+#define JIFFY_FILE_BLOCK_H
 
 #include <string>
 #include <cstring>
@@ -15,7 +15,7 @@ namespace storage {
  * This data structure only mainly blocks of memory without metadata
  * Handles read write across multiple blocks
  */
-class dummy_block {
+class file_block {
   typedef std::ptrdiff_t difference_type;
   typedef std::size_t size_type;
   typedef std::string value_type;
@@ -26,7 +26,7 @@ class dummy_block {
   /**
    * @brief Constructor
    */
-  dummy_block() = default;
+  file_block() = default;
 
   /**
    * @brief Constructor
@@ -34,20 +34,20 @@ class dummy_block {
    * @param alloc Block memory allocator 
    */
 
-  dummy_block(std::size_t max_size, block_memory_allocator<char> alloc);
+  file_block(std::size_t max_size, block_memory_allocator<char> alloc);
 
   /**
    * @brief Deconstructor
    */
 
-  ~dummy_block();
+  ~file_block();
 
   /**
    * @brief Copy constructor
    * @param other Another dummy block
    */
 
-  dummy_block(const dummy_block &other);
+  file_block(const file_block &other);
 
   /**
    * @brief Copy assignment operator
@@ -55,7 +55,7 @@ class dummy_block {
    * @return Dummy block
    */
 
-  dummy_block &operator=(const dummy_block &other);
+  file_block &operator=(const file_block &other);
 
   /**
    * @brief Operator ==
@@ -63,15 +63,15 @@ class dummy_block {
    * @return Boolean, true if equal 
    */
 
-  bool operator==(const dummy_block &other) const;
+  bool operator==(const file_block &other) const;
 
   /**
    * @brief Write new message to the block
    * @param offset Offset
-   * @param msg Message
+   * @param data Message
    * @return Pair, a status boolean and the remain string
    */
-  std::pair<bool, std::string> write(const std::string &msg, std::size_t offset);
+  std::pair<bool, std::string> write(const std::string &data, std::size_t offset);
 
   /**
    * @brief Read string at offset with given size
@@ -109,13 +109,6 @@ class dummy_block {
   bool empty() const;
 
   /**
-   * @brief Fetch the maximum offset of the strings
-   * @return Maximum offset of the strings
-   */
-
-  std::size_t max_offset() const;
-
-  /**
    * @brief Fetch data pointer
    * @return Data pointer of the block
    */
@@ -142,4 +135,4 @@ class dummy_block {
 }
 }
 
-#endif //JIFFY_DUMMY_BLOCK_H
+#endif //JIFFY_FILE_BLOCK_H

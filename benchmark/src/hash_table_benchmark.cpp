@@ -13,12 +13,12 @@ using namespace ::jiffy::utils;
 
 using namespace ::apache::thrift;
 
-typedef std::shared_ptr<hash_table_client> client_ptr;
-typedef std::vector<client_ptr> client_list;
+typedef std::shared_ptr<hash_table_client> writer_ptr;
+typedef std::vector<writer_ptr> writer_list;
 
 class hash_table_benchmark {
  public:
-  hash_table_benchmark(client_list &clients,
+  hash_table_benchmark(writer_list &clients,
                        size_t data_size,
                        size_t num_clients,
                        size_t num_ops)
@@ -59,7 +59,7 @@ class hash_table_benchmark {
 
 class put_benchmark : public hash_table_benchmark {
  public:
-  put_benchmark(client_list &clients,
+  put_benchmark(writer_list &clients,
                 size_t data_size,
                 size_t num_clients,
                 size_t num_ops) : hash_table_benchmark(clients, data_size, num_clients, num_ops) {
@@ -86,7 +86,7 @@ class put_benchmark : public hash_table_benchmark {
 
 class get_benchmark : public hash_table_benchmark {
  public:
-  get_benchmark(client_list &clients,
+  get_benchmark(writer_list &clients,
                 size_t data_size,
                 size_t num_clients,
                 size_t num_ops) : hash_table_benchmark(clients, data_size, num_clients, num_ops) {
@@ -116,7 +116,7 @@ class get_benchmark : public hash_table_benchmark {
 
 class remove_benchmark : public hash_table_benchmark {
  public:
-  remove_benchmark(client_list &clients,
+  remove_benchmark(writer_list &clients,
                    size_t data_size,
                    size_t num_clients,
                    size_t num_ops) : hash_table_benchmark(clients, data_size, num_clients, num_ops) {

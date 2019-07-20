@@ -14,12 +14,12 @@ using namespace ::jiffy::utils;
 
 using namespace ::apache::thrift;
 
-typedef std::shared_ptr<fifo_queue_client> client_ptr;
-typedef std::vector<client_ptr> client_list;
+typedef std::shared_ptr<fifo_queue_client> writer_ptr;
+typedef std::vector<writer_ptr> writer_list;
 
 class fifo_queue_benchmark {
  public:
-  fifo_queue_benchmark(client_list &clients,
+  fifo_queue_benchmark(writer_list &clients,
                        size_t data_size,
                        size_t num_clients,
                        size_t num_ops)
@@ -61,7 +61,7 @@ class fifo_queue_benchmark {
 
 class enqueue_benchmark : public fifo_queue_benchmark {
  public:
-  enqueue_benchmark(client_list &clients,
+  enqueue_benchmark(writer_list &clients,
                     size_t data_size,
                     size_t num_clients,
                     size_t num_ops) : fifo_queue_benchmark(clients, data_size, num_clients, num_ops) {
@@ -89,7 +89,7 @@ class enqueue_benchmark : public fifo_queue_benchmark {
 
 class dequeue_benchmark : public fifo_queue_benchmark {
  public:
-  dequeue_benchmark(client_list &clients,
+  dequeue_benchmark(writer_list &clients,
                     size_t data_size,
                     size_t num_clients,
                     size_t num_ops) : fifo_queue_benchmark(clients, data_size, num_clients, num_ops) {

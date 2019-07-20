@@ -152,9 +152,7 @@ void file_partition::run_command(std::vector<std::string> &_return,
     try {
       overload_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
-      std::map<std::string, std::string> scale_conf;
-      scale_conf.emplace(std::make_pair(std::string("type"), std::string("file")));
-      scale_conf.emplace(std::make_pair(std::string("next_partition_name"), dst_partition_name));
+      std::map<std::string, std::string> scale_conf{{"type", "file"}, {"next_partition_name", dst_partition_name}};
       auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
       scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {

@@ -26,7 +26,6 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
       partition_(manager->mb_capacity(), build_allocator<char>()),
       overload_(false),
       underload_(false),
-      new_block_available_(false),
       dirty_(false),
       directory_host_(directory_host),
       directory_port_(directory_port),
@@ -64,23 +63,23 @@ std::string fifo_queue_partition::enqueue(const std::string &message) {
 std::string fifo_queue_partition::dequeue() {
   auto ret = partition_.at(head_);
   if (ret.first) {
-    head_ += (metadata_length + ret.second.size());
+    head_ += (string_array::METADATA_LEN + ret.second.size());
     return ret.second;
   }
   if (ret.second == "!not_available")
     return "!msg_not_found";
-  head_ += (metadata_length + ret.second.size());
+  head_ += (string_array::METADATA_LEN + ret.second.size());
   if (!auto_scale_) {
     return "!split_dequeue!" + ret.second;
   }
   if (!next_target_str().empty()) {
     return "!split_dequeue!" + next_target_str() + "!" + ret.second;
   }
-  head_ -= (metadata_length + ret.second.size());
+  head_ -= (string_array::METADATA_LEN + ret.second.size());
   return "!redo";
 }
 
-std::string fifo_queue_partition::readnext(std::string pos) {
+std::string fifo_queue_partition::read_next(std::string pos) {
   auto ret = partition_.at(std::stoi(pos));
   if (ret.first) {
     return ret.second;
@@ -145,7 +144,7 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
       if (nargs != 1) {
         _return.emplace_back("!args_error");
       } else {
-        _return.emplace_back(readnext(args[0]));
+        _return.emplace_back(read_next(args[0]));
       }
       break;
     default:throw std::invalid_argument("No such operation id " + std::to_string(cmd_id));
