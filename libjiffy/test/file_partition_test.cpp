@@ -60,7 +60,7 @@ TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
     std::vector<std::string> res;
-    block.run_command(res, file_cmd_id::file_write, {std::to_string(i), std::to_string(offset)});
+    block.run_command(res, {"write", std::to_string(i), std::to_string(offset)});
     offset += std::to_string(i).size();
     REQUIRE(res.front() == "!ok");
   }

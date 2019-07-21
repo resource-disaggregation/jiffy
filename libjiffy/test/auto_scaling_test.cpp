@@ -65,21 +65,13 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  data_status status = t->create("/sandbox/scale_up.txt",
-                                 "hashtable",
-                                 "/tmp",
-                                 3,
-                                 3,
-                                 0,
-                                 perms::all(),
-                                 {"0_32768", "32768_49152", "49152_65536"},
-                                 {"regular", "regular", "regular"},
-                                 {});
+  data_status status = t->create("/sandbox/scale_up.txt", "hashtable", "/tmp", 3, 3, 0, perms::all(),
+                                 {"0_32768", "32768_49152", "49152_65536"}, {"regular", "regular", "regular"}, {});
   hash_table_client client(t, "/sandbox/scale_up.txt", status);
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 2000; ++i) {
     REQUIRE_NOTHROW(client.put(std::to_string(i), std::to_string(i)));
-    REQUIRE_NOTHROW(client.update(std::to_string(i), std::to_string(2000 - i)));
+    REQUIRE_NOTHROW(client.update(std::to_string(i), std::to_string(2000 - i))); // FIXME(anuragkh): why?
   }
 
   // Busy wait until number of blocks increases
@@ -160,9 +152,9 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
   for (std::size_t i = 1; i < 1000; i++) {
     std::string key = std::to_string(i);
     std::vector<std::string> ret;
-    REQUIRE_NOTHROW(blocks[0]->impl()->run_command(ret, 0, {}));
+    REQUIRE_NOTHROW(blocks[0]->impl()->run_command(ret, {"get"}));
     REQUIRE(ret.front() == "!block_moved");
-    REQUIRE_NOTHROW(blocks[2]->impl()->run_command(ret, 0, {}));
+    REQUIRE_NOTHROW(blocks[2]->impl()->run_command(ret, {"get"}));
     REQUIRE(ret.front() == "!block_moved");
   }
   for (std::size_t i = 1; i < 1000 && i != 600; i++) {
@@ -218,8 +210,8 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  data_status status = t->create("/sandbox/scale_down.txt", "hashtable", "/tmp", 3, 5, 0, perms::all(),
-                                 {"0_16384", "16384_32768", "32768_65536"}, {"regular", "regular", "regular"}, {});
+  auto status = t->create("/sandbox/scale_down.txt", "hashtable", "/tmp", 3, 5, 0, perms::all(),
+                          {"0_16384", "16384_32768", "32768_65536"}, {"regular", "regular", "regular"}, {});
   hash_table_client client(t, "/sandbox/scale_down.txt", status);
   std::vector<int> remain_keys;
   std::size_t iter = 15000;
@@ -308,8 +300,7 @@ TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][managemen
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  data_status
-      status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 1, 1, 0, perms::all(), {"0"}, {"regular"}, {});
+  auto status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 1, 1, 0, perms::all(), {"0"}, {"regular"}, {});
   file_writer writer(t, "/sandbox/scale_up.txt", status);
   file_reader reader(t, "/sandbox/scale_up.txt", status);
 

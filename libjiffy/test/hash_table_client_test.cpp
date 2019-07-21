@@ -28,6 +28,8 @@ using namespace ::jiffy::utils;
 #define STORAGE_MANAGEMENT_PORT 9092
 #define AUTO_SCALING_SERVICE_PORT 9095
 
+// TODO: Disable auto-scaling for these tests?
+
 TEST_CASE("hash_table_client_put_get_test", "[put][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -58,7 +60,6 @@ TEST_CASE("hash_table_client_put_get_test", "[put][get]") {
     REQUIRE(client.get(std::to_string(i)) == "!key_not_found");
   }
 
-
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -68,8 +69,6 @@ TEST_CASE("hash_table_client_put_get_test", "[put][get]") {
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
-
-
 }
 
 TEST_CASE("hash_table_client_put_update_get_test", "[put][update][get]") {
@@ -110,7 +109,6 @@ TEST_CASE("hash_table_client_put_update_get_test", "[put][update][get]") {
     REQUIRE(client.get(std::to_string(i)) == std::to_string(i + 1000));
   }
 
-
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -120,9 +118,7 @@ TEST_CASE("hash_table_client_put_update_get_test", "[put][update][get]") {
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
-
 }
-
 
 TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();

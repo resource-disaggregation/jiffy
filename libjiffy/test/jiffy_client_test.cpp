@@ -26,7 +26,6 @@ using namespace jiffy::utils;
 #define DIRECTORY_LEASE_PORT 9091
 #define STORAGE_SERVICE_PORT 9092
 #define STORAGE_MANAGEMENT_PORT 9093
-#define STORAGE_NOTIFICATION_PORT 9094
 #define STORAGE_CHAIN_PORT 9095
 #define LEASE_PERIOD_MS 100
 #define LEASE_PERIOD_US (LEASE_PERIOD_MS * 1000)
@@ -424,7 +423,7 @@ TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
 
   {
     jiffy_client client(HOST, DIRECTORY_SERVICE_PORT, DIRECTORY_LEASE_PORT);
-    std::string op1 = "ht_put", op2 = "ht_remove";
+    std::string op1 = "put", op2 = "remove";
     std::string key = "key1", value = "value1";
 
     client.fs()->create("/a/file.txt", "hashtable", "/tmp", 1, 1, 0, 0, {"0_65536"}, {"regular"});

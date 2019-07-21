@@ -360,11 +360,10 @@ class hash_table_partition : public chain_module {
   /**
    * @brief Run particular command on key value block
    * @param _return Return status to be collected
-   * @param cmd_id Operation identifier
    * @param args Command arguments
    */
 
-  void run_command(std::vector<std::string> &_return, int cmd_id, const std::vector<std::string> &args) override;
+  void run_command(std::vector<std::string> &_return, const std::vector<std::string> &args) override;
 
   /**
    * @brief Atomically check dirty bit

@@ -6,7 +6,7 @@ namespace storage {
 partition::partition(block_memory_manager *manager,
                      const std::string &name,
                      const std::string &metadata,
-                     const std::vector<command> &supported_commands)
+                     const command_map &supported_commands)
     : name_(name),
       metadata_(metadata),
       supported_commands_(supported_commands),
@@ -43,20 +43,21 @@ const std::string &partition::metadata() const {
   return metadata_;
 }
 
-bool partition::is_accessor(int i) const {
+bool partition::is_accessor(const std::string &cmd) const {
   // Does not require lock since block_ops don't change
-  return supported_commands_.at(static_cast<size_t>(i)).type == accessor;
+  return supported_commands_.at(cmd).is_accessor();
 }
 
-bool partition::is_mutator(int i) const {
+bool partition::is_mutator(const std::string &cmd) const {
   // Does not require lock since block_ops don't change
-  return supported_commands_.at(static_cast<size_t>(i)).type == mutator;
+  return supported_commands_.at(cmd).is_mutator();
 }
 
-std::string partition::command_name(int cmd_id) {
-  if (!default_.load())
-    return supported_commands_[cmd_id].name;
-  else return "default_partition";
+uint32_t partition::command_id(const std::string &cmd_name) {
+  auto it = supported_commands_.find(cmd_name);
+  if (it == supported_commands_.end())
+    return UINT32_MAX;
+  return it->second.id;
 }
 
 std::size_t partition::storage_capacity() {

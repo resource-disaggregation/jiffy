@@ -22,7 +22,7 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
                                            int directory_port,
                                            const std::string &auto_scaling_host,
                                            int auto_scaling_port)
-    : chain_module(manager, name, metadata, FIFO_QUEUE_OPS),
+    : chain_module(manager, name, metadata, FQ_CMDS),
       partition_(manager->mb_capacity(), build_allocator<char>()),
       overload_(false),
       underload_(false),
@@ -111,13 +111,16 @@ std::string fifo_queue_partition::update_partition(const std::string &next) {
 }
 
 void fifo_queue_partition::run_command(std::vector<std::string> &_return,
-                                       int32_t cmd_id,
                                        const std::vector<std::string> &args) {
-  size_t nargs = args.size();
-  switch (cmd_id) {
+
+  auto arg_it = args.begin();
+  auto cmd_name = *arg_it;
+  std::advance(arg_it, 1);
+  auto nargs = args.size() - 1;
+  switch (command_id(cmd_name)) {
     case fifo_queue_cmd_id::fq_enqueue:
-      for (const std::string &msg: args)
-        _return.emplace_back(enqueue(msg));
+      for (; arg_it != args.cend(); ++arg_it)
+        _return.emplace_back(enqueue(*arg_it));
       break;
     case fifo_queue_cmd_id::fq_dequeue:
       if (nargs != 0) {
@@ -137,22 +140,25 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
       if (nargs != 1) {
         _return.emplace_back("!args_error");
       } else {
-        _return.emplace_back(update_partition(args[0]));
+        _return.emplace_back(update_partition(*arg_it));
       }
       break;
     case fifo_queue_cmd_id::fq_readnext:
       if (nargs != 1) {
         _return.emplace_back("!args_error");
       } else {
-        _return.emplace_back(read_next(args[0]));
+        _return.emplace_back(read_next(*arg_it));
       }
       break;
-    default:throw std::invalid_argument("No such operation id " + std::to_string(cmd_id));
+    default: {
+      _return.emplace_back("!no_such_command");
+      return;
+    }
   }
-  if (is_mutator(cmd_id)) {
+  if (is_mutator(cmd_name)) {
     dirty_ = true;
   }
-  if (auto_scale_ && is_mutator(cmd_id) && overload() && is_tail() && !overload_) {
+  if (auto_scale_ && is_mutator(cmd_name) && overload() && is_tail() && !overload_) {
     LOG(log_level::info) << "Overloaded partition: " << name() << " storage = " << storage_size() << " capacity = "
                          << storage_capacity() << " partition size = " << size() << "partition capacity "
                          << partition_.capacity();
@@ -169,8 +175,8 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
       LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();
     }
   }
-  if (auto_scale_ && cmd_id == fifo_queue_cmd_id::fq_dequeue && head_ > partition_.capacity() && is_tail()
-      && !underload_ && !next_target_str().empty()) {
+  if (auto_scale_ && cmd_name == "dequeue" && head_ > partition_.capacity() && is_tail() && !underload_
+      && !next_target_str().empty()) {
     try {
       LOG(log_level::info) << "Underloaded partition: " << name() << " storage = " << storage_size() << " capacity = "
                            << storage_capacity() << " partition size = " << size() << "partition capacity "
@@ -238,11 +244,9 @@ bool fifo_queue_partition::dump(const std::string &path) {
 }
 
 void fifo_queue_partition::forward_all() {
-  int64_t i = 0;
   for (auto it = partition_.begin(); it != partition_.end(); it++) {
-    std::vector<std::string> result;
-    run_command_on_next(result, fifo_queue_cmd_id::fq_enqueue, {*it});
-    ++i;
+    std::vector<std::string> ignore;
+    run_command_on_next(ignore, {"enqueue", *it}); // TODO: Could be more efficient
   }
 }
 

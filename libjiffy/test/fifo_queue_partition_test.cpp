@@ -69,7 +69,7 @@ TEST_CASE("fifo_queue_flush_load_test", "[enqueue][sync][reset][load][dequeue]")
   fifo_queue_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {
     std::vector<std::string> res;
-    block.run_command(res, fifo_queue_cmd_id::fq_enqueue, {std::to_string(i)});
+    block.run_command(res, {"enqueue", std::to_string(i)});
     REQUIRE(res.front() == "!ok");
   }
   REQUIRE(block.is_dirty());

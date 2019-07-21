@@ -14,11 +14,11 @@ hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interf
                                      const std::string &path,
                                      const directory::data_status &status,
                                      int timeout_ms)
-    : data_structure_client(fs, path, status, KV_OPS, timeout_ms) {
+    : data_structure_client(fs, path, status, timeout_ms) {
   blocks_.clear();
   for (auto &block: status.data_blocks()) {
     blocks_.emplace(std::make_pair(static_cast<int32_t>(std::stoi(utils::string_utils::split(block.name, '_')[0])),
-                                   std::make_shared<replica_chain_client>(fs_, path_, block, KV_OPS, timeout_ms_)));
+                                   std::make_shared<replica_chain_client>(fs_, path_, block, HT_OPS, timeout_ms_)));
   }
 }
 
@@ -28,19 +28,19 @@ void hash_table_client::refresh() {
   for (auto &block: status_.data_blocks()) {
     if (block.metadata != "split_importing" && block.metadata != "importing") {
       blocks_.emplace(std::make_pair(static_cast<int32_t>(std::stoi(utils::string_utils::split(block.name, '_')[0])),
-                                     std::make_shared<replica_chain_client>(fs_, path_, block, KV_OPS, timeout_ms_)));
+                                     std::make_shared<replica_chain_client>(fs_, path_, block, HT_OPS, timeout_ms_)));
     }
   }
 }
 
 std::string hash_table_client::put(const std::string &key, const std::string &value) {
   std::string _return;
-  std::vector<std::string> args{key, value};
+  std::vector<std::string> args{"put", key, value};
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(hash_table_cmd_id::ht_put, args).front();
-      handle_redirect(hash_table_cmd_id::ht_put, args, _return);
+      _return = blocks_[block_id(key)]->run_command(args).front();
+      handle_redirect(args, _return);
       redo = false;
       redo_times = 0;
     } catch (redo_error &e) {
@@ -52,12 +52,12 @@ std::string hash_table_client::put(const std::string &key, const std::string &va
 
 std::string hash_table_client::get(const std::string &key) {
   std::string _return;
-  std::vector<std::string> args{key};
+  std::vector<std::string> args{"get", key};
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(hash_table_cmd_id::ht_get, args).front();
-      handle_redirect(hash_table_cmd_id::ht_get, args, _return);
+      _return = blocks_[block_id(key)]->run_command(args).front();
+      handle_redirect(args, _return);
       redo = false;
       redo_times = 0;
     } catch (redo_error &e) {
@@ -69,12 +69,12 @@ std::string hash_table_client::get(const std::string &key) {
 
 std::string hash_table_client::update(const std::string &key, const std::string &value) {
   std::string _return;
-  std::vector<std::string> args{key, value};
+  std::vector<std::string> args{"update", key, value};
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(hash_table_cmd_id::ht_update, args).front();
-      handle_redirect(hash_table_cmd_id::ht_update, args, _return);
+      _return = blocks_[block_id(key)]->run_command(args).front();
+      handle_redirect(args, _return);
       redo = false;
       redo_times = 0;
     } catch (redo_error &e) {
@@ -86,12 +86,12 @@ std::string hash_table_client::update(const std::string &key, const std::string 
 
 std::string hash_table_client::remove(const std::string &key) {
   std::string _return;
-  std::vector<std::string> args{key};
+  std::vector<std::string> args{"remove", key};
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(hash_table_cmd_id::ht_remove, args).front();
-      handle_redirect(hash_table_cmd_id::ht_remove, args, _return);
+      _return = blocks_[block_id(key)]->run_command(args).front();
+      handle_redirect(args, _return);
       redo = false;
       redo_times = 0;
     } catch (redo_error &e) {
@@ -105,7 +105,7 @@ std::size_t hash_table_client::block_id(const std::string &key) {
   return static_cast<size_t>((*std::prev(blocks_.upper_bound(hash_slot::get(key)))).first);
 }
 
-void hash_table_client::handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) {
+void hash_table_client::handle_redirect(const std::vector<std::string> &args, std::string &response) {
   if (response.substr(0, 10) == "!exporting") {
     typedef std::vector<std::string> list_t;
     do {
@@ -114,8 +114,8 @@ void hash_table_client::handle_redirect(int32_t cmd_id, const std::vector<std::s
       response = replica_chain_client(fs_,
                                       path_,
                                       directory::replica_chain(chain),
-                                      KV_OPS,
-                                      0).run_command_redirected(cmd_id, args).front();
+                                      HT_OPS,
+                                      0).run_command_redirected(args).front();
     } while (response.substr(0, 10) == "!exporting");
   }
   if (response == "!block_moved") {

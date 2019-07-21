@@ -55,8 +55,8 @@ std::pair<bool, std::string> file_block::write(const std::string &data, std::siz
 
 const std::pair<bool, std::string> file_block::read(std::size_t offset, std::size_t size) const {
   if (offset >= tail_) return std::make_pair(false, std::string("!not_available"));
-  else if (offset + size <= tail_) return std::make_pair(true, std::string((const char *) (data_ + offset), size));
-  else return std::make_pair(tail_ != max_, std::string((const char *) (data_ + offset), tail_ - offset));
+  else if (offset + size <= tail_) return std::make_pair(true, std::string(data_ + offset, size));
+  else return std::make_pair(tail_ != max_, std::string(data_ + offset, tail_ - offset));
 }
 
 std::size_t file_block::size() const {

@@ -56,7 +56,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
     REQUIRE(reader.read(std::to_string(i).size()) == "!msg_not_found");
   }
 
-  REQUIRE(reader.seek(0) == true);
+  REQUIRE(reader.seek(0));
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(reader.read(std::to_string(i).size()) == std::to_string(i));
   }

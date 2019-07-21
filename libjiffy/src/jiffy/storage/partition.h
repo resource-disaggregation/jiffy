@@ -20,6 +20,7 @@
 namespace jiffy {
 namespace storage {
 using namespace utils;
+
 /* Partition class */
 class partition {
  public:
@@ -36,7 +37,7 @@ class partition {
   explicit partition(block_memory_manager *manager,
                      const std::string &name,
                      const std::string &metadata,
-                     const std::vector<command> &supported_commands);
+                     const command_map &supported_commands);
 
   /**
    * @brief Destructor
@@ -53,23 +54,19 @@ class partition {
    * @param cmd_id Operation identifier
    * @param args Operation arguments
    */
-
   virtual void run_command(std::vector<std::string> &_return,
-                           int32_t cmd_id,
                            const std::vector<std::string> &args) = 0;
 
   /**
    * @brief Set block path
    * @param path Block path
    */
-
   void path(const std::string &path);
 
   /**
    * @brief Fetch block path
    * @return Block path
    */
-
   const std::string &path() const;
 
   /**
@@ -82,14 +79,12 @@ class partition {
    * @brief Fetch partition name
    * @return Partition name
    */
-
   const std::string &name() const;
 
   /**
    * @brief Set partition metadata
    * @param metadata Partition metadata
    */
-
   void metadata(const std::string &metadata);
 
   /**
@@ -100,33 +95,29 @@ class partition {
 
   /**
    * @brief Check if ith command type is accessor
-   * @param i Command identifier
+   * @param cmd Command name
    * @return Bool value, true if block is accessor
    */
-
-  bool is_accessor(int i) const;
+  bool is_accessor(const std::string& cmd) const;
 
   /**
    * @brief Check if ith command  type is mutator
-   * @param i Command identifier
+   * @param cmd Command name
    * @return Bool value, true if is mutator
    */
-
-  bool is_mutator(int i) const;
+  bool is_mutator(const std::string& cmd) const;
 
   /**
-   * @brief Fetch command name
-   * @param cmd_id Command identifier
-   * @return Operation name
+   * @brief Fetch command id
+   * @param cmd_name Name of the command
+   * @return Command ID
    */
-
-  std::string command_name(int cmd_id);
+  uint32_t command_id(const std::string& cmd_name);
 
   /**
    * Management Operations
    * Virtual function
    */
-
   virtual void load(const std::string &path) = 0;
 
   /**
@@ -203,7 +194,7 @@ class partition {
   /* Partition path */
   std::string path_;
   /* Supported commands */
-  const std::vector<command> &supported_commands_;
+  const command_map &supported_commands_;
   /* Subscription map */
   subscription_map sub_map_{};
   /* Block response client map */

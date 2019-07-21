@@ -93,7 +93,7 @@ class fifo_queue_partition : public chain_module {
    * @param args Command arguments
    */
 
-  void run_command(std::vector<std::string> &_return, int cmd_id, const std::vector<std::string> &args) override;
+  void run_command(std::vector<std::string> &_return, const std::vector<std::string> &args) override;
 
   /**
    * @brief Atomically check dirty bit

@@ -80,11 +80,10 @@ class fifo_queue_client : data_structure_client {
   }
   /**
    * @brief Handle command in redirect case
-   * @param cmd_id Command identifier
    * @param response Response to be collected
    */
 
-  void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) override;
+  void handle_redirect(const std::vector<std::string> &args, std::string &response) override;
 
   /* Dequeue partition id */
   std::size_t dequeue_partition_;

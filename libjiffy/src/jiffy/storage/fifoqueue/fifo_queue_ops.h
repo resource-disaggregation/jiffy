@@ -3,17 +3,18 @@
 
 #include <vector>
 #include <string>
+#include <unordered_map>
 #include "jiffy/storage/command.h"
 
 namespace jiffy {
 namespace storage {
-extern std::vector<command> FIFO_QUEUE_OPS;
+
+extern command_map FQ_CMDS;
 
 /**
  * @brief FIFO queue supported operations
  */
-
-enum fifo_queue_cmd_id {
+enum fifo_queue_cmd_id : uint32_t {
   fq_enqueue = 0,
   fq_dequeue = 1,
   fq_clear = 2,

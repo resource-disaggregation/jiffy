@@ -7,18 +7,19 @@
 
 namespace jiffy {
 namespace storage {
-extern std::vector<command> FILE_OPS;
+
+extern command_map FILE_OPS;
 
 /**
  * @brief File supported operations
  */
 
-enum file_cmd_id {
+enum file_cmd_id: uint32_t {
   file_write = 0,
   file_read = 1,
-  file_clear = 2,
-  file_update_partition = 3,
-  file_seek = 4
+  file_seek = 2,
+  file_clear = 3,
+  file_update_partition = 4
 };
 
 }

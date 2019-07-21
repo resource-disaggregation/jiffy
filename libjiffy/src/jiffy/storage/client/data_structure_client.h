@@ -22,7 +22,6 @@ class data_structure_client {
    * @brief Constructor
    * @param fs Directory service
    * @param path Key value block path
-   * @param OPS operation type
    * @param status Data status
    * @param timeout_ms Timeout
    */
@@ -30,7 +29,6 @@ class data_structure_client {
   data_structure_client(std::shared_ptr<directory::directory_interface> fs,
                         const std::string &path,
                         const directory::data_status &status,
-                        std::vector<command> OPS,
                         int timeout_ms = 1000);
 
   /**
@@ -50,12 +48,11 @@ class data_structure_client {
 
   /**
    * @brief Handle command in redirect case
-   * @param cmd_id Command identifier
    * @param args Command arguments
    * @param response Response to be collected
    */
 
-  virtual void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) = 0;
+  virtual void handle_redirect(const std::vector<std::string> &args, std::string &response) = 0;
 
   /* Directory client */
   std::shared_ptr<directory::directory_interface> fs_;

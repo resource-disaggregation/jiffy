@@ -3,10 +3,10 @@
 namespace jiffy {
 namespace storage {
 
-std::vector<command> FILE_OPS = {command{command_type::mutator, "file_write"},
-                                 command{command_type::accessor, "file_read"},
-                                 command{command_type::mutator, "file_clear"},
-                                 command{command_type::mutator, "file_update_partition"},
-                                 command{command_type::accessor, "file_seek"}};
+command_map FILE_OPS = {{"write", {command_type::mutator, file_cmd_id::file_write}},
+                        {"read", {command_type::accessor, file_cmd_id::file_read}},
+                        {"seek", {command_type::accessor, file_cmd_id::file_seek}},
+                        {"clear", {command_type::mutator, file_cmd_id::file_clear}},
+                        {"update_partition", {command_type::mutator, file_cmd_id::file_update_partition}}};
 }
 }

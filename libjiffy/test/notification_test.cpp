@@ -26,7 +26,6 @@ using namespace ::apache::thrift::protocol;
 #define DIRECTORY_SERVICE_PORT 9090
 #define STORAGE_SERVICE_PORT 9091
 #define STORAGE_MANAGEMENT_PORT 9092
-#define STORAGE_NOTIFICATION_PORT 9093
 
 TEST_CASE("notification_test", "[subscribe][get_message]") {
 
@@ -52,7 +51,7 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
       {"regular"});
   hash_table_client table(tree, "/sandbox/file.txt", status);
 
-  std::string op1 = "ht_put", op2 = "ht_get";
+  std::string op1 = "put", op2 = "get";
   std::string key = "msg1";
 
   {

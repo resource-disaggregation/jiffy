@@ -13,7 +13,7 @@ file_client::file_client(std::shared_ptr<directory::directory_interface> fs,
                          const std::string &path,
                          const directory::data_status &status,
                          int timeout_ms)
-    : data_structure_client(fs, path, status, FILE_OPS, timeout_ms),
+    : data_structure_client(fs, path, status, timeout_ms),
       cur_partition_(0),
       cur_offset_(0),
       last_partition_(0) {
@@ -33,7 +33,7 @@ void file_client::refresh() {
 bool file_client::seek(const std::size_t offset) {
   std::vector<std::string> ret;
   auto seek_partition = block_id();
-  ret = blocks_[seek_partition]->run_command(file_cmd_id::file_seek, {});
+  ret = blocks_[seek_partition]->run_command({"seek"});
   auto size = static_cast<std::size_t>(std::stoi(ret[0]));
   auto cap = static_cast<std::size_t>(std::stoi(ret[1]));
   if (offset > seek_partition * cap + size) {

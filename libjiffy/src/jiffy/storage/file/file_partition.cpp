@@ -42,9 +42,9 @@ file_partition::file_partition(block_memory_manager *manager,
   auto_scale_ = conf.get_as<bool>("file.auto_scale", true);
 }
 
-std::string file_partition::write(const std::string &message, std::string offset) {
+std::string file_partition::write(const std::string &data, std::string offset) {
   auto off = std::stoi(offset);
-  auto ret = partition_.write(message, off);
+  auto ret = partition_.write(data, off);
   if (!ret.first) {
     if (!auto_scale_) {
       return "!split_write!" + std::to_string(ret.second.size());
@@ -58,7 +58,7 @@ std::string file_partition::write(const std::string &message, std::string offset
   return "!ok";
 }
 
-std::string file_partition::read(std::string position, std::string size) {
+std::string file_partition::read(const std::string &position, const std::string &size) {
   auto pos = std::stoi(position);
   auto read_size = std::stoi(size);
   if (pos < 0) throw std::invalid_argument("read position invalid");
@@ -98,23 +98,25 @@ std::string file_partition::update_partition(const std::string &next) {
 }
 
 void file_partition::run_command(std::vector<std::string> &_return,
-                                 int32_t cmd_id,
                                  const std::vector<std::string> &args) {
-  size_t nargs = args.size();
-  switch (cmd_id) {
+  auto arg_it = args.begin();
+  auto cmd_name = *arg_it;
+  std::advance(arg_it, 1);
+  size_t nargs = args.size() - 1;
+  switch (command_id(cmd_name)) {
     case file_cmd_id::file_write:
       if (nargs % 2 != 0) {
         _return.emplace_back("!args_error");
       }
       for (size_t i = 0; i < nargs; i += 2)
-        _return.emplace_back(write(args[i], args[i + 1]));
+        _return.emplace_back(write(args[i + 1], args[i + 2]));
       break;
     case file_cmd_id::file_read:
       if (nargs % 2 != 0) {
         _return.emplace_back("!args_error");
       }
       for (size_t i = 0; i < nargs; i += 2)
-        _return.emplace_back(read(args[i], args[i + 1]));
+        _return.emplace_back(read(args[i + 1], args[i + 2]));
       break;
     case file_cmd_id::file_clear:
       if (nargs != 0) {
@@ -127,25 +129,25 @@ void file_partition::run_command(std::vector<std::string> &_return,
       if (nargs != 1) {
         _return.emplace_back("!args_error");
       } else {
-        _return.emplace_back(update_partition(args[0]));
+        _return.emplace_back(update_partition(*arg_it));
       }
       break;
     case file_cmd_id::file_seek:
       if (nargs != 0) {
         _return.emplace_back("!args_error");
       } else {
-        std::vector<std::string> ret;
-        seek(ret);
-        _return.emplace_back(ret[0]);
-        _return.emplace_back(ret[1]);
+        seek(_return);
       }
       break;
-    default:throw std::invalid_argument("No such operation id " + std::to_string(cmd_id));
+    default: {
+      _return.emplace_back("!no_such_command");
+      return;
+    }
   }
-  if (is_mutator(cmd_id)) {
+  if (is_mutator(cmd_name)) {
     dirty_ = true;
   }
-  if (auto_scale_ && is_mutator(cmd_id) && overload() && is_tail() && !overload_ && next_target_str().empty()) {
+  if (auto_scale_ && is_mutator(cmd_name) && overload() && is_tail() && !overload_ && next_target_str().empty()) {
     LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
                          << storage_capacity() << " partition size = " << size() << " partition capacity = "
                          << partition_.capacity();
@@ -213,7 +215,7 @@ bool file_partition::dump(const std::string &path) {
 
 void file_partition::forward_all() {
   std::vector<std::string> result;
-  run_command_on_next(result, file_cmd_id::file_write, {std::string(partition_.data(), partition_.size())});
+  run_command_on_next(result, {"write", std::string(partition_.data(), partition_.size())});
 }
 
 bool file_partition::overload() {

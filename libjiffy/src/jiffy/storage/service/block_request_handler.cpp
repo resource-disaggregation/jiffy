@@ -26,9 +26,8 @@ void block_request_handler::register_client_id(const int32_t block_id, const int
 
 void block_request_handler::command_request(const sequence_id &seq,
                                             const int32_t block_id,
-                                            const int32_t cmd_id,
-                                            const std::vector<std::string> &arguments) {
-  blocks_.at(static_cast<std::size_t>(block_id))->impl()->request(seq, cmd_id, arguments);
+                                            const std::vector<std::string> &args) {
+  blocks_.at(static_cast<std::size_t>(block_id))->impl()->request(seq, args);
 }
 
 int32_t block_request_handler::registered_block_id() const {
@@ -41,20 +40,18 @@ int64_t block_request_handler::registered_client_id() const {
 
 void block_request_handler::chain_request(const sequence_id &seq,
                                           const int32_t block_id,
-                                          const int32_t cmd_id,
-                                          const std::vector<std::string> &arguments) {
+                                          const std::vector<std::string> &args) {
   const auto &b = blocks_.at(static_cast<std::size_t>(block_id));
   if (!b->impl()->is_set_prev()) {
     b->impl()->reset_prev(prot_);
   }
-  b->impl()->chain_request(seq, cmd_id, arguments);
+  b->impl()->chain_request(seq, args);
 }
 
 void block_request_handler::run_command(std::vector<std::string> &_return,
                                         const int32_t block_id,
-                                        const int32_t cmd_id,
-                                        const std::vector<std::string> &arguments) {
-  blocks_.at(static_cast<std::size_t>(block_id))->impl()->run_command(_return, cmd_id, arguments);
+                                        const std::vector<std::string> &args) {
+  blocks_.at(static_cast<std::size_t>(block_id))->impl()->run_command(_return, args);
 }
 
 void block_request_handler::subscribe(int32_t block_id,

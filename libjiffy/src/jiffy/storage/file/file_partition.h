@@ -55,11 +55,11 @@ class file_partition : public chain_module {
 
   /**
    * @brief Write to the file
-   * @param message New message
+   * @param data New message
    * @param offset Offset
    * @return Write return status string
    */
-  std::string write(const std::string &message, std::string offset);
+  std::string write(const std::string &data, std::string offset);
 
   /**
    * @brief Read a new message from the file
@@ -67,7 +67,7 @@ class file_partition : public chain_module {
    * @param size Number of bytes to be read
    * @return Read return status string
    */
-  std::string read(std::string position, std::string size);
+  std::string read(const std::string &position, const std::string &size);
 
   /**
    *@brief Fetch the metadata for seek
@@ -91,10 +91,9 @@ class file_partition : public chain_module {
   /**
    * @brief Run particular command on file
    * @param _return Return status to be collected
-   * @param cmd_id Operation identifier
    * @param args Command arguments
    */
-  void run_command(std::vector<std::string> &_return, int cmd_id, const std::vector<std::string> &args) override;
+  void run_command(std::vector<std::string> &_return, const std::vector<std::string> &args) override;
 
   /**
    * @brief Atomically check dirty bit
