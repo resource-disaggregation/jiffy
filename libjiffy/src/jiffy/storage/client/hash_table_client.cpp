@@ -42,7 +42,7 @@ std::string hash_table_client::put(const std::string &key, const std::string &va
       _return = blocks_[block_id(key)]->run_command(args).front();
       handle_redirect(args, _return);
       redo = false;
-      redo_times = 0;
+      redo_times_ = 0;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -59,7 +59,7 @@ std::string hash_table_client::get(const std::string &key) {
       _return = blocks_[block_id(key)]->run_command(args).front();
       handle_redirect(args, _return);
       redo = false;
-      redo_times = 0;
+      redo_times_ = 0;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -76,7 +76,7 @@ std::string hash_table_client::update(const std::string &key, const std::string 
       _return = blocks_[block_id(key)]->run_command(args).front();
       handle_redirect(args, _return);
       redo = false;
-      redo_times = 0;
+      redo_times_ = 0;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -93,7 +93,7 @@ std::string hash_table_client::remove(const std::string &key) {
       _return = blocks_[block_id(key)]->run_command(args).front();
       handle_redirect(args, _return);
       redo = false;
-      redo_times = 0;
+      redo_times_ = 0;
     } catch (redo_error &e) {
       redo = true;
     }
@@ -123,8 +123,8 @@ void hash_table_client::handle_redirect(const std::vector<std::string> &args, st
     throw redo_error();
   }
   if (response == "!full") {
-    std::this_thread::sleep_for(std::chrono::milliseconds((int) (std::pow(2, redo_times))));
-    redo_times++;
+    std::this_thread::sleep_for(std::chrono::milliseconds((int) (std::pow(2, redo_times_))));
+    redo_times_++;
     throw redo_error();
   }
 }

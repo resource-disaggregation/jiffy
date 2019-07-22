@@ -78,7 +78,7 @@ std::vector<std::string> replica_chain_client::run_command(const std::vector<std
     try {
       send_command(args);
       response = recv_response();
-      if (retry && response[0] == "!duplicate_key") {
+      if (retry && response[0] == "!duplicate_key") { // TODO: This is hash table specific logic
         response[0] = "!ok";
       }
     } catch (apache::thrift::transport::TTransportException &e) {
@@ -88,7 +88,7 @@ std::vector<std::string> replica_chain_client::run_command(const std::vector<std
 	      LOG(log_level::info) << x;
       connect(fs_->resolve_failures(path_, chain_), timeout_ms_);
       retry = true;
-    } catch (std::logic_error &e) {
+    } catch (std::logic_error &e) { // TODO: This is very iffy, we need to fix this
       response.clear();
       response.push_back("!block_moved");
       break;

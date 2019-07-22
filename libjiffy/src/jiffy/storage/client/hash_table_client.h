@@ -83,7 +83,7 @@ class hash_table_client : public data_structure_client {
   void handle_redirect(const std::vector<std::string> &args, std::string &response) override;
 
   /* Redo times */
-  std::size_t redo_times = 0;
+  std::size_t redo_times_ = 0;
 
   /* Map from slot begin to replica chain client pointer */
   std::map<int32_t, std::shared_ptr<replica_chain_client>> blocks_;

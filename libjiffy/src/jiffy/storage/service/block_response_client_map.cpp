@@ -24,7 +24,7 @@ void block_response_client_map::respond_client(const sequence_id &seq, const std
     client->response(seq, result);
   });
   if (!found)
-    LOG(log_level::error) << "Cannot respond to client since client id " << seq.client_id << " is not registered...";
+    LOG(log_level::warn) << "Cannot respond to client since client id " << seq.client_id << " is not registered...";
 }
 
 void block_response_client_map::clear() {
