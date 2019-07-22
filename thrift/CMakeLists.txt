@@ -17,7 +17,7 @@ endfunction()
 
 set(THRIFT_GEN_CXX "cpp:templates,pure_enums,no_skeleton,include_prefix")
 set(THRIFT_GEN_PY "py:no_utf8strings,slots")
-set(THRIFT_GEN_JAVA "java:fullcamel,handle_runtime_exceptions,generated_annotations=undated")
+set(THRIFT_GEN_JAVA "java:fullcamel,reuse-objects,generated_annotations=undated,unsafe_binaries")
 
 # Generate cpp sources
 thrift_gen(${THRIFT_GEN_CXX} src/block_registration_service.thrift ../libjiffy/src/jiffy/directory/block/)

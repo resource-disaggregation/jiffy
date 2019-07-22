@@ -16,15 +16,22 @@ public class HashTableClient extends DataStructureClient implements Closeable {
 
   private int[] slots;
   private ReplicaChainClient[] blocks;
+  private int redoTimes;
 
   public HashTableClient(Client fs, String path, rpc_data_status dataStatus, int timeoutMs)
       throws TException {
     super(fs, path, dataStatus, timeoutMs);
+    init();
+  }
+
+  private void init() throws TException {
+    this.redoTimes = 0;
     this.blocks = new ReplicaChainClient[dataStatus.data_blocks.size()];
     this.slots = new int[dataStatus.data_blocks.size()];
     for (int i = 0; i < blocks.length; i++) {
       slots[i] = Integer.parseInt(dataStatus.data_blocks.get(i).name.split("_")[0]);
-      blocks[i] = new ReplicaChainClient(fs, path, cache, dataStatus.data_blocks.get(i));
+      blocks[i] = new ReplicaChainClient(fs, path, cache, dataStatus.data_blocks.get(i),
+          HashTableCommands.CMD_TYPES);
     }
   }
 
@@ -40,207 +47,90 @@ public class HashTableClient extends DataStructureClient implements Closeable {
   }
 
   void refresh() throws TException {
-    this.dataStatus  = fs.dstatus(path);
-    this.blocks = new ReplicaChainClient[dataStatus.data_blocks.size()];
-    this.slots = new int[dataStatus.data_blocks.size()];
-    for (int i = 0; i < blocks.length; i++) {
-      slots[i] = Integer.parseInt(dataStatus.data_blocks.get(i).name.split("_")[0]);
-      blocks[i] = new ReplicaChainClient(fs, path, cache, dataStatus.data_blocks.get(i));
-    }
+    this.dataStatus = fs.dstatus(path);
+    init();
   }
 
-  ByteBuffer handleRedirect(int cmdId, List<ByteBuffer> args, ByteBuffer response)
+  ByteBuffer handleRedirect(List<ByteBuffer> args, ByteBuffer response)
       throws TException {
     String resp;
     while ((resp = ByteBufferUtils.toString(response)).startsWith("!exporting")) {
       rpc_replica_chain chain = extractChain(resp);
-      response = new ReplicaChainClient(fs, path, cache, chain).runCommandRedirected(cmdId, args).get(0);
+      response = new ReplicaChainClient(fs, path, cache, chain, HashTableCommands.CMD_TYPES)
+          .runCommandRedirected(args)
+          .get(0);
     }
     if (resp.equals("!block_moved")) {
       refresh();
       return null;
     }
+    if (resp.equals("!full")) {
+      long sleepyTime = (long) Math.pow(2, redoTimes);
+      try {
+        Thread.sleep(sleepyTime);
+        redoTimes++;
+      } catch (InterruptedException ignored) {}
+      return null;
+    }
     return response;
   }
 
-  List<ByteBuffer> handleRedirects(int cmdId, List<ByteBuffer> args,
-      List<ByteBuffer> responses) throws TException {
-    int numOps = responses.size();
-    int numOpArgs = args.size() / numOps;
-    for (int i = 0; i < numOps; i++) {
-      ByteBuffer response = responses.get(i);
-      String resp;
-      while ((resp = ByteBufferUtils.toString(response)).startsWith("!exporting")) {
-        rpc_replica_chain chain = extractChain(resp);
-        List<ByteBuffer> opArgs = args.subList(i * numOpArgs, (i + 1) * numOpArgs);
-        response = new ReplicaChainClient(fs, path, cache, chain).runCommandRedirected(cmdId, opArgs)
-            .get(0);
-      }
-      if (resp.equals("!block_moved")) {
-        refresh();
-        return null;
-      }
-      responses.set(i, response);
-    }
-    return responses;
-  }
-
-  private List<ByteBuffer> batchCommand(int op, List<ByteBuffer> args, int argsPerOp)
-      throws TException {
-    if (args.size() % argsPerOp != 0) {
-      throw new IllegalArgumentException("Incorrect number of arguments");
-    }
-
-    int numOps = args.size() / argsPerOp;
-    List<List<ByteBuffer>> blockArgs = new ArrayList<>(blocks.length);
-    List<List<Integer>> positions = new ArrayList<>(blocks.length);
-    for (ReplicaChainClient ignored : blocks) {
-      blockArgs.add(null);
-      positions.add(null);
-    }
-
-    for (int i = 0; i < numOps; i++) {
-      int id = blockId(args.get(i * argsPerOp));
-      if (blockArgs.get(id) == null) {
-        blockArgs.set(id, new ArrayList<>());
-        positions.set(id, new ArrayList<>());
-      }
-      blockArgs.get(id).addAll(args.subList(i * argsPerOp, (i + 1) * argsPerOp));
-      positions.get(id).add(i);
-    }
-
-    for (int i = 0; i < blocks.length; i++) {
-      if (blockArgs.get(i) != null) {
-        blocks[i].sendCommandRequest(op, blockArgs.get(i));
-      }
-    }
-
-    List<ByteBuffer> responses = Arrays.asList(new ByteBuffer[numOps]);
-    for (int i = 0; i < blocks.length; i++) {
-      if (blockArgs.get(i) != null) {
-        List<ByteBuffer> response = blocks[i].receiveCommandResponse();
-        for (int j = 0; j < response.size(); j++) {
-          responses.set(positions.get(i).get(j), response.get(j));
-        }
-      }
-    }
-    return responses;
-  }
-
   public boolean exists(ByteBuffer key) throws TException {
-    List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key);
+    List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(HashTableCommands.EXISTS, key);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(HashTableOps.EXISTS, args).get(0);
-      response = handleRedirect(HashTableOps.EXISTS, args, response);
+      response = blocks[blockId(key)].runCommand(args).get(0);
+      response = handleRedirect(args, response);
     }
     return ByteBufferUtils.toString(response).equals("true");
   }
 
   public ByteBuffer get(ByteBuffer key) throws TException {
-    List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key);
+    List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(HashTableCommands.GET, key);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(HashTableOps.GET, args).get(0);
-      response = handleRedirect(HashTableOps.GET, args, response);
+      response = blocks[blockId(key)].runCommand(args).get(0);
+      response = handleRedirect(args, response);
     }
     return response;
   }
 
   public ByteBuffer put(ByteBuffer key, ByteBuffer value) throws TException {
-    List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
+    List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(HashTableCommands.PUT, key, value);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(HashTableOps.PUT, args).get(0);
-      response = handleRedirect(HashTableOps.PUT, args, response);
+      response = blocks[blockId(key)].runCommand(args).get(0);
+      response = handleRedirect(args, response);
     }
     return response;
   }
 
   public ByteBuffer upsert(ByteBuffer key, ByteBuffer value) throws TException {
-    List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
+    List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(HashTableCommands.UPSERT, key, value);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(HashTableOps.UPSERT, args).get(0);
-      response = handleRedirect(HashTableOps.UPSERT, args, response);
+      response = blocks[blockId(key)].runCommand(args).get(0);
+      response = handleRedirect(args, response);
     }
     return response;
   }
 
   public ByteBuffer update(ByteBuffer key, ByteBuffer value) throws TException {
-    List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key, value);
+    List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(HashTableCommands.UPDATE, key, value);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(HashTableOps.UPDATE, args).get(0);
-      response = handleRedirect(HashTableOps.UPDATE, args, response);
+      response = blocks[blockId(key)].runCommand(args).get(0);
+      response = handleRedirect(args, response);
     }
     return response;
   }
 
   public ByteBuffer remove(ByteBuffer key) throws TException {
-    List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(key);
+    List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(HashTableCommands.REMOVE, key);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(HashTableOps.REMOVE, args).get(0);
-      response = handleRedirect(HashTableOps.REMOVE, args, response);
-    }
-    return response;
-  }
-
-  public List<Boolean> exists(List<ByteBuffer> args) throws TException {
-    List<ByteBuffer> response = null;
-    while (response == null) {
-      response = batchCommand(HashTableOps.EXISTS, args, 1);
-      response = handleRedirects(HashTableOps.EXISTS, args, response);
-    }
-    List<Boolean> out = new ArrayList<>(response.size());
-    for (ByteBuffer r : response) {
-      out.add(ByteBufferUtils.toString(r).equals("true"));
-    }
-    return out;
-  }
-
-  public List<ByteBuffer> get(List<ByteBuffer> args) throws TException {
-    List<ByteBuffer> response = null;
-    while (response == null) {
-      response = batchCommand(HashTableOps.GET, args, 1);
-      response = handleRedirects(HashTableOps.GET, args, response);
-    }
-    return response;
-  }
-
-  public List<ByteBuffer> put(List<ByteBuffer> args) throws TException {
-    List<ByteBuffer> response = null;
-    while (response == null) {
-      response = batchCommand(HashTableOps.PUT, args, 2);
-      response = handleRedirects(HashTableOps.PUT, args, response);
-    }
-    return response;
-  }
-
-  public List<ByteBuffer> upsert(List<ByteBuffer> args) throws TException {
-    List<ByteBuffer> response = null;
-    while (response == null) {
-      response = batchCommand(HashTableOps.UPSERT, args, 2);
-      response = handleRedirects(HashTableOps.UPSERT, args, response);
-    }
-    return response;
-  }
-
-  public List<ByteBuffer> update(List<ByteBuffer> args) throws TException {
-    List<ByteBuffer> response = null;
-    while (response == null) {
-      response = batchCommand(HashTableOps.UPDATE, args, 2);
-      response = handleRedirects(HashTableOps.UPDATE, args, response);
-    }
-    return response;
-  }
-
-  public List<ByteBuffer> remove(List<ByteBuffer> args) throws TException {
-    List<ByteBuffer> response = null;
-    while (response == null) {
-      response = batchCommand(HashTableOps.REMOVE, args, 1);
-      response = handleRedirects(HashTableOps.REMOVE, args, response);
+      response = blocks[blockId(key)].runCommand(args).get(0);
+      response = handleRedirect(args, response);
     }
     return response;
   }

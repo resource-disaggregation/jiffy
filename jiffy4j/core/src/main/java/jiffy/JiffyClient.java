@@ -11,7 +11,8 @@ import jiffy.directory.directory_service;
 import jiffy.directory.directory_service.Client;
 import jiffy.directory.rpc_data_status;
 import jiffy.partition.PartitionNameBuilder;
-import jiffy.storage.FileClient;
+import jiffy.storage.FileReader;
+import jiffy.storage.FileWriter;
 import jiffy.storage.HashTableClient;
 import jiffy.lease.LeaseWorker;
 import jiffy.notification.HashTableListener;
@@ -19,8 +20,6 @@ import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
-
-import static jiffy.storage.HashSlot.SLOT_MAX;
 
 public class JiffyClient implements Closeable {
 
@@ -149,54 +148,54 @@ public class JiffyClient implements Closeable {
     return new HashTableClient(fs, path, status, timeoutMs);
   }
 
-  public FileClient createFile(String path) throws TException {
+  public FileWriter createFile(String path) throws TException {
     return createFile(path, DEFAULT_BACKING_PATH);
   }
 
-  public FileClient createFile(String path, String backingPath) throws TException {
+  public FileWriter createFile(String path, String backingPath) throws TException {
     return createFile(path, backingPath, DEFAULT_NUM_BLOCKS, DEFAULT_CHAIN_LENGTH);
   }
 
-  public FileClient createFile(String path, String backingPath, int numBlocks,
+  public FileWriter createFile(String path, String backingPath, int numBlocks,
       int chainLength) throws TException {
     return createFile(path, backingPath, numBlocks, chainLength, DEFAULT_FLAGS,
         DEFAULT_PERMISSIONS, DEFAULT_TAGS);
   }
 
-  public FileClient createFile(String path, String backingPath, int numBlocks,
+  public FileWriter createFile(String path, String backingPath, int numBlocks,
       int chainLength, int flags, int permissions, Map<String, String> tags) throws TException {
     rpc_data_status status = initDataStructure(InitType.CREATE, path, "file", backingPath,
         numBlocks, chainLength, flags, permissions, tags);
-    return new FileClient(fs, path, status, timeoutMs);
+    return new FileWriter(fs, path, status, timeoutMs);
   }
 
-  public FileClient openFile(String path) throws TException {
+  public FileReader openFile(String path) throws TException {
     rpc_data_status status = fs.open(path);
     beginScope(path);
-    return new FileClient(fs, path, status, timeoutMs);
+    return new FileReader(fs, path, status, timeoutMs);
   }
 
-  public FileClient openOrCreateFile(String path) throws TException {
+  public FileWriter openOrCreateFile(String path) throws TException {
     return openOrCreateFile(path, DEFAULT_BACKING_PATH);
   }
 
-  public FileClient openOrCreateFile(String path, String backingPath) throws TException {
+  public FileWriter openOrCreateFile(String path, String backingPath) throws TException {
     return openOrCreateFile(path, backingPath, DEFAULT_NUM_BLOCKS, DEFAULT_CHAIN_LENGTH);
   }
 
-  public FileClient openOrCreateFile(String path, String backingPath, int numBlocks,
+  public FileWriter openOrCreateFile(String path, String backingPath, int numBlocks,
       int chainLength)
       throws TException {
     return openOrCreateFile(path, backingPath, numBlocks, chainLength, DEFAULT_FLAGS,
         DEFAULT_PERMISSIONS, DEFAULT_TAGS);
   }
 
-  public FileClient openOrCreateFile(String path, String backingPath, int numBlocks,
+  public FileWriter openOrCreateFile(String path, String backingPath, int numBlocks,
       int chainLength, int flags, int permissions,
       Map<String, String> tags) throws TException {
     rpc_data_status status = initDataStructure(InitType.OPEN_OR_CREATE, path, "file",
         backingPath, numBlocks, chainLength, flags, permissions, tags);
-    return new FileClient(fs, path, status, timeoutMs);
+    return new FileWriter(fs, path, status, timeoutMs);
   }
 
   public HashTableListener listenOnHashTable(String path) throws TException {

@@ -81,10 +81,10 @@ public class BlockClientCache {
   }
 
   public Value get(String host, int port) throws TTransportException {
-    Key key = new Key(host, port);
-    if (cache.containsKey(key)) {
-      return cache.get(key);
-    }
+//    Key key = new Key(host, port);
+//    if (cache.containsKey(key)) {
+//      return cache.get(key);
+//    }
     TSocket socket = new TSocket(host, port);
     socket.setTimeout(timeoutMs);
     TFramedTransport transport = new TFramedTransport(socket);
@@ -105,17 +105,17 @@ public class BlockClientCache {
       throw ex;
     }
     Value value = new Value(transport, protocol, client);
-    cache.put(key, value);
+    // cache.put(key, value);
     return value;
   }
 
   public void remove(String host, int port) {
-    Key k = new Key(host, port);
-    if (cache.containsKey(k)) {
-      Value value = cache.remove(k);
-      if (value.getTransport().isOpen()) {
-        value.getTransport().close();
-      }
-    }
+//    Key k = new Key(host, port);
+//    if (cache.containsKey(k)) {
+//      Value value = cache.remove(k);
+//      if (value.getTransport().isOpen()) {
+//        value.getTransport().close();
+//      }
+//    }
   }
 }

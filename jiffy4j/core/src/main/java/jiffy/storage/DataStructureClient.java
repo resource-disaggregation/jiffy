@@ -9,8 +9,8 @@ import org.apache.thrift.TException;
 public abstract class DataStructureClient {
   protected Client fs;
   protected String path;
-  protected rpc_data_status dataStatus;
-  protected BlockClientCache cache;
+  rpc_data_status dataStatus;
+  BlockClientCache cache;
 
   DataStructureClient(Client fs, String path, rpc_data_status dataStatus, int timeoutMs) {
     this.fs = fs;
@@ -21,11 +21,7 @@ public abstract class DataStructureClient {
 
   abstract void refresh() throws TException;
 
-  abstract ByteBuffer handleRedirect(int cmdId, List<ByteBuffer> args, ByteBuffer response)
-      throws TException;
-
-  abstract List<ByteBuffer> handleRedirects(int cmdId, List<ByteBuffer> args,
-      List<ByteBuffer> responses) throws TException;
+  abstract ByteBuffer handleRedirect(List<ByteBuffer> args, ByteBuffer response) throws TException;
 
   public rpc_data_status status() {
     return dataStatus;
