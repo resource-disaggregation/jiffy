@@ -222,48 +222,6 @@ class TestClient(TestCase):
         if getattr(kv, "num_keys", None) is not None:
             self.assertEqual(0, kv.num_keys())
 
-        # Batched Ops
-        valid_keys = [b(str(i)) for i in range(1000)]
-        invalid_keys = [b(str(i)) for i in range(1000, 2000)]
-        original_values = [b(str(i)) for i in range(1000)]
-        updated_values = [b(str(i)) for i in range(1000, 2000)]
-        original_kvs = [b(str(j)) for i in range(1000) for j in [i, i]]
-        updated_kvs = [b(str(j)) for i in range(1000) for j in [i, i + 1000]]
-        invalid_kvs = [b(str(j)) for i in range(1000, 2000) for j in [i, i + 1000]]
-
-        # Test exists/get/put
-        self.assertEqual([b('!ok')] * 1000, kv.multi_put(original_kvs))
-        self.assertEqual(original_values, kv.multi_get(valid_keys))
-        if getattr(kv, "multi_exists", None) is not None:
-            self.assertEqual([True] * 1000, kv.multi_exists(valid_keys))
-        self.assertEqual([b('!key_not_found')] * 1000, kv.multi_get(invalid_keys))
-        if getattr(kv, "multi_exists", None) is not None:
-            self.assertEqual([False] * 1000, kv.multi_exists(invalid_keys))
-
-        if getattr(kv, "num_keys", None) is not None:
-            self.assertEqual(1000, kv.num_keys())
-
-        # Test update
-        self.assertEqual(original_values, kv.multi_update(updated_kvs))
-        self.assertEqual([b('!key_not_found')] * 1000, kv.multi_update(invalid_kvs))
-        self.assertEqual(updated_values, kv.multi_get(valid_keys))
-
-        if getattr(kv, "num_keys", None) is not None:
-            self.assertEqual(1000, kv.num_keys())
-
-        # Test remove
-        self.assertEqual(updated_values, kv.multi_remove(valid_keys))
-        self.assertEqual([b('!key_not_found')] * 1000, kv.multi_remove(invalid_keys))
-        self.assertEqual([b('!key_not_found')] * 1000, kv.multi_get(valid_keys))
-
-        if getattr(kv, "num_keys", None) is not None:
-            self.assertEqual(0, kv.num_keys())
-
-        if getattr(kv, "lock", None) is not None:
-            locked_kv = kv.lock()
-            self.hash_table_ops(locked_kv)
-            locked_kv.unlock()
-
     def test_lease_worker(self):
         self.start_servers()
         client = self.jiffy_client()

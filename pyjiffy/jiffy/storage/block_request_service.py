@@ -30,33 +30,30 @@ class Iface(object):
         """
         pass
 
-    def command_request(self, seq, block_id, cmd_id, arguments):
+    def command_request(self, seq, block_id, arguments):
         """
         Parameters:
          - seq
          - block_id
-         - cmd_id
          - arguments
 
         """
         pass
 
-    def chain_request(self, seq, block_id, cmd_id, arguments):
+    def chain_request(self, seq, block_id, arguments):
         """
         Parameters:
          - seq
          - block_id
-         - cmd_id
          - arguments
 
         """
         pass
 
-    def run_command(self, block_id, cmd_id, arguments):
+    def run_command(self, block_id, arguments):
         """
         Parameters:
          - block_id
-         - cmd_id
          - arguments
 
         """
@@ -146,66 +143,60 @@ class Client(Iface):
         iprot.readMessageEnd()
         return
 
-    def command_request(self, seq, block_id, cmd_id, arguments):
+    def command_request(self, seq, block_id, arguments):
         """
         Parameters:
          - seq
          - block_id
-         - cmd_id
          - arguments
 
         """
-        self.send_command_request(seq, block_id, cmd_id, arguments)
+        self.send_command_request(seq, block_id, arguments)
 
-    def send_command_request(self, seq, block_id, cmd_id, arguments):
+    def send_command_request(self, seq, block_id, arguments):
         self._oprot.writeMessageBegin('command_request', TMessageType.ONEWAY, self._seqid)
         args = command_request_args()
         args.seq = seq
         args.block_id = block_id
-        args.cmd_id = cmd_id
         args.arguments = arguments
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def chain_request(self, seq, block_id, cmd_id, arguments):
+    def chain_request(self, seq, block_id, arguments):
         """
         Parameters:
          - seq
          - block_id
-         - cmd_id
          - arguments
 
         """
-        self.send_chain_request(seq, block_id, cmd_id, arguments)
+        self.send_chain_request(seq, block_id, arguments)
 
-    def send_chain_request(self, seq, block_id, cmd_id, arguments):
+    def send_chain_request(self, seq, block_id, arguments):
         self._oprot.writeMessageBegin('chain_request', TMessageType.ONEWAY, self._seqid)
         args = chain_request_args()
         args.seq = seq
         args.block_id = block_id
-        args.cmd_id = cmd_id
         args.arguments = arguments
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def run_command(self, block_id, cmd_id, arguments):
+    def run_command(self, block_id, arguments):
         """
         Parameters:
          - block_id
-         - cmd_id
          - arguments
 
         """
-        self.send_run_command(block_id, cmd_id, arguments)
+        self.send_run_command(block_id, arguments)
         return self.recv_run_command()
 
-    def send_run_command(self, block_id, cmd_id, arguments):
+    def send_run_command(self, block_id, arguments):
         self._oprot.writeMessageBegin('run_command', TMessageType.CALL, self._seqid)
         args = run_command_args()
         args.block_id = block_id
-        args.cmd_id = cmd_id
         args.arguments = arguments
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -341,7 +332,7 @@ class Processor(Iface, TProcessor):
         args.read(iprot)
         iprot.readMessageEnd()
         try:
-            self._handler.command_request(args.seq, args.block_id, args.cmd_id, args.arguments)
+            self._handler.command_request(args.seq, args.block_id, args.arguments)
         except TTransport.TTransportException:
             raise
         except Exception:
@@ -352,7 +343,7 @@ class Processor(Iface, TProcessor):
         args.read(iprot)
         iprot.readMessageEnd()
         try:
-            self._handler.chain_request(args.seq, args.block_id, args.cmd_id, args.arguments)
+            self._handler.chain_request(args.seq, args.block_id, args.arguments)
         except TTransport.TTransportException:
             raise
         except Exception:
@@ -364,7 +355,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = run_command_result()
         try:
-            result.success = self._handler.run_command(args.block_id, args.cmd_id, args.arguments)
+            result.success = self._handler.run_command(args.block_id, args.arguments)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -675,7 +666,6 @@ class command_request_args(object):
     Attributes:
      - seq
      - block_id
-     - cmd_id
      - arguments
 
     """
@@ -683,15 +673,13 @@ class command_request_args(object):
     __slots__ = (
         'seq',
         'block_id',
-        'cmd_id',
         'arguments',
     )
 
 
-    def __init__(self, seq=None, block_id=None, cmd_id=None, arguments=None,):
+    def __init__(self, seq=None, block_id=None, arguments=None,):
         self.seq = seq
         self.block_id = block_id
-        self.cmd_id = cmd_id
         self.arguments = arguments
 
     def read(self, iprot):
@@ -715,11 +703,6 @@ class command_request_args(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
-                if ftype == TType.I32:
-                    self.cmd_id = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
                 if ftype == TType.LIST:
                     self.arguments = []
                     (_etype3, _size0) = iprot.readListBegin()
@@ -747,12 +730,8 @@ class command_request_args(object):
             oprot.writeFieldBegin('block_id', TType.I32, 2)
             oprot.writeI32(self.block_id)
             oprot.writeFieldEnd()
-        if self.cmd_id is not None:
-            oprot.writeFieldBegin('cmd_id', TType.I32, 3)
-            oprot.writeI32(self.cmd_id)
-            oprot.writeFieldEnd()
         if self.arguments is not None:
-            oprot.writeFieldBegin('arguments', TType.LIST, 4)
+            oprot.writeFieldBegin('arguments', TType.LIST, 3)
             oprot.writeListBegin(TType.STRING, len(self.arguments))
             for iter6 in self.arguments:
                 oprot.writeBinary(iter6)
@@ -786,8 +765,7 @@ command_request_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'seq', [sequence_id, None], None, ),  # 1
     (2, TType.I32, 'block_id', None, None, ),  # 2
-    (3, TType.I32, 'cmd_id', None, None, ),  # 3
-    (4, TType.LIST, 'arguments', (TType.STRING, 'BINARY', False), None, ),  # 4
+    (3, TType.LIST, 'arguments', (TType.STRING, 'BINARY', False), None, ),  # 3
 )
 
 
@@ -796,7 +774,6 @@ class chain_request_args(object):
     Attributes:
      - seq
      - block_id
-     - cmd_id
      - arguments
 
     """
@@ -804,15 +781,13 @@ class chain_request_args(object):
     __slots__ = (
         'seq',
         'block_id',
-        'cmd_id',
         'arguments',
     )
 
 
-    def __init__(self, seq=None, block_id=None, cmd_id=None, arguments=None,):
+    def __init__(self, seq=None, block_id=None, arguments=None,):
         self.seq = seq
         self.block_id = block_id
-        self.cmd_id = cmd_id
         self.arguments = arguments
 
     def read(self, iprot):
@@ -836,11 +811,6 @@ class chain_request_args(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
-                if ftype == TType.I32:
-                    self.cmd_id = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
                 if ftype == TType.LIST:
                     self.arguments = []
                     (_etype10, _size7) = iprot.readListBegin()
@@ -868,12 +838,8 @@ class chain_request_args(object):
             oprot.writeFieldBegin('block_id', TType.I32, 2)
             oprot.writeI32(self.block_id)
             oprot.writeFieldEnd()
-        if self.cmd_id is not None:
-            oprot.writeFieldBegin('cmd_id', TType.I32, 3)
-            oprot.writeI32(self.cmd_id)
-            oprot.writeFieldEnd()
         if self.arguments is not None:
-            oprot.writeFieldBegin('arguments', TType.LIST, 4)
+            oprot.writeFieldBegin('arguments', TType.LIST, 3)
             oprot.writeListBegin(TType.STRING, len(self.arguments))
             for iter13 in self.arguments:
                 oprot.writeBinary(iter13)
@@ -907,8 +873,7 @@ chain_request_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'seq', [sequence_id, None], None, ),  # 1
     (2, TType.I32, 'block_id', None, None, ),  # 2
-    (3, TType.I32, 'cmd_id', None, None, ),  # 3
-    (4, TType.LIST, 'arguments', (TType.STRING, 'BINARY', False), None, ),  # 4
+    (3, TType.LIST, 'arguments', (TType.STRING, 'BINARY', False), None, ),  # 3
 )
 
 
@@ -916,21 +881,18 @@ class run_command_args(object):
     """
     Attributes:
      - block_id
-     - cmd_id
      - arguments
 
     """
 
     __slots__ = (
         'block_id',
-        'cmd_id',
         'arguments',
     )
 
 
-    def __init__(self, block_id=None, cmd_id=None, arguments=None,):
+    def __init__(self, block_id=None, arguments=None,):
         self.block_id = block_id
-        self.cmd_id = cmd_id
         self.arguments = arguments
 
     def read(self, iprot):
@@ -948,11 +910,6 @@ class run_command_args(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
-                if ftype == TType.I32:
-                    self.cmd_id = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
                 if ftype == TType.LIST:
                     self.arguments = []
                     (_etype17, _size14) = iprot.readListBegin()
@@ -976,12 +933,8 @@ class run_command_args(object):
             oprot.writeFieldBegin('block_id', TType.I32, 1)
             oprot.writeI32(self.block_id)
             oprot.writeFieldEnd()
-        if self.cmd_id is not None:
-            oprot.writeFieldBegin('cmd_id', TType.I32, 2)
-            oprot.writeI32(self.cmd_id)
-            oprot.writeFieldEnd()
         if self.arguments is not None:
-            oprot.writeFieldBegin('arguments', TType.LIST, 3)
+            oprot.writeFieldBegin('arguments', TType.LIST, 2)
             oprot.writeListBegin(TType.STRING, len(self.arguments))
             for iter20 in self.arguments:
                 oprot.writeBinary(iter20)
@@ -1014,8 +967,7 @@ all_structs.append(run_command_args)
 run_command_args.thrift_spec = (
     None,  # 0
     (1, TType.I32, 'block_id', None, None, ),  # 1
-    (2, TType.I32, 'cmd_id', None, None, ),  # 2
-    (3, TType.LIST, 'arguments', (TType.STRING, 'BINARY', False), None, ),  # 3
+    (2, TType.LIST, 'arguments', (TType.STRING, 'BINARY', False), None, ),  # 2
 )
 
 
