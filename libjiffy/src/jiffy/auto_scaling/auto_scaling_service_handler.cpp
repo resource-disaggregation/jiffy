@@ -22,10 +22,8 @@ std::mutex MTX;
 #define LOCK MTX.lock()
 #define UNLOCK MTX.unlock()
 #define UNLOCK_AND_RETURN \
-  MTX.unlock();           \
   return
 #define UNLOCK_AND_THROW(ex)  \
-  MTX.unlock();               \
   throw make_exception(ex)
 
 auto_scaling_service_handler::auto_scaling_service_handler(const std::string directory_host, int directory_port)
@@ -34,7 +32,7 @@ auto_scaling_service_handler::auto_scaling_service_handler(const std::string dir
 void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &cur_chain,
                                                 const std::string &path,
                                                 const std::map<std::string, std::string> &conf) {
-  LOCK;
+  //LOCK;
   std::string scaling_type = conf.find("type")->second;
   auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
   if (scaling_type == "file") {
@@ -144,10 +142,12 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
 
   } else if (scaling_type == "hash_table_merge") {
     // Find a merge target
+    //LOCK;
     auto start = time_utils::now_us();
     auto src = std::make_shared<replica_chain_client>(fs, path, cur_chain, KV_OPS);
     auto name = src->run_command(hash_table_cmd_id::ht_update_partition, {"merging", "merging"}).front();
     if (name == "!fail") {
+	    LOG(log_level::info) << " Fetching partition name failed";
       UNLOCK_AND_THROW("Partition is under auto_scaling");
     }
     auto storage_capacity = static_cast<std::size_t>(std::stoi(conf.find("storage_capacity")->second));
@@ -160,7 +160,12 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     size_t find_min_size = storage_capacity + 1;
     for (auto &i : replica_set) {
       if (i.fetch_slot_range().first == merge_range_end || i.fetch_slot_range().second == merge_range_beg) {
-        auto client = std::make_shared<replica_chain_client>(fs, path, i, KV_OPS, 0);
+	      std::shared_ptr<replica_chain_client> client;
+	      try {
+        	client = std::make_shared<replica_chain_client>(fs, path, i, KV_OPS, 0);
+	      } catch (apache::thrift::transport::TTransportException &e) {
+		      continue;
+	      }
         auto ret = client->run_command(hash_table_cmd_id::ht_get_storage_size, {}).front();
         if (ret == "!block_moved") continue;
 
@@ -173,6 +178,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       }
     }
     if (able_to_merge) {
+	    LOG(log_level::info) << "Failed to find merge target";
       src->run_command(hash_table_cmd_id::ht_update_partition, {name, "regular$" + name});
       UNLOCK_AND_THROW("Adjacent partitions are not found or full");
     }
@@ -180,18 +186,23 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
 
     // Connect the two replica chains
     auto dst = std::make_shared<replica_chain_client>(fs, path, merge_target, KV_OPS);
-    auto dst_name = (merge_target.fetch_slot_range().first == merge_range_end) ?
-                    std::to_string(merge_range_beg) + "_" + std::to_string(merge_target.fetch_slot_range().second) :
-                    std::to_string(merge_target.fetch_slot_range().first) + "_" + std::to_string(merge_range_end);
+    //auto dst_name = (merge_target.fetch_slot_range().first == merge_range_end) ?
+    //                std::to_string(merge_range_beg) + "_" + std::to_string(merge_target.fetch_slot_range().second) :
+    //                std::to_string(merge_target.fetch_slot_range().first) + "_" + std::to_string(merge_range_end);
     auto exp_target = pack(merge_target);
-    auto ret = dst->run_command(hash_table_cmd_id::ht_update_partition, {merge_target.name, "importing$" + name}).front();
+    auto dst_old_name = dst->run_command(hash_table_cmd_id::ht_update_partition, {merge_target.name, "importing$" + name}).front();
 
     // We don't need to update the src partition cause it will be deleted anyway
-    if (ret == "!fail") {
+    if (dst_old_name == "!fail") {
+	    LOG(log_level::info) << "Unable to save the destination block";
       src->run_command(hash_table_cmd_id::ht_update_partition, {name, "regular$" + name});
       UNLOCK_AND_RETURN;
     }
-    src->run_command(hash_table_cmd_id::ht_update_partition, {name, "exporting$" + dst_name + "$" + exp_target});
+    auto dst_slot_range = string_utils::split(dst_old_name, '_', 2);
+    auto dst_name = (std::stoi(dst_slot_range[0]) == merge_range_end) ?
+                    std::to_string(merge_range_beg) + "_" + dst_slot_range[1]:
+                    dst_slot_range[0] + "_" + std::to_string(merge_range_end);
+    src->run_command(hash_table_cmd_id::ht_update_partition, {name, "exporting$" + name + "$" + exp_target});
     auto finish_update_partition_before = time_utils::now_us();
 
     // Transfer data from source to destination
@@ -229,7 +240,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     auto finish_data_transmission = time_utils::now_us();
 
     // Update partition at directory server
-    fs->update_partition(path, merge_target.name, dst_name, "regular");
+    fs->update_partition(path, dst_old_name, dst_name, "regular");
     auto finish_update_partition_dir = time_utils::now_us();
 
     // Setting name and metadata for src and dst
@@ -253,6 +264,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
                          << finish_update_partition_dir - finish_data_transmission << " "
                          << finish_update_partition_after - finish_update_partition_dir;
 
+    //UNLOCK;
   } else if (scaling_type == "fifo_queue_add") {
     // Add a replica chain at directory server
     auto start = time_utils::now_us();
@@ -284,7 +296,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     // Log auto-scaling info
     LOG(log_level::info) << "D " << start << " " << finish_removing_replica_chain - start;
   }
-  UNLOCK; // Using global lock because we want to avoid merging and splitting happening in the same time
+  //UNLOCK; // Using global lock because we want to avoid merging and splitting happening in the same time
 }
 
 std::string auto_scaling_service_handler::pack(const directory::replica_chain &chain) {

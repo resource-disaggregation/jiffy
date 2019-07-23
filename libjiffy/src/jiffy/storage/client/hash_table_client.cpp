@@ -26,7 +26,7 @@ void hash_table_client::refresh() {
   status_ = fs_->dstatus(path_);
   blocks_.clear();
   for (auto &block: status_.data_blocks()) {
-    if (block.metadata != "split_importing" && block.metadata != "importing") {
+    if (block.metadata != "importing" && block.metadata != "split_importing") {
       blocks_.emplace(std::make_pair(static_cast<int32_t>(std::stoi(utils::string_utils::split(block.name, '_')[0])),
                                      std::make_shared<replica_chain_client>(fs_, path_, block, KV_OPS, timeout_ms_)));
     }

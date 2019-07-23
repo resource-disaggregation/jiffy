@@ -89,6 +89,7 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
     REQUIRE(client.get(std::to_string(i)) == std::to_string(2000 - i));
   }
 
+  t->remove("/sandbox/scale_up.txt");
   as_server->stop();
   if (auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();
@@ -155,8 +156,8 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
   REQUIRE_NOTHROW(client.update(std::to_string(1000), std::string(102400, 'x')));
 
   // Busy wait until number of blocks decreases
-  while (t->dstatus("/sandbox/scale_down.txt").data_blocks().size() >= 2);
-
+  while (t->dstatus("/sandbox/scale_down.txt").data_blocks().size() == 3);
+/*
   for (std::size_t i = 1; i < 1000; i++) {
     std::string key = std::to_string(i);
     std::vector<std::string> ret;
@@ -165,6 +166,7 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
     REQUIRE_NOTHROW(blocks[2]->impl()->run_command(ret, 0, {}));
     REQUIRE(ret.front() == "!block_moved");
   }
+  */
   for (std::size_t i = 1; i < 1000 && i != 600; i++) {
     REQUIRE(client.get(std::to_string(i)) == std::to_string(1000 - i));
   }
@@ -172,6 +174,9 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
   for (std::size_t i = 1000; i < 4000; i++) {
     REQUIRE(client.put(std::to_string(i), std::string(102400, 'x')) == "!ok");
   }
+
+  t->remove("/sandbox/scale_down.txt");
+
   as_server->stop();
   if (auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();
@@ -218,9 +223,9 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  data_status status = t->create("/sandbox/scale_down.txt", "hashtable", "/tmp", 3, 5, 0, perms::all(),
+  data_status status = t->create("/sandbox/scale_mix.txt", "hashtable", "/tmp", 3, 5, 0, perms::all(),
                                  {"0_16384", "16384_32768", "32768_65536"}, {"regular", "regular", "regular"}, {});
-  hash_table_client client(t, "/sandbox/scale_down.txt", status);
+  hash_table_client client(t, "/sandbox/scale_mix.txt", status);
   std::vector<int> remain_keys;
   std::size_t iter = 15000;
   const std::size_t max_key = 100;
@@ -262,6 +267,8 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
       REQUIRE(client.get(std::to_string(k)) == std::string(string_size, 'b'));
   }
 
+  t->remove("/sandbox/scale_mix.txt");
+
   as_server->stop();
   if (auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();
@@ -282,7 +289,7 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
     dir_serve_thread.join();
   }
 }
-
+/*
 TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(21, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -889,3 +896,4 @@ TEST_CASE("fifo_queue_auto_scale_mix_test", "[directory_service][storage_server]
   }
 
 }
+*/
