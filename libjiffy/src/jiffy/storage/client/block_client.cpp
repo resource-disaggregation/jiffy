@@ -1,6 +1,7 @@
 #include <thrift/transport/TBufferTransports.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <iostream>
+#include <jiffy/utils/logger.h>
 
 #include "block_client.h"
 
@@ -10,6 +11,8 @@ using namespace ::apache::thrift::transport;
 
 namespace jiffy {
 namespace storage {
+
+using namespace utils;
 
 block_client::~block_client() {
   if (transport_ != nullptr)
@@ -32,7 +35,9 @@ void block_client::connect(const std::string &host, int port, int block_id, int 
 }
 
 block_client::command_response_reader block_client::get_command_response_reader(int64_t client_id) {
+	LOG(log_level::info) << "register client id";
   client_->register_client_id(block_id_, client_id);
+  LOG(log_level::info) << "Finish registering client id";
   return block_client::command_response_reader(protocol_);
 }
 

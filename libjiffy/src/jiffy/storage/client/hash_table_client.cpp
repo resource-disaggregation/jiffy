@@ -23,7 +23,9 @@ hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interf
 }
 
 void hash_table_client::refresh() {
+	LOG(log_level::info) << "Refreshing this client";
   status_ = fs_->dstatus(path_);
+  LOG(log_level::info) << "Finish fetching file status with blocks: " << status_.data_blocks().size();
   blocks_.clear();
   for (auto &block: status_.data_blocks()) {
     if (block.metadata != "importing" && block.metadata != "split_importing") {
@@ -31,6 +33,7 @@ void hash_table_client::refresh() {
                                      std::make_shared<replica_chain_client>(fs_, path_, block, KV_OPS, timeout_ms_)));
     }
   }
+  LOG(log_level::info) << "Finish adding the new chains";
 }
 
 std::string hash_table_client::put(const std::string &key, const std::string &value) {

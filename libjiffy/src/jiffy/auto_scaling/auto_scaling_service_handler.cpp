@@ -185,7 +185,14 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     auto finish_finding_chain_to_merge = time_utils::now_us();
 
     // Connect the two replica chains
-    auto dst = std::make_shared<replica_chain_client>(fs, path, merge_target, KV_OPS);
+    std::shared_ptr<replica_chain_client> dst;
+    try {
+    	dst = std::make_shared<replica_chain_client>(fs, path, merge_target, KV_OPS);
+    } catch (apache::thrift::transport::TTransportException &e) {
+	LOG(log_level::info) << "The merge target chain has been deleted";
+      src->run_command(hash_table_cmd_id::ht_update_partition, {name, "regular$" + name});
+      UNLOCK_AND_RETURN;
+    }
     //auto dst_name = (merge_target.fetch_slot_range().first == merge_range_end) ?
     //                std::to_string(merge_range_beg) + "_" + std::to_string(merge_target.fetch_slot_range().second) :
     //                std::to_string(merge_target.fetch_slot_range().first) + "_" + std::to_string(merge_range_end);
