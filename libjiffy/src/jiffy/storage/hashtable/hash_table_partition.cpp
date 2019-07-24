@@ -50,8 +50,6 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
 
 std::string hash_table_partition::put(const std::string &key, const std::string &value, bool redirect) {
   auto hash = hash_slot::get(key);
-  if(is_tail())
-  LOG(log_level::info) << "Putting key: " << key << " hash " << hash  << " at " << name();
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
@@ -61,9 +59,6 @@ std::string hash_table_partition::put(const std::string &key, const std::string 
     }
 
     if (block_.insert(make_binary(key), make_binary(value))) {
-
-  if(is_tail())
-	LOG(log_level::info) << "Successful put at " << name();
       return "!ok";
     } else {
       return "!duplicate_key";
@@ -105,15 +100,10 @@ std::string hash_table_partition::exists(const std::string &key, bool redirect) 
 
 std::string hash_table_partition::get(const std::string &key, bool redirect) {
   auto hash = hash_slot::get(key);
-  if(is_tail())
-  LOG(log_level::info) << "Getting key: " << key << " hash " << hash <<  " at " << name();
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     try {
       return to_string(block_.find(key));
     } catch (std::out_of_range &e) {
-
-  if(is_tail())
-	LOG(log_level::info) << "not successful get at " << name() << " key " << key << " hash " << hash;
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
         return "!exporting!" + export_target_str();
       }
@@ -125,8 +115,6 @@ std::string hash_table_partition::get(const std::string &key, bool redirect) {
 
 std::string hash_table_partition::update(const std::string &key, const std::string &value, bool redirect) {
   auto hash = hash_slot::get(key);
-  if(is_tail())
-  LOG(log_level::info) << "Updating key: " << key << " hash " << hash  << " at " << name();
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
       return "!exporting!" + export_target_str();
@@ -136,8 +124,6 @@ std::string hash_table_partition::update(const std::string &key, const std::stri
       old_val = to_string(v);
       v = make_binary(value);
     })) {
-  if(is_tail())
-	LOG(log_level::info) << "Successful update at " << name();
       return old_val;
     }
     if (metadata_ == "importing" && in_import_slot_range(hash)) {
@@ -208,8 +194,6 @@ void hash_table_partition::get_data_in_slot_range(std::vector<std::string> &data
 
 std::string hash_table_partition::update_partition(const std::string &new_name, const std::string &new_metadata) {
 
-  if(is_tail())
-	  LOG(log_level::info) << "Update partition from " << name() << " " << metadata() << " to " << new_name << " " << new_metadata;
   update_lock_.lock();
   if (new_name == "merging" && new_metadata == "merging") {
     if (metadata() == "regular" && name() != "0_65536" && underload()) {
