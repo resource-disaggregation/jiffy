@@ -31,11 +31,10 @@ void file_client::refresh() {
 }
 
 bool file_client::seek(const std::size_t offset) {
-  std::vector<std::string> ret;
   auto seek_partition = block_id();
-  ret = blocks_[seek_partition]->run_command({"seek"});
-  auto size = static_cast<std::size_t>(std::stoi(ret[0]));
-  auto cap = static_cast<std::size_t>(std::stoi(ret[1]));
+  auto ret = blocks_[seek_partition]->run_command({"seek"});
+  auto size = static_cast<std::size_t>(std::stoull(ret[0]));
+  auto cap = static_cast<std::size_t>(std::stoull(ret[1]));
   if (offset > seek_partition * cap + size) {
     return false;
   } else {

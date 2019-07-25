@@ -28,7 +28,7 @@ std::mutex MTX;
   MTX.unlock();               \
   throw make_exception(ex)
 
-auto_scaling_service_handler::auto_scaling_service_handler(const std::string directory_host, int directory_port)
+auto_scaling_service_handler::auto_scaling_service_handler(const std::string &directory_host, int directory_port)
     : directory_host_(directory_host), directory_port_(directory_port) {}
 
 void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &cur_chain,
@@ -91,7 +91,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     auto finish_data_transmission = time_utils::now_us();
 
     // Finalize slot range split at directory server
-    auto old_name = cur_name;
+    const auto &old_name = cur_name;
     fs->update_partition(path, old_name, src_name, "regular");
     fs->update_partition(path, dst_name, dst_name, "regular");
     auto finish_updating_partition_dir = time_utils::now_us();
@@ -223,8 +223,8 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
   UNLOCK; // Using global lock because we want to avoid merging and splitting happening in the same time
 }
 
-void auto_scaling_service_handler::hash_table_transfer_data(std::shared_ptr<storage::replica_chain_client> src,
-                                                            std::shared_ptr<storage::replica_chain_client> dst,
+void auto_scaling_service_handler::hash_table_transfer_data(const std::shared_ptr<storage::replica_chain_client> &src,
+                                                            const std::shared_ptr<storage::replica_chain_client> &dst,
                                                             size_t slot_beg,
                                                             size_t slot_end,
                                                             size_t batch_size) {
@@ -245,19 +245,16 @@ void auto_scaling_service_handler::hash_table_transfer_data(std::shared_ptr<stor
     }
 
     write_args.insert(write_args.begin(), "scale_put"); // Add scale_put command name
-    write_args.emplace_back("!redirected"); // Add redirected argument
 
     // Write data to dst partition
     auto response = dst->run_command(write_args);
 
     // Remove data from src partition
-    write_args.pop_back(); // Remove !redirected argument
     auto transfer_size = write_args.size() - 1; // Account for "scale_put" command name
 
     std::vector<std::string> remove_args{"scale_remove"};
     for (std::size_t i = 0; i < transfer_size; i++) {
       if (i % 2) {
-        assert(response[i / 2] == "!ok");
         remove_args.push_back(write_args.back());
       }
       write_args.pop_back();
@@ -269,7 +266,7 @@ void auto_scaling_service_handler::hash_table_transfer_data(std::shared_ptr<stor
 }
 
 bool auto_scaling_service_handler::find_merge_target(directory::replica_chain &merge_target,
-                                                     std::shared_ptr<directory::directory_client> fs,
+                                                     const std::shared_ptr<directory::directory_client> &fs,
                                                      const std::string &path,
                                                      size_t storage_capacity,
                                                      int32_t slot_beg,

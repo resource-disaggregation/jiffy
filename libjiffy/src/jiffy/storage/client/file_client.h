@@ -41,7 +41,7 @@ class file_client : public data_structure_client {
    * @param offset File offset to seek
    * @return Boolean, true if offset is within file range
    */
-  bool seek(const std::size_t offset);
+  bool seek(std::size_t offset);
 
  protected:
 

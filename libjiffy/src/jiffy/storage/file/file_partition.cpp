@@ -1,13 +1,13 @@
-#include <jiffy/utils/string_utils.h>
 #include "file_partition.h"
-#include "jiffy/storage/client/replica_chain_client.h"
-#include "jiffy/utils/logger.h"
 #include "jiffy/persistent/persistent_store.h"
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/storage/file/file_ops.h"
-#include "jiffy/directory/client/directory_client.h"
 #include "jiffy/auto_scaling/auto_scaling_client.h"
 #include <thread>
+
+#define RETURN(...)           \
+  _return = { __VA_ARGS__ };  \
+  return
 
 namespace jiffy {
 namespace storage {
@@ -24,7 +24,7 @@ file_partition::file_partition(block_memory_manager *manager,
                                int auto_scaling_port)
     : chain_module(manager, name, metadata, FILE_OPS),
       partition_(manager->mb_capacity(), build_allocator<char>()),
-      overload_(false),
+      scaling_up_(false),
       dirty_(false),
       directory_host_(directory_host),
       directory_port_(directory_port),
@@ -42,102 +42,92 @@ file_partition::file_partition(block_memory_manager *manager,
   auto_scale_ = conf.get_as<bool>("file.auto_scale", true);
 }
 
-std::string file_partition::write(const std::string &data, std::string offset) {
-  auto off = std::stoi(offset);
-  auto ret = partition_.write(data, off);
+void file_partition::write(response& _return, const arg_list &args) {
+  if (args.size() != 3) {
+    RETURN("!args_error");
+  }
+  auto off = std::stoi(args[2]);
+  auto ret = partition_.write(args[1], off);
   if (!ret.first) {
     if (!auto_scale_) {
-      return "!split_write!" + std::to_string(ret.second.size());
+      RETURN("!split_write", std::to_string(ret.second.size()));
     }
     if (!next_target_str().empty()) {
-      return "!split_write!" + next_target_str() + "!" + std::to_string(ret.second.size());
+      RETURN("!split_write", std::to_string(ret.second.size()), next_target_str_);
     } else {
-      return "!redo";
+      RETURN("!redo");
     }
   }
-  return "!ok";
+  RETURN("!ok");
 }
 
-std::string file_partition::read(const std::string &position, const std::string &size) {
-  auto pos = std::stoi(position);
-  auto read_size = std::stoi(size);
+void file_partition::read(response& _return, const arg_list &args) {
+  if (args.size() != 3) {
+    RETURN("!args_error");
+  }
+  auto pos = std::stoi(args[1]);
+  auto size = std::stoi(args[2]);
   if (pos < 0) throw std::invalid_argument("read position invalid");
-  auto ret = partition_.read(static_cast<std::size_t>(pos), static_cast<std::size_t>(read_size));
+  auto ret = partition_.read(static_cast<std::size_t>(pos), static_cast<std::size_t>(size));
   if (ret.first) {
-    return ret.second;
+    RETURN(ret.second);
   }
   if (ret.second == "!not_available") {
-    return "!msg_not_found";
+    RETURN("!msg_not_found");
   } else {
     if (!auto_scale_) {
-      return "!split_read!" + ret.second;
+      RETURN("!split_read", ret.second);
     }
     if (!next_target_str().empty()) {
-      return "!split_read!" + next_target_str() + "!" + ret.second;
+      RETURN("!split_read", ret.second, next_target_str_);
     } else {
-      return "!redo";
+      RETURN("!redo");
     }
   }
 }
 
-void file_partition::seek(std::vector<std::string> &ret) {
-  ret.emplace_back(std::to_string(partition_.size()));
-  ret.emplace_back(std::to_string(partition_.capacity()));
+void file_partition::seek(response& _return, const arg_list &args) {
+  if (args.size() != 1) {
+    RETURN("!args_error");
+  }
+  RETURN(std::to_string(partition_.size()), std::to_string(partition_.capacity()));
 }
 
-std::string file_partition::clear() {
+void file_partition::clear(response& _return, const arg_list &args) {
+  if (args.size() != 1) {
+    RETURN("!args_error");
+  }
   partition_.clear();
-  overload_ = false;
+  scaling_up_ = false;
   dirty_ = false;
-  return "!ok";
+  RETURN("!ok");
 }
 
-std::string file_partition::update_partition(const std::string &next) {
-  next_target(next);
-  return "!ok";
+void file_partition::update_partition(response& _return, const arg_list &args) {
+  if (args.size() != 2) {
+    RETURN("!args_error");
+  }
+  next_target(args[1]);
+  RETURN("!ok");
 }
 
-void file_partition::run_command(std::vector<std::string> &_return,
-                                 const std::vector<std::string> &args) {
-  auto arg_it = args.begin();
-  auto cmd_name = *arg_it;
-  std::advance(arg_it, 1);
-  size_t nargs = args.size() - 1;
+void file_partition::run_command(response &_return, const arg_list &args) {
+  auto cmd_name = args[0];
   switch (command_id(cmd_name)) {
     case file_cmd_id::file_write:
-      if (nargs % 2 != 0) {
-        _return.emplace_back("!args_error");
-      }
-      for (size_t i = 0; i < nargs; i += 2)
-        _return.emplace_back(write(args[i + 1], args[i + 2]));
+      write(_return, args);
       break;
     case file_cmd_id::file_read:
-      if (nargs % 2 != 0) {
-        _return.emplace_back("!args_error");
-      }
-      for (size_t i = 0; i < nargs; i += 2)
-        _return.emplace_back(read(args[i + 1], args[i + 2]));
+      read(_return, args);
       break;
     case file_cmd_id::file_clear:
-      if (nargs != 0) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(clear());
-      }
+      clear(_return, args);
       break;
     case file_cmd_id::file_update_partition:
-      if (nargs != 1) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(update_partition(*arg_it));
-      }
+      update_partition(_return, args);
       break;
     case file_cmd_id::file_seek:
-      if (nargs != 0) {
-        _return.emplace_back("!args_error");
-      } else {
-        seek(_return);
-      }
+      seek(_return, args);
       break;
     default: {
       _return.emplace_back("!no_such_command");
@@ -147,18 +137,18 @@ void file_partition::run_command(std::vector<std::string> &_return,
   if (is_mutator(cmd_name)) {
     dirty_ = true;
   }
-  if (auto_scale_ && is_mutator(cmd_name) && overload() && is_tail() && !overload_ && next_target_str().empty()) {
+  if (auto_scale_ && is_mutator(cmd_name) && overload() && is_tail() && !scaling_up_ && next_target_str().empty()) {
     LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
                          << storage_capacity() << " partition size = " << size() << " partition capacity = "
                          << partition_.capacity();
     try {
-      overload_ = true;
+      scaling_up_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
       std::map<std::string, std::string> scale_conf{{"type", "file"}, {"next_partition_name", dst_partition_name}};
       auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
       scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
-      overload_ = false;
+      scaling_up_ = false;
       LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();
     }
   }
@@ -208,7 +198,7 @@ bool file_partition::dump(const std::string &path) {
   sub_map_.clear();
   chain_ = {};
   role_ = singleton;
-  overload_ = false;
+  scaling_up_ = false;
   dirty_ = false;
   return flushed;
 }

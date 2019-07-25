@@ -73,7 +73,9 @@ TEST_CASE("chain_replication_no_failure_test", "[put][get]") {
   for (size_t i = 0; i < NUM_BLOCKS; i++) {
     auto ht = std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl());
     for (std::size_t j = 0; j < 1000; j++) {
-      REQUIRE(ht->get(std::to_string(j)) == std::to_string(j));
+      response resp;
+      REQUIRE_NOTHROW(ht->get(resp, {"get", std::to_string(j)}));
+      REQUIRE(resp[0] == std::to_string(j));
     }
   }
 
@@ -162,7 +164,9 @@ TEST_CASE("chain_replication_head_failure_test", "[put][get]") {
   for (size_t i = 1; i < NUM_BLOCKS; i++) {
     auto ht = std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl());
     for (std::size_t j = 0; j < 1000; j++) {
-      REQUIRE(ht->get(std::to_string(j)) == std::to_string(j));
+      response resp;
+      REQUIRE_NOTHROW(ht->get(resp, {"get", std::to_string(j)}));
+      REQUIRE(resp[0] == std::to_string(j));
     }
   }
 
@@ -251,7 +255,9 @@ TEST_CASE("chain_replication_mid_failure_test", "[put][get]") {
     if (i == 1) continue;
     auto ht = std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl());
     for (std::size_t j = 0; j < 1000; j++) {
-      REQUIRE(ht->get(std::to_string(j)) == std::to_string(j));
+      response resp;
+      REQUIRE_NOTHROW(ht->get(resp, {"get", std::to_string(j)}));
+      REQUIRE(resp[0] == std::to_string(j));
     }
   }
 
@@ -340,7 +346,9 @@ TEST_CASE("chain_replication_tail_failure_test", "[put][get]") {
   for (size_t i = 0; i < NUM_BLOCKS - 1; i++) {
     auto ht = std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl());
     for (std::size_t j = 0; j < 1000; j++) {
-      REQUIRE(ht->get(std::to_string(j)) == std::to_string(j));
+      response resp;
+      REQUIRE_NOTHROW(ht->get(resp, {"get", std::to_string(j)}));
+      REQUIRE(resp[0] == std::to_string(j));
     }
   }
 
@@ -425,7 +433,9 @@ TEST_CASE("chain_replication_add_block_test", "[put][get]") {
   for (size_t i = 0; i < NUM_BLOCKS; i++) {
     auto ht = std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl());
     for (std::size_t j = 0; j < 1000; j++) {
-      REQUIRE(ht->get(std::to_string(j)) == std::to_string(j));
+      response resp;
+      REQUIRE_NOTHROW(ht->get(resp, {"get", std::to_string(j)}));
+      REQUIRE(resp[0] == std::to_string(j));
     }
   }
 

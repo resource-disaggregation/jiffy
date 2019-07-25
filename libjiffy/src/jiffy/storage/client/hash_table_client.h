@@ -80,7 +80,7 @@ class hash_table_client : public data_structure_client {
    * @param response Response to be collected
    */
 
-  void handle_redirect(const std::vector<std::string> &args, std::string &response) override;
+  void handle_redirect(const std::vector<std::string> &args, std::vector<std::string> &response) override;
 
   /* Redo times */
   std::size_t redo_times_ = 0;

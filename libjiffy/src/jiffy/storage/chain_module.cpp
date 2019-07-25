@@ -98,7 +98,7 @@ void chain_module::reset_next_and_listen(const std::string &next_block) {
   }
 }
 
-void chain_module::request(sequence_id seq, const std::vector<std::string> &args) {
+void chain_module::request(sequence_id seq, const arg_list &args) {
   if (!is_head() && !is_tail()) {
     LOG(log_level::error) << "Invalid state: Direct request on a mid node";
     return;
@@ -126,7 +126,7 @@ void chain_module::request(sequence_id seq, const std::vector<std::string> &args
   add_pending(seq, args);
 }
 
-void chain_module::chain_request(const sequence_id &seq, const std::vector<std::string> &args) {
+void chain_module::chain_request(const sequence_id &seq, const arg_list &args) {
   auto cmd_name = args.front();
   if (is_head()) {
     LOG(log_level::error) << "Invalid state: Chain request " << cmd_name << " on head node";

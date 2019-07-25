@@ -13,34 +13,32 @@ file_reader::file_reader(std::shared_ptr<jiffy::directory::directory_interface> 
 }
 
 std::string file_reader::read(const std::size_t size) {
-  std::string _return;
+  std::vector<std::string> _return;
   std::vector<std::string> args = {"read", std::to_string(cur_offset_), std::to_string(size)};
   bool redo;
   do {
     try {
-      _return = blocks_[block_id()]->run_command(args).front();
+      _return = blocks_[block_id()]->run_command(args);
       handle_redirect(args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
   } while (redo);
-  return _return;
+  return _return[0];
 }
 
-void file_reader::handle_redirect(const std::vector<std::string> &args, std::string &response) {
+void file_reader::handle_redirect(const std::vector<std::string> &args, std::vector<std::string> &response) {
   bool read_flag = true;
-  typedef std::vector<std::string> list_t;
-  if (response == "!redo") throw redo_error();
+  if (response[0] == "!redo") throw redo_error();
 
-  if (response.substr(0, 11) == "!split_read") {
+  if (response[0] == "!split_read") {
     std::string result;
     do {
-      auto parts = string_utils::split(response, '!');
-      auto data_part = *(parts.end() - 1);
+      auto data_part = response[1];
+      auto chain = string_utils::split(response[2], '!');
       result += data_part;
       if (need_chain()) {
-        auto chain = directory::replica_chain(list_t(parts.begin() + 2, parts.end() - 1));
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FILE_OPS));
       }
       cur_partition_++;
@@ -48,19 +46,19 @@ void file_reader::handle_redirect(const std::vector<std::string> &args, std::str
       cur_offset_ = 0;
       std::vector<std::string> new_args{"read", std::to_string(cur_offset_),
                                         std::to_string(std::stoi(args[2]) - result.size())};
-      response = blocks_[block_id()]->run_command(new_args).front();
-      if (response != "!msg_not_found") {
-        if (response.substr(0, 11) == "!split_read")
+      response = blocks_[block_id()]->run_command(new_args);
+      if (response[0] != "!msg_not_found") {
+        if (response[0] == "!split_read")
           continue;
-        cur_offset_ += response.size();
-        result += response;
+        cur_offset_ += response[0].size();
+        result += response[0];
       }
-    } while (response.substr(0, 11) == "!split_read");
-    response = result;
+    } while (response[0] == "!split_read");
+    response[0] = result;
     read_flag = false;
   }
-  if (response != "!msg_not_found" && read_flag) {
-    cur_offset_ += response.size();
+  if (response[0] != "!msg_not_found" && read_flag) {
+    cur_offset_ += response[0].size();
   }
 }
 

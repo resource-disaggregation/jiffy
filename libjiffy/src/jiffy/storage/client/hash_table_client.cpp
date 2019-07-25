@@ -1,5 +1,4 @@
 #include "hash_table_client.h"
-#include "jiffy/utils/logger.h"
 #include "jiffy/utils/string_utils.h"
 #include "jiffy/storage/hashtable/hash_slot.h"
 #include <thread>
@@ -34,12 +33,12 @@ void hash_table_client::refresh() {
 }
 
 std::string hash_table_client::put(const std::string &key, const std::string &value) {
-  std::string _return;
+  std::vector<std::string> _return;
   std::vector<std::string> args{"put", key, value};
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(args).front();
+      _return = blocks_[block_id(key)]->run_command(args);
       handle_redirect(args, _return);
       redo = false;
       redo_times_ = 0;
@@ -47,16 +46,16 @@ std::string hash_table_client::put(const std::string &key, const std::string &va
       redo = true;
     }
   } while (redo);
-  return _return;
+  return _return[0];
 }
 
 std::string hash_table_client::get(const std::string &key) {
-  std::string _return;
+  std::vector<std::string> _return;
   std::vector<std::string> args{"get", key};
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(args).front();
+      _return = blocks_[block_id(key)]->run_command(args);
       handle_redirect(args, _return);
       redo = false;
       redo_times_ = 0;
@@ -64,16 +63,16 @@ std::string hash_table_client::get(const std::string &key) {
       redo = true;
     }
   } while (redo);
-  return _return;
+  return _return[0];
 }
 
 std::string hash_table_client::update(const std::string &key, const std::string &value) {
-  std::string _return;
+  std::vector<std::string> _return;
   std::vector<std::string> args{"update", key, value};
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(args).front();
+      _return = blocks_[block_id(key)]->run_command(args);
       handle_redirect(args, _return);
       redo = false;
       redo_times_ = 0;
@@ -81,16 +80,16 @@ std::string hash_table_client::update(const std::string &key, const std::string 
       redo = true;
     }
   } while (redo);
-  return _return;
+  return _return[0];
 }
 
 std::string hash_table_client::remove(const std::string &key) {
-  std::string _return;
+  std::vector<std::string> _return;
   std::vector<std::string> args{"remove", key};
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(key)]->run_command(args).front();
+      _return = blocks_[block_id(key)]->run_command(args);
       handle_redirect(args, _return);
       redo = false;
       redo_times_ = 0;
@@ -98,31 +97,25 @@ std::string hash_table_client::remove(const std::string &key) {
       redo = true;
     }
   } while (redo);
-  return _return;
+  return _return[0];
 }
 
 std::size_t hash_table_client::block_id(const std::string &key) {
   return static_cast<size_t>((*std::prev(blocks_.upper_bound(hash_slot::get(key)))).first);
 }
 
-void hash_table_client::handle_redirect(const std::vector<std::string> &args, std::string &response) {
-  if (response.substr(0, 10) == "!exporting") {
-    typedef std::vector<std::string> list_t;
+void hash_table_client::handle_redirect(const std::vector<std::string> &args, std::vector<std::string> &response) {
+  if (response[0] == "!exporting") {
     do {
-      auto parts = string_utils::split(response, '!');
-      auto chain = list_t(parts.begin() + 2, parts.end());
-      response = replica_chain_client(fs_,
-                                      path_,
-                                      directory::replica_chain(chain),
-                                      HT_OPS,
-                                      0).run_command_redirected(args).front();
-    } while (response.substr(0, 10) == "!exporting");
+      auto chain = directory::replica_chain(string_utils::split(response[1], '!'));
+      response = replica_chain_client(fs_, path_, chain, HT_OPS,0).run_command_redirected(args);
+    } while (response[0] == "!exporting");
   }
-  if (response == "!block_moved") {
+  if (response[0] == "!block_moved") {
     refresh();
     throw redo_error();
   }
-  if (response == "!full") {
+  if (response[0] == "!full") {
     std::this_thread::sleep_for(std::chrono::milliseconds((int) (std::pow(2, redo_times_))));
     redo_times_++;
     throw redo_error();

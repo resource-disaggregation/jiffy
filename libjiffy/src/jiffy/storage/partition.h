@@ -19,7 +19,11 @@
 
 namespace jiffy {
 namespace storage {
+
 using namespace utils;
+
+typedef std::vector<std::string> arg_list;
+typedef std::vector<std::string> response;
 
 /* Partition class */
 class partition {
@@ -54,8 +58,7 @@ class partition {
    * @param cmd_id Operation identifier
    * @param args Operation arguments
    */
-  virtual void run_command(std::vector<std::string> &_return,
-                           const std::vector<std::string> &args) = 0;
+  virtual void run_command(response &_return, const arg_list &args) = 0;
 
   /**
    * @brief Set block path
@@ -204,7 +207,7 @@ class partition {
   /* Binary allocator */
   allocator<uint8_t> binary_allocator_;
   /* Atomic bool to indicate that the partition is a default one */
-  std::atomic<bool> default_;
+  std::atomic<bool> default_{};
 };
 
 }

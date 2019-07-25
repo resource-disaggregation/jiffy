@@ -35,7 +35,7 @@ class default_partition : public chain_module {
   /**
    * @brief Virtual destructor
    */
-  virtual ~default_partition() = default;
+  ~default_partition() override = default;
 
   /**
    * @brief Run particular command on key value block
@@ -43,7 +43,7 @@ class default_partition : public chain_module {
    * @param args Command arguments
    */
 
-  void run_command(std::vector<std::string> &_return, const std::vector<std::string> &args) override;
+  void run_command(response &_return, const arg_list &args) override;
   /**
    * @brief Load persistent data into the block, lock the block while doing this
    * @param path Persistent storage path

@@ -16,7 +16,7 @@ class auto_scaling_service_handler : public auto_scaling_serviceIf {
    * @param directory_host Directory server host name
    * @param directory_port Directory server port number
    */
-  explicit auto_scaling_service_handler(const std::string directory_host, int directory_port);
+  explicit auto_scaling_service_handler(const std::string& directory_host, int directory_port);
 
   /**
    * @brief Auto scaling handling function
@@ -61,7 +61,7 @@ class auto_scaling_service_handler : public auto_scaling_serviceIf {
    * @return True if merge candidate is found, false otherwise
    */
   static bool find_merge_target(directory::replica_chain &merge_target,
-                                std::shared_ptr<directory::directory_client> fs,
+                                const std::shared_ptr<directory::directory_client>& fs,
                                 const std::string &path,
                                 size_t storage_capacity,
                                 int32_t slot_beg,
@@ -75,8 +75,8 @@ class auto_scaling_service_handler : public auto_scaling_serviceIf {
    * @param slot_end End of slot range for data transfer
    * @param batch_size Batch size for data transfer
    */
-  static void hash_table_transfer_data(std::shared_ptr<storage::replica_chain_client> src,
-                                       std::shared_ptr<storage::replica_chain_client> dst,
+  static void hash_table_transfer_data(const std::shared_ptr<storage::replica_chain_client>& src,
+                                       const std::shared_ptr<storage::replica_chain_client>& dst,
                                        size_t slot_beg,
                                        size_t slot_end,
                                        size_t batch_size = 2);

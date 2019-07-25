@@ -5,26 +5,18 @@
 #include <chrono>
 #include <queue>
 #include "jiffy/storage/manager/storage_management_server.h"
-#include "jiffy/storage/manager/storage_management_client.h"
 #include "jiffy/storage/manager/storage_manager.h"
-#include "jiffy/storage/hashtable/hash_table_partition.h"
 #include "jiffy/storage/file/file_partition.h"
-#include "jiffy/storage/fifoqueue/fifo_queue_partition.h"
 #include "jiffy/storage/hashtable/hash_slot.h"
 #include "test_utils.h"
 #include "jiffy/storage/service/block_server.h"
 #include "jiffy/directory/fs/directory_tree.h"
 #include "jiffy/directory/fs/directory_server.h"
-#include "jiffy/storage/hashtable/hash_table_ops.h"
-#include "jiffy/storage/file/file_ops.h"
-#include "jiffy/storage/client/file_client.h"
 #include "jiffy/storage/client/hash_table_client.h"
 #include "jiffy/storage/client/fifo_queue_client.h"
 #include "jiffy/client/jiffy_client.h"
 #include "jiffy/directory/fs/sync_worker.h"
 #include "jiffy/directory/lease/lease_expiry_worker.h"
-#include "jiffy/directory/lease/lease_server.h"
-#include "jiffy/auto_scaling/auto_scaling_client.h"
 #include "jiffy/auto_scaling/auto_scaling_server.h"
 #include "jiffy/utils/rand_utils.h"
 
@@ -65,8 +57,8 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  data_status status = t->create("/sandbox/scale_up.txt", "hashtable", "/tmp", 3, 3, 0, perms::all(),
-                                 {"0_32768", "32768_49152", "49152_65536"}, {"regular", "regular", "regular"}, {});
+  auto status = t->create("/sandbox/scale_up.txt", "hashtable", "/tmp", 3, 3, 0, perms::all(),
+                          {"0_32768", "32768_49152", "49152_65536"}, {"regular", "regular", "regular"}, {});
   hash_table_client client(t, "/sandbox/scale_up.txt", status);
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 2000; ++i) {
@@ -127,8 +119,8 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  data_status status = t->create("/sandbox/scale_down.txt", "hashtable", "/tmp", 3, 5, 0, perms::all(),
-                                 {"0_16384", "16384_32768", "32768_65536"}, {"regular", "regular", "regular"}, {});
+  auto status = t->create("/sandbox/scale_down.txt", "hashtable", "/tmp", 3, 5, 0, perms::all(),
+                          {"0_16384", "16384_32768", "32768_65536"}, {"regular", "regular", "regular"}, {});
   hash_table_client client(t, "/sandbox/scale_down.txt", status);
 
   for (std::size_t i = 0; i <= 1000; ++i) {
@@ -348,10 +340,12 @@ TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][managemen
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
   }
+
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
+
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
@@ -383,8 +377,7 @@ TEST_CASE("file_auto_scale_chain_replica_test", "[directory_service][storage_ser
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  data_status
-      status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 1, 3, 0, perms::all(), {"0"}, {"regular"}, {});
+  auto status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 1, 3, 0, perms::all(), {"0"}, {"regular"}, {});
   file_writer writer(t, "/sandbox/scale_up.txt", status);
   file_reader reader(t, "/sandbox/scale_up.txt", status);
 
@@ -429,10 +422,12 @@ TEST_CASE("file_auto_scale_chain_replica_test", "[directory_service][storage_ser
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
   }
+
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
+
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
@@ -465,11 +460,11 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
   std::map<std::string, std::string> conf;
   conf.emplace("file.auto_scale", "false");
-  data_status status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 8, 1, 0, perms::all(),
-                                 {"0", "1", "2", "3", "4", "5", "6", "7"},
-                                 {"regular", "regular", "regular", "regular", "regular", "regular", "regular",
-                                  "regular"},
-                                 conf);
+  auto status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 8, 1, 0, perms::all(),
+                          {"0", "1", "2", "3", "4", "5", "6", "7"},
+                          {"regular", "regular", "regular", "regular", "regular", "regular", "regular",
+                           "regular"},
+                          conf);
   file_writer writer(t, "/sandbox/scale_up.txt", status);
   file_reader reader(t, "/sandbox/scale_up.txt", status);
 
@@ -514,10 +509,12 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
   }
+
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
+
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
@@ -629,8 +626,7 @@ TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][man
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-  data_status
-      status = t->create("/sandbox/scale_up.txt", "fifoqueue", "/tmp", 1, 1, 0, perms::all(), {"0"}, {"regular"}, {});
+  auto status = t->create("/sandbox/scale_up.txt", "fifoqueue", "/tmp", 1, 1, 0, perms::all(), {"0"}, {"regular"}, {});
   fifo_queue_client client(t, "/sandbox/scale_up.txt", status);
 
   // Write data until auto scaling is triggered
@@ -650,7 +646,6 @@ TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][man
   // Busy wait until number of blocks decreases
   //while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() > 1);
 
-
   as_server->stop();
   if (auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();
@@ -668,7 +663,6 @@ TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][man
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
   }
-
 }
 
 TEST_CASE("fifo_queue_auto_scale_replica_chain_test", "[directory_service][storage_server][management_server]") {
@@ -717,8 +711,6 @@ TEST_CASE("fifo_queue_auto_scale_replica_chain_test", "[directory_service][stora
   // Busy wait until number of blocks decreases
   //while (t->dstatus("/sandbox/scale_up.txt").data_blocks_size() > 1);
 
-
-
   as_server->stop();
   if (auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();
@@ -728,15 +720,16 @@ TEST_CASE("fifo_queue_auto_scale_replica_chain_test", "[directory_service][stora
   if (storage_serve_thread1.joinable()) {
     storage_serve_thread1.join();
   }
+
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
+
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
   }
-
 }
 
 TEST_CASE("fifo_queue_auto_scale_multi_block_test", "[directory_service][storage_server][management_server]") {
@@ -791,15 +784,16 @@ TEST_CASE("fifo_queue_auto_scale_multi_block_test", "[directory_service][storage
   if (storage_serve_thread1.joinable()) {
     storage_serve_thread1.join();
   }
+
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
+
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
   }
-
 }
 
 TEST_CASE("fifo_queue_auto_scale_mix_test", "[directory_service][storage_server][management_server]") {
@@ -826,8 +820,7 @@ TEST_CASE("fifo_queue_auto_scale_mix_test", "[directory_service][storage_server]
   auto dir_server = directory_server::create(t, HOST, DIRECTORY_SERVICE_PORT);
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
-  data_status
-      status = t->create("/sandbox/scale_up.txt", "fifoqueue", "/tmp", 1, 1, 0, perms::all(), {"0"}, {"regular"}, {});
+  auto status = t->create("/sandbox/scale_up.txt", "fifoqueue", "/tmp", 1, 1, 0, perms::all(), {"0"}, {"regular"}, {});
   fifo_queue_client client(t, "/sandbox/scale_up.txt", status);
   std::queue<std::pair<std::size_t, char>> result;
   const std::size_t dict_size = 11;
@@ -870,13 +863,14 @@ TEST_CASE("fifo_queue_auto_scale_mix_test", "[directory_service][storage_server]
   if (storage_serve_thread1.joinable()) {
     storage_serve_thread1.join();
   }
+
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
+
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
   }
-
 }

@@ -331,7 +331,7 @@ class chain_module : public partition {
    * @param result Command result
    * @param args Command arguments
    */
-  void run_command_on_next(std::vector<std::string> &result, const std::vector<std::string> &args) {
+  void run_command_on_next(response &result, const arg_list &args) {
     next_->run_command(result, args);
   }
 
@@ -341,7 +341,7 @@ class chain_module : public partition {
    * @param args Command arguments
    */
 
-  void add_pending(const sequence_id &seq, const std::vector<std::string> &args) {
+  void add_pending(const sequence_id &seq, const arg_list &args) {
     pending_.insert(seq.server_seq_no, chain_op{seq, args});
   }
 
@@ -368,14 +368,14 @@ class chain_module : public partition {
    * @param seq Sequence identifier
    * @param args Command arguments
    */
-  void request(sequence_id seq, const std::vector<std::string> &args);
+  void request(sequence_id seq, const arg_list &args);
 
   /**
    * @brief Chain request
    * @param seq Sequence identifier
    * @param args Command arguments
    */
-  void chain_request(const sequence_id &seq, const std::vector<std::string> &args);
+  void chain_request(const sequence_id &seq, const arg_list &args);
 
   /**
    * @brief Acknowledge the previous block

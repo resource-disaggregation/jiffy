@@ -29,7 +29,7 @@ class file_writer : public file_client {
   /**
    * @brief Destructor
    */
-  virtual ~file_writer() = default;
+  ~file_writer() override = default;
 
 
   /**
@@ -46,7 +46,7 @@ class file_writer : public file_client {
    * @brief Handle command in redirect case
    * @param response Response to be collected
    */
-  void handle_redirect(const std::vector<std::string> &args, std::string &response) override;
+  void handle_redirect(const std::vector<std::string> &args, std::vector<std::string> &response) override;
 
 };
 

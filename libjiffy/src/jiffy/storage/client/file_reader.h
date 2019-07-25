@@ -28,14 +28,14 @@ class file_reader: public file_client {
   /**
    * @brief Destructor
    */
-  virtual ~file_reader() = default;
+  ~file_reader() override = default;
 
   /**
    * @brief Read message from file
    * @param size Size to be read
    * @return Response of the command
    */
-  std::string read(const std::size_t size);
+  std::string read(std::size_t size);
 
  private:
 
@@ -43,7 +43,7 @@ class file_reader: public file_client {
    * @brief Handle command in redirect case
    * @param response Response to be collected
    */
-  void handle_redirect(const std::vector<std::string> &args, std::string &response) override;
+  void handle_redirect(const std::vector<std::string> &args, std::vector<std::string> &response) override;
 };
 
 }

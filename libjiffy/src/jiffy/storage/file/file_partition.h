@@ -39,7 +39,7 @@ class file_partition : public chain_module {
   /**
    * @brief Virtual destructor
    */
-  virtual ~file_partition() = default;
+  ~file_partition() override = default;
 
   /**
    * @brief Fetch block size
@@ -54,46 +54,46 @@ class file_partition : public chain_module {
   bool empty() const;
 
   /**
-   * @brief Write to the file
-   * @param data New message
-   * @param offset Offset
-   * @return Write return status string
+   * @brief Write data to the file
+   * @param _return Response
+   * @param args Arguments
    */
-  std::string write(const std::string &data, std::string offset);
+  void write(response& _return, const arg_list &args);
 
   /**
-   * @brief Read a new message from the file
-   * @param position Read position
-   * @param size Number of bytes to be read
-   * @return Read return status string
+   * @brief Read data from the file
+   * @param _return Response
+   * @param args Arguments
    */
-  std::string read(const std::string &position, const std::string &size);
+  void read(response& _return, const arg_list &args);
 
   /**
    *@brief Fetch the metadata for seek
-   *@param ret Metadata to be returned
+   * @param _return Response
+   * @param args Arguments
    */
-  void seek(std::vector<std::string> &ret);
+  void seek(response& _return, const arg_list &args);
 
   /**
    * @brief Clear the file
-   * @return Clear return status
+   * @param _return Response
+   * @param args Arguments
    */
-  std::string clear();
+  void clear(response& _return, const arg_list &args);
 
   /**
-   * @brief Update partition with next target partition
-   * @param next_target Next target partition string
-   * @return Update status string
+   * @brief Update partition with next partition pointer
+   * @param _return Response
+   * @param args Arguments
    */
-  std::string update_partition(const std::string &next_target);
+  void update_partition(response& _return, const arg_list &args);
 
   /**
-   * @brief Run particular command on file
-   * @param _return Return status to be collected
-   * @param args Command arguments
+   * @brief Run command on file partition
+   * @param _return Response
+   * @param args Arguments
    */
-  void run_command(std::vector<std::string> &_return, const std::vector<std::string> &args) override;
+  void run_command(response &_return, const arg_list &args) override;
 
   /**
    * @brief Atomically check dirty bit
@@ -174,7 +174,7 @@ class file_partition : public chain_module {
   double threshold_hi_;
 
   /* Bool for partition slot range splitting */
-  bool overload_;
+  bool scaling_up_;
 
   /* Partition dirty bit */
   bool dirty_;

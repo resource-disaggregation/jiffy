@@ -27,10 +27,10 @@ class fifo_queue_client : data_structure_client {
                     int timeout_ms = 1000);
 
   virtual ~fifo_queue_client() = default;
+
   /**
    * @brief Refresh the slot and blocks from directory service
    */
-
   void refresh() override;
 
   /**
@@ -38,14 +38,12 @@ class fifo_queue_client : data_structure_client {
    * @param msg New message
    * @return Enqueue result
    */
-
   std::string enqueue(const std::string &msg);
 
   /**
    * @brief Dequeue message
    * @return Dequeue result
    */
-
   std::string dequeue();
 
   /**
@@ -57,17 +55,10 @@ class fifo_queue_client : data_structure_client {
  private:
 
   /**
-   * @brief Check if new chain needs to be added
-   * @param op Operation
-   * @return Boolean, true if new chain needs to be added
-   */
-  bool need_chain(const fifo_queue_cmd_id &op) const;
-  /**
    * @brief Fetch block identifier for specified operation
    * @param op Operation
    * @return Block identifier
    */
-
   std::size_t block_id(const fifo_queue_cmd_id &op) const;
 
   /**
@@ -82,8 +73,7 @@ class fifo_queue_client : data_structure_client {
    * @brief Handle command in redirect case
    * @param response Response to be collected
    */
-
-  void handle_redirect(const std::vector<std::string> &args, std::string &response) override;
+  void handle_redirect(const std::vector<std::string> &args, std::vector<std::string> &response) override;
 
   /* Dequeue partition id */
   std::size_t dequeue_partition_;

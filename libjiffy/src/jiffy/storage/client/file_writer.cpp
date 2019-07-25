@@ -12,50 +12,47 @@ file_writer::file_writer(std::shared_ptr<jiffy::directory::directory_interface> 
                          int timeout_ms) : file_client(fs, path, status, timeout_ms) {}
 
 std::string file_writer::write(const std::string &data) {
-  std::string _return;
+  std::vector<std::string> _return;
   std::vector<std::string> args{"write", data, std::to_string(cur_offset_)};
   bool redo;
   do {
     try {
-      _return = blocks_[block_id()]->run_command(args).front();
+      _return = blocks_[block_id()]->run_command(args);
       handle_redirect(args, _return);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
   } while (redo);
-  return _return;
+  return _return[0];
 }
 
-void file_writer::handle_redirect(const std::vector<std::string> &args, std::string &response) {
+void file_writer::handle_redirect(const std::vector<std::string> &args, std::vector<std::string> &response) {
   bool write_flag = true;
   auto data = args[1];
 
-  typedef std::vector<std::string> list_t;
+  if (response[0] == "!redo") throw redo_error();
 
-  if (response == "!redo") throw redo_error();
-
-  if (response.substr(0, 12) == "!split_write") {
+  if (response[0] == "!split_write") {
     do {
-      auto parts = string_utils::split(response, '!');
-      auto remaining_data_len = std::stoi(*(parts.end() - 1));
+      auto remaining_data_len = std::stoi(response[1]);
+      auto chain = string_utils::split(response[2], '!');
 
       auto remaining_data = data.substr(data.size() - remaining_data_len, remaining_data_len);
 
       if (need_chain()) {
-        auto chain = directory::replica_chain(list_t(parts.begin() + 2, parts.end() - 1));
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FILE_OPS));
       }
       cur_partition_++;
       update_last_partition(cur_partition_);
       cur_offset_ = 0;
-      auto new_args = std::vector<std::string>{"write", remaining_data, std::to_string(cur_offset_)};
+      std::vector<std::string> new_args{"write", remaining_data, std::to_string(cur_offset_)};
       do {
-        response = blocks_[block_id()]->run_command(new_args).front();
-      } while (response == "!redo");
+        response = blocks_[block_id()]->run_command(new_args);
+      } while (response[0] == "!redo");
       cur_offset_ += remaining_data.size();
       write_flag = false;
-    } while (response.substr(0, 12) == "!split_write");
+    } while (response[0] == "!split_write");
   }
 
   if (write_flag) {

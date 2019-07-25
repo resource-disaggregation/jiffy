@@ -153,31 +153,38 @@ TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
   }
+
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
   }
+
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.remove(std::to_string(i)) == std::to_string(i));
   }
+
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.get(std::to_string(i)) == "!key_not_found");
   }
 
+  LOG(log_level::info) << "Wait 1";
   as_server->stop();
   if(auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();
   }
 
+  LOG(log_level::info) << "Wait 2";
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
   }
 
+  LOG(log_level::info) << "Wait 3";
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
 
+  LOG(log_level::info) << "Wait 4";
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();

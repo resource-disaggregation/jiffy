@@ -14,7 +14,7 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
-std::shared_ptr<TThreadedServer> auto_scaling_server::create(const std::string directory_host,
+std::shared_ptr<TThreadedServer> auto_scaling_server::create(const std::string& directory_host,
                                                              int directory_port,
                                                              const std::string &address,
                                                              int port) {

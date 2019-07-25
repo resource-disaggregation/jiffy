@@ -1,13 +1,12 @@
-#include <jiffy/utils/string_utils.h>
 #include "fifo_queue_partition.h"
-#include "jiffy/storage/client/replica_chain_client.h"
-#include "jiffy/utils/logger.h"
 #include "jiffy/persistent/persistent_store.h"
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_ops.h"
-#include "jiffy/directory/client/directory_client.h"
 #include "jiffy/auto_scaling/auto_scaling_client.h"
-#include <thread>
+
+#define RETURN(...)           \
+  _return = { __VA_ARGS__ };  \
+  return
 
 namespace jiffy {
 namespace storage {
@@ -24,8 +23,8 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
                                            int auto_scaling_port)
     : chain_module(manager, name, metadata, FQ_CMDS),
       partition_(manager->mb_capacity(), build_allocator<char>()),
-      overload_(false),
-      underload_(false),
+      scaling_up_(false),
+      scaling_down_(false),
       dirty_(false),
       directory_host_(directory_host),
       directory_port_(directory_port),
@@ -44,111 +43,101 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
   auto_scale_ = conf.get_as<bool>("fifoqueue.auto_scale", true);
 }
 
-std::string fifo_queue_partition::enqueue(const std::string &message) {
-  auto ret = partition_.push_back(message);
+void fifo_queue_partition::enqueue(response &_return, const arg_list &args) {
+  if (args.size() != 2) {
+    RETURN("!args_error");
+  }
+  auto ret = partition_.push_back(args[1]);
   if (!ret.first) {
     if (!auto_scale_) {
-      return "!split_enqueue!" + std::to_string(ret.second.size());
-    }
-    if (!next_target_str().empty()) {
-      return "!split_enqueue!" + next_target_str() + "!" + std::to_string(ret.second.size());
+      RETURN("!split_enqueue", std::to_string(ret.second.size()));
+    } else if (!next_target_str_.empty()) {
+      RETURN("!split_enqueue", std::to_string(ret.second.size()), next_target_str_);
     } else {
-      partition_.recover(message.size() - ret.second.size());
-      return "!redo";
+      partition_.recover(args[1].size() - ret.second.size());
+      RETURN("!redo");
     }
   }
-  return "!ok";
+  RETURN("!ok");
 }
 
-std::string fifo_queue_partition::dequeue() {
+void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
+  if (args.size() != 1) {
+    RETURN("!args_error");
+  }
   auto ret = partition_.at(head_);
   if (ret.first) {
     head_ += (string_array::METADATA_LEN + ret.second.size());
-    return ret.second;
-  }
-  if (ret.second == "!not_available")
-    return "!msg_not_found";
-  head_ += (string_array::METADATA_LEN + ret.second.size());
-  if (!auto_scale_) {
-    return "!split_dequeue!" + ret.second;
-  }
-  if (!next_target_str().empty()) {
-    return "!split_dequeue!" + next_target_str() + "!" + ret.second;
-  }
-  head_ -= (string_array::METADATA_LEN + ret.second.size());
-  return "!redo";
-}
-
-std::string fifo_queue_partition::read_next(std::string pos) {
-  auto ret = partition_.at(std::stoi(pos));
-  if (ret.first) {
-    return ret.second;
+    RETURN(ret.second);
   }
   if (ret.second == "!not_available") {
-    return "!msg_not_found";
+    RETURN("!msg_not_found");
+  }
+  head_ += (string_array::METADATA_LEN + ret.second.size());
+  if (!auto_scale_) {
+    RETURN("!split_dequeue", ret.second);
+  }
+  if (!next_target_str_.empty()) {
+    RETURN("!split_dequeue", ret.second, next_target_str_);
+  }
+  head_ -= (string_array::METADATA_LEN + ret.second.size());
+  RETURN("!redo");
+}
+
+void fifo_queue_partition::read_next(response &_return, const arg_list &args) {
+  if (args.size() != 2) {
+    RETURN("!args_error");
+  }
+  auto ret = partition_.at(std::stoi(args[1]));
+  if (ret.first) {
+    RETURN(ret.second);
+  }
+  if (ret.second == "!not_available") {
+    RETURN("!msg_not_found");
   }
   if (!auto_scale_) {
-    return "!split_readnext!" + ret.second;
+    RETURN("!split_readnext", ret.second);
   }
-  if (!next_target_str().empty()) {
-    return "!split_readnext!" + next_target_str() + "!" + ret.second;
+  if (!next_target_str_.empty()) {
+    RETURN("!split_readnext", ret.second, next_target_str_);
   }
-  return "!redo";
+  RETURN("!redo");
 }
 
-std::string fifo_queue_partition::clear() {
+void fifo_queue_partition::clear(response &_return, const arg_list &args) {
+  if (args.size() != 1) {
+    RETURN("!args_error");
+  }
   partition_.clear();
   head_ = 0;
-  overload_ = false;
-  underload_ = false;
+  scaling_up_ = false;
+  scaling_down_ = false;
   dirty_ = false;
-  return "!ok";
+  RETURN("!ok");
 }
 
-std::string fifo_queue_partition::update_partition(const std::string &next) {
-  next_target(next);
-  return "!ok";
+void fifo_queue_partition::update_partition(response &_return, const arg_list &args) {
+  next_target(args[1]);
+  RETURN("!ok");
 }
 
-void fifo_queue_partition::run_command(std::vector<std::string> &_return,
-                                       const std::vector<std::string> &args) {
-
-  auto arg_it = args.begin();
-  auto cmd_name = *arg_it;
-  std::advance(arg_it, 1);
-  auto nargs = args.size() - 1;
+void fifo_queue_partition::run_command(response &_return, const arg_list &args) {
+  auto cmd_name = args[0];
   switch (command_id(cmd_name)) {
     case fifo_queue_cmd_id::fq_enqueue:
-      for (; arg_it != args.cend(); ++arg_it)
-        _return.emplace_back(enqueue(*arg_it));
+      enqueue(_return, args);
       break;
     case fifo_queue_cmd_id::fq_dequeue:
-      if (nargs != 0) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(dequeue());
-      }
-      break;
-    case fifo_queue_cmd_id::fq_clear:
-      if (nargs != 0) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(clear());
-      }
-      break;
-    case fifo_queue_cmd_id::fq_update_partition:
-      if (nargs != 1) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(update_partition(*arg_it));
-      }
+      dequeue(_return, args);
       break;
     case fifo_queue_cmd_id::fq_readnext:
-      if (nargs != 1) {
-        _return.emplace_back("!args_error");
-      } else {
-        _return.emplace_back(read_next(*arg_it));
-      }
+      read_next(_return, args);
+      break;
+    case fifo_queue_cmd_id::fq_clear:
+      clear(_return, args);
+      break;
+    case fifo_queue_cmd_id::fq_update_partition:
+      update_partition(_return, args);
       break;
     default: {
       _return.emplace_back("!no_such_command");
@@ -158,12 +147,12 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
   if (is_mutator(cmd_name)) {
     dirty_ = true;
   }
-  if (auto_scale_ && is_mutator(cmd_name) && overload() && is_tail() && !overload_) {
+  if (auto_scale_ && is_mutator(cmd_name) && overload() && is_tail() && !scaling_up_) {
     LOG(log_level::info) << "Overloaded partition: " << name() << " storage = " << storage_size() << " capacity = "
                          << storage_capacity() << " partition size = " << size() << "partition capacity "
                          << partition_.capacity();
     try {
-      overload_ = true;
+      scaling_up_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
       std::map<std::string, std::string> scale_conf;
       scale_conf.emplace(std::make_pair(std::string("type"), std::string("fifo_queue_add")));
@@ -171,17 +160,17 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
       auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
       scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
-      overload_ = false;
+      scaling_up_ = false;
       LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();
     }
   }
-  if (auto_scale_ && cmd_name == "dequeue" && head_ > partition_.capacity() && is_tail() && !underload_
-      && !next_target_str().empty()) {
+  if (auto_scale_ && cmd_name == "dequeue" && head_ > partition_.capacity() && is_tail() && !scaling_down_
+      && !next_target_str_.empty()) {
     try {
       LOG(log_level::info) << "Underloaded partition: " << name() << " storage = " << storage_size() << " capacity = "
                            << storage_capacity() << " partition size = " << size() << "partition capacity "
                            << partition_.capacity();
-      underload_ = true;
+      scaling_down_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
       std::map<std::string, std::string> scale_conf;
       scale_conf.emplace(std::make_pair(std::string("type"), std::string("fifo_queue_delete")));
@@ -189,7 +178,7 @@ void fifo_queue_partition::run_command(std::vector<std::string> &_return,
       auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
       scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
-      underload_ = false;
+      scaling_down_ = false;
       LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();
     }
   }
@@ -238,7 +227,7 @@ bool fifo_queue_partition::dump(const std::string &path) {
   sub_map_.clear();
   chain_ = {};
   role_ = singleton;
-  overload_ = false;
+  scaling_up_ = false;
   dirty_ = false;
   return flushed;
 }

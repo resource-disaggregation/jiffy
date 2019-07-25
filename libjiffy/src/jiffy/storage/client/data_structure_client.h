@@ -52,7 +52,7 @@ class data_structure_client {
    * @param response Response to be collected
    */
 
-  virtual void handle_redirect(const std::vector<std::string> &args, std::string &response) = 0;
+  virtual void handle_redirect(const std::vector<std::string> &args, std::vector<std::string> &response) = 0;
 
   /* Directory client */
   std::shared_ptr<directory::directory_interface> fs_;
