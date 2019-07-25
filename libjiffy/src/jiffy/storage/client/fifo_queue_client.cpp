@@ -2,6 +2,7 @@
 #include "jiffy/utils/string_utils.h"
 #include <algorithm>
 #include <thread>
+#include <utility>
 
 namespace jiffy {
 namespace storage {
@@ -12,7 +13,7 @@ fifo_queue_client::fifo_queue_client(std::shared_ptr<directory::directory_interf
                                      const std::string &path,
                                      const directory::data_status &status,
                                      int timeout_ms)
-    : data_structure_client(fs, path, status, timeout_ms) {
+    : data_structure_client(std::move(fs), path, status, timeout_ms) {
   dequeue_partition_ = 0;
   enqueue_partition_ = 0;
   read_partition_ = 0;
@@ -30,20 +31,20 @@ void fifo_queue_client::refresh() {
   }
 }
 
-std::string fifo_queue_client::enqueue(const std::string &msg) {
+void fifo_queue_client::enqueue(const std::string &item) {
   std::vector<std::string> _return;
-  std::vector<std::string> args{"enqueue", msg};
+  std::vector<std::string> args{"enqueue", item};
   bool redo;
   do {
     try {
       _return = blocks_[enqueue_partition_]->run_command(args);
-      handle_redirect(args, _return);
+      handle_redirect(_return, args);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
   } while (redo);
-  return _return[0];
+  THROW_IF_NOT_OK(_return);
 }
 
 std::string fifo_queue_client::dequeue() {
@@ -53,13 +54,14 @@ std::string fifo_queue_client::dequeue() {
   do {
     try {
       _return = blocks_[dequeue_partition_]->run_command(args);
-      handle_redirect(args, _return);
+      handle_redirect(_return, args);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
   } while (redo);
-  return _return[0];
+  THROW_IF_NOT_OK(_return);
+  return _return[1];
 }
 
 std::string fifo_queue_client::read_next() {
@@ -69,100 +71,73 @@ std::string fifo_queue_client::read_next() {
   do {
     try {
       _return = blocks_[read_partition_]->run_command(args);
-      handle_redirect(args, _return);
+      handle_redirect(_return, args);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
   } while (redo);
-  return _return[0];
+  THROW_IF_NOT_OK(_return);
+  return _return[1];
 }
 
-std::size_t fifo_queue_client::block_id(const fifo_queue_cmd_id &op) const {
-  switch (op) {
-    case fifo_queue_cmd_id::fq_enqueue:
-      if (!is_valid(enqueue_partition_)) {
-        throw std::logic_error("Blocks are insufficient, need to add more");
-      }
-      return enqueue_partition_;
-    case fifo_queue_cmd_id::fq_dequeue:
-      if (!is_valid(dequeue_partition_)) {
-        throw std::logic_error("Blocks are insufficient, need to add more");
-      }
-      return dequeue_partition_;
-    case fifo_queue_cmd_id::fq_readnext:
-      if (!is_valid(read_partition_)) {
-        throw std::logic_error("Blocks are insufficient, need to add more");
-      }
-      return read_partition_;
-    default:throw std::invalid_argument("Incorrect operation of message queue");
-  }
-}
-
-void fifo_queue_client::handle_redirect(const std::vector<std::string> &args, std::vector<std::string> &response) {
+void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
   auto cmd_name = args.front();
-  bool read_flag = true;
 
-  if (response[0] == "!redo") throw redo_error();
-
-  if (response[0] == "!split_enqueue") {
+  if (_return[0] == "!ok") {
+    if (cmd_name == "read_next") read_offset_ += (string_array::METADATA_LEN + _return[1].size());
+    return;
+  } else if (_return[0] == "!redo") {
+    throw redo_error();
+  } else if (_return[0] == "!split_enqueue") {
     do {
-      auto remaining_data_len = std::stoi(response[1]);
+      auto remaining_data_len = std::stoi(_return[1]);
       auto data = args[1];
       auto remaining_data = data.substr(data.size() - remaining_data_len, remaining_data_len);
 
       if (enqueue_partition_ >= blocks_.size() - 1) {
-        auto chain = string_utils::split(response[2], '!');
+        auto chain = string_utils::split(_return[2], '!');
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FQ_CMDS));
       }
       enqueue_partition_++;
       do {
-        response = blocks_[enqueue_partition_]->run_command({"enqueue", remaining_data});
-      } while (response[0] == "!redo");
-    } while (response[0] == "!split_enqueue");
-  }
-  if (response[0] == "!split_dequeue") {
+        _return = blocks_[enqueue_partition_]->run_command({"enqueue", remaining_data});
+      } while (_return[0] == "!redo");
+    } while (_return[0] == "!split_enqueue");
+  } else if (_return[0] == "!split_dequeue") {
     std::string result;
     do {
-      auto data_part = response[1];
+      auto data_part = _return[1];
       result += data_part;
       if (dequeue_partition_ >= blocks_.size() - 1) {
-        auto chain = string_utils::split(response[2], '!');
+        auto chain = string_utils::split(_return[2], '!');
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FQ_CMDS));
       }
       dequeue_partition_++;
-      response = blocks_[dequeue_partition_]->run_command({"dequeue"});
-      if (response[0] != "!msg_not_found") {
-        if (response[0] == "!split_dequeue") continue;
-        result += response[0];
+      _return = blocks_[dequeue_partition_]->run_command({"dequeue"});
+      if (_return[0] == "!ok") {
+        result += _return[1];
       }
-    } while (response[0] == "!split_dequeue");
-    response[0] = result;
-  }
-  if (response[0] == "!split_readnext") {
+    } while (_return[0] == "!split_dequeue");
+    _return[1] = result;
+  } else if (_return[0] == "!split_readnext") {
     std::string result;
     do {
-      auto data_part = response[1];
+      auto data_part = _return[1];
       result += data_part;
       if (read_partition_ >= blocks_.size() - 1) {
-        auto chain = string_utils::split(response[2], '!');
+        auto chain = string_utils::split(_return[2], '!');
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FQ_CMDS));
       }
       read_partition_++;
       read_offset_ = 0;
-      response = blocks_[read_partition_]->run_command({"read_next", std::to_string(0)});
-      if (response[0] != "!msg_not_found") {
-        if (response[0] == "!split_readnext")
-          continue;
-        read_offset_ += (string_array::METADATA_LEN + response[0].size());
-        result += response[0];
+      _return = blocks_[read_partition_]->run_command({"read_next", std::to_string(0)});
+      if (_return[0] == "!ok") {
+        read_offset_ += (string_array::METADATA_LEN + _return[1].size());
+        result += _return[1];
       }
-    } while (response[0] == "!split_readnext");
-    response[0] = result;
-    read_flag = false;
-  }
-  if (read_flag && cmd_name == "read_next" && response[0] != "!msg_not_found") {
-    read_offset_ += (string_array::METADATA_LEN + response[0].size());
+    } while (_return[0] == "!split_readnext");
+    _return[1] = result;
   }
 }
 

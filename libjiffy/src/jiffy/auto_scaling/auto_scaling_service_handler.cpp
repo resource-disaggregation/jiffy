@@ -4,11 +4,10 @@
 #include "jiffy/storage/file/file_ops.h"
 #include "jiffy/storage/hashtable/hash_table_ops.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_ops.h"
-#include "jiffy/utils/logger.h"
 #include "jiffy/utils/string_utils.h"
-#include <thread>
 #include <mutex>
 #include <chrono>
+#include <jiffy/storage/client/data_structure_client.h>
 
 namespace jiffy {
 namespace auto_scaling {
@@ -120,15 +119,16 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
   } else if (scaling_type == "hash_table_merge") {
     LOG(log_level::info) << "Auto-scaling hash table (merge)";
 
-    auto storage_capacity = std::stoull(conf.find("storage_capacity")->second);
+    auto storage_capacity = std::stoull(conf.at("storage_capacity"));
 
     // Find a merge target
     auto start = time_utils::now_us();
     auto src = std::make_shared<replica_chain_client>(fs, path, cur_chain, HT_OPS);
-    auto name = src->run_command({"update_partition", "merging", "merging"}).front(); // TODO: Why "merging" twice?
-    if (name == "!fail") {
+    auto update_resp = src->run_command({"update_partition", "merging", "merging"}); // TODO: Why "merging" twice?
+    if (update_resp[0] == "!fail") {
       UNLOCK_AND_THROW("Partition is under auto_scaling");
     }
+    auto name = update_resp[1];
     auto slot_range = string_utils::split(name, '_', 2);
     auto merge_range_beg = std::stoi(slot_range[0]);
     auto merge_range_end = std::stoi(slot_range[1]);
@@ -146,10 +146,10 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
                     std::to_string(merge_range_beg) + "_" + std::to_string(merge_target.fetch_slot_range().second) :
                     std::to_string(merge_target.fetch_slot_range().first) + "_" + std::to_string(merge_range_end);
     auto exp_target = pack(merge_target);
-    auto ret = dst->run_command({"update_partition", merge_target.name, "importing$" + name}).front();
+    auto ret = dst->run_command({"update_partition", merge_target.name, "importing$" + name});
 
     // We don't need to update the src partition cause it will be deleted anyway
-    if (ret == "!fail") {
+    if (ret[0] == "!fail") {
       src->run_command({"update_partition", name, "regular$" + name});
       UNLOCK_AND_RETURN;
     }
@@ -244,7 +244,8 @@ void auto_scaling_service_handler::hash_table_transfer_data(const std::shared_pt
       has_more = false;
     }
 
-    write_args.insert(write_args.begin(), "scale_put"); // Add scale_put command name
+    // write_args.insert(write_args.begin(), "scale_put"); // Add scale_put command name
+    write_args[0] = "scale_put";
 
     // Write data to dst partition
     auto response = dst->run_command(write_args);
@@ -277,9 +278,9 @@ bool auto_scaling_service_handler::find_merge_target(directory::replica_chain &m
   for (auto &r : replica_set) {
     if (r.fetch_slot_range().first == slot_end || r.fetch_slot_range().second == slot_beg) {
       auto client = std::make_shared<replica_chain_client>(fs, path, r, HT_OPS, 0);
-      auto ret = client->run_command({"get_storage_size"}).front();
-      if (ret == "!block_moved") continue;
-      auto size = std::stoull(ret);
+      auto ret = client->run_command({"get_storage_size"});
+      if (ret[0] == "!block_moved") continue;
+      auto size = std::stoull(ret[1]);
       if (size < (storage_capacity / 2) && size < find_min_size) {
         merge_target = r;
         find_min_size = size;

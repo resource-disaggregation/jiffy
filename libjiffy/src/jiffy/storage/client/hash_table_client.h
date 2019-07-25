@@ -42,7 +42,7 @@ class hash_table_client : public data_structure_client {
    * @param value Value
    * @return Response of the command
    */
-  std::string put(const std::string &key, const std::string &value);
+  void put(const std::string &key, const std::string &value);
 
   /**
    * @brief Get value for specified key
@@ -77,10 +77,10 @@ class hash_table_client : public data_structure_client {
   /**
    * @brief Handle command in redirect case
    * @param args Command arguments
-   * @param response Response to be collected
+   * @param _return Response to be collected
    */
 
-  void handle_redirect(const std::vector<std::string> &args, std::vector<std::string> &response) override;
+  void handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) override;
 
   /* Redo times */
   std::size_t redo_times_ = 0;

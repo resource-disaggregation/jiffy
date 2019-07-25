@@ -19,7 +19,8 @@ TEST_CASE("fifo_queue_enqueue_dequeue_test", "[enqueue][dequeue]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
     REQUIRE_NOTHROW(block.dequeue(resp, {"dequeue"}));
-    REQUIRE(resp[0] == std::to_string(i));
+    REQUIRE(resp[0] == "!ok");
+    REQUIRE(resp[1] == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
     response resp;
@@ -62,13 +63,15 @@ TEST_CASE("fifo_queue_enqueue_readnext_dequeue", "[enqueue][read_next][dequeue]"
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
     REQUIRE_NOTHROW(block.read_next(resp, {"read_next", std::to_string(pos)}));
-    REQUIRE(resp[0] == std::to_string(i));
+    REQUIRE(resp[0] == "!ok");
+    REQUIRE(resp[1] == std::to_string(i));
     pos += (std::to_string(i).size() + string_array::METADATA_LEN);
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
     REQUIRE_NOTHROW(block.dequeue(resp, {"dequeue"}));
-    REQUIRE(resp[0] == std::to_string(i));
+    REQUIRE(resp[0] == "!ok");
+    REQUIRE(resp[1] == std::to_string(i));
   }
 }
 
@@ -99,7 +102,8 @@ TEST_CASE("fifo_queue_flush_load_test", "[enqueue][sync][reset][load][dequeue]")
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
     REQUIRE_NOTHROW(block.dequeue(resp, {"dequeue"}));
-    REQUIRE(resp[0] == std::to_string(i));
+    REQUIRE(resp[0] == "!ok");
+    REQUIRE(resp[1] == std::to_string(i));
   }
 }
 

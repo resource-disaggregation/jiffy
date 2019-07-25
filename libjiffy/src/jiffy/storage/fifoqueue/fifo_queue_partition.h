@@ -12,6 +12,7 @@
 
 namespace jiffy {
 namespace storage {
+
 /* Fifo queue partition class */
 class fifo_queue_partition : public chain_module {
  public:

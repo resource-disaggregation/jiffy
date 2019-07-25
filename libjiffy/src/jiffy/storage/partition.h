@@ -17,6 +17,13 @@
 #include "jiffy/storage/block_memory_allocator.h"
 #include "jiffy/utils/logger.h"
 
+#define RETURN(...)           \
+  _return = { __VA_ARGS__ };  \
+  return
+
+#define RETURN_OK(...) RETURN("!ok", ##__VA_ARGS__)
+#define RETURN_ERR(...) RETURN(__VA_ARGS__)
+
 namespace jiffy {
 namespace storage {
 

@@ -21,7 +21,8 @@ TEST_CASE("file_write_read_test", "[write][read]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
     REQUIRE_NOTHROW(block.read(resp, {"read", std::to_string(read_pos), std::to_string(std::to_string(i).size())}));
-    REQUIRE(resp[0] == std::to_string(i));
+    REQUIRE(resp[0] == "!ok");
+    REQUIRE(resp[1] == std::to_string(i));
     read_pos += std::to_string(i).size();
   }
   response resp;
@@ -88,7 +89,8 @@ TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
     REQUIRE_NOTHROW(block.read(resp, {"read", std::to_string(read_pos), std::to_string(std::to_string(i).size())}));
-    REQUIRE(resp[0] == std::to_string(i));
+    REQUIRE(resp[0] == "!ok");
+    REQUIRE(resp[1] == std::to_string(i));
     read_pos += std::to_string(i).size();
   }
 }

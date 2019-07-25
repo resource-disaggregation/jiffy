@@ -5,10 +5,6 @@
 #include "jiffy/auto_scaling/auto_scaling_client.h"
 #include <thread>
 
-#define RETURN(...)           \
-  _return = { __VA_ARGS__ };  \
-  return
-
 namespace jiffy {
 namespace storage {
 
@@ -44,71 +40,71 @@ file_partition::file_partition(block_memory_manager *manager,
 
 void file_partition::write(response& _return, const arg_list &args) {
   if (args.size() != 3) {
-    RETURN("!args_error");
+    RETURN_ERR("!args_error");
   }
   auto off = std::stoi(args[2]);
   auto ret = partition_.write(args[1], off);
   if (!ret.first) {
     if (!auto_scale_) {
-      RETURN("!split_write", std::to_string(ret.second.size()));
+      RETURN_ERR("!split_write", std::to_string(ret.second.size()));
     }
     if (!next_target_str().empty()) {
-      RETURN("!split_write", std::to_string(ret.second.size()), next_target_str_);
+      RETURN_ERR("!split_write", std::to_string(ret.second.size()), next_target_str_);
     } else {
-      RETURN("!redo");
+      RETURN_ERR("!redo");
     }
   }
-  RETURN("!ok");
+  RETURN_OK();
 }
 
 void file_partition::read(response& _return, const arg_list &args) {
   if (args.size() != 3) {
-    RETURN("!args_error");
+    RETURN_ERR("!args_error");
   }
   auto pos = std::stoi(args[1]);
   auto size = std::stoi(args[2]);
   if (pos < 0) throw std::invalid_argument("read position invalid");
   auto ret = partition_.read(static_cast<std::size_t>(pos), static_cast<std::size_t>(size));
   if (ret.first) {
-    RETURN(ret.second);
+    RETURN_OK(ret.second);
   }
   if (ret.second == "!not_available") {
-    RETURN("!msg_not_found");
+    RETURN_ERR("!msg_not_found");
   } else {
     if (!auto_scale_) {
-      RETURN("!split_read", ret.second);
+      RETURN_ERR("!split_read", ret.second);
     }
     if (!next_target_str().empty()) {
-      RETURN("!split_read", ret.second, next_target_str_);
+      RETURN_ERR("!split_read", ret.second, next_target_str_);
     } else {
-      RETURN("!redo");
+      RETURN_ERR("!redo");
     }
   }
 }
 
 void file_partition::seek(response& _return, const arg_list &args) {
   if (args.size() != 1) {
-    RETURN("!args_error");
+    RETURN_ERR("!args_error");
   }
-  RETURN(std::to_string(partition_.size()), std::to_string(partition_.capacity()));
+  RETURN_OK(std::to_string(partition_.size()), std::to_string(partition_.capacity()));
 }
 
 void file_partition::clear(response& _return, const arg_list &args) {
   if (args.size() != 1) {
-    RETURN("!args_error");
+    RETURN_ERR("!args_error");
   }
   partition_.clear();
   scaling_up_ = false;
   dirty_ = false;
-  RETURN("!ok");
+  RETURN_OK();
 }
 
 void file_partition::update_partition(response& _return, const arg_list &args) {
   if (args.size() != 2) {
-    RETURN("!args_error");
+    RETURN_ERR("!args_error");
   }
   next_target(args[1]);
-  RETURN("!ok");
+  RETURN_OK();
 }
 
 void file_partition::run_command(response &_return, const arg_list &args) {

@@ -4,9 +4,7 @@
 #include "test_utils.h"
 #include "jiffy/client/jiffy_client.h"
 #include "jiffy/storage/hashtable/hash_slot.h"
-#include "jiffy/storage/hashtable/hash_table_partition.h"
 #include "jiffy/storage/manager/storage_management_server.h"
-#include "jiffy/storage/manager/storage_management_client.h"
 #include "jiffy/storage/manager/storage_manager.h"
 #include "jiffy/storage/service/block_server.h"
 #include "jiffy/directory/fs/directory_tree.h"
@@ -26,13 +24,12 @@ using namespace jiffy::utils;
 #define DIRECTORY_LEASE_PORT 9091
 #define STORAGE_SERVICE_PORT 9092
 #define STORAGE_MANAGEMENT_PORT 9093
-#define STORAGE_CHAIN_PORT 9095
 #define LEASE_PERIOD_MS 100
 #define LEASE_PERIOD_US (LEASE_PERIOD_MS * 1000)
 
 void test_hash_table_ops(std::shared_ptr<hash_table_client> table) {
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(table->put(std::to_string(i), std::to_string(i)) == "!ok");
+    REQUIRE_NOTHROW(table->put(std::to_string(i), std::to_string(i)));
   }
 
   for (size_t i = 0; i < 1000; i++) {
@@ -40,7 +37,7 @@ void test_hash_table_ops(std::shared_ptr<hash_table_client> table) {
   }
 
   for (size_t i = 1000; i < 2000; i++) {
-    REQUIRE(table->get(std::to_string(i)) == "!key_not_found");
+    REQUIRE_THROWS_AS(table->get(std::to_string(i)), std::logic_error);
   }
 
   for (size_t i = 0; i < 1000; i++) {
@@ -48,7 +45,7 @@ void test_hash_table_ops(std::shared_ptr<hash_table_client> table) {
   }
 
   for (size_t i = 1000; i < 2000; i++) {
-    REQUIRE(table->update(std::to_string(i), std::to_string(i + 1000)) == "!key_not_found");
+    REQUIRE_THROWS_AS(table->update(std::to_string(i), std::to_string(i + 1000)), std::logic_error);
   }
 
   for (size_t i = 0; i < 1000; i++) {
@@ -56,11 +53,11 @@ void test_hash_table_ops(std::shared_ptr<hash_table_client> table) {
   }
 
   for (size_t i = 1000; i < 2000; i++) {
-    REQUIRE(table->remove(std::to_string(i)) == "!key_not_found");
+    REQUIRE_THROWS_AS(table->remove(std::to_string(i)), std::logic_error);
   }
 
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(table->get(std::to_string(i)) == "!key_not_found");
+    REQUIRE_THROWS_AS(table->get(std::to_string(i)), std::logic_error);
   }
 }
 

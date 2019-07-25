@@ -5,6 +5,8 @@
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/client_cache.h"
 
+#define THROW_IF_NOT_OK(ret) if (ret[0] != "!ok") throw std::logic_error(ret[0])
+
 namespace jiffy {
 namespace storage {
 
@@ -49,10 +51,10 @@ class data_structure_client {
   /**
    * @brief Handle command in redirect case
    * @param args Command arguments
-   * @param response Response to be collected
+   * @param _return Response to be collected
    */
 
-  virtual void handle_redirect(const std::vector<std::string> &args, std::vector<std::string> &response) = 0;
+  virtual void handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) = 0;
 
   /* Directory client */
   std::shared_ptr<directory::directory_interface> fs_;

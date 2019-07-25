@@ -32,9 +32,12 @@ void file_client::refresh() {
 
 bool file_client::seek(const std::size_t offset) {
   auto seek_partition = block_id();
-  auto ret = blocks_[seek_partition]->run_command({"seek"});
-  auto size = static_cast<std::size_t>(std::stoull(ret[0]));
-  auto cap = static_cast<std::size_t>(std::stoull(ret[1]));
+  auto _return = blocks_[seek_partition]->run_command({"seek"});
+  
+  THROW_IF_NOT_OK(_return);
+  
+  auto size = static_cast<std::size_t>(std::stoull(_return[1]));
+  auto cap = static_cast<std::size_t>(std::stoull(_return[2]));
   if (offset > seek_partition * cap + size) {
     return false;
   } else {

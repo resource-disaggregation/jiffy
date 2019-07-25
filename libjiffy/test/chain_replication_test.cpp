@@ -63,7 +63,9 @@ TEST_CASE("chain_replication_no_failure_test", "[put][get]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command({"get", std::to_string(i)}).front() == std::to_string(i));
+    auto ret = client.run_command({"get", std::to_string(i)});
+    REQUIRE(ret[0] == "!ok");
+    REQUIRE(ret[1] == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
     REQUIRE(client.run_command({"get", std::to_string(i)}).front() == "!key_not_found");
@@ -75,7 +77,8 @@ TEST_CASE("chain_replication_no_failure_test", "[put][get]") {
     for (std::size_t j = 0; j < 1000; j++) {
       response resp;
       REQUIRE_NOTHROW(ht->get(resp, {"get", std::to_string(j)}));
-      REQUIRE(resp[0] == std::to_string(j));
+      REQUIRE(resp[0] == "!ok");
+      REQUIRE(resp[1] == std::to_string(j));
     }
   }
 
@@ -154,7 +157,9 @@ TEST_CASE("chain_replication_head_failure_test", "[put][get]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command({"get", std::to_string(i)}).front() == std::to_string(i));
+    auto ret = client.run_command({"get", std::to_string(i)});
+    REQUIRE(ret[0] == "!ok");
+    REQUIRE(ret[1] == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
     REQUIRE(client.run_command({"get", std::to_string(i)}).front() == "!key_not_found");
@@ -166,7 +171,8 @@ TEST_CASE("chain_replication_head_failure_test", "[put][get]") {
     for (std::size_t j = 0; j < 1000; j++) {
       response resp;
       REQUIRE_NOTHROW(ht->get(resp, {"get", std::to_string(j)}));
-      REQUIRE(resp[0] == std::to_string(j));
+      REQUIRE(resp[0] == "!ok");
+      REQUIRE(resp[1] == std::to_string(j));
     }
   }
 
@@ -244,7 +250,9 @@ TEST_CASE("chain_replication_mid_failure_test", "[put][get]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command({"get", std::to_string(i)}).front() == std::to_string(i));
+    auto ret = client.run_command({"get", std::to_string(i)});
+    REQUIRE(ret[0] == "!ok");
+    REQUIRE(ret[1] == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
     REQUIRE(client.run_command({"get", std::to_string(i)}).front() == "!key_not_found");
@@ -257,7 +265,8 @@ TEST_CASE("chain_replication_mid_failure_test", "[put][get]") {
     for (std::size_t j = 0; j < 1000; j++) {
       response resp;
       REQUIRE_NOTHROW(ht->get(resp, {"get", std::to_string(j)}));
-      REQUIRE(resp[0] == std::to_string(j));
+      REQUIRE(resp[0] == "!ok");
+      REQUIRE(resp[1] == std::to_string(j));
     }
   }
 
@@ -336,7 +345,9 @@ TEST_CASE("chain_replication_tail_failure_test", "[put][get]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command({"get", std::to_string(i)}).front() == std::to_string(i));
+    auto ret = client.run_command({"get", std::to_string(i)});
+    REQUIRE(ret[0] == "!ok");
+    REQUIRE(ret[1] == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
     REQUIRE(client.run_command({"get", std::to_string(i)}).front() == "!key_not_found");
@@ -348,7 +359,8 @@ TEST_CASE("chain_replication_tail_failure_test", "[put][get]") {
     for (std::size_t j = 0; j < 1000; j++) {
       response resp;
       REQUIRE_NOTHROW(ht->get(resp, {"get", std::to_string(j)}));
-      REQUIRE(resp[0] == std::to_string(j));
+      REQUIRE(resp[0] == "!ok");
+      REQUIRE(resp[1] == std::to_string(j));
     }
   }
 
@@ -422,7 +434,9 @@ TEST_CASE("chain_replication_add_block_test", "[put][get]") {
   {
     replica_chain_client client2(t, "/file", fixed_chain, HT_OPS, 100);
     for (std::size_t i = 0; i < 1000; ++i) {
-      REQUIRE(client2.run_command({"get", std::to_string(i)}).front() == std::to_string(i));
+      auto ret = client2.run_command({"get", std::to_string(i)});
+      REQUIRE(ret[0] == "!ok");
+      REQUIRE(ret[1] == std::to_string(i));
     }
     for (std::size_t i = 1000; i < 2000; ++i) {
       REQUIRE(client2.run_command({"get", std::to_string(i)}).front() == "!key_not_found");
@@ -435,7 +449,8 @@ TEST_CASE("chain_replication_add_block_test", "[put][get]") {
     for (std::size_t j = 0; j < 1000; j++) {
       response resp;
       REQUIRE_NOTHROW(ht->get(resp, {"get", std::to_string(j)}));
-      REQUIRE(resp[0] == std::to_string(j));
+      REQUIRE(resp[0] == "!ok");
+      REQUIRE(resp[1] == std::to_string(j));
     }
   }
 

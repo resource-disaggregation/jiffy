@@ -1,18 +1,13 @@
 #include <catch.hpp>
-#include <thrift/transport/TTransportException.h>
 #include <thread>
 #include "test_utils.h"
-#include "jiffy/utils/logger.h"
 #include "jiffy/directory/fs/directory_tree.h"
 #include "jiffy/directory/fs/directory_server.h"
 #include "jiffy/storage/manager/storage_management_server.h"
-#include "jiffy/storage/manager/storage_management_client.h"
 #include "jiffy/storage/manager/storage_manager.h"
-#include "jiffy/storage/hashtable/hash_table_partition.h"
 #include "jiffy/storage/service/block_server.h"
 #include "jiffy/storage/hashtable/hash_slot.h"
 #include "jiffy/storage/client/hash_table_client.h"
-#include "jiffy/auto_scaling/auto_scaling_client.h"
 #include "jiffy/auto_scaling/auto_scaling_server.h"
 
 using namespace ::jiffy::storage;
@@ -51,13 +46,13 @@ TEST_CASE("hash_table_client_put_get_test", "[put][get]") {
 
   hash_table_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
+    REQUIRE_NOTHROW(client.put(std::to_string(i), std::to_string(i)));
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == "!key_not_found");
+    REQUIRE_THROWS_AS(client.get(std::to_string(i)), std::logic_error);
   }
 
   storage_server->stop();
@@ -94,7 +89,7 @@ TEST_CASE("hash_table_client_put_update_get_test", "[put][update][get]") {
 
   hash_table_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
+    REQUIRE_NOTHROW(client.put(std::to_string(i), std::to_string(i)));
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
@@ -103,7 +98,7 @@ TEST_CASE("hash_table_client_put_update_get_test", "[put][update][get]") {
     REQUIRE(client.update(std::to_string(i), std::to_string(i + 1000)) == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.update(std::to_string(i), std::to_string(i + 1000)) == "!key_not_found");
+    REQUIRE_THROWS_AS(client.update(std::to_string(i), std::to_string(i + 1000)), std::logic_error);
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.get(std::to_string(i)) == std::to_string(i + 1000));
@@ -151,7 +146,7 @@ TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
 
   hash_table_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.put(std::to_string(i), std::to_string(i)) == "!ok");
+    REQUIRE_NOTHROW(client.put(std::to_string(i), std::to_string(i)));
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -163,28 +158,24 @@ TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.get(std::to_string(i)) == "!key_not_found");
+    REQUIRE_THROWS_AS(client.get(std::to_string(i)), std::logic_error);
   }
 
-  LOG(log_level::info) << "Wait 1";
   as_server->stop();
   if(auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();
   }
 
-  LOG(log_level::info) << "Wait 2";
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
   }
 
-  LOG(log_level::info) << "Wait 3";
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
 
-  LOG(log_level::info) << "Wait 4";
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();

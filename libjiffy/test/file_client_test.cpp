@@ -46,14 +46,14 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   file_writer writer(tree, "/sandbox/file.txt", status);
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(writer.write(std::to_string(i)) == "!ok");
+    REQUIRE_NOTHROW(writer.write(std::to_string(i)));
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(reader.read(std::to_string(i).size()) == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(reader.read(std::to_string(i).size()) == "!msg_not_found");
+    REQUIRE_THROWS_AS(reader.read(std::to_string(i).size()), std::logic_error);
   }
 
   REQUIRE(reader.seek(0));

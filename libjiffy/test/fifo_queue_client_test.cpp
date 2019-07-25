@@ -56,7 +56,7 @@ TEST_CASE("fifo_queue_client_enqueue_dequeue_test", "[enqueue][dequeue]") {
   fifo_queue_client client(tree, "/sandbox/file.txt", status);
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.enqueue(std::to_string(i)) == "!ok");
+    REQUIRE_NOTHROW(client.enqueue(std::to_string(i)));
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.read_next() == std::to_string(i));
@@ -66,7 +66,7 @@ TEST_CASE("fifo_queue_client_enqueue_dequeue_test", "[enqueue][dequeue]") {
     REQUIRE(client.dequeue() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.dequeue() == "!msg_not_found");
+    REQUIRE_THROWS_AS(client.dequeue(), std::logic_error);
   }
 
   as_server->stop();

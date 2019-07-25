@@ -4,10 +4,6 @@
 #include "jiffy/storage/fifoqueue/fifo_queue_ops.h"
 #include "jiffy/auto_scaling/auto_scaling_client.h"
 
-#define RETURN(...)           \
-  _return = { __VA_ARGS__ };  \
-  return
-
 namespace jiffy {
 namespace storage {
 
@@ -45,80 +41,80 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
 
 void fifo_queue_partition::enqueue(response &_return, const arg_list &args) {
   if (args.size() != 2) {
-    RETURN("!args_error");
+    RETURN_ERR("!args_error");
   }
   auto ret = partition_.push_back(args[1]);
   if (!ret.first) {
     if (!auto_scale_) {
-      RETURN("!split_enqueue", std::to_string(ret.second.size()));
+      RETURN_ERR("!split_enqueue", std::to_string(ret.second.size()));
     } else if (!next_target_str_.empty()) {
-      RETURN("!split_enqueue", std::to_string(ret.second.size()), next_target_str_);
+      RETURN_ERR("!split_enqueue", std::to_string(ret.second.size()), next_target_str_);
     } else {
       partition_.recover(args[1].size() - ret.second.size());
-      RETURN("!redo");
+      RETURN_ERR("!redo");
     }
   }
-  RETURN("!ok");
+  RETURN_OK();
 }
 
 void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
   if (args.size() != 1) {
-    RETURN("!args_error");
+    RETURN_ERR("!args_error");
   }
   auto ret = partition_.at(head_);
   if (ret.first) {
     head_ += (string_array::METADATA_LEN + ret.second.size());
-    RETURN(ret.second);
+    RETURN_OK(ret.second);
   }
   if (ret.second == "!not_available") {
-    RETURN("!msg_not_found");
+    RETURN_ERR("!msg_not_found");
   }
   head_ += (string_array::METADATA_LEN + ret.second.size());
   if (!auto_scale_) {
-    RETURN("!split_dequeue", ret.second);
+    RETURN_ERR("!split_dequeue", ret.second);
   }
   if (!next_target_str_.empty()) {
-    RETURN("!split_dequeue", ret.second, next_target_str_);
+    RETURN_ERR("!split_dequeue", ret.second, next_target_str_);
   }
   head_ -= (string_array::METADATA_LEN + ret.second.size());
-  RETURN("!redo");
+  RETURN_ERR("!redo");
 }
 
 void fifo_queue_partition::read_next(response &_return, const arg_list &args) {
   if (args.size() != 2) {
-    RETURN("!args_error");
+    RETURN_ERR("!args_error");
   }
   auto ret = partition_.at(std::stoi(args[1]));
   if (ret.first) {
-    RETURN(ret.second);
+    RETURN_OK(ret.second);
   }
   if (ret.second == "!not_available") {
-    RETURN("!msg_not_found");
+    RETURN_ERR("!msg_not_found");
   }
   if (!auto_scale_) {
-    RETURN("!split_readnext", ret.second);
+    RETURN_ERR("!split_readnext", ret.second);
   }
   if (!next_target_str_.empty()) {
-    RETURN("!split_readnext", ret.second, next_target_str_);
+    RETURN_ERR("!split_readnext", ret.second, next_target_str_);
   }
-  RETURN("!redo");
+  RETURN_ERR("!redo");
 }
 
 void fifo_queue_partition::clear(response &_return, const arg_list &args) {
   if (args.size() != 1) {
-    RETURN("!args_error");
+    RETURN_ERR("!args_error");
   }
   partition_.clear();
   head_ = 0;
   scaling_up_ = false;
   scaling_down_ = false;
   dirty_ = false;
-  RETURN("!ok");
+  RETURN_OK();
 }
 
 void fifo_queue_partition::update_partition(response &_return, const arg_list &args) {
   next_target(args[1]);
-  RETURN("!ok");
+  RETURN_OK();
 }
 
 void fifo_queue_partition::run_command(response &_return, const arg_list &args) {

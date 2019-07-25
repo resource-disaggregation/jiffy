@@ -32,21 +32,21 @@ void hash_table_client::refresh() {
   }
 }
 
-std::string hash_table_client::put(const std::string &key, const std::string &value) {
+void hash_table_client::put(const std::string &key, const std::string &value) {
   std::vector<std::string> _return;
   std::vector<std::string> args{"put", key, value};
   bool redo;
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(args);
-      handle_redirect(args, _return);
+      handle_redirect(_return, args);
       redo = false;
       redo_times_ = 0;
     } catch (redo_error &e) {
       redo = true;
     }
   } while (redo);
-  return _return[0];
+  THROW_IF_NOT_OK(_return);
 }
 
 std::string hash_table_client::get(const std::string &key) {
@@ -56,14 +56,15 @@ std::string hash_table_client::get(const std::string &key) {
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(args);
-      handle_redirect(args, _return);
+      handle_redirect(_return, args);
       redo = false;
       redo_times_ = 0;
     } catch (redo_error &e) {
       redo = true;
     }
   } while (redo);
-  return _return[0];
+  THROW_IF_NOT_OK(_return);
+  return _return[1];
 }
 
 std::string hash_table_client::update(const std::string &key, const std::string &value) {
@@ -73,14 +74,15 @@ std::string hash_table_client::update(const std::string &key, const std::string 
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(args);
-      handle_redirect(args, _return);
+      handle_redirect(_return, args);
       redo = false;
       redo_times_ = 0;
     } catch (redo_error &e) {
       redo = true;
     }
   } while (redo);
-  return _return[0];
+  THROW_IF_NOT_OK(_return);
+  return _return[1];
 }
 
 std::string hash_table_client::remove(const std::string &key) {
@@ -90,32 +92,33 @@ std::string hash_table_client::remove(const std::string &key) {
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(args);
-      handle_redirect(args, _return);
+      handle_redirect(_return, args);
       redo = false;
       redo_times_ = 0;
     } catch (redo_error &e) {
       redo = true;
     }
   } while (redo);
-  return _return[0];
+  THROW_IF_NOT_OK(_return);
+  return _return[1];
 }
 
 std::size_t hash_table_client::block_id(const std::string &key) {
   return static_cast<size_t>((*std::prev(blocks_.upper_bound(hash_slot::get(key)))).first);
 }
 
-void hash_table_client::handle_redirect(const std::vector<std::string> &args, std::vector<std::string> &response) {
-  if (response[0] == "!exporting") {
+void hash_table_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
+  if (_return[0] == "!exporting") {
     do {
-      auto chain = directory::replica_chain(string_utils::split(response[1], '!'));
-      response = replica_chain_client(fs_, path_, chain, HT_OPS,0).run_command_redirected(args);
-    } while (response[0] == "!exporting");
+      auto chain = directory::replica_chain(string_utils::split(_return[1], '!'));
+      _return = replica_chain_client(fs_, path_, chain, HT_OPS, 0).run_command_redirected(args);
+    } while (_return[0] == "!exporting");
   }
-  if (response[0] == "!block_moved") {
+  if (_return[0] == "!block_moved") {
     refresh();
     throw redo_error();
   }
-  if (response[0] == "!full") {
+  if (_return[0] == "!full") {
     std::this_thread::sleep_for(std::chrono::milliseconds((int) (std::pow(2, redo_times_))));
     redo_times_++;
     throw redo_error();
