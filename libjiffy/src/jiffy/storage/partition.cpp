@@ -16,17 +16,14 @@ partition::partition(block_memory_manager *manager,
 }
 
 void partition::path(const std::string &path) {
-  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   path_ = path;
 }
 
 const std::string &partition::path() const {
-  std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
   return path_;
 }
 
 void partition::name(const std::string &name) {
-  std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
   name_ = name;
 }
 
@@ -35,7 +32,6 @@ const std::string &partition::name() const {
 }
 
 void partition::metadata(const std::string &metadata) {
-  std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
   metadata_ = metadata;
 }
 
@@ -69,17 +65,14 @@ std::size_t partition::storage_size() {
 }
 
 subscription_map &partition::subscriptions() {
-  std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
   return sub_map_;
 }
 
 block_response_client_map &partition::clients() {
-  std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
   return client_map_;
 }
 
 void partition::set_name_and_metadata(const std::string &name, const std::string &metadata) {
-  std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
   name_ = name;
   metadata_ = metadata;
 }

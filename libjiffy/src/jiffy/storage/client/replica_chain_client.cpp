@@ -90,7 +90,7 @@ std::vector<std::string> replica_chain_client::run_command(const std::vector<std
       retry = true;
     } catch (std::logic_error &e) { // TODO: This is very iffy, we need to fix this
       response.clear();
-      response.push_back("!block_moved");
+      response.emplace_back("!block_moved");
       break;
     }
   }

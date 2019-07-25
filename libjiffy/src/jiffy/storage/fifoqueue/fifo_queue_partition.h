@@ -130,7 +130,6 @@ class fifo_queue_partition : public chain_module {
    * @param target_str Next target string
    */
   void next_target(const std::string &target_str) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     next_target_str_ = target_str;
   }
 

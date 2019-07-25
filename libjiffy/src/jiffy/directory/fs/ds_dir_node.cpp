@@ -9,7 +9,7 @@ ds_dir_node::ds_dir_node(const std::string &name)
     : ds_node(name, file_status(file_type::directory, perms(perms::all), utils::time_utils::now_ms())) {}
 
 std::shared_ptr<ds_node> ds_dir_node::get_child(const std::string &name) const {
-  std::shared_lock<std::shared_mutex> lock(mtx_);
+  std::unique_lock<std::mutex> lock(mtx_);
   auto ret = children_.find(name);
   if (ret != children_.end()) {
     return ret->second;
@@ -19,7 +19,7 @@ std::shared_ptr<ds_node> ds_dir_node::get_child(const std::string &name) const {
 }
 
 void ds_dir_node::add_child(std::shared_ptr<ds_node> node) {
-  std::unique_lock<std::shared_mutex> lock(mtx_);
+  std::unique_lock<std::mutex> lock(mtx_);
   if (children_.find(node->name()) == children_.end()) {
     children_.insert(std::make_pair(node->name(), node));
   } else {
@@ -28,7 +28,7 @@ void ds_dir_node::add_child(std::shared_ptr<ds_node> node) {
 }
 
 void ds_dir_node::remove_child(const std::string &name) {
-  std::unique_lock<std::shared_mutex> lock(mtx_);
+  std::unique_lock<std::mutex> lock(mtx_);
   auto ret = children_.find(name);
   if (ret != children_.end()) {
     children_.erase(ret);
@@ -40,7 +40,7 @@ void ds_dir_node::remove_child(const std::string &name) {
 bool ds_dir_node::handle_lease_expiry(std::vector<std::string> &cleared_blocks,
                                       const std::string &child_name,
                                       std::shared_ptr<storage::storage_management_ops> storage) {
-  std::unique_lock<std::shared_mutex> lock(mtx_);
+  std::unique_lock<std::mutex> lock(mtx_);
   auto ret = children_.find(child_name);
   if (ret != children_.end()) {
     if (ret->second->is_regular_file()) {
@@ -70,7 +70,7 @@ bool ds_dir_node::handle_lease_expiry(std::vector<std::string> &cleared_blocks,
 }
 
 void ds_dir_node::sync(const std::string &backing_path, const std::shared_ptr<storage::storage_management_ops> &storage) {
-  std::unique_lock<std::shared_mutex> lock(mtx_);
+  std::unique_lock<std::mutex> lock(mtx_);
   for (const auto &entry: children_) {
     entry.second->sync(backing_path, storage);
   }
@@ -79,7 +79,7 @@ void ds_dir_node::sync(const std::string &backing_path, const std::shared_ptr<st
 void ds_dir_node::dump(std::vector<std::string> &cleared_blocks,
                        const std::string &backing_path,
                        const std::shared_ptr<storage::storage_management_ops> &storage) {
-  std::unique_lock<std::shared_mutex> lock(mtx_);
+  std::unique_lock<std::mutex> lock(mtx_);
   for (const auto &entry: children_) {
     entry.second->dump(cleared_blocks, backing_path, storage);
   }
@@ -89,14 +89,14 @@ void ds_dir_node::load(const std::string &path,
                        const std::string &backing_path,
                        const std::shared_ptr<storage::storage_management_ops> &storage,
                        const std::shared_ptr<block_allocator> &allocator) {
-  std::unique_lock<std::shared_mutex> lock(mtx_);
+  std::unique_lock<std::mutex> lock(mtx_);
   for (const auto &entry: children_) {
     entry.second->load(path, backing_path, storage, allocator);
   }
 }
 
 std::vector<directory_entry> ds_dir_node::entries() const {
-  std::shared_lock<std::shared_mutex> lock(mtx_);
+  std::unique_lock<std::mutex> lock(mtx_);
   std::vector<directory_entry> ret;
   ret.reserve(children_.size());
   populate_entries(ret);
@@ -104,7 +104,7 @@ std::vector<directory_entry> ds_dir_node::entries() const {
 }
 
 std::vector<directory_entry> ds_dir_node::recursive_entries() const {
-  std::shared_lock<std::shared_mutex> lock(mtx_);
+  std::unique_lock<std::mutex> lock(mtx_);
   std::vector<directory_entry> ret;
   populate_recursive_entries(ret);
   return ret;

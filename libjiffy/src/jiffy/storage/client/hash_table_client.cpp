@@ -108,11 +108,9 @@ std::size_t hash_table_client::block_id(const std::string &key) {
 }
 
 void hash_table_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
-  if (_return[0] == "!exporting") {
-    do {
-      auto chain = directory::replica_chain(string_utils::split(_return[1], '!'));
-      _return = replica_chain_client(fs_, path_, chain, HT_OPS, 0).run_command_redirected(args);
-    } while (_return[0] == "!exporting");
+  while (_return[0] == "!exporting") {
+    auto chain = directory::replica_chain(string_utils::split(_return[1], '!'));
+    _return = replica_chain_client(fs_, path_, chain, HT_OPS, 0).run_command_redirected(args);
   }
   if (_return[0] == "!block_moved") {
     refresh();

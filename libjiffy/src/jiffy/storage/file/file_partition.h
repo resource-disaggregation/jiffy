@@ -128,23 +128,9 @@ class file_partition : public chain_module {
 
   /**
    * @brief Set next target string
-   * @param block_ids Next target replica chain data blocks
-   */
-  void next_target(std::vector<std::string> &target) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    next_target_str_ = "";
-    for (const auto &block: target) {
-      next_target_str_ += (block + "!");
-    }
-    next_target_str_.pop_back();
-  }
-
-  /**
-   * @brief Set next target string
    * @param target_str Next target replica chain in string format
    */
   void next_target(const std::string &target_str) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     next_target_str_ = target_str;
   }
 
@@ -152,7 +138,7 @@ class file_partition : public chain_module {
    * @brief Fetch next target string
    * @return Next target string
    */
-  std::string next_target_str() const {
+  std::string next_target() const {
     return next_target_str_;
   }
 

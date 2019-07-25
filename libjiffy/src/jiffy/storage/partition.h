@@ -195,8 +195,6 @@ class partition {
    */
   binary make_binary(const std::string &str);
 
-  /* Metadata mutex */
-  mutable std::shared_mutex metadata_mtx_;
   /* Partition name */
   std::string name_;
   /* Partition metadata */

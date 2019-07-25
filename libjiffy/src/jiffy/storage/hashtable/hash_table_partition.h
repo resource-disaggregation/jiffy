@@ -51,7 +51,6 @@ class hash_table_partition : public chain_module {
    * @param slot_end End slot
    */
   void slot_range(int32_t slot_begin, int32_t slot_end) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     slot_range_.first = slot_begin;
     slot_range_.second = slot_end;
   }
@@ -71,7 +70,6 @@ class hash_table_partition : public chain_module {
    * @return Block slot range
    */
   const std::pair<int32_t, int32_t> &slot_range() const {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot_range_;
   }
 
@@ -80,7 +78,6 @@ class hash_table_partition : public chain_module {
    * @return Begin slot
    */
   int32_t slot_begin() const {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot_range_.first;
   }
 
@@ -89,7 +86,6 @@ class hash_table_partition : public chain_module {
    * @return End slot
    */
   int32_t slot_end() const {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot_range_.second;
   }
 
@@ -99,7 +95,6 @@ class hash_table_partition : public chain_module {
    * @return Bool value, true if slot is within the range
    */
   bool in_slot_range(int32_t slot) {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot >= slot_range_.first && slot < slot_range_.second;
   }
 
@@ -108,7 +103,6 @@ class hash_table_partition : public chain_module {
    * @param state Block state
    */
   void state(hash_partition_state state) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     state_ = state;
   }
 
@@ -117,7 +111,6 @@ class hash_table_partition : public chain_module {
    * @return Block state
    */
   const hash_partition_state &state() const {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return state_;
   }
 
@@ -127,7 +120,6 @@ class hash_table_partition : public chain_module {
    * @param slot_end End slot
    */
   void export_slot_range(int32_t slot_begin, int32_t slot_end) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     export_slot_range_.first = slot_begin;
     export_slot_range_.second = slot_end;
   };
@@ -138,7 +130,6 @@ class hash_table_partition : public chain_module {
    * @return Bool value, true if slot is within the range
    */
   bool in_export_slot_range(int32_t slot) {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot >= export_slot_range_.first && slot < export_slot_range_.second;
   }
 
@@ -148,7 +139,6 @@ class hash_table_partition : public chain_module {
    * @param slot_end End slot
    */
   void import_slot_range(int32_t slot_begin, int32_t slot_end) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     import_slot_range_.first = slot_begin;
     import_slot_range_.second = slot_end;
   }
@@ -158,7 +148,6 @@ class hash_table_partition : public chain_module {
    * @return Import slot range
    */
   const std::pair<int32_t, int32_t> &import_slot_range() {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return import_slot_range_;
   };
 
@@ -176,7 +165,6 @@ class hash_table_partition : public chain_module {
    * @param export_target_string Export target string
    */
   void export_target(const std::string &export_target_string) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     export_target_.clear();
     export_target_ = utils::string_utils::split(export_target_string, '!');
     export_target_str_ = export_target_string;

@@ -26,7 +26,6 @@ void chain_module::setup(const std::string &path,
                          const std::vector<std::string> &chain,
                          chain_role role,
                          const std::string &next_block_id) {
-  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   path_ = path;
   chain_ = chain;
   role_ = role;
@@ -104,7 +103,6 @@ void chain_module::request(sequence_id seq, const arg_list &args) {
     return;
   }
 
-
   std::vector<std::string> result;
   run_command(result, args);
 
@@ -117,11 +115,8 @@ void chain_module::request(sequence_id seq, const arg_list &args) {
       LOG(log_level::error) << "Invalid state: Accessor request on non-tail node";
       return;
     }
-    {
-      std::lock_guard<std::mutex> lock(request_mtx_); // Ensures atomic use of chain client handle
-      seq.server_seq_no = ++chain_seq_no_;
-      next_->request(seq, args);
-    }
+    seq.server_seq_no = ++chain_seq_no_;
+    next_->request(seq, args);
   }
   add_pending(seq, args);
 }

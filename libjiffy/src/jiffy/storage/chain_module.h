@@ -76,7 +76,6 @@ class next_chain_module_cxn {
    */
 
   std::shared_ptr<apache::thrift::protocol::TProtocol> reset(const std::string &block_name) {
-    std::unique_lock<std::shared_mutex> lock(mtx_);
     client_.disconnect();
     if (block_name != "nil") {
       auto bid = block_id_parser::parse(block_name);
@@ -94,7 +93,6 @@ class next_chain_module_cxn {
    * @param args Operation arguments
    */
   void request(const sequence_id &seq, const std::vector<std::string> &args) {
-    std::shared_lock<std::shared_mutex> lock(mtx_);
     client_.request(seq, args);
   }
 
@@ -104,13 +102,10 @@ class next_chain_module_cxn {
    * @param args Command arguments
    */
   void run_command(std::vector<std::string> &result, const std::vector<std::string> &args) {
-    std::unique_lock<std::shared_mutex> lock(mtx_);
     client_.run_command(result, args);
   }
 
  private:
-  /* Operation mutex */
-  std::shared_mutex mtx_;
   /* Chain request client */
   chain_request_client client_;
 };
@@ -219,7 +214,7 @@ class chain_module : public partition {
   /**
    * @brief Destructor
    */
-  virtual ~chain_module();
+  ~chain_module() override;
 
   /**
    * @brief Setup a chain module and start the processor thread
@@ -238,7 +233,6 @@ class chain_module : public partition {
    * @param role Role
    */
   void role(chain_role role) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     role_ = role;
   }
 
@@ -247,7 +241,6 @@ class chain_module : public partition {
    * @return Role
    */
   chain_role role() const {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return role_;
   }
 
@@ -256,7 +249,6 @@ class chain_module : public partition {
    * @param chain Chain block names
    */
   void chain(const std::vector<std::string> &chain) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     chain_ = chain;
   }
 
@@ -265,19 +257,7 @@ class chain_module : public partition {
    * @return Replica chain block names
    */
   const std::vector<std::string> &chain() {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return chain_;
-  }
-
-  /**
-   * @brief Convert chain to string
-   * @param ret Variable to store string in.
-   */
-  void chain_to_string(std::string &ret) {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
-    for (const auto &x : chain()) {
-      ret += x;
-    }
   }
 
   /**
@@ -285,7 +265,6 @@ class chain_module : public partition {
    * @return Bool value, true if chain role is head or singleton
    */
   bool is_head() const {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return role() == chain_role::head || role() == chain_role::singleton;
   }
 
@@ -294,7 +273,6 @@ class chain_module : public partition {
    * @return Bool value, true if chain role is tail or singleton
    */
   bool is_tail() const {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return role() == chain_role::tail || role() == chain_role::singleton;
   }
 
@@ -384,8 +362,6 @@ class chain_module : public partition {
   void ack(const sequence_id &seq);
 
  protected:
-  /* Request mutex */
-  std::mutex request_mtx_;
   /* Role of chain module */
   chain_role role_{singleton};
   /* Chain sequence number */

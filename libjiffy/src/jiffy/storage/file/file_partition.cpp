@@ -48,7 +48,7 @@ void file_partition::write(response& _return, const arg_list &args) {
     if (!auto_scale_) {
       RETURN_ERR("!split_write", std::to_string(ret.second.size()));
     }
-    if (!next_target_str().empty()) {
+    if (!next_target().empty()) {
       RETURN_ERR("!split_write", std::to_string(ret.second.size()), next_target_str_);
     } else {
       RETURN_ERR("!redo");
@@ -74,7 +74,7 @@ void file_partition::read(response& _return, const arg_list &args) {
     if (!auto_scale_) {
       RETURN_ERR("!split_read", ret.second);
     }
-    if (!next_target_str().empty()) {
+    if (!next_target().empty()) {
       RETURN_ERR("!split_read", ret.second, next_target_str_);
     } else {
       RETURN_ERR("!redo");
@@ -133,7 +133,7 @@ void file_partition::run_command(response &_return, const arg_list &args) {
   if (is_mutator(cmd_name)) {
     dirty_ = true;
   }
-  if (auto_scale_ && is_mutator(cmd_name) && overload() && is_tail() && !scaling_up_ && next_target_str().empty()) {
+  if (auto_scale_ && is_mutator(cmd_name) && overload() && is_tail() && !scaling_up_ && next_target().empty()) {
     LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
                          << storage_capacity() << " partition size = " << size() << " partition capacity = "
                          << partition_.capacity();
@@ -180,7 +180,6 @@ bool file_partition::sync(const std::string &path) {
 }
 
 bool file_partition::dump(const std::string &path) {
-  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   bool flushed = false;
   if (dirty_) {
     auto remote = persistent::persistent_store::instance(path, ser_);

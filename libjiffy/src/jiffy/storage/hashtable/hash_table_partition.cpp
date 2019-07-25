@@ -100,10 +100,7 @@ void hash_table_partition::exists(response &_return, const arg_list &args) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
       RETURN_ERR("!exporting", export_target_str_);
     }
-    if (metadata_ == "importing" && in_import_slot_range(hash)) {
-      RETURN_ERR("!full");
-    }
-    RETURN_ERR("!key_not_found");
+    RETURN_OK("false");
   }
   RETURN_ERR("!block_moved");
 }
@@ -406,7 +403,6 @@ bool hash_table_partition::sync(const std::string &path) {
 }
 
 bool hash_table_partition::dump(const std::string &path) {
-  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
   bool flushed = false;
   if (dirty_) {
     locked_hash_table_type ltable = block_.lock_table();
