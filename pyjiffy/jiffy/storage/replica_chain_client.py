@@ -60,7 +60,7 @@ class ReplicaChainClient:
     def _recv_response(self):
         rseq, result = self.response_reader.recv_response()
         if self.seq.client_seq_no != rseq:
-            raise RuntimeError("SEQ: Expected={} Received={}".format(self.seq.client_seq_no, rseq))
+            raise EOFError("SEQ: Expected={} Received={}".format(self.seq.client_seq_no, rseq))
         self.seq.client_seq_no += 1
         self.in_flight = False
         return result
@@ -95,10 +95,13 @@ class ReplicaChainClient:
                 self._invalidate_cache()
                 self._init()
                 retry = True
+            except EOFError:
+                resp = [b('!block_moved')]
         return resp
 
     def _run_command_redirected(self, client, args):
-        args.append("!redirected")
+        if args[-1] != b('!redirected'):
+            args.append(b('!redirected'))
         self._send_command(client, args)
         return self._recv_response()
 

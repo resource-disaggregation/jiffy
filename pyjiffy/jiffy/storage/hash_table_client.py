@@ -1,7 +1,10 @@
 import logging
 from bisect import bisect_right
 
-from jiffy.directory.directory_client import ReplicaChain, StorageMode
+import math
+import time
+
+from jiffy.directory.directory_client import ReplicaChain
 from jiffy.directory.ttypes import rpc_storage_mode
 from jiffy.storage import crc
 from jiffy.storage.block_client import BlockClientCache
@@ -36,6 +39,7 @@ class RedirectError(Exception):
 
 class HashTableClient:
     def __init__(self, fs, path, data_status, timeout_ms=1000):
+        self.redo_times = 0
         self.fs = fs
         self.path = path
         self.client_cache = BlockClientCache(timeout_ms)
@@ -52,83 +56,47 @@ class HashTableClient:
         self.slots = [int(chain.name.split('_')[0]) for chain in self.file_info.data_blocks]
 
     def _handle_redirect(self, args, response):
-        response = b(response)
-        while response.startswith(b('!exporting')):
-            chain = ReplicaChain([bytes_to_str(x) for x in response[1:].split(b('!'))[1:]], 0, 0,
+        while b(response[0]) == b('!exporting'):
+            chain = ReplicaChain([bytes_to_str(x) for x in response[1].split(b('!'))], 0, 0,
                                  rpc_storage_mode.rpc_in_memory)
-            response = \
-                ReplicaChainClient(self.fs, self.path, self.client_cache, chain,
-                                   HashTableOps.op_types).run_command_redirected(args)[0]
-        if response == b('!block_moved'):
+            response = ReplicaChainClient(self.fs, self.path, self.client_cache, chain,
+                                          HashTableOps.op_types).run_command_redirected(args)
+        if b(response[0]) == b('!block_moved'):
             self.refresh()
+            return None
+        if b(response[0]) == b('!full'):
+            time.sleep(0.001 * math.pow(2, self.redo_times))
+            self.redo_times += 1
             return None
         return response
 
-    def _handle_redirects(self, args, responses):
-        n_ops = len(responses)
-        n_op_args = int(len(args) / n_ops)
-        for i in range(n_ops):
-            response = b(responses[i])
-            while response.startswith(b('!exporting')):
-                chain = ReplicaChain([bytes_to_str(x) for x in response[1:].split(b('!'))[1:]], 0, 0,
-                                     StorageMode.in_memory)
-                op_args = args[i * n_op_args: (i + 1) * n_op_args]
-                response = \
-                    ReplicaChainClient(self.fs, self.path, self.client_cache, chain,
-                                       HashTableOps.op_types).run_command_redirected(op_args)[0]
-            if response == "!block_moved":
-                self.refresh()
-                return None
-            responses[i] = response
-        return responses
+    def run_repeated(self, key, args):
+        response = None
+        while response is None:
+            response = self.blocks[self.block_id(key)].run_command(args)
+            response = self._handle_redirect(args, response)
+        self.redo_times = 0
+        if b(response[0]) != b('!ok'):
+            raise KeyError(response[0])
+        return response
 
     def put(self, key, value):
-        args = [HashTableOps.put, key, value]
-        response = None
-        while response is None:
-            response = self.blocks[self.block_id(key)].run_command(args)[0]
-            response = self._handle_redirect(args, response)
-        return response
+        self.run_repeated(key, [HashTableOps.put, key, value])
 
     def get(self, key):
-        args = [HashTableOps.get, key]
-        response = None
-        while response is None:
-            response = self.blocks[self.block_id(key)].run_command(args)[0]
-            response = self._handle_redirect(args, response)
-        return response
+        return self.run_repeated(key, [HashTableOps.get, key])[1]
 
     def exists(self, key):
-        args = [HashTableOps.exists, key]
-        response = None
-        while response is None:
-            response = self.blocks[self.block_id(key)].run_command(args)[0]
-            response = self._handle_redirect(args, response)
-        return response == b('true')
+        return self.run_repeated(key, [HashTableOps.exists, key])[1] == b('true')
 
     def update(self, key, value):
-        args = [HashTableOps.update, key, value]
-        response = None
-        while response is None:
-            response = self.blocks[self.block_id(key)].run_command(args)[0]
-            response = self._handle_redirect(args, response)
-        return response
+        return self.run_repeated(key, [HashTableOps.update, key, value])[1]
 
     def upsert(self, key, value):
-        args = [HashTableOps.upsert, key, value]
-        response = None
-        while response is None:
-            response = self.blocks[self.block_id(key)].run_command(args)[0]
-            response = self._handle_redirect(args, response)
-        return response
+        self.run_repeated(key, [HashTableOps.upsert, key, value])
 
     def remove(self, key):
-        args = [HashTableOps.remove, key]
-        response = None
-        while response is None:
-            response = self.blocks[self.block_id(key)].run_command(args)[0]
-            response = self._handle_redirect(args, response)
-        return response
+        return self.run_repeated(key, [HashTableOps.remove, key])[1]
 
     def block_id(self, key):
         i = bisect_right(self.slots, crc.crc16(encode(key)))
