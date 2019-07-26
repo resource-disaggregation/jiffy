@@ -2,7 +2,6 @@ from __future__ import print_function
 
 import os
 import subprocess
-
 import sys
 import time
 
@@ -54,6 +53,7 @@ class StorageServer(JiffyServer):
         self.host = None
         self.service_port = None
         self.management_port = None
+        self.auto_scaling_port = None
 
     def start(self, executable, conf):
         super(StorageServer, self).start(executable, conf)
@@ -62,14 +62,17 @@ class StorageServer(JiffyServer):
         self.host = config.get('storage', 'host')
         self.service_port = int(config.get('storage', 'service_port'))
         self.management_port = int(config.get('storage', 'management_port'))
+        self.auto_scaling_port = int(config.get('storage', 'auto_scaling_port'))
         wait_till_server_ready(self.host, self.service_port)
         wait_till_server_ready(self.host, self.management_port)
+        wait_till_server_ready(self.host, self.auto_scaling_port)
 
     def stop(self):
         super(StorageServer, self).stop()
         self.host = None
         self.service_port = None
         self.management_port = None
+        self.auto_scaling_port = None
 
 
 class DirectoryServer(JiffyServer):
@@ -198,6 +201,22 @@ class TestClient(TestCase):
         for i in range(0, 1000):
             self.assertRaises(KeyError, kv.get, b(str(i)))
 
+    def queue_ops(self, q):
+        for i in range(0, 1000):
+            try:
+                q.put(b(str(i)))
+            except KeyError as k:
+                self.fail('Received error message: {}'.format(k))
+
+        for i in range(0, 1000):
+            self.assertEqual(b(str(i)), q.read_next())
+
+        for i in range(0, 1000):
+            self.assertEqual(b(str(i)), q.get())
+
+        for i in range(1000, 2000):
+            self.assertRaises(KeyError, q.get)
+
     def test_lease_worker(self):
         self.start_servers()
         client = self.jiffy_client()
@@ -212,25 +231,26 @@ class TestClient(TestCase):
             client.disconnect()
             self.stop_servers()
 
-    def test_create(self):
+    def test_hash_table(self):
         self.start_servers()
         client = self.jiffy_client()
         try:
-            kv = client.create_hash_table("/a/file.txt", "local://tmp")
-            self.hash_table_ops(kv)
+            client.create_hash_table('/a/file.txt', 'local://tmp')
             self.assertTrue(client.fs.exists('/a/file.txt'))
+            kv = client.open_hash_table('/a/file.txt')
+            self.hash_table_ops(kv)
         finally:
             client.disconnect()
             self.stop_servers()
 
-    def test_open(self):
+    def test_queue(self):
         self.start_servers()
         client = self.jiffy_client()
         try:
-            client.create_hash_table("/a/file.txt", "local://tmp")
+            client.create_queue('/a/file.txt', 'local://tmp')
             self.assertTrue(client.fs.exists('/a/file.txt'))
-            kv = client.open('/a/file.txt')
-            self.hash_table_ops(kv)
+            q = client.open_queue('/a/file.txt')
+            self.queue_ops(q)
         finally:
             client.disconnect()
             self.stop_servers()
@@ -283,7 +303,7 @@ class TestClient(TestCase):
         client = self.jiffy_client()
         try:
             kv = client.create_hash_table("/a/file.txt", "local://tmp", 1, 3)
-            self.assertEqual(3, kv.file_info.chain_length)
+            self.assertEqual(3, kv.block_info.chain_length)
             self.hash_table_ops(kv)
         finally:
             client.disconnect()
@@ -296,7 +316,7 @@ class TestClient(TestCase):
             client = self.jiffy_client()
             try:
                 kv = client.create_hash_table("/a/file.txt", "local://tmp", 1, 3)
-                self.assertEqual(3, kv.file_info.chain_length)
+                self.assertEqual(3, kv.block_info.chain_length)
                 s.stop()
                 self.hash_table_ops(kv)
             finally:
@@ -336,7 +356,7 @@ class TestClient(TestCase):
             n2.subscribe(['put', 'remove'])
             n3.subscribe(['remove'])
 
-            kv = client.open("/a/file.txt")
+            kv = client.open_hash_table("/a/file.txt")
             kv.put(b'key1', b'value1')
             kv.remove(b'key1')
 
