@@ -22,8 +22,10 @@ std::mutex MTX;
 #define LOCK MTX.lock()
 #define UNLOCK MTX.unlock()
 #define UNLOCK_AND_RETURN \
+  MTX.unlock();		  \
   return
 #define UNLOCK_AND_THROW(ex)  \
+  MTX.unlock();   	      \
   throw make_exception(ex)
 
 auto_scaling_service_handler::auto_scaling_service_handler(const std::string directory_host, int directory_port)
@@ -142,7 +144,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
 
   } else if (scaling_type == "hash_table_merge") {
     // Find a merge target
-    //LOCK;
+    LOCK;
     auto start = time_utils::now_us();
     auto src = std::make_shared<replica_chain_client>(fs, path, cur_chain, KV_OPS);
     auto name = src->run_command(hash_table_cmd_id::ht_update_partition, {"merging", "merging"}).front();
@@ -205,6 +207,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       src->run_command(hash_table_cmd_id::ht_update_partition, {name, "regular$" + name});
       UNLOCK_AND_RETURN;
     }
+    UNLOCK;
     auto dst_slot_range = string_utils::split(dst_old_name, '_', 2);
     auto dst_name = (std::stoi(dst_slot_range[0]) == merge_range_end) ?
                     std::to_string(merge_range_beg) + "_" + dst_slot_range[1]:
