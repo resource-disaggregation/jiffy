@@ -3,6 +3,7 @@
 #include "jiffy/utils/string_utils.h"
 #include <algorithm>
 #include <thread>
+#include <utility>
 
 namespace jiffy {
 namespace storage {
@@ -13,7 +14,7 @@ file_client::file_client(std::shared_ptr<directory::directory_interface> fs,
                          const std::string &path,
                          const directory::data_status &status,
                          int timeout_ms)
-    : data_structure_client(fs, path, status, timeout_ms),
+    : data_structure_client(std::move(fs), path, status, timeout_ms),
       cur_partition_(0),
       cur_offset_(0),
       last_partition_(0) {
