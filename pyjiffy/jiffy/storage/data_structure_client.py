@@ -22,13 +22,13 @@ class DataStructureClient(object):
     def _handle_redirect(self, args, response):
         raise NotImplementedError()
 
-    def block_id(self, args):
+    def _block_id(self, args):
         raise NotImplementedError()
 
     def _run_repeated(self, args):
         response = None
         while response is None:
-            response = self.blocks[self.block_id(args)].run_command(args)
+            response = self.blocks[self._block_id(args)].run_command(args)
             response = self._handle_redirect(args, response)
         self.redo_times = 0
         if response[0] != b('!ok'):

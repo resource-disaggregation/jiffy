@@ -1,15 +1,30 @@
-from bisect import bisect_right
-
 import math
 import time
+from bisect import bisect_right
 
 from jiffy.directory.directory_client import ReplicaChain
 from jiffy.directory.ttypes import rpc_storage_mode
 from jiffy.storage import crc
+from jiffy.storage.command import CommandType
 from jiffy.storage.compat import b, unicode, bytes, long, basestring, bytes_to_str
 from jiffy.storage.data_structure_client import DataStructureClient
-from jiffy.storage.hash_table_ops import HashTableOps
 from jiffy.storage.replica_chain_client import ReplicaChainClient
+
+
+class HashTableOps:
+    exists = b('exists')
+    get = b('get')
+    put = b('put')
+    remove = b('remove')
+    update = b('update')
+    upsert = b('upsert')
+
+    op_types = {exists: CommandType.accessor,
+                get: CommandType.accessor,
+                put: CommandType.mutator,
+                remove: CommandType.mutator,
+                update: CommandType.mutator,
+                upsert: CommandType.mutator}
 
 
 def encode(value):
@@ -36,13 +51,13 @@ class RedirectError(Exception):
         self.blocks = blocks
 
 
-class HashTableClient(DataStructureClient):
+class HashTable(DataStructureClient):
     def __init__(self, fs, path, block_info, timeout_ms=1000):
-        super(HashTableClient, self).__init__(fs, path, block_info, HashTableOps.op_types, timeout_ms)
+        super(HashTable, self).__init__(fs, path, block_info, HashTableOps.op_types, timeout_ms)
         self.slots = [int(chain.name.split('_')[0]) for chain in self.block_info.data_blocks]
 
     def _refresh(self):
-        super(HashTableClient, self)._refresh()
+        super(HashTable, self)._refresh()
         self.slots = [int(chain.name.split('_')[0]) for chain in self.block_info.data_blocks]
 
     def _handle_redirect(self, args, response):
@@ -78,7 +93,7 @@ class HashTableClient(DataStructureClient):
     def remove(self, key):
         return self._run_repeated([HashTableOps.remove, key])[1]
 
-    def block_id(self, args):
+    def _block_id(self, args):
         i = bisect_right(self.slots, crc.crc16(encode(args[1])))
         if i:
             return i - 1

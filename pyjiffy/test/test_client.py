@@ -217,6 +217,24 @@ class TestClient(TestCase):
         for i in range(1000, 2000):
             self.assertRaises(KeyError, q.get)
 
+    def file_ops(self, w, r):
+        for i in range(0, 1000):
+            try:
+                w.write(b(str(i)))
+            except KeyError as k:
+                self.fail('Received error message: {}'.format(k))
+
+        for i in range(0, 1000):
+            self.assertEqual(b(str(i)), r.read(len(b(str(i)))))
+
+        for i in range(1000, 2000):
+            self.assertRaises(KeyError, r.read, len(b(str(i))))
+
+        self.assertTrue(r.seek(0))
+
+        for i in range(0, 1000):
+            self.assertEqual(b(str(i)), r.read(len(b(str(i)))))
+
     def test_lease_worker(self):
         self.start_servers()
         client = self.jiffy_client()
@@ -251,6 +269,18 @@ class TestClient(TestCase):
             self.assertTrue(client.fs.exists('/a/file.txt'))
             q = client.open_queue('/a/file.txt')
             self.queue_ops(q)
+        finally:
+            client.disconnect()
+            self.stop_servers()
+
+    def test_file(self):
+        self.start_servers()
+        client = self.jiffy_client()
+        try:
+            w = client.create_file('/a/file.txt', 'local://tmp')
+            self.assertTrue(client.fs.exists('/a/file.txt'))
+            r = client.open_file('/a/file.txt')
+            self.file_ops(w, r)
         finally:
             client.disconnect()
             self.stop_servers()

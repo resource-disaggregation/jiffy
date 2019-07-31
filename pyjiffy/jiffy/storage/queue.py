@@ -1,7 +1,17 @@
+from jiffy.storage.command import CommandType
 from jiffy.storage.compat import b
 from jiffy.storage.data_structure_client import DataStructureClient
-from jiffy.storage.queue_ops import QueueOps
 from jiffy.storage.replica_chain_client import ReplicaChainClient
+
+
+class QueueOps:
+    enqueue = b('enqueue')
+    dequeue = b('dequeue')
+    read_next = b('read_next')
+
+    op_types = {enqueue: CommandType.mutator,
+                dequeue: CommandType.mutator,
+                read_next: CommandType.accessor}
 
 
 class Queue(DataStructureClient):
@@ -71,7 +81,7 @@ class Queue(DataStructureClient):
             response[1] = result
         return response
 
-    def block_id(self, args):
+    def _block_id(self, args):
         if args[0] == QueueOps.enqueue:
             return self.enqueue_partition
         elif args[0] == QueueOps.dequeue:
