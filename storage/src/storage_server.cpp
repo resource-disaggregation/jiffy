@@ -17,7 +17,7 @@ using namespace ::jiffy::auto_scaling;
 using namespace ::jiffy::utils;
 
 using namespace ::apache::thrift;
-
+using namespace ::apache::thrift::server;
 std::string mapper(const std::string &env_var) {
   if (env_var == "JIFFY_DIRECTORY_HOST") return "directory.host";
   else if (env_var == "JIFFY_DIRECTORY_SERVICE_PORT") return "directory.service_port";
@@ -64,10 +64,11 @@ int main(int argc, char **argv) {
   // Configuration priority order: default < env < configuration file < commandline args
   // First set defaults
   std::string address = "127.0.0.1";
-  int32_t service_port = 9093;
+  int32_t service_port = 9095;
   int32_t mgmt_port = 9094;
-  int32_t auto_scaling_port = 9095;
+  int32_t auto_scaling_port = 9093;
   int32_t dir_port = 9090;
+  std::size_t num_servers = 64;
   std::size_t num_blocks = 64;
   std::size_t num_block_groups = 4;
   std::size_t block_capacity = 134217728;
@@ -92,12 +93,13 @@ int main(int argc, char **argv) {
     config_file_options.add_options()
         ("storage.host", po::value<std::string>(&address)->default_value("127.0.0.1"))
         ("storage.management_port", po::value<int>(&mgmt_port)->default_value(9093))
-        ("storage.service_port", po::value<int>(&service_port)->default_value(9094))
-        ("storage.auto_scaling_port", po::value<int>(&auto_scaling_port)->default_value(9095))
+        ("storage.service_port", po::value<int>(&service_port)->default_value(9095))
+        ("storage.auto_scaling_port", po::value<int>(&auto_scaling_port)->default_value(9094))
         ("directory.host", po::value<std::string>(&dir_host)->default_value("127.0.0.1"))
         ("directory.service_port", po::value<int>(&dir_port)->default_value(9090))
         ("directory.block_port", po::value<int>(&block_port)->default_value(9092))
         ("storage.block.num_blocks", po::value<size_t>(&num_blocks)->default_value(64))
+        ("storage.block.num_servers", po::value<size_t>(&num_servers)->default_value(64))
         ("storage.block.capacity", po::value<size_t>(&block_capacity)->default_value(134217728))
         ("storage.block.capacity_threshold_lo", po::value<double>(&blk_thresh_lo)->default_value(0.25))
         ("storage.block.capacity_threshold_hi", po::value<double>(&blk_thresh_hi)->default_value(0.75));
@@ -152,9 +154,10 @@ int main(int argc, char **argv) {
     LOG(log_level::info) << "storage.host: " << address;
     LOG(log_level::info) << "storage.service_port: " << service_port;
     LOG(log_level::info) << "storage.management_port: " << mgmt_port;
-    LOG(log_level::info) << "storage.auto_scaling_port" << auto_scaling_port;
+    LOG(log_level::info) << "storage.auto_scaling_port: " << auto_scaling_port;
     LOG(log_level::info) << "storage.block.num_blocks: " << num_block_groups;
     LOG(log_level::info) << "storage.block.num_blocks: " << num_blocks;
+    LOG(log_level::info) << "storage.block.num_servers: " << num_servers;
     LOG(log_level::info) << "storage.block.capacity: " << block_capacity;
     LOG(log_level::info) << "storage.block.capacity_threshold_lo: " << blk_thresh_lo;
     LOG(log_level::info) << "storage.block.capacity_threshold_hi: " << blk_thresh_hi;
@@ -180,7 +183,7 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Hostname: " << hostname;
 
   for (int i = 0; i < static_cast<int>(num_blocks); i++) {
-    block_ids.push_back(block_id_parser::make(hostname, service_port, mgmt_port, i));
+    block_ids.push_back(block_id_parser::make(hostname, service_port + i, mgmt_port, 0));
   }
 
   std::vector<std::shared_ptr<block>> blocks;
@@ -228,17 +231,37 @@ int main(int argc, char **argv) {
 
   LOG(log_level::info) << "Advertised " << num_blocks << " to block allocation server";
 
-  std::exception_ptr storage_exception = nullptr;
-  auto storage_server = block_server::create(blocks, service_port);
-  std::thread storage_serve_thread([&storage_exception, &storage_server, &failing_thread, &failure_condition] {
-    try {
-      storage_server->serve();
-    } catch (...) {
-      storage_exception = std::current_exception();
-      failing_thread = 1;
-      failure_condition.notify_all();
-    }
-  });
+  //std::exception_ptr storage_exception = nullptr;
+  //auto storage_server = block_server::create(blocks, service_port);
+  //std::thread storage_serve_thread([&storage_exception, &storage_server, &failing_thread, &failure_condition] {
+  //  try {
+  //    storage_server->serve();
+  //  } catch (...) {
+  //    storage_exception = std::current_exception();
+  //    failing_thread = 1;
+  //    failure_condition.notify_all();
+  //  }
+  //});
+ 
+  std::vector<std::exception_ptr> storage_exception(num_blocks);
+  std::vector<std::thread> storage_serve_thread(num_blocks);
+  std::vector<std::shared_ptr<TServer>> storage_server(num_blocks);
+  std::vector<std::vector<std::shared_ptr<block>>> block_vec(num_blocks);
+  for(size_t i = 0; i < num_blocks; i++) {
+  	auto tmp_block = std::vector<std::shared_ptr<block>>();
+	tmp_block.push_back(blocks[i]);
+	block_vec[i] = tmp_block;
+  	storage_server[i] = block_server::create(block_vec[i], service_port + i);
+  	storage_serve_thread[i] = std::thread([&storage_exception, &storage_server, &failing_thread, &failure_condition, i] {
+    		try {
+      			storage_server[i]->serve();
+    		} catch (...) {
+      			storage_exception[i] = std::current_exception();
+      			failing_thread = 1;
+      			failure_condition.notify_all();
+    		}
+  	});
+  }
 
   LOG(log_level::info) << "Storage server listening on " << address << ":" << service_port;
 
@@ -266,9 +289,9 @@ int main(int argc, char **argv) {
     }
     case 1: {
       LOG(log_level::error) << "KV server failed";
-      if (storage_exception) {
+      if (storage_exception[0]) {
         try {
-          std::rethrow_exception(storage_exception);
+          std::rethrow_exception(storage_exception[0]);
         } catch (std::exception &e) {
           LOG(log_level::error) << "ERROR: " << e.what();
           std::exit(-1);

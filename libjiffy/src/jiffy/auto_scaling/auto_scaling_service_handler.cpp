@@ -22,10 +22,10 @@ std::mutex MTX;
 #define LOCK MTX.lock()
 #define UNLOCK MTX.unlock()
 #define UNLOCK_AND_RETURN \
-  MTX.unlock();		  \
+  MTX.unlock();           \
   return
 #define UNLOCK_AND_THROW(ex)  \
-  MTX.unlock();   	      \
+  MTX.unlock();               \
   throw make_exception(ex)
 
 auto_scaling_service_handler::auto_scaling_service_handler(const std::string directory_host, int directory_port)
@@ -61,6 +61,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
   } else if (scaling_type == "hash_table_split") {
     // Add replica chain at directory server
     auto start = time_utils::now_us();
+    LOG(log_level::info) << "tmp time start " << start;
     auto slot_range_beg = std::stoi(conf.find("slot_range_begin")->second);
     auto slot_range_end = std::stoi(conf.find("slot_range_end")->second);
     auto split_range_beg = (slot_range_beg + slot_range_end) / 2;
@@ -76,6 +77,8 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     std::string cur_name = std::to_string(slot_range_beg) + "_" + std::to_string(slot_range_end);
     auto src = std::make_shared<replica_chain_client>(fs, path, cur_chain, KV_OPS);
     src->run_command(hash_table_cmd_id::ht_update_partition, {cur_name, "exporting$" + dst_name + "$" + exp_target});
+    auto tmp_time = time_utils::now_us();
+    LOG(log_level::info) << "tmp time add split target << " << tmp_time;
     auto dst = std::make_shared<replica_chain_client>(fs, path, dst_replica_chain, KV_OPS);
     dst->run_command(hash_table_cmd_id::ht_update_partition, {dst_name, "importing$" + dst_name});
     auto finish_updating_partition_before = time_utils::now_us();

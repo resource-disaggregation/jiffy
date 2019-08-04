@@ -26,7 +26,7 @@ default_partition::default_partition(block_memory_manager *manager,
 void default_partition::run_command(std::vector<std::string> &_return,
                                     int32_t,
                                     const std::vector<std::string> &) {
-  _return.emplace_back("!block_moved");
+  //_return.emplace_back("!block_moved");
 }
 
 void default_partition::load(const std::string &) {}

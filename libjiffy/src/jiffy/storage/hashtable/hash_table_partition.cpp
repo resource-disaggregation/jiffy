@@ -6,6 +6,7 @@
 #include "jiffy/persistent/persistent_store.h"
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/auto_scaling/auto_scaling_client.h"
+#include "jiffy/utils/time_utils.h"
 #include <chrono>
 #include <thread>
 
@@ -49,21 +50,32 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
 }
 
 std::string hash_table_partition::put(const std::string &key, const std::string &value, bool redirect) {
+  auto start_t = time_utils::now_us();
   auto hash = hash_slot::get(key);
+  LOG(log_level::info) << "Putting key " << key << " hash " << hash << " at " << name() << " " << metadata() << " CURRENT: " << start_t;
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+  	auto end_t = time_utils::now_us();
+	    LOG(log_level::info) << "Redirected put " << key << " time " << end_t - start_t << " CURRENT: " << end_t;
       return "!exporting!" + export_target_str();
     }
-    if (overload()) {
+    if (storage_size() + value.size() + key.size() > storage_capacity()) {
+  auto end_t = time_utils::now_us();
+	    LOG(log_level::info) << "Partition full put " << key << " " << storage_size() << " " << storage_capacity() << " time " << end_t - start_t;
       return "!full";
     }
 
     if (block_.insert(make_binary(key), make_binary(value))) {
+
+  auto end_t = time_utils::now_us();
+	    LOG(log_level::info) << "Successful put " << key << " time " << end_t - start_t;
       return "!ok";
     } else {
       return "!duplicate_key";
     }
   }
+  auto end_t = time_utils::now_us();
+	    LOG(log_level::info) << "Removed block " << key << " time " << end_t - start_t;
   return "!block_moved";
 }
 
@@ -99,17 +111,28 @@ std::string hash_table_partition::exists(const std::string &key, bool redirect) 
 }
 
 std::string hash_table_partition::get(const std::string &key, bool redirect) {
+  auto start_t = time_utils::now_us();
   auto hash = hash_slot::get(key);
+  LOG(log_level::info) << "Getting key " << key << " hash " << hash << " at " << name() << " " << metadata();
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     try {
-      return to_string(block_.find(key));
+	    auto ret = block_.find(key);
+  auto end_t = time_utils::now_us();
+	    LOG(log_level::info) << "Successful get " << key << " time " << end_t - start_t;
+      return to_string(ret);
     } catch (std::out_of_range &e) {
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+  auto end_t = time_utils::now_us();
+	    LOG(log_level::info) << "Redirected get " << key << " time " << end_t - start_t;
         return "!exporting!" + export_target_str();
       }
+  auto end_t = time_utils::now_us();
+	    LOG(log_level::info) << "Get not found " << key << " time " << end_t - start_t;
       return "!key_not_found";
     }
   }
+  auto end_t = time_utils::now_us();
+	    LOG(log_level::info) << "block moved get " << key << " time " << end_t - start_t;
   return "!block_moved";
 }
 
@@ -135,9 +158,13 @@ std::string hash_table_partition::update(const std::string &key, const std::stri
 }
 
 std::string hash_table_partition::remove(const std::string &key, bool redirect) {
+  auto start_t = time_utils::now_us();
   auto hash = hash_slot::get(key);
+  LOG(log_level::info) << "Removing key " << key << " hash " << hash << " at " << name() << " " << metadata();
   if (in_slot_range(hash) || (in_import_slot_range(hash) && redirect)) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+  auto end_t = time_utils::now_us();
+	    LOG(log_level::info) << "Redirected remove " << key << " time " << end_t - start_t;
       return "!exporting!" + export_target_str();
     }
     std::string old_val;
@@ -145,17 +172,24 @@ std::string hash_table_partition::remove(const std::string &key, bool redirect) 
       old_val = to_string(value);
       return true;
     })) {
+  auto end_t = time_utils::now_us();
+	    LOG(log_level::info) << "Successful remove " << key << " time " << end_t - start_t;
       return old_val;
     }
     if (metadata_ == "importing" && in_import_slot_range(hash)) {
+  auto end_t = time_utils::now_us();
+	    LOG(log_level::info) << "Remove cannot be determined " << key << " time " << end_t - start_t;
       return "!full";
     }
     return "!key_not_found";
   }
+  auto end_t = time_utils::now_us();
+	    LOG(log_level::info) << "Block moved remove " << key << " time " << end_t - start_t;
   return "!block_moved";
 }
 
 std::string hash_table_partition::scale_remove(const std::string &key) {
+  auto start_t = time_utils::now_us();
   auto hash = hash_slot::get(key);
   if (in_slot_range(hash)) {
     std::string old_val;
@@ -163,6 +197,8 @@ std::string hash_table_partition::scale_remove(const std::string &key) {
       old_val = to_string(value);
       return true;
     })) {
+  auto end_t = time_utils::now_us();
+	    LOG(log_level::info) << "Scale remove " << key << " time " << end_t - start_t << " CURRENT " << start_t << " " << name() << " " << metadata();
       return old_val;
     } else {
       LOG(log_level::info) << "Not successful scale remove";
@@ -175,6 +211,8 @@ void hash_table_partition::get_data_in_slot_range(std::vector<std::string> &data
                                                   int32_t slot_begin,
                                                   int32_t slot_end,
                                                   int32_t batch_size) {
+  auto start_t = time_utils::now_us();
+  LOG(log_level::info) << "Get data in rnage " << start_t << " " << name() << " " << metadata();
   if (block_.empty()) {
     return;
   }
@@ -186,24 +224,34 @@ void hash_table_partition::get_data_in_slot_range(std::vector<std::string> &data
       data.push_back(to_string(entry.second));
       n_items = n_items + 2;
       if (n_items == static_cast<std::size_t>(batch_size)) {
+  auto end_t = time_utils::now_us();
+  LOG(log_level::info) << "Finish get data in rnage " << end_t - start_t;
         return;
       }
     }
   }
+  auto end_t = time_utils::now_us();
+  LOG(log_level::info) << "Finish get data in rnage " << end_t - start_t;
 }
 
 std::string hash_table_partition::update_partition(const std::string &new_name, const std::string &new_metadata) {
 
+  auto start_t = time_utils::now_us();
+  LOG(log_level::info) << "Update partition " << start_t;
   update_lock_.lock();
   if (new_name == "merging" && new_metadata == "merging") {
     if (metadata() == "regular" && name() != "0_65536" && underload()) {
       metadata("exporting");
       update_lock_.unlock();
+  auto end_t = time_utils::now_us();
+  LOG(log_level::info) << "Finish update partition " << end_t - start_t;
       return name();
     }
     splitting_ = false;
     merging_ = false;
     update_lock_.unlock();
+  auto end_t = time_utils::now_us();
+  LOG(log_level::info) << "Finish update partition " << end_t - start_t;
     return "!fail";
   }
   auto s = utils::string_utils::split(new_metadata, '$');
@@ -216,6 +264,8 @@ std::string hash_table_partition::update_partition(const std::string &new_name, 
   } else if (status == "importing") {
     if ((metadata() != "regular" && !(metadata() == "split_importing" && s[1] == name())) || new_name != name() || splitting_ || merging_ ) {
       update_lock_.unlock();
+  auto end_t = time_utils::now_us();
+  LOG(log_level::info) << "Finish update partition " << end_t - start_t;
       return "!fail";
     }
     auto range = utils::string_utils::split(s[1], '_');
@@ -243,6 +293,8 @@ std::string hash_table_partition::update_partition(const std::string &new_name, 
   metadata(status);
   slot_range(new_name);
   update_lock_.unlock();
+  auto end_t = time_utils::now_us();
+  LOG(log_level::info) << "Finish update partition " << end_t - start_t;
   return name();
 }
 
@@ -352,6 +404,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
     LOG(log_level::info) << "Overloaded partition; storage = " << storage_size() << " capacity = "
                          << storage_capacity()
                          << " slot range = (" << slot_begin() << ", " << slot_end() << ")";
+    LOG(log_level::info) << "Tmp time start request " << time_utils::now_us();
     try {
       splitting_ = true;
       std::map<std::string, std::string> scale_conf;
