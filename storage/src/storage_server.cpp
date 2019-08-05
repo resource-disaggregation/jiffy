@@ -183,7 +183,7 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Hostname: " << hostname;
 
   for (int i = 0; i < static_cast<int>(num_blocks); i++) {
-    block_ids.push_back(block_id_parser::make(hostname, service_port + i, mgmt_port, 0));
+    block_ids.push_back(block_id_parser::make(hostname, service_port + i, mgmt_port, i));
   }
 
   std::vector<std::shared_ptr<block>> blocks;

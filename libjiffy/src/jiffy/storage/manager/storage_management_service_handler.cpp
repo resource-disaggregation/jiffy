@@ -15,6 +15,7 @@ void storage_management_service_handler::create_partition(int32_t block_id,
                                                           const std::string &metadata,
                                                           const std::map<std::string, std::string> &conf) {
   try {
+	  LOG(log_level::info) << "Setting up this partition to be " << type << " block id " << block_id << " block size " << blocks_.size();
     blocks_.at(static_cast<std::size_t>(block_id))->setup(type, name, metadata, utils::property_map(conf));
   } catch (std::exception &e) {
     LOG(log_level::info) << "Caught exception: " << e.what();

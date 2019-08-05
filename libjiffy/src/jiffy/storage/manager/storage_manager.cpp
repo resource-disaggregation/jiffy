@@ -16,7 +16,7 @@ void storage_manager::create_partition(const std::string &block_id,
                                        const std::map<std::string, std::string> &conf) {
   auto bid = block_id_parser::parse(block_id);
   storage_management_client client(bid.host, bid.management_port);
-  LOG(log_level::info) << "Creating partition name : " << name << " on " << bid.host << ":" << bid.management_port;
+  LOG(log_level::info) << "Creating partition type: " << type << " name : " << name << " on " << bid.host << ":" << bid.management_port;
   client.create_partition(bid.id, type, name, metadata, conf);
 }
 

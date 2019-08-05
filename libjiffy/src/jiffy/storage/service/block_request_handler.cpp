@@ -20,15 +20,17 @@ int64_t block_request_handler::get_client_id() {
 
 void block_request_handler::register_client_id(const int32_t block_id, const int64_t client_id) {
   registered_client_id_ = client_id;
-  registered_block_id_ = block_id;
-  blocks_.at(static_cast<std::size_t>(block_id))->impl()->clients().add_client(client_id, client_);
+  //registered_block_id_ = block_id;
+  registered_block_id_ = 0;
+  //blocks_.at(static_cast<std::size_t>(block_id))->impl()->clients().add_client(client_id, client_);
+  blocks_.at(static_cast<std::size_t>(0))->impl()->clients().add_client(client_id, client_);
 }
 
 void block_request_handler::command_request(const sequence_id &seq,
                                             const int32_t block_id,
                                             const int32_t cmd_id,
                                             const std::vector<std::string> &arguments) {
-  blocks_.at(static_cast<std::size_t>(block_id))->impl()->request(seq, cmd_id, arguments);
+  blocks_.at(static_cast<std::size_t>(0))->impl()->request(seq, cmd_id, arguments);
 }
 
 int32_t block_request_handler::registered_block_id() const {
@@ -43,7 +45,7 @@ void block_request_handler::chain_request(const sequence_id &seq,
                                           const int32_t block_id,
                                           const int32_t cmd_id,
                                           const std::vector<std::string> &arguments) {
-  const auto &b = blocks_.at(static_cast<std::size_t>(block_id));
+  const auto &b = blocks_.at(static_cast<std::size_t>(0));
   if (!b->impl()->is_set_prev()) {
     b->impl()->reset_prev(prot_);
   }
@@ -54,7 +56,7 @@ void block_request_handler::run_command(std::vector<std::string> &_return,
                                         const int32_t block_id,
                                         const int32_t cmd_id,
                                         const std::vector<std::string> &arguments) {
-  blocks_.at(static_cast<std::size_t>(block_id))->impl()->run_command(_return, cmd_id, arguments);
+  blocks_.at(static_cast<std::size_t>(0))->impl()->run_command(_return, cmd_id, arguments);
 }
 
 void block_request_handler::subscribe(int32_t block_id,
