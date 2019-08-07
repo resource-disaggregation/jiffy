@@ -436,6 +436,7 @@ void hash_table_partition::run_command(std::vector<std::string> &_return,
       LOG(log_level::warn) << "Merge slot range failed: " << e.what();
     }
   }
+  LOG(log_level::info) << "This command ends at " << time_utils::now_us() << " " << name() << " " << metadata();
 }
 
 std::size_t hash_table_partition::size() const {
