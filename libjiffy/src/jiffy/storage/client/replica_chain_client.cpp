@@ -43,7 +43,6 @@ void replica_chain_client::connect(const directory::replica_chain &chain, int ti
   auto start = time_utils::now_us();
   head_.connect(h.host, h.service_port, h.id, timeout_ms);
   auto head = time_utils::now_us();
-  LOG(log_level::info) << "Connecting head " << head - start; 
   seq_.client_id = head_.get_client_id();
   if (chain_.block_ids.size() == 1) {
     tail_ = head_;
@@ -53,10 +52,8 @@ void replica_chain_client::connect(const directory::replica_chain &chain, int ti
   }
   auto tail = time_utils::now_us();
 
-  LOG(log_level::info) << "Connecting tail " << tail - head; 
   response_reader_ = tail_.get_command_response_reader(seq_.client_id);
   auto tail_res = time_utils::now_us();
-  LOG(log_level::info) << "get reader " << tail_res - tail; 
   in_flight_ = false;
 }
 
@@ -110,9 +107,7 @@ std::vector<std::string> replica_chain_client::run_command_redirected(int32_t cm
   auto args_copy = args;
   if (args_copy.back() != "!redirected")
     args_copy.push_back("!redirected");
-  LOG(log_level::info) << "Sending command " << time_utils::now_us();
   send_command(cmd_id, args_copy);
-  LOG(log_level::info) << "finish sending command " << time_utils::now_us();
   return recv_response();
 }
 
