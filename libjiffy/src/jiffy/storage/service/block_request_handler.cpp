@@ -76,7 +76,7 @@ void block_request_handler::unsubscribe(int32_t block_id,
     }
     local_subs_.clear();
   } else {
-    for (auto op: ops) {
+    for (const auto& op: ops) {
       auto it = local_subs_.find(std::make_pair(block_id, op));
       if (it != local_subs_.end()) {
         if (block_id == -1)

@@ -44,7 +44,11 @@ void data_structure_listener::unsubscribe(const std::vector<std::string> &ops) {
 }
 
 data_structure_listener::notification_t data_structure_listener::get_notification(int64_t timeout_ms) {
-  return notifications_.pop(timeout_ms);
+  auto notification = notifications_.pop(timeout_ms);
+  if (notification.first == "error" && notification.second == "!block_moved") {
+    // TODO: refresh connections
+  }
+  return notification;
 }
 
 }

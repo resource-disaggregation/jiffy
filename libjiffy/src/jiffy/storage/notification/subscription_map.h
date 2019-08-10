@@ -28,7 +28,7 @@ class subscription_map {
    * @param client Subscription service client
    */
 
-  void add_subscriptions(const std::vector<std::string> &ops, std::shared_ptr<notification_response_client> client);
+  void add_subscriptions(const std::vector<std::string> &ops, const std::shared_ptr<notification_response_client>& client);
 
   /**
    * @brief Remove a subscription from subscription map
@@ -38,7 +38,7 @@ class subscription_map {
    */
 
   void remove_subscriptions(const std::vector<std::string> &ops,
-                            std::shared_ptr<notification_response_client> client,
+                            const std::shared_ptr<notification_response_client>& client,
                             bool inform = true);
 
   /**
@@ -56,13 +56,11 @@ class subscription_map {
   void clear();
 
   /**
-   * @brief Send failure message to end the connection
+   * @brief Send failure message to all clients to end their connections
    */
-  void send_failure();
+  void end_connections();
 
  private:
-  /* Subscription map operation mutex */
-  std::mutex mtx_{};
   /* Subscription map */
   std::map<std::string, std::set<std::shared_ptr<notification_response_client>>> subs_{};
 };

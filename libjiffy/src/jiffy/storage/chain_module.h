@@ -293,18 +293,6 @@ class chain_module : public partition {
   }
 
   /**
-   * @brief Reset next block
-   * @param next_block Next block
-   */
-  void reset_next(const std::string &next_block);
-
-  /**
-   * @brief Reset next block and start up response processor thread
-   * @param next_block Next block
-   */
-  void reset_next_and_listen(const std::string &next_block);
-
-  /**
    * @brief Run command on next block
    * @param result Command result
    * @param args Command arguments

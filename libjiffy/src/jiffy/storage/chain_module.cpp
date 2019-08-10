@@ -72,31 +72,6 @@ void chain_module::ack(const sequence_id &seq) {
   }
 }
 
-void chain_module::reset_next(const std::string &next_block) {
-  next_->reset(next_block);
-}
-
-void chain_module::reset_next_and_listen(const std::string &next_block) {
-  auto protocol = next_->reset(next_block);
-  if (protocol) {
-    auto handler = std::make_shared<chain_response_handler>(this);
-    auto processor = std::make_shared<block_response_serviceProcessor>(handler);
-    if (response_processor_.joinable())
-      response_processor_.join();
-    response_processor_ = std::thread([processor, protocol] {
-      while (true) {
-        try {
-          if (!processor->process(protocol, protocol, nullptr)) {
-            break;
-          }
-        } catch (std::exception &e) {
-          break;
-        }
-      }
-    });
-  }
-}
-
 void chain_module::request(sequence_id seq, const arg_list &args) {
   if (!is_head() && !is_tail()) {
     LOG(log_level::error) << "Invalid state: Direct request on a mid node";
