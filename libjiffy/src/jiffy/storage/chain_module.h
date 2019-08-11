@@ -40,11 +40,9 @@ enum chain_role {
  */
 
 struct chain_op {
-  /* Operation sequence identifier */
+  /* Command sequence identifier */
   sequence_id seq;
-  /* Operation identifier */
-  int32_t op_id;
-  /* Operation arguments */
+  /* Command arguments */
   std::vector<std::string> args;
 };
 
@@ -78,7 +76,6 @@ class next_chain_module_cxn {
    */
 
   std::shared_ptr<apache::thrift::protocol::TProtocol> reset(const std::string &block_name) {
-    std::unique_lock<std::shared_mutex> lock(mtx_);
     client_.disconnect();
     if (block_name != "nil") {
       auto bid = block_id_parser::parse(block_name);
@@ -93,32 +90,22 @@ class next_chain_module_cxn {
   /**
    * @brief Request an operation
    * @param seq Request sequence identifier
-   * @param op_id Operation identifier
    * @param args Operation arguments
    */
-
-  void request(const sequence_id &seq,
-               int32_t op_id,
-               const std::vector<std::string> &args) {
-    std::shared_lock<std::shared_mutex> lock(mtx_);
-    client_.request(seq, op_id, args);
+  void request(const sequence_id &seq, const std::vector<std::string> &args) {
+    client_.request(seq, args);
   }
 
   /**
    * @brief Run command on next block
    * @param result Result
-   * @param cmd_id Command identifier
    * @param args Command arguments
    */
-
-  void run_command(std::vector<std::string> &result, int32_t cmd_id, const std::vector<std::string> &args) {
-    std::unique_lock<std::shared_mutex> lock(mtx_);
-    client_.run_command(result, cmd_id, args);
+  void run_command(std::vector<std::string> &result, const std::vector<std::string> &args) {
+    client_.run_command(result, args);
   }
 
  private:
-  /* Operation mutex */
-  std::shared_mutex mtx_;
   /* Chain request client */
   chain_request_client client_;
 };
@@ -219,17 +206,15 @@ class chain_module : public partition {
    * @param metadata Partition metadata
    * @param supported_cmds Supported commands
    */
-
   chain_module(block_memory_manager *manager,
                const std::string &name,
                const std::string &metadata,
-               const std::vector<command> &supported_cmds);
+               const command_map &supported_cmds);
 
   /**
    * @brief Destructor
    */
-
-  virtual ~chain_module();
+  ~chain_module() override;
 
   /**
    * @brief Setup a chain module and start the processor thread
@@ -238,7 +223,6 @@ class chain_module : public partition {
    * @param role Chain module role
    * @param next_block_id Next block name
    */
-
   virtual void setup(const std::string &path,
                      const std::vector<std::string> &chain,
                      chain_role role,
@@ -248,9 +232,7 @@ class chain_module : public partition {
    * @brief Set chain module role
    * @param role Role
    */
-
   void role(chain_role role) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     role_ = role;
   }
 
@@ -258,9 +240,7 @@ class chain_module : public partition {
    * @brief Fetch chain module role
    * @return Role
    */
-
   chain_role role() const {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return role_;
   }
 
@@ -268,9 +248,7 @@ class chain_module : public partition {
    * @brief Set replica chain block names
    * @param chain Chain block names
    */
-
   void chain(const std::vector<std::string> &chain) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     chain_ = chain;
   }
 
@@ -278,9 +256,7 @@ class chain_module : public partition {
    * @brief Fetch replica chain block names
    * @return Replica chain block names
    */
-
   const std::vector<std::string> &chain() {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return chain_;
   }
 
@@ -288,9 +264,7 @@ class chain_module : public partition {
    * @brief Check if chain module role is head
    * @return Bool value, true if chain role is head or singleton
    */
-
   bool is_head() const {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return role() == chain_role::head || role() == chain_role::singleton;
   }
 
@@ -298,9 +272,7 @@ class chain_module : public partition {
    * @brief Check if chain module role is tail
    * @return Bool value, true if chain role is tail or singleton
    */
-
   bool is_tail() const {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return role() == chain_role::tail || role() == chain_role::singleton;
   }
 
@@ -308,7 +280,6 @@ class chain_module : public partition {
    * @brief Check if previous chain module is set
    * @return Bool value, true if set
    */
-
   bool is_set_prev() const {
     return prev_->is_set(); // Does not require a lock since only one thread calls this at a time
   }
@@ -317,52 +288,33 @@ class chain_module : public partition {
    * @brief Reset previous block
    * @param prot Protocol
    */
-
   void reset_prev(const std::shared_ptr<::apache::thrift::protocol::TProtocol> &prot) {
     prev_->reset(prot); // Does not require a lock since only one thread calls this at a time
   }
 
   /**
-   * @brief Reset next block
-   * @param next_block Next block
-   */
-
-  void reset_next(const std::string &next_block);
-
-  /**
-   * @brief Reset next block and start up response processor thread
-   * @param next_block Next block
-   */
-
-  void reset_next_and_listen(const std::string &next_block);
-
-  /**
    * @brief Run command on next block
    * @param result Command result
-   * @param oid Operation identifier
-   * @param args Operation arguments
+   * @param args Command arguments
    */
-
-  void run_command_on_next(std::vector<std::string> &result, int32_t oid, const std::vector<std::string> &args) {
-    next_->run_command(result, oid, args);
+  void run_command_on_next(response &result, const arg_list &args) {
+    next_->run_command(result, args);
   }
 
   /**
    * @brief Add request to pending
    * @param seq Request sequence identifier
-   * @param op_id Operation identifier
-   * @param args Operation arguments
+   * @param args Command arguments
    */
 
-  void add_pending(const sequence_id &seq, int op_id, const std::vector<std::string> &args) {
-    pending_.insert(seq.server_seq_no, chain_op{seq, op_id, args});
+  void add_pending(const sequence_id &seq, const arg_list &args) {
+    pending_.insert(seq.server_seq_no, chain_op{seq, args});
   }
 
   /**
    * @brief Remove a pending request
    * @param seq Sequence identifier
    */
-
   void remove_pending(const sequence_id &seq) {
     pending_.erase(seq.server_seq_no);
   }
@@ -370,43 +322,34 @@ class chain_module : public partition {
   /**
    * @brief Resend the pending request
    */
-
   void resend_pending();
 
   /**
    * @brief Virtual function for forwarding all
    */
-
   virtual void forward_all() = 0;
 
   /**
    * @brief Request for the first time
    * @param seq Sequence identifier
-   * @param oid Operation identifier
-   * @param args Operation arguments
+   * @param args Command arguments
    */
-
-  void request(sequence_id seq, int32_t oid, const std::vector<std::string> &args);
+  void request(sequence_id seq, const arg_list &args);
 
   /**
    * @brief Chain request
    * @param seq Sequence identifier
-   * @param oid Operation identifier
-   * @param args Operation arguments
+   * @param args Command arguments
    */
-
-  void chain_request(const sequence_id &seq, int32_t oid, const std::vector<std::string> &args);
+  void chain_request(const sequence_id &seq, const arg_list &args);
 
   /**
    * @brief Acknowledge the previous block
    * @param seq Sequence identifier
    */
-
   void ack(const sequence_id &seq);
 
  protected:
-  /* Request mutex */
-  std::mutex request_mtx_;
   /* Role of chain module */
   chain_role role_{singleton};
   /* Chain sequence number */

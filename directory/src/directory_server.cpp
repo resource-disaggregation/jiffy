@@ -20,7 +20,7 @@ using namespace ::jiffy::utils;
 
 using namespace ::apache::thrift;
 
-std::string mapper(const std::string& env_var) {
+std::string mapper(const std::string &env_var) {
   if (env_var == "JIFFY_DIRECTORY_HOST") return "directory.host";
   else if (env_var == "JIFFY_DIRECTORY_SERVICE_PORT") return "directory.service_port";
   else if (env_var == "JIFFY_LEASE_PORT") return "directory.lease_port";
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
       config_files = {config_file};
     }
 
-    for (const auto& cfile: config_files) {
+    for (const auto &cfile: config_files) {
       std::ifstream ifs(cfile.c_str());
       if (ifs) {
         LOG(log_level::info) << "config: " << cfile;

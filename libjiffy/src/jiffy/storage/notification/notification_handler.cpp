@@ -14,7 +14,7 @@ void notification_handler::notification(const std::string &op, const std::string
 
 void notification_handler::control(response_type type, const std::vector<std::string> &ops, const std::string &error) {
   std::string msg = type == response_type::subscribe ? "Subscribe: " : "Unsubscribe: ";
-  if (error == "") {
+  if (error.empty()) {
     for (const auto &op: ops)
       msg += op + ", ";
     msg.pop_back();

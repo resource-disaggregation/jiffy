@@ -99,7 +99,7 @@ public class JiffyFileSystem extends FileSystem {
   public FSDataInputStream open(Path path, int bufferSize) throws IOException {
     String pathStr = makeAbsolute(path).toString();
     try {
-      HashTableClient kv = client.open(pathStr);
+      HashTableClient kv = client.openHashTable(pathStr);
       long fileLength = Long.parseLong(kv.getDataStatus().tags.get("FileLength"));
       long blockSize = Long.parseLong(kv.getDataStatus().tags.get("BlockSize"));
       return new FSDataInputStream(new JiffyInputStream(client, pathStr, kv, blockSize, fileLength));

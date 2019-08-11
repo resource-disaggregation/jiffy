@@ -79,3 +79,4 @@ test-driver
 .DS_Store
 /Debug/
 target
+.vscode/

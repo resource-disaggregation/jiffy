@@ -299,7 +299,7 @@ class directory_tree : public directory_interface {
   void handle_lease_expiry(const std::string &path) override;
 
   /**
-   * Add a block to file
+   * @brief Add a block to file
    * @param path File path
    * @param partition_name Name of the partition at new block
    * @param partition_metadata Metadata of the partition at new block
@@ -310,11 +310,30 @@ class directory_tree : public directory_interface {
                           const std::string &partition_metadata) override;
 
   /**
-   * Remove block from the file
+   * @brief Remove block from the file
    * @param path File path
    * @param partition_name Name of the partition at the block.
    */
   void remove_block(const std::string &path, const std::string &partition_name) override;
+
+  /**
+   * @brief Update partition name and metadata
+   * @param path File path
+   * @param old_partition_name Old partition name
+   * @param new_partition_name New partition name to be set
+   * @param partition_metadata New partition metadata to be set
+   */
+  void update_partition(const std::string &path,
+                        const std::string &old_partition_name,
+                        const std::string &new_partition_name,
+                        const std::string &partition_metadata) override;
+  /**
+   * @brief Fetch the capacity of the partition
+   * @param path File path
+   * @param partition_name Partition name
+   * @return Storage capacity
+   */
+  int64_t get_capacity(const std::string &path, const std::string &partition_name) override;
 
  private:
   /**

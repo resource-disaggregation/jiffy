@@ -1,24 +1,20 @@
 #include "jiffy/storage/hashtable/hash_table_ops.h"
+#include <string>
 
 namespace jiffy {
 namespace storage {
 
-std::vector<command> KV_OPS = {command{command_type::accessor, "exists"},
-                               command{command_type::accessor, "get"},
-                               command{command_type::accessor, "keys"},
-                               command{command_type::accessor, "num_keys"},
-                               command{command_type::mutator, "put"},
-                               command{command_type::mutator, "remove"},
-                               command{command_type::mutator, "update"},
-                               command{command_type::mutator, "lock"},
-                               command{command_type::mutator, "unlock"},
-                               command{command_type::accessor, "locked_get_data_in_slot_range"},
-                               command{command_type::accessor, "locked_get"},
-                               command{command_type::mutator, "locked_put"},
-                               command{command_type::mutator, "locked_remove"},
-                               command{command_type::mutator, "locked_update"},
-                               command{command_type::mutator, "upsert"},
-                               command{command_type::mutator, "locked_upsert"}};
-
+command_map HT_OPS = {{"exists", {command_type::accessor, 0}},
+                      {"get", {command_type::accessor, 1}},
+                      {"put", {command_type::mutator, 2}},
+                      {"remove", {command_type::mutator, 3}},
+                      {"update", {command_type::mutator, 4}},
+                      {"upsert", {command_type::mutator, 5}},
+                      {"update_partition", {command_type::mutator, 6}},
+                      {"get_storage_size", {command_type::accessor, 7}},
+                      {"get_metadata", {command_type::accessor, 8}},
+                      {"get_range_data", {command_type::accessor, 9}},
+                      {"scale_put", {command_type::mutator, 10}},
+                      {"scale_remove", {command_type::mutator, 11}}};
 }
 }

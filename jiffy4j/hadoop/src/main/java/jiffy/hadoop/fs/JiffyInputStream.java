@@ -23,7 +23,8 @@ public class JiffyInputStream extends FSInputStream {
   private HashTableClient client;
   private String path;
 
-  JiffyInputStream(JiffyClient mm, String path, HashTableClient client, long blockSize, long fileLength) {
+  JiffyInputStream(JiffyClient mm, String path, HashTableClient client, long blockSize,
+      long fileLength) {
     this.mm = mm;
     this.path = path;
     this.filePos = 0;

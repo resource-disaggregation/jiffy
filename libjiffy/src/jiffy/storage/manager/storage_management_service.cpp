@@ -185,5 +185,21 @@ storage_management_service_forward_all_result::~storage_management_service_forwa
 storage_management_service_forward_all_presult::~storage_management_service_forward_all_presult() throw() {
 }
 
+
+storage_management_service_update_partition_data_args::~storage_management_service_update_partition_data_args() throw() {
+}
+
+
+storage_management_service_update_partition_data_pargs::~storage_management_service_update_partition_data_pargs() throw() {
+}
+
+
+storage_management_service_update_partition_data_result::~storage_management_service_update_partition_data_result() throw() {
+}
+
+
+storage_management_service_update_partition_data_presult::~storage_management_service_update_partition_data_presult() throw() {
+}
+
 }} // namespace
 

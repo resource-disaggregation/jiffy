@@ -90,11 +90,10 @@ class block_client {
   /**
    * @brief Request command
    * @param seq Sequence identifier
-   * @param cmd_id Command identifier
-   * @param args Arguments
+   * @param args Command arguments
    */
 
-  void command_request(const sequence_id &seq, int32_t cmd_id, const std::vector<std::string> &args);
+  void command_request(const sequence_id &seq, const std::vector<std::string> &args);
 
  private:
   /* Transport */

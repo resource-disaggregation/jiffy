@@ -25,7 +25,11 @@ class partition_builder {
   virtual std::shared_ptr<chain_module> build(block_memory_manager *manager,
                                               const std::string &name,
                                               const std::string &metadata,
-                                              const utils::property_map &conf) = 0;
+                                              const utils::property_map &conf,
+                                              const std::string &directory_host,
+                                              const int directory_port,
+                                              const std::string &auto_scaling_host,
+                                              const int auto_scaling_port) = 0;
 };
 
 class partition_manager {
@@ -51,7 +55,11 @@ class partition_manager {
                                                        const std::string &type,
                                                        const std::string &name,
                                                        const std::string &metadata,
-                                                       const utils::property_map &conf);
+                                                       const utils::property_map &conf,
+                                                       const std::string &directory_host,
+                                                       const int directory_port,
+                                                       const std::string &auto_scaling_host,
+                                                       const int auto_scaling_port);
 
  private:
   /**
@@ -61,29 +69,34 @@ class partition_manager {
   static partition_map &implementations();
 };
 
-#define REGISTER_IMPLEMENTATION(type, impl)                                       \
-class impl##_builder : public partition_builder {                                 \
- public:                                                                          \
-  static_assert(std::is_base_of<chain_module, impl>::value,                       \
-      "Partition implementation must be a subclass of chain_module");             \
-                                                                                  \
-  virtual ~impl##_builder() = default;                                            \
-                                                                                  \
-  std::shared_ptr<chain_module> build(block_memory_manager *manager,              \
-                                      const std::string& name,                    \
-                                      const std::string& metadata,                \
-                                      const utils::property_map& conf) override { \
-    return std::make_shared<impl>(manager, name, metadata, conf);                 \
-  }                                                                               \
-};                                                                                \
-                                                                                  \
-class impl##_registration_stub {                                                  \
-  public:                                                                         \
-   impl##_registration_stub() {                                                   \
-     partition_manager::register_impl(type, std::make_shared<impl##_builder>());  \
-   }                                                                              \
-};                                                                                \
-                                                                                  \
+#define REGISTER_IMPLEMENTATION(type, impl)                                                           \
+class impl##_builder : public partition_builder {                                                     \
+ public:                                                                                              \
+  static_assert(std::is_base_of<chain_module, impl>::value,                                           \
+      "Partition implementation must be a subclass of chain_module");                                 \
+                                                                                                      \
+  virtual ~impl##_builder() = default;                                                                \
+                                                                                                      \
+  std::shared_ptr<chain_module> build(block_memory_manager *manager,                                  \
+                                      const std::string& name,                                        \
+                                      const std::string& metadata,                                    \
+                                      const utils::property_map& conf,                                \
+                                      const std::string& directory_host,                              \
+                                      const int directory_port,                                       \
+                                      const std::string& auto_scaling_host,                           \
+                                      const int auto_scaling_port) override {                         \
+    return std::make_shared<impl>(manager, name, metadata, conf, directory_host,                      \
+                                  directory_port, auto_scaling_host, auto_scaling_port);              \
+  }                                                                                                   \
+};                                                                                                    \
+                                                                                                      \
+class impl##_registration_stub {                                                                      \
+  public:                                                                                             \
+   impl##_registration_stub() {                                                                       \
+     partition_manager::register_impl(type, std::make_shared<impl##_builder>());                      \
+   }                                                                                                  \
+};                                                                                                    \
+                                                                                                      \
 static impl##_registration_stub impl##_registeration_stub_singleton
 
 }

@@ -23,6 +23,7 @@ class Iface(object):
         Parameters:
          - seq
          - result
+
         """
         pass
 
@@ -30,6 +31,7 @@ class Iface(object):
         """
         Parameters:
          - seq
+
         """
         pass
 
@@ -38,6 +40,7 @@ class Iface(object):
         Parameters:
          - op
          - data
+
         """
         pass
 
@@ -47,6 +50,7 @@ class Iface(object):
          - type
          - ops
          - error
+
         """
         pass
 
@@ -63,6 +67,7 @@ class Client(Iface):
         Parameters:
          - seq
          - result
+
         """
         self.send_response(seq, result)
 
@@ -79,6 +84,7 @@ class Client(Iface):
         """
         Parameters:
          - seq
+
         """
         self.send_chain_ack(seq)
 
@@ -95,6 +101,7 @@ class Client(Iface):
         Parameters:
          - op
          - data
+
         """
         self.send_notification(op, data)
 
@@ -113,6 +120,7 @@ class Client(Iface):
          - type
          - ops
          - error
+
         """
         self.send_control(type, ops, error)
 
@@ -203,6 +211,7 @@ class response_args(object):
     Attributes:
      - seq
      - result
+
     """
 
     __slots__ = (
@@ -296,6 +305,7 @@ class chain_ack_args(object):
     """
     Attributes:
      - seq
+
     """
 
     __slots__ = (
@@ -370,6 +380,7 @@ class notification_args(object):
     Attributes:
      - op
      - data
+
     """
 
     __slots__ = (
@@ -456,6 +467,7 @@ class control_args(object):
      - type
      - ops
      - error
+
     """
 
     __slots__ = (
@@ -556,6 +568,4 @@ control_args.thrift_spec = (
 )
 fix_spec(all_structs)
 del all_structs
-
-ll_structs
 

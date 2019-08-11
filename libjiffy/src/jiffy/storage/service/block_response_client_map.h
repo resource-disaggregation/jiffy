@@ -49,6 +49,11 @@ class block_response_client_map {
 
   void clear();
 
+  /**
+   * @brief Send failing request when block is deleted
+   */
+  void send_failure();
+
  private:
   /* Response client map */
   cuckoohash_map<int64_t, std::shared_ptr<block_response_client>> clients_;
