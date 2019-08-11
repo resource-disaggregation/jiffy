@@ -16,26 +16,27 @@ class ClientEntry:
 
 class BlockClientCache:
     def __init__(self, timeout_ms):
-        self.cache = {}
+        # self.cache = {}
         self.timeout_ms = timeout_ms
 
     def __del__(self):
-        for k in self.cache:
-            client_entry = self.cache[k]
-            if client_entry.transport.isOpen():
-                client_entry.transport.close()
+        pass
+        # for k in self.cache:
+        #     client_entry = self.cache[k]
+        #     if client_entry.transport.isOpen():
+        #         client_entry.transport.close()
 
     def remove(self, host, port):
-        if (host, port) in self.cache:
-            if self.cache[(host, port)].transport.isOpen():
-                self.cache[(host, port)].transport.close()
-            del self.cache[(host, port)]
+        pass
+        # if (host, port) in self.cache:
+        #     if self.cache[(host, port)].transport.isOpen():
+        #         self.cache[(host, port)].transport.close()
+        #     del self.cache[(host, port)]
 
     def get(self, host, port):
-        if (host, port) in self.cache:
-            entry = self.cache[(host, port)]
-            return entry.transport, entry.protocol, entry.client
-
+        # if (host, port) in self.cache:
+        #     entry = self.cache[(host, port)]
+        #     return entry.transport, entry.protocol, entry.client
         socket = TSocket.TSocket(host, port)
         socket.setTimeout(self.timeout_ms)
         transport = TTransport.TFramedTransport(socket)
@@ -55,7 +56,7 @@ class BlockClientCache:
                 break
         else:
             raise TTransportException(ex.type, "Connection failed {}:{}: {}".format(host, port, ex.message))
-        self.cache[(host, port)] = ClientEntry(transport, protocol, client)
+        # self.cache[(host, port)] = ClientEntry(transport, protocol, client)
         return transport, protocol, client
 
 
@@ -86,6 +87,9 @@ class BlockClient:
         self.transport_, self.protocol_, self.client_ = client_cache.get(host, port)
         self.id_ = block_id
 
+    def __del__(self):
+        self.transport_.close()
+
     def is_open(self):
         return self.transport_.isOpen()
 
@@ -96,5 +100,5 @@ class BlockClient:
     def get_client_id(self):
         return self.client_.get_client_id()
 
-    def send_request(self, seq, cmd_id, arguments):
-        self.client_.command_request(seq, self.id_, cmd_id, arguments)
+    def send_request(self, seq, arguments):
+        self.client_.command_request(seq, self.id_, arguments)

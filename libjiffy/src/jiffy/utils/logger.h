@@ -78,7 +78,7 @@ class logger {
    * @return String
    */
 
-  std::string to_string(const log_level level) {
+  static std::string to_string(const log_level level) {
     switch (level) {
       case log_level::trace:return "TRACE";
       case log_level::debug:return "DEBUG";

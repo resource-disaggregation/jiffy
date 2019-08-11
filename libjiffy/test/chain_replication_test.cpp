@@ -57,23 +57,28 @@ TEST_CASE("chain_replication_no_failure_test", "[put][get]") {
   t->create("/file", "hashtable", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
   auto chain = t->dstatus("/file").data_blocks()[0];
 
-  replica_chain_client client(t, "/file", chain, KV_OPS, 100);
+  replica_chain_client client(t, "/file", chain, HT_OPS, 100);
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::ht_put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+    REQUIRE(client.run_command({"put", std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == std::to_string(i));
+    auto ret = client.run_command({"get", std::to_string(i)});
+    REQUIRE(ret[0] == "!ok");
+    REQUIRE(ret[1] == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == "!key_not_found");
+    REQUIRE(client.run_command({"get", std::to_string(i)}).front() == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
   for (size_t i = 0; i < NUM_BLOCKS; i++) {
+    auto ht = std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl());
     for (std::size_t j = 0; j < 1000; j++) {
-      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl())->get(std::to_string(j))
-                  == std::to_string(j));
+      response resp;
+      REQUIRE_NOTHROW(ht->get(resp, {"get", std::to_string(j)}));
+      REQUIRE(resp[0] == "!ok");
+      REQUIRE(resp[1] == std::to_string(j));
     }
   }
 
@@ -135,7 +140,7 @@ TEST_CASE("chain_replication_head_failure_test", "[put][get]") {
 
   t->create("/file", "hashtable", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
   auto chain = t->dstatus("/file").data_blocks()[0];
-  replica_chain_client client(t, "/file", chain, KV_OPS, 100);
+  replica_chain_client client(t, "/file", chain, HT_OPS, 100);
 
   storage_servers[0]->stop();
   chain_servers[0]->stop();
@@ -148,21 +153,26 @@ TEST_CASE("chain_replication_head_failure_test", "[put][get]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::ht_put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+    REQUIRE(client.run_command({"put", std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == std::to_string(i));
+    auto ret = client.run_command({"get", std::to_string(i)});
+    REQUIRE(ret[0] == "!ok");
+    REQUIRE(ret[1] == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == "!key_not_found");
+    REQUIRE(client.run_command({"get", std::to_string(i)}).front() == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
   for (size_t i = 1; i < NUM_BLOCKS; i++) {
+    auto ht = std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl());
     for (std::size_t j = 0; j < 1000; j++) {
-      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl())->get(std::to_string(j))
-                  == std::to_string(j));
+      response resp;
+      REQUIRE_NOTHROW(ht->get(resp, {"get", std::to_string(j)}));
+      REQUIRE(resp[0] == "!ok");
+      REQUIRE(resp[1] == std::to_string(j));
     }
   }
 
@@ -224,7 +234,7 @@ TEST_CASE("chain_replication_mid_failure_test", "[put][get]") {
   t->create("/file", "hashtable", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
   auto chain = t->dstatus("/file").data_blocks()[0];
 
-  replica_chain_client client(t, "/file", chain, KV_OPS, 100);
+  replica_chain_client client(t, "/file", chain, HT_OPS, 100);
 
   storage_servers[1]->stop();
   management_servers[1]->stop();
@@ -236,22 +246,27 @@ TEST_CASE("chain_replication_mid_failure_test", "[put][get]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::ht_put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+    REQUIRE(client.run_command({"put", std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == std::to_string(i));
+    auto ret = client.run_command({"get", std::to_string(i)});
+    REQUIRE(ret[0] == "!ok");
+    REQUIRE(ret[1] == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == "!key_not_found");
+    REQUIRE(client.run_command({"get", std::to_string(i)}).front() == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
   for (size_t i = 0; i < NUM_BLOCKS; i++) {
     if (i == 1) continue;
+    auto ht = std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl());
     for (std::size_t j = 0; j < 1000; j++) {
-      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl())->get(std::to_string(j))
-                  == std::to_string(j));
+      response resp;
+      REQUIRE_NOTHROW(ht->get(resp, {"get", std::to_string(j)}));
+      REQUIRE(resp[0] == "!ok");
+      REQUIRE(resp[1] == std::to_string(j));
     }
   }
 
@@ -314,7 +329,7 @@ TEST_CASE("chain_replication_tail_failure_test", "[put][get]") {
   t->create("/file", "hashtable", "/tmp", 1, 3, 0, 0, {"0_65536"}, {"regular"});
   auto chain = t->dstatus("/file").data_blocks()[0];
 
-  replica_chain_client client(t, "/file", chain, KV_OPS, 100);
+  replica_chain_client client(t, "/file", chain, HT_OPS, 100);
 
   storage_servers[2]->stop();
   management_servers[2]->stop();
@@ -326,21 +341,26 @@ TEST_CASE("chain_replication_tail_failure_test", "[put][get]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::ht_put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+    REQUIRE(client.run_command({"put", std::to_string(i), std::to_string(i)}).front() == "!ok");
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == std::to_string(i));
+    auto ret = client.run_command({"get", std::to_string(i)});
+    REQUIRE(ret[0] == "!ok");
+    REQUIRE(ret[1] == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == "!key_not_found");
+    REQUIRE(client.run_command({"get", std::to_string(i)}).front() == "!key_not_found");
   }
 
   // Ensure all three blocks have the data
   for (size_t i = 0; i < NUM_BLOCKS - 1; i++) {
+    auto ht = std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl());
     for (std::size_t j = 0; j < 1000; j++) {
-      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl())->get(std::to_string(j))
-                  == std::to_string(j));
+      response resp;
+      REQUIRE_NOTHROW(ht->get(resp, {"get", std::to_string(j)}));
+      REQUIRE(resp[0] == "!ok");
+      REQUIRE(resp[1] == std::to_string(j));
     }
   }
 
@@ -403,29 +423,34 @@ TEST_CASE("chain_replication_add_block_test", "[put][get]") {
 
   auto chain = t->dstatus("/file").data_blocks()[0].block_ids;
   {
-    replica_chain_client client(t, "/file", chain, KV_OPS, 100);
+    replica_chain_client client(t, "/file", chain, HT_OPS, 100);
     for (std::size_t i = 0; i < 1000; ++i) {
-      REQUIRE(client.run_command(hash_table_cmd_id::ht_put, {std::to_string(i), std::to_string(i)}).front() == "!ok");
+      REQUIRE(client.run_command({"put", std::to_string(i), std::to_string(i)}).front() == "!ok");
     }
   }
 
   auto fixed_chain = t->add_replica_to_chain("/file", t->dstatus("/file").data_blocks()[0]);
 
   {
-    replica_chain_client client2(t, "/file", fixed_chain, KV_OPS, 100);
+    replica_chain_client client2(t, "/file", fixed_chain, HT_OPS, 100);
     for (std::size_t i = 0; i < 1000; ++i) {
-      REQUIRE(client2.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == std::to_string(i));
+      auto ret = client2.run_command({"get", std::to_string(i)});
+      REQUIRE(ret[0] == "!ok");
+      REQUIRE(ret[1] == std::to_string(i));
     }
     for (std::size_t i = 1000; i < 2000; ++i) {
-      REQUIRE(client2.run_command(hash_table_cmd_id::ht_get, {std::to_string(i)}).front() == "!key_not_found");
+      REQUIRE(client2.run_command({"get", std::to_string(i)}).front() == "!key_not_found");
     }
   }
 
   // Ensure all three blocks have the data
   for (size_t i = 0; i < NUM_BLOCKS; i++) {
+    auto ht = std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl());
     for (std::size_t j = 0; j < 1000; j++) {
-      REQUIRE(std::dynamic_pointer_cast<hash_table_partition>(blocks[i][0]->impl())->get(std::to_string(j))
-                  == std::to_string(j));
+      response resp;
+      REQUIRE_NOTHROW(ht->get(resp, {"get", std::to_string(j)}));
+      REQUIRE(resp[0] == "!ok");
+      REQUIRE(resp[1] == std::to_string(j));
     }
   }
 

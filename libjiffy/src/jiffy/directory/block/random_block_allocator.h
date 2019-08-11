@@ -80,7 +80,7 @@ class random_block_allocator : public block_allocator {
     return block_name.substr(0, pos);
   }
   /* Operation mutex */
-  std::shared_mutex mtx_;
+  std::mutex mtx_;
   /* Allocated blocks */
   std::set<std::string> allocated_blocks_;
   /* Free blocks */

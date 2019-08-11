@@ -20,71 +20,46 @@ class fifo_queue_client : data_structure_client {
    * @param status Data status
    * @param timeout_ms Timeout
    */
-
   fifo_queue_client(std::shared_ptr<directory::directory_interface> fs,
                     const std::string &path,
                     const directory::data_status &status,
                     int timeout_ms = 1000);
 
+  /**
+   * @brief Destructor
+   */
   virtual ~fifo_queue_client() = default;
+
   /**
    * @brief Refresh the slot and blocks from directory service
    */
-
   void refresh() override;
 
   /**
    * @brief Enqueue message
-   * @param msg New message
-   * @return Enqueue result
+   * @param item New item
    */
-
-  std::string enqueue(const std::string &msg);
+  void enqueue(const std::string &item);
 
   /**
-   * @brief Dequeue message
+   * @brief Dequeue item
    * @return Dequeue result
    */
-
   std::string dequeue();
 
   /**
-   * @brief Read next message without dequeue
+   * @brief Read next item without dequeue
    * @return Read next result
    */ 
   std::string read_next();
 
  private:
-
-  /**
-   * @brief Check if new chain needs to be added
-   * @param op Operation
-   * @return Boolean, true if new chain needs to be added
-   */
-  bool need_chain(const fifo_queue_cmd_id &op) const;
-  /**
-   * @brief Fetch block identifier for specified operation
-   * @param op Operation
-   * @return Block identifier
-   */
-
-  std::size_t block_id(const fifo_queue_cmd_id &op) const;
-
-  /**
-   * @brief Check if partition number is valid
-   * @param partition_num Partition number
-   * @return Boolean, true if valid
-   */
-  bool is_valid(std::size_t partition_num) const {
-    return partition_num < blocks_.size();
-  }
   /**
    * @brief Handle command in redirect case
-   * @param cmd_id Command identifier
-   * @param response Response to be collected
+   * @param args Arguments
+   * @param _return Response
    */
-
-  void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) override;
+  void handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) override;
 
   /* Dequeue partition id */
   std::size_t dequeue_partition_;

@@ -28,23 +28,22 @@ class file_reader: public file_client {
   /**
    * @brief Destructor
    */
-  virtual ~file_reader() = default;
+  ~file_reader() override = default;
 
   /**
    * @brief Read message from file
    * @param size Size to be read
    * @return Response of the command
    */
-  std::string read(const std::size_t size);
+  std::string read(std::size_t size);
 
  private:
 
   /**
    * @brief Handle command in redirect case
-   * @param cmd_id Command identifier
-   * @param response Response to be collected
+   * @param _return Response to be collected
    */
-  void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) override;
+  void handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) override;
 };
 
 }

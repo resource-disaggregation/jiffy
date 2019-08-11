@@ -2,7 +2,6 @@
 #define JIFFY_LEASE_RENEWAL_WORKER_H
 
 #include <atomic>
-#include <shared_mutex>
 #include <string>
 #include <thread>
 #include <vector>
@@ -66,7 +65,7 @@ class lease_renewal_worker {
 
  private:
   /* Metadata mutex */
-  mutable std::shared_mutex metadata_mtx_;
+  mutable std::mutex metadata_mtx_;
   /* Worker thread */
   std::thread worker_;
   /* Stop bool */

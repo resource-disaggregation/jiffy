@@ -16,7 +16,7 @@ class auto_scaling_server {
    * @param port Auto scaling server port number
    * @return Server
    */
-  static std::shared_ptr<apache::thrift::server::TThreadedServer> create(const std::string directory_host,
+  static std::shared_ptr<apache::thrift::server::TThreadedServer> create(const std::string& directory_host,
                                                                          int directory_port,
                                                                          const std::string &address,
                                                                          int port);

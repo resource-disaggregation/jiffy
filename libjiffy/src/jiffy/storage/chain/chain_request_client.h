@@ -68,20 +68,18 @@ class chain_request_client {
   /**
    * @brief Send a request
    * @param seq Sequence identifier
-   * @param cmd_id Command identifier
    * @param arguments Arguments
    */
 
-  void request(const sequence_id &seq, int32_t cmd_id, const std::vector<std::string> &arguments);
+  void request(const sequence_id &seq, const std::vector<std::string> &arguments);
 
   /**
    * @brief Run command
    * @param _return Return value
-   * @param cmd_id Command identifier
    * @param arguments Arguments
    */
 
-  void run_command(std::vector<std::string> &_return, int32_t cmd_id, const std::vector<std::string> &arguments);
+  void run_command(std::vector<std::string> &_return, const std::vector<std::string> &arguments);
 
  private:
   /* Server hostname */

@@ -242,7 +242,7 @@ class ds_file_node : public ds_node {
    */
 
   bool handle_lease_expiry(std::vector<std::string> &cleared_blocks,
-                           std::shared_ptr<storage::storage_management_ops> storage);
+                           const std::shared_ptr<storage::storage_management_ops>& storage);
 
   /**
    * Get the number of blocks in this file node.
@@ -260,7 +260,7 @@ class ds_file_node : public ds_node {
 
  private:
   /* Operation mutex */
-  mutable std::shared_mutex mtx_;
+  mutable std::mutex mtx_;
   /* Data status */
   data_status dstatus_{};
 };

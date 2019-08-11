@@ -12,6 +12,7 @@
 
 namespace jiffy {
 namespace storage {
+
 /* Fifo queue partition class */
 class fifo_queue_partition : public chain_module {
  public:
@@ -37,76 +38,72 @@ class fifo_queue_partition : public chain_module {
   /**
    * @brief Virtual destructor
    */
-  virtual ~fifo_queue_partition() = default;
+  ~fifo_queue_partition() override = default;
 
   /**
    * @brief Fetch block size
    * @return Block size
    */
-
   std::size_t size() const;
 
   /**
    * @brief Check if block is empty
    * @return Bool value, true if empty
    */
-
   bool empty() const;
 
   /**
-   * @brief Enqueue a new message to the fifo queue
-   * @param message New message
+   * @brief Enqueue a new item to the fifo queue
+   * @param item New message
    * @return Enqueue return status string
    */
-  std::string enqueue(const std::string &message);
+  void enqueue(response &_return, const arg_list &args);
 
   /**
-   * @brief Dequeue a new message from the fifo queue
-   * @return Dequeue return status string
+   * @brief Dequeue an item from the fifo queue
+   * @param _return Response
+   * @param args Arguments
    */
-  std::string dequeue();
+  void dequeue(response &_return, const arg_list &args);
 
   /**
-   * @brief Read next message without dequeue
-   * @param Read next position
-   * @return Read next return status string
+   * @brief Fetch an item without dequeue
+   * @param _return Response
+   * @param args Arguments
    */
-  std::string read_next(std::string pos);
+  void read_next(response &_return, const arg_list &args);
 
   /**
    * @brief Clear the fifo queue
-   * @return Clear return status
+   * @param _return Response
+   * @param args Arguments
    */
-  std::string clear();
+  void clear(response &_return, const arg_list &args);
 
   /**
-   * @brief Update partition with next target partition
-   * @param next_target Next target partition string
-   * @return Update status string
+   * @brief Update partition with next partition pointer
+   * @param _return Response
+   * @param args Arguments
    */
-  std::string update_partition(const std::string &next_target);
+  void update_partition(response &_return, const arg_list &args);
 
   /**
-   * @brief Run particular command on key value block
-   * @param _return Return status to be collected
-   * @param cmd_id Operation identifier
-   * @param args Command arguments
+   * @brief Run particular command on fifo queue partition
+   * @param _return Response
+   * @param args Arguments
    */
-
-  void run_command(std::vector<std::string> &_return, int cmd_id, const std::vector<std::string> &args) override;
+  void run_command(response &_return, const arg_list &args) override;
 
   /**
    * @brief Atomically check dirty bit
    * @return Bool value, true if block is dirty
    */
-
   bool is_dirty() const;
 
   /**
    * @brief Load persistent data into the block
    * @param path Persistent storage path
    */
-
   void load(const std::string &path) override;
 
   /**
@@ -114,7 +111,6 @@ class fifo_queue_partition : public chain_module {
    * @param path Persistent storage path
    * @return Bool value, true if block successfully synchronized
    */
-
   bool sync(const std::string &path) override;
 
   /**
@@ -122,42 +118,19 @@ class fifo_queue_partition : public chain_module {
    * @param path Persistent storage path
    * @return Bool value, true if block successfully dumped
    */
-
   bool dump(const std::string &path) override;
 
   /**
    * @brief Send all key and value to the next block
    */
-
   void forward_all() override;
-
-  /**
-   * @brief Set next target string
-   * @param block_ids Next target replica chain data blocks
-   */
-  void next_target(std::vector<std::string> &target) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    next_target_str_ = "";
-    for (const auto &block: target) {
-      next_target_str_ += (block + "!");
-    }
-    next_target_str_.pop_back();
-  }
 
   /**
    * @brief Set next target string
    * @param target_str Next target string
    */
   void next_target(const std::string &target_str) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     next_target_str_ = target_str;
-  }
-  /**
-   * @brief Fetch next target string
-   * @return Next target string
-   */
-  std::string next_target_str() const {
-    return next_target_str_;
   }
 
  private:
@@ -166,7 +139,6 @@ class fifo_queue_partition : public chain_module {
    * @brief Check if block is overloaded
    * @return Bool value, true if block size is over the high threshold capacity
    */
-
   bool overload();
 
   /* Fifo queue partition */
@@ -179,10 +151,10 @@ class fifo_queue_partition : public chain_module {
   double threshold_hi_;
 
   /* Bool for overload partition */
-  bool overload_;
+  bool scaling_up_;
 
   /* Bool for underload partition */
-  bool underload_;
+  bool scaling_down_;
 
   /* Partition dirty bit */
   bool dirty_;

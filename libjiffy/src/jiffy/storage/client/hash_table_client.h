@@ -42,7 +42,7 @@ class hash_table_client : public data_structure_client {
    * @param value Value
    * @return Response of the command
    */
-  std::string put(const std::string &key, const std::string &value);
+  void put(const std::string &key, const std::string &value);
 
   /**
    * @brief Get value for specified key
@@ -76,15 +76,14 @@ class hash_table_client : public data_structure_client {
 
   /**
    * @brief Handle command in redirect case
-   * @param cmd_id Command identifier
    * @param args Command arguments
-   * @param response Response to be collected
+   * @param _return Response to be collected
    */
 
-  void handle_redirect(int32_t cmd_id, const std::vector<std::string> &args, std::string &response) override;
+  void handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) override;
 
   /* Redo times */
-  std::size_t redo_times = 0;
+  std::size_t redo_times_ = 0;
 
   /* Map from slot begin to replica chain client pointer */
   std::map<int32_t, std::shared_ptr<replica_chain_client>> blocks_;

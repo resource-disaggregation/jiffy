@@ -3,8 +3,7 @@
 
 #include <cstdint>
 #include <cstring>
-
-#define MAX_BLOCK_OP_NAME_SIZE 63
+#include <unordered_map>
 
 namespace jiffy {
 namespace storage {
@@ -22,18 +21,24 @@ enum command_type : uint8_t {
 /**
  * Command structure
  */
-struct command {
+struct command_info {
   command_type type;
-  char name[MAX_BLOCK_OP_NAME_SIZE];
+  uint32_t id;
 
   /**
-   * @brief Operator < to check if name is smaller in Lexicographical order
-   * @param other Other block operation
-   * @return Bool value
+   * @brief Checks if the command is an accessor.
+   * @return True if the command is an accessor, false otherwise.
    */
+  bool is_accessor() const;
 
-  bool operator<(const command &other) const;
+  /**
+   * @brief Checks if the command is a mutator.
+   * @return True if the command is an accessor, false otherwise.
+   */
+  bool is_mutator() const;
 };
+
+typedef std::unordered_map<std::string, command_info> command_map;
 
 }
 

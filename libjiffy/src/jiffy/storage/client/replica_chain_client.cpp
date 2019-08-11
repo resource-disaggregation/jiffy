@@ -13,13 +13,13 @@ using namespace utils;
 replica_chain_client::replica_chain_client(std::shared_ptr<directory::directory_interface> fs,
                                            const std::string &path,
                                            const directory::replica_chain &chain,
-                                           std::vector<command> OPS,
+                                           const command_map& OPS,
                                            int timeout_ms) : fs_(fs), path_(path), in_flight_(false) {
   seq_.client_id = -1;
   seq_.client_seq_no = 0;
   connect(chain, timeout_ms);
   for (auto &op: OPS) {
-    cmd_client_.push_back(op.type == command_type::accessor ? &tail_ : &head_);
+    cmd_client_[op.first] = op.second.is_accessor() ? &tail_ : &head_;
   }
 }
 
@@ -52,11 +52,11 @@ void replica_chain_client::connect(const directory::replica_chain &chain, int ti
   in_flight_ = false;
 }
 
-void replica_chain_client::send_command(int32_t cmd_id, const std::vector<std::string> &args) {
+void replica_chain_client::send_command(const std::vector<std::string> &args) {
   if (in_flight_) {
     throw std::length_error("Cannot have more than one request in-flight");
   }
-  cmd_client_.at(static_cast<unsigned long>(cmd_id))->command_request(seq_, cmd_id, args);
+  cmd_client_.at(args.front())->command_request(seq_, args);
   in_flight_ = true;
 }
 
@@ -71,38 +71,37 @@ std::vector<std::string> replica_chain_client::recv_response() {
   return ret;
 }
 
-std::vector<std::string> replica_chain_client::run_command(int32_t cmd_id, const std::vector<std::string> &args) {
+std::vector<std::string> replica_chain_client::run_command(const std::vector<std::string> &args) {
   std::vector<std::string> response;
   bool retry = false;
   while (response.empty()) {
     try {
-      send_command(cmd_id, args);
+      send_command(args);
       response = recv_response();
-      if (retry && response[0] == "!duplicate_key") {
+      if (retry && response[0] == "!duplicate_key") { // TODO: This is hash table specific logic
         response[0] = "!ok";
       }
     } catch (apache::thrift::transport::TTransportException &e) {
       LOG(log_level::info) << "Error in connection to chain: " << e.what();
-      LOG(log_level::info) << cmd_id << " " << chain_.name;
+      LOG(log_level::info) << args.front() << " " << chain_.name;
       for(const auto &x : chain_.block_ids)
 	      LOG(log_level::info) << x;
       connect(fs_->resolve_failures(path_, chain_), timeout_ms_);
       retry = true;
-    } catch (std::logic_error &e) {
+    } catch (std::logic_error &e) { // TODO: This is very iffy, we need to fix this
       response.clear();
-      response.push_back("!block_moved");
+      response.emplace_back("!block_moved");
       break;
     }
   }
   return response;
 }
 
-std::vector<std::string> replica_chain_client::run_command_redirected(int32_t cmd_id,
-                                                                      const std::vector<std::string> &args) {
+std::vector<std::string> replica_chain_client::run_command_redirected(const std::vector<std::string> &args) {
   auto args_copy = args;
   if (args_copy.back() != "!redirected")
     args_copy.push_back("!redirected");
-  send_command(cmd_id, args_copy);
+  send_command(args_copy);
   return recv_response();
 }
 

@@ -48,14 +48,13 @@ std::string chain_request_client::endpoint() {
   return host_ + ":" + std::to_string(port_);
 }
 
-void chain_request_client::request(const sequence_id &seq, int32_t cmd_id, const std::vector<std::string> &arguments) {
-  client_->chain_request(seq, block_id_, cmd_id, arguments);
+void chain_request_client::request(const sequence_id &seq, const std::vector<std::string> &arguments) {
+  client_->chain_request(seq, block_id_, arguments);
 }
 
 void chain_request_client::run_command(std::vector<std::string> &_return,
-                                       int32_t cmd_id,
                                        const std::vector<std::string> &arguments) {
-  client_->run_command(_return, block_id_, cmd_id, arguments);
+  client_->run_command(_return, block_id_, arguments);
 }
 
 }

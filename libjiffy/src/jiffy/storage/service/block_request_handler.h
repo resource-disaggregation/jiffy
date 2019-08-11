@@ -45,13 +45,9 @@ class block_request_handler : public block_request_serviceIf {
    * @brief Request a command, starting from either the head or tail of the chain
    * @param seq Sequence identifier
    * @param block_id Block identifier
-   * @param cmd_id Command identifier
-   * @param arguments Command arguments
+   * @param args Command arguments
    */
-  void command_request(const sequence_id &seq,
-                       int32_t block_id,
-                       int32_t cmd_id,
-                       const std::vector<std::string> &arguments) override;
+  void command_request(const sequence_id &seq, int32_t block_id, const std::vector<std::string> &args) override;
 
   /**
    * @brief Fetch the registered block identifier
@@ -69,25 +65,21 @@ class block_request_handler : public block_request_serviceIf {
    * @brief Send chain request
    * @param seq Sequence identifier
    * @param block_id Block identifier
-   * @param cmd_id Command identifier
-   * @param arguments Command arguments
+   * @param args Command arguments
    */
   void chain_request(const sequence_id &seq,
                      const int32_t block_id,
-                     const int32_t cmd_id,
-                     const std::vector<std::string> &arguments) override;
+                     const std::vector<std::string> &args) override;
 
   /**
    * @brief Run command on data block
    * @param _return Return status
    * @param block_id Block identifier
-   * @param cmd_id Command identifier
-   * @param arguments Command arguments
+   * @param args Command arguments
    */
   void run_command(std::vector<std::string> &_return,
                    const int32_t block_id,
-                   const int32_t cmd_id,
-                   const std::vector<std::string> &arguments) override;
+                   const std::vector<std::string> &args) override;
 
   /**
    * @brief Subscribe to a block for given operations

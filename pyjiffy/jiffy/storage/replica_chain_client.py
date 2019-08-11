@@ -7,55 +7,17 @@ from jiffy.directory.directory_client import ReplicaChain
 from jiffy.directory.ttypes import rpc_replica_chain
 from jiffy.storage import block_request_service
 from jiffy.storage.block_client import BlockClient
-from jiffy.storage.compat import b, bytes_to_str
-from jiffy.storage.hash_table_ops import CommandType, op_type, HashTableOps
+from jiffy.storage.compat import b
+from jiffy.storage.command import CommandType
 
 
 class ReplicaChainClient:
-    class LockedClient:
-        def __init__(self, parent):
-            self.parent = parent
-            response = b(self.run_command(HashTableOps.lock, [])[0])
-            if response != b("!ok"):
-                self.redirecting = True
-                self.redirect_chain = [bytes_to_str(x) for x in response[1:].split(b('!'))]
-            else:
-                self.redirecting = False
-                self.redirect_chain = []
-
-        def __del__(self):
-            if self.parent.is_open():
-                self.unlock()
-
-        def unlock(self):
-            self.run_command(HashTableOps.unlock, [])
-
-        def get_chain(self):
-            return self.parent.get_chain()
-
-        def is_redirecting(self):
-            return self.redirecting
-
-        def get_redirect_chain(self):
-            return self.redirect_chain
-
-        def send_command(self, cmd_id, args):
-            self.parent.send_command(cmd_id, args)
-
-        def recv_response(self):
-            return self.parent.recv_response()
-
-        def run_command(self, cmd_id, args):
-            return self.parent.run_command(cmd_id, args)
-
-        def run_command_redirected(self, cmd_id, args):
-            return self.parent.run_command_redirected(cmd_id, args)
-
-    def __init__(self, fs, path, client_cache, chain):
+    def __init__(self, fs, path, client_cache, chain, cmd_type):
         self.fs = fs
         self.path = path
         self.client_cache = client_cache
         self.chain = chain
+        self.cmd_type = cmd_type
         self._init()
 
     def _init(self):
@@ -77,31 +39,28 @@ class ReplicaChainClient:
             host, port, _, _ = block.split(':')
             self.client_cache.remove(host, int(port))
 
-    def lock(self):
-        return self.LockedClient(self)
-
     def get_chain(self):
         return self.chain
 
     def is_open(self):
         return self.head.is_open() and self.tail.is_open()
 
-    def _send_command(self, client, cmd_id, args):
+    def _send_command(self, client, args):
         if self.in_flight:
             raise RuntimeError("Cannot have more than one request in-flight")
-        client.send_request(self.seq, cmd_id, args)
+        client.send_request(self.seq, args)
         self.in_flight = True
 
-    def send_command(self, cmd_id, args):
-        if op_type(cmd_id) == CommandType.accessor:
-            self._send_command(self.tail, cmd_id, args)
+    def send_command(self, args):
+        if self.cmd_type[args[0]] == CommandType.accessor:
+            self._send_command(self.tail, args)
         else:
-            self._send_command(self.head, cmd_id, args)
+            self._send_command(self.head, args)
 
     def _recv_response(self):
         rseq, result = self.response_reader.recv_response()
         if self.seq.client_seq_no != rseq:
-            raise RuntimeError("SEQ: Expected={} Received={}".format(self.seq.client_seq_no, rseq))
+            raise EOFError("SEQ: Expected={} Received={}".format(self.seq.client_seq_no, rseq))
         self.seq.client_seq_no += 1
         self.in_flight = False
         return result
@@ -109,19 +68,19 @@ class ReplicaChainClient:
     def recv_response(self):
         return self._recv_response()
 
-    def _run_command(self, client, cmd_id, args):
-        self._send_command(client, cmd_id, args)
+    def _run_command(self, client, args):
+        self._send_command(client, args)
         return self._recv_response()
 
-    def run_command(self, cmd_id, args):
+    def run_command(self, args):
         resp = None
         retry = False
         while resp is None:
             try:
-                if op_type(cmd_id) == CommandType.accessor:
-                    resp = self._run_command(self.tail, cmd_id, args)
+                if self.cmd_type[args[0]] == CommandType.accessor:
+                    resp = self._run_command(self.tail, args)
                 else:
-                    resp = self._run_command(self.head, cmd_id, args)
+                    resp = self._run_command(self.head, args)
                     if retry and resp[0] == b('!duplicate_key'):
                         resp[0] = b('!ok')
             except (TTransportException, socket.timeout) as e:
@@ -136,15 +95,18 @@ class ReplicaChainClient:
                 self._invalidate_cache()
                 self._init()
                 retry = True
+            except EOFError:
+                resp = [b('!block_moved')]
         return resp
 
-    def _run_command_redirected(self, client, cmd_id, args):
-        args.append("!redirected")
-        self._send_command(client, cmd_id, args)
+    def _run_command_redirected(self, client, args):
+        if args[-1] != b('!redirected'):
+            args.append(b('!redirected'))
+        self._send_command(client, args)
         return self._recv_response()
 
-    def run_command_redirected(self, cmd_id, args):
-        if op_type(cmd_id) == CommandType.accessor:
-            return self._run_command_redirected(self.tail, cmd_id, args)
+    def run_command_redirected(self, args):
+        if self.cmd_type[args[0]] == CommandType.accessor:
+            return self._run_command_redirected(self.tail, args)
         else:
-            return self._run_command_redirected(self.head, cmd_id, args)
+            return self._run_command_redirected(self.head, args)

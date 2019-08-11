@@ -11,59 +11,47 @@ file_writer::file_writer(std::shared_ptr<jiffy::directory::directory_interface> 
                          const jiffy::directory::data_status &status,
                          int timeout_ms) : file_client(fs, path, status, timeout_ms) {}
 
-std::string file_writer::write(const std::string &data) {
-  std::string _return;
-  std::vector<std::string> args{data};
-  args.push_back(std::to_string(cur_offset_));
+void file_writer::write(const std::string &data) {
+  std::vector<std::string> _return;
+  std::vector<std::string> args{"write", data, std::to_string(cur_offset_)};
   bool redo;
   do {
     try {
-      _return = blocks_[block_id()]->run_command(file_cmd_id::file_write, args).front();
-      handle_redirect(file_cmd_id::file_write, args, _return);
+      _return = blocks_[block_id()]->run_command(args);
+      handle_redirect(_return, args);
       redo = false;
     } catch (redo_error &e) {
       redo = true;
     }
   } while (redo);
-  return _return;
+  THROW_IF_NOT_OK(_return);
 }
 
-void file_writer::handle_redirect(int32_t cmd_id,
-                                  const std::vector<std::string> &args,
-                                  std::string &response) {
-  bool write_flag = true;
-  typedef std::vector<std::string> list_t;
-  if (response == "!redo") {
+void file_writer::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
+  auto data = args[1];
+  if (_return[0] == "!ok") {
+    cur_offset_ += data.size();
+    return;
+  } else if (_return[0] == "!redo") {
     throw redo_error();
-  }
-  if (response.substr(0, 12) == "!split_write") {
+  } else if (_return[0] == "!split_write") {
     do {
-      auto parts = string_utils::split(response, '!');
-      auto remaining_data_len = std::stoi(*(parts.end() - 1));
-      auto data = args.front();
+      auto remaining_data_len = std::stoi(_return[1]);
+      auto chain = string_utils::split(_return[2], '!');
       auto remaining_data = data.substr(data.size() - remaining_data_len, remaining_data_len);
-      auto new_args = std::vector<std::string>{remaining_data};
+
       if (need_chain()) {
-        auto chain = list_t(parts.begin() + 2, parts.end() - 1);
-        blocks_.push_back(std::make_shared<replica_chain_client>(fs_,
-                                                                 path_,
-                                                                 directory::replica_chain(chain),
-                                                                 FILE_OPS));
+        blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FILE_OPS));
       }
       cur_partition_++;
       update_last_partition(cur_partition_);
       cur_offset_ = 0;
-      new_args.push_back(std::to_string(cur_offset_));
+      std::vector<std::string> new_args{"write", remaining_data, std::to_string(cur_offset_)};
       do {
-        response = blocks_[block_id()]->run_command(cmd_id, new_args).front();
-      } while (response == "!redo");
-      cur_offset_ += new_args[0].size();
-      write_flag = false;
-    } while (response.substr(0, 12) == "!split_write");
-  }
-
-  if (cmd_id == static_cast<int32_t>(file_cmd_id::file_write) && write_flag) {
-    cur_offset_ += args[0].size();
+        _return = blocks_[block_id()]->run_command(new_args);
+      } while (_return[0] == "!redo");
+      cur_offset_ += remaining_data.size();
+    } while (_return[0] == "!split_write");
   }
 }
 

@@ -7,17 +7,15 @@ namespace storage {
 subscription_map::subscription_map() = default;
 
 void subscription_map::add_subscriptions(const std::vector<std::string> &ops,
-                                         std::shared_ptr<notification_response_client> client) {
-  std::lock_guard<std::mutex> lock{mtx_};
+                                         const std::shared_ptr<notification_response_client>& client) {
   for (const auto &op: ops)
     subs_[op].insert(client);
   client->control(response_type::subscribe, ops, "");
 }
 
 void subscription_map::remove_subscriptions(const std::vector<std::string> &ops,
-                                            std::shared_ptr<notification_response_client> client,
+                                            const std::shared_ptr<notification_response_client>& client,
                                             bool inform) {
-  std::lock_guard<std::mutex> lock{mtx_};
   for (const auto &op: ops) {
     auto &clients = subs_[op];
     auto it = clients.find(client);
@@ -33,20 +31,23 @@ void subscription_map::remove_subscriptions(const std::vector<std::string> &ops,
 
 void subscription_map::notify(const std::string &op, const std::string &msg) {
   if (op == "default_partition") return;
-  std::lock_guard<std::mutex> lock{mtx_};
   for (const auto &client: subs_[op]) {
     client->notification(op, msg);
   }
 }
 
 void subscription_map::clear() {
-  std::lock_guard<std::mutex> lock{mtx_};
   subs_.clear();
 }
+
 // TODO fix this function so that we could let the
-// subscibed blocks know whenever the partition is destroyed
-void subscription_map::send_failure() {
-  std::lock_guard<std::mutex> lock(mtx_);
+// subscribed blocks know whenever the partition is destroyed
+void subscription_map::end_connections() {
+  for (const auto &sub: subs_) {
+    for (const auto &client: sub.second) {
+      client->notification("error", "!block_moved");
+    }
+  }
 }
 
 }

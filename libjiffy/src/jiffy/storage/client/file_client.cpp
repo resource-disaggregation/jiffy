@@ -3,6 +3,7 @@
 #include "jiffy/utils/string_utils.h"
 #include <algorithm>
 #include <thread>
+#include <utility>
 
 namespace jiffy {
 namespace storage {
@@ -13,7 +14,7 @@ file_client::file_client(std::shared_ptr<directory::directory_interface> fs,
                          const std::string &path,
                          const directory::data_status &status,
                          int timeout_ms)
-    : data_structure_client(fs, path, status, FILE_OPS, timeout_ms),
+    : data_structure_client(std::move(fs), path, status, timeout_ms),
       cur_partition_(0),
       cur_offset_(0),
       last_partition_(0) {
@@ -31,11 +32,13 @@ void file_client::refresh() {
 }
 
 bool file_client::seek(const std::size_t offset) {
-  std::vector<std::string> ret;
   auto seek_partition = block_id();
-  ret = blocks_[seek_partition]->run_command(file_cmd_id::file_seek, {});
-  auto size = static_cast<std::size_t>(std::stoi(ret[0]));
-  auto cap = static_cast<std::size_t>(std::stoi(ret[1]));
+  auto _return = blocks_[seek_partition]->run_command({"seek"});
+  
+  THROW_IF_NOT_OK(_return);
+  
+  auto size = static_cast<std::size_t>(std::stoull(_return[1]));
+  auto cap = static_cast<std::size_t>(std::stoull(_return[2]));
   if (offset > seek_partition * cap + size) {
     return false;
   } else {

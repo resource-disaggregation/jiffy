@@ -154,7 +154,7 @@ class ds_dir_node : public ds_node {
   void populate_recursive_entries(std::vector<directory_entry> &entries) const;
 
   /* Operation mutex */
-  mutable std::shared_mutex mtx_;
+  mutable std::mutex mtx_;
 
   /* Children of directory */
   child_map children_{};

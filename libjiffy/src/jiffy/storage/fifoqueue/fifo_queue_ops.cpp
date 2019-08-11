@@ -3,10 +3,10 @@
 namespace jiffy {
 namespace storage {
 
-std::vector<command> FIFO_QUEUE_OPS = {command{command_type::mutator, "fq_enqueue"},
-                                       command{command_type::mutator, "fq_dequeue"},
-                                       command{command_type::mutator, "fq_clear"},
-                                       command{command_type::mutator, "fq_update_partition"},
-                                       command{command_type::accessor, "fq_readnext"}};
+command_map FQ_CMDS = {{"enqueue", {command_type::mutator, 0}},
+                       {"dequeue", {command_type::mutator, 1}},
+                       {"clear", {command_type::mutator, 2}},
+                       {"update_partition", {command_type::mutator, 3}},
+                       {"read_next", {command_type::accessor, 4}}};
 }
 }

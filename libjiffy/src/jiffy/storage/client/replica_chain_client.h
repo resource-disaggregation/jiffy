@@ -24,7 +24,7 @@ class replica_chain_client {
   explicit replica_chain_client(std::shared_ptr<directory::directory_interface> fs,
                                 const std::string &path,
                                 const directory::replica_chain &chain,
-                                std::vector<command> OPS,
+                                const command_map& OPS,
                                 int timeout_ms = 1000);
 
   /**
@@ -49,21 +49,18 @@ class replica_chain_client {
 
   /**
    * @brief Send out command
-   * For each command identifier, we either save tail block client or
+   * For each command, we either save tail block client or
    * head block client into command client, so we can use
    * command identifier to locate the right block
-   * @param cmd_id Command identifier
    * @param args Command arguments
    */
-
-  void send_command(int32_t cmd_id, const std::vector<std::string> &args);
+  void send_command(const std::vector<std::string> &args);
 
   /**
    * @brief Receive response of command
    * Check whether response equals client sequence number
    * @return Response
    */
-
   std::vector<std::string> recv_response();
 
   /**
@@ -73,8 +70,7 @@ class replica_chain_client {
    * @param args Command argument
    * @return Response of the command
    */
-
-  std::vector<std::string> run_command(int32_t cmd_id, const std::vector<std::string> &args);
+  std::vector<std::string> run_command(const std::vector<std::string> &args);
 
   /**
    * @brief Sent command with a redirect symbol at the back of the arguments
@@ -83,7 +79,7 @@ class replica_chain_client {
    * @return Response of the command
    */
 
-  std::vector<std::string> run_command_redirected(int32_t cmd_id, const std::vector<std::string> &args);
+  std::vector<std::string> run_command_redirected(const std::vector<std::string> &args);
 
   /**
    * @brief Set replica chain name and metadata
@@ -122,7 +118,7 @@ class replica_chain_client {
   /* Command response reader */
   block_client::command_response_reader response_reader_;
   /* Clients for each commands */
-  std::vector<client_ref> cmd_client_;
+  std::unordered_map<std::string, client_ref> cmd_client_;
   /* Bool value, true if request is in flight */
   bool in_flight_;
   /* Time out */
