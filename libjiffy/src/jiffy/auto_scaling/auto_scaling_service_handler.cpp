@@ -150,9 +150,6 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       UNLOCK_AND_RETURN;
     }
  
-    auto dst_name = (merge_target.fetch_slot_range().first == merge_range_end) ?
-                    std::to_string(merge_range_beg) + "_" + std::to_string(merge_target.fetch_slot_range().second) :
-                    std::to_string(merge_target.fetch_slot_range().first) + "_" + std::to_string(merge_range_end);
     auto exp_target = pack(merge_target);
     auto dst_old_name = dst->run_command({"update_partition", merge_target.name, "importing$" + name});
 
