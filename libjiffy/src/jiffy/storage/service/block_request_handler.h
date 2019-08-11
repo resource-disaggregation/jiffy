@@ -119,6 +119,8 @@ class block_request_handler : public block_request_serviceIf {
   std::atomic<int64_t> &client_id_gen_;
   /* Data blocks */
   std::vector<std::shared_ptr<block>> &blocks_;
+  /* First block id */
+  std::size_t first_;
 };
 
 }
