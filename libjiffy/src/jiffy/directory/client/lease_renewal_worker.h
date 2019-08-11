@@ -5,7 +5,8 @@
 #include <string>
 #include <thread>
 #include <vector>
-
+#include <mutex>
+#include <algorithm>
 #include "lease_client.h"
 
 namespace jiffy {
