@@ -33,9 +33,9 @@ void block_response_client_map::clear() {
 
 void block_response_client_map::send_failure() {
   sequence_id fail;
-  fail.__set_client_id(-1);
-  fail.__set_client_seq_no(-1);
-  fail.__set_client_id(-1);
+  fail.__set_client_id(-2);
+  fail.__set_client_seq_no(-2);
+  fail.__set_client_id(-2);
   for (const auto &x : clients_.lock_table()) {
     x.second->response(fail, {});
   }

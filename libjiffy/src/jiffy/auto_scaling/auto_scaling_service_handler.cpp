@@ -33,7 +33,6 @@ auto_scaling_service_handler::auto_scaling_service_handler(const std::string &di
 void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &cur_chain,
                                                 const std::string &path,
                                                 const std::map<std::string, std::string> &conf) {
-  LOCK;
   std::string scaling_type = conf.find("type")->second;
   auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
   if (scaling_type == "file") {
@@ -117,6 +116,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
                          << finish_updating_partition_after - finish_updating_partition_dir;
 
   } else if (scaling_type == "hash_table_merge") {
+    LOCK;
     LOG(log_level::info) << "Auto-scaling hash table (merge)";
 
     auto storage_capacity = std::stoull(conf.at("storage_capacity"));
@@ -141,19 +141,32 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     auto finish_finding_chain_to_merge = time_utils::now_us();
 
     // Connect the two replica chains
-    auto dst = std::make_shared<replica_chain_client>(fs, path, merge_target, HT_OPS);
+    std::shared_ptr<replica_chain_client> dst;
+    try {
+      dst = std::make_shared<replica_chain_client>(fs, path, merge_target, HT_OPS);
+    } catch (apache::thrift::transport::TTransportException &e) {
+      LOG(log_level::info) << "The merge target chain has been deleted";
+      src->run_command({"update_partition", name, "regular$" + name});
+      UNLOCK_AND_RETURN;
+    }
+ 
     auto dst_name = (merge_target.fetch_slot_range().first == merge_range_end) ?
                     std::to_string(merge_range_beg) + "_" + std::to_string(merge_target.fetch_slot_range().second) :
                     std::to_string(merge_target.fetch_slot_range().first) + "_" + std::to_string(merge_range_end);
     auto exp_target = pack(merge_target);
-    auto ret = dst->run_command({"update_partition", merge_target.name, "importing$" + name});
+    auto dst_old_name = dst->run_command({"update_partition", merge_target.name, "importing$" + name});
 
     // We don't need to update the src partition cause it will be deleted anyway
-    if (ret[0] == "!fail") {
+    if (dst_old_name[0] == "!fail") {
       src->run_command({"update_partition", name, "regular$" + name});
       UNLOCK_AND_RETURN;
     }
-    src->run_command({"update_partition", name, "exporting$" + dst_name + "$" + exp_target});
+    UNLOCK;
+    auto dst_slot_range = string_utils::split(dst_old_name[0], '_', 2);
+    auto dst_name = (std::stoi(dst_slot_range[0]) == merge_range_end) ?
+                    std::to_string(merge_range_beg) + "_" + dst_slot_range[1]:
+                    dst_slot_range[0] + "_" + std::to_string(merge_range_end);
+    src->run_command({"update_partition", name, "exporting$" + name + "$" + exp_target});
     auto finish_update_partition_before = time_utils::now_us();
 
     // Transfer data from source to destination
@@ -161,7 +174,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     auto finish_data_transmission = time_utils::now_us();
 
     // Update partition at directory server
-    fs->update_partition(path, merge_target.name, dst_name, "regular");
+    fs->update_partition(path, dst_old_name[0], dst_name, "regular");
     auto finish_update_partition_dir = time_utils::now_us();
 
     // Setting name and metadata for src and dst
@@ -220,7 +233,6 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     // Log auto-scaling info
     LOG(log_level::info) << "D " << start << " " << finish_removing_replica_chain - start;
   }
-  UNLOCK; // Using global lock because we want to avoid merging and splitting happening in the same time
 }
 
 void auto_scaling_service_handler::hash_table_transfer_data(const std::shared_ptr<storage::replica_chain_client> &src,
@@ -261,7 +273,7 @@ void auto_scaling_service_handler::hash_table_transfer_data(const std::shared_pt
       write_args.pop_back();
     }
     assert(write_args.size() == 1);
-    assert(remove_args.size() == split_keys);
+    assert(remove_args.size() == transfer_size / 2 + 1);
     auto ret = src->run_command(remove_args);
   }
 }
@@ -277,7 +289,12 @@ bool auto_scaling_service_handler::find_merge_target(directory::replica_chain &m
   size_t find_min_size = storage_capacity + 1;
   for (auto &r : replica_set) {
     if (r.fetch_slot_range().first == slot_end || r.fetch_slot_range().second == slot_beg) {
-      auto client = std::make_shared<replica_chain_client>(fs, path, r, HT_OPS, 0);
+      std::shared_ptr<replica_chain_client> client;
+      try {
+        client = std::make_shared<replica_chain_client>(fs, path, r, HT_OPS, 0);
+      } catch (apache::thrift::transport::TTransportException &e) {
+        continue;
+      }
       auto ret = client->run_command({"get_storage_size"});
       if (ret[0] == "!block_moved") continue;
       auto size = std::stoull(ret[1]);
