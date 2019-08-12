@@ -9,7 +9,7 @@ from jiffy.lease.lease_client import LeaseClient
 from jiffy.storage.file import FileWriter, FileReader
 from jiffy.storage.hash_table import HashTable
 from jiffy.storage.partition import HashTableNameFormatter, DefaultNameFormatter
-from jiffy.storage.queue import Queue
+from jiffy.storage.queue import Queue, BlockingQueue
 from jiffy.storage.subscriber import SubscriptionClient, Mailbox
 
 logging.basicConfig(level=logging.WARN,
@@ -149,6 +149,29 @@ class JiffyClient:
         self.begin_scope(path)
         return Queue(self.fs, path, s)
 
+    def create_blocking_queue(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+        fmt = DefaultNameFormatter()
+        block_names = [fmt.get(i) for i in range(num_blocks)]
+        block_metadata = ['regular' for _ in range(num_blocks)]
+        s = self.fs.create(path, 'fifoqueue', persistent_store_prefix, num_blocks, chain_length, flags, Perms.all,
+                           block_names, block_metadata)
+        self.begin_scope(path)
+        return BlockingQueue(self.fs, path, s)
+
+    def open_blocking_queue(self, path):
+        s = self.fs.open(path)
+        self.begin_scope(path)
+        return BlockingQueue(self.fs, path, s)
+
+    def open_or_create_blocking_queue(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+        fmt = DefaultNameFormatter()
+        block_names = [fmt.get(i) for i in range(num_blocks)]
+        block_metadata = ['regular' for _ in range(num_blocks)]
+        s = self.fs.open_or_create(path, 'fifoqueue', persistent_store_prefix, num_blocks, chain_length, flags,
+                                   Perms.all, block_names, block_metadata)
+        self.begin_scope(path)
+        return BlockingQueue(self.fs, path, s)
+
     def create_file(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
         fmt = DefaultNameFormatter()
         block_names = [fmt.get(i) for i in range(num_blocks)]
@@ -188,8 +211,8 @@ class JiffyClient:
     def load(self, path, backing_path):
         self.fs.load(path, backing_path)
 
-    def listen(self, path, callback=Mailbox()):
+    def listen(self, path):
         s = self.fs.dstatus(path)
         if path not in self.to_renew:
             self.to_renew.append(path)
-        return SubscriptionClient(s, callback)
+        return SubscriptionClient(s)

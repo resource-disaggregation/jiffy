@@ -1,15 +1,20 @@
 #include <iostream>
+#include <jiffy/utils/logger.h>
 #include "subscription_map.h"
 
 namespace jiffy {
 namespace storage {
 
+using namespace utils;
+
 subscription_map::subscription_map() = default;
 
 void subscription_map::add_subscriptions(const std::vector<std::string> &ops,
                                          const std::shared_ptr<notification_response_client>& client) {
-  for (const auto &op: ops)
+  for (const auto &op: ops) {
+    LOG(log_level::info) << "Adding subscription for " << op;
     subs_[op].insert(client);
+  }
   client->control(response_type::subscribe, ops, "");
 }
 
@@ -32,6 +37,7 @@ void subscription_map::remove_subscriptions(const std::vector<std::string> &ops,
 void subscription_map::notify(const std::string &op, const std::string &msg) {
   if (op == "default_partition") return;
   for (const auto &client: subs_[op]) {
+    LOG(log_level::info) << "Sending notification for " << op;
     client->notification(op, msg);
   }
 }

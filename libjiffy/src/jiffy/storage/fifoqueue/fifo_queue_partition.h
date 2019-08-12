@@ -67,13 +67,6 @@ class fifo_queue_partition : public chain_module {
   void dequeue(response &_return, const arg_list &args);
 
   /**
-   * @brief Fetch an item without dequeue
-   * @param _return Response
-   * @param args Arguments
-   */
-  void read_next(response &_return, const arg_list &args);
-
-  /**
    * @brief Clear the fifo queue
    * @param _return Response
    * @param args Arguments
@@ -159,8 +152,11 @@ class fifo_queue_partition : public chain_module {
   /* Partition dirty bit */
   bool dirty_;
 
-  /* Bool value for auto scaling */
-  bool auto_scale_;
+  /* Full */
+  bool full_;
+
+  /* Empty */
+  bool empty_;
 
   /* Directory server hostname */
   std::string directory_host_;
@@ -176,9 +172,6 @@ class fifo_queue_partition : public chain_module {
 
   /* Next partition target string */
   std::string next_target_str_;
-
-  /* Head position of queue */
-  std::size_t head_;
 
 };
 

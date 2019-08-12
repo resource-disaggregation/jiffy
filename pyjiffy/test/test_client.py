@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 import time
+from multiprocessing import Process
 
 try:
     import ConfigParser as configparser
@@ -109,6 +110,16 @@ class DirectoryServer(JiffyServer):
         return JiffyClient(self.host, self.service_port, self.lease_port)
 
 
+def consumer(q):
+    for i in range(0, 1024):
+        q.get()
+
+
+def producer(q):
+    for i in range(0, 1024):
+        q.put(b(str(i)))
+
+
 class TestClient(TestCase):
     def __init__(self, *args, **kwargs):
         super(TestClient, self).__init__(*args, **kwargs)
@@ -209,13 +220,9 @@ class TestClient(TestCase):
                 self.fail('Received error message: {}'.format(k))
 
         for i in range(0, 1000):
-            self.assertEqual(b(str(i)), q.read_next())
-
-        for i in range(0, 1000):
             self.assertEqual(b(str(i)), q.get())
 
-        for i in range(1000, 2000):
-            self.assertRaises(KeyError, q.get)
+        self.assertRaises(KeyError, q.get)
 
     def file_ops(self, w, r):
         for i in range(0, 1000):
@@ -269,6 +276,26 @@ class TestClient(TestCase):
             self.assertTrue(client.fs.exists('/a/file.txt'))
             q = client.open_queue('/a/file.txt')
             self.queue_ops(q)
+        finally:
+            client.disconnect()
+            self.stop_servers()
+
+    def test_blocking_queue(self):
+        self.start_servers()
+        client = self.jiffy_client()
+        try:
+            q1 = client.create_blocking_queue('/a/file.txt', 'local://tmp')
+            self.assertTrue(client.fs.exists('/a/file.txt'))
+            q2 = client.open_blocking_queue('/a/file.txt')
+
+            p = Process(target=producer, args=(q1,))
+            c = Process(target=consumer, args=(q2,))
+
+            p.start()
+            c.start()
+
+            p.join()
+            c.join()
         finally:
             client.disconnect()
             self.stop_servers()
@@ -387,8 +414,8 @@ class TestClient(TestCase):
             n3.subscribe(['remove'])
 
             kv = client.open_hash_table("/a/file.txt")
-            kv.put(b'key1', b'value1')
-            kv.remove(b'key1')
+            kv.put(b('key1'), b('value1'))
+            kv.remove(b('key1'))
 
             self.assertEqual(Notification('put', b('key1')), n1.get_notification())
             n2_notifs = [n2.get_notification(), n2.get_notification()]
@@ -406,11 +433,11 @@ class TestClient(TestCase):
             n1.unsubscribe(['put'])
             n2.unsubscribe(['remove'])
 
-            kv.put(b'key1', b'value1')
-            kv.remove(b'key1')
+            kv.put(b('key1'), b('value1'))
+            kv.remove(b('key1'))
 
-            self.assertEqual(Notification('put', b'key1'), n2.get_notification())
-            self.assertEqual(Notification('remove', b'key1'), n3.get_notification())
+            self.assertEqual(Notification('put', b('key1')), n2.get_notification())
+            self.assertEqual(Notification('remove', b('key1')), n3.get_notification())
 
             with self.assertRaises(queue.Empty):
                 n1.get_notification(block=False)

@@ -1,5 +1,5 @@
 from jiffy.storage.block_client import BlockClientCache
-from jiffy.storage.compat import b
+from jiffy.storage.compat import b, bytes_to_str
 from jiffy.storage.replica_chain_client import ReplicaChainClient
 
 
@@ -32,5 +32,5 @@ class DataStructureClient(object):
             response = self._handle_redirect(args, response)
         self.redo_times = 0
         if response[0] != b('!ok'):
-            raise KeyError(response[0])
+            raise KeyError(bytes_to_str(response[0]))
         return response

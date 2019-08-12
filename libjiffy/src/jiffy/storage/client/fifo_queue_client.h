@@ -47,12 +47,6 @@ class fifo_queue_client : data_structure_client {
    */
   std::string dequeue();
 
-  /**
-   * @brief Read next item without dequeue
-   * @return Read next result
-   */ 
-  std::string read_next();
-
  private:
   /**
    * @brief Handle command in redirect case
@@ -67,10 +61,6 @@ class fifo_queue_client : data_structure_client {
   std::size_t enqueue_partition_;
   /* Replica chain clients, each partition only save a replica chain client */
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
-  /* Read offset */
-  std::size_t read_offset_;
-  /* Read next partition */
-  std::size_t read_partition_;
    
 };
 

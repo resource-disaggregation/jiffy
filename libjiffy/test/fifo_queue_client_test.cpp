@@ -1,16 +1,13 @@
 #include <catch.hpp>
-#include <thrift/transport/TTransportException.h>
 #include <thread>
 #include "test_utils.h"
 #include "jiffy/directory/fs/directory_tree.h"
 #include "jiffy/directory/fs/directory_server.h"
 #include "jiffy/storage/manager/storage_management_server.h"
-#include "jiffy/storage/manager/storage_management_client.h"
 #include "jiffy/storage/manager/storage_manager.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_partition.h"
 #include "jiffy/storage/service/block_server.h"
 #include "jiffy/storage/client/fifo_queue_client.h"
-#include "jiffy/auto_scaling/auto_scaling_client.h"
 #include "jiffy/auto_scaling/auto_scaling_server.h"
 
 using namespace ::jiffy::storage;
@@ -58,10 +55,6 @@ TEST_CASE("fifo_queue_client_enqueue_dequeue_test", "[enqueue][dequeue]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_NOTHROW(client.enqueue(std::to_string(i)));
   }
-  for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.read_next() == std::to_string(i));
-  }
-
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.dequeue() == std::to_string(i));
   }

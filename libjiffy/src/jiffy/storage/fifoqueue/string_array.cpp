@@ -1,122 +1,127 @@
 #include "string_array.h"
-#include "jiffy/utils/logger.h"
 
 namespace jiffy {
 namespace storage {
-using namespace utils;
 
-string_array::string_array(std::size_t max_size, block_memory_allocator<char> alloc) : alloc_(alloc), max_(max_size) {
-  data_ = alloc_.allocate(max_);
-  tail_ = 0;
-  last_element_offset_ = 0;
-  max_tail_ = 0;
-  split_string_ = false;
+string_array::string_array(std::size_t capacity, block_memory_allocator<char> alloc)
+    : head_(0), tail_(0), size_(0), capacity_(capacity), alloc_(alloc) {
+  data_ = alloc_.allocate(capacity_);
 }
 
 string_array::~string_array() {
-  alloc_.deallocate(data_, max_);
+  alloc_.deallocate(data_, capacity_);
 }
 
 string_array::string_array(const string_array &other) {
   alloc_ = other.alloc_;
-  max_ = other.max_;
+  capacity_ = other.capacity_;
   data_ = other.data_;
   tail_ = other.tail_;
-  max_tail_ = other.max_tail_;
-  split_string_ = other.split_string_;
-  last_element_offset_ = other.last_element_offset_;
 }
 
-string_array &string_array::operator=(const string_array &other) {
-  alloc_ = other.alloc_;
-  max_ = other.max_;
-  data_ = other.data_;
-  tail_ = other.tail_;
-  last_element_offset_ = other.last_element_offset_;
-  max_tail_ = other.max_tail_;
-  split_string_ = other.split_string_;
-  return *this;
-}
+string_array &string_array::operator=(const string_array &other) = default;
 
 bool string_array::operator==(const string_array &other) const {
-  return data_ == other.data_ && tail_ == other.tail_ && alloc_ == other.alloc_ && max_ == other.max_
-      && last_element_offset_ == other.last_element_offset_ && max_tail_ == other.max_tail_
-      && split_string_ == other.split_string_;
+  return data_ == other.data_ && tail_ == other.tail_ && alloc_ == other.alloc_ && capacity_ == other.capacity_;
 }
 
-std::pair<bool, std::string> string_array::push_back(const std::string &item) {
-  auto len = item.size();
-  if (len + tail_ + METADATA_LEN <= max_) { // Complete item will be written
-    // Write length
-    std::memcpy(data_ + tail_, (char *) &len, METADATA_LEN);
-    last_element_offset_ = tail_;
-    tail_ += METADATA_LEN;
+void string_array::write(std::size_t offset, const std::string &item) {
+  // Write size
+  uint32_t sz = item.size();
+  data_[offset % capacity_] = sz;
+  data_[(offset + 1) % capacity_] = sz >> 8;
+  data_[(offset + 2) % capacity_] = sz >> 16;
+  data_[(offset + 3) % capacity_] = sz >> 24;
 
-    // Write data
-    std::memcpy(data_ + tail_, item.c_str(), len);
-    tail_ += len;
-
-    max_tail_ = std::max(tail_, max_tail_);
-    return std::make_pair(true, std::string("!success"));
-  } else if (max_ - tail_ >= METADATA_LEN) { // Item will be partially written, remaining part will be returned
-    // Write length
-    auto remain_len = max_ - tail_ - METADATA_LEN;
-    std::memcpy(data_ + tail_, (char *) &len, METADATA_LEN);
-    last_element_offset_ = tail_;
-    tail_ += METADATA_LEN;
-
-    // Write data
-    std::memcpy(data_ + tail_, item.c_str(), remain_len);
-    tail_ += remain_len;
-
-    max_tail_ = std::max(tail_, max_tail_);
-    split_string_ = true;
-    return std::make_pair(false, item.substr(remain_len, item.size() - remain_len));
-  } else { // Item will not be written, full item will be returned
-    split_string_ = true;
-    return std::make_pair(false, item);
-  }
-}
-
-const std::pair<bool, std::string> string_array::at(std::size_t offset) const {
-  if (offset > last_element_offset_ || empty()) {
-    if (max_ - offset < METADATA_LEN && split_string_)
-      return std::make_pair(false, "");
-    return std::make_pair(false, std::string("!not_available"));
-  }
-  auto len = *((std::size_t *) (data_ + offset));
-  if (offset + METADATA_LEN + len <= max_) {
-    return std::make_pair(true, std::string(data_ + offset + METADATA_LEN, len));
+  // Write data
+  auto data_offset = (offset + METADATA_LEN) % capacity_;
+  if (data_offset + sz <= capacity_) {
+    std::memcpy(data_ + data_offset, item.data(), sz);
   } else {
-    return std::make_pair(false, std::string(data_ + offset + METADATA_LEN, max_ - offset - METADATA_LEN));
+    size_t sz1 = capacity_ - data_offset;
+    std::memcpy(data_ + data_offset, item.data(), sz1);
+    size_t sz2 = sz - sz1;
+    std::memcpy(data_, item.data() + sz1, sz2);
   }
+}
+
+std::string string_array::read(std::size_t offset) const {
+  // Read size
+  uint32_t u0 = data_[offset % capacity_];
+  uint32_t u1 = data_[(offset + 1) % capacity_];
+  uint32_t u2 = data_[(offset + 2) % capacity_];
+  uint32_t u3 = data_[(offset + 3) % capacity_];
+  uint32_t sz = u0 | (u1 << 8) | (u2 << 16) | (u3 << 24);
+
+  // Read data
+  auto data_offset = (offset + METADATA_LEN) % capacity_;
+  std::string buf(sz, '\0');
+  if (data_offset + sz <= capacity_) {
+    std::memcpy(&buf[0], data_ + data_offset, sz);
+  } else {
+    size_t sz1 = capacity_ - data_offset;
+    std::memcpy(&buf[0], data_ + data_offset, sz1);
+    size_t sz2 = sz - sz1;
+    std::memcpy(&buf[0] + sz1, data_, sz2);
+  }
+  return buf;
+}
+
+void string_array::push_back(const std::string &item) {
+  if (!enqueue(item)) {
+    throw std::out_of_range("!full");
+  }
+}
+
+bool string_array::enqueue(const std::string &item) {
+  if (size_ + METADATA_LEN + item.size() > capacity_) {
+    // The buffer cannot accommodate the item
+    return false;
+  }
+
+  write(tail_, item);
+  tail_ = (tail_ + METADATA_LEN + item.size()) % capacity_;
+  size_ += (METADATA_LEN + item.size());
+  return true;
+}
+
+bool string_array::dequeue(std::string &item) {
+  if (size_ == 0) {
+    // The buffer is empty
+    return false;
+  }
+  item = read(head_);
+  head_ = (head_ + METADATA_LEN + item.size()) % capacity_;
+  size_ -= (METADATA_LEN + item.size());
+  return true;
 }
 
 std::size_t string_array::find_next(std::size_t offset) const {
-  if (offset >= last_element_offset_ || offset >= tail_) return 0;
-  return offset + *reinterpret_cast<size_t*>(data_ + offset) + METADATA_LEN;
-}
-
-void string_array::recover(std::size_t len) {
-  tail_ -= (len + METADATA_LEN);
+  // Read size
+  uint32_t u0 = data_[offset % capacity_];
+  uint32_t u1 = data_[(offset + 1) % capacity_];
+  uint32_t u2 = data_[(offset + 2) % capacity_];
+  uint32_t u3 = data_[(offset + 3) % capacity_];
+  uint32_t sz = u0 | (u1 << 8) | (u2 << 16) | (u3 << 24);
+  return offset + sz + METADATA_LEN;
 }
 
 std::size_t string_array::size() const {
-  return max_tail_;
+  return size_;
 }
 
-std::size_t string_array::capacity() {
-  return max_ - METADATA_LEN;
+std::size_t string_array::capacity() const {
+  return capacity_;
 }
 
 void string_array::clear() {
   tail_ = 0;
-  last_element_offset_ = 0;
-  max_tail_ = 0;
+  head_ = 0;
+  size_ = 0;
 }
 
 bool string_array::empty() const {
-  return tail_ == 0;
+  return head_ == tail_;
 }
 
 string_array::iterator string_array::begin() {
@@ -124,19 +129,15 @@ string_array::iterator string_array::begin() {
 }
 
 string_array::iterator string_array::end() {
-  return string_array::iterator(*this, max_);
-}
-
-std::size_t string_array::max_offset() const {
-  return max_;
+  return string_array::iterator(*this, capacity_);
 }
 
 string_array::const_iterator string_array::begin() const {
-  return string_array::const_iterator(*this, 0);
+  return {*this, 0};
 }
 
 string_array::const_iterator string_array::end() const {
-  return string_array::const_iterator(*this, max_);
+  return {*this, capacity_};
 }
 
 string_array_iterator::string_array_iterator(string_array &impl, std::size_t pos)
@@ -144,18 +145,15 @@ string_array_iterator::string_array_iterator(string_array &impl, std::size_t pos
       pos_(pos) {}
 
 string_array_iterator::value_type string_array_iterator::operator*() const {
-  auto ret = impl_.at(pos_);
-  return ret.second;
+  return impl_.read(pos_);
 }
 
 const string_array_iterator string_array_iterator::operator++(int) {
-  pos_ = impl_.find_next(pos_);
-  if (pos_) {
-    return *this;
-  } else {
-    pos_ = impl_.max_offset();
-    return *this;
-  }
+  if (pos_ != impl_.tail_)
+    pos_ = impl_.find_next(pos_);
+  else
+    pos_ = impl_.capacity_;
+  return *this;
 }
 
 bool string_array_iterator::operator==(string_array_iterator other) const {
@@ -176,18 +174,15 @@ const_string_array_iterator::const_string_array_iterator(const string_array &imp
     : impl_(impl), pos_(pos) {}
 
 const_string_array_iterator::value_type const_string_array_iterator::operator*() const {
-  auto ret = impl_.at(pos_);
-  return ret.second;
+  return impl_.read(pos_);
 }
 
 const const_string_array_iterator const_string_array_iterator::operator++(int) {
-  pos_ = impl_.find_next(pos_);
-  if (pos_) {
-    return *this;
-  } else {
-    pos_ = impl_.max_offset();
-    return *this;
-  }
+  if (pos_ != impl_.tail_)
+    pos_ = impl_.find_next(pos_);
+  else
+    pos_ = impl_.capacity_;
+  return *this;
 }
 
 bool const_string_array_iterator::operator==(const_string_array_iterator other) const {
