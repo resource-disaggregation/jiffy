@@ -34,19 +34,15 @@ class ControlMessage:
         return self.ctype == other.ctype and self.rtype == other.rtype and self.data == other.data
 
 
-class Mailbox:
+class Mailbox(queue.Queue):
     def __init__(self):
-        self.q = queue.Queue()
+        super(Mailbox, self).__init__()
 
     def __call__(self, notification):
-        self.q.put(notification)
+        self.put(notification)
 
     def pop(self, block=True, timeout=None):
-        ret = self.q.get(block, timeout)
-        return ret
-
-    def empty(self):
-        return self.q.empty()
+        return self.get(block, timeout)
 
 
 class SubscriptionServiceHandler(block_response_service.Iface):
@@ -54,9 +50,6 @@ class SubscriptionServiceHandler(block_response_service.Iface):
         self.notification_callback = notification_callback
         self.success_callback = success_callback
         self.error_callback = failure_callback
-
-    def register_callback(self, callback):
-        self.notification_callback = callback
 
     def notification(self, op, data):
         self.notification_callback(Notification(op, data))
@@ -95,7 +88,7 @@ class SubscriptionWorker(threading.Thread):
 
 
 class SubscriptionClient:
-    def __init__(self, data_status, callback=Mailbox()):
+    def __init__(self, data_status):
         self.block_names = [block_chain.block_ids[-1].split(':') for block_chain in data_status.data_blocks]
         self.block_ids = [int(b[-1]) for b in self.block_names]
         self.transports = [TTransport.TFramedTransport(TSocket.TSocket(b[0], int(b[1]))) for b in self.block_names]
@@ -103,7 +96,7 @@ class SubscriptionClient:
         self.clients = [block_request_service.Client(protocol) for protocol in self.protocols]
         for transport in self.transports:
             transport.open()
-        self.notifications = callback
+        self.notifications = Mailbox()
         self.controls = Mailbox()
         self.worker = SubscriptionWorker(self.protocols, self.notifications, self.controls)
         self.worker.start()
@@ -142,13 +135,7 @@ class SubscriptionClient:
             raise RuntimeError('One or more storage servers did not respond to subscription request')
 
     def get_notification(self, block=True, timeout=None):
-        if hasattr(self.notifications, 'pop'):
-            n = self.notifications.pop(block, timeout)
-            return n
-        else:
-            return None
+        return self.notifications.pop(block, timeout)
 
     def has_notification(self):
-        if hasattr(self.notifications, 'empty'):
-            return not self.notifications.empty()
-        return None
+        return not self.notifications.empty()

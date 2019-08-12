@@ -34,7 +34,7 @@ class string_array {
   typedef const std::string &const_reference;
 
  public:
-  static const int METADATA_LEN = 8;
+  static const int METADATA_LEN = sizeof(uint32_t);
 
   /**
    * @brief Constructor
@@ -43,10 +43,10 @@ class string_array {
 
   /**
    * @brief Constructor
-   * @param max_size Max size for the string array
+   * @param capacity Max size for the string array
    * @param alloc Block memory allocator
    */
-  string_array(std::size_t max_size, block_memory_allocator<char> alloc);
+  string_array(std::size_t capacity, block_memory_allocator<char> alloc);
 
   /**
    * @brief Destructor
@@ -74,18 +74,38 @@ class string_array {
   bool operator==(const string_array &other) const;
 
   /**
-   * @brief Push new message at the end of the array
-   * @param item Message
-   * @return Pair, a status boolean and the remain string
+   * @brief Push an item to the end
+   * @param item Item to add.
    */
-  std::pair<bool, std::string> push_back(const std::string &item);
+  void push_back(const std::string& item);
 
   /**
-   * @brief Read string at offset
-   * @param offset Read offset
-   * @param Pair, a status boolean and the read string
+   * @brief Enqueue new item
+   * @param item Item
+   * @return True if successful, false otherwise
    */
-  const std::pair<bool, std::string> at(std::size_t offset) const;
+  bool enqueue(const std::string &item);
+
+  /**
+   * @brief Dequeue an item
+   * @param item Item
+   * @return True if successful, false otherwise
+   */
+  bool dequeue(std::string& item);
+
+  /**
+   * @brief Read item at offset
+   * @param offset Read offset
+   * @param The item at given offset
+   */
+  std::string read(std::size_t offset) const;
+
+  /**
+   * @brief Write item at offset
+   * @param offset Write offset
+   * @param item The item to write
+   */
+  void write(std::size_t offset, const std::string& item);
 
   /**
    * @brief Find next string for the given offset string
@@ -93,12 +113,6 @@ class string_array {
    * @return Offset of the next string
    */
   std::size_t find_next(std::size_t offset) const;
-
-  /**
-   * @brief Recover last write
-   * @param len Length of bytes to recover
-   */
-  void recover(std::size_t len);
 
   /**
    * @brief Fetch total size of the string array
@@ -110,7 +124,7 @@ class string_array {
    * @brief Fetch capacity of the string array
    * @return Capacity
    */
-  std::size_t capacity();
+  std::size_t capacity() const;
 
   /**
    * @brief Clear the content of string array
@@ -147,34 +161,24 @@ class string_array {
    */
   const_iterator end() const;
 
-  /**
-   * @brief Fetch the maximum offset of the strings
-   * @return Maximum offset of the strings
-   */
-  std::size_t max_offset() const;
-
  private:
-  /* Block memory allocator */
-  block_memory_allocator<char> alloc_;
-
-  /* Offset of the last element */
-  std::size_t last_element_offset_;
-
-  /* Maximum capacity */
-  std::size_t max_{};
-
-  /* Data pointer */
-  char *data_{};
+  /* Head position */
+  std::size_t head_{};
 
   /* Tail position */
   std::size_t tail_{};
 
-  /* Max position */
-  std::size_t max_tail_;
+  /* Size */
+  std::size_t size_{};
 
-  /* Bool for split string */
-  bool split_string_;
+  /* Maximum capacity */
+  std::size_t capacity_{};
 
+  /* Block memory allocator */
+  block_memory_allocator<char> alloc_;
+
+  /* Data pointer */
+  char *data_{};
 };
 
 /**

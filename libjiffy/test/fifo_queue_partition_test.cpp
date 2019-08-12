@@ -25,7 +25,7 @@ TEST_CASE("fifo_queue_enqueue_dequeue_test", "[enqueue][dequeue]") {
   for (std::size_t i = 1000; i < 2000; ++i) {
     response resp;
     REQUIRE_NOTHROW(block.dequeue(resp, {"dequeue"}));
-    REQUIRE(resp[0] == "!msg_not_found");
+    REQUIRE(resp[0] == "!empty");
   }
 }
 
@@ -47,31 +47,7 @@ TEST_CASE("fifo_queue_enqueue_clear_dequeue_test", "[enqueue][dequeue]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
     REQUIRE_NOTHROW(block.dequeue(resp, {"dequeue"}));
-    REQUIRE(resp[0] == "!msg_not_found");
-  }
-}
-
-TEST_CASE("fifo_queue_enqueue_readnext_dequeue", "[enqueue][read_next][dequeue]") {
-  block_memory_manager manager;
-  fifo_queue_partition block(&manager);
-  for (std::size_t i = 0; i < 1000; ++i) {
-    response resp;
-    REQUIRE_NOTHROW(block.enqueue(resp, {"enqueue", std::to_string(i)}));
-    REQUIRE(resp[0] == "!ok");
-  }
-  std::size_t pos = 0;
-  for (std::size_t i = 0; i < 1000; ++i) {
-    response resp;
-    REQUIRE_NOTHROW(block.read_next(resp, {"read_next", std::to_string(pos)}));
-    REQUIRE(resp[0] == "!ok");
-    REQUIRE(resp[1] == std::to_string(i));
-    pos += (std::to_string(i).size() + string_array::METADATA_LEN);
-  }
-  for (std::size_t i = 0; i < 1000; ++i) {
-    response resp;
-    REQUIRE_NOTHROW(block.dequeue(resp, {"dequeue"}));
-    REQUIRE(resp[0] == "!ok");
-    REQUIRE(resp[1] == std::to_string(i));
+    REQUIRE(resp[0] == "!empty");
   }
 }
 
