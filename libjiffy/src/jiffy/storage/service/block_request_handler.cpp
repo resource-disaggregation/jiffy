@@ -5,17 +5,14 @@ namespace storage {
 using namespace std;
 block_request_handler::block_request_handler(std::shared_ptr<::apache::thrift::protocol::TProtocol> prot,
                                              std::atomic<int64_t> &client_id_gen,
-                                             std::vector<std::shared_ptr<block>> &blocks)
+                                             std::map<int, std::shared_ptr<block>> &blocks)
     : prot_(std::move(prot)),
       client_(std::make_shared<block_response_client>(prot_)),
       notification_client_(std::make_shared<notification_response_client>(prot_)),
       registered_block_id_(-1),
       registered_client_id_(-1),
       client_id_gen_(client_id_gen),
-      blocks_(blocks) {
-	      auto bid = block_id_parser::parse(blocks.front()->id());
-	      first_ = bid.id;
-      }
+      blocks_(blocks) {}
 
 int64_t block_request_handler::get_client_id() {
   return client_id_gen_.fetch_add(1L);
@@ -23,17 +20,14 @@ int64_t block_request_handler::get_client_id() {
 
 void block_request_handler::register_client_id(const int32_t block_id, const int64_t client_id) {
   registered_client_id_ = client_id;
-  //registered_block_id_ = block_id;
-  registered_block_id_ = block_id - first_;
-
-  //blocks_.at(static_cast<std::size_t>(block_id))->impl()->clients().add_client(client_id, client_);
-  blocks_.at(static_cast<std::size_t>(block_id - first_))->impl()->clients().add_client(client_id, client_);
+  registered_block_id_ = block_id;
+  blocks_[static_cast<std::size_t>(block_id)]->impl()->clients().add_client(client_id, client_);
 }
 
 void block_request_handler::command_request(const sequence_id &seq,
                                             const int32_t block_id,
                                             const std::vector<std::string> &args) {
-  blocks_.at(static_cast<std::size_t>(block_id - first_))->impl()->request(seq, args);
+  blocks_[static_cast<std::size_t>(block_id)]->impl()->request(seq, args);
 }
 
 int32_t block_request_handler::registered_block_id() const {
@@ -47,7 +41,7 @@ int64_t block_request_handler::registered_client_id() const {
 void block_request_handler::chain_request(const sequence_id &seq,
                                           const int32_t block_id,
                                           const std::vector<std::string> &args) {
-  const auto &b = blocks_.at(static_cast<std::size_t>(block_id - first_));
+  const auto &b = blocks_[static_cast<std::size_t>(block_id)];
   if (!b->impl()->is_set_prev()) {
     b->impl()->reset_prev(prot_);
   }
@@ -57,7 +51,7 @@ void block_request_handler::chain_request(const sequence_id &seq,
 void block_request_handler::run_command(std::vector<std::string> &_return,
                                         const int32_t block_id,
                                         const std::vector<std::string> &args) {
-  blocks_.at(static_cast<std::size_t>(block_id - first_))->impl()->run_command(_return, args);
+  blocks_[static_cast<std::size_t>(block_id)]->impl()->run_command(_return, args);
 }
 
 void block_request_handler::subscribe(int32_t block_id,
@@ -67,7 +61,7 @@ void block_request_handler::subscribe(int32_t block_id,
     local_subs_.insert(std::make_pair(block_id, op));
     added.push_back(op);
   }
-  blocks_[block_id]->impl()->subscriptions().add_subscriptions(added, notification_client_);
+  blocks_[static_cast<std::size_t>(block_id)]->impl()->subscriptions().add_subscriptions(added, notification_client_);
 }
 
 void block_request_handler::unsubscribe(int32_t block_id,
@@ -93,7 +87,7 @@ void block_request_handler::unsubscribe(int32_t block_id,
     }
   }
   if (!removed.empty())
-    blocks_[block_id]->impl()->subscriptions().remove_subscriptions(removed, notification_client_, inform);
+    blocks_[static_cast<std::size_t>(block_id)]->impl()->subscriptions().remove_subscriptions(removed, notification_client_, inform);
 }
 
 }

@@ -24,7 +24,7 @@ class block_request_handler : public block_request_serviceIf {
    */
   explicit block_request_handler(std::shared_ptr<::apache::thrift::protocol::TProtocol> prot,
                                  std::atomic<int64_t> &client_id_gen,
-                                 std::vector<std::shared_ptr<block>> &blocks);
+                                 std::map<int, std::shared_ptr<block>> &blocks);
 
   /**
    * @brief Fetch client identifier and add one to the atomic pointer
@@ -118,9 +118,7 @@ class block_request_handler : public block_request_serviceIf {
   /* Client identifier generator */
   std::atomic<int64_t> &client_id_gen_;
   /* Data blocks */
-  std::vector<std::shared_ptr<block>> &blocks_;
-  /* First block id */
-  std::size_t first_;
+  std::map<int, std::shared_ptr<block>> &blocks_;
 };
 
 }

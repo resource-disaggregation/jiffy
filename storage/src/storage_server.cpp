@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
         ("directory.service_port", po::value<int>(&dir_port)->default_value(9090))
         ("directory.block_port", po::value<int>(&block_port)->default_value(9092))
         ("storage.block.num_blocks", po::value<size_t>(&num_blocks)->default_value(64))
-        ("storage.block.num_servers", po::value<size_t>(&num_servers)->default_value(64))
+        ("storage.block.num_servers", po::value<size_t>(&num_servers)->default_value(4))
         ("storage.block.capacity", po::value<size_t>(&block_capacity)->default_value(134217728))
         ("storage.block.capacity_threshold_lo", po::value<double>(&blk_thresh_lo)->default_value(0.25))
         ("storage.block.capacity_threshold_hi", po::value<double>(&blk_thresh_hi)->default_value(0.75));
@@ -171,7 +171,8 @@ int main(int argc, char **argv) {
 
   std::mutex failure_mtx;
   std::condition_variable failure_condition;
-  std::atomic<int> failing_thread(-1); // management -> 0, service -> 1, notification -> 2, chain -> 3, auto_scaling -> 4
+  std::atomic<int>
+      failing_thread(-1); // management -> 0, service -> 1, notification -> 2, chain -> 3, auto_scaling -> 4
 
   std::string hostname;
   if (address == "0.0.0.0") {
@@ -183,10 +184,7 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Hostname: " << hostname;
 
   for (int i = 0; i < static_cast<int>(num_blocks); i++) {
-   // block_ids.push_back(block_id_parser::make(hostname, service_port + i, mgmt_port, i));
-    
     block_ids.push_back(block_id_parser::make(hostname, service_port + i % num_servers, mgmt_port, i));
-//    LOG(log_level::info) << hostname << " " << service_port + i % num_servers << " " << mgmt_port << " " <<
   }
 
   std::vector<std::shared_ptr<block>> blocks;
@@ -234,42 +232,25 @@ int main(int argc, char **argv) {
 
   LOG(log_level::info) << "Advertised " << num_blocks << " to block allocation server";
 
-  //std::exception_ptr storage_exception = nullptr;
-  //auto storage_server = block_server::create(blocks, service_port);
-  //std::thread storage_serve_thread([&storage_exception, &storage_server, &failing_thread, &failure_condition] {
-  //  try {
-  //    storage_server->serve();
-  //  } catch (...) {
-  //    storage_exception = std::current_exception();
-  //    failing_thread = 1;
-  //    failure_condition.notify_all();
-  //  }
-  //});
- 
- std::vector<std::exception_ptr> storage_exception(num_servers);
- std::vector<std::thread> storage_serve_thread(num_servers);
- std::vector<std::shared_ptr<TServer>> storage_server(num_servers);
- std::vector<std::vector<std::shared_ptr<block>>> block_vec(num_servers);
- // std::vector<std::exception_ptr> storage_exception(num_blocks);
- // std::vector<std::thread> storage_serve_thread(num_blocks);
- // std::vector<std::shared_ptr<TServer>> storage_server(num_blocks);
- // std::vector<std::vector<std::shared_ptr<block>>> block_vec(num_blocks);
-  for(size_t i = 0; i < num_servers; i++) {
-  	auto tmp_block = std::vector<std::shared_ptr<block>>();
-	for(size_t j = i; j < num_blocks; j += num_servers)
-		tmp_block.push_back(blocks[j]);
-//tmp_block.push_back(blocks[i]);
-	block_vec[i] = tmp_block;
-  	storage_server[i] = block_server::create(block_vec[i], service_port + i);
-  	storage_serve_thread[i] = std::thread([&storage_exception, &storage_server, &failing_thread, &failure_condition, i] {
-    		try {
-      			storage_server[i]->serve();
-    		} catch (...) {
-      			storage_exception[i] = std::current_exception();
-      			failing_thread = 1;
-      			failure_condition.notify_all();
-    		}
-  	});
+  std::exception_ptr storage_exception;
+  std::vector<std::thread> storage_serve_thread(num_servers);
+  std::vector<std::shared_ptr<TServer>> storage_server(num_servers);
+  std::vector<std::vector<std::shared_ptr<block>>> block_vec(num_servers);
+  for (size_t i = 0; i < num_servers; i++) {
+    auto tmp_block = std::vector<std::shared_ptr<block>>();
+    for (size_t j = i; j < num_blocks; j += num_servers)
+      tmp_block.push_back(blocks[j]);
+    storage_server[i] = block_server::create(tmp_block, service_port + i);
+    storage_serve_thread[i] =
+        std::thread([&storage_exception, &storage_server, &failing_thread, &failure_condition, i] {
+          try {
+            storage_server[i]->serve();
+          } catch (...) {
+            storage_exception = std::current_exception();
+            failing_thread = 1;
+            failure_condition.notify_all();
+          }
+        });
   }
 
   LOG(log_level::info) << "Storage server listening on " << address << ":" << service_port;
@@ -298,9 +279,9 @@ int main(int argc, char **argv) {
     }
     case 1: {
       LOG(log_level::error) << "KV server failed";
-      if (storage_exception[0]) {
+      if (storage_exception) {
         try {
-          std::rethrow_exception(storage_exception[0]);
+          std::rethrow_exception(storage_exception);
         } catch (std::exception &e) {
           LOG(log_level::error) << "ERROR: " << e.what();
           std::exit(-1);
@@ -310,7 +291,7 @@ int main(int argc, char **argv) {
     }
     case 4: {
       LOG(log_level::error) << "Auto_scaling server failed";
-      if(auto_scaling_exception) {
+      if (auto_scaling_exception) {
         try {
           std::rethrow_exception(auto_scaling_exception);
         } catch (std::exception &e) {

@@ -13,7 +13,7 @@ using namespace utils;
 replica_chain_client::replica_chain_client(std::shared_ptr<directory::directory_interface> fs,
                                            const std::string &path,
                                            const directory::replica_chain &chain,
-                                           const command_map& OPS,
+                                           const command_map &OPS,
                                            int timeout_ms) : fs_(fs), path_(path), in_flight_(false) {
   seq_.client_id = -1;
   seq_.client_seq_no = 0;
@@ -84,8 +84,8 @@ std::vector<std::string> replica_chain_client::run_command(const std::vector<std
     } catch (apache::thrift::transport::TTransportException &e) {
       LOG(log_level::info) << "Error in connection to chain: " << e.what();
       LOG(log_level::info) << args.front() << " " << chain_.name;
-      for(const auto &x : chain_.block_ids)
-	      LOG(log_level::info) << x;
+      for (const auto &x : chain_.block_ids)
+        LOG(log_level::info) << x;
       connect(fs_->resolve_failures(path_, chain_), timeout_ms_);
       retry = true;
     } catch (std::logic_error &e) { // TODO: This is very iffy, we need to fix this

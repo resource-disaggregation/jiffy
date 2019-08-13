@@ -111,7 +111,7 @@ std::size_t hash_table_client::block_id(const std::string &key) {
 void hash_table_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
   while (_return[0] == "!exporting") {
     auto it = redirect_blocks_.find(_return[0] + _return[1]);
-    if(it == redirect_blocks_.end()) {
+    if (it == redirect_blocks_.end()) {
       auto chain = directory::replica_chain(string_utils::split(_return[1], '!'));
       auto client = std::make_shared<replica_chain_client>(fs_, path_, chain, HT_OPS, 0);
       redirect_blocks_.emplace(std::make_pair(_return[0] + _return[1], client));
@@ -119,14 +119,14 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
     } else {
       _return = it->second->run_command_redirected(args);
     }
-    
+
   }
   if (_return[0] == "!block_moved") {
     refresh();
     throw redo_error();
   }
   if (_return[0] == "!full") {
-    std::this_thread::sleep_for(std::chrono::milliseconds((int)redo_times_));
+    std::this_thread::sleep_for(std::chrono::milliseconds((int) redo_times_));
     redo_times_++;
     throw redo_error();
   }
