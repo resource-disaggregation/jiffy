@@ -37,10 +37,10 @@ void file_writer::handle_redirect(std::vector<std::string> &_return, const std::
   } else if (_return[0] == "!split_write") {
     do {
       auto remaining_data_len = std::stoi(_return[1]);
-      auto chain = string_utils::split(_return[2], '!');
       auto remaining_data = data.substr(data.size() - remaining_data_len, remaining_data_len);
 
       if (need_chain()) {
+        auto chain = string_utils::split(_return[2], '!');
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FILE_OPS));
       }
       cur_partition_++;

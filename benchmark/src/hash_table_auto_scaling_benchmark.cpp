@@ -20,7 +20,6 @@ using namespace ::jiffy::directory;
 using namespace ::jiffy::storage;
 using namespace ::jiffy::utils;
 using namespace ::apache::thrift;
-namespace ts = std::chrono;
 
 std::vector<std::string> keygenerator(std::size_t num_keys, double theta = 0, int num_buckets = 512) {
   int bucket_size = 65536 / num_buckets;
@@ -76,7 +75,7 @@ int main() {
   jiffy_client client(address, service_port, lease_port);
   std::shared_ptr<hash_table_client>
       ht_client = client.open_or_create_hash_table(path, backing_path, num_blocks, chain_length);
-  std::chrono::milliseconds periodicity_ms_(1000);
+  uint64_t periodicity_ms_ = 1000;
   uint64_t put_tot_time = 0, put_t0 = 0, put_t1 = 0;
 
   std::atomic_bool stop_{false};
@@ -84,22 +83,21 @@ int main() {
   auto worker_ = std::thread([&] {
     std::ofstream out("dataset.trace");
     while (!stop_.load()) {
-      auto start = std::chrono::steady_clock::now();
+      auto start = time_utils::now_ms();
       try {
-        namespace ts = std::chrono;
-        auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
+        auto cur_epoch = time_utils::now_ms();
         out << cur_epoch;
         out << "\t" << j * 100 * 1024;
         out << std::endl;
       } catch (std::exception &e) {
         LOG(log_level::error) << "Exception: " << e.what();
       }
-      auto end = std::chrono::steady_clock::now();
-      auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+      auto end = time_utils::now_ms();
+      auto elapsed = end - start;
 
-      auto time_to_wait = std::chrono::duration_cast<std::chrono::milliseconds>(periodicity_ms_ - elapsed);
-      if (time_to_wait > std::chrono::milliseconds::zero()) {
-        std::this_thread::sleep_for(time_to_wait);
+      auto time_to_wait = periodicity_ms_ - elapsed;
+      if (time_to_wait > 0) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(time_to_wait));
       }
     }
     out.close();
@@ -112,7 +110,7 @@ int main() {
     ht_client->put(key, data_);
     put_t1 = time_utils::now_us();
     put_tot_time = (put_t1 - put_t0);
-    auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
+    auto cur_epoch = time_utils::now_ms();
     out << cur_epoch << " " << put_tot_time << " put" << key << std::endl;
   }
 
@@ -123,7 +121,7 @@ int main() {
     ht_client->remove(key);
     remove_t1 = time_utils::now_us();
     remove_tot_time = (remove_t1 - remove_t0);
-    auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
+    auto cur_epoch = time_utils::now_ms();
     out << cur_epoch << " " << remove_tot_time << " remove " << key << std::endl;
     if (j == 0)
       break;

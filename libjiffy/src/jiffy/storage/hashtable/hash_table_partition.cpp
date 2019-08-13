@@ -58,7 +58,7 @@ void hash_table_partition::put(response &_return, const arg_list &args) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
       RETURN_ERR("!exporting", export_target_str_);
     }
-    if (overload()) {
+    if (storage_size() + args[1].size() + args[2].size() > storage_capacity()) {
       RETURN_ERR("!full");
     }
 
@@ -223,7 +223,7 @@ void hash_table_partition::update_partition(response &_return, const arg_list &a
   auto new_name = args[1];
   auto new_metadata = args[2];
   if (new_name == "merging" && new_metadata == "merging") {
-    if (metadata() == "regular" && name() != "0_65536") {
+    if (metadata() == "regular" && name() != "0_65536" && underload()) {
       metadata("exporting");
       update_lock_.unlock();
       RETURN_OK(name());
@@ -241,7 +241,8 @@ void hash_table_partition::update_partition(response &_return, const arg_list &a
     auto range = utils::string_utils::split(s[1], '_');
     export_slot_range(std::stoi(range[0]), std::stoi(range[1]));
   } else if (status == "importing") {
-    if (metadata() != "regular" && metadata() != "split_importing") {
+    if ((metadata() != "regular" && !(metadata() == "split_importing" && s[1] == name())) || new_name != name()
+        || scaling_up_ || scaling_down_) {
       update_lock_.unlock();
       RETURN_ERR("!fail");
     }
@@ -270,7 +271,7 @@ void hash_table_partition::update_partition(response &_return, const arg_list &a
   metadata(status);
   slot_range(new_name);
   update_lock_.unlock();
-  RETURN_ERR("!ok");
+  RETURN_ERR(name());
 }
 
 void hash_table_partition::get_storage_size(response &_return, const arg_list &args) {
@@ -290,41 +291,29 @@ void hash_table_partition::get_metadata(response &_return, const arg_list &args)
 void hash_table_partition::run_command(response &_return, const arg_list &args) {
   auto cmd_name = args[0];
   switch (command_id(cmd_name)) {
-    case hash_table_cmd_id::ht_exists:
-      exists(_return, args);
+    case hash_table_cmd_id::ht_exists:exists(_return, args);
       break;
-    case hash_table_cmd_id::ht_get:
-      get(_return, args);
+    case hash_table_cmd_id::ht_get:get(_return, args);
       break;
-    case hash_table_cmd_id::ht_put:
-      put(_return, args);
+    case hash_table_cmd_id::ht_put:put(_return, args);
       break;
-    case hash_table_cmd_id::ht_upsert:
-      upsert(_return, args);
+    case hash_table_cmd_id::ht_upsert:upsert(_return, args);
       break;
-    case hash_table_cmd_id::ht_remove:
-      remove(_return, args);
+    case hash_table_cmd_id::ht_remove:remove(_return, args);
       break;
-    case hash_table_cmd_id::ht_update:
-      update(_return, args);
+    case hash_table_cmd_id::ht_update:update(_return, args);
       break;
-    case hash_table_cmd_id::ht_update_partition:
-      update_partition(_return, args);;
+    case hash_table_cmd_id::ht_update_partition:update_partition(_return, args);;
       break;
-    case hash_table_cmd_id::ht_get_storage_size:
-      get_storage_size(_return, args);
+    case hash_table_cmd_id::ht_get_storage_size:get_storage_size(_return, args);
       break;
-    case hash_table_cmd_id::ht_get_metadata:
-      get_metadata(_return, args);
+    case hash_table_cmd_id::ht_get_metadata:get_metadata(_return, args);
       break;
-    case hash_table_cmd_id::ht_get_range_data:
-      get_data_in_slot_range(_return, args);
+    case hash_table_cmd_id::ht_get_range_data:get_data_in_slot_range(_return, args);
       break;
-    case hash_table_cmd_id::ht_scale_put:
-      scale_put(_return, args);
+    case hash_table_cmd_id::ht_scale_put:scale_put(_return, args);
       break;
-    case hash_table_cmd_id::ht_scale_remove:
-      scale_remove(_return, args);
+    case hash_table_cmd_id::ht_scale_remove:scale_remove(_return, args);
       break;
     default: {
       _return.emplace_back("!no_such_command");

@@ -41,9 +41,9 @@ void file_reader::handle_redirect(std::vector<std::string> &_return, const std::
     std::string result;
     do {
       auto data_part = _return[1];
-      auto chain = string_utils::split(_return[2], '!');
       result += data_part;
       if (need_chain()) {
+        auto chain = string_utils::split(_return[2], '!');
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FILE_OPS));
       }
       cur_partition_++;

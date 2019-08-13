@@ -34,7 +34,7 @@ class block_request_handler_factory : public block_request_serviceIfFactory {
 
  public:
   /* Data blocks */
-  std::vector<std::shared_ptr<block>> &blocks_;
+  std::map<int, std::shared_ptr<block>> blocks_;
   /* Client identifier generator, starts at 1 */
   std::atomic<int64_t> client_id_gen_;
 };
