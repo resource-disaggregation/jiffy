@@ -1,7 +1,8 @@
 # - Find Thrift (a cross platform RPC lib/tool)
 # This module defines
 #  THRIFT_VERSION_STRING, version string of Thrift if found
-#  THRIFT_LIBRARIES, libraries to link
+#  THRIFT_LIBRARY, libraries to link
+#  THRIFT_NB_LIBRARY, non-blocking libraries to link
 #  THRIFT_INCLUDE_DIR, where to find THRIFT headers
 #  THRIFT_COMPILER, thrift compiler executable
 #  THRIFT_FOUND, If false, do not try to use Thrift
@@ -25,21 +26,7 @@ find_path(THRIFT_INCLUDE_DIR
         )
 
 # prefer the thrift version supplied in THRIFT_HOME
-find_library(THRIFT_LIBRARIES
-        NAMES
-        thrift libthrift
-        HINTS
-        ${THRIFT_HOME}
-        ENV THRIFT_HOME
-        /usr/local/Cellar
-        /usr/local
-        /opt/local
-        /usr
-        PATH_SUFFIXES
-        lib lib64
-        )
-
-find_library(THRIFTNB_LIBRARIES
+find_library(THRIFTNB_LIBRARY
         NAMES
         thriftnb libthriftnb
         HINTS
@@ -53,6 +40,20 @@ find_library(THRIFTNB_LIBRARIES
         lib lib64
         )
 
+# prefer the thrift version supplied in THRIFT_HOME
+find_library(THRIFT_LIBRARY
+        NAMES
+        thrift libthrift
+        HINTS
+        ${THRIFT_HOME}
+        ENV THRIFT_HOME
+        /usr/local/Cellar
+        /usr/local
+        /opt/local
+        /usr
+        PATH_SUFFIXES
+        lib lib64)
+
 find_program(THRIFT_COMPILER
         NAMES
         thrift
@@ -64,8 +65,7 @@ find_program(THRIFT_COMPILER
         /opt/local
         /usr
         PATH_SUFFIXES
-        bin bin64
-        )
+        bin bin64)
 
 if (THRIFT_COMPILER)
   exec_program(${THRIFT_COMPILER}
@@ -75,5 +75,5 @@ endif ()
 
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(THRIFT DEFAULT_MSG THRIFT_LIBRARIES THRIFT_INCLUDE_DIR THRIFT_COMPILER)
-mark_as_advanced(THRIFT_LIBRARIES THRIFTNB_LIBRARIES THRIFT_INCLUDE_DIR THRIFT_COMPILER THRIFT_VERSION_STRING)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(THRIFT DEFAULT_MSG THRIFT_LIBRARY THRIFT_INCLUDE_DIR THRIFT_COMPILER)
+mark_as_advanced(THRIFT_LIBRARY THRIFT_INCLUDE_DIR THRIFT_COMPILER THRIFT_VERSION_STRING)

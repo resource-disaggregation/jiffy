@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.12) # 3.12 allows linking object libs
 project(Jiffy C CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -28,12 +28,35 @@ if (GENERATE_THRIFT)
   add_subdirectory(thrift)
 endif ()
 
-add_subdirectory(libjiffy)
-add_subdirectory(directory)
-add_subdirectory(storage)
-
 if (BUILD_TESTS)
+  include(CTest)
   enable_testing(true)
+endif ()
+
+add_subdirectory(libjiffy)
+
+if (BUILD_DIRECTORY)
+  add_subdirectory(directory)
+endif ()
+
+if (BUILD_STORAGE)
+  add_subdirectory(storage)
+endif ()
+
+if (BUILD_PYTHON_CLIENT)
+  add_subdirectory(pyjiffy)
+endif ()
+
+if (BUILD_JAVA_CLIENT)
+  add_subdirectory(jiffy4j)
+endif ()
+
+if (BUILD_BENCHMARKS)
+  add_subdirectory(benchmark)
+endif ()
+
+if (BUILD_DOC)
+  add_subdirectory(docs)
 endif ()
 
 install(FILES conf/jiffy.conf DESTINATION conf)

@@ -1,6 +1,5 @@
 #include "block_response_client.h"
 
-#include <thrift/transport/TBufferTransports.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <iostream>
 

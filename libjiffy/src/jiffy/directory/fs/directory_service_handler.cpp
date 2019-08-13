@@ -33,20 +33,18 @@ void directory_service_handler::open(rpc_data_status &_return, const std::string
 
 void directory_service_handler::create(rpc_data_status &_return,
                                        const std::string &path,
+                                       const std::string &type,
                                        const std::string &backing_path,
                                        int32_t num_blocks,
                                        int32_t chain_length,
                                        int32_t flags,
                                        int32_t permissions,
+                                       const std::vector<std::string> &block_names,
+                                       const std::vector<std::string> &block_metadata,
                                        const std::map<std::string, std::string> &tags) {
   try {
-    _return = directory_type_conversions::to_rpc(shard_->create(path,
-                                                                backing_path,
-                                                                (size_t) num_blocks,
-                                                                (size_t) chain_length,
-                                                                flags,
-                                                                permissions,
-                                                                tags));
+    _return = directory_type_conversions::to_rpc(shard_->create(path, type, backing_path, num_blocks, chain_length,
+                                                                flags, permissions, block_names, block_metadata, tags));
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
   }
@@ -54,20 +52,19 @@ void directory_service_handler::create(rpc_data_status &_return,
 
 void directory_service_handler::open_or_create(rpc_data_status &_return,
                                                const std::string &path,
+                                               const std::string &type,
                                                const std::string &backing_path,
                                                int32_t num_blocks,
                                                int32_t chain_length,
                                                int32_t flags,
                                                int32_t permissions,
+                                               const std::vector<std::string> &block_names,
+                                               const std::vector<std::string> &block_metadata,
                                                const std::map<std::string, std::string> &tags) {
   try {
-    _return = directory_type_conversions::to_rpc(shard_->open_or_create(path,
-                                                                        backing_path,
-                                                                        (size_t) num_blocks,
-                                                                        (size_t) chain_length,
-                                                                        flags,
-                                                                        permissions,
-                                                                        tags));
+    _return = directory_type_conversions::to_rpc(shard_->open_or_create(path, type, backing_path, num_blocks,
+                                                                        chain_length, flags, permissions, block_names,
+                                                                        block_metadata, tags));
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
   }
@@ -237,29 +234,40 @@ void directory_service_handler::add_replica_to_chain(rpc_replica_chain &_return,
   }
 }
 
-void directory_service_handler::add_block_to_file(const std::string &path) {
+void directory_service_handler::add_data_block(rpc_replica_chain &_return,
+                                               const std::string &path,
+                                               const std::string &partition_name,
+                                               const std::string &partition_metadata) {
   try {
-    shard_->add_block_to_file(path);
+    auto ret = shard_->add_block(path, partition_name, partition_metadata);
+    _return = directory_type_conversions::to_rpc(ret);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
   }
 }
 
-void directory_service_handler::split_slot_range(const std::string &path,
-                                                 const int32_t slot_begin,
-                                                 const int32_t slot_end) {
+void directory_service_handler::remove_data_block(const std::string &path, const std::string &partition_name) {
   try {
-    shard_->split_slot_range(path, slot_begin, slot_end);
+    shard_->remove_block(path, partition_name);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
   }
 }
 
-void directory_service_handler::merge_slot_range(const std::string &path,
-                                                 const int32_t slot_begin,
-                                                 const int32_t slot_end) {
+void directory_service_handler::request_partition_data_update(const std::string &path,
+                                                              const std::string &old_partition_name,
+                                                              const std::string &new_partition_name,
+                                                              const std::string &partition_metadata) {
   try {
-    shard_->merge_slot_range(path, slot_begin, slot_end);
+    shard_->update_partition(path, old_partition_name, new_partition_name, partition_metadata);
+  } catch (directory_ops_exception &e) {
+    throw make_exception(e);
+  }
+}
+
+int64_t directory_service_handler::get_storage_capacity(const std::string &path, const std::string &partition_name) {
+  try {
+    return shard_->get_capacity(path, partition_name);
   } catch (directory_ops_exception &e) {
     throw make_exception(e);
   }

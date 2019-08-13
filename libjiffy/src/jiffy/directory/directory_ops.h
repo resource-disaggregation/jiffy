@@ -223,6 +223,7 @@ enum perm_options {
   add = 1,
   remove = 2
 };
+
 /* File types */
 enum file_type {
   none = 0,
@@ -237,22 +238,17 @@ enum storage_mode {
   on_disk = 2
 };
 
-/* Chain status */
-enum chain_status {
-  stable = 0,
-  exporting = 1,
-  importing = 2
-};
 /* Replica chain structure */
 struct replica_chain {
-  /* Block names */
-  std::vector<std::string> block_names;
-  /* Slot range */
-  std::pair<int32_t, int32_t> slot_range;
-  /* Chain status */
-  chain_status status;
+  /* Partition name */
+  std::string name;
+  /* Block identifier */
+  std::vector<std::string> block_ids;
+  /* Partition metadata */
+  std::string metadata;
   /* Storage mode */
   storage_mode mode;
+  typedef std::pair<int32_t, int32_t> slot_range;
   /**
    * Default Constructor
    */
@@ -260,38 +256,20 @@ struct replica_chain {
 
   /**
    * Constructor
-   * @param block_names Block names
-   * @param slot_begin Begin slot
-   * @param slot_end End slot
-   * @param status Chain status
+   * @param block_ids Block IDs
    * @param mode Storage mode
    */
-  replica_chain(const std::vector<std::string> &block_names,
-                int32_t slot_begin,
-                int32_t slot_end,
-                chain_status status,
-                storage_mode mode) {
-    this->block_names = block_names;
-    this->slot_range.first = slot_begin;
-    this->slot_range.second = slot_end;
-    this->status = status;
+  replica_chain(const std::vector<std::string> &block_ids, storage_mode mode) {
+    this->block_ids = block_ids;
     this->mode = mode;
   }
 
   /**
    * Constructor
-   * @param block_names Block names
+   * @param block_ids Block IDs
    */
-  replica_chain(const std::vector<std::string> block_names) : mode(storage_mode::in_memory) {
-    this->block_names = block_names;
-  }
-
-  /**
-   * Fetch slot range string
-   * @return Slot range string
-   */
-  const std::string slot_range_string() const {
-    return std::to_string(slot_range.first) + "_" + std::to_string(slot_range.second);
+  replica_chain(const std::vector<std::string> block_ids) : mode(storage_mode::in_memory) {
+    this->block_ids = block_ids;
   }
 
   /**
@@ -299,7 +277,7 @@ struct replica_chain {
    * @return Head block name
    */
   const std::string &head() const {
-    return block_names.front();
+    return block_ids.front();
   }
 
   /**
@@ -307,23 +285,7 @@ struct replica_chain {
    * @return Tail block name
    */
   const std::string &tail() const {
-    return block_names.back();
-  }
-
-  /**
-   * Fetch begin slot
-   * @return Begin slot
-   */
-  int32_t slot_begin() const {
-    return slot_range.first;
-  }
-
-  /**
-   * Fetch end slot
-   * @return End slot
-   */
-  int32_t slot_end() const {
-    return slot_range.second;
+    return block_ids.back();
   }
 
   /**
@@ -332,13 +294,12 @@ struct replica_chain {
    */
   std::string to_string() const {
     std::string out = "<";
-    for (const auto &name: block_names) {
+    for (const auto &name: block_ids) {
       out += name + ", ";
     }
     out.pop_back();
     out.pop_back();
-    out += "> :: (" + std::to_string(slot_begin()) + ", " + std::to_string(slot_end()) + ") :: { mode : "
-        + std::to_string(mode) + " }";
+    out += "> :: { mode : " + std::to_string(mode) + " }";
     return out;
   }
 
@@ -348,7 +309,7 @@ struct replica_chain {
    * @return Bool value, true if equal
    */
   bool operator==(const replica_chain &other) const {
-    return block_names == other.block_names && slot_range == other.slot_range;
+    return block_ids == other.block_ids;
   }
 
   /**
@@ -358,6 +319,21 @@ struct replica_chain {
    */
   bool operator!=(const replica_chain &other) const {
     return !(*this == other);
+  }
+
+  bool operator<(const replica_chain &other) const {
+    return fetch_slot_range().first < other.fetch_slot_range().first;
+  }
+
+  /**
+   * @brief Fetch slot range from name
+   * @return Slot range pair
+   */
+  slot_range fetch_slot_range() const {
+    std::string delimiter = "_";
+    int32_t slot_begin = atoi(name.substr(0, name.find(delimiter)).c_str());
+    int32_t slot_end = atoi(name.substr(name.find(delimiter) + 1, name.length()).c_str());
+    return std::make_pair(slot_begin, slot_end);
   }
 };
 
@@ -492,6 +468,8 @@ class data_status {
   static const std::int32_t PINNED = 0x01;
   static const std::int32_t STATIC_PROVISIONED = 0x02;
   static const std::int32_t MAPPED = 0x04;
+  static const std::size_t MAX_NAME_LEN = 256;
+  static const std::size_t MAX_METADATA_LEN = 8192;
   static const std::size_t MAX_TAG_KEYLEN = 256;
   static const std::size_t MAX_TAG_VALLEN = 256;
   static const std::size_t MAX_NUM_TAGS = 256;
@@ -503,23 +481,34 @@ class data_status {
 
   /**
    * Constructor
+   * @param type Data type
    * @param backing_path File backing path
    * @param chain_length Chain length
    * @param blocks Data blocks
    * @param flags Flags
    * @param tags Tags
    */
-  data_status(std::string backing_path,
+  data_status(std::string type,
+              std::string backing_path,
               std::size_t chain_length,
               std::vector<replica_chain> blocks,
-              int32_t flags = 0,
-              const std::map<std::string, std::string> &tags = {})
-      : backing_path_(std::move(backing_path)),
+              int32_t flags,
+              const std::map<std::string, std::string> &tags)
+      : type_(type),
+        backing_path_(std::move(backing_path)),
         chain_length_(chain_length),
         data_blocks_(std::move(blocks)),
         tags_(tags),
-        flags_(flags) {}
+        flags_(flags) {
+  }
 
+  /**
+   * @brief Get data type
+   * @return The data type
+   */
+  const std::string &type() const {
+    return type_;
+  }
   /**
    * @brief Fetch data blocks
    * @return Data blocks
@@ -573,8 +562,8 @@ class data_status {
 
   std::vector<std::string> mark_dumped(size_t block_id) {
     data_blocks_.at(block_id).mode = storage_mode::on_disk;
-    std::vector<std::string> chain = data_blocks_.at(block_id).block_names;
-    data_blocks_.at(block_id).block_names.clear();
+    std::vector<std::string> chain = data_blocks_.at(block_id).block_ids;
+    data_blocks_.at(block_id).block_ids.clear();
     return chain;
   }
 
@@ -586,7 +575,7 @@ class data_status {
 
   void mark_loaded(size_t block_id, const std::vector<std::string> chain) {
     data_blocks_.at(block_id).mode = storage_mode::in_memory;
-    data_blocks_.at(block_id).block_names = chain;
+    data_blocks_.at(block_id).block_ids = chain;
   }
 
   /**
@@ -648,13 +637,20 @@ class data_status {
   }
 
   /**
-   * @brief Add data blocks
-   * @param block Blocks
+   * @brief Add data block
+   * @param block Block
    * @param i Data block offset
    */
-
   void add_data_block(const replica_chain &block, std::size_t i) {
     data_blocks_.insert(data_blocks_.begin() + i, block);
+  }
+
+  /**
+   * @brief Add data block
+   * @param block Block
+   */
+  void add_data_block(const replica_chain &block) {
+    data_blocks_.push_back(block);
   }
 
   /**
@@ -664,6 +660,26 @@ class data_status {
 
   void remove_data_block(std::size_t i) {
     data_blocks_.erase(data_blocks_.begin() + i);
+  }
+
+  /**
+   * @brief Remove data block by partition name
+   * @param partition_name Name of partition at data block.
+   * @return True if removal was successful, false otherwise
+   */
+  bool remove_data_block(const std::string &partition_name, replica_chain &block) {
+    std::vector<replica_chain>::iterator it;
+    for (it = data_blocks_.begin(); it != data_blocks_.end(); ++it) {
+      if (it->name == partition_name) {
+        break;
+      }
+    }
+    if (it != data_blocks_.end()) {
+      block = *it;
+      data_blocks_.erase(it);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -687,47 +703,80 @@ class data_status {
   }
 
   /**
-   * @brief Update data block slot
+   * @brief Get data block name.
    * @param i Data block offset
-   * @param slot_begin Slot begin
-   * @param slot_end Slot end
+   * @return Data block name
    */
 
-  void update_data_block_slots(std::size_t i, int32_t slot_begin, int32_t slot_end) {
-    data_blocks_[i].slot_range.first = slot_begin;
-    data_blocks_[i].slot_range.second = slot_end;
+  const std::string &get_data_block_name(std::size_t i) const {
+    return data_blocks_[i].name;
   }
 
   /**
-   * @brief Fetch data block status
+   * @brief Set data block name
    * @param i Data block offset
-   * @return Data block
+   * @param name Data block name
    */
 
-  chain_status get_data_block_status(std::size_t i) const {
-    return data_blocks_[i].status;
+  void set_data_block_name(std::size_t i, const std::string &name) {
+    if (name.size() > MAX_NAME_LEN) {
+      throw directory_ops_exception("Data block name size > " + std::to_string(MAX_NAME_LEN));
+    }
+    data_blocks_[i].name = name;
   }
 
   /**
-   * @brief Set data block status
-   * @param i Data block offset
-   * @param status Chain status
+   * @brief Set new name for partition
+   * @param old_name Old partition name
+   * @param new_name New partition name
    */
-
-  void set_data_block_status(std::size_t i, chain_status status) {
-    data_blocks_[i].status = status;
+  void set_partition_name(const std::string &old_name, const std::string &new_name) {
+    for (auto &replica : data_blocks_) {
+      if (replica.name == old_name) {
+        replica.name = new_name;
+        return;
+      }
+    }
+    throw directory_ops_exception("Partition not found: " + old_name);
   }
 
   /**
-   * @brief Count block slot numbers
+   * @brief Fetch data block metadata
    * @param i Data block offset
-   * @return Number of slots
+   * @return Data block metadata
    */
 
-  int32_t num_slots(std::size_t i) {
-    return data_blocks_[i].slot_range.second - data_blocks_[i].slot_range.second;
+  const std::string &get_data_block_metadata(std::size_t i) const {
+    return data_blocks_[i].metadata;
   }
 
+  /**
+   * @brief Set data block metadata
+   * @param i Data block offset
+   * @param metadata Data block metadata
+   */
+
+  void set_data_block_metadata(std::size_t i, const std::string &metadata) {
+    if (metadata.size() > MAX_METADATA_LEN) {
+      throw directory_ops_exception("Data block metadata size > " + std::to_string(MAX_METADATA_LEN));
+    }
+    data_blocks_[i].metadata = metadata;
+  }
+
+  /**
+   * @brief Set new metadata for partition
+   * @param name Partition name
+   * @param metadata New partition metadata
+   */
+  void set_partition_metadata(const std::string &name, const std::string &metadata) {
+    for (auto &replica : data_blocks_) {
+      if (replica.name == name) {
+        replica.metadata = metadata;
+        return;
+      }
+    }
+    throw directory_ops_exception("Partition not found: " + name);
+  }
   /**
    * @brief Add tag
    * @param key Key
@@ -775,8 +824,9 @@ class data_status {
     throw new directory_ops_exception("tag " + key + " not found");
   }
 
-  /*
-   * Fetch all tags
+  /**
+   * @brief Fetch all tags
+   * @return Tags
    */
 
   const std::map<std::string, std::string> &get_tags() const {
@@ -878,6 +928,8 @@ class data_status {
   }
 
  private:
+  /* Type data type */
+  std::string type_;
   /* Backing path */
   std::string backing_path_;
   /* Replica chain */
@@ -894,65 +946,297 @@ class data_status {
 class directory_ops {
  public:
   virtual ~directory_ops() = default;
+  /**
+   * @brief Create directory
+   * @param Directory path
+   */
 
   virtual void create_directory(const std::string &path) = 0;
+
+  /**
+   * @brief Create multiple directories
+   * @param Directory path
+   */
+
   virtual void create_directories(const std::string &path) = 0;
 
+  /**
+   * @brief Open a file given file path
+   * @param path File path
+   * @return Data status
+   */
+
   virtual data_status open(const std::string &path) = 0;
+
+  /**
+   * @brief Create file
+   * @param path File path
+   * @param backing_path File backing path
+   * @param num_blocks Number of blocks
+   * @param chain_length Replica chain length
+   * @param flags Flags
+   * @param permissions File permissions
+   * @param tags Tags
+   * @return Data status
+   */
+
   virtual data_status create(const std::string &path,
+                             const std::string &type,
                              const std::string &backing_path,
-                             std::size_t num_blocks,
-                             std::size_t chain_length,
-                             std::int32_t flags,
-                             std::int32_t permissions,
+                             int32_t num_blocks,
+                             int32_t chain_length,
+                             int32_t flags,
+                             int32_t permissions,
+                             const std::vector<std::string> &block_names,
+                             const std::vector<std::string> &block_metadata,
                              const std::map<std::string, std::string> &tags) = 0;
+
+  /**
+   * @brief Open or create a file
+   * Open file if file exists
+   * If not, create it
+   * @param path File path
+   * @param backing_path File backing path
+   * @param num_blocks Number of blocks
+   * @param chain_length Replica chain length
+   * @param flags Flags
+   * @param permissions File permissions
+   * @param tags Tags
+   * @return File data status
+   */
+
   virtual data_status open_or_create(const std::string &path,
+                                     const std::string &type,
                                      const std::string &backing_path,
-                                     std::size_t num_blocks,
-                                     std::size_t chain_length,
-                                     std::int32_t flags,
-                                     std::int32_t permissions,
+                                     int32_t num_blocks,
+                                     int32_t chain_length,
+                                     int32_t flags,
+                                     int32_t permissions,
+                                     const std::vector<std::string> &block_names,
+                                     const std::vector<std::string> &block_metadata,
                                      const std::map<std::string, std::string> &tags) = 0;
+
+  /**
+   * @brief Check if the file exists
+   * @param path File path
+   * @return Bool value, true if file exists
+   */
 
   virtual bool exists(const std::string &path) const = 0;
 
+  /**
+   * @brief Fetch last write time of file
+   * @param path File path
+   * @return Last write time
+   */
+
   virtual std::uint64_t last_write_time(const std::string &path) const = 0;
 
+  /**
+   * @brief Fetch file permissions
+   * @param path File path
+   * @return File permissions
+   */
+
   virtual perms permissions(const std::string &path) = 0;
+
+  /**
+   * @brief Set permissions of a file
+   * @param path File path
+   * @param prms Permission
+   * @param opts Permission options
+   */
+
   virtual void permissions(const std::string &path, const perms &permissions, perm_options opts) = 0;
 
+  /**
+   * @brief Remove file given path
+   * @param path File path
+   */
+
   virtual void remove(const std::string &path) = 0;
+
+  /**
+   * @brief Remove all files under given directory
+   * @param path Directory path
+   */
+
   virtual void remove_all(const std::string &path) = 0;
 
+  /**
+   * @brief Write all dirty blocks back to persistent storage
+   * @param path File path
+   * @param backing_path File backing path
+   */
+
   virtual void sync(const std::string &path, const std::string &backing_path) = 0;
+
+  /**
+   * @brief Write all dirty blocks back to persistent storage and clear the block
+   * @param path File path
+   * @param backing_path File backing path
+   */
+
   virtual void dump(const std::string &path, const std::string &backing_path) = 0;
+
+  /**
+   * @brief Load blocks from persistent storage
+   * @param path File path
+   * @param backing_path File backing path
+   */
+
   virtual void load(const std::string &path, const std::string &backing_path) = 0;
+
+  /**
+   * @brief Rename a file
+   * If new file path is a directory path, then put old path file under that directory.
+   * If new file path is a file path, overwrite that file with old path file.
+   * If new file path doesn't exist, put old path file in new path
+   * @param old_path Original file path
+   * @param new_path New file path
+   */
 
   virtual void rename(const std::string &old_path, const std::string &new_path) = 0;
 
+  /**
+   * @brief Fetch file status
+   * @param path File path
+   * @return File status
+   */
+
   virtual file_status status(const std::string &path) const = 0;
+
+  /**
+   * @brief Collect all entries of files in the directory
+   * @param path Directory path
+   * @return Directory entries
+   */
 
   virtual std::vector<directory_entry> directory_entries(const std::string &path) = 0;
 
+  /**
+   * @brief Collect all entries of files in the directory recursively
+   * @param path Directory path
+   * @return Directory recursive entries
+   */
+
   virtual std::vector<directory_entry> recursive_directory_entries(const std::string &path) = 0;
 
+  /**
+   * @brief Collect data status
+   * @param path File path
+   * @return Data status
+   */
+
   virtual data_status dstatus(const std::string &path) = 0;
+
+  /**
+   * @brief Add tags to the file status
+   * @param path File path
+   * @param tags Tags
+   */
+
   virtual void add_tags(const std::string &path, const std::map<std::string, std::string> &tags) = 0;
 
-  // Check file type
+  /**
+   * @brief Check if path is regular file
+   * @param path File path
+   * @return Bool value
+   */
+
   virtual bool is_regular_file(const std::string &path) = 0;
+
+  /**
+   * @brief Check if path is directory
+   * @param path File path
+   * @return Bool value
+   */
+
   virtual bool is_directory(const std::string &path) = 0;
 };
+
 /* Directory management operations virtual class */
 class directory_management_ops {
  public:
+
+  // Lease management
+
+  /**
+   * @brief Touch file or directory at given path
+   * First touch all nodes along the path, then touch all nodes under the path
+   * @param path File or directory path
+   */
   virtual void touch(const std::string &path) = 0;
-  virtual replica_chain resolve_failures(const std::string &path, const replica_chain &chain) = 0;
-  virtual replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) = 0;
-  virtual void add_block_to_file(const std::string &path) = 0;
-  virtual void split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) = 0;
-  virtual void merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) = 0;
+
+  /**
+   * @brief Handle lease expiry
+   * @param path File path
+   */
   virtual void handle_lease_expiry(const std::string &path) = 0;
+
+  // Chain replication
+
+  /**
+   * @brief Resolve failure
+   * @param path File path
+   * @param chain Replica chain
+   * @return Replica chain
+   */
+
+  virtual replica_chain resolve_failures(const std::string &path, const replica_chain &chain) = 0;
+
+  /**
+   * @brief Add a new replica to the chain of the given path
+   * @param path File path
+   * @param chain Replica chain
+   * @return Replica chain
+   */
+
+  virtual replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) = 0;
+
+  // Block allocation
+
+  /**
+   * @brief Add a block to file
+   * @param path File path
+   * @param partition_name Name of the partition at new block
+   * @param partition_metadata Metadata of the partition at new block
+   * @return Replica chain corresponding to the new block
+   */
+
+  virtual replica_chain add_block(const std::string &path,
+                                  const std::string &partition_name,
+                                  const std::string &partition_metadata) = 0;
+      
+  /**
+   * @brief Remove block from the file
+   * @param path File path
+   * @param partition_name Name of the partition at the block.
+   */
+
+  virtual void remove_block(const std::string &path, const std::string &block_name) = 0;
+
+  /**
+   * @brief Update partition name and metadata
+   * @param path File path
+   * @param old_partition_name Old partition name
+   * @param new_partition_name New partition name to be set
+   * @param partition_metadata New partition metadata to be set
+   */
+  
+  virtual void update_partition(const std::string &path,
+                                const std::string &old_partition_name,
+                                const std::string &new_partition_name,
+                                const std::string &partition_metadata) = 0;
+  
+  /**
+   * @brief Fetch the capacity of the partition
+   * @param path File path
+   * @param partition_name Partition name
+   * @return Storage capacity
+   */
+
+  virtual int64_t get_capacity(const std::string &path, const std::string &partition_name) = 0;
 };
 
 class directory_interface : public directory_ops, public directory_management_ops {};

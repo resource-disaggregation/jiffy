@@ -1,6 +1,6 @@
 package jiffy.notification.event;
 
-import jiffy.notification.response_type;
+import jiffy.storage.response_type;
 
 public class Control {
 

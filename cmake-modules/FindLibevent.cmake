@@ -1,9 +1,8 @@
-# find LibEvent
-# an event notification library (http://libevent.org/)
+# Find LibEvent: an event notification library (http://libevent.org/)
 #
 # Usage:
-# LIBEVENT_INCLUDE_DIRS, where to find LibEvent headers
-# LIBEVENT_LIBRARIES, LibEvent libraries
+# LIBEVENT_INCLUDE_DIR, where to find LibEvent headers
+# LIBEVENT_LIBRARY, LibEvent libraries
 # Libevent_FOUND, If false, do not try to use libevent
 
 set(LIBEVENT_ROOT CACHE PATH "Root directory of libevent installation")
@@ -15,22 +14,22 @@ endforeach ()
 
 # Looking for "event.h" will find the Platform SDK include dir on windows
 # so we also look for a peer header like evhttp.h to get the right path
-find_path(LIBEVENT_INCLUDE_DIRS evhttp.h event.h PATHS ${LibEvent_INCLUDE_PATHS})
+find_path(LIBEVENT_INCLUDE_DIR evhttp.h event.h PATHS ${LibEvent_INCLUDE_PATHS})
 
 # "lib" prefix is needed on Windows in some cases
 # newer versions of libevent use three libraries
-find_library(LIBEVENT_LIBRARIES NAMES event event_core event_extra libevent PATHS ${LibEvent_LIBRARIES_PATHS})
+find_library(LIBEVENT_LIBRARY NAMES event event_core event_extra libevent PATHS ${LibEvent_LIBRARIES_PATHS})
 
-if (LIBEVENT_LIBRARIES AND LIBEVENT_INCLUDE_DIRS)
+if (LIBEVENT_LIBRARY AND LIBEVENT_INCLUDE_DIR)
   set(Libevent_FOUND TRUE)
-  set(LIBEVENT_LIBRARIES ${LIBEVENT_LIBRARIES})
+  set(LIBEVENT_LIBRARY ${LIBEVENT_LIBRARY})
 else ()
   set(Libevent_FOUND FALSE)
 endif ()
 
 if (Libevent_FOUND)
   if (NOT Libevent_FIND_QUIETLY)
-    message(STATUS "Found libevent: ${LIBEVENT_LIBRARIES}")
+    message(STATUS "Found libevent: ${LIBEVENT_LIBRARY}")
   endif ()
 else ()
   if (LibEvent_FIND_REQUIRED)
@@ -40,6 +39,6 @@ else ()
 endif ()
 
 mark_as_advanced(
-        LIBEVENT_LIBRARIES
-        LIBEVENT_INCLUDE_DIRS
+        LIBEVENT_LIBRARY
+        LIBEVENT_INCLUDE_DIR
 )

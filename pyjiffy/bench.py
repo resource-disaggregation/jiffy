@@ -10,7 +10,7 @@ def benchmark_sync():
     w_path = sys.argv[2]
     path = "/test"
     em = JiffyClient(d_host)
-    em.create(path, '/tmp')
+    em.create_hash_table(path, '/tmp')
     off = 0
     for i in [1, 2, 4, 8, 16, 32]:
         stdout_backup = sys.stdout
@@ -42,7 +42,7 @@ def benchmark_async():
     w_path = sys.argv[2]
     path = "/test"
     em = JiffyClient(d_host)
-    em.create(path, '/tmp')
+    em.create_hash_table(path, '/tmp')
     off = 0
     for i in [1, 2, 4, 8, 16, 32]:
         stdout_backup = sys.stdout
@@ -68,7 +68,7 @@ def benchmark_chain():
     chain_length = int(sys.argv[3])
     path = "/test"
     em = JiffyClient(d_host)
-    em.create(path, '/tmp', 1, chain_length)
+    em.create_hash_table(path, '/tmp', 1, chain_length)
     off = 0
     print("Write throughput")
     for i in [1, 2, 4, 8, 16, 32]:

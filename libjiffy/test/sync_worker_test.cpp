@@ -15,16 +15,17 @@ TEST_CASE("sync_worker_test") {
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
   sync_worker worker(tree, SYNC_PERIOD_MS);
-  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/c/file.txt", "local://tmp", 1, 1, data_status::MAPPED));
+  REQUIRE_NOTHROW(tree->create("/sandbox/a/b/c/file.txt", "testtype", "local://tmp", 1, 1, data_status::MAPPED));
   REQUIRE(tree->exists("/sandbox/a/b/c/file.txt"));
 
   REQUIRE_NOTHROW(worker.start());
   while (worker.num_epochs() != 3);
   REQUIRE_NOTHROW(worker.stop());
 
-  REQUIRE(sm->COMMANDS.size() == 4);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/a/b/c/file.txt:0:65536:0:1:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "sync:0:local://tmp/0_65536");
-  REQUIRE(sm->COMMANDS[2] == "sync:0:local://tmp/0_65536");
-  REQUIRE(sm->COMMANDS[3] == "sync:0:local://tmp/0_65536");
+  REQUIRE(sm->COMMANDS.size() == 5);
+  REQUIRE(sm->COMMANDS[0] == "create_partition:0:testtype:0:");
+  REQUIRE(sm->COMMANDS[1] == "setup_chain:0:/sandbox/a/b/c/file.txt:0:nil");
+  REQUIRE(sm->COMMANDS[2] == "sync:0:local://tmp/0");
+  REQUIRE(sm->COMMANDS[3] == "sync:0:local://tmp/0");
+  REQUIRE(sm->COMMANDS[4] == "sync:0:local://tmp/0");
 }

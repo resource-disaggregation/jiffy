@@ -1,9 +1,8 @@
 #ifndef JIFFY_KV_MANAGEMENT_RPC_SERVICE_FACTORY_H
 #define JIFFY_KV_MANAGEMENT_RPC_SERVICE_FACTORY_H
 
+#include "jiffy/storage/block.h"
 #include "storage_management_service.h"
-#include "../block.h"
-#include "../chain_module.h"
 
 namespace jiffy {
 namespace storage {
@@ -17,7 +16,7 @@ class storage_management_service_factory : public storage_management_serviceIfFa
    * @param blocks Blocks
    */
 
-  explicit storage_management_service_factory(std::vector<std::shared_ptr<chain_module>> &blocks);
+  explicit storage_management_service_factory(std::vector<std::shared_ptr<block>> &blocks);
 
   /**
    * @brief Fetch storage management service handler
@@ -36,7 +35,7 @@ class storage_management_service_factory : public storage_management_serviceIfFa
  private:
 
   /* Chain blocks */
-  std::vector<std::shared_ptr<chain_module>> &blocks_;
+  std::vector<std::shared_ptr<block>> &blocks_;
 };
 
 }

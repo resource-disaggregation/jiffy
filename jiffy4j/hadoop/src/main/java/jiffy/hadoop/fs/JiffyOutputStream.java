@@ -5,7 +5,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import jiffy.JiffyClient;
-import jiffy.kv.KVClient;
+import jiffy.storage.HashTableClient;
 import jiffy.util.ByteBufferUtils;
 import org.apache.thrift.TException;
 
@@ -17,9 +17,9 @@ public class JiffyOutputStream extends OutputStream {
   private JiffyBlock block;
   private long blockNum;
   private long blockSize;
-  private KVClient client;
+  private HashTableClient client;
 
-  JiffyOutputStream(JiffyClient mm, String path, KVClient client, long blockSize) {
+  JiffyOutputStream(JiffyClient mm, String path, HashTableClient client, long blockSize) {
     this.mm = mm;
     this.path = path;
     this.blockNum = 0;
@@ -72,7 +72,7 @@ public class JiffyOutputStream extends OutputStream {
     }
     try {
       if (block.usedBytes() > 0) {
-        client.upsert(ByteBufferUtils.fromByteBuffers(blockKey(), block.getData()));
+        client.upsert(blockKey(), block.getData());
         mm.fs().addTags(path, Collections.singletonMap(FILE_LENGTH_KEY, fileLength()));
         if (block.remaining() == 0) {
           block.reset();
