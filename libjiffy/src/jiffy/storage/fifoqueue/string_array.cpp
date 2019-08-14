@@ -5,11 +5,11 @@ namespace storage {
 
 string_array::string_array(std::size_t capacity, block_memory_allocator<char> alloc)
     : head_(0), tail_(0), size_(0), capacity_(capacity), alloc_(alloc) {
-  data_ = alloc_.allocate(capacity_);
+  data_ = reinterpret_cast<uint8_t *>(alloc_.allocate(capacity_));
 }
 
 string_array::~string_array() {
-  alloc_.deallocate(data_, capacity_);
+  alloc_.deallocate(reinterpret_cast<block_memory_allocator<char>::pointer>(data_), capacity_);
 }
 
 string_array::string_array(const string_array &other) {
@@ -29,9 +29,9 @@ void string_array::write(std::size_t offset, const std::string &item) {
   // Write size
   uint32_t sz = item.size();
   data_[offset % capacity_] = sz;
-  data_[(offset + 1) % capacity_] = sz >> 8;
-  data_[(offset + 2) % capacity_] = sz >> 16;
-  data_[(offset + 3) % capacity_] = sz >> 24;
+  data_[(offset + 1) % capacity_] = sz >> 8u;
+  data_[(offset + 2) % capacity_] = sz >> 16u;
+  data_[(offset + 3) % capacity_] = sz >> 24u;
 
   // Write data
   auto data_offset = (offset + METADATA_LEN) % capacity_;
@@ -51,7 +51,7 @@ std::string string_array::read(std::size_t offset) const {
   uint32_t u1 = data_[(offset + 1) % capacity_];
   uint32_t u2 = data_[(offset + 2) % capacity_];
   uint32_t u3 = data_[(offset + 3) % capacity_];
-  uint32_t sz = u0 | (u1 << 8) | (u2 << 16) | (u3 << 24);
+  uint32_t sz = u0 | (u1 << 8u) | (u2 << 16u) | (u3 << 24u);
 
   // Read data
   auto data_offset = (offset + METADATA_LEN) % capacity_;
@@ -102,7 +102,7 @@ std::size_t string_array::find_next(std::size_t offset) const {
   uint32_t u1 = data_[(offset + 1) % capacity_];
   uint32_t u2 = data_[(offset + 2) % capacity_];
   uint32_t u3 = data_[(offset + 3) % capacity_];
-  uint32_t sz = u0 | (u1 << 8) | (u2 << 16) | (u3 << 24);
+  uint32_t sz = u0 | (u1 << 8u) | (u2 << 16u) | (u3 << 24u);
   return offset + sz + METADATA_LEN;
 }
 

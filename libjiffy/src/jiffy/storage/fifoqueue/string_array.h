@@ -178,7 +178,7 @@ class string_array {
   block_memory_allocator<char> alloc_;
 
   /* Data pointer */
-  char *data_{};
+  uint8_t *data_{};
 };
 
 /**

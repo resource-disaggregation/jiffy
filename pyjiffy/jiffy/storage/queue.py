@@ -3,7 +3,6 @@ from time import sleep
 from jiffy.storage.command import CommandType
 from jiffy.storage.compat import b
 from jiffy.storage.data_structure_client import DataStructureClient
-from jiffy.storage.subscriber import SubscriptionClient
 
 
 class QueueOps:
@@ -17,7 +16,7 @@ class QueueOps:
 
 
 class Queue(DataStructureClient):
-    def __init__(self, fs, path, block_info, timeout_ms=1000):
+    def __init__(self, fs, path, block_info, timeout_ms=100000):
         super(Queue, self).__init__(fs, path, block_info, QueueOps.op_types, timeout_ms)
 
     def _handle_redirect(self, args, response):
@@ -34,20 +33,15 @@ class Queue(DataStructureClient):
 
 
 class BlockingQueue(Queue):
-    def __init__(self, fs, path, block_info, timeout_ms=1000):
+    def __init__(self, fs, path, block_info, timeout_ms=100000):
         super(BlockingQueue, self).__init__(fs, path, block_info, timeout_ms)
         self.wait_time = 0.001
 
     def _handle_redirect(self, args, response):
-        if response[0] == b('!ok'):
-            self.wait_time = 0.001
-
         if response[0] == b('!full'):
             sleep(self.wait_time)
-            self.wait_time = self.wait_time * 2
             return None
         elif response[0] == b('!empty'):
             sleep(self.wait_time)
-            self.wait_time = self.wait_time * 2
             return None
         return response
