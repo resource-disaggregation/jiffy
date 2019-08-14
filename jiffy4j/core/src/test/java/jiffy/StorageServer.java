@@ -4,20 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import org.ini4j.Ini;
 
-public class StorageServer extends MMuxServer {
+public class StorageServer extends JiffyServer {
   private String host;
   private int servicePort;
   private int managementPort;
-  private int notificationPort;
-  private int chainPort;
 
   public StorageServer(String executable) {
     super(executable);
     host = null;
     servicePort = -1;
     managementPort = -1;
-    notificationPort = -1;
-    chainPort = -1;
   }
 
   @Override
@@ -28,12 +24,8 @@ public class StorageServer extends MMuxServer {
     host = ini.get("storage", "host");
     servicePort = Integer.parseInt(ini.get("storage", "service_port"));
     managementPort = Integer.parseInt(ini.get("storage", "management_port"));
-    notificationPort = Integer.parseInt(ini.get("storage", "notification_port"));
-    chainPort = Integer.parseInt(ini.get("storage", "chain_port"));
     waitTillServerReady(host, servicePort);
     waitTillServerReady(host, managementPort);
-    waitTillServerReady(host, notificationPort);
-    waitTillServerReady(host, chainPort);
   }
 
   @Override
@@ -42,7 +34,5 @@ public class StorageServer extends MMuxServer {
     host = null;
     servicePort = -1;
     managementPort = -1;
-    notificationPort = -1;
-    chainPort = -1;
   }
 }

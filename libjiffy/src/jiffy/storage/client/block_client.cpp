@@ -25,7 +25,7 @@ void block_client::connect(const std::string &host, int port, int block_id, int 
   auto sock = std::make_shared<TSocket>(host, port);
   if (timeout_ms > 0)
     sock->setRecvTimeout(timeout_ms);
-  transport_ = std::shared_ptr<TTransport>(new TBufferedTransport(sock));
+  transport_ = std::shared_ptr<TTransport>(new TFramedTransport(sock));
   protocol_ = std::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
   client_ = std::make_shared<thrift_client>(protocol_);
   transport_->open();
@@ -48,8 +48,8 @@ bool block_client::is_connected() const {
   return transport_->isOpen();
 }
 
-void block_client::command_request(const sequence_id &seq, const int32_t cmd_id, const std::vector<std::string> &args) {
-  client_->command_request(seq, block_id_, cmd_id, args);
+void block_client::command_request(const sequence_id &seq, const std::vector<std::string> &args) {
+  client_->command_request(seq, block_id_, args);
 }
 
 block_client::command_response_reader::command_response_reader(std::shared_ptr<apache::thrift::protocol::TProtocol> prot)

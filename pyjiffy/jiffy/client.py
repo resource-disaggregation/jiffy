@@ -1,14 +1,16 @@
+import logging
 import threading
-
 import time
 
 from thrift.transport.TTransport import TTransportException
 
-from jiffy.directory.directory_client import DirectoryClient
-from jiffy.subscription.subscriber import SubscriptionClient, Mailbox
+from jiffy.directory.directory_client import DirectoryClient, Perms
 from jiffy.lease.lease_client import LeaseClient
-from jiffy.kv.kv_client import KVClient
-import logging
+from jiffy.storage.file import FileWriter, FileReader
+from jiffy.storage.hash_table import HashTable
+from jiffy.storage.partition import HashTableNameFormatter, DefaultNameFormatter
+from jiffy.storage.queue import Queue
+from jiffy.storage.subscriber import SubscriptionClient, Mailbox
 
 logging.basicConfig(level=logging.WARN,
                     format="%(asctime)s %(levelname)s %(name)s %(message)s",
@@ -101,20 +103,74 @@ class JiffyClient:
         if path in self.to_renew:
             self.to_renew.remove(path)
 
-    def create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
-        s = self.fs.create(path, persistent_store_prefix, num_blocks, chain_length, flags)
+    def create_hash_table(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+        fmt = HashTableNameFormatter(num_blocks)
+        block_names = [fmt.get(i) for i in range(num_blocks)]
+        block_metadata = ['regular' for _ in range(num_blocks)]
+        s = self.fs.create(path, 'hashtable', persistent_store_prefix, num_blocks, chain_length, flags, Perms.all,
+                           block_names, block_metadata)
         self.begin_scope(path)
-        return KVClient(self.fs, path, s)
+        return HashTable(self.fs, path, s)
 
-    def open(self, path):
+    def open_hash_table(self, path):
         s = self.fs.open(path)
         self.begin_scope(path)
-        return KVClient(self.fs, path, s)
+        return HashTable(self.fs, path, s)
 
-    def open_or_create(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
-        s = self.fs.open_or_create(path, persistent_store_prefix, num_blocks, chain_length, flags)
+    def open_or_create_hash_table(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+        fmt = HashTableNameFormatter(num_blocks)
+        block_names = [fmt.get(i) for i in range(num_blocks)]
+        block_metadata = ['regular' for _ in range(num_blocks)]
+        s = self.fs.open_or_create(path, 'hashtable', persistent_store_prefix, num_blocks, chain_length, flags,
+                                   Perms.all, block_names, block_metadata)
         self.begin_scope(path)
-        return KVClient(self.fs, path, s)
+        return HashTable(self.fs, path, s)
+
+    def create_queue(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+        fmt = DefaultNameFormatter()
+        block_names = [fmt.get(i) for i in range(num_blocks)]
+        block_metadata = ['regular' for _ in range(num_blocks)]
+        s = self.fs.create(path, 'fifoqueue', persistent_store_prefix, num_blocks, chain_length, flags, Perms.all,
+                           block_names, block_metadata)
+        self.begin_scope(path)
+        return Queue(self.fs, path, s)
+
+    def open_queue(self, path):
+        s = self.fs.open(path)
+        self.begin_scope(path)
+        return Queue(self.fs, path, s)
+
+    def open_or_create_queue(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+        fmt = DefaultNameFormatter()
+        block_names = [fmt.get(i) for i in range(num_blocks)]
+        block_metadata = ['regular' for _ in range(num_blocks)]
+        s = self.fs.open_or_create(path, 'fifoqueue', persistent_store_prefix, num_blocks, chain_length, flags,
+                                   Perms.all, block_names, block_metadata)
+        self.begin_scope(path)
+        return Queue(self.fs, path, s)
+
+    def create_file(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+        fmt = DefaultNameFormatter()
+        block_names = [fmt.get(i) for i in range(num_blocks)]
+        block_metadata = ['regular' for _ in range(num_blocks)]
+        s = self.fs.create(path, 'file', persistent_store_prefix, num_blocks, chain_length, flags, Perms.all,
+                           block_names, block_metadata)
+        self.begin_scope(path)
+        return FileWriter(self.fs, path, s)
+
+    def open_file(self, path):
+        s = self.fs.open(path)
+        self.begin_scope(path)
+        return FileReader(self.fs, path, s)
+
+    def open_or_create_file(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+        fmt = DefaultNameFormatter()
+        block_names = [fmt.get(i) for i in range(num_blocks)]
+        block_metadata = ['regular' for _ in range(num_blocks)]
+        s = self.fs.open_or_create(path, 'file', persistent_store_prefix, num_blocks, chain_length, flags,
+                                   Perms.all, block_names, block_metadata)
+        self.begin_scope(path)
+        return FileWriter(self.fs, path, s)
 
     def close(self, path):
         self.end_scope(path)

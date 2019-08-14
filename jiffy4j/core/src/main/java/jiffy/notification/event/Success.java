@@ -1,6 +1,6 @@
 package jiffy.notification.event;
 
-import jiffy.notification.response_type;
+import jiffy.storage.response_type;
 import java.util.List;
 
 public class Success extends Control {

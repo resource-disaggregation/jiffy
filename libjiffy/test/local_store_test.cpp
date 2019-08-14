@@ -1,19 +1,26 @@
 #include <fstream>
 #include <catch.hpp>
 #include <iostream>
-#include "jiffy/persistent/local/local_store.h"
+#include "jiffy/persistent/persistent_service.h"
 #include "jiffy/utils/directory_utils.h"
-#include "jiffy/storage/kv/serde/csv_serde.h"
+#include "jiffy/storage/serde/serde_all.h"
 
 using namespace ::jiffy::persistent;
 using namespace ::jiffy::storage;
 
-TEST_CASE("local_write_test", "[write]") {
-  hash_table_type table;
-  auto ltable = table.lock_table();
-  ltable.insert("key", "value");
+binary make_binary(const std::string& str, const block_memory_allocator<uint8_t>& allocator) {
+  return binary(str, allocator);
+}
 
-  auto ser = std::make_shared<csv_serde>();
+TEST_CASE("local_write_test", "[write]") {
+  block_memory_manager manager;
+  block_memory_allocator<uint8_t> binary_allocator(&manager);
+  hash_table_type table(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type());
+  auto ltable = table.lock_table();
+  auto bkey = binary("key", binary_allocator);
+  auto bval = binary("value", binary_allocator);
+  ltable.insert(bkey, bval);
+  auto ser = std::make_shared<csv_serde>(binary_allocator);
   local_store store(ser);
   REQUIRE_NOTHROW(store.write(ltable, "/tmp/a.txt"));
   ltable.unlock();
@@ -28,13 +35,18 @@ TEST_CASE("local_read_test", "[read]") {
   std::ofstream out("/tmp/a.txt", std::ofstream::out);
   out << "key,value\n";
   out.close();
-
-  auto ser = std::make_shared<csv_serde>();
+  block_memory_manager manager;
+  block_memory_allocator<kv_pair_type> allocator(&manager);
+  block_memory_allocator<uint8_t> binary_allocator(&manager);
+  auto ser = std::make_shared<csv_serde>(binary_allocator);
   local_store store(ser);
-  hash_table_type table;
+  //hash_table_type table(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type(), allocator);
+  hash_table_type table(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type());
   auto ltable = table.lock_table();
+  auto bkey = make_binary("key", binary_allocator);
+  auto bval = make_binary("value", binary_allocator);
   REQUIRE_NOTHROW(store.read("/tmp/a.txt", ltable));
-  REQUIRE(ltable.at("key") == "value");
+  REQUIRE(ltable.at(bkey) == bval);
   ltable.unlock();
   std::remove("/tmp/a.txt");
 }

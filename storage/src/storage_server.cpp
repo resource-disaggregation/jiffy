@@ -1,23 +1,23 @@
 #include <atomic>
 #include <iostream>
-#include <jiffy/directory/block/block_advertisement_client.h>
-#include <jiffy/storage/kv/kv_block.h>
+#include <jiffy/directory/block/block_registration_client.h>
+#include <jiffy/storage/hashtable/hash_table_partition.h>
 #include <jiffy/storage/manager/storage_management_server.h>
-#include <jiffy/storage/notification/notification_server.h>
+#include <jiffy/auto_scaling/auto_scaling_server.h>
 #include <jiffy/storage/service/block_server.h>
 #include <jiffy/utils/signal_handling.h>
 #include <jiffy/utils/logger.h>
-#include <jiffy/storage/service/chain_server.h>
-#include <jiffy/storage/service/server_storage_tracker.h>
 #include <boost/program_options.hpp>
 #include <ifaddrs.h>
+#include "server_storage_tracker.h"
 
 using namespace ::jiffy::directory;
 using namespace ::jiffy::storage;
+using namespace ::jiffy::auto_scaling;
 using namespace ::jiffy::utils;
 
 using namespace ::apache::thrift;
-
+using namespace ::apache::thrift::server;
 std::string mapper(const std::string &env_var) {
   if (env_var == "JIFFY_DIRECTORY_HOST") return "directory.host";
   else if (env_var == "JIFFY_DIRECTORY_SERVICE_PORT") return "directory.service_port";
@@ -54,54 +54,26 @@ std::string local_address() {
 
 std::string dir_host = "127.0.0.1";
 int32_t block_port = 9092;
-std::vector<std::string> block_names;
-
-void retract_block_names_and_print_stacktrace(int sig_num) {
-  std::string trace = signal_handling::stacktrace();
-  LOG(log_level::info) << "Caught signal " << sig_num << ", cleaning up...";
-  try {
-    block_advertisement_client client(dir_host, block_port);
-    client.retract_blocks(block_names);
-    client.disconnect();
-  } catch (std::exception &e) {
-    LOG(log_level::error) << "Failed to retract blocks: " << e.what()
-                          << "; make sure block allocation server is running\n";
-  }
-
-  fprintf(stderr, "%s\n", trace.c_str());
-  fprintf(stderr, "Exiting...\n");
-  std::exit(0);
-}
+std::vector<std::string> block_ids;
 
 int main(int argc, char **argv) {
-  signal_handling::install_signal_handler(retract_block_names_and_print_stacktrace,
-                                          SIGSTOP,
-                                          SIGINT,
-                                          SIGTERM,
-                                          SIGABRT,
-                                          SIGFPE,
-                                          SIGSEGV,
-                                          SIGILL,
-                                          SIGTRAP);
+  signal_handling::install_error_handler(SIGABRT, SIGFPE, SIGSEGV, SIGILL, SIGTRAP);
   GlobalOutput.setOutputFunction(log_utils::log_thrift_msg);
 
   // Parse configuration parameters
   // Configuration priority order: default < env < configuration file < commandline args
   // First set defaults
   std::string address = "127.0.0.1";
-  int32_t service_port = 9093;
+  int32_t service_port = 9095;
   int32_t mgmt_port = 9094;
-  int32_t notf_port = 9095;
-  int32_t chain_port = 9096;
+  int32_t auto_scaling_port = 9093;
   int32_t dir_port = 9090;
+  std::size_t num_servers = 64;
   std::size_t num_blocks = 64;
+  std::size_t num_block_groups = 4;
   std::size_t block_capacity = 134217728;
   double blk_thresh_lo = 0.25;
   double blk_thresh_hi = 0.75;
-  bool non_blocking = false;
-  int io_threads = 1;
-  int work_threads = std::thread::hardware_concurrency();
-  int concurrency = std::thread::hardware_concurrency();
   std::string storage_trace = "";
   try {
     namespace po = boost::program_options;
@@ -120,17 +92,14 @@ int main(int argc, char **argv) {
     po::options_description config_file_options;
     config_file_options.add_options()
         ("storage.host", po::value<std::string>(&address)->default_value("127.0.0.1"))
-        ("storage.service_port", po::value<int>(&service_port)->default_value(9093))
-        ("storage.management_port", po::value<int>(&mgmt_port)->default_value(9094))
-        ("storage.notification_port", po::value<int>(&notf_port)->default_value(9095))
-        ("storage.chain_port", po::value<int>(&chain_port)->default_value(9096))
+        ("storage.management_port", po::value<int>(&mgmt_port)->default_value(9093))
+        ("storage.service_port", po::value<int>(&service_port)->default_value(9095))
+        ("storage.auto_scaling_port", po::value<int>(&auto_scaling_port)->default_value(9094))
         ("directory.host", po::value<std::string>(&dir_host)->default_value("127.0.0.1"))
         ("directory.service_port", po::value<int>(&dir_port)->default_value(9090))
         ("directory.block_port", po::value<int>(&block_port)->default_value(9092))
-        ("storage.server.non_blocking", po::bool_switch(&non_blocking))
-        ("storage.server.io_threads", po::value<int>(&io_threads)->default_value(1))
-        ("storage.server.work_threads", po::value<int>(&work_threads)->default_value(concurrency))
         ("storage.block.num_blocks", po::value<size_t>(&num_blocks)->default_value(64))
+        ("storage.block.num_servers", po::value<size_t>(&num_servers)->default_value(4))
         ("storage.block.capacity", po::value<size_t>(&block_capacity)->default_value(134217728))
         ("storage.block.capacity_threshold_lo", po::value<double>(&blk_thresh_lo)->default_value(0.25))
         ("storage.block.capacity_threshold_hi", po::value<double>(&blk_thresh_hi)->default_value(0.75));
@@ -155,7 +124,7 @@ int main(int argc, char **argv) {
     }
 
     if (vm.count("version")) {
-      std::cout << "Storage service daemon, Version 0.1.0" << std::endl; // TODO: Configure version string
+      std::cout << "Jiffy storage service daemon, Version 0.1.0" << std::endl; // TODO: Configure version string
       return 0;
     }
 
@@ -185,12 +154,10 @@ int main(int argc, char **argv) {
     LOG(log_level::info) << "storage.host: " << address;
     LOG(log_level::info) << "storage.service_port: " << service_port;
     LOG(log_level::info) << "storage.management_port: " << mgmt_port;
-    LOG(log_level::info) << "storage.notification_port: " << notf_port;
-    LOG(log_level::info) << "storage.chain_port: " << chain_port;
-    LOG(log_level::info) << "storage.server.non_blocking: " << non_blocking;
-    LOG(log_level::info) << "storage.server.io_threads: " << io_threads;
-    LOG(log_level::info) << "storage.server.work_threads: " << work_threads;
+    LOG(log_level::info) << "storage.auto_scaling_port: " << auto_scaling_port;
+    LOG(log_level::info) << "storage.block.num_blocks: " << num_block_groups;
     LOG(log_level::info) << "storage.block.num_blocks: " << num_blocks;
+    LOG(log_level::info) << "storage.block.num_servers: " << num_servers;
     LOG(log_level::info) << "storage.block.capacity: " << block_capacity;
     LOG(log_level::info) << "storage.block.capacity_threshold_lo: " << blk_thresh_lo;
     LOG(log_level::info) << "storage.block.capacity_threshold_hi: " << blk_thresh_hi;
@@ -204,7 +171,8 @@ int main(int argc, char **argv) {
 
   std::mutex failure_mtx;
   std::condition_variable failure_condition;
-  std::atomic<int> failing_thread(-1); // management -> 0, service -> 1, notification -> 2, chain -> 3
+  std::atomic<int>
+      failing_thread(-1); // management -> 0, service -> 1, notification -> 2, chain -> 3, auto_scaling -> 4
 
   std::string hostname;
   if (address == "0.0.0.0") {
@@ -216,25 +184,27 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Hostname: " << hostname;
 
   for (int i = 0; i < static_cast<int>(num_blocks); i++) {
-    block_names.push_back(block_name_parser::make(hostname,
-                                                  service_port,
-                                                  mgmt_port,
-                                                  notf_port,
-                                                  chain_port,
-                                                  i));
+    block_ids.push_back(block_id_parser::make(hostname, service_port + i % num_servers, mgmt_port, i));
   }
 
-  std::vector<std::shared_ptr<chain_module>> blocks;
+  std::vector<std::shared_ptr<block>> blocks;
   blocks.resize(num_blocks);
   for (size_t i = 0; i < blocks.size(); ++i) {
-    blocks[i] = std::make_shared<kv_block>(block_names[i],
-                                           block_capacity,
-                                           blk_thresh_lo,
-                                           blk_thresh_hi,
-                                           dir_host,
-                                           dir_port);
+    blocks[i] = std::make_shared<block>(block_ids[i], block_capacity, dir_host, dir_port, address, auto_scaling_port);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
+
+  std::exception_ptr auto_scaling_exception = nullptr;
+  auto scaling_server = auto_scaling_server::create(dir_host, dir_port, address, auto_scaling_port);
+  std::thread scaling_serve_thread([&auto_scaling_exception, &scaling_server, &failing_thread, & failure_condition] {
+    try {
+      scaling_server->serve();
+    } catch (...) {
+      auto_scaling_exception = std::current_exception();
+      failing_thread = 4;
+      failure_condition.notify_all();
+    }
+  });
 
   std::exception_ptr management_exception = nullptr;
   auto management_server = storage_management_server::create(blocks, address, mgmt_port);
@@ -251,8 +221,8 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Management server listening on " << address << ":" << mgmt_port;
 
   try {
-    block_advertisement_client client(dir_host, block_port);
-    client.advertise_blocks(block_names);
+    block_registration_client client(dir_host, block_port);
+    client.register_blocks(block_ids);
     client.disconnect();
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to advertise blocks: " << e.what()
@@ -262,48 +232,28 @@ int main(int argc, char **argv) {
 
   LOG(log_level::info) << "Advertised " << num_blocks << " to block allocation server";
 
-  std::exception_ptr kv_exception = nullptr;
-  auto kv_server = block_server::create(blocks, address, service_port, non_blocking, io_threads, work_threads);
-  std::thread kv_serve_thread([&kv_exception, &kv_server, &failing_thread, &failure_condition] {
-    try {
-      kv_server->serve();
-    } catch (...) {
-      kv_exception = std::current_exception();
-      failing_thread = 1;
-      failure_condition.notify_all();
-    }
-  });
+  std::exception_ptr storage_exception;
+  std::vector<std::thread> storage_serve_thread(num_servers);
+  std::vector<std::shared_ptr<TServer>> storage_server(num_servers);
+  std::vector<std::vector<std::shared_ptr<block>>> block_vec(num_servers);
+  for (size_t i = 0; i < num_servers; i++) {
+    auto tmp_block = std::vector<std::shared_ptr<block>>();
+    for (size_t j = i; j < num_blocks; j += num_servers)
+      tmp_block.push_back(blocks[j]);
+    storage_server[i] = block_server::create(tmp_block, service_port + i);
+    storage_serve_thread[i] =
+        std::thread([&storage_exception, &storage_server, &failing_thread, &failure_condition, i] {
+          try {
+            storage_server[i]->serve();
+          } catch (...) {
+            storage_exception = std::current_exception();
+            failing_thread = 1;
+            failure_condition.notify_all();
+          }
+        });
+  }
 
-  LOG(log_level::info) << "KV server listening on " << address << ":" << service_port;
-
-  std::exception_ptr notification_exception = nullptr;
-  auto notification_server = notification_server::create(blocks, address, notf_port);
-  std::thread
-      notification_serve_thread([&notification_exception, &notification_server, &failing_thread, &failure_condition] {
-    try {
-      notification_server->serve();
-    } catch (...) {
-      notification_exception = std::current_exception();
-      failing_thread = 2;
-      failure_condition.notify_all();
-    }
-  });
-
-  LOG(log_level::info) << "Notification server listening on " << address << ":" << notf_port;
-
-  std::exception_ptr chain_exception = nullptr;
-  auto chain_server = chain_server::create(blocks, address, chain_port, non_blocking, io_threads, work_threads);
-  std::thread chain_serve_thread([&chain_exception, &chain_server, &failing_thread, &failure_condition] {
-    try {
-      chain_server->serve();
-    } catch (...) {
-      chain_exception = std::current_exception();
-      failing_thread = 2;
-      failure_condition.notify_all();
-    }
-  });
-
-  LOG(log_level::info) << "Chain server listening on " << address << ":" << chain_port;
+  LOG(log_level::info) << "Storage server listening on " << address << ":" << service_port;
 
   server_storage_tracker tracker(blocks, 1000, storage_trace);
   if (!storage_trace.empty()) {
@@ -329,9 +279,9 @@ int main(int argc, char **argv) {
     }
     case 1: {
       LOG(log_level::error) << "KV server failed";
-      if (kv_exception) {
+      if (storage_exception) {
         try {
-          std::rethrow_exception(kv_exception);
+          std::rethrow_exception(storage_exception);
         } catch (std::exception &e) {
           LOG(log_level::error) << "ERROR: " << e.what();
           std::exit(-1);
@@ -339,36 +289,23 @@ int main(int argc, char **argv) {
       }
       break;
     }
-    case 2: {
-      LOG(log_level::error) << "Notification server failed";
-      if (notification_exception) {
+    case 4: {
+      LOG(log_level::error) << "Auto_scaling server failed";
+      if (auto_scaling_exception) {
         try {
-          std::rethrow_exception(notification_exception);
+          std::rethrow_exception(auto_scaling_exception);
         } catch (std::exception &e) {
           LOG(log_level::error) << "ERROR: " << e.what();
           std::exit(-1);
         }
       }
-      break;
-    }
-    case 3: {
-      LOG(log_level::error) << "Chain server failed";
-      if (chain_exception) {
-        try {
-          std::rethrow_exception(chain_exception);
-        } catch (std::exception &e) {
-          LOG(log_level::error) << "ERROR: " << e.what();
-          std::exit(-1);
-        }
-      }
-      break;
     }
     default:break;
   }
 
   try {
-    block_advertisement_client client(dir_host, block_port);
-    client.retract_blocks(block_names);
+    block_registration_client client(dir_host, block_port);
+    client.deregister_blocks(block_ids);
     client.disconnect();
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to retract blocks: " << e.what()

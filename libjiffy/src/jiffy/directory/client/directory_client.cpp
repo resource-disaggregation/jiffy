@@ -3,6 +3,7 @@
 
 #include "directory_client.h"
 #include "../fs/directory_type_conversions.h"
+#include "jiffy/utils/logger.h"
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -10,6 +11,8 @@ using namespace ::apache::thrift::transport;
 
 namespace jiffy {
 namespace directory {
+
+using namespace utils;
 
 directory_client::directory_client(const std::string &host, int port) {
   connect(host, port);
@@ -49,40 +52,34 @@ data_status directory_client::open(const std::string &path) {
 }
 
 data_status directory_client::create(const std::string &path,
+                                     const std::string &type,
                                      const std::string &backing_path,
-                                     std::size_t num_blocks,
-                                     std::size_t chain_length,
-                                     std::int32_t flags,
-                                     std::int32_t permissions,
+                                     int32_t num_blocks,
+                                     int32_t chain_length,
+                                     int32_t flags,
+                                     int32_t permissions,
+                                     const std::vector<std::string> &block_names,
+                                     const std::vector<std::string> &block_metadata,
                                      const std::map<std::string, std::string> &tags) {
   rpc_data_status s;
-  client_->create(s,
-                  path,
-                  backing_path,
-                  static_cast<const int32_t>(num_blocks),
-                  static_cast<const int32_t>(chain_length),
-                  flags,
-                  permissions,
-                  tags);
+  client_->create(s, path, type, backing_path, num_blocks, chain_length, flags, permissions, block_names,
+                  block_metadata, tags);
   return directory_type_conversions::from_rpc(s);
 }
 
 data_status directory_client::open_or_create(const std::string &path,
+                                             const std::string &type,
                                              const std::string &backing_path,
-                                             std::size_t num_blocks,
-                                             std::size_t chain_length,
-                                             std::int32_t flags,
-                                             std::int32_t permissions,
+                                             int32_t num_blocks,
+                                             int32_t chain_length,
+                                             int32_t flags,
+                                             int32_t permissions,
+                                             const std::vector<std::string> &block_names,
+                                             const std::vector<std::string> &block_metadata,
                                              const std::map<std::string, std::string> &tags) {
   rpc_data_status s;
-  client_->open_or_create(s,
-                          path,
-                          backing_path,
-                          static_cast<const int32_t>(num_blocks),
-                          static_cast<const int32_t>(chain_length),
-                          flags,
-                          permissions,
-                          tags);
+  client_->open_or_create(s, path, type, backing_path, num_blocks, chain_length, flags, permissions, block_names,
+                          block_metadata, tags);
   return directory_type_conversions::from_rpc(s);
 }
 
@@ -184,16 +181,16 @@ replica_chain directory_client::add_replica_to_chain(const std::string &path, co
   return directory_type_conversions::from_rpc(out);
 }
 
-void directory_client::add_block_to_file(const std::string &path) {
-  client_->add_block_to_file(path);
+replica_chain directory_client::add_block(const std::string &path,
+                                          const std::string &partition_name,
+                                          const std::string &partition_metadata) {
+  rpc_replica_chain out;
+  client_->add_data_block(out, path, partition_name, partition_metadata);
+  return directory_type_conversions::from_rpc(out);
 }
 
-void directory_client::split_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) {
-  client_->split_slot_range(path, slot_begin, slot_end);
-}
-
-void directory_client::merge_slot_range(const std::string &path, int32_t slot_begin, int32_t slot_end) {
-  client_->merge_slot_range(path, slot_begin, slot_end);
+void directory_client::remove_block(const std::string &path, const std::string &partition_name) {
+  client_->remove_data_block(path, partition_name);
 }
 
 void directory_client::touch(const std::string &) {
@@ -202,6 +199,17 @@ void directory_client::touch(const std::string &) {
 
 void directory_client::handle_lease_expiry(const std::string &) {
   throw directory_ops_exception("Unsupported operation");
+}
+
+void directory_client::update_partition(const std::string &path,
+                                        const std::string &old_partition_name,
+                                        const std::string &new_partition_name,
+                                        const std::string &partition_metadata) {
+  client_->request_partition_data_update(path, old_partition_name, new_partition_name, partition_metadata);
+}
+
+int64_t directory_client::get_capacity(const std::string &path, const std::string &partition_name) {
+  return client_->get_storage_capacity(path, partition_name);
 }
 
 }

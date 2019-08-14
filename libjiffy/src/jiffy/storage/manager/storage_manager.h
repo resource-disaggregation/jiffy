@@ -3,13 +3,14 @@
 
 #include <vector>
 #include <string>
+#include <jiffy/utils/property_map.h>
 
 #include "../storage_management_ops.h"
 
 namespace jiffy {
 namespace storage {
-/* Storage manager class
- * Inherited from storage_management_ops virtual class */
+
+/* Storage manager class -- inherited from storage_management_ops virtual class */
 class storage_manager : public storage_management_ops {
  public:
   storage_manager() = default;
@@ -17,25 +18,24 @@ class storage_manager : public storage_management_ops {
   virtual ~storage_manager() = default;
 
   /**
-   * @brief Setup block
-   * @param block_name Block name
+   * @brief Create partition
+   * @param block_id Partition name
    * @param path Block path
-   * @param slot_begin Begin Slot
-   * @param slot_end End Slot
    * @param chain Chain block names
-   * @param auto_scale Bool value, true if auto_scale is on
    * @param role Block role
    * @param next_block_name Next block's name
    */
+  void create_partition(const std::string &block_id,
+                        const std::string &type,
+                        const std::string &name,
+                        const std::string &metadata,
+                        const std::map<std::string, std::string> &conf) override;
 
-  void setup_block(const std::string &block_name,
-                   const std::string &path,
-                   int32_t slot_begin,
-                   int32_t slot_end,
-                   const std::vector<std::string> &chain,
-                   bool auto_scale,
-                   int32_t role,
-                   const std::string &next_block_name) override;
+  /**
+   * @brief Destroy partition
+   * @param block_name Block name
+   */
+  void destroy_partition(const std::string &block_name) override;
 
   /**
    * @brief Fetch block path
@@ -44,14 +44,6 @@ class storage_manager : public storage_management_ops {
    */
 
   std::string path(const std::string &block_name) override;
-
-  /**
-   * @brief Fetch block slot range
-   * @param block_name Block name
-   * @return Block slot range
-   */
-
-  std::pair<int32_t, int32_t> slot_range(const std::string &block_name) override;
 
   /**
    * @brief Load block from persistent storage
@@ -76,13 +68,6 @@ class storage_manager : public storage_management_ops {
    */
 
   void dump(const std::string &block_name, const std::string &backing_path) override;
-
-  /**
-   * @brief Reset block
-   * @param block_name Block name
-   */
-
-  void reset(const std::string &block_name) override;
 
   /**
    * @brief Fetch storage capacity of block
@@ -115,61 +100,29 @@ class storage_manager : public storage_management_ops {
   void forward_all(const std::string &block_name) override;
 
   /**
-   * @brief Export slot range
-   * @param block_name Block name
+   * @brief Setup a replica chian
+   * @param block_id Block identifier
+   * @param path File path
+   * @param chain Replica chain
+   * @param role Chain role
+   * @param next_block_id Next block identifier
    */
-
-  void export_slots(const std::string &block_name) override;
+  void setup_chain(const std::string &block_id,
+                   const std::string &path,
+                   const std::vector<std::string> &chain,
+                   int32_t role,
+                   const std::string &next_block_id) override;
 
   /**
-   * @brief Set exporting slot range and exporting target
+   * @brief Update partition data and metadata
    * @param block_name Block name
-   * @param target_block Exporting target blocks
-   * @param slot_begin Exporting begin slot
-   * @param slot_end Exporting end slot
+   * @param partition_name New partition name
+   * @param partition_metadata New partition metadata
    */
 
-  void set_exporting(const std::string &block_name,
-                     const std::vector<std::string> &target_block,
-                     int32_t slot_begin,
-                     int32_t slot_end) override;
-
-  /**
-   * @brief Setup the block and set importing slot range
-   * @param block_name Block name
-   * @param path Block path
-   * @param slot_begin Importing begin slot
-   * @param slot_end Importing end slot
-   * @param chain Chain block names
-   * @param role Block role
-   * @param next_block_name Next block's name
-   */
-
-  void setup_and_set_importing(const std::string &block_name,
-                               const std::string &path,
-                               int32_t slot_begin,
-                               int32_t slot_end,
-                               const std::vector<std::string> &chain,
-                               int32_t role,
-                               const std::string &next_block_name) override;
-
-  /**
-   * @brief Set block to regular after exporting
-   * @param block_name Block name
-   * @param slot_begin Begin slot
-   * @param slot_end End slot
-   */
-
-  void set_regular(const std::string &block_name, int32_t slot_begin, int32_t slot_end) override;
-
-  /**
-   * @brief Virtual function of set importing
-   * @param block_name Block name
-   * @param slot_begin Importing begin slot
-   * @param slot_end Importing end slot
-   */
-
-  void set_importing(const std::string &block_name, int32_t slot_begin, int32_t slot_end) override;
+  void update_partition(const std::string &block_name,
+                        const std::string &partition_name,
+                        const std::string &partition_metadata) override;
 };
 
 }

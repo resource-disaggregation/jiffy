@@ -45,7 +45,7 @@ void sync_worker::sync_nodes() {
   auto cur_epoch = ts::duration_cast<ts::milliseconds>(ts::system_clock::now().time_since_epoch()).count();
   auto node = std::dynamic_pointer_cast<ds_dir_node>(tree_->root_);
   std::string parent_path;
-  for (const auto &cname: node->children()) {
+  for (const auto &cname: node->child_names()) {
     sync_nodes(node, parent_path, cname, static_cast<uint64_t>(cur_epoch));
   }
 }
@@ -69,7 +69,7 @@ void sync_worker::sync_nodes(std::shared_ptr<ds_dir_node> parent,
     }
   } else if (child->is_directory()) {
     auto node = std::dynamic_pointer_cast<ds_dir_node>(child);
-    for (const auto &cname: node->children()) {
+    for (const auto &cname: node->child_names()) {
       sync_nodes(node, child_path, cname, epoch);
     }
   }

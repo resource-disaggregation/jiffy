@@ -27,7 +27,7 @@ void lease_renewal_worker::start() {
       LOG(trace) << "Looking for expired leases...";
       auto start = std::chrono::steady_clock::now();
       try {
-        std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+        std::unique_lock<std::mutex> lock(metadata_mtx_);
         if (!to_renew_.empty()) {
           ack = ls_.renew_leases(to_renew_);
         }
@@ -46,14 +46,14 @@ void lease_renewal_worker::start() {
 }
 
 void lease_renewal_worker::add_path(const std::string &path) {
-  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+  std::unique_lock<std::mutex> lock(metadata_mtx_);
   if (std::find(to_renew_.begin(), to_renew_.end(), path) == to_renew_.end()) {
     to_renew_.push_back(path);
   }
 }
 
 void lease_renewal_worker::remove_path(const std::string &path) {
-  std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
+  std::unique_lock<std::mutex> lock(metadata_mtx_);
   std::vector<std::string>::iterator it;
   if ((it = std::find(to_renew_.begin(), to_renew_.end(), path)) != to_renew_.end()) {
     to_renew_.erase(it);
@@ -61,7 +61,7 @@ void lease_renewal_worker::remove_path(const std::string &path) {
 }
 
 bool lease_renewal_worker::has_path(const std::string &path) {
-  std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
+  std::unique_lock<std::mutex> lock(metadata_mtx_);
   return std::find(to_renew_.begin(), to_renew_.end(), path) != to_renew_.end();
 }
 

@@ -8,7 +8,7 @@
 #include <jiffy/directory/lease/lease_server.h>
 #include <jiffy/storage/manager/storage_manager.h>
 #include <jiffy/utils/signal_handling.h>
-#include <jiffy/directory/block/block_allocation_server.h>
+#include <jiffy/directory/block/block_registration_server.h>
 #include <jiffy/utils/logger.h>
 #include <jiffy/directory/block/file_size_tracker.h>
 #include <boost/program_options.hpp>
@@ -20,7 +20,7 @@ using namespace ::jiffy::utils;
 
 using namespace ::apache::thrift;
 
-std::string mapper(const std::string& env_var) {
+std::string mapper(const std::string &env_var) {
   if (env_var == "JIFFY_DIRECTORY_HOST") return "directory.host";
   else if (env_var == "JIFFY_DIRECTORY_SERVICE_PORT") return "directory.service_port";
   else if (env_var == "JIFFY_LEASE_PORT") return "directory.lease_port";
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
       config_files = {config_file};
     }
 
-    for (const auto& cfile: config_files) {
+    for (const auto &cfile: config_files) {
       std::ifstream ifs(cfile.c_str());
       if (ifs) {
         LOG(log_level::info) << "config: " << cfile;
@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
 
   std::exception_ptr alloc_exception = nullptr;
   auto alloc = std::make_shared<random_block_allocator>();
-  auto alloc_server = block_allocation_server::create(alloc, address, block_port);
+  auto alloc_server = block_registration_server::create(alloc, address, block_port);
   std::thread alloc_serve_thread([&alloc_exception, &alloc_server, &failing_thread, &failure_condition] {
     try {
       alloc_server->serve();

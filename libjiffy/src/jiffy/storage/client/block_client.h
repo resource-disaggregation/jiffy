@@ -2,10 +2,9 @@
 #define JIFFY_BLOCK_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
-#include <libcuckoo/cuckoohash_map.hh>
-#include "../service/block_request_service.h"
-#include "../service/block_response_service.h"
-#include "../../utils/client_cache.h"
+#include "jiffy/storage/service/block_request_service.h"
+#include "jiffy/storage/service/block_response_service.h"
+#include "jiffy/utils/client_cache.h"
 
 namespace jiffy {
 namespace storage {
@@ -91,11 +90,10 @@ class block_client {
   /**
    * @brief Request command
    * @param seq Sequence identifier
-   * @param cmd_id Command identifier
-   * @param args Arguments
+   * @param args Command arguments
    */
 
-  void command_request(const sequence_id &seq, int32_t cmd_id, const std::vector<std::string> &args);
+  void command_request(const sequence_id &seq, const std::vector<std::string> &args);
 
  private:
   /* Transport */

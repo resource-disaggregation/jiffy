@@ -50,13 +50,13 @@ TEST_CASE("rpc_create_file_test", "[file][dir]") {
   test_utils::wait_till_server_ready(HOST, PORT);
 
   directory_client tree(HOST, PORT);
-  REQUIRE_NOTHROW(tree.create("/sandbox/a.txt", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/a.txt", "testtype", "/tmp", 1, 1, 0));
   REQUIRE(tree.is_regular_file("/sandbox/a.txt"));
 
-  REQUIRE_NOTHROW(tree.create("/sandbox/foo/bar/baz/a", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/foo/bar/baz/a", "testtype", "/tmp", 1, 1, 0));
   REQUIRE(tree.is_regular_file("/sandbox/foo/bar/baz/a"));
 
-  REQUIRE_THROWS_AS(tree.create("/sandbox/foo/bar/baz/a/b", "/tmp", 1, 1, 0), directory_service_exception);
+  REQUIRE_THROWS_AS(tree.create("/sandbox/foo/bar/baz/a/b", "testtype", "/tmp", 1, 1, 0), directory_service_exception);
   REQUIRE_THROWS_AS(tree.create_directories("/sandbox/foo/bar/baz/a/b"), directory_service_exception);
 
   server->stop();
@@ -74,8 +74,8 @@ TEST_CASE("rpc_open_file_test", "[file][dir]") {
   test_utils::wait_till_server_ready(HOST, PORT);
 
   directory_client tree(HOST, PORT);
-  REQUIRE_NOTHROW(tree.create("/sandbox/a.txt", "/tmp", 1, 1, 0));
-  REQUIRE_NOTHROW(tree.create("/sandbox/foo/bar/baz/a", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/a.txt", "testtype", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/foo/bar/baz/a", "testtype", "/tmp", 1, 1, 0));
 
   data_status s;
   REQUIRE_NOTHROW(s = tree.open("/sandbox/a.txt"));
@@ -107,23 +107,23 @@ TEST_CASE("rpc_open_or_create_file_test", "[file][dir]") {
   test_utils::wait_till_server_ready(HOST, PORT);
 
   directory_client tree(HOST, PORT);
-  REQUIRE_NOTHROW(tree.create("/sandbox/a.txt", "/tmp", 1, 1, 0));
-  REQUIRE_NOTHROW(tree.create("/sandbox/foo/bar/baz/a", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/a.txt", "testtype", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/foo/bar/baz/a", "testtype", "/tmp", 1, 1, 0));
 
   data_status s;
-  REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/a.txt", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/a.txt", "testtype", "/tmp", 1, 1, 0));
   REQUIRE(s.chain_length() == 1);
   REQUIRE(s.mode() == std::vector<storage_mode>{storage_mode::in_memory});
   REQUIRE(s.backing_path() == "/tmp");
   REQUIRE(s.data_blocks().size() == 1);
 
-  REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/foo/bar/baz/a", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/foo/bar/baz/a", "testtype", "/tmp", 1, 1, 0));
   REQUIRE(s.chain_length() == 1);
   REQUIRE(s.mode() == std::vector<storage_mode>{storage_mode::in_memory});
   REQUIRE(s.backing_path() == "/tmp");
   REQUIRE(s.data_blocks().size() == 1);
 
-  REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/b.txt", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(s = tree.open_or_create("/sandbox/b.txt", "testtype", "/tmp", 1, 1, 0));
   REQUIRE(s.chain_length() == 1);
   REQUIRE(s.mode() == std::vector<storage_mode>{storage_mode::in_memory});
   REQUIRE(s.backing_path() == "/tmp");
@@ -145,7 +145,7 @@ TEST_CASE("rpc_exists_test", "[file][dir]") {
 
   directory_client tree(HOST, PORT);
 
-  REQUIRE_NOTHROW(tree.create("/sandbox/file", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file", "testtype", "/tmp", 1, 1, 0));
   REQUIRE(tree.exists("/sandbox"));
   REQUIRE(tree.exists("/sandbox/file"));
   REQUIRE(!tree.exists("/sandbox/foo"));
@@ -167,7 +167,7 @@ TEST_CASE("rpc_last_write_time_test", "[file][dir][touch]") {
   directory_client tree(HOST, PORT);
 
   std::uint64_t before = time_utils::now_ms();
-  REQUIRE_NOTHROW(tree.create("/sandbox/file", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file", "testtype", "/tmp", 1, 1, 0));
   std::uint64_t after = time_utils::now_ms();
   REQUIRE(before <= tree.last_write_time("/sandbox/file"));
   REQUIRE(tree.last_write_time("/sandbox/file") <= after);
@@ -203,7 +203,7 @@ TEST_CASE("rpc_permissions_test", "[file][dir]") {
 
   directory_client tree(HOST, PORT);
 
-  REQUIRE_NOTHROW(tree.create("/sandbox/file", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file", "testtype", "/tmp", 1, 1, 0));
   REQUIRE(tree.permissions("/sandbox") == perms::all);
   REQUIRE(tree.permissions("/sandbox/file") == perms::all);
 
@@ -241,7 +241,7 @@ TEST_CASE("rpc_remove_test", "[file][dir]") {
 
   directory_client tree(HOST, PORT);
 
-  REQUIRE_NOTHROW(tree.create("/sandbox/abcdef/example/a/b", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/abcdef/example/a/b", "testtype", "/tmp", 1, 1, 0));
   REQUIRE(alloc->num_free_blocks() == 3);
 
   REQUIRE_NOTHROW(tree.remove("/sandbox/abcdef/example/a/b"));
@@ -257,9 +257,10 @@ TEST_CASE("rpc_remove_test", "[file][dir]") {
   REQUIRE(!tree.exists("/sandbox/abcdef"));
   REQUIRE(alloc->num_free_blocks() == 4);
 
-  REQUIRE(sm->COMMANDS.size() == 2);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/abcdef/example/a/b:0:65536:0:1:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "reset:0");
+  REQUIRE(sm->COMMANDS.size() == 3);
+  REQUIRE(sm->COMMANDS[0] == "create_partition:0:testtype:0:");
+  REQUIRE(sm->COMMANDS[1] == "setup_chain:0:/sandbox/abcdef/example/a/b:0:nil");
+  REQUIRE(sm->COMMANDS[2] == "destroy_partition:0");
 
   server->stop();
   if (serve_thread.joinable()) {
@@ -276,8 +277,8 @@ TEST_CASE("rpc_path_flush_test", "[file][dir]") {
   test_utils::wait_till_server_ready(HOST, PORT);
 
   directory_client tree(HOST, PORT);
-  REQUIRE_NOTHROW(tree.create("/sandbox/abcdef/example/a/b", "/tmp", 1, 1, 0));
-  REQUIRE_NOTHROW(tree.create("/sandbox/abcdef/example/c", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/abcdef/example/a/b", "testtype", "/tmp", 1, 1, 0, 0, {"0_65536"}));
+  REQUIRE_NOTHROW(tree.create("/sandbox/abcdef/example/c", "testtype", "/tmp", 1, 1, 0, 0, {"0_65536"}));
   REQUIRE(alloc->num_free_blocks() == 2);
 
   REQUIRE_NOTHROW(tree.sync("/sandbox/abcdef/example/c", "local://tmp"));
@@ -287,11 +288,13 @@ TEST_CASE("rpc_path_flush_test", "[file][dir]") {
   REQUIRE(tree.dstatus("/sandbox/abcdef/example/a/b").mode() == std::vector<storage_mode>{storage_mode::in_memory});
 
   REQUIRE(alloc->num_free_blocks() == 2);
-  REQUIRE(sm->COMMANDS.size() == 4);
-  REQUIRE(sm->COMMANDS[0] == "setup_block:0:/sandbox/abcdef/example/a/b:0:65536:0:1:0:nil");
-  REQUIRE(sm->COMMANDS[1] == "setup_block:1:/sandbox/abcdef/example/c:0:65536:1:1:0:nil");
-  REQUIRE(sm->COMMANDS[2] == "sync:1:local://tmp/0_65536");
-  REQUIRE(sm->COMMANDS[3] == "sync:0:local://tmp/0_65536");
+  REQUIRE(sm->COMMANDS.size() == 6);
+  REQUIRE(sm->COMMANDS[0] == "create_partition:0:testtype:0_65536:");
+  REQUIRE(sm->COMMANDS[1] == "setup_chain:0:/sandbox/abcdef/example/a/b:0:nil");
+  REQUIRE(sm->COMMANDS[2] == "create_partition:1:testtype:0_65536:");
+  REQUIRE(sm->COMMANDS[3] == "setup_chain:1:/sandbox/abcdef/example/c:0:nil");
+  REQUIRE(sm->COMMANDS[4] == "sync:1:local://tmp/0_65536");
+  REQUIRE(sm->COMMANDS[5] == "sync:0:local://tmp/0_65536");
 
   server->stop();
   if (serve_thread.joinable()) {
@@ -308,7 +311,7 @@ TEST_CASE("rpc_rename_test", "[file][dir]") {
   test_utils::wait_till_server_ready(HOST, PORT);
 
   directory_client tree(HOST, PORT);
-  REQUIRE_NOTHROW(tree.create("/sandbox/from/file1.txt", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/from/file1.txt", "testtype", "/tmp", 1, 1, 0));
   REQUIRE_NOTHROW(tree.create_directory("/sandbox/to"));
   REQUIRE_NOTHROW(tree.create_directory("/sandbox/to2"));
 
@@ -340,7 +343,7 @@ TEST_CASE("rpc_status_test", "[file][dir]") {
 
   directory_client tree(HOST, PORT);
   std::uint64_t before = time_utils::now_ms();
-  REQUIRE_NOTHROW(tree.create("/sandbox/file", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file", "testtype", "/tmp", 1, 1, 0));
   std::uint64_t after = time_utils::now_ms();
   REQUIRE(tree.status("/sandbox/file").permissions() == perms::all);
   REQUIRE(tree.status("/sandbox/file").type() == file_type::regular);
@@ -374,9 +377,9 @@ TEST_CASE("rpc_directory_entries_test", "[file][dir]") {
   std::uint64_t t0 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_directories("/sandbox/a/b"));
   std::uint64_t t1 = time_utils::now_ms();
-  REQUIRE_NOTHROW(tree.create("/sandbox/file1.txt", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file1.txt", "testtype", "/tmp", 1, 1, 0));
   std::uint64_t t2 = time_utils::now_ms();
-  REQUIRE_NOTHROW(tree.create("/sandbox/file2.txt", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file2.txt", "testtype", "/tmp", 1, 1, 0));
   std::uint64_t t3 = time_utils::now_ms();
 
   std::vector<directory_entry> entries;
@@ -417,9 +420,9 @@ TEST_CASE("rpc_recursive_directory_entries_test", "[file][dir]") {
   std::uint64_t t0 = time_utils::now_ms();
   REQUIRE_NOTHROW(tree.create_directories("/sandbox/a/b"));
   std::uint64_t t1 = time_utils::now_ms();
-  REQUIRE_NOTHROW(tree.create("/sandbox/file1.txt", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file1.txt", "testtype", "/tmp", 1, 1, 0));
   std::uint64_t t2 = time_utils::now_ms();
-  REQUIRE_NOTHROW(tree.create("/sandbox/file2.txt", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file2.txt", "testtype", "/tmp", 1, 1, 0));
   std::uint64_t t3 = time_utils::now_ms();
 
   std::vector<directory_entry> entries;
@@ -461,7 +464,7 @@ TEST_CASE("rpc_dstatus_test", "[file]") {
   test_utils::wait_till_server_ready(HOST, PORT);
 
   directory_client tree(HOST, PORT);
-  REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "testtype", "/tmp", 1, 1, 0));
   REQUIRE_THROWS_AS(tree.dstatus("/sandbox"), directory_service_exception);
   REQUIRE(tree.dstatus("/sandbox/file.txt").mode() == std::vector<storage_mode>{storage_mode::in_memory});
   REQUIRE(tree.dstatus("/sandbox/file.txt").backing_path() == "/tmp");
@@ -483,7 +486,7 @@ TEST_CASE("rpc_file_type_test", "[file][dir]") {
 
   directory_client tree(HOST, PORT);
 
-  REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "/tmp", 1, 1, 0));
+  REQUIRE_NOTHROW(tree.create("/sandbox/file.txt", "testtype", "/tmp", 1, 1, 0));
   REQUIRE(tree.is_regular_file("/sandbox/file.txt"));
   REQUIRE_FALSE(tree.is_directory("/sandbox/file.txt"));
 
