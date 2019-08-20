@@ -31,13 +31,13 @@ void block_response_client_map::clear() {
   clients_.clear();
 }
 
-void block_response_client_map::send_failure() {
+void block_response_client_map::send_failure(const std::vector<std::string> &msg) {
   sequence_id fail;
   fail.__set_client_id(-2);
   fail.__set_client_seq_no(-2);
   fail.__set_client_id(-2);
   for (const auto &x : clients_.lock_table()) {
-    x.second->response(fail, {});
+    x.second->response(fail, msg);
   }
 }
 

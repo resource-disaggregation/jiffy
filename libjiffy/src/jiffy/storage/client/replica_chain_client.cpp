@@ -63,9 +63,9 @@ void replica_chain_client::send_command(const std::vector<std::string> &args) {
 std::vector<std::string> replica_chain_client::recv_response() {
   std::vector<std::string> ret;
   int64_t rseq = response_reader_.recv_response(ret);
-  if (rseq != seq_.client_seq_no) {
+  if (rseq != seq_.client_seq_no && rseq != -2) {
     throw std::logic_error("SEQ: Expected=" + std::to_string(seq_.client_seq_no) + " Received=" + std::to_string(rseq));
-  }
+  } 
   seq_.client_seq_no++;
   in_flight_ = false;
   return ret;

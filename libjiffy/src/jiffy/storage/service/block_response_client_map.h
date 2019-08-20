@@ -52,7 +52,7 @@ class block_response_client_map {
   /**
    * @brief Send failing request when block is deleted
    */
-  void send_failure();
+  void send_failure(const std::vector<std::string> &msg);
 
  private:
   /* Response client map */

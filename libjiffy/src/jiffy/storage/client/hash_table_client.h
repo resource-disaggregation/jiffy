@@ -103,7 +103,7 @@ class hash_table_client : public data_structure_client {
   std::map<int32_t, std::shared_ptr<replica_chain_client>> blocks_;
 
   /* Caching created connections */
-  std::map<std::string, client_cache_slot> redirect_blocks_;
+  std::map<std::string, std::shared_ptr<replica_chain_client>> redirect_blocks_;
 };
 
 }

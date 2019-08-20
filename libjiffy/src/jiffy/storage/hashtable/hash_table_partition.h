@@ -43,7 +43,7 @@ class hash_table_partition : public chain_module {
   /**
    * @brief Virtual destructor
    */
-  ~hash_table_partition() override = default;
+  ~hash_table_partition();
 
   /**
    * @brief Set block hash slot range

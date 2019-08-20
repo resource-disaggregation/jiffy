@@ -54,7 +54,7 @@ class partition {
    * @brief Destructor
    */
   virtual ~partition() {
-    client_map_.send_failure();
+    client_map_.send_failure({});
     client_map_.clear();
     sub_map_.clear();
   }

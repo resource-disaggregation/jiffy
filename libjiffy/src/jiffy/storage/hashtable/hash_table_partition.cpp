@@ -49,6 +49,11 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
   slot_range(std::stoi(r[0]), std::stoi(r[1]));
 }
 
+hash_table_partition::~hash_table_partition() {
+  std::vector<std::string> ret = {"!block_moved", export_slot_range(), std::to_string(scaling_down_), export_target_str_, std::to_string(merge_direction_)};
+  client_map_.send_failure(ret);
+}
+
 void hash_table_partition::put(response &_return, const arg_list &args) {
   if (!(args.size() == 3 || (args.size() == 4 && args[3] == "!redirected"))) {
     RETURN_ERR("!args_error");
@@ -56,7 +61,7 @@ void hash_table_partition::put(response &_return, const arg_list &args) {
   auto hash = hash_slot::get(args[1]);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[3] == "!redirected")) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      RETURN_ERR("!exporting", export_target_str_, export_slot_range(), std::to_string(scaling_down_), std::to_string(merge_direction_));
+      RETURN_ERR("!exporting", export_target_str_, std::to_string(export_slot_range_.first));
     }
     if (storage_size() + args[1].size() + args[2].size() > storage_capacity()) {
       RETURN_ERR("!full");
@@ -78,7 +83,7 @@ void hash_table_partition::upsert(response &_return, const arg_list &args) {
   auto hash = hash_slot::get(args[1]);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[3] == "!redirected")) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      RETURN_ERR("!exporting", export_target_str_, export_slot_range(), std::to_string(scaling_down_), std::to_string(merge_direction_));
+      RETURN_ERR("!exporting", export_target_str_, std::to_string(export_slot_range_.first));
     }
     block_.upsert(make_binary(args[1]), [&](value_type &v) {
       v = make_binary(args[2]);
@@ -98,7 +103,7 @@ void hash_table_partition::exists(response &_return, const arg_list &args) {
       RETURN_OK("true");
     }
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      RETURN_ERR("!exporting", export_target_str_, export_slot_range(), std::to_string(scaling_down_), std::to_string(merge_direction_));
+      RETURN_ERR("!exporting", export_target_str_, std::to_string(export_slot_range_.first));
     }
     RETURN_OK("false");
   }
@@ -115,7 +120,7 @@ void hash_table_partition::get(response &_return, const arg_list &args) {
       RETURN_OK(to_string(block_.find(args[1])));
     } catch (std::out_of_range &e) {
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-        RETURN_ERR("!exporting", export_target_str_, export_slot_range(), std::to_string(scaling_down_), std::to_string(merge_direction_));
+        RETURN_ERR("!exporting", export_target_str_, std::to_string(export_slot_range_.first));
       }
       RETURN_ERR("!key_not_found");
     }
@@ -130,7 +135,7 @@ void hash_table_partition::update(response &_return, const arg_list &args) {
   auto hash = hash_slot::get(args[1]);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[3] == "!redirected")) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      RETURN_ERR("!exporting", export_target_str_, export_slot_range(), std::to_string(scaling_down_), std::to_string(merge_direction_));
+      RETURN_ERR("!exporting", export_target_str_, std::to_string(export_slot_range_.first));
     }
     std::string old_val;
     if (block_.update_fn(args[1], [&](value_type &v) {
@@ -154,7 +159,7 @@ void hash_table_partition::remove(response &_return, const arg_list &args) {
   auto hash = hash_slot::get(args[1]);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[2] == "!redirected")) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      RETURN_ERR("!exporting", export_target_str_, export_slot_range(), std::to_string(scaling_down_), std::to_string(merge_direction_));
+      RETURN_ERR("!exporting", export_target_str_, std::to_string(export_slot_range_.first));
     }
     std::string old_val;
     if (block_.erase_fn(args[1], [&](value_type &value) {
@@ -257,6 +262,9 @@ void hash_table_partition::update_partition(response &_return, const arg_list &a
           && is_tail()) {
         auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
         fs->remove_block(path(), s[1]);
+      } else {
+        std::vector<std::string> ret = {"!block_moved", export_slot_range(), std::to_string(scaling_down_), export_target_str_, std::to_string(merge_direction_)};
+        client_map_.send_failure()
       }
       if (!underload()) {
         scaling_down_ = false;

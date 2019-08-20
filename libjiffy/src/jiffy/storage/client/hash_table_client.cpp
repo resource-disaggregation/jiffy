@@ -110,43 +110,49 @@ std::size_t hash_table_client::block_id(const std::string &key) {
 
 void hash_table_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
   while (_return[0] == "!exporting") {
-    auto it = redirect_blocks_.find(_return[0] + _return[1] + _return[2]);
+    auto it = redirect_blocks_.find(_return[1]);
     if (it == redirect_blocks_.end()) {
-      auto chain = directory::replica_chain(string_utils::split(_return[1], '!'));
-      auto client = std::make_shared<replica_chain_client>(fs_, path_, chain, HT_OPS, 0);
-      redirect_blocks_.emplace(std::make_pair(_return[0] + _return[1] + _return[2], client_cache_slot(_return[2], std::stoi(_return[3]), std::stoi(_return[4]), client)));
-      _return = client->run_command_redirected(args);
+      auto merge_it = blocks_.find(std::stoi(_return[2]));
+      if(merge_it == blocks_.end()) {
+        auto chain = directory::replica_chain(string_utils::split(_return[1], '!'));
+        auto client = std::make_shared<replica_chain_client>(fs_, path_, chain, HT_OPS, 0);
+        redirect_blocks_.emplace(std::make_pair(_return[1], client));
+        _return = client->run_command_redirected(args);
+      } else {
+        _return = merge_it->second->run_command_redirected(args);
+      }
     } else {
-      _return = it->second.client_->run_command_redirected(args);
+      _return = it->second->run_command_redirected(args);
     }
-
   }
   if (_return[0] == "!block_moved") {
-    auto hash = hash_slot::get(args[1]);
-    for(auto x = redirect_blocks_.begin(); x != redirect_blocks_.end(); x++) {
-      auto slot_range = string_utils::split((*x).second.slot_range_, '_', 2);
-      if(hash >= std::stoi(slot_range[0]) && hash < std::stoi(slot_range[1])) {
-        auto it = blocks_.find(std::stoi(slot_range[0]));
-        if(it == blocks_.end() && !(*x).second.merging_) {
-          blocks_.emplace(std::make_pair(std::stoi(slot_range[0]), (*x).second.client_));
-        } else if((*x).second.merging_ && it != blocks_.end()) {
-          if((*x).second.merge_direction_) {
-            auto node = *(std::next(it));
+    auto slot_range = string_utils::split(_return[1], '_', 2);
+    if(!_return[2]) {  // split
+      //auto it = std::prev(blocks_.find(std::stoi(slot_range[1])));
+      auto it = redirect_blocks_.find(_return[3]);
+      if(it != redirect_blocks_.end()) {
+        blocks_.emplace(std::make_pair(std::stoi(slot_range[0]), it->second));
+        redirect_blocks_.erase(it);
+      } else {
+        auto chain = directory::replica_chain(string_utils::split(_return[3], '!'));
+        auto client = std::make_shared<replica_chain_client>(fs_, path_, chain, HT_OPS, 0);
+        blocks_.emplace(std::make_pair(std::stoi(slot_range[0]), client));
+      }
+    } else {
+      auto it = blocks_.find(std::stoi(slot_range[0]));
+      if(_return[4]) {
+            auto client = std::next(it)->second;
             blocks_.erase(std::next(it));
             blocks_.erase(it);
-            blocks_.insert(std::make_pair(std::stoi(slot_range[0]), node.second));
+            blocks_.insert(std::make_pair(std::stoi(slot_range[0]), client));
           } else {
             blocks_.erase(it);
           }
-        } else {
-          continue;
-        }
-        redirect_blocks_.erase(x);
-        throw redo_error();
-      }
     }
-    refresh();
     throw redo_error();
+  }
+  refresh();  // Should never be called
+  throw redo_error();
   }
   if (_return[0] == "!full") {
     std::this_thread::sleep_for(std::chrono::milliseconds((int) redo_times_));
