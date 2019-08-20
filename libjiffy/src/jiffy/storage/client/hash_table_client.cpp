@@ -151,7 +151,7 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
             }
       }
     } catch (std::exception &e) {
-      LOG(log_level::info) << "This refresh should never be called";
+      LOG(log_level::info) << "This refresh should never be called " << e.what();
       refresh();
     }
     throw redo_error();
