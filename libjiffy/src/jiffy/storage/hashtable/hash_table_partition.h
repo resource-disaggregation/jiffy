@@ -125,6 +125,14 @@ class hash_table_partition : public chain_module {
   };
 
   /**
+   * @brief Fetch export slot range
+   * @return Export slot range
+   */
+  std::string export_slot_range() {
+    return std::to_string(export_slot_range_.first) + "_" + std::to_string(export_slot_range_.second);
+  }
+  
+  /**
    * @brief Check if slot is within export slot range
    * @param slot Slot
    * @return Bool value, true if slot is within the range
@@ -375,6 +383,8 @@ class hash_table_partition : public chain_module {
   /* Data update mutex, we want only one update function happen at a time */
   std::mutex update_lock_;
 
+  /* Merge direction */
+  int merge_direction_;
 };
 
 }

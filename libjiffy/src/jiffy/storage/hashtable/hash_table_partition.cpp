@@ -56,7 +56,7 @@ void hash_table_partition::put(response &_return, const arg_list &args) {
   auto hash = hash_slot::get(args[1]);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[3] == "!redirected")) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      RETURN_ERR("!exporting", export_target_str_);
+      RETURN_ERR("!exporting", export_target_str_, export_slot_range(), std::to_string(scaling_down_), std::to_string(merge_direction_));
     }
     if (storage_size() + args[1].size() + args[2].size() > storage_capacity()) {
       RETURN_ERR("!full");
@@ -78,7 +78,7 @@ void hash_table_partition::upsert(response &_return, const arg_list &args) {
   auto hash = hash_slot::get(args[1]);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[3] == "!redirected")) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      RETURN_ERR("!exporting", export_target_str_);
+      RETURN_ERR("!exporting", export_target_str_, export_slot_range(), std::to_string(scaling_down_), std::to_string(merge_direction_));
     }
     block_.upsert(make_binary(args[1]), [&](value_type &v) {
       v = make_binary(args[2]);
@@ -98,7 +98,7 @@ void hash_table_partition::exists(response &_return, const arg_list &args) {
       RETURN_OK("true");
     }
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      RETURN_ERR("!exporting", export_target_str_);
+      RETURN_ERR("!exporting", export_target_str_, export_slot_range(), std::to_string(scaling_down_), std::to_string(merge_direction_));
     }
     RETURN_OK("false");
   }
@@ -115,7 +115,7 @@ void hash_table_partition::get(response &_return, const arg_list &args) {
       RETURN_OK(to_string(block_.find(args[1])));
     } catch (std::out_of_range &e) {
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-        RETURN_ERR("!exporting", export_target_str_);
+        RETURN_ERR("!exporting", export_target_str_, export_slot_range(), std::to_string(scaling_down_), std::to_string(merge_direction_));
       }
       RETURN_ERR("!key_not_found");
     }
@@ -130,7 +130,7 @@ void hash_table_partition::update(response &_return, const arg_list &args) {
   auto hash = hash_slot::get(args[1]);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[3] == "!redirected")) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      RETURN_ERR("!exporting", export_target_str_);
+      RETURN_ERR("!exporting", export_target_str_, export_slot_range(), std::to_string(scaling_down_), std::to_string(merge_direction_));
     }
     std::string old_val;
     if (block_.update_fn(args[1], [&](value_type &v) {
@@ -154,7 +154,7 @@ void hash_table_partition::remove(response &_return, const arg_list &args) {
   auto hash = hash_slot::get(args[1]);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[2] == "!redirected")) {
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      RETURN_ERR("!exporting", export_target_str_);
+      RETURN_ERR("!exporting", export_target_str_, export_slot_range(), std::to_string(scaling_down_), std::to_string(merge_direction_));
     }
     std::string old_val;
     if (block_.erase_fn(args[1], [&](value_type &value) {
@@ -240,6 +240,9 @@ void hash_table_partition::update_partition(response &_return, const arg_list &a
     export_target(s[2]);
     auto range = utils::string_utils::split(s[1], '_');
     export_slot_range(std::stoi(range[0]), std::stoi(range[1]));
+    if(s.size() == 4) {
+      merge_direction_ = std::stoi(s[3]);
+    }
   } else if (status == "importing") {
     if ((metadata() != "regular" && !(metadata() == "split_importing" && s[1] == name())) || new_name != name()
         || scaling_up_ || scaling_down_) {

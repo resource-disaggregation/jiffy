@@ -10,6 +10,20 @@
 namespace jiffy {
 namespace storage {
 
+struct client_cache_slot {
+  std::string slot_range_;
+  int merging_;
+  int merge_direction_;
+  std::shared_ptr<replica_chain_client> client_;
+
+   client_cache_slot(std::string slot_range, int merging, int merge_direction, std::shared_ptr<replica_chain_client> & client) {
+    slot_range_ = slot_range;
+    merging_ = merging;
+    merge_direction_ = merge_direction;
+    client_ = client;
+  }
+};
+
 /* Hash table client */
 class hash_table_client : public data_structure_client {
  public:
@@ -89,7 +103,7 @@ class hash_table_client : public data_structure_client {
   std::map<int32_t, std::shared_ptr<replica_chain_client>> blocks_;
 
   /* Caching created connections */
-  std::map<std::string, std::shared_ptr<replica_chain_client>> redirect_blocks_;
+  std::map<std::string, client_cache_slot>> redirect_blocks_;
 };
 
 }

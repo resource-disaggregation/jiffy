@@ -160,10 +160,15 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     }
     UNLOCK;
     auto dst_slot_range = string_utils::split(dst_old_name[0], '_', 2);
-    auto dst_name = (std::stoi(dst_slot_range[0]) == merge_range_end) ?
-                    std::to_string(merge_range_beg) + "_" + dst_slot_range[1]:
-                    dst_slot_range[0] + "_" + std::to_string(merge_range_end);
-    src->run_command({"update_partition", name, "exporting$" + name + "$" + exp_target});
+    std::string dst_name;
+    bool merge_direction = false; // 0 low, 1 high
+    if(std::stoi(dst_slot_range[0]) == merge_range_end) {
+      merge_direction = true;
+      dst_name = std::to_string(merge_range_beg) + "_" + dst_slot_range[1];
+    } else {
+      dst_name = dst_slot_range[0] + "_" + std::to_string(merge_range_end);
+    }
+    src->run_command({"update_partition", name, "exporting$" + name + "$" + exp_target + "$" + std::to_string(merge_direction)});
     auto finish_update_partition_before = time_utils::now_us();
 
     // Transfer data from source to destination
