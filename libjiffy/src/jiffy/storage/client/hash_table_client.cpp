@@ -113,7 +113,7 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
     auto it = redirect_blocks_.find(_return[1]);
     if (it == redirect_blocks_.end()) {
       auto merge_it = blocks_.find(std::stoi(_return[2]));
-      if(merge_it == blocks_.end()) {
+      if (merge_it == blocks_.end()) {
         auto chain = directory::replica_chain(string_utils::split(_return[1], '!'));
         auto client = std::make_shared<replica_chain_client>(fs_, path_, chain, HT_OPS, 0);
         redirect_blocks_.emplace(std::make_pair(_return[1], client));
@@ -126,33 +126,34 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
     }
   }
   if (_return[0] == "!block_moved") {
-    auto slot_range = string_utils::split(_return[1], '_', 2);
-    if(!_return[2]) {  // split
-      //auto it = std::prev(blocks_.find(std::stoi(slot_range[1])));
-      auto it = redirect_blocks_.find(_return[3]);
-      if(it != redirect_blocks_.end()) {
-        blocks_.emplace(std::make_pair(std::stoi(slot_range[0]), it->second));
-        redirect_blocks_.erase(it);
+    try {
+      auto slot_range = string_utils::split(_return[1], '_', 2);
+      if (!std::stoi(_return[2])) {  // split
+        auto it = redirect_blocks_.find(_return[3]);
+        if (it != redirect_blocks_.end()) {
+          blocks_.emplace(std::make_pair(std::stoi(slot_range[0]), it->second));
+          redirect_blocks_.erase(it);
+        } else {
+          auto chain = directory::replica_chain(string_utils::split(_return[3], '!'));
+          auto client = std::make_shared<replica_chain_client>(fs_, path_, chain, HT_OPS, 0);
+          blocks_.emplace(std::make_pair(std::stoi(slot_range[0]), client));
+        }
       } else {
-        auto chain = directory::replica_chain(string_utils::split(_return[3], '!'));
-        auto client = std::make_shared<replica_chain_client>(fs_, path_, chain, HT_OPS, 0);
-        blocks_.emplace(std::make_pair(std::stoi(slot_range[0]), client));
+        auto it = blocks_.find(std::stoi(slot_range[0]));
+        if (std::stoi(_return[4])) {
+              auto client = std::next(it)->second;
+              blocks_.erase(std::next(it));
+              blocks_.erase(it);
+              blocks_.insert(std::make_pair(std::stoi(slot_range[0]), client));
+            } else {
+              blocks_.erase(it);
+            }
       }
-    } else {
-      auto it = blocks_.find(std::stoi(slot_range[0]));
-      if(_return[4]) {
-            auto client = std::next(it)->second;
-            blocks_.erase(std::next(it));
-            blocks_.erase(it);
-            blocks_.insert(std::make_pair(std::stoi(slot_range[0]), client));
-          } else {
-            blocks_.erase(it);
-          }
+    } catch (std::exception &e) {
+      LOG(log_level::info) << "This refresh should never be called";
+      refresh();
     }
     throw redo_error();
-  }
-  refresh();  // Should never be called
-  throw redo_error();
   }
   if (_return[0] == "!full") {
     std::this_thread::sleep_for(std::chrono::milliseconds((int) redo_times_));
