@@ -132,11 +132,13 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
       if (!std::stoi(_return[2])) {  // split
         auto it = redirect_blocks_.find(_return[3]);
         if (it != redirect_blocks_.end()) {
+          LOG(log_level::info) << "Adding block cached" << _return[1];
           blocks_.emplace(std::make_pair(std::stoi(slot_range[0]), it->second));
           redirect_blocks_.erase(it);
         } else {
           auto chain = directory::replica_chain(string_utils::split(_return[3], '!'));
           auto client = std::make_shared<replica_chain_client>(fs_, path_, chain, HT_OPS, 0);
+          LOG(log_level::info) << "Adding block not cached" << _return[1] << " at " << _return[3];
           blocks_.emplace(std::make_pair(std::stoi(slot_range[0]), client));
         }
       } else {
