@@ -1,6 +1,7 @@
 #include "hash_table_client.h"
 #include "jiffy/utils/string_utils.h"
 #include "jiffy/storage/hashtable/hash_slot.h"
+#include "jiffy/utils/logger.h"
 #include <thread>
 #include <cmath>
 
