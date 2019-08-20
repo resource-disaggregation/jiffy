@@ -264,7 +264,7 @@ void hash_table_partition::update_partition(response &_return, const arg_list &a
         fs->remove_block(path(), s[1]);
       } else {
         std::vector<std::string> ret = {"!block_moved", export_slot_range(), std::to_string(scaling_down_), export_target_str_, std::to_string(merge_direction_)};
-        client_map_.send_failure()
+        client_map_.send_failure(ret);
       }
       if (!underload()) {
         scaling_down_ = false;
