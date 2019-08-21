@@ -64,8 +64,21 @@ std::vector<std::string> replica_chain_client::recv_response() {
   std::vector<std::string> ret;
   int64_t rseq = response_reader_.recv_response(ret);
   if (rseq != seq_.client_seq_no && rseq != -2) {
+	  LOG(log_level::info) << "Getting this logic error " << rseq << " " << seq_.client_seq_no;
     throw std::logic_error("SEQ: Expected=" + std::to_string(seq_.client_seq_no) + " Received=" + std::to_string(rseq));
   } 
+  if(rseq == -2) {
+	  LOG(log_level::info) << "Receiving failure: ";
+	  std::vector<std::string> real_result;
+	  response_reader_.recv_response(real_result);
+	  ret.insert(std::end(ret), std::begin(real_result), std::end(real_result));
+	  for(const auto &x:ret) {
+		  if(x.size() < 1000)
+	  	LOG(log_level::info) << x;
+		  else LOG(log_level::info) << x.size();
+	  }
+  }
+
   seq_.client_seq_no++;
   in_flight_ = false;
   return ret;
@@ -89,6 +102,7 @@ std::vector<std::string> replica_chain_client::run_command(const std::vector<std
       connect(fs_->resolve_failures(path_, chain_), timeout_ms_);
       retry = true;
     } catch (std::logic_error &e) { // TODO: This is very iffy, we need to fix this
+	    LOG(log_level::info) << "This should never happen";
       response.clear();
       response.emplace_back("!block_moved");
       break;
