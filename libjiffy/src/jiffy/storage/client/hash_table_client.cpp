@@ -111,47 +111,42 @@ std::size_t hash_table_client::block_id(const std::string &key) {
 
 void hash_table_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
 	while(_return[0] == "!block_moved" || _return[0] == "!exporting") {
-	bool redo_flag = false;
-  if (_return[0] == "!block_moved") {
-    try {
-      auto slot_range = string_utils::split(_return[1], '_', 2);
-      if (!std::stoi(_return[2])) {  // split
-        auto it = redirect_blocks_.find(_return[3]);
-        if (it != redirect_blocks_.end()) {
-          LOG(log_level::info) << "Adding block cached " << _return[1];
-          blocks_.emplace(std::make_pair(std::stoi(slot_range[0]), it->second));
-          redirect_blocks_.erase(it);
+	  bool redo_flag = false;
+    if (_return[0] == "!block_moved") {
+      try {
+        auto slot_range = string_utils::split(_return[1], '_', 2);
+        if (!std::stoi(_return[2])) {  // split
+          auto it = redirect_blocks_.find(_return[3]);
+          if (it != redirect_blocks_.end()) {
+            blocks_.emplace(std::make_pair(std::stoi(slot_range[0]), it->second));
+            redirect_blocks_.erase(it);
+          } else {
+            auto chain = directory::replica_chain(string_utils::split(_return[3], '!'));
+            auto client = std::make_shared<replica_chain_client>(fs_, path_, chain, HT_OPS, 0);
+            blocks_.emplace(std::make_pair(std::stoi(slot_range[0]), client));
+          }
+	        auto beg = _return.cbegin();
+	        _return = std::vector<std::string>(beg + 5, beg + _return.size());
+	        if(_return[0] == "!block_moved")
+		        redo_flag = true;
         } else {
-          auto chain = directory::replica_chain(string_utils::split(_return[3], '!'));
-          auto client = std::make_shared<replica_chain_client>(fs_, path_, chain, HT_OPS, 0);
-          LOG(log_level::info) << "Adding block not cached " << _return[1] << " at " << _return[3];
-          blocks_.emplace(std::make_pair(std::stoi(slot_range[0]), client));
+          auto it = blocks_.find(std::stoi(slot_range[0]));
+          if (std::stoi(_return[4])) {
+            auto client = std::next(it)->second;
+            blocks_.erase(std::next(it));
+            blocks_.erase(it);
+            blocks_.insert(std::make_pair(std::stoi(slot_range[0]), client));
+          } else {
+              blocks_.erase(it);
+          }
+	        redo_flag = true;
         }
-	auto beg = _return.cbegin();
-	_return = std::vector<std::string>(beg + 5, beg + _return.size());
-	if(_return[0] == "!block_moved")
-		redo_flag = true;
-      } else {
-	      LOG(log_level::info) << " Handling merging";
-        auto it = blocks_.find(std::stoi(slot_range[0]));
-        if (std::stoi(_return[4])) {
-		LOG(log_level::info) << "Merging slot_range " << slot_range[0] + "_" + std::to_string(std::next(std::next(it))->first) + " from " + slot_range[0] + "_" + slot_range[1];
-              auto client = std::next(it)->second;
-              blocks_.erase(std::next(it));
-              blocks_.erase(it);
-              blocks_.insert(std::make_pair(std::stoi(slot_range[0]), client));
-            } else {
-		LOG(log_level::info) << "Merging slot_range " <<  std::to_string(std::prev(it)->first) + "_" + std::to_string(std::next(it)->first) + " from " + slot_range[0] + "_" + slot_range[1];
-              blocks_.erase(it);
-            }
-	redo_flag = true;
+      } catch (std::exception &e) {
+        LOG(log_level::error) << "This refresh should never be called " << e.what();
+        refresh();
       }
-    } catch (std::exception &e) {
-      LOG(log_level::info) << "This refresh should never be called " << e.what();
-      refresh();
-    }
     	if(redo_flag) throw redo_error();
-  }
+    }
   while (_return[0] == "!exporting") {
     auto it = redirect_blocks_.find(_return[1]);
     if (it == redirect_blocks_.end()) {
@@ -160,7 +155,6 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
         auto chain = directory::replica_chain(string_utils::split(_return[1], '!'));
         auto client = std::make_shared<replica_chain_client>(fs_, path_, chain, HT_OPS, 0);
         redirect_blocks_.emplace(std::make_pair(_return[1], client));
-	      LOG(log_level::info) << "Sent put to " << _return[2];
         _return = client->run_command_redirected(args);
       } else {
         _return = merge_it->second->run_command_redirected(args);

@@ -50,9 +50,7 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
 }
 
 hash_table_partition::~hash_table_partition() {
-	LOG(log_level::info) << "Sending failure for merging";
   std::vector<std::string> ret = {"!block_moved", export_slot_range(), std::to_string(scaling_down_), export_target_str_, std::to_string(merge_direction_)};
-	for(const auto &x:ret) LOG(log_level::info) << x;
   client_map_.send_failure(ret);
 }
 
@@ -230,7 +228,6 @@ void hash_table_partition::update_partition(response &_return, const arg_list &a
   update_lock_.lock();
   auto new_name = args[1];
   auto new_metadata = args[2];
-  LOG(log_level::info) << "Update partition to be " << new_name << " " << new_metadata << " from " << name() << " " << metadata();
   if (new_name == "merging" && new_metadata == "merging") {
     if (metadata() == "regular" && name() != "0_65536" && underload()) {
       metadata("exporting");
@@ -272,11 +269,7 @@ void hash_table_partition::update_partition(response &_return, const arg_list &a
       }
     } else {
 	    if(new_name != name()) {
-	      LOG(log_level::info) << "Finish splitting, sending failure";
         std::vector<std::string> ret = {"!block_moved", export_slot_range(), std::to_string(scaling_down_), export_target_str_, std::to_string(merge_direction_)};
-	for(const auto &x:ret) {
-		LOG(log_level::info) << x;
-	}
         client_map_.send_failure(ret);
 	    }
       scaling_up_ = false;
