@@ -144,6 +144,7 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
       } catch (std::exception &e) {
         LOG(log_level::error) << "This refresh should never be called " << e.what();
         refresh();
+        throw redo_error();
       }
     	if(redo_flag) throw redo_error();
     }
@@ -157,7 +158,10 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
         redirect_blocks_.emplace(std::make_pair(_return[1], client));
         _return = client->run_command_redirected(args);
       } else {
-        _return = merge_it->second->run_command_redirected(args);
+        if(std::stoi(_return[3]))
+          _return = std::next(merge_it)->second->run_command_redirected(args);
+        else
+          _return = std::prev(merge_it)->second->run_command_redirected(args);
       }
     } else {
       _return = it->second->run_command_redirected(args);
