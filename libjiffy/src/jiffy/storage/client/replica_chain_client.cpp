@@ -71,9 +71,7 @@ std::vector<std::string> replica_chain_client::recv_response() {
 	    std::vector<std::string> real_result;
 	    response_reader_.recv_response(real_result);
 	    ret.insert(std::end(ret), std::begin(real_result), std::end(real_result));
-    } catch(apache::thrift::transport::TTransportException &e) {
-      continue;
-    }
+    } catch(apache::thrift::transport::TTransportException &e) {}
   }
   seq_.client_seq_no++;
   in_flight_ = false;
