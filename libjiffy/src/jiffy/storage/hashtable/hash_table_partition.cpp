@@ -154,14 +154,27 @@ void hash_table_partition::update(response &_return, const arg_list &args) {
 }
 
 void hash_table_partition::remove(response &_return, const arg_list &args) {
-  if (!(args.size() == 2 || (args.size() == 3 && args[2] == "!redirected"))) {
+  if (!(args.size() == 2 || (args.size() == 3 && args[2] == "!redirected") || (args.size() == 3 && args[2] == "!buffered"))) {
     RETURN_ERR("!args_error");
   }
   auto hash = hash_slot::get(args[1]);
-  if (in_slot_range(hash) || (in_import_slot_range(hash) && args[2] == "!redirected")) {
+  if (in_slot_range(hash) || (in_import_slot_range(hash) && args[2] == "!buffered")) {
+    std::string old_val;
+    if (block_.erase_fn(args[1], [&](value_type &value) {
+      old_val = to_string(value);
+      return true;
+    })) {
+        if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+            RETURN_ERR("!exporting", export_target_str_, std::to_string(export_slot_range_.first), std::to_string(merge_direction_));
+        }
+      RETURN_OK(old_val);
+    }
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
       RETURN_ERR("!exporting", export_target_str_, std::to_string(export_slot_range_.first), std::to_string(merge_direction_));
     }
+    RETURN_ERR("!key_not_found");
+  }
+   if (in_import_slot_range(hash) && args[2] == "!redirected") {
     std::string old_val;
     if (block_.erase_fn(args[1], [&](value_type &value) {
       old_val = to_string(value);
@@ -170,11 +183,12 @@ void hash_table_partition::remove(response &_return, const arg_list &args) {
       RETURN_OK(old_val);
     }
     if (metadata_ == "importing" && in_import_slot_range(hash)) {
-      RETURN_ERR("!full");
+      //RETURN_ERR("!full");
+      remove_cache_.push_back(args[1]);
     }
     RETURN_ERR("!key_not_found");
   }
-  RETURN_ERR("!block_moved");
+   RETURN_ERR("!block_moved");
 }
 
 void hash_table_partition::scale_remove(response &_return, const arg_list &args) {
@@ -263,6 +277,7 @@ void hash_table_partition::update_partition(response &_return, const arg_list &a
           && is_tail()) {
         auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
         fs->remove_block(path(), s[1]);
+        buffer_remove();
       }
       if (!underload()) {
         scaling_down_ = false;
@@ -446,6 +461,18 @@ bool hash_table_partition::overload() {
 
 bool hash_table_partition::underload() {
   return storage_size() < static_cast<size_t>(static_cast<double>(storage_capacity()) * threshold_lo_);
+}
+
+void hash_table_partition::buffer_remove() {
+    response ret;
+    for(const auto &x : remove_cache_) {
+        arg_list args;
+        args.push_back("remove");
+        args.push_back(x);
+        args.push_back("!buffered");
+        remove(ret, args);
+    }
+    remove_cache_.clear();
 }
 
 REGISTER_IMPLEMENTATION("hashtable", hash_table_partition);

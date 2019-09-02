@@ -131,7 +131,7 @@ class hash_table_partition : public chain_module {
   std::string export_slot_range() {
     return std::to_string(export_slot_range_.first) + "_" + std::to_string(export_slot_range_.second);
   }
-  
+
   /**
    * @brief Check if slot is within export slot range
    * @param slot Slot
@@ -326,6 +326,9 @@ class hash_table_partition : public chain_module {
    */
   bool underload();
 
+  void buffer_remove();
+
+
   /* Cuckoo hash map partition */
   hash_table_type block_;
 
@@ -385,6 +388,9 @@ class hash_table_partition : public chain_module {
 
   /* Merge direction */
   int merge_direction_;
+
+  /* Buffer remove cache */
+  std::vector<std::string> remove_cache_;
 };
 
 }

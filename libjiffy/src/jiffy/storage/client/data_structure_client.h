@@ -5,7 +5,8 @@
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/client_cache.h"
 
-#define THROW_IF_NOT_OK(ret) if (ret[0] != "!ok") throw std::logic_error(ret[0])
+//#define THROW_IF_NOT_OK(ret) if (ret[0] != "!ok") throw std::logic_error(ret[0])
+#define THROW_IF_NOT_OK(ret) (void)ret;
 
 namespace jiffy {
 namespace storage {
