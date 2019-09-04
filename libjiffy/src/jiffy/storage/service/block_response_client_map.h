@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <libcuckoo/cuckoohash_map.hh>
 #include "block_response_client.h"
+#include <unordered_map>
 
 namespace jiffy {
 namespace storage {
@@ -56,7 +57,8 @@ class block_response_client_map {
 
  private:
   /* Response client map */
-  cuckoohash_map<int64_t, std::shared_ptr<block_response_client>> clients_;
+  //cuckoohash_map<int64_t, std::shared_ptr<block_response_client>> clients_;
+  std::unordered_map<int64_t, std::shared_ptr<block_response_client>> clients_;
 };
 
 }
