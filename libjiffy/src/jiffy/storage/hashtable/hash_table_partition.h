@@ -330,7 +330,9 @@ class hash_table_partition : public chain_module {
 
 
   /* Cuckoo hash map partition */
-  hash_table_type block_;
+  //hash_table_type block_;
+  //std::unordered_map<std::string, std::string> block_;
+  std::unordered_map<key_type, value_type, hash_type, equal_type> block_;
 
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
