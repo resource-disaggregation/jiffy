@@ -116,23 +116,23 @@ void hash_table_partition::exists(response &_return, const arg_list &args) {
 }
 
 void hash_table_partition::get(response &_return, const arg_list &args) {
-  /*
   if (!(args.size() == 2 || (args.size() == 3 && args[2] == "!redirected"))) {
     RETURN("!args_error");
   }
   auto hash = hash_slot::get(args[1]);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[2] == "!redirected")) {
-    try {
-      RETURN_OK(to_string(block_.find(args[1])));
-    } catch (std::out_of_range &e) {
-      if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-        RETURN_ERR("!exporting", export_target_str_, std::to_string(export_slot_range_.first), std::to_string(merge_direction_));
+      auto it = block_.find(make_binary(args[1]));
+      if(it != block_.end()) {
+        RETURN_OK(to_string(it->second));
       }
-      RETURN_ERR("!key_not_found");
-    }
+      else {
+        if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+          RETURN_ERR("!exporting", export_target_str_, std::to_string(export_slot_range_.first), std::to_string(merge_direction_));
+        }
+        RETURN_ERR("!key_not_found");
+      }
   }
   RETURN_ERR("!block_moved");
-   */
 }
 
 void hash_table_partition::update(response &_return, const arg_list &args) {
