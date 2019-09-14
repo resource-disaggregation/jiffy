@@ -6,7 +6,6 @@
 #include <jiffy/auto_scaling/auto_scaling_server.h>
 #include <jiffy/storage/service/block_server.h>
 #include <jiffy/utils/signal_handling.h>
-#include <jiffy/utils/logger.h>
 #include <boost/program_options.hpp>
 #include <ifaddrs.h>
 #include "server_storage_tracker.h"
@@ -70,7 +69,7 @@ int main(int argc, char **argv) {
   int32_t dir_port = 9090;
   std::size_t num_servers = 64;
   std::size_t num_blocks = 64;
-  std::size_t num_block_groups = 4;
+  std::size_t num_block_groups = std::thread::hardware_concurrency();
   std::size_t block_capacity = 134217728;
   double blk_thresh_lo = 0.25;
   double blk_thresh_hi = 0.75;
@@ -155,7 +154,7 @@ int main(int argc, char **argv) {
     LOG(log_level::info) << "storage.service_port: " << service_port;
     LOG(log_level::info) << "storage.management_port: " << mgmt_port;
     LOG(log_level::info) << "storage.auto_scaling_port: " << auto_scaling_port;
-    LOG(log_level::info) << "storage.block.num_blocks: " << num_block_groups;
+    LOG(log_level::info) << "storage.block.num_block_groups: " << num_block_groups;
     LOG(log_level::info) << "storage.block.num_blocks: " << num_blocks;
     LOG(log_level::info) << "storage.block.num_servers: " << num_servers;
     LOG(log_level::info) << "storage.block.capacity: " << block_capacity;
