@@ -64,11 +64,10 @@ int main(int argc, char **argv) {
   // Configuration priority order: default < env < configuration file < commandline args
   // First set defaults
   std::string address = "127.0.0.1";
+  int32_t mgmt_port = 9093;
+  int32_t auto_scaling_port = 9094;
   int32_t service_port = 9095;
-  int32_t mgmt_port = 9094;
-  int32_t auto_scaling_port = 9093;
   int32_t dir_port = 9090;
-  std::size_t num_servers = 64;
   std::size_t num_blocks = 64;
   std::size_t num_block_groups = 4;
   std::size_t block_capacity = 134217728;
@@ -93,13 +92,13 @@ int main(int argc, char **argv) {
     config_file_options.add_options()
         ("storage.host", po::value<std::string>(&address)->default_value("127.0.0.1"))
         ("storage.management_port", po::value<int>(&mgmt_port)->default_value(9093))
-        ("storage.service_port", po::value<int>(&service_port)->default_value(9095))
         ("storage.auto_scaling_port", po::value<int>(&auto_scaling_port)->default_value(9094))
+        ("storage.service_port", po::value<int>(&service_port)->default_value(9095))
         ("directory.host", po::value<std::string>(&dir_host)->default_value("127.0.0.1"))
         ("directory.service_port", po::value<int>(&dir_port)->default_value(9090))
         ("directory.block_port", po::value<int>(&block_port)->default_value(9092))
         ("storage.block.num_blocks", po::value<size_t>(&num_blocks)->default_value(64))
-        ("storage.block.num_servers", po::value<size_t>(&num_servers)->default_value(4))
+        ("storage.block.num_block_groups", po::value<size_t>(&num_block_groups)->default_value(4))
         ("storage.block.capacity", po::value<size_t>(&block_capacity)->default_value(134217728))
         ("storage.block.capacity_threshold_lo", po::value<double>(&blk_thresh_lo)->default_value(0.25))
         ("storage.block.capacity_threshold_hi", po::value<double>(&blk_thresh_hi)->default_value(0.75));
@@ -155,9 +154,8 @@ int main(int argc, char **argv) {
     LOG(log_level::info) << "storage.service_port: " << service_port;
     LOG(log_level::info) << "storage.management_port: " << mgmt_port;
     LOG(log_level::info) << "storage.auto_scaling_port: " << auto_scaling_port;
-    LOG(log_level::info) << "storage.block.num_blocks: " << num_block_groups;
     LOG(log_level::info) << "storage.block.num_blocks: " << num_blocks;
-    LOG(log_level::info) << "storage.block.num_servers: " << num_servers;
+    LOG(log_level::info) << "storage.block.num_block_groups: " << num_block_groups;
     LOG(log_level::info) << "storage.block.capacity: " << block_capacity;
     LOG(log_level::info) << "storage.block.capacity_threshold_lo: " << blk_thresh_lo;
     LOG(log_level::info) << "storage.block.capacity_threshold_hi: " << blk_thresh_hi;
@@ -184,7 +182,7 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Hostname: " << hostname;
 
   for (int i = 0; i < static_cast<int>(num_blocks); i++) {
-    block_ids.push_back(block_id_parser::make(hostname, service_port + i % num_servers, mgmt_port, i));
+    block_ids.push_back(block_id_parser::make(hostname, service_port + i % num_block_groups, mgmt_port, i));
   }
 
   std::vector<std::shared_ptr<block>> blocks;
@@ -233,12 +231,12 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Advertised " << num_blocks << " to block allocation server";
 
   std::exception_ptr storage_exception;
-  std::vector<std::thread> storage_serve_thread(num_servers);
-  std::vector<std::shared_ptr<TServer>> storage_server(num_servers);
-  std::vector<std::vector<std::shared_ptr<block>>> block_vec(num_servers);
-  for (size_t i = 0; i < num_servers; i++) {
+  std::vector<std::thread> storage_serve_thread(num_block_groups);
+  std::vector<std::shared_ptr<TServer>> storage_server(num_block_groups);
+  std::vector<std::vector<std::shared_ptr<block>>> block_vec(num_block_groups);
+  for (size_t i = 0; i < num_block_groups; i++) {
     auto tmp_block = std::vector<std::shared_ptr<block>>();
-    for (size_t j = i; j < num_blocks; j += num_servers)
+    for (size_t j = i; j < num_blocks; j += num_block_groups)
       tmp_block.push_back(blocks[j]);
     storage_server[i] = block_server::create(tmp_block, service_port + i);
     storage_serve_thread[i] =
