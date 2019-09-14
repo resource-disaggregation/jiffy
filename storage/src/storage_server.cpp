@@ -235,10 +235,10 @@ int main(int argc, char **argv) {
   std::vector<std::shared_ptr<TServer>> storage_server(num_block_groups);
   std::vector<std::vector<std::shared_ptr<block>>> block_vec(num_block_groups);
   for (size_t i = 0; i < num_block_groups; i++) {
-    auto tmp_block = std::vector<std::shared_ptr<block>>();
+    auto block_group = std::vector<std::shared_ptr<block>>();
     for (size_t j = i; j < num_blocks; j += num_block_groups)
-      tmp_block.push_back(blocks[j]);
-    storage_server[i] = block_server::create(tmp_block, service_port + i);
+      block_group.push_back(blocks[j]);
+    storage_server[i] = block_server::create(block_group, service_port + i);
     storage_serve_thread[i] =
         std::thread([&storage_exception, &storage_server, &failing_thread, &failure_condition, i] {
           try {
