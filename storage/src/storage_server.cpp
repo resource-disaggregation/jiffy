@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
   int32_t service_port = 9095;
   int32_t dir_port = 9090;
   std::size_t num_blocks = 64;
-  std::size_t num_block_groups = 4;
+  std::size_t num_block_groups = std::thread::hardware_concurrency() / 2;
   std::size_t block_capacity = 134217728;
   double blk_thresh_lo = 0.25;
   double blk_thresh_hi = 0.75;
@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
         ("directory.service_port", po::value<int>(&dir_port)->default_value(9090))
         ("directory.block_port", po::value<int>(&block_port)->default_value(9092))
         ("storage.block.num_blocks", po::value<size_t>(&num_blocks)->default_value(64))
-        ("storage.block.num_block_groups", po::value<size_t>(&num_block_groups)->default_value(4))
+        ("storage.block.num_block_groups", po::value<size_t>(&num_block_groups)->default_value(std::thread::hardware_concurrency() / 2))
         ("storage.block.capacity", po::value<size_t>(&block_capacity)->default_value(134217728))
         ("storage.block.capacity_threshold_lo", po::value<double>(&blk_thresh_lo)->default_value(0.25))
         ("storage.block.capacity_threshold_hi", po::value<double>(&blk_thresh_hi)->default_value(0.75));
