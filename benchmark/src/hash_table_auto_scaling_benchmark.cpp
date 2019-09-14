@@ -131,6 +131,6 @@ int main() {
   stop_.store(true);
   if (worker_.joinable())
     worker_.join();
-  client.remove(path);
+  //client.remove(path);
   return 0;
 }
