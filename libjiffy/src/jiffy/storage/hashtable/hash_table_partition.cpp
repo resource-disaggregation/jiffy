@@ -116,6 +116,8 @@ void hash_table_partition::exists(response &_return, const arg_list &args) {
 }
 
 void hash_table_partition::get(response &_return, const arg_list &args) {
+    auto start = time_utils::now_us();
+    //RETURN_OK("0");
   if (!(args.size() == 2 || (args.size() == 3 && args[2] == "!redirected"))) {
     RETURN("!args_error");
   }
@@ -123,15 +125,24 @@ void hash_table_partition::get(response &_return, const arg_list &args) {
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[2] == "!redirected")) {
       auto it = block_.find(make_binary(args[1]));
       if(it != block_.end()) {
+    auto end = time_utils::now_us();
+      LOG(log_level::info) << "Get takes time " << end - start;
         RETURN_OK(to_string(it->second));
       }
       else {
         if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+    auto end = time_utils::now_us();
+      LOG(log_level::info) << "Get takes time " << end - start;
+      LOG(log_level::info) << "Fuck this shit";
           RETURN_ERR("!exporting", export_target_str_, std::to_string(export_slot_range_.first), std::to_string(merge_direction_));
         }
+    auto end = time_utils::now_us();
+      LOG(log_level::info) << "Get takes time " << end - start;
         RETURN_ERR("!key_not_found");
       }
   }
+    auto end = time_utils::now_us();
+      LOG(log_level::info) << "Get takes time " << end - start;
   RETURN_ERR("!block_moved");
 }
 

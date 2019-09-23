@@ -15,6 +15,7 @@ hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interf
                                      const directory::data_status &status,
                                      int timeout_ms)
     : data_structure_client(fs, path, status, timeout_ms) {
+  redirect_bool = false;
   blocks_.clear();
   for (auto &block: status.data_blocks()) {
     blocks_.emplace(std::make_pair(static_cast<int32_t>(std::stoi(utils::string_utils::split(block.name, '_')[0])),
@@ -55,18 +56,27 @@ std::string hash_table_client::get(const std::string &key) {
   std::vector<std::string> _return;
   std::vector<std::string> args{"get", key};
   bool redo;
+  bool tmp;
   do {
     try {
+        auto start = time_utils::now_us();
       _return = blocks_[block_id(key)]->run_command(args);
+        auto end_1 = time_utils::now_us();
       handle_redirect(_return, args);
+      tmp = redirect_bool;
+      redirect_bool = false;
+        auto end_2 = time_utils::now_us();
+        //LOG(log_level::info) << "time: " << end_1 - start << " " << end_2 - end_1;
       redo = false;
       redo_times_ = 0;
     } catch (redo_error &e) {
       redo = true;
     }
   } while (redo);
-  THROW_IF_NOT_OK(_return);
-  return _return[1];
+  //THROW_IF_NOT_OK(_return);
+  if(_return[0] == "!key_not_found")
+    return "!ok!" + std::to_string(tmp);
+  return _return[1] + "!" + std::to_string(tmp);
 }
 
 std::string hash_table_client::update(const std::string &key, const std::string &value) {
@@ -110,10 +120,17 @@ std::size_t hash_table_client::block_id(const std::string &key) {
 }
 
 void hash_table_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
+  if(_return[0] == "!exporting" && args[0] == "get") {
+    redirect_bool = true;
+  }
 	while(_return[0] == "!block_moved" || _return[0] == "!exporting") {
 	  bool redo_flag = false;
     if (_return[0] == "!block_moved") {
       try {
+        if(_return.size() == 1) {
+          redirect_bool = false;
+          throw std::logic_error("do some refreshing");
+        }
         auto slot_range = string_utils::split(_return[1], '_', 2);
         if (!std::stoi(_return[2])) {  // split
           auto it = redirect_blocks_.find(_return[3]);
@@ -132,6 +149,8 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
         } else {
           auto it = blocks_.find(std::stoi(slot_range[0]));
           if (std::stoi(_return[4])) {
+            if(it == blocks_.end())
+              throw std::logic_error("do some refreshing");
             auto client = std::next(it)->second;
             blocks_.erase(std::next(it));
             blocks_.erase(it);
@@ -144,9 +163,13 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
       } catch (std::exception &e) {
         LOG(log_level::error) << "This refresh should never be called " << e.what();
         refresh();
+        redirect_bool = false;
         throw redo_error();
       }
-    	if(redo_flag) throw redo_error();
+    	if(redo_flag) {
+          redirect_bool = false;
+          throw redo_error();
+    	}
     }
   while (_return[0] == "!exporting") {
     auto it = redirect_blocks_.find(_return[1]);
@@ -171,6 +194,7 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
   if (_return[0] == "!full") {
     std::this_thread::sleep_for(std::chrono::milliseconds((int) redo_times_));
     redo_times_++;
+    redirect_bool = false;
     throw redo_error();
   }
 }
