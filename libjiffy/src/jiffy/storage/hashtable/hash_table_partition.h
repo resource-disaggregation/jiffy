@@ -26,11 +26,11 @@ enum hash_partition_state {
 /* Key value partition structure class, inherited from chain module */
 class hash_table_partition : public chain_module {
  public:
+
   /**
    * @brief Constructor
    * @param conf Configuration properties
    */
-
   explicit hash_table_partition(block_memory_manager *manager,
                                 const std::string &name = "0_65536",
                                 const std::string &metadata = "regular",
@@ -50,12 +50,11 @@ class hash_table_partition : public chain_module {
    * @param slot_begin Begin slot
    * @param slot_end End slot
    */
-
   void slot_range(int32_t slot_begin, int32_t slot_end) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     slot_range_.first = slot_begin;
     slot_range_.second = slot_end;
   }
+
   /**
    * @brief Set slot range based on the partition name
    * @param new_name New partition name
@@ -70,9 +69,7 @@ class hash_table_partition : public chain_module {
    * @brief Fetch slot range
    * @return Block slot range
    */
-
   const std::pair<int32_t, int32_t> &slot_range() const {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot_range_;
   }
 
@@ -80,9 +77,7 @@ class hash_table_partition : public chain_module {
    * @brief Fetch begin slot
    * @return Begin slot
    */
-
   int32_t slot_begin() const {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot_range_.first;
   }
 
@@ -90,9 +85,7 @@ class hash_table_partition : public chain_module {
    * @brief Fetch end slot
    * @return End slot
    */
-
   int32_t slot_end() const {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot_range_.second;
   }
 
@@ -101,9 +94,7 @@ class hash_table_partition : public chain_module {
    * @param slot Slot
    * @return Bool value, true if slot is within the range
    */
-
   bool in_slot_range(int32_t slot) {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot >= slot_range_.first && slot < slot_range_.second;
   }
 
@@ -111,9 +102,7 @@ class hash_table_partition : public chain_module {
    * @brief Set block state
    * @param state Block state
    */
-
   void state(hash_partition_state state) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     state_ = state;
   }
 
@@ -121,9 +110,7 @@ class hash_table_partition : public chain_module {
    * @brief Fetch block state
    * @return Block state
    */
-
   const hash_partition_state &state() const {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return state_;
   }
 
@@ -132,21 +119,9 @@ class hash_table_partition : public chain_module {
    * @param slot_begin Begin slot
    * @param slot_end End slot
    */
-
   void export_slot_range(int32_t slot_begin, int32_t slot_end) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     export_slot_range_.first = slot_begin;
     export_slot_range_.second = slot_end;
-  }
-
-  /**
-   * @brief Fetch export slot range
-   * @return Export slot range
-   */
-
-  const std::pair<int32_t, int32_t> &export_slot_range() {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
-    return export_slot_range_;
   };
 
   /**
@@ -154,9 +129,7 @@ class hash_table_partition : public chain_module {
    * @param slot Slot
    * @return Bool value, true if slot is within the range
    */
-
   bool in_export_slot_range(int32_t slot) {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return slot >= export_slot_range_.first && slot < export_slot_range_.second;
   }
 
@@ -165,9 +138,7 @@ class hash_table_partition : public chain_module {
    * @param slot_begin Begin slot
    * @param slot_end End slot
    */
-
   void import_slot_range(int32_t slot_begin, int32_t slot_end) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     import_slot_range_.first = slot_begin;
     import_slot_range_.second = slot_end;
   }
@@ -176,9 +147,7 @@ class hash_table_partition : public chain_module {
    * @brief Fetch import slot range
    * @return Import slot range
    */
-
   const std::pair<int32_t, int32_t> &import_slot_range() {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
     return import_slot_range_;
   };
 
@@ -187,205 +156,134 @@ class hash_table_partition : public chain_module {
    * @param slot Slot
    * @return Bool value, true if slot is within the range
    */
-
   bool in_import_slot_range(int32_t slot) {
     return slot >= import_slot_range_.first && slot < import_slot_range_.second;
   }
 
   /**
    * @brief Set the export target
-   * @param target Export target
-   */
-
-  void export_target(const std::vector<std::string> &target) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    export_target_ = target;
-    export_target_str_ = "";
-    for (const auto &block: target) {
-      export_target_str_ += (block + "!");
-    }
-    export_target_str_.pop_back();
-  }
-
-  /**
-   * @brief Set the export target
    * @param export_target_string Export target string
    */
-
   void export_target(const std::string &export_target_string) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
     export_target_.clear();
     export_target_ = utils::string_utils::split(export_target_string, '!');
     export_target_str_ = export_target_string;
   }
 
   /**
-   * @brief Fetch export target
-   * @return Export target
-   */
-
-  const std::vector<std::string> &export_target() const {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
-    return export_target_;
-  }
-
-  /**
-   * @brief Fetch export target string
-   * @return Export target string
-   */
-
-  const std::string export_target_str() const {
-    std::shared_lock<std::shared_mutex> lock(metadata_mtx_);
-    return export_target_str_;
-  }
-
-  /**
    * @brief Check if hash map contains key
-   * @param key Key
-   * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning
-   * @return String of key status
+   * @param _return Response
+   * @param args Arguments
    */
-
-  std::string exists(const std::string &key, bool redirect = false);
+  void exists(response &_return, const arg_list &args);
 
   /**
-   * @brief Put new key value pair
-   * @param key Key
-   * @param value Value
-   * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning
-   * @return Put status string
+   * @brief Insert new key value pair
+   * @param _return Response
+   * @param args Arguments
    */
-
-  std::string put(const std::string &key, const std::string &value, bool redirect = false);
+  void put(response &_return, const arg_list &args);
 
   /**
-   * @brief Insert with the maximum value for specified key
-   * @param key Key
-   * @param value Value
-   * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning
-   * @return Upsert status string
+   * @brief Insert or update key value pair
+   * @param _return Response
+   * @param args Arguments
    */
-
-  std::string upsert(const std::string &key, const std::string &value, bool redirect = false);
+  void upsert(response &_return, const arg_list &args);
 
   /**
    * @brief Get value for specified key
-   * @param key Key
-   * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning
-   * @return Get status string
+   * @param _return Response
+   * @param args Arguments
    */
-
-  std::string get(const std::string &key, bool redirect = false);
+  void get(response &_return, const arg_list &args);
 
   /**
    * @brief Update the value for specified key
-   * @param key Key
-   * @param value Value
-   * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning
-   * @return Update status string
+   * @param _return Response
+   * @param args Arguments
    */
-
-  std::string update(const std::string &key, const std::string &value, bool redirect = false);
+  void update(response &_return, const arg_list &args);
 
   /**
    * @brief Remove value for specified key
-   * @param key Key
-   * @param redirect Bool value to choose whether to indirect to the destination
-   * block when block is in repartitioning
-   * @return Remove status string
+   * @param _return Response
+   * @param args Arguments
    */
-
-  std::string remove(const std::string &key, bool redirect = false);
+  void remove(response &_return, const arg_list &args);
 
   /**
-   * @brief
-   * @param key
-   * @return
+   * @brief Remove key from hash table during scaling
+   * @param _return Response
+   * @param args Arguments
    */
-  std::string scale_remove(const std::string &key);
+  void scale_remove(response &_return, const arg_list &args);
 
   /**
-   * @brief Return keys
-   * @param keys Keys
-   * TODO to be removed?
+   * @brief Insert key value pair to hash table during scaling
+   * @param _return Response
+   * @param args Arguments
    */
-
-  void keys(std::vector<std::string> &keys);
+  void scale_put(response &_return, const arg_list &args);
 
   /**
    * @brief Fetch data from keys which lie in slot range
    * @param data Data to be fetched
-   * @param slot_begin Slot begin value
-   * @param slot_end Slot end value
-   * @param num_keys Key numbers to be fetched
+   * @param _return Response
+   * @param args Arguments
    */
+  void get_data_in_slot_range(response &_return, const arg_list &args);
 
-  void get_data_in_slot_range(std::vector<std::string> &data,
-                              int32_t slot_begin,
-                              int32_t slot_end,
-                              int32_t batch_size);
+  /**
+   * @brief Update partition name and metadata
+   * @param _return Response
+   * @param args Arguments
+   */
+  void update_partition(response &_return, const arg_list &args);
+
+  /**
+   * @brief Fetch storage size
+   * @param _return Response
+   * @param args Arguments
+   */
+  void get_storage_size(response &_return, const arg_list &args);
+
+  /**
+   * @brief Fetch partition metadata
+   * @param _return Response
+   * @param args Arguments
+   */
+  void get_metadata(response &_return, const arg_list &args);
 
   /**
    * @brief Fetch block size
    * @return Block size
    */
-
   std::size_t size() const;
 
   /**
    * @brief Check if block is empty
    * @return Bool value, true if empty
    */
-
   bool empty() const;
 
   /**
-   * @brief Update partition name and metadata
-   * @param new_name New partition name
-   * @param new_metadata New partition metadata
-   */
-
-  std::string update_partition(const std::string &new_name, const std::string &new_metadata);
-
-  /**
-   * @brief Fetch storage size
-   * @return Storage size
-   */
-  std::vector<std::string> get_storage_size();
-
-  /**
-   * @brief Fetch partition metadata
-   * @return Partition metadata
-   */
-
-  std::string get_metadata();
-
-  /**
    * @brief Run particular command on key value block
-   * @param _return Return status to be collected
-   * @param cmd_id Operation identifier
-   * @param args Command arguments
+   * @param _return Response
+   * @param args Arguments
    */
-
-  void run_command(std::vector<std::string> &_return, int cmd_id, const std::vector<std::string> &args) override;
+  void run_command(response &_return, const arg_list &args) override;
 
   /**
    * @brief Atomically check dirty bit
    * @return Bool value, true if block is dirty
    */
-
   bool is_dirty() const;
 
   /**
    * @brief Load persistent data into the block, lock the block while doing this
    * @param path Persistent storage path
    */
-
   void load(const std::string &path) override;
 
   /**
@@ -393,7 +291,6 @@ class hash_table_partition : public chain_module {
    * @param path Persistent storage path
    * @return Bool value, true if block successfully synchronized
    */
-
   bool sync(const std::string &path) override;
 
   /**
@@ -401,47 +298,24 @@ class hash_table_partition : public chain_module {
    * @param path Persistent storage path
    * @return Bool value, true if block successfully dumped
    */
-
   bool dump(const std::string &path) override;
 
   /**
    * @brief Send all key and value to the next block
    */
-
   void forward_all() override;
-
-  /**
-   * @brief Set block to be exporting
-   * @param target_block Export target block
-   * @param slot_begin Begin slot
-   * @param slot_end End slot
-   */
-
-  void set_exporting(const std::vector<std::string> &target_block, int32_t slot_begin, int32_t slot_end) {
-    std::unique_lock<std::shared_mutex> lock(metadata_mtx_);
-    export_target_ = target_block;
-    export_target_str_ = "";
-    for (const auto &block: target_block) {
-      export_target_str_ += (block + "!");
-    }
-    export_target_str_.pop_back();
-    export_slot_range_.first = slot_begin;
-    export_slot_range_.second = slot_end;
-  }
 
  private:
   /**
    * @brief Check if block is overloaded
    * @return Bool value, true if block size is over the high threshold capacity
    */
-
   bool overload();
 
   /**
    * @brief Check if block is underloaded
    * @return Bool value, true if block size is under the low threshold capacity
    */
-
   bool underload();
 
   /* Cuckoo hash map partition */
@@ -449,32 +323,40 @@ class hash_table_partition : public chain_module {
 
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
+
   /* Low threshold */
   double threshold_lo_;
+
   /* High threshold */
   double threshold_hi_;
 
   /* Bool for partition hash slot range splitting */
-  bool splitting_;
+  bool scaling_up_;
 
   /* Bool for partition hash slot range merging */
-  bool merging_;
+  bool scaling_down_;
 
   /* Bool partition dirty bit */
   bool dirty_;
 
   /* Block state, regular, importing or exporting */
   hash_partition_state state_;
+
   /* Hash slot range */
   std::pair<int32_t, int32_t> slot_range_;
+
   /* Bool value for auto scaling */
   bool auto_scale_;
+
   /* Export slot range */
   std::pair<int32_t, int32_t> export_slot_range_;
+
   /* Export targets */
   std::vector<std::string> export_target_;
+
   /* String representation for export target */
   std::string export_target_str_;
+
   /* Import slot range */
   std::pair<int32_t, int32_t> import_slot_range_;
 
@@ -491,7 +373,7 @@ class hash_table_partition : public chain_module {
   int auto_scaling_port_;
 
   /* Data update mutex, we want only one update function happen at a time */
-  std::mutex update_lock;
+  std::mutex update_lock_;
 
 };
 

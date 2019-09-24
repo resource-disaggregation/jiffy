@@ -2,14 +2,11 @@ package jiffy.storage;
 
 import java.io.Closeable;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import jiffy.directory.directory_service.Client;
 import jiffy.directory.rpc_replica_chain;
-import jiffy.directory.rpc_storage_mode;
 import jiffy.storage.BlockClient.CommandResponse;
 import jiffy.storage.BlockClient.CommandResponseReader;
 import jiffy.storage.BlockNameParser.BlockMetadata;
@@ -18,69 +15,6 @@ import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 
 public class ReplicaChainClient implements Closeable {
-
-  public class LockedClient implements Closeable {
-
-    private ReplicaChainClient parent;
-    private boolean redirecting;
-    private rpc_replica_chain redirectChain;
-
-    LockedClient(ReplicaChainClient parent) throws TException {
-      this.parent = parent;
-      String response = StandardCharsets.UTF_8
-          .decode(runCommand(HashTableOps.LOCK, Collections.emptyList()).get(0)).toString();
-      if (!response.equals("!ok")) {
-        this.redirecting = true;
-        String[] parts = response.split("!");
-        this.redirectChain = new rpc_replica_chain(new ArrayList<>(parts.length - 1), parent.getChain().getName(), parent.getChain().getMetadata(),
-            rpc_storage_mode.rpc_in_memory);
-        this.redirectChain.block_ids.addAll(Arrays.asList(parts).subList(2, parts.length));
-      } else {
-        this.redirecting = false;
-        this.redirectChain = null;
-      }
-    }
-
-    void unlock() throws TException {
-      runCommand(HashTableOps.UNLOCK, Collections.emptyList());
-    }
-
-    void sendCommandRequest(int cmdId, List<ByteBuffer> args) throws TException {
-      parent.sendCommandRequest(cmdId, args);
-    }
-
-    List<ByteBuffer> receiveCommandResponse() throws TException {
-      return parent.receiveCommandResponse();
-    }
-
-    List<ByteBuffer> runCommand(int cmdId, List<ByteBuffer> args) throws TException {
-      return parent.runCommand(cmdId, args);
-    }
-
-    List<ByteBuffer> runCommandRedirected(int cmdId, List<ByteBuffer> args) throws TException {
-      return parent.runCommandRedirected(cmdId, args);
-    }
-
-    boolean isRedirecting() {
-      return redirecting;
-    }
-
-    rpc_replica_chain getRedirectChain() {
-      return redirectChain;
-    }
-
-    public rpc_replica_chain getChain() {
-      return parent.getChain();
-    }
-
-    @Override
-    public void close() {
-      try {
-        unlock();
-      } catch (TException ignored) {
-      }
-    }
-  }
 
   private Client fs;
   private String path;
@@ -92,7 +26,10 @@ public class ReplicaChainClient implements Closeable {
   private BlockClientCache cache;
   private boolean inFlight;
 
-  ReplicaChainClient(Client fs, String path, BlockClientCache cache, rpc_replica_chain chain)
+  private HashMap<ByteBuffer, CommandType> cmdMap;
+
+  ReplicaChainClient(Client fs, String path, BlockClientCache cache, rpc_replica_chain chain,
+      HashMap<ByteBuffer, CommandType> cmdMap)
       throws TException {
     if (chain == null || chain.block_ids.size() == 0) {
       throw new IllegalArgumentException("Chain length must be >= 1");
@@ -101,6 +38,7 @@ public class ReplicaChainClient implements Closeable {
     this.path = path;
     this.cache = cache;
     this.chain = chain;
+    this.cmdMap = cmdMap;
     connect();
   }
 
@@ -114,28 +52,30 @@ public class ReplicaChainClient implements Closeable {
     return chain;
   }
 
-  public LockedClient lock() throws TException {
-    return new LockedClient(this);
-  }
-
-  private void sendCommandRequest(BlockClient client, int cmdId, List<ByteBuffer> args)
+  private void sendCommandRequest(BlockClient client, List<ByteBuffer> args)
       throws TException {
     if (inFlight) {
       throw new IllegalStateException("Cannot have more than one request in-flight");
     }
-    client.sendCommandRequest(seq, cmdId, args);
+    client.sendCommandRequest(seq, args);
     inFlight = true;
   }
 
-  void sendCommandRequest(int cmdId, List<ByteBuffer> args) throws TException {
-    if (CommandType.opType(cmdId) == CommandType.accessor) {
-      sendCommandRequest(tail, cmdId, args);
-    } else {
-      sendCommandRequest(head, cmdId, args);
+  void sendCommandRequest(List<ByteBuffer> args) throws TException {
+    ByteBuffer cmd = args.get(0);
+    switch (cmdMap.getOrDefault(cmd, CommandType.invalid)) {
+      case accessor:
+        sendCommandRequest(tail, args);
+        break;
+      case mutator:
+        sendCommandRequest(head, args);
+        break;
+      case invalid:
+        throw new IllegalArgumentException("Unknown command " + ByteBufferUtils.toString(cmd));
     }
   }
 
-  List<ByteBuffer> receiveCommandResponse() throws TException {
+  private List<ByteBuffer> receiveCommandResponse() throws TException {
     CommandResponse response = responseReader.receiveResponse();
 
     if (response.clientSeqNo != seq.getClientSeqNo()) {
@@ -147,25 +87,30 @@ public class ReplicaChainClient implements Closeable {
     return response.result;
   }
 
-  private List<ByteBuffer> runCommand(BlockClient client, int cmdId, List<ByteBuffer> args)
-      throws TException {
-    sendCommandRequest(client, cmdId, args);
+  private List<ByteBuffer> runCommand(BlockClient client, List<ByteBuffer> args) throws TException {
+    sendCommandRequest(client, args);
     return receiveCommandResponse();
   }
 
-  List<ByteBuffer> runCommand(int cmdId, List<ByteBuffer> args) throws TException {
+  List<ByteBuffer> runCommand(List<ByteBuffer> args) throws TException {
     List<ByteBuffer> response = null;
     boolean retry = false;
     int numRetriesRemaining = 3;
+    ByteBuffer cmd = args.get(0);
     while (response == null) {
       try {
-        if (CommandType.opType(cmdId) == CommandType.accessor) {
-          response = runCommand(tail, cmdId, args);
-        } else {
-          response = runCommand(head, cmdId, args);
-          if (retry && ByteBufferUtils.toString(response.get(0)).equals("!duplicate_key")) {
-            response.set(0, ByteBufferUtils.fromString("!ok"));
-          }
+        switch (cmdMap.getOrDefault(cmd, CommandType.invalid)) {
+          case accessor:
+            response = runCommand(tail, args);
+            break;
+          case mutator:
+            response = runCommand(head, args);
+            if (retry && ByteBufferUtils.toString(response.get(0)).equals("!duplicate_key")) {
+              response.set(0, ByteBufferUtils.fromString("!ok"));
+            }
+            break;
+          case invalid:
+            throw new IllegalArgumentException("Unknown command " + ByteBufferUtils.toString(cmd));
         }
       } catch (TTransportException e) {
         if (numRetriesRemaining > 0) {
@@ -177,25 +122,32 @@ public class ReplicaChainClient implements Closeable {
         } else {
           throw e;
         }
+      } catch (IllegalStateException e) { // TODO: This is very iffy
+        response = new ArrayList<>();
+        response.add(ByteBufferUtils.fromString("!block_moved"));
       }
     }
     return response;
   }
 
-  private List<ByteBuffer> runCommandRedirected(BlockClient client, int cmdId,
-      List<ByteBuffer> args)
+  private List<ByteBuffer> runCommandRedirected(BlockClient client, List<ByteBuffer> args)
       throws TException {
     List<ByteBuffer> newArgs = new ArrayList<>(args);
     newArgs.add(ByteBufferUtils.fromString("!redirected"));
-    return runCommand(client, cmdId, newArgs);
+    return runCommand(client, newArgs);
   }
 
-  List<ByteBuffer> runCommandRedirected(int cmdId, List<ByteBuffer> args) throws TException {
-    if (CommandType.opType(cmdId) == CommandType.accessor) {
-      return runCommandRedirected(tail, cmdId, args);
-    } else {
-      return runCommandRedirected(head, cmdId, args);
+  List<ByteBuffer> runCommandRedirected(List<ByteBuffer> args) throws TException {
+    ByteBuffer cmd = args.get(0);
+    switch (cmdMap.getOrDefault(cmd, CommandType.invalid)) {
+      case accessor:
+        return runCommandRedirected(tail, args);
+      case mutator:
+        return runCommandRedirected(head, args);
+      case invalid:
+        throw new IllegalArgumentException("Unknown command " + ByteBufferUtils.toString(cmd));
     }
+    throw new IllegalStateException("Reached invalid state");
   }
 
   private void connect() throws TException {

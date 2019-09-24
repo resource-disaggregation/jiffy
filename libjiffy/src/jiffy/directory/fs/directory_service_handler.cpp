@@ -254,6 +254,25 @@ void directory_service_handler::remove_data_block(const std::string &path, const
   }
 }
 
+void directory_service_handler::request_partition_data_update(const std::string &path,
+                                                              const std::string &old_partition_name,
+                                                              const std::string &new_partition_name,
+                                                              const std::string &partition_metadata) {
+  try {
+    shard_->update_partition(path, old_partition_name, new_partition_name, partition_metadata);
+  } catch (directory_ops_exception &e) {
+    throw make_exception(e);
+  }
+}
+
+int64_t directory_service_handler::get_storage_capacity(const std::string &path, const std::string &partition_name) {
+  try {
+    return shard_->get_capacity(path, partition_name);
+  } catch (directory_ops_exception &e) {
+    throw make_exception(e);
+  }
+}
+
 directory_service_exception directory_service_handler::make_exception(directory_ops_exception &ex) const {
   directory_service_exception e;
   e.msg = ex.what();

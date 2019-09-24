@@ -3,8 +3,12 @@
 namespace jiffy {
 namespace storage {
 
-bool command::operator<(const command &other) const {
-  return std::strcmp(name, other.name) < 0;
+bool command_info::is_accessor() const {
+  return type == command_type::accessor;
+}
+
+bool command_info::is_mutator() const {
+  return type == command_type::mutator;
 }
 
 }

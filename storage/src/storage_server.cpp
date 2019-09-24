@@ -3,6 +3,7 @@
 #include <jiffy/directory/block/block_registration_client.h>
 #include <jiffy/storage/hashtable/hash_table_partition.h>
 #include <jiffy/storage/manager/storage_management_server.h>
+#include <jiffy/auto_scaling/auto_scaling_server.h>
 #include <jiffy/storage/service/block_server.h>
 #include <jiffy/utils/signal_handling.h>
 #include <jiffy/utils/logger.h>
@@ -12,10 +13,11 @@
 
 using namespace ::jiffy::directory;
 using namespace ::jiffy::storage;
+using namespace ::jiffy::auto_scaling;
 using namespace ::jiffy::utils;
 
 using namespace ::apache::thrift;
-
+using namespace ::apache::thrift::server;
 std::string mapper(const std::string &env_var) {
   if (env_var == "JIFFY_DIRECTORY_HOST") return "directory.host";
   else if (env_var == "JIFFY_DIRECTORY_SERVICE_PORT") return "directory.service_port";
@@ -62,11 +64,12 @@ int main(int argc, char **argv) {
   // Configuration priority order: default < env < configuration file < commandline args
   // First set defaults
   std::string address = "127.0.0.1";
-  int32_t service_port = 9093;
-  int32_t mgmt_port = 9094;
+  int32_t mgmt_port = 9093;
+  int32_t auto_scaling_port = 9094;
+  int32_t service_port = 9095;
   int32_t dir_port = 9090;
   std::size_t num_blocks = 64;
-  std::size_t num_block_groups = 4;
+  std::size_t num_block_groups = std::thread::hardware_concurrency() / 2;
   std::size_t block_capacity = 134217728;
   double blk_thresh_lo = 0.25;
   double blk_thresh_hi = 0.75;
@@ -89,11 +92,13 @@ int main(int argc, char **argv) {
     config_file_options.add_options()
         ("storage.host", po::value<std::string>(&address)->default_value("127.0.0.1"))
         ("storage.management_port", po::value<int>(&mgmt_port)->default_value(9093))
-        ("storage.service_port", po::value<int>(&service_port)->default_value(9094))
+        ("storage.auto_scaling_port", po::value<int>(&auto_scaling_port)->default_value(9094))
+        ("storage.service_port", po::value<int>(&service_port)->default_value(9095))
         ("directory.host", po::value<std::string>(&dir_host)->default_value("127.0.0.1"))
         ("directory.service_port", po::value<int>(&dir_port)->default_value(9090))
         ("directory.block_port", po::value<int>(&block_port)->default_value(9092))
         ("storage.block.num_blocks", po::value<size_t>(&num_blocks)->default_value(64))
+        ("storage.block.num_block_groups", po::value<size_t>(&num_block_groups)->default_value(std::thread::hardware_concurrency() / 2))
         ("storage.block.capacity", po::value<size_t>(&block_capacity)->default_value(134217728))
         ("storage.block.capacity_threshold_lo", po::value<double>(&blk_thresh_lo)->default_value(0.25))
         ("storage.block.capacity_threshold_hi", po::value<double>(&blk_thresh_hi)->default_value(0.75));
@@ -148,8 +153,9 @@ int main(int argc, char **argv) {
     LOG(log_level::info) << "storage.host: " << address;
     LOG(log_level::info) << "storage.service_port: " << service_port;
     LOG(log_level::info) << "storage.management_port: " << mgmt_port;
-    LOG(log_level::info) << "storage.block.num_blocks: " << num_block_groups;
+    LOG(log_level::info) << "storage.auto_scaling_port: " << auto_scaling_port;
     LOG(log_level::info) << "storage.block.num_blocks: " << num_blocks;
+    LOG(log_level::info) << "storage.block.num_block_groups: " << num_block_groups;
     LOG(log_level::info) << "storage.block.capacity: " << block_capacity;
     LOG(log_level::info) << "storage.block.capacity_threshold_lo: " << blk_thresh_lo;
     LOG(log_level::info) << "storage.block.capacity_threshold_hi: " << blk_thresh_hi;
@@ -163,7 +169,8 @@ int main(int argc, char **argv) {
 
   std::mutex failure_mtx;
   std::condition_variable failure_condition;
-  std::atomic<int> failing_thread(-1); // management -> 0, service -> 1, notification -> 2, chain -> 3
+  std::atomic<int>
+      failing_thread(-1); // management -> 0, service -> 1, notification -> 2, chain -> 3, auto_scaling -> 4
 
   std::string hostname;
   if (address == "0.0.0.0") {
@@ -175,15 +182,27 @@ int main(int argc, char **argv) {
   LOG(log_level::info) << "Hostname: " << hostname;
 
   for (int i = 0; i < static_cast<int>(num_blocks); i++) {
-    block_ids.push_back(block_id_parser::make(hostname, service_port, mgmt_port, i));
+    block_ids.push_back(block_id_parser::make(hostname, service_port + i % num_block_groups, mgmt_port, i));
   }
 
   std::vector<std::shared_ptr<block>> blocks;
   blocks.resize(num_blocks);
   for (size_t i = 0; i < blocks.size(); ++i) {
-    blocks[i] = std::make_shared<block>(block_ids[i], block_capacity, dir_host, dir_port);
+    blocks[i] = std::make_shared<block>(block_ids[i], block_capacity, dir_host, dir_port, address, auto_scaling_port);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
+
+  std::exception_ptr auto_scaling_exception = nullptr;
+  auto scaling_server = auto_scaling_server::create(dir_host, dir_port, address, auto_scaling_port);
+  std::thread scaling_serve_thread([&auto_scaling_exception, &scaling_server, &failing_thread, & failure_condition] {
+    try {
+      scaling_server->serve();
+    } catch (...) {
+      auto_scaling_exception = std::current_exception();
+      failing_thread = 4;
+      failure_condition.notify_all();
+    }
+  });
 
   std::exception_ptr management_exception = nullptr;
   auto management_server = storage_management_server::create(blocks, address, mgmt_port);
@@ -211,17 +230,26 @@ int main(int argc, char **argv) {
 
   LOG(log_level::info) << "Advertised " << num_blocks << " to block allocation server";
 
-  std::exception_ptr storage_exception = nullptr;
-  auto storage_server = block_server::create(blocks, service_port);
-  std::thread storage_serve_thread([&storage_exception, &storage_server, &failing_thread, &failure_condition] {
-    try {
-      storage_server->serve();
-    } catch (...) {
-      storage_exception = std::current_exception();
-      failing_thread = 1;
-      failure_condition.notify_all();
-    }
-  });
+  std::exception_ptr storage_exception;
+  std::vector<std::thread> storage_serve_thread(num_block_groups);
+  std::vector<std::shared_ptr<TServer>> storage_server(num_block_groups);
+  std::vector<std::vector<std::shared_ptr<block>>> block_vec(num_block_groups);
+  for (size_t i = 0; i < num_block_groups; i++) {
+    auto block_group = std::vector<std::shared_ptr<block>>();
+    for (size_t j = i; j < num_blocks; j += num_block_groups)
+      block_group.push_back(blocks[j]);
+    storage_server[i] = block_server::create(block_group, service_port + i);
+    storage_serve_thread[i] =
+        std::thread([&storage_exception, &storage_server, &failing_thread, &failure_condition, i] {
+          try {
+            storage_server[i]->serve();
+          } catch (...) {
+            storage_exception = std::current_exception();
+            failing_thread = 1;
+            failure_condition.notify_all();
+          }
+        });
+  }
 
   LOG(log_level::info) << "Storage server listening on " << address << ":" << service_port;
 
@@ -258,6 +286,17 @@ int main(int argc, char **argv) {
         }
       }
       break;
+    }
+    case 4: {
+      LOG(log_level::error) << "Auto_scaling server failed";
+      if (auto_scaling_exception) {
+        try {
+          std::rethrow_exception(auto_scaling_exception);
+        } catch (std::exception &e) {
+          LOG(log_level::error) << "ERROR: " << e.what();
+          std::exit(-1);
+        }
+      }
     }
     default:break;
   }

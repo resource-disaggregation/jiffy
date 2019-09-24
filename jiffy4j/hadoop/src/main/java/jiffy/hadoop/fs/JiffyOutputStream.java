@@ -72,7 +72,7 @@ public class JiffyOutputStream extends OutputStream {
     }
     try {
       if (block.usedBytes() > 0) {
-        client.upsert(ByteBufferUtils.fromByteBuffers(blockKey(), block.getData()));
+        client.upsert(blockKey(), block.getData());
         mm.fs().addTags(path, Collections.singletonMap(FILE_LENGTH_KEY, fileLength()));
         if (block.remaining() == 0) {
           block.reset();

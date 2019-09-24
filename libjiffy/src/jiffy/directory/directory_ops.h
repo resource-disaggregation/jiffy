@@ -240,14 +240,15 @@ enum storage_mode {
 
 /* Replica chain structure */
 struct replica_chain {
-  /* Chain name */
+  /* Partition name */
   std::string name;
-  /* Block names */
+  /* Block identifier */
   std::vector<std::string> block_ids;
-  /* Chain metadata */
+  /* Partition metadata */
   std::string metadata;
   /* Storage mode */
   storage_mode mode;
+  typedef std::pair<int32_t, int32_t> slot_range;
   /**
    * Default Constructor
    */
@@ -318,6 +319,21 @@ struct replica_chain {
    */
   bool operator!=(const replica_chain &other) const {
     return !(*this == other);
+  }
+
+  bool operator<(const replica_chain &other) const {
+    return fetch_slot_range().first < other.fetch_slot_range().first;
+  }
+
+  /**
+   * @brief Fetch slot range from name
+   * @return Slot range pair
+   */
+  slot_range fetch_slot_range() const {
+    std::string delimiter = "_";
+    int32_t slot_begin = atoi(name.substr(0, name.find(delimiter)).c_str());
+    int32_t slot_end = atoi(name.substr(name.find(delimiter) + 1, name.length()).c_str());
+    return std::make_pair(slot_begin, slot_end);
   }
 };
 
@@ -710,6 +726,21 @@ class data_status {
   }
 
   /**
+   * @brief Set new name for partition
+   * @param old_name Old partition name
+   * @param new_name New partition name
+   */
+  void set_partition_name(const std::string &old_name, const std::string &new_name) {
+    for (auto &replica : data_blocks_) {
+      if (replica.name == old_name) {
+        replica.name = new_name;
+        return;
+      }
+    }
+    throw directory_ops_exception("Partition not found: " + old_name);
+  }
+
+  /**
    * @brief Fetch data block metadata
    * @param i Data block offset
    * @return Data block metadata
@@ -732,6 +763,20 @@ class data_status {
     data_blocks_[i].metadata = metadata;
   }
 
+  /**
+   * @brief Set new metadata for partition
+   * @param name Partition name
+   * @param metadata New partition metadata
+   */
+  void set_partition_metadata(const std::string &name, const std::string &metadata) {
+    for (auto &replica : data_blocks_) {
+      if (replica.name == name) {
+        replica.metadata = metadata;
+        return;
+      }
+    }
+    throw directory_ops_exception("Partition not found: " + name);
+  }
   /**
    * @brief Add tag
    * @param key Key
@@ -901,11 +946,40 @@ class data_status {
 class directory_ops {
  public:
   virtual ~directory_ops() = default;
+  /**
+   * @brief Create directory
+   * @param Directory path
+   */
 
   virtual void create_directory(const std::string &path) = 0;
+
+  /**
+   * @brief Create multiple directories
+   * @param Directory path
+   */
+
   virtual void create_directories(const std::string &path) = 0;
 
+  /**
+   * @brief Open a file given file path
+   * @param path File path
+   * @return Data status
+   */
+
   virtual data_status open(const std::string &path) = 0;
+
+  /**
+   * @brief Create file
+   * @param path File path
+   * @param backing_path File backing path
+   * @param num_blocks Number of blocks
+   * @param chain_length Replica chain length
+   * @param flags Flags
+   * @param permissions File permissions
+   * @param tags Tags
+   * @return Data status
+   */
+
   virtual data_status create(const std::string &path,
                              const std::string &type,
                              const std::string &backing_path,
@@ -916,6 +990,21 @@ class directory_ops {
                              const std::vector<std::string> &block_names,
                              const std::vector<std::string> &block_metadata,
                              const std::map<std::string, std::string> &tags) = 0;
+
+  /**
+   * @brief Open or create a file
+   * Open file if file exists
+   * If not, create it
+   * @param path File path
+   * @param backing_path File backing path
+   * @param num_blocks Number of blocks
+   * @param chain_length Replica chain length
+   * @param flags Flags
+   * @param permissions File permissions
+   * @param tags Tags
+   * @return File data status
+   */
+
   virtual data_status open_or_create(const std::string &path,
                                      const std::string &type,
                                      const std::string &backing_path,
@@ -927,52 +1016,227 @@ class directory_ops {
                                      const std::vector<std::string> &block_metadata,
                                      const std::map<std::string, std::string> &tags) = 0;
 
+  /**
+   * @brief Check if the file exists
+   * @param path File path
+   * @return Bool value, true if file exists
+   */
+
   virtual bool exists(const std::string &path) const = 0;
+
+  /**
+   * @brief Fetch last write time of file
+   * @param path File path
+   * @return Last write time
+   */
 
   virtual std::uint64_t last_write_time(const std::string &path) const = 0;
 
+  /**
+   * @brief Fetch file permissions
+   * @param path File path
+   * @return File permissions
+   */
+
   virtual perms permissions(const std::string &path) = 0;
+
+  /**
+   * @brief Set permissions of a file
+   * @param path File path
+   * @param prms Permission
+   * @param opts Permission options
+   */
+
   virtual void permissions(const std::string &path, const perms &permissions, perm_options opts) = 0;
 
+  /**
+   * @brief Remove file given path
+   * @param path File path
+   */
+
   virtual void remove(const std::string &path) = 0;
+
+  /**
+   * @brief Remove all files under given directory
+   * @param path Directory path
+   */
+
   virtual void remove_all(const std::string &path) = 0;
 
+  /**
+   * @brief Write all dirty blocks back to persistent storage
+   * @param path File path
+   * @param backing_path File backing path
+   */
+
   virtual void sync(const std::string &path, const std::string &backing_path) = 0;
+
+  /**
+   * @brief Write all dirty blocks back to persistent storage and clear the block
+   * @param path File path
+   * @param backing_path File backing path
+   */
+
   virtual void dump(const std::string &path, const std::string &backing_path) = 0;
+
+  /**
+   * @brief Load blocks from persistent storage
+   * @param path File path
+   * @param backing_path File backing path
+   */
+
   virtual void load(const std::string &path, const std::string &backing_path) = 0;
+
+  /**
+   * @brief Rename a file
+   * If new file path is a directory path, then put old path file under that directory.
+   * If new file path is a file path, overwrite that file with old path file.
+   * If new file path doesn't exist, put old path file in new path
+   * @param old_path Original file path
+   * @param new_path New file path
+   */
 
   virtual void rename(const std::string &old_path, const std::string &new_path) = 0;
 
+  /**
+   * @brief Fetch file status
+   * @param path File path
+   * @return File status
+   */
+
   virtual file_status status(const std::string &path) const = 0;
+
+  /**
+   * @brief Collect all entries of files in the directory
+   * @param path Directory path
+   * @return Directory entries
+   */
 
   virtual std::vector<directory_entry> directory_entries(const std::string &path) = 0;
 
+  /**
+   * @brief Collect all entries of files in the directory recursively
+   * @param path Directory path
+   * @return Directory recursive entries
+   */
+
   virtual std::vector<directory_entry> recursive_directory_entries(const std::string &path) = 0;
 
+  /**
+   * @brief Collect data status
+   * @param path File path
+   * @return Data status
+   */
+
   virtual data_status dstatus(const std::string &path) = 0;
+
+  /**
+   * @brief Add tags to the file status
+   * @param path File path
+   * @param tags Tags
+   */
+
   virtual void add_tags(const std::string &path, const std::map<std::string, std::string> &tags) = 0;
 
-  // Check file type
+  /**
+   * @brief Check if path is regular file
+   * @param path File path
+   * @return Bool value
+   */
+
   virtual bool is_regular_file(const std::string &path) = 0;
+
+  /**
+   * @brief Check if path is directory
+   * @param path File path
+   * @return Bool value
+   */
+
   virtual bool is_directory(const std::string &path) = 0;
 };
 
 /* Directory management operations virtual class */
 class directory_management_ops {
  public:
+
   // Lease management
+
+  /**
+   * @brief Touch file or directory at given path
+   * First touch all nodes along the path, then touch all nodes under the path
+   * @param path File or directory path
+   */
   virtual void touch(const std::string &path) = 0;
+
+  /**
+   * @brief Handle lease expiry
+   * @param path File path
+   */
   virtual void handle_lease_expiry(const std::string &path) = 0;
 
   // Chain replication
+
+  /**
+   * @brief Resolve failure
+   * @param path File path
+   * @param chain Replica chain
+   * @return Replica chain
+   */
+
   virtual replica_chain resolve_failures(const std::string &path, const replica_chain &chain) = 0;
+
+  /**
+   * @brief Add a new replica to the chain of the given path
+   * @param path File path
+   * @param chain Replica chain
+   * @return Replica chain
+   */
+
   virtual replica_chain add_replica_to_chain(const std::string &path, const replica_chain &chain) = 0;
 
   // Block allocation
+
+  /**
+   * @brief Add a block to file
+   * @param path File path
+   * @param partition_name Name of the partition at new block
+   * @param partition_metadata Metadata of the partition at new block
+   * @return Replica chain corresponding to the new block
+   */
+
   virtual replica_chain add_block(const std::string &path,
                                   const std::string &partition_name,
                                   const std::string &partition_metadata) = 0;
+      
+  /**
+   * @brief Remove block from the file
+   * @param path File path
+   * @param partition_name Name of the partition at the block.
+   */
+
   virtual void remove_block(const std::string &path, const std::string &block_name) = 0;
+
+  /**
+   * @brief Update partition name and metadata
+   * @param path File path
+   * @param old_partition_name Old partition name
+   * @param new_partition_name New partition name to be set
+   * @param partition_metadata New partition metadata to be set
+   */
+  
+  virtual void update_partition(const std::string &path,
+                                const std::string &old_partition_name,
+                                const std::string &new_partition_name,
+                                const std::string &partition_metadata) = 0;
+  
+  /**
+   * @brief Fetch the capacity of the partition
+   * @param path File path
+   * @param partition_name Partition name
+   * @return Storage capacity
+   */
+
+  virtual int64_t get_capacity(const std::string &path, const std::string &partition_name) = 0;
 };
 
 class directory_interface : public directory_ops, public directory_management_ops {};

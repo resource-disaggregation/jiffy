@@ -50,7 +50,7 @@ public class BlockClient {
     }
   }
 
-  private int id;
+  private int blockId;
   private TTransport transport;
   private TProtocol protocol;
   private block_request_service.Client client;
@@ -61,7 +61,7 @@ public class BlockClient {
     this.transport = value.getTransport();
     this.protocol = value.getProtocol();
     this.client = value.getClient();
-    this.id = blockId;
+    this.blockId = blockId;
   }
 
   public void close() {
@@ -69,7 +69,7 @@ public class BlockClient {
   }
 
   CommandResponseReader newCommandResponseReader(long clientId) throws TException {
-    client.registerClientId(id, clientId);
+    client.registerClientId(blockId, clientId);
     return new CommandResponseReader(protocol);
   }
 
@@ -77,7 +77,7 @@ public class BlockClient {
     return client.getClientId();
   }
 
-  void sendCommandRequest(sequence_id seq, int cmdId, List<ByteBuffer> args) throws TException {
-    client.commandRequest(seq, id, cmdId, args);
+  void sendCommandRequest(sequence_id seq, List<ByteBuffer> args) throws TException {
+    client.commandRequest(seq, blockId, args);
   }
 }

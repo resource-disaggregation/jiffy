@@ -7,25 +7,24 @@
 namespace jiffy {
 namespace storage {
 
-extern std::vector<command> KV_OPS;
+extern command_map HT_OPS;
 
 /**
  * @brief Hash table supported operations
  */
-enum hash_table_cmd_id {
+enum hash_table_cmd_id: uint32_t {
   ht_exists = 0,
   ht_get = 1,
-  ht_keys = 2, // TODO: We should not support multi-key operations since we do not provide any guarantees
-  ht_num_keys = 3, // TODO: We should not support multi-key operations since we do not provide any guarantees
-  ht_put = 4,
-  ht_remove = 5,
-  ht_update = 6,
-  ht_upsert = 7,
-  ht_update_partition = 8,
-  ht_get_storage_size = 9,
-  ht_get_metadata = 10,
-  ht_get_range_data = 11,
-  ht_scale_remove = 12,
+  ht_put = 2,
+  ht_remove = 3,
+  ht_update = 4,
+  ht_upsert = 5,
+  ht_update_partition = 6,
+  ht_get_storage_size = 7,
+  ht_get_metadata = 8,
+  ht_get_range_data = 9,
+  ht_scale_put = 10,
+  ht_scale_remove = 11
 };
 
 }

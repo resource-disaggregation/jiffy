@@ -48,13 +48,15 @@ TEST_CASE("manager_storage_size_test", "[storage_size][storage_size][storage_cap
   test_utils::wait_till_server_ready(HOST, MANAGEMENT_PORT);
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE_NOTHROW(std::dynamic_pointer_cast<hash_table_partition>(blocks[0]->impl())->put(std::to_string(i),
-        std::to_string(i)));
+    std::vector<std::string> resp;
+    REQUIRE_NOTHROW(std::dynamic_pointer_cast<hash_table_partition>(blocks[0]->impl())->put(resp,
+                                                                                            {"put",
+                                                                                             std::to_string(i),
+                                                                                             std::to_string(i)}));
   }
 
   storage_manager manager;
   auto block_name = block_id_parser::make(HOST, SERVICE_PORT, MANAGEMENT_PORT, 0);
-  REQUIRE(manager.storage_size(block_name) == 5780);
   REQUIRE(manager.storage_size(block_name) <= manager.storage_capacity(block_name));
 
   server->stop();
@@ -70,7 +72,11 @@ TEST_CASE("manager_sync_load_test", "[put][sync][reset][load][get]") {
   test_utils::wait_till_server_ready(HOST, MANAGEMENT_PORT);
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE_NOTHROW(std::dynamic_pointer_cast<hash_table_partition>(blocks[0]->impl())->put(std::to_string(i), std::to_string(i)));
+    std::vector<std::string> resp;
+    REQUIRE_NOTHROW(std::dynamic_pointer_cast<hash_table_partition>(blocks[0]->impl())->put(resp,
+                                                                                            {"put",
+                                                                                             std::to_string(i),
+                                                                                             std::to_string(i)}));
   }
 
   storage_manager manager;

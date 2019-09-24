@@ -21,7 +21,7 @@ class block_server {
    * @param port Socket port
    * @return Block server
    */
-  static server_ptr create(std::vector<block_ptr> &blocks, int port);
+  static server_ptr create(std::vector<block_ptr> &blocks, int port, size_t num_threads = 1);
 };
 
 }

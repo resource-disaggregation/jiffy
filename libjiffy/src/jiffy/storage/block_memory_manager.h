@@ -38,6 +38,13 @@ class block_memory_manager {
   void mb_free(void *ptr);
 
   /**
+   * @brief Free memory.
+   * @param ptr Pointer to memory allocation.
+   * @param size Number of bytes to free.
+   */
+  void mb_free(void *ptr, size_t size);
+
+  /**
    * @brief Get capacity of memory block.
    * @return Capacity of memory block.
    */
@@ -54,7 +61,7 @@ class block_memory_manager {
    * @param other Instance of other block memory manager.
    * @return True if the instances are equal, false otherwise.
    */
-  inline bool operator==(const block_memory_manager& other){
+  inline bool operator==(const block_memory_manager &other) {
     return this == &other;
   }
 
@@ -63,7 +70,7 @@ class block_memory_manager {
    * @param other Instance of other block memory manager.
    * @return True if the instances are unequal, false otherwise.
    */
-  inline bool operator!=(const block_memory_manager& other){
+  inline bool operator!=(const block_memory_manager &other) {
     return this != &other;
   }
 
