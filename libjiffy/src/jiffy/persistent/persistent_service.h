@@ -80,7 +80,7 @@ class persistent_service {
    * @param out_path Persistent store path
    */
 
-  virtual void virtual_write(const storage::locked_hash_table_type &table, const std::string &out_path) = 0;
+  //virtual void virtual_write(const storage::locked_hash_table_type &table, const std::string &out_path) = 0;
 
   /**
    * @brief Virtual write for fifo queue
@@ -99,12 +99,20 @@ class persistent_service {
   virtual void virtual_write(const storage::file_type &table, const std::string &out_path) = 0;
 
   /**
+   * @brief Virtual write for new hash table type
+   * @param table Hash table
+   * @param out_path Persistent store path
+   */
+
+  virtual void virtual_write(const storage::hash_table_type_new &table, const std::string &out_path) = 0;
+
+  /**
    * @brief Virtual read for lock hash table
    * @param in_path Persistent store path
    * @param table Lock hash table
    */
 
-  virtual void virtual_read(const std::string &in_path, storage::locked_hash_table_type &table) = 0;
+  //virtual void virtual_read(const std::string &in_path, storage::locked_hash_table_type &table) = 0;
 
   /**
    * @brief Virtual read for fifo queue
@@ -121,6 +129,14 @@ class persistent_service {
    */
 
   virtual void virtual_read(const std::string &in_path, storage::file_type &table) = 0;
+
+  /**
+   * @brief Virtual read for new hash table type
+   * @param in_path Persistent store path
+   * @param table Hash table
+   */
+
+  virtual void virtual_read(const std::string &in_path, storage::hash_table_type_new &table) = 0;
 };
 
 /**
@@ -144,9 +160,9 @@ class derived_persistent : public persistent_service_impl {
    * @param out_path Persistent store path
    */
 
-  void virtual_write(const storage::locked_hash_table_type &table, const std::string &out_path) final {
-    return persistent_service_impl::write_impl(table, out_path);
-  }
+//  void virtual_write(const storage::locked_hash_table_type &table, const std::string &out_path) final {
+//    return persistent_service_impl::write_impl(table, out_path);
+//  }
 
   /**
    * @brief Virtual write for fifo queue
@@ -170,14 +186,24 @@ class derived_persistent : public persistent_service_impl {
   }
 
   /**
+   * @brief Virtual write for new hash table type
+   * @param table Hash table
+   * @param out_path Persistent store path
+   */
+
+  void virtual_write(const storage::hash_table_type_new &table, const std::string &out_path) final {
+    return persistent_service_impl::write_impl(table, out_path);
+  }
+
+  /**
    * @brief Virtual read for lock hash table
    * @param in_path Persistent store path
    * @param table Lock hash table
    */
 
-  void virtual_read(const std::string &in_path, storage::locked_hash_table_type &table) final {
-    return persistent_service_impl::read_impl(in_path, table);
-  }
+//  void virtual_read(const std::string &in_path, storage::locked_hash_table_type &table) final {
+//    return persistent_service_impl::read_impl(in_path, table);
+//  }
 
   /**
    * @brief Virtual read for fifo queue
@@ -198,6 +224,16 @@ class derived_persistent : public persistent_service_impl {
   void virtual_read(const std::string &in_path, storage::file_type &table) final {
     return persistent_service_impl::read_impl(in_path, table);
   }
+
+  /**
+   * @brief Virtual read for hash table
+   * @param in_path Persistent store path
+   * @param table Hash table
+   */
+  void virtual_read(const std::string &in_path, storage::hash_table_type_new &table) final {
+    return persistent_service_impl::read_impl(in_path, table);
+  }
+
 };
 
 /* Local store, inherited persistent_service */

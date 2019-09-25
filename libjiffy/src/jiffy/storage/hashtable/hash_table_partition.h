@@ -318,8 +318,13 @@ class hash_table_partition : public chain_module {
    */
   bool underload();
 
+  /**
+   * @brief Remove all keys in the remove buffer
+   */
+  void buffer_remove();
+
   /* Cuckoo hash map partition */
-  hash_table_type block_;
+  std::unordered_map<key_type, value_type, hash_type, equal_type> block_;
 
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
@@ -374,6 +379,9 @@ class hash_table_partition : public chain_module {
 
   /* Data update mutex, we want only one update function happen at a time */
   std::mutex update_lock_;
+
+  /* Buffer remove cache */
+  std::map<std::string, int> remove_cache_;
 
 };
 

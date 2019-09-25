@@ -5,6 +5,7 @@
 #include "libcuckoo/cuckoohash_map.hh"
 #include "jiffy/storage/block_memory_allocator.h"
 #include "jiffy/storage/types/binary.h"
+#include <unordered_map>
 
 namespace jiffy {
 namespace storage {
@@ -39,6 +40,8 @@ struct equal_type {
 // Hash table definitions
 typedef cuckoohash_map<key_type, value_type, hash_type, equal_type> hash_table_type;
 typedef hash_table_type::locked_table locked_hash_table_type;
+
+typedef std::unordered_map<key_type, value_type, hash_type, equal_type> hash_table_type_new;
 
 }
 }
