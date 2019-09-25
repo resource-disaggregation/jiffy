@@ -69,7 +69,7 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
   if (ret.second == "!not_available") {
     RETURN_ERR("!msg_not_found");
   }
-  if (ret.second == "") 
+  if (!ret.second.empty()) 
     head_ += (string_array::METADATA_LEN + ret.second.size());
   if (!auto_scale_) {
     RETURN_ERR("!split_dequeue", ret.second);
