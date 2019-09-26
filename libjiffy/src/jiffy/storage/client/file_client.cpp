@@ -30,10 +30,9 @@ void file_client::refresh() {
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FILE_OPS, timeout_ms_));
   }
 }
-
+// TODO currently only support the offset within the file, need to extend to support seek + write
 bool file_client::seek(const std::size_t offset) {
-  auto seek_partition = block_id();
-  auto _return = blocks_[seek_partition]->run_command({"seek"});
+  auto _return = blocks_[last_partition_]->run_command({"seek"});
   
   THROW_IF_NOT_OK(_return);
   
@@ -51,6 +50,11 @@ bool file_client::seek(const std::size_t offset) {
 bool file_client::need_chain() const {
   return cur_partition_ >= blocks_.size() - 1;
 }
+
+std::size_t file_client::num_chain(std::size_t data_size) const {
+  auto
+}
+
 
 std::size_t file_client::block_id() const {
   if (cur_partition_ >= blocks_.size()) {
