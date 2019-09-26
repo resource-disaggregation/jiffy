@@ -18,6 +18,8 @@ file_client::file_client(std::shared_ptr<directory::directory_interface> fs,
       cur_partition_(0),
       cur_offset_(0),
       last_partition_(0) {
+  //TODO init block_size_
+  block_size_ = 100;
   for (const auto &block: status.data_blocks()) {
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FILE_OPS, timeout_ms_));
   }
@@ -38,7 +40,7 @@ bool file_client::seek(const std::size_t offset) {
   
   auto size = static_cast<std::size_t>(std::stoull(_return[1]));
   auto cap = static_cast<std::size_t>(std::stoull(_return[2]));
-  if (offset > seek_partition * cap + size) {
+  if (offset > last_partition_ * cap + size) {
     return false;
   } else {
     cur_partition_ = offset / cap;
@@ -52,13 +54,13 @@ bool file_client::need_chain() const {
 }
 
 std::size_t file_client::num_chain(std::size_t data_size) const {
-  auto
+
 }
 
 
 std::size_t file_client::block_id() const {
   if (cur_partition_ >= blocks_.size()) {
-    throw std::logic_error("Blocks are insufficient, need to add more");
+    //throw std::logic_error("Blocks are insufficient, need to add more");
   }
   return cur_partition_;
 }
