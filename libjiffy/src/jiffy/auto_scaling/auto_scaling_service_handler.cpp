@@ -38,16 +38,25 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
   if (scaling_type == "file") {
     LOG(log_level::info) << "Auto-scaling file";
 
-    auto dst_name = conf.find("next_partition_name")->second;
-
-    // Add replica chain at directory server
+    auto dst_name = std::stoi(conf.find("next_partition_name")->second);
+    auto chain_to_add = std::stoi(conf.find("partition_num")->second);
+    std::vector<replica_chain> chain_vector(chain_to_add);
+    std::vector<std::shared_ptr<replica_chain_client>> src_vector(chain_to_add);
     auto start = time_utils::now_us();
-    auto dst_replica_chain = fs->add_block(path, dst_name, "regular");
+    chain_vector[0] = cur_chain;
+    for(std::size_t i = 0; i < chain_to_add; i++) {
+      // Add replica chain at directory server
+      chain_vector[i + 1] = fs->add_block(path, std::to_string(dst_name + i), "regular");
+      src_vector[i] = std::make_shared<replica_chain_client>(fs, path, chain_vector[i], FILE_OPS);
+      src_vector[i]->send_command({"update_partition", pack(chain_vector[i])});
+    }
     auto finish_adding_replica_chain = time_utils::now_us();
 
     // Update source partition
-    auto src = std::make_shared<replica_chain_client>(fs, path, cur_chain, FILE_OPS);
-    src->run_command({"update_partition", pack(dst_replica_chain)});
+    for(std::size_t i = 0; i < chain_to_add; i++) {
+      src_vector[i]->recv_response();
+    }
+
     auto finish_updating_partition = time_utils::now_us();
 
     // Log auto-scaling info

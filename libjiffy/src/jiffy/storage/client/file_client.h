@@ -7,6 +7,16 @@
 #include "jiffy/storage/file/file_ops.h"
 #include "jiffy/storage/client/data_structure_client.h"
 
+#define MAX(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+
+#define MIN(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
+
 namespace jiffy {
 namespace storage {
 
@@ -53,6 +63,13 @@ class file_client : public data_structure_client {
   bool need_chain() const;
 
   /**
+   * @brief Check the number of the new chains to be added
+   * @param data_size Data to be written
+   * @return Number of new chains to be added
+   */
+  std::size_t num_chain(std::size_t data_size) const;
+
+  /**
    * @brief Fetch block identifier for specified operation
    * @param op Operation
    * @return Block identifier
@@ -61,11 +78,18 @@ class file_client : public data_structure_client {
 
   /**
    * @brief Track the last partition of the file
-   * @brief partition Partition 
+   * @param partition Partition
    */
   void update_last_partition(std::size_t partition) {
     if (last_partition_ < partition)
       last_partition_ = partition;
+  }
+  /**
+   * @brief Fetch last partition number
+   * @return Last partition number
+   */
+  std::size_t last_partition() {
+    return last_partition_;
   }
 
   /* Current partition number */
@@ -76,6 +100,8 @@ class file_client : public data_structure_client {
   std::size_t last_partition_;
   /* Replica chain clients, each partition only save a replica chain client */
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
+  /* Block size */
+  std::size_t block_size_;
 };
 
 }

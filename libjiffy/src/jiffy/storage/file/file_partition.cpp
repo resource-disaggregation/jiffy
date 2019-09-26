@@ -140,7 +140,8 @@ void file_partition::run_command(response &_return, const arg_list &args) {
     try {
       scaling_up_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
-      std::map<std::string, std::string> scale_conf{{"type", "file"}, {"next_partition_name", dst_partition_name}};
+      // TODO add partition number to count the partition that needs to be allocated
+      std::map<std::string, std::string> scale_conf{{"type", "file"}, {"next_partition_name", dst_partition_name}, {"partition_num", args.back()}};
       auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
       scale->auto_scaling(chain(), path(), scale_conf);
     } catch (std::exception &e) {
