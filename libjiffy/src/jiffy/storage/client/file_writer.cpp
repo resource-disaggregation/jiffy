@@ -20,19 +20,13 @@ void file_writer::write(const std::string &data) {
   std::size_t remain_size = file_size - cur_partition_ * block_size_ - cur_offset_;
   std::size_t num_chain_needed = 0;
   if(remain_size < data.size()) {
-    num_chain_needed = (data.size() - remain_size) / block_size_ + 1 - (last_partition_ - cur_partition_);
+    num_chain_needed = (data.size() - remain_size) / block_size_;
   }
   LOG(log_level::info) << "Num chains needed " << num_chain_needed;
 // First write should be able to allocate new blocks
   bool redo;
   std::size_t init_size;
-  if(block_size_ - cur_offset_== 0) {
-    //cur_partition_++;
-    //cur_offset_ = 0;
-    init_size = MIN(data.size(), block_size_ - cur_offset_);
-  } else {
-    init_size = MIN(data.size(), block_size_ - cur_offset_);
-  }
+  init_size = MIN(data.size(), block_size_ - cur_offset_);
   LOG(log_level::info) << "Writing data " << init_size;
   std::vector<std::string> init_args{"write", data.substr(0, init_size), std::to_string(cur_offset_), std::to_string(num_chain_needed)};
   do {
@@ -51,6 +45,7 @@ void file_writer::write(const std::string &data) {
   while(has_more > 0) {
     std::string data_to_write = data.substr(data.size() - has_more, MIN(has_more, block_size_ - cur_offset_));
     std::vector<std::string> args{"write", data_to_write, std::to_string(cur_offset_), std::to_string(0)};
+    LOG(log_level::info) << "Data to write " << data_to_write.size() << " " << has_more << " " << cur_partition_;
     do {
       try {
         _return = blocks_[block_id()]->run_command(args);
@@ -78,6 +73,7 @@ void file_writer::handle_redirect(std::vector<std::string> &_return, const std::
     throw redo_error();
   } else if (_return[0] == "!split_write") {
     do {
+      LOG(log_level::info) << "Split writing ";
       auto remaining_data_len = std::stoul(_return[1]);
       auto remaining_data = data.substr(data.size() - remaining_data_len, remaining_data_len);
 
@@ -88,6 +84,11 @@ void file_writer::handle_redirect(std::vector<std::string> &_return, const std::
       cur_partition_++;
       update_last_partition(cur_partition_);
       cur_offset_ = 0;
+      if(remaining_data_len == 0) {
+        _return.clear();
+        _return.push_back("!ok");
+        return;
+      }
       std::vector<std::string> new_args{"write", remaining_data, std::to_string(cur_offset_), std::to_string(0)};
       do {
         _return = blocks_[block_id()]->run_command(new_args);

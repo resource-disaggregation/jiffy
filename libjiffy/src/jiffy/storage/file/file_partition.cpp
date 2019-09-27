@@ -116,7 +116,7 @@ void file_partition::update_partition(response& _return, const arg_list &args) {
 
 void file_partition::run_command(response &_return, const arg_list &args) {
   if(command_id(args[0]) == file_cmd_id::file_write && args.size() == 4) {
-    if(std::stoi(args[3]) == 1) {
+    if(std::stoi(args[3]) != 0) {
       LOG(log_level::info) << "Scaling";
       scaling_up_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
