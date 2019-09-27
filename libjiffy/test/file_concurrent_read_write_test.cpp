@@ -1,3 +1,4 @@
+
 #include <catch.hpp>
 #include <thrift/transport/TTransportException.h>
 #include <thread>
@@ -30,9 +31,9 @@ TEST_CASE("file_client_concurrent_write_read_seek_test", "[write][read][seek]") 
 
 
 auto alloc = std::make_shared<sequential_block_allocator>();
-auto block_names = test_utils::init_block_names(64, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
+auto block_names = test_utils::init_block_names(10, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
 alloc->add_blocks(block_names);
-auto blocks = test_utils::init_file_blocks(block_names, 100);
+auto blocks = test_utils::init_file_blocks(block_names, 1000);
 
 auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
 std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -54,24 +55,33 @@ std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
 test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
 auto status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 5, 1, 0, perms::all(), {"0", "1", "2", "3", "4"}, {"regular", "regular", "regular", "regular", "regular"}, {});
-file_writer writer(t, "/sandbox/scale_up.txt", status);
+//auto status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 1, 1, 0, perms::all(), {"0"}, {"regular"}, {});
+
+file_client client(t, "/sandbox/scale_up.txt", status);
 
 
 for (std::size_t i = 0; i < 2; ++i) {
-REQUIRE_NOTHROW(writer.write(std::string(845, 'x')));
+  REQUIRE_NOTHROW(client.write_data_file(std::string(1024, 'x')));
 }
 
-//for (std::size_t i = 0; i < 1000; ++i) {
-//REQUIRE(reader.read(std::to_string(i).size()) == std::to_string(i));
-//}
-//for (std::size_t i = 1000; i < 2000; ++i) {
-//REQUIRE_THROWS_AS(reader.read(std::to_string(i).size()), std::logic_error);
-//}
+REQUIRE_NOTHROW(client.seek(0));
 
-//REQUIRE(reader.seek(0));
-//for (std::size_t i = 0; i < 1000; ++i) {
-//REQUIRE(reader.read(std::to_string(i).size()) == std::to_string(i));
-//}
+REQUIRE(client.read_data_file(2048) == std::string(2048, 'x'));
+
+REQUIRE_NOTHROW(client.seek(4095));
+
+REQUIRE(client.read_data_file(256) == "");
+
+REQUIRE_NOTHROW(client.write_data_file(std::string(4096, 'y')));
+
+REQUIRE_NOTHROW(client.seek(0));
+
+std::string ret;
+REQUIRE_NOTHROW(ret = client.read_data_file(8192));
+std::cout << ret.size() << std::endl;
+REQUIRE(ret.substr(0, 2048) == std::string(2048, 'x'));
+REQUIRE(ret.substr(4095, 4096) == std::string(4096, 'y'));
+
 
 as_server->stop();
 if (auto_scaling_thread.joinable()) {
@@ -94,3 +104,4 @@ dir_serve_thread.join();
 }
 
 }
+

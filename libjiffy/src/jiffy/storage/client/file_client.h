@@ -47,11 +47,26 @@ class file_client : public data_structure_client {
   void refresh() override;
 
   /**
+   * @brief
+   * @param size
+   * @return
+   */
+  std::string read_data_file(const std::size_t size);
+
+  /**
+   * @brief
+   * @param data
+   */
+  void write_data_file(const std::string &data);
+
+  /**
    * @brief Seek to a location of the file
    * @param offset File offset to seek
    * @return Boolean, true if offset is within file range
    */
   bool seek(std::size_t offset);
+
+  void handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args);
 
  protected:
 
@@ -76,20 +91,21 @@ class file_client : public data_structure_client {
    */
   std::size_t block_id() const;
 
+
   /**
    * @brief Track the last partition of the file
    * @param partition Partition
    */
-  void update_last_partition(std::size_t partition) {
-    if (last_partition_ < partition)
-      last_partition_ = partition;
+  void update_last_partition() {
+    if (last_partition_ < cur_partition_) {
+      last_partition_ = cur_partition_;
+      last_offset_ = cur_offset_;
+    }
   }
-  /**
-   * @brief Fetch last partition number
-   * @return Last partition number
-   */
-  std::size_t last_partition() {
-    return last_partition_;
+
+  void update_last_offset() {
+    if (last_offset_ < cur_offset_ && cur_partition_ == last_partition_)
+      last_offset_ = cur_offset_;
   }
 
   /* Current partition number */
@@ -98,6 +114,10 @@ class file_client : public data_structure_client {
   std::size_t cur_offset_;
   /* Last partition of the file */
   std::size_t last_partition_;
+  /* Max partition of the file */
+  std::size_t max_partition_;
+  /* Last offset of the file */
+  std::size_t last_offset_;
   /* Replica chain clients, each partition only save a replica chain client */
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
   /* Block size */

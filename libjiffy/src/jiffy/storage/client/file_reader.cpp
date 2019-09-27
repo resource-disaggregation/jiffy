@@ -1,3 +1,4 @@
+
 #include "file_reader.h"
 
 #include <utility>
@@ -47,7 +48,7 @@ void file_reader::handle_redirect(std::vector<std::string> &_return, const std::
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FILE_OPS));
       }
       cur_partition_++;
-      update_last_partition(cur_partition_);
+      update_last_partition();
       cur_offset_ = 0;
       std::vector<std::string> new_args{"read", std::to_string(cur_offset_),
                                         std::to_string(std::stoi(args[2]) - result.size())};
