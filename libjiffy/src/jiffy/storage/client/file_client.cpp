@@ -23,6 +23,7 @@ file_client::file_client(std::shared_ptr<directory::directory_interface> fs,
   for (const auto &block: status.data_blocks()) {
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FILE_OPS, timeout_ms_));
   }
+  last_partition_ = status.data_blocks().size() - 1;
 }
 
 void file_client::refresh() {

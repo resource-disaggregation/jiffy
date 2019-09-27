@@ -39,8 +39,8 @@ bool file_block::operator==(const file_block &other) const {
 
 std::pair<bool, std::string> file_block::write(const std::string &data, std::size_t offset) {
   auto len = data.size();
-  //if (len == 0) return std::make_pair(true, std::string("!success"));
-  if (len == 0) return std::make_pair(false, std::string(""));
+  if (len == 0) return std::make_pair(true, std::string("!success"));
+  //if (len == 0) return std::make_pair(false, std::string(""));
   else if (len + offset <= max_) {
     std::memcpy(data_ + offset, data.c_str(), len);
     tail_ = std::max(tail_, len + offset);

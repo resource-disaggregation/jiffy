@@ -53,12 +53,12 @@ auto dir_server = directory_server::create(t, HOST, DIRECTORY_SERVICE_PORT);
 std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
 test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
-auto status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 1, 1, 0, perms::all(), {"0"}, {"regular"}, {});
+auto status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 5, 1, 0, perms::all(), {"0", "1", "2", "3", "4"}, {"regular", "regular", "regular", "regular", "regular"}, {});
 file_writer writer(t, "/sandbox/scale_up.txt", status);
 
 
 for (std::size_t i = 0; i < 2; ++i) {
-REQUIRE_NOTHROW(writer.write(std::string(1000, 'x')));
+REQUIRE_NOTHROW(writer.write(std::string(845, 'x')));
 }
 
 //for (std::size_t i = 0; i < 1000; ++i) {

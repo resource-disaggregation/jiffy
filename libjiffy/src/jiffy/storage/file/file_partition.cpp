@@ -22,6 +22,7 @@ file_partition::file_partition(block_memory_manager *manager,
       partition_(manager->mb_capacity(), build_allocator<char>()),
       scaling_up_(false),
       dirty_(false),
+      block_allocated_(false),
       directory_host_(directory_host),
       directory_port_(directory_port),
       auto_scaling_host_(auto_scaling_host),
@@ -39,7 +40,7 @@ file_partition::file_partition(block_memory_manager *manager,
 }
 
 void file_partition::write(response& _return, const arg_list &args) {
-  if (args.size() != 4) {
+  if (args.size() != 5) {
     RETURN_ERR("!args_error");
   }
   auto off = std::stoi(args[2]);
@@ -57,6 +58,17 @@ void file_partition::write(response& _return, const arg_list &args) {
         LOG(log_level::info) << "Next target string is empty " << name();
         RETURN_ERR("!redo");
       }
+    }
+  }
+  if(std::stoi(args[3]) != 0) {
+    if(block_allocated_) {
+      LOG(log_level::info) << "Block allocated";
+      block_allocated_ = false;
+      scaling_up_ = false;
+      _return.push_back("!block_allocated");
+      _return.insert(_return.end(), allocated_blocks_.begin(), allocated_blocks_.end());
+      allocated_blocks_.clear();
+      return;
     }
   }
   RETURN_OK();
@@ -106,22 +118,26 @@ void file_partition::clear(response& _return, const arg_list &args) {
 
 void file_partition::update_partition(response& _return, const arg_list &args) {
   LOG(log_level::info) << "Partition updated!!!";
-  if (args.size() != 2) {
-    RETURN_ERR("!args_error");
-  }
+//  if (args.size() != 2 && args.size() != 3) {
+//    RETURN_ERR("!args_error");
+//  }
   next_target(args[1]);
+  if(args.size() > 2) {
+    block_allocated_ = true;
+    allocated_blocks_.insert(allocated_blocks_.end(), args.begin() + 2, args.end());
+  }
   LOG(log_level::info) << "Next target set " << name();
   RETURN_OK();
 }
 
 void file_partition::run_command(response &_return, const arg_list &args) {
-  if(command_id(args[0]) == file_cmd_id::file_write && args.size() == 4) {
+  if(command_id(args[0]) == file_cmd_id::file_write && args.size() == 5 && scaling_up_ == false) {
     if(std::stoi(args[3]) != 0) {
-      LOG(log_level::info) << "Scaling";
+      LOG(log_level::info) << "Scaling " << name();
       scaling_up_ = true;
-      std::string dst_partition_name = std::to_string(std::stoi(name_) + 1);
+      std::string dst_partition_name = std::to_string(std::stoi(args[4]) + 1);
       // TODO add partition number to count the partition that needs to be allocated
-      std::map<std::string, std::string> scale_conf{{"type", "file"}, {"next_partition_name", dst_partition_name}, {"partition_num", args.back()}};
+      std::map<std::string, std::string> scale_conf{{"type", "file"}, {"next_partition_name", dst_partition_name}, {"partition_num", args[3]}};
       auto scale = std::make_shared<auto_scaling::auto_scaling_client>(auto_scaling_host_, auto_scaling_port_);
       scale->auto_scaling(chain(), path(), scale_conf);
     }

@@ -165,6 +165,9 @@ class file_partition : public chain_module {
   /* Partition dirty bit */
   bool dirty_;
 
+  /* Bool to indicate if block is successfully allocated */
+  bool block_allocated_;
+
   /* Bool value for auto scaling */
   bool auto_scale_;
 
@@ -182,6 +185,8 @@ class file_partition : public chain_module {
 
   /* Next partition target string */
   std::string next_target_str_;
+
+  std::vector<std::string> allocated_blocks_;
 
 };
 

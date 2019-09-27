@@ -53,7 +53,11 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     // Update source partition
     for(std::size_t i = 0; i < chain_to_add; i++) {
       src_vector[i] = std::make_shared<replica_chain_client>(fs, path, chain_vector[i], FILE_OPS);
-      src_vector[i]->run_command({"update_partition", pack(chain_vector[i + 1])});
+      std::vector<std::string> args{"update_partition", pack(chain_vector[i + 1])};
+      for(std::size_t j = 0; j < chain_to_add; j++) {
+        args.push_back(pack(chain_vector[j + 1]));
+      }
+      src_vector[i]->run_command(args);
     }
 
     auto finish_updating_partition = time_utils::now_us();
