@@ -55,14 +55,14 @@ void file_partition::write(response& _return, const arg_list &args) {
       if(args[1].empty() && !overload()) {
         RETURN_OK();
       } else {
-        LOG(log_level::info) << "Next target string is empty " << name();
+        //LOG(log_level::info) << "Next target string is empty " << name();
         RETURN_ERR("!redo");
       }
     }
   }
   if(std::stoi(args[3]) != 0) {
     if(block_allocated_) {
-      LOG(log_level::info) << "Block allocated";
+      //LOG(log_level::info) << "Block allocated";
       block_allocated_ = false;
       scaling_up_ = false;
       _return.push_back("!block_allocated");
@@ -117,7 +117,7 @@ void file_partition::clear(response& _return, const arg_list &args) {
 }
 
 void file_partition::update_partition(response& _return, const arg_list &args) {
-  LOG(log_level::info) << "Partition updated!!!";
+  //LOG(log_level::info) << "Partition updated!!!";
 //  if (args.size() != 2 && args.size() != 3) {
 //    RETURN_ERR("!args_error");
 //  }
@@ -126,14 +126,14 @@ void file_partition::update_partition(response& _return, const arg_list &args) {
     block_allocated_ = true;
     allocated_blocks_.insert(allocated_blocks_.end(), args.begin() + 2, args.end());
   }
-  LOG(log_level::info) << "Next target set " << name();
+  //LOG(log_level::info) << "Next target set " << name();
   RETURN_OK();
 }
 
 void file_partition::run_command(response &_return, const arg_list &args) {
   if(command_id(args[0]) == file_cmd_id::file_write && args.size() == 5 && scaling_up_ == false) {
     if(std::stoi(args[3]) != 0) {
-      LOG(log_level::info) << "Scaling " << name();
+      //LOG(log_level::info) << "Scaling " << name();
       scaling_up_ = true;
       std::string dst_partition_name = std::to_string(std::stoi(args[4]) + 1);
       // TODO add partition number to count the partition that needs to be allocated

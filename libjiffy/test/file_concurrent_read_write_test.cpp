@@ -31,9 +31,9 @@ TEST_CASE("file_client_concurrent_write_read_seek_test", "[write][read][seek]") 
 
 
 auto alloc = std::make_shared<sequential_block_allocator>();
-auto block_names = test_utils::init_block_names(10, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
+auto block_names = test_utils::init_block_names(20, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
 alloc->add_blocks(block_names);
-auto blocks = test_utils::init_file_blocks(block_names, 1000);
+auto blocks = test_utils::init_file_blocks(block_names, 500);
 
 auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
 std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -78,7 +78,6 @@ REQUIRE_NOTHROW(client.seek(0));
 
 std::string ret;
 REQUIRE_NOTHROW(ret = client.read_data_file(8192));
-std::cout << ret.size() << std::endl;
 REQUIRE(ret.substr(0, 2048) == std::string(2048, 'x'));
 REQUIRE(ret.substr(4095, 4096) == std::string(4096, 'y'));
 
