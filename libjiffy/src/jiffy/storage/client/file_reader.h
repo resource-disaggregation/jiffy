@@ -10,7 +10,7 @@
 namespace jiffy {
 namespace storage {
 
-class file_reader: public file_client {
+class file_reader : public file_client {
  public:
   /**
    * @brief Constructor
@@ -23,6 +23,7 @@ class file_reader: public file_client {
   file_reader(std::shared_ptr<directory::directory_interface> fs,
               const std::string &path,
               const directory::data_status &status,
+              std::size_t block_size = 134217728,
               int timeout_ms = 1000);
 
   /**

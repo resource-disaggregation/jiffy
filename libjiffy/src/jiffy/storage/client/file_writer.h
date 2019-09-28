@@ -24,13 +24,13 @@ class file_writer : public file_client {
   file_writer(std::shared_ptr<directory::directory_interface> fs,
               const std::string &path,
               const directory::data_status &status,
+              std::size_t block_size = 134217728,
               int timeout_ms = 1000);
 
   /**
    * @brief Destructor
    */
   ~file_writer() override = default;
-
 
   /**
    * @brief Write message to file

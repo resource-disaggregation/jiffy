@@ -12,7 +12,8 @@ using namespace jiffy::utils;
 file_reader::file_reader(std::shared_ptr<jiffy::directory::directory_interface> fs,
                          const std::string &path,
                          const jiffy::directory::data_status &status,
-                         int timeout_ms) : file_client(std::move(fs), path, status, timeout_ms) {
+                         std::size_t block_size,
+                         int timeout_ms) : file_client(std::move(fs), path, status, block_size, timeout_ms) {
 }
 
 std::string file_reader::read(const std::size_t size) {

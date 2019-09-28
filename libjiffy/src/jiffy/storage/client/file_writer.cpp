@@ -10,8 +10,8 @@ using namespace jiffy::utils;
 file_writer::file_writer(std::shared_ptr<jiffy::directory::directory_interface> fs,
                          const std::string &path,
                          const jiffy::directory::data_status &status,
-                         int timeout_ms) : file_client(fs, path, status, timeout_ms) {}
-
+                         std::size_t block_size,
+                         int timeout_ms) : file_client(fs, path, status, block_size, timeout_ms) {}
 
 void file_writer::write(const std::string &data) {
   std::vector<std::string> _return;

@@ -21,6 +21,7 @@ using namespace ::apache::thrift::transport;
 
 
 #define NUM_BLOCKS 1
+#define BLOCK_SIZE 500
 #define HOST "127.0.0.1"
 #define DIRECTORY_SERVICE_PORT 9090
 #define STORAGE_SERVICE_PORT 9091
@@ -33,7 +34,7 @@ TEST_CASE("file_client_concurrent_write_read_seek_test", "[write][read][seek]") 
 auto alloc = std::make_shared<sequential_block_allocator>();
 auto block_names = test_utils::init_block_names(20, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
 alloc->add_blocks(block_names);
-auto blocks = test_utils::init_file_blocks(block_names, 500);
+auto blocks = test_utils::init_file_blocks(block_names, BLOCK_SIZE);
 
 auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
 std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -55,29 +56,28 @@ std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
 test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
 auto status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 5, 1, 0, perms::all(), {"0", "1", "2", "3", "4"}, {"regular", "regular", "regular", "regular", "regular"}, {});
-//auto status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 1, 1, 0, perms::all(), {"0"}, {"regular"}, {});
 
-file_client client(t, "/sandbox/scale_up.txt", status);
+file_client client(t, "/sandbox/scale_up.txt", status, BLOCK_SIZE);
 
 
 for (std::size_t i = 0; i < 2; ++i) {
-  REQUIRE_NOTHROW(client.write_data_file(std::string(1024, 'x')));
+  REQUIRE_NOTHROW(client.write_data(std::string(1024, 'x')));
 }
 
 REQUIRE_NOTHROW(client.seek(0));
 
-REQUIRE(client.read_data_file(2048) == std::string(2048, 'x'));
+REQUIRE(client.read_data(2048) == std::string(2048, 'x'));
 
 REQUIRE_NOTHROW(client.seek(4095));
 
-REQUIRE(client.read_data_file(256) == "");
+REQUIRE(client.read_data(256) == "");
 
-REQUIRE_NOTHROW(client.write_data_file(std::string(4096, 'y')));
+REQUIRE_NOTHROW(client.write_data(std::string(4096, 'y')));
 
 REQUIRE_NOTHROW(client.seek(0));
 
 std::string ret;
-REQUIRE_NOTHROW(ret = client.read_data_file(8192));
+REQUIRE_NOTHROW(ret = client.read_data(8192));
 REQUIRE(ret.substr(0, 2048) == std::string(2048, 'x'));
 REQUIRE(ret.substr(4095, 4096) == std::string(4096, 'y'));
 
