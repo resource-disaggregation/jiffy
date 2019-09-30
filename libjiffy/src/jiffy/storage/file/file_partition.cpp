@@ -120,7 +120,6 @@ void file_partition::update_partition(response &_return, const arg_list &args) {
     block_allocated_ = true;
     allocated_blocks_.insert(allocated_blocks_.end(), args.begin() + 2, args.end());
   }
-  //LOG(log_level::info) << "Next target set " << name();
   RETURN_OK();
 }
 
