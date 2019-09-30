@@ -13,7 +13,7 @@ TEST_CASE("file_write_read_test", "[write][read]") {
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
-    REQUIRE_NOTHROW(block.write(resp, {"write", std::to_string(i), std::to_string(offset)}));
+    REQUIRE_NOTHROW(block.write(resp, {"write", std::to_string(i), std::to_string(offset), std::to_string(0), std::to_string(0)}));
     REQUIRE(resp[0] == "!ok");
     offset += std::to_string(i).size();
   }
@@ -27,7 +27,7 @@ TEST_CASE("file_write_read_test", "[write][read]") {
   }
   response resp;
   REQUIRE_NOTHROW(block.read(resp, {"read", std::to_string(read_pos + 1), std::to_string(std::to_string(1).size())}));
-  REQUIRE(resp[0] == "!msg_not_found");
+  REQUIRE(resp[1] == std::string(std::to_string(1).size(), 0));
 }
 
 TEST_CASE("file_write_clear_read_test", "[write][read]") {
@@ -36,7 +36,7 @@ TEST_CASE("file_write_clear_read_test", "[write][read]") {
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
-    REQUIRE_NOTHROW(block.write(resp, {"write", std::to_string(i), std::to_string(offset)}));
+    REQUIRE_NOTHROW(block.write(resp, {"write", std::to_string(i), std::to_string(offset), std::to_string(0), std::to_string(0)}));
     REQUIRE(resp[0] == "!ok");
     offset += std::to_string(i).size();
   }
@@ -52,7 +52,7 @@ TEST_CASE("file_write_clear_read_test", "[write][read]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
     REQUIRE_NOTHROW(block.read(resp, {"read", std::to_string(read_pos), std::to_string(std::to_string(i).size())}));
-    REQUIRE(resp[0] == "!msg_not_found");
+    REQUIRE(resp[1] == std::string(std::to_string(i).size(), 0));
     read_pos += std::to_string(i).size();
   }
 }
@@ -63,7 +63,7 @@ TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
-    REQUIRE_NOTHROW(block.write(resp, {"write", std::to_string(i), std::to_string(offset)}));
+    REQUIRE_NOTHROW(block.write(resp, {"write", std::to_string(i), std::to_string(offset), std::to_string(0), std::to_string(0)}));
     REQUIRE(resp[0] == "!ok");
     offset += std::to_string(i).size();
   }
@@ -76,7 +76,7 @@ TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
     std::vector<std::string> res;
-    block.run_command(res, {"write", std::to_string(i), std::to_string(offset)});
+    block.run_command(res, {"write", std::to_string(i), std::to_string(offset), std::to_string(0), std::to_string(0)});
     offset += std::to_string(i).size();
     REQUIRE(res.front() == "!ok");
   }

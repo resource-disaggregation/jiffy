@@ -40,7 +40,6 @@ bool file_block::operator==(const file_block &other) const {
 std::pair<bool, std::string> file_block::write(const std::string &data, std::size_t offset) {
   auto len = data.size();
   if (len == 0) return std::make_pair(true, std::string("!success"));
-  //if (len == 0) return std::make_pair(false, std::string(""));
   else if (len + offset <= max_) {
     std::memcpy(data_ + offset, data.c_str(), len);
     tail_ = std::max(tail_, len + offset);
@@ -55,10 +54,10 @@ std::pair<bool, std::string> file_block::write(const std::string &data, std::siz
 }
 
 const std::pair<bool, std::string> file_block::read(std::size_t offset, std::size_t size) const {
-//  if (offset >= tail_) return std::make_pair(false, std::string("!not_available"));
-//  else if (offset + size <= tail_) return std::make_pair(true, std::string(data_ + offset, size));
-//  else return std::make_pair(tail_ != max_, std::string(data_ + offset, tail_ - offset));
-return std::make_pair(true, std::string(data_ + offset, size));
+  if (offset >= max_) {
+    throw std::invalid_argument("Read exceeds partition capacity");
+  }
+  return std::make_pair(true, std::string(data_ + offset, size));
 }
 
 std::size_t file_block::size() const {
@@ -72,6 +71,9 @@ std::size_t file_block::capacity() {
 void file_block::clear() {
   tail_ = 0;
   extend_ = false;
+  for(std::size_t i = 0; i < max_; i++) {
+    data_[i] = 0;
+  }
 }
 
 bool file_block::empty() const {

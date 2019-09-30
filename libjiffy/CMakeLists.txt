@@ -222,11 +222,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/types/binary.h
           src/jiffy/storage/types/binary.cpp
           src/jiffy/storage/types/byte_string.h
-          src/jiffy/storage/types/byte_string.cc
-          src/jiffy/storage/client/file_writer.cpp
-          src/jiffy/storage/client/file_writer.h
-          src/jiffy/storage/client/file_reader.cpp
-          src/jiffy/storage/client/file_reader.h)
+          src/jiffy/storage/types/byte_string.cc)
 
   add_dependencies(jiffy thrift_ep awssdk_ep jemalloc_ep)
   target_link_libraries(jiffy ${THRIFT_LIBRARY}
@@ -258,9 +254,8 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             #test/file_size_tracker_test.cpp
             test/directory_tree_test.cpp
             test/directory_service_test.cpp
-            test/file_concurrent_read_write_test.cpp
-#	          test/file_partition_test.cpp
-#	          test/file_client_test.cpp
+	          test/file_partition_test.cpp
+	          test/file_client_test.cpp
             test/fifo_queue_partition_test.cpp
             test/fifo_queue_client_test.cpp
             test/hash_table_partition_test.cpp
@@ -374,11 +369,7 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/utils/string_utils.h
           src/jiffy/utils/property_map.cpp
           src/jiffy/utils/property_map.h
-          src/jiffy/utils/thread_utils.h
-          src/jiffy/storage/client/file_writer.cpp
-          src/jiffy/storage/client/file_writer.h
-          src/jiffy/storage/client/file_reader.cpp
-          src/jiffy/storage/client/file_reader.h)
+          src/jiffy/utils/thread_utils.h)
   add_dependencies(jiffy_client thrift_ep)
   target_link_libraries(jiffy_client ${THRIFT_LIBRARY}
           ${THRIFTNB_LIBRARY}

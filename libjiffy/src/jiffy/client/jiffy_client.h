@@ -5,8 +5,7 @@
 #include "jiffy/directory/directory_ops.h"
 #include "jiffy/directory/client/lease_renewal_worker.h"
 #include "jiffy/storage/client/hash_table_client.h"
-#include "jiffy/storage/client/file_reader.h"
-#include "jiffy/storage/client/file_writer.h"
+#include "jiffy/storage/client/file_client.h"
 #include "jiffy/storage/client/fifo_queue_client.h"
 #include "jiffy/storage/client/data_structure_listener.h"
 
@@ -78,7 +77,7 @@ class jiffy_client {
    * @param tags Tags
    * @return File writer
    */
-  std::shared_ptr<storage::file_writer> create_file(const std::string &path,
+  std::shared_ptr<storage::file_client> create_file(const std::string &path,
                                                     const std::string &backing_path,
                                                     int32_t num_blocks = 1,
                                                     int32_t chain_length = 1,
@@ -117,14 +116,7 @@ class jiffy_client {
    * @param path File path
    * @return File reader client
    */
-  std::shared_ptr<storage::file_reader> open_file_reader(const std::string &path);
-
-  /**
-   * @brief Open file, begin lease
-   * @param path File path
-   * @return File writer client
-   */
-  std::shared_ptr<storage::file_writer> open_file_writer(const std::string &path);
+  std::shared_ptr<storage::file_client> open_file(const std::string &path);
 
   /**
    * @brief Open file, begin lease
@@ -165,7 +157,7 @@ class jiffy_client {
    * @param tags Tags
    * @return File client
    */
-  std::shared_ptr<storage::file_writer> open_or_create_file(const std::string &path,
+  std::shared_ptr<storage::file_client> open_or_create_file(const std::string &path,
                                                             const std::string &backing_path,
                                                             int32_t num_blocks = 1,
                                                             int32_t chain_length = 1,

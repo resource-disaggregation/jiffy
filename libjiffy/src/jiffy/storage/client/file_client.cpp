@@ -26,15 +26,12 @@ file_client::file_client(std::shared_ptr<directory::directory_interface> fs,
   last_partition_ = status.data_blocks().size() - 1;
 }
 
-std::string file_client::read_data(const std::size_t size) {
-  if (cur_partition_ * block_size_ + cur_offset_ > last_partition_ * block_size_ + last_offset_) {
-    return "";
-  }
+std::string file_client::read(const std::size_t size) {
   std::size_t file_size = last_partition_ * block_size_ + last_offset_;
+  if(file_size <= cur_partition_ * block_size_ + cur_offset_)
+    throw std::out_of_range("!No more data to read");
   std::size_t remain_size = file_size - cur_partition_ * block_size_ - cur_offset_;
   std::size_t has_more = MIN(remain_size, size);
-  if (has_more <= 0)
-    return "!msg_not_found";
   // Parallel read here
   std::size_t start_partition = block_id();
   std::size_t count = 0;
@@ -55,13 +52,15 @@ std::string file_client::read_data(const std::size_t size) {
   std::string ret;
   for (std::size_t k = 0; k < count; k++) {
     auto tmp = blocks_[start_partition + k]->recv_response().back();
+    if(tmp.size() == 14)
+      LOG(log_level::info) << tmp;
     ret.append(tmp);
   }
   return ret;
 
 }
 
-void file_client::write_data(const std::string &data) {
+void file_client::write(const std::string &data) {
   std::size_t file_size = (last_partition_ + 1) * block_size_;;
   std::vector<std::string> _return;
   std::size_t remain_size;
@@ -167,7 +166,7 @@ std::size_t file_client::block_id() const {
   return cur_partition_;
 }
 
-void file_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
+void file_client::handle_redirect(std::vector<std::string> &, const std::vector<std::string> &) {
 
 }
 

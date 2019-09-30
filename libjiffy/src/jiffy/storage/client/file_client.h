@@ -42,13 +42,13 @@ class file_client : public data_structure_client {
    * @param size
    * @return
    */
-  std::string read_data(const std::size_t size);
+  std::string read(std::size_t size);
 
   /**
    * @brief
    * @param data
    */
-  void write_data(const std::string &data);
+  void write(const std::string &data);
 
   /**
    * @brief Seek to a location of the file
@@ -63,7 +63,7 @@ class file_client : public data_structure_client {
    * @param args Command args
    */
 
-  void handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args);
+  void handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) override;
 
  protected:
 
