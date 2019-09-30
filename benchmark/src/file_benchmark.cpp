@@ -14,15 +14,13 @@ using namespace ::jiffy::utils;
 
 using namespace ::apache::thrift;
 
-typedef std::shared_ptr<file_writer> writer_ptr;
-typedef std::vector<writer_ptr> writer_list;
+typedef std::shared_ptr<file_client> client_ptr;
+typedef std::vector<client_ptr> client_list;
 
-typedef std::shared_ptr<file_reader> reader_ptr;
-typedef std::vector<reader_ptr> reader_list;
 
 class file_benchmark {
  public:
-  file_benchmark(writer_list &writers,
+  file_benchmark(client_list &clients,
                  size_t data_size,
                  size_t num_clients,
                  size_t num_ops)
@@ -30,7 +28,7 @@ class file_benchmark {
       : data_(data_size, 'x'),
         num_clients_(num_clients),
         num_ops_(num_ops / num_clients),
-        writers_(writers),
+        clients_(clients),
         workers_(num_clients),
         throughput_(num_clients),
         latency_(num_clients) {
@@ -56,7 +54,7 @@ class file_benchmark {
   std::string data_;
   size_t num_clients_;
   size_t num_ops_;
-  writer_list &writers_;
+  client_list &clients_;
   std::vector<std::thread> workers_;
   std::vector<double> throughput_;
   std::vector<double> latency_;
@@ -64,10 +62,10 @@ class file_benchmark {
 
 class write_benchmark : public file_benchmark {
  public:
-  write_benchmark(writer_list &writers,
+  write_benchmark(client_list &clients,
                   size_t data_size,
                   size_t num_clients,
-                  size_t num_ops) : file_benchmark(writers, data_size, num_clients, num_ops) {
+                  size_t num_ops) : file_benchmark(clients, data_size, num_clients, num_ops) {
   }
 
   void run() override {
@@ -78,7 +76,7 @@ class write_benchmark : public file_benchmark {
         size_t j;
         for (j = 0; j < num_ops_; ++j) {
           t0 = time_utils::now_us();
-          writers_[i]->write(data_);
+          clients_[i]->write(data_);
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);
         }
@@ -92,25 +90,25 @@ class write_benchmark : public file_benchmark {
 
 class read_benchmark : public file_benchmark {
  public:
-  read_benchmark(writer_list &writers,
-                 reader_list &readers,
+  read_benchmark(client_list &clients,
                  size_t data_size,
                  size_t num_clients,
-                 size_t num_ops) : file_benchmark(writers, data_size, num_clients, num_ops), readers_(readers) {
+                 size_t num_ops) : file_benchmark(clients, data_size, num_clients, num_ops) {
   }
 
   void run() override {
     for (size_t i = 0; i < num_clients_; ++i) {
       workers_[i] = std::thread([i, this]() {
         for (size_t j = 0; j < num_ops_; ++j) {
-          writers_[i]->write(data_);
+          clients_[i]->write(data_);
         }
+        clients_[i]->seek(0);
         auto bench_begin = time_utils::now_us();
         uint64_t tot_time = 0, t0, t1 = bench_begin;
         size_t j;
         for (j = 0; j < num_ops_; ++j) {
           t0 = time_utils::now_us();
-          readers_[i]->read(data_.size());
+          clients_[i]->read(data_.size());
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);
         }
@@ -121,8 +119,6 @@ class read_benchmark : public file_benchmark {
     }
   }
 
- private:
-  reader_list &readers_;
 };
 
 int main() {
@@ -155,20 +151,16 @@ int main() {
       int num_clients = i;
 
       jiffy_client client(address, service_port, lease_port);
-      writer_list file_writers(static_cast<size_t>(num_clients), nullptr);
+      client_list file_clients(static_cast<size_t>(num_clients), nullptr);
       for (int j = 0; j < num_clients; ++j) {
-        file_writers[j] = client.open_or_create_file(path, backing_path, num_blocks, chain_length);
+        file_clients[j] = client.open_or_create_file(path, backing_path, num_blocks, chain_length);
       }
 
       std::shared_ptr<file_benchmark> benchmark = nullptr;
       if (op_type == "write") {
-        benchmark = std::make_shared<write_benchmark>(file_writers, data_size, num_clients, num_ops);
+        benchmark = std::make_shared<write_benchmark>(file_clients, data_size, num_clients, num_ops);
       } else if (op_type == "read") {
-        reader_list file_readers(static_cast<size_t>(num_clients), nullptr);
-        for (int j = 0; j < num_clients; ++j) {
-          file_readers[j] = client.open_file_reader(path);
-        }
-        benchmark = std::make_shared<read_benchmark>(file_writers, file_readers, data_size, num_clients, num_ops);
+        benchmark = std::make_shared<read_benchmark>(file_clients, data_size, num_clients, num_ops);
       } else {
         LOG(log_level::info) << "Incorrect operation type for file: " << op_type;
         return 0;
