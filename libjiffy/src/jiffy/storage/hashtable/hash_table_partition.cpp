@@ -49,7 +49,22 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
 }
 
 void hash_table_partition::exists(response &_return, const arg_list &args) {
-
+  if (!(args.size() == 2 || (args.size() == 3 && args[2] == "!redirected"))) {
+    RETURN("!args_error");
+  }
+  auto hash = hash_slot::get(args[1]);
+  if (in_slot_range(hash) || (in_import_slot_range(hash) && args[2] == "!redirected")) {
+    auto it = block_.find(make_binary(args[1]));
+    if (it != block_.end()) {
+      RETURN_OK();
+    } else {
+      if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+        RETURN_ERR("!exporting", export_target_str_);
+      }
+      RETURN_ERR("!key_not_found");
+    }
+  }
+  RETURN_ERR("!block_moved");
 }
 
 void hash_table_partition::put(response &_return, const arg_list &args) {

@@ -124,7 +124,7 @@ std::string hash_table_client::remove(const std::string &key) {
 
 bool hash_table_client::exists(const std::string &key) {
   std::vector<std::string> _return;
-  std::vector<std::string> args{"remove", key};
+  std::vector<std::string> args{"exists", key};
   bool redo;
   do {
     try {
@@ -136,8 +136,9 @@ bool hash_table_client::exists(const std::string &key) {
       redo = true;
     }
   } while (redo);
-  THROW_IF_NOT_OK(_return);
-  return _return[1];
+  if(_return[0] == "!ok")
+    return true;
+  else return false;
 }
 
 
