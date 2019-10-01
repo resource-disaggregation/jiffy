@@ -92,7 +92,7 @@ void hash_table_partition::put(response &_return, const arg_list &args) {
 }
 
 void hash_table_partition::upsert(response &_return, const arg_list &args) {
-  if (!(args.size() == 2 || (args.size() == 6 && args[3] == "!redirected"))) {
+  if (!(args.size() == 3 || (args.size() == 6 && args[3] == "!redirected"))) {
     RETURN_ERR("!args_error");
   }
   auto hash = hash_slot::get(args[1]);
@@ -155,7 +155,7 @@ void hash_table_partition::get(response &_return, const arg_list &args) {
 }
 
 void hash_table_partition::update(response &_return, const arg_list &args) {
-  if (!(args.size() == 2 || (args.size() == 6 && args[3] == "!redirected"))) {
+  if (!(args.size() == 3 || (args.size() == 6 && args[3] == "!redirected"))) {
     RETURN_ERR("!args_error");
   }
   auto hash = hash_slot::get(args[1]);

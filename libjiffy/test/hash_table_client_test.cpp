@@ -154,7 +154,7 @@ TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.remove(std::to_string(i)) == std::to_string(i));
+    REQUIRE_NOTHROW(client.remove(std::to_string(i)));
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {

@@ -108,7 +108,6 @@ TEST_CASE("hash_table_put_remove_get_test", "[put][update][get]") {
     response resp;
     REQUIRE_NOTHROW(block.remove(resp, {"remove", std::to_string(i)}));
     REQUIRE(resp[0] == "!ok");
-    REQUIRE(resp[1] == std::to_string(i));
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;

@@ -88,7 +88,7 @@ std::string hash_table_client::update(const std::string &key, const std::string 
 
 std::string hash_table_client::upsert(const std::string &key, const std::string &value) {
   std::vector<std::string> _return;
-  std::vector<std::string> args{"update", key, value};
+  std::vector<std::string> args{"upsert", key, value};
   bool redo;
   do {
     try {
