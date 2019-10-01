@@ -56,18 +56,14 @@ void hash_table_partition::put(response &_return, const arg_list &args) {
   if (!(args.size() == 3 || (args.size() == 4 && args[3] == "!redirected"))) {
     RETURN_ERR("!args_error");
   }
+  auto it = block_.find(make_binary(args[1]));
   auto hash = hash_slot::get(args[1]);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[3] == "!redirected")) {
+    if(block_.find(make_binary(args[1])) != block_.end()) {
+        RETURN_ERR("!duplicate_key");
+    }
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
       RETURN_ERR("!exporting", export_target_str_);
-    }
-    if(block_.find(make_binary(args[1])) != block_.end()) {
-      if(remove_cache_.find(args[1]) != remove_cache_.end()) {
-        block_.erase(make_binary(args[1]));
-        remove_cache_.erase(args[1]);
-      } else {
-        RETURN_ERR("!duplicate_key");
-      }
     }
     if (storage_size() + args[1].size() + args[2].size() > storage_capacity()) {
       RETURN_ERR("!full");
@@ -114,29 +110,26 @@ void hash_table_partition::remove(response &_return, const arg_list &args) {
     RETURN_ERR("!args_error");
   }
   auto hash = hash_slot::get(args[1]);
+  // Ordinary remove or buffered remove
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[2] == "!buffered")) {
-    std::string old_val = "!ok";
     if (block_.erase(make_binary(args[1]))) {
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
         RETURN_ERR("!exporting", export_target_str_);
       }
-      RETURN_OK(old_val);
+      RETURN_OK();
     }
     if (metadata_ == "exporting" && in_export_slot_range(hash)) {
       RETURN_ERR("!exporting", export_target_str_);
     }
     RETURN_ERR("!key_not_found");
   }
+  // Redirected remove
   if (in_import_slot_range(hash) && args[2] == "!redirected") {
-    std::string old_val = "!ok";
     if (block_.erase(make_binary(args[1]))) {
-      RETURN_OK(old_val);
+      RETURN_OK();
     }
-    if (metadata_ == "importing" && in_import_slot_range(hash)) {
-      remove_cache_.emplace(std::make_pair(args[1], 1));
-      RETURN_OK(old_val);
-    }
-    RETURN_ERR("!key_not_found");
+    remove_cache_.emplace(std::make_pair(args[1], 1));
+    RETURN_OK();
   }
   RETURN_ERR("!block_moved");
 }
@@ -152,6 +145,11 @@ void hash_table_partition::scale_remove(response &_return, const arg_list &args)
 
 void hash_table_partition::scale_put(response &_return, const arg_list &args) {
   for (size_t i = 1; i < args.size(); i += 2) {
+    auto it = remove_cache_.find(args[i]);
+    if(it != remove_cache_.end()) {
+      remove_cache_.erase(make_binary(args[i]));
+      continue;
+    }
     if (!block_.emplace(make_binary(args[i]), make_binary(args[i + 1])).second) {
       LOG(log_level::error) << "Unsuccessful scale put";
     }

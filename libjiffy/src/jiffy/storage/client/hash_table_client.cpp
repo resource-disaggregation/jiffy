@@ -86,6 +86,24 @@ std::string hash_table_client::update(const std::string &key, const std::string 
   return _return[1];
 }
 
+std::string hash_table_client::upsert(const std::string &key, const std::string &value) {
+  std::vector<std::string> _return;
+  std::vector<std::string> args{"update", key, value};
+  bool redo;
+  do {
+    try {
+      _return = blocks_[block_id(key)]->run_command(args);
+      handle_redirect(_return, args);
+      redo = false;
+      redo_times_ = 0;
+    } catch (redo_error &e) {
+      redo = true;
+    }
+  } while (redo);
+  THROW_IF_NOT_OK(_return);
+  return _return[1];
+}
+
 std::string hash_table_client::remove(const std::string &key) {
   std::vector<std::string> _return;
   std::vector<std::string> args{"remove", key};
@@ -103,6 +121,25 @@ std::string hash_table_client::remove(const std::string &key) {
   THROW_IF_NOT_OK(_return);
   return _return[1];
 }
+
+bool hash_table_client::exists(const std::string &key) {
+  std::vector<std::string> _return;
+  std::vector<std::string> args{"remove", key};
+  bool redo;
+  do {
+    try {
+      _return = blocks_[block_id(key)]->run_command(args);
+      handle_redirect(_return, args);
+      redo = false;
+      redo_times_ = 0;
+    } catch (redo_error &e) {
+      redo = true;
+    }
+  } while (redo);
+  THROW_IF_NOT_OK(_return);
+  return _return[1];
+}
+
 
 std::size_t hash_table_client::block_id(const std::string &key) {
   return static_cast<size_t>((*std::prev(blocks_.upper_bound(hash_slot::get(key)))).first);
