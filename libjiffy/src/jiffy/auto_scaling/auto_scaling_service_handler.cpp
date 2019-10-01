@@ -80,8 +80,8 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     auto cur_name = std::to_string(slot_range_beg) + "_" + std::to_string(slot_range_end);
     auto src = std::make_shared<replica_chain_client>(fs, path, cur_chain, HT_OPS);
     auto dst = std::make_shared<replica_chain_client>(fs, path, dst_chain, HT_OPS);
-    src->run_command({"update_partition", cur_name, "exporting$" + dst_name + "$" + exp_target});
     dst->run_command({"update_partition", dst_name, "importing$" + dst_name});
+    src->run_command({"update_partition", cur_name, "exporting$" + dst_name + "$" + exp_target});
     auto finish_updating_partition_before = time_utils::now_us();
 
     // Transfer the data from source to destination

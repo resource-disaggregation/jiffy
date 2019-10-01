@@ -49,11 +49,11 @@ void test_hash_table_ops(std::shared_ptr<hash_table_client> table) {
   }
 
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(table->remove(std::to_string(i)) == std::to_string(i + 1000));
+    REQUIRE_NOTHROW(table->remove(std::to_string(i)));
   }
 
   for (size_t i = 1000; i < 2000; i++) {
-    REQUIRE_THROWS_AS(table->remove(std::to_string(i)), std::logic_error);
+    REQUIRE_NOTHROW(table->remove(std::to_string(i)));
   }
 
   for (size_t i = 0; i < 1000; i++) {

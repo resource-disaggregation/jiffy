@@ -1,6 +1,7 @@
 #include "hash_table_client.h"
 #include "jiffy/utils/string_utils.h"
 #include "jiffy/storage/hashtable/hash_slot.h"
+#include "jiffy/utils/logger.h"
 #include <thread>
 #include <cmath>
 
@@ -118,8 +119,7 @@ std::string hash_table_client::remove(const std::string &key) {
       redo = true;
     }
   } while (redo);
-  THROW_IF_NOT_OK(_return);
-  return _return[1];
+  return _return[0];
 }
 
 bool hash_table_client::exists(const std::string &key) {
@@ -162,7 +162,6 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
     } else {
       _return = it->second->run_command_redirected(args_copy);
     }
-
   }
   if (_return[0] == "!block_moved") {
     refresh();

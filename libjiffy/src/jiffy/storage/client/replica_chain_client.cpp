@@ -89,6 +89,7 @@ std::vector<std::string> replica_chain_client::run_command(const std::vector<std
       connect(fs_->resolve_failures(path_, chain_), timeout_ms_);
       retry = true;
     } catch (std::logic_error &e) { // TODO: This is very iffy, we need to fix this
+      LOG(log_level::info) << "Catching this error " << chain_.name;
       response.clear();
       response.emplace_back("!block_moved");
       break;
@@ -100,7 +101,7 @@ std::vector<std::string> replica_chain_client::run_command(const std::vector<std
 std::vector<std::string> replica_chain_client::run_command_redirected(const std::vector<std::string> &args) {
   auto args_copy = args;
   if (args_copy.back() != "!redirected")
-    args_copy.push_back("!redirected");
+    args_copy.emplace_back("!redirected");
   send_command(args_copy);
   return recv_response();
 }

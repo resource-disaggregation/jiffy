@@ -89,6 +89,32 @@ TEST_CASE("hash_table_put_upsert_get_test", "[put][upsert][get]") {
   }
 }
 
+TEST_CASE("hash_table_put_exists_remove_exists_test", "[put][exists][remove][exists]") {
+  block_memory_manager manager;
+  hash_table_partition block(&manager);
+  block.slot_range(0, hash_slot::MAX);
+  for (std::size_t i = 0; i < 1000; ++i) {
+    response resp;
+    REQUIRE_NOTHROW(block.put(resp, {"put", std::to_string(i), std::to_string(i)}));
+    REQUIRE(resp[0] == "!ok");
+  }
+  for (std::size_t i = 0; i < 1000; ++i) {
+    response resp;
+    REQUIRE_NOTHROW(block.get(resp, {"exists", std::to_string(i)}));
+    REQUIRE(resp[0] == "!ok");
+  }
+  for (std::size_t i = 0; i < 1000; ++i) {
+    response resp;
+    REQUIRE_NOTHROW(block.remove(resp, {"remove", std::to_string(i)}));
+    REQUIRE(resp[0] == "!ok");
+  }
+  for (std::size_t i = 0; i < 1000; ++i) {
+    response resp;
+    REQUIRE_NOTHROW(block.get(resp, {"exists", std::to_string(i)}));
+    REQUIRE(resp[0] == "!key_not_found");
+  }
+}
+
 TEST_CASE("hash_table_put_remove_get_test", "[put][update][get]") {
   block_memory_manager manager;
   hash_table_partition block(&manager);

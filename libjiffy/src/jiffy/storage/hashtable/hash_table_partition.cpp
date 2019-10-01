@@ -92,7 +92,7 @@ void hash_table_partition::put(response &_return, const arg_list &args) {
 }
 
 void hash_table_partition::upsert(response &_return, const arg_list &args) {
-  if (!(args.size() == 3 || (args.size() == 6 && args[3] == "!redirected"))) {
+  if (!(args.size() == 3 || (args.size() == 6 && args[5] == "!redirected"))) {
     RETURN_ERR("!args_error");
   }
   auto hash = hash_slot::get(args[1]);
@@ -100,8 +100,8 @@ void hash_table_partition::upsert(response &_return, const arg_list &args) {
   bool found = false;
   std::string old_val;
   // Redirected update
-  if (in_import_slot_range(hash) && args[3] == "!redirected" && metadata() == "!importing") {
-    found = static_cast<bool>(std::stoi(args[4]));
+  if (in_import_slot_range(hash) && args[5] == "!redirected" && metadata() == "importing") {
+    found = static_cast<bool>(std::stoi(args[3]));
     if(it != block_.end()) {
       old_val = to_string(it->second);
       it->second = make_binary(args[2]);
@@ -110,7 +110,7 @@ void hash_table_partition::upsert(response &_return, const arg_list &args) {
     if(remove_cache_.find(args[1]) != remove_cache_.end())
       remove_cache_.erase(args[1]);
     if(found && block_.emplace(make_binary(args[1]), make_binary(args[2])).second) {
-      RETURN_OK(args[5]);
+      RETURN_OK(args[4]);
     }
     block_.emplace(make_binary(args[1]), make_binary(args[2]));
     RETURN_OK();
@@ -132,6 +132,7 @@ void hash_table_partition::upsert(response &_return, const arg_list &args) {
     block_.emplace(make_binary(args[1]), make_binary(args[2]));
     RETURN_OK();
   }
+  RETURN_ERR("!block_moved");
 }
 
 
@@ -155,7 +156,7 @@ void hash_table_partition::get(response &_return, const arg_list &args) {
 }
 
 void hash_table_partition::update(response &_return, const arg_list &args) {
-  if (!(args.size() == 3 || (args.size() == 6 && args[3] == "!redirected"))) {
+  if (!(args.size() == 3 || (args.size() == 6 && args[5] == "!redirected"))) {
     RETURN_ERR("!args_error");
   }
   auto hash = hash_slot::get(args[1]);
@@ -163,8 +164,8 @@ void hash_table_partition::update(response &_return, const arg_list &args) {
   bool found = false;
   std::string old_val;
   // Redirected update
-  if (in_import_slot_range(hash) && args[3] == "!redirected" && metadata() == "!importing") {
-    found = static_cast<bool>(std::stoi(args[4]));
+  if (in_import_slot_range(hash) && args.size() == 6 && args[5] == "!redirected" && metadata() == "importing") {
+    found = static_cast<bool>(std::stoi(args[3]));
     if(it != block_.end()) {
         old_val = to_string(it->second);
         it->second = make_binary(args[2]);
@@ -173,7 +174,7 @@ void hash_table_partition::update(response &_return, const arg_list &args) {
     if(found && block_.emplace(make_binary(args[1]), make_binary(args[2])).second) {
       if(remove_cache_.find(args[1]) != remove_cache_.end())
         remove_cache_.erase(args[1]);
-      RETURN_OK(args[5]);
+      RETURN_OK(args[4]);
     }
     RETURN_ERR("!key_not_found");
   }
@@ -193,6 +194,7 @@ void hash_table_partition::update(response &_return, const arg_list &args) {
     }
     RETURN_ERR("!key_not_found");
   }
+  RETURN_ERR("!block_moved");
 }
 
 void hash_table_partition::remove(response &_return, const arg_list &args) {
