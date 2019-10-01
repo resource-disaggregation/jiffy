@@ -103,8 +103,8 @@ void hash_table_partition::upsert(response &_return, const arg_list &args) {
   if (in_import_slot_range(hash) && args[3] == "!redirected" && metadata() == "!importing") {
     found = static_cast<bool>(std::stoi(args[4]));
     if(it != block_.end()) {
-      old_val = it->second;
-      it->second = args[2];
+      old_val = to_string(it->second);
+      it->second = make_binary(args[2]);
       RETURN_OK(old_val);
     }
     if(remove_cache_.find(args[1]) != remove_cache_.end())
@@ -119,8 +119,8 @@ void hash_table_partition::upsert(response &_return, const arg_list &args) {
   if (in_slot_range(hash)) {
     if (it != block_.end()) {
       found = true;
-      old_val = it->second;
-      it->second = args[2];
+      old_val = to_string(it->second);
+      it->second = make_binary(args[2]);
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
         RETURN_ERR("!exporting", export_target_str_, std::to_string(found), old_val);
       }
@@ -166,8 +166,8 @@ void hash_table_partition::update(response &_return, const arg_list &args) {
   if (in_import_slot_range(hash) && args[3] == "!redirected" && metadata() == "!importing") {
     found = static_cast<bool>(std::stoi(args[4]));
     if(it != block_.end()) {
-        old_val = it->second;
-        it->second = args[2];
+        old_val = to_string(it->second);
+        it->second = make_binary(args[2]);
         RETURN_OK(old_val);
     }
     if(found && block_.emplace(make_binary(args[1]), make_binary(args[2])).second) {
@@ -181,8 +181,8 @@ void hash_table_partition::update(response &_return, const arg_list &args) {
   if (in_slot_range(hash)) {
     if (it != block_.end()) {
       found = true;
-      old_val = it->second;
-      it->second = args[2];
+      old_val = to_string(it->second);
+      it->second = make_binary(args[2]);
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
         RETURN_ERR("!exporting", export_target_str_, std::to_string(found), old_val);
       }
@@ -237,7 +237,7 @@ void hash_table_partition::scale_put(response &_return, const arg_list &args) {
   for (size_t i = 1; i < args.size(); i += 2) {
     auto it = remove_cache_.find(args[i]);
     if(it != remove_cache_.end()) {
-      remove_cache_.erase(make_binary(args[i]));
+      remove_cache_.erase(args[i]);
       continue;
     }
     if (!block_.emplace(make_binary(args[i]), make_binary(args[i + 1])).second) {
