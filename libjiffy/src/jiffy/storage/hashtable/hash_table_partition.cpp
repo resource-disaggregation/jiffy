@@ -100,7 +100,7 @@ void hash_table_partition::upsert(response &_return, const arg_list &args) {
   bool found = false;
   std::string old_val;
   // Redirected update
-  if (in_import_slot_range(hash) && args[5] == "!redirected" && metadata() == "importing") {
+  if (in_import_slot_range(hash) && args.size() == 6 && args[5] == "!redirected" && metadata() == "importing") {
     found = static_cast<bool>(std::stoi(args[3]));
     if(it != block_.end()) {
       old_val = to_string(it->second);
@@ -434,14 +434,14 @@ bool hash_table_partition::is_dirty() const {
 void hash_table_partition::load(const std::string &path) {
   auto remote = persistent::persistent_store::instance(path, ser_);
   auto decomposed = persistent::persistent_store::decompose_path(path);
-  remote->read<hash_table_type_new>(decomposed.second, block_);
+  remote->read<hash_table_type>(decomposed.second, block_);
 }
 
 bool hash_table_partition::sync(const std::string &path) {
   if (dirty_) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    remote->write<hash_table_type_new>(block_, decomposed.second);
+    remote->write<hash_table_type>(block_, decomposed.second);
     dirty_ = false;
     return true;
   }
@@ -453,7 +453,7 @@ bool hash_table_partition::dump(const std::string &path) {
   if (dirty_) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    remote->write<hash_table_type_new>(block_, decomposed.second);
+    remote->write<hash_table_type>(block_, decomposed.second);
     flushed = true;
   }
   block_.clear();

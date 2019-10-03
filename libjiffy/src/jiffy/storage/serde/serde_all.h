@@ -73,16 +73,7 @@ class serde {
    * @return Output stream position
    */
 
-  virtual std::size_t virtual_serialize(const hash_table_type_new &table, std::shared_ptr<std::ostream> out) = 0;
-
-  /**
-   * @brief Virtual serialize function for lock hash table
-   * @param table Lock hash table
-   * @param out Output stream
-   * @return Output stream position
-   */
-
-  //virtual std::size_t virtual_serialize(const locked_hash_table_type &table, std::shared_ptr<std::ostream> out) = 0;
+  virtual std::size_t virtual_serialize(const hash_table_type &table, std::shared_ptr<std::ostream> out) = 0;
 
   /**
    * @brief Virtual serialize function for fifo queue
@@ -109,16 +100,7 @@ class serde {
    * @return Input stream position
    */
 
-  virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, hash_table_type_new &table) = 0;
-
-  /**
-   * @brief Virtual deserialize function for lock hash table
-   * @param in Input stream
-   * @param table Lock hash table
-   * @return Input stream position
-   */
-
-  //virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, locked_hash_table_type &table) = 0;
+  virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, hash_table_type &table) = 0;
 
   /**
    * @brief Virtual deserialize function for fifo queue
@@ -165,20 +147,9 @@ class derived : public impl {
    * @param out Output stream
    * @return Output stream position
    */
-  std::size_t virtual_serialize(const hash_table_type_new &table, std::shared_ptr<std::ostream> out) final {
+  std::size_t virtual_serialize(const hash_table_type &table, std::shared_ptr<std::ostream> out) final {
     return impl::serialize_impl(table, out);
   }
-
-  /**
-   * @brief Virtual serialize function for lock hash table
-   * @param table Lock hash table
-   * @param out Output stream
-   * @return Output stream position
-   */
-
-//  std::size_t virtual_serialize(const locked_hash_table_type &table, std::shared_ptr<std::ostream> out) final {
-//    return impl::serialize_impl(table, out);
-//  }
 
   /**
    * @brief Virtual serialize function for fifo queue
@@ -208,20 +179,9 @@ class derived : public impl {
    * @param table Hash table
    * @return Input stream position
    */
-  std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, hash_table_type_new &table) final {
+  std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, hash_table_type &table) final {
     return impl::deserialize_impl(in, table);
   }
-
-  /**
-   * @brief Virtual deserialize function for lock hash table
-   * @param in Input stream
-   * @param table Lock hash table
-   * @return Input stream position
-   */
-
-//  std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, locked_hash_table_type &table) final {
-//    return impl::deserialize_impl(in, table);
-//  }
 
   /**
    * @brief Virtual deserialize function for fifo queue

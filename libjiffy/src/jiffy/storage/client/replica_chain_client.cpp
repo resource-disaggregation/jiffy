@@ -89,7 +89,6 @@ std::vector<std::string> replica_chain_client::run_command(const std::vector<std
       connect(fs_->resolve_failures(path_, chain_), timeout_ms_);
       retry = true;
     } catch (std::logic_error &e) { // TODO: This is very iffy, we need to fix this
-      LOG(log_level::info) << "Catching this error " << chain_.name;
       response.clear();
       response.emplace_back("!block_moved");
       break;

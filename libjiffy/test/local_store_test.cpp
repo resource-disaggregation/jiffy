@@ -15,7 +15,7 @@ binary make_binary(const std::string& str, const block_memory_allocator<uint8_t>
 TEST_CASE("local_write_test", "[write]") {
   block_memory_manager manager;
   block_memory_allocator<uint8_t> binary_allocator(&manager);
-  hash_table_type_new table;
+  hash_table_type table;
   auto bkey = binary("key", binary_allocator);
   auto bval = binary("value", binary_allocator);
   table.emplace(std::make_pair(bkey, bval));
@@ -38,7 +38,7 @@ TEST_CASE("local_read_test", "[read]") {
   block_memory_allocator<uint8_t> binary_allocator(&manager);
   auto ser = std::make_shared<csv_serde>(binary_allocator);
   local_store store(ser);
-  hash_table_type_new table;
+  hash_table_type table;
   auto bkey = make_binary("key", binary_allocator);
   auto bval = make_binary("value", binary_allocator);
   REQUIRE_NOTHROW(store.read("/tmp/a.txt", table));

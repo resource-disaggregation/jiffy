@@ -96,7 +96,7 @@ class persistent_service {
    * @param out_path Persistent store path
    */
 
-  virtual void virtual_write(const storage::hash_table_type_new &table, const std::string &out_path) = 0;
+  virtual void virtual_write(const storage::hash_table_type &table, const std::string &out_path) = 0;
 
   /**
    * @brief Virtual read for fifo queue
@@ -120,7 +120,7 @@ class persistent_service {
    * @param table Hash table
    */
 
-  virtual void virtual_read(const std::string &in_path, storage::hash_table_type_new &table) = 0;
+  virtual void virtual_read(const std::string &in_path, storage::hash_table_type &table) = 0;
 };
 
 /**
@@ -165,7 +165,7 @@ class derived_persistent : public persistent_service_impl {
    * @param out_path Persistent store path
    */
 
-  void virtual_write(const storage::hash_table_type_new &table, const std::string &out_path) final {
+  void virtual_write(const storage::hash_table_type &table, const std::string &out_path) final {
     return persistent_service_impl::write_impl(table, out_path);
   }
 
@@ -195,7 +195,7 @@ class derived_persistent : public persistent_service_impl {
    * @param table Hash table
    */
 
-  void virtual_read(const std::string &in_path, storage::hash_table_type_new &table) final {
+  void virtual_read(const std::string &in_path, storage::hash_table_type &table) final {
     return persistent_service_impl::read_impl(in_path, table);
   }
 
