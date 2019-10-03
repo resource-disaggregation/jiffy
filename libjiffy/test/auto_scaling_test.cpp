@@ -843,14 +843,18 @@ TEST_CASE("fifo_queue_auto_scale_mix_test", "[directory_service][storage_server]
       case 1:
         try {
           ret = client.dequeue();
-          auto str = result.front();
-          result.pop();
-          REQUIRE(ret == std::string(str.first, str.second));
+          if(!result.empty()) {
+            auto str = result.front();
+            result.pop();
+            REQUIRE(ret == std::string(str.first, str.second));
+          } else {
+            REQUIRE(ret == "!msg_not_found");
+          }
         } catch (std::exception& e) {}
         break;
       case 2:
         try {
-          client.read_next(); // TODO: Better testing
+          //client.read_next(); // TODO: Better testing
         } catch (std::exception& e) {}
         break;
       default:

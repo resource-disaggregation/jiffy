@@ -29,6 +29,8 @@ void fifo_queue_client::refresh() {
   for (const auto &block: status_.data_blocks()) {
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FQ_CMDS, timeout_ms_));
   }
+  enqueue_partition_ = blocks_.size() - 1;
+  dequeue_partition_ = 0;
 }
 
 void fifo_queue_client::enqueue(const std::string &item) {
@@ -84,10 +86,6 @@ std::string fifo_queue_client::read_next() {
 
 void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
   auto cmd_name = args.front();
-  if (_return[0] == "!block_moved") {
-    refresh();
-    throw redo_error();
-  }
   if (_return[0] == "!ok") {
     if (cmd_name == "read_next") read_offset_ += (string_array::METADATA_LEN + _return[1].size());
     return;
@@ -142,6 +140,10 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
       }
     } while (_return[0] == "!split_readnext");
     _return[1] = result;
+  }
+  if (_return[0] == "!block_moved") {
+    refresh();
+    throw redo_error();
   }
 }
 

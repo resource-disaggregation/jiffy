@@ -121,15 +121,17 @@ TEST_CASE("fifo_queue_multiple_test", "[enqueue][dequeue]") {
   const uint32_t num_threads = 4;
   std::vector<std::thread> workers;
 
-  int count = 0;
-  workers.push_back(std::thread([&tree, &status, num_ops, &count] {
-    fifo_queue_client client(tree, "/sandbox/file.txt", status);
-    for (uint32_t j = 0; j < num_ops * num_threads * 10 ; j++) {
-      std::string ret;
-      REQUIRE_NOTHROW(ret = client.dequeue());
-      if(ret != "!msg_not_found") count++;
-    }
-  }));
+  std::vector<int> count(3);
+  for (uint32_t k = 1; k <= 3; k++) {
+    workers.push_back(std::thread([k, &tree, &status, num_ops, &count] {
+      fifo_queue_client client(tree, "/sandbox/file.txt", status);
+      for (uint32_t j = 0; j < num_ops * num_threads * 2; j++) {
+        std::string ret;
+        REQUIRE_NOTHROW(ret = client.dequeue());
+        if (ret != "!msg_not_found") count[k - 1]++;
+      }
+    }));
+  }
 
 
   for (uint32_t i = 1; i <= num_threads; i++) {
@@ -146,8 +148,12 @@ TEST_CASE("fifo_queue_multiple_test", "[enqueue][dequeue]") {
     worker.join();
   }
 
+  int read_count = 0;
 
-  REQUIRE(count == num_threads * num_ops);
+  for(const auto &x : count)
+    read_count += x;
+
+  REQUIRE(read_count == num_threads * num_ops);
 
 
   as_server->stop();
