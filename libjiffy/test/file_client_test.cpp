@@ -30,7 +30,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_file_blocks(block_names, 134217728, 0, 1);
+  auto blocks = test_utils::init_file_blocks(block_names, 134217728);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -46,7 +46,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   data_status status = tree->create("/sandbox/file.txt", "file", "/tmp", NUM_BLOCKS, 1, 0, 0,
                                   {"0"}, {"regular"});
 
-  file_client client(tree, "/sandbox/file.txt", status, 134217728);
+  file_client client(tree, "/sandbox/file.txt", status);
 
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_NOTHROW(client.write(std::to_string(i)));
@@ -54,23 +54,24 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
 
   REQUIRE_NOTHROW(client.seek(0));
 
+  std::string buffer;
+
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.read(std::to_string(i).size()) == std::to_string(i));
+    buffer.clear();
+    REQUIRE(client.read(buffer, std::to_string(i).size()) == std::to_string(i).size());
+    REQUIRE(buffer == std::to_string(i));
   }
 
   for (std::size_t i = 1000; i < 2000; ++i) {
-    try {
-      client.read(std::to_string(i).size());
-    } catch(std::out_of_range &e) {
-      continue;
-    }
-    throw std::logic_error("This should throw an error");
+    REQUIRE(client.read(buffer, std::to_string(i).size()) == -1);
   }
 
   REQUIRE_NOTHROW(client.seek(0));
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.read(std::to_string(i).size()) == std::to_string(i));
+    buffer.clear();
+    REQUIRE(client.read(buffer, std::to_string(i).size()) == std::to_string(i).size());
+    REQUIRE(buffer == std::to_string(i));
   }
 
   storage_server->stop();
@@ -114,8 +115,9 @@ TEST_CASE("file_client_concurrent_write_read_seek_test", "[write][read][seek]") 
 
   auto status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 5, 1, 0, perms::all(), {"0", "1", "2", "3", "4"}, {"regular", "regular", "regular", "regular", "regular"}, {});
 
-  file_client client(t, "/sandbox/scale_up.txt", status, BLOCK_SIZE);
+  file_client client(t, "/sandbox/scale_up.txt", status);
 
+  std::string buffer;
 
   for (std::size_t i = 0; i < 2; ++i) {
     REQUIRE_NOTHROW(client.write(std::string(1024, 'x')));
@@ -123,20 +125,21 @@ TEST_CASE("file_client_concurrent_write_read_seek_test", "[write][read][seek]") 
 
   REQUIRE_NOTHROW(client.seek(0));
 
-  REQUIRE(client.read(2048) == std::string(2048, 'x'));
+  REQUIRE(client.read(buffer, 2048) == 2048);
+  REQUIRE(buffer == std::string(2048, 'x'));
 
-  REQUIRE_NOTHROW(client.seek(4095));
+  REQUIRE_NOTHROW(client.seek(4096));
 
-  REQUIRE_THROWS_AS(client.read(256), std::out_of_range);
+  REQUIRE(client.read(buffer, 256) == -1);
 
   REQUIRE_NOTHROW(client.write(std::string(4096, 'y')));
 
   REQUIRE_NOTHROW(client.seek(0));
 
-  std::string ret;
-  REQUIRE_NOTHROW(ret = client.read(8192));
-  REQUIRE(ret.substr(0, 2048) == std::string(2048, 'x'));
-  REQUIRE(ret.substr(4095, 4096) == std::string(4096, 'y'));
+  buffer.clear();
+  REQUIRE(client.read(buffer, 8192) == 8192);
+  REQUIRE(buffer.substr(0, 2048) == std::string(2048, 'x'));
+  REQUIRE(buffer.substr(4096, 4096) == std::string(4096, 'y'));
 
 
   as_server->stop();

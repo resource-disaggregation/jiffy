@@ -298,6 +298,7 @@ TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][managemen
   auto status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 1, 1, 0, perms::all(), {"0"}, {"regular"}, {});
   file_client client(t, "/sandbox/scale_up.txt", status);
 
+  std::string buffer;
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 5000; ++i) {
     REQUIRE_NOTHROW(client.write(std::string(512, (std::to_string(i)).c_str()[0])));
@@ -309,27 +310,37 @@ TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][managemen
 
   REQUIRE_NOTHROW(client.seek(0));
   for (std::size_t i = 0; i < 5000; ++i) {
-    REQUIRE(client.read(512) == std::string(512, (std::to_string(i)).c_str()[0]));
+    buffer.clear();
+    REQUIRE(client.read(buffer, 512) == 512);
+    REQUIRE(buffer == std::string(512, (std::to_string(i)).c_str()[0]));
   }
 
   for (std::size_t i = 0; i < 6000; ++i) {
-    REQUIRE(client.read(102400) == std::string(102400, (std::to_string(i)).c_str()[0]));
+    buffer.clear();
+    REQUIRE(client.read(buffer, 102400) == 102400);
+    REQUIRE(buffer == std::string(102400, (std::to_string(i)).c_str()[0]));
   }
 
   REQUIRE_NOTHROW(client.seek(0));
 
   for (std::size_t i = 0; i < 5000; ++i) {
-    REQUIRE(client.read(512) == std::string(512, (std::to_string(i)).c_str()[0]));
+    buffer.clear();
+    REQUIRE(client.read(buffer, 512) == 512);
+    REQUIRE(buffer == std::string(512, (std::to_string(i)).c_str()[0]));
   }
 
   for (std::size_t i = 0; i < 6000; ++i) {
-    REQUIRE(client.read(102400) == std::string(102400, (std::to_string(i)).c_str()[0]));
+    buffer.clear();
+    REQUIRE(client.read(buffer, 102400) == 102400);
+    REQUIRE(buffer == std::string(102400, (std::to_string(i)).c_str()[0]));
   }
 
   REQUIRE_NOTHROW(client.seek(5000 * 512));
 
   for (std::size_t i = 0; i < 6000; ++i) {
-    REQUIRE(client.read(102400) == std::string(102400, (std::to_string(i)).c_str()[0]));
+    buffer.clear();
+    REQUIRE(client.read(buffer, 102400) == 102400);
+    REQUIRE(buffer == std::string(102400, (std::to_string(i)).c_str()[0]));
   }
   // Busy wait until number of blocks increases
   while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
@@ -383,7 +394,7 @@ TEST_CASE("file_auto_scale_chain_replica_test", "[directory_service][storage_ser
   auto status = t->create("/sandbox/scale_up.txt", "file", "/tmp", 1, 3, 0, perms::all(), {"0"}, {"regular"}, {});
   file_client client(t, "/sandbox/scale_up.txt", status);
 
-
+  std::string buffer;
 
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 5000; ++i) {
@@ -397,23 +408,31 @@ TEST_CASE("file_auto_scale_chain_replica_test", "[directory_service][storage_ser
   REQUIRE_NOTHROW(client.seek(0));
 
   for (std::size_t i = 0; i < 5000; ++i) {
-    REQUIRE(client.read(512) == std::string(512, (std::to_string(i)).c_str()[0]));
+    buffer.clear();
+    REQUIRE(client.read(buffer, 512) == 512);
+    REQUIRE(buffer == std::string(512, (std::to_string(i)).c_str()[0]));
   }
 
   REQUIRE_NOTHROW(client.seek(0));
 
   for (std::size_t i = 0; i < 5000; ++i) {
-    REQUIRE(client.read(512) == std::string(512, (std::to_string(i)).c_str()[0]));
+    buffer.clear();
+    REQUIRE(client.read(buffer, 512) == 512);
+    REQUIRE(buffer == std::string(512, (std::to_string(i)).c_str()[0]));
   }
 
   for (std::size_t i = 0; i < 6000; ++i) {
-    REQUIRE(client.read(102400) == std::string(102400, (std::to_string(i)).c_str()[0]));
+    buffer.clear();
+    REQUIRE(client.read(buffer, 102400) == 102400);
+    REQUIRE(buffer == std::string(102400, (std::to_string(i)).c_str()[0]));
   }
 
   REQUIRE_NOTHROW(client.seek(5000 * 512));
 
   for (std::size_t i = 0; i < 6000; ++i) {
-    REQUIRE(client.read(102400) == std::string(102400, (std::to_string(i)).c_str()[0]));
+    buffer.clear();
+    REQUIRE(client.read(buffer, 102400) == 102400);
+    REQUIRE(buffer == std::string(102400, (std::to_string(i)).c_str()[0]));
   }
   // Busy wait until number of blocks increases
   while (t->dstatus("/sandbox/scale_up.txt").data_blocks().size() == 1);
@@ -471,7 +490,7 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
                            "regular"},
                           conf);
   file_client client(t, "/sandbox/scale_up.txt", status);
-
+  std::string buffer;
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 5000; ++i) {
     REQUIRE_NOTHROW(client.write(std::string(512, (std::to_string(i)).c_str()[0])));
@@ -484,23 +503,31 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
   REQUIRE_NOTHROW(client.seek(0));
 
   for (std::size_t i = 0; i < 5000; ++i) {
-    REQUIRE(client.read(512) == std::string(512, (std::to_string(i)).c_str()[0]));
+    buffer.clear();
+    REQUIRE(client.read(buffer, 512) == 512);
+    REQUIRE(buffer == std::string(512, (std::to_string(i)).c_str()[0]));
   }
 
   REQUIRE_NOTHROW(client.seek(0));
 
   for (std::size_t i = 0; i < 5000; ++i) {
-    REQUIRE(client.read(512) == std::string(512, (std::to_string(i)).c_str()[0]));
+    buffer.clear();
+    REQUIRE(client.read(buffer, 512) == 512);
+    REQUIRE(buffer == std::string(512, (std::to_string(i)).c_str()[0]));
   }
 
   for (std::size_t i = 0; i < 10000; ++i) {
-    REQUIRE(client.read(102400) == std::string(102400, (std::to_string(i)).c_str()[0]));
+    buffer.clear();
+    REQUIRE(client.read(buffer, 102400) == 102400);
+    REQUIRE(buffer == std::string(102400, (std::to_string(i)).c_str()[0]));
   }
 
   REQUIRE_NOTHROW(client.seek(5000 * 512));
 
   for (std::size_t i = 0; i < 10000; ++i) {
-    REQUIRE(client.read(102400) == std::string(102400, (std::to_string(i)).c_str()[0]));
+    buffer.clear();
+    REQUIRE(client.read(buffer, 102400) == 102400);
+    REQUIRE(buffer == std::string(102400, (std::to_string(i)).c_str()[0]));
   }
 
   // Busy wait until number of blocks increases

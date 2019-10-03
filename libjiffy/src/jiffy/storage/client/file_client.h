@@ -24,7 +24,6 @@ class file_client : public data_structure_client {
   file_client(std::shared_ptr<directory::directory_interface> fs,
               const std::string &path,
               const directory::data_status &status,
-              std::size_t block_size = 134217728,
               int timeout_ms = 1000);
 
   /**
@@ -38,15 +37,16 @@ class file_client : public data_structure_client {
   void refresh() override;
 
   /**
-   * @brief
-   * @param size
-   * @return
+   * @brief Read data from file
+   * @param buf Buffer
+   * @param size Size
+   * @return Read status, -1 if reach EOF, number of bytes read otherwise
    */
-  std::string read(std::size_t size);
+  int read(std::string& buf, size_t size);
 
   /**
-   * @brief
-   * @param data
+   * @brief Write data to file
+   * @param data Data
    */
   void write(const std::string &data);
 
@@ -113,6 +113,8 @@ class file_client : public data_structure_client {
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
   /* Block size */
   std::size_t block_size_;
+  /* Auto scaling support */
+  bool auto_scaling_;
 };
 
 }
