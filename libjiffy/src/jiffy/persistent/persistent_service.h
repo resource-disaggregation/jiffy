@@ -75,14 +75,6 @@ class persistent_service {
   std::shared_ptr<storage::serde> ser_;
 
   /**
-   * @brief Virtual write for lock hash table
-   * @param table Lock hash table
-   * @param out_path Persistent store path
-   */
-
-  //virtual void virtual_write(const storage::locked_hash_table_type &table, const std::string &out_path) = 0;
-
-  /**
    * @brief Virtual write for fifo queue
    * @param table Fifo queue
    * @param out_path Persistent store path
@@ -105,14 +97,6 @@ class persistent_service {
    */
 
   virtual void virtual_write(const storage::hash_table_type_new &table, const std::string &out_path) = 0;
-
-  /**
-   * @brief Virtual read for lock hash table
-   * @param in_path Persistent store path
-   * @param table Lock hash table
-   */
-
-  //virtual void virtual_read(const std::string &in_path, storage::locked_hash_table_type &table) = 0;
 
   /**
    * @brief Virtual read for fifo queue
@@ -155,16 +139,6 @@ class derived_persistent : public persistent_service_impl {
  private:
 
   /**
-   * @brief Virtual write for lock hash table
-   * @param table Lock hash table
-   * @param out_path Persistent store path
-   */
-
-//  void virtual_write(const storage::locked_hash_table_type &table, const std::string &out_path) final {
-//    return persistent_service_impl::write_impl(table, out_path);
-//  }
-
-  /**
    * @brief Virtual write for fifo queue
    * @param table Fifo queue
    * @param out_path Persistent store path
@@ -196,16 +170,6 @@ class derived_persistent : public persistent_service_impl {
   }
 
   /**
-   * @brief Virtual read for lock hash table
-   * @param in_path Persistent store path
-   * @param table Lock hash table
-   */
-
-//  void virtual_read(const std::string &in_path, storage::locked_hash_table_type &table) final {
-//    return persistent_service_impl::read_impl(in_path, table);
-//  }
-
-  /**
    * @brief Virtual read for fifo queue
    * @param in_path Persistent store path
    * @param table Fifo queue
@@ -230,6 +194,7 @@ class derived_persistent : public persistent_service_impl {
    * @param in_path Persistent store path
    * @param table Hash table
    */
+
   void virtual_read(const std::string &in_path, storage::hash_table_type_new &table) final {
     return persistent_service_impl::read_impl(in_path, table);
   }
