@@ -60,6 +60,7 @@ std::string fifo_queue_client::dequeue() {
       redo = true;
     }
   } while (redo);
+  if(_return[0] == "!msg_not_found") return "!msg_not_found";
   THROW_IF_NOT_OK(_return);
   return _return[1];
 }
@@ -83,7 +84,10 @@ std::string fifo_queue_client::read_next() {
 
 void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
   auto cmd_name = args.front();
-
+  if (_return[0] == "!block_moved") {
+    refresh();
+    throw redo_error();
+  }
   if (_return[0] == "!ok") {
     if (cmd_name == "read_next") read_offset_ += (string_array::METADATA_LEN + _return[1].size());
     return;
