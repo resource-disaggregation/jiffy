@@ -49,7 +49,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   file_client client(tree, "/sandbox/file.txt", status);
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE_NOTHROW(client.write(std::to_string(i)));
+    REQUIRE(client.write(std::to_string(i)) == std::to_string(i).size());
   }
 
   REQUIRE_NOTHROW(client.seek(0));
@@ -120,7 +120,7 @@ TEST_CASE("file_client_concurrent_write_read_seek_test", "[write][read][seek]") 
   std::string buffer;
 
   for (std::size_t i = 0; i < 2; ++i) {
-    REQUIRE_NOTHROW(client.write(std::string(1024, 'x')));
+    REQUIRE(client.write(std::string(1024, 'x')) == 1024);
   }
 
   REQUIRE_NOTHROW(client.seek(0));
@@ -132,7 +132,7 @@ TEST_CASE("file_client_concurrent_write_read_seek_test", "[write][read][seek]") 
 
   REQUIRE(client.read(buffer, 256) == -1);
 
-  REQUIRE_NOTHROW(client.write(std::string(4096, 'y')));
+  REQUIRE(client.write(std::string(4096, 'y')) == 4096);
 
   REQUIRE_NOTHROW(client.seek(0));
 

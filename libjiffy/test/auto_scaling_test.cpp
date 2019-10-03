@@ -301,11 +301,11 @@ TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][managemen
   std::string buffer;
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 5000; ++i) {
-    REQUIRE_NOTHROW(client.write(std::string(512, (std::to_string(i)).c_str()[0])));
+    REQUIRE(client.write(std::string(512, (std::to_string(i)).c_str()[0])) == 512);
   }
 
   for (std::size_t i = 0; i < 6000; ++i) {
-    REQUIRE_NOTHROW(client.write(std::string(102400, (std::to_string(i)).c_str()[0])));
+    REQUIRE(client.write(std::string(102400, (std::to_string(i)).c_str()[0])) == 102400);
   }
 
   REQUIRE_NOTHROW(client.seek(0));
@@ -398,11 +398,11 @@ TEST_CASE("file_auto_scale_chain_replica_test", "[directory_service][storage_ser
 
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 5000; ++i) {
-    REQUIRE_NOTHROW(client.write(std::string(512, (std::to_string(i)).c_str()[0])));
+    REQUIRE(client.write(std::string(512, (std::to_string(i)).c_str()[0])) == 512);
   }
 
   for (std::size_t i = 0; i < 6000; ++i) {
-    REQUIRE_NOTHROW(client.write(std::string(102400, (std::to_string(i)).c_str()[0])));
+    REQUIRE(client.write(std::string(102400, (std::to_string(i)).c_str()[0])) == 102400);
   }
 
   REQUIRE_NOTHROW(client.seek(0));
@@ -493,11 +493,11 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
   std::string buffer;
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 5000; ++i) {
-    REQUIRE_NOTHROW(client.write(std::string(512, (std::to_string(i)).c_str()[0])));
+    REQUIRE(client.write(std::string(512, (std::to_string(i)).c_str()[0])) == 512);
   }
 
   for (std::size_t i = 0; i < 10000; ++i) {
-    REQUIRE_NOTHROW(client.write(std::string(102400, (std::to_string(i)).c_str()[0])));
+    REQUIRE(client.write(std::string(102400, (std::to_string(i)).c_str()[0])) == 102400);
   }
 
   REQUIRE_NOTHROW(client.seek(0));

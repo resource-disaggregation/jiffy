@@ -47,8 +47,9 @@ class file_client : public data_structure_client {
   /**
    * @brief Write data to file
    * @param data Data
+   * @return Number of bytes written
    */
-  void write(const std::string &data);
+  std::size_t write(const std::string &data);
 
   /**
    * @brief Seek to a location of the file

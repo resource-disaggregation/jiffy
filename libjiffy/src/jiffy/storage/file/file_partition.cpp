@@ -144,7 +144,6 @@ bool file_partition::is_dirty() const {
 }
 
 void file_partition::load(const std::string &path) {
-  LOG(log_level::info) << "Loading";
   auto remote = persistent::persistent_store::instance(path, ser_);
   auto decomposed = persistent::persistent_store::decompose_path(path);
   remote->read<file_type>(decomposed.second, partition_);

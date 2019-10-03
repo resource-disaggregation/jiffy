@@ -63,7 +63,7 @@ int file_client::read(std::string& buf, size_t size) {
   return after_size - previous_size;
 }
 
-void file_client::write(const std::string &data) {
+std::size_t file_client::write(const std::string &data) {
   std::size_t file_size = (last_partition_ + 1) * block_size_;
   std::vector<std::string> _return;
 
@@ -128,6 +128,8 @@ void file_client::write(const std::string &data) {
   for (std::size_t i = 0; i < count; i++) {
     blocks_[start_partition + i]->recv_response();
   }
+
+  return data.size();
 
 }
 
