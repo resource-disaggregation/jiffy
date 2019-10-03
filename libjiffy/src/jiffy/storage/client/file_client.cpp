@@ -89,6 +89,10 @@ std::size_t file_client::write(const std::string &data) {
   // First allocate new blocks if needed
   std::vector<std::string> init_args
       {"add_blocks", std::to_string(last_partition_), std::to_string(num_chain_needed)};
+
+  if(num_chain_needed && !auto_scaling_)
+    throw std::logic_error("Insufficient blocks");
+
   while (num_chain_needed != 0) {
     _return = blocks_[init_block_id]->run_command(init_args);
     if (_return[0] == "!block_allocated") {

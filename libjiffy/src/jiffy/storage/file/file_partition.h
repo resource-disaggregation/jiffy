@@ -69,7 +69,7 @@ class file_partition : public chain_module {
   void clear(response &_return, const arg_list &args);
 
   /**
-   * @brief Update partition with next partition pointer
+   * @brief Update partition
    * @param _return Response
    * @param args Arguments
    */

@@ -49,7 +49,6 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
       chain_vector[i + 1] = fs->add_block(path, std::to_string(dst_name + i), "regular");
     }
     auto finish_adding_replica_chain = time_utils::now_us();
-    LOG(log_level::info) << "Finish adding blocks";
     // Update source partition
     for(std::size_t i = 0; i < chain_to_add; i++) {
       src_vector[i] = std::make_shared<replica_chain_client>(fs, path, chain_vector[i], FILE_OPS);
