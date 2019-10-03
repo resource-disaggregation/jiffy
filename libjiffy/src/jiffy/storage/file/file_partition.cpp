@@ -73,9 +73,9 @@ void file_partition::clear(response &_return, const arg_list &args) {
 }
 
 void file_partition::update_partition(response &_return, const arg_list &args) {
-  if (args.size() > 2) {
+  if (args.size() >= 2) {
     block_allocated_ = true;
-    allocated_blocks_.insert(allocated_blocks_.end(), args.begin() + 2, args.end());
+    allocated_blocks_.insert(allocated_blocks_.end(), args.begin() + 1, args.end());
   }
   RETURN_OK();
 }

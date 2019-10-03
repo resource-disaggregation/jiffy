@@ -68,17 +68,14 @@ std::size_t file_client::write(const std::string &data) {
   std::vector<std::string> _return;
 
   std::size_t remain_size;
-  std::size_t init_block_id;
   std::size_t num_chain_needed = 0;
 
   if (cur_partition_ * block_size_ + cur_offset_ > file_size) {
-    init_block_id = last_partition_;
     num_chain_needed = cur_partition_ - last_partition_;
     file_size = (cur_partition_ + 1) * block_size_;
     remain_size = file_size - cur_partition_ * block_size_ - cur_offset_;
     num_chain_needed += (data.size() - remain_size) / block_size_ + ((data.size() - remain_size) % block_size_ != 0);
   } else {
-    init_block_id = block_id();
     remain_size = file_size - cur_partition_ * block_size_ - cur_offset_;
     if (remain_size < data.size()) {
       num_chain_needed = (data.size() - remain_size) / block_size_ + ((data.size() - remain_size) % block_size_ != 0);
@@ -94,7 +91,7 @@ std::size_t file_client::write(const std::string &data) {
     throw std::logic_error("Insufficient blocks");
 
   while (num_chain_needed != 0) {
-    _return = blocks_[init_block_id]->run_command(init_args);
+    _return = blocks_[last_partition_]->run_command(init_args);
     if (_return[0] == "!block_allocated") {
       last_partition_ += num_chain_needed;
       num_chain_needed = 0;
