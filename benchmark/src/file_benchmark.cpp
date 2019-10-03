@@ -106,9 +106,11 @@ class read_benchmark : public file_benchmark {
         auto bench_begin = time_utils::now_us();
         uint64_t tot_time = 0, t0, t1 = bench_begin;
         size_t j;
+        std::string buffer;
         for (j = 0; j < num_ops_; ++j) {
+          buffer.clear();
           t0 = time_utils::now_us();
-          clients_[i]->read(data_.size());
+          clients_[i]->read(buffer, data_.size());
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);
         }
