@@ -121,8 +121,8 @@ TEST_CASE("fifo_queue_multiple_test", "[enqueue][dequeue]") {
   const uint32_t num_threads = 4;
   std::vector<std::thread> workers;
 
-  std::vector<int> count(3);
-  for (uint32_t k = 1; k <= 3; k++) {
+  std::vector<int> count(num_threads);
+  for (uint32_t k = 1; k <= num_threads; k++) {
     workers.push_back(std::thread([k, &tree, &status, num_ops, &count] {
       fifo_queue_client client(tree, "/sandbox/file.txt", status);
       for (uint32_t j = 0; j < num_ops * num_threads * 2; j++) {
