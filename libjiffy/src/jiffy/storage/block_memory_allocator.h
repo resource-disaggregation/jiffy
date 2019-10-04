@@ -6,10 +6,12 @@
 #include <type_traits>
 #include <memory>
 #include "block_memory_manager.h"
+#include "jiffy/utils/logger.h"
 
 namespace jiffy {
 namespace storage {
 
+using namespace utils;
 template<typename T>
 class block_memory_allocator {
  public:
@@ -62,13 +64,20 @@ class block_memory_allocator {
 
   // allocate but don't initialize num elements of type T
   pointer allocate(size_type num, const void * = 0) {
+    LOG(log_level::info) << " Hi 0.1";
     size_t requested_bytes = num * sizeof(T);
+    LOG(log_level::info) << " Hi 0.2";
     if (requested_bytes == 0) return nullptr;
+    LOG(log_level::info) << " Hi 1";
     auto p = static_cast<pointer>(manager_->mb_malloc(num * sizeof(T)));
+    LOG(log_level::info) << " Hi 2";
     if (p == nullptr) {
+      LOG(log_level::info) << " Hi 3";
       if (manager_->mb_used() + requested_bytes > manager_->mb_capacity()) {
+        LOG(log_level::info) << " Hi 4";
         throw memory_block_overflow();
       } else {
+        LOG(log_level::info) << " Hi 5";
         throw std::bad_alloc();
       }
     }

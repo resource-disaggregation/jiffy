@@ -1,8 +1,9 @@
 #include "byte_string.h"
-
+#include "jiffy/utils/logger.h"
 namespace jiffy {
 namespace storage {
 
+using namespace utils;
 immutable_byte_string::immutable_byte_string(uint8_t *data, size_t size)
     : data_(data),
       size_(size) {
@@ -61,8 +62,11 @@ byte_string::byte_string(const binary_allocator &allocator)
 byte_string::byte_string(const std::string &str, const binary_allocator &allocator)
     : size_(str.length()),
       allocator_(allocator) {
+  LOG(log_level::info) << "enter this constructor";
   data_ = allocator_.allocate(size_);
+  LOG(log_level::info) << "Successful allocate";
   memcpy(data_, str.c_str(), str.length());
+  LOG(log_level::info) << "Successful copy";
 }
 
 byte_string::byte_string(const byte_string &other)
