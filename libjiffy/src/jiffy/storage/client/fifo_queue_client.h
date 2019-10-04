@@ -67,8 +67,6 @@ class fifo_queue_client : data_structure_client {
   std::size_t enqueue_partition_;
   /* Replica chain clients, each partition only save a replica chain client */
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
-  /* Read offset */
-  std::size_t read_offset_;
   /* Read next partition */
   std::size_t read_partition_;
   /* Starting name of the chains */

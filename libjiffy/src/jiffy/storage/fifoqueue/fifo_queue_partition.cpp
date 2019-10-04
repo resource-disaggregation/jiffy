@@ -87,7 +87,7 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
 }
 
 void fifo_queue_partition::read_next(response &_return, const arg_list &args) {
-  if (args.size() != 2) {
+  if (args.size() != 1) {
     RETURN_ERR("!args_error");
   }
   auto ret = partition_.at(read_head_);

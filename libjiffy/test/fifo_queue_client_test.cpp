@@ -121,6 +121,7 @@ TEST_CASE("fifo_queue_multiple_test", "[enqueue][dequeue]") {
   const uint32_t num_threads = 4;
   std::vector<std::thread> workers;
 
+  // Start multiple consumers
   std::vector<int> count(num_threads);
   for (uint32_t k = 1; k <= num_threads; k++) {
     workers.push_back(std::thread([k, &tree, &status, num_ops, &count] {
@@ -133,7 +134,7 @@ TEST_CASE("fifo_queue_multiple_test", "[enqueue][dequeue]") {
     }));
   }
 
-
+  // Start multiple producers
   for (uint32_t i = 1; i <= num_threads; i++) {
     workers.push_back(std::thread([i, &tree, &status, num_ops, data_size] {
       std::string data_(data_size, std::to_string(i)[0]);
@@ -147,7 +148,7 @@ TEST_CASE("fifo_queue_multiple_test", "[enqueue][dequeue]") {
   for (std::thread &worker : workers) {
     worker.join();
   }
-
+  // Check if data read is correct
   int read_count = 0;
 
   for(const auto &x : count)

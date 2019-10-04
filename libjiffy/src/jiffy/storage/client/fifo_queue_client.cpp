@@ -18,7 +18,6 @@ fifo_queue_client::fifo_queue_client(std::shared_ptr<directory::directory_interf
   dequeue_partition_ = 0;
   enqueue_partition_ = 0;
   read_partition_ = 0;
-  read_offset_ = 0;
   start_ = 0;
   for (const auto &block: status.data_blocks()) {
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FQ_CMDS, timeout_ms_));
@@ -31,6 +30,7 @@ void fifo_queue_client::refresh() {
   for (const auto &block: status_.data_blocks()) {
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FQ_CMDS, timeout_ms_));
   }
+  // Restore pointers after refreshing
   start_ = std::stoul(status_.data_blocks().front().name);
   enqueue_partition_ = blocks_.size() - 1;
   dequeue_partition_ = 0;
@@ -75,10 +75,11 @@ std::string fifo_queue_client::dequeue() {
 
 std::string fifo_queue_client::read_next() {
   std::vector<std::string> _return;
-  std::vector<std::string> args{"read_next", std::to_string(read_offset_)};
+  std::vector<std::string> args{"read_next"};
   bool redo;
   do {
     try {
+      // Use partition name instead of offset for read_next to avoid refreshing
       _return = blocks_[read_partition_ - start_]->run_command(args);
       handle_redirect(_return, args);
       redo = false;
@@ -92,10 +93,7 @@ std::string fifo_queue_client::read_next() {
 
 void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
   auto cmd_name = args.front();
-  if (_return[0] == "!ok") {
-    if (cmd_name == "read_next") read_offset_ += (string_array::METADATA_LEN + _return[1].size());
-    return;
-  } else if (_return[0] == "!redo") {
+  if (_return[0] == "!redo") {
     throw redo_error();
   } else if (_return[0] == "!split_enqueue") {
     do {
@@ -141,10 +139,8 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FQ_CMDS));
       }
       read_partition_++;
-      read_offset_ = 0;
-      _return = blocks_[read_partition_ - start_]->run_command({"read_next", std::to_string(0)});
+      _return = blocks_[read_partition_ - start_]->run_command({"read_next"});
       if (_return[0] == "!ok") {
-        read_offset_ += (string_array::METADATA_LEN + _return[1].size());
         result += _return[1];
       }
     } while (_return[0] == "!split_readnext");
