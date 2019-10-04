@@ -77,10 +77,10 @@ void chain_module::request(sequence_id seq, const arg_list &args) {
     LOG(log_level::error) << "Invalid state: Direct request on a mid node";
     return;
   }
-  LOG(log_level::info) << "Sending out to the first partition " << args[0] << " " << args[1] << " " << name() << " " << metadata();
+
   std::vector<std::string> result;
   run_command(result, args);
-  LOG(log_level::info) << "Finish the first partition " << args[0] << " " << args[1] << " " << name() << " " << metadata();
+
   auto cmd_name = args.front();
   if (is_tail()) {
     clients().respond_client(seq, result);
@@ -91,7 +91,6 @@ void chain_module::request(sequence_id seq, const arg_list &args) {
       return;
     }
     seq.server_seq_no = ++chain_seq_no_;
-    LOG(log_level::info) << "Sending out to the next partition " << args[0] << " " << args[1] << " " << name() << " " << metadata();
     next_->request(seq, args);
   }
   add_pending(seq, args);
