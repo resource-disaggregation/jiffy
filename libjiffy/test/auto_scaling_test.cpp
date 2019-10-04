@@ -854,7 +854,7 @@ TEST_CASE("fifo_queue_auto_scale_mix_test", "[directory_service][storage_server]
         break;
       case 2:
         try {
-          //client.read_next(); // TODO: Better testing
+          client.read_next(); // TODO: Better testing
         } catch (std::exception& e) {}
         break;
       default:

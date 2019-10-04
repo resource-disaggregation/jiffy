@@ -1,5 +1,6 @@
 #include "fifo_queue_client.h"
 #include "jiffy/utils/string_utils.h"
+#include "jiffy/utils/logger.h"
 #include <algorithm>
 #include <thread>
 #include <utility>
@@ -18,6 +19,7 @@ fifo_queue_client::fifo_queue_client(std::shared_ptr<directory::directory_interf
   enqueue_partition_ = 0;
   read_partition_ = 0;
   read_offset_ = 0;
+  start_ = 0;
   for (const auto &block: status.data_blocks()) {
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FQ_CMDS, timeout_ms_));
   }
@@ -29,8 +31,12 @@ void fifo_queue_client::refresh() {
   for (const auto &block: status_.data_blocks()) {
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FQ_CMDS, timeout_ms_));
   }
+  start_ = std::stoul(status_.data_blocks().front().name);
   enqueue_partition_ = blocks_.size() - 1;
   dequeue_partition_ = 0;
+  if(read_partition_ < start_) {
+    read_partition_ = start_;
+  }
 }
 
 void fifo_queue_client::enqueue(const std::string &item) {
@@ -73,7 +79,7 @@ std::string fifo_queue_client::read_next() {
   bool redo;
   do {
     try {
-      _return = blocks_[read_partition_]->run_command(args);
+      _return = blocks_[read_partition_ - start_]->run_command(args);
       handle_redirect(_return, args);
       redo = false;
     } catch (redo_error &e) {
@@ -116,6 +122,9 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FQ_CMDS));
       }
       dequeue_partition_++;
+      auto dequeue_name = dequeue_partition_ + start_;
+      if(dequeue_name > read_partition_)
+        read_partition_ = dequeue_name;
       _return = blocks_[dequeue_partition_]->run_command({"dequeue"});
       if (_return[0] == "!ok") {
         result += _return[1];
@@ -133,7 +142,7 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
       }
       read_partition_++;
       read_offset_ = 0;
-      _return = blocks_[read_partition_]->run_command({"read_next", std::to_string(0)});
+      _return = blocks_[read_partition_ - start_]->run_command({"read_next", std::to_string(0)});
       if (_return[0] == "!ok") {
         read_offset_ += (string_array::METADATA_LEN + _return[1].size());
         result += _return[1];

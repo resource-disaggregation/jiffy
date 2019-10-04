@@ -35,6 +35,7 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
   head_ = 0;
+  read_head_ = 0;
   threshold_hi_ = conf.get_as<double>("fifoqueue.capacity_threshold_hi", 0.95);
   auto_scale_ = conf.get_as<bool>("fifoqueue.auto_scale", true);
 }
@@ -62,14 +63,17 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
     RETURN_ERR("!args_error");
   }
   auto ret = partition_.at(head_);
+  bool read_flag = false;
   if (ret.first) {
     head_ += (string_array::METADATA_LEN + ret.second.size());
+    read_flag = update_read_head();
     RETURN_OK(ret.second);
   }
   if (ret.second == "!not_available") {
     RETURN_ERR("!msg_not_found");
   }
   head_ += (string_array::METADATA_LEN + ret.second.size());
+  read_flag = update_read_head();
   if (!auto_scale_) {
     RETURN_ERR("!split_dequeue", ret.second);
   }
@@ -77,6 +81,8 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
     RETURN_ERR("!split_dequeue", ret.second, next_target_str_);
   }
   head_ -= (string_array::METADATA_LEN + ret.second.size());
+  if(read_flag)
+    read_head_ -= (string_array::METADATA_LEN + ret.second.size());
   RETURN_ERR("!redo");
 }
 
@@ -84,19 +90,22 @@ void fifo_queue_partition::read_next(response &_return, const arg_list &args) {
   if (args.size() != 2) {
     RETURN_ERR("!args_error");
   }
-  auto ret = partition_.at(std::stoi(args[1]));
+  auto ret = partition_.at(read_head_);
   if (ret.first) {
+    read_head_ += (string_array::METADATA_LEN + ret.second.size());
     RETURN_OK(ret.second);
   }
   if (ret.second == "!not_available") {
     RETURN_ERR("!msg_not_found");
   }
+  read_head_ += (string_array::METADATA_LEN + ret.second.size());
   if (!auto_scale_) {
     RETURN_ERR("!split_readnext", ret.second);
   }
   if (!next_target_str_.empty()) {
     RETURN_ERR("!split_readnext", ret.second, next_target_str_);
   }
+  read_head_ -= (string_array::METADATA_LEN + ret.second.size());
   RETURN_ERR("!redo");
 }
 
