@@ -37,7 +37,11 @@ void block_response_client_map::send_failure() {
   fail.__set_client_seq_no(-2);
   fail.__set_client_id(-2);
   for (const auto &x : clients_.lock_table()) {
-    x.second->response(fail, {});
+    try {
+      x.second->response(fail, {});
+    } catch (std::exception &e) {
+      continue;
+    }
   }
 }
 

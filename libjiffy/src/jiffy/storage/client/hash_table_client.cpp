@@ -27,8 +27,12 @@ void hash_table_client::refresh() {
   blocks_.clear();
   for (auto &block: status_.data_blocks()) {
     if (block.metadata != "split_importing" && block.metadata != "importing") {
-      blocks_.emplace(std::make_pair(static_cast<int32_t>(std::stoi(utils::string_utils::split(block.name, '_')[0])),
-                                     std::make_shared<replica_chain_client>(fs_, path_, block, HT_OPS, timeout_ms_)));
+      try {
+        blocks_.emplace(std::make_pair(static_cast<int32_t>(std::stoi(utils::string_utils::split(block.name, '_')[0])),
+                                       std::make_shared<replica_chain_client>(fs_, path_, block, HT_OPS, timeout_ms_)));
+      } catch (std::exception &e) {
+        continue;
+      }
     }
   }
   redirect_blocks_.clear();
@@ -136,9 +140,7 @@ bool hash_table_client::exists(const std::string &key) {
       redo = true;
     }
   } while (redo);
-  if(_return[0] == "!ok")
-    return true;
-  else return false;
+  return _return[0] == "!ok";
 }
 
 

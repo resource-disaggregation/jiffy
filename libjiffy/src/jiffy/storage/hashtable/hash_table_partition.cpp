@@ -54,14 +54,18 @@ void hash_table_partition::exists(response &_return, const arg_list &args) {
   }
   auto hash = hash_slot::get(args[1]);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[2] == "!redirected")) {
-    auto it = block_.find(make_binary(args[1]));
-    if (it != block_.end()) {
-      RETURN_OK();
-    } else {
-      if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-        RETURN_ERR("!exporting", export_target_str_);
+    try {
+      auto it = block_.find(make_binary(args[1]));
+      if (it != block_.end()) {
+        RETURN_OK();
+      } else {
+        if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+          RETURN_ERR("!exporting", export_target_str_);
+        }
+        RETURN_ERR("!key_not_found");
       }
-      RETURN_ERR("!key_not_found");
+    } catch (std::bad_alloc &e) {
+      RETURN_ERR("!redo");
     }
   }
   RETURN_ERR("!block_moved");
@@ -76,19 +80,23 @@ void hash_table_partition::put(response &_return, const arg_list &args) {
     if (storage_size() + args[1].size() > storage_capacity()) {
       RETURN_ERR("!redo");
     }
-    if(block_.find(make_binary(args[1])) != block_.end()) {
+    try {
+      if (block_.find(make_binary(args[1])) != block_.end()) {
         RETURN_ERR("!duplicate_key");
-    }
-    if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      RETURN_ERR("!exporting", export_target_str_);
-    }
-    if (storage_size() + args[1].size() + args[2].size() > storage_capacity()) {
-      RETURN_ERR("!full");
-    }
-    if (block_.emplace(make_binary(args[1]), make_binary(args[2])).second) {
-      if(remove_cache_.find(args[1]) != remove_cache_.end())
-        remove_cache_.erase(args[1]);
-      RETURN_OK();
+      }
+      if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+        RETURN_ERR("!exporting", export_target_str_);
+      }
+      if (storage_size() + args[1].size() + args[2].size() > storage_capacity()) {
+        RETURN_ERR("!full");
+      }
+      if (block_.emplace(make_binary(args[1]), make_binary(args[2])).second) {
+        if (remove_cache_.find(args[1]) != remove_cache_.end())
+          remove_cache_.erase(args[1]);
+        RETURN_OK();
+      }
+    } catch (std::bad_alloc &e) {
+      RETURN_ERR("!redo");
     }
   }
   RETURN_ERR("!block_moved");
@@ -99,48 +107,53 @@ void hash_table_partition::upsert(response &_return, const arg_list &args) {
     RETURN_ERR("!args_error");
   }
   auto hash = hash_slot::get(args[1]);
-  if (storage_size() + args[1].size() > storage_capacity()) {
-    RETURN_ERR("!redo");
-  }
-  auto it = block_.find(make_binary(args[1]));
   bool found = false;
   std::string old_val;
   // Redirected upsert
   if (in_import_slot_range(hash) && args.size() == 6 && args[5] == "!redirected" && metadata() == "importing") {
     found = static_cast<bool>(std::stoi(args[3]));
-    if(it != block_.end()) {
-      old_val = to_string(it->second);
-      it->second = make_binary(args[2]);
-      RETURN_OK(old_val);
+    try {
+      auto it = block_.find(make_binary(args[1]));
+      if (it != block_.end()) {
+        old_val = to_string(it->second);
+        it->second = make_binary(args[2]);
+        RETURN_OK(old_val);
+      }
+      if (found && block_.emplace(make_binary(args[1]), make_binary(args[2])).second) {
+        RETURN_OK(args[4]);
+      }
+      block_.emplace(make_binary(args[1]), make_binary(args[2]));
+    } catch (std::bad_alloc &e) {
+      RETURN_ERR("!redo");
     }
-    if(remove_cache_.find(args[1]) != remove_cache_.end())
+    if (remove_cache_.find(args[1]) != remove_cache_.end())
       remove_cache_.erase(args[1]);
-    if(found && block_.emplace(make_binary(args[1]), make_binary(args[2])).second) {
-      RETURN_OK(args[4]);
-    }
-    block_.emplace(make_binary(args[1]), make_binary(args[2]));
     RETURN_OK();
   }
   // Ordinary upsert
   if (in_slot_range(hash)) {
-    if (it != block_.end()) {
-      found = true;
-      old_val = to_string(it->second);
-      it->second = make_binary(args[2]);
+    try {
+      auto it = block_.find(make_binary(args[1]));
+      if (it != block_.end()) {
+        found = true;
+        old_val = to_string(it->second);
+        it->second = make_binary(args[2]);
+        if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+          RETURN_ERR("!exporting", export_target_str_, std::to_string(found), old_val);
+        }
+        RETURN_OK(old_val);
+      }
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
         RETURN_ERR("!exporting", export_target_str_, std::to_string(found), old_val);
       }
-      RETURN_OK(old_val);
+      block_.emplace(make_binary(args[1]), make_binary(args[2]));
+    } catch (std::bad_alloc &e) {
+      RETURN_ERR("!redo");
     }
-    if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      RETURN_ERR("!exporting", export_target_str_, std::to_string(found), old_val);
-    }
-    block_.emplace(make_binary(args[1]), make_binary(args[2]));
     RETURN_OK();
   }
   RETURN_ERR("!block_moved");
 }
-
 
 void hash_table_partition::get(response &_return, const arg_list &args) {
   if (!(args.size() == 2 || (args.size() == 3 && args[2] == "!redirected"))) {
@@ -148,17 +161,18 @@ void hash_table_partition::get(response &_return, const arg_list &args) {
   }
   auto hash = hash_slot::get(args[1]);
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[2] == "!redirected")) {
-    if (storage_size() + args[1].size() > storage_capacity()) {
-      RETURN_ERR("!redo");
-    }
-    auto it = block_.find(make_binary(args[1]));
-    if (it != block_.end()) {
-      RETURN_OK(to_string(it->second));
-    } else {
-      if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-        RETURN_ERR("!exporting", export_target_str_);
+    try {
+      auto it = block_.find(make_binary(args[1]));
+      if (it != block_.end()) {
+        RETURN_OK(to_string(it->second));
+      } else {
+        if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+          RETURN_ERR("!exporting", export_target_str_);
+        }
+        RETURN_ERR("!key_not_found");
       }
-      RETURN_ERR("!key_not_found");
+    } catch (std::bad_alloc &e) {
+      RETURN_ERR("!redo");
     }
   }
   RETURN_ERR("!block_moved");
@@ -169,71 +183,83 @@ void hash_table_partition::update(response &_return, const arg_list &args) {
     RETURN_ERR("!args_error");
   }
   auto hash = hash_slot::get(args[1]);
-  if (storage_size() + args[1].size() > storage_capacity()) {
-    RETURN_ERR("!redo");
-  }
-  auto it = block_.find(make_binary(args[1]));
   bool found = false;
   std::string old_val;
   // Redirected update
   if (in_import_slot_range(hash) && args.size() == 6 && args[5] == "!redirected" && metadata() == "importing") {
     found = static_cast<bool>(std::stoi(args[3]));
-    if(it != block_.end()) {
+    try {
+      auto it = block_.find(make_binary(args[1]));
+      if (it != block_.end()) {
         old_val = to_string(it->second);
         it->second = make_binary(args[2]);
         RETURN_OK(old_val);
-    }
-    if(found && block_.emplace(make_binary(args[1]), make_binary(args[2])).second) {
-      if(remove_cache_.find(args[1]) != remove_cache_.end())
-        remove_cache_.erase(args[1]);
-      RETURN_OK(args[4]);
+      }
+      if (found && block_.emplace(make_binary(args[1]), make_binary(args[2])).second) {
+        if (remove_cache_.find(args[1]) != remove_cache_.end())
+          remove_cache_.erase(args[1]);
+        RETURN_OK(args[4]);
+      }
+    } catch (std::bad_alloc &e) {
+      RETURN_ERR("!redo");
     }
     RETURN_ERR("!key_not_found");
   }
   // Ordinary update
   if (in_slot_range(hash)) {
-    if (it != block_.end()) {
-      found = true;
-      old_val = to_string(it->second);
-      it->second = make_binary(args[2]);
+    try {
+      auto it = block_.find(make_binary(args[1]));
+      if (it != block_.end()) {
+        found = true;
+        old_val = to_string(it->second);
+        it->second = make_binary(args[2]);
+        if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+          RETURN_ERR("!exporting", export_target_str_, std::to_string(found), old_val);
+        }
+        RETURN_OK(old_val);
+      }
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
         RETURN_ERR("!exporting", export_target_str_, std::to_string(found), old_val);
       }
-      RETURN_OK(old_val);
+      RETURN_ERR("!key_not_found");
+    } catch (std::bad_alloc &e) {
+      RETURN_ERR("!redo");
     }
-    if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      RETURN_ERR("!exporting", export_target_str_, std::to_string(found), old_val);
-    }
-    RETURN_ERR("!key_not_found");
   }
   RETURN_ERR("!block_moved");
 }
 
 void hash_table_partition::remove(response &_return, const arg_list &args) {
-  if (!(args.size() == 2 || (args.size() == 3 && args[2] == "!redirected") || (args.size() == 3 && args[2] == "!buffered"))) {
+  if (!(args.size() == 2 || (args.size() == 3 && args[2] == "!redirected")
+      || (args.size() == 3 && args[2] == "!buffered"))) {
     RETURN_ERR("!args_error");
   }
   auto hash = hash_slot::get(args[1]);
-  if (storage_size() + args[1].size() > storage_capacity()) {
-    RETURN_ERR("!redo");
-  }
   // Ordinary remove or buffered remove
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[2] == "!buffered")) {
-    if (block_.erase(make_binary(args[1]))) {
+    try {
+      if (block_.erase(make_binary(args[1]))) {
+        if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+          RETURN_ERR("!exporting", export_target_str_);
+        }
+        RETURN_OK();
+      }
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
         RETURN_ERR("!exporting", export_target_str_);
       }
-      RETURN_OK();
+      RETURN_ERR("!key_not_found");
+    } catch (std::bad_alloc &e) {
+      RETURN_ERR("!redo");
     }
-    if (metadata_ == "exporting" && in_export_slot_range(hash)) {
-      RETURN_ERR("!exporting", export_target_str_);
-    }
-    RETURN_ERR("!key_not_found");
   }
   // Redirected remove
   if (in_import_slot_range(hash) && args[2] == "!redirected") {
-    if (block_.erase(make_binary(args[1]))) {
-      RETURN_OK();
+    try {
+      if (block_.erase(make_binary(args[1]))) {
+        RETURN_OK();
+      }
+    } catch (std::bad_alloc &e) {
+      RETURN_ERR("!redo");
     }
     remove_cache_.emplace(std::make_pair(args[1], 1));
     RETURN_OK();
@@ -243,8 +269,12 @@ void hash_table_partition::remove(response &_return, const arg_list &args) {
 
 void hash_table_partition::scale_remove(response &_return, const arg_list &args) {
   for (size_t i = 1; i < args.size(); ++i) {
-    if (!block_.erase(make_binary(args[i]))) {
-      LOG(log_level::error) << "Unsuccessful scale remove";
+    try {
+      if (!block_.erase(make_binary(args[i]))) {
+        LOG(log_level::error) << "Unsuccessful scale remove";
+      }
+    } catch (std::bad_alloc &e) {
+      RETURN_ERR("!redo");
     }
   }
   RETURN_OK();
@@ -253,12 +283,16 @@ void hash_table_partition::scale_remove(response &_return, const arg_list &args)
 void hash_table_partition::scale_put(response &_return, const arg_list &args) {
   for (size_t i = 1; i < args.size(); i += 2) {
     auto it = remove_cache_.find(args[i]);
-    if(it != remove_cache_.end()) {
+    if (it != remove_cache_.end()) {
       remove_cache_.erase(args[i]);
       continue;
     }
-    if (!block_.emplace(make_binary(args[i]), make_binary(args[i + 1])).second) {
-      LOG(log_level::error) << "Unsuccessful scale put";
+    try {
+      if (!block_.emplace(make_binary(args[i]), make_binary(args[i + 1])).second) {
+        LOG(log_level::error) << "Unsuccessful scale put";
+      }
+    } catch (std::bad_alloc &e) {
+      RETURN_ERR("!redo");
     }
   }
   RETURN_OK();
@@ -505,7 +539,7 @@ bool hash_table_partition::underload() {
 
 void hash_table_partition::buffer_remove() {
   response ret;
-  for(const auto &x : remove_cache_) {
+  for (const auto &x : remove_cache_) {
     arg_list args;
     args.push_back("remove");
     args.push_back(x.first);
@@ -514,7 +548,6 @@ void hash_table_partition::buffer_remove() {
   }
   remove_cache_.clear();
 }
-
 
 REGISTER_IMPLEMENTATION("hashtable", hash_table_partition);
 

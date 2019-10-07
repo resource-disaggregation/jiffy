@@ -122,8 +122,13 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     auto storage_capacity = std::stoull(conf.at("storage_capacity"));
 
     // Find a merge target
+    std::shared_ptr<replica_chain_client> src;
     auto start = time_utils::now_us();
-    auto src = std::make_shared<replica_chain_client>(fs, path, cur_chain, HT_OPS);
+    try {
+      src = std::make_shared<replica_chain_client>(fs, path, cur_chain, HT_OPS);
+    } catch (std::exception &e) {
+      UNLOCK_AND_THROW("Unable to connect to src partition");
+    }
     auto update_resp = src->run_command({"update_partition", "merging", "merging"}); // TODO: Why "merging" twice?
     if (update_resp[0] == "!fail") {
       UNLOCK_AND_THROW("Partition is under auto_scaling");
@@ -134,7 +139,13 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     auto merge_range_end = std::stoi(slot_range[1]);
 
     directory::replica_chain merge_target;
-    if (!find_merge_target(merge_target, fs, path, storage_capacity, merge_range_beg, merge_range_end)) {
+    bool found;
+    try {
+      found = find_merge_target(merge_target, fs, path, storage_capacity, merge_range_beg, merge_range_end);
+      } catch (std::exception &e) {
+      UNLOCK_AND_THROW("Adjacent partitions are not found or full");
+    }
+    if (!found) {
       src->run_command({"update_partition", name, "regular$" + name});
       UNLOCK_AND_THROW("Adjacent partitions are not found or full");
     }
@@ -144,12 +155,11 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     std::shared_ptr<replica_chain_client> dst;
     try {
       dst = std::make_shared<replica_chain_client>(fs, path, merge_target, HT_OPS);
-    } catch (apache::thrift::transport::TTransportException &e) {
-      LOG(log_level::info) << "The merge target chain has been deleted";
+    } catch (std::exception &e) {
       src->run_command({"update_partition", name, "regular$" + name});
       UNLOCK_AND_RETURN;
     }
- 
+
     auto exp_target = pack(merge_target);
     auto dst_old_name = dst->run_command({"update_partition", merge_target.name, "importing$" + name});
 
