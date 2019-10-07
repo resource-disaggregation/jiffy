@@ -13,6 +13,9 @@ namespace storage {
 // The default number of elements in an empty hash table
 constexpr size_t HASH_TABLE_DEFAULT_SIZE = 0;
 
+// Hash table max key size
+constexpr size_t HASH_TABLE_MAX_KEY_SIZE = 65536;
+
 // Key/Value definitions
 typedef binary key_type;
 typedef binary value_type;
