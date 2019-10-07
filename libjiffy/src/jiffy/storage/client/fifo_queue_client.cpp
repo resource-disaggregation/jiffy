@@ -68,7 +68,6 @@ std::string fifo_queue_client::dequeue() {
       redo = true;
     }
   } while (redo);
-  if(_return[0] == "!msg_not_found") return "!msg_not_found";
   THROW_IF_NOT_OK(_return);
   return _return[1];
 }
@@ -120,9 +119,9 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FQ_CMDS));
       }
       dequeue_partition_++;
-      auto dequeue_name = dequeue_partition_ + start_;
-      if(dequeue_name > read_partition_)
-        read_partition_ = dequeue_name;
+      auto dequeue_partition_name = dequeue_partition_ + start_;
+      if(dequeue_partition_name > read_partition_)
+        read_partition_ = dequeue_partition_name;
       _return = blocks_[dequeue_partition_]->run_command({"dequeue"});
       if (_return[0] == "!ok") {
         result += _return[1];

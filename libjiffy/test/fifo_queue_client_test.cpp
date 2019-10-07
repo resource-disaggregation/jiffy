@@ -52,7 +52,7 @@ TEST_CASE("fifo_queue_client_enqueue_dequeue_test", "[enqueue][dequeue]") {
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
   data_status status = tree->create("/sandbox/file.txt", "fifoqueue", "/tmp", NUM_BLOCKS, 1, 0, 0,
-                                    {"0"}, {"regular"}); //TODO we do not use metadata for now
+                                    {"0"}, {"regular"});
 
   fifo_queue_client client(tree, "/sandbox/file.txt", status);
 
@@ -67,7 +67,7 @@ TEST_CASE("fifo_queue_client_enqueue_dequeue_test", "[enqueue][dequeue]") {
     REQUIRE(client.dequeue() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
-    REQUIRE(client.dequeue() == "!msg_not_found");
+    REQUIRE_THROWS_AS(client.dequeue(), std::logic_error);
   }
 
   as_server->stop();
@@ -128,8 +128,12 @@ TEST_CASE("fifo_queue_multiple_test", "[enqueue][dequeue]") {
       fifo_queue_client client(tree, "/sandbox/file.txt", status);
       for (uint32_t j = 0; j < num_ops * num_threads * 2; j++) {
         std::string ret;
-        REQUIRE_NOTHROW(ret = client.dequeue());
-        if (ret != "!msg_not_found") count[k - 1]++;
+        try {
+          ret = client.dequeue();
+        } catch (std::logic_error &e) {
+          continue;
+        }
+        count[k - 1]++;
       }
     }));
   }

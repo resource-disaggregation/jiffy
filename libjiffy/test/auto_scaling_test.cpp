@@ -700,9 +700,6 @@ TEST_CASE("fifo_queue_auto_scale_replica_chain_test", "[directory_service][stora
   for (std::size_t i = 0; i < 4000; ++i) {
     REQUIRE_NOTHROW(client.enqueue(std::string(100000, (std::to_string(i)).c_str()[0])));
   }
-  // Busy wait until number of blocks increases
-  //while (t->dstatus("/sandbox/scale_up.txt").data_blocks_size() == 1);
-
 
   for (std::size_t i = 0; i < 4000; ++i) {
     REQUIRE(client.read_next() == std::string(100000, (std::to_string(i)).c_str()[0]));
@@ -711,8 +708,6 @@ TEST_CASE("fifo_queue_auto_scale_replica_chain_test", "[directory_service][stora
   for (std::size_t i = 0; i < 4000; ++i) {
     REQUIRE(client.dequeue() == std::string(100000, (std::to_string(i)).c_str()[0]));
   }
-  // Busy wait until number of blocks decreases
-  //while (t->dstatus("/sandbox/scale_up.txt").data_blocks_size() > 1);
 
   as_server->stop();
   if (auto_scaling_thread.joinable()) {
