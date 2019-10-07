@@ -220,7 +220,7 @@ void hash_table_partition::remove(response &_return, const arg_list &args) {
   // Ordinary remove or buffered remove
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[2] == "!buffered")) {
     try {
-      if (block_.erase(make_binary(args[1]))) {
+      if (block_.erase(make_temporary_binary(args[1]))) {
         if (metadata_ == "exporting" && in_export_slot_range(hash)) {
           RETURN_ERR("!exporting", export_target_str_);
         }
@@ -235,7 +235,7 @@ void hash_table_partition::remove(response &_return, const arg_list &args) {
   // Redirected remove
   if (in_import_slot_range(hash) && args[2] == "!redirected") {
     try {
-      if (block_.erase(make_binary(args[1]))) {
+      if (block_.erase(make_temporary_binary(args[1]))) {
         RETURN_OK();
       }
     END_CATCH_HANDLER;

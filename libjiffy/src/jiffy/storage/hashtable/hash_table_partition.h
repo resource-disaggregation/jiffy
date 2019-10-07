@@ -309,9 +309,9 @@ class hash_table_partition : public chain_module {
   void buffer_remove();
 
   /**
-   * @brief
-   * @param str
-   * @return
+   * @brief Construct binary string for temporary values
+   * @param str String
+   * @return Binary string
    */
   binary make_temporary_binary(const std::string &str) {
     return binary(str, temporary_data_allocator_);
