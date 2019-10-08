@@ -35,25 +35,25 @@ int file_client::read(std::string& buf, size_t size) {
   if (file_size <= cur_partition_ * block_size_ + cur_offset_)
     return -1;
   std::size_t remain_size = file_size - cur_partition_ * block_size_ - cur_offset_;
-  std::size_t has_more = std::min(remain_size, size);
-  if(has_more == 0)
+  std::size_t remaining_data = std::min(remain_size, size);
+  if(remaining_data == 0)
     return -1;
   // Parallel read here
   std::size_t start_partition = block_id();
   std::size_t count = 0;
-  while (has_more > 0) {
+  while (remaining_data > 0) {
     count++;
-    std::size_t data_to_read = std::min(has_more, block_size_ - cur_offset_);
+    std::size_t data_to_read = std::min(remaining_data, block_size_ - cur_offset_);
     std::vector<std::string>
         args{"read", std::to_string(cur_offset_), std::to_string(data_to_read)};
     blocks_[block_id()]->send_command(args);
-    has_more -= data_to_read;
+    remaining_data -= data_to_read;
     cur_offset_ += data_to_read;
     if (cur_offset_ == block_size_ && cur_partition_ != last_partition_) {
       cur_offset_ = 0;
       cur_partition_++;
     }
-    if (has_more == 0) break;
+    if (remaining_data == 0) break;
   }
   auto previous_size = buf.size();
   for (std::size_t k = 0; k < count; k++) {
@@ -82,16 +82,15 @@ std::size_t file_client::write(const std::string &data) {
     }
   }
 
-
-  // First allocate new blocks if needed
-  std::vector<std::string> init_args
-      {"add_blocks", std::to_string(last_partition_), std::to_string(num_chain_needed)};
-
   if(num_chain_needed && !auto_scaling_)
     throw std::logic_error("Insufficient blocks");
 
+  // First allocate new blocks if needed
+  std::vector<std::string> add_block_args
+      {"add_blocks", std::to_string(last_partition_), std::to_string(num_chain_needed)};
+
   while (num_chain_needed != 0) {
-    _return = blocks_[last_partition_]->run_command(init_args);
+    _return = blocks_[last_partition_]->run_command(add_block_args);
     if (_return[0] == "!block_allocated") {
       last_partition_ += num_chain_needed;
       num_chain_needed = 0;
@@ -106,17 +105,17 @@ std::size_t file_client::write(const std::string &data) {
     cur_offset_ = 0;
   }
   // Parallel write
-  std::size_t has_more = data.size();
+  std::size_t remaining_data = data.size();
   std::size_t start_partition = block_id();
   std::size_t count = 0;
 
-  while (has_more > 0) {
+  while (remaining_data > 0) {
     count++;
-    std::string data_to_write = data.substr(data.size() - has_more, std::min(has_more, block_size_ - cur_offset_));
+    std::string data_to_write = data.substr(data.size() - remaining_data, std::min(remaining_data, block_size_ - cur_offset_));
     std::vector<std::string>
         args{"write", data_to_write, std::to_string(cur_offset_)};
     blocks_[block_id()]->send_command(args);
-    has_more -= data_to_write.size();
+    remaining_data -= data_to_write.size();
     cur_offset_ += data_to_write.size();
     update_last_offset();
     if (cur_offset_ == block_size_ && cur_partition_ != last_partition_) {

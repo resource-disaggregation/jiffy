@@ -38,7 +38,7 @@ std::pair<bool, std::string> file_block::write(const std::string &data, std::siz
 
 const std::pair<bool, std::string> file_block::read(std::size_t offset, std::size_t size) const {
   if (offset >= max_) {
-    throw std::invalid_argument("Read exceeds partition capacity");
+    throw std::invalid_argument("Read offset exceeds partition capacity");
   }
   return std::make_pair(true, std::string(data_ + offset, size));
 }
