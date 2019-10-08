@@ -59,13 +59,11 @@ TEST_CASE("fifo_queue_enqueue_readnext_dequeue", "[enqueue][read_next][dequeue]"
     REQUIRE_NOTHROW(block.enqueue(resp, {"enqueue", std::to_string(i)}));
     REQUIRE(resp[0] == "!ok");
   }
-  std::size_t pos = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
-    REQUIRE_NOTHROW(block.read_next(resp, {"read_next", std::to_string(pos)}));
+    REQUIRE_NOTHROW(block.read_next(resp, {"read_next"}));
     REQUIRE(resp[0] == "!ok");
     REQUIRE(resp[1] == std::to_string(i));
-    pos += (std::to_string(i).size() + string_array::METADATA_LEN);
   }
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;

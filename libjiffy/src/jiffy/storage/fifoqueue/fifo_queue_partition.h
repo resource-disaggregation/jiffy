@@ -141,6 +141,18 @@ class fifo_queue_partition : public chain_module {
    */
   bool overload();
 
+  /**
+   * @brief Update read head pointer
+   * @return Bool value, true if pointer updated
+   */
+  bool update_read_head() {
+    if (read_head_ < head_) {
+      read_head_ = head_;
+    return true;
+    }
+    return false;
+  }
+
   /* Fifo queue partition */
   fifo_queue_type partition_;
 
@@ -180,6 +192,8 @@ class fifo_queue_partition : public chain_module {
   /* Head position of queue */
   std::size_t head_;
 
+  /* Head position for read next operation */
+  std::size_t read_head_;
 };
 
 }
