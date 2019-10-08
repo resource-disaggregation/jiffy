@@ -73,7 +73,7 @@ class put_benchmark : public hash_table_benchmark {
         size_t j;
         for (j = 0; j < num_ops_; ++j) {
           t0 = time_utils::now_us();
-          clients_[i]->put(std::to_string(j), data_);
+          clients_[i]->put(std::to_string(j) + "_" + std::to_string(i), data_);
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);
         }
@@ -96,14 +96,14 @@ class get_benchmark : public hash_table_benchmark {
     for (size_t i = 0; i < num_clients_; ++i) {
       workers_[i] = std::thread([i, this]() {
         for (size_t j = 0; j < num_ops_; ++j) {
-          clients_[i]->put(std::to_string(j), data_);
+          clients_[i]->put(std::to_string(j) + "_" + std::to_string(i), data_);
         }
         auto bench_begin = time_utils::now_us();
         uint64_t tot_time = 0, t0, t1 = bench_begin;
         size_t j;
         for (j = 0; j < num_ops_; ++j) {
           t0 = time_utils::now_us();
-          clients_[i]->get(std::to_string(j));
+          clients_[i]->get(std::to_string(j) + "_" + std::to_string(i));
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);
         }
@@ -126,14 +126,14 @@ class remove_benchmark : public hash_table_benchmark {
     for (size_t i = 0; i < num_clients_; ++i) {
       workers_[i] = std::thread([i, this]() {
         for (size_t j = 0; j < num_ops_; ++j) {
-          clients_[i]->put(std::to_string(j), data_);
+          clients_[i]->put(std::to_string(j) + "_" + std::to_string(i), data_);
         }
         auto bench_begin = time_utils::now_us();
         uint64_t tot_time = 0, t0, t1 = bench_begin;
         size_t j;
         for (j = 0; j < num_ops_; ++j) {
           t0 = time_utils::now_us();
-          clients_[i]->remove(std::to_string(j));
+          clients_[i]->remove(std::to_string(j) + "_" + std::to_string(i));
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);
         }

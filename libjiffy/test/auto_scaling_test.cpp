@@ -200,37 +200,35 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
   auto status = t->create("/sandbox/scale_mix.txt", "hashtable", "/tmp", 3, 5, 0, perms::all(),
                           {"0_16384", "16384_32768", "32768_65536"}, {"regular", "regular", "regular"}, {});
   hash_table_client client(t, "/sandbox/scale_mix.txt", status);
-  std::vector<int> remain_keys;
-  std::size_t iter = 15000;
-  const std::size_t max_key = 100;
+  std::size_t iter = 10000;
+  const std::size_t max_key = 200000;
   const std::size_t string_size = 102400;
   int bitmap[max_key] = {0};
   for (std::size_t i = 0; i < iter; i++) {
     std::size_t j = rand_utils::rand_uint32(0, 3);
     std::string ret;
-    std::size_t key;
+    std::size_t key = rand_utils::rand_uint32(0, max_key - 1);
     switch (j) {
       case 0:
-        if (i % 2) {
-          key = rand_utils::rand_uint32(0, max_key - 1);
           try {
             client.put(std::to_string(key), std::string(string_size, 'a'));
-            bitmap[key] = 1;
+            if(bitmap[key] != 2)
+              bitmap[key] = 1;
           } catch (std::exception &e) {}
-        }
         break;
-      case 1:key = rand_utils::rand_uint32(0, max_key - 1);
+      case 1:
         try {
           ret = client.update(std::to_string(key), std::string(string_size, 'b'));
-          bitmap[key] = 2;
+          if(bitmap[key] == 1)
+            bitmap[key] = 2;
         } catch (std::exception &e) {}
         break;
-      case 2:key = rand_utils::rand_uint32(0, max_key - 1);
+      case 2:
         try {
           client.get(std::to_string(key));
         } catch (std::exception &e) {}
         break;
-      case 3:key = rand_utils::rand_uint32(0, max_key - 1);
+      case 3:
         try {
           ret = client.remove(std::to_string(key));
           bitmap[key] = 0;

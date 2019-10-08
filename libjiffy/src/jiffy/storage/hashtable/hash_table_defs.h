@@ -5,12 +5,16 @@
 #include "libcuckoo/cuckoohash_map.hh"
 #include "jiffy/storage/block_memory_allocator.h"
 #include "jiffy/storage/types/binary.h"
+#include <unordered_map>
 
 namespace jiffy {
 namespace storage {
 
 // The default number of elements in an empty hash table
 constexpr size_t HASH_TABLE_DEFAULT_SIZE = 0;
+
+// Hash table max key size
+constexpr size_t HASH_TABLE_MAX_KEY_SIZE = 65536;
 
 // Key/Value definitions
 typedef binary key_type;
@@ -37,8 +41,7 @@ struct equal_type {
 };
 
 // Hash table definitions
-typedef cuckoohash_map<key_type, value_type, hash_type, equal_type> hash_table_type;
-typedef hash_table_type::locked_table locked_hash_table_type;
+typedef std::unordered_map<key_type, value_type, hash_type, equal_type> hash_table_type;
 
 }
 }
