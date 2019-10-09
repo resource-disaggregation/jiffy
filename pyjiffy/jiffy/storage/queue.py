@@ -97,7 +97,7 @@ class Queue(DataStructureClient):
         return self._run_repeated([QueueOps.dequeue])[1]
 
     def read_next(self):
-        return self._run_repeated([QueueOps.read_next, str(self.read_offset)])[1]
+        return self._run_repeated([QueueOps.read_next])[1]
 
     class ReadIterator(object):
         def __init__(self, q):
