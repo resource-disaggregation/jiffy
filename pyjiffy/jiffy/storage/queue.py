@@ -17,7 +17,7 @@ class QueueOps:
 class Queue(DataStructureClient):
     METADATA_LEN = 8
 
-    def __init__(self, fs, path, block_info, timeout_ms=1000):
+    def __init__(self, fs, path, block_info, timeout_ms):
         super(Queue, self).__init__(fs, path, block_info, QueueOps.op_types, timeout_ms)
         self.enqueue_partition = 0
         self.dequeue_partition = 0

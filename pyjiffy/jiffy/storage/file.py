@@ -15,8 +15,8 @@ class FileOps:
 
 
 class FileClient(DataStructureClient):
-    def __init__(self, fs, path, block_info):
-        super(FileClient, self).__init__(fs, path, block_info, FileOps.op_types)
+    def __init__(self, fs, path, block_info, timeout_ms):
+        super(FileClient, self).__init__(fs, path, block_info, FileOps.op_types, timeout_ms)
         self.cur_partition = 0
         self.cur_offset = 0
         self.last_partition = 0
@@ -47,8 +47,8 @@ class FileClient(DataStructureClient):
 
 
 class FileReader(FileClient):
-    def __init__(self, fs, path, block_info):
-        super(FileReader, self).__init__(fs, path, block_info)
+    def __init__(self, fs, path, block_info, timeout_ms):
+        super(FileReader, self).__init__(fs, path, block_info, timeout_ms)
 
     def _handle_redirect(self, args, response):
         if response[0] == b('!ok'):
@@ -82,8 +82,8 @@ class FileReader(FileClient):
 
 
 class FileWriter(FileClient):
-    def __init__(self, fs, path, block_info):
-        super(FileWriter, self).__init__(fs, path, block_info)
+    def __init__(self, fs, path, block_info, timeout_ms):
+        super(FileWriter, self).__init__(fs, path, block_info, timeout_ms)
 
     def _handle_redirect(self, args, response):
         data = args[1]

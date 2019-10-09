@@ -75,7 +75,7 @@ class ChainFailureCallback:
 
 
 class JiffyClient:
-    def __init__(self, host="127.0.0.1", directory_service_port=9090, lease_port=9091):
+    def __init__(self, host="127.0.0.1", directory_service_port=9090, lease_port=9091, timeout_ms=10000):
         self.directory_host = host
         self.directory_port = directory_service_port
         self.fs = DirectoryClient(host, directory_service_port)
@@ -86,6 +86,7 @@ class JiffyClient:
         self.lease_worker = LeaseRenewalWorker(self.ls, self.to_renew)
         self.lease_worker.daemon = True
         self.lease_worker.start()
+        self.timeout_ms = timeout_ms
 
     def __del__(self):
         self.disconnect()
@@ -110,12 +111,12 @@ class JiffyClient:
         s = self.fs.create(path, 'hashtable', persistent_store_prefix, num_blocks, chain_length, flags, Perms.all,
                            block_names, block_metadata)
         self.begin_scope(path)
-        return HashTable(self.fs, path, s)
+        return HashTable(self.fs, path, s, self.timeout_ms)
 
     def open_hash_table(self, path):
         s = self.fs.open(path)
         self.begin_scope(path)
-        return HashTable(self.fs, path, s)
+        return HashTable(self.fs, path, s, self.timeout_ms)
 
     def open_or_create_hash_table(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
         fmt = HashTableNameFormatter(num_blocks)
@@ -124,7 +125,7 @@ class JiffyClient:
         s = self.fs.open_or_create(path, 'hashtable', persistent_store_prefix, num_blocks, chain_length, flags,
                                    Perms.all, block_names, block_metadata)
         self.begin_scope(path)
-        return HashTable(self.fs, path, s)
+        return HashTable(self.fs, path, s, self.timeout_ms)
 
     def create_queue(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
         fmt = DefaultNameFormatter()
@@ -133,12 +134,12 @@ class JiffyClient:
         s = self.fs.create(path, 'fifoqueue', persistent_store_prefix, num_blocks, chain_length, flags, Perms.all,
                            block_names, block_metadata)
         self.begin_scope(path)
-        return Queue(self.fs, path, s)
+        return Queue(self.fs, path, s, self.timeout_ms)
 
     def open_queue(self, path):
         s = self.fs.open(path)
         self.begin_scope(path)
-        return Queue(self.fs, path, s)
+        return Queue(self.fs, path, s, self.timeout_ms)
 
     def open_or_create_queue(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
         fmt = DefaultNameFormatter()
@@ -147,7 +148,7 @@ class JiffyClient:
         s = self.fs.open_or_create(path, 'fifoqueue', persistent_store_prefix, num_blocks, chain_length, flags,
                                    Perms.all, block_names, block_metadata)
         self.begin_scope(path)
-        return Queue(self.fs, path, s)
+        return Queue(self.fs, path, s, self.timeout_ms)
 
     def create_file(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
         fmt = DefaultNameFormatter()
@@ -156,12 +157,12 @@ class JiffyClient:
         s = self.fs.create(path, 'file', persistent_store_prefix, num_blocks, chain_length, flags, Perms.all,
                            block_names, block_metadata)
         self.begin_scope(path)
-        return FileWriter(self.fs, path, s)
+        return FileWriter(self.fs, path, s, self.timeout_ms)
 
     def open_file(self, path):
         s = self.fs.open(path)
         self.begin_scope(path)
-        return FileReader(self.fs, path, s)
+        return FileReader(self.fs, path, s, self.timeout_ms)
 
     def open_or_create_file(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
         fmt = DefaultNameFormatter()
@@ -170,7 +171,7 @@ class JiffyClient:
         s = self.fs.open_or_create(path, 'file', persistent_store_prefix, num_blocks, chain_length, flags,
                                    Perms.all, block_names, block_metadata)
         self.begin_scope(path)
-        return FileWriter(self.fs, path, s)
+        return FileWriter(self.fs, path, s, self.timeout_ms)
 
     def close(self, path):
         self.end_scope(path)
