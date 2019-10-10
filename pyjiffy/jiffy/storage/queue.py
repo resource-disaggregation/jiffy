@@ -51,17 +51,15 @@ class Queue(DataStructureClient):
                         break
         elif response[0] == b('!split_dequeue'):
             result = b('')
+            result += response[1]
             while response[0] == b('!split_dequeue'):
-                data_part = response[1]
-                result += data_part
-                if self.dequeue_partition >= len(self.blocks) - 1:
+                if len(response) == 3:
                     chain = response[2].split('!')
                     self.blocks.append(
                         ReplicaChainClient(self.fs, self.path, self.client_cache, chain, QueueOps.op_types))
-                self.dequeue_partition += 1
+                    self.dequeue_partition += 1
                 response = self.blocks[self.dequeue_partition].run_command([QueueOps.dequeue])
-                if response[0] == b('!ok'):
-                    result += response[1]
+                result += response[1]
             response[1] = result
         elif response[0] == b('!split_readnext'):
             result = b('')
