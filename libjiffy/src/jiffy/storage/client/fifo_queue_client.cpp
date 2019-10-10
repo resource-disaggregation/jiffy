@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <thread>
 #include <utility>
+#include "jiffy/utils/logger.h"
 
 namespace jiffy {
 namespace storage {
@@ -83,7 +84,6 @@ std::string fifo_queue_client::read_next() {
 
 void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
   auto cmd_name = args.front();
-
   if (_return[0] == "!ok") {
     if (cmd_name == "read_next") read_offset_ += (string_array::METADATA_LEN + _return[1].size());
     return;
@@ -106,18 +106,15 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
     } while (_return[0] == "!split_enqueue");
   } else if (_return[0] == "!split_dequeue") {
     std::string result;
+    result += _return[1];
     do {
-      auto data_part = _return[1];
-      result += data_part;
-      if (dequeue_partition_ >= blocks_.size() - 1) {
+      if (_return.size() == 3) {
         auto chain = string_utils::split(_return[2], '!');
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FQ_CMDS));
+        dequeue_partition_++;
       }
-      dequeue_partition_++;
       _return = blocks_[dequeue_partition_]->run_command({"dequeue"});
-      if (_return[0] == "!ok") {
-        result += _return[1];
-      }
+      result += _return[1];
     } while (_return[0] == "!split_dequeue");
     _return[1] = result;
   } else if (_return[0] == "!split_readnext") {

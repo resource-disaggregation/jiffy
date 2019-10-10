@@ -9,6 +9,7 @@
 #include "jiffy/storage/chain_module.h"
 #include "fifo_queue_defs.h"
 #include "jiffy/directory/directory_ops.h"
+#include <queue>
 
 namespace jiffy {
 namespace storage {
@@ -141,6 +142,8 @@ class fifo_queue_partition : public chain_module {
    */
   bool overload();
 
+  std::string split_data(std::string& data_to_send);
+
   /* Fifo queue partition */
   fifo_queue_type partition_;
 
@@ -180,6 +183,11 @@ class fifo_queue_partition : public chain_module {
   /* Head position of queue */
   std::size_t head_;
 
+  std::queue<std::string> dequeue_vector_;
+
+  std::size_t max_data_size_;
+
+  bool split_pointer_;
 };
 
 }
