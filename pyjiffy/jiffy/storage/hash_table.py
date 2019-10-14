@@ -91,7 +91,11 @@ class HashTable(DataStructureClient):
         return self._run_repeated([HashTableOps.get, key])[1]
 
     def exists(self, key):
-        return self._run_repeated([HashTableOps.exists, key])[1] == b('true')
+        try:
+            self._run_repeated([HashTableOps.exists, key])[0]
+        except:
+            return False
+        return True
 
     def update(self, key, value):
         return self._run_repeated([HashTableOps.update, key, value])[1]
@@ -100,7 +104,7 @@ class HashTable(DataStructureClient):
         self._run_repeated([HashTableOps.upsert, key, value])
 
     def remove(self, key):
-        return self._run_repeated([HashTableOps.remove, key])[1]
+        return self._run_repeated([HashTableOps.remove, key])[0]
 
     def _block_id(self, args):
         i = bisect_right(self.slots, crc.crc16(encode(args[1])))

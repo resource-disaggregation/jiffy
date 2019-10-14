@@ -123,6 +123,7 @@ std::string hash_table_client::remove(const std::string &key) {
       redo = true;
     }
   } while (redo);
+  THROW_IF_NOT_OK(_return);
   return _return[0];
 }
 

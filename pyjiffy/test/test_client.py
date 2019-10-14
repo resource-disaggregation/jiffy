@@ -193,10 +193,10 @@ class TestClient(TestCase):
 
         # Test remove
         for i in range(0, 1000):
-            self.assertEqual(b(str(i + 1000)), kv.remove(b(str(i))))
+            self.assertEqual(b("!ok"), kv.remove(b(str(i))))
 
         for i in range(1000, 2000):
-            self.assertRaises(KeyError, kv.remove, b(str(i)))
+            self.assertEqual(b("!ok"), kv.remove(b(str(i))))
 
         for i in range(0, 1000):
             self.assertRaises(KeyError, kv.get, b(str(i)))
@@ -366,7 +366,7 @@ class TestClient(TestCase):
 
             self.assertEqual(2, len(client.fs.dstatus("/a/file.txt").data_blocks))
             for i in range(0, 2000):
-                self.assertEqual(b(str(i)), kv.remove(b(str(i))))
+                self.assertEqual(b("!ok"), kv.remove(b(str(i))))
             self.assertEqual(1, len(client.fs.dstatus("/a/file.txt").data_blocks))
         finally:
             client.disconnect()

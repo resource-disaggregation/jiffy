@@ -53,7 +53,7 @@ class Queue(DataStructureClient):
                 self.enqueue_partition += 1
 
                 while True:
-                    response = self.blocks[self.enqueue_partition].run_command([QueueOps.enqueue, remaining_data])
+                    response = self.blocks[self._block_id(args)].run_command([QueueOps.enqueue, remaining_data])
                     if response[0] != b('!redo'):
                         break
         elif response[0] == b('!split_dequeue'):
@@ -66,13 +66,15 @@ class Queue(DataStructureClient):
                     self.blocks.append(
                         ReplicaChainClient(self.fs, self.path, self.client_cache, chain, QueueOps.op_types))
                 self.dequeue_partition += 1
-                response = self.blocks[self.dequeue_partition].run_command([QueueOps.dequeue])
+                if self.dequeue_partition + self.start_ > self.read_partition:
+                    self.read_partition = self.dequeue_partition + self.start_
+                response = self.blocks[self._block_id(args)].run_command([QueueOps.dequeue])
                 if response[0] == b('!ok'):
                     result += response[1]
             response[1] = result
         elif response[0] == b('!split_readnext'):
             result = b('')
-            while response[0] == b('!split_dequeue'):
+            while response[0] == b('!split_readnext'):
                 data_part = response[1]
                 result += data_part
                 if self.read_partition >= len(self.blocks) - 1:
@@ -80,10 +82,13 @@ class Queue(DataStructureClient):
                     self.blocks.append(
                         ReplicaChainClient(self.fs, self.path, self.client_cache, chain, QueueOps.op_types))
                 self.read_partition += 1
-                response = self.blocks[self.read_partition].run_command([QueueOps.read_next, str(self.read_partition)])
+                response = self.blocks[self._block_id(args)].run_command([QueueOps.read_next, str(self.read_partition)])
                 if response[0] == b('!ok'):
                     result += response[1]
             response[1] = result
+        if response[0] == "!block_moved":
+            self._refresh()
+            return None
         return response
 
     def _block_id(self, args):

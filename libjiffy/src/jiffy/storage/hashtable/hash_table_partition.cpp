@@ -229,7 +229,7 @@ void hash_table_partition::remove(response &_return, const arg_list &args) {
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
         RETURN_ERR("!exporting", export_target_str_);
       }
-      RETURN_ERR("!key_not_found");
+      RETURN_OK();
     END_CATCH_HANDLER;
   }
   // Redirected remove
