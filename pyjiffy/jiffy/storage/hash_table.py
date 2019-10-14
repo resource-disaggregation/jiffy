@@ -1,5 +1,6 @@
 import math
 import time
+import copy
 from bisect import bisect_right
 
 from jiffy.directory.directory_client import ReplicaChain
@@ -62,16 +63,24 @@ class HashTable(DataStructureClient):
 
     def _handle_redirect(self, args, response):
         while b(response[0]) == b('!exporting'):
+            args_copy = copy.deepcopy(args)
+            if args[0] == b("update") or args[0] == b("upsert"):
+                args_copy += [response[2], response[3]]
             block_ids = [bytes_to_str(x) for x in response[1].split(b('!'))]
             chain = ReplicaChain(block_ids, 0, 0, rpc_storage_mode.rpc_in_memory)
-            response = ReplicaChainClient(self.fs, self.path, self.client_cache, chain,
-                                          HashTableOps.op_types).run_command_redirected(args)
+            while True:
+                response = ReplicaChainClient(self.fs, self.path, self.client_cache, chain,
+                                            HashTableOps.op_types).run_command_redirected(args)
+                if b(response[0]) != b("!redo"):
+                    break
         if b(response[0]) == b('!block_moved'):
             self._refresh()
             return None
         if b(response[0]) == b('!full'):
             time.sleep(0.001 * math.pow(2, self.redo_times))
             self.redo_times += 1
+            return None
+        if b(response[0]) == b("!redo"):
             return None
         return response
 

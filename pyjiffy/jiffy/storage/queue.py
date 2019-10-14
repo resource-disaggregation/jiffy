@@ -22,13 +22,20 @@ class Queue(DataStructureClient):
         self.enqueue_partition = 0
         self.dequeue_partition = 0
         self.read_partition = 0
-        self.read_offset = 0
+        self.start_ = 0
+
+    def _refresh(self):
+        self._refresh()
+        self.start_ = int(self.block_info.data_blocks[0])
+        self.enqueue_partition = len(self.block_info.data_blocks) - 1
+        self.dequeue_partition = 0
+        if self.read_partition < self.start_:
+            self.read_partition = self.start_
+
 
     def _handle_redirect(self, args, response):
         cmd = args[0]
         if response[0] == b('!ok'):
-            if cmd == QueueOps.read_next:
-                self.read_offset += self.METADATA_LEN + len(response[1])
             return response
         elif response[0] == b('!redo'):
             return None
@@ -73,10 +80,8 @@ class Queue(DataStructureClient):
                     self.blocks.append(
                         ReplicaChainClient(self.fs, self.path, self.client_cache, chain, QueueOps.op_types))
                 self.read_partition += 1
-                self.read_offset = 0
                 response = self.blocks[self.read_partition].run_command([QueueOps.read_next, str(self.read_partition)])
                 if response[0] == b('!ok'):
-                    self.read_offset += (self.METADATA_LEN + len(response[1]))
                     result += response[1]
             response[1] = result
         return response
@@ -87,7 +92,7 @@ class Queue(DataStructureClient):
         elif args[0] == QueueOps.dequeue:
             return self.dequeue_partition
         elif args[0] == QueueOps.read_next:
-            return self.read_partition
+            return self.read_partition - self.start_
         raise ValueError
 
     def put(self, item):
@@ -97,7 +102,7 @@ class Queue(DataStructureClient):
         return self._run_repeated([QueueOps.dequeue])[1]
 
     def read_next(self):
-        return self._run_repeated([QueueOps.read_next, str(self.read_offset)])[1]
+        return self._run_repeated([QueueOps.read_next])[1]
 
     class ReadIterator(object):
         def __init__(self, q):

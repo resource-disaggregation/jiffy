@@ -140,6 +140,15 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
     _return[1] = result;
   }
 }
+std::size_t fifo_queue_client::block_id(fifo_queue_cmd_id &cmd) {
+  switch (cmd) {
+    case fifo_queue_cmd_id::fq_enqueue: return enqueue_partition_;
+    break;
+    case fifo_queue_cmd_id::fq_dequeue: return dequeue_partition_;
+    case fifo_queue_cmd_id::fq_readnext: return read_partition_ - start_;
+
+  }
+}
 
 }
 }
