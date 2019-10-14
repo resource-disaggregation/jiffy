@@ -15,15 +15,13 @@ binary make_binary(const std::string& str, const block_memory_allocator<uint8_t>
 TEST_CASE("local_write_test", "[write]") {
   block_memory_manager manager;
   block_memory_allocator<uint8_t> binary_allocator(&manager);
-  hash_table_type table(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type());
-  auto ltable = table.lock_table();
+  hash_table_type table;
   auto bkey = binary("key", binary_allocator);
   auto bval = binary("value", binary_allocator);
-  ltable.insert(bkey, bval);
+  table.emplace(std::make_pair(bkey, bval));
   auto ser = std::make_shared<csv_serde>(binary_allocator);
   local_store store(ser);
-  REQUIRE_NOTHROW(store.write(ltable, "/tmp/a.txt"));
-  ltable.unlock();
+  REQUIRE_NOTHROW(store.write(table, "/tmp/a.txt"));
   std::ifstream in("/tmp/a.txt", std::ifstream::in);
   std::string data;
   in >> data;
@@ -40,13 +38,10 @@ TEST_CASE("local_read_test", "[read]") {
   block_memory_allocator<uint8_t> binary_allocator(&manager);
   auto ser = std::make_shared<csv_serde>(binary_allocator);
   local_store store(ser);
-  //hash_table_type table(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type(), allocator);
-  hash_table_type table(HASH_TABLE_DEFAULT_SIZE, hash_type(), equal_type());
-  auto ltable = table.lock_table();
+  hash_table_type table;
   auto bkey = make_binary("key", binary_allocator);
   auto bval = make_binary("value", binary_allocator);
-  REQUIRE_NOTHROW(store.read("/tmp/a.txt", ltable));
-  REQUIRE(ltable.at(bkey) == bval);
-  ltable.unlock();
+  REQUIRE_NOTHROW(store.read("/tmp/a.txt", table));
+  REQUIRE(table.at(bkey) == bval);
   std::remove("/tmp/a.txt");
 }

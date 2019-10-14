@@ -4,7 +4,7 @@ from jiffy.storage.replica_chain_client import ReplicaChainClient
 
 
 class DataStructureClient(object):
-    def __init__(self, fs, path, block_info, op_types, timeout_ms=1000):
+    def __init__(self, fs, path, block_info, op_types, timeout_ms):
         self.redo_times = 0
         self.fs = fs
         self.path = path

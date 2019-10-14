@@ -100,7 +100,7 @@ std::vector<std::string> replica_chain_client::run_command(const std::vector<std
 std::vector<std::string> replica_chain_client::run_command_redirected(const std::vector<std::string> &args) {
   auto args_copy = args;
   if (args_copy.back() != "!redirected")
-    args_copy.push_back("!redirected");
+    args_copy.emplace_back("!redirected");
   send_command(args_copy);
   return recv_response();
 }

@@ -60,11 +60,28 @@ class hash_table_client : public data_structure_client {
   std::string update(const std::string &key, const std::string &value);
 
   /**
+   * @brief Put key value pair, update if key exists
+   * @param key Key
+   * @param value Value
+   * @return Response of the command
+   */
+  std::string upsert(const std::string &key, const std::string &value);
+
+  /**
    * @brief Remove key value pair
    * @param key Key
    * @return Response of the command
    */
   std::string remove(const std::string &key);
+
+  /**
+   * @brief Check if key exists
+   * @param key Key
+   * @return Bool, true if key exists
+   */
+  bool exists(const std::string &key);
+
+
  private:
   /**
    * @brief Fetch block identifier for particular key

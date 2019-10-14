@@ -12,7 +12,6 @@
 
 using namespace ::jiffy::storage;
 using namespace ::jiffy::directory;
-using namespace ::jiffy::auto_scaling;
 using namespace ::apache::thrift::transport;
 using namespace ::jiffy::utils;
 
@@ -21,7 +20,6 @@ using namespace ::jiffy::utils;
 #define DIRECTORY_SERVICE_PORT 9090
 #define STORAGE_SERVICE_PORT 9091
 #define STORAGE_MANAGEMENT_PORT 9092
-#define AUTO_SCALING_SERVICE_PORT 9095
 
 // TODO: Disable auto-scaling for these tests?
 
@@ -129,10 +127,6 @@ TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
   std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
 
-  auto as_server = auto_scaling_server::create(HOST, DIRECTORY_SERVICE_PORT, HOST, AUTO_SCALING_SERVICE_PORT);
-  std::thread auto_scaling_thread([&as_server]{as_server->serve(); });
-  test_utils::wait_till_server_ready(HOST, AUTO_SCALING_SERVICE_PORT);
-
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
@@ -154,16 +148,11 @@ TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.remove(std::to_string(i)) == std::to_string(i));
+    REQUIRE_NOTHROW(client.remove(std::to_string(i)));
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_THROWS_AS(client.get(std::to_string(i)), std::logic_error);
-  }
-
-  as_server->stop();
-  if(auto_scaling_thread.joinable()) {
-    auto_scaling_thread.join();
   }
 
   storage_server->stop();

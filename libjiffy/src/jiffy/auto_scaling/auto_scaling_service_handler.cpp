@@ -80,8 +80,8 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     auto cur_name = std::to_string(slot_range_beg) + "_" + std::to_string(slot_range_end);
     auto src = std::make_shared<replica_chain_client>(fs, path, cur_chain, HT_OPS);
     auto dst = std::make_shared<replica_chain_client>(fs, path, dst_chain, HT_OPS);
-    src->run_command({"update_partition", cur_name, "exporting$" + dst_name + "$" + exp_target});
     dst->run_command({"update_partition", dst_name, "importing$" + dst_name});
+    src->run_command({"update_partition", cur_name, "exporting$" + dst_name + "$" + exp_target});
     auto finish_updating_partition_before = time_utils::now_us();
 
     // Transfer the data from source to destination
@@ -122,8 +122,13 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     auto storage_capacity = std::stoull(conf.at("storage_capacity"));
 
     // Find a merge target
+    std::shared_ptr<replica_chain_client> src;
     auto start = time_utils::now_us();
-    auto src = std::make_shared<replica_chain_client>(fs, path, cur_chain, HT_OPS);
+    try {
+      src = std::make_shared<replica_chain_client>(fs, path, cur_chain, HT_OPS);
+    } catch (std::exception &e) {
+      UNLOCK_AND_THROW("Unable to connect to src partition");
+    }
     auto update_resp = src->run_command({"update_partition", "merging", "merging"}); // TODO: Why "merging" twice?
     if (update_resp[0] == "!fail") {
       UNLOCK_AND_THROW("Partition is under auto_scaling");
@@ -142,24 +147,25 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
 
     // Connect the two replica chains
     std::shared_ptr<replica_chain_client> dst;
+    std::string dst_old_name;
     try {
       dst = std::make_shared<replica_chain_client>(fs, path, merge_target, HT_OPS);
-    } catch (apache::thrift::transport::TTransportException &e) {
-      LOG(log_level::info) << "The merge target chain has been deleted";
+      dst_old_name = dst->run_command({"update_partition", merge_target.name, "importing$" + name}).front();
+    } catch (std::exception &e) {
       src->run_command({"update_partition", name, "regular$" + name});
       UNLOCK_AND_RETURN;
     }
- 
+
     auto exp_target = pack(merge_target);
-    auto dst_old_name = dst->run_command({"update_partition", merge_target.name, "importing$" + name});
+
 
     // We don't need to update the src partition cause it will be deleted anyway
-    if (dst_old_name[0] == "!fail") {
+    if (dst_old_name == "!fail") {
       src->run_command({"update_partition", name, "regular$" + name});
       UNLOCK_AND_RETURN;
     }
     UNLOCK;
-    auto dst_slot_range = string_utils::split(dst_old_name[0], '_', 2);
+    auto dst_slot_range = string_utils::split(dst_old_name, '_', 2);
     auto dst_name = (std::stoi(dst_slot_range[0]) == merge_range_end) ?
                     std::to_string(merge_range_beg) + "_" + dst_slot_range[1]:
                     dst_slot_range[0] + "_" + std::to_string(merge_range_end);
@@ -171,7 +177,7 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     auto finish_data_transmission = time_utils::now_us();
 
     // Update partition at directory server
-    fs->update_partition(path, dst_old_name[0], dst_name, "regular");
+    fs->update_partition(path, dst_old_name, dst_name, "regular");
     auto finish_update_partition_dir = time_utils::now_us();
 
     // Setting name and metadata for src and dst
@@ -289,16 +295,16 @@ bool auto_scaling_service_handler::find_merge_target(directory::replica_chain &m
       std::shared_ptr<replica_chain_client> client;
       try {
         client = std::make_shared<replica_chain_client>(fs, path, r, HT_OPS, 0);
-      } catch (apache::thrift::transport::TTransportException &e) {
+        auto ret = client->run_command({"get_storage_size"});
+        if (ret[0] == "!block_moved") continue;
+        auto size = std::stoull(ret[1]);
+        if (size < (storage_capacity / 2) && size < find_min_size) {
+          merge_target = r;
+          find_min_size = size;
+          able_to_merge = true;
+        }
+      } catch (std::exception &e) {
         continue;
-      }
-      auto ret = client->run_command({"get_storage_size"});
-      if (ret[0] == "!block_moved") continue;
-      auto size = std::stoull(ret[1]);
-      if (size < (storage_capacity / 2) && size < find_min_size) {
-        merge_target = r;
-        find_min_size = size;
-        able_to_merge = true;
       }
     }
   }

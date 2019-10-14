@@ -13,15 +13,16 @@
 namespace jiffy {
 namespace storage {
 
-/**
- * Hash partition state
- */
+#define BEGIN_CATCH_HANDLER                       \
+  try {                                           \
+  auto it = block_.find(make_binary(args[1]))
 
-enum hash_partition_state {
-  regular = 0,
-  importing = 1,
-  exporting = 2
-};
+
+
+#define END_CATCH_HANDLER                         \
+  } catch (std::bad_alloc &e) {                   \
+  RETURN_ERR("!redo");                            \
+}
 
 /* Key value partition structure class, inherited from chain module */
 class hash_table_partition : public chain_module {
@@ -96,22 +97,6 @@ class hash_table_partition : public chain_module {
    */
   bool in_slot_range(int32_t slot) {
     return slot >= slot_range_.first && slot < slot_range_.second;
-  }
-
-  /**
-   * @brief Set block state
-   * @param state Block state
-   */
-  void state(hash_partition_state state) {
-    state_ = state;
-  }
-
-  /**
-   * @brief Fetch block state
-   * @return Block state
-   */
-  const hash_partition_state &state() const {
-    return state_;
   }
 
   /**
@@ -318,8 +303,22 @@ class hash_table_partition : public chain_module {
    */
   bool underload();
 
+  /**
+   * @brief Remove all keys in the remove buffer
+   */
+  void buffer_remove();
+
+  /**
+   * @brief Construct binary string for temporary values
+   * @param str String
+   * @return Binary string
+   */
+  binary make_temporary_binary(const std::string &str) {
+    return binary(str, temporary_data_allocator_);
+  }
+
   /* Cuckoo hash map partition */
-  hash_table_type block_;
+  std::unordered_map<key_type, value_type, hash_type, equal_type> block_;
 
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
@@ -338,9 +337,6 @@ class hash_table_partition : public chain_module {
 
   /* Bool partition dirty bit */
   bool dirty_;
-
-  /* Block state, regular, importing or exporting */
-  hash_partition_state state_;
 
   /* Hash slot range */
   std::pair<int32_t, int32_t> slot_range_;
@@ -374,6 +370,15 @@ class hash_table_partition : public chain_module {
 
   /* Data update mutex, we want only one update function happen at a time */
   std::mutex update_lock_;
+
+  /* Buffer remove cache */
+  std::map<std::string, int> remove_cache_;
+
+  /* Temporary data allocator */
+  allocator<uint8_t> temporary_data_allocator_;
+
+  /* Temporary data manager */
+  block_memory_manager* temporary_data_manager_;
 
 };
 
