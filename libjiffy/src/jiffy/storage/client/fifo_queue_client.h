@@ -61,13 +61,6 @@ class fifo_queue_client : data_structure_client {
    */
   void handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) override;
 
-  /**
-   * @brief Fetch block identifier for fifo queue commands
-   * @param cmd Command
-   * @return Block identifier
-   */
-  std::size_t block_id(fifo_queue_cmd_id cmd);
-
   /* Dequeue partition id */
   std::size_t dequeue_partition_;
   /* Enqueue partition id */

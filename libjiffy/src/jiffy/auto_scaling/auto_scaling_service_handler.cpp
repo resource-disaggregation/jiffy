@@ -150,7 +150,8 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     std::string dst_old_name;
     try {
       dst = std::make_shared<replica_chain_client>(fs, path, merge_target, HT_OPS);
-      dst_old_name = dst->run_command({"update_partition", merge_target.name, "importing$" + name}).front();
+      dst->send_command({"update_partition", merge_target.name, "importing$" + name});
+      dst_old_name = dst->recv_response().front();
     } catch (std::exception &e) {
       src->run_command({"update_partition", name, "regular$" + name});
       UNLOCK_AND_RETURN;

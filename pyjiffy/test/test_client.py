@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 import time
+import threading, queue
 
 try:
     import ConfigParser as configparser
@@ -217,6 +218,22 @@ class TestClient(TestCase):
         for i in range(1000, 2000):
             self.assertRaises(KeyError, q.get)
 
+    def queue_worker(self, client, type, result_queue, ops):
+        q = client.open_queue('/a/file.txt')
+        if type:
+            for i in range(0, ops):
+                try:
+                    q.put(b(str(i)))
+                except KeyError as k:
+                    self.fail('Received error message: {}'.format(k))
+        else:
+            for i in range(0, ops * 10):
+                try:
+                    q.get()
+                    result_queue.put(1)
+                except KeyError as k:
+                    continue
+
     def file_ops(self, w, r):
         for i in range(0, 1000):
             try:
@@ -425,3 +442,28 @@ class TestClient(TestCase):
         finally:
             client.disconnect()
             self.stop_servers()
+    def test_queue_multithread(self):
+        self.start_servers()
+        client = self.jiffy_client()
+        threads = list()
+        workers = 3
+        ops = 1000
+        try:
+            client.create_queue('/a/file.txt', 'local://tmp')
+            self.assertTrue(client.fs.exists('/a/file.txt'))
+            result_queue = queue.Queue()
+            for index in range(workers):
+                x = threading.Thread(target=self.queue_worker, args=(client, True, result_queue, ops))
+                threads.append(x)
+                x.start()
+            for index in range(workers):
+                x = threading.Thread(target=self.queue_worker, args=(client, False, result_queue, ops))
+                threads.append(x)
+                x.start()
+            for index, thread in enumerate(threads):
+                thread.join()
+            self.assertEqual(workers * ops, result_queue.qsize())
+        finally:
+            client.disconnect()
+            self.stop_servers()
+

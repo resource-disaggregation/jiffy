@@ -45,7 +45,7 @@ void fifo_queue_client::enqueue(const std::string &item) {
   bool redo;
   do {
     try {
-      _return = blocks_[block_id(fifo_queue_cmd_id::fq_enqueue)]->run_command(args);
+      _return = blocks_[enqueue_partition_]->run_command(args);
       handle_redirect(_return, args);
       redo = false;
     } catch (redo_error &e) {
@@ -61,7 +61,7 @@ std::string fifo_queue_client::dequeue() {
   bool redo;
   do {
     try {
-      _return = blocks_[fifo_queue_cmd_id::fq_dequeue]->run_command(args);
+      _return = blocks_[dequeue_partition_]->run_command(args);
       handle_redirect(_return, args);
       redo = false;
     } catch (redo_error &e) {
@@ -79,7 +79,7 @@ std::string fifo_queue_client::read_next() {
   do {
     try {
       // Use partition name instead of offset for read_next to avoid refreshing
-      _return = blocks_[fifo_queue_cmd_id::fq_readnext]->run_command(args);
+      _return = blocks_[read_partition_ - start_]->run_command(args);
       handle_redirect(_return, args);
       redo = false;
     } catch (redo_error &e) {
@@ -148,16 +148,6 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
   if (_return[0] == "!block_moved") {
     refresh();
     throw redo_error();
-  }
-}
-std::size_t fifo_queue_client::block_id(fifo_queue_cmd_id cmd) {
-  switch (cmd) {
-    case fifo_queue_cmd_id::fq_enqueue: return enqueue_partition_;
-    case fifo_queue_cmd_id::fq_dequeue: return dequeue_partition_;
-    case fifo_queue_cmd_id::fq_readnext: return read_partition_ - start_;
-    default: {
-      throw std::logic_error("Undefined fifo queue operation");
-    }
   }
 }
 

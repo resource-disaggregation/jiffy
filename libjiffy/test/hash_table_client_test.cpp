@@ -21,7 +21,6 @@ using namespace ::jiffy::utils;
 #define STORAGE_SERVICE_PORT 9091
 #define STORAGE_MANAGEMENT_PORT 9092
 
-// TODO: Disable auto-scaling for these tests?
 
 TEST_CASE("hash_table_client_put_get_test", "[put][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
@@ -135,8 +134,10 @@ TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
 
   data_status status;
+  std::map<std::string, std::string> conf;
+  conf.emplace("hashtable.auto_scale", "false");
   REQUIRE_NOTHROW(status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
-      {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}));
+      {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"}, conf));
 
   hash_table_client client(tree, "/sandbox/file.txt", status);
   for (std::size_t i = 0; i < 1000; ++i) {
