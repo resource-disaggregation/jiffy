@@ -70,7 +70,7 @@ class HashTable(DataStructureClient):
             chain = ReplicaChain(block_ids, 0, 0, rpc_storage_mode.rpc_in_memory)
             while True:
                 response = ReplicaChainClient(self.fs, self.path, self.client_cache, chain,
-                                            HashTableOps.op_types).run_command_redirected(args)
+                                            HashTableOps.op_types).run_command_redirected(args_copy)
                 if b(response[0]) != b("!redo"):
                     break
         if b(response[0]) == b('!block_moved'):
