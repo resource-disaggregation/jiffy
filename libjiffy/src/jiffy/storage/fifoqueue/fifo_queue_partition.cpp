@@ -126,6 +126,18 @@ void fifo_queue_partition::update_partition(response &_return, const arg_list &a
   RETURN_OK();
 }
 
+void fifo_queue_partition::qsize(response &_return, const arg_list &args) {
+
+}
+
+void fifo_queue_partition::in_rate(response &_return, const arg_list &args) {
+
+}
+
+void fifo_queue_partition::out_rate(response &_return, const arg_list &args) {
+
+}
+
 void fifo_queue_partition::run_command(response &_return, const arg_list &args) {
   auto cmd_name = args[0];
   switch (command_id(cmd_name)) {
@@ -143,6 +155,9 @@ void fifo_queue_partition::run_command(response &_return, const arg_list &args) 
       break;
     case fifo_queue_cmd_id::fq_update_partition:
       update_partition(_return, args);
+      break;
+    case fifo_queue_cmd_id::fq_qsize:
+      qsize(_return, args);
       break;
     default: {
       _return.emplace_back("!no_such_command");
