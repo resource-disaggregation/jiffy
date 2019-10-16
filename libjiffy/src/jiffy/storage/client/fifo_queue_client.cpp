@@ -90,6 +90,18 @@ std::string fifo_queue_client::read_next() {
   return _return[1];
 }
 
+std::size_t fifo_queue_client::qsize() {
+  return 0;
+}
+
+double fifo_queue_client::in_rate() {
+  return 0;
+}
+
+double fifo_queue_client::out_rate() {
+  return 0;
+}
+
 void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
   auto cmd_name = args.front();
   if (_return[0] == "!redo") {

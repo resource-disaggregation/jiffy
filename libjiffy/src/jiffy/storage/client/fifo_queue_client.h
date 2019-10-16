@@ -53,6 +53,24 @@ class fifo_queue_client : data_structure_client {
    */ 
   std::string read_next();
 
+  /**
+   * @brief Fetch Queue size
+   * @return Queue size
+   */
+  std::size_t qsize();
+
+  /**
+   * @brief Fetch in rate of the queue
+   * @return Queue in rate
+   */
+  double in_rate();
+
+  /**
+   * @brief Fetch out rate of the queue
+   * @return Queue out rate
+   */
+  double out_rate();
+
  private:
   /**
    * @brief Handle command in redirect case

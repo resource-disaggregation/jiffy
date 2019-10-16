@@ -163,6 +163,11 @@ class fifo_queue_partition : public chain_module {
   bool overload();
 
   /**
+   * @brief Check if block is underloaded
+   * @return Bool value, true if block is empty
+   */
+  bool underload();
+  /**
    * @brief Update read head pointer
    * @return Bool value, true if pointer updated
    */
