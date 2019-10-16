@@ -9,7 +9,7 @@ add_executable(storaged src/storage_server.cpp
         src/server_storage_tracker.cpp
         src/server_storage_tracker.h)
 
-add_dependencies(storaged boost_ep jemalloc_ep)
+add_dependencies(storaged boost_ep jemalloc_ep thrift_ep awssdk_ep)
 
 target_link_libraries(storaged jiffy ${JEMALLOC_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 

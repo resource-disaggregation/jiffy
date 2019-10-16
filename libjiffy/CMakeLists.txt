@@ -272,7 +272,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             test/auto_scaling_test.cpp
             test/test_utils.h)
     target_link_libraries(jiffy_tests jiffy)
-    add_dependencies(jiffy_tests catch_ep)
+    add_dependencies(jiffy_tests catch_ep boost_ep jemalloc_ep thrift_ep awssdk_ep)
     # Register test
     add_test(JiffyTest jiffy_tests)
   endif ()
