@@ -1,5 +1,7 @@
+from jiffy.directory.directory_client import ReplicaChain
+from jiffy.directory.ttypes import rpc_storage_mode
 from jiffy.storage.command import CommandType
-from jiffy.storage.compat import b
+from jiffy.storage.compat import b, bytes_to_str
 from jiffy.storage.data_structure_client import DataStructureClient
 from jiffy.storage.replica_chain_client import ReplicaChainClient
 
@@ -39,7 +41,8 @@ class Queue(DataStructureClient):
                 remaining_data = data[len(data) - remaining_data_len: len(data)]
 
                 if self.enqueue_partition >= len(self.blocks) - 1:
-                    chain = response[2].split('!')
+                    block_ids = [bytes_to_str(x) for x in response[2].split(b('!'))]
+                    chain = ReplicaChain(block_ids, 0, 0, rpc_storage_mode.rpc_in_memory)
                     self.blocks.append(
                         ReplicaChainClient(self.fs, self.path, self.client_cache, chain, QueueOps.op_types))
 
@@ -54,7 +57,8 @@ class Queue(DataStructureClient):
             result += response[1]
             while response[0] == b('!split_dequeue'):
                 if len(response) == 3:
-                    chain = response[2].split('!')
+                    block_ids = [bytes_to_str(x) for x in response[2].split(b('!'))]
+                    chain = ReplicaChain(block_ids, 0, 0, rpc_storage_mode.rpc_in_memory)
                     self.blocks.append(
                         ReplicaChainClient(self.fs, self.path, self.client_cache, chain, QueueOps.op_types))
                     self.dequeue_partition += 1
