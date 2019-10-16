@@ -220,6 +220,9 @@ class fifo_queue_partition : public chain_module {
 
   /* Head position for read next operation */
   std::size_t read_head_;
+
+  /* Boolean indicating whether the operations are redirected to the next chain */
+  bool redirected_;
 };
 
 }
