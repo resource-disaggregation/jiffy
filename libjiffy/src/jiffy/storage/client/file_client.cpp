@@ -1,6 +1,7 @@
 #include "file_client.h"
 #include "jiffy/utils/logger.h"
 #include "jiffy/utils/string_utils.h"
+#include "jiffy/directory/directory_ops.h"
 #include <algorithm>
 #include <thread>
 #include <utility>
@@ -27,7 +28,11 @@ file_client::file_client(std::shared_ptr<directory::directory_interface> fs,
   auto ret = blocks_[block_id()]->run_command(get_storage_capacity_args);
   THROW_IF_NOT_OK(ret);
   block_size_ = std::stoul(ret[1]);
-  auto_scaling_ = static_cast<bool>(std::stoi(ret[2]));
+  try {
+    auto_scaling_ = (status.get_tag("file.auto_scale") == "true");
+  } catch (directory::directory_ops_exception &e) {
+    auto_scaling_ = true;
+  }
 }
 
 int file_client::read(std::string& buf, size_t size) {

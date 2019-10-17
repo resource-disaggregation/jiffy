@@ -107,7 +107,7 @@ void file_partition::get_storage_capacity(response &_return, const arg_list &arg
   if (args.size() != 1) {
     RETURN_ERR("!args_error");
   }
-  RETURN_OK(std::to_string(manager_->mb_capacity()), std::to_string(auto_scale_));
+  RETURN_OK(std::to_string(manager_->mb_capacity()));
 }
 
 void file_partition::run_command(response &_return, const arg_list &args) {

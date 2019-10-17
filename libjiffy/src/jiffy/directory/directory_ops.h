@@ -821,7 +821,7 @@ class data_status {
   std::string get_tag(const std::string &key) const {
     if (tags_.find(key) != tags_.end())
       return tags_.at(key);
-    throw new directory_ops_exception("tag " + key + " not found");
+    throw directory_ops_exception("tag " + key + " not found");
   }
 
   /**
