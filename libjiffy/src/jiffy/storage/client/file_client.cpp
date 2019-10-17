@@ -42,7 +42,7 @@ int file_client::read(std::string& buf, size_t size) {
   std::size_t remain_size = file_size - cur_partition_ * block_size_ - cur_offset_;
   std::size_t remaining_data = std::min(remain_size, size);
   if(remaining_data == 0)
-    return -1;
+    return 0;
   // Parallel read here
   std::size_t start_partition = block_id();
   std::size_t count = 0;
@@ -64,10 +64,10 @@ int file_client::read(std::string& buf, size_t size) {
     buf += blocks_[start_partition + k]->recv_response().back();
   }
   auto after_size = buf.size();
-  return after_size - previous_size;
+  return static_cast<int>(after_size - previous_size);
 }
 
-std::size_t file_client::write(const std::string &data) {
+int file_client::write(const std::string &data) {
   std::size_t file_size = (last_partition_ + 1) * block_size_;
   std::vector<std::string> _return;
 
@@ -86,8 +86,9 @@ std::size_t file_client::write(const std::string &data) {
     }
   }
 
-  if(num_chain_needed && !auto_scaling_)
-    throw std::logic_error("Insufficient blocks");
+  if(num_chain_needed && !auto_scaling_) {
+    return -1;
+  }
 
   // First allocate new blocks if needed
   std::vector<std::string> add_block_args
@@ -99,9 +100,13 @@ std::size_t file_client::write(const std::string &data) {
       last_partition_ += num_chain_needed;
       last_offset_ = 0;
       num_chain_needed = 0;
-      for (auto x = _return.begin() + 1; x < _return.end(); x++) {
-        auto chain = string_utils::split(*x, '!');
-        blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FILE_OPS));
+      try {
+        for (auto x = _return.begin() + 1; x < _return.end(); x++) {
+          auto chain = string_utils::split(*x, '!');
+          blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FILE_OPS));
+        }
+      } catch (std::exception &e) {
+        return -1;
       }
     }
   }
