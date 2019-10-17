@@ -15,13 +15,15 @@ class DataStructureClient(object):
                        in self.block_info.data_blocks]
 
     def _refresh(self):
-        self.block_info = self.fs.dstatus(self.path)
-        self.blocks.clear()
-        for chain in self.block_info.data_blocks:
+        while True:
+            self.blocks.clear()
+            self.block_info = self.fs.dstatus(self.path)
             try:
-                self.blocks.append(ReplicaChainClient(self.fs, self.path, self.client_cache, chain, self.op_types))
+                for chain in self.block_info.data_blocks:
+                    self.blocks.append(ReplicaChainClient(self.fs, self.path, self.client_cache, chain, self.op_types))
             except StandardError as e:
                 continue
+            break
 
     def _handle_redirect(self, args, response):
         raise NotImplementedError()

@@ -5,6 +5,7 @@ import subprocess
 import sys
 import time
 import threading, queue
+from enum import Enum
 
 try:
     import ConfigParser as configparser
@@ -21,6 +22,9 @@ from thrift.transport import TTransport, TSocket
 from jiffy import JiffyClient, b, Flags
 from jiffy.storage.subscriber import Notification
 
+class QueryType(Enum):
+    GET_QUERY = 0
+    PUT_QUERY = 1
 
 def wait_till_server_ready(host, port):
     check = True
@@ -218,15 +222,15 @@ class TestClient(TestCase):
         for i in range(1000, 2000):
             self.assertRaises(KeyError, q.get)
 
-    def queue_worker(self, client, type, result_queue, ops):
+    def queue_worker(self, client, query_type, result_queue, ops):
         q = client.open_queue('/a/file.txt')
-        if type:
+        if query_type == QueryType.PUT_QUERY:
             for i in range(0, ops):
                 try:
                     q.put(b(str(i)))
                 except KeyError as k:
                     self.fail('Received error message: {}'.format(k))
-        else:
+        elif query_type == QueryType.GET_QUERY:
             for i in range(0, ops * 10):
                 try:
                     q.get()
@@ -234,23 +238,25 @@ class TestClient(TestCase):
                 except KeyError as k:
                     continue
 
-    def file_ops(self, w, r):
+    def file_ops(self, c):
         for i in range(0, 1000):
             try:
-                w.write(b(str(i)))
+                c.write(b(str(i)))
             except KeyError as k:
                 self.fail('Received error message: {}'.format(k))
 
+        self.assertTrue(c.seek(0))
+
         for i in range(0, 1000):
-            self.assertEqual(b(str(i)), r.read(len(b(str(i)))))
+            self.assertEqual(b(str(i)), c.read(len(b(str(i)))))
 
         for i in range(1000, 2000):
-            self.assertRaises(KeyError, r.read, len(b(str(i))))
+            self.assertRaises(KeyError, c.read, len(b(str(i))))
 
-        self.assertTrue(r.seek(0))
+        self.assertTrue(c.seek(0))
 
         for i in range(0, 1000):
-            self.assertEqual(b(str(i)), r.read(len(b(str(i)))))
+            self.assertEqual(b(str(i)), c.read(len(b(str(i)))))
 
     def test_lease_worker(self):
         self.start_servers()
@@ -294,10 +300,9 @@ class TestClient(TestCase):
         self.start_servers()
         client = self.jiffy_client()
         try:
-            w = client.create_file('/a/file.txt', 'local://tmp')
+            c = client.create_file('/a/file.txt', 'local://tmp')
             self.assertTrue(client.fs.exists('/a/file.txt'))
-            r = client.open_file('/a/file.txt')
-            self.file_ops(w, r)
+            self.file_ops(c)
         finally:
             client.disconnect()
             self.stop_servers()
@@ -453,11 +458,11 @@ class TestClient(TestCase):
             self.assertTrue(client.fs.exists('/a/file.txt'))
             result_queue = queue.Queue()
             for index in range(workers):
-                x = threading.Thread(target=self.queue_worker, args=(client, True, result_queue, ops))
+                x = threading.Thread(target=self.queue_worker, args=(client, QueryType.PUT_QUERY, result_queue, ops))
                 threads.append(x)
                 x.start()
             for index in range(workers):
-                x = threading.Thread(target=self.queue_worker, args=(client, False, result_queue, ops))
+                x = threading.Thread(target=self.queue_worker, args=(client, QueryType.GET_QUERY, result_queue, ops))
                 threads.append(x)
                 x.start()
             for index, thread in enumerate(threads):
