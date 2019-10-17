@@ -103,7 +103,7 @@ void file_partition::add_blocks(response &_return, const arg_list &args) {
   RETURN_ERR("!blocks_not_ready");
 }
 
-void file_partition::register_client(response &_return, const arg_list &args) {
+void file_partition::get_storage_capacity(response &_return, const arg_list &args) {
   if (args.size() != 1) {
     RETURN_ERR("!args_error");
   }
@@ -123,7 +123,7 @@ void file_partition::run_command(response &_return, const arg_list &args) {
       break;
     case file_cmd_id::file_add_blocks:add_blocks(_return, args);
       break;
-    case file_cmd_id::file_register_client:register_client(_return, args);
+    case file_cmd_id::file_get_storage_capacity:get_storage_capacity(_return, args);
       break;
     default: {
       _return.emplace_back("!no_such_command");

@@ -83,11 +83,11 @@ class file_partition : public chain_module {
   void add_blocks(response &_return, const arg_list &args);
 
   /**
-   * @brief Register a file client
+   * @brief Get storage capacity of the partition
    * @param _return Response
    * @param args Arguments
    */
-  void register_client(response &_return, const arg_list &args);
+  void get_storage_capacity(response &_return, const arg_list &args);
 
   /**
    * @brief Run command on file partition

@@ -23,8 +23,8 @@ file_client::file_client(std::shared_ptr<directory::directory_interface> fs,
     blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FILE_OPS, timeout_ms_));
   }
   last_partition_ = status.data_blocks().size() - 1;
-  std::vector<std::string> register_args{"register_client"};
-  auto ret = blocks_[block_id()]->run_command(register_args);
+  std::vector<std::string> get_storage_capacity_args{"get_storage_capacity"};
+  auto ret = blocks_[block_id()]->run_command(get_storage_capacity_args);
   THROW_IF_NOT_OK(ret);
   block_size_ = std::stoul(ret[1]);
   auto_scaling_ = static_cast<bool>(std::stoi(ret[2]));
@@ -53,11 +53,10 @@ int file_client::read(std::string& buf, size_t size) {
       cur_offset_ = 0;
       cur_partition_++;
     }
-    if (remaining_data == 0) break;
   }
   auto previous_size = buf.size();
   for (std::size_t k = 0; k < count; k++) {
-    buf.append(blocks_[start_partition + k]->recv_response().back());
+    buf += blocks_[start_partition + k]->recv_response().back();
   }
   auto after_size = buf.size();
   return after_size - previous_size;
@@ -93,6 +92,7 @@ std::size_t file_client::write(const std::string &data) {
     _return = blocks_[last_partition_]->run_command(add_block_args);
     if (_return[0] == "!block_allocated") {
       last_partition_ += num_chain_needed;
+      last_offset_ = 0;
       num_chain_needed = 0;
       for (auto x = _return.begin() + 1; x < _return.end(); x++) {
         auto chain = string_utils::split(*x, '!');
@@ -128,7 +128,6 @@ std::size_t file_client::write(const std::string &data) {
   for (std::size_t i = 0; i < count; i++) {
     blocks_[start_partition + i]->recv_response();
   }
-
   return data.size();
 
 }

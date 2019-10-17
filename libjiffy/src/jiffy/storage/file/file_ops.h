@@ -20,7 +20,7 @@ enum file_cmd_id : uint32_t {
   file_clear = 2,
   file_update_partition = 3,
   file_add_blocks = 4,
-  file_register_client = 5
+  file_get_storage_capacity = 5
 };
 
 }

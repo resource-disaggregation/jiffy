@@ -554,85 +554,99 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
   }
 }
 
-//TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][management_server]") {
-//  auto alloc = std::make_shared<sequential_block_allocator>();
-//  auto block_names = test_utils::init_block_names(1000, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
-//  alloc->add_blocks(block_names);
-//  auto blocks = test_utils::init_file_blocks(block_names, 50000);
-//
-//  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
-//  std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
-//  test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
-//
-//  auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
-//  std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
-//  test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
-//
-//  auto as_server = auto_scaling_server::create(HOST, DIRECTORY_SERVICE_PORT, HOST, AUTO_SCALING_SERVICE_PORT);
-//  std::thread auto_scaling_thread([&as_server] { as_server->serve(); });
-//  test_utils::wait_till_server_ready(HOST, AUTO_SCALING_SERVICE_PORT);
-//
-//  auto sm = std::make_shared<storage_manager>();
-//  auto t = std::make_shared<directory_tree>(alloc, sm);
-//
-//  auto dir_server = directory_server::create(t, HOST, DIRECTORY_SERVICE_PORT);
-//  std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
-//  test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
-//
-//  data_status
-//      status = t->create("/sandbox/scale_mix.txt", "file", "/tmp", 1, 5, 0, perms::all(), {"0"}, {"regular"}, {});
-//  file_writer writer(t, "/sandbox/scale_mix.txt", status);
-//  file_reader reader(t, "/sandbox/scale_mix.txt", status);
-//  std::size_t file_size = 0;
-//  std::size_t iter = 10000;
-//  std::size_t current_offset = 0;
-//  for (std::size_t i = 0; i < iter; i++) {
-//    std::size_t j = rand_utils::rand_uint32(0, 2);
-//    std::string ret;
-//    std::size_t string_size = rand_utils::rand_uint32(0, 102400);
-//    switch (j) {
-//      case 0:
-//        REQUIRE_NOTHROW(writer.write(std::string(string_size, 'a')));
-//        current_offset += string_size;
-//        if (current_offset > file_size) {
-//          file_size = current_offset;
-//        }
-//        break;
-//      case 1:
-//        REQUIRE_NOTHROW(reader.read(string_size));
-//        break;
-//      case 2:
-//        std::size_t seek_offset = rand_utils::rand_uint32(0, file_size);
-//        REQUIRE(reader.seek(seek_offset));
-//        current_offset = seek_offset;
-//        break;
-//    }
-//  }
-//  REQUIRE_NOTHROW(reader.seek(0));
-//  for (std::size_t i = 0; i < (std::size_t) (file_size / 102400); i++)
-//    REQUIRE(reader.read(102400) == std::string(102400, 'a'));
-//  REQUIRE(reader.read(file_size % 102400) == std::string(file_size % 102400, 'a'));
-//
-//  as_server->stop();
-//  if (auto_scaling_thread.joinable()) {
-//    auto_scaling_thread.join();
-//  }
-//
-//  storage_server->stop();
-//  if (storage_serve_thread.joinable()) {
-//    storage_serve_thread.join();
-//  }
-//
-//  mgmt_server->stop();
-//  if (mgmt_serve_thread.joinable()) {
-//    mgmt_serve_thread.join();
-//  }
-//
-//  dir_server->stop();
-//  if (dir_serve_thread.joinable()) {
-//    dir_serve_thread.join();
-//  }
-//}
+TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][management_server]") {
+  auto alloc = std::make_shared<sequential_block_allocator>();
+  auto block_names = test_utils::init_block_names(1000, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
+  alloc->add_blocks(block_names);
+  auto blocks = test_utils::init_file_blocks(block_names, 50000);
+
+  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
+  std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
+
+  auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
+  std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
+
+  auto as_server = auto_scaling_server::create(HOST, DIRECTORY_SERVICE_PORT, HOST, AUTO_SCALING_SERVICE_PORT);
+  std::thread auto_scaling_thread([&as_server] { as_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, AUTO_SCALING_SERVICE_PORT);
+
+  auto sm = std::make_shared<storage_manager>();
+  auto t = std::make_shared<directory_tree>(alloc, sm);
+
+  auto dir_server = directory_server::create(t, HOST, DIRECTORY_SERVICE_PORT);
+  std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
+  test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
+
+  data_status
+      status = t->create("/sandbox/scale_mix.txt", "file", "/tmp", 1, 5, 0, perms::all(), {"0"}, {"regular"}, {});
+  file_client client(t, "/sandbox/scale_mix.txt", status);
+  std::size_t file_size = 0;
+  std::size_t iter = 10000;
+  std::size_t current_offset = 0;
+  for (std::size_t i = 0; i < iter; i++) {
+    std::size_t j = rand_utils::rand_uint32(0, 2);
+    std::string ret;
+    std::size_t string_size = rand_utils::rand_uint32(0, 102400);
+    switch (j) {
+      case 0:
+        REQUIRE_NOTHROW(client.write(std::string(string_size, 'a')));
+        current_offset += string_size;
+        if (current_offset > file_size) {
+          file_size = current_offset;
+        }
+        break;
+      case 1:
+        {
+          std::string buf;
+          int ret;
+          REQUIRE_NOTHROW(ret = client.read(buf, string_size));
+          if(ret != -1) {
+            current_offset += ret;
+            REQUIRE(ret == buf.size());
+          }
+          break;
+        }
+      case 2:
+        std::size_t seek_offset = rand_utils::rand_uint32(0, file_size);
+        REQUIRE(client.seek(seek_offset));
+        current_offset = seek_offset;
+        break;
+    }
+  }
+  REQUIRE_NOTHROW(client.seek(0));
+  for (std::size_t i = 0; i < (std::size_t) (file_size / 102400); i++) {
+    std::string buf;
+    buf.clear();
+    REQUIRE_NOTHROW(client.read(buf, 102400));
+    REQUIRE(buf == std::string(102400, 'a'));
+  }
+  std::string buf;
+  buf.clear();
+  REQUIRE_NOTHROW(client.read(buf, file_size % 102400));
+  REQUIRE(buf == std::string(file_size % 102400, 'a'));
+
+  as_server->stop();
+  if (auto_scaling_thread.joinable()) {
+    auto_scaling_thread.join();
+  }
+
+  storage_server->stop();
+  if (storage_serve_thread.joinable()) {
+    storage_serve_thread.join();
+  }
+
+  mgmt_server->stop();
+  if (mgmt_serve_thread.joinable()) {
+    mgmt_serve_thread.join();
+  }
+
+  dir_server->stop();
+  if (dir_serve_thread.joinable()) {
+    dir_serve_thread.join();
+  }
+}
 
 TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
