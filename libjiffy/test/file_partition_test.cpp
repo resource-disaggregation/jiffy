@@ -27,7 +27,7 @@ TEST_CASE("file_write_read_test", "[write][read]") {
   }
   response resp;
   REQUIRE_NOTHROW(block.read(resp, {"read", std::to_string(read_pos + 1), std::to_string(std::to_string(1).size())}));
-  REQUIRE(resp[0] == "!msg_not_found");
+  REQUIRE(resp[1] == std::string(std::to_string(1).size(), 0));
 }
 
 TEST_CASE("file_write_clear_read_test", "[write][read]") {
@@ -45,14 +45,13 @@ TEST_CASE("file_write_clear_read_test", "[write][read]") {
     response resp;
     REQUIRE_NOTHROW(block.clear(resp, {"clear"}));
     REQUIRE(resp[0] == "!ok");
-    REQUIRE(block.size() == 0);
   }
 
   int read_pos = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
     REQUIRE_NOTHROW(block.read(resp, {"read", std::to_string(read_pos), std::to_string(std::to_string(i).size())}));
-    REQUIRE(resp[0] == "!msg_not_found");
+    REQUIRE(resp[1] == std::string(std::to_string(i).size(), 0));
     read_pos += std::to_string(i).size();
   }
 }

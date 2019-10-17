@@ -429,8 +429,7 @@ class binary_serde_impl : public serde {
 
   size_t serialize_impl(const file_type &table, const std::shared_ptr<std::ostream> &out) {
     std::size_t msg_size = table.size();
-    out->write(reinterpret_cast<const char *>(&msg_size), sizeof(size_t))
-        .write(reinterpret_cast<const char *>(table.data()), msg_size);
+    out->write(reinterpret_cast<const char *>(table.data()), msg_size);
     out->flush();
     auto sz = out->tellp();
     return static_cast<std::size_t>(sz);
@@ -490,16 +489,11 @@ class binary_serde_impl : public serde {
    */
 
   size_t deserialize_impl(const std::shared_ptr<std::istream> &in, file_type &table) {
-    std::size_t offset = 0;
-    while (!in->eof()) {
-      std::size_t msg_size;
-      in->read(reinterpret_cast<char *>(&msg_size), sizeof(msg_size));
-      std::string msg;
-      msg.resize(msg_size);
-      in->read(&msg[0], msg_size);
-      table.write(msg, offset);
-      offset += msg.size();
-    }
+    std::size_t msg_size = table.size();
+    std::string msg;
+    msg.resize(msg_size);
+    in->read(&msg[0], msg_size);
+    table.write(msg, 0);
     auto sz = in->tellg();
     return static_cast<std::size_t>(sz);
   }

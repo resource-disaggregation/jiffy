@@ -48,45 +48,46 @@ class file_partition : public chain_module {
   std::size_t size() const;
 
   /**
-   * @brief Check if block is empty
-   * @return Bool value, true if empty
-   */
-  bool empty() const;
-
-  /**
    * @brief Write data to the file
    * @param _return Response
    * @param args Arguments
    */
-  void write(response& _return, const arg_list &args);
+  void write(response &_return, const arg_list &args);
 
   /**
    * @brief Read data from the file
    * @param _return Response
    * @param args Arguments
    */
-  void read(response& _return, const arg_list &args);
-
-  /**
-   *@brief Fetch the metadata for seek
-   * @param _return Response
-   * @param args Arguments
-   */
-  void seek(response& _return, const arg_list &args);
+  void read(response &_return, const arg_list &args);
 
   /**
    * @brief Clear the file
    * @param _return Response
    * @param args Arguments
    */
-  void clear(response& _return, const arg_list &args);
+  void clear(response &_return, const arg_list &args);
 
   /**
-   * @brief Update partition with next partition pointer
+   * @brief Update partition
    * @param _return Response
    * @param args Arguments
    */
-  void update_partition(response& _return, const arg_list &args);
+  void update_partition(response &_return, const arg_list &args);
+
+  /**
+   * @brief Add blocks
+   * @param _return Response
+   * @param args Arguments
+   */
+  void add_blocks(response &_return, const arg_list &args);
+
+  /**
+   * @brief Get storage capacity of the partition
+   * @param _return Response
+   * @param args Arguments
+   */
+  void get_storage_capacity(response &_return, const arg_list &args);
 
   /**
    * @brief Run command on file partition
@@ -126,29 +127,7 @@ class file_partition : public chain_module {
    */
   void forward_all() override;
 
-  /**
-   * @brief Set next target string
-   * @param target_str Next target replica chain in string format
-   */
-  void next_target(const std::string &target_str) {
-    next_target_str_ = target_str;
-  }
-
-  /**
-   * @brief Fetch next target string
-   * @return Next target string
-   */
-  std::string next_target() const {
-    return next_target_str_;
-  }
-
  private:
-
-  /**
-   * @brief Check if block is overloaded
-   * @return Bool value, true if block size is over the high threshold capacity
-   */
-  bool overload();
 
   /* File partition */
   file_type partition_;
@@ -156,23 +135,17 @@ class file_partition : public chain_module {
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
 
-  /* High threshold */
-  double threshold_hi_;
-
   /* Bool for partition slot range splitting */
   bool scaling_up_;
 
   /* Partition dirty bit */
   bool dirty_;
 
+  /* Bool to indicate if block is successfully allocated */
+  bool block_allocated_;
+
   /* Bool value for auto scaling */
   bool auto_scale_;
-
-  /* Directory server hostname */
-  std::string directory_host_;
-
-  /* Directory server port number */
-  int directory_port_;
 
   /* Auto scaling server hostname */
   std::string auto_scaling_host_;
@@ -180,8 +153,7 @@ class file_partition : public chain_module {
   /* Auto scaling server port number */
   int auto_scaling_port_;
 
-  /* Next partition target string */
-  std::string next_target_str_;
+  std::vector<std::string> allocated_blocks_;
 
 };
 
