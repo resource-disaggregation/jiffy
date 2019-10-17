@@ -14,12 +14,13 @@ extern command_map FILE_OPS;
  * @brief File supported operations
  */
 
-enum file_cmd_id: uint32_t {
+enum file_cmd_id : uint32_t {
   file_write = 0,
   file_read = 1,
-  file_seek = 2,
-  file_clear = 3,
-  file_update_partition = 4
+  file_clear = 2,
+  file_update_partition = 3,
+  file_add_blocks = 4,
+  file_get_storage_capacity = 5
 };
 
 }

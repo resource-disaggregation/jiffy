@@ -90,23 +90,10 @@ class file_block {
   std::size_t size() const;
 
   /**
-   * @brief Fetch capacity of the block
-   * @return Capacity
-   */
-
-  std::size_t capacity();
-
-  /**
    * @brief Clear the content of the block
    */
 
   void clear();
-
-  /**
-   * @brief Check if block is empty
-   * @return Boolean, true if empty
-   */
-  bool empty() const;
 
   /**
    * @brief Fetch data pointer
@@ -124,12 +111,6 @@ class file_block {
 
   /* Data pointer */
   char *data_{};
-
-  /* Tail position */
-  std::size_t tail_{};
-
-  /* Boolean, true if the file is extended */
-  bool extend_;
 };
 
 }
