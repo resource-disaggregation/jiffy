@@ -18,8 +18,6 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
                                            const std::string &name,
                                            const std::string &metadata,
                                            const utils::property_map &conf,
-                                           const std::string &directory_host,
-                                           int directory_port,
                                            const std::string &auto_scaling_host,
                                            int auto_scaling_port)
     : chain_module(manager, name, metadata, HT_OPS),
@@ -28,8 +26,6 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
       dirty_(false),
       export_slot_range_(0, -1),
       import_slot_range_(0, -1),
-      directory_host_(directory_host),
-      directory_port_(directory_port),
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port) {
   auto ser = conf.get("hashtable.serializer", "csv");
@@ -337,12 +333,7 @@ void hash_table_partition::update_partition(response &_return, const arg_list &a
     import_slot_range(std::stoi(range[0]), std::stoi(range[1]));
   } else {
     if (metadata() == "importing") {
-      if ((import_slot_range().first != slot_range().first || import_slot_range().second != slot_range().second)
-          && is_tail()) {
-        auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
-        fs->remove_block(path(), s[1]);
-        buffer_remove();
-      }
+      buffer_remove();
       if (!underload()) {
         scaling_down_ = false;
       }

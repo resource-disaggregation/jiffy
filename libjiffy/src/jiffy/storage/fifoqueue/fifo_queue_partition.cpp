@@ -13,8 +13,6 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
                                            const std::string &name,
                                            const std::string &metadata,
                                            const utils::property_map &conf,
-                                           const std::string &directory_host,
-                                           int directory_port,
                                            const std::string &auto_scaling_host,
                                            int auto_scaling_port)
     : chain_module(manager, name, metadata, FQ_CMDS),
@@ -22,8 +20,6 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
       scaling_up_(false),
       scaling_down_(false),
       dirty_(false),
-      directory_host_(directory_host),
-      directory_port_(directory_port),
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port) {
   auto ser = conf.get("fifoqueue.serializer", "csv");

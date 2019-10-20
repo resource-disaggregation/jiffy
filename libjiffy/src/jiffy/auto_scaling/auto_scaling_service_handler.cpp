@@ -187,8 +187,11 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
 
     // Setting name and metadata for src and dst
     // We don't need to update the src partition cause it will be deleted anyway
-    dst->run_command({"update_partition", dst_name, "regular$" + name});
+    dst->run_command({"update_partition", dst_name, "regular$"});
     auto finish_update_partition_after = time_utils::now_us();
+
+    // Remove the merged chain
+    fs->remove_block(path, name);
 
     // Log auto-scaling info
     LOG(log_level::info) << "Merged slot range (" << merge_range_beg << ", " << merge_range_end << ")";

@@ -188,7 +188,7 @@ int main(int argc, char **argv) {
   std::vector<std::shared_ptr<block>> blocks;
   blocks.resize(num_blocks);
   for (size_t i = 0; i < blocks.size(); ++i) {
-    blocks[i] = std::make_shared<block>(block_ids[i], block_capacity, dir_host, dir_port, address, auto_scaling_port);
+    blocks[i] = std::make_shared<block>(block_ids[i], block_capacity, address, auto_scaling_port);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
 

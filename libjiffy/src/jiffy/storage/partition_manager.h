@@ -26,8 +26,6 @@ class partition_builder {
                                               const std::string &name,
                                               const std::string &metadata,
                                               const utils::property_map &conf,
-                                              const std::string &directory_host,
-                                              const int directory_port,
                                               const std::string &auto_scaling_host,
                                               const int auto_scaling_port) = 0;
 };
@@ -56,8 +54,6 @@ class partition_manager {
                                                        const std::string &name,
                                                        const std::string &metadata,
                                                        const utils::property_map &conf,
-                                                       const std::string &directory_host,
-                                                       const int directory_port,
                                                        const std::string &auto_scaling_host,
                                                        const int auto_scaling_port);
 
@@ -81,12 +77,10 @@ class impl##_builder : public partition_builder {                               
                                       const std::string& name,                                        \
                                       const std::string& metadata,                                    \
                                       const utils::property_map& conf,                                \
-                                      const std::string& directory_host,                              \
-                                      const int directory_port,                                       \
                                       const std::string& auto_scaling_host,                           \
                                       const int auto_scaling_port) override {                         \
-    return std::make_shared<impl>(manager, name, metadata, conf, directory_host,                      \
-                                  directory_port, auto_scaling_host, auto_scaling_port);              \
+    return std::make_shared<impl>(manager, name, metadata, conf,                                      \
+        auto_scaling_host, auto_scaling_port);                                                        \
   }                                                                                                   \
 };                                                                                                    \
                                                                                                       \

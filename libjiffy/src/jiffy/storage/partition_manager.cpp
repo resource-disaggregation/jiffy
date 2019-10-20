@@ -17,8 +17,6 @@ std::shared_ptr<chain_module> partition_manager::build_partition(block_memory_ma
                                                                  const std::string &name,
                                                                  const std::string &metadata,
                                                                  const utils::property_map &conf,
-                                                                 const std::string &directory_host,
-                                                                 const int directory_port,
                                                                  const std::string &auto_scaling_host,
                                                                  const int auto_scaling_port) {
   auto it = implementations().find(type);
@@ -29,8 +27,6 @@ std::shared_ptr<chain_module> partition_manager::build_partition(block_memory_ma
                            name,
                            metadata,
                            conf,
-                           directory_host,
-                           directory_port,
                            auto_scaling_host,
                            auto_scaling_port);
 }

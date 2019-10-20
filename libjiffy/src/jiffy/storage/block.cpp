@@ -9,8 +9,6 @@ using namespace jiffy::utils;
 
 block::block(const std::string &id,
              const size_t capacity,
-             const std::string &directory_host,
-             const int directory_port,
              const std::string &auto_scaling_host,
              const int auto_scaling_port)
     : id_(id),
@@ -20,12 +18,8 @@ block::block(const std::string &id,
                                                "default",
                                                "default",
                                                utils::property_map(),
-                                               directory_host,
-                                               directory_port,
                                                auto_scaling_host,
                                                auto_scaling_port)),
-      directory_host_(directory_host),
-      directory_port_(directory_port),
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port) {
   if (impl_ == nullptr) {
@@ -53,8 +47,6 @@ void block::setup(const std::string &type,
                                              name,
                                              metadata,
                                              conf,
-                                             directory_host_,
-                                             directory_port_,
                                              auto_scaling_host_,
                                              auto_scaling_port_);
   if (impl_ == nullptr) {
@@ -67,9 +59,7 @@ void block::destroy() {
   std::string type = "default";
   std::string name = "default";
   std::string metadata = "default";
-  std::string directory_host_ = "default";
   std::string auto_scaling_host_ = "default";
-  int directory_port_ = 0;
   int auto_scaling_port_ = 0;
   utils::property_map conf;
   impl_.reset();
@@ -78,8 +68,6 @@ void block::destroy() {
                                              name,
                                              metadata,
                                              conf,
-                                             directory_host_,
-                                             directory_port_,
                                              auto_scaling_host_,
                                              auto_scaling_port_);
   if (impl_ == nullptr) {
