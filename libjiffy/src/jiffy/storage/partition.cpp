@@ -77,9 +77,14 @@ void partition::set_name_and_metadata(const std::string &name, const std::string
   metadata_ = metadata;
 }
 
+void partition::notify(const arg_list &args) {
+  subscriptions().notify(args.front(), args[1]);
+}
+
 binary partition::make_binary(const std::string &str) {
   return binary(str, binary_allocator_);
 }
+
 
 }
 }
