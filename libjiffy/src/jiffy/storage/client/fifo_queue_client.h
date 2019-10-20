@@ -53,6 +53,24 @@ class fifo_queue_client : data_structure_client {
    */ 
   std::string read_next();
 
+  /**
+   * @brief Fetch Queue size
+   * @return Queue size
+   */
+  std::size_t qsize();
+
+  /**
+   * @brief Fetch in rate of the queue
+   * @return Queue in rate
+   */
+  double in_rate();
+
+  /**
+   * @brief Fetch out rate of the queue
+   * @return Queue out rate
+   */
+  double out_rate();
+
  private:
   /**
    * @brief Handle command in redirect case
@@ -60,6 +78,13 @@ class fifo_queue_client : data_structure_client {
    * @param _return Response
    */
   void handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) override;
+
+  /**
+   * @brief Fetch block identifier for specific command
+   * @param cmd_id Command identifier
+   * @return Block identifier
+   */
+  std::size_t block_id(fifo_queue_cmd_id cmd_id);
 
   /* Dequeue partition id */
   std::size_t dequeue_partition_;

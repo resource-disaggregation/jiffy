@@ -86,6 +86,27 @@ class fifo_queue_partition : public chain_module {
   void update_partition(response &_return, const arg_list &args);
 
   /**
+   * @brief Fetch number of elements of the queue
+   * @param _return Response
+   * @param args Arguments
+   */
+  void qsize(response &_return, const arg_list &args);
+
+  /**
+   * @brief Fetch in rate of the queue
+   * @param _return Response
+   * @param args Arguments
+   */
+  void in_rate(response &_return, const arg_list &args);
+
+  /**
+   * @brief Fetch out rate of the queue
+   * @param _return Response
+   * @param args Arguments
+   */
+  void out_rate(response &_return, const arg_list &args);
+
+  /**
    * @brief Run particular command on fifo queue partition
    * @param _return Response
    * @param args Arguments
@@ -140,6 +161,11 @@ class fifo_queue_partition : public chain_module {
   bool overload();
 
   /**
+   * @brief Check if block is underloaded
+   * @return Bool value, true if block is empty
+   */
+  bool underload();
+  /**
    * @brief Update read head pointer
    * @return Bool value, true if pointer updated
    */
@@ -192,6 +218,9 @@ class fifo_queue_partition : public chain_module {
 
   /* Head position for read next operation */
   std::size_t read_head_;
+
+  /* Boolean indicating whether the operations are redirected to the next chain */
+  bool redirected_;
 };
 
 }
