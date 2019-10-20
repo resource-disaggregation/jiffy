@@ -198,12 +198,6 @@ class fifo_queue_partition : public chain_module {
   /* Bool value for auto scaling */
   bool auto_scale_;
 
-  /* Directory server hostname */
-  std::string directory_host_;
-
-  /* Directory server port number */
-  int directory_port_;
-
   /* Auto scaling server hostname */
   std::string auto_scaling_host_;
 

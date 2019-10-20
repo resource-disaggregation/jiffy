@@ -52,6 +52,15 @@ void block_client::command_request(const sequence_id &seq, const std::vector<std
   client_->command_request(seq, block_id_, args);
 }
 
+void block_client::send_run_command(const int32_t block_id, const std::vector<std::string> &arguments) {
+  client_->send_run_command(block_id, arguments);
+
+}
+
+void block_client::recv_run_command(std::vector<std::string> &_return) {
+  client_->recv_run_command(_return);
+}
+
 block_client::command_response_reader::command_response_reader(std::shared_ptr<apache::thrift::protocol::TProtocol> prot)
     : prot_(std::move(prot)) {
   iprot_ = prot_.get();

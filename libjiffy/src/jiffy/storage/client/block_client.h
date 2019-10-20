@@ -95,6 +95,19 @@ class block_client {
 
   void command_request(const sequence_id &seq, const std::vector<std::string> &args);
 
+  /**
+   * @brief Send run command
+   * @param block_id Block identifier
+   * @param arguments Command arguments
+   */
+  void send_run_command(const int32_t block_id, const std::vector<std::string> &arguments);
+
+  /**
+   * @brief Receive response from run command
+   * @param _return Response
+   */
+  void recv_run_command(std::vector<std::string> &_return);
+
  private:
   /* Transport */
   std::shared_ptr<apache::thrift::transport::TTransport> transport_{};

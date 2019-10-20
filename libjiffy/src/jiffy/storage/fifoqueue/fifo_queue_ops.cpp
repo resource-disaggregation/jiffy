@@ -4,7 +4,7 @@ namespace jiffy {
 namespace storage {
 
 command_map FQ_CMDS = {{"enqueue", {command_type::mutator, 0}},
-                       {"dequeue", {command_type::mutator, 1}},
+                       {"dequeue", {command_type::accessor, 1}},
                        {"clear", {command_type::mutator, 2}},
                        {"update_partition", {command_type::mutator, 3}},
                        {"read_next", {command_type::accessor, 4}},

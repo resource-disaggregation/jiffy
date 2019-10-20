@@ -134,23 +134,17 @@ void fifo_queue_partition::out_rate(response &_return, const arg_list &args) {
 void fifo_queue_partition::run_command(response &_return, const arg_list &args) {
   auto cmd_name = args[0];
   switch (command_id(cmd_name)) {
-    case fifo_queue_cmd_id::fq_enqueue:
-      enqueue(_return, args);
+    case fifo_queue_cmd_id::fq_enqueue:enqueue(_return, args);
       break;
-    case fifo_queue_cmd_id::fq_dequeue:
-      dequeue(_return, args);
+    case fifo_queue_cmd_id::fq_dequeue:dequeue(_return, args);
       break;
-    case fifo_queue_cmd_id::fq_readnext:
-      read_next(_return, args);
+    case fifo_queue_cmd_id::fq_readnext:read_next(_return, args);
       break;
-    case fifo_queue_cmd_id::fq_clear:
-      clear(_return, args);
+    case fifo_queue_cmd_id::fq_clear:clear(_return, args);
       break;
-    case fifo_queue_cmd_id::fq_update_partition:
-      update_partition(_return, args);
+    case fifo_queue_cmd_id::fq_update_partition:update_partition(_return, args);
       break;
-    case fifo_queue_cmd_id::fq_qsize:
-      qsize(_return, args);
+    case fifo_queue_cmd_id::fq_qsize:qsize(_return, args);
       break;
     default: {
       _return.emplace_back("!no_such_command");
@@ -177,7 +171,7 @@ void fifo_queue_partition::run_command(response &_return, const arg_list &args) 
       LOG(log_level::warn) << "Adding new message queue partition failed: " << e.what();
     }
   }
-  if (auto_scale_ && cmd_name == "dequeue" && underload() && is_tail() && !scaling_down_ && !scaling_up_
+  if (auto_scale_ && cmd_name == "dequeue" && underload() && is_tail() && !scaling_down_ && redirected_
       && !next_target_str_.empty()) {
     try {
       LOG(log_level::info) << "Underloaded partition: " << name() << " storage = " << storage_size() << " capacity = "
@@ -257,7 +251,7 @@ bool fifo_queue_partition::overload() {
 }
 
 bool fifo_queue_partition::underload() {
-  return head_ > partition_.last_element_offset() && partition_.full() && redirected_;
+  return head_ > partition_.last_element_offset() && partition_.full();
 }
 
 REGISTER_IMPLEMENTATION("fifoqueue", fifo_queue_partition);

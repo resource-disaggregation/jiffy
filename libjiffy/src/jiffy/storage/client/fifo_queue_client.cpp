@@ -31,7 +31,7 @@ void fifo_queue_client::refresh() {
   for (const auto &block: status_.data_blocks()) {
     try {
       blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FQ_CMDS, timeout_ms_));
-      if(flag) {
+      if (flag) {
         flag = false;
         start_ = std::stoul(block.name);
       }
@@ -40,7 +40,7 @@ void fifo_queue_client::refresh() {
   // Restore pointers after refreshing
   enqueue_partition_ = blocks_.size() - 1;
   dequeue_partition_ = 0;
-  if(read_partition_ < start_) {
+  if (read_partition_ < start_) {
     read_partition_ = start_;
   }
 }
@@ -133,15 +133,16 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
       }
       dequeue_partition_++;
       auto dequeue_partition_name = dequeue_partition_ + start_;
-      if(dequeue_partition_name > read_partition_)
+      if (dequeue_partition_name > read_partition_)
         read_partition_ = dequeue_partition_name;
       do {
         _return = blocks_[block_id(fifo_queue_cmd_id::fq_dequeue)]->run_command({"dequeue"});
       } while (_return[0] == "!redo");
-      if(_return[0] != "!msg_not_found")
+      if (_return[0] == "!ok" || _return[0] == "!split_dequeue")
         result += _return[1];
     } while (_return[0] == "!split_dequeue");
-    _return[1] = result;
+    if (_return.size() >= 2)
+      _return[1] = result;
   } else if (_return[0] == "!split_readnext") {
     std::string result;
     result += _return[1];
@@ -154,7 +155,7 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
       do {
         _return = blocks_[block_id(fifo_queue_cmd_id::fq_readnext)]->run_command({"read_next"});
       } while (_return[0] == "!redo");
-      if(_return[0] != "!msg_not_found")
+      if (_return[0] != "!msg_not_found")
         result += _return[1];
     } while (_return[0] == "!split_readnext");
     _return[1] = result;
@@ -167,12 +168,9 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
 
 std::size_t fifo_queue_client::block_id(fifo_queue_cmd_id cmd_id) {
   switch (cmd_id) {
-    case fifo_queue_cmd_id::fq_enqueue:
-      return enqueue_partition_;
-    case fifo_queue_cmd_id::fq_dequeue:
-      return dequeue_partition_;
-    case fifo_queue_cmd_id::fq_readnext:
-      return read_partition_ - start_;
+    case fifo_queue_cmd_id::fq_enqueue:return enqueue_partition_;
+    case fifo_queue_cmd_id::fq_dequeue:return dequeue_partition_;
+    case fifo_queue_cmd_id::fq_readnext:return read_partition_ - start_;
     default: {
       throw std::logic_error("Fifo queue command does not exists");
     }

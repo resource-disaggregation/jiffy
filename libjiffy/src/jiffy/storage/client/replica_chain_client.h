@@ -24,7 +24,7 @@ class replica_chain_client {
   explicit replica_chain_client(std::shared_ptr<directory::directory_interface> fs,
                                 const std::string &path,
                                 const directory::replica_chain &chain,
-                                const command_map& OPS,
+                                const command_map &OPS,
                                 int timeout_ms = 1000);
 
   /**
@@ -123,6 +123,12 @@ class replica_chain_client {
   bool in_flight_;
   /* Time out */
   int timeout_ms_;
+  /* Operations for the data structure */
+  command_map OPS_;
+  /* Bool indicating if the command is accessor type */
+  bool accessor_;
+  /* Bool indicating if send run command throws an exception */
+  bool exception_;
 };
 
 }
