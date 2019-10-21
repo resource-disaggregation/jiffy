@@ -176,12 +176,12 @@ void hash_table_partition::update(response &_return, const arg_list &args) {
       if (it != block_.end()) {
         old_val = to_string(it->second);
         it->second = make_binary(args[2]);
-        RETURN_OK(old_val);
+        RETURN_OK();
       }
       if (found && block_.emplace(make_binary(args[1]), make_binary(args[2])).second) {
         if (remove_cache_.find(args[1]) != remove_cache_.end())
           remove_cache_.erase(args[1]);
-        RETURN_OK(args[4]);
+        RETURN_OK();
       }
     END_CATCH_HANDLER;
     RETURN_ERR("!key_not_found");
@@ -196,7 +196,7 @@ void hash_table_partition::update(response &_return, const arg_list &args) {
         if (metadata_ == "exporting" && in_export_slot_range(hash)) {
           RETURN_ERR("!exporting", export_target_str_, std::to_string(found), old_val);
         }
-        RETURN_OK(old_val);
+        RETURN_OK();
       }
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
         RETURN_ERR("!exporting", export_target_str_, std::to_string(found), old_val);

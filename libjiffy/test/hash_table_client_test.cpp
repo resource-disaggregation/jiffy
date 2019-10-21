@@ -92,7 +92,7 @@ TEST_CASE("hash_table_client_put_update_get_test", "[put][update][get]") {
     REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.update(std::to_string(i), std::to_string(i + 1000)) == std::to_string(i));
+    REQUIRE(client.update(std::to_string(i), std::to_string(i + 1000)) == "!ok");
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
     REQUIRE_THROWS_AS(client.update(std::to_string(i), std::to_string(i + 1000)), std::logic_error);

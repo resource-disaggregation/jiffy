@@ -88,7 +88,7 @@ std::string hash_table_client::update(const std::string &key, const std::string 
     }
   } while (redo);
   THROW_IF_NOT_OK(_return);
-  return _return[1];
+  return _return[0];
 }
 
 std::string hash_table_client::upsert(const std::string &key, const std::string &value) {

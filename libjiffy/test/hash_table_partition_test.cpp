@@ -46,7 +46,6 @@ TEST_CASE("hash_table_put_update_get_test", "[put][update][get]") {
     response resp;
     REQUIRE_NOTHROW(block.update(resp, {"update", std::to_string(i), std::to_string(i + 1000)}));
     REQUIRE(resp[0] == "!ok");
-    REQUIRE(resp[1] == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
     response resp;

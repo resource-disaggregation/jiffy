@@ -41,7 +41,7 @@ void test_hash_table_ops(std::shared_ptr<hash_table_client> table) {
   }
 
   for (size_t i = 0; i < 1000; i++) {
-    REQUIRE(table->update(std::to_string(i), std::to_string(i + 1000)) == std::to_string(i));
+    REQUIRE(table->update(std::to_string(i), std::to_string(i + 1000)) == "!ok");
   }
 
   for (size_t i = 1000; i < 2000; i++) {
