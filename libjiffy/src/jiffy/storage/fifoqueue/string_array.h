@@ -159,6 +159,12 @@ class string_array {
    */
   std::size_t max_offset() const;
 
+  /**
+   * @brief Fetch the number of elements in the string array
+   * @return Number of elements
+   */
+  std::size_t num_elements() const;
+
  private:
   /* Block memory allocator */
   block_memory_allocator<char> alloc_;
@@ -174,9 +180,6 @@ class string_array {
 
   /* Tail position */
   std::size_t tail_{};
-
-  /* Max position */
-  std::size_t max_tail_;
 
   /* Bool for split string */
   bool split_string_;

@@ -12,7 +12,10 @@
 
 namespace jiffy {
 namespace storage {
-
+enum fifo_queue_size_type: uint32_t {
+  head_size = 0,
+  tail_size = 1
+};
 /* Fifo queue partition class */
 class fifo_queue_partition : public chain_module {
  public:
@@ -213,8 +216,23 @@ class fifo_queue_partition : public chain_module {
   /* Head position for read next operation */
   std::size_t read_head_;
 
-  /* Boolean indicating whether the operations are redirected to the next chain */
-  bool redirected_;
+  /* Boolean indicating whether enqueues are redirected to the next chain */
+  bool enqueue_redirected_;
+
+  /* Boolean indicating whether dequeues are redirected to the next chain */
+  bool dequeue_redirected_;
+
+  /* Boolean indicating whether readnexts are redirected to the next chain */
+  bool readnext_redirected_;
+
+  /* Number of elements inserted in the queue partition */
+  std::size_t enqueue_num_elements_;
+
+  /* Number of elements removed from the queue partition */
+  std::size_t dequeue_num_elements_;
+
+  /* Total number of elements from all of the previous partitions */
+  std::size_t prev_num_elements_;
 };
 
 }

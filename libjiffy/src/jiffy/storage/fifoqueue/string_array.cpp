@@ -9,7 +9,6 @@ string_array::string_array(std::size_t max_size, block_memory_allocator<char> al
   data_ = alloc_.allocate(max_);
   tail_ = 0;
   last_element_offset_ = 0;
-  max_tail_ = 0;
   split_string_ = false;
 }
 
@@ -22,7 +21,6 @@ string_array::string_array(const string_array &other) {
   max_ = other.max_;
   data_ = other.data_;
   tail_ = other.tail_;
-  max_tail_ = other.max_tail_;
   split_string_ = other.split_string_;
   last_element_offset_ = other.last_element_offset_;
 }
@@ -33,14 +31,13 @@ string_array &string_array::operator=(const string_array &other) {
   data_ = other.data_;
   tail_ = other.tail_;
   last_element_offset_ = other.last_element_offset_;
-  max_tail_ = other.max_tail_;
   split_string_ = other.split_string_;
   return *this;
 }
 
 bool string_array::operator==(const string_array &other) const {
   return data_ == other.data_ && tail_ == other.tail_ && alloc_ == other.alloc_ && max_ == other.max_
-      && last_element_offset_ == other.last_element_offset_ && max_tail_ == other.max_tail_
+      && last_element_offset_ == other.last_element_offset_
       && split_string_ == other.split_string_;
 }
 
@@ -55,7 +52,6 @@ std::pair<bool, std::string> string_array::push_back(const std::string &item) {
     // Write data
     std::memcpy(data_ + tail_, item.c_str(), len);
     tail_ += len;
-    max_tail_ = std::max(tail_, max_tail_);
     return std::make_pair(true, std::string("!success"));
   } else { // Item will not be written, full item will be returned
     split_string_ = true;
@@ -93,7 +89,6 @@ std::size_t string_array::capacity() {
 void string_array::clear() {
   tail_ = 0;
   last_element_offset_ = 0;
-  max_tail_ = 0;
 }
 
 bool string_array::empty() const {

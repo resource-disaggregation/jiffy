@@ -11,6 +11,7 @@
 namespace jiffy {
 namespace storage {
 
+
 class fifo_queue_client : data_structure_client {
  public:
   /**
