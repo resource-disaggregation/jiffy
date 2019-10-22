@@ -29,7 +29,10 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
       readnext_redirected_(false),
       enqueue_num_elements_(0),
       dequeue_num_elements_(0),
-      prev_num_elements_(0) {
+      enqueue_start_num_elements_(0),
+      dequeue_start_num_elements_(0),
+      prev_num_elements_(0),
+      rate_set_(false) {
   auto ser = conf.get("fifoqueue.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
@@ -40,6 +43,7 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
   }
   threshold_hi_ = conf.get_as<double>("fifoqueue.capacity_threshold_hi", 0.95);
   auto_scale_ = conf.get_as<bool>("fifoqueue.auto_scale", true);
+  time_stamp_ = time_utils::now_us();
 }
 
 void fifo_queue_partition::enqueue(response &_return, const arg_list &args) {
@@ -47,8 +51,11 @@ void fifo_queue_partition::enqueue(response &_return, const arg_list &args) {
     RETURN_ERR("!args_error");
   }
   if (prev_num_elements_ == 0 && (args.size() == 4 && args[3] == "!redirected")) {
-    enqueue_num_elements_ += std::stoul(args[2]);
     prev_num_elements_ = std::stoul(args[2]);
+    enqueue_start_num_elements_ = prev_num_elements_;
+    dequeue_start_num_elements_ = prev_num_elements_;
+    enqueue_num_elements_ += std::stoul(args[2]);
+    // TODO Update time_period and start num elements here
   }
   auto ret = partition_.push_back(args[1]);
   if (!ret.first) {
@@ -162,14 +169,16 @@ void fifo_queue_partition::qsize(response &_return, const arg_list &args) {
 }
 
 void fifo_queue_partition::in_rate(response &_return, const arg_list &args) {
-  if(!rate_set_)
-    RETURN_ERR("!redo")
+  if(!rate_set_) {
+    RETURN_ERR("!redo");
+  }
   RETURN_OK(std::to_string(in_rate_));
 }
 
 void fifo_queue_partition::out_rate(response &_return, const arg_list &args) {
-  if(!rate_set_)
-    RETURN_ERR("!redo")
+  if(!rate_set_) {
+    RETURN_ERR("!redo");
+  }
   RETURN_OK(std::to_string(out_rate_));
 }
 
@@ -188,11 +197,16 @@ void fifo_queue_partition::run_command(response &_return, const arg_list &args) 
       break;
     case fifo_queue_cmd_id::fq_qsize:qsize(_return, args);
       break;
+    case fifo_queue_cmd_id::fq_in_rate:in_rate(_return, args);
+      break;
+    case fifo_queue_cmd_id::fq_out_rate:out_rate(_return, args);
+      break;
     default: {
       _return.emplace_back("!no_such_command");
       return;
     }
   }
+  update_rate();
   if (is_mutator(cmd_name)) {
     dirty_ = true;
   }

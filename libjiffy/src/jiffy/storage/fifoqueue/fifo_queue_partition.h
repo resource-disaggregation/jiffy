@@ -182,14 +182,16 @@ class fifo_queue_partition : public chain_module {
   }
 
   void update_rate() {
-    auto cur_time = utils::time_utils:now_ms();
-    time_period_ = cur_time - time_stamp_;
-    if(time_period_ > 1000) {
+    auto cur_time = utils::time_utils::now_us();
+    time_period_ += cur_time - time_stamp_;
+    if(time_period_ > 5000) {
       rate_set_ = true;
-      in_rate_ = (enqueue_num_elements_ - enqueue_start_num_elements_) / time_period_;
-      out_rate_ = (dequeue_num_elements_ - dequeue_start_num_elements_) / time_period_;
+      in_rate_ = (double)(enqueue_num_elements_ - enqueue_start_num_elements_) / (double)time_period_ * 1000;
+      out_rate_ = (double)(dequeue_num_elements_ - dequeue_start_num_elements_) / (double)time_period_ * 1000;
       time_period_ = 0;
       time_stamp_ = cur_time;
+      enqueue_start_num_elements_ = enqueue_num_elements_;
+      dequeue_start_num_elements_ = dequeue_num_elements_;
     }
   };
 

@@ -119,12 +119,37 @@ std::size_t fifo_queue_client::qsize() {
 }
 
 double fifo_queue_client::in_rate() {
-
-  return 0;
+  std::vector<std::string> _return;
+  std::vector<std::string> args{"in_rate"};
+  bool redo;
+  do {
+    try {
+      _return = blocks_[block_id(fifo_queue_cmd_id::fq_enqueue)]->run_command(args);
+      handle_redirect(_return, args);
+      redo = false;
+    } catch (redo_error &e) {
+      redo = true;
+    }
+  } while (redo);
+  THROW_IF_NOT_OK(_return);
+  return std::stod(_return[1]);
 }
 
 double fifo_queue_client::out_rate() {
-  return 0;
+  std::vector<std::string> _return;
+  std::vector<std::string> args{"out_rate"};
+  bool redo;
+  do {
+    try {
+      _return = blocks_[block_id(fifo_queue_cmd_id::fq_dequeue)]->run_command(args);
+      handle_redirect(_return, args);
+      redo = false;
+    } catch (redo_error &e) {
+      redo = true;
+    }
+  } while (redo);
+  THROW_IF_NOT_OK(_return);
+  return std::stod(_return[1]);
 }
 
 void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
@@ -225,7 +250,7 @@ std::size_t fifo_queue_client::block_id(fifo_queue_cmd_id cmd_id) {
     }
   }
 }
-void fifo_queue_client::handle_partition_id() {
+void fifo_queue_client::handle_partition_id(std::string& op) {
 
 }
 
