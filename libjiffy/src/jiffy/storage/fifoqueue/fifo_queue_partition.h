@@ -9,6 +9,7 @@
 #include "jiffy/storage/chain_module.h"
 #include "fifo_queue_defs.h"
 #include "jiffy/directory/directory_ops.h"
+#include "jiffy/utils/time_utils.h"
 
 namespace jiffy {
 namespace storage {
@@ -180,6 +181,18 @@ class fifo_queue_partition : public chain_module {
     return false;
   }
 
+  void update_rate() {
+    auto cur_time = utils::time_utils:now_ms();
+    time_period_ = cur_time - time_stamp_;
+    if(time_period_ > 1000) {
+      rate_set_ = true;
+      in_rate_ = (enqueue_num_elements_ - enqueue_start_num_elements_) / time_period_;
+      out_rate_ = (dequeue_num_elements_ - dequeue_start_num_elements_) / time_period_;
+      time_period_ = 0;
+      time_stamp_ = cur_time;
+    }
+  };
+
   /* Fifo queue partition */
   fifo_queue_type partition_;
 
@@ -233,6 +246,20 @@ class fifo_queue_partition : public chain_module {
 
   /* Total number of elements from all of the previous partitions */
   std::size_t prev_num_elements_;
+
+  std::size_t enqueue_start_num_elements_;
+
+  std::size_t dequeue_start_num_elements_;
+
+  std::size_t time_stamp_;
+
+  std::size_t time_period_;
+
+  double in_rate_;
+
+  double out_rate_;
+
+  bool rate_set_;
 };
 
 }

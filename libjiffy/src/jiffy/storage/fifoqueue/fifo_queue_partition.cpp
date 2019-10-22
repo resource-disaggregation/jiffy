@@ -162,11 +162,15 @@ void fifo_queue_partition::qsize(response &_return, const arg_list &args) {
 }
 
 void fifo_queue_partition::in_rate(response &_return, const arg_list &args) {
-
+  if(!rate_set_)
+    RETURN_ERR("!redo")
+  RETURN_OK(std::to_string(in_rate_));
 }
 
 void fifo_queue_partition::out_rate(response &_return, const arg_list &args) {
-
+  if(!rate_set_)
+    RETURN_ERR("!redo")
+  RETURN_OK(std::to_string(out_rate_));
 }
 
 void fifo_queue_partition::run_command(response &_return, const arg_list &args) {
