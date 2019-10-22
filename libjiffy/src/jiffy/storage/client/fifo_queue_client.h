@@ -80,6 +80,8 @@ class fifo_queue_client : data_structure_client {
    */
   void handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) override;
 
+  void handle_partition_id(std::string& op);
+
   /**
    * @brief Fetch block identifier for specific command
    * @param cmd_id Command identifier

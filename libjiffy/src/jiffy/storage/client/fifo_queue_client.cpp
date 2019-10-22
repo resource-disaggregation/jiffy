@@ -225,6 +225,9 @@ std::size_t fifo_queue_client::block_id(fifo_queue_cmd_id cmd_id) {
     }
   }
 }
+void fifo_queue_client::handle_partition_id() {
+
+}
 
 }
 }
