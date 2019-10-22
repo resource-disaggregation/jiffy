@@ -159,7 +159,7 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
   } else if (_return[0] == "!split_enqueue") {
     do {
       if (enqueue_partition_ >= blocks_.size() - 1) {
-        if(_return.size() == 4) {
+        if(_return.size() == 6) {
           auto chain = string_utils::split(_return[2], '!');
           blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FQ_CMDS));
         } else {
@@ -169,7 +169,8 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
       enqueue_partition_++;
       do {
         auto args_copy = args;
-        args_copy.emplace_back(_return.back());
+        args_copy.insert(args_copy.end(), _return.end() - 3, _return.end());
+        // TODO insert the last elements in args_copy
         _return = blocks_[block_id(fifo_queue_cmd_id::fq_enqueue)]->run_command_redirected(args_copy);
       } while (_return[0] == "!redo");
     } while (_return[0] == "!split_enqueue");
@@ -189,7 +190,9 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
       if (dequeue_partition_name > read_partition_)
         read_partition_ = dequeue_partition_name;
       do {
-        _return = blocks_[block_id(fifo_queue_cmd_id::fq_dequeue)]->run_command_redirected({"dequeue"});
+        auto args_copy = args;
+        args_copy.insert(args_copy.end(), _return.end() - 2, _return.end());
+        _return = blocks_[block_id(fifo_queue_cmd_id::fq_dequeue)]->run_command_redirected({args_copy});
       } while (_return[0] == "!redo");
       if (_return[0] == "!ok" || _return[0] == "!split_dequeue")
         result += _return[1];
@@ -233,6 +236,28 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
         _return = blocks_[block_id(fifo_queue_cmd_id::fq_dequeue)]->run_command(args);
       }
     } while (_return[0] == "!split_qsize");
+  } else if (_return[0] == "!split_rate") {
+    do {
+      if (args[0] == "in_rate") {
+        if(enqueue_partition_ >= blocks_.size() - 1) {
+          auto chain = string_utils::split(_return[1], '!');
+          blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FQ_CMDS));
+        }
+        enqueue_partition_++;
+        do {
+          _return = blocks_[block_id(fifo_queue_cmd_id::fq_enqueue)]->run_command(args);
+        } while(_return[0] == "!redo");
+      } else {
+        if(dequeue_partition_ >= blocks_.size() - 1) {
+          auto chain = string_utils::split(_return[1], '!');
+          blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, chain, FQ_CMDS));
+        }
+        dequeue_partition_++;
+        do {
+          _return = blocks_[block_id(fifo_queue_cmd_id::fq_dequeue)]->run_command(args);
+        } while(_return[0] == "!redo");
+      }
+    } while (_return[0] == "!split_rate");
   }
   if (_return[0] == "!block_moved") {
     refresh();

@@ -169,6 +169,7 @@ class fifo_queue_partition : public chain_module {
    * @return Bool value, true if block is empty
    */
   bool underload();
+
   /**
    * @brief Update read head pointer
    * @return Bool value, true if pointer updated
@@ -181,19 +182,10 @@ class fifo_queue_partition : public chain_module {
     return false;
   }
 
-  void update_rate() {
-    auto cur_time = utils::time_utils::now_us();
-    time_period_ += cur_time - time_stamp_;
-    if(time_period_ > 5000) {
-      rate_set_ = true;
-      in_rate_ = (double)(enqueue_num_elements_ - enqueue_start_num_elements_) / (double)time_period_ * 1000;
-      out_rate_ = (double)(dequeue_num_elements_ - dequeue_start_num_elements_) / (double)time_period_ * 1000;
-      time_period_ = 0;
-      time_stamp_ = cur_time;
-      enqueue_start_num_elements_ = enqueue_num_elements_;
-      dequeue_start_num_elements_ = dequeue_num_elements_;
-    }
-  };
+  /**
+   * @brief Update in rate and out rate
+   */
+  void update_rate();
 
   /* Fifo queue partition */
   fifo_queue_type partition_;
@@ -240,28 +232,35 @@ class fifo_queue_partition : public chain_module {
   /* Boolean indicating whether readnexts are redirected to the next chain */
   bool readnext_redirected_;
 
-  /* Number of elements inserted in the queue partition */
+  /* Number of elements inserted in the queue */
   std::size_t enqueue_num_elements_;
 
-  /* Number of elements removed from the queue partition */
+  /* Number of elements removed from the queue */
   std::size_t dequeue_num_elements_;
 
   /* Total number of elements from all of the previous partitions */
   std::size_t prev_num_elements_;
 
+  /* Enqueue element start */
   std::size_t enqueue_start_num_elements_;
-
+  /* Dequeue element start */
   std::size_t dequeue_start_num_elements_;
+// TODO fix names
+  std::size_t enqueue_time_stamp_;
 
-  std::size_t time_stamp_;
+  std::size_t dequeue_time_stamp_;
 
-  std::size_t time_period_;
+  std::size_t enqueue_time_period_;
+
+  std::size_t dequeue_time_period_;
 
   double in_rate_;
 
   double out_rate_;
 
-  bool rate_set_;
+  bool enqueue_rate_set_;
+
+  bool dequeue_rate_set_;
 };
 
 }

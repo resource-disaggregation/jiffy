@@ -136,7 +136,7 @@ TEST_CASE("fifo_queue_client_enqueue_qsize_dequeue_test", "[enqueue][dequeue]") 
 
 
 
-  TEST_CASE("fifo_queue_client_enqueue_in_rate_out_rate_dequeue_test", "[enqueue][dequeue]") {
+TEST_CASE("fifo_queue_client_enqueue_in_rate_out_rate_dequeue_test", "[enqueue][dequeue]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
