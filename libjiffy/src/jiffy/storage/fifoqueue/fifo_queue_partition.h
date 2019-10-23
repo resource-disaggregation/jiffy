@@ -250,23 +250,23 @@ class fifo_queue_partition : public chain_module {
   std::size_t enqueue_start_num_elements_;
   /* Dequeue element start */
   std::size_t dequeue_start_num_elements_;
-// TODO fix names
+  /* Enqueue start time */
   std::size_t enqueue_start_time_;
-
+  /* Dequeue start time */
   std::size_t dequeue_start_time_;
-
+  /* Enqueue time counter */
   std::size_t enqueue_time_count_;
-
+  /* Dequeue time counter */
   std::size_t dequeue_time_count_;
-
+  /* In rate */
   double in_rate_;
-
+  /* Out rate */
   double out_rate_;
-
-  bool enqueue_rate_set_;
-
-  bool dequeue_rate_set_;
-
+  /* Boolean indicating if in rate is set */
+  bool in_rate_set_;
+  /* Boolean indicating if out rate is set */
+  bool out_rate_set_;
+  /* Periodicity for rate calculation in microseconds */
   std::size_t periodicity_us_;
 
 };

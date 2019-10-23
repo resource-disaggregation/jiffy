@@ -32,8 +32,8 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
       prev_num_elements_(0),
       enqueue_start_num_elements_(0),
       dequeue_start_num_elements_(0),
-      enqueue_rate_set_(false),
-      dequeue_rate_set_(false) {
+      in_rate_set_(false),
+      out_rate_set_(false) {
   auto ser = conf.get("fifoqueue.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
@@ -64,14 +64,12 @@ void fifo_queue_partition::enqueue(response &_return, const arg_list &args) {
     if (!auto_scale_) {
       enqueue_redirected_ = true;
       RETURN_ERR("!redirected_enqueue",
-                 std::to_string(ret.second.size()),
                  std::to_string(enqueue_num_elements_),
                  std::to_string(enqueue_time_count_),
                  std::to_string(enqueue_start_num_elements_));
     } else if (!next_target_str_.empty()) {
       enqueue_redirected_ = true;
       RETURN_ERR("!redirected_enqueue",
-                 std::to_string(ret.second.size()),
                  next_target_str_,
                  std::to_string(enqueue_num_elements_),
                  std::to_string(enqueue_time_count_),
@@ -107,14 +105,12 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
   if (!auto_scale_) {
     dequeue_redirected_ = true;
     RETURN_ERR("!redirected_dequeue",
-               ret.second,
                std::to_string(dequeue_time_count_),
                std::to_string(dequeue_start_num_elements_));
   }
   if (!next_target_str_.empty()) {
     dequeue_redirected_ = true;
     RETURN_ERR("!redirected_dequeue",
-               ret.second,
                next_target_str_,
                std::to_string(dequeue_time_count_),
                std::to_string(dequeue_start_num_elements_));
@@ -123,7 +119,7 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
 }
 
 void fifo_queue_partition::read_next(response &_return, const arg_list &args) {
-  if (args.size() != 1) {
+  if (!(args.size() == 1 || (args.size() == 2 && args[1] == "!redirected"))) {
     RETURN_ERR("!args_error");
   }
   auto ret = partition_.at(read_head_);
@@ -135,11 +131,11 @@ void fifo_queue_partition::read_next(response &_return, const arg_list &args) {
     RETURN_ERR("!msg_not_found");
   }
   if (!auto_scale_) {
-    RETURN_ERR("!redirected_readnext", ret.second);
+    RETURN_ERR("!redirected_readnext");
   }
   if (!next_target_str_.empty()) {
     readnext_redirected_ = true;
-    RETURN_ERR("!redirected_readnext", ret.second, next_target_str_);
+    RETURN_ERR("!redirected_readnext", next_target_str_);
   }
   RETURN_ERR("!redo");
 }
@@ -158,7 +154,7 @@ void fifo_queue_partition::update_partition(response &_return, const arg_list &a
 }
 
 void fifo_queue_partition::qsize(response &_return, const arg_list &args) {
-  if (args.size() != 2) {
+  if (!(args.size() == 2 || (args.size() == 3 && args[2] == "!redirected"))) {
     RETURN_ERR("!args_error");
   }
   switch (std::stoi(args[1])) {
@@ -179,26 +175,26 @@ void fifo_queue_partition::qsize(response &_return, const arg_list &args) {
 }
 
 void fifo_queue_partition::in_rate(response &_return, const arg_list &args) {
-  if (args.size() != 1) {
+  if (!(args.size() == 1 || (args.size() == 2 && args[1] == "!redirected"))) {
     RETURN_ERR("!args_error");
   }
   if (overload() && enqueue_redirected_) {
     RETURN_ERR("!redirected_rate", next_target_str_);
   }
-  if (!enqueue_rate_set_) {
+  if (!in_rate_set_) {
     RETURN_ERR("!redo");
   }
   RETURN_OK(std::to_string(in_rate_));
 }
 
 void fifo_queue_partition::out_rate(response &_return, const arg_list &args) {
-  if (args.size() != 1) {
+  if (!(args.size() == 1 || (args.size() == 2 && args[1] == "!redirected"))) {
     RETURN_ERR("!args_error");
   }
   if (underload() && dequeue_redirected_) {
     RETURN_ERR("!redirected_rate", next_target_str_);
   }
-  if (!dequeue_rate_set_) {
+  if (!out_rate_set_) {
     RETURN_ERR("!redo");
   }
   RETURN_OK(std::to_string(out_rate_));
@@ -335,14 +331,14 @@ void fifo_queue_partition::update_rate() {
   enqueue_time_count_ += cur_time - enqueue_start_time_;
   dequeue_time_count_ += cur_time - dequeue_start_time_;
   if(enqueue_time_count_ > periodicity_us_) {
-    enqueue_rate_set_ = true;
+    in_rate_set_ = true;
     in_rate_ = (double) (enqueue_num_elements_ - enqueue_start_num_elements_) / (double) enqueue_time_count_ * 1000;
     enqueue_time_count_ = 0;
     enqueue_start_time_ = cur_time;
     enqueue_start_num_elements_ = enqueue_num_elements_;
   }
   if(dequeue_time_count_ > periodicity_us_) {
-    dequeue_rate_set_ = true;
+    out_rate_set_ = true;
     out_rate_ = (double)(dequeue_num_elements_ - dequeue_start_num_elements_) / (double)dequeue_time_count_ * 1000;
     dequeue_time_count_ = 0;
     dequeue_start_time_ = cur_time;
@@ -365,8 +361,8 @@ void fifo_queue_partition::clear_partition() {
   prev_num_elements_ = 0;
   enqueue_start_num_elements_ = 0;
   dequeue_start_num_elements_ = 0;
-  enqueue_rate_set_ = false;
-  dequeue_rate_set_ = false;
+  in_rate_set_ = false;
+  out_rate_set_ = false;
   enqueue_start_time_ = 0;
   dequeue_start_time_ = 0;
   enqueue_time_count_ = 0;
