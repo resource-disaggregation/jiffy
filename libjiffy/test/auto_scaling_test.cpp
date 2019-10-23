@@ -1241,13 +1241,13 @@ TEST_CASE("fifo_queue_client_queue_size_test", "[enqueue][dequeue]") {
     REQUIRE_NOTHROW(client.enqueue(std::string(data_size, std::to_string(i).c_str()[0])));
   }
 
-  REQUIRE(client.qsize() == 1000);
+  REQUIRE(client.length() == 1000);
 
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.dequeue() == std::string(data_size, std::to_string(i).c_str()[0]));
   }
 
-  REQUIRE(client.qsize() == 0);
+  REQUIRE(client.length() == 0);
 
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_THROWS_AS(client.dequeue(), std::logic_error);
@@ -1314,7 +1314,7 @@ TEST_CASE("fifo_queue_multiple_queue_size_test", "[enqueue][dequeue]") {
         try {
           ret = client.dequeue();
           std::size_t queue_size;
-          REQUIRE_NOTHROW(queue_size = client.qsize());
+          REQUIRE_NOTHROW(queue_size = client.length());
         } catch (std::logic_error &e) {
           continue;
         }
@@ -1331,7 +1331,7 @@ TEST_CASE("fifo_queue_multiple_queue_size_test", "[enqueue][dequeue]") {
       for (uint32_t j = 0; j < num_ops; j++) {
         REQUIRE_NOTHROW(client.enqueue(data_));
         std::size_t queue_size;
-        REQUIRE_NOTHROW(queue_size = client.qsize());
+        REQUIRE_NOTHROW(queue_size = client.length());
       }
     }));
   }
@@ -1406,7 +1406,7 @@ TEST_CASE("fifo_queue_client_in_rate_out_rate_auto_scale_test", "[enqueue][deque
   REQUIRE_NOTHROW(rate = client.out_rate());
   LOG(log_level::info) << "Out rate: " << rate;
 
-  REQUIRE(client.qsize() == 1000);
+  REQUIRE(client.length() == 1000);
 
   for (std::size_t i = 0; i < 500; ++i) {
     REQUIRE(client.dequeue() == std::to_string(i));
@@ -1417,7 +1417,7 @@ TEST_CASE("fifo_queue_client_in_rate_out_rate_auto_scale_test", "[enqueue][deque
   REQUIRE_NOTHROW(rate = client.out_rate());
   LOG(log_level::info) << "Out rate: " << rate;
 
-  REQUIRE(client.qsize() == 500);
+  REQUIRE(client.length() == 500);
 
   for (std::size_t i = 500; i < 1000; ++i) {
     REQUIRE(client.dequeue() == std::to_string(i));
@@ -1429,7 +1429,7 @@ TEST_CASE("fifo_queue_client_in_rate_out_rate_auto_scale_test", "[enqueue][deque
   REQUIRE_NOTHROW(rate = client.out_rate());
   LOG(log_level::info) << "Out rate: " << rate;
 
-  REQUIRE(client.qsize() == 0);
+  REQUIRE(client.length() == 0);
 
   as_server->stop();
   if(auto_scaling_thread.joinable()) {

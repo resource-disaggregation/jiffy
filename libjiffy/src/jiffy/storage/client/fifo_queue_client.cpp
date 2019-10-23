@@ -71,10 +71,10 @@ std::string fifo_queue_client::read_next() {
   return _return[1];
 }
 
-std::size_t fifo_queue_client::qsize() {
+std::size_t fifo_queue_client::length() {
   std::vector<std::string> _head, _tail;
-  std::vector<std::string> head_args{"qsize", std::to_string(fifo_queue_size_type::head_size)};
-  std::vector<std::string> tail_args{"qsize", std::to_string(fifo_queue_size_type::tail_size)};
+  std::vector<std::string> head_args{"length", std::to_string(fifo_queue_size_type::head_size)};
+  std::vector<std::string> tail_args{"length", std::to_string(fifo_queue_size_type::tail_size)};
   bool redo;
   do {
     try {
@@ -114,7 +114,7 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
   FIFO_QUEUE_HANDLE_REDIRECT(enqueue);
   FIFO_QUEUE_HANDLE_REDIRECT(dequeue);
   FIFO_QUEUE_HANDLE_REDIRECT(readnext);
-  FIFO_QUEUE_HANDLE_REDIRECT(qsize);
+  FIFO_QUEUE_HANDLE_REDIRECT(length);
   FIFO_QUEUE_HANDLE_REDIRECT(rate);
   if (_return[0] == "!block_moved") {
     refresh();
@@ -127,7 +127,7 @@ std::size_t fifo_queue_client::block_id(const std::vector<std::string> &args) {
     case fifo_queue_cmd_id::fq_enqueue:return enqueue_partition_;
     case fifo_queue_cmd_id::fq_dequeue:return dequeue_partition_;
     case fifo_queue_cmd_id::fq_readnext:return read_partition_ - start_;
-    case fifo_queue_cmd_id::fq_qsize:
+    case fifo_queue_cmd_id::fq_length:
       if (std::stoi(args[1]) == fifo_queue_size_type::head_size)
         return enqueue_partition_;
       else
@@ -143,11 +143,11 @@ std::size_t fifo_queue_client::block_id(const std::vector<std::string> &args) {
 void fifo_queue_client::handle_partition_id(const std::vector<std::string> &args) {
   auto cmd = FQ_CMDS[args[0]].id;
   if (cmd == fifo_queue_cmd_id::fq_enqueue
-      || (cmd == fifo_queue_cmd_id::fq_qsize && std::stoi(args[1]) == fifo_queue_size_type::head_size)
+      || (cmd == fifo_queue_cmd_id::fq_length && std::stoi(args[1]) == fifo_queue_size_type::head_size)
       || (cmd == fifo_queue_cmd_id::fq_in_rate)) {
     enqueue_partition_++;
   } else if (cmd == fifo_queue_cmd_id::fq_dequeue
-      || (cmd == fifo_queue_cmd_id::fq_qsize && std::stoi(args[1]) == fifo_queue_size_type::tail_size)
+      || (cmd == fifo_queue_cmd_id::fq_length && std::stoi(args[1]) == fifo_queue_size_type::tail_size)
       || (cmd == fifo_queue_cmd_id::fq_out_rate)) {
     dequeue_partition_++;
     if (dequeue_partition_ > enqueue_partition_) {
@@ -191,18 +191,18 @@ void fifo_queue_client::add_blocks(const std::vector<std::string> &_return, cons
   }
 
 }
-redirect_options fifo_queue_client::redirect_type(std::string &type) {
+redirect_operations fifo_queue_client::redirect_type(std::string &type) {
   if (type == "!redirected_enqueue")
-    return redirect_options::redirected_enqueue;
+    return redirect_operations::redirected_enqueue;
   if (type == "!redirected_dequeue")
-    return redirect_options::redirected_dequeue;
+    return redirect_operations::redirected_dequeue;
   if (type == "!redirected_readnext")
-    return redirect_options::redirected_readnext;
-  if (type == "!redirected_qsize")
-    return redirect_options::redirected_qsize;
+    return redirect_operations::redirected_readnext;
+  if (type == "!redirected_length")
+    return redirect_operations::redirected_length;
   if (type == "!redirected_rate")
-    return redirect_options::redirected_rate;
-  return redirect_options::non_type;
+    return redirect_operations::redirected_rate;
+  return redirect_operations::non_type;
 }
 
 }

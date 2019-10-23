@@ -94,7 +94,7 @@ class fifo_queue_partition : public chain_module {
    * @param _return Response
    * @param args Arguments
    */
-  void qsize(response &_return, const arg_list &args);
+  void length(response &_return, const arg_list &args);
 
   /**
    * @brief Fetch in rate of the queue

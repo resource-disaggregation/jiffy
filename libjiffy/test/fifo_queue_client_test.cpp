@@ -78,7 +78,7 @@ TEST_CASE("fifo_queue_client_enqueue_dequeue_test", "[enqueue][dequeue]") {
 }
 
 
-TEST_CASE("fifo_queue_client_enqueue_qsize_dequeue_test", "[enqueue][dequeue]") {
+TEST_CASE("fifo_queue_client_enqueue_length_dequeue_test", "[enqueue][dequeue]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
@@ -107,18 +107,18 @@ TEST_CASE("fifo_queue_client_enqueue_qsize_dequeue_test", "[enqueue][dequeue]") 
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_NOTHROW(client.enqueue(std::to_string(i)));
   }
-  REQUIRE(client.qsize() == 1000);
+  REQUIRE(client.length() == 1000);
 
   for (std::size_t i = 0; i < 500; ++i) {
     REQUIRE(client.dequeue() == std::to_string(i));
   }
-  REQUIRE(client.qsize() == 500);
+  REQUIRE(client.length() == 500);
 
   for (std::size_t i = 500; i < 1000; ++i) {
     REQUIRE(client.dequeue() == std::to_string(i));
   }
 
-  REQUIRE(client.qsize() == 0);
+  REQUIRE(client.length() == 0);
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -172,7 +172,7 @@ TEST_CASE("fifo_queue_client_enqueue_in_rate_out_rate_dequeue_test", "[enqueue][
   REQUIRE_NOTHROW(rate = client.out_rate());
   LOG(log_level::info) << "Out rate: " << rate;
 
-  REQUIRE(client.qsize() == 1000);
+  REQUIRE(client.length() == 1000);
 
   for (std::size_t i = 0; i < 500; ++i) {
     REQUIRE(client.dequeue() == std::to_string(i));
@@ -183,7 +183,7 @@ TEST_CASE("fifo_queue_client_enqueue_in_rate_out_rate_dequeue_test", "[enqueue][
   REQUIRE_NOTHROW(rate = client.out_rate());
   LOG(log_level::info) << "Out rate: " << rate;
 
-  REQUIRE(client.qsize() == 500);
+  REQUIRE(client.length() == 500);
 
   for (std::size_t i = 500; i < 1000; ++i) {
     REQUIRE(client.dequeue() == std::to_string(i));
@@ -195,7 +195,7 @@ TEST_CASE("fifo_queue_client_enqueue_in_rate_out_rate_dequeue_test", "[enqueue][
   REQUIRE_NOTHROW(rate = client.out_rate());
   LOG(log_level::info) << "Out rate: " << rate;
 
-  REQUIRE(client.qsize() == 0);
+  REQUIRE(client.length() == 0);
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();

@@ -153,24 +153,24 @@ void fifo_queue_partition::update_partition(response &_return, const arg_list &a
   RETURN_OK();
 }
 
-void fifo_queue_partition::qsize(response &_return, const arg_list &args) {
+void fifo_queue_partition::length(response &_return, const arg_list &args) {
   if (!(args.size() == 2 || (args.size() == 3 && args[2] == "!redirected"))) {
     RETURN_ERR("!args_error");
   }
   switch (std::stoi(args[1])) {
     case fifo_queue_size_type::head_size:
       if (overload() && enqueue_redirected_) {
-        RETURN_ERR("!redirected_qsize", next_target_str_);
+        RETURN_ERR("!redirected_length", next_target_str_);
       } else {
         RETURN_OK(std::to_string(enqueue_num_elements_));
       }
     case fifo_queue_size_type::tail_size:
       if (underload() && dequeue_redirected_) {
-        RETURN_ERR("!redirected_qsize", next_target_str_);
+        RETURN_ERR("!redirected_length", next_target_str_);
       } else {
         RETURN_OK(std::to_string(dequeue_num_elements_));
       }
-    default:throw std::logic_error("Undefined type for qsize operation");
+    default:throw std::logic_error("Undefined type for length operation");
   }
 }
 
@@ -213,7 +213,7 @@ void fifo_queue_partition::run_command(response &_return, const arg_list &args) 
       break;
     case fifo_queue_cmd_id::fq_update_partition:update_partition(_return, args);
       break;
-    case fifo_queue_cmd_id::fq_qsize:qsize(_return, args);
+    case fifo_queue_cmd_id::fq_length:length(_return, args);
       break;
     case fifo_queue_cmd_id::fq_in_rate:in_rate(_return, args);
       break;
