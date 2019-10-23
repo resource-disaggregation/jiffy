@@ -187,6 +187,11 @@ class fifo_queue_partition : public chain_module {
    */
   void update_rate();
 
+  /**
+   * @brief Clear the partition
+   */
+  void clear_partition();
+
   /* Fifo queue partition */
   fifo_queue_type partition_;
 
@@ -246,13 +251,13 @@ class fifo_queue_partition : public chain_module {
   /* Dequeue element start */
   std::size_t dequeue_start_num_elements_;
 // TODO fix names
-  std::size_t enqueue_time_stamp_;
+  std::size_t enqueue_start_time_;
 
-  std::size_t dequeue_time_stamp_;
+  std::size_t dequeue_start_time_;
 
-  std::size_t enqueue_time_period_;
+  std::size_t enqueue_time_count_;
 
-  std::size_t dequeue_time_period_;
+  std::size_t dequeue_time_count_;
 
   double in_rate_;
 
@@ -261,6 +266,9 @@ class fifo_queue_partition : public chain_module {
   bool enqueue_rate_set_;
 
   bool dequeue_rate_set_;
+
+  std::size_t periodicity_us_;
+
 };
 
 }

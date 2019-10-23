@@ -156,7 +156,7 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
   auto cmd_name = args.front();
   if (_return[0] == "!redo") {
     throw redo_error();
-  } else if (_return[0] == "!split_enqueue") {
+  } else if (_return[0] == "!redirected_enqueue") {
     do {
       if (enqueue_partition_ >= blocks_.size() - 1) {
         if(_return.size() == 6) {
@@ -173,8 +173,8 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
         // TODO insert the last elements in args_copy
         _return = blocks_[block_id(fifo_queue_cmd_id::fq_enqueue)]->run_command_redirected(args_copy);
       } while (_return[0] == "!redo");
-    } while (_return[0] == "!split_enqueue");
-  } else if (_return[0] == "!split_dequeue") {
+    } while (_return[0] == "!redirected_enqueue");
+  } else if (_return[0] == "!redirected_dequeue") {
     std::string result;
     result += _return[1];
     do {
@@ -194,12 +194,12 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
         args_copy.insert(args_copy.end(), _return.end() - 2, _return.end());
         _return = blocks_[block_id(fifo_queue_cmd_id::fq_dequeue)]->run_command_redirected({args_copy});
       } while (_return[0] == "!redo");
-      if (_return[0] == "!ok" || _return[0] == "!split_dequeue")
+      if (_return[0] == "!ok" || _return[0] == "!redirected_dequeue")
         result += _return[1];
-    } while (_return[0] == "!split_dequeue");
+    } while (_return[0] == "!redirected_dequeue");
     if (_return.size() >= 2)
       _return[1] = result;
-  } else if (_return[0] == "!split_readnext") {
+  } else if (_return[0] == "!redirected_readnext") {
     std::string result;
     result += _return[1];
     do {
@@ -216,9 +216,9 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
       } while (_return[0] == "!redo");
       if (_return[0] != "!msg_not_found")
         result += _return[1];
-    } while (_return[0] == "!split_readnext");
+    } while (_return[0] == "!redirected_readnext");
     _return[1] = result;
-  } else if (_return[0] == "!split_qsize") {
+  } else if (_return[0] == "!redirected_qsize") {
     do {
       if (std::stoi(args[1]) == fifo_queue_size_type::head_size) {
         if(enqueue_partition_ >= blocks_.size() - 1) {
@@ -235,8 +235,8 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
         dequeue_partition_++;
         _return = blocks_[block_id(fifo_queue_cmd_id::fq_dequeue)]->run_command(args);
       }
-    } while (_return[0] == "!split_qsize");
-  } else if (_return[0] == "!split_rate") {
+    } while (_return[0] == "!redirected_qsize");
+  } else if (_return[0] == "!redirected_rate") {
     do {
       if (args[0] == "in_rate") {
         if(enqueue_partition_ >= blocks_.size() - 1) {
@@ -257,7 +257,7 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
           _return = blocks_[block_id(fifo_queue_cmd_id::fq_dequeue)]->run_command(args);
         } while(_return[0] == "!redo");
       }
-    } while (_return[0] == "!split_rate");
+    } while (_return[0] == "!redirected_rate");
   }
   if (_return[0] == "!block_moved") {
     refresh();
