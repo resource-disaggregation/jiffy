@@ -19,7 +19,6 @@ enum redirect_options {
   non_type = 5
 };
 
-
 class fifo_queue_client : data_structure_client {
  public:
   /**
@@ -59,7 +58,7 @@ class fifo_queue_client : data_structure_client {
   /**
    * @brief Read next item without dequeue
    * @return Read next result
-   */ 
+   */
   std::string read_next();
 
   /**
@@ -115,7 +114,7 @@ class fifo_queue_client : data_structure_client {
    */
   void add_blocks(const std::vector<std::string> &_return, const std::vector<std::string> &args);
 
-  redirect_options redirect_type(std::string & type);
+  redirect_options redirect_type(std::string &type);
 
   /* Dequeue partition id */
   std::size_t dequeue_partition_;
@@ -129,7 +128,7 @@ class fifo_queue_client : data_structure_client {
   std::size_t start_;
   /* Boolean, true if using auto scaling */
   bool auto_scaling_;
-   
+
 };
 
 }
@@ -150,7 +149,5 @@ class fifo_queue_client : data_structure_client {
       } while (_return[0] == "!redo");                                                              \
     } while (redirect_type(_return[0]) == redirect_options::redirected_##type);                     \
   }
-
-
 
 #endif //JIFFY_FIFO_QUEUE_CLIENT_H

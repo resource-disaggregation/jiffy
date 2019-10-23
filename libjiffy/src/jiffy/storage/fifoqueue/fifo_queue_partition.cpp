@@ -330,16 +330,16 @@ void fifo_queue_partition::update_rate() {
   auto cur_time = utils::time_utils::now_us();
   enqueue_time_count_ += cur_time - enqueue_start_time_;
   dequeue_time_count_ += cur_time - dequeue_start_time_;
-  if(enqueue_time_count_ > periodicity_us_) {
+  if (enqueue_time_count_ > periodicity_us_) {
     in_rate_set_ = true;
     in_rate_ = (double) (enqueue_num_elements_ - enqueue_start_num_elements_) / (double) enqueue_time_count_ * 1000;
     enqueue_time_count_ = 0;
     enqueue_start_time_ = cur_time;
     enqueue_start_num_elements_ = enqueue_num_elements_;
   }
-  if(dequeue_time_count_ > periodicity_us_) {
+  if (dequeue_time_count_ > periodicity_us_) {
     out_rate_set_ = true;
-    out_rate_ = (double)(dequeue_num_elements_ - dequeue_start_num_elements_) / (double)dequeue_time_count_ * 1000;
+    out_rate_ = (double) (dequeue_num_elements_ - dequeue_start_num_elements_) / (double) dequeue_time_count_ * 1000;
     dequeue_time_count_ = 0;
     dequeue_start_time_ = cur_time;
     dequeue_start_num_elements_ = dequeue_num_elements_;

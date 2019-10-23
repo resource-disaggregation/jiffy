@@ -192,15 +192,15 @@ void fifo_queue_client::add_blocks(const std::vector<std::string> &_return, cons
 
 }
 redirect_options fifo_queue_client::redirect_type(std::string &type) {
-  if(type == "!redirected_enqueue")
+  if (type == "!redirected_enqueue")
     return redirect_options::redirected_enqueue;
-  if(type == "!redirected_dequeue")
+  if (type == "!redirected_dequeue")
     return redirect_options::redirected_dequeue;
-  if(type == "!redirected_readnext")
+  if (type == "!redirected_readnext")
     return redirect_options::redirected_readnext;
-  if(type == "!redirected_qsize")
+  if (type == "!redirected_qsize")
     return redirect_options::redirected_qsize;
-  if(type == "!redirected_rate")
+  if (type == "!redirected_rate")
     return redirect_options::redirected_rate;
   return redirect_options::non_type;
 }
