@@ -614,7 +614,7 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
     dir_serve_thread.join();
   }
 }
-/*
+
 TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(1000, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -708,7 +708,7 @@ TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][manag
     dir_serve_thread.join();
   }
 }
-*/
+
 TEST_CASE("file_auto_scale_large_data_test", "[directory_service][storage_server][management_server]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(21, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -1143,7 +1143,7 @@ TEST_CASE("fifo_queue_auto_scale_mix_test", "[directory_service][storage_server]
   }
 }
 
-TEST_CASE("fifo_queue_client_large_data_test", "[enqueue][dequeue]") {
+TEST_CASE("fifo_queue_large_data_test", "[enqueue][dequeue]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(64, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
@@ -1206,7 +1206,7 @@ TEST_CASE("fifo_queue_client_large_data_test", "[enqueue][dequeue]") {
 
 
 
-TEST_CASE("fifo_queue_client_queue_size_test", "[enqueue][dequeue]") {
+TEST_CASE("fifo_queue_queue_size_test", "[enqueue][dequeue]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(64, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
@@ -1237,17 +1237,20 @@ TEST_CASE("fifo_queue_client_queue_size_test", "[enqueue][dequeue]") {
   fifo_queue_client client(tree, "/sandbox/file.txt", status);
 
   const int data_size = 1024 * 512;
+  std::size_t length = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_NOTHROW(client.enqueue(std::string(data_size, std::to_string(i).c_str()[0])));
+    length += data_size;
   }
 
-  REQUIRE(client.length() == 1000);
+  REQUIRE(client.length() == length);
 
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.dequeue() == std::string(data_size, std::to_string(i).c_str()[0]));
+    length -= data_size;
   }
 
-  REQUIRE(client.length() == 0);
+  REQUIRE(client.length() == length);
 
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_THROWS_AS(client.dequeue(), std::logic_error);
@@ -1364,13 +1367,11 @@ TEST_CASE("fifo_queue_multiple_queue_size_test", "[enqueue][dequeue]") {
 
 }
 
-
-
-TEST_CASE("fifo_queue_client_in_rate_out_rate_auto_scale_test", "[enqueue][dequeue]") {
+TEST_CASE("fifo_queue_in_rate_out_rate_auto_scale_test", "[enqueue][dequeue]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(64, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_fifo_queue_blocks(block_names, 200);
+  auto blocks = test_utils::init_fifo_queue_blocks(block_names);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -1396,9 +1397,11 @@ TEST_CASE("fifo_queue_client_in_rate_out_rate_auto_scale_test", "[enqueue][deque
 
   fifo_queue_client client(tree, "/sandbox/file.txt", status);
   double rate;
-
+  std::size_t length = 0;
+  std::size_t data_size = 1024 * 1024;
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE_NOTHROW(client.enqueue(std::to_string(i)));
+    REQUIRE_NOTHROW(client.enqueue(std::string(data_size, 'a')));
+    length += data_size;
   }
 
   REQUIRE_NOTHROW(rate = client.in_rate());
@@ -1406,10 +1409,11 @@ TEST_CASE("fifo_queue_client_in_rate_out_rate_auto_scale_test", "[enqueue][deque
   REQUIRE_NOTHROW(rate = client.out_rate());
   LOG(log_level::info) << "Out rate: " << rate;
 
-  REQUIRE(client.length() == 1000);
+  REQUIRE(client.length() == length);
 
   for (std::size_t i = 0; i < 500; ++i) {
-    REQUIRE(client.dequeue() == std::to_string(i));
+    REQUIRE(client.dequeue() == std::string(data_size, 'a'));
+    length -= data_size;
   }
 
   REQUIRE_NOTHROW(rate = client.in_rate());
@@ -1417,10 +1421,11 @@ TEST_CASE("fifo_queue_client_in_rate_out_rate_auto_scale_test", "[enqueue][deque
   REQUIRE_NOTHROW(rate = client.out_rate());
   LOG(log_level::info) << "Out rate: " << rate;
 
-  REQUIRE(client.length() == 500);
+  REQUIRE(client.length() == length);
 
   for (std::size_t i = 500; i < 1000; ++i) {
-    REQUIRE(client.dequeue() == std::to_string(i));
+    REQUIRE(client.dequeue() == std::string(data_size, 'a'));
+    length -= data_size;
   }
 
 
@@ -1429,7 +1434,7 @@ TEST_CASE("fifo_queue_client_in_rate_out_rate_auto_scale_test", "[enqueue][deque
   REQUIRE_NOTHROW(rate = client.out_rate());
   LOG(log_level::info) << "Out rate: " << rate;
 
-  REQUIRE(client.length() == 0);
+  REQUIRE(client.length() == length);
 
   as_server->stop();
   if(auto_scaling_thread.joinable()) {
@@ -1450,6 +1455,7 @@ TEST_CASE("fifo_queue_client_in_rate_out_rate_auto_scale_test", "[enqueue][deque
     dir_serve_thread.join();
   }
 }
+
 
 TEST_CASE("fifo_queue_multiple_in_rate_out_rate_test", "[enqueue][dequeue]") {
   auto alloc = std::make_shared<sequential_block_allocator>();

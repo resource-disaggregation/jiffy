@@ -53,6 +53,7 @@ void fifo_queue_partition::enqueue(response &_return, const arg_list &args) {
     RETURN_ERR("!args_error");
   }
   if (prev_num_elements_ == 0 && args.size() == 6 && args[5] == "!redirected") {
+    in_rate_ = false;
     prev_num_elements_ = std::stoul(args[2]);
     enqueue_num_elements_ += std::stoul(args[2]);
     enqueue_time_count_ += std::stoul(args[3]);
@@ -78,7 +79,7 @@ void fifo_queue_partition::enqueue(response &_return, const arg_list &args) {
       RETURN_ERR("!redo");
     }
   }
-  enqueue_num_elements_++;
+  enqueue_num_elements_ += args[1].size();
   RETURN_OK();
 }
 
@@ -87,6 +88,7 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
     RETURN_ERR("!args_error");
   }
   if (args.size() == 4 && args[3] == "!redirected" && dequeue_num_elements_ == 0) {
+    out_rate_ = false;
     dequeue_start_num_elements_ = std::stoul(args[2]);
     dequeue_time_count_ = std::stoul(args[1]);
     dequeue_start_time_ = time_utils::now_us();
@@ -96,7 +98,7 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
   if (ret.first) {
     head_ += (string_array::METADATA_LEN + ret.second.size());
     update_read_head();
-    dequeue_num_elements_++;
+    dequeue_num_elements_ += ret.second.size();
     RETURN_OK(ret.second);
   }
   if (ret.second == "!not_available") {
@@ -202,6 +204,7 @@ void fifo_queue_partition::out_rate(response &_return, const arg_list &args) {
 
 void fifo_queue_partition::run_command(response &_return, const arg_list &args) {
   auto cmd_name = args[0];
+  update_rate();
   switch (command_id(cmd_name)) {
     case fifo_queue_cmd_id::fq_enqueue:enqueue(_return, args);
       break;
@@ -224,7 +227,6 @@ void fifo_queue_partition::run_command(response &_return, const arg_list &args) 
       return;
     }
   }
-  update_rate();
   if (is_mutator(cmd_name)) {
     dirty_ = true;
   }
@@ -246,8 +248,7 @@ void fifo_queue_partition::run_command(response &_return, const arg_list &args) 
     }
   }
   if (auto_scale_ && cmd_name == "dequeue" && underload() && is_tail() && !scaling_down_
-      && (enqueue_redirected_ || dequeue_redirected_ || readnext_redirected_)
-      && !next_target_str_.empty()) {
+      && dequeue_redirected_ && !next_target_str_.empty()) {
     try {
       LOG(log_level::info) << "Underloaded partition: " << name() << " storage = " << storage_size() << " capacity = "
                            << storage_capacity() << " partition size = " << size() << "partition capacity "
@@ -330,6 +331,8 @@ void fifo_queue_partition::update_rate() {
   auto cur_time = utils::time_utils::now_us();
   enqueue_time_count_ += cur_time - enqueue_start_time_;
   dequeue_time_count_ += cur_time - dequeue_start_time_;
+  enqueue_start_time_ = cur_time;
+  dequeue_start_time_ = cur_time;
   if (enqueue_time_count_ > periodicity_us_) {
     in_rate_set_ = true;
     in_rate_ = (double) (enqueue_num_elements_ - enqueue_start_num_elements_) / (double) enqueue_time_count_ * 1000;
