@@ -63,7 +63,6 @@ class FileClient(DataStructureClient):
         return ret
 
     def write(self, data):
-        # self._run_repeated([FileOps.write, data, b(str(self.cur_offset))])
         file_size = (self.last_partition + 1) * self.block_size
         num_chain_needed = 0
         if self.cur_partition * self.block_size + self.cur_offset > file_size:

@@ -18,6 +18,8 @@ class ReplicaChainClient:
         self.client_cache = client_cache
         self.chain = chain
         self.cmd_type = cmd_type
+        self.accessor = False
+        self.exception = False
         self._init()
 
     def _init(self):
@@ -45,24 +47,47 @@ class ReplicaChainClient:
     def is_open(self):
         return self.head.is_open() and self.tail.is_open()
 
-    def _send_command(self, client, args):
+    def _send_accessor_command(self, client, args):
+        if self.in_flight:
+            raise RuntimeError("Cannot have more than one request in-flight")
+        try:
+            self.accessor_ = True
+            client.send_run_command(self.seq, args)
+        except:
+            self.exception = True
+        self.in_flight = True
+
+    def _send_mutator_command(self, client, args):
         if self.in_flight:
             raise RuntimeError("Cannot have more than one request in-flight")
         client.send_request(self.seq, args)
         self.in_flight = True
 
+
     def send_command(self, args):
         if self.cmd_type[args[0]] == CommandType.accessor:
-            self._send_command(self.tail, args)
+            self._send_accessor_command(self.tail, args)
         else:
-            self._send_command(self.head, args)
+            self._send_mutator_command(self.head, args)
 
     def _recv_response(self):
-        rseq, result = self.response_reader.recv_response()
-        if self.seq.client_seq_no != rseq:
-            raise EOFError("SEQ: Expected={} Received={}".format(self.seq.client_seq_no, rseq))
+        result = []
+        if self.accessor:
+            if self.exception:
+                result.append(b"!block_moved")
+            try:
+                self.tail.recv_run_command(result)
+            except:
+                if not self.exception:
+                    result.append(b"!block_moved")
+            self.exception = False
+        else:
+            rseq, result = self.response_reader.recv_response()
+            if self.seq.client_seq_no != rseq:
+                raise EOFError("SEQ: Expected={} Received={}".format(self.seq.client_seq_no, rseq))
         self.seq.client_seq_no += 1
         self.in_flight = False
+        self.accessor = False
         return result
 
     def recv_response(self):

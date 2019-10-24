@@ -34,23 +34,18 @@ void fifo_queue_client::refresh() {
   status_ = fs_->dstatus(path_);
   blocks_.clear();
   bool redo;
-  bool flag = true;
   do {
     try {
       for (const auto &block: status_.data_blocks()) {
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FQ_CMDS, timeout_ms_));
-        if (flag) {
-          flag = false;
-          start_ = std::stoul(block.name);
-        }
       }
       redo = false;
     } catch (std::exception &e) {
       redo = true;
-      flag = true;
     }
   } while (redo);
   // Restore pointers after refreshing
+  start_ = std::stoul(status_.data_blocks()[0].name);
   enqueue_partition_ = blocks_.size() - 1;
   dequeue_partition_ = 0;
   if (read_partition_ < start_) {
@@ -80,22 +75,10 @@ std::string fifo_queue_client::read_next() {
 
 std::size_t fifo_queue_client::length() {
   std::vector<std::string> _head, _tail;
-  std::vector<std::string> head_args{"length", std::to_string(fifo_queue_size_type::head_size)};
   std::vector<std::string> tail_args{"length", std::to_string(fifo_queue_size_type::tail_size)};
-  bool redo;
-  do {
-    try {
-      _tail = blocks_[block_id(tail_args)]->run_command(tail_args);
-      handle_redirect(_tail, tail_args);
-      _head = blocks_[block_id(head_args)]->run_command(head_args);
-      handle_redirect(_head, head_args);
-      redo = false;
-    } catch (redo_error &e) {
-      redo = true;
-    }
-  } while (redo);
-  THROW_IF_NOT_OK(_head);
-  THROW_IF_NOT_OK(_tail);
+  run_repeated(_tail, tail_args);
+  std::vector<std::string> head_args{"length", std::to_string(fifo_queue_size_type::head_size)};
+  run_repeated(_head, head_args);
   return std::stoul(_head[1]) - std::stoul(_tail[1]);
 }
 
@@ -196,8 +179,8 @@ void fifo_queue_client::add_blocks(const std::vector<std::string> &_return, cons
       throw std::logic_error("Insufficient blocks");
     }
   }
-
 }
+
 redirect_operations fifo_queue_client::redirect_type(std::string &type) {
   if (type == "!redirected_enqueue")
     return redirect_operations::redirected_enqueue;
