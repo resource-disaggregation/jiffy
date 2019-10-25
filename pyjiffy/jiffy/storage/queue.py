@@ -1,20 +1,14 @@
-from enum import Enum
+from enum import IntEnum
 import copy
 
 from jiffy.storage.command import CommandType
-from jiffy.storage.compat import b
+from jiffy.storage.compat import b, unicode, bytes, long, basestring, bytes_to_str
 from jiffy.storage.data_structure_client import DataStructureClient
 from jiffy.storage.replica_chain_client import ReplicaChainClient
+from jiffy.directory.directory_client import ReplicaChain
+from jiffy.directory.ttypes import rpc_storage_mode
 
-class RedirectOperations(Enum):
-    REDIRECTED_ENQUEUE = 0
-    REDIRECTED_DEQUEUE = 1
-    REDIRECTED_READNEXT = 2
-    REDIRECTED_LENGTH = 3
-    REDIRECTED_RATE = 4
-    NON_TYPE = 5
-
-class FifoQueueSizeType(Enum):
+class FifoQueueSizeType(IntEnum):
     HEAD_SIZE = 0
     TAIL_SIZE = 1
 
@@ -71,13 +65,13 @@ class Queue(DataStructureClient):
                 while True:
                     args_copy = copy.deepcopy(args)
                     if args[0] == QueueOps.enqueue:
-                        args_copy.extend(args[-3:])
+                        args_copy.extend(response[-3:])
                     elif args[0] == QueueOps.dequeue:
-                        args_copy.extend(args[-2:])
-                    response = self.blocks[self._block_id(args)].run_command(args_copy)
+                        args_copy.extend(response[-2:])
+                    response = self.blocks[self._block_id(args)].run_command_redirected(args_copy)
                     if response[0] != b('!redo'):
                         break
-        if response[0] == "!block_moved":
+        if response[0] == b("!block_moved"):
             self._refresh()
             return None
         return response
@@ -111,26 +105,26 @@ class Queue(DataStructureClient):
         return self._run_repeated([QueueOps.read_next])[1]
 
     def length(self):
-        tail = int(self._run_repeated([QueueOps.length, FifoQueueSizeType.TAIL_SIZE])[1])
-        head = int(self._run_repeated([QueueOps.length, FifoQueueSizeType.HEAD_SIZE])[1])
+        tail = int(self._run_repeated([QueueOps.length, b(str(int(FifoQueueSizeType.TAIL_SIZE)))])[1])
+        head = int(self._run_repeated([QueueOps.length, b(str(int(FifoQueueSizeType.HEAD_SIZE)))])[1])
         return head - tail
 
     def in_rate(self):
-        return int(self._run_repeated([QueueOps.in_rate])[1])
+        return float(bytes_to_str(self._run_repeated([QueueOps.in_rate])[1]))
 
     def out_rate(self):
-        return int(self._run_repeated([QueueOps.out_rate])[1])
+        return float(bytes_to_str(self._run_repeated([QueueOps.out_rate])[1]))
 
     def handle_partition_id(self, args):
         if args[0] == QueueOps.enqueue or (args[0] == QueueOps.length and int(args[1]) == FifoQueueSizeType.HEAD_SIZE) or args[0] == QueueOps.in_rate:
             self.enqueue_partition += 1
         elif args[0] == QueueOps.dequeue or (args[0] == QueueOps.length and int(args[1]) == FifoQueueSizeType.TAIL_SIZE) or args[0] == QueueOps.out_rate:
-            self.dequeue_partition_ += 1
+            self.dequeue_partition += 1
             if self.dequeue_partition > self.enqueue_partition:
                 self.enqueue_partition = self.dequeue_partition
-        dequeue_partition_name = self.dequeue_partition + self.start
-        if dequeue_partition_name > self.read_partition:
-            self.read_partition = dequeue_partition_name
+            dequeue_partition_name = self.dequeue_partition + self.start
+            if dequeue_partition_name > self.read_partition:
+                self.read_partition = dequeue_partition_name
         elif args[0] == QueueOps.read_next:
             self.read_partition += 1
             if self.read_partition - self.start > self.enqueue_partition:
@@ -141,7 +135,8 @@ class Queue(DataStructureClient):
     def add_blocks(self, response, args):
         if self._block_id(args) >= len(self.block_info.data_blocks) - 1:
             if self.auto_scale:
-                chain = response[1].split('!')
+                block_ids = [bytes_to_str(j) for j in response[1].split(b('!'))]
+                chain = ReplicaChain(block_ids, 0, 0, rpc_storage_mode.rpc_in_memory)
                 self.blocks.append(
                     ReplicaChainClient(self.fs, self.path, self.client_cache, chain, QueueOps.op_types))
             else:

@@ -19,7 +19,7 @@ class ReplicaChainClient:
         self.chain = chain
         self.cmd_type = cmd_type
         self.accessor = False
-        self.exception = False
+        self.send_run_command_exception_ = False
         self._init()
 
     def _init(self):
@@ -54,7 +54,7 @@ class ReplicaChainClient:
             self.accessor = True
             client.send_run_command(int(self.chain.block_ids[-1].split(":")[-1]), args)
         except:
-            self.exception = True
+            self.send_run_command_exception_ = True
         self.in_flight = True
 
     def _send_mutator_command(self, client, args):
@@ -72,15 +72,15 @@ class ReplicaChainClient:
 
     def _recv_response(self):
         if self.accessor:
-            if self.exception:
+            if self.send_run_command_exception_:
                 result = [b"!block_moved"]
             else:
                 try:
                     result = self.tail.recv_run_command()
                 except:
-                    if not self.exception:
+                    if not self.send_run_command_exception_:
                         result = [b"!block_moved"]
-            self.exception = False
+            self.send_run_command_exception_ = False
         else:
             rseq, result = self.response_reader.recv_response()
             if self.seq.client_seq_no != rseq:

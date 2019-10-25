@@ -1,7 +1,9 @@
 from jiffy.storage.replica_chain_client import ReplicaChainClient
 from jiffy.storage.command import CommandType
-from jiffy.storage.compat import b
+from jiffy.storage.compat import b, unicode, bytes, long, basestring, bytes_to_str
 from jiffy.storage.data_structure_client import DataStructureClient
+from jiffy.directory.directory_client import ReplicaChain
+from jiffy.directory.ttypes import rpc_storage_mode
 
 
 class FileOps:
@@ -45,7 +47,7 @@ class FileClient(DataStructureClient):
         remain_size = file_size - self.cur_partition * self.block_size - self.cur_offset;
         remaining_data = min(remain_size, size)
         if remaining_data == 0:
-            return ""
+            return b""
         #Parallel read here
         start_partition = self._block_id()
         count = 0
@@ -66,27 +68,28 @@ class FileClient(DataStructureClient):
         file_size = (self.last_partition + 1) * self.block_size
         num_chain_needed = 0
         if self.cur_partition * self.block_size + self.cur_offset > file_size:
-            num_chain_needed = self.cur_partition - self.last_partition
+            num_chain_needed = int(self.cur_partition - self.last_partition)
             file_size = (self.cur_partition + 1) * self.block_size
             remain_size = file_size - self.cur_partition * self.block_size - self.cur_offset
-            num_chain_needed += (len(data) - remain_size) / self.block_size + ((len(data) - remain_size) % self.block_size != 0)
+            num_chain_needed += int((len(data) - remain_size) / self.block_size + ((len(data) - remain_size) % self.block_size != 0))
         else:
             remain_size = file_size - self.cur_partition * self.block_size - self.cur_offset
             if remain_size < len(data):
-                num_chain_needed = (len(data) - remain_size) / self.block_size + ((len(data) - remain_size) % self.block_size != 0)
+                num_chain_needed = int((len(data) - remain_size) / self.block_size + ((len(data) - remain_size) % self.block_size != 0))
 
         if num_chain_needed and not self.auto_scale:
             return -1
         # First allocate new blocks if needed
         while num_chain_needed != 0:
             _return = self.blocks[self.last_partition].run_command([FileOps.add_blocks, b(str(self.last_partition)), b(str(num_chain_needed))])
-            if _return[0] == "!block_allocated":
+            if _return[0] == b("!block_allocated"):
                 self.last_partition += num_chain_needed
                 self.last_offset = 0
                 num_chain_needed = 0
                 try:
                     for x in _return[1:]:
-                        chain = x.split('!')
+                        block_ids = [bytes_to_str(j) for j in x.split(b('!'))]
+                        chain = ReplicaChain(block_ids, 0, 0, rpc_storage_mode.rpc_in_memory)
                         self.blocks.append(
                             ReplicaChainClient(self.fs, self.path, self.client_cache, chain, FileOps.op_types))
                 except:
@@ -100,7 +103,7 @@ class FileClient(DataStructureClient):
         count = 0
         while remaining_data > 0:
             count += 1
-            data_to_write = data[len(data) - remaining_data:min(remaining_data, self.block_size - self.cur_offset)]
+            data_to_write = data[len(data) - remaining_data : len(data) - remaining_data + min(remaining_data, self.block_size - self.cur_offset)]
             self.blocks[self._block_id()].send_command([FileOps.write, data_to_write, b(str(self.cur_offset))])
             remaining_data -= len(data_to_write)
             self.cur_offset += len(data_to_write)
@@ -112,7 +115,6 @@ class FileClient(DataStructureClient):
                 if self.last_partition < self.cur_partition:
                     self.last_partition = self.cur_partition
                     self.last_offset = self.cur_offset
-
         for i in range(0, count):
             self.blocks[start_partition + i].recv_response()
 
