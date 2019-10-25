@@ -188,7 +188,7 @@ class TestClient(TestCase):
 
         # Test update
         for i in range(0, 1000):
-            self.assertEqual(b(str(i)), kv.update(b(str(i)), b(str(i + 1000))))
+            self.assertEqual(b('!ok'), kv.update(b(str(i)), b(str(i + 1000))))
 
         for i in range(1000, 2000):
             self.assertRaises(KeyError, kv.update, b(str(i)), b(str(i + 1000)))

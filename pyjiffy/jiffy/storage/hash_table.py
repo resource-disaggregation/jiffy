@@ -24,7 +24,7 @@ class HashTableOps:
                 get: CommandType.accessor,
                 put: CommandType.mutator,
                 remove: CommandType.mutator,
-                update: CommandType.mutator,
+                update: CommandType.accessor,
                 upsert: CommandType.mutator}
 
 

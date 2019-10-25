@@ -51,8 +51,8 @@ class ReplicaChainClient:
         if self.in_flight:
             raise RuntimeError("Cannot have more than one request in-flight")
         try:
-            self.accessor_ = True
-            client.send_run_command(self.seq, args)
+            self.accessor = True
+            client.send_run_command(int(self.chain.block_ids[-1].split(":")[-1]), args)
         except:
             self.exception = True
         self.in_flight = True
@@ -71,15 +71,15 @@ class ReplicaChainClient:
             self._send_mutator_command(self.head, args)
 
     def _recv_response(self):
-        result = []
         if self.accessor:
             if self.exception:
-                result.append(b"!block_moved")
-            try:
-                self.tail.recv_run_command(result)
-            except:
-                if not self.exception:
-                    result.append(b"!block_moved")
+                result = [b"!block_moved"]
+            else:
+                try:
+                    result = self.tail.recv_run_command()
+                except:
+                    if not self.exception:
+                        result = [b"!block_moved"]
             self.exception = False
         else:
             rseq, result = self.response_reader.recv_response()
@@ -93,9 +93,9 @@ class ReplicaChainClient:
     def recv_response(self):
         return self._recv_response()
 
-    def _run_command(self, client, args):
-        self._send_command(client, args)
-        return self._recv_response()
+    def _run_command(self, args):
+        self.send_command(args)
+        return self.recv_response()
 
     def run_command(self, args):
         resp = None
@@ -103,9 +103,9 @@ class ReplicaChainClient:
         while resp is None:
             try:
                 if self.cmd_type[args[0]] == CommandType.accessor:
-                    resp = self._run_command(self.tail, args)
+                    resp = self._run_command(args)
                 else:
-                    resp = self._run_command(self.head, args)
+                    resp = self._run_command(args)
                     if retry and resp[0] == b('!duplicate_key'):
                         resp[0] = b('!ok')
             except (TTransportException, socket.timeout) as e:
@@ -124,14 +124,14 @@ class ReplicaChainClient:
                 resp = [b('!block_moved')]
         return resp
 
-    def _run_command_redirected(self, client, args):
+    def _run_command_redirected(self, args):
         if args[-1] != b('!redirected'):
             args.append(b('!redirected'))
-        self._send_command(client, args)
+        self.send_command(args)
         return self._recv_response()
 
     def run_command_redirected(self, args):
         if self.cmd_type[args[0]] == CommandType.accessor:
-            return self._run_command_redirected(self.tail, args)
+            return self._run_command_redirected(args)
         else:
-            return self._run_command_redirected(self.head, args)
+            return self._run_command_redirected(args)

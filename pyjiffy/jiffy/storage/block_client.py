@@ -106,5 +106,5 @@ class BlockClient:
     def send_run_command(self, block_id, arguments):
         self.client_.send_run_command(block_id, arguments)
 
-    def recv_run_command(self, _return):
-        self.recv_run_command(_return)
+    def recv_run_command(self):
+        return self.client_.recv_run_command()

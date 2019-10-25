@@ -63,82 +63,20 @@ class Queue(DataStructureClient):
             return response
         elif response[0] == b('!redo'):
             return None
-        if response[0] == b('!redirected_enqueue'):
-            while response[0] == b('!redirected_enqueue'):
+        if response[0][:11] == b('!redirected'):
+            redirected_response = response[0]
+            while response[0] == redirected_response:
                 self.add_blocks(response, args)
                 self.handle_partition_id(args)
-
-
                 while True:
                     args_copy = copy.deepcopy(args)
                     if args[0] == QueueOps.enqueue:
-                            # TODO args_copy.insert(args_copy.end(), _return.end() - 3, _return.end()); \
+                        args_copy.extend(args[-3:])
                     elif args[0] == QueueOps.dequeue:
-                            # TODO args_copy.insert(args_copy.end(), _return.end() - 2, _return.end());
+                        args_copy.extend(args[-2:])
                     response = self.blocks[self._block_id(args)].run_command(args_copy)
                     if response[0] != b('!redo'):
                         break
-        if response[0] == b('!redirected_dequeue'):
-            while response[0] == b('!redirected_enqueue'):
-                self.add_blocks(response, args)
-                self.handle_partition_id(args)
-
-
-                while True:
-                    args_copy = copy.deepcopy(args)
-                    if args[0] == QueueOps.enqueue:
-                    # TODO args_copy.insert(args_copy.end(), _return.end() - 3, _return.end()); \
-                    elif args[0] == QueueOps.dequeue:
-                    # TODO args_copy.insert(args_copy.end(), _return.end() - 2, _return.end());
-                    response = self.blocks[self._block_id(args)].run_command(args_copy)
-                    if response[0] != b('!redo'):
-                        break
-        if response[0] == b('!redirected_readnext'):
-            while response[0] == b('!redirected_enqueue'):
-                self.add_blocks(response, args)
-                self.handle_partition_id(args)
-
-
-                while True:
-                    args_copy = copy.deepcopy(args)
-                    if args[0] == QueueOps.enqueue:
-                    # TODO args_copy.insert(args_copy.end(), _return.end() - 3, _return.end()); \
-                    elif args[0] == QueueOps.dequeue:
-                    # TODO args_copy.insert(args_copy.end(), _return.end() - 2, _return.end());
-                    response = self.blocks[self._block_id(args)].run_command(args_copy)
-                    if response[0] != b('!redo'):
-                        break
-        if response[0] == b('!redirected_length'):
-            while response[0] == b('!redirected_enqueue'):
-                self.add_blocks(response, args)
-                self.handle_partition_id(args)
-
-
-                while True:
-                    args_copy = copy.deepcopy(args)
-                    if args[0] == QueueOps.enqueue:
-                    # TODO args_copy.insert(args_copy.end(), _return.end() - 3, _return.end()); \
-                    elif args[0] == QueueOps.dequeue:
-                    # TODO args_copy.insert(args_copy.end(), _return.end() - 2, _return.end());
-                    response = self.blocks[self._block_id(args)].run_command(args_copy)
-                    if response[0] != b('!redo'):
-                        break
-        if response[0] == b('!redirected_rate'):
-            while response[0] == b('!redirected_enqueue'):
-                self.add_blocks(response, args)
-                self.handle_partition_id(args)
-
-
-                while True:
-                    args_copy = copy.deepcopy(args)
-                    if args[0] == QueueOps.enqueue:
-                    # TODO args_copy.insert(args_copy.end(), _return.end() - 3, _return.end()); \
-                    elif args[0] == QueueOps.dequeue:
-                    # TODO args_copy.insert(args_copy.end(), _return.end() - 2, _return.end());
-                    response = self.blocks[self._block_id(args)].run_command(args_copy)
-                    if response[0] != b('!redo'):
-                        break
-
         if response[0] == "!block_moved":
             self._refresh()
             return None
@@ -160,7 +98,7 @@ class Queue(DataStructureClient):
             return self.enqueue_partition
         elif args[0] == QueueOps.out_rate:
             return self.dequeue_partition
-        else
+        else:
             raise ValueError
 
     def put(self, item):
