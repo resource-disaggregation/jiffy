@@ -10,14 +10,6 @@
 
 namespace jiffy {
 namespace storage {
-enum redirect_operations {
-  redirected_enqueue = 0,
-  redirected_dequeue = 1,
-  redirected_readnext = 2,
-  redirected_length = 3,
-  redirected_rate = 4,
-  non_type = 5
-};
 
 class fifo_queue_client : data_structure_client {
  public:
@@ -113,12 +105,6 @@ class fifo_queue_client : data_structure_client {
    * @param args Arguments
    */
   void add_blocks(const std::vector<std::string> &_return, const std::vector<std::string> &args);
-  /**
-   * @brief Fetch redirect operation from string
-   * @param type String type
-   * @return Redirected operation
-   */
-  redirect_operations redirect_type(std::string &type);
 
   /* Dequeue partition id */
   std::size_t dequeue_partition_;
@@ -142,21 +128,5 @@ class fifo_queue_client : data_structure_client {
 
 }
 }
-
-#define FIFO_QUEUE_HANDLE_REDIRECT(type)                                                            \
-  if (redirect_type(_return[0]) == redirect_operations::redirected_##type) {                        \
-    do {                                                                                            \
-      add_blocks(_return, args);                                                                    \
-      handle_partition_id(args);                                                                    \
-      do {                                                                                          \
-        auto args_copy = args;                                                                      \
-        if (args[0] == "enqueue")                                                                   \
-          args_copy.insert(args_copy.end(), _return.end() - 3, _return.end());                      \
-        else if (args[0] == "dequeue")                                                              \
-          args_copy.insert(args_copy.end(), _return.end() - 2, _return.end());                      \
-        _return = blocks_[block_id(args_copy)]->run_command_redirected(args_copy);                  \
-      } while (_return[0] == "!redo");                                                              \
-    } while (redirect_type(_return[0]) == redirect_operations::redirected_##type);                  \
-  }
 
 #endif //JIFFY_FIFO_QUEUE_CLIENT_H

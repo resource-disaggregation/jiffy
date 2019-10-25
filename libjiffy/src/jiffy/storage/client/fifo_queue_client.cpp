@@ -101,11 +101,23 @@ void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const
   if (_return[0] == "!redo") {
     throw redo_error();
   }
-  FIFO_QUEUE_HANDLE_REDIRECT(enqueue);
-  FIFO_QUEUE_HANDLE_REDIRECT(dequeue);
-  FIFO_QUEUE_HANDLE_REDIRECT(readnext);
-  FIFO_QUEUE_HANDLE_REDIRECT(length);
-  FIFO_QUEUE_HANDLE_REDIRECT(rate);
+  if(string_utils::split(_return[0], '_')[0] == "!redirected") {
+    auto redirected_type = _return[0];
+    if (_return[0] == redirected_type) {
+      do {
+        add_blocks(_return, args);
+        handle_partition_id(args);
+        do {
+          auto args_copy = args;
+          if (args[0] == "enqueue")
+            args_copy.insert(args_copy.end(), _return.end() - 3, _return.end());
+          else if (args[0] == "dequeue")
+            args_copy.insert(args_copy.end(), _return.end() - 2, _return.end());
+          _return = blocks_[block_id(args_copy)]->run_command_redirected(args_copy);
+        } while (_return[0] == "!redo");
+      } while (_return[0] == redirected_type);
+    }
+  }
   if (_return[0] == "!block_moved") {
     refresh();
     throw redo_error();
@@ -179,20 +191,6 @@ void fifo_queue_client::add_blocks(const std::vector<std::string> &_return, cons
       throw std::logic_error("Insufficient blocks");
     }
   }
-}
-
-redirect_operations fifo_queue_client::redirect_type(std::string &type) {
-  if (type == "!redirected_enqueue")
-    return redirect_operations::redirected_enqueue;
-  if (type == "!redirected_dequeue")
-    return redirect_operations::redirected_dequeue;
-  if (type == "!redirected_readnext")
-    return redirect_operations::redirected_readnext;
-  if (type == "!redirected_length")
-    return redirect_operations::redirected_length;
-  if (type == "!redirected_rate")
-    return redirect_operations::redirected_rate;
-  return redirect_operations::non_type;
 }
 
 }
