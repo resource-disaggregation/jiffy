@@ -447,6 +447,29 @@ class TestClient(TestCase):
         finally:
             client.disconnect()
             self.stop_servers()
+
+    def test_large_data_read(self):
+        self.start_servers()
+        client = self.jiffy_client()
+        try:
+            c = client.create_file('/a/file.txt', 'local://tmp')
+            self.assertTrue(client.fs.exists('/a/file.txt'))
+            data = b""
+            data_size = 1024 * 1024
+            for i in range(0, data_size):
+                data += b"a"
+            for i in range(0, 50):
+                try:
+                    c.write(data)
+                except KeyError as k:
+                    self.fail('Received error message: {}'.format(k))
+            self.assertTrue(c.seek(0))
+            for i in range(0, 50):
+                self.assertEqual(data, c.read(len(data)))
+        finally:
+            client.disconnect()
+            self.stop_servers()
+
     def test_queue_multithread(self):
         self.start_servers()
         client = self.jiffy_client()
