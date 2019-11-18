@@ -31,6 +31,10 @@ void block_client::connect(const std::string &host, int port, int block_id, int 
   transport_->open();
 }
 
+std::shared_ptr<apache::thrift::protocol::TProtocol> block_client::protocol() {
+  return protocol_;
+}
+
 block_client::command_response_reader block_client::get_command_response_reader(int64_t client_id) {
   client_->register_client_id(block_id_, client_id);
   return block_client::command_response_reader(protocol_);

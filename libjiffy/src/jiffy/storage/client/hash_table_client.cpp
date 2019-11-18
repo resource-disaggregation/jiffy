@@ -5,6 +5,7 @@
 #include <thread>
 #include <cmath>
 
+
 namespace jiffy {
 namespace storage {
 
@@ -18,7 +19,7 @@ hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interf
   blocks_.clear();
   for (auto &block: status.data_blocks()) {
     blocks_.emplace(std::make_pair(static_cast<int32_t>(std::stoi(utils::string_utils::split(block.name, '_')[0])),
-                                   std::make_shared<replica_chain_client>(fs_, path_, block, HT_OPS, timeout_ms_)));
+                                   std::make_shared<pool_replica_chain_client>(fs_, pool_, path_, block, HT_OPS, timeout_ms_)));
   }
 }
 
@@ -32,7 +33,8 @@ void hash_table_client::refresh() {
         if (block.metadata != "split_importing" && block.metadata != "importing") {
           blocks_.emplace(std::make_pair(static_cast<int32_t>(std::stoi(utils::string_utils::split(block.name,
                                                                                                    '_')[0])),
-                                         std::make_shared<replica_chain_client>(fs_,
+                                         std::make_shared<pool_replica_chain_client>(fs_,
+                                                                                pool_,
                                                                                 path_,
                                                                                 block,
                                                                                 HT_OPS,
@@ -167,7 +169,7 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
     auto it = redirect_blocks_.find(_return[0] + _return[1]);
     if (it == redirect_blocks_.end()) {
       auto chain = directory::replica_chain(string_utils::split(_return[1], '!'));
-      auto client = std::make_shared<replica_chain_client>(fs_, path_, chain, HT_OPS, 0);
+      auto client = std::make_shared<pool_replica_chain_client>(fs_, pool_, path_, chain, HT_OPS, 0);
       redirect_blocks_.emplace(std::make_pair(_return[0] + _return[1], client));
       do {
         _return = client->run_command_redirected(args_copy);

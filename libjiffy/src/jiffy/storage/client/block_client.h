@@ -66,6 +66,8 @@ class block_client {
 
   void connect(const std::string &hostname, int port, int block_id, int timeout_ms = 1000);
 
+  std::shared_ptr<apache::thrift::protocol::TProtocol> protocol();
+
   /**
    * @brief Disconnect server
    */

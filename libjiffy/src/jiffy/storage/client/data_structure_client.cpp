@@ -8,11 +8,21 @@ data_structure_client::data_structure_client(std::shared_ptr<directory::director
                                              const directory::data_status &status,
                                              int timeout_ms)
     : fs_(std::move(fs)), path_(path), status_(status), timeout_ms_(timeout_ms) {
+  std::vector<std::string> block_names;
+  for(const auto &chain : status.data_blocks()) {
+    for(const auto &block : chain.block_ids) {
+      block_names.push_back(block);
+    }
+  }
+  pool_.init(block_names);
 }
 
 directory::data_status &data_structure_client::status() {
   return status_;
 }
+
+
+
 
 }
 }
