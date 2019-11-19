@@ -203,6 +203,13 @@ REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
 for (std::size_t i = 1000; i < 2000; ++i) {
 REQUIRE_THROWS_AS(client.get(std::to_string(i)), std::logic_error);
 }
+client.refresh();
+for (std::size_t i = 1000; i < 2000; ++i) {
+REQUIRE_NOTHROW(client.put(std::to_string(i), std::to_string(i)));
+}
+for (std::size_t i = 1000; i < 2000; ++i) {
+REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
+}
 
 storage_server->stop();
 if (storage_serve_thread.joinable()) {
