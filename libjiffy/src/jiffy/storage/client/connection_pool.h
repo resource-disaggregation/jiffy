@@ -8,6 +8,7 @@
 #include "jiffy/utils/client_cache.h"
 #include "jiffy/storage/manager/detail/block_id_parser.h"
 #include "jiffy/storage/client/response_worker.h"
+#include <libcuckoo/cuckoohash_map.hh>
 
 namespace jiffy {
 namespace storage {
@@ -15,6 +16,9 @@ namespace storage {
 struct connection_instance {
   std::shared_ptr<block_client> connection;
   std::size_t client_id;
+  connection_instance() {
+    connection = std::make_shared<block_client>();
+  }
 };
 
 
@@ -22,23 +26,26 @@ class connection_pool {
  public:
   typedef std::string response_t;
   typedef blocking_queue<response_t> mailbox_t;
-  connection_pool() = default;
-  void init(std::vector<std::string> block_ids, int timeout_ms_ = 1000);
+  connection_pool(int timeout_ms = 1000) {
+    timeout_ms_ = timeout_ms;
+  }
+  void init(std::vector<std::string> block_ids, int timeout_ms = 1000);
 
-  connection_instance & request_connection(std::size_t block_id);
+  connection_instance request_connection(block_id & block_info);
 
   void release_connection(std::size_t block_id);
 
 
 
  private:
-  std::vector<bool> free_;
+  std::map<std::size_t, bool> free_;
+  std::mutex mutex_;
   int timeout_ms_;
 //  response_worker worker_;
   mailbox_t response_;
   std::size_t pool_size_;
-  std::vector<connection_instance> connections_;
   std::vector<std::string> block_ids_;
+  cuckoohash_map<std::size_t, connection_instance> connections_;
 
 };
 

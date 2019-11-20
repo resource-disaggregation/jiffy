@@ -41,19 +41,28 @@ const directory::replica_chain &pool_replica_chain_client::chain() const {
 }
 
 void pool_replica_chain_client::connect(const directory::replica_chain &chain, int timeout_ms) {
+  auto start = time_utils::now_us();
   chain_ = chain;
   timeout_ms_ = timeout_ms;
-  head_id_ = static_cast<std::size_t>(block_id_parser::parse(chain_.block_ids.front()).id);
-  head_ = pool_.request_connection(head_id_);
+  auto h = block_id_parser::parse(chain_.block_ids.front());
+  head_id_ = static_cast<std::size_t>(h.id);
+  LOG(log_level::info) << "Head id: " << head_id_;
+  head_ = pool_.request_connection(h);
   seq_.client_id = head_.connection->get_client_id();
   if (chain_.block_ids.size() == 1) {
     tail_ = head_;
     tail_id_ = head_id_;
   } else {
-    tail_id_ = static_cast<std::size_t>(block_id_parser::parse(chain_.block_ids.back()).id);
-    tail_ = pool_.request_connection(tail_id_);
+    auto t = block_id_parser::parse(chain_.block_ids.back());
+    tail_id_ = static_cast<std::size_t>(t.id);
+    LOG(log_level::info) << "Tail id: " << tail_id_;
+    tail_ = pool_.request_connection(t);
   }
+  auto start1 = time_utils::now_us();
   response_reader_ = tail_.connection->get_command_response_reader(seq_.client_id);
+  auto end = time_utils::now_us();
+  LOG(log_level::info) << "Connecting takes time: " << start1 - start;
+  LOG(log_level::info) << "Fetching the command response reader takes time: " << end - start1;
   in_flight_ = false;
 }
 

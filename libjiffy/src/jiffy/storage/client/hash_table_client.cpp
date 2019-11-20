@@ -2,9 +2,9 @@
 #include "jiffy/utils/string_utils.h"
 #include "jiffy/storage/hashtable/hash_slot.h"
 #include "jiffy/utils/logger.h"
+#include "jiffy/utils/time_utils.h"
 #include <thread>
 #include <cmath>
-
 
 namespace jiffy {
 namespace storage {
@@ -19,26 +19,41 @@ hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interf
   blocks_.clear();
   for (auto &block: status.data_blocks()) {
     blocks_.emplace(std::make_pair(static_cast<int32_t>(std::stoi(utils::string_utils::split(block.name, '_')[0])),
-                                   std::make_shared<pool_replica_chain_client>(fs_, pool_, path_, block, HT_OPS, timeout_ms_)));
+                                   std::make_shared<pool_replica_chain_client>(fs_,
+                                                                               pool_,
+                                                                               path_,
+                                                                               block,
+                                                                               HT_OPS,
+                                                                               timeout_ms_)));
+    //std::make_shared<replica_chain_client>(fs_, path_, block, HT_OPS, timeout_ms_)));
   }
 }
 
 void hash_table_client::refresh() {
+  LOG(log_level::info) << "Refreshing";
+  auto start = time_utils::now_us();
   status_ = fs_->dstatus(path_);
   blocks_.clear();
+  redirect_blocks_.clear();
   bool redo;
   do {
     try {
       for (auto &block: status_.data_blocks()) {
         if (block.metadata != "split_importing" && block.metadata != "importing") {
+          LOG(log_level::info) << "Creating connections for !!!!" << block.to_string();
           blocks_.emplace(std::make_pair(static_cast<int32_t>(std::stoi(utils::string_utils::split(block.name,
                                                                                                    '_')[0])),
                                          std::make_shared<pool_replica_chain_client>(fs_,
-                                                                                pool_,
-                                                                                path_,
-                                                                                block,
-                                                                                HT_OPS,
-                                                                                timeout_ms_)));
+                                                                                     pool_,
+                                                                                     path_,
+                                                                                     block,
+                                                                                     HT_OPS,
+                                                                                     timeout_ms_)));
+//                                        std::make_shared<replica_chain_client>(fs_,
+//                                                      path_,
+//                                                      block,
+//                                                      HT_OPS,
+//                                                      timeout_ms_)));
         }
       }
       redo = false;
@@ -46,7 +61,9 @@ void hash_table_client::refresh() {
       redo = true;
     }
   } while (redo);
-  redirect_blocks_.clear();
+  auto end = time_utils::now_us();
+  LOG(log_level::info) << "Refresh taking time " << end - start;
+
 }
 
 void hash_table_client::put(const std::string &key, const std::string &value) {
@@ -166,18 +183,46 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
       args_copy.emplace_back(_return[2]);
       args_copy.emplace_back(_return[3]);
     }
-    auto it = redirect_blocks_.find(_return[0] + _return[1]);
-    if (it == redirect_blocks_.end()) {
-      auto chain = directory::replica_chain(string_utils::split(_return[1], '!'));
-      auto client = std::make_shared<pool_replica_chain_client>(fs_, pool_, path_, chain, HT_OPS, 0);
-      redirect_blocks_.emplace(std::make_pair(_return[0] + _return[1], client));
+//    auto it = redirect_blocks_.find(_return[0] + _return[1]);
+//    if (it == redirect_blocks_.end()) {
+//      auto chain = directory::replica_chain(string_utils::split(_return[1], '!'));
+//      auto client = std::make_shared<replica_chain_client>(fs_, path_, chain, HT_OPS, 0);
+//      redirect_blocks_.emplace(std::make_pair(_return[0] + _return[1], client));
+//      do {
+//        _return = client->run_command_redirected(args_copy);
+//      } while (_return[0] == "!redo");
+//    } else {
+//      do {
+//        _return = it->second->run_command_redirected(args_copy);
+//      } while (_return[0] == "!redo");
+//    }
+    auto chain = directory::replica_chain(string_utils::split(_return[1], '!'));
+    bool found = false;
+    std::string redirected_id;
+    for (const auto &chains: status_.data_blocks()) { // FIXME storage mode only use default
+      if (chains.to_string() == chain.to_string()) {
+        found = true;
+        redirected_id = utils::string_utils::split(chains.name, '_')[0];
+      }
+    }
+    if (found) {
       do {
-        _return = client->run_command_redirected(args_copy);
+        _return = blocks_[block_id(redirected_id)]->run_command_redirected(args_copy);
       } while (_return[0] == "!redo");
     } else {
-      do {
-        _return = it->second->run_command_redirected(args_copy);
-      } while (_return[0] == "!redo");
+      auto it = redirect_blocks_.find(_return[0] + _return[1]);
+      if (it == redirect_blocks_.end()) {
+        auto client = std::make_shared<pool_replica_chain_client>(fs_, pool_, path_, chain, HT_OPS, 0);
+        redirect_blocks_.emplace(std::make_pair(_return[0] + _return[1], client));
+        do {
+          _return = client->run_command_redirected(args_copy);
+        } while (_return[0] == "!redo");
+      } else {
+        do {
+          _return = it->second->run_command_redirected(args_copy);
+        } while (_return[0] == "!redo");
+
+      }
     }
   }
   if (_return[0] == "!block_moved") {

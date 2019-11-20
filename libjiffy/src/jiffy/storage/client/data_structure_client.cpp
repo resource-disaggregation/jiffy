@@ -14,7 +14,7 @@ data_structure_client::data_structure_client(std::shared_ptr<directory::director
       block_names.push_back(block);
     }
   }
-  pool_.init(block_names);
+  //pool_.init(block_names);
 }
 
 directory::data_status &data_structure_client::status() {

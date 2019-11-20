@@ -7,35 +7,59 @@ using namespace utils;
 
 void connection_pool::init(std::vector<std::string> block_ids, int timeout_ms){ //, worker_(response_) {
   timeout_ms_ = timeout_ms;
-  connections_.resize(block_ids.size());
-  free_.resize(block_ids.size());
   for (auto &block : block_ids) {
     auto block_info = block_id_parser::parse(block);
-    connections_[block_info.id].connection = std::make_shared<block_client>();
-    connections_[block_info.id].connection->connect(block_info.host,
-                                                    block_info.service_port,
-                                                    block_info.id,
-                                                    timeout_ms_);
-    free_[block_info.id] = true;
+    auto instance = new connection_instance();
+    instance->connection->connect(block_info.host,
+                                  block_info.service_port,
+                                  block_info.id,
+                                  timeout_ms_);
+    connections_.insert(block_info.id, *instance);
+    free_.emplace(block_info.id, true);
     //worker_.add_protocol(connections_[block_info.id].connection->protocol());
   }
 }
-connection_instance & connection_pool::request_connection(std::size_t block_id) {
-  if (block_id > connections_.size()) { // TODO this is only for one connection
-    throw std::logic_error("Invalid block id");
+connection_instance connection_pool::request_connection(block_id & block_info) {
+  LOG(log_level::info) << "Requesting connection of block: " << block_info.id;
+  bool found;
+  auto id = static_cast<std::size_t>(block_info.id);
+  //std::unique_lock<std::mutex> mlock(mutex_);
+  auto it = free_.find(id);
+  if(it != free_.end()) {
+    found = true;
+    if(!it->second) {
+      //mlock.unlock();
+      throw std::logic_error("This connection is in use");
+    }
+    LOG(log_level::info) << "look here 1";
+    free_[id] = false;
+  } else {
+    found = false;
+    free_.emplace(id, false);
   }
-  LOG(log_level::info) << "Requesting connection of block: " << block_id;
+  //mlock.unlock();
+  if (!found) {
+    LOG(log_level::info) << "look here 2";
+    auto instance = new connection_instance();
+    instance->connection->connect(block_info.host,
+                                  block_info.service_port,
+                                  block_info.id,
+                                  timeout_ms_);
+    connections_.insert(block_info.id, *instance);
+  }
+  return connections_.find(block_info.id);
   //bool expected = false;
   /* free_.compare_exchange_strong(expected, true);
   if (expected) {
     //TODO create new connections
   } else {
     return connections_[block_id];
-  } */
+  }
   if(free_[block_id]) {
     free_[block_id] = false;
     return connections_[block_id];
   }
+   return connections_.find(block_info.id); */
 
 }
 void connection_pool::release_connection(std::size_t block_id) {
@@ -45,11 +69,15 @@ void connection_pool::release_connection(std::size_t block_id) {
     throw std::logic_error("Connection already closed");
   } */
   LOG(log_level::info) << "Releasing connection of block: " << block_id;
-  if(!free_[block_id]) {
+  //std::unique_lock<std::mutex> mlock(mutex_);
+  auto it = free_.find(block_id);
+  if(it != free_.end()) {
     free_[block_id] = true;
   } else {
+    //mlock.unlock();
     throw std::logic_error("Connection already closed");
   }
+  //mlock.unlock();
 }
 
 }
