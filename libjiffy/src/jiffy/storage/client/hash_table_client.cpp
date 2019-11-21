@@ -199,15 +199,19 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
     auto chain = directory::replica_chain(string_utils::split(_return[1], '!'));
     bool found = false;
     std::string redirected_id;
-    for (const auto &chains: status_.data_blocks()) { // FIXME storage mode only use default
-      if (chains.to_string() == chain.to_string()) {
+    std::shared_ptr<pool_replica_chain_client> redirected_client;
+    for (const auto &clients: blocks_) { // FIXME storage mode only use default
+      if (clients.second->chain().to_string() == chain.to_string()) {
         found = true;
-        redirected_id = utils::string_utils::split(chains.name, '_')[0];
+        //redirected_id = utils::string_utils::split(chains.name, '_')[0];
+        redirected_client = clients.second;
+        LOG(log_level::info) << "Redirecting to this block " << chain.to_string();
       }
     }
     if (found) {
       do {
-        _return = blocks_[block_id(redirected_id)]->run_command_redirected(args_copy);
+        LOG(log_level::info) << "The information of the redirected block: " << redirected_client->chain().to_string();
+        _return = redirected_client->run_command_redirected(args_copy);
       } while (_return[0] == "!redo");
     } else {
       auto it = redirect_blocks_.find(_return[0] + _return[1]);

@@ -19,7 +19,7 @@ void connection_pool::init(std::vector<std::string> block_ids, int timeout_ms){ 
     //worker_.add_protocol(connections_[block_info.id].connection->protocol());
   }
 }
-connection_instance connection_pool::request_connection(block_id & block_info) {
+connection_instance connection_pool::request_connection(block_id & block_info) { // TODO we should allow creating connections in batches
   LOG(log_level::info) << "Requesting connection of block: " << block_info.id;
   bool found;
   auto id = static_cast<std::size_t>(block_info.id);
@@ -29,6 +29,7 @@ connection_instance connection_pool::request_connection(block_id & block_info) {
     found = true;
     if(!it->second) {
       //mlock.unlock();
+      LOG(log_level::info) << "This connection is in use!";
       throw std::logic_error("This connection is in use");
     }
     LOG(log_level::info) << "look here 1";
@@ -45,8 +46,11 @@ connection_instance connection_pool::request_connection(block_id & block_info) {
                                   block_info.service_port,
                                   block_info.id,
                                   timeout_ms_);
+    instance->client_id = instance->connection->get_client_id();
+    instance->response_reader = instance->connection->get_command_response_reader(instance->client_id);
     connections_.insert(block_info.id, *instance);
   }
+  LOG(log_level::info) << "look here 3";
   return connections_.find(block_info.id);
   //bool expected = false;
   /* free_.compare_exchange_strong(expected, true);

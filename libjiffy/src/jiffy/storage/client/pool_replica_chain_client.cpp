@@ -48,9 +48,13 @@ void pool_replica_chain_client::connect(const directory::replica_chain &chain, i
   head_id_ = static_cast<std::size_t>(h.id);
   LOG(log_level::info) << "Head id: " << head_id_;
   head_ = pool_.request_connection(h);
-  seq_.client_id = head_.connection->get_client_id();
+  LOG(log_level::info) << "Hey 1";
+  seq_.client_id = head_.client_id;
+  LOG(log_level::info) << "Hey 2";
   if (chain_.block_ids.size() == 1) {
+    LOG(log_level::info) << "Hey 3";
     tail_ = head_;
+    LOG(log_level::info) << "Hey 4";
     tail_id_ = head_id_;
   } else {
     auto t = block_id_parser::parse(chain_.block_ids.back());
@@ -59,7 +63,9 @@ void pool_replica_chain_client::connect(const directory::replica_chain &chain, i
     tail_ = pool_.request_connection(t);
   }
   auto start1 = time_utils::now_us();
-  response_reader_ = tail_.connection->get_command_response_reader(seq_.client_id);
+  LOG(log_level::info) << "Hey 5";
+  //response_reader_ = tail_.connection->get_command_response_reader(seq_.client_id);
+  response_reader_ = tail_.response_reader;
   auto end = time_utils::now_us();
   LOG(log_level::info) << "Connecting takes time: " << start1 - start;
   LOG(log_level::info) << "Fetching the command response reader takes time: " << end - start1;

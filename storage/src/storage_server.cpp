@@ -98,7 +98,8 @@ int main(int argc, char **argv) {
         ("directory.service_port", po::value<int>(&dir_port)->default_value(9090))
         ("directory.block_port", po::value<int>(&block_port)->default_value(9092))
         ("storage.block.num_blocks", po::value<size_t>(&num_blocks)->default_value(64))
-        ("storage.block.num_block_groups", po::value<size_t>(&num_block_groups)->default_value(std::thread::hardware_concurrency() / 2))
+        ("storage.block.num_block_groups",
+         po::value<size_t>(&num_block_groups)->default_value(std::thread::hardware_concurrency() / 2))
         ("storage.block.capacity", po::value<size_t>(&block_capacity)->default_value(134217728))
         ("storage.block.capacity_threshold_lo", po::value<double>(&blk_thresh_lo)->default_value(0.25))
         ("storage.block.capacity_threshold_hi", po::value<double>(&blk_thresh_hi)->default_value(0.75));
@@ -233,7 +234,6 @@ int main(int argc, char **argv) {
   std::exception_ptr storage_exception;
   std::vector<std::thread> storage_serve_thread(num_block_groups);
   std::vector<std::shared_ptr<TServer>> storage_server(num_block_groups);
-  std::vector<std::vector<std::shared_ptr<block>>> block_vec(num_block_groups);
   for (size_t i = 0; i < num_block_groups; i++) {
     auto block_group = std::vector<std::shared_ptr<block>>();
     for (size_t j = i; j < num_blocks; j += num_block_groups)

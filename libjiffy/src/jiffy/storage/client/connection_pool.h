@@ -15,7 +15,8 @@ namespace storage {
 
 struct connection_instance {
   std::shared_ptr<block_client> connection;
-  std::size_t client_id;
+  int64_t client_id;
+  block_client::command_response_reader response_reader;
   connection_instance() {
     connection = std::make_shared<block_client>();
   }
@@ -45,7 +46,8 @@ class connection_pool {
   mailbox_t response_;
   std::size_t pool_size_;
   std::vector<std::string> block_ids_;
-  cuckoohash_map<std::size_t, connection_instance> connections_;
+  /* Map from service port to connection_instanse*/
+  cuckoohash_map<int, connection_instance> connections_; // TODO this connection should be per block server instead of per block id
 
 };
 
