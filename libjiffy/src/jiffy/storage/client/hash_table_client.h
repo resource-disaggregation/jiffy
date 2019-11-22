@@ -110,6 +110,8 @@ class hash_table_client : public data_structure_client {
   /* Caching created connections */
   std::map<std::string, std::shared_ptr<pool_replica_chain_client>> redirect_blocks_;
   //std::map<std::string, std::shared_ptr<replica_chain_client>> redirect_blocks_;
+
+  std::map<std::string, int> chain_lookup;
 };
 
 }

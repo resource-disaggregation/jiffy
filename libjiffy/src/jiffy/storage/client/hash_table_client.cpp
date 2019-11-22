@@ -17,6 +17,11 @@ hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interf
                                      int timeout_ms)
     : data_structure_client(fs, path, status, timeout_ms) {
   blocks_.clear();
+  std::vector<std::string> block_init;
+  for(auto & block: status.data_blocks()) {
+    block_init.emplace_back(block.block_ids[0]);
+  }
+  pool_.init(block_init); // we need to figure this out?
   for (auto &block: status.data_blocks()) {
     blocks_.emplace(std::make_pair(static_cast<int32_t>(std::stoi(utils::string_utils::split(block.name, '_')[0])),
                                    std::make_shared<pool_replica_chain_client>(fs_,
@@ -25,12 +30,12 @@ hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interf
                                                                                block,
                                                                                HT_OPS,
                                                                                timeout_ms_)));
-    //std::make_shared<replica_chain_client>(fs_, path_, block, HT_OPS, timeout_ms_)));
+//    std::make_shared<replica_chain_client>(fs_, path_, block, HT_OPS, timeout_ms_)));
   }
 }
 
 void hash_table_client::refresh() {
-  LOG(log_level::info) << "Refreshing";
+  //LOG(log_level::info) << "Refreshing";
   auto start = time_utils::now_us();
   status_ = fs_->dstatus(path_);
   blocks_.clear();
@@ -40,7 +45,7 @@ void hash_table_client::refresh() {
     try {
       for (auto &block: status_.data_blocks()) {
         if (block.metadata != "split_importing" && block.metadata != "importing") {
-          LOG(log_level::info) << "Creating connections for !!!!" << block.to_string();
+          //LOG(log_level::info) << "Creating connections for !!!!" << block.to_string();
           blocks_.emplace(std::make_pair(static_cast<int32_t>(std::stoi(utils::string_utils::split(block.name,
                                                                                                    '_')[0])),
                                          std::make_shared<pool_replica_chain_client>(fs_,
@@ -183,6 +188,7 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
       args_copy.emplace_back(_return[2]);
       args_copy.emplace_back(_return[3]);
     }
+
 //    auto it = redirect_blocks_.find(_return[0] + _return[1]);
 //    if (it == redirect_blocks_.end()) {
 //      auto chain = directory::replica_chain(string_utils::split(_return[1], '!'));
@@ -196,6 +202,7 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
 //        _return = it->second->run_command_redirected(args_copy);
 //      } while (_return[0] == "!redo");
 //    }
+
     auto chain = directory::replica_chain(string_utils::split(_return[1], '!'));
     bool found = false;
     std::string redirected_id;
@@ -205,12 +212,12 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
         found = true;
         //redirected_id = utils::string_utils::split(chains.name, '_')[0];
         redirected_client = clients.second;
-        LOG(log_level::info) << "Redirecting to this block " << chain.to_string();
+        //LOG(log_level::info) << "Redirecting to this block " << chain.to_string();
       }
     }
     if (found) {
       do {
-        LOG(log_level::info) << "The information of the redirected block: " << redirected_client->chain().to_string();
+        //LOG(log_level::info) << "The information of the redirected block: " << redirected_client->chain().to_string();
         _return = redirected_client->run_command_redirected(args_copy);
       } while (_return[0] == "!redo");
     } else {

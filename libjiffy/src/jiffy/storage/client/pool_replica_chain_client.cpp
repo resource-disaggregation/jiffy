@@ -46,24 +46,24 @@ void pool_replica_chain_client::connect(const directory::replica_chain &chain, i
   timeout_ms_ = timeout_ms;
   auto h = block_id_parser::parse(chain_.block_ids.front());
   head_id_ = static_cast<std::size_t>(h.id);
-  LOG(log_level::info) << "Head id: " << head_id_;
+  //LOG(log_level::info) << "Head id: " << head_id_;
   head_ = pool_.request_connection(h);
-  LOG(log_level::info) << "Hey 1";
+  //LOG(log_level::info) << "Hey 1";
   seq_.client_id = head_.client_id;
-  LOG(log_level::info) << "Hey 2";
+  //LOG(log_level::info) << "Hey 2";
   if (chain_.block_ids.size() == 1) {
-    LOG(log_level::info) << "Hey 3";
+    //LOG(log_level::info) << "Hey 3";
     tail_ = head_;
-    LOG(log_level::info) << "Hey 4";
+    //LOG(log_level::info) << "Hey 4";
     tail_id_ = head_id_;
   } else {
     auto t = block_id_parser::parse(chain_.block_ids.back());
     tail_id_ = static_cast<std::size_t>(t.id);
-    LOG(log_level::info) << "Tail id: " << tail_id_;
+    //LOG(log_level::info) << "Tail id: " << tail_id_;
     tail_ = pool_.request_connection(t);
   }
   auto start1 = time_utils::now_us();
-  LOG(log_level::info) << "Hey 5";
+  //LOG(log_level::info) << "Hey 5";
   //response_reader_ = tail_.connection->get_command_response_reader(seq_.client_id);
   response_reader_ = tail_.response_reader;
   auto end = time_utils::now_us();
@@ -123,8 +123,12 @@ std::vector<std::string> pool_replica_chain_client::run_command(const std::vecto
   bool retry = false;
   while (response.empty()) {
     try {
+      auto start = time_utils::now_us();
       send_command(args);
+      auto end_1 = time_utils::now_us();
       response = recv_response();
+      auto end_2 = time_utils::now_us();
+      LOG(log_level::info) << args[0] << " " << args[1] << " " << end_1 - start << " " << end_2 - end_1 << " " << end_2 - start;
       if (retry && response[0] == "!duplicate_key") { // TODO: This is hash table specific logic
         response[0] = "!ok";
       }

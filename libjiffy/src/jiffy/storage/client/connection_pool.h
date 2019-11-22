@@ -42,7 +42,7 @@ class connection_pool {
   std::map<std::size_t, bool> free_;
   std::mutex mutex_;
   int timeout_ms_;
-//  response_worker worker_;
+  //response_worker worker_;
   mailbox_t response_;
   std::size_t pool_size_;
   std::vector<std::string> block_ids_;
