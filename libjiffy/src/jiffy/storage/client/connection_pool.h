@@ -25,6 +25,17 @@ struct connection_instance {
 
 class connection_pool {
  public:
+  struct register_info {
+    int service_port;
+    int offset;
+    int64_t client_id;
+    register_info() = default;
+    register_info(int _port, int _offset, int64_t _client_id) {
+      service_port = _port;
+      offset = _offset;
+      client_id = _client_id;
+    }
+  };
   typedef std::string response_t;
   typedef blocking_queue<response_t> mailbox_t;
   connection_pool(int timeout_ms = 1000) {
@@ -32,9 +43,19 @@ class connection_pool {
   }
   void init(std::vector<std::string> block_ids, int timeout_ms = 1000);
 
-  connection_instance request_connection(block_id & block_info);
+  register_info request_connection(block_id & block_info);
 
   void release_connection(std::size_t block_id);
+
+  void send_run_command(register_info connection_info, const int32_t block_id, const std::vector<std::string> &arguments);
+
+  void recv_run_command(register_info connection_info, std::vector<std::string> &_return);
+
+  void command_request(register_info connection_info, const sequence_id &seq, const std::vector<std::string> &args);
+
+  int64_t recv_response(register_info connection_info, std::vector<std::string> &out);
+
+  void get_command_response_reader(register_info connection_info, int64_t client_id);
 
 
 
@@ -47,7 +68,7 @@ class connection_pool {
   std::size_t pool_size_;
   std::vector<std::string> block_ids_;
   /* Map from service port to connection_instanse*/
-  cuckoohash_map<int, connection_instance> connections_; // TODO this connection should be per block server instead of per block id
+  cuckoohash_map<int, std::vector<connection_instance>> connections_; // TODO this connection should be per block server instead of per block id
 
 };
 

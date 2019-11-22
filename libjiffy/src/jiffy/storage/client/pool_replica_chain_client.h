@@ -43,13 +43,6 @@ class pool_replica_chain_client {
   const directory::replica_chain &chain() const;
 
   /**
-   * @brief Check if head and tail of replica chain is connected
-   * @return Bool value, true if both connected
-   */
-
-  bool is_connected() const;
-
-  /**
    * @brief Send out command
    * For each command, we either save tail block client or
    * head block client into command client, so we can use
@@ -114,14 +107,14 @@ class pool_replica_chain_client {
   /* Directory replica chain structure */
   directory::replica_chain chain_;
   /* Block client, head of the chain */
-  connection_instance head_;
+  connection_pool::register_info head_;
   /* Block client, tail of the chain
    * Set after connection */
-  connection_instance tail_;
+  connection_pool::register_info tail_;
   /* Command response reader */
   block_client::command_response_reader response_reader_;
   /* Clients for each commands */
-  std::unordered_map<std::string, client_ref> cmd_client_;
+  std::unordered_map<std::string, connection_pool::register_info> cmd_client_;
   /* Bool value, true if request is in flight */
   bool in_flight_;
   /* Time out */

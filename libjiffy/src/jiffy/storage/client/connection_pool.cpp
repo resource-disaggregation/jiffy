@@ -15,14 +15,16 @@ void connection_pool::init(std::vector<std::string> block_ids, int timeout_ms){ 
                                   block_info.id,
                                   timeout_ms_);
     instance->client_id = instance->connection->get_client_id();
-    instance->response_reader = instance->connection->get_command_response_reader(instance->client_id);
+    //instance->response_reader = instance->connection->get_command_response_reader(instance->client_id);
     //worker_.add_protocol(instance->connection->protocol());
-    connections_.insert(block_info.id, *instance);
+    std::vector<connection_instance> connections;
+    connections.push_back(*instance);
+    connections_.insert(block_info.id, connections);
     free_.emplace(block_info.id, true);
   }
 }
-connection_instance connection_pool::request_connection(block_id & block_info) { // TODO we should allow creating connections in batches
-  //LOG(log_level::info) << "Requesting connection of block: " << block_info.id;
+connection_pool::register_info connection_pool::request_connection(block_id & block_info) { // TODO we should allow creating connections in batches
+  LOG(log_level::info) << "Requesting connection of block: " << block_info.id;
   bool found;
   auto id = static_cast<std::size_t>(block_info.id);
   //std::unique_lock<std::mutex> mlock(mutex_);
@@ -49,11 +51,13 @@ connection_instance connection_pool::request_connection(block_id & block_info) {
                                   block_info.id,
                                   timeout_ms_);
     instance->client_id = instance->connection->get_client_id();
-    instance->response_reader = instance->connection->get_command_response_reader(instance->client_id);
-    connections_.insert(block_info.id, *instance);
+    //instance->response_reader = instance->connection->get_command_response_reader(instance->client_id);
+    std::vector<connection_instance> connections;
+    connections.push_back(*instance);
+    connections_.insert(block_info.id, connections);
   }
   //LOG(log_level::info) << "look here 3";
-  return connections_.find(block_info.id);
+  return register_info(block_info.id, 0, connections_.find(block_info.id)[0].client_id);
   //bool expected = false;
   /* free_.compare_exchange_strong(expected, true);
   if (expected) {
@@ -74,7 +78,7 @@ void connection_pool::release_connection(std::size_t block_id) {
   if (!expected) {
     throw std::logic_error("Connection already closed");
   } */
-  //LOG(log_level::info) << "Releasing connection of block: " << block_id;
+  LOG(log_level::info) << "Releasing connection of block: " << block_id;
   //std::unique_lock<std::mutex> mlock(mutex_);
   auto it = free_.find(block_id);
   if(it != free_.end()) {
@@ -84,6 +88,36 @@ void connection_pool::release_connection(std::size_t block_id) {
     throw std::logic_error("Connection already closed");
   }
   //mlock.unlock();
+}
+void connection_pool::command_request(connection_pool::register_info connection_info,
+                                      const sequence_id &seq,
+                                      const std::vector<std::string> &args) {
+  auto instance = connections_.find(connection_info.service_port)[connection_info.offset];
+  instance.connection->command_request(seq, args);
+}
+void connection_pool::send_run_command(connection_pool::register_info connection_info,
+                                       const int32_t block_id,
+                                       const std::vector<std::string> &arguments) {
+  auto instance = connections_.find(connection_info.service_port)[connection_info.offset];
+  instance.connection->send_run_command(block_id, arguments);
+
+}
+void connection_pool::recv_run_command(connection_pool::register_info connection_info,
+                                       std::vector<std::string> &_return) {
+  auto instance = connections_.find(connection_info.service_port)[connection_info.offset];
+  instance.connection->recv_run_command(_return);
+
+}
+int64_t connection_pool::recv_response(connection_pool::register_info connection_info,
+                                       std::vector<std::string> &out) {
+  auto instance = connections_.find(connection_info.service_port)[connection_info.offset];
+  return instance.response_reader.recv_response(out);
+}
+void connection_pool::get_command_response_reader(connection_pool::register_info connection_info, int64_t client_id) {
+  auto instance = connections_.update_fn(connection_info.service_port, [&](std::vector<connection_instance> &connections) {
+    connections[connection_info.offset].response_reader = connections[connection_info.offset].connection->get_command_response_reader(client_id);
+  });
+  //instance.response_reader = instance.connection->get_command_response_reader(client_id);
 }
 
 }

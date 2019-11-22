@@ -22,7 +22,7 @@ pool_replica_chain_client::pool_replica_chain_client(std::shared_ptr<directory::
   send_run_command_exception_ = false;
   connect(chain, timeout_ms);
   for (auto &op: OPS) {
-    cmd_client_[op.first] = op.second.is_accessor() ? &tail_ : &head_;
+    cmd_client_[op.first] = op.second.is_accessor() ? tail_ : head_;
   }
 }
 
@@ -65,7 +65,8 @@ void pool_replica_chain_client::connect(const directory::replica_chain &chain, i
   auto start1 = time_utils::now_us();
   //LOG(log_level::info) << "Hey 5";
   //response_reader_ = tail_.connection->get_command_response_reader(seq_.client_id);
-  response_reader_ = tail_.response_reader;
+  pool_.get_command_response_reader(tail_, seq_.client_id);
+  ////response_reader_ = tail_.response_reader;
   auto end = time_utils::now_us();
   LOG(log_level::info) << "Connecting takes time: " << start1 - start;
   LOG(log_level::info) << "Fetching the command response reader takes time: " << end - start1;
@@ -79,12 +80,15 @@ void pool_replica_chain_client::send_command(const std::vector<std::string> &arg
   if (OPS_[args[0]].is_accessor()) {
     try {
       accessor_ = true;
-      cmd_client_.at(args.front())->connection->send_run_command(std::stoi(string_utils::split(chain_.tail(), ':').back()), args);
+      pool_.send_run_command(cmd_client_.at(args.front()), std::stoi(string_utils::split(chain_.tail(), ':').back()), args);
+      //cmd_client_.at(args.front())->connection->send_run_command(std::stoi(string_utils::split(chain_.tail(), ':').back()), args);
     } catch (std::exception &e) {
       send_run_command_exception_ = true;
     }
   } else {
-    cmd_client_.at(args.front())->connection->command_request(seq_, args);
+    LOG(log_level::info) << "Sending out the request " << cmd_client_.at(args.front()).service_port << " " << cmd_client_.at(args.front()).offset;
+    pool_.command_request(cmd_client_.at(args.front()), seq_, args);
+    //cmd_client_.at(args.front())->connection->command_request(seq_, args);
   }
   in_flight_ = true;
 }
@@ -97,7 +101,8 @@ std::vector<std::string> pool_replica_chain_client::recv_response() {
       ret.emplace_back("!block_moved");
     } else {
       try {
-        tail_.connection->recv_run_command(ret);
+        //tail_.connection->recv_run_command(ret);
+        pool_.recv_run_command(tail_, ret);
       } catch (std::exception &e) {
         if (!send_run_command_exception_) {
           ret.emplace_back("!block_moved");
@@ -106,7 +111,9 @@ std::vector<std::string> pool_replica_chain_client::recv_response() {
     }
     send_run_command_exception_ = false;
   } else {
-    rseq = response_reader_.recv_response(ret);
+    //rseq = response_reader_.recv_response(ret);
+    LOG(log_level::info) << "Receiving the response " << tail_.service_port << " " << tail_.offset;
+    rseq = pool_.recv_response(tail_, ret);
     if (rseq != seq_.client_seq_no) {
       throw std::logic_error(
           "SEQ: Expected=" + std::to_string(seq_.client_seq_no) + " Received=" + std::to_string(rseq));
@@ -161,9 +168,6 @@ void pool_replica_chain_client::set_chain_name_metadata(std::string &name, std::
   chain_.metadata = metadata;
 }
 
-bool pool_replica_chain_client::is_connected() const {
-  return head_.connection->is_connected() && tail_.connection->is_connected();
-}
 
 }
 }
