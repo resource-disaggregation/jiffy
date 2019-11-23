@@ -3,7 +3,7 @@
 
 
 #include "jiffy/directory/client/directory_client.h"
-#include "jiffy/storage/client/block_client.h"
+#include "jiffy/storage/client/pool_block_client.h"
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/client_cache.h"
 #include "jiffy/storage/manager/detail/block_id_parser.h"
@@ -13,32 +13,38 @@
 namespace jiffy {
 namespace storage {
 
+
 struct connection_instance {
-  std::shared_ptr<block_client> connection;
+  std::shared_ptr<pool_block_client> connection;
   int64_t client_id;
-  block_client::command_response_reader response_reader;
+  int32_t block_id;
+  pool_block_client::command_response_reader response_reader;
+//    std::vector<mailbox_t> response_;
+//    std::vector<response_worker> workers_;
   connection_instance() {
-    connection = std::make_shared<block_client>();
+    connection = std::make_shared<pool_block_client>();
   }
 };
 
-
 class connection_pool {
  public:
+  typedef std::string response_t;
+  typedef blocking_queue<response_t> mailbox_t;
+
   struct register_info {
-    int service_port;
+    std::string address;
     int offset;
     int64_t client_id;
     register_info() = default;
-    register_info(int _port, int _offset, int64_t _client_id) {
-      service_port = _port;
+    register_info(std::string _address, int _offset, int64_t _client_id) {
+      address = _address;
       offset = _offset;
       client_id = _client_id;
     }
   };
-  typedef std::string response_t;
-  typedef blocking_queue<response_t> mailbox_t;
-  connection_pool(int timeout_ms = 1000) {
+
+  connection_pool(std::size_t pool_size = 4, int timeout_ms = 1000) {
+    pool_size_ = pool_size;
     timeout_ms_ = timeout_ms;
   }
   void init(std::vector<std::string> block_ids, int timeout_ms = 1000);
@@ -68,7 +74,7 @@ class connection_pool {
   std::size_t pool_size_;
   std::vector<std::string> block_ids_;
   /* Map from service port to connection_instanse*/
-  cuckoohash_map<int, std::vector<connection_instance>> connections_; // TODO this connection should be per block server instead of per block id
+  cuckoohash_map<std::string, std::vector<connection_instance>> connections_; // TODO this connection should be per block server instead of per block id, and a block server is determined by host and port
 
 };
 

@@ -230,7 +230,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/client/response_handler.cpp
           src/jiffy/storage/client/response_handler.h
           src/jiffy/storage/client/connection_pool.cpp
-          src/jiffy/storage/client/connection_pool.h)
+          src/jiffy/storage/client/connection_pool.h src/jiffy/storage/client/pool_block_client.cpp src/jiffy/storage/client/pool_block_client.h)
 
   add_dependencies(jiffy thrift_ep awssdk_ep jemalloc_ep)
   target_link_libraries(jiffy ${THRIFT_LIBRARY}
@@ -381,7 +381,7 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/utils/string_utils.h
           src/jiffy/utils/property_map.cpp
           src/jiffy/utils/property_map.h
-          src/jiffy/utils/thread_utils.h)
+          src/jiffy/utils/thread_utils.h src/jiffy/storage/client/pool_block_client.cpp src/jiffy/storage/client/pool_block_client.h)
   add_dependencies(jiffy_client thrift_ep)
   target_link_libraries(jiffy_client ${THRIFT_LIBRARY}
           ${THRIFTNB_LIBRARY}

@@ -86,7 +86,7 @@ void pool_replica_chain_client::send_command(const std::vector<std::string> &arg
       send_run_command_exception_ = true;
     }
   } else {
-    LOG(log_level::info) << "Sending out the request " << cmd_client_.at(args.front()).service_port << " " << cmd_client_.at(args.front()).offset;
+    LOG(log_level::info) << "Sending out the request " << cmd_client_.at(args.front()).address << " " << cmd_client_.at(args.front()).offset;
     pool_.command_request(cmd_client_.at(args.front()), seq_, args);
     //cmd_client_.at(args.front())->connection->command_request(seq_, args);
   }
@@ -112,7 +112,7 @@ std::vector<std::string> pool_replica_chain_client::recv_response() {
     send_run_command_exception_ = false;
   } else {
     //rseq = response_reader_.recv_response(ret);
-    LOG(log_level::info) << "Receiving the response " << tail_.service_port << " " << tail_.offset;
+    LOG(log_level::info) << "Receiving the response " << tail_.address << " " << tail_.offset;
     rseq = pool_.recv_response(tail_, ret);
     if (rseq != seq_.client_seq_no) {
       throw std::logic_error(
