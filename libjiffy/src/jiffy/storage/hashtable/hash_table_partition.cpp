@@ -71,6 +71,7 @@ void hash_table_partition::put(response &_return, const arg_list &args) {
     RETURN_ERR("!args_error");
   }
   auto hash = hash_slot::get(args[1]);
+  LOG(log_level::info) << "Put " << hash << " " << name() << " " << metadata();
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[3] == "!redirected")) {
     if (storage_size() + args[1].size() > storage_capacity()) {
       RETURN_ERR("!redo");

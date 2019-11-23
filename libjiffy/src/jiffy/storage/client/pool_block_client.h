@@ -31,6 +31,8 @@ class pool_block_client {
 
     int64_t recv_response(std::vector<std::string> &out);
 
+    bool is_set();
+
    private:
     /* Thrift protocol */
     std::shared_ptr<apache::thrift::protocol::TProtocol> prot_;
@@ -55,6 +57,8 @@ class pool_block_client {
    */
 
   int64_t get_client_id();
+
+  void register_client_id(int64_t client_id);
 
   /**
    * @brief Connect block server

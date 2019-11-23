@@ -31,9 +31,9 @@ pool_replica_chain_client::~pool_replica_chain_client() {
 }
 
 void pool_replica_chain_client::disconnect() {
-  pool_.release_connection(head_id_);
+  pool_.release_connection(head_);
   if(head_id_ != tail_id_)
-    pool_.release_connection(tail_id_);
+    pool_.release_connection(tail_);
 }
 
 const directory::replica_chain &pool_replica_chain_client::chain() const {
@@ -86,7 +86,7 @@ void pool_replica_chain_client::send_command(const std::vector<std::string> &arg
       send_run_command_exception_ = true;
     }
   } else {
-    LOG(log_level::info) << "Sending out the request " << cmd_client_.at(args.front()).address << " " << cmd_client_.at(args.front()).offset;
+    //LOG(log_level::info) << "Sending out the request " << cmd_client_.at(args.front()).address << " " << cmd_client_.at(args.front()).offset;
     pool_.command_request(cmd_client_.at(args.front()), seq_, args);
     //cmd_client_.at(args.front())->connection->command_request(seq_, args);
   }
@@ -112,7 +112,7 @@ std::vector<std::string> pool_replica_chain_client::recv_response() {
     send_run_command_exception_ = false;
   } else {
     //rseq = response_reader_.recv_response(ret);
-    LOG(log_level::info) << "Receiving the response " << tail_.address << " " << tail_.offset;
+    //LOG(log_level::info) << "Receiving the response " << tail_.address << " " << tail_.offset;
     rseq = pool_.recv_response(tail_, ret);
     if (rseq != seq_.client_seq_no) {
       throw std::logic_error(
@@ -135,7 +135,7 @@ std::vector<std::string> pool_replica_chain_client::run_command(const std::vecto
       auto end_1 = time_utils::now_us();
       response = recv_response();
       auto end_2 = time_utils::now_us();
-      LOG(log_level::info) << args[0] << " " << args[1] << " " << end_1 - start << " " << end_2 - end_1 << " " << end_2 - start;
+      //LOG(log_level::info) << args[0] << " " << args[1] << " " << end_1 - start << " " << end_2 - end_1 << " " << end_2 - start;
       if (retry && response[0] == "!duplicate_key") { // TODO: This is hash table specific logic
         response[0] = "!ok";
       }

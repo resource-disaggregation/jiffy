@@ -182,6 +182,8 @@ int main(int argc, char **argv) {
 
   LOG(log_level::info) << "Hostname: " << hostname;
 
+  num_block_groups = 4;
+
   for (int i = 0; i < static_cast<int>(num_blocks); i++) {
     block_ids.push_back(block_id_parser::make(hostname, service_port + i % num_block_groups, mgmt_port, i));
   }

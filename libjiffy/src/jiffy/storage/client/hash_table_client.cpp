@@ -35,17 +35,17 @@ hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interf
 }
 
 void hash_table_client::refresh() {
-  //LOG(log_level::info) << "Refreshing";
+  LOG(log_level::info) << "Refreshing";
   auto start = time_utils::now_us();
-  status_ = fs_->dstatus(path_);
-  blocks_.clear();
-  redirect_blocks_.clear();
   bool redo;
   do {
-    try {
+    status_ = fs_->dstatus(path_);
+    blocks_.clear();
+    redirect_blocks_.clear();
+   // try {
       for (auto &block: status_.data_blocks()) {
         if (block.metadata != "split_importing" && block.metadata != "importing") {
-          //LOG(log_level::info) << "Creating connections for !!!!" << block.to_string();
+          LOG(log_level::info) << "Creating connections for !!!!" << block.to_string();
           blocks_.emplace(std::make_pair(static_cast<int32_t>(std::stoi(utils::string_utils::split(block.name,
                                                                                                    '_')[0])),
                                          std::make_shared<pool_replica_chain_client>(fs_,
@@ -62,9 +62,10 @@ void hash_table_client::refresh() {
         }
       }
       redo = false;
-    } catch (std::exception &e) {
-      redo = true;
-    }
+    //} catch (std::exception &e) {
+    //  LOG(log_level::info) << "Refreshing the connection due to: " << e.what();
+    //  redo = true;
+    //}
   } while (redo);
   auto end = time_utils::now_us();
   LOG(log_level::info) << "Refresh taking time " << end - start;
@@ -204,6 +205,7 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
 //    }
 
     auto chain = directory::replica_chain(string_utils::split(_return[1], '!'));
+    LOG(log_level::info) << "Redirecting to block: " << chain.to_string();
     bool found = false;
     std::string redirected_id;
     std::shared_ptr<pool_replica_chain_client> redirected_client;

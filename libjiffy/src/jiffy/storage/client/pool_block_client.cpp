@@ -62,6 +62,11 @@ void pool_block_client::recv_run_command(std::vector<std::string> &_return) {
   client_->recv_run_command(_return);
 }
 
+void pool_block_client::register_client_id(int64_t client_id) {
+  client_->register_client_id(0, client_id);
+
+}
+
 pool_block_client::command_response_reader::command_response_reader(std::shared_ptr<apache::thrift::protocol::TProtocol> prot)
     : prot_(std::move(prot)) {
   iprot_ = prot_.get();
@@ -91,6 +96,9 @@ int64_t pool_block_client::command_response_reader::recv_response(std::vector<st
     return result.seq.client_seq_no;
   }
   throw TApplicationException(TApplicationException::MISSING_RESULT, "Command failed: unknown result");
+}
+bool pool_block_client::command_response_reader::is_set() {
+  return prot_ != nullptr;
 }
 
 }
