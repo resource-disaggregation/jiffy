@@ -15,12 +15,13 @@ namespace storage {
 using namespace utils;
 
 hash_table_partition::hash_table_partition(block_memory_manager *manager,
+                                           block_response_client_map &response_map,
                                            const std::string &name,
                                            const std::string &metadata,
                                            const utils::property_map &conf,
                                            const std::string &auto_scaling_host,
                                            int auto_scaling_port)
-    : chain_module(manager, name, metadata, HT_OPS),
+    : chain_module(manager, response_map, name, metadata, HT_OPS),
       scaling_up_(false),
       scaling_down_(false),
       dirty_(false),

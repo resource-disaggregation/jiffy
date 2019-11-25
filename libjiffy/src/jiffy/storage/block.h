@@ -81,6 +81,7 @@ class block {
   std::shared_ptr<chain_module> impl_;
   std::string auto_scaling_host_;
   int auto_scaling_port_;
+  block_response_client_map client_map_{};
 };
 
 }

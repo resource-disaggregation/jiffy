@@ -140,6 +140,7 @@ void connection_pool::release_connection(connection_pool::register_info &connect
 void connection_pool::command_request(connection_pool::register_info connection_info,
                                       const sequence_id &seq,
                                       const std::vector<std::string> &args) {
+  LOG(log_level::info) << "requesting command " << args[0] << " " << args[1];
   auto instance = connections_.find(connection_info.address)[connection_info.offset];
   instance.connection->command_request(seq, args, instance.block_id);
 }

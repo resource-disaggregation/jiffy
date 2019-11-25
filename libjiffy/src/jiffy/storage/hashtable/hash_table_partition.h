@@ -34,6 +34,7 @@ class hash_table_partition : public chain_module {
    * @param conf Configuration properties
    */
   explicit hash_table_partition(block_memory_manager *manager,
+                                block_response_client_map &response_map,
                                 const std::string &name = "0_65536",
                                 const std::string &metadata = "regular",
                                 const utils::property_map &conf = {},

@@ -14,6 +14,7 @@ block::block(const std::string &id,
     : id_(id),
       manager_(capacity),
       impl_(partition_manager::build_partition(&manager_,
+                                               client_map_,
                                                "default",
                                                "default",
                                                "default",
@@ -43,6 +44,7 @@ void block::setup(const std::string &type,
                   const std::string &metadata,
                   const utils::property_map &conf) {
   impl_ = partition_manager::build_partition(&manager_,
+                                             client_map_,
                                              type,
                                              name,
                                              metadata,
@@ -64,6 +66,7 @@ void block::destroy() {
   utils::property_map conf;
   impl_.reset();
   impl_ = partition_manager::build_partition(&manager_,
+                                             client_map_,
                                              type,
                                              name,
                                              metadata,
