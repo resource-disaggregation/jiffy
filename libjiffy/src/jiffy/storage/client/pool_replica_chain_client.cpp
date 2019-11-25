@@ -148,6 +148,7 @@ std::vector<std::string> pool_replica_chain_client::run_command(const std::vecto
       retry = true;
     } catch (std::logic_error &e) { // TODO: This is very iffy, we need to fix this
       response.clear();
+      LOG(log_level::info) << "block moved here " << e.what();
       response.emplace_back("!block_moved");
       break;
     }

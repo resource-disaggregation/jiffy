@@ -35,7 +35,7 @@ std::shared_ptr<apache::thrift::protocol::TProtocol> pool_block_client::protocol
 }
 
 pool_block_client::command_response_reader pool_block_client::get_command_response_reader(int64_t client_id) {
-  client_->register_client_id(0, client_id);
+  client_->register_client_id(-1, client_id);
   return pool_block_client::command_response_reader(protocol_);
 }
 
@@ -63,7 +63,7 @@ void pool_block_client::recv_run_command(std::vector<std::string> &_return) {
 }
 
 void pool_block_client::register_client_id(int64_t client_id) {
-  client_->register_client_id(0, client_id);
+  client_->register_client_id(-1, client_id);
 
 }
 

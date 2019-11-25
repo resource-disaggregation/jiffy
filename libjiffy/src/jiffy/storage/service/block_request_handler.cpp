@@ -22,12 +22,16 @@ int64_t block_request_handler::get_client_id() {
 
 void block_request_handler::register_client_id(const int32_t block_id, const int64_t client_id) {
   registered_client_id_ = client_id;
-  //registered_block_id_ = block_id;
-  // All the blocks within the same service port should be able to respond to the connection
-  // Adding the client to all blocks since the block server only handles the block with the specific address + service_port
-  // TODO Remove the block_id field from thrift file
-  for(auto &block: blocks_) {
-    block.second->impl()->clients().add_client(client_id, client_);
+  if(block_id > 0) {
+    registered_block_id_ = block_id;
+    blocks_[static_cast<std::size_t>(block_id)]->impl()->clients().add_client(client_id, client_);
+  } else {
+    // All the blocks within the same service port should be able to respond to the connection
+    // Adding the client to all blocks since the block server only handles the block with the specific address + service_port
+    // TODO Remove the block_id field from thrift file? Need to keep it since the clients in auto_scaling might need it
+    for (auto &block: blocks_) {
+      block.second->impl()->clients().add_client(client_id, client_);
+    }
   }
   //blocks_[static_cast<std::size_t>(block_id)]->impl()->clients().add_client(client_id, client_);
 }

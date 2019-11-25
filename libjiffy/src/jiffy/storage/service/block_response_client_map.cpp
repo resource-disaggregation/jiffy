@@ -33,6 +33,7 @@ void block_response_client_map::clear() {
 
 void block_response_client_map::send_failure() {
   sequence_id fail;
+  LOG(log_level::info) << "Sending failure here";
   fail.__set_client_id(-2);
   fail.__set_client_seq_no(-2);
   fail.__set_client_id(-2);

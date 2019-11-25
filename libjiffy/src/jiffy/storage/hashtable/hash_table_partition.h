@@ -21,6 +21,7 @@ namespace storage {
 
 #define END_CATCH_HANDLER                         \
   } catch (std::bad_alloc &e) {                   \
+  LOG(log_level::info) << "Redo bad alloc";       \
   RETURN_ERR("!redo");                            \
 }
 

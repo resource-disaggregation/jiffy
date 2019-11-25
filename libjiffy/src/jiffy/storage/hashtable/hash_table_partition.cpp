@@ -71,28 +71,34 @@ void hash_table_partition::put(response &_return, const arg_list &args) {
     RETURN_ERR("!args_error");
   }
   auto hash = hash_slot::get(args[1]);
-  LOG(log_level::info) << "Put " << hash << " " << name() << " " << metadata();
+  LOG(log_level::info) << "Put " << hash << " " << name() << " " << metadata() << " " << (args.size() == 4) << " " << args[1];
   if (in_slot_range(hash) || (in_import_slot_range(hash) && args[3] == "!redirected")) {
     if (storage_size() + args[1].size() > storage_capacity()) {
+      LOG(log_level::info) << "Redoing";
       RETURN_ERR("!redo");
     }
     BEGIN_CATCH_HANDLER;
       if (it != block_.end()) {
+        LOG(log_level::info) << "**************Duplicated key";
         RETURN_ERR("!duplicate_key");
       }
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+        LOG(log_level::info) << "Exporting";
         RETURN_ERR("!exporting", export_target_str_);
       }
       if (storage_size() + args[1].size() + args[2].size() > storage_capacity()) {
+        LOG(log_level::info) << "Full man";
         RETURN_ERR("!full");
       }
       if (block_.emplace(make_binary(args[1]), make_binary(args[2])).second) {
         if (remove_cache_.find(args[1]) != remove_cache_.end())
           remove_cache_.erase(args[1]);
+        LOG(log_level::info) << "Ok";
         RETURN_OK();
       }
     END_CATCH_HANDLER;
   }
+  LOG(log_level::info) << "Block moved";
   RETURN_ERR("!block_moved");
 }
 
@@ -256,6 +262,7 @@ void hash_table_partition::scale_remove(response &_return, const arg_list &args)
 }
 
 void hash_table_partition::scale_put(response &_return, const arg_list &args) {
+  LOG(log_level::info) << "Scale put " << hash_slot::get(args[1]) << " " << name() << " " << metadata() << " " << args[1];
   for (size_t i = 1; i < args.size(); i += 2) {
     auto it = remove_cache_.find(args[i]);
     if (it != remove_cache_.end()) {

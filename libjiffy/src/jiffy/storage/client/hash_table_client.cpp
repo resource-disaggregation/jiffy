@@ -79,6 +79,7 @@ void hash_table_client::put(const std::string &key, const std::string &value) {
   do {
     try {
       _return = blocks_[block_id(key)]->run_command(args);
+      LOG(log_level::info) << "Returning: " << _return.front();
       handle_redirect(_return, args);
       redo = false;
       redo_times_ = 0;
