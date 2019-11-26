@@ -16,7 +16,7 @@ block_request_handler::block_request_handler(std::shared_ptr<::apache::thrift::p
 
 int64_t block_request_handler::get_client_id() {
   // The client id is changing due to the data movement in the auto scaling server
-  LOG(log_level::info) << "Here: " << client_id_gen_.load() << " " << blocks_.begin()->second->id();
+  //LOG(log_level::info) << "Here: " << client_id_gen_.load() << " " << blocks_.begin()->second->id();
   return client_id_gen_.fetch_add(1L);
 }
 

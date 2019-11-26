@@ -20,14 +20,14 @@ void connection_pool::init(std::vector<std::string> block_ids, int timeout_ms) {
                                       block_info.service_port,
                                       timeout_ms_);
         instance->client_id = instance->connection->get_client_id();
-        LOG(log_level::info) << "Assigning client id " << instance->client_id;
+        //LOG(log_level::info) << "Assigning client id " << instance->client_id;
         instance->free_ = true;
         instance->block_id = -1;
         //instance->response_reader = instance->connection->get_command_response_reader(instance->client_id);
         //worker_.add_protocol(instance->connection->protocol());
         connections.push_back(*instance);
       }
-      LOG(log_level::info) << "Initialize connection of block: " << block_address;
+      //LOG(log_level::info) << "Initialize connection of block: " << block_address;
       connections_.insert(block_address, connections);
     }
   }
@@ -82,7 +82,7 @@ connection_pool::register_info connection_pool::request_connection(block_id &blo
                                     timeout_ms_);
       instance->client_id = instance->connection->get_client_id();
       instance->free_ = true;
-      LOG(log_level::info) << "Assigning client id " << instance->client_id;
+      //LOG(log_level::info) << "Assigning client id " << instance->client_id;
       //instance->response_reader = instance->connection->get_command_response_reader(instance->client_id);
       connections.push_back(*instance);
     }
@@ -92,7 +92,7 @@ connection_pool::register_info connection_pool::request_connection(block_id &blo
     offset = 0;
     connections_.insert(block_address, connections);
   }
-  LOG(log_level::info) << "Register result: " << block_address << " " << offset << " " << client_id;
+  //LOG(log_level::info) << "Register result: " << block_address << " " << offset << " " << client_id;
   return register_info(block_address, offset, client_id);
   //bool expected = false;
   /* connection_map_.compare_exchange_strong(expected, true);
@@ -140,9 +140,16 @@ void connection_pool::release_connection(connection_pool::register_info &connect
 void connection_pool::command_request(connection_pool::register_info connection_info,
                                       const sequence_id &seq,
                                       const std::vector<std::string> &args) {
-  LOG(log_level::info) << "requesting command " << args[0] << " " << args[1];
-  auto instance = connections_.find(connection_info.address)[connection_info.offset];
-  instance.connection->command_request(seq, args, instance.block_id);
+  //LOG(log_level::info) << "requesting command " << args[0] << " " << args[1];
+  bool found = connections_.update_fn(connection_info.address, [&](std::vector<connection_instance> &connections) {
+    connections[connection_info.offset].in_flight_ = true;
+    connections[connection_info.offset].connection->command_request(seq,
+                                                                    args,
+                                                                    connections[connection_info.offset].block_id);
+  });
+  if(!found) {
+    throw std::logic_error("Connection does not request");
+  }
 }
 void connection_pool::send_run_command(connection_pool::register_info connection_info,
                                        const int32_t block_id,
@@ -162,9 +169,10 @@ int64_t connection_pool::recv_response(connection_pool::register_info connection
   auto instance = connections_.find(connection_info.address)[connection_info.offset];
   return instance.response_reader.recv_response(out);
 }
+
 void connection_pool::get_command_response_reader(connection_pool::register_info connection_info, int64_t client_id) {
   bool found = connections_.update_fn(connection_info.address, [&](std::vector<connection_instance> &connections) {
-    LOG(log_level::info) << "Vector size: " << connections.size();
+    //LOG(log_level::info) << "Vector size: " << connections.size();
     if(!connections[connection_info.offset].response_reader.is_set()) {
       connections[connection_info.offset].response_reader =
           connections[connection_info.offset].connection->get_command_response_reader(client_id);

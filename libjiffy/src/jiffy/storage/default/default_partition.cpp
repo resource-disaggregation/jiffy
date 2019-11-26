@@ -24,6 +24,7 @@ default_partition::default_partition(block_memory_manager *manager,
 
 void default_partition::run_command(std::vector<std::string> &_return,
                                     const std::vector<std::string> &) {
+  LOG(log_level::info) << "Asking the default partition";
   _return.emplace_back("!block_moved");
 }
 

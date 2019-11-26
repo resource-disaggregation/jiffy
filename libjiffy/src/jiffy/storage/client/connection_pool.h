@@ -22,9 +22,12 @@ struct connection_instance {
   int32_t block_id;
   bool free_;
   pool_block_client::command_response_reader response_reader;
+  bool in_flight_;
 //    std::vector<mailbox_t> response_;
 //    std::vector<response_worker> workers_;
   connection_instance() {
+    free_ = false;
+    in_flight_ = false;
     connection = std::make_shared<pool_block_client>();
   }
 };
@@ -46,7 +49,7 @@ class connection_pool {
     }
   };
 
-  explicit connection_pool(std::size_t pool_size = 4, int timeout_ms = 1000) {
+  explicit connection_pool(std::size_t pool_size = 8, int timeout_ms = 1000) {
     pool_size_ = pool_size;
     timeout_ms_ = timeout_ms;
   }

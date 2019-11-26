@@ -56,8 +56,8 @@ class partition {
    */
   virtual ~partition() {
     if(!default_.load()) {
-      client_map_.send_failure();
-      sub_map_.clear();
+      //client_map_.send_failure();
+      //sub_map_.clear();
     }
     //client_map_.clear();
   }

@@ -95,6 +95,7 @@ class replica_chain_client {
    * @param chain Directory replica chain
    * @param timeout_ms time out
    */
+   //FIXME timeout not used?
   void connect(const directory::replica_chain &chain, int timeout_ms = 0);
 
   /**

@@ -68,8 +68,8 @@ void pool_replica_chain_client::connect(const directory::replica_chain &chain, i
   pool_.get_command_response_reader(tail_, seq_.client_id);
   ////response_reader_ = tail_.response_reader;
   auto end = time_utils::now_us();
-  LOG(log_level::info) << "Connecting takes time: " << start1 - start;
-  LOG(log_level::info) << "Fetching the command response reader takes time: " << end - start1;
+  //LOG(log_level::info) << "Connecting takes time: " << start1 - start;
+  //LOG(log_level::info) << "Fetching the command response reader takes time: " << end - start1;
   in_flight_ = false;
 }
 
@@ -132,14 +132,20 @@ std::vector<std::string> pool_replica_chain_client::run_command(const std::vecto
     try {
       auto start = time_utils::now_us();
       send_command(args);
+      //LOG(log_level::info) << "Finish send command";
       auto end_1 = time_utils::now_us();
       response = recv_response();
+      //LOG(log_level::info) << "Finish receive response";
       auto end_2 = time_utils::now_us();
-      //LOG(log_level::info) << args[0] << " " << args[1] << " " << end_1 - start << " " << end_2 - end_1 << " " << end_2 - start;
+      LOG(log_level::info) << args[0] << " " << args[1] << " " << end_1 - start << " " << end_2 - end_1 << " " << end_2 - start;
       if (retry && response[0] == "!duplicate_key") { // TODO: This is hash table specific logic
         response[0] = "!ok";
       }
     } catch (apache::thrift::transport::TTransportException &e) {
+      response.clear();
+      LOG(log_level::info) << "block moved here " << e.what();
+      response.emplace_back("!block_moved");
+      break;
       LOG(log_level::info) << "Error in connection to chain: " << e.what();
       LOG(log_level::info) << args.front() << " " << chain_.name;
       for (const auto &x : chain_.block_ids)
