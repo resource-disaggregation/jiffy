@@ -1,22 +1,26 @@
 #include <iostream>
 #include "response_handler.h"
+#include "jiffy/utils/logger.h"
 
 namespace jiffy {
 namespace storage {
 
-response_handler::response_handler(mailbox_t &responses)
+using namespace utils;
+
+response_handler::response_handler(std::vector<std::shared_ptr<mailbox_t>> &responses)
     : responses_(responses) {}
 
-void response_handler::notification(const std::string &op, const std::string &data) {
+void response_handler::notification(const std::string &, const std::string &) {
   throw std::logic_error("response handler cannot handle notification.");
 }
 
-void response_handler::control(response_type type, const std::vector<std::string> &ops, const std::string &error) {
+void response_handler::control(response_type, const std::vector<std::string> &, const std::string &) {
   throw std::logic_error("response handler cannot handle control messages.");
 }
 
-void response_handler::response(const sequence_id &, const std::vector<std::string> &) {
-  throw std::logic_error("response handler cannot handle query responses.");
+void response_handler::response(const sequence_id &seq, const std::vector<std::string> &response) {
+  LOG(log_level::info) << "Response handler doing some stuff";
+  responses_[seq.client_id]->push(response);
 }
 
 void response_handler::chain_ack(const sequence_id &) {

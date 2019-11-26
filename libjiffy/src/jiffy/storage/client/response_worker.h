@@ -16,7 +16,7 @@ class response_worker {
   typedef block_response_serviceProcessor processor_t;
   typedef std::shared_ptr<processor_t> processor_ptr_t;
   typedef std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_ptr_t;
-  typedef blocking_queue<std::string> mailbox_t;
+  typedef blocking_queue<std::vector<std::string>> mailbox_t;
 
   /**
    * @brief Constructor
@@ -24,7 +24,7 @@ class response_worker {
    * @param controls Control mailbox
    */
 
-  response_worker(mailbox_t &responses);
+  response_worker(std::vector<std::shared_ptr<mailbox_t>> &responses);
 
   /**
    * @brief Destructor
@@ -53,7 +53,7 @@ class response_worker {
 
  private:
   /* response mailbox */
-  mailbox_t &responses_;
+  std::vector<std::shared_ptr<mailbox_t>> &responses_;
   /* Atomic boolean stop */
   std::atomic_bool stop_;
   /* Worker thread */

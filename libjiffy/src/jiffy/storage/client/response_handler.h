@@ -13,14 +13,14 @@ namespace storage {
  * Inherited from subscription_serviceIf */
 class response_handler : public block_response_serviceIf {
  public:
-  typedef blocking_queue<std::string> mailbox_t;
+  typedef blocking_queue<std::vector<std::string>> mailbox_t;
   /**
    * @brief Constructor
    * @param responses response mailbox
    * @param controls Control mailbox
    */
 
-  explicit response_handler(mailbox_t &responses);
+  explicit response_handler(std::vector<std::shared_ptr<mailbox_t>> &responses);
   void response(const sequence_id &seq, const std::vector<std::string> &result) override;
   void chain_ack(const sequence_id &seq) override;
 
@@ -34,7 +34,7 @@ class response_handler : public block_response_serviceIf {
    * The response mailbox is like a response
    * buffer as to prevent client from being overwhelmed
    */
-  mailbox_t &responses_;
+  std::vector<std::shared_ptr<mailbox_t>> &responses_;
 };
 
 }

@@ -349,6 +349,10 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/client/fifo_queue_client.h
           src/jiffy/storage/client/data_structure_listener.cpp
           src/jiffy/storage/client/data_structure_listener.h
+          src/jiffy/storage/client/response_worker.cpp
+          src/jiffy/storage/client/response_worker.h
+          src/jiffy/storage/client/response_handler.cpp
+          src/jiffy/storage/client/response_handler.h
           src/jiffy/storage/service/block_request_service.cpp
           src/jiffy/storage/service/block_request_service.h
           src/jiffy/storage/service/block_request_service.tcc

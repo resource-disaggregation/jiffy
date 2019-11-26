@@ -111,9 +111,6 @@ std::vector<std::string> replica_chain_client::run_command(const std::vector<std
         response[0] = "!ok";
       }
     } catch (apache::thrift::transport::TTransportException &e) {
-      response.clear();
-      response.emplace_back("!block_moved");
-      break;
       LOG(log_level::info) << "Error in connection to chain: " << e.what();
       LOG(log_level::info) << args.front() << " " << chain_.name;
       for (const auto &x : chain_.block_ids)

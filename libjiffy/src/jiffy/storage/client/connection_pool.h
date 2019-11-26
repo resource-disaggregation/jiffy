@@ -14,7 +14,8 @@
 
 namespace jiffy {
 namespace storage {
-
+typedef std::vector<std::string> response_t;
+typedef blocking_queue<response_t> mailbox_t;
 
 struct connection_instance {
   std::shared_ptr<pool_block_client> connection;
@@ -23,8 +24,7 @@ struct connection_instance {
   bool free_;
   pool_block_client::command_response_reader response_reader;
   bool in_flight_;
-//    std::vector<mailbox_t> response_;
-//    std::vector<response_worker> workers_;
+  std::shared_ptr<mailbox_t> response_mailbox;
   connection_instance() {
     free_ = false;
     in_flight_ = false;
@@ -34,8 +34,7 @@ struct connection_instance {
 
 class connection_pool {
  public:
-  typedef std::string response_t;
-  typedef blocking_queue<response_t> mailbox_t;
+
 
   struct register_info {
     std::string address;
@@ -49,10 +48,13 @@ class connection_pool {
     }
   };
 
-  explicit connection_pool(std::size_t pool_size = 8, int timeout_ms = 1000) {
+  explicit connection_pool(std::size_t pool_size = 100, int timeout_ms = 1000) {
     pool_size_ = pool_size;
     timeout_ms_ = timeout_ms;
   }
+
+  ~connection_pool();
+
   void init(std::vector<std::string> block_ids, int timeout_ms = 1000);
 
   register_info request_connection(block_id & block_info);
@@ -74,14 +76,13 @@ class connection_pool {
  private:
   std::mutex mutex_;
   int timeout_ms_;
-  //response_worker worker_;
-  mailbox_t response_;
+  //response_worker worker_; One worker is inefficient
+  std::vector<std::shared_ptr<response_worker>> workers_;
   std::size_t pool_size_;
   std::vector<std::string> block_ids_;
   /* Map from service port to connection_instanse*/
-  cuckoohash_map<std::string, bool> connection_map_;
   cuckoohash_map<std::string, std::vector<connection_instance>> connections_; // TODO this connection should be per block server instead of per block id, and a block server is determined by host and port
-
+  cuckoohash_map<std::string, mailbox_t> queue;
 };
 
 }

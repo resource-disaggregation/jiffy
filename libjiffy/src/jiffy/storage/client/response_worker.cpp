@@ -9,7 +9,7 @@ using namespace ::jiffy::utils;
 namespace jiffy {
 namespace storage {
 
-response_worker::response_worker(mailbox_t &responses)
+response_worker::response_worker(std::vector<std::shared_ptr<mailbox_t>> &responses)
     : responses_(responses), stop_(false) {
   processor_ = std::make_shared<processor_t>(std::make_shared<response_handler>(responses_));
 }
@@ -19,6 +19,7 @@ response_worker::~response_worker() {
 }
 
 void response_worker::add_protocol(response_worker::protocol_ptr_t protocol) {
+  LOG(log_level::info) << "Adding this protocol";
   protocols_.push_back(protocol);
 }
 
