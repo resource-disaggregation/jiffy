@@ -21,6 +21,7 @@ int64_t block_request_handler::get_client_id() {
 }
 
 void block_request_handler::register_client_id(const int32_t block_id, const int64_t client_id) {
+  LOG(log_level::info) << "Registering client id: " << client_id;
   registered_client_id_ = client_id;
   if(block_id > 0) {
     registered_block_id_ = block_id;

@@ -27,7 +27,9 @@ void response_worker::start() {
   worker_ = std::thread([&] {
     while (!stop_.load()) {
       try {
+        LOG(log_level::info) << "Number of connections: " << protocols_.size();
         for (const auto &protocol: protocols_) {
+          LOG(log_level::info) << "Checking this protocol";
           if (!processor_->process(protocol, protocol, nullptr)) {
             return;
           }

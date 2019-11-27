@@ -8,13 +8,13 @@ namespace storage {
 using namespace utils;
 
 void connection_pool::init(std::vector<std::string> block_ids, int timeout_ms) { //, worker_(response_) {
+  LOG(log_level::info) << "Init this pool " << block_ids.size();
   timeout_ms_ = timeout_ms;
   for (auto &block : block_ids) {
     auto block_info = block_id_parser::parse(block);
     std::string block_address = block_info.host + std::to_string(block_info.service_port);
     try {
-      std::vector<connection_instance> ret;
-      connections_.find(block_address, ret);
+      connections_.find(block_address);
     } catch (std::out_of_range &e) {
       std::vector<connection_instance> connections;
       std::vector<std::shared_ptr<apache::thrift::protocol::TProtocol>> protocols;
@@ -26,6 +26,8 @@ void connection_pool::init(std::vector<std::string> block_ids, int timeout_ms) {
                                       block_info.service_port,
                                       timeout_ms_);
         instance->client_id = instance->connection->get_client_id();
+        LOG(log_level::info) << "Trying to register client id: " << instance->client_id;
+        instance->connection->register_client_id(instance->client_id);
         //LOG(log_level::info) << "Assigning client id " << instance->client_id;
         instance->free_ = true;
         instance->block_id = -1;
@@ -82,6 +84,7 @@ connection_pool::register_info connection_pool::request_connection(block_id &blo
         connection.free_ = false;
         connection.block_id = block_info.id;
         client_id = connection.client_id;
+        //connection.connection->register_client_id(client_id);
         offset = count;
         break;
       }
@@ -166,7 +169,7 @@ void connection_pool::release_connection(connection_pool::register_info &connect
 void connection_pool::command_request(connection_pool::register_info connection_info,
                                       const sequence_id &seq,
                                       const std::vector<std::string> &args) {
-  //LOG(log_level::info) << "requesting command " << args[0] << " " << args[1];
+  LOG(log_level::info) << "requesting command " << args[0];
   bool found = connections_.update_fn(connection_info.address, [&](std::vector<connection_instance> &connections) {
     connections[connection_info.offset].in_flight_ = true;
     connections[connection_info.offset].connection->command_request(seq,
@@ -201,13 +204,17 @@ int64_t connection_pool::recv_response(connection_pool::register_info connection
 }
 
 void connection_pool::get_command_response_reader(connection_pool::register_info connection_info, int64_t client_id) {
-  bool found = connections_.update_fn(connection_info.address, [&](std::vector<connection_instance> &connections) {
+  //bool found = connections_.update_fn(connection_info.address, [&](std::vector<connection_instance> &connections) {
+    LOG(log_level::info) << "registering client id: " << client_id;
+  auto &instance = connections_.find(connection_info.address)[connection_info.offset];
+  instance.connection->register_client_id(client_id);
+  //  connections[connection_info.offset].connection->register_client_id(client_id);
     //LOG(log_level::info) << "Vector size: " << connections.size();
     //if(!connections[connection_info.offset].response_reader.is_set()) {
     //  connections[connection_info.offset].response_reader =
     //      connections[connection_info.offset].connection->get_command_response_reader(client_id);
     //}
-  });
+ // });
 //  if (!found) {
 //    throw std::logic_error("Failed to find connection");
 //  }

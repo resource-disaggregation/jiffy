@@ -17,7 +17,9 @@ pool_block_client::~pool_block_client() {
 }
 
 int64_t pool_block_client::get_client_id() {
-  return client_->get_client_id();
+  auto ret = client_->get_client_id();
+  //client_->register_client_id(-1, ret);
+  return ret;
 }
 
 void pool_block_client::connect(const std::string &host, int port, int timeout_ms) {
@@ -64,7 +66,6 @@ void pool_block_client::recv_run_command(std::vector<std::string> &_return) {
 
 void pool_block_client::register_client_id(int64_t client_id) {
   client_->register_client_id(-1, client_id);
-
 }
 
 pool_block_client::command_response_reader::command_response_reader(std::shared_ptr<apache::thrift::protocol::TProtocol> prot)

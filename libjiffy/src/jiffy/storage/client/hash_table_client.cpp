@@ -21,7 +21,7 @@ hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interf
   for(auto & block: status.data_blocks()) {
     block_init.emplace_back(block.block_ids[0]);
   }
-  pool_.init(block_init); // we need to figure this out?
+  pool_.init(block_init); // TODO we need to figure this out?
   for (auto &block: status.data_blocks()) {
     blocks_.emplace(std::make_pair(static_cast<int32_t>(std::stoi(utils::string_utils::split(block.name, '_')[0])),
                                    std::make_shared<pool_replica_chain_client>(fs_,
