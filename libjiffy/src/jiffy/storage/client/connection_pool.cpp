@@ -27,7 +27,7 @@ void connection_pool::init(std::vector<std::string> block_ids, int timeout_ms) {
                                       timeout_ms_);
         instance->client_id = instance->connection->get_client_id();
         LOG(log_level::info) << "Trying to register client id: " << instance->client_id;
-        instance->connection->register_client_id(instance->client_id);
+        //instance->connection->register_client_id(instance->client_id);
         //LOG(log_level::info) << "Assigning client id " << instance->client_id;
         instance->free_ = true;
         instance->block_id = -1;
@@ -84,7 +84,7 @@ connection_pool::register_info connection_pool::request_connection(block_id &blo
         connection.free_ = false;
         connection.block_id = block_info.id;
         client_id = connection.client_id;
-        //connection.connection->register_client_id(client_id);
+//        connection.connection->register_client_id(client_id);
         offset = count;
         break;
       }

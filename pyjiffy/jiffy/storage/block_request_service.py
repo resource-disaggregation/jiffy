@@ -119,29 +119,15 @@ class Client(Iface):
 
         """
         self.send_register_client_id(block_id, client_id)
-        self.recv_register_client_id()
 
     def send_register_client_id(self, block_id, client_id):
-        self._oprot.writeMessageBegin('register_client_id', TMessageType.CALL, self._seqid)
+        self._oprot.writeMessageBegin('register_client_id', TMessageType.ONEWAY, self._seqid)
         args = register_client_id_args()
         args.block_id = block_id
         args.client_id = client_id
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
-
-    def recv_register_client_id(self):
-        iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = register_client_id_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        return
 
     def command_request(self, seq, block_id, arguments):
         """
@@ -308,24 +294,12 @@ class Processor(Iface, TProcessor):
         args = register_client_id_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = register_client_id_result()
         try:
             self._handler.register_client_id(args.block_id, args.client_id)
-            msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except TApplicationException as ex:
-            logging.exception('TApplication exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = ex
         except Exception:
-            logging.exception('Unexpected exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("register_client_id", msg_type, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
+            logging.exception('Exception in oneway handler')
 
     def process_command_request(self, seqid, iprot, oprot):
         args = command_request_args()
@@ -605,59 +579,6 @@ register_client_id_args.thrift_spec = (
     None,  # 0
     (1, TType.I32, 'block_id', None, None, ),  # 1
     (2, TType.I64, 'client_id', None, None, ),  # 2
-)
-
-
-class register_client_id_result(object):
-
-    __slots__ = (
-    )
-
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('register_client_id_result')
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, getattr(self, key))
-             for key in self.__slots__]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return False
-        for attr in self.__slots__:
-            my_val = getattr(self, attr)
-            other_val = getattr(other, attr)
-            if my_val != other_val:
-                return False
-        return True
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(register_client_id_result)
-register_client_id_result.thrift_spec = (
 )
 
 

@@ -1,5 +1,3 @@
-#include <utility>
-
 #ifndef JIFFY_CONNECTION_POOL_H
 #define JIFFY_CONNECTION_POOL_H
 
@@ -10,7 +8,8 @@
 #include "jiffy/utils/client_cache.h"
 #include "jiffy/storage/manager/detail/block_id_parser.h"
 #include "jiffy/storage/client/response_worker.h"
-#include <libcuckoo/cuckoohash_map.hh>
+//#include <libcuckoo/cuckoohash_map.hh>
+#include "../../../../../thirdparty/libcuckoo/libcuckoo/cuckoohash_map.hh"
 
 namespace jiffy {
 namespace storage {

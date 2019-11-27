@@ -238,46 +238,6 @@ class block_request_service_register_client_id_pargs {
 
 };
 
-
-class block_request_service_register_client_id_result {
- public:
-
-  block_request_service_register_client_id_result(const block_request_service_register_client_id_result&);
-  block_request_service_register_client_id_result& operator=(const block_request_service_register_client_id_result&);
-  block_request_service_register_client_id_result() {
-  }
-
-  virtual ~block_request_service_register_client_id_result() throw();
-
-  bool operator == (const block_request_service_register_client_id_result & /* rhs */) const
-  {
-    return true;
-  }
-  bool operator != (const block_request_service_register_client_id_result &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const block_request_service_register_client_id_result & ) const;
-
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
-
-};
-
-
-class block_request_service_register_client_id_presult {
- public:
-
-
-  virtual ~block_request_service_register_client_id_presult() throw();
-
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-
-};
-
 typedef struct _block_request_service_command_request_args__isset {
   _block_request_service_command_request_args__isset() : seq(false), block_id(false), arguments(false) {}
   bool seq :1;
@@ -676,7 +636,6 @@ class block_request_serviceClientT : virtual public block_request_serviceIf {
   int64_t recv_get_client_id();
   void register_client_id(const int32_t block_id, const int64_t client_id);
   void send_register_client_id(const int32_t block_id, const int64_t client_id);
-  void recv_register_client_id();
   void command_request(const sequence_id& seq, const int32_t block_id, const std::vector<std::string> & arguments);
   void send_command_request(const sequence_id& seq, const int32_t block_id, const std::vector<std::string> & arguments);
   void chain_request(const sequence_id& seq, const int32_t block_id, const std::vector<std::string> & arguments);
@@ -886,8 +845,7 @@ class block_request_serviceConcurrentClientT : virtual public block_request_serv
   int32_t send_get_client_id();
   int64_t recv_get_client_id(const int32_t seqid);
   void register_client_id(const int32_t block_id, const int64_t client_id);
-  int32_t send_register_client_id(const int32_t block_id, const int64_t client_id);
-  void recv_register_client_id(const int32_t seqid);
+  void send_register_client_id(const int32_t block_id, const int64_t client_id);
   void command_request(const sequence_id& seq, const int32_t block_id, const std::vector<std::string> & arguments);
   void send_command_request(const sequence_id& seq, const int32_t block_id, const std::vector<std::string> & arguments);
   void chain_request(const sequence_id& seq, const int32_t block_id, const std::vector<std::string> & arguments);

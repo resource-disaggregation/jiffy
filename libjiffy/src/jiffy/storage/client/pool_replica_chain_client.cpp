@@ -65,7 +65,7 @@ void pool_replica_chain_client::connect(const directory::replica_chain &chain, i
   auto start1 = time_utils::now_us();
   //LOG(log_level::info) << "Hey 5";
   //response_reader_ = tail_.connection->get_command_response_reader(seq_.client_id);
-  //pool_.get_command_response_reader(tail_, seq_.client_id);
+  pool_.get_command_response_reader(tail_, seq_.client_id);
   ////response_reader_ = tail_.response_reader;
   auto end = time_utils::now_us();
   LOG(log_level::info) << "Connecting takes time: " << start1 - start;
