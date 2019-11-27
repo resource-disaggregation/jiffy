@@ -32,7 +32,7 @@ if (Boost_BUILD)
     list(APPEND Boost_COMPONENT_FLAGS --with-${component})
   endforeach ()
   ExternalProject_Add(boost_ep
-          URL https://downloads.sourceforge.net/project/boost/boost/${Boost_VERSION}/boost_${Boost_VERSION_STR}.zip
+          URL https://downloads.sourceforge.net/project/boost/boost/${Boost_VERSION}/boost_${Boost_VERSION_STR}.tar.gz
           UPDATE_COMMAND ""
           CONFIGURE_COMMAND ./bootstrap.sh --prefix=${Boost_PREFIX}
           BUILD_COMMAND ./b2 link=static variant=release cxxflags=-fPIC cflags=-fPIC --prefix=${Boost_PREFIX} ${Boost_COMPONENT_FLAGS} install
