@@ -91,7 +91,7 @@ void chain_module::request(sequence_id seq, const arg_list &args) {
       LOG(log_level::error) << "Invalid state: Accessor request on non-tail node";
       return;
     }
-    seq.server_seq_no = ++chain_seq_no_;
+    //seq.server_seq_no = ++chain_seq_no_;
     next_->request(seq, args);
   }
   add_pending(seq, args);

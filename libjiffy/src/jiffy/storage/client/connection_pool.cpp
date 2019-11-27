@@ -31,8 +31,9 @@ void connection_pool::init(std::vector<std::string> block_ids, int timeout_ms) {
         //LOG(log_level::info) << "Assigning client id " << instance->client_id;
         instance->free_ = true;
         instance->block_id = -1;
-        instance->response_mailbox = std::make_shared<mailbox_t>();
+       // instance->response_mailbox = std::make_shared<mailbox_t>();
         protocols.push_back(instance->connection->protocol());
+        LOG(log_level::info) << "Adding one mailbox to the vector " << i;
         mailboxes.emplace_back(instance->response_mailbox);
         //instance->response_reader = instance->connection->get_command_response_reader(instance->client_id);
 
@@ -103,8 +104,8 @@ connection_pool::register_info connection_pool::request_connection(block_id &blo
       instance->client_id = instance->connection->get_client_id();
       instance->free_ = true;
       protocols.push_back(instance->connection->protocol());
-      instance->response_mailbox = std::make_unique<mailbox_t>();
-      mailboxes.emplace_back(instance->response_mailbox);
+      //instance->response_mailbox = std::make_unique<mailbox_t>();
+      mailboxes.push_back(instance->response_mailbox);
       //LOG(log_level::info) << "Assigning client id " << instance->client_id;
       //instance->response_reader = instance->connection->get_command_response_reader(instance->client_id);
       connections.push_back(*instance);
@@ -121,7 +122,7 @@ connection_pool::register_info connection_pool::request_connection(block_id &blo
     workers_.push_back(worker);
     workers_.back()->start();
   }
-  //LOG(log_level::info) << "Register result: " << block_address << " " << offset << " " << client_id;
+  LOG(log_level::info) << "Register result: " << block_address << " " << offset << " " << client_id;
   return register_info(block_address, offset, client_id);
   //bool expected = false;
   /* connection_map_.compare_exchange_strong(expected, true);
@@ -167,11 +168,12 @@ void connection_pool::release_connection(connection_pool::register_info &connect
 //  //mlock.unlock();
 }
 void connection_pool::command_request(connection_pool::register_info connection_info,
-                                      const sequence_id &seq,
+                                      sequence_id &seq,
                                       const std::vector<std::string> &args) {
-  LOG(log_level::info) << "requesting command " << args[0];
+  LOG(log_level::info) << "requesting command " << args[0] << " " << connection_info.offset;
   bool found = connections_.update_fn(connection_info.address, [&](std::vector<connection_instance> &connections) {
     connections[connection_info.offset].in_flight_ = true;
+    seq.__set_server_seq_no(connection_info.offset);
     connections[connection_info.offset].connection->command_request(seq,
                                                                     args,
                                                                     connections[connection_info.offset].block_id);
@@ -198,7 +200,9 @@ int64_t connection_pool::recv_response(connection_pool::register_info connection
   auto &instance = connections_.find(connection_info.address)[connection_info.offset];
   //return instance.response_reader.recv_response(out);
   //return instance.response_mailbox->pop()
-  auto ret = instance.response_mailbox->pop();
+  LOG(log_level::info) << "Trying to receive response " << connection_info.offset;
+  auto ret = instance.response_mailbox->pop(3000);
+  LOG(log_level::info) << "Response received";
   out.insert(out.begin(), ret.begin(), ret.end());
   return 0;
 }

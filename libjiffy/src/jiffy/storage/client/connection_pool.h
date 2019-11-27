@@ -28,6 +28,7 @@ struct connection_instance {
     free_ = false;
     in_flight_ = false;
     connection = std::make_shared<pool_block_client>();
+    response_mailbox = std::make_shared<mailbox_t>();
   }
 };
 
@@ -64,7 +65,7 @@ class connection_pool {
 
   void recv_run_command(register_info connection_info, std::vector<std::string> &_return);
 
-  void command_request(register_info connection_info, const sequence_id &seq, const std::vector<std::string> &args);
+  void command_request(register_info connection_info, sequence_id &seq, const std::vector<std::string> &args);
 
   int64_t recv_response(register_info connection_info, std::vector<std::string> &out);
 

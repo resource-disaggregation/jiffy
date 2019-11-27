@@ -53,7 +53,7 @@ class response_worker {
 
  private:
   /* response mailbox */
-  std::vector<std::shared_ptr<mailbox_t>> &responses_;
+  std::vector<std::shared_ptr<mailbox_t>> responses_;
   /* Atomic boolean stop */
   std::atomic_bool stop_;
   /* Worker thread */

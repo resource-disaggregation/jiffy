@@ -34,7 +34,7 @@ class response_handler : public block_response_serviceIf {
    * The response mailbox is like a response
    * buffer as to prevent client from being overwhelmed
    */
-  std::vector<std::shared_ptr<mailbox_t>> &responses_;
+  std::vector<std::shared_ptr<mailbox_t>> responses_;
 };
 
 }
