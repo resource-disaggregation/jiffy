@@ -202,6 +202,10 @@ void fifo_queue_partition::out_rate(response &_return, const arg_list &args) {
   RETURN_OK(std::to_string(out_rate_));
 }
 
+void fifo_queue_partition::front(response &_return, const arg_list &args) {
+
+}
+
 void fifo_queue_partition::run_command(response &_return, const arg_list &args) {
   auto cmd_name = args[0];
   update_rate();
@@ -221,6 +225,8 @@ void fifo_queue_partition::run_command(response &_return, const arg_list &args) 
     case fifo_queue_cmd_id::fq_in_rate:in_rate(_return, args);
       break;
     case fifo_queue_cmd_id::fq_out_rate:out_rate(_return, args);
+      break;
+    case fifo_queue_cmd_id::fq_front:front(_return, args);
       break;
     default: {
       _return.emplace_back("!no_such_command");

@@ -71,6 +71,11 @@ class fifo_queue_client : data_structure_client {
    */
   double out_rate();
 
+  /**
+   * @brief Fetch the front element of the queue
+   * @return Dequeue result
+   */
+  std::string front();
  private:
   /**
    * @brief Handle command in redirect case

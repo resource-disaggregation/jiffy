@@ -96,6 +96,13 @@ double fifo_queue_client::out_rate() {
   return std::stod(_return[1]);
 }
 
+std::string fifo_queue_client::front() {
+  std::vector<std::string> _return;
+  std::vector<std::string> args{"front"};
+  run_repeated(_return, args);
+  return _return[1];
+}
+
 void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
   auto cmd_name = args.front();
   if (_return[0] == "!redo") {
