@@ -31,10 +31,10 @@ fifo_queue_client::fifo_queue_client(std::shared_ptr<directory::directory_interf
 }
 
 void fifo_queue_client::refresh() {
-  status_ = fs_->dstatus(path_);
-  blocks_.clear();
   bool redo;
   do {
+    status_ = fs_->dstatus(path_);
+    blocks_.clear();
     try {
       for (const auto &block: status_.data_blocks()) {
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FQ_CMDS, timeout_ms_));
@@ -45,7 +45,7 @@ void fifo_queue_client::refresh() {
     }
   } while (redo);
   // Restore pointers after refreshing
-  start_ = std::stoul(status_.data_blocks()[0].name);
+  start_ = std::stoul(status_.data_blocks().front().name);
   enqueue_partition_ = blocks_.size() - 1;
   dequeue_partition_ = 0;
   if (read_partition_ < start_) {
