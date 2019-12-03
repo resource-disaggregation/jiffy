@@ -99,7 +99,7 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
     head_ += (string_array::METADATA_LEN + ret.second.size());
     update_read_head();
     dequeue_data_size_ += ret.second.size();
-    RETURN_OK(ret.second);
+    RETURN_OK();
   }
   if (ret.second == "!not_available") {
     RETURN_ERR("!msg_not_found");
@@ -203,7 +203,24 @@ void fifo_queue_partition::out_rate(response &_return, const arg_list &args) {
 }
 
 void fifo_queue_partition::front(response &_return, const arg_list &args) {
-
+  if (!(args.size() == 1 || (args.size() == 2 && args[1] == "!redirected"))) {
+    RETURN_ERR("!args_error");
+  }
+  auto ret = partition_.at(head_);
+  if (ret.first) {
+    RETURN_OK(ret.second);
+  }
+  if (ret.second == "!not_available") {
+    RETURN_ERR("!msg_not_found");
+  }
+  if (!auto_scale_) {
+    RETURN_ERR("!redirected_front");
+  }
+  if (!next_target_str_.empty()) {
+    RETURN_ERR("!redirected_front",
+               next_target_str_);
+  }
+  RETURN_ERR("!redo");
 }
 
 void fifo_queue_partition::run_command(response &_return, const arg_list &args) {
