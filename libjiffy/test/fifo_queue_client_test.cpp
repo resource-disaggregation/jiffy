@@ -122,6 +122,7 @@ TEST_CASE("fifo_queue_client_enqueue_length_dequeue_test", "[enqueue][dequeue]")
   for (std::size_t i = 500; i < 1000; ++i) {
     REQUIRE(client.front() == std::to_string(i));
     REQUIRE_NOTHROW(client.dequeue());
+    length -= std::to_string(i).size();
   }
 
   REQUIRE(client.length() == length);
