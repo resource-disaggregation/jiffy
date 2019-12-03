@@ -78,10 +78,8 @@ void chain_module::request(sequence_id seq, const arg_list &args) {
     LOG(log_level::error) << "Invalid state: Direct request on a mid node";
     return;
   }
-
   std::vector<std::string> result;
   run_command(result, args);
-
   auto cmd_name = args.front();
   if (is_tail()) {
     clients().respond_client(seq, result);

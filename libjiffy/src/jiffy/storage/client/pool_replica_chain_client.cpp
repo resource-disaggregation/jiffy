@@ -137,16 +137,11 @@ std::vector<std::string> pool_replica_chain_client::run_command(const std::vecto
       response = recv_response();
       //LOG(log_level::info) << "Finish receive response";
       auto end_2 = time_utils::now_us();
-      LOG(log_level::info) << args[0] << " " << args[1] << " " << end_1 - start << " " << end_2 - end_1 << " " << end_2 - start;
+      LOG(log_level::info) << args[0] << " " << args[1] << " " << end_1 - start << " " << end_2 - end_1 << " " << end_2 - start << " " << end_2;
       if (retry && response[0] == "!duplicate_key") { // TODO: This is hash table specific logic
         response[0] = "!ok";
       }
     } catch (apache::thrift::transport::TTransportException &e) {
-        //TODO Fix this issue
-      response.clear();
-      LOG(log_level::info) << "block moved here " << e.what();
-      response.emplace_back("!block_moved");
-      break;
       LOG(log_level::info) << "Error in connection to chain: " << e.what();
       LOG(log_level::info) << args.front() << " " << chain_.name;
       for (const auto &x : chain_.block_ids)
@@ -155,7 +150,7 @@ std::vector<std::string> pool_replica_chain_client::run_command(const std::vecto
       retry = true;
     } catch (std::logic_error &e) { // TODO: This is very iffy, we need to fix this
       response.clear();
-      LOG(log_level::info) << "block moved here " << e.what();
+      LOG(log_level::info) << "block moved here 2" << e.what();
       response.emplace_back("!block_moved");
       break;
     }

@@ -68,7 +68,7 @@ void hash_table_client::refresh() {
     }
   } while (redo);
   auto end = time_utils::now_us();
-  LOG(log_level::info) << "Refresh taking time " << end - start;
+  LOG(log_level::info) << "Refresh taking time " << end - start << " " << start << " " << end;
 
 }
 
