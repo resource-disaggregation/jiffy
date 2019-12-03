@@ -82,6 +82,7 @@ int main() {
   uint64_t dequeue_tot_time = 0, dequeue_t0 = 0, dequeue_t1 = 0;
   for (j = num_ops; j > 0; --j) {
     dequeue_t0 = time_utils::now_us();
+    fq_client->front();
     fq_client->dequeue();
     dequeue_t1 = time_utils::now_us();
     dequeue_tot_time = (dequeue_t1 - dequeue_t0);
