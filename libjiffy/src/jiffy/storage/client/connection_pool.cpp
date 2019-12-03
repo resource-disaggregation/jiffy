@@ -17,9 +17,6 @@ void connection_pool::init(std::vector<std::string> block_ids, int timeout_ms) {
       connections_.find(block_address);
     } catch (std::out_of_range &e) {
       std::vector<connection_instance> connections;
-      std::vector<std::shared_ptr<apache::thrift::protocol::TProtocol>> protocols;
-      std::vector<std::shared_ptr<mailbox_t>> mailboxes;
-
       for (std::size_t i = 0; i < pool_size_; i++) {
         auto instance = new connection_instance();
         instance->connection->connect(block_info.host,
@@ -32,21 +29,12 @@ void connection_pool::init(std::vector<std::string> block_ids, int timeout_ms) {
         instance->free_ = true;
         instance->block_id = -1;
        // instance->response_mailbox = std::make_shared<mailbox_t>();
-        protocols.push_back(instance->connection->protocol());
-        LOG(log_level::info) << "Adding one mailbox to the vector " << i;
-        mailboxes.emplace_back(instance->response_mailbox);
         //instance->response_reader = instance->connection->get_command_response_reader(instance->client_id);
 
         connections.push_back(*instance);
       }
-      auto worker = std::make_shared<response_worker>(mailboxes);
-      for(auto & protocol : protocols) {
-        worker->add_protocol(protocol);
-      }
       //LOG(log_level::info) << "Initialize connection of block: " << block_address;
       connections_.insert(block_address, connections);
-      workers_.push_back(worker);
-      workers_.back()->start();
     }
   }
 }
@@ -94,8 +82,6 @@ connection_pool::register_info connection_pool::request_connection(block_id &blo
   });
   if (!found) {
     std::vector<connection_instance> connections;
-    std::vector<std::shared_ptr<apache::thrift::protocol::TProtocol>> protocols;
-    std::vector<std::shared_ptr<mailbox_t>> mailboxes;
     for (std::size_t i = 0; i < pool_size_; i++) {
       auto instance = new connection_instance();
       instance->connection->connect(block_info.host,
@@ -103,9 +89,6 @@ connection_pool::register_info connection_pool::request_connection(block_id &blo
                                     timeout_ms_);
       instance->client_id = instance->connection->get_client_id();
       instance->free_ = true;
-      protocols.push_back(instance->connection->protocol());
-      //instance->response_mailbox = std::make_unique<mailbox_t>();
-      mailboxes.push_back(instance->response_mailbox);
       //LOG(log_level::info) << "Assigning client id " << instance->client_id;
       //instance->response_reader = instance->connection->get_command_response_reader(instance->client_id);
       connections.push_back(*instance);
@@ -115,12 +98,6 @@ connection_pool::register_info connection_pool::request_connection(block_id &blo
     client_id = connections[0].client_id;
     offset = 0;
     connections_.insert(block_address, connections);
-    auto worker = std::make_shared<response_worker>(mailboxes);
-    for(auto & protocol : protocols) {
-      worker->add_protocol(protocol);
-    }
-    workers_.push_back(worker);
-    workers_.back()->start();
   }
   LOG(log_level::info) << "Register result: " << block_address << " " << offset << " " << client_id;
   return register_info(block_address, offset, client_id);
@@ -173,7 +150,7 @@ void connection_pool::command_request(connection_pool::register_info connection_
   LOG(log_level::info) << "requesting command " << args[0] << " " << connection_info.offset;
   bool found = connections_.update_fn(connection_info.address, [&](std::vector<connection_instance> &connections) {
     connections[connection_info.offset].in_flight_ = true;
-    seq.__set_server_seq_no(connection_info.offset);
+  //  seq.__set_server_seq_no(connection_info.offset);
     connections[connection_info.offset].connection->command_request(seq,
                                                                     args,
                                                                     connections[connection_info.offset].block_id);
@@ -197,31 +174,23 @@ void connection_pool::recv_run_command(connection_pool::register_info connection
 }
 int64_t connection_pool::recv_response(connection_pool::register_info connection_info,
                                        std::vector<std::string> &out) {
-  auto &instance = connections_.find(connection_info.address)[connection_info.offset];
-  //return instance.response_reader.recv_response(out);
-  //return instance.response_mailbox->pop()
   LOG(log_level::info) << "Trying to receive response " << connection_info.offset;
-  auto ret = instance.response_mailbox->pop(3000);
-  LOG(log_level::info) << "Response received";
-  out.insert(out.begin(), ret.begin(), ret.end());
-  return 0;
+  auto &instance = connections_.find(connection_info.address)[connection_info.offset];
+  return instance.response_reader.recv_response(out);
 }
 
 void connection_pool::get_command_response_reader(connection_pool::register_info connection_info, int64_t client_id) {
-  //bool found = connections_.update_fn(connection_info.address, [&](std::vector<connection_instance> &connections) {
-    LOG(log_level::info) << "registering client id: " << client_id;
-  auto &instance = connections_.find(connection_info.address)[connection_info.offset];
-  instance.connection->register_client_id(client_id);
-  //  connections[connection_info.offset].connection->register_client_id(client_id);
-    //LOG(log_level::info) << "Vector size: " << connections.size();
-    //if(!connections[connection_info.offset].response_reader.is_set()) {
-    //  connections[connection_info.offset].response_reader =
-    //      connections[connection_info.offset].connection->get_command_response_reader(client_id);
-    //}
- // });
-//  if (!found) {
-//    throw std::logic_error("Failed to find connection");
-//  }
+  bool found = connections_.update_fn(connection_info.address, [&](std::vector<connection_instance> &connections) {
+    connections[connection_info.offset].connection->register_client_id(client_id);
+    LOG(log_level::info) << "Vector size: " << connections.size();
+    if(!connections[connection_info.offset].response_reader.is_set()) {
+      connections[connection_info.offset].response_reader =
+        connections[connection_info.offset].connection->get_command_response_reader(client_id);
+    }
+    });
+    if (!found) {
+        throw std::logic_error("Failed to find connection");
+    }
 }
 connection_pool::~connection_pool() {
 

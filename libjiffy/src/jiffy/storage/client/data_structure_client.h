@@ -6,7 +6,6 @@
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/client_cache.h"
 #include "jiffy/storage/manager/detail/block_id_parser.h"
-#include "jiffy/storage/client/response_worker.h"
 #include "jiffy/storage/client/connection_pool.h"
 
 #define THROW_IF_NOT_OK(ret) if (ret[0] != "!ok") throw std::logic_error(ret[0])

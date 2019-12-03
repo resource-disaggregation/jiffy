@@ -142,6 +142,7 @@ std::vector<std::string> pool_replica_chain_client::run_command(const std::vecto
         response[0] = "!ok";
       }
     } catch (apache::thrift::transport::TTransportException &e) {
+        //TODO Fix this issue
       response.clear();
       LOG(log_level::info) << "block moved here " << e.what();
       response.emplace_back("!block_moved");

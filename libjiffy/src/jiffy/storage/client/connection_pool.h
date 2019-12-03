@@ -7,14 +7,11 @@
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/client_cache.h"
 #include "jiffy/storage/manager/detail/block_id_parser.h"
-#include "jiffy/storage/client/response_worker.h"
 //#include <libcuckoo/cuckoohash_map.hh>
 #include "../../../../../thirdparty/libcuckoo/libcuckoo/cuckoohash_map.hh"
 
 namespace jiffy {
 namespace storage {
-typedef std::vector<std::string> response_t;
-typedef blocking_queue<response_t> mailbox_t;
 
 struct connection_instance {
   std::shared_ptr<pool_block_client> connection;
@@ -23,12 +20,10 @@ struct connection_instance {
   bool free_;
   pool_block_client::command_response_reader response_reader;
   bool in_flight_;
-  std::shared_ptr<mailbox_t> response_mailbox;
   connection_instance() {
     free_ = false;
     in_flight_ = false;
     connection = std::make_shared<pool_block_client>();
-    response_mailbox = std::make_shared<mailbox_t>();
   }
 };
 
@@ -76,13 +71,10 @@ class connection_pool {
  private:
   std::mutex mutex_;
   int timeout_ms_;
-  //response_worker worker_; One worker is inefficient
-  std::vector<std::shared_ptr<response_worker>> workers_;
   std::size_t pool_size_;
   std::vector<std::string> block_ids_;
   /* Map from service port to connection_instanse*/
   cuckoohash_map<std::string, std::vector<connection_instance>> connections_; // TODO this connection should be per block server instead of per block id, and a block server is determined by host and port
-  cuckoohash_map<std::string, mailbox_t> queue;
 };
 
 }

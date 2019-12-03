@@ -225,10 +225,6 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/types/binary.cpp
           src/jiffy/storage/types/byte_string.h
           src/jiffy/storage/types/byte_string.cc
-          src/jiffy/storage/client/response_worker.cpp
-          src/jiffy/storage/client/response_worker.h
-          src/jiffy/storage/client/response_handler.cpp
-          src/jiffy/storage/client/response_handler.h
           src/jiffy/storage/client/connection_pool.cpp
           src/jiffy/storage/client/connection_pool.h src/jiffy/storage/client/pool_block_client.cpp src/jiffy/storage/client/pool_block_client.h)
 
@@ -349,10 +345,6 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/client/fifo_queue_client.h
           src/jiffy/storage/client/data_structure_listener.cpp
           src/jiffy/storage/client/data_structure_listener.h
-          src/jiffy/storage/client/response_worker.cpp
-          src/jiffy/storage/client/response_worker.h
-          src/jiffy/storage/client/response_handler.cpp
-          src/jiffy/storage/client/response_handler.h
           src/jiffy/storage/service/block_request_service.cpp
           src/jiffy/storage/service/block_request_service.h
           src/jiffy/storage/service/block_request_service.tcc
