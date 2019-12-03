@@ -259,6 +259,78 @@ uint32_t block_request_service_register_client_id_pargs::write(Protocol_* oprot)
 
 
 template <class Protocol_>
+uint32_t block_request_service_register_client_id_result::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    xfer += iprot->skip(ftype);
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t block_request_service_register_client_id_result::write(Protocol_* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("block_request_service_register_client_id_result");
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t block_request_service_register_client_id_presult::read(Protocol_* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    xfer += iprot->skip(ftype);
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
+template <class Protocol_>
 uint32_t block_request_service_command_request_args::read(Protocol_* iprot) {
 
   ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
@@ -1078,13 +1150,14 @@ template <class Protocol_>
 void block_request_serviceClientT<Protocol_>::register_client_id(const int32_t block_id, const int64_t client_id)
 {
   send_register_client_id(block_id, client_id);
+  recv_register_client_id();
 }
 
 template <class Protocol_>
 void block_request_serviceClientT<Protocol_>::send_register_client_id(const int32_t block_id, const int64_t client_id)
 {
   int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("register_client_id", ::apache::thrift::protocol::T_ONEWAY, cseqid);
+  this->oprot_->writeMessageBegin("register_client_id", ::apache::thrift::protocol::T_CALL, cseqid);
 
   block_request_service_register_client_id_pargs args;
   args.block_id = &block_id;
@@ -1094,6 +1167,40 @@ void block_request_serviceClientT<Protocol_>::send_register_client_id(const int3
   this->oprot_->writeMessageEnd();
   this->oprot_->getTransport()->writeEnd();
   this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+void block_request_serviceClientT<Protocol_>::recv_register_client_id()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("register_client_id") != 0) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  block_request_service_register_client_id_presult result;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+
+  return;
 }
 
 template <class Protocol_>
@@ -1401,8 +1508,6 @@ void block_request_serviceProcessorT<Protocol_>::process_get_client_id(int32_t s
 template <class Protocol_>
 void block_request_serviceProcessorT<Protocol_>::process_register_client_id(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
-  (void) seqid;
-  (void) oprot;
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
     ctx = this->eventHandler_->getContext("block_request_service.register_client_id", callContext);
@@ -1422,24 +1527,40 @@ void block_request_serviceProcessorT<Protocol_>::process_register_client_id(int3
     this->eventHandler_->postRead(ctx, "block_request_service.register_client_id", bytes);
   }
 
+  block_request_service_register_client_id_result result;
   try {
     iface_->register_client_id(args.block_id, args.client_id);
-  } catch (const std::exception&) {
+  } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "block_request_service.register_client_id");
     }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("register_client_id", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
     return;
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->asyncComplete(ctx, "block_request_service.register_client_id");
+    this->eventHandler_->preWrite(ctx, "block_request_service.register_client_id");
   }
 
-  return;
+  oprot->writeMessageBegin("register_client_id", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "block_request_service.register_client_id", bytes);
+  }
 }
 
 template <class Protocol_>
-void block_request_serviceProcessorT<Protocol_>::process_register_client_id(int32_t, Protocol_* iprot, Protocol_*, void* callContext)
+void block_request_serviceProcessorT<Protocol_>::process_register_client_id(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
@@ -1460,20 +1581,36 @@ void block_request_serviceProcessorT<Protocol_>::process_register_client_id(int3
     this->eventHandler_->postRead(ctx, "block_request_service.register_client_id", bytes);
   }
 
+  block_request_service_register_client_id_result result;
   try {
     iface_->register_client_id(args.block_id, args.client_id);
-  } catch (const std::exception&) {
+  } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "block_request_service.register_client_id");
     }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("register_client_id", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
     return;
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->asyncComplete(ctx, "block_request_service.register_client_id");
+    this->eventHandler_->preWrite(ctx, "block_request_service.register_client_id");
   }
 
-  return;
+  oprot->writeMessageBegin("register_client_id", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "block_request_service.register_client_id", bytes);
+  }
 }
 
 template <class Protocol_>
@@ -1995,15 +2132,16 @@ int64_t block_request_serviceConcurrentClientT<Protocol_>::recv_get_client_id(co
 template <class Protocol_>
 void block_request_serviceConcurrentClientT<Protocol_>::register_client_id(const int32_t block_id, const int64_t client_id)
 {
-  send_register_client_id(block_id, client_id);
+  int32_t seqid = send_register_client_id(block_id, client_id);
+  recv_register_client_id(seqid);
 }
 
 template <class Protocol_>
-void block_request_serviceConcurrentClientT<Protocol_>::send_register_client_id(const int32_t block_id, const int64_t client_id)
+int32_t block_request_serviceConcurrentClientT<Protocol_>::send_register_client_id(const int32_t block_id, const int64_t client_id)
 {
-  int32_t cseqid = 0;
+  int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("register_client_id", ::apache::thrift::protocol::T_ONEWAY, cseqid);
+  this->oprot_->writeMessageBegin("register_client_id", ::apache::thrift::protocol::T_CALL, cseqid);
 
   block_request_service_register_client_id_pargs args;
   args.block_id = &block_id;
@@ -2015,6 +2153,62 @@ void block_request_serviceConcurrentClientT<Protocol_>::send_register_client_id(
   this->oprot_->getTransport()->flush();
 
   sentry.commit();
+  return cseqid;
+}
+
+template <class Protocol_>
+void block_request_serviceConcurrentClientT<Protocol_>::recv_register_client_id(const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      this->iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(this->iprot_);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("register_client_id") != 0) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      block_request_service_register_client_id_presult result;
+      result.read(this->iprot_);
+      this->iprot_->readMessageEnd();
+      this->iprot_->getTransport()->readEnd();
+
+      sentry.commit();
+      return;
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
 }
 
 template <class Protocol_>

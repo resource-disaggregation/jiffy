@@ -34,6 +34,14 @@ block_request_service_register_client_id_pargs::~block_request_service_register_
 }
 
 
+block_request_service_register_client_id_result::~block_request_service_register_client_id_result() throw() {
+}
+
+
+block_request_service_register_client_id_presult::~block_request_service_register_client_id_presult() throw() {
+}
+
+
 block_request_service_command_request_args::~block_request_service_command_request_args() throw() {
 }
 

@@ -26,7 +26,7 @@ service block_request_service {
   i64 get_client_id(),
 
   // Register client ID (at tail node)
-  oneway void register_client_id(1: i32 block_id, 2: i64 client_id),
+  void register_client_id(1: i32 block_id, 2: i64 client_id),
 
   // Command request (at head node)
   oneway void command_request(1: sequence_id seq, 2: i32 block_id, 3: list<binary> arguments),
