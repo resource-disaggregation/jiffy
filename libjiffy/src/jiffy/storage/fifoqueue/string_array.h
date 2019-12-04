@@ -95,16 +95,16 @@ class string_array {
   std::size_t find_next(std::size_t offset) const;
 
   /**
-   * @brief Recover last write
-   * @param len Length of bytes to recover
-   */
-  void recover(std::size_t len);
-
-  /**
    * @brief Fetch total size of the string array
    * @return Size
    */
   std::size_t size() const;
+
+  /**
+   * @brief Fetch last element offset in the partition
+   * @return Last element offset
+   */
+  std::size_t last_element_offset() const;
 
   /**
    * @brief Fetch capacity of the string array
@@ -122,6 +122,12 @@ class string_array {
    * @return Boolean, true if empty
    */
   bool empty() const;
+
+  /**
+   * @brief Check if string array is full
+   * @return Boolean, true if full
+   */
+  bool full() const;
 
   /**
    * @brief Fetch begin iterator
@@ -153,6 +159,12 @@ class string_array {
    */
   std::size_t max_offset() const;
 
+  /**
+   * @brief Fetch the number of elements in the string array
+   * @return Number of elements
+   */
+  std::size_t num_elements() const;
+
  private:
   /* Block memory allocator */
   block_memory_allocator<char> alloc_;
@@ -168,9 +180,6 @@ class string_array {
 
   /* Tail position */
   std::size_t tail_{};
-
-  /* Max position */
-  std::size_t max_tail_;
 
   /* Bool for split string */
   bool split_string_;

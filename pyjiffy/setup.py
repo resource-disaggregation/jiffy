@@ -6,7 +6,7 @@ import datetime
 
 now = datetime.datetime.now()
 jiffy_version = os.getenv('JIFFY_VERSION', str(now.year) + '.' + str(now.month))
-thrift_version = os.getenv('THRIFT_VERSION', '0.11.0')
+thrift_version = os.getenv('THRIFT_PY_VERSION', '0.11.0')
 
 setup(name='pyjiffy',
       version=jiffy_version,

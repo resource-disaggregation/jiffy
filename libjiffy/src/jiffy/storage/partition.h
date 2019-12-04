@@ -187,6 +187,12 @@ class partition {
    */
   void set_name_and_metadata(const std::string &name, const std::string &metadata);
 
+  /**
+   * @brief Notify the listener
+   * @param args Arguments
+   */
+  void notify(const arg_list & args);
+
  protected:
   /**
    * @brief Construct binary string

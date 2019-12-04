@@ -14,8 +14,6 @@ file_partition::file_partition(block_memory_manager *manager,
                                const std::string &name,
                                const std::string &metadata,
                                const utils::property_map &conf,
-                               const std::string &directory_host,
-                               int directory_port,
                                const std::string &auto_scaling_host,
                                int auto_scaling_port)
     : chain_module(manager, name, metadata, FILE_OPS),

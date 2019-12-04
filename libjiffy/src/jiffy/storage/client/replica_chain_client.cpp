@@ -14,9 +14,11 @@ replica_chain_client::replica_chain_client(std::shared_ptr<directory::directory_
                                            const std::string &path,
                                            const directory::replica_chain &chain,
                                            const command_map &OPS,
-                                           int timeout_ms) : fs_(fs), path_(path), in_flight_(false) {
+                                           int timeout_ms) : fs_(fs), path_(path), in_flight_(false), OPS_(OPS) {
   seq_.client_id = -1;
   seq_.client_seq_no = 0;
+  accessor_ = false;
+  send_run_command_exception_ = false;
   connect(chain, timeout_ms);
   for (auto &op: OPS) {
     cmd_client_[op.first] = op.second.is_accessor() ? &tail_ : &head_;
@@ -56,18 +58,45 @@ void replica_chain_client::send_command(const std::vector<std::string> &args) {
   if (in_flight_) {
     throw std::length_error("Cannot have more than one request in-flight");
   }
-  cmd_client_.at(args.front())->command_request(seq_, args);
+  if (OPS_[args[0]].is_accessor()) {
+    try {
+      accessor_ = true;
+      cmd_client_.at(args.front())->send_run_command(std::stoi(string_utils::split(chain_.tail(), ':').back()), args);
+    } catch (std::exception &e) {
+      send_run_command_exception_ = true;
+    }
+  } else {
+    cmd_client_.at(args.front())->command_request(seq_, args);
+  }
   in_flight_ = true;
 }
 
 std::vector<std::string> replica_chain_client::recv_response() {
   std::vector<std::string> ret;
-  int64_t rseq = response_reader_.recv_response(ret);
-  if (rseq != seq_.client_seq_no) {
-    throw std::logic_error("SEQ: Expected=" + std::to_string(seq_.client_seq_no) + " Received=" + std::to_string(rseq));
+  int64_t rseq;
+  if (accessor_) {
+    if (send_run_command_exception_) {
+      ret.emplace_back("!block_moved");
+    } else {
+      try {
+        tail_.recv_run_command(ret);
+      } catch (std::exception &e) {
+        if (!send_run_command_exception_) {
+          ret.emplace_back("!block_moved");
+        }
+      }
+    }
+    send_run_command_exception_ = false;
+  } else {
+    rseq = response_reader_.recv_response(ret);
+    if (rseq != seq_.client_seq_no) {
+      throw std::logic_error(
+          "SEQ: Expected=" + std::to_string(seq_.client_seq_no) + " Received=" + std::to_string(rseq));
+    }
   }
   seq_.client_seq_no++;
   in_flight_ = false;
+  accessor_ = false;
   return ret;
 }
 

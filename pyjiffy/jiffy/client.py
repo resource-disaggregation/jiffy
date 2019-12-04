@@ -6,7 +6,7 @@ from thrift.transport.TTransport import TTransportException
 
 from jiffy.directory.directory_client import DirectoryClient, Perms
 from jiffy.lease.lease_client import LeaseClient
-from jiffy.storage.file import FileWriter, FileReader
+from jiffy.storage.file import FileClient
 from jiffy.storage.hash_table import HashTable
 from jiffy.storage.partition import HashTableNameFormatter, DefaultNameFormatter
 from jiffy.storage.queue import Queue
@@ -157,12 +157,12 @@ class JiffyClient:
         s = self.fs.create(path, 'file', persistent_store_prefix, num_blocks, chain_length, flags, Perms.all,
                            block_names, block_metadata)
         self.begin_scope(path)
-        return FileWriter(self.fs, path, s, self.timeout_ms)
+        return FileClient(self.fs, path, s, self.timeout_ms)
 
     def open_file(self, path):
         s = self.fs.open(path)
         self.begin_scope(path)
-        return FileReader(self.fs, path, s, self.timeout_ms)
+        return FileClient(self.fs, path, s, self.timeout_ms)
 
     def open_or_create_file(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
         fmt = DefaultNameFormatter()
@@ -171,7 +171,7 @@ class JiffyClient:
         s = self.fs.open_or_create(path, 'file', persistent_store_prefix, num_blocks, chain_length, flags,
                                    Perms.all, block_names, block_metadata)
         self.begin_scope(path)
-        return FileWriter(self.fs, path, s, self.timeout_ms)
+        return FileClient(self.fs, path, s, self.timeout_ms)
 
     def close(self, path):
         self.end_scope(path)

@@ -18,8 +18,6 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
                                            const std::string &name,
                                            const std::string &metadata,
                                            const utils::property_map &conf,
-                                           const std::string &directory_host,
-                                           int directory_port,
                                            const std::string &auto_scaling_host,
                                            int auto_scaling_port)
     : chain_module(manager, name, metadata, HT_OPS),
@@ -28,8 +26,6 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
       dirty_(false),
       export_slot_range_(0, -1),
       import_slot_range_(0, -1),
-      directory_host_(directory_host),
-      directory_port_(directory_port),
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port) {
   auto ser = conf.get("hashtable.serializer", "csv");
@@ -180,12 +176,12 @@ void hash_table_partition::update(response &_return, const arg_list &args) {
       if (it != block_.end()) {
         old_val = to_string(it->second);
         it->second = make_binary(args[2]);
-        RETURN_OK(old_val);
+        RETURN_OK();
       }
       if (found && block_.emplace(make_binary(args[1]), make_binary(args[2])).second) {
         if (remove_cache_.find(args[1]) != remove_cache_.end())
           remove_cache_.erase(args[1]);
-        RETURN_OK(args[4]);
+        RETURN_OK();
       }
     END_CATCH_HANDLER;
     RETURN_ERR("!key_not_found");
@@ -200,7 +196,7 @@ void hash_table_partition::update(response &_return, const arg_list &args) {
         if (metadata_ == "exporting" && in_export_slot_range(hash)) {
           RETURN_ERR("!exporting", export_target_str_, std::to_string(found), old_val);
         }
-        RETURN_OK(old_val);
+        RETURN_OK();
       }
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
         RETURN_ERR("!exporting", export_target_str_, std::to_string(found), old_val);
@@ -229,7 +225,7 @@ void hash_table_partition::remove(response &_return, const arg_list &args) {
       if (metadata_ == "exporting" && in_export_slot_range(hash)) {
         RETURN_ERR("!exporting", export_target_str_);
       }
-      RETURN_ERR("!key_not_found");
+      RETURN_OK();
     END_CATCH_HANDLER;
   }
   // Redirected remove
@@ -337,12 +333,7 @@ void hash_table_partition::update_partition(response &_return, const arg_list &a
     import_slot_range(std::stoi(range[0]), std::stoi(range[1]));
   } else {
     if (metadata() == "importing") {
-      if ((import_slot_range().first != slot_range().first || import_slot_range().second != slot_range().second)
-          && is_tail()) {
-        auto fs = std::make_shared<directory::directory_client>(directory_host_, directory_port_);
-        fs->remove_block(path(), s[1]);
-        buffer_remove();
-      }
+      buffer_remove();
       if (!underload()) {
         scaling_down_ = false;
       }

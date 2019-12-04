@@ -36,8 +36,6 @@ class hash_table_partition : public chain_module {
                                 const std::string &name = "0_65536",
                                 const std::string &metadata = "regular",
                                 const utils::property_map &conf = {},
-                                const std::string &directory_host = "localhost",
-                                int directory_port = 9091,
                                 const std::string &auto_scaling_host = "localhost",
                                 int auto_scaling_port = 9095);
 
@@ -355,12 +353,6 @@ class hash_table_partition : public chain_module {
 
   /* Import slot range */
   std::pair<int32_t, int32_t> import_slot_range_;
-
-  /* Directory server hostname */
-  std::string directory_host_;
-
-  /* Directory server port number */
-  int directory_port_;
 
   /* Auto scaling server hostname */
   std::string auto_scaling_host_;

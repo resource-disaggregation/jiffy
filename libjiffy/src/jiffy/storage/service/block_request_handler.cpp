@@ -52,6 +52,7 @@ void block_request_handler::run_command(std::vector<std::string> &_return,
                                         const int32_t block_id,
                                         const std::vector<std::string> &args) {
   blocks_[static_cast<std::size_t>(block_id)]->impl()->run_command(_return, args);
+  blocks_[static_cast<std::size_t>(block_id)]->impl()->notify(args);
 }
 
 void block_request_handler::subscribe(int32_t block_id,

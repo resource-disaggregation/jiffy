@@ -21,8 +21,6 @@ class block {
    */
   explicit block(const std::string &id,
         const size_t capacity = 134217728,
-        const std::string &directory_host = "127.0.0.1",
-        const int directory_port = 9090,
         const std::string &auto_scaling_host = "127.0.0.1",
         const int auto_scaling_port = 9095);
 

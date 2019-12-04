@@ -9,7 +9,6 @@ string_array::string_array(std::size_t max_size, block_memory_allocator<char> al
   data_ = alloc_.allocate(max_);
   tail_ = 0;
   last_element_offset_ = 0;
-  max_tail_ = 0;
   split_string_ = false;
 }
 
@@ -22,7 +21,6 @@ string_array::string_array(const string_array &other) {
   max_ = other.max_;
   data_ = other.data_;
   tail_ = other.tail_;
-  max_tail_ = other.max_tail_;
   split_string_ = other.split_string_;
   last_element_offset_ = other.last_element_offset_;
 }
@@ -33,20 +31,19 @@ string_array &string_array::operator=(const string_array &other) {
   data_ = other.data_;
   tail_ = other.tail_;
   last_element_offset_ = other.last_element_offset_;
-  max_tail_ = other.max_tail_;
   split_string_ = other.split_string_;
   return *this;
 }
 
 bool string_array::operator==(const string_array &other) const {
   return data_ == other.data_ && tail_ == other.tail_ && alloc_ == other.alloc_ && max_ == other.max_
-      && last_element_offset_ == other.last_element_offset_ && max_tail_ == other.max_tail_
+      && last_element_offset_ == other.last_element_offset_
       && split_string_ == other.split_string_;
 }
 
 std::pair<bool, std::string> string_array::push_back(const std::string &item) {
   auto len = item.size();
-  if (len + tail_ + METADATA_LEN <= max_) { // Complete item will be written
+  if (len + tail_ + METADATA_LEN <= max_ && !split_string_) { // Complete item will be written
     // Write length
     std::memcpy(data_ + tail_, (char *) &len, METADATA_LEN);
     last_element_offset_ = tail_;
@@ -55,23 +52,7 @@ std::pair<bool, std::string> string_array::push_back(const std::string &item) {
     // Write data
     std::memcpy(data_ + tail_, item.c_str(), len);
     tail_ += len;
-
-    max_tail_ = std::max(tail_, max_tail_);
     return std::make_pair(true, std::string("!success"));
-  } else if (max_ - tail_ >= METADATA_LEN) { // Item will be partially written, remaining part will be returned
-    // Write length
-    auto remain_len = max_ - tail_ - METADATA_LEN;
-    std::memcpy(data_ + tail_, (char *) &len, METADATA_LEN);
-    last_element_offset_ = tail_;
-    tail_ += METADATA_LEN;
-
-    // Write data
-    std::memcpy(data_ + tail_, item.c_str(), remain_len);
-    tail_ += remain_len;
-
-    max_tail_ = std::max(tail_, max_tail_);
-    split_string_ = true;
-    return std::make_pair(false, item.substr(remain_len, item.size() - remain_len));
   } else { // Item will not be written, full item will be returned
     split_string_ = true;
     return std::make_pair(false, item);
@@ -80,16 +61,12 @@ std::pair<bool, std::string> string_array::push_back(const std::string &item) {
 
 const std::pair<bool, std::string> string_array::at(std::size_t offset) const {
   if (offset > last_element_offset_ || empty()) {
-    if (max_ - offset < METADATA_LEN && split_string_)
+    if (split_string_)
       return std::make_pair(false, "");
     return std::make_pair(false, std::string("!not_available"));
   }
   auto len = *((std::size_t *) (data_ + offset));
-  if (offset + METADATA_LEN + len <= max_) {
-    return std::make_pair(true, std::string(data_ + offset + METADATA_LEN, len));
-  } else {
-    return std::make_pair(false, std::string(data_ + offset + METADATA_LEN, max_ - offset - METADATA_LEN));
-  }
+  return std::make_pair(true, std::string(data_ + offset + METADATA_LEN, len));
 }
 
 std::size_t string_array::find_next(std::size_t offset) const {
@@ -97,12 +74,12 @@ std::size_t string_array::find_next(std::size_t offset) const {
   return offset + *reinterpret_cast<size_t*>(data_ + offset) + METADATA_LEN;
 }
 
-void string_array::recover(std::size_t len) {
-  tail_ -= (len + METADATA_LEN);
+std::size_t string_array::size() const {
+  return tail_;
 }
 
-std::size_t string_array::size() const {
-  return max_tail_;
+std::size_t string_array::last_element_offset() const {
+  return last_element_offset_;
 }
 
 std::size_t string_array::capacity() {
@@ -112,7 +89,6 @@ std::size_t string_array::capacity() {
 void string_array::clear() {
   tail_ = 0;
   last_element_offset_ = 0;
-  max_tail_ = 0;
 }
 
 bool string_array::empty() const {
@@ -137,6 +113,9 @@ string_array::const_iterator string_array::begin() const {
 
 string_array::const_iterator string_array::end() const {
   return string_array::const_iterator(*this, max_);
+}
+bool string_array::full() const {
+  return split_string_;
 }
 
 string_array_iterator::string_array_iterator(string_array &impl, std::size_t pos)

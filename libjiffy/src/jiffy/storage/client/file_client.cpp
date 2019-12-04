@@ -35,13 +35,13 @@ file_client::file_client(std::shared_ptr<directory::directory_interface> fs,
   }
 }
 
-int file_client::read(std::string& buf, size_t size) {
+int file_client::read(std::string &buf, size_t size) {
   std::size_t file_size = last_partition_ * block_size_ + last_offset_;
   if (file_size <= cur_partition_ * block_size_ + cur_offset_)
     return -1;
   std::size_t remain_size = file_size - cur_partition_ * block_size_ - cur_offset_;
   std::size_t remaining_data = std::min(remain_size, size);
-  if(remaining_data == 0)
+  if (remaining_data == 0)
     return 0;
   // Parallel read here
   std::size_t start_partition = block_id();
@@ -86,7 +86,7 @@ int file_client::write(const std::string &data) {
     }
   }
 
-  if(num_chain_needed && !auto_scaling_) {
+  if (num_chain_needed && !auto_scaling_) {
     return -1;
   }
 
@@ -121,7 +121,8 @@ int file_client::write(const std::string &data) {
 
   while (remaining_data > 0) {
     count++;
-    std::string data_to_write = data.substr(data.size() - remaining_data, std::min(remaining_data, block_size_ - cur_offset_));
+    std::string
+        data_to_write = data.substr(data.size() - remaining_data, std::min(remaining_data, block_size_ - cur_offset_));
     std::vector<std::string>
         args{"write", data_to_write, std::to_string(cur_offset_)};
     blocks_[block_id()]->send_command(args);
@@ -143,11 +144,19 @@ int file_client::write(const std::string &data) {
 }
 
 void file_client::refresh() {
-  status_ = fs_->dstatus(path_);
-  blocks_.clear();
-  for (const auto &block: status_.data_blocks()) {
-    blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FILE_OPS, timeout_ms_));
-  }
+  bool redo;
+  do {
+    status_ = fs_->dstatus(path_);
+    blocks_.clear();
+    try {
+      for (const auto &block: status_.data_blocks()) {
+        blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FILE_OPS, timeout_ms_));
+      }
+      redo = false;
+    } catch (std::exception &e) {
+      redo = true;
+    }
+  } while (redo);
 }
 
 bool file_client::seek(const std::size_t offset) {

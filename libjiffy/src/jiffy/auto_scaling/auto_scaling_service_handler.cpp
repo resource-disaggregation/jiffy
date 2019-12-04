@@ -154,7 +154,8 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
     std::string dst_old_name;
     try {
       dst = std::make_shared<replica_chain_client>(fs, path, merge_target, HT_OPS);
-      dst_old_name = dst->run_command({"update_partition", merge_target.name, "importing$" + name}).front();
+      dst->send_command({"update_partition", merge_target.name, "importing$" + name});
+      dst_old_name = dst->recv_response().front();
     } catch (std::exception &e) {
       src->run_command({"update_partition", name, "regular$" + name});
       UNLOCK_AND_RETURN;
@@ -186,8 +187,11 @@ void auto_scaling_service_handler::auto_scaling(const std::vector<std::string> &
 
     // Setting name and metadata for src and dst
     // We don't need to update the src partition cause it will be deleted anyway
-    dst->run_command({"update_partition", dst_name, "regular$" + name});
+    dst->run_command({"update_partition", dst_name, "regular"});
     auto finish_update_partition_after = time_utils::now_us();
+
+    // Remove the merged chain
+    fs->remove_block(path, name);
 
     // Log auto-scaling info
     LOG(log_level::info) << "Merged slot range (" << merge_range_beg << ", " << merge_range_end << ")";

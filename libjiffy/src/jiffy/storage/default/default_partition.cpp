@@ -18,8 +18,6 @@ default_partition::default_partition(block_memory_manager *manager,
                                      const std::string &metadata,
                                      const utils::property_map &,
                                      const std::string &,
-                                     int,
-                                     const std::string &,
                                      int)
     : chain_module(manager, name, metadata, {}) {}
 

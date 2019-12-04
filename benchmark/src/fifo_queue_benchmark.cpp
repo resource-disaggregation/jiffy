@@ -106,6 +106,7 @@ class dequeue_benchmark : public fifo_queue_benchmark {
         size_t j;
         for (j = 0; j < num_ops_; ++j) {
           t0 = time_utils::now_us();
+          clients_[i]->front();
           clients_[i]->dequeue();
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);

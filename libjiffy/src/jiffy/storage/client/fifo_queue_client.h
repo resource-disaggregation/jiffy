@@ -43,16 +43,38 @@ class fifo_queue_client : data_structure_client {
 
   /**
    * @brief Dequeue item
-   * @return Dequeue result
    */
-  std::string dequeue();
+  void dequeue();
 
   /**
    * @brief Read next item without dequeue
    * @return Read next result
-   */ 
+   */
   std::string read_next();
 
+  /**
+   * @brief Fetch Queue size
+   * @return Queue size
+   */
+  std::size_t length();
+
+  /**
+   * @brief Fetch in rate of the queue
+   * @return Queue in rate
+   */
+  double in_rate();
+
+  /**
+   * @brief Fetch out rate of the queue
+   * @return Queue out rate
+   */
+  double out_rate();
+
+  /**
+   * @brief Fetch the front element of the queue
+   * @return Dequeue result
+   */
+  std::string front();
  private:
   /**
    * @brief Handle command in redirect case
@@ -61,17 +83,51 @@ class fifo_queue_client : data_structure_client {
    */
   void handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) override;
 
+  /**
+   * @brief Handle partition identifier changes after auto scaling
+   * @param args Arguments
+   */
+  void handle_partition_id(const std::vector<std::string> &args);
+
+  /**
+   * @brief Run command repeatedly
+   * @param _return Response
+   * @param args Arguments
+   */
+  void run_repeated(std::vector<std::string> &_return, const std::vector<std::string> &args);
+
+  /**
+   * @brief Fetch block identifier for specific command
+   * @param args Arguments
+   * @return Block identifier
+   */
+  std::size_t block_id(const std::vector<std::string> &args);
+
+  /**
+   * @brief Add next data block due to auto scaling
+   * @param _return Response
+   * @param args Arguments
+   */
+  void add_blocks(const std::vector<std::string> &_return, const std::vector<std::string> &args);
+
   /* Dequeue partition id */
   std::size_t dequeue_partition_;
+
   /* Enqueue partition id */
   std::size_t enqueue_partition_;
+
   /* Replica chain clients, each partition only save a replica chain client */
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
+
   /* Read next partition */
   std::size_t read_partition_;
+
   /* Starting name of the chains */
   std::size_t start_;
-   
+
+  /* Boolean, true if using auto scaling */
+  bool auto_scaling_;
+
 };
 
 }
