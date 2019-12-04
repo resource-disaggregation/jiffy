@@ -31,10 +31,10 @@ fifo_queue_client::fifo_queue_client(std::shared_ptr<directory::directory_interf
 }
 
 void fifo_queue_client::refresh() {
-  status_ = fs_->dstatus(path_);
-  blocks_.clear();
   bool redo;
   do {
+    status_ = fs_->dstatus(path_);
+    blocks_.clear();
     try {
       for (const auto &block: status_.data_blocks()) {
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FQ_CMDS, timeout_ms_));
@@ -45,7 +45,7 @@ void fifo_queue_client::refresh() {
     }
   } while (redo);
   // Restore pointers after refreshing
-  start_ = std::stoul(status_.data_blocks()[0].name);
+  start_ = std::stoul(status_.data_blocks().front().name);
   enqueue_partition_ = blocks_.size() - 1;
   dequeue_partition_ = 0;
   if (read_partition_ < start_) {
@@ -59,11 +59,10 @@ void fifo_queue_client::enqueue(const std::string &item) {
   run_repeated(_return, args);
 }
 
-std::string fifo_queue_client::dequeue() {
+void fifo_queue_client::dequeue() {
   std::vector<std::string> _return;
   std::vector<std::string> args{"dequeue"};
   run_repeated(_return, args);
-  return _return[1];
 }
 
 std::string fifo_queue_client::read_next() {
@@ -96,27 +95,32 @@ double fifo_queue_client::out_rate() {
   return std::stod(_return[1]);
 }
 
+std::string fifo_queue_client::front() {
+  std::vector<std::string> _return;
+  std::vector<std::string> args{"front"};
+  run_repeated(_return, args);
+  return _return[1];
+}
+
 void fifo_queue_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
   auto cmd_name = args.front();
   if (_return[0] == "!redo") {
     throw redo_error();
   }
-  if(string_utils::split(_return[0], '_')[0] == "!redirected") {
+  if (string_utils::split(_return[0], '_')[0] == "!redirected") {
     auto redirected_type = _return[0];
-    if (_return[0] == redirected_type) {
+    do {
+      add_blocks(_return, args);
+      handle_partition_id(args);
       do {
-        add_blocks(_return, args);
-        handle_partition_id(args);
-        do {
-          auto args_copy = args;
-          if (args[0] == "enqueue")
-            args_copy.insert(args_copy.end(), _return.end() - 3, _return.end());
-          else if (args[0] == "dequeue")
-            args_copy.insert(args_copy.end(), _return.end() - 2, _return.end());
-          _return = blocks_[block_id(args_copy)]->run_command_redirected(args_copy);
-        } while (_return[0] == "!redo");
-      } while (_return[0] == redirected_type);
-    }
+        auto args_copy = args;
+        if (args[0] == "enqueue")
+          args_copy.insert(args_copy.end(), _return.end() - 3, _return.end());
+        else if (args[0] == "dequeue")
+          args_copy.insert(args_copy.end(), _return.end() - 2, _return.end());
+        _return = blocks_[block_id(args_copy)]->run_command_redirected(args_copy);
+      } while (_return[0] == "!redo");
+    } while (_return[0] == redirected_type);
   }
   if (_return[0] == "!block_moved") {
     refresh();
@@ -136,6 +140,7 @@ std::size_t fifo_queue_client::block_id(const std::vector<std::string> &args) {
         return dequeue_partition_;
     case fifo_queue_cmd_id::fq_in_rate:return enqueue_partition_;
     case fifo_queue_cmd_id::fq_out_rate:return dequeue_partition_;
+    case fifo_queue_cmd_id::fq_front: return dequeue_partition_;
     default: {
       throw std::logic_error("Fifo queue command does not exists");
     }
@@ -150,7 +155,7 @@ void fifo_queue_client::handle_partition_id(const std::vector<std::string> &args
     enqueue_partition_++;
   } else if (cmd == fifo_queue_cmd_id::fq_dequeue
       || (cmd == fifo_queue_cmd_id::fq_length && std::stoi(args[1]) == fifo_queue_size_type::tail_size)
-      || (cmd == fifo_queue_cmd_id::fq_out_rate)) {
+      || (cmd == fifo_queue_cmd_id::fq_out_rate) || cmd == fifo_queue_cmd_id::fq_front) {
     dequeue_partition_++;
     if (dequeue_partition_ > enqueue_partition_) {
       enqueue_partition_ = dequeue_partition_;
@@ -164,7 +169,7 @@ void fifo_queue_client::handle_partition_id(const std::vector<std::string> &args
       enqueue_partition_ = read_partition_ - start_;
     }
   } else {
-    throw std::logic_error("Wrong command or argument");
+      throw std::logic_error("Wrong command or argument");
   }
 }
 
