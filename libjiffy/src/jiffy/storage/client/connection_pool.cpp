@@ -182,7 +182,6 @@ int64_t connection_pool::recv_response(connection_pool::register_info connection
 void connection_pool::get_command_response_reader(connection_pool::register_info connection_info, int64_t client_id) {
   bool found = connections_.update_fn(connection_info.address, [&](std::vector<connection_instance> &connections) {
     connections[connection_info.offset].connection->register_client_id(client_id);
-    LOG(log_level::info) << "Vector size: " << connections.size();
     if(!connections[connection_info.offset].response_reader.is_set()) {
       connections[connection_info.offset].response_reader =
         connections[connection_info.offset].connection->get_command_response_reader(client_id);

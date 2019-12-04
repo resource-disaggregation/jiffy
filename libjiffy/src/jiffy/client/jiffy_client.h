@@ -8,6 +8,7 @@
 #include "jiffy/storage/client/file_client.h"
 #include "jiffy/storage/client/fifo_queue_client.h"
 #include "jiffy/storage/client/data_structure_listener.h"
+#include "jiffy/storage/client/connection_pool.h"
 
 namespace jiffy {
 namespace client {
@@ -231,6 +232,8 @@ class jiffy_client {
   std::shared_ptr<directory::directory_client> fs_;
   /* Lease worker */
   directory::lease_renewal_worker lease_worker_;
+
+  storage::connection_pool pool_;
 };
 
 }

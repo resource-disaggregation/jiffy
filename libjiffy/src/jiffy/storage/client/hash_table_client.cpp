@@ -14,8 +14,9 @@ using namespace jiffy::utils;
 hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interface> fs,
                                      const std::string &path,
                                      const directory::data_status &status,
+                                     connection_pool & pool,
                                      int timeout_ms)
-    : data_structure_client(fs, path, status, timeout_ms) {
+    : data_structure_client(fs, path, status, pool, timeout_ms) {
   blocks_.clear();
   std::vector<std::string> block_init;
   for(auto & block: status.data_blocks()) {

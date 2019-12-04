@@ -9,7 +9,8 @@ using namespace directory;
 
 jiffy_client::jiffy_client(const std::string &host, int dir_port, int lease_port)
     : fs_(std::make_shared<directory_client>(host, dir_port)),
-      lease_worker_(host, lease_port) {
+      lease_worker_(host, lease_port),
+      pool_() {
   lease_worker_.start();
 }
 
@@ -49,7 +50,7 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::create_hash_table(cons
   auto s = fs_->create(path, "hashtable", backing_path, num_blocks, chain_length, flags, permissions, block_names,
                        block_metadata, tags);
   begin_scope(path);
-  return std::make_shared<storage::hash_table_client>(fs_, path, s);
+  return std::make_shared<storage::hash_table_client>(fs_, path, s, pool_);
 }
 
 std::shared_ptr<storage::file_client> jiffy_client::create_file(const std::string &path,
@@ -68,7 +69,7 @@ std::shared_ptr<storage::file_client> jiffy_client::create_file(const std::strin
   auto s = fs_->create(path, "file", backing_path, num_blocks, chain_length, flags, permissions, block_names,
                        block_metadata, tags);
   begin_scope(path);
-  return std::make_shared<storage::file_client>(fs_, path, s);
+  return std::make_shared<storage::file_client>(fs_, path, s, pool_);
 }
 
 std::shared_ptr<storage::fifo_queue_client> jiffy_client::create_fifo_queue(const std::string &path,
@@ -88,26 +89,26 @@ std::shared_ptr<storage::fifo_queue_client> jiffy_client::create_fifo_queue(cons
   auto s = fs_->create(path, "fifoqueue", backing_path, num_blocks, chain_length, flags, permissions,
                        block_names, block_metadata, tags);
   begin_scope(path);
-  return std::make_shared<storage::fifo_queue_client>(fs_, path, s);
+  return std::make_shared<storage::fifo_queue_client>(fs_, path, s, pool_);
 }
 
 std::shared_ptr<storage::hash_table_client> jiffy_client::open_hash_table(const std::string &path) {
   auto s = fs_->open(path);
   begin_scope(path);
-  return std::make_shared<storage::hash_table_client>(fs_, path, s);
+  return std::make_shared<storage::hash_table_client>(fs_, path, s, pool_);
 }
 
 std::shared_ptr<storage::file_client> jiffy_client::open_file(const std::string &path) {
   auto s = fs_->open(path);
   begin_scope(path);
-  return std::make_shared<storage::file_client>(fs_, path, s);
+  return std::make_shared<storage::file_client>(fs_, path, s, pool_);
 }
 
 
 std::shared_ptr<storage::fifo_queue_client> jiffy_client::open_fifo_queue(const std::string &path) {
   auto s = fs_->open(path);
   begin_scope(path);
-  return std::make_shared<storage::fifo_queue_client>(fs_, path, s);
+  return std::make_shared<storage::fifo_queue_client>(fs_, path, s, pool_);
 }
 
 std::shared_ptr<storage::hash_table_client> jiffy_client::open_or_create_hash_table(const std::string &path,
@@ -131,7 +132,7 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::open_or_create_hash_ta
   auto s = fs_->open_or_create(path, "hashtable", backing_path, num_blocks, chain_length, flags, permissions,
                                block_names, block_metadata, tags);
   begin_scope(path);
-  return std::make_shared<storage::hash_table_client>(fs_, path, s, timeout_ms);
+  return std::make_shared<storage::hash_table_client>(fs_, path, s, pool_, timeout_ms);
 }
 
 std::shared_ptr<storage::file_client> jiffy_client::open_or_create_file(const std::string &path,
@@ -151,7 +152,7 @@ std::shared_ptr<storage::file_client> jiffy_client::open_or_create_file(const st
   auto s = fs_->open_or_create(path, "file", backing_path, num_blocks, chain_length, flags, permissions,
                                block_names, block_metadata, tags);
   begin_scope(path);
-  return std::make_shared<storage::file_client>(fs_, path, s);
+  return std::make_shared<storage::file_client>(fs_, path, s, pool_);
 }
 
 std::shared_ptr<storage::fifo_queue_client> jiffy_client::open_or_create_fifo_queue(const std::string &path,
@@ -171,7 +172,7 @@ std::shared_ptr<storage::fifo_queue_client> jiffy_client::open_or_create_fifo_qu
   auto s = fs_->open_or_create(path, "fifoqueue", backing_path, num_blocks, chain_length, flags, permissions,
                                block_names, block_metadata, tags);
   begin_scope(path);
-  return std::make_shared<storage::fifo_queue_client>(fs_, path, s);
+  return std::make_shared<storage::fifo_queue_client>(fs_, path, s, pool_);
 }
 
 std::shared_ptr<storage::data_structure_listener> jiffy_client::listen(const std::string &path) {

@@ -25,6 +25,7 @@ class hash_table_client : public data_structure_client {
   hash_table_client(std::shared_ptr<directory::directory_interface> fs,
                     const std::string &path,
                     const directory::data_status &status,
+                    connection_pool & pool,
                     int timeout_ms = 1000);
 
   /**

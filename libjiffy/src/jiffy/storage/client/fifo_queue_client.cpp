@@ -14,8 +14,9 @@ using namespace jiffy::utils;
 fifo_queue_client::fifo_queue_client(std::shared_ptr<directory::directory_interface> fs,
                                      const std::string &path,
                                      const directory::data_status &status,
+                                     connection_pool &pool,
                                      int timeout_ms)
-    : data_structure_client(std::move(fs), path, status, timeout_ms) {
+    : data_structure_client(std::move(fs), path, status, pool, timeout_ms) {
   dequeue_partition_ = 0;
   enqueue_partition_ = 0;
   read_partition_ = 0;

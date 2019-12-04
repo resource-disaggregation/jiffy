@@ -35,6 +35,7 @@ class data_structure_client {
   data_structure_client(std::shared_ptr<directory::directory_interface> fs,
                         const std::string &path,
                         const directory::data_status &status,
+                        connection_pool &pool,
                         int timeout_ms = 1000);
 
   /**
@@ -67,7 +68,7 @@ class data_structure_client {
   /* Data status */
   directory::data_status status_;
 
-  connection_pool pool_;
+  connection_pool& pool_;
 
   /* Time out*/
   int timeout_ms_;
