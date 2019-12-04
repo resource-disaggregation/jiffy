@@ -22,8 +22,7 @@ enum fifo_queue_cmd_id : uint32_t {
   fq_readnext = 4,
   fq_length = 5,
   fq_in_rate = 6,
-  fq_out_rate = 7,
-  fq_front = 8
+  fq_out_rate = 7
 };
 
 }

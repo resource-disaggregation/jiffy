@@ -1,18 +1,19 @@
-#ifndef JIFFY_REPLICA_CHAIN_CLIENT_H
-#define JIFFY_REPLICA_CHAIN_CLIENT_H
+#ifndef JIFFY_POOL_REPLICA_CHAIN_CLIENT_H
+#define JIFFY_POOL_REPLICA_CHAIN_CLIENT_H
 
 #include <map>
 #include "block_client.h"
 #include "jiffy/directory/client/directory_client.h"
 #include "jiffy/storage/command.h"
+#include "jiffy/storage/client/connection_pool.h"
 
 namespace jiffy {
 namespace storage {
 
 /* Replica chain client class */
-class replica_chain_client {
+class pool_replica_chain_client {
  public:
-  typedef block_client *client_ref;
+  typedef connection_instance* client_ref;
   /**
    * @brief Constructor
    * @param fs Directory interface
@@ -21,7 +22,8 @@ class replica_chain_client {
    * @param timeout_ms Timeout
    */
 
-  explicit replica_chain_client(std::shared_ptr<directory::directory_interface> fs,
+  explicit pool_replica_chain_client(std::shared_ptr<directory::directory_interface> fs,
+                                connection_pool & pool,
                                 const std::string &path,
                                 const directory::replica_chain &chain,
                                 const command_map &OPS,
@@ -31,7 +33,7 @@ class replica_chain_client {
    * @brief Destructor
    */
 
-  ~replica_chain_client();
+  ~pool_replica_chain_client();
 
   /**
    * @brief Fetch directory replica chain
@@ -39,13 +41,6 @@ class replica_chain_client {
    */
 
   const directory::replica_chain &chain() const;
-
-  /**
-   * @brief Check if head and tail of replica chain is connected
-   * @return Bool value, true if both connected
-   */
-
-  bool is_connected() const;
 
   /**
    * @brief Send out command
@@ -95,7 +90,6 @@ class replica_chain_client {
    * @param chain Directory replica chain
    * @param timeout_ms time out
    */
-   //FIXME timeout not used?
   void connect(const directory::replica_chain &chain, int timeout_ms = 0);
 
   /**
@@ -105,6 +99,7 @@ class replica_chain_client {
   void disconnect();
   /* Directory client */
   std::shared_ptr<directory::directory_interface> fs_;
+  connection_pool & pool_;
   /* File path */
   std::string path_;
   /* Sequence identifier */
@@ -112,14 +107,14 @@ class replica_chain_client {
   /* Directory replica chain structure */
   directory::replica_chain chain_;
   /* Block client, head of the chain */
-  block_client head_;
+  connection_pool::register_info head_;
   /* Block client, tail of the chain
    * Set after connection */
-  block_client tail_;
+  connection_pool::register_info tail_;
   /* Command response reader */
   block_client::command_response_reader response_reader_;
   /* Clients for each commands */
-  std::unordered_map<std::string, client_ref> cmd_client_;
+  std::unordered_map<std::string, connection_pool::register_info> cmd_client_;
   /* Bool value, true if request is in flight */
   bool in_flight_;
   /* Time out */
@@ -130,9 +125,12 @@ class replica_chain_client {
   bool accessor_;
   /* Bool indicating if send run command throws an exception */
   bool send_run_command_exception_;
+
+  std::size_t head_id_;
+  std::size_t tail_id_;
 };
 
 }
 }
 
-#endif //JIFFY_REPLICA_CHAIN_CLIENT_H
+#endif //JIFFY_POOL_REPLICA_CHAIN_CLIENT_H

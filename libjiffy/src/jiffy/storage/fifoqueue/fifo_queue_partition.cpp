@@ -10,12 +10,13 @@ namespace storage {
 using namespace utils;
 
 fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
+                                           block_response_client_map &response_map,
                                            const std::string &name,
                                            const std::string &metadata,
                                            const utils::property_map &conf,
                                            const std::string &auto_scaling_host,
                                            int auto_scaling_port)
-    : chain_module(manager, name, metadata, FQ_CMDS),
+    : chain_module(manager, response_map, name, metadata, FQ_CMDS),
       partition_(manager->mb_capacity(), build_allocator<char>()),
       scaling_up_(false),
       scaling_down_(false),
@@ -99,7 +100,7 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
     head_ += (string_array::METADATA_LEN + ret.second.size());
     update_read_head();
     dequeue_data_size_ += ret.second.size();
-    RETURN_OK();
+    RETURN_OK(ret.second);
   }
   if (ret.second == "!not_available") {
     RETURN_ERR("!msg_not_found");
@@ -202,27 +203,6 @@ void fifo_queue_partition::out_rate(response &_return, const arg_list &args) {
   RETURN_OK(std::to_string(out_rate_));
 }
 
-void fifo_queue_partition::front(response &_return, const arg_list &args) {
-  if (!(args.size() == 1 || (args.size() == 2 && args[1] == "!redirected"))) {
-    RETURN_ERR("!args_error");
-  }
-  auto ret = partition_.at(head_);
-  if (ret.first) {
-    RETURN_OK(ret.second);
-  }
-  if (ret.second == "!not_available") {
-    RETURN_ERR("!msg_not_found");
-  }
-  if (!auto_scale_) {
-    RETURN_ERR("!redirected_front");
-  }
-  if (!next_target_str_.empty()) {
-    RETURN_ERR("!redirected_front",
-               next_target_str_);
-  }
-  RETURN_ERR("!redo");
-}
-
 void fifo_queue_partition::run_command(response &_return, const arg_list &args) {
   auto cmd_name = args[0];
   update_rate();
@@ -242,8 +222,6 @@ void fifo_queue_partition::run_command(response &_return, const arg_list &args) 
     case fifo_queue_cmd_id::fq_in_rate:in_rate(_return, args);
       break;
     case fifo_queue_cmd_id::fq_out_rate:out_rate(_return, args);
-      break;
-    case fifo_queue_cmd_id::fq_front:front(_return, args);
       break;
     default: {
       _return.emplace_back("!no_such_command");

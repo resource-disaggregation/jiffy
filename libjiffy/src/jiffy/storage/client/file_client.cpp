@@ -14,8 +14,9 @@ using namespace jiffy::utils;
 file_client::file_client(std::shared_ptr<directory::directory_interface> fs,
                          const std::string &path,
                          const directory::data_status &status,
+                         connection_pool &pool,
                          int timeout_ms)
-    : data_structure_client(std::move(fs), path, status, timeout_ms),
+    : data_structure_client(std::move(fs), path, status, pool, timeout_ms),
       cur_partition_(0),
       cur_offset_(0),
       last_partition_(0),
@@ -144,10 +145,10 @@ int file_client::write(const std::string &data) {
 }
 
 void file_client::refresh() {
+  status_ = fs_->dstatus(path_);
+  blocks_.clear();
   bool redo;
   do {
-    status_ = fs_->dstatus(path_);
-    blocks_.clear();
     try {
       for (const auto &block: status_.data_blocks()) {
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FILE_OPS, timeout_ms_));

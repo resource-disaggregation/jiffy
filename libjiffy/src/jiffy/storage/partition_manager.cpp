@@ -13,6 +13,7 @@ void partition_manager::register_impl(const std::string &type,
 }
 
 std::shared_ptr<chain_module> partition_manager::build_partition(block_memory_manager *manager,
+                                                                 block_response_client_map &response_map,
                                                                  const std::string &type,
                                                                  const std::string &name,
                                                                  const std::string &metadata,
@@ -24,6 +25,7 @@ std::shared_ptr<chain_module> partition_manager::build_partition(block_memory_ma
     return nullptr;
   }
   return it->second->build(manager,
+                           response_map,
                            name,
                            metadata,
                            conf,

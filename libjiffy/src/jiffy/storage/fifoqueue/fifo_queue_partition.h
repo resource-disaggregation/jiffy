@@ -31,6 +31,7 @@ class fifo_queue_partition : public chain_module {
    * @param auto_scaling_port Auto scaling server port number
    */
   explicit fifo_queue_partition(block_memory_manager *manager,
+                                block_response_client_map &response_map,
                                 const std::string &name = "0",
                                 const std::string &metadata = "regular",
                                 const utils::property_map &conf = {},
@@ -109,13 +110,6 @@ class fifo_queue_partition : public chain_module {
    * @param args Arguments
    */
   void out_rate(response &_return, const arg_list &args);
-
-  /**
-   * @brief Fetch the front element of the queue
-   * @param _return Response
-   * @param args Arguments
-   */
-  void front(response &_return, const arg_list &args);
 
   /**
    * @brief Run particular command on fifo queue partition

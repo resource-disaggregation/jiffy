@@ -46,6 +46,7 @@ class partition {
    */
 
   explicit partition(block_memory_manager *manager,
+                     block_response_client_map & response_map,
                      const std::string &name,
                      const std::string &metadata,
                      const command_map &supported_commands);
@@ -54,9 +55,11 @@ class partition {
    * @brief Destructor
    */
   virtual ~partition() {
-    client_map_.send_failure();
-    client_map_.clear();
-    sub_map_.clear();
+    if(!default_.load()) {
+      //client_map_.send_failure();
+      //sub_map_.clear();
+    }
+    //client_map_.clear();
   }
 
   /**
@@ -212,7 +215,7 @@ class partition {
   /* Subscription map */
   subscription_map sub_map_{};
   /* Block response client map */
-  block_response_client_map client_map_{};
+  block_response_client_map & client_map_;
   /* Block memory manager */
   block_memory_manager *manager_;
   /* Binary allocator */

@@ -24,11 +24,12 @@ class default_partition : public chain_module {
    * @param auto_scaling_port Auto scaling server port number
    */
   explicit default_partition(block_memory_manager *manager,
-                               const std::string &name = "default",
-                               const std::string &metadata = "default",
-                               const utils::property_map &conf = {},
-                               const std::string &auto_scaling_host = "localhost",
-                               int auto_scaling_port = 9095);
+                             block_response_client_map &response_map,
+                             const std::string &name = "default",
+                             const std::string &metadata = "default",
+                             const utils::property_map &conf = {},
+                             const std::string &auto_scaling_host = "localhost",
+                             int auto_scaling_port = 9095);
 
   /**
    * @brief Virtual destructor

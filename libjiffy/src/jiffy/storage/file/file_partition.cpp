@@ -11,12 +11,13 @@ namespace storage {
 using namespace utils;
 
 file_partition::file_partition(block_memory_manager *manager,
+                               block_response_client_map &response_map,
                                const std::string &name,
                                const std::string &metadata,
                                const utils::property_map &conf,
                                const std::string &auto_scaling_host,
                                int auto_scaling_port)
-    : chain_module(manager, name, metadata, FILE_OPS),
+    : chain_module(manager, response_map, name, metadata, FILE_OPS),
       partition_(manager->mb_capacity(), build_allocator<char>()),
       scaling_up_(false),
       dirty_(false),

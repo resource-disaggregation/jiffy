@@ -23,6 +23,7 @@ class fifo_queue_client : data_structure_client {
   fifo_queue_client(std::shared_ptr<directory::directory_interface> fs,
                     const std::string &path,
                     const directory::data_status &status,
+                    connection_pool &pool,
                     int timeout_ms = 1000);
 
   /**
@@ -43,8 +44,9 @@ class fifo_queue_client : data_structure_client {
 
   /**
    * @brief Dequeue item
+   * @return Dequeue result
    */
-  void dequeue();
+  std::string dequeue();
 
   /**
    * @brief Read next item without dequeue
@@ -70,11 +72,6 @@ class fifo_queue_client : data_structure_client {
    */
   double out_rate();
 
-  /**
-   * @brief Fetch the front element of the queue
-   * @return Dequeue result
-   */
-  std::string front();
  private:
   /**
    * @brief Handle command in redirect case

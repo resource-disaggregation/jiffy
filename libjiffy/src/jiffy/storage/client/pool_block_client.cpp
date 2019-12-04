@@ -2,7 +2,7 @@
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <iostream>
 
-#include "block_client.h"
+#include "pool_block_client.h"
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -11,17 +11,18 @@ using namespace ::apache::thrift::transport;
 namespace jiffy {
 namespace storage {
 
-block_client::~block_client() {
+pool_block_client::~pool_block_client() {
   if (transport_ != nullptr)
     disconnect();
 }
 
-int64_t block_client::get_client_id() {
-  return client_->get_client_id();
+int64_t pool_block_client::get_client_id() {
+  auto ret = client_->get_client_id();
+  //client_->register_client_id(-1, ret);
+  return ret;
 }
 
-void block_client::connect(const std::string &host, int port, int block_id, int timeout_ms) {
-  block_id_ = block_id;
+void pool_block_client::connect(const std::string &host, int port, int timeout_ms) {
   auto sock = std::make_shared<TSocket>(host, port);
   if (timeout_ms > 0)
     sock->setRecvTimeout(timeout_ms);
@@ -31,45 +32,48 @@ void block_client::connect(const std::string &host, int port, int block_id, int 
   transport_->open();
 }
 
-std::shared_ptr<apache::thrift::protocol::TProtocol> block_client::protocol() {
+std::shared_ptr<apache::thrift::protocol::TProtocol> pool_block_client::protocol() {
   return protocol_;
 }
 
-block_client::command_response_reader block_client::get_command_response_reader(int64_t client_id) {
-  client_->register_client_id(block_id_, client_id);
-  return block_client::command_response_reader(protocol_);
+pool_block_client::command_response_reader pool_block_client::get_command_response_reader(int64_t client_id) {
+  client_->register_client_id(-1, client_id);
+  return pool_block_client::command_response_reader(protocol_);
 }
 
-void block_client::disconnect() {
+void pool_block_client::disconnect() {
   if (is_connected()) {
     transport_->close();
   }
-  block_id_ = -1;
 }
 
-bool block_client::is_connected() const {
+bool pool_block_client::is_connected() const {
   if (transport_ == nullptr) return false;
   return transport_->isOpen();
 }
 
-void block_client::command_request(const sequence_id &seq, const std::vector<std::string> &args) {
-  client_->command_request(seq, block_id_, args);
+void pool_block_client::command_request(const sequence_id &seq, const std::vector<std::string> &args, int block_id) {
+  client_->command_request(seq, block_id, args);
 }
 
-void block_client::send_run_command(const int32_t block_id, const std::vector<std::string> &arguments) {
+void pool_block_client::send_run_command(const int32_t block_id, const std::vector<std::string> &arguments) {
   client_->send_run_command(block_id, arguments);
 }
 
-void block_client::recv_run_command(std::vector<std::string> &_return) {
+void pool_block_client::recv_run_command(std::vector<std::string> &_return) {
   client_->recv_run_command(_return);
 }
 
-block_client::command_response_reader::command_response_reader(std::shared_ptr<apache::thrift::protocol::TProtocol> prot)
+void pool_block_client::register_client_id(int64_t client_id) {
+  client_->register_client_id(-1, client_id);
+}
+
+pool_block_client::command_response_reader::command_response_reader(std::shared_ptr<apache::thrift::protocol::TProtocol> prot)
     : prot_(std::move(prot)) {
   iprot_ = prot_.get();
 }
 
-int64_t block_client::command_response_reader::recv_response(std::vector<std::string> &out) {
+int64_t pool_block_client::command_response_reader::recv_response(std::vector<std::string> &out) {
   using namespace ::apache::thrift::protocol;
   using namespace ::apache::thrift;
   int32_t rseqid = 0;
@@ -93,6 +97,9 @@ int64_t block_client::command_response_reader::recv_response(std::vector<std::st
     return result.seq.client_seq_no;
   }
   throw TApplicationException(TApplicationException::MISSING_RESULT, "Command failed: unknown result");
+}
+bool pool_block_client::command_response_reader::is_set() {
+  return prot_ != nullptr;
 }
 
 }

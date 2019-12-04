@@ -1,5 +1,5 @@
-#ifndef JIFFY_BLOCK_CLIENT_H
-#define JIFFY_BLOCK_CLIENT_H
+#ifndef JIFFY_POOL_BLOCK_CLIENT_H
+#define JIFFY_POOL_BLOCK_CLIENT_H
 
 #include <thrift/transport/TSocket.h>
 #include "jiffy/storage/service/block_request_service.h"
@@ -9,7 +9,7 @@
 namespace jiffy {
 namespace storage {
 /* Block client class */
-class block_client {
+class pool_block_client {
  public:
   /* Command response reader class */
   class command_response_reader {
@@ -31,6 +31,8 @@ class block_client {
 
     int64_t recv_response(std::vector<std::string> &out);
 
+    bool is_set();
+
    private:
     /* Thrift protocol */
     std::shared_ptr<apache::thrift::protocol::TProtocol> prot_;
@@ -41,13 +43,13 @@ class block_client {
   typedef block_request_serviceClient thrift_client;
   typedef utils::client_cache<thrift_client> client_cache;
 
-  block_client() = default;
+  pool_block_client() = default;
 
   /**
    * @brief Destructor
    */
 
-  ~block_client();
+  ~pool_block_client();
 
   /**
    * @brief Fetch client identifier
@@ -55,6 +57,8 @@ class block_client {
    */
 
   int64_t get_client_id();
+
+  void register_client_id(int64_t client_id);
 
   /**
    * @brief Connect block server
@@ -64,7 +68,7 @@ class block_client {
    * @param timeout_ms Timeout
    */
 
-  void connect(const std::string &hostname, int port, int block_id, int timeout_ms = 1000);
+  void connect(const std::string &hostname, int port, int timeout_ms = 1000);
 
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol();
 
@@ -95,7 +99,7 @@ class block_client {
    * @param args Command arguments
    */
 
-  void command_request(const sequence_id &seq, const std::vector<std::string> &args);
+  void command_request(const sequence_id &seq, const std::vector<std::string> &args, int block_id);
 
   /**
    * @brief Send run command
@@ -117,11 +121,10 @@ class block_client {
   std::shared_ptr<apache::thrift::protocol::TProtocol> protocol_{};
   /* Block request client */
   std::shared_ptr<thrift_client> client_{};
-  /* Block identifier */
-  int block_id_{-1};
 };
 
 }
 }
 
-#endif //JIFFY_BLOCK_CLIENT_H
+
+#endif //JIFFY_POOL_BLOCK_CLIENT_H
