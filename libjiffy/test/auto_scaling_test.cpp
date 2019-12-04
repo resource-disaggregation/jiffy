@@ -19,7 +19,7 @@
 #include "jiffy/directory/lease/lease_expiry_worker.h"
 #include "jiffy/auto_scaling/auto_scaling_server.h"
 #include "jiffy/utils/rand_utils.h"
-
+#include "jiffy/storage/client/connection_pool.h"
 using namespace jiffy::client;
 using namespace ::jiffy::storage;
 using namespace ::jiffy::directory;
@@ -59,7 +59,8 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
 
   auto status = t->create("/sandbox/scale_up.txt", "hashtable", "/tmp", 3, 3, 0, perms::all(),
                           {"0_32768", "32768_49152", "49152_65536"}, {"regular", "regular", "regular"}, {});
-  hash_table_client client(t, "/sandbox/scale_up.txt", status);
+  connection_pool pool;
+  hash_table_client client(t, "/sandbox/scale_up.txt", status, pool);
   // Write data until auto scaling is triggered
   for (std::size_t i = 0; i < 2000; ++i) {
     REQUIRE_NOTHROW(client.put(std::to_string(i), std::to_string(i)));

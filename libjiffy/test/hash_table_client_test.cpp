@@ -9,6 +9,7 @@
 #include "jiffy/storage/hashtable/hash_slot.h"
 #include "jiffy/storage/client/hash_table_client.h"
 #include "jiffy/auto_scaling/auto_scaling_server.h"
+#include "jiffy/storage/client/connection_pool.h"
 
 using namespace ::jiffy::storage;
 using namespace ::jiffy::directory;
@@ -192,8 +193,8 @@ auto sm = std::make_shared<storage_manager>();
 auto tree = std::make_shared<directory_tree>(alloc, sm);
 data_status status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
                                   {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"});
-
-hash_table_client client(tree, "/sandbox/file.txt", status);
+connection_pool pool;
+hash_table_client client(tree, "/sandbox/file.txt", status, pool);
 for (std::size_t i = 0; i < 1000; ++i) {
 REQUIRE_NOTHROW(client.put(std::to_string(i), std::to_string(i)));
 }
