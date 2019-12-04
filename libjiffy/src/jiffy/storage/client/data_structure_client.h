@@ -2,8 +2,11 @@
 #define JIFFY_DATA_STRUCTURE_CLIENT_H
 
 #include "jiffy/directory/client/directory_client.h"
+#include "jiffy/storage/client/block_client.h"
 #include "jiffy/storage/client/replica_chain_client.h"
 #include "jiffy/utils/client_cache.h"
+#include "jiffy/storage/manager/detail/block_id_parser.h"
+#include "jiffy/storage/client/connection_pool.h"
 
 #define THROW_IF_NOT_OK(ret) if (ret[0] != "!ok") throw std::logic_error(ret[0])
 
@@ -16,6 +19,7 @@ class redo_error : public std::exception {
  public:
   redo_error() = default;
 };
+
 
 /* Data structure client */
 class data_structure_client {
@@ -62,6 +66,8 @@ class data_structure_client {
   std::string path_;
   /* Data status */
   directory::data_status status_;
+
+  connection_pool pool_;
 
   /* Time out*/
   int timeout_ms_;

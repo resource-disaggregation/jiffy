@@ -14,6 +14,7 @@ block::block(const std::string &id,
     : id_(id),
       manager_(capacity),
       impl_(partition_manager::build_partition(&manager_,
+                                               client_map_,
                                                "default",
                                                "default",
                                                "default",
@@ -35,7 +36,7 @@ std::shared_ptr<chain_module> block::impl() {
   if (impl_ == nullptr) {
     throw std::logic_error("De-referenced uninitialized partition implementation");
   }
-  return impl_;
+  return std::atomic_load(&impl_);
 }
 
 void block::setup(const std::string &type,
@@ -43,6 +44,7 @@ void block::setup(const std::string &type,
                   const std::string &metadata,
                   const utils::property_map &conf) {
   impl_ = partition_manager::build_partition(&manager_,
+                                             client_map_,
                                              type,
                                              name,
                                              metadata,
@@ -62,14 +64,15 @@ void block::destroy() {
   std::string auto_scaling_host_ = "default";
   int auto_scaling_port_ = 0;
   utils::property_map conf;
-  impl_.reset();
-  impl_ = partition_manager::build_partition(&manager_,
+  auto new_partition = partition_manager::build_partition(&manager_,
+                                             client_map_,
                                              type,
                                              name,
                                              metadata,
                                              conf,
                                              auto_scaling_host_,
                                              auto_scaling_port_);
+  std::atomic_store(&impl_, new_partition);
   if (impl_ == nullptr) {
     throw std::invalid_argument("Fail to set default partition");
   }

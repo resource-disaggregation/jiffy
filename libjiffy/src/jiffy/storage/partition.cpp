@@ -4,12 +4,14 @@ namespace jiffy {
 namespace storage {
 
 partition::partition(block_memory_manager *manager,
+                     block_response_client_map & response_map,
                      const std::string &name,
                      const std::string &metadata,
                      const command_map &supported_commands)
     : name_(name),
       metadata_(metadata),
       supported_commands_(supported_commands),
+      client_map_(response_map),
       manager_(manager),
       binary_allocator_(build_allocator<uint8_t>()) {
   default_ = supported_commands_.empty();

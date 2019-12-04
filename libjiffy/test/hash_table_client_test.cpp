@@ -21,7 +21,7 @@ using namespace ::jiffy::utils;
 #define STORAGE_SERVICE_PORT 9091
 #define STORAGE_MANAGEMENT_PORT 9092
 
-
+/*
 TEST_CASE("hash_table_client_put_get_test", "[put][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
@@ -172,3 +172,52 @@ TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
   }
 }
 
+*/
+
+TEST_CASE("hash_table_client_connection_pool_test", "[put][get]") {
+auto alloc = std::make_shared<sequential_block_allocator>();
+auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
+alloc->add_blocks(block_names);
+auto blocks = test_utils::init_hash_table_blocks(block_names, 134217728, 0, 1);
+
+auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
+std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
+test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
+
+auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
+std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
+test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
+
+auto sm = std::make_shared<storage_manager>();
+auto tree = std::make_shared<directory_tree>(alloc, sm);
+data_status status = tree->create("/sandbox/file.txt", "hashtable", "/tmp", NUM_BLOCKS, 1, 0, 0,
+                                  {"0_21845", "21845_43690", "43690_65536"}, {"regular", "regular", "regular"});
+
+hash_table_client client(tree, "/sandbox/file.txt", status);
+for (std::size_t i = 0; i < 1000; ++i) {
+REQUIRE_NOTHROW(client.put(std::to_string(i), std::to_string(i)));
+}
+for (std::size_t i = 0; i < 1000; ++i) {
+REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
+}
+for (std::size_t i = 1000; i < 2000; ++i) {
+REQUIRE_THROWS_AS(client.get(std::to_string(i)), std::logic_error);
+}
+client.refresh();
+for (std::size_t i = 1000; i < 2000; ++i) {
+REQUIRE_NOTHROW(client.put(std::to_string(i), std::to_string(i)));
+}
+for (std::size_t i = 1000; i < 2000; ++i) {
+REQUIRE(client.get(std::to_string(i)) == std::to_string(i));
+}
+
+storage_server->stop();
+if (storage_serve_thread.joinable()) {
+storage_serve_thread.join();
+}
+
+mgmt_server->stop();
+if (mgmt_serve_thread.joinable()) {
+mgmt_serve_thread.join();
+}
+}

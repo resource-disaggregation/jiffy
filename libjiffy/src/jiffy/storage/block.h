@@ -79,12 +79,9 @@ class block {
   std::string id_;
   block_memory_manager manager_;
   std::shared_ptr<chain_module> impl_;
-
-  std::string directory_host_;
-  int directory_port_;
-
   std::string auto_scaling_host_;
   int auto_scaling_port_;
+  block_response_client_map client_map_{};
 };
 
 }

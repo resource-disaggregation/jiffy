@@ -6,6 +6,7 @@
 #include "jiffy/utils/client_cache.h"
 #include "jiffy/storage/client/data_structure_client.h"
 #include "jiffy/storage/hashtable/hash_table_ops.h"
+#include "jiffy/storage/client/pool_replica_chain_client.h"
 
 namespace jiffy {
 namespace storage {
@@ -103,10 +104,13 @@ class hash_table_client : public data_structure_client {
   std::size_t redo_times_ = 0;
 
   /* Map from slot begin to replica chain client pointer */
-  std::map<int32_t, std::shared_ptr<replica_chain_client>> blocks_;
+  std::map<int32_t, std::shared_ptr<pool_replica_chain_client>> blocks_;
+  //std::map<int32_t, std::shared_ptr<replica_chain_client>> blocks_;
 
   /* Caching created connections */
-  std::map<std::string, std::shared_ptr<replica_chain_client>> redirect_blocks_;
+  std::map<std::string, std::shared_ptr<pool_replica_chain_client>> redirect_blocks_;
+  //std::map<std::string, std::shared_ptr<replica_chain_client>> redirect_blocks_;
+
 };
 
 }
