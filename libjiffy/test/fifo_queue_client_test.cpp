@@ -56,8 +56,7 @@ TEST_CASE("fifo_queue_client_enqueue_dequeue_test", "[enqueue][dequeue]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.front() == std::to_string(i));
-    REQUIRE_NOTHROW(client.dequeue());
+    REQUIRE(client.dequeue() == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
     REQUIRE_THROWS_AS(client.dequeue(), std::logic_error);
@@ -113,15 +112,13 @@ TEST_CASE("fifo_queue_client_enqueue_length_dequeue_test", "[enqueue][dequeue]")
   REQUIRE(client.length() == length);
 
   for (std::size_t i = 0; i < 500; ++i) {
-    REQUIRE(client.front() == std::to_string(i));
-    REQUIRE_NOTHROW(client.dequeue());
+    REQUIRE(client.dequeue() == std::to_string(i));
     length -= std::to_string(i).size();
   }
   REQUIRE(client.length() == length);
 
   for (std::size_t i = 500; i < 1000; ++i) {
-    REQUIRE(client.front() == std::to_string(i));
-    REQUIRE_NOTHROW(client.dequeue());
+    REQUIRE(client.dequeue() == std::to_string(i));
     length -= std::to_string(i).size();
   }
 
@@ -179,8 +176,7 @@ TEST_CASE("fifo_queue_client_enqueue_in_rate_out_rate_dequeue_test", "[enqueue][
 
 
   for (std::size_t i = 0; i < 500; ++i) {
-    REQUIRE(client.front() == std::to_string(i));
-    REQUIRE_NOTHROW(client.dequeue());
+    REQUIRE(client.dequeue() == std::to_string(i));
   }
 
   REQUIRE_NOTHROW(rate = client.in_rate());
@@ -190,8 +186,7 @@ TEST_CASE("fifo_queue_client_enqueue_in_rate_out_rate_dequeue_test", "[enqueue][
 
 
   for (std::size_t i = 500; i < 1000; ++i) {
-    REQUIRE(client.front() == std::to_string(i));
-    REQUIRE_NOTHROW(client.dequeue());
+    REQUIRE(client.dequeue() == std::to_string(i));
   }
 
 

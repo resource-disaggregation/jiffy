@@ -112,13 +112,6 @@ class fifo_queue_partition : public chain_module {
   void out_rate(response &_return, const arg_list &args);
 
   /**
-   * @brief Fetch the front element of the queue
-   * @param _return Response
-   * @param args Arguments
-   */
-  void front(response &_return, const arg_list &args);
-
-  /**
    * @brief Run particular command on fifo queue partition
    * @param _return Response
    * @param args Arguments

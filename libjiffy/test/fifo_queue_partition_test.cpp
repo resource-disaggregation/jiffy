@@ -17,12 +17,10 @@ TEST_CASE("fifo_queue_enqueue_dequeue_test", "[enqueue][dequeue]") {
     REQUIRE(resp[0] == "!ok");
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    response resp1, resp2;
-    REQUIRE_NOTHROW(block.front(resp1, {"front"}));
-    REQUIRE_NOTHROW(block.dequeue(resp2, {"dequeue"}));
-    REQUIRE(resp1[0] == "!ok");
-    REQUIRE(resp1[1] == std::to_string(i));
-    REQUIRE(resp2[0] == "!ok");
+    response resp;
+    REQUIRE_NOTHROW(block.dequeue(resp, {"dequeue"}));
+    REQUIRE(resp[0] == "!ok");
+    REQUIRE(resp[1] == std::to_string(i));
   }
   for (std::size_t i = 1000; i < 2000; ++i) {
     response resp;
@@ -68,12 +66,10 @@ TEST_CASE("fifo_queue_enqueue_readnext_dequeue", "[enqueue][read_next][dequeue]"
     REQUIRE(resp[1] == std::to_string(i));
   }
   for (std::size_t i = 0; i < 1000; ++i) {
-    response resp1, resp2;
-    REQUIRE_NOTHROW(block.front(resp1, {"front"}));
-    REQUIRE_NOTHROW(block.dequeue(resp2, {"dequeue"}));
-    REQUIRE(resp1[0] == "!ok");
-    REQUIRE(resp1[1] == std::to_string(i));
-    REQUIRE(resp2[0] == "!ok");
+    response resp;
+    REQUIRE_NOTHROW(block.dequeue(resp, {"dequeue"}));
+    REQUIRE(resp[0] == "!ok");
+    REQUIRE(resp[1] == std::to_string(i));
   }
 }
 
@@ -102,12 +98,10 @@ TEST_CASE("fifo_queue_flush_load_test", "[enqueue][sync][reset][load][dequeue]")
   REQUIRE_FALSE(block.sync("local://tmp/test"));
   REQUIRE_NOTHROW(block.load("local://tmp/test"));
   for (std::size_t i = 0; i < 1000; ++i) {
-    response resp1, resp2;
-    REQUIRE_NOTHROW(block.front(resp1, {"front"}));
-    REQUIRE_NOTHROW(block.dequeue(resp2, {"dequeue"}));
-    REQUIRE(resp1[0] == "!ok");
-    REQUIRE(resp1[1] == std::to_string(i));
-    REQUIRE(resp2[0] == "!ok");
+    response resp;
+    REQUIRE_NOTHROW(block.dequeue(resp, {"dequeue"}));
+    REQUIRE(resp[0] == "!ok");
+    REQUIRE(resp[1] == std::to_string(i));
   }
 }
 
