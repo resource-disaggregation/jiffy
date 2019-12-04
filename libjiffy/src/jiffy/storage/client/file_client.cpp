@@ -144,10 +144,10 @@ int file_client::write(const std::string &data) {
 }
 
 void file_client::refresh() {
+  status_ = fs_->dstatus(path_);
+  blocks_.clear();
   bool redo;
   do {
-    status_ = fs_->dstatus(path_);
-    blocks_.clear();
     try {
       for (const auto &block: status_.data_blocks()) {
         blocks_.push_back(std::make_shared<replica_chain_client>(fs_, path_, block, FILE_OPS, timeout_ms_));
