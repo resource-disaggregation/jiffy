@@ -111,9 +111,9 @@ The create method also accepts flags as it's last argument, details can be seen 
 ```python tab="Python"
 hash_table = client.create_hash_table("/a/file.txt", "local://tmp")
 
-hash_table = client.open("/a/file.txt")
+hash_table = client.open_hash_table("/a/file.txt")
 
-hash_table = client.open_or_create("/a/file.txt", "local://tmp")
+hash_table = client.open_or_create_hash_table("/a/file.txt", "local://tmp")
 ```
 
 ```java tab="Java"
@@ -163,13 +163,13 @@ The Jiffy client could also listen after a path on a specific operation and rece
 ```python tab="Python"
 
 client = JiffyClient("127.0.0.1", 9090, 9091)
-client.createHashTable("/a/file.txt", "local://tmp")
+client.create_hash_table("/a/file.txt", "local://tmp")
 # Create subscription client listenning to specific file
 subscription = client.listen("/a/file.txt")
 # Subscription client listenning on operation 'put'
 subscription.subscribe(['put'])
 
-hash_table = client.open("/a/file.txt")
+hash_table = client.open_hash_table("/a/file.txt")
 hash_table.put(b'key1', b'value1')
 hash_table.remove(b'key1')
 
