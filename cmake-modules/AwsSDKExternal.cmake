@@ -5,7 +5,7 @@
 #  - AWSSDK_INCLUDE_DIR
 #  - AWSSDK_LINK_LIBRARIES
 
-set(AWSSDK_VERSION "1.6.53")
+set(AWSSDK_VERSION "1.7.276")
 set(AWSSDK_MODULES "s3" "core")
 set(AWSSDK_BUILD ON)
 
@@ -15,7 +15,10 @@ if ((DEFINED ENV{AWSDK_ROOT} AND EXISTS $ENV{AWSDK_ROOT}))
 endif ()
 
 if (USE_SYSTEM_AWSSDK)
-  find_package(AWSSDK REQUIRED COMPONENTS "${AWSSDK_MODULES}")
+  CheckHasModule(AWSSDK)
+  if (HAS_MODULE_AWSSDK)
+    find_package(AWSSDK REQUIRED COMPONENTS "${AWSSDK_MODULES}")
+  endif ()
   if (AWSSDK_FOUND)
     set(AWSSDK_BUILD OFF)
     add_custom_target(awssdk_ep)
