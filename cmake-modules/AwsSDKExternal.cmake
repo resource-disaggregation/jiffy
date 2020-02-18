@@ -6,13 +6,25 @@
 #  - AWSSDK_LINK_LIBRARIES
 
 set(AWSSDK_VERSION "1.6.53")
-
 set(AWSSDK_MODULES "s3" "core")
+set(AWSSDK_BUILD ON)
+
+if ((DEFINED ENV{AWSDK_ROOT} AND EXISTS $ENV{AWSDK_ROOT}))
+  set(AWSDK_ROOT_DIR "$ENV{AWSDK_ROOT}")
+  set(USE_SYSTEM_AWSSDK ON)
+endif ()
 
 if (USE_SYSTEM_AWSSDK)
   find_package(AWSSDK REQUIRED COMPONENTS "${AWSSDK_MODULES}")
-  add_custom_target(awssdk_ep)
-else ()
+  if (AWSSDK_FOUND)
+    set(AWSSDK_BUILD OFF)
+    add_custom_target(awssdk_ep)
+  else(AWSSDK_FOUND)
+    message(STATUS "${Red}Could not use system aws-sdk-cpp, will download and build${ColorReset}")
+  endif(AWSSDK_FOUND)
+endif()
+
+if (AWSSDK_BUILD)
   set(AWSSDK_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/awssdk_ep")
   set(AWSSDK_HOME "${AWSSDK_PREFIX}")
   set(AWSSDK_INCLUDE_DIR "${AWSSDK_PREFIX}/include")

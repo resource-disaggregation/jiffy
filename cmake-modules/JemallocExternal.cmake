@@ -11,11 +11,17 @@ set(JEMALLOC_BUILD ON)
 
 if (DEFINED ENV{JEMALLOC_ROOT} AND EXISTS $ENV{JEMALLOC_ROOT})
   set(JEMALLOC_ROOT_DIR "$ENV{JEMALLOC_ROOT}")
+  set(USE_SYSTEM_JEMALLOC ON)
+endif ()
+
+if (USE_SYSTEM_JEMALLOC)
   find_package(Jemalloc ${JEMALLOC_VERSION})
   if (JEMALLOC_FOUND)
     set(JEMALLOC_BUILD OFF)
     get_filename_component(JEMALLOC_HOME ${JEMALLOC_INCLUDE_DIR} DIRECTORY)
     add_custom_target(jemalloc_ep)
+  else (JEMALLOC_FOUND)
+    message(STATUS "${Red}Could not use system Jemalloc, will download and build${ColorReset}")
   endif (JEMALLOC_FOUND)
 endif ()
 
