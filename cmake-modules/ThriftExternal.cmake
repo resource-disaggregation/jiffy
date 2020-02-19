@@ -15,7 +15,7 @@ if ((DEFINED ENV{THRIFT_ROOT} AND EXISTS $ENV{THRIFT_ROOT}))
 endif ()
 
 if (USE_SYSTEM_THRIFT)
-  find_package(THRIFT ${THRIFT_VERSION})
+  find_package(Thrift ${THRIFT_VERSION})
   if (THRIFT_FOUND)
     set(THRIFT_BUILD OFF)
     add_custom_target(thrift_ep)
