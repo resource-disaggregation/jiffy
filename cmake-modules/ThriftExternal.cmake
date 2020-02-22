@@ -25,6 +25,16 @@ if (USE_SYSTEM_THRIFT)
 endif()
 
 if (THRIFT_BUILD)
+  message(STATUS "${Yellow}[Assessing thrift dependencies]")
+
+  # Boost
+  include(BoostExternal)
+
+  # Libevent
+  include(LibeventExternal)
+
+  message(STATUS "[Finished assessing thrift dependencies] ${ColorReset}")
+
   set(THRIFT_PREFIX "${PROJECT_BINARY_DIR}/external/thrift_ep")
   set(THRIFT_HOME "${THRIFT_PREFIX}")
   set(THRIFT_INCLUDE_DIR "${THRIFT_PREFIX}/include")
@@ -66,7 +76,7 @@ if (THRIFT_BUILD)
   endif ()
   ExternalProject_Add(thrift_ep
           URL "http://archive.apache.org/dist/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
-          DEPENDS boost_ep openssl_ep libevent_ep
+          DEPENDS boost_ep libevent_ep
           CMAKE_ARGS ${THRIFT_CMAKE_ARGS}
           LIST_SEPARATOR |
           LOG_DOWNLOAD ON
