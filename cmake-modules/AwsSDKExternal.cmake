@@ -28,6 +28,19 @@ if (USE_SYSTEM_AWSSDK)
 endif()
 
 if (AWSSDK_BUILD)
+  message(STATUS "${Yellow}[Assessing aws-sdk-cpp dependencies]")
+
+  # OpenSSL
+  include(OpenSSLExternal)
+
+  # Curl
+  include(CurlExternal)
+
+  # Zlib
+  include(ZlibExternal)
+
+  message(STATUS "[Finished assessing aws-sdk-cpp dependencies]${ColorReset}")
+
   set(AWSSDK_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/awssdk_ep")
   set(AWSSDK_HOME "${AWSSDK_PREFIX}")
   set(AWSSDK_INCLUDE_DIR "${AWSSDK_PREFIX}/include")
