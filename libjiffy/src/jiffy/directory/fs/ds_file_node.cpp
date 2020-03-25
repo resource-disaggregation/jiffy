@@ -158,11 +158,12 @@ void ds_file_node::load(const std::string &path,
   for (std::size_t i = 0; i < num_blocks; ++i) {
     replica_chain chain(allocator->allocate(chain_length, {}), storage_mode::in_memory);
     assert(chain.block_ids.size() == chain_length);
+    chain.metadata = "regular";
     using namespace storage;
     if (chain_length == 1) {
       std::string block_backing_path = backing_path;
       utils::directory_utils::push_path_element(block_backing_path, chain.name);
-      storage->create_partition(chain.block_ids[0], dstatus_.type(), chain.name, chain.metadata, get_tags());
+      storage->create_partition(chain.block_ids[0], dstatus_.type(), dstatus_.data_blocks()[i].name, "regular", dstatus_.get_tags());
       storage->setup_chain(chain.block_ids[0], path, chain.block_ids, chain_role::singleton, "nil");
       storage->load(chain.block_ids[0], block_backing_path);
       dstatus_.mark_loaded(i, chain.block_ids);
