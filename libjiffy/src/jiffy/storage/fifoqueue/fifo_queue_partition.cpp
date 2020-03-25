@@ -99,7 +99,7 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
     head_ += (string_array::METADATA_LEN + ret.second.size());
     update_read_head();
     dequeue_data_size_ += ret.second.size();
-    RETURN_OK();
+    RETURN_OK(ret.second);
   }
   if (ret.second == "!not_available") {
     RETURN_ERR("!msg_not_found");
