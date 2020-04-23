@@ -36,7 +36,8 @@ javaclient/target
 javaclient/core/target
 javaclient/hadoop/target
 build
-
+ubuntu-build
+log
 # Eclipse files
 .settings
 debug

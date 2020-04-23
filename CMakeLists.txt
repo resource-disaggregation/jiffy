@@ -35,6 +35,8 @@ endif ()
 
 add_subdirectory(libjiffy)
 
+add_subdirectory(maestro-allocator)
+
 if (BUILD_DIRECTORY)
   add_subdirectory(directory)
 endif ()
