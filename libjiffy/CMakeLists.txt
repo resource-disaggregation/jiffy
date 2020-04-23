@@ -222,7 +222,8 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/types/binary.h
           src/jiffy/storage/types/binary.cpp
           src/jiffy/storage/types/byte_string.h
-          src/jiffy/storage/types/byte_string.cc)
+          src/jiffy/storage/types/byte_string.cc
+          src/jiffy/maestro/free_block_allocator.h src/jiffy/maestro/free_block_allocator.cpp)
 
   add_dependencies(jiffy thrift_ep awssdk_ep jemalloc_ep)
   target_link_libraries(jiffy ${THRIFT_LIBRARY}
