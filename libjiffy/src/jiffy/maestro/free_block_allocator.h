@@ -10,59 +10,74 @@
 
 
 namespace jiffy {
-    namespace directory {
+  namespace maestro {
 
-        class free_block_allocator : public block_allocator {
-        public:
-            free_block_allocator() = default;
+    class free_block_allocator : public directory::block_allocator {
 
-            virtual ~free_block_allocator() = default;
+    public:
+      free_block_allocator() = default;
 
-            /**
-             * @brief Allocate blocks in different prefixes
-             * @param count Number of blocks
-             * @return Block names
-             */
+      virtual ~free_block_allocator() = default;
 
-            std::vector<std::string> allocate(std::size_t count, const std::vector<std::string> &exclude_list) override;
+      /**
+       * @brief Allocate blocks
+       * @param count Number of blocks
+       * @return Block names
+       */
 
-            /**
-             * @brief Free blocks
-             * @param blocks Block names
-             */
-            void free(const std::vector<std::string> &block_name) override;
+      std::vector<std::string> allocate(std::size_t count, const std::vector<std::string> &exclude_list) override;
 
-            /**
-             * @brief Add blocks to free block list
-             * @param block_names Block names
-             */
+      /**
+       * @brief Add blocks to free block list
+       * @param blocks Block names
+       */
+      void free(const std::vector<std::string> &block_name) override;
 
-            void add_blocks(const std::vector<std::string> &block_names) override;
+      /**
+       * @brief Add blocks to free block list
+       * @param block_names Block names
+       */
 
-            /**
-             * @brief Remove blocks from free block list
-             * @param block_names Block names
-             */
+      void add_blocks(const std::vector<std::string> &block_names) override;
 
-            void remove_blocks(const std::vector<std::string> &block_names) override;
+      /**
+       * @brief Remove blocks from free block list
+       * @param block_names Block names
+       */
 
-            /**
-             * @brief Fetch number of free blocks
-             * @return Number of free blocks
-             */
+      void remove_blocks(const std::vector<std::string> &block_names) override;
 
-            std::size_t num_free_blocks() override;
+      /**
+       * @brief Fetch number of free blocks
+       * @return Number of free blocks
+       */
 
-        private:
+      std::size_t num_free_blocks() override;
 
-            /* Operation mutex */
-            std::mutex mtx_;
-            /* Free blocks per storage server*/
-            std::unordered_map<std::string,std::set<std::string>> free_blocks_by_server_;
+      /**
+       * @brief Fetch number of allocated blocks
+       * @return Number of allocated blocks
+       */
 
-        };
+      std::size_t num_allocated_blocks() override;
 
-    }
+      /**
+       * @brief Fetch number of total blocks
+       * @return Number of total blocks
+       */
+
+      std::size_t num_total_blocks() override;
+
+    private:
+
+      /* Operation mutex */
+      std::mutex mtx_;
+      /* Free blocks per storage server*/
+      std::unordered_map<std::string, std::set<std::string>> free_blocks_by_server_;
+
+    };
+
+  }
 }
 
 #endif //JIFFY_FREE_BLOCK_ALLOCATOR_H
