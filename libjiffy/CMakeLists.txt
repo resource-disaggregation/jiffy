@@ -223,7 +223,23 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/types/binary.cpp
           src/jiffy/storage/types/byte_string.h
           src/jiffy/storage/types/byte_string.cc
-          src/jiffy/maestro/free_block_allocator.h src/jiffy/maestro/free_block_allocator.cpp)
+          src/jiffy/maestro/free_block_allocator.h
+          src/jiffy/maestro/free_block_allocator.cpp
+          src/jiffy/maestro/allocator_service.cpp
+          src/jiffy/maestro/allocator_service.h
+          src/jiffy/maestro/controller/maestro_allocator_service_handler.cpp
+          src/jiffy/maestro/controller/maestro_allocator_service_handler.h
+          src/jiffy/maestro/controller/maestro_allocator_service_factory.cpp
+          src/jiffy/maestro/controller/maestro_allocator_service_factory.h
+          src/jiffy/maestro/controller/maestro_alloactor_server.cpp
+          src/jiffy/maestro/controller/maestro_alloactor_server.h
+          src/jiffy/maestro/controller/maestro_allocator_service_constants.cpp
+          src/jiffy/maestro/controller/maestro_allocator_service_constants.h
+          src/jiffy/maestro/controller/maestro_allocator_service.cpp
+          src/jiffy/maestro/controller/maestro_allocator_service.h
+          src/jiffy/maestro/controller/maestro_allocator_service_types.cpp
+          src/jiffy/maestro/controller/maestro_allocator_service_types.h
+          src/jiffy/maestro/controller/maestro_allocator_service_types.tcc)
 
   add_dependencies(jiffy thrift_ep awssdk_ep jemalloc_ep)
   target_link_libraries(jiffy ${THRIFT_LIBRARY}

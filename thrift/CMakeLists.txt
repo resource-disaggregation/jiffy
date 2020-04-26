@@ -26,7 +26,7 @@ thrift_gen(${THRIFT_GEN_CXX} src/directory_service.thrift ../libjiffy/src/jiffy/
 thrift_gen(${THRIFT_GEN_CXX} src/lease_service.thrift ../libjiffy/src/jiffy/directory/lease/)
 thrift_gen(${THRIFT_GEN_CXX} src/storage_management_service.thrift ../libjiffy/src/jiffy/storage/manager/)
 thrift_gen(${THRIFT_GEN_CXX} src/auto_scaling_service.thrift ../libjiffy/src/jiffy/auto_scaling/)
-thrift_gen(${THRIFT_GEN_CXX} src/maestro_allocator_service.thrift ../libjiffy/src/jiffy/maestro/allocator/)
+thrift_gen(${THRIFT_GEN_CXX} src/maestro_allocator_service.thrift ../libjiffy/src/jiffy/maestro/controller/)
 
 
 # Generate py sources
@@ -49,4 +49,5 @@ file(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/../pyjiffy/jiffy/lease/lease_service-rem
 # Generate java sources
 thrift_gen(${THRIFT_GEN_JAVA} src/block_service.thrift ../jiffy4j/core/src/main/java/)
 thrift_gen(${THRIFT_GEN_JAVA} src/directory_service.thrift ../jiffy4j/core/src/main/java/)
+thrift_gen(${THRIFT_GEN_JAVA} src/lease_service.thrift ../jiffy4j/core/src/main/java/)
 thrift_gen(${THRIFT_GEN_JAVA} src/lease_service.thrift ../jiffy4j/core/src/main/java/)
