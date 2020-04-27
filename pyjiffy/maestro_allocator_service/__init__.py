@@ -1,1 +1,2 @@
-__all__ = ['ttypes', 'constants', 'maestro_allocator_service']
+from __future__ import absolute_import
+from .ttypes import maestro_allocator_service_exception as MaestroAllocatorServiceException
