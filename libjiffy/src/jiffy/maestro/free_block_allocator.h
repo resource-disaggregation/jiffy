@@ -74,7 +74,8 @@ namespace jiffy {
       std::mutex mtx_;
       /* Free blocks per storage server*/
       std::unordered_map<std::string, std::set<std::string>> free_blocks_by_server_;
-
+      /* Max capacity per storage server*/
+      std::unordered_map<std::string, std::size_t> max_capacity_by_server_;
     };
 
   }

@@ -13,7 +13,9 @@ try:
     client = maestro_allocator_service.Client(protocol)
     transport.open()
 
-    print(client.allocate("ASDASD", 10))
+    print(client.allocate("POMNQW", 5))
+    print(client.deallocate("ASDASD", ["172.17.0.3:9095:9093:1", "172.17.0.3:9095:9093:10"]))
+
 
     transport.close()
 

@@ -37,7 +37,12 @@ namespace jiffy {
       for (const auto &block_name: block_names) {
         auto block = storage::block_id_parser::parse(block_name);
         auto storage_server_id = block.get_storage_server_id();
+        auto block_id = block.get_block_id();
+
         free_blocks_by_server_[storage_server_id].insert(block_name);
+        if(max_capacity_by_server_[storage_server_id] < block_id) {
+          max_capacity_by_server_[storage_server_id] = block_id;
+        }
       }
     }
 
@@ -53,7 +58,7 @@ namespace jiffy {
     std::size_t free_block_allocator::num_free_blocks() {
       std::unique_lock<std::mutex> lock(mtx_);
 
-      unsigned int num_free_blocks = 0;
+      size_t num_free_blocks = 0;
 
       for(auto &server: free_blocks_by_server_) {
         auto free_block_set = server.second;
@@ -68,7 +73,13 @@ namespace jiffy {
     }
 
     std::size_t free_block_allocator::num_total_blocks() {
-      throw std::logic_error("number of total blocks cannot be determined");
+      std::unique_lock<std::mutex> lock(mtx_);
+
+      std::size_t total_block_count = 0;
+      for(auto &capacity: max_capacity_by_server_) {
+        total_block_count += capacity.second;
+      }
+      return total_block_count;
     }
   }
 }

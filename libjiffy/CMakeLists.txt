@@ -239,7 +239,11 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/maestro/controller/maestro_allocator_service.h
           src/jiffy/maestro/controller/maestro_allocator_service_types.cpp
           src/jiffy/maestro/controller/maestro_allocator_service_types.h
-          src/jiffy/maestro/controller/maestro_allocator_service_types.tcc)
+          src/jiffy/maestro/controller/maestro_allocator_service_types.tcc
+          src/jiffy/maestro/usage_tracker.cpp
+          src/jiffy/maestro/usage_tracker.h
+          src/jiffy/maestro/maestro_ops_exception.cpp
+          src/jiffy/maestro/maestro_ops_exception.h)
 
   add_dependencies(jiffy thrift_ep awssdk_ep jemalloc_ep)
   target_link_libraries(jiffy ${THRIFT_LIBRARY}

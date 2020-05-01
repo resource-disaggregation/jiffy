@@ -4,15 +4,25 @@
 #include <string>
 #include <vector>
 #include "jiffy/storage/manager/detail/block_id_parser.h"
+#include "jiffy/maestro/free_block_allocator.h"
+#include "jiffy/maestro/usage_tracker.h"
 
 namespace jiffy {
   namespace maestro {
 
     class allocator_service {
     public:
-      std::vector<std::string> allocate(std::string tenantID, int64_t numBlocks);
 
-      void deallocate(std::string tenantID, std::vector<std::string> blocks);
+      explicit allocator_service(std::shared_ptr<free_block_allocator> free_pool,
+                                 std::shared_ptr<usage_tracker> usage_tracker);
+
+      std::vector<std::string> allocate(const std::string& tenant_ID, int64_t num_blocks);
+
+      void deallocate(const std::string& tenant_ID, const std::vector<std::string>& blocks);
+
+    private:
+      std::shared_ptr<free_block_allocator> free_block_allocator_;
+      std::shared_ptr<usage_tracker> usage_tracker_;
     };
 
   }

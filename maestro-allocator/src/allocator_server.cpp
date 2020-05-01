@@ -2,6 +2,7 @@
 #include <vector>
 #include <thread>
 #include <jiffy/maestro/free_block_allocator.h>
+#include <jiffy/maestro/usage_tracker.h>
 #include <jiffy/directory/block/block_registration_server.h>
 #include <jiffy/directory/fs/directory_tree.h>
 #include <jiffy/utils/logger.h>
@@ -26,11 +27,11 @@ int main(int argc, char **argv) {
     std::atomic<int> failing_thread(-1); // alloc -> 0
 
     std::exception_ptr free_pool_exception = nullptr;
-    auto alloc = std::make_shared<free_block_allocator>();
-    auto alloc_server = block_registration_server::create(alloc, address, block_port);
-    std::thread alloc_serve_thread([&free_pool_exception, &alloc_server, &failing_thread, &failure_condition] {
+    auto free_block_pool = std::make_shared<free_block_allocator>();
+    auto free_block_pool_server = block_registration_server::create(free_block_pool, address, block_port);
+    std::thread alloc_serve_thread([&free_pool_exception, &free_block_pool_server, &failing_thread, &failure_condition] {
         try {
-            alloc_server->serve();
+            free_block_pool_server->serve();
         } catch (...) {
             free_pool_exception = std::current_exception();
             failing_thread = 0;
@@ -41,7 +42,8 @@ int main(int argc, char **argv) {
 
 
     std::exception_ptr allocator_exception = nullptr;
-    auto allocator = std::make_shared<allocator_service>();
+    auto tracker = std::make_shared<usage_tracker>(free_block_pool);
+    auto allocator = std::make_shared<allocator_service>(free_block_pool, tracker);
     auto maestro_alloactor_server = maestro_alloactor_server::create(allocator, address, service_port);
     std::thread directory_serve_thread([&allocator_exception, &maestro_alloactor_server, &failing_thread, &failure_condition] {
       try {
