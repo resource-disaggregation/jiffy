@@ -243,7 +243,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/maestro/usage_tracker.cpp
           src/jiffy/maestro/usage_tracker.h
           src/jiffy/maestro/maestro_ops_exception.cpp
-          src/jiffy/maestro/maestro_ops_exception.h)
+          src/jiffy/maestro/maestro_ops_exception.h src/jiffy/maestro/reclaim_service.cpp src/jiffy/maestro/reclaim_service.h)
 
   add_dependencies(jiffy thrift_ep awssdk_ep jemalloc_ep)
   target_link_libraries(jiffy ${THRIFT_LIBRARY}

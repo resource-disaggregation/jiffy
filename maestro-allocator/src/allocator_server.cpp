@@ -21,6 +21,12 @@ int main(int argc, char **argv) {
     std::string address = "127.0.0.1";
     int block_port = 9092;
     int service_port = 9090;
+    std::unordered_map<std::string, std::float_t> capacityDistribution({
+                                                                               { "A", 0.25 },
+                                                                               { "B", 0.25 },
+                                                                               { "C", 0.25 },
+                                                                               { "D", 0.25 },
+                                                                           });
 
     std::mutex failure_mtx;
     std::condition_variable failure_condition;
@@ -42,8 +48,9 @@ int main(int argc, char **argv) {
 
 
     std::exception_ptr allocator_exception = nullptr;
-    auto tracker = std::make_shared<usage_tracker>(free_block_pool);
-    auto allocator = std::make_shared<allocator_service>(free_block_pool, tracker);
+    auto tracker = std::make_shared<usage_tracker>(free_block_pool, capacityDistribution);
+    auto reclaimer = std::make_shared<reclaim_service>(tracker);
+    auto allocator = std::make_shared<allocator_service>(free_block_pool, tracker, reclaimer);
     auto maestro_alloactor_server = maestro_alloactor_server::create(allocator, address, service_port);
     std::thread directory_serve_thread([&allocator_exception, &maestro_alloactor_server, &failing_thread, &failure_condition] {
       try {
