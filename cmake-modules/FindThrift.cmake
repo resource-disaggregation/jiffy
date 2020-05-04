@@ -54,6 +54,19 @@ find_library(THRIFT_LIBRARY
         PATH_SUFFIXES
         lib lib64)
 
+find_library(THRIFTNB_LIBRARY
+        NAMES
+        thriftnb libthriftnb
+        HINTS
+        ${THRIFT_HOME}
+        ENV THRIFT_HOME
+        /usr/local/Cellar
+        /usr/local
+        /opt/local
+        /usr
+        PATH_SUFFIXES
+        lib lib64)
+
 find_program(THRIFT_COMPILER
         NAMES
         thrift
@@ -75,5 +88,5 @@ endif ()
 
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(THRIFT DEFAULT_MSG THRIFT_LIBRARY THRIFT_INCLUDE_DIR THRIFT_COMPILER)
-mark_as_advanced(THRIFT_LIBRARY THRIFT_INCLUDE_DIR THRIFT_COMPILER THRIFT_VERSION_STRING)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(THRIFT DEFAULT_MSG THRIFT_LIBRARY THRIFTNB_LIBRARY THRIFT_INCLUDE_DIR THRIFT_COMPILER)
+mark_as_advanced(THRIFT_LIBRARY THRIFTNB_LIBRARY THRIFT_INCLUDE_DIR THRIFT_COMPILER THRIFT_VERSION_STRING)

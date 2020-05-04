@@ -18,7 +18,7 @@ replica_chain_client::replica_chain_client(std::shared_ptr<directory::directory_
   seq_.client_id = -1;
   seq_.client_seq_no = 0;
   accessor_ = false;
-  exception_ = false;
+  send_run_command_exception_ = false;
   connect(chain, timeout_ms);
   for (auto &op: OPS) {
     cmd_client_[op.first] = op.second.is_accessor() ? &tail_ : &head_;
@@ -63,7 +63,7 @@ void replica_chain_client::send_command(const std::vector<std::string> &args) {
       accessor_ = true;
       cmd_client_.at(args.front())->send_run_command(std::stoi(string_utils::split(chain_.tail(), ':').back()), args);
     } catch (std::exception &e) {
-      exception_ = true;
+      send_run_command_exception_ = true;
     }
   } else {
     cmd_client_.at(args.front())->command_request(seq_, args);
@@ -75,18 +75,18 @@ std::vector<std::string> replica_chain_client::recv_response() {
   std::vector<std::string> ret;
   int64_t rseq;
   if (accessor_) {
-    if (exception_) {
+    if (send_run_command_exception_) {
       ret.emplace_back("!block_moved");
     } else {
       try {
         tail_.recv_run_command(ret);
       } catch (std::exception &e) {
-        if (!exception_) {
+        if (!send_run_command_exception_) {
           ret.emplace_back("!block_moved");
         }
       }
     }
-    exception_ = false;
+    send_run_command_exception_ = false;
   } else {
     rseq = response_reader_.recv_response(ret);
     if (rseq != seq_.client_seq_no) {

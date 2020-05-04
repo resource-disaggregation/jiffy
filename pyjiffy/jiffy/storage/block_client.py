@@ -102,3 +102,9 @@ class BlockClient:
 
     def send_request(self, seq, arguments):
         self.client_.command_request(seq, self.id_, arguments)
+
+    def send_run_command(self, block_id, arguments):
+        self.client_.send_run_command(block_id, arguments)
+
+    def recv_run_command(self):
+        return self.client_.recv_run_command()

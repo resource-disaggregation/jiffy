@@ -188,7 +188,7 @@ class TestClient(TestCase):
 
         # Test update
         for i in range(0, 1000):
-            self.assertEqual(b(str(i)), kv.update(b(str(i)), b(str(i + 1000))))
+            self.assertEqual(b('!ok'), kv.update(b(str(i)), b(str(i + 1000))))
 
         for i in range(1000, 2000):
             self.assertRaises(KeyError, kv.update, b(str(i)), b(str(i + 1000)))
@@ -207,18 +207,25 @@ class TestClient(TestCase):
             self.assertRaises(KeyError, kv.get, b(str(i)))
 
     def queue_ops(self, q):
+        length = 0
         for i in range(0, 1000):
             try:
                 q.put(b(str(i)))
+                length += len(b(str(i)))
             except KeyError as k:
                 self.fail('Received error message: {}'.format(k))
 
+        self.assertEqual(length, q.length())
+        q.in_rate()
+        q.out_rate()
         for i in range(0, 1000):
             self.assertEqual(b(str(i)), q.read_next())
 
         for i in range(0, 1000):
             self.assertEqual(b(str(i)), q.get())
-
+        q.in_rate()
+        q.out_rate()
+        self.assertEqual(0, q.length())
         for i in range(1000, 2000):
             self.assertRaises(KeyError, q.get)
 
@@ -295,6 +302,7 @@ class TestClient(TestCase):
         finally:
             client.disconnect()
             self.stop_servers()
+
 
     def test_file(self):
         self.start_servers()
@@ -375,7 +383,7 @@ class TestClient(TestCase):
                 client.disconnect()
                 self.stop_servers()
 
-    def test_auto_scale(self):
+    def test_hash_table_auto_scale(self):
         self.start_servers(auto_scale=True)
         client = self.jiffy_client()
         try:
@@ -389,6 +397,60 @@ class TestClient(TestCase):
             self.assertEqual(2, len(client.fs.dstatus("/a/file.txt").data_blocks))
             for i in range(0, 2000):
                 self.assertEqual(b("!ok"), kv.remove(b(str(i))))
+            self.assertEqual(1, len(client.fs.dstatus("/a/file.txt").data_blocks))
+        finally:
+            client.disconnect()
+            self.stop_servers()
+
+    def test_file_auto_scale(self):
+        self.start_servers(auto_scale=True)
+        client = self.jiffy_client()
+        try:
+            file_client = client.create_file("/a/file.txt", "local://tmp")
+            for i in range(0, 4000):
+                try:
+                    file_client.write(b(str(i)))
+                except KeyError as k:
+                    self.fail("Received error message: {}".format(k))
+
+            self.assertEqual(2, len(client.fs.dstatus("/a/file.txt").data_blocks))
+            self.assertTrue(file_client.seek(0))
+            for i in range(0, 4000):
+                self.assertEqual(b(str(i)), file_client.read(len(b(str(i)))))
+            self.assertEqual(2, len(client.fs.dstatus("/a/file.txt").data_blocks))
+        finally:
+            client.disconnect()
+            self.stop_servers()
+
+    def test_file_asyn_read_write(self):
+        self.start_servers(auto_scale=True)
+        client = self.jiffy_client()
+        data_size = 25000
+        data = b("")
+        for i in range(0, data_size):
+            data += b("a")
+        file_client = client.create_file("/a/file.txt", "local://tmp")
+        self.assertEqual(data_size, file_client.write(data))
+        self.assertEqual(4, len(client.fs.dstatus("/a/file.txt").data_blocks))
+        self.assertTrue(file_client.seek(0))
+        self.assertEqual(data, file_client.read(len(data)))
+        self.assertEqual(4, len(client.fs.dstatus("/a/file.txt").data_blocks))
+        client.disconnect()
+        self.stop_servers()
+
+    def test_fifo_queue_auto_scale(self):
+        self.start_servers(auto_scale=True)
+        client = self.jiffy_client()
+        try:
+            queue_client = client.create_queue("/a/file.txt", "local://tmp")
+            for i in range(0, 1000):
+                try:
+                    queue_client.put(b(str(i)))
+                except KeyError as k:
+                    self.fail("Received error message: {}".format(k))
+            self.assertEqual(2, len(client.fs.dstatus("/a/file.txt").data_blocks))
+            for i in range(0, 1000):
+                self.assertEqual(b(str(i)), queue_client.get())
             self.assertEqual(1, len(client.fs.dstatus("/a/file.txt").data_blocks))
         finally:
             client.disconnect()
@@ -447,6 +509,29 @@ class TestClient(TestCase):
         finally:
             client.disconnect()
             self.stop_servers()
+
+    def test_large_data_read(self):
+        self.start_servers()
+        client = self.jiffy_client()
+        try:
+            c = client.create_file('/a/file.txt', 'local://tmp')
+            self.assertTrue(client.fs.exists('/a/file.txt'))
+            data = b("")
+            data_size = 1024 * 1024
+            for i in range(0, data_size):
+                data += b("a")
+            for i in range(0, 50):
+                try:
+                    c.write(data)
+                except KeyError as k:
+                    self.fail('Received error message: {}'.format(k))
+            self.assertTrue(c.seek(0))
+            for i in range(0, 50):
+                self.assertEqual(data, c.read(len(data)))
+        finally:
+            client.disconnect()
+            self.stop_servers()
+
     def test_queue_multithread(self):
         self.start_servers()
         client = self.jiffy_client()

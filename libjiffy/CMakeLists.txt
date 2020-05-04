@@ -370,7 +370,7 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/utils/property_map.cpp
           src/jiffy/utils/property_map.h
           src/jiffy/utils/thread_utils.h)
-  add_dependencies(jiffy_client thrift_ep)
+  add_dependencies(jiffy_client thrift_ep awssdk_ep)
   target_link_libraries(jiffy_client ${THRIFT_LIBRARY}
           ${THRIFTNB_LIBRARY}
           ${LIBEVENT_LIBRARY}

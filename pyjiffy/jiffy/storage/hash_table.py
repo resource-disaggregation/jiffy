@@ -24,7 +24,7 @@ class HashTableOps:
                 get: CommandType.accessor,
                 put: CommandType.mutator,
                 remove: CommandType.mutator,
-                update: CommandType.mutator,
+                update: CommandType.accessor,
                 upsert: CommandType.mutator}
 
 
@@ -98,7 +98,7 @@ class HashTable(DataStructureClient):
         return True
 
     def update(self, key, value):
-        return self._run_repeated([HashTableOps.update, key, value])[1]
+        return self._run_repeated([HashTableOps.update, key, value])[0]
 
     def upsert(self, key, value):
         self._run_repeated([HashTableOps.upsert, key, value])

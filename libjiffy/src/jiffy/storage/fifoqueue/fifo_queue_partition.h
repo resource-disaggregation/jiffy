@@ -94,7 +94,7 @@ class fifo_queue_partition : public chain_module {
    * @param _return Response
    * @param args Arguments
    */
-  void qsize(response &_return, const arg_list &args);
+  void length(response &_return, const arg_list &args);
 
   /**
    * @brief Fetch in rate of the queue
@@ -109,6 +109,13 @@ class fifo_queue_partition : public chain_module {
    * @param args Arguments
    */
   void out_rate(response &_return, const arg_list &args);
+
+  /**
+   * @brief Fetch the front element of the queue
+   * @param _return Response
+   * @param args Arguments
+   */
+  void front(response &_return, const arg_list &args);
 
   /**
    * @brief Run particular command on fifo queue partition
@@ -198,9 +205,6 @@ class fifo_queue_partition : public chain_module {
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
 
-  /* High threshold */
-  double threshold_hi_;
-
   /* Bool for overload partition */
   bool scaling_up_;
 
@@ -238,19 +242,19 @@ class fifo_queue_partition : public chain_module {
   bool readnext_redirected_;
 
   /* Number of elements inserted in the queue */
-  std::size_t enqueue_num_elements_;
+  std::size_t enqueue_data_size_;
 
   /* Number of elements removed from the queue */
-  std::size_t dequeue_num_elements_;
+  std::size_t dequeue_data_size_;
 
   /* Total number of elements from all of the previous partitions */
-  std::size_t prev_num_elements_;
+  std::size_t prev_data_size_;
 
   /* Enqueue element start */
-  std::size_t enqueue_start_num_elements_;
+  std::size_t enqueue_start_data_size_;
 
   /* Dequeue element start */
-  std::size_t dequeue_start_num_elements_;
+  std::size_t dequeue_start_data_size_;
 
   /* Enqueue start time */
   std::size_t enqueue_start_time_;

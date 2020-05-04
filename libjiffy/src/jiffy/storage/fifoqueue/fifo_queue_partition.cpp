@@ -27,11 +27,11 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
       enqueue_redirected_(false),
       dequeue_redirected_(false),
       readnext_redirected_(false),
-      enqueue_num_elements_(0),
-      dequeue_num_elements_(0),
-      prev_num_elements_(0),
-      enqueue_start_num_elements_(0),
-      dequeue_start_num_elements_(0),
+      enqueue_data_size_(0),
+      dequeue_data_size_(0),
+      prev_data_size_(0),
+      enqueue_start_data_size_(0),
+      dequeue_start_data_size_(0),
       in_rate_set_(false),
       out_rate_set_(false) {
   auto ser = conf.get("fifoqueue.serializer", "csv");
@@ -52,11 +52,12 @@ void fifo_queue_partition::enqueue(response &_return, const arg_list &args) {
   if (!(args.size() == 2 || (args.size() == 6 && args[5] == "!redirected"))) {
     RETURN_ERR("!args_error");
   }
-  if (prev_num_elements_ == 0 && args.size() == 6 && args[5] == "!redirected") {
-    prev_num_elements_ = std::stoul(args[2]);
-    enqueue_num_elements_ += std::stoul(args[2]);
+  if (prev_data_size_ == 0 && args.size() == 6 && args[5] == "!redirected") {
+    in_rate_ = false;
+    prev_data_size_ = std::stoul(args[2]);
+    enqueue_data_size_ += std::stoul(args[2]);
     enqueue_time_count_ += std::stoul(args[3]);
-    enqueue_start_num_elements_ = std::stoul(args[4]);
+    enqueue_start_data_size_ = std::stoul(args[4]);
     enqueue_start_time_ = time_utils::now_us();
   }
   auto ret = partition_.push_back(args[1]);
@@ -64,21 +65,21 @@ void fifo_queue_partition::enqueue(response &_return, const arg_list &args) {
     if (!auto_scale_) {
       enqueue_redirected_ = true;
       RETURN_ERR("!redirected_enqueue",
-                 std::to_string(enqueue_num_elements_),
+                 std::to_string(enqueue_data_size_),
                  std::to_string(enqueue_time_count_),
-                 std::to_string(enqueue_start_num_elements_));
+                 std::to_string(enqueue_start_data_size_));
     } else if (!next_target_str_.empty()) {
       enqueue_redirected_ = true;
       RETURN_ERR("!redirected_enqueue",
                  next_target_str_,
-                 std::to_string(enqueue_num_elements_),
+                 std::to_string(enqueue_data_size_),
                  std::to_string(enqueue_time_count_),
-                 std::to_string(enqueue_start_num_elements_));
+                 std::to_string(enqueue_start_data_size_));
     } else {
       RETURN_ERR("!redo");
     }
   }
-  enqueue_num_elements_++;
+  enqueue_data_size_ += args[1].size();
   RETURN_OK();
 }
 
@@ -86,17 +87,18 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
   if (!(args.size() == 1 || (args.size() == 4 && args[3] == "!redirected"))) {
     RETURN_ERR("!args_error");
   }
-  if (args.size() == 4 && args[3] == "!redirected" && dequeue_num_elements_ == 0) {
-    dequeue_start_num_elements_ = std::stoul(args[2]);
+  if (args.size() == 4 && args[3] == "!redirected" && dequeue_data_size_ == 0) {
+    out_rate_ = false;
+    dequeue_start_data_size_ = std::stoul(args[2]);
     dequeue_time_count_ = std::stoul(args[1]);
     dequeue_start_time_ = time_utils::now_us();
-    dequeue_num_elements_ += prev_num_elements_;
+    dequeue_data_size_ += prev_data_size_;
   }
   auto ret = partition_.at(head_);
   if (ret.first) {
     head_ += (string_array::METADATA_LEN + ret.second.size());
     update_read_head();
-    dequeue_num_elements_++;
+    dequeue_data_size_ += ret.second.size();
     RETURN_OK(ret.second);
   }
   if (ret.second == "!not_available") {
@@ -106,14 +108,14 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
     dequeue_redirected_ = true;
     RETURN_ERR("!redirected_dequeue",
                std::to_string(dequeue_time_count_),
-               std::to_string(dequeue_start_num_elements_));
+               std::to_string(dequeue_start_data_size_));
   }
   if (!next_target_str_.empty()) {
     dequeue_redirected_ = true;
     RETURN_ERR("!redirected_dequeue",
                next_target_str_,
                std::to_string(dequeue_time_count_),
-               std::to_string(dequeue_start_num_elements_));
+               std::to_string(dequeue_start_data_size_));
   }
   RETURN_ERR("!redo");
 }
@@ -153,24 +155,24 @@ void fifo_queue_partition::update_partition(response &_return, const arg_list &a
   RETURN_OK();
 }
 
-void fifo_queue_partition::qsize(response &_return, const arg_list &args) {
+void fifo_queue_partition::length(response &_return, const arg_list &args) {
   if (!(args.size() == 2 || (args.size() == 3 && args[2] == "!redirected"))) {
     RETURN_ERR("!args_error");
   }
   switch (std::stoi(args[1])) {
     case fifo_queue_size_type::head_size:
       if (overload() && enqueue_redirected_) {
-        RETURN_ERR("!redirected_qsize", next_target_str_);
+        RETURN_ERR("!redirected_length", next_target_str_);
       } else {
-        RETURN_OK(std::to_string(enqueue_num_elements_));
+        RETURN_OK(std::to_string(enqueue_data_size_));
       }
     case fifo_queue_size_type::tail_size:
       if (underload() && dequeue_redirected_) {
-        RETURN_ERR("!redirected_qsize", next_target_str_);
+        RETURN_ERR("!redirected_length", next_target_str_);
       } else {
-        RETURN_OK(std::to_string(dequeue_num_elements_));
+        RETURN_OK(std::to_string(dequeue_data_size_));
       }
-    default:throw std::logic_error("Undefined type for qsize operation");
+    default:throw std::logic_error("Undefined type for length operation");
   }
 }
 
@@ -200,8 +202,30 @@ void fifo_queue_partition::out_rate(response &_return, const arg_list &args) {
   RETURN_OK(std::to_string(out_rate_));
 }
 
+void fifo_queue_partition::front(response &_return, const arg_list &args) {
+  if (!(args.size() == 1 || (args.size() == 2 && args[1] == "!redirected"))) {
+    RETURN_ERR("!args_error");
+  }
+  auto ret = partition_.at(head_);
+  if (ret.first) {
+    RETURN_OK(ret.second);
+  }
+  if (ret.second == "!not_available") {
+    RETURN_ERR("!msg_not_found");
+  }
+  if (!auto_scale_) {
+    RETURN_ERR("!redirected_front");
+  }
+  if (!next_target_str_.empty()) {
+    RETURN_ERR("!redirected_front",
+               next_target_str_);
+  }
+  RETURN_ERR("!redo");
+}
+
 void fifo_queue_partition::run_command(response &_return, const arg_list &args) {
   auto cmd_name = args[0];
+  update_rate();
   switch (command_id(cmd_name)) {
     case fifo_queue_cmd_id::fq_enqueue:enqueue(_return, args);
       break;
@@ -213,18 +237,19 @@ void fifo_queue_partition::run_command(response &_return, const arg_list &args) 
       break;
     case fifo_queue_cmd_id::fq_update_partition:update_partition(_return, args);
       break;
-    case fifo_queue_cmd_id::fq_qsize:qsize(_return, args);
+    case fifo_queue_cmd_id::fq_length:length(_return, args);
       break;
     case fifo_queue_cmd_id::fq_in_rate:in_rate(_return, args);
       break;
     case fifo_queue_cmd_id::fq_out_rate:out_rate(_return, args);
+      break;
+    case fifo_queue_cmd_id::fq_front:front(_return, args);
       break;
     default: {
       _return.emplace_back("!no_such_command");
       return;
     }
   }
-  update_rate();
   if (is_mutator(cmd_name)) {
     dirty_ = true;
   }
@@ -246,8 +271,7 @@ void fifo_queue_partition::run_command(response &_return, const arg_list &args) 
     }
   }
   if (auto_scale_ && cmd_name == "dequeue" && underload() && is_tail() && !scaling_down_
-      && (enqueue_redirected_ || dequeue_redirected_ || readnext_redirected_)
-      && !next_target_str_.empty()) {
+      && dequeue_redirected_ && !next_target_str_.empty()) {
     try {
       LOG(log_level::info) << "Underloaded partition: " << name() << " storage = " << storage_size() << " capacity = "
                            << storage_capacity() << " partition size = " << size() << "partition capacity "
@@ -330,19 +354,21 @@ void fifo_queue_partition::update_rate() {
   auto cur_time = utils::time_utils::now_us();
   enqueue_time_count_ += cur_time - enqueue_start_time_;
   dequeue_time_count_ += cur_time - dequeue_start_time_;
+  enqueue_start_time_ = cur_time;
+  dequeue_start_time_ = cur_time;
   if (enqueue_time_count_ > periodicity_us_) {
     in_rate_set_ = true;
-    in_rate_ = (double) (enqueue_num_elements_ - enqueue_start_num_elements_) / (double) enqueue_time_count_ * 1000;
+    in_rate_ = (double) (enqueue_data_size_ - enqueue_start_data_size_) / (double) enqueue_time_count_ * 1000;
     enqueue_time_count_ = 0;
     enqueue_start_time_ = cur_time;
-    enqueue_start_num_elements_ = enqueue_num_elements_;
+    enqueue_start_data_size_ = enqueue_data_size_;
   }
   if (dequeue_time_count_ > periodicity_us_) {
     out_rate_set_ = true;
-    out_rate_ = (double) (dequeue_num_elements_ - dequeue_start_num_elements_) / (double) dequeue_time_count_ * 1000;
+    out_rate_ = (double) (dequeue_data_size_ - dequeue_start_data_size_) / (double) dequeue_time_count_ * 1000;
     dequeue_time_count_ = 0;
     dequeue_start_time_ = cur_time;
-    dequeue_start_num_elements_ = dequeue_num_elements_;
+    dequeue_start_data_size_ = dequeue_data_size_;
   }
 };
 
@@ -356,11 +382,11 @@ void fifo_queue_partition::clear_partition() {
   enqueue_redirected_ = false;
   dequeue_redirected_ = false;
   readnext_redirected_ = false;
-  enqueue_num_elements_ = 0;
-  dequeue_num_elements_ = 0;
-  prev_num_elements_ = 0;
-  enqueue_start_num_elements_ = 0;
-  dequeue_start_num_elements_ = 0;
+  enqueue_data_size_ = 0;
+  dequeue_data_size_ = 0;
+  prev_data_size_ = 0;
+  enqueue_start_data_size_ = 0;
+  dequeue_start_data_size_ = 0;
   in_rate_set_ = false;
   out_rate_set_ = false;
   enqueue_start_time_ = 0;

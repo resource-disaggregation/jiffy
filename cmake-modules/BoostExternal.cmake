@@ -6,24 +6,31 @@
 #  - Boost_<C>_LIBRARY (for each component <C>)
 #  - Boost_LIBRARIES
 
-set(Boost_VERSION 1.69.0)
+set(BOOST_VERSION "1.69.0")
 set(Boost_BUILD ON)
 set(Boost_COMPONENTS "program_options")
 
 if (DEFINED ENV{Boost_ROOT} AND EXISTS $ENV{Boost_ROOT})
-  set(Boost_USE_STATIC_LIBS ON)
   set(Boost_ROOT "$ENV{Boost_ROOT}")
-  find_package(Boost ${Boost_VERSION} COMPONENTS ${Boost_COMPONENTS})
+  set(USE_SYSTEM_BOOST ON)
+endif()
+
+if (USE_SYSTEM_BOOST)
+  set(Boost_USE_STATIC_LIBS ON)
+  set(Boost_USE_MULTITHREADED TRUE)
+  find_package(Boost ${BOOST_VERSION} COMPONENTS ${Boost_COMPONENTS})
   if (Boost_FOUND)
     set(Boost_BUILD OFF)
     set(Boost_INCLUDE_DIR ${Boost_INCLUDE_DIRS})
     get_filename_component(Boost_HOME ${Boost_INCLUDE_DIR} DIRECTORY)
     add_custom_target(boost_ep)
+  else (Boost_FOUND)
+    message(STATUS "${Red}Could not use system Boost, will download and build${ColorReset}")
   endif (Boost_FOUND)
 endif ()
 
 if (Boost_BUILD)
-  string(REGEX REPLACE "\\." "_" Boost_VERSION_STR ${Boost_VERSION})
+  string(REGEX REPLACE "\\." "_" BOOST_VERSION_STR ${BOOST_VERSION})
   set(Boost_PREFIX "${PROJECT_BINARY_DIR}/external/boost_ep")
   set(Boost_HOME ${Boost_PREFIX})
   set(Boost_INCLUDE_DIRS "${Boost_PREFIX}/include")
@@ -32,7 +39,7 @@ if (Boost_BUILD)
     list(APPEND Boost_COMPONENT_FLAGS --with-${component})
   endforeach ()
   ExternalProject_Add(boost_ep
-          URL https://downloads.sourceforge.net/project/boost/boost/${Boost_VERSION}/boost_${Boost_VERSION_STR}.zip
+          URL https://dl.bintray.com/boostorg/release/${BOOST_VERSION}/source/boost_${BOOST_VERSION_STR}.tar.gz
           UPDATE_COMMAND ""
           CONFIGURE_COMMAND ./bootstrap.sh --prefix=${Boost_PREFIX}
           BUILD_COMMAND ./b2 link=static variant=release cxxflags=-fPIC cflags=-fPIC --prefix=${Boost_PREFIX} ${Boost_COMPONENT_FLAGS} install

@@ -128,7 +128,7 @@ class replica_chain_client {
   /* Bool indicating if the command is accessor type */
   bool accessor_;
   /* Bool indicating if send run command throws an exception */
-  bool exception_;
+  bool send_run_command_exception_;
 };
 
 }

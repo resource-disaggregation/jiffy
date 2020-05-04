@@ -10,14 +10,6 @@
 
 namespace jiffy {
 namespace storage {
-enum redirect_options {
-  redirected_enqueue = 0,
-  redirected_dequeue = 1,
-  redirected_readnext = 2,
-  redirected_qsize = 3,
-  redirected_rate = 4,
-  non_type = 5
-};
 
 class fifo_queue_client : data_structure_client {
  public:
@@ -51,9 +43,8 @@ class fifo_queue_client : data_structure_client {
 
   /**
    * @brief Dequeue item
-   * @return Dequeue result
    */
-  std::string dequeue();
+  void dequeue();
 
   /**
    * @brief Read next item without dequeue
@@ -65,7 +56,7 @@ class fifo_queue_client : data_structure_client {
    * @brief Fetch Queue size
    * @return Queue size
    */
-  std::size_t qsize();
+  std::size_t length();
 
   /**
    * @brief Fetch in rate of the queue
@@ -79,6 +70,11 @@ class fifo_queue_client : data_structure_client {
    */
   double out_rate();
 
+  /**
+   * @brief Fetch the front element of the queue
+   * @return Dequeue result
+   */
+  std::string front();
  private:
   /**
    * @brief Handle command in redirect case
@@ -114,18 +110,21 @@ class fifo_queue_client : data_structure_client {
    */
   void add_blocks(const std::vector<std::string> &_return, const std::vector<std::string> &args);
 
-  redirect_options redirect_type(std::string &type);
-
   /* Dequeue partition id */
   std::size_t dequeue_partition_;
+
   /* Enqueue partition id */
   std::size_t enqueue_partition_;
+
   /* Replica chain clients, each partition only save a replica chain client */
   std::vector<std::shared_ptr<replica_chain_client>> blocks_;
+
   /* Read next partition */
   std::size_t read_partition_;
+
   /* Starting name of the chains */
   std::size_t start_;
+
   /* Boolean, true if using auto scaling */
   bool auto_scaling_;
 
@@ -133,21 +132,5 @@ class fifo_queue_client : data_structure_client {
 
 }
 }
-
-#define FIFO_QUEUE_HANDLE_REDIRECT(type)                                                            \
-  if (redirect_type(_return[0]) == redirect_options::redirected_##type) {                           \
-    do {                                                                                            \
-      add_blocks(_return, args);                                                                    \
-      handle_partition_id(args);                                                                    \
-      do {                                                                                          \
-        auto args_copy = args;                                                                      \
-        if (args[0] == "enqueue")                                                                   \
-          args_copy.insert(args_copy.end(), _return.end() - 3, _return.end());                      \
-        else if (args[0] == "dequeue")                                                              \
-          args_copy.insert(args_copy.end(), _return.end() - 2, _return.end());                      \
-        _return = blocks_[block_id(args_copy)]->run_command_redirected(args_copy);                  \
-      } while (_return[0] == "!redo");                                                              \
-    } while (redirect_type(_return[0]) == redirect_options::redirected_##type);                     \
-  }
 
 #endif //JIFFY_FIFO_QUEUE_CLIENT_H

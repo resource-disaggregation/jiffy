@@ -25,16 +25,25 @@ hash_table_client::hash_table_client(std::shared_ptr<directory::directory_interf
 void hash_table_client::refresh() {
   status_ = fs_->dstatus(path_);
   blocks_.clear();
-  for (auto &block: status_.data_blocks()) {
-    if (block.metadata != "split_importing" && block.metadata != "importing") {
-      try {
-        blocks_.emplace(std::make_pair(static_cast<int32_t>(std::stoi(utils::string_utils::split(block.name, '_')[0])),
-                                       std::make_shared<replica_chain_client>(fs_, path_, block, HT_OPS, timeout_ms_)));
-      } catch (std::exception &e) {
-        continue;
+  bool redo;
+  do {
+    try {
+      for (auto &block: status_.data_blocks()) {
+        if (block.metadata != "split_importing" && block.metadata != "importing") {
+          blocks_.emplace(std::make_pair(static_cast<int32_t>(std::stoi(utils::string_utils::split(block.name,
+                                                                                                   '_')[0])),
+                                         std::make_shared<replica_chain_client>(fs_,
+                                                                                path_,
+                                                                                block,
+                                                                                HT_OPS,
+                                                                                timeout_ms_)));
+        }
       }
+      redo = false;
+    } catch (std::exception &e) {
+      redo = true;
     }
-  }
+  } while (redo);
   redirect_blocks_.clear();
 }
 
@@ -144,7 +153,6 @@ bool hash_table_client::exists(const std::string &key) {
   return _return[0] == "!ok";
 }
 
-
 std::size_t hash_table_client::block_id(const std::string &key) {
   return static_cast<size_t>((*std::prev(blocks_.upper_bound(hash_slot::get(key)))).first);
 }
@@ -152,7 +160,7 @@ std::size_t hash_table_client::block_id(const std::string &key) {
 void hash_table_client::handle_redirect(std::vector<std::string> &_return, const std::vector<std::string> &args) {
   while (_return[0] == "!exporting") {
     auto args_copy = args;
-    if(args[0] == "update" || args[0] == "upsert") {
+    if (args[0] == "update" || args[0] == "upsert") {
       args_copy.emplace_back(_return[2]);
       args_copy.emplace_back(_return[3]);
     }
@@ -163,11 +171,11 @@ void hash_table_client::handle_redirect(std::vector<std::string> &_return, const
       redirect_blocks_.emplace(std::make_pair(_return[0] + _return[1], client));
       do {
         _return = client->run_command_redirected(args_copy);
-      } while(_return[0] == "!redo");
+      } while (_return[0] == "!redo");
     } else {
       do {
         _return = it->second->run_command_redirected(args_copy);
-      } while(_return[0] == "!redo");
+      } while (_return[0] == "!redo");
     }
   }
   if (_return[0] == "!block_moved") {
