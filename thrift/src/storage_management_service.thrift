@@ -5,8 +5,8 @@ exception storage_management_exception {
 }
 
 service storage_management_service {
-  void create_partition(1: i32 block_id, 2: string partition_type, 3: string partition_name,
-                        5: string partition_metadata, 6: map<string, string> conf)
+  void create_partition(1: i32 block_id, 2: string partition_type, 3: string backing_path, 4: string partition_name,
+                        6: string partition_metadata, 7: map<string, string> conf)
     throws (1: storage_management_exception ex),
 
   void setup_chain(1: i32 block_id, 2: string path, 6: list<string> chain, 7: i32 chain_role, 8: string next_block_id)

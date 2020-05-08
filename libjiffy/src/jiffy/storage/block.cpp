@@ -15,6 +15,7 @@ block::block(const std::string &id,
       manager_(capacity),
       impl_(partition_manager::build_partition(&manager_,
                                                "default",
+                                               "local://tmp",
                                                "default",
                                                "default",
                                                utils::property_map(),
@@ -39,11 +40,13 @@ std::shared_ptr<chain_module> block::impl() {
 }
 
 void block::setup(const std::string &type,
+                  const std::string &backing_path,
                   const std::string &name,
                   const std::string &metadata,
                   const utils::property_map &conf) {
   impl_ = partition_manager::build_partition(&manager_,
                                              type,
+                                             backing_path,
                                              name,
                                              metadata,
                                              conf,
@@ -57,6 +60,7 @@ void block::setup(const std::string &type,
 void block::destroy() {
   LOG(log_level::info) << "Destroying partition " << impl_->name() << " on block " << id_;
   std::string type = "default";
+  std::string backing_path = "local://tmp";
   std::string name = "default";
   std::string metadata = "default";
   std::string auto_scaling_host_ = "default";
@@ -65,6 +69,7 @@ void block::destroy() {
   impl_.reset();
   impl_ = partition_manager::build_partition(&manager_,
                                              type,
+                                             backing_path,
                                              name,
                                              metadata,
                                              conf,

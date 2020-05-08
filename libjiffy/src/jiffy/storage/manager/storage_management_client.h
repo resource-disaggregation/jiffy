@@ -51,6 +51,7 @@ class storage_management_client {
    */
   void create_partition(int32_t block_id,
                         const std::string &type,
+                        const std::string &backing_path,
                         const std::string &name,
                         const std::string &metadata,
                         const std::map<std::string, std::string> &conf);

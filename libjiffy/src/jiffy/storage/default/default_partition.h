@@ -24,6 +24,7 @@ class default_partition : public chain_module {
    * @param auto_scaling_port Auto scaling server port number
    */
   explicit default_partition(block_memory_manager *manager,
+                               const std::string &backing_path = "local://tmp",
                                const std::string &name = "default",
                                const std::string &metadata = "default",
                                const utils::property_map &conf = {},

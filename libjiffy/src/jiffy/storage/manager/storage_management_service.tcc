@@ -52,13 +52,21 @@ uint32_t storage_management_service_create_partition_args::read(Protocol_* iprot
         break;
       case 3:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->backing_path);
+          this->__isset.backing_path = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 4:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->partition_name);
           this->__isset.partition_name = true;
         } else {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 5:
+      case 6:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->partition_metadata);
           this->__isset.partition_metadata = true;
@@ -66,7 +74,7 @@ uint32_t storage_management_service_create_partition_args::read(Protocol_* iprot
           xfer += iprot->skip(ftype);
         }
         break;
-      case 6:
+      case 7:
         if (ftype == ::apache::thrift::protocol::T_MAP) {
           {
             this->conf.clear();
@@ -115,15 +123,19 @@ uint32_t storage_management_service_create_partition_args::write(Protocol_* opro
   xfer += oprot->writeString(this->partition_type);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("partition_name", ::apache::thrift::protocol::T_STRING, 3);
+  xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 3);
+  xfer += oprot->writeString(this->backing_path);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("partition_name", ::apache::thrift::protocol::T_STRING, 4);
   xfer += oprot->writeString(this->partition_name);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("partition_metadata", ::apache::thrift::protocol::T_STRING, 5);
+  xfer += oprot->writeFieldBegin("partition_metadata", ::apache::thrift::protocol::T_STRING, 6);
   xfer += oprot->writeString(this->partition_metadata);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("conf", ::apache::thrift::protocol::T_MAP, 6);
+  xfer += oprot->writeFieldBegin("conf", ::apache::thrift::protocol::T_MAP, 7);
   {
     xfer += oprot->writeMapBegin(::apache::thrift::protocol::T_STRING, ::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->conf.size()));
     std::map<std::string, std::string> ::const_iterator _iter9;
@@ -156,15 +168,19 @@ uint32_t storage_management_service_create_partition_pargs::write(Protocol_* opr
   xfer += oprot->writeString((*(this->partition_type)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("partition_name", ::apache::thrift::protocol::T_STRING, 3);
+  xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 3);
+  xfer += oprot->writeString((*(this->backing_path)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("partition_name", ::apache::thrift::protocol::T_STRING, 4);
   xfer += oprot->writeString((*(this->partition_name)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("partition_metadata", ::apache::thrift::protocol::T_STRING, 5);
+  xfer += oprot->writeFieldBegin("partition_metadata", ::apache::thrift::protocol::T_STRING, 6);
   xfer += oprot->writeString((*(this->partition_metadata)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("conf", ::apache::thrift::protocol::T_MAP, 6);
+  xfer += oprot->writeFieldBegin("conf", ::apache::thrift::protocol::T_MAP, 7);
   {
     xfer += oprot->writeMapBegin(::apache::thrift::protocol::T_STRING, ::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->conf)).size()));
     std::map<std::string, std::string> ::const_iterator _iter10;
@@ -2465,14 +2481,14 @@ uint32_t storage_management_service_update_partition_data_presult::read(Protocol
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf)
+void storage_management_serviceClientT<Protocol_>::create_partition(const int32_t block_id, const std::string& partition_type, const std::string& backing_path, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf)
 {
-  send_create_partition(block_id, partition_type, partition_name, partition_metadata, conf);
+  send_create_partition(block_id, partition_type, backing_path, partition_name, partition_metadata, conf);
   recv_create_partition();
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::send_create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf)
+void storage_management_serviceClientT<Protocol_>::send_create_partition(const int32_t block_id, const std::string& partition_type, const std::string& backing_path, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("create_partition", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -2480,6 +2496,7 @@ void storage_management_serviceClientT<Protocol_>::send_create_partition(const i
   storage_management_service_create_partition_pargs args;
   args.block_id = &block_id;
   args.partition_type = &partition_type;
+  args.backing_path = &backing_path;
   args.partition_name = &partition_name;
   args.partition_metadata = &partition_metadata;
   args.conf = &conf;
@@ -3264,7 +3281,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_create_partition(i
 
   storage_management_service_create_partition_result result;
   try {
-    iface_->create_partition(args.block_id, args.partition_type, args.partition_name, args.partition_metadata, args.conf);
+    iface_->create_partition(args.block_id, args.partition_type, args.backing_path, args.partition_name, args.partition_metadata, args.conf);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -3321,7 +3338,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_create_partition(i
 
   storage_management_service_create_partition_result result;
   try {
-    iface_->create_partition(args.block_id, args.partition_type, args.partition_name, args.partition_metadata, args.conf);
+    iface_->create_partition(args.block_id, args.partition_type, args.backing_path, args.partition_name, args.partition_metadata, args.conf);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -4623,14 +4640,14 @@ template <class Protocol_>
 }
 
 template <class Protocol_>
-void storage_management_serviceConcurrentClientT<Protocol_>::create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf)
+void storage_management_serviceConcurrentClientT<Protocol_>::create_partition(const int32_t block_id, const std::string& partition_type, const std::string& backing_path, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf)
 {
-  int32_t seqid = send_create_partition(block_id, partition_type, partition_name, partition_metadata, conf);
+  int32_t seqid = send_create_partition(block_id, partition_type, backing_path, partition_name, partition_metadata, conf);
   recv_create_partition(seqid);
 }
 
 template <class Protocol_>
-int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf)
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_create_partition(const int32_t block_id, const std::string& partition_type, const std::string& backing_path, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -4639,6 +4656,7 @@ int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_create_part
   storage_management_service_create_partition_pargs args;
   args.block_id = &block_id;
   args.partition_type = &partition_type;
+  args.backing_path = &backing_path;
   args.partition_name = &partition_name;
   args.partition_metadata = &partition_metadata;
   args.conf = &conf;

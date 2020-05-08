@@ -206,6 +206,46 @@ class TestClient(TestCase):
         for i in range(0, 1000):
             self.assertRaises(KeyError, kv.get, b(str(i)))
 
+    def hash_table_ls_ops(self, kv):
+        if getattr(kv, "num_keys", None) is not None:
+            self.assertEqual(0, kv.num_keys())
+
+        # Test exists/get/put
+        for i in range(0, 1000):
+            try:
+                kv.put_ls(b(str(i)), b(str(i)))
+            except KeyError as k:
+                self.fail("Received error message: {}".format(k))
+
+        for i in range(0, 1000):
+            self.assertTrue(kv.exists_ls(b(str(i))))
+            self.assertEqual(b(str(i)), kv.get_ls(b(str(i))))
+
+        for i in range(1000, 2000):
+            self.assertFalse(kv.exists_ls(b(str(i))))
+            self.assertRaises(KeyError, kv.get_ls, b(str(i)))
+
+        # Test update
+        for i in range(0, 1000):
+            self.assertEqual(b('!ok'), kv.update_ls(b(str(i)), b(str(i + 1000))))
+
+        for i in range(1000, 2000):
+            self.assertRaises(KeyError, kv.update_ls, b(str(i)), b(str(i + 1000)))
+
+        for i in range(0, 1000):
+            self.assertEqual(b(str(i + 1000)), kv.get_ls(b(str(i))))
+
+        # Test remove
+        for i in range(0, 1000):
+            self.assertEqual(b("!ok"), kv.remove_ls(b(str(i))))
+
+        for i in range(1000, 2000):
+            self.assertRaises(KeyError, kv.remove_ls, b(str(i)))
+
+        for i in range(0, 1000):
+            self.assertRaises(KeyError, kv.get_ls, b(str(i)))
+
+
     def queue_ops(self, q):
         length = 0
         for i in range(0, 1000):
@@ -228,6 +268,20 @@ class TestClient(TestCase):
         self.assertEqual(0, q.length())
         for i in range(1000, 2000):
             self.assertRaises(KeyError, q.get)
+
+    def queue_ls_ops(self, q):
+        length = 0
+        for i in range(0, 1000):
+            try:
+                q.put_ls(b(str(i)))
+            except KeyError as k:
+                self.fail('Received error message: {}'.format(k))
+
+        for i in range(0, 1000):
+            self.assertEqual(b(str(i)), q.get_ls())
+        for i in range(1000, 2000):
+            self.assertRaises(KeyError, q.get_ls)
+
 
     def queue_worker(self, client, query_type, result_queue, ops):
         q = client.open_queue('/a/file.txt')
@@ -264,6 +318,35 @@ class TestClient(TestCase):
 
         for i in range(0, 1000):
             self.assertEqual(b(str(i)), c.read(len(b(str(i)))))
+
+    def file_ls_ops(self, c):
+        write_offset = 0
+        for i in range(0, 1000):
+            try:
+                c.write_ls(b(str(i)))
+            except KeyError as k:
+                self.fail('Received error message: {}'.format(k))
+
+        read_offset = 0 
+        for i in range(0, 1000):
+            c.seek(read_offset)
+            self.assertEqual(b(str(i)), c.read_ls(len(b(str(i)))))
+            read_offset += len(b(str(i)))
+            
+
+        for i in range(1000, 2000):
+            c.seek(read_offset)
+            self.assertRaises(KeyError, c.read_ls, len(b(str(i))))
+            read_offset += len(b(str(i)))
+            
+        read_offset = 0
+
+        for i in range(0, 1000):
+            c.seek(read_offset)
+            self.assertEqual(b(str(i)), c.read_ls(len(b(str(i)))))
+            read_offset += len(b(str(i)))
+            
+
 
     def test_lease_worker(self):
         self.start_servers()
@@ -314,6 +397,47 @@ class TestClient(TestCase):
         finally:
             client.disconnect()
             self.stop_servers()
+
+    def test_hash_table_ls(self):
+        self.start_servers()
+        client = self.jiffy_client()
+        try:
+            client.create_hash_table('/a/file.txt', 'local://tmp')
+            self.assertTrue(client.fs.exists('/a/file.txt'))
+            kv = client.open_hash_table('/a/file.txt')
+            client.sync('/a/file.txt', 'local://tmp')
+            self.hash_table_ls_ops(kv)
+            os.remove("/tmp/0_65536")
+        finally:
+            client.disconnect()
+            self.stop_servers()
+
+    def test_queue_ls(self):
+        self.start_servers()
+        client = self.jiffy_client()
+        try:
+            client.create_queue('/a/file.txt', 'local://tmp')
+            self.assertTrue(client.fs.exists('/a/file.txt'))
+            q = client.open_queue('/a/file.txt')
+            client.sync('/a/file.txt', 'local://tmp')
+            self.queue_ls_ops(q)
+        finally:
+            client.disconnect()
+            self.stop_servers()
+
+    def test_file_ls(self):
+        self.start_servers()
+        client = self.jiffy_client()
+        try:
+            c = client.create_file('/a/file.txt', 'local://tmp')
+            self.assertTrue(client.fs.exists('/a/file.txt'))
+            client.sync('/a/file.txt', 'local://tmp')
+            self.file_ls_ops(c)
+            os.remove("/tmp/0")
+        finally:
+            client.disconnect()
+            self.stop_servers()
+
 
     def test_sync_remove(self):
         self.start_servers()

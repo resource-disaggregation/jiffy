@@ -5,6 +5,8 @@ namespace storage {
 
 command_map FILE_OPS = {{"write", {command_type::mutator, file_cmd_id::file_write}},
                         {"read", {command_type::accessor, file_cmd_id::file_read}},
+                        {"write_ls", {command_type::mutator, file_cmd_id::file_write_ls}},
+                        {"read_ls", {command_type::accessor, file_cmd_id::file_read_ls}},
                         {"clear", {command_type::mutator, file_cmd_id::file_clear}},
                         {"update_partition", {command_type::mutator, file_cmd_id::file_update_partition}},
                         {"add_blocks", {command_type::accessor, file_cmd_id::file_add_blocks}},

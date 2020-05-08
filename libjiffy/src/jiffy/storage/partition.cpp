@@ -4,11 +4,13 @@ namespace jiffy {
 namespace storage {
 
 partition::partition(block_memory_manager *manager,
+                     const std::string &backing_path,
                      const std::string &name,
                      const std::string &metadata,
                      const command_map &supported_commands)
     : name_(name),
       metadata_(metadata),
+      backing_path_(backing_path),
       supported_commands_(supported_commands),
       manager_(manager),
       binary_allocator_(build_allocator<uint8_t>()) {
@@ -22,6 +24,15 @@ void partition::path(const std::string &path) {
 const std::string &partition::path() const {
   return path_;
 }
+
+void partition::backing_path(const std::string &backing_path) {
+  backing_path_ = backing_path;
+}
+
+const std::string &partition::backing_path() const {
+  return backing_path_;
+}
+
 
 void partition::name(const std::string &name) {
   name_ = name;

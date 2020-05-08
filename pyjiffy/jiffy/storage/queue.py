@@ -15,15 +15,23 @@ class FifoQueueSizeType(IntEnum):
 class QueueOps:
     enqueue = b('enqueue')
     dequeue = b('dequeue')
+    enqueue_ls = b('enqueue_ls')
+    dequeue_ls = b('dequeue_ls')
     read_next = b('read_next')
+    read_next_ls = b('read_next_ls')
     length = b('length')
+    length_ls = b('length')
     in_rate = b('in_rate')
     out_rate = b('out_rate')
 
     op_types = {enqueue: CommandType.mutator,
                 dequeue: CommandType.accessor,
+                enqueue_ls: CommandType.mutator,
+                dequeue_ls: CommandType.accessor,
                 read_next: CommandType.accessor,
+                read_next_ls: CommandType.accessor,
                 length: CommandType.accessor,
+                length_ls: CommandType.accessor,
                 in_rate: CommandType.accessor,
                 out_rate: CommandType.accessor}
 
@@ -37,6 +45,7 @@ class Queue(DataStructureClient):
         self.dequeue_partition = 0
         self.read_partition = 0
         self.start = 0
+        self.read_head = 0
         if self.block_info.tags.get("fifoqueue.auto_scale") is None:
             self.auto_scale = True
         else:
@@ -81,7 +90,13 @@ class Queue(DataStructureClient):
             return self.enqueue_partition
         elif args[0] == QueueOps.dequeue:
             return self.dequeue_partition
+        elif args[0] == QueueOps.enqueue_ls:
+            return self.enqueue_partition
+        elif args[0] == QueueOps.dequeue_ls:
+            return self.dequeue_partition
         elif args[0] == QueueOps.read_next:
+            return self.read_partition - self.start
+        elif args[0] == QueueOps.read_next_ls:
             return self.read_partition - self.start
         elif args[0] == QueueOps.length:
             if int(args[1]) == FifoQueueSizeType.HEAD_SIZE:
@@ -101,8 +116,17 @@ class Queue(DataStructureClient):
     def get(self):
         return self._run_repeated([QueueOps.dequeue])[1]
 
+    def put_ls(self, item):
+        self._run_repeated([QueueOps.enqueue_ls, item])
+
+    def get_ls(self):
+        return self._run_repeated([QueueOps.dequeue_ls])[1]
+
     def read_next(self):
         return self._run_repeated([QueueOps.read_next])[1]
+
+    def read_next_ls(self):
+        return self._run_repeated([QueueOps.read_next_ls])[1]
 
     def length(self):
         tail = int(self._run_repeated([QueueOps.length, b(str(int(FifoQueueSizeType.TAIL_SIZE)))])[1])

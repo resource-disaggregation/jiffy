@@ -8,6 +8,7 @@
 #include "jiffy/auto_scaling/auto_scaling_client.h"
 #include <chrono>
 #include <thread>
+#include <string>
 
 namespace jiffy {
 namespace storage {
@@ -15,12 +16,13 @@ namespace storage {
 using namespace utils;
 
 hash_table_partition::hash_table_partition(block_memory_manager *manager,
+                                           const std::string &backing_path,
                                            const std::string &name,
                                            const std::string &metadata,
                                            const utils::property_map &conf,
                                            const std::string &auto_scaling_host,
                                            int auto_scaling_port)
-    : chain_module(manager, name, metadata, HT_OPS),
+    : chain_module(manager, backing_path, name, metadata, HT_OPS),
       scaling_up_(false),
       scaling_down_(false),
       dirty_(false),
@@ -241,6 +243,280 @@ void hash_table_partition::remove(response &_return, const arg_list &args) {
   RETURN_ERR("!block_moved");
 }
 
+void hash_table_partition::exists_ls(response &_return, const arg_list &args) {
+  if (!(args.size() == 2)) {
+    RETURN("!args_error");
+  }
+  std::string file_path, line, key, value;
+  std::string separator = ":/";
+  std::size_t split = backing_path().find(separator);
+  if (split == std::string::npos) {
+    file_path = backing_path();
+  }
+  else{
+    std::string uri = backing_path().substr(0, split);
+    std::size_t key_pos = split + separator.length();
+    std::size_t key_len = backing_path().length() - separator.length() - uri.length();
+    file_path = backing_path().substr(key_pos, key_len);
+  }
+  file_path.append("/");
+  file_path.append(name());
+  std::ifstream in(file_path);
+  if (in) {
+    while(getline(in,line)){
+      int split_index = line.find(",");
+      key = line.substr(0,split_index);
+      if (key == args[1]){
+        RETURN_OK();
+      }
+    }
+    in.close();
+    RETURN_ERR("!key_not_found");
+  }
+  else{
+    RETURN_ERR("!hash_table_does_not_exist");
+  }
+}
+
+void hash_table_partition::put_ls(response &_return, const arg_list &args) {
+  if (!(args.size() == 3)) {
+    RETURN_ERR("!args_error");
+  }
+  std::string file_path, line, key, value;
+  int key_exist = 0;
+  std::string separator = ":/";
+  std::size_t split = backing_path().find(separator);
+  if (split == std::string::npos) {
+    file_path = backing_path();
+  }
+  else{
+    std::string uri = backing_path().substr(0, split);
+    std::size_t key_pos = split + separator.length();
+    std::size_t key_len = backing_path().length() - separator.length() - uri.length();
+    file_path = backing_path().substr(key_pos, key_len);
+  }
+  file_path.append("/");
+  file_path.append(name());
+  std::ofstream out(file_path,std::ios::app);
+  if (out) {
+    std::ifstream in(file_path);
+    if (in) {
+      while(getline(in,line)){
+        int split_index = line.find(",");
+        key = line.substr(0,split_index);
+        if (key == args[1]){
+          key_exist = 1;
+        }
+      }
+      in.close();
+    }
+    if (key_exist == 1){
+      RETURN_ERR("!duplicate_key");
+    }
+    else{
+      out<<args[1]<<","<<args[2]<<std::endl;
+      out.close();
+      RETURN_OK();
+    }  
+  }
+  else{
+    RETURN_ERR("!hash_table_does_not_exist");
+  }
+}
+
+void hash_table_partition::upsert_ls(response &_return, const arg_list &args) {
+  if (!(args.size() == 3 )) {
+    RETURN_ERR("!args_error");
+  }
+
+  // Ordinary upsert
+  std::unordered_map<std::string,std::string> ht;
+  std::string file_path, line, key, value;
+  int key_exist = 0;
+  std::string separator = ":/";
+  std::size_t split = backing_path().find(separator);
+  if (split == std::string::npos) {
+    file_path = backing_path();
+  }
+  else{
+    std::string uri = backing_path().substr(0, split);
+    std::size_t key_pos = split + separator.length();
+    std::size_t key_len = backing_path().length() - separator.length() - uri.length();
+    file_path = backing_path().substr(key_pos, key_len);
+  }
+  file_path.append("/");
+  file_path.append(name());
+  std::ifstream in(file_path);
+  if (in) {
+    while(getline(in,line)){
+      int split_index = line.find(",");
+      key = line.substr(0,split_index);
+      if (key == args[1]){
+        key_exist = 1;
+        value = args[2];
+        ht.insert({key,value});
+        continue;
+      }
+      value = line.substr(split_index+1);
+      ht.insert({key,value});
+    }
+    in.close();
+  }
+  else{
+    RETURN_ERR("!hash_table_does_not_exist");
+  }
+  if (key_exist == 0){
+    ht.insert({args[1],args[2]});
+  }
+  std::ofstream out(file_path);
+  for (auto x: ht){
+    out<<(x.first)<<","<<(x.second)<<std::endl;
+  }
+  out.close();
+  RETURN_OK();
+}
+
+void hash_table_partition::get_ls(response &_return, const arg_list &args) {
+  if (!(args.size() == 2)) {
+    RETURN("!args_error");
+  }
+  std::string file_path, line, key, value;
+  std::string separator = ":/";
+  std::size_t split = backing_path().find(separator);
+  if (split == std::string::npos) {
+    file_path = backing_path();
+  }
+  else{
+    std::string uri = backing_path().substr(0, split);
+    std::size_t key_pos = split + separator.length();
+    std::size_t key_len = backing_path().length() - separator.length() - uri.length();
+    file_path = backing_path().substr(key_pos, key_len);
+  }
+  file_path.append("/");
+  file_path.append(name());
+  std::ifstream in(file_path);
+  if (in) {
+    while(getline(in,line)){
+      int split_index = line.find(",");
+      key = line.substr(0,split_index);
+      if (key == args[1]){
+        value = line.substr(split_index+1);
+        RETURN_OK(value);
+      }
+    }
+    in.close();
+    RETURN_ERR("!key_not_found");
+  }
+  else{
+    RETURN_ERR("!hash_table_does_not_exist");
+  }
+}
+
+void hash_table_partition::update_ls(response &_return, const arg_list &args) {
+  if (!(args.size() == 3)) {
+    RETURN_ERR("!args_error");
+  }
+  
+  std::unordered_map<std::string,std::string> ht;
+  std::string file_path, line, key, value;
+  int key_exist = 0;
+  std::string separator = ":/";
+  std::size_t split = backing_path().find(separator);
+  if (split == std::string::npos) {
+    file_path = backing_path();
+  }
+  else{
+    std::string uri = backing_path().substr(0, split);
+    std::size_t key_pos = split + separator.length();
+    std::size_t key_len = backing_path().length() - separator.length() - uri.length();
+    file_path = backing_path().substr(key_pos, key_len);
+  }
+  file_path.append("/");
+  file_path.append(name());
+  std::ifstream in(file_path);
+  if (in) {
+    while(getline(in,line)){
+      int split_index = line.find(",");
+      key = line.substr(0,split_index);
+      if (key == args[1]){
+        key_exist = 1;
+        value = args[2];
+        ht.insert({key,value});
+        continue;
+      }
+      value = line.substr(split_index+1);
+      ht.insert({key,value});
+    }
+    in.close();
+  }
+  else{
+    RETURN_ERR("!hash_table_does_not_exist");
+  }
+  if (key_exist == 1){
+    std::ofstream out(file_path);
+    for (auto x: ht){
+      out<<(x.first)<<","<<(x.second)<<std::endl;
+    }
+    out.close();
+    RETURN_OK();
+  }
+  else{
+    RETURN_ERR("!key_not_found");
+  }
+}
+
+void hash_table_partition::remove_ls(response &_return, const arg_list &args) {
+  if (!(args.size() == 2)) {
+    RETURN_ERR("!args_error");
+  }
+  // Ordinary remove or buffered remove
+  std::unordered_map<std::string,std::string> ht;
+  std::string file_path, line, key, value;
+  int key_exist = 0;
+  std::string separator = ":/";
+  std::size_t split = backing_path().find(separator);
+  if (split == std::string::npos) {
+    file_path = backing_path();
+  }
+  else{
+    std::string uri = backing_path().substr(0, split);
+    std::size_t key_pos = split + separator.length();
+    std::size_t key_len = backing_path().length() - separator.length() - uri.length();
+    file_path = backing_path().substr(key_pos, key_len);
+  }
+  file_path.append("/");
+  file_path.append(name());
+  std::ifstream in(file_path);
+  if (in) {
+    while(getline(in,line)){
+      int split_index = line.find(",");
+      key = line.substr(0,split_index);
+      if (key == args[1]){
+        key_exist = 1;
+        continue;
+      }
+      value = line.substr(split_index+1);
+      ht.insert({key,value});
+    }
+    in.close();
+  }
+  else{
+    RETURN_ERR("!hash_table_does_not_exist");
+  }
+  if (key_exist == 1){
+    std::ofstream out(file_path);
+    for (auto x: ht){
+      out<<(x.first)<<","<<(x.second)<<std::endl;
+    }
+    out.close();
+    RETURN_OK();
+  }
+  else{
+    RETURN_ERR("!key_not_found");
+  }
+}
+
+
 void hash_table_partition::scale_remove(response &_return, const arg_list &args) {
   for (size_t i = 1; i < args.size(); ++i) {
     try {
@@ -381,6 +657,18 @@ void hash_table_partition::run_command(response &_return, const arg_list &args) 
     case hash_table_cmd_id::ht_remove:remove(_return, args);
       break;
     case hash_table_cmd_id::ht_update:update(_return, args);
+      break;
+    case hash_table_cmd_id::ht_exists_ls:exists_ls(_return, args);
+      break;
+    case hash_table_cmd_id::ht_get_ls:get_ls(_return, args);
+      break;
+    case hash_table_cmd_id::ht_put_ls:put_ls(_return, args);
+      break;
+    case hash_table_cmd_id::ht_upsert_ls:upsert_ls(_return, args);
+      break;
+    case hash_table_cmd_id::ht_remove_ls:remove_ls(_return, args);
+      break;
+    case hash_table_cmd_id::ht_update_ls:update_ls(_return, args);
       break;
     case hash_table_cmd_id::ht_update_partition:update_partition(_return, args);;
       break;

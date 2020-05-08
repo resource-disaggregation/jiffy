@@ -38,10 +38,11 @@ void storage_management_client::disconnect() {
 
 void storage_management_client::create_partition(int32_t block_id,
                                                  const std::string &type,
+                                                 const std::string &backing_path,
                                                  const std::string &name,
                                                  const std::string &metadata,
                                                  const std::map<std::string, std::string> &conf) {
-  client_->create_partition(block_id, type, name, metadata, conf);
+  client_->create_partition(block_id, type, backing_path, name, metadata, conf);
 }
 
 void storage_management_client::setup_chain(int32_t block_id,
