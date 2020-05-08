@@ -1,9 +1,0 @@
-coverage>=4.4
-pytest>=3.6
-
-[testing]
-fields
-hunter
-process-tests==2.0.2
-six
-virtualenv

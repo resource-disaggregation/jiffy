@@ -1,9 +1,0 @@
-zipp>=0.5
-
-[docs]
-rst.linker
-sphinx
-
-[testing]
-importlib-resources
-packaging
