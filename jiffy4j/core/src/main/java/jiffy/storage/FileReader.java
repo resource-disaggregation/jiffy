@@ -1,6 +1,7 @@
 package jiffy.storage;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import jiffy.directory.directory_service.Client;
@@ -69,8 +70,12 @@ public class FileReader extends FileClient {
             ByteBufferUtils.fromInteger(size));
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks.get(partition).runCommand(args).get(0);
-      response = handleRedirect(args, response);
+      List<ByteBuffer> byteBuffers = blocks.get(partition).runCommand(args);
+      if("!ok".equals(ByteBufferUtils.toString(byteBuffers.get(0)))) {
+        response = byteBuffers.get(1);
+      } else {
+        response = handleRedirect(args, byteBuffers.get(0));
+      }
     }
     return response;
   }
