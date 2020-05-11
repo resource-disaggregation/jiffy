@@ -1,7 +1,6 @@
 package jiffy.storage;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import jiffy.directory.directory_service.Client;
