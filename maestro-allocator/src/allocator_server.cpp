@@ -18,7 +18,7 @@ using namespace ::apache::thrift;
 
 int main(int argc, char **argv) {
 
-    std::string address = "127.0.0.1";
+    std::string address = "0.0.0.0";
     int block_port = 9092;
     int service_port = 9090;
     std::unordered_map<std::string, std::float_t> capacityDistribution({

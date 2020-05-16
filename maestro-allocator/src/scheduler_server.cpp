@@ -14,9 +14,9 @@ using namespace ::apache::thrift;
 
 int main(int argc, char **argv) {
 
-  std::string address = "127.0.0.1";
-  int service_port = 9001;
-  int lease_port = 9091;
+  std::string address = "0.0.0.0";
+  int service_port = 8080;
+  int lease_port = 8081;
 
   std::string tenantID = "TENANTA";
   std::string allocator_service_address = "127.0.0.1";
