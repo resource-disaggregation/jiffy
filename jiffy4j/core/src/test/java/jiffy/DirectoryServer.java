@@ -20,6 +20,11 @@ public class DirectoryServer extends JiffyServer {
     blockPort = -1;
   }
 
+  // if the server is remote
+  public DirectoryServer() {
+    super();
+  }
+
   @Override
   public void start(String conf) throws IOException, InterruptedException {
     super.start(conf);
@@ -44,7 +49,7 @@ public class DirectoryServer extends JiffyServer {
   }
 
   public JiffyClient connect() throws TException {
-    if (handle == null) {
+    if (handle == null && host == null) {
       throw new RuntimeException("Cannot connect: server not running");
     }
     return new JiffyClient(host, servicePort, leasePort);

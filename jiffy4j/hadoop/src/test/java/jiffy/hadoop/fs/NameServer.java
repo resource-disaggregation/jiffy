@@ -11,8 +11,12 @@ public class NameServer extends DirectoryServer {
     super(executable);
   }
 
+  public NameServer() {
+    super();
+  }
+
   public JiffyFileSystem connectFS() {
-    if (handle == null) {
+    if (handle == null && host == null) {
       throw new RuntimeException("Cannot connect: server not running");
     }
 

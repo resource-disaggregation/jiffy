@@ -1,7 +1,9 @@
 package jiffy;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +25,8 @@ import org.junit.rules.TestName;
 
 public class JiffyClientTest {
 
+  private static final boolean REMOTE_SERVER_INTEGRATION_TEST = true;
+
   @Rule
   public TestName testName = new TestName();
 
@@ -32,10 +36,18 @@ public class JiffyClientTest {
   private StorageServer storageServer3;
 
   public JiffyClientTest() {
-    directoryServer = new DirectoryServer(System.getProperty("jiffy.directory.exec", "directoryd"));
-    storageServer1 = new StorageServer(System.getProperty("jiffy.storage.exec", "storaged"));
-    storageServer2 = new StorageServer(System.getProperty("jiffy.storage.exec", "storaged"));
-    storageServer3 = new StorageServer(System.getProperty("jiffy.storage.exec", "storaged"));
+    if(REMOTE_SERVER_INTEGRATION_TEST) {
+      directoryServer = new DirectoryServer();
+      storageServer1 = new StorageServer();
+      storageServer2 = new StorageServer();
+      storageServer3 = new StorageServer();
+    }
+    else {
+      directoryServer = new DirectoryServer(System.getProperty("jiffy.directory.exec", "directoryd"));
+      storageServer1 = new StorageServer(System.getProperty("jiffy.storage.exec", "storaged"));
+      storageServer2 = new StorageServer(System.getProperty("jiffy.storage.exec", "storaged"));
+      storageServer3 = new StorageServer(System.getProperty("jiffy.storage.exec", "storaged"));
+    }
   }
 
   @Before
@@ -145,7 +157,7 @@ public class JiffyClientTest {
     }
   }
 
-  private void fileOps(FileWriter os, FileReader is) throws TException {
+  private void fileOps(FileWriter os, FileReader is) throws TException, UnsupportedEncodingException {
     for (int i = 0; i < 1000; i++) {
       Assert.assertEquals(makeBB("!ok"), os.write(makeBB(i)));
     }

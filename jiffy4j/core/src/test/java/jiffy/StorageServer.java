@@ -16,6 +16,10 @@ public class StorageServer extends JiffyServer {
     managementPort = -1;
   }
 
+  public StorageServer() {
+    super();
+  }
+
   @Override
   public void start(String conf) throws IOException, InterruptedException {
     super.start(conf);
