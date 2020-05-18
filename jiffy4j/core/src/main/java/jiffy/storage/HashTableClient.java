@@ -90,8 +90,11 @@ public class HashTableClient extends DataStructureClient implements Closeable {
     ByteBuffer response = null;
     while (response == null) {
       List<ByteBuffer> byteBuffers = blocks[blockId(key)].runCommand(args);
-      if("!ok".equals(ByteBufferUtils.toString(byteBuffers.get(0).slice()))) {
+      String responseType = ByteBufferUtils.toString(byteBuffers.get(0).slice());
+      if("!ok".equals(responseType)) {
         response = byteBuffers.get(1);
+      } else if("!block_reclaimed".equals(responseType)) {
+        throw new RuntimeException("block reclaimed");
       } else {
         response = byteBuffers.get(0);
         response = handleRedirect(args, response);

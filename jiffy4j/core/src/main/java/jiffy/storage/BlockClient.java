@@ -87,7 +87,7 @@ public class BlockClient {
       System.out.println("seq:" + sequenceId);
       System.out.println("args:" + args.size());
       List<ByteBuffer> newArgs = new ArrayList<>(args);
-      newArgs.add(ByteBufferUtils.fromString("seq:" + 1));
+      newArgs.add(ByteBufferUtils.fromString("seq:" + -1));
       args = newArgs;
     }
     client.commandRequest(seq, blockId, args);
