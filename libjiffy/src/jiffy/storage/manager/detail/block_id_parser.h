@@ -11,6 +11,14 @@ struct block_id {
   int32_t service_port;
   int32_t management_port;
   int32_t id;
+
+  std::string get_storage_server_id() const {
+    return host + ":" + std::to_string(service_port) + ":" + std::to_string(management_port);
+  }
+
+  int32_t get_block_id() {
+    return id;
+  }
 };
 /* Block name parser class */
 class block_id_parser {
