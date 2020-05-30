@@ -3,6 +3,7 @@
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/storage/file/file_ops.h"
 #include "jiffy/auto_scaling/auto_scaling_client.h"
+#include <jiffy/utils/directory_utils.h>
 #include <thread>
 
 namespace jiffy {
@@ -67,28 +68,17 @@ void file_partition::write_ls(response &_return, const arg_list &args) {
   }
   std::string file_path, line, data;
   int pos = std::stoi(args[2]);
-  std::string separator = ":/";
-  std::size_t split = backing_path().find(separator);
-  if (split == std::string::npos) {
-    file_path = backing_path();
-  }
-  else{
-    std::string uri = backing_path().substr(0, split);
-    std::size_t key_pos = split + separator.length();
-    std::size_t key_len = backing_path().length() - separator.length() - uri.length();
-    file_path = backing_path().substr(key_pos, key_len);
-  }
-  file_path.append("/");
-  file_path.append(name());
+  file_path = directory_utils::decompose_path(backing_path());
+  directory_utils::push_path_element(file_path,name());
   std::ofstream out(file_path,std::ios::in|std::ios::out);
   if (out) {
     data = args[1];
     out.seekp(pos, std::ios::beg);
-    out<<data;
+    out << data;
     out.close();
     RETURN_OK();  
   }
-  else{
+  else {
     RETURN_ERR("!file_does_not_exist");
   }
 }
@@ -100,19 +90,8 @@ void file_partition::read_ls(response &_return, const arg_list &args) {
   std::string file_path, line, ret_str;
   auto pos = std::stoi(args[1]);
   auto size = std::stoi(args[2]);
-  std::string separator = ":/";
-  std::size_t split = backing_path().find(separator);
-  if (split == std::string::npos) {
-    file_path = backing_path();
-  }
-  else{
-    std::string uri = backing_path().substr(0, split);
-    std::size_t key_pos = split + separator.length();
-    std::size_t key_len = backing_path().length() - separator.length() - uri.length();
-    file_path = backing_path().substr(key_pos, key_len);
-  }
-  file_path.append("/");
-  file_path.append(name());
+  file_path = directory_utils::decompose_path(backing_path());
+  directory_utils::push_path_element(file_path,name());
   std::ifstream in(file_path,std::ios::in);
   if (in) {
     if (pos < 0) throw std::invalid_argument("read position invalid");
@@ -125,7 +104,7 @@ void file_partition::read_ls(response &_return, const arg_list &args) {
     delete[] ret;
     RETURN_OK(ret_str);
   }
-  else{
+  else {
     RETURN_ERR("file_does_not_exist");
   }
 

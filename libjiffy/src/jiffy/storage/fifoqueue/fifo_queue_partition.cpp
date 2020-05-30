@@ -3,6 +3,7 @@
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_ops.h"
 #include "jiffy/auto_scaling/auto_scaling_client.h"
+#include <jiffy/utils/directory_utils.h>
 
 namespace jiffy {
 namespace storage {
@@ -128,50 +129,39 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
 }
 
 void fifo_queue_partition::enqueue_ls(response &_return, const arg_list &args) {
-  if (!(args.size() == 2)) {
+  if (args.size() != 2) {
     RETURN_ERR("!args_error");
   }
   std::string file_path, line, data;
-  std::string separator = ":/";
-  std::size_t split = backing_path().find(separator);
-  if (split == std::string::npos) {
-    file_path = backing_path();
-  }
-  else{
-    std::string uri = backing_path().substr(0, split);
-    std::size_t key_pos = split + separator.length();
-    std::size_t key_len = backing_path().length() - separator.length() - uri.length();
-    file_path = backing_path().substr(key_pos, key_len);
-  }
-  file_path.append("/");
-  file_path.append(name());
-  if (ser == "csv"){
+  file_path = directory_utils::decompose_path(backing_path());
+  directory_utils::push_path_element(file_path,name());
+  if (ser == "csv") {
     std::ofstream out(file_path,std::ios::app);
     if (out) {
       data = args[1];
-      out<<data<<std::endl;
+      out << data << std::endl;
       out.close();
     }
-    else{
+    else {
       RETURN_ERR("!fifo_queue_does_not_exist");
     }
     enqueue_data_size_ += args[1].size();
     RETURN_OK();
   }
-  else if (ser == "binary"){
-    std::shared_ptr<std::ofstream> out(new std::ofstream(file_path,std::ios::app));
+  else if (ser == "binary") {
+    std::ofstream out(file_path,std::ios::app);
     std::string offset_path = file_path;
     offset_path.append("_offset");
-    std::shared_ptr<std::ofstream> offset_out(new std::ofstream(offset_path,std::ios::app));
+    std::ofstream offset_out(offset_path,std::ios::app);
     if (out && offset_out) {
       data = args[1];
       std::size_t msg_size = data.size();
-      offset_out->write(reinterpret_cast<const char *>(&msg_size), sizeof(size_t));
-      out->write(reinterpret_cast<const char *>(data.data()), msg_size);
-      out->close();
-      offset_out->close();
+      offset_out.write(reinterpret_cast<const char *>(&msg_size), sizeof(size_t));
+      out.write(reinterpret_cast<const char *>(data.data()), msg_size);
+      out.close();
+      offset_out.close();
     }
-    else{
+    else {
       RETURN_ERR("!fifo_queue_does_not_exist");
     }
     enqueue_data_size_ += args[1].size();
@@ -180,81 +170,70 @@ void fifo_queue_partition::enqueue_ls(response &_return, const arg_list &args) {
 }
 
 void fifo_queue_partition::dequeue_ls(response &_return, const arg_list &args) {
-  if (!(args.size() == 1)) {
+  if (args.size() != 1) {
     RETURN_ERR("!args_error");
   }
   std::vector<std::string> v;
   std::string file_path, line;
-  std::string separator = ":/";
-  std::size_t split = backing_path().find(separator);
-  if (split == std::string::npos) {
-    file_path = backing_path();
-  }
-  else{
-    std::string uri = backing_path().substr(0, split);
-    std::size_t key_pos = split + separator.length();
-    std::size_t key_len = backing_path().length() - separator.length() - uri.length();
-    file_path = backing_path().substr(key_pos, key_len);
-  }
-  file_path.append("/");
-  file_path.append(name());
-  if (ser == "csv"){
+  file_path = directory_utils::decompose_path(backing_path());
+  directory_utils::push_path_element(file_path,name());
+  if (ser == "csv") {
     std::ifstream in(file_path);
     if (in) {
-      while(getline(in,line)){
+      while(getline(in,line)) {
         v.push_back(line);
       }
       in.close();
     }
-    else{
+    else {
       RETURN_ERR("!fifo_queue_does_not_exist");
     }
-    if (v.size()==0){
+    if (v.size() == 0) {
       RETURN_ERR("!queue_is_empty");
     }
     std::ofstream out(file_path);
-    for (int i=1;i<v.size();i++){
-      out<<v[i]<<std::endl;
+    for (int i = 1; i < v.size(); i++) {
+      out << v[i] << std::endl;
     }
     out.close();
     head_index_++;
     dequeue_data_size_ += v[0].size();
     RETURN_OK(v[0]);
   }
-  else if (ser == "binary"){
-    auto in = std::make_shared<std::ifstream>(file_path.c_str(), std::fstream::in);
+  else if (ser == "binary") {
+    std::ifstream in(file_path,std::ios::binary);
     std::string offset_path = file_path;
     offset_path.append("_offset");
-    auto offset_in = std::make_shared<std::ifstream>(offset_path.c_str(), std::fstream::in);
+    std::ifstream offset_in(offset_path,std::ios::binary);
     if (in && offset_in) {
-      while (in->peek()!=EOF && offset_in->peek()!=EOF) {
+      while (in.peek() != EOF && offset_in.peek() != EOF) {
         std::size_t msg_size;
-        offset_in->read(reinterpret_cast<char *>(&msg_size), sizeof(msg_size));
+        offset_in.read(reinterpret_cast<char *>(&msg_size), sizeof(msg_size));
         std::string msg;
         msg.resize(msg_size);
-        in->read(&msg[0], msg_size);
-        if (msg!="") v.push_back(msg);
+        in.read(&msg[0], msg_size);
+        v.push_back(msg);
       }
-      in->close();
-      offset_in->close();
+      in.close();
+      offset_in.close();
     }
-    else{
+    else {
       RETURN_ERR("!fifo_queue_does_not_exist");
     }
-    if (v.size()==0){
+    if (v.size() == 0) {
       RETURN_ERR("!queue_is_empty");
     }
-    std::shared_ptr<std::ofstream> out(new std::ofstream(file_path));
-    std::shared_ptr<std::ofstream> offset_out(new std::ofstream(offset_path));
-    for (int i=1;i<v.size();i++){
+    std::ofstream out(file_path,std::ios::binary);
+    std::ofstream offset_out(offset_path,std::ios::binary);
+    for (int i = 1; i < v.size(); i++) {
       std::size_t msg_size = v[i].size();
-      offset_out->write(reinterpret_cast<const char *>(&msg_size), sizeof(size_t));
-      out->write(reinterpret_cast<const char *>(v[i].data()), msg_size);
+      offset_out.write(reinterpret_cast<const char *>(&msg_size), sizeof(size_t));
+      out.write(reinterpret_cast<const char *>(v[i].data()), msg_size);
     }
-    out->flush();
-    offset_out->flush();
-    out->close();
-    offset_out->close();
+    out.flush();
+    offset_out.flush();
+    out.close();
+    offset_out.close();
     head_index_++;
     dequeue_data_size_ += v[0].size();
     RETURN_OK(v[0]);
@@ -290,24 +269,13 @@ void fifo_queue_partition::read_next_ls(response &_return, const arg_list &args)
   }
   std::vector<std::string> v;
   std::string file_path, line;
-  std::string separator = ":/";
-  std::size_t split = backing_path().find(separator);
-  if (split == std::string::npos) {
-    file_path = backing_path();
-  }
-  else{
-    std::string uri = backing_path().substr(0, split);
-    std::size_t key_pos = split + separator.length();
-    std::size_t key_len = backing_path().length() - separator.length() - uri.length();
-    file_path = backing_path().substr(key_pos, key_len);
-  }
-  file_path.append("/");
-  file_path.append(name());
-  if (ser == "csv"){
+  file_path = directory_utils::decompose_path(backing_path());
+  directory_utils::push_path_element(file_path,name());
+  if (ser == "csv") {
     std::ifstream in(file_path);
     if (in) {
       int count = read_head_index_ - head_index_;
-      while(count >= 0){
+      while(count >= 0) {
         count--;
         getline(in,line);
       }
@@ -315,34 +283,34 @@ void fifo_queue_partition::read_next_ls(response &_return, const arg_list &args)
       read_head_index_ += 1;
       RETURN_OK(line);
     }
-    else{
+    else {
       RETURN_ERR("!fifo_queue_does_not_exist");
     }
   }
-  else if (ser == "binary"){
-    auto in = std::make_shared<std::ifstream>(file_path.c_str(), std::fstream::in);
+  else if (ser == "binary") {
+    std::ifstream in(file_path,std::ios::binary);
     std::string offset_path = file_path;
     offset_path.append("_offset");
-    auto offset_in = std::make_shared<std::ifstream>(offset_path.c_str(), std::fstream::in);
+    std::ifstream offset_in(offset_path,std::ios::binary);
     std::size_t offset = 0;
     std::size_t msg_size = 0;
     if (in && offset_in) {
       int count = read_head_index_ - head_index_;
-      while(count >= 0){
+      while(count >= 0) {
         count--;
-        offset_in->read(reinterpret_cast<char *>(&msg_size), sizeof(msg_size));
-        in->seekg(offset, std::ios::beg);
+        offset_in.read(reinterpret_cast<char *>(&msg_size), sizeof(msg_size));
+        in.seekg(offset, std::ios::beg);
         offset += msg_size;
       }
       std::string msg;
       msg.resize(msg_size);
-      in->read(&msg[0], msg_size);
-      in->close();
-      offset_in->close();
+      in.read(&msg[0], msg_size);
+      in.close();
+      offset_in.close();
       read_head_index_ += 1;
       RETURN_OK(msg);
     }
-    else{
+    else {
       RETURN_ERR("!fifo_queue_does_not_exist");
     }
   }
