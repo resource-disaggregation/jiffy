@@ -16,11 +16,13 @@ command_map HT_OPS = {{"exists", {command_type::accessor, 0}},
                       {"remove_ls", {command_type::mutator, 9}},
                       {"update_ls", {command_type::mutator, 10}},
                       {"upsert_ls", {command_type::mutator, 11}},
-                      {"update_partition", {command_type::mutator, 12}},
-                      {"get_storage_size", {command_type::accessor, 13}},
-                      {"get_metadata", {command_type::accessor, 14}},
-                      {"get_range_data", {command_type::accessor, 15}},
-                      {"scale_put", {command_type::mutator, 16}},
-                      {"scale_remove", {command_type::mutator, 17}}};
+                      {"multi_get", {command_type::accessor, 12}},
+                      {"multi_get_ls", {command_type::accessor, 13}},
+                      {"update_partition", {command_type::mutator, 14}},
+                      {"get_storage_size", {command_type::accessor, 15}},
+                      {"get_metadata", {command_type::accessor, 16}},
+                      {"get_range_data", {command_type::accessor, 17}},
+                      {"scale_put", {command_type::mutator, 18}},
+                      {"scale_remove", {command_type::mutator, 19}}};
 }
 }

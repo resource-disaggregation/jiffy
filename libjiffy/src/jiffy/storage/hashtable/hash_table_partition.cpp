@@ -165,6 +165,42 @@ void hash_table_partition::get(response &_return, const arg_list &args) {
   RETURN_ERR("!block_moved");
 }
 
+void hash_table_partition::multi_get(response &_return, const arg_list &args) {
+  if (!(args.size() == 3 || (args.size() == 4 && args[3] == "!redirected"))) {
+    RETURN("!args_error");
+  }
+  auto hash = hash_slot::get(args[1]);
+  std::vector<std::string> prefetched_data;
+  std::size_t prefetch_size = stoi(args[2]);
+  std::size_t prefetch_lock = 1;
+  if (in_slot_range(hash) || (in_import_slot_range(hash) && args[2] == "!redirected")) {
+    BEGIN_CATCH_HANDLER;
+      if (it != block_.end()) {
+        prefetched_data.emplace_back("!ok");
+        for (auto e: block_) {
+          if (prefetch_lock == 1 && to_string(e.first) == args[1]) {
+            prefetch_lock = 0;
+          } 
+          if (prefetch_lock == 0) {
+            if (prefetch_size <= 0) break;
+            prefetched_data.emplace_back(to_string(e.first));
+            prefetched_data.emplace_back(to_string(e.second));
+            prefetch_size --;
+          }
+        }
+        _return = prefetched_data;
+        return;
+      } else {
+        if (metadata_ == "exporting" && in_export_slot_range(hash)) {
+          RETURN_ERR("!exporting", export_target_str_);
+        }
+        RETURN_ERR("!key_not_found");
+      }
+    END_CATCH_HANDLER;
+  }
+  RETURN_ERR("!block_moved");
+}
+
 void hash_table_partition::update(response &_return, const arg_list &args) {
   if (!(args.size() == 3 || (args.size() == 6 && args[5] == "!redirected"))) {
     RETURN_ERR("!args_error");
@@ -503,6 +539,96 @@ void hash_table_partition::get_ls(response &_return, const arg_list &args) {
   }
 }
 
+void hash_table_partition::multi_get_ls(response &_return, const arg_list &args) {
+  if (args.size() != 3) {
+    RETURN("!args_error");
+  }
+  std::string file_path, line, key, value;
+  file_path = directory_utils::decompose_path(backing_path());
+  directory_utils::push_path_element(file_path,name());
+  std::vector<std::string> prefetched_data;
+  std::size_t prefetch_size = stoi(args[2]);
+  if (ser == "csv") {
+    std::ifstream in(file_path);
+    if (in) {
+      while(getline(in,line)) {
+        int split_index = line.find(",");
+        key = line.substr(0,split_index);
+        if (key == args[1]) {
+          value = line.substr(split_index+1);
+          prefetched_data.emplace_back("!ok");
+          prefetched_data.emplace_back(key);
+          prefetched_data.emplace_back(value);
+          prefetch_size --;
+          while (prefetch_size > 0 && getline(in,line)) {
+            key = line.substr(0,split_index);
+            value = line.substr(split_index+1);
+            prefetched_data.emplace_back(key);
+            prefetched_data.emplace_back(value);
+            prefetch_size --;
+          }
+          _return = prefetched_data;
+          in.close();
+          return;
+        }
+      }
+      in.close();
+      RETURN_ERR("!key_not_found");
+    }
+    else {
+      RETURN_ERR("!hash_table_does_not_exist");
+    }
+  }
+  else if (ser == "binary") {
+    std::ifstream in(file_path,std::ios::binary);
+    std::string offset_path = file_path;
+    offset_path.append("_offset");
+    std::ifstream offset_in(offset_path,std::ios::binary);
+    std::size_t offset = 0;
+    std::size_t key_size = 0;
+    std::size_t value_size = 0;
+    if (in && offset_in) {
+      while (offset_in.peek() != EOF) {
+        offset_in.read(reinterpret_cast<char *>(&key_size), sizeof(key_size));
+        key.resize(key_size);
+        offset_in.read(&key[0], key_size);
+        offset_in.read(reinterpret_cast<char *>(&value_size), sizeof(value_size));
+        if (key == args[1]) {
+          value.resize(value_size);
+          in.seekg(offset,std::ios::beg);
+          in.read(&value[0], value_size);
+          prefetched_data.emplace_back("!ok");
+          prefetched_data.emplace_back(key);
+          prefetched_data.emplace_back(value);
+          while (prefetch_size > 0 && offset_in.peek() != EOF) {
+            offset_in.read(reinterpret_cast<char *>(&key_size), sizeof(key_size));
+            key.resize(key_size);
+            offset_in.read(&key[0], key_size);
+            offset_in.read(reinterpret_cast<char *>(&value_size), sizeof(value_size));
+            value.resize(value_size);
+            in.seekg(offset,std::ios::beg);
+            in.read(&value[0], value_size);
+            offset += value_size;
+            prefetched_data.emplace_back(key);
+            prefetched_data.emplace_back(value);
+            prefetch_size --;
+          }
+          _return = prefetched_data;
+          in.close();
+          offset_in.close();
+          return;
+        }
+      }
+      in.close();
+      offset_in.close();
+      RETURN_ERR("!key_not_found");
+    }
+    else {
+      RETURN_ERR("!hash_table_does_not_exist");
+    }
+  }
+}
+
 void hash_table_partition::update_ls(response &_return, const arg_list &args) {
   if (args.size() != 3) {
     RETURN_ERR("!args_error");
@@ -814,6 +940,8 @@ void hash_table_partition::run_command(response &_return, const arg_list &args) 
       break;
     case hash_table_cmd_id::ht_get:get(_return, args);
       break;
+    case hash_table_cmd_id::ht_multi_get:multi_get(_return, args);
+      break;
     case hash_table_cmd_id::ht_put:put(_return, args);
       break;
     case hash_table_cmd_id::ht_upsert:upsert(_return, args);
@@ -825,6 +953,8 @@ void hash_table_partition::run_command(response &_return, const arg_list &args) 
     case hash_table_cmd_id::ht_exists_ls:exists_ls(_return, args);
       break;
     case hash_table_cmd_id::ht_get_ls:get_ls(_return, args);
+      break;
+    case hash_table_cmd_id::ht_multi_get_ls:multi_get_ls(_return, args);
       break;
     case hash_table_cmd_id::ht_put_ls:put_ls(_return, args);
       break;

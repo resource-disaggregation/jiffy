@@ -32,6 +32,7 @@ TEST_CASE("hash_table_ls_put_get_csv_test", "[put][get]") {
     REQUIRE(resp[0] == "!ok");
     REQUIRE(resp[1] == std::to_string(i));
   }
+  
   for (std::size_t i = 1000; i < 2000; ++i) {
     response resp;
     REQUIRE_NOTHROW(block.get_ls(resp, {"get_ls", std::to_string(i)}));

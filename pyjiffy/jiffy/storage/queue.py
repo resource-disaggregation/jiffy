@@ -27,7 +27,7 @@ class QueueOps:
     op_types = {enqueue: CommandType.mutator,
                 dequeue: CommandType.mutator,
                 enqueue_ls: CommandType.mutator,
-                dequeue_ls: CommandType.accessor,
+                dequeue_ls: CommandType.mutator,
                 read_next: CommandType.accessor,
                 read_next_ls: CommandType.accessor,
                 length: CommandType.accessor,

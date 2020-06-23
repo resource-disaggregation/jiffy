@@ -11,6 +11,8 @@ namespace storage {
 
 using namespace utils;
 
+#define min(a,b) ((a) < (b) ? (a) : (b))
+
 file_partition::file_partition(block_memory_manager *manager,
                                const std::string &backing_path,
                                const std::string &name,
@@ -37,7 +39,7 @@ file_partition::file_partition(block_memory_manager *manager,
 }
 
 void file_partition::write(response &_return, const arg_list &args) {
-  if (args.size() != 3) {
+  if (args.size() != 5) {
     RETURN_ERR("!args_error");
   }
   auto off = std::stoi(args[2]);
@@ -45,7 +47,15 @@ void file_partition::write(response &_return, const arg_list &args) {
   if (!ret.first) {
     throw std::logic_error("Write failed");
   }
-  RETURN_OK();
+  int cache_block_size = std::stoi(args[3]);
+  int last_offset = std::stoi(args[4]) + args[1].size();
+  int start_offset = (int(off)) / cache_block_size * cache_block_size;
+  int end_offset = (int(off) + args[1].size() - 1) / cache_block_size * cache_block_size;
+  int num_of_blocks = (end_offset - start_offset) / cache_block_size + 1;
+  auto full_block_data = partition_.read(static_cast<std::size_t>(start_offset), static_cast<std::size_t>(min(last_offset - start_offset, cache_block_size * num_of_blocks)));
+  if (full_block_data.first) {
+    RETURN_OK(full_block_data.second);
+  }
 }
 
 void file_partition::read(response &_return, const arg_list &args) {
@@ -76,7 +86,23 @@ void file_partition::write_ls(response &_return, const arg_list &args) {
     out.seekp(pos, std::ios::beg);
     out << data;
     out.close();
-    RETURN_OK();  
+  }
+  std::ifstream in(file_path,std::ios::in);
+  int cache_block_size = std::stoi(args[3]);
+  int last_offset = std::stoi(args[4]) + args[1].size();
+  int start_offset = (int(off)) / cache_block_size * cache_block_size;
+  int end_offset = (int(off) + args[1].size() - 1) / cache_block_size * cache_block_size;
+  int num_of_blocks = (end_offset - start_offset) / cache_block_size + 1;
+  if (in) {
+    in.seekg(0, std::ios::end);
+    in.seekg(start_offset, std::ios::beg);
+    int read_size = min(last_offset - start_offset, cache_block_size * num_of_blocks));
+    char *ret = new char[read_size];
+    in.read(ret, read_size);
+    ret_str = ret;
+    memset(ret, 0, read_size);
+    delete[] ret;
+    RETURN_OK(ret_str);
   }
   else {
     RETURN_ERR("!file_does_not_exist");
