@@ -17,5 +17,5 @@ setup(name='pyjiffy',
       package_dir={'jiffy': 'jiffy'},
       packages=['jiffy', 'jiffy.storage', 'jiffy.directory', 'jiffy.lease'],
       setup_requires=['pytest-runner>=2.0,<4.0', 'thrift>={}'.format(thrift_version)],
-      tests_require=['pytest-cov', 'pytest>2.0,<4.0', 'thrift>={}'.format(thrift_version)],
+      tests_require=['pytest-cov', 'pytest>4.0', 'thrift>={}'.format(thrift_version)],
       install_requires=['thrift>={}'.format(thrift_version)])

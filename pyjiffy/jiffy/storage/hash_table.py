@@ -27,7 +27,6 @@ class HashTableOps:
     update_ls = b('update_ls')
     upsert_ls = b('upsert_ls')
     multi_get = b('multi_get')
-    multi_get_ls = b('multi_get_ls')
 
     op_types = {exists: CommandType.accessor,
                 get: CommandType.accessor,
@@ -40,9 +39,7 @@ class HashTableOps:
                 put_ls: CommandType.mutator,
                 remove_ls: CommandType.mutator,
                 update_ls: CommandType.accessor,
-                upsert_ls: CommandType.mutator,
-                multi_get: CommandType.accessor,
-                multi_get_ls: CommandType.accessor}
+                upsert_ls: CommandType.mutator}
 
 
 def encode(value):
@@ -112,9 +109,9 @@ class HashTable(DataStructureClient):
             self.cache.hit_handling(key)
             return self.cache.get(key)
         else:
-            prefetched_data = self._run_repeated([HashTableOps.multi_get, key, str(self.cache.prefetch_size)])[1:]
-            self.cache.miss_handling(prefetched_data)
-            return self._run_repeated([HashTableOps.get, key])[1]
+            value = self._run_repeated([HashTableOps.get, key])[1]
+            self.cache.miss_handling([key,value])
+            return value
 
     def exists(self, key):
         try:
@@ -129,12 +126,12 @@ class HashTable(DataStructureClient):
     def update(self, key, value):
         resp = self._run_repeated([HashTableOps.update, key, value])
         if resp[0] == b'!ok':
-            self.cache.miss_handling([[key,value]])
+            self.cache.miss_handling([key,value])
         return resp[0]
 
     def upsert(self, key, value):
         if self._run_repeated([HashTableOps.upsert, key, value])[0] == b'!ok':
-            self.cache.miss_handling([[key,value]])
+            self.cache.miss_handling([key,value])
 
     def remove(self, key):
         resp = self._run_repeated([HashTableOps.remove, key])
@@ -144,16 +141,16 @@ class HashTable(DataStructureClient):
 
     def put_ls(self, key, value):
         if self._run_repeated([HashTableOps.put_ls, key, value])[0] == b'!ok':
-            self.cache.miss_handling([[key,value]])
+            self.cache.miss_handling([key,value])
 
     def get_ls(self, key):
         if self.cache.exists(key):
             self.cache.hit_handling(key)
             return self.cache.get(key)
         else:
-            prefetched_data = self._run_repeated([HashTableOps.multi_get_ls, key, str(self.cache.prefetch_size)])[1:]
-            self.cache.miss_handling(prefetched_data)
-            return self._run_repeated([HashTableOps.get_ls, key])[1]
+            value = self._run_repeated([HashTableOps.get_ls, key])[1]
+            self.cache.miss_handling([key,value])
+            return value
     
     def exists_ls(self, key):
         try:
@@ -168,12 +165,12 @@ class HashTable(DataStructureClient):
     def update_ls(self, key, value):
         resp = self._run_repeated([HashTableOps.update_ls, key, value])
         if resp[0] == b'!ok':
-            self.cache.miss_handling([[key,value]])
+            self.cache.miss_handling([key,value])
         return resp[0]
 
     def upsert_ls(self, key, value):
         if self._run_repeated([HashTableOps.upsert_ls, key, value])[0] == b'!ok':
-            self.cache.miss_handling([[key,value]])
+            self.cache.miss_handling([key,value])
 
     def remove_ls(self, key):
         resp = self._run_repeated([HashTableOps.remove_ls, key])

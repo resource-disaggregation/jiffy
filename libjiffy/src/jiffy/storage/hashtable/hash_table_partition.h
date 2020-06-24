@@ -183,13 +183,6 @@ class hash_table_partition : public chain_module {
   void get(response &_return, const arg_list &args);
 
   /**
-   * @brief Get multiple key-value pairs to help the pre-fetch process
-   * @param _return Response
-   * @param args Arguments
-   */
-  void multi_get(response &_return, const arg_list &args);
-
-  /**
    * @brief Update the value for specified key
    * @param _return Response
    * @param args Arguments
@@ -230,13 +223,6 @@ class hash_table_partition : public chain_module {
    * @param args Arguments
    */
   void get_ls(response &_return, const arg_list &args);
-
-  /**
-   * @brief Get multiple key-value pairs to help the pre-fetch process
-   * @param _return Response
-   * @param args Arguments
-   */
-  void multi_get_ls(response &_return, const arg_list &args);
 
   /**
    * @brief Update the value for specified key

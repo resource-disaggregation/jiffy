@@ -25,14 +25,12 @@ enum hash_table_cmd_id: uint32_t {
   ht_remove_ls = 9,
   ht_update_ls = 10,
   ht_upsert_ls = 11,
-  ht_multi_get = 12,
-  ht_multi_get_ls = 13,
-  ht_update_partition = 14,
-  ht_get_storage_size = 15,
-  ht_get_metadata = 16,
-  ht_get_range_data = 17,
-  ht_scale_put = 18,
-  ht_scale_remove = 19
+  ht_update_partition = 12,
+  ht_get_storage_size = 13,
+  ht_get_metadata = 14,
+  ht_get_range_data = 15,
+  ht_scale_put = 16,
+  ht_scale_remove = 17
 };
 
 }

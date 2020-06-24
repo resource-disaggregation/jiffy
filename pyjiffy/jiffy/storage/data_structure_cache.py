@@ -70,12 +70,17 @@ class LinkedList(object):
         temp_node = cur_node
         while cur_node != None:
             if cur_node.mark == mark:
-                if cur_node == self.head:
+                if self.head == self.tail:
+                    self.head = None
+                    self.tail = None
+                    break
+                elif cur_node == self.head:
                     self.head = cur_node.next
                     self.head.prev = None
                     break
                 elif cur_node == self.tail:
                     temp_node.next = None
+                    self.tail = temp_node
                     break
                 else:
                     temp_node.next = cur_node.next
@@ -117,6 +122,8 @@ class HashTableCache(DataStructureCache):
         self.list.insert_head(new_node)
     
     def delete(self, key):
+        if key not in self.table:
+            return
         value = self.table[key]
         self.list.remove(key)
         del self.table[key]
@@ -138,21 +145,18 @@ class HashTableCache(DataStructureCache):
         self.list.move_to_head(key)
 
     def miss_handling(self, raw_data):
-        prefetch_data_length = len(raw_data)
-        prefetch_data = raw_data[::-1]
-        for i in range(0, min(prefetch_data_length, 2 * self.prefetch_size),2):
-            new_value = prefetch_data[i]
-            new_key = prefetch_data[i+1]
-            if self.exists(new_key):
-                if self.get(new_key) == new_value:
-                    self.hit_handling(new_key)
-                else:
-                    self.update(new_key,new_value)
-                    self.hit_handling(new_key)
+        new_value = raw_data[1]
+        new_key = raw_data[0]
+        if self.exists(new_key):
+            if self.get(new_key) == new_value:
+                self.hit_handling(new_key)
             else:
-                if self.isFull():
-                    self.evict()
-                self.insert([new_key,new_value])
+                self.update(new_key,new_value)
+                self.hit_handling(new_key)
+        else:
+            if self.isFull():
+                self.evict()
+            self.insert([new_key,new_value])
     
     def print_out(self): # for debug use
         cur_node = self.list.head
@@ -179,25 +183,25 @@ class FileCache(DataStructureCache):
     
     def exists(self, cur_offset):
         start_offset = (cur_offset // self.block_size) * self.block_size
-        if start_offset in self.table:
+        if start_offset in self.table and (cur_offset - start_offset) <= len(self.table[start_offset]):
             return True
         return False
 
-    def read_handling(self, cur_offset, data):
-        start_offset = (cur_offset // self.block_size) * self.block_size
-        end_offset = start_offset + ((len(data) - 1) // self.block_size) * self.block_size
-        data_index = 0
-        for offset in range(start_offset, end_offset + 1, self.block_size):
-            if offset in self.table:
-                self.table[start_offset] = data[data_index : (data_index + min(self.block_size, len(data) - data_index))]
-                self.list.move_to_head(offset)
-            else:
-                if self.isFull():
-                    self.evict()
-                self.insert(offset, data[data_index : (data_index + min(self.block_size, len(data) - data_index))])
-            data_index += self.block_size
+    def prefetch_handling(self, start_offset, prefetch_data):
+        block_list = []
+        offset_list = []
+        offset = start_offset
+        end_offset = start_offset + (len(prefetch_data) - 1) // self.block_size * self.block_size
+        while offset <= end_offset:
+            offset_list.append(offset)
+            block_list.append(prefetch_data[(offset - start_offset):(offset - start_offset + min(self.block_size, len(prefetch_data) - (offset - start_offset)))])
+            offset += self.block_size
+        block_list.reverse()
+        offset_list.reverse()
+        for i in range(len(offset_list)):
+            self.miss_handling(offset_list[i], block_list[i])
 
-    def write_handling(self, cur_offset, data):
+    def miss_handling(self, cur_offset, data):
         start_offset = (cur_offset // self.block_size) * self.block_size
         if start_offset in self.table:
             self.table[start_offset] = data
