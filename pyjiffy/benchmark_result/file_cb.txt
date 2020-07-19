@@ -1,0 +1,2429 @@
+host:  frog.zoo.cs.yale.edu
+service-port:  9090
+lease-port:  9091
+num-blocks:  1
+chain-length:  1
+num-ops:  100000
+data-size:  64
+path:  /tmp
+backing-path:  local://tmp
+=====  Cache_Size=  100 Block Size=  1000  ======
+	 100000  requests completed in  0.012212537229061127  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  512.6027488708496 us
+	Average read latency:  7.357571125030518 us
+	Average total latency:  519.9603199958801 us
+	Throughput:  8188306.665877635  bytes per second
+	Hit_rate:  99.697 %
+
+
+=====  Cache_Size=  100 Block Size=  2000  ======
+	 100000  requests completed in  0.010030962526798248  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  464.78660821914673 us
+	Average read latency:  5.964608192443848 us
+	Average total latency:  470.7512164115906 us
+	Throughput:  9969133.045093598  bytes per second
+	Hit_rate:  99.8438 %
+
+
+=====  Cache_Size=  100 Block Size=  3000  ======
+	 100000  requests completed in  0.008954551070928574  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  419.03122663497925 us
+	Average read latency:  5.274040699005127 us
+	Average total latency:  424.3052673339844 us
+	Throughput:  11167505.685980765  bytes per second
+	Hit_rate:  99.895 %
+
+
+=====  Cache_Size=  100 Block Size=  4000  ======
+	 100000  requests completed in  0.008726958185434341  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  326.3814973831177 us
+	Average read latency:  5.119616985321045 us
+	Average total latency:  331.5011143684387 us
+	Throughput:  11458746.3209007  bytes per second
+	Hit_rate:  99.9206 %
+
+
+=====  Cache_Size=  100 Block Size=  5000  ======
+	 100000  requests completed in  0.008686568588018417  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  407.8317379951477 us
+	Average read latency:  5.085539817810059 us
+	Average total latency:  412.91727781295776 us
+	Throughput:  11512025.604440894  bytes per second
+	Hit_rate:  99.9367 %
+
+
+=====  Cache_Size=  100 Block Size=  6000  ======
+	 100000  requests completed in  0.008340548723936081  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  370.9824299812317 us
+	Average read latency:  4.876282215118408 us
+	Average total latency:  375.8587121963501 us
+	Throughput:  11989618.826039048  bytes per second
+	Hit_rate:  99.9464 %
+
+
+=====  Cache_Size=  100 Block Size=  7000  ======
+	 100000  requests completed in  0.008348841220140457  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  355.94409227371216 us
+	Average read latency:  4.887650012969971 us
+	Average total latency:  360.83174228668213 us
+	Throughput:  11977710.123263985  bytes per second
+	Hit_rate:  99.9544 %
+
+
+=====  Cache_Size=  100 Block Size=  8000  ======
+	 100000  requests completed in  0.00826268270611763  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  333.4715437889099 us
+	Average read latency:  4.828360080718994 us
+	Average total latency:  338.2999038696289 us
+	Throughput:  12102606.811460972  bytes per second
+	Hit_rate:  99.96 %
+
+
+=====  Cache_Size=  100 Block Size=  9000  ======
+	 100000  requests completed in  0.008296199142932892  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  415.73365926742554 us
+	Average read latency:  4.846651554107666 us
+	Average total latency:  420.5803108215332 us
+	Throughput:  12053712.582970588  bytes per second
+	Hit_rate:  99.9642 %
+
+
+=====  Cache_Size=  100 Block Size=  10000  ======
+	 100000  requests completed in  0.008257877081632614  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  423.53293895721436 us
+	Average read latency:  4.820098876953125 us
+	Average total latency:  428.3530378341675 us
+	Throughput:  12109649.85449137  bytes per second
+	Hit_rate:  99.9682 %
+
+
+=====  Cache_Size=  100 Block Size=  11000  ======
+	 100000  requests completed in  0.008202500641345978  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  454.040367603302 us
+	Average read latency:  4.798083305358887 us
+	Average total latency:  458.8384509086609 us
+	Throughput:  12191404.106198356  bytes per second
+	Hit_rate:  99.9702 %
+
+
+=====  Cache_Size=  100 Block Size=  12000  ======
+	 100000  requests completed in  0.008149251341819763  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  470.0808787345886 us
+	Average read latency:  4.760725498199463 us
+	Average total latency:  474.8416042327881 us
+	Throughput:  12271065.869183213  bytes per second
+	Hit_rate:  99.9731 %
+
+
+=====  Cache_Size=  100 Block Size=  13000  ======
+	 100000  requests completed in  0.00813758373260498  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  419.22523260116577 us
+	Average read latency:  4.742083549499512 us
+	Average total latency:  423.9673161506653 us
+	Throughput:  12288660.035451123  bytes per second
+	Hit_rate:  99.9751 %
+
+
+=====  Cache_Size=  100 Block Size=  14000  ======
+	 100000  requests completed in  0.008175261318683624  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  458.00726890563965 us
+	Average read latency:  4.762887954711914 us
+	Average total latency:  462.77015686035156 us
+	Throughput:  12232024.89826979  bytes per second
+	Hit_rate:  99.9771 %
+
+
+=====  Cache_Size=  100 Block Size=  15000  ======
+	 100000  requests completed in  0.008098457008600235  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  474.46059226989746 us
+	Average read latency:  4.721224308013916 us
+	Average total latency:  479.1818165779114 us
+	Throughput:  12348031.222960625  bytes per second
+	Hit_rate:  99.9781 %
+
+
+=====  Cache_Size=  100 Block Size=  16000  ======
+	 100000  requests completed in  0.008130304515361786  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  493.19995164871216 us
+	Average read latency:  4.740879535675049 us
+	Average total latency:  497.9408311843872 us
+	Throughput:  12299662.30798062  bytes per second
+	Hit_rate:  99.98 %
+
+
+=====  Cache_Size=  100 Block Size=  17000  ======
+	 100000  requests completed in  0.008014529943466187  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  511.17595911026 us
+	Average read latency:  4.667727947235107 us
+	Average total latency:  515.8436870574951 us
+	Throughput:  12477338.122808388  bytes per second
+	Hit_rate:  99.9811 %
+
+
+=====  Cache_Size=  100 Block Size=  18000  ======
+	 100000  requests completed in  0.008135892450809479  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  583.3048105239868 us
+	Average read latency:  4.739823341369629 us
+	Average total latency:  588.0446338653564 us
+	Throughput:  12291214.590730058  bytes per second
+	Hit_rate:  99.982 %
+
+
+=====  Cache_Size=  100 Block Size=  19000  ======
+	 100000  requests completed in  0.008022017776966095  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  593.6737203598022 us
+	Average read latency:  4.66416597366333 us
+	Average total latency:  598.3378863334656 us
+	Throughput:  12465691.647696612  bytes per second
+	Hit_rate:  99.983 %
+
+
+=====  Cache_Size=  100 Block Size=  20000  ======
+	 100000  requests completed in  0.008058764040470123  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  590.466742515564 us
+	Average read latency:  4.692091941833496 us
+	Average total latency:  595.1588344573975 us
+	Throughput:  12408850.724231692  bytes per second
+	Hit_rate:  99.984 %
+
+
+=====  Cache_Size=  300 Block Size=  1000  ======
+	 100000  requests completed in  0.01260611042380333  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  472.8022766113281 us
+	Average read latency:  7.5971150398254395 us
+	Average total latency:  480.39939165115356 us
+	Throughput:  7932660.958702714  bytes per second
+	Hit_rate:  99.697 %
+
+
+=====  Cache_Size=  300 Block Size=  2000  ======
+	 100000  requests completed in  0.009867094457149506  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  336.6725564002991 us
+	Average read latency:  5.848736763000488 us
+	Average total latency:  342.52129316329956 us
+	Throughput:  10134695.723678  bytes per second
+	Hit_rate:  99.8438 %
+
+
+=====  Cache_Size=  300 Block Size=  3000  ======
+	 100000  requests completed in  0.009184185415506363  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  433.8367795944214 us
+	Average read latency:  5.415349006652832 us
+	Average total latency:  439.2521286010742 us
+	Throughput:  10888281.91895629  bytes per second
+	Hit_rate:  99.895 %
+
+
+=====  Cache_Size=  300 Block Size=  4000  ======
+	 100000  requests completed in  0.008948307484388351  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  421.65859937667847 us
+	Average read latency:  5.256352424621582 us
+	Average total latency:  426.91495180130005 us
+	Throughput:  11175297.69450422  bytes per second
+	Hit_rate:  99.9206 %
+
+
+=====  Cache_Size=  300 Block Size=  5000  ======
+	 100000  requests completed in  0.008672729134559631  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  411.33410692214966 us
+	Average read latency:  5.082850456237793 us
+	Average total latency:  416.41695737838745 us
+	Throughput:  11530395.847543972  bytes per second
+	Hit_rate:  99.9367 %
+
+
+=====  Cache_Size=  300 Block Size=  6000  ======
+	 100000  requests completed in  0.008523307740688324  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  409.34381008148193 us
+	Average read latency:  4.992818832397461 us
+	Average total latency:  414.3366289138794 us
+	Throughput:  11732534.251065798  bytes per second
+	Hit_rate:  99.9464 %
+
+
+=====  Cache_Size=  300 Block Size=  7000  ======
+	 100000  requests completed in  0.008438900113105774  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  423.47004890441895 us
+	Average read latency:  4.935195446014404 us
+	Average total latency:  428.40524435043335 us
+	Throughput:  11849885.489780603  bytes per second
+	Hit_rate:  99.9544 %
+
+
+=====  Cache_Size=  300 Block Size=  8000  ======
+	 100000  requests completed in  0.008299317210912704  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  397.89913415908813 us
+	Average read latency:  4.851207733154297 us
+	Average total latency:  402.75034189224243 us
+	Throughput:  12049183.982088408  bytes per second
+	Hit_rate:  99.96 %
+
+
+=====  Cache_Size=  300 Block Size=  9000  ======
+	 100000  requests completed in  0.008390091359615326  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  400.67856550216675 us
+	Average read latency:  4.896974563598633 us
+	Average total latency:  405.5755400657654 us
+	Throughput:  11918821.346968606  bytes per second
+	Hit_rate:  99.9642 %
+
+
+=====  Cache_Size=  300 Block Size=  10000  ======
+	 100000  requests completed in  0.008236140012741089  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  429.59487438201904 us
+	Average read latency:  4.803411960601807 us
+	Average total latency:  434.39828634262085 us
+	Throughput:  12141610.007273149  bytes per second
+	Hit_rate:  99.9682 %
+
+
+=====  Cache_Size=  300 Block Size=  11000  ======
+	 100000  requests completed in  0.008255686610937119  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  460.5985474586487 us
+	Average read latency:  4.826474189758301 us
+	Average total latency:  465.425021648407 us
+	Throughput:  12112862.89229053  bytes per second
+	Hit_rate:  99.9702 %
+
+
+=====  Cache_Size=  300 Block Size=  12000  ======
+	 100000  requests completed in  0.008189436048269272  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  405.2023410797119 us
+	Average read latency:  4.778780937194824 us
+	Average total latency:  409.98112201690674 us
+	Throughput:  12210853.031953728  bytes per second
+	Hit_rate:  99.9731 %
+
+
+=====  Cache_Size=  300 Block Size=  13000  ======
+	 100000  requests completed in  0.008171994239091873  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  463.1368041038513 us
+	Average read latency:  4.774658679962158 us
+	Average total latency:  467.9114627838135 us
+	Throughput:  12236915.136532532  bytes per second
+	Hit_rate:  99.9751 %
+
+
+=====  Cache_Size=  300 Block Size=  14000  ======
+	 100000  requests completed in  0.008230894804000854  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  509.1786503791809 us
+	Average read latency:  4.801681041717529 us
+	Average total latency:  513.9803314208984 us
+	Throughput:  12149347.353023177  bytes per second
+	Hit_rate:  99.9771 %
+
+
+=====  Cache_Size=  300 Block Size=  15000  ======
+	 100000  requests completed in  0.008146882057189941  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  478.167359828949 us
+	Average read latency:  4.748802185058594 us
+	Average total latency:  482.91616201400757 us
+	Throughput:  12274634.553196471  bytes per second
+	Hit_rate:  99.9781 %
+
+
+=====  Cache_Size=  300 Block Size=  16000  ======
+	 100000  requests completed in  0.008161619305610657  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  495.4789066314697 us
+	Average read latency:  4.7519659996032715 us
+	Average total latency:  500.230872631073 us
+	Throughput:  12252470.52766301  bytes per second
+	Hit_rate:  99.98 %
+
+
+=====  Cache_Size=  300 Block Size=  17000  ======
+	 100000  requests completed in  0.008131079375743866  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  530.3729581832886 us
+	Average read latency:  4.73813533782959 us
+	Average total latency:  535.1110935211182 us
+	Throughput:  12298490.19778528  bytes per second
+	Hit_rate:  99.9811 %
+
+
+=====  Cache_Size=  300 Block Size=  18000  ======
+	 100000  requests completed in  0.00811556726694107  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  580.6158518791199 us
+	Average read latency:  4.722905158996582 us
+	Average total latency:  585.3387570381165 us
+	Throughput:  12321997.552451083  bytes per second
+	Hit_rate:  99.982 %
+
+
+=====  Cache_Size=  300 Block Size=  19000  ======
+	 100000  requests completed in  0.008089318871498108  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  549.0998959541321 us
+	Average read latency:  4.724330902099609 us
+	Average total latency:  553.8242268562317 us
+	Throughput:  12361980.234496607  bytes per second
+	Hit_rate:  99.983 %
+
+
+=====  Cache_Size=  300 Block Size=  20000  ======
+	 100000  requests completed in  0.008062943816184998  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  524.5910811424255 us
+	Average read latency:  4.690337181091309 us
+	Average total latency:  529.2814183235168 us
+	Throughput:  12402418.059675287  bytes per second
+	Hit_rate:  99.984 %
+
+
+=====  Cache_Size=  500 Block Size=  1000  ======
+	 100000  requests completed in  0.012055397033691406  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  361.0638952255249 us
+	Average read latency:  7.2452592849731445 us
+	Average total latency:  368.30915451049805 us
+	Throughput:  8295039.949371094  bytes per second
+	Hit_rate:  99.697 %
+
+
+=====  Cache_Size=  500 Block Size=  2000  ======
+	 100000  requests completed in  0.00978255644440651  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  349.58900213241577 us
+	Average read latency:  5.794262886047363 us
+	Average total latency:  355.38326501846313 us
+	Throughput:  10222276.821840186  bytes per second
+	Hit_rate:  99.8438 %
+
+
+=====  Cache_Size=  500 Block Size=  3000  ======
+	 100000  requests completed in  0.009076330810785294  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  347.1635866165161 us
+	Average read latency:  5.345773696899414 us
+	Average total latency:  352.5093603134155 us
+	Throughput:  11017668.051628442  bytes per second
+	Hit_rate:  99.895 %
+
+
+=====  Cache_Size=  500 Block Size=  4000  ======
+	 100000  requests completed in  0.008722979575395584  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  353.13183784484863 us
+	Average read latency:  5.117506980895996 us
+	Average total latency:  358.24934482574463 us
+	Throughput:  11463972.732673174  bytes per second
+	Hit_rate:  99.9206 %
+
+
+=====  Cache_Size=  500 Block Size=  5000  ======
+	 100000  requests completed in  0.008693896234035492  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  354.0023159980774 us
+	Average read latency:  5.095667839050293 us
+	Average total latency:  359.0979838371277 us
+	Throughput:  11502322.699517943  bytes per second
+	Hit_rate:  99.9367 %
+
+
+=====  Cache_Size=  500 Block Size=  6000  ======
+	 100000  requests completed in  0.008437678217887878  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  352.2504734992981 us
+	Average read latency:  4.93905782699585 us
+	Average total latency:  357.18953132629395 us
+	Throughput:  11851601.520901803  bytes per second
+	Hit_rate:  99.9464 %
+
+
+=====  Cache_Size=  500 Block Size=  7000  ======
+	 100000  requests completed in  0.008385803550481796  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  339.59803581237793 us
+	Average read latency:  4.900822639465332 us
+	Average total latency:  344.49885845184326 us
+	Throughput:  11924915.65036181  bytes per second
+	Hit_rate:  99.9544 %
+
+
+=====  Cache_Size=  500 Block Size=  8000  ======
+	 100000  requests completed in  0.008360277861356735  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  361.4188504219055 us
+	Average read latency:  4.883677959442139 us
+	Average total latency:  366.30252838134766 us
+	Throughput:  11961324.929429037  bytes per second
+	Hit_rate:  99.96 %
+
+
+=====  Cache_Size=  500 Block Size=  9000  ======
+	 100000  requests completed in  0.008383329957723618  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  368.78344774246216 us
+	Average read latency:  4.902081489562988 us
+	Average total latency:  373.68552923202515 us
+	Throughput:  11928434.22652944  bytes per second
+	Hit_rate:  99.9642 %
+
+
+=====  Cache_Size=  500 Block Size=  10000  ======
+	 100000  requests completed in  0.008271131664514542  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  418.2581043243408 us
+	Average read latency:  4.837689399719238 us
+	Average total latency:  423.09579372406006 us
+	Throughput:  12090244.002405118  bytes per second
+	Hit_rate:  99.9682 %
+
+
+=====  Cache_Size=  500 Block Size=  11000  ======
+	 100000  requests completed in  0.00827724114060402  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  444.1387915611267 us
+	Average read latency:  4.831273555755615 us
+	Average total latency:  448.9700651168823 us
+	Throughput:  12081320.128448335  bytes per second
+	Hit_rate:  99.9702 %
+
+
+=====  Cache_Size=  500 Block Size=  12000  ======
+	 100000  requests completed in  0.008202675729990005  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  456.2567472457886 us
+	Average read latency:  4.788522720336914 us
+	Average total latency:  461.0452699661255 us
+	Throughput:  12191143.876916593  bytes per second
+	Hit_rate:  99.9731 %
+
+
+=====  Cache_Size=  500 Block Size=  13000  ======
+	 100000  requests completed in  0.0067942216992378235  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  458.025119304657 us
+	Average read latency:  3.880293369293213 us
+	Average total latency:  461.9054126739502 us
+	Throughput:  14718389.305903576  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  500 Block Size=  14000  ======
+	 100000  requests completed in  0.007016260176897049  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  437.1639037132263 us
+	Average read latency:  4.020259380340576 us
+	Average total latency:  441.1841630935669 us
+	Throughput:  14252607.155201754  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  500 Block Size=  15000  ======
+	 100000  requests completed in  0.006841182708740234  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  432.5323963165283 us
+	Average read latency:  3.9145445823669434 us
+	Average total latency:  436.44694089889526 us
+	Throughput:  14617355.54471318  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  500 Block Size=  16000  ======
+	 100000  requests completed in  0.006925158202648163  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  463.07101488113403 us
+	Average read latency:  3.9722061157226562 us
+	Average total latency:  467.0432209968567 us
+	Throughput:  14440103.326702379  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  500 Block Size=  17000  ======
+	 100000  requests completed in  0.006882239133119583  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  504.5721244812012 us
+	Average read latency:  3.941218852996826 us
+	Average total latency:  508.513343334198 us
+	Throughput:  14530154.80365501  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  500 Block Size=  18000  ======
+	 100000  requests completed in  0.006877865642309189  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  514.179904460907 us
+	Average read latency:  3.936138153076172 us
+	Average total latency:  518.1160426139832 us
+	Throughput:  14539394.224983115  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  500 Block Size=  19000  ======
+	 100000  requests completed in  0.006843205541372299  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  493.8451409339905 us
+	Average read latency:  3.9188647270202637 us
+	Average total latency:  497.76400566101074 us
+	Throughput:  14613034.694840766  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  500 Block Size=  20000  ======
+	 100000  requests completed in  0.006804566830396652  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  543.7932419776917 us
+	Average read latency:  3.891589641571045 us
+	Average total latency:  547.6848316192627 us
+	Throughput:  14696012.618068561  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  700 Block Size=  1000  ======
+	 100000  requests completed in  0.012141752988100052  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  351.29497051239014 us
+	Average read latency:  7.297227382659912 us
+	Average total latency:  358.59219789505005 us
+	Throughput:  8236043.024265811  bytes per second
+	Hit_rate:  99.697 %
+
+
+=====  Cache_Size=  700 Block Size=  2000  ======
+	 100000  requests completed in  0.010024596005678177  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  332.3131203651428 us
+	Average read latency:  5.936369895935059 us
+	Average total latency:  338.2494902610779 us
+	Throughput:  9975464.342239583  bytes per second
+	Hit_rate:  99.8438 %
+
+
+=====  Cache_Size=  700 Block Size=  3000  ======
+	 100000  requests completed in  0.009047821164131165  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  329.5341086387634 us
+	Average read latency:  5.328323841094971 us
+	Average total latency:  334.8624324798584 us
+	Throughput:  11052384.677588033  bytes per second
+	Hit_rate:  99.895 %
+
+
+=====  Cache_Size=  700 Block Size=  4000  ======
+	 100000  requests completed in  0.009255465120077133  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  425.5762195587158 us
+	Average read latency:  5.455880165100098 us
+	Average total latency:  431.0320997238159 us
+	Throughput:  10804427.298102833  bytes per second
+	Hit_rate:  99.9206 %
+
+
+=====  Cache_Size=  700 Block Size=  5000  ======
+	 100000  requests completed in  0.008549943566322327  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  405.31368494033813 us
+	Average read latency:  4.997665882110596 us
+	Average total latency:  410.31135082244873 us
+	Throughput:  11695983.631271383  bytes per second
+	Hit_rate:  99.9367 %
+
+
+=====  Cache_Size=  700 Block Size=  6000  ======
+	 100000  requests completed in  0.00845942273736  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  370.68509101867676 us
+	Average read latency:  4.946537017822266 us
+	Average total latency:  375.631628036499 us
+	Throughput:  11821137.576960457  bytes per second
+	Hit_rate:  99.9464 %
+
+
+=====  Cache_Size=  700 Block Size=  7000  ======
+	 100000  requests completed in  0.00844535231590271  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  358.25891971588135 us
+	Average read latency:  4.933173656463623 us
+	Average total latency:  363.19209337234497 us
+	Throughput:  11840832.242332706  bytes per second
+	Hit_rate:  99.9544 %
+
+
+=====  Cache_Size=  700 Block Size=  8000  ======
+	 100000  requests completed in  0.008421074599027634  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  355.8116316795349 us
+	Average read latency:  4.922451972961426 us
+	Average total latency:  360.73408365249634 us
+	Throughput:  11874969.022545747  bytes per second
+	Hit_rate:  99.96 %
+
+
+=====  Cache_Size=  700 Block Size=  9000  ======
+	 100000  requests completed in  0.008239544928073883  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  363.4254765510559 us
+	Average read latency:  4.807333946228027 us
+	Average total latency:  368.23281049728394 us
+	Throughput:  12136592.599826565  bytes per second
+	Hit_rate:  99.9642 %
+
+
+=====  Cache_Size=  700 Block Size=  10000  ======
+	 100000  requests completed in  0.006930656731128693  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  410.54997205734253 us
+	Average read latency:  3.97352933883667 us
+	Average total latency:  414.5235013961792 us
+	Throughput:  14428647.079122398  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  700 Block Size=  11000  ======
+	 100000  requests completed in  0.006838962435722351  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  408.8776707649231 us
+	Average read latency:  3.9104771614074707 us
+	Average total latency:  412.78814792633057 us
+	Throughput:  14622101.07744768  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  700 Block Size=  12000  ======
+	 100000  requests completed in  0.00696185976266861  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  426.81487798690796 us
+	Average read latency:  3.9905714988708496 us
+	Average total latency:  430.8054494857788 us
+	Throughput:  14363977.932481097  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  700 Block Size=  13000  ======
+	 100000  requests completed in  0.006823744624853134  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  462.4789047241211 us
+	Average read latency:  3.9014124870300293 us
+	Average total latency:  466.3803172111511 us
+	Throughput:  14654710.206443617  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  700 Block Size=  14000  ======
+	 100000  requests completed in  0.006864603608846664  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  515.4877495765686 us
+	Average read latency:  3.9299416542053223 us
+	Average total latency:  519.4176912307739 us
+	Throughput:  14567483.528273411  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  700 Block Size=  15000  ======
+	 100000  requests completed in  0.0068957991898059845  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  516.8122887611389 us
+	Average read latency:  3.943297863006592 us
+	Average total latency:  520.7555866241455 us
+	Throughput:  14501582.376097808  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  700 Block Size=  16000  ======
+	 100000  requests completed in  0.006852351129055023  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  554.1950917243958 us
+	Average read latency:  3.9297890663146973 us
+	Average total latency:  558.1248807907104 us
+	Throughput:  14593531.200697614  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  700 Block Size=  17000  ======
+	 100000  requests completed in  0.006834540516138077  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  559.697003364563 us
+	Average read latency:  3.9064836502075195 us
+	Average total latency:  563.6034870147705 us
+	Throughput:  14631561.516663006  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  700 Block Size=  18000  ======
+	 100000  requests completed in  0.006935600191354752  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  532.8234648704529 us
+	Average read latency:  3.9809823036193848 us
+	Average total latency:  536.8044471740723 us
+	Throughput:  14418362.829600576  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  700 Block Size=  19000  ======
+	 100000  requests completed in  0.006832420825958252  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  530.7044005393982 us
+	Average read latency:  3.9090704917907715 us
+	Average total latency:  534.613471031189 us
+	Throughput:  14636100.812185397  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  700 Block Size=  20000  ======
+	 100000  requests completed in  0.0068490169942379  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  561.5770244598389 us
+	Average read latency:  3.9178013801574707 us
+	Average total latency:  565.4948258399963 us
+	Throughput:  14600635.402734483  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  900 Block Size=  1000  ======
+	 100000  requests completed in  0.012372307479381561  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  340.35661935806274 us
+	Average read latency:  7.44534969329834 us
+	Average total latency:  347.8019690513611 us
+	Throughput:  8082566.664839999  bytes per second
+	Hit_rate:  99.697 %
+
+
+=====  Cache_Size=  900 Block Size=  2000  ======
+	 100000  requests completed in  0.00989413261413574  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  459.38409328460693 us
+	Average read latency:  5.866873264312744 us
+	Average total latency:  465.2509665489197 us
+	Throughput:  10107000.168678764  bytes per second
+	Hit_rate:  99.8438 %
+
+
+=====  Cache_Size=  900 Block Size=  3000  ======
+	 100000  requests completed in  0.009167570620775223  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  413.20927381515503 us
+	Average read latency:  5.396580696105957 us
+	Average total latency:  418.605854511261 us
+	Throughput:  10908015.235070407  bytes per second
+	Hit_rate:  99.895 %
+
+
+=====  Cache_Size=  900 Block Size=  4000  ======
+	 100000  requests completed in  0.009102880954742432  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  356.8795132637024 us
+	Average read latency:  5.353579521179199 us
+	Average total latency:  362.2330927848816 us
+	Throughput:  10985533.096299788  bytes per second
+	Hit_rate:  99.9206 %
+
+
+=====  Cache_Size=  900 Block Size=  5000  ======
+	 100000  requests completed in  0.008555520325899124  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  401.006019115448 us
+	Average read latency:  5.004842281341553 us
+	Average total latency:  406.01086139678955 us
+	Throughput:  11688359.818079295  bytes per second
+	Hit_rate:  99.9367 %
+
+
+=====  Cache_Size=  900 Block Size=  6000  ======
+	 100000  requests completed in  0.008409224450588226  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  354.2814803123474 us
+	Average read latency:  4.914050102233887 us
+	Average total latency:  359.1955304145813 us
+	Throughput:  11891703.04438776  bytes per second
+	Hit_rate:  99.9464 %
+
+
+=====  Cache_Size=  900 Block Size=  7000  ======
+	 100000  requests completed in  0.008381735533475876  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  359.7602415084839 us
+	Average read latency:  4.902820587158203 us
+	Average total latency:  364.6630620956421 us
+	Throughput:  11930703.325177616  bytes per second
+	Hit_rate:  99.9544 %
+
+
+=====  Cache_Size=  900 Block Size=  8000  ======
+	 100000  requests completed in  0.006911884993314743  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  335.76473474502563 us
+	Average read latency:  3.9507508277893066 us
+	Average total latency:  339.71548557281494 us
+	Throughput:  14467833.318511691  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  900 Block Size=  9000  ======
+	 100000  requests completed in  0.006814468652009964  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  337.7371048927307 us
+	Average read latency:  3.8972902297973633 us
+	Average total latency:  341.6343951225281 us
+	Throughput:  14674658.451984288  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  900 Block Size=  10000  ======
+	 100000  requests completed in  0.006821274757385254  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  402.15041399002075 us
+	Average read latency:  3.8969016075134277 us
+	Average total latency:  406.0473155975342 us
+	Throughput:  14660016.427535346  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  900 Block Size=  11000  ======
+	 100000  requests completed in  0.007042054086923599  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  439.3741798400879 us
+	Average read latency:  4.035394191741943 us
+	Average total latency:  443.40957403182983 us
+	Throughput:  14200402.150516018  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  900 Block Size=  12000  ======
+	 100000  requests completed in  0.006919402629137039  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  441.6018009185791 us
+	Average read latency:  3.9644217491149902 us
+	Average total latency:  445.5662226676941 us
+	Throughput:  14452114.634709675  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  900 Block Size=  13000  ======
+	 100000  requests completed in  0.006925676017999649  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  499.83129024505615 us
+	Average read latency:  3.967280387878418 us
+	Average total latency:  503.79857063293457 us
+	Throughput:  14439023.676548345  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  900 Block Size=  14000  ======
+	 100000  requests completed in  0.006907600909471512  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  545.1939940452576 us
+	Average read latency:  3.9543962478637695 us
+	Average total latency:  549.1483902931213 us
+	Throughput:  14476806.24728663  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  900 Block Size=  15000  ======
+	 100000  requests completed in  0.0068703629076480865  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  493.50184202194214 us
+	Average read latency:  3.9269447326660156 us
+	Average total latency:  497.42878675460815 us
+	Throughput:  14555271.87489325  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  900 Block Size=  16000  ======
+	 100000  requests completed in  0.006824485957622528  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  540.194399356842 us
+	Average read latency:  3.9071130752563477 us
+	Average total latency:  544.1015124320984 us
+	Throughput:  14653118.289196009  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  900 Block Size=  17000  ======
+	 100000  requests completed in  0.006947796791791916  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  477.6566553115845 us
+	Average read latency:  3.9753293991088867 us
+	Average total latency:  481.63198471069336 us
+	Throughput:  14393051.926639447  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  900 Block Size=  18000  ======
+	 100000  requests completed in  0.006856411695480347  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  475.4059052467346 us
+	Average read latency:  3.9179635047912598 us
+	Average total latency:  479.3238687515259 us
+	Throughput:  14584888.487066586  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  900 Block Size=  19000  ======
+	 100000  requests completed in  0.006783254444599152  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  545.6557869911194 us
+	Average read latency:  3.8715505599975586 us
+	Average total latency:  549.527337551117 us
+	Throughput:  14742186.190526925  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  900 Block Size=  20000  ======
+	 100000  requests completed in  0.006774120032787323  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  618.0422210693359 us
+	Average read latency:  3.865339756011963 us
+	Average total latency:  621.9075608253479 us
+	Throughput:  14762064.964304058  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1100 Block Size=  1000  ======
+	 100000  requests completed in  0.012040920555591583  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  458.0934238433838 us
+	Average read latency:  7.233285903930664 us
+	Average total latency:  465.32670974731445 us
+	Throughput:  8305012.854981576  bytes per second
+	Hit_rate:  99.697 %
+
+
+=====  Cache_Size=  1100 Block Size=  2000  ======
+	 100000  requests completed in  0.009824622422456741  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  383.83025884628296 us
+	Average read latency:  5.816066265106201 us
+	Average total latency:  389.64632511138916 us
+	Throughput:  10178508.211310377  bytes per second
+	Hit_rate:  99.8438 %
+
+
+=====  Cache_Size=  1100 Block Size=  3000  ======
+	 100000  requests completed in  0.009030781686306  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  354.0555953979492 us
+	Average read latency:  5.31261682510376 us
+	Average total latency:  359.368212223053 us
+	Throughput:  11073238.56047112  bytes per second
+	Hit_rate:  99.895 %
+
+
+=====  Cache_Size=  1100 Block Size=  4000  ======
+	 100000  requests completed in  0.009094834327697754  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  372.4716782569885 us
+	Average read latency:  5.350401401519775 us
+	Average total latency:  377.8220796585083 us
+	Throughput:  10995252.51333674  bytes per second
+	Hit_rate:  99.9206 %
+
+
+=====  Cache_Size=  1100 Block Size=  5000  ======
+	 100000  requests completed in  0.008900392800569534  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  421.7526078224182 us
+	Average read latency:  5.224425792694092 us
+	Average total latency:  426.9770336151123 us
+	Throughput:  11235459.18036348  bytes per second
+	Hit_rate:  99.9367 %
+
+
+=====  Cache_Size=  1100 Block Size=  6000  ======
+	 100000  requests completed in  0.0069258734583854675  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  360.6658172607422 us
+	Average read latency:  3.9657163619995117 us
+	Average total latency:  364.6315336227417 us
+	Throughput:  14438612.053895598  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1100 Block Size=  7000  ======
+	 100000  requests completed in  0.0071187689900398254  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  379.129478931427 us
+	Average read latency:  4.0781426429748535 us
+	Average total latency:  383.20762157440186 us
+	Throughput:  14047372.535885667  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1100 Block Size=  8000  ======
+	 100000  requests completed in  0.006769314408302307  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  351.1027121543884 us
+	Average read latency:  3.865780830383301 us
+	Average total latency:  354.96849298477173 us
+	Throughput:  14772544.746533534  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1100 Block Size=  9000  ======
+	 100000  requests completed in  0.0069318972527980804  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  356.8744158744812 us
+	Average read latency:  3.9580607414245605 us
+	Average total latency:  360.83247661590576 us
+	Throughput:  14426064.950635947  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1100 Block Size=  10000  ======
+	 100000  requests completed in  0.00701141357421875  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  380.34510135650635 us
+	Average read latency:  4.018270969390869 us
+	Average total latency:  384.3633723258972 us
+	Throughput:  14262459.194776932  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1100 Block Size=  11000  ======
+	 100000  requests completed in  0.00693269819021225  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  406.3263964653015 us
+	Average read latency:  3.9668822288513184 us
+	Average total latency:  410.29327869415283 us
+	Throughput:  14424398.301541874  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1100 Block Size=  12000  ======
+	 100000  requests completed in  0.006932951509952545  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  441.40344858169556 us
+	Average read latency:  3.966224193572998 us
+	Average total latency:  445.36967277526855 us
+	Throughput:  14423871.25547406  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1100 Block Size=  13000  ======
+	 100000  requests completed in  0.00696905329823494  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  507.3490810394287 us
+	Average read latency:  3.9878416061401367 us
+	Average total latency:  511.33692264556885 us
+	Throughput:  14349151.272142963  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1100 Block Size=  14000  ======
+	 100000  requests completed in  0.006936855614185333  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  529.6811485290527 us
+	Average read latency:  3.977518081665039 us
+	Average total latency:  533.6586666107178 us
+	Throughput:  14415753.413622698  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1100 Block Size=  15000  ======
+	 100000  requests completed in  0.006860453635454178  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  479.68717098236084 us
+	Average read latency:  3.9217352867126465 us
+	Average total latency:  483.6089062690735 us
+	Throughput:  14576295.579523988  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1100 Block Size=  16000  ======
+	 100000  requests completed in  0.006967119872570038  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  514.0723705291748 us
+	Average read latency:  3.995065689086914 us
+	Average total latency:  518.0674362182617 us
+	Throughput:  14353133.26439321  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1100 Block Size=  17000  ======
+	 100000  requests completed in  0.0068566277623176575  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  571.7665028572083 us
+	Average read latency:  3.924083709716797 us
+	Average total latency:  575.690586566925 us
+	Throughput:  14584428.886394482  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1100 Block Size=  18000  ======
+	 100000  requests completed in  0.006806761026382446  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  481.3432717323303 us
+	Average read latency:  3.8892269134521484 us
+	Average total latency:  485.23249864578247 us
+	Throughput:  14691275.279447628  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1100 Block Size=  19000  ======
+	 100000  requests completed in  0.006941225379705429  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  516.9418501853943 us
+	Average read latency:  3.9716124534606934 us
+	Average total latency:  520.913462638855 us
+	Throughput:  14406678.148267213  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1100 Block Size=  20000  ======
+	 100000  requests completed in  0.006823252886533737  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  529.9532985687256 us
+	Average read latency:  3.8969063758850098 us
+	Average total latency:  533.8502049446106 us
+	Throughput:  14655766.34237878  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1300 Block Size=  1000  ======
+	 100000  requests completed in  0.012474425137043  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  505.47370195388794 us
+	Average read latency:  7.508571147918701 us
+	Average total latency:  512.9822731018066 us
+	Throughput:  8016401.4695193  bytes per second
+	Hit_rate:  99.697 %
+
+
+=====  Cache_Size=  1300 Block Size=  2000  ======
+	 100000  requests completed in  0.010036841034889221  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  456.3482332229614 us
+	Average read latency:  5.956623554229736 us
+	Average total latency:  462.30485677719116 us
+	Throughput:  9963294.193102036  bytes per second
+	Hit_rate:  99.8438 %
+
+
+=====  Cache_Size=  1300 Block Size=  3000  ======
+	 100000  requests completed in  0.009136416018009186  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  365.1969504356384 us
+	Average read latency:  5.375869274139404 us
+	Average total latency:  370.57281970977783 us
+	Throughput:  10945210.87950523  bytes per second
+	Hit_rate:  99.895 %
+
+
+=====  Cache_Size=  1300 Block Size=  4000  ======
+	 100000  requests completed in  0.008904267102479935  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  402.55844354629517 us
+	Average read latency:  5.2295756340026855 us
+	Average total latency:  407.78801918029785 us
+	Throughput:  11230570.562303653  bytes per second
+	Hit_rate:  99.9206 %
+
+
+=====  Cache_Size=  1300 Block Size=  5000  ======
+	 100000  requests completed in  0.006932362914085388  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  424.45510149002075 us
+	Average read latency:  3.9684486389160156 us
+	Average total latency:  428.42355012893677 us
+	Throughput:  14425095.921740757  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1300 Block Size=  6000  ======
+	 100000  requests completed in  0.007026277482509613  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  410.2593803405762 us
+	Average read latency:  4.031932353973389 us
+	Average total latency:  414.29131269454956 us
+	Throughput:  14232287.33122599  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1300 Block Size=  7000  ======
+	 100000  requests completed in  0.006846081465482712  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  370.69509744644165 us
+	Average read latency:  3.914916515350342 us
+	Average total latency:  374.610013961792 us
+	Throughput:  14606896.003822105  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1300 Block Size=  8000  ======
+	 100000  requests completed in  0.006965756416320801  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  386.10313653945923 us
+	Average read latency:  3.988327980041504 us
+	Average total latency:  390.09146451950073 us
+	Throughput:  14355942.703609262  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1300 Block Size=  9000  ======
+	 100000  requests completed in  0.006876807659864426  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  359.18200969696045 us
+	Average read latency:  3.9258193969726562 us
+	Average total latency:  363.1078290939331 us
+	Throughput:  14541631.080310231  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1300 Block Size=  10000  ======
+	 100000  requests completed in  0.006853282451629639  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  375.57881116867065 us
+	Average read latency:  3.9180850982666016 us
+	Average total latency:  379.49689626693726 us
+	Throughput:  14591548.02181268  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1300 Block Size=  11000  ======
+	 100000  requests completed in  0.006911952048540115  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  383.3068633079529 us
+	Average read latency:  3.9545106887817383 us
+	Average total latency:  387.2613739967346 us
+	Throughput:  14467692.96108198  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1300 Block Size=  12000  ======
+	 100000  requests completed in  0.0069074854254722595  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  480.09437084198 us
+	Average read latency:  3.948233127593994 us
+	Average total latency:  484.042603969574 us
+	Throughput:  14477048.280295586  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1300 Block Size=  13000  ======
+	 100000  requests completed in  0.0069471076130867004  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  487.444429397583 us
+	Average read latency:  3.964059352874756 us
+	Average total latency:  491.40848875045776 us
+	Throughput:  14394479.770490924  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1300 Block Size=  14000  ======
+	 100000  requests completed in  0.0068910494446754456  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  490.11842250823975 us
+	Average read latency:  3.9405035972595215 us
+	Average total latency:  494.05892610549927 us
+	Throughput:  14511577.779675879  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1300 Block Size=  15000  ======
+	 100000  requests completed in  0.007069490849971771  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  445.3557324409485 us
+	Average read latency:  4.050993919372559 us
+	Average total latency:  449.40672636032104 us
+	Throughput:  14145290.251051009  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1300 Block Size=  16000  ======
+	 100000  requests completed in  0.006944168359041214  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  446.50134563446045 us
+	Average read latency:  3.979341983795166 us
+	Average total latency:  450.4806876182556 us
+	Throughput:  14400572.513453154  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1300 Block Size=  17000  ======
+	 100000  requests completed in  0.0069520846009254456  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  464.3590307235718 us
+	Average read latency:  3.983945846557617 us
+	Average total latency:  468.3429765701294 us
+	Throughput:  14384174.78214926  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1300 Block Size=  18000  ======
+	 100000  requests completed in  0.006898142397403717  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  514.6117782592773 us
+	Average read latency:  3.9487671852111816 us
+	Average total latency:  518.5605454444885 us
+	Throughput:  14496656.38065654  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1300 Block Size=  19000  ======
+	 100000  requests completed in  0.006863117218017578  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  518.3545160293579 us
+	Average read latency:  3.9237403869628906 us
+	Average total latency:  522.2782564163208 us
+	Throughput:  14570638.504828736  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1300 Block Size=  20000  ======
+	 100000  requests completed in  0.006834711879491806  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  498.6902046203613 us
+	Average read latency:  3.9044189453125 us
+	Average total latency:  502.5946235656738 us
+	Throughput:  14631194.666750968  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1500 Block Size=  1000  ======
+	 100000  requests completed in  0.011991314589977264  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  438.7487053871155 us
+	Average read latency:  7.203540802001953 us
+	Average total latency:  445.95224618911743 us
+	Throughput:  8339369.236762689  bytes per second
+	Hit_rate:  99.697 %
+
+
+=====  Cache_Size=  1500 Block Size=  2000  ======
+	 100000  requests completed in  0.010138604789972305  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  405.6052231788635 us
+	Average read latency:  6.014354228973389 us
+	Average total latency:  411.6195774078369 us
+	Throughput:  9863290.075070888  bytes per second
+	Hit_rate:  99.8438 %
+
+
+=====  Cache_Size=  1500 Block Size=  3000  ======
+	 100000  requests completed in  0.009151585400104523  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  330.8617687225342 us
+	Average read latency:  5.392360687255859 us
+	Average total latency:  336.25412940979004 us
+	Throughput:  10927068.439841896  bytes per second
+	Hit_rate:  99.895 %
+
+
+=====  Cache_Size=  1500 Block Size=  4000  ======
+	 100000  requests completed in  0.009066194295883179  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  426.04327917099 us
+	Average read latency:  5.323739051818848 us
+	Average total latency:  431.36701822280884 us
+	Throughput:  11029986.423896572  bytes per second
+	Hit_rate:  99.9206 %
+
+
+=====  Cache_Size=  1500 Block Size=  5000  ======
+	 100000  requests completed in  0.006905559450387955  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  405.0490140914917 us
+	Average read latency:  3.9500927925109863 us
+	Average total latency:  408.9991068840027 us
+	Throughput:  14481085.959571602  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1500 Block Size=  6000  ======
+	 100000  requests completed in  0.007071465253829956  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  379.0254020690918 us
+	Average read latency:  4.056639671325684 us
+	Average total latency:  383.0820417404175 us
+	Throughput:  14141340.784477346  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1500 Block Size=  7000  ======
+	 100000  requests completed in  0.00698031485080719  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  413.6077380180359 us
+	Average read latency:  3.996882438659668 us
+	Average total latency:  417.60462045669556 us
+	Throughput:  14326001.353425512  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1500 Block Size=  8000  ======
+	 100000  requests completed in  0.006913304328918457  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  351.5237355232239 us
+	Average read latency:  3.956773281097412 us
+	Average total latency:  355.4805088043213 us
+	Throughput:  14464863.000706982  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1500 Block Size=  9000  ======
+	 100000  requests completed in  0.006884511560201645  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  360.77369689941406 us
+	Average read latency:  3.9362025260925293 us
+	Average total latency:  364.7098994255066 us
+	Throughput:  14525358.716526149  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1500 Block Size=  10000  ======
+	 100000  requests completed in  0.0070345439016819  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  382.68954277038574 us
+	Average read latency:  4.0410590171813965 us
+	Average total latency:  386.73060178756714 us
+	Throughput:  14215562.714178363  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1500 Block Size=  11000  ======
+	 100000  requests completed in  0.006959106773138046  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  405.4232096672058 us
+	Average read latency:  3.9806103706359863 us
+	Average total latency:  409.4038200378418 us
+	Throughput:  14369660.253812622  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1500 Block Size=  12000  ======
+	 100000  requests completed in  0.006885495036840439  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  424.6839761734009 us
+	Average read latency:  3.9418411254882812 us
+	Average total latency:  428.62581729888916 us
+	Throughput:  14523284.014432635  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1500 Block Size=  13000  ======
+	 100000  requests completed in  0.006915077567100525  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  445.08743047714233 us
+	Average read latency:  3.945901393890381 us
+	Average total latency:  449.0333318710327 us
+	Throughput:  14461153.765760252  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1500 Block Size=  14000  ======
+	 100000  requests completed in  0.0068719349801540375  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  459.67238664627075 us
+	Average read latency:  3.9281272888183594 us
+	Average total latency:  463.6005139350891 us
+	Throughput:  14551942.107833862  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1500 Block Size=  15000  ======
+	 100000  requests completed in  0.007004059851169586  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  508.7621474266052 us
+	Average read latency:  4.008798599243164 us
+	Average total latency:  512.7709460258484 us
+	Throughput:  14277433.677740676  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1500 Block Size=  16000  ======
+	 100000  requests completed in  0.006809215992689133  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  535.954053401947 us
+	Average read latency:  3.9091944694519043 us
+	Average total latency:  539.8632478713989 us
+	Throughput:  14685978.54839195  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1500 Block Size=  17000  ======
+	 100000  requests completed in  0.006975580006837845  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  556.8011927604675 us
+	Average read latency:  3.9949464797973633 us
+	Average total latency:  560.7961392402649 us
+	Throughput:  14335725.474007113  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1500 Block Size=  18000  ======
+	 100000  requests completed in  0.006920658051967621  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  586.5747308731079 us
+	Average read latency:  3.9610648155212402 us
+	Average total latency:  590.5357956886292 us
+	Throughput:  14449492.988830574  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1500 Block Size=  19000  ======
+	 100000  requests completed in  0.006882369518280029  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  593.3625340461731 us
+	Average read latency:  3.935105800628662 us
+	Average total latency:  597.2976398468018 us
+	Throughput:  14529879.532680333  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1500 Block Size=  20000  ======
+	 100000  requests completed in  0.006851129233837128  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  529.8684287071228 us
+	Average read latency:  3.914949893951416 us
+	Average total latency:  533.7833786010742 us
+	Throughput:  14596133.949146478  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  1000  ======
+	 100000  requests completed in  0.01204545795917511  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  396.4137816429138 us
+	Average read latency:  7.23745584487915 us
+	Average total latency:  403.65123748779297 us
+	Throughput:  8301884.439672075  bytes per second
+	Hit_rate:  99.697 %
+
+
+=====  Cache_Size=  1700 Block Size=  2000  ======
+	 100000  requests completed in  0.009883847087621689  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  397.59814500808716 us
+	Average read latency:  5.8490800857543945 us
+	Average total latency:  403.44722509384155 us
+	Throughput:  10117517.917212397  bytes per second
+	Hit_rate:  99.8438 %
+
+
+=====  Cache_Size=  1700 Block Size=  3000  ======
+	 100000  requests completed in  0.009195778518915176  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  431.1305832862854 us
+	Average read latency:  5.413084030151367 us
+	Average total latency:  436.54366731643677 us
+	Throughput:  10874555.079192683  bytes per second
+	Hit_rate:  99.895 %
+
+
+=====  Cache_Size=  1700 Block Size=  4000  ======
+	 100000  requests completed in  0.006918452680110931  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  424.61135625839233 us
+	Average read latency:  3.9638257026672363 us
+	Average total latency:  428.57518196105957 us
+	Throughput:  14454099.005038882  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  5000  ======
+	 100000  requests completed in  0.006891574710607529  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  408.3390402793884 us
+	Average read latency:  3.941528797149658 us
+	Average total latency:  412.2805690765381 us
+	Throughput:  14510471.728047837  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  6000  ======
+	 100000  requests completed in  0.006928417831659317  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  416.255624294281 us
+	Average read latency:  3.9609217643737793 us
+	Average total latency:  420.2165460586548 us
+	Throughput:  14433309.657372463  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  7000  ======
+	 100000  requests completed in  0.0068808868527412415  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  407.39277362823486 us
+	Average read latency:  3.9379215240478516 us
+	Average total latency:  411.3306951522827 us
+	Throughput:  14533010.372080382  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  8000  ======
+	 100000  requests completed in  0.006852302700281143  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  411.0059714317322 us
+	Average read latency:  3.9167070388793945 us
+	Average total latency:  414.9226784706116 us
+	Throughput:  14593634.340744622  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  9000  ======
+	 100000  requests completed in  0.0068774111568927765  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  402.74356603622437 us
+	Average read latency:  3.9347362518310547 us
+	Average total latency:  406.6783022880554 us
+	Throughput:  14540355.043303844  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  10000  ======
+	 100000  requests completed in  0.006968099623918533  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  425.61681270599365 us
+	Average read latency:  3.9909744262695312 us
+	Average total latency:  429.6077871322632 us
+	Throughput:  14351115.13858705  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  11000  ======
+	 100000  requests completed in  0.006991181522607803  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  467.2725009918213 us
+	Average read latency:  3.9981651306152344 us
+	Average total latency:  471.2706661224365 us
+	Throughput:  14303733.879119573  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  12000  ======
+	 100000  requests completed in  0.006953995674848557  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  459.0136408805847 us
+	Average read latency:  3.979630470275879 us
+	Average total latency:  462.9932713508606 us
+	Throughput:  14380221.771158606  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  13000  ======
+	 100000  requests completed in  0.006815023720264435  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  466.16066694259644 us
+	Average read latency:  3.891754150390625 us
+	Average total latency:  470.05242109298706 us
+	Throughput:  14673463.234273208  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  14000  ======
+	 100000  requests completed in  0.006920173764228821  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  510.379741191864 us
+	Average read latency:  3.959810733795166 us
+	Average total latency:  514.3395519256592 us
+	Throughput:  14450504.193537967  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  15000  ======
+	 100000  requests completed in  0.0068306028842926025  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  527.4536824226379 us
+	Average read latency:  3.9005637168884277 us
+	Average total latency:  531.3542461395264 us
+	Throughput:  14639996.16050821  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  16000  ======
+	 100000  requests completed in  0.00699109211564064  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  556.6854238510132 us
+	Average read latency:  4.005546569824219 us
+	Average total latency:  560.6909704208374 us
+	Throughput:  14303916.805255303  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  17000  ======
+	 100000  requests completed in  0.00689157098531723  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  562.1051955223083 us
+	Average read latency:  3.945462703704834 us
+	Average total latency:  566.0506582260132 us
+	Throughput:  14510479.57179198  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  18000  ======
+	 100000  requests completed in  0.006901927292346954  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  582.9005312919617 us
+	Average read latency:  3.9459848403930664 us
+	Average total latency:  586.8465161323547 us
+	Throughput:  14488706.67050966  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  19000  ======
+	 100000  requests completed in  0.006874516606330872  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  598.1464767456055 us
+	Average read latency:  3.923366069793701 us
+	Average total latency:  602.0698428153992 us
+	Throughput:  14546477.334552966  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1700 Block Size=  20000  ======
+	 100000  requests completed in  0.006942000240087509  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  588.7108373641968 us
+	Average read latency:  3.975653648376465 us
+	Average total latency:  592.6864910125732 us
+	Throughput:  14405070.086649755  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  1000  ======
+	 100000  requests completed in  0.012355923652648926  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  496.01903915405273 us
+	Average read latency:  7.432589530944824 us
+	Average total latency:  503.45162868499756 us
+	Throughput:  8093284.064486874  bytes per second
+	Hit_rate:  99.697 %
+
+
+=====  Cache_Size=  1900 Block Size=  2000  ======
+	 100000  requests completed in  0.010082505643367767  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  452.0042824745178 us
+	Average read latency:  5.983572006225586 us
+	Average total latency:  457.9878544807434 us
+	Throughput:  9918169.504400883  bytes per second
+	Hit_rate:  99.8438 %
+
+
+=====  Cache_Size=  1900 Block Size=  3000  ======
+	 100000  requests completed in  0.009228561073541641  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  424.6269750595093 us
+	Average read latency:  5.430939197540283 us
+	Average total latency:  430.05791425704956 us
+	Throughput:  10835925.47127426  bytes per second
+	Hit_rate:  99.895 %
+
+
+=====  Cache_Size=  1900 Block Size=  4000  ======
+	 100000  requests completed in  0.006953578442335129  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  419.61272716522217 us
+	Average read latency:  3.9793801307678223 us
+	Average total latency:  423.59210729599 us
+	Throughput:  14381084.621290088  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  5000  ======
+	 100000  requests completed in  0.006868176162242889  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  415.5589771270752 us
+	Average read latency:  3.9217257499694824 us
+	Average total latency:  419.4807028770447 us
+	Throughput:  14559906.099925041  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  6000  ======
+	 100000  requests completed in  0.00699305534362793  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  330.3640913963318 us
+	Average read latency:  4.005367755889893 us
+	Average total latency:  334.3694591522217 us
+	Throughput:  14299901.128498858  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  7000  ======
+	 100000  requests completed in  0.006980709731578827  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  412.7964782714844 us
+	Average read latency:  3.997504711151123 us
+	Average total latency:  416.7939829826355 us
+	Throughput:  14325190.968423637  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  8000  ======
+	 100000  requests completed in  0.006898920983076096  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  415.258104801178 us
+	Average read latency:  3.9485549926757812 us
+	Average total latency:  419.20665979385376 us
+	Throughput:  14495020.343806276  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  9000  ======
+	 100000  requests completed in  0.006830025464296341  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  399.2440414428711 us
+	Average read latency:  3.9048099517822266 us
+	Average total latency:  403.1488513946533 us
+	Throughput:  14641233.846454252  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  10000  ======
+	 100000  requests completed in  0.0069990865886211395  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  419.73716259002686 us
+	Average read latency:  4.006369113922119 us
+	Average total latency:  423.743531703949 us
+	Throughput:  14287578.63384293  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  11000  ======
+	 100000  requests completed in  0.006822235882282257  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  447.77220487594604 us
+	Average read latency:  3.897061347961426 us
+	Average total latency:  451.66926622390747 us
+	Throughput:  14657951.106572818  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  12000  ======
+	 100000  requests completed in  0.006817236542701721  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  478.130886554718 us
+	Average read latency:  3.890516757965088 us
+	Average total latency:  482.0214033126831 us
+	Throughput:  14668700.341204423  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  13000  ======
+	 100000  requests completed in  0.0068630650639534  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  496.4088034629822 us
+	Average read latency:  3.9249515533447266 us
+	Average total latency:  500.3337550163269 us
+	Throughput:  14570749.230577162  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  14000  ======
+	 100000  requests completed in  0.00686277449131012  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  502.5048494338989 us
+	Average read latency:  3.921074867248535 us
+	Average total latency:  506.42592430114746 us
+	Throughput:  14571366.16198353  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  15000  ======
+	 100000  requests completed in  0.006924334913492203  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  489.2179012298584 us
+	Average read latency:  3.95993709564209 us
+	Average total latency:  493.1778383255005 us
+	Throughput:  14441820.225238966  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  16000  ======
+	 100000  requests completed in  0.006874445825815201  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  467.1001172065735 us
+	Average read latency:  3.9396142959594727 us
+	Average total latency:  471.03973150253296 us
+	Throughput:  14546627.107668214  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  17000  ======
+	 100000  requests completed in  0.006849698722362518  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  557.6456451416016 us
+	Average read latency:  3.9028191566467285 us
+	Average total latency:  561.5484642982483 us
+	Throughput:  14599182.249217112  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  18000  ======
+	 100000  requests completed in  0.006801344454288483  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  595.9767150878906 us
+	Average read latency:  3.8855624198913574 us
+	Average total latency:  599.862277507782 us
+	Throughput:  14702975.37083959  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  19000  ======
+	 100000  requests completed in  0.006886694580316544  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  611.4125752449036 us
+	Average read latency:  3.93951416015625 us
+	Average total latency:  615.3520894050598 us
+	Throughput:  14520754.308724338  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  1900 Block Size=  20000  ======
+	 100000  requests completed in  0.007058858871459961  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  600.7776188850403 us
+	Average read latency:  4.0367913246154785 us
+	Average total latency:  604.8144102096558 us
+	Throughput:  14166595.737494512  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  1000  ======
+	 100000  requests completed in  0.012698952108621597  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  504.9631381034851 us
+	Average read latency:  7.651827335357666 us
+	Average total latency:  512.6149654388428 us
+	Throughput:  7874665.495596901  bytes per second
+	Hit_rate:  99.697 %
+
+
+=====  Cache_Size=  2100 Block Size=  2000  ======
+	 100000  requests completed in  0.009985674172639847  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  462.29004859924316 us
+	Average read latency:  5.924367904663086 us
+	Average total latency:  468.21441650390625 us
+	Throughput:  10014346.379736088  bytes per second
+	Hit_rate:  99.8438 %
+
+
+=====  Cache_Size=  2100 Block Size=  3000  ======
+	 100000  requests completed in  0.009294271469116211  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  435.97448348999023 us
+	Average read latency:  5.475244522094727 us
+	Average total latency:  441.44972801208496 us
+	Throughput:  10759315.599107303  bytes per second
+	Hit_rate:  99.895 %
+
+
+=====  Cache_Size=  2100 Block Size=  4000  ======
+	 100000  requests completed in  0.0069428905844688416  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  416.16759061813354 us
+	Average read latency:  3.9708566665649414 us
+	Average total latency:  420.1384472846985 us
+	Throughput:  14403222.805166876  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  5000  ======
+	 100000  requests completed in  0.006892170757055283  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  421.2071657180786 us
+	Average read latency:  3.9451026916503906 us
+	Average total latency:  425.152268409729 us
+	Throughput:  14509216.838197658  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  6000  ======
+	 100000  requests completed in  0.006877698004245758  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  397.91942596435547 us
+	Average read latency:  3.932797908782959 us
+	Average total latency:  401.8522238731384 us
+	Throughput:  14539748.610402456  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  7000  ======
+	 100000  requests completed in  0.006860259920358658  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  345.01352548599243 us
+	Average read latency:  3.9200353622436523 us
+	Average total latency:  348.9335608482361 us
+	Throughput:  14576707.174496086  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  8000  ======
+	 100000  requests completed in  0.006850283592939377  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  357.15461254119873 us
+	Average read latency:  3.916635513305664 us
+	Average total latency:  361.0712480545044 us
+	Throughput:  14597935.785179831  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  9000  ======
+	 100000  requests completed in  0.006933741271495819  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  356.18794202804565 us
+	Average read latency:  3.978903293609619 us
+	Average total latency:  360.1668453216553 us
+	Throughput:  14422228.359038115  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  10000  ======
+	 100000  requests completed in  0.006923388689756393  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  392.4429154396057 us
+	Average read latency:  3.9681077003479004 us
+	Average total latency:  396.4110231399536 us
+	Throughput:  14443793.997577595  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  11000  ======
+	 100000  requests completed in  0.006896905601024628  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  417.7537989616394 us
+	Average read latency:  3.943765163421631 us
+	Average total latency:  421.69756412506104 us
+	Throughput:  14499256.012021342  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  12000  ======
+	 100000  requests completed in  0.006898671388626099  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  421.25555753707886 us
+	Average read latency:  3.9444494247436523 us
+	Average total latency:  425.2000069618225 us
+	Throughput:  14495544.774733132  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  13000  ======
+	 100000  requests completed in  0.006910897791385651  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  404.4789719581604 us
+	Average read latency:  3.9533185958862305 us
+	Average total latency:  408.43229055404663 us
+	Throughput:  14469900.007007595  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  14000  ======
+	 100000  requests completed in  0.006902020424604416  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  425.8759832382202 us
+	Average read latency:  3.948345184326172 us
+	Average total latency:  429.8243284225464 us
+	Throughput:  14488511.167471867  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  15000  ======
+	 100000  requests completed in  0.006847765296697617  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  466.96779012680054 us
+	Average read latency:  3.9148330688476562 us
+	Average total latency:  470.8826231956482 us
+	Throughput:  14603304.241199054  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  16000  ======
+	 100000  requests completed in  0.006833482533693314  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  486.664297580719 us
+	Average read latency:  3.911435604095459 us
+	Average total latency:  490.57573318481445 us
+	Throughput:  14633826.823576102  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  17000  ======
+	 100000  requests completed in  0.0068096257746219635  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  509.8747515678406 us
+	Average read latency:  3.8954997062683105 us
+	Average total latency:  513.7702512741089 us
+	Throughput:  14685094.792239374  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  18000  ======
+	 100000  requests completed in  0.0069260671734809875  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  489.3870973587036 us
+	Average read latency:  3.965771198272705 us
+	Average total latency:  493.3528685569763 us
+	Throughput:  14438208.220516114  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  19000  ======
+	 100000  requests completed in  0.006918326020240784  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  582.6260828971863 us
+	Average read latency:  3.9649248123168945 us
+	Average total latency:  586.5910077095032 us
+	Throughput:  14454363.628923  bytes per second
+	Hit_rate:  100.0 %
+
+
+=====  Cache_Size=  2100 Block Size=  20000  ======
+	 100000  requests completed in  0.006807837635278702  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  626.0547685623169 us
+	Average read latency:  3.8917064666748047 us
+	Average total latency:  629.9464750289917 us
+	Throughput:  14688951.963512298  bytes per second
+	Hit_rate:  100.0 %
+
+

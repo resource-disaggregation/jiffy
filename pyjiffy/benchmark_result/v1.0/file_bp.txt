@@ -1,0 +1,1197 @@
+host:  frog.zoo.cs.yale.edu
+service-port:  9090
+lease-port:  9091
+num-blocks:  1
+chain-length:  1
+num-ops:  100000
+data-size:  64
+path:  /tmp
+backing-path:  local://tmp
+=====  Block Size=  100 Prefetch Size=  100  ======
+	 100000  requests completed in  0.8728456497192383  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  503.7208127975464 us
+	Average read latency:  13.75509262084961 us
+	Average total latency:  517.475905418396 us
+	Throughput:  114567.79332309928  requests per second
+	Hit_rate:  99.6 %
+
+
+=====  Block Size=  100 Prefetch Size=  150  ======
+	 100000  requests completed in  0.7151636481285095  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  518.2882809638977 us
+	Average read latency:  11.230239868164062 us
+	Average total latency:  529.5185208320618 us
+	Throughput:  139828.13620586984  requests per second
+	Hit_rate:  99.7331 %
+
+
+=====  Block Size=  100 Prefetch Size=  200  ======
+	 100000  requests completed in  0.683952122926712  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  510.59104204177856 us
+	Average read latency:  10.731182098388672 us
+	Average total latency:  521.3222241401672 us
+	Throughput:  146209.0644182639  requests per second
+	Hit_rate:  99.8 %
+
+
+=====  Block Size=  100 Prefetch Size=  250  ======
+	 100000  requests completed in  0.658702403306961  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  573.644597530365 us
+	Average read latency:  10.327486991882324 us
+	Average total latency:  583.9720845222473 us
+	Throughput:  151813.6255431258  requests per second
+	Hit_rate:  99.84 %
+
+
+=====  Block Size=  100 Prefetch Size=  300  ======
+	 100000  requests completed in  0.6447595357894897  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  691.2313270568848 us
+	Average read latency:  10.100500583648682 us
+	Average total latency:  701.3318276405334 us
+	Throughput:  155096.5816698668  requests per second
+	Hit_rate:  99.8662 %
+
+
+=====  Block Size=  100 Prefetch Size=  350  ======
+	 100000  requests completed in  0.6223495304584503  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  719.0158772468567 us
+	Average read latency:  9.746553897857666 us
+	Average total latency:  728.7624311447144 us
+	Throughput:  160681.40989250134  requests per second
+	Hit_rate:  99.8856 %
+
+
+=====  Block Size=  100 Prefetch Size=  400  ======
+	 100000  requests completed in  0.6205935776233673  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  698.9684295654297 us
+	Average read latency:  9.713504314422607 us
+	Average total latency:  708.6819338798523 us
+	Throughput:  161136.05361976387  requests per second
+	Hit_rate:  99.9 %
+
+
+=====  Block Size=  100 Prefetch Size=  450  ======
+	 100000  requests completed in  0.6118907034397125  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  680.2211403846741 us
+	Average read latency:  9.575114250183105 us
+	Average total latency:  689.7962546348572 us
+	Throughput:  163427.87925663043  requests per second
+	Hit_rate:  99.9106 %
+
+
+=====  Block Size=  100 Prefetch Size=  500  ======
+	 100000  requests completed in  0.6033000349998474  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  695.0430369377136 us
+	Average read latency:  9.44070816040039 us
+	Average total latency:  704.483745098114 us
+	Throughput:  165755.00447306503  requests per second
+	Hit_rate:  99.92 %
+
+
+=====  Block Size=  500 Prefetch Size=  100  ======
+	 100000  requests completed in  0.5960098334721156  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  506.09023094177246 us
+	Average read latency:  6.452932357788086 us
+	Average total latency:  512.5431632995605 us
+	Throughput:  167782.4666372363  requests per second
+	Hit_rate:  99.8857 %
+
+
+=====  Block Size=  500 Prefetch Size=  150  ======
+	 100000  requests completed in  0.5659888897623334  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  507.7842450141907 us
+	Average read latency:  6.134383678436279 us
+	Average total latency:  513.918628692627 us
+	Throughput:  176681.9133887794  requests per second
+	Hit_rate:  99.9232 %
+
+
+=====  Block Size=  500 Prefetch Size=  200  ======
+	 100000  requests completed in  0.5555031555039541  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  500.8902645111084 us
+	Average read latency:  6.007833480834961 us
+	Average total latency:  506.89809799194336 us
+	Throughput:  180016.9792182003  requests per second
+	Hit_rate:  99.9429 %
+
+
+=====  Block Size=  500 Prefetch Size=  250  ======
+	 100000  requests completed in  0.5451496158327376  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  457.29519844055176 us
+	Average read latency:  5.8959197998046875 us
+	Average total latency:  463.19111824035645 us
+	Throughput:  183435.8808952769  requests per second
+	Hit_rate:  99.9536 %
+
+
+=====  Block Size=  500 Prefetch Size=  300  ======
+	 100000  requests completed in  0.5400446908814567  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  362.85807371139526 us
+	Average read latency:  5.83958625793457 us
+	Average total latency:  368.69765996932983 us
+	Throughput:  185169.86036244666  requests per second
+	Hit_rate:  99.9616 %
+
+
+=====  Block Size=  500 Prefetch Size=  350  ======
+	 100000  requests completed in  0.5404080663408551  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  370.25208950042725 us
+	Average read latency:  5.842022895812988 us
+	Average total latency:  376.09411239624023 us
+	Throughput:  185045.35040919678  requests per second
+	Hit_rate:  99.967 %
+
+
+=====  Block Size=  500 Prefetch Size=  400  ======
+	 100000  requests completed in  0.5356820566313607  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  447.57975578308105 us
+	Average read latency:  5.787136554718018 us
+	Average total latency:  453.3668923377991 us
+	Throughput:  186677.8973872123  requests per second
+	Hit_rate:  99.9714 %
+
+
+=====  Block Size=  500 Prefetch Size=  450  ======
+	 100000  requests completed in  0.5362219044140407  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  459.70446586608887 us
+	Average read latency:  5.794413089752197 us
+	Average total latency:  465.49887895584106 us
+	Throughput:  186489.95719276989  requests per second
+	Hit_rate:  99.9741 %
+
+
+=====  Block Size=  500 Prefetch Size=  500  ======
+	 100000  requests completed in  0.5377950412886483  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  408.69890213012695 us
+	Average read latency:  5.815978050231934 us
+	Average total latency:  414.5148801803589 us
+	Throughput:  185944.44411458872  requests per second
+	Hit_rate:  99.9768 %
+
+
+=====  Block Size=  900 Prefetch Size=  100  ======
+	 100000  requests completed in  0.5509032229664983  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  450.3110194206238 us
+	Average read latency:  5.673103332519531 us
+	Average total latency:  455.9841227531433 us
+	Throughput:  181520.08525475848  requests per second
+	Hit_rate:  99.9325 %
+
+
+=====  Block Size=  900 Prefetch Size=  150  ======
+	 100000  requests completed in  0.5387052450377017  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  390.92143535614014 us
+	Average read latency:  5.535156726837158 us
+	Average total latency:  396.4565920829773 us
+	Throughput:  185630.2698389384  requests per second
+	Hit_rate:  99.955 %
+
+
+=====  Block Size=  900 Prefetch Size=  200  ======
+	 100000  requests completed in  0.5379864152680535  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  460.522837638855 us
+	Average read latency:  5.522432327270508 us
+	Average total latency:  466.0452699661255 us
+	Throughput:  185878.29945515384  requests per second
+	Hit_rate:  99.9663 %
+
+
+=====  Block Size=  900 Prefetch Size=  250  ======
+	 100000  requests completed in  0.528557585976126  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  474.9005460739136 us
+	Average read latency:  5.4244160652160645 us
+	Average total latency:  480.32496213912964 us
+	Throughput:  189194.14393669646  requests per second
+	Hit_rate:  99.9728 %
+
+
+=====  Block Size=  900 Prefetch Size=  300  ======
+	 100000  requests completed in  0.5217481491190576  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  459.55125093460083 us
+	Average read latency:  5.358185768127441 us
+	Average total latency:  464.90943670272827 us
+	Throughput:  191663.3536100595  requests per second
+	Hit_rate:  99.9775 %
+
+
+=====  Block Size=  900 Prefetch Size=  350  ======
+	 100000  requests completed in  0.521884717834622  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  484.37827587127686 us
+	Average read latency:  5.358068943023682 us
+	Average total latency:  489.73634481430054 us
+	Throughput:  191613.19843760706  requests per second
+	Hit_rate:  99.9803 %
+
+
+=====  Block Size=  900 Prefetch Size=  400  ======
+	 100000  requests completed in  0.5208073672470275  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  401.1433482170105 us
+	Average read latency:  5.339853763580322 us
+	Average total latency:  406.4832019805908 us
+	Throughput:  192009.57261529745  requests per second
+	Hit_rate:  99.9831 %
+
+
+=====  Block Size=  900 Prefetch Size=  450  ======
+	 100000  requests completed in  0.560467950423832  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  377.8543996810913 us
+	Average read latency:  5.743014812469482 us
+	Average total latency:  383.5974144935608 us
+	Throughput:  178422.33427331375  requests per second
+	Hit_rate:  99.985 %
+
+
+=====  Block Size=  900 Prefetch Size=  500  ======
+	 100000  requests completed in  0.5391507138595016  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  333.7297058105469 us
+	Average read latency:  5.526130199432373 us
+	Average total latency:  339.25583600997925 us
+	Throughput:  185476.89436252735  requests per second
+	Hit_rate:  99.9859 %
+
+
+=====  Block Size=  1300 Prefetch Size=  100  ======
+	 100000  requests completed in  0.5315980424827744  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  302.8433847427368 us
+	Average read latency:  5.356841087341309 us
+	Average total latency:  308.2002258300781 us
+	Throughput:  188112.05461359528  requests per second
+	Hit_rate:  99.9522 %
+
+
+=====  Block Size=  1300 Prefetch Size=  150  ======
+	 100000  requests completed in  0.5250486875789159  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  284.28481578826904 us
+	Average read latency:  5.268306732177734 us
+	Average total latency:  289.5531225204468 us
+	Throughput:  190458.52768648203  requests per second
+	Hit_rate:  99.9685 %
+
+
+=====  Block Size=  1300 Prefetch Size=  200  ======
+	 100000  requests completed in  0.5235295143661272  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  313.29497814178467 us
+	Average read latency:  5.2646589279174805 us
+	Average total latency:  318.55963706970215 us
+	Throughput:  191011.1985206351  requests per second
+	Hit_rate:  99.9761 %
+
+
+=====  Block Size=  1300 Prefetch Size=  250  ======
+	 100000  requests completed in  0.5192411431772516  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  357.56070137023926 us
+	Average read latency:  5.223960876464844 us
+	Average total latency:  362.7846622467041 us
+	Throughput:  192588.74477491732  requests per second
+	Hit_rate:  99.9809 %
+
+
+=====  Block Size=  1300 Prefetch Size=  300  ======
+	 100000  requests completed in  0.5166611011817549  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  358.2883548736572 us
+	Average read latency:  5.192294120788574 us
+	Average total latency:  363.4806489944458 us
+	Throughput:  193550.47200431925  requests per second
+	Hit_rate:  99.9838 %
+
+
+=====  Block Size=  1300 Prefetch Size=  350  ======
+	 100000  requests completed in  0.5177185514828859  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  380.4897165298462 us
+	Average read latency:  5.207099914550781 us
+	Average total latency:  385.696816444397 us
+	Throughput:  193155.14136700908  requests per second
+	Hit_rate:  99.9857 %
+
+
+=====  Block Size=  1300 Prefetch Size=  400  ======
+	 100000  requests completed in  0.5133255747577562  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  359.2974853515625 us
+	Average read latency:  5.1573896408081055 us
+	Average total latency:  364.4548749923706 us
+	Throughput:  194808.13915650133  requests per second
+	Hit_rate:  99.9876 %
+
+
+=====  Block Size=  1300 Prefetch Size=  450  ======
+	 100000  requests completed in  0.5143951036937924  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  357.8441119194031 us
+	Average read latency:  5.16634464263916 us
+	Average total latency:  363.01045656204224 us
+	Throughput:  194403.0945899666  requests per second
+	Hit_rate:  99.9895 %
+
+
+=====  Block Size=  1300 Prefetch Size=  500  ======
+	 100000  requests completed in  0.5120390861909707  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  391.8296003341675 us
+	Average read latency:  5.135400295257568 us
+	Average total latency:  396.96500062942505 us
+	Throughput:  195297.59093957895  requests per second
+	Hit_rate:  99.9904 %
+
+
+=====  Block Size=  1700 Prefetch Size=  100  ======
+	 100000  requests completed in  0.5323088749778142  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  360.806725025177 us
+	Average read latency:  5.295002460479736 us
+	Average total latency:  366.10172748565674 us
+	Throughput:  187860.85429097502  requests per second
+	Hit_rate:  99.9633 %
+
+
+=====  Block Size=  1700 Prefetch Size=  150  ======
+	 100000  requests completed in  0.5261389027272476  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  350.0597953796387 us
+	Average read latency:  5.236098766326904 us
+	Average total latency:  355.2958941459656 us
+	Throughput:  190063.87758374974  requests per second
+	Hit_rate:  99.9749 %
+
+
+=====  Block Size=  1700 Prefetch Size=  200  ======
+	 100000  requests completed in  0.517859459522098  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  380.0968909263611 us
+	Average read latency:  5.151281356811523 us
+	Average total latency:  385.2481722831726 us
+	Throughput:  193102.58441988126  requests per second
+	Hit_rate:  99.9816 %
+
+
+=====  Block Size=  1700 Prefetch Size=  250  ======
+	 100000  requests completed in  0.5160726270836034  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  441.8309497833252 us
+	Average read latency:  5.1320648193359375 us
+	Average total latency:  446.96301460266113 us
+	Throughput:  193771.17628794536  requests per second
+	Hit_rate:  99.9845 %
+
+
+=====  Block Size=  1700 Prefetch Size=  300  ======
+	 100000  requests completed in  0.5146888049257333  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  411.8435740470886 us
+	Average read latency:  5.112757682800293 us
+	Average total latency:  416.9563317298889 us
+	Throughput:  194292.16070559263  requests per second
+	Hit_rate:  99.9874 %
+
+
+=====  Block Size=  1700 Prefetch Size=  350  ======
+	 100000  requests completed in  0.5149368289670091  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  355.9045910835266 us
+	Average read latency:  5.121769905090332 us
+	Average total latency:  361.02636098861694 us
+	Throughput:  194198.57810637736  requests per second
+	Hit_rate:  99.9894 %
+
+
+=====  Block Size=  1700 Prefetch Size=  400  ======
+	 100000  requests completed in  0.5166589494690148  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  374.77564811706543 us
+	Average read latency:  5.13554573059082 us
+	Average total latency:  379.91119384765625 us
+	Throughput:  193551.27807768135  requests per second
+	Hit_rate:  99.9903 %
+
+
+=====  Block Size=  1700 Prefetch Size=  450  ======
+	 100000  requests completed in  0.5110290109944851  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  420.03122329711914 us
+	Average read latency:  5.083603858947754 us
+	Average total latency:  425.1148271560669 us
+	Throughput:  195683.60670051895  requests per second
+	Hit_rate:  99.9913 %
+
+
+=====  Block Size=  1700 Prefetch Size=  500  ======
+	 100000  requests completed in  0.5117825250734584  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  426.2976551055908 us
+	Average read latency:  5.087213516235352 us
+	Average total latency:  431.3848686218262 us
+	Throughput:  195395.49535351282  requests per second
+	Hit_rate:  99.9923 %
+
+
+=====  Block Size=  2100 Prefetch Size=  100  ======
+	 100000  requests completed in  0.5253898778375209  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  444.6991491317749 us
+	Average read latency:  5.195279121398926 us
+	Average total latency:  449.8944282531738 us
+	Throughput:  190334.84316750662  requests per second
+	Hit_rate:  99.9699 %
+
+
+=====  Block Size=  2100 Prefetch Size=  150  ======
+	 100000  requests completed in  0.5194042055272846  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  430.1109266281128 us
+	Average read latency:  5.128915309906006 us
+	Average total latency:  435.2398419380188 us
+	Throughput:  192528.28324422747  requests per second
+	Hit_rate:  99.9796 %
+
+
+=====  Block Size=  2100 Prefetch Size=  200  ======
+	 100000  requests completed in  0.5143287967480983  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  434.6643280982971 us
+	Average read latency:  5.07183313369751 us
+	Average total latency:  439.73616123199463 us
+	Throughput:  194428.15691491758  requests per second
+	Hit_rate:  99.9844 %
+
+
+=====  Block Size=  2100 Prefetch Size=  250  ======
+	 100000  requests completed in  0.5137856983388165  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  372.22456455230713 us
+	Average read latency:  5.079324245452881 us
+	Average total latency:  377.30388879776 us
+	Throughput:  194633.6776662376  requests per second
+	Hit_rate:  99.9874 %
+
+
+=====  Block Size=  2100 Prefetch Size=  300  ======
+	 100000  requests completed in  0.5124964480816994  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  369.90355014801025 us
+	Average read latency:  5.058748722076416 us
+	Average total latency:  374.96229887008667 us
+	Throughput:  195123.30353567356  requests per second
+	Hit_rate:  99.9893 %
+
+
+=====  Block Size=  2100 Prefetch Size=  350  ======
+	 100000  requests completed in  0.5181260814859788  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  441.28271102905273 us
+	Average read latency:  5.11469841003418 us
+	Average total latency:  446.3974094390869 us
+	Throughput:  193003.21596087446  requests per second
+	Hit_rate:  99.9912 %
+
+
+=====  Block Size=  2100 Prefetch Size=  400  ======
+	 100000  requests completed in  0.5179369358171892  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  453.04608821868896 us
+	Average read latency:  5.109014511108398 us
+	Average total latency:  458.15510272979736 us
+	Throughput:  193073.69890935128  requests per second
+	Hit_rate:  99.9922 %
+
+
+=====  Block Size=  2100 Prefetch Size=  450  ======
+	 100000  requests completed in  0.5093067010863402  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  421.0172176361084 us
+	Average read latency:  5.023171901702881 us
+	Average total latency:  426.0403895378113 us
+	Throughput:  196345.34512642806  requests per second
+	Hit_rate:  99.9932 %
+
+
+=====  Block Size=  2100 Prefetch Size=  500  ======
+	 100000  requests completed in  0.5139746122114432  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  391.3640260696411 us
+	Average read latency:  5.065302848815918 us
+	Average total latency:  396.42932891845703 us
+	Throughput:  194562.1391098227  requests per second
+	Hit_rate:  99.9932 %
+
+
+=====  Block Size=  2500 Prefetch Size=  100  ======
+	 100000  requests completed in  0.5197857972234488  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  341.8024516105652 us
+	Average read latency:  5.114350318908691 us
+	Average total latency:  346.9168019294739 us
+	Throughput:  192386.9419560369  requests per second
+	Hit_rate:  99.9746 %
+
+
+=====  Block Size=  2500 Prefetch Size=  150  ======
+	 100000  requests completed in  0.5134162493050098  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  345.7276391983032 us
+	Average read latency:  5.049610137939453 us
+	Average total latency:  350.7772493362427 us
+	Throughput:  194773.7340517871  requests per second
+	Hit_rate:  99.9824 %
+
+
+=====  Block Size=  2500 Prefetch Size=  200  ======
+	 100000  requests completed in  0.5115235690027475  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  350.7363271713257 us
+	Average read latency:  5.026228427886963 us
+	Average total latency:  355.76255559921265 us
+	Throughput:  195494.41327788137  requests per second
+	Hit_rate:  99.9873 %
+
+
+=====  Block Size=  2500 Prefetch Size=  250  ======
+	 100000  requests completed in  0.5100267007946968  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  350.8941912651062 us
+	Average read latency:  5.011930465698242 us
+	Average total latency:  355.90612173080444 us
+	Throughput:  196068.1663218519  requests per second
+	Hit_rate:  99.9893 %
+
+
+=====  Block Size=  2500 Prefetch Size=  300  ======
+	 100000  requests completed in  0.5103342700749636  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  426.7730236053467 us
+	Average read latency:  5.021696090698242 us
+	Average total latency:  431.7947196960449 us
+	Throughput:  195949.99956657994  requests per second
+	Hit_rate:  99.9912 %
+
+
+=====  Block Size=  2500 Prefetch Size=  350  ======
+	 100000  requests completed in  0.5079153925180435  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  436.1180567741394 us
+	Average read latency:  4.991059303283691 us
+	Average total latency:  441.1091160774231 us
+	Throughput:  196883.1846269505  requests per second
+	Hit_rate:  99.9922 %
+
+
+=====  Block Size=  2500 Prefetch Size=  400  ======
+	 100000  requests completed in  0.5144884344190359  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  442.9326844215393 us
+	Average read latency:  5.05742073059082 us
+	Average total latency:  447.9901051521301 us
+	Throughput:  194367.82891518393  requests per second
+	Hit_rate:  99.9932 %
+
+
+=====  Block Size=  2500 Prefetch Size=  450  ======
+	 100000  requests completed in  0.511018093675375  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  371.8801951408386 us
+	Average read latency:  5.023987293243408 us
+	Average total latency:  376.90418243408203 us
+	Throughput:  195687.78725773486  requests per second
+	Hit_rate:  99.9941 %
+
+
+=====  Block Size=  2500 Prefetch Size=  500  ======
+	 100000  requests completed in  0.5072688218206167  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  357.162401676178 us
+	Average read latency:  4.984548091888428 us
+	Average total latency:  362.1469497680664 us
+	Throughput:  197134.13420737017  requests per second
+	Hit_rate:  99.9941 %
+
+
+=====  Block Size=  2900 Prefetch Size=  100  ======
+	 100000  requests completed in  0.5160204571367384  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  350.8013868331909 us
+	Average read latency:  5.056657791137695 us
+	Average total latency:  355.8580446243286 us
+	Throughput:  193790.76665850356  requests per second
+	Hit_rate:  99.9775 %
+
+
+=====  Block Size=  2900 Prefetch Size=  150  ======
+	 100000  requests completed in  0.5173750205597267  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  342.6690936088562 us
+	Average read latency:  5.064990520477295 us
+	Average total latency:  347.7340841293335 us
+	Throughput:  193283.39410707174  requests per second
+	Hit_rate:  99.9853 %
+
+
+=====  Block Size=  2900 Prefetch Size=  200  ======
+	 100000  requests completed in  0.5120266089894278  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  353.1533455848694 us
+	Average read latency:  5.015075206756592 us
+	Average total latency:  358.168420791626 us
+	Throughput:  195302.35000358114  requests per second
+	Hit_rate:  99.9882 %
+
+
+=====  Block Size=  2900 Prefetch Size=  250  ======
+	 100000  requests completed in  0.5121247149797113  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  408.8543963432312 us
+	Average read latency:  4.9916863441467285 us
+	Average total latency:  413.84608268737793 us
+	Throughput:  195264.93659647272  requests per second
+	Hit_rate:  99.9912 %
+
+
+=====  Block Size=  2900 Prefetch Size=  300  ======
+	 100000  requests completed in  0.5117691975577786  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  334.65125799179077 us
+	Average read latency:  5.014538764953613 us
+	Average total latency:  339.6657967567444 us
+	Throughput:  195400.583851493  requests per second
+	Hit_rate:  99.9922 %
+
+
+=====  Block Size=  2900 Prefetch Size=  350  ======
+	 100000  requests completed in  0.5135180536274309  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  352.65350103378296 us
+	Average read latency:  5.020091533660889 us
+	Average total latency:  357.67359256744385 us
+	Throughput:  194735.12039861464  requests per second
+	Hit_rate:  99.9931 %
+
+
+=====  Block Size=  2900 Prefetch Size=  400  ======
+	 100000  requests completed in  0.5099547039089126  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  379.51356649398804 us
+	Average read latency:  4.990625381469727 us
+	Average total latency:  384.50419187545776 us
+	Throughput:  196095.84779486974  requests per second
+	Hit_rate:  99.9941 %
+
+
+=====  Block Size=  2900 Prefetch Size=  450  ======
+	 100000  requests completed in  0.5064903945234428  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  420.35325050354004 us
+	Average read latency:  4.955410957336426 us
+	Average total latency:  425.30866146087646 us
+	Throughput:  197437.11051833487  requests per second
+	Hit_rate:  99.9951 %
+
+
+=====  Block Size=  2900 Prefetch Size=  500  ======
+	 100000  requests completed in  0.5135353389685762  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  430.9184765815735 us
+	Average read latency:  5.021107196807861 us
+	Average total latency:  435.93958377838135 us
+	Throughput:  194728.56571243508  requests per second
+	Hit_rate:  99.9951 %
+
+
+=====  Block Size=  3300 Prefetch Size=  100  ======
+	 100000  requests completed in  0.5171508742604854  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  399.3626141548157 us
+	Average read latency:  5.054812431335449 us
+	Average total latency:  404.4174265861511 us
+	Throughput:  193367.1680300219  requests per second
+	Hit_rate:  99.9804 %
+
+
+=====  Block Size=  3300 Prefetch Size=  150  ======
+	 100000  requests completed in  0.5133790004541172  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  365.231249332428 us
+	Average read latency:  5.01941442489624 us
+	Average total latency:  370.2506637573242 us
+	Throughput:  194787.8661019315  requests per second
+	Hit_rate:  99.9872 %
+
+
+=====  Block Size=  3300 Prefetch Size=  200  ======
+	 100000  requests completed in  0.5086927259019167  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  380.3100848197937 us
+	Average read latency:  4.972488880157471 us
+	Average total latency:  385.2825736999512 us
+	Throughput:  196582.32742113448  requests per second
+	Hit_rate:  99.9902 %
+
+
+=====  Block Size=  3300 Prefetch Size=  250  ======
+	 100000  requests completed in  0.5119929984017275  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  413.4814977645874 us
+	Average read latency:  5.003523826599121 us
+	Average total latency:  418.4850215911865 us
+	Throughput:  195315.17093430352  requests per second
+	Hit_rate:  99.9921 %
+
+
+=====  Block Size=  3300 Prefetch Size=  300  ======
+	 100000  requests completed in  0.513083722774093  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  425.1466655731201 us
+	Average read latency:  5.0106000900268555 us
+	Average total latency:  430.157265663147 us
+	Throughput:  194899.96575866677  requests per second
+	Hit_rate:  99.9931 %
+
+
+=====  Block Size=  3300 Prefetch Size=  350  ======
+	 100000  requests completed in  0.515722723134024  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  412.6714253425598 us
+	Average read latency:  5.0418877601623535 us
+	Average total latency:  417.71331310272217 us
+	Throughput:  193902.6448016571  requests per second
+	Hit_rate:  99.9941 %
+
+
+=====  Block Size=  3300 Prefetch Size=  400  ======
+	 100000  requests completed in  0.5106128503874033  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  371.0963249206543 us
+	Average read latency:  4.977178573608398 us
+	Average total latency:  376.0735034942627 us
+	Throughput:  195843.09310690034  requests per second
+	Hit_rate:  99.9951 %
+
+
+=====  Block Size=  3300 Prefetch Size=  450  ======
+	 100000  requests completed in  0.5126577829644466  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  350.62713384628296 us
+	Average read latency:  5.0095415115356445 us
+	Average total latency:  355.6366753578186 us
+	Throughput:  195061.89766933687  requests per second
+	Hit_rate:  99.9951 %
+
+
+=====  Block Size=  3300 Prefetch Size=  500  ======
+	 100000  requests completed in  0.5223260780719172  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  377.3911714553833 us
+	Average read latency:  5.091233253479004 us
+	Average total latency:  382.4824047088623 us
+	Throughput:  191451.2872287249  requests per second
+	Hit_rate:  99.9961 %
+
+
+=====  Block Size=  3700 Prefetch Size=  100  ======
+	 100000  requests completed in  0.5197961878405154  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  410.0529623031616 us
+	Average read latency:  5.071468353271484 us
+	Average total latency:  415.1244306564331 us
+	Throughput:  192383.0961813097  requests per second
+	Hit_rate:  99.9823 %
+
+
+=====  Block Size=  3700 Prefetch Size=  150  ======
+	 100000  requests completed in  0.5129714586531571  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  396.00579261779785 us
+	Average read latency:  4.999935626983643 us
+	Average total latency:  401.0057282447815 us
+	Throughput:  194942.61973669467  requests per second
+	Hit_rate:  99.9882 %
+
+
+=====  Block Size=  3700 Prefetch Size=  200  ======
+	 100000  requests completed in  0.5232743620714132  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  400.4731345176697 us
+	Average read latency:  5.104031562805176 us
+	Average total latency:  405.57716608047485 us
+	Throughput:  191104.33693740307  requests per second
+	Hit_rate:  99.9911 %
+
+
+=====  Block Size=  3700 Prefetch Size=  250  ======
+	 100000  requests completed in  0.508357041737589  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  400.3037214279175 us
+	Average read latency:  4.958102703094482 us
+	Average total latency:  405.26182413101196 us
+	Throughput:  196712.13692289017  requests per second
+	Hit_rate:  99.9931 %
+
+
+=====  Block Size=  3700 Prefetch Size=  300  ======
+	 100000  requests completed in  0.5146876707610166  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  374.4716000556946 us
+	Average read latency:  5.0113630294799805 us
+	Average total latency:  379.48296308517456 us
+	Throughput:  194292.5888474074  requests per second
+	Hit_rate:  99.9941 %
+
+
+=====  Block Size=  3700 Prefetch Size=  350  ======
+	 100000  requests completed in  0.5124191738545376  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  346.07495069503784 us
+	Average read latency:  4.996328353881836 us
+	Average total latency:  351.0712790489197 us
+	Throughput:  195152.7286689459  requests per second
+	Hit_rate:  99.9951 %
+
+
+=====  Block Size=  3700 Prefetch Size=  400  ======
+	 100000  requests completed in  0.5160338942845843  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  342.9262852668762 us
+	Average read latency:  5.034756660461426 us
+	Average total latency:  347.96104192733765 us
+	Throughput:  193785.72048767714  requests per second
+	Hit_rate:  99.9951 %
+
+
+=====  Block Size=  3700 Prefetch Size=  450  ======
+	 100000  requests completed in  0.5150977785893883  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  347.6808977127075 us
+	Average read latency:  5.017952919006348 us
+	Average total latency:  352.69885063171387 us
+	Throughput:  194137.89800036256  requests per second
+	Hit_rate:  99.9961 %
+
+
+=====  Block Size=  3700 Prefetch Size=  500  ======
+	 100000  requests completed in  0.5123525430632004  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  345.79442024230957 us
+	Average read latency:  4.989135265350342 us
+	Average total latency:  350.7835555076599 us
+	Throughput:  195178.10803110362  requests per second
+	Hit_rate:  99.9961 %
+
+
+=====  Block Size=  4100 Prefetch Size=  100  ======
+	 100000  requests completed in  0.5167662723174652  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  347.9903817176819 us
+	Average read latency:  5.035510063171387 us
+	Average total latency:  353.02589178085327 us
+	Throughput:  193511.08103774808  requests per second
+	Hit_rate:  99.9842 %
+
+
+=====  Block Size=  4100 Prefetch Size=  150  ======
+	 100000  requests completed in  0.5128472623707301  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  358.77811908721924 us
+	Average read latency:  4.989025592803955 us
+	Average total latency:  363.7671446800232 us
+	Throughput:  194989.829014065  requests per second
+	Hit_rate:  99.9892 %
+
+
+=====  Block Size=  4100 Prefetch Size=  200  ======
+	 100000  requests completed in  0.515920106421183  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  390.7120203971863 us
+	Average read latency:  5.019845962524414 us
+	Average total latency:  395.7318663597107 us
+	Throughput:  193828.46056083485  requests per second
+	Hit_rate:  99.9921 %
+
+
+=====  Block Size=  4100 Prefetch Size=  250  ======
+	 100000  requests completed in  0.5183404087626732  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  345.3297710418701 us
+	Average read latency:  5.048122406005859 us
+	Average total latency:  350.377893447876 us
+	Throughput:  192923.41154475938  requests per second
+	Hit_rate:  99.9931 %
+
+
+=====  Block Size=  4100 Prefetch Size=  300  ======
+	 100000  requests completed in  0.5108398213121524  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  346.2202715873718 us
+	Average read latency:  4.966611862182617 us
+	Average total latency:  351.18688344955444 us
+	Throughput:  195756.0781834474  requests per second
+	Hit_rate:  99.9941 %
+
+
+=====  Block Size=  4100 Prefetch Size=  350  ======
+	 100000  requests completed in  0.5114446619167151  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  348.14335346221924 us
+	Average read latency:  4.976787567138672 us
+	Average total latency:  353.1201410293579 us
+	Throughput:  195524.57469247034  requests per second
+	Hit_rate:  99.9951 %
+
+
+=====  Block Size=  4100 Prefetch Size=  400  ======
+	 100000  requests completed in  0.5080003132058839  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  350.1180934906006 us
+	Average read latency:  4.937014579772949 us
+	Average total latency:  355.05510807037354 us
+	Throughput:  196850.2723333395  requests per second
+	Hit_rate:  99.9961 %
+
+
+=====  Block Size=  4100 Prefetch Size=  450  ======
+	 100000  requests completed in  0.5088030076523431  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  344.14538860321045 us
+	Average read latency:  4.951043128967285 us
+	Average total latency:  349.09643173217773 us
+	Throughput:  196539.7187045097  requests per second
+	Hit_rate:  99.9961 %
+
+
+=====  Block Size=  4100 Prefetch Size=  500  ======
+	 100000  requests completed in  0.517566381975016  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  346.1352324485779 us
+	Average read latency:  5.043909549713135 us
+	Average total latency:  351.179141998291 us
+	Throughput:  193211.9308414185  requests per second
+	Hit_rate:  99.9961 %
+
+
+=====  Block Size=  4500 Prefetch Size=  100  ======
+	 100000  requests completed in  0.5183320703596253  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  348.3766436576843 us
+	Average read latency:  5.036516189575195 us
+	Average total latency:  353.4131598472595 us
+	Throughput:  192926.51510183184  requests per second
+	Hit_rate:  99.9852 %
+
+
+=====  Block Size=  4500 Prefetch Size=  150  ======
+	 100000  requests completed in  0.5125248907660193  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  382.1492123603821 us
+	Average read latency:  4.985785484313965 us
+	Average total latency:  387.13499784469604 us
+	Throughput:  195112.47512396929  requests per second
+	Hit_rate:  99.9901 %
+
+
+=====  Block Size=  4500 Prefetch Size=  200  ======
+	 100000  requests completed in  0.5134565993467939  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  356.3433504104614 us
+	Average read latency:  4.992456436157227 us
+	Average total latency:  361.33580684661865 us
+	Throughput:  194758.42773706172  requests per second
+	Hit_rate:  99.9921 %
+
+
+=====  Block Size=  4500 Prefetch Size=  250  ======
+	 100000  requests completed in  0.5078049397965948  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  367.58811950683594 us
+	Average read latency:  4.936268329620361 us
+	Average total latency:  372.5243878364563 us
+	Throughput:  196926.00871518848  requests per second
+	Hit_rate:  99.9941 %
+
+
+=====  Block Size=  4500 Prefetch Size=  300  ======
+	 100000  requests completed in  0.5103956072670266  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  406.2918257713318 us
+	Average read latency:  4.95877742767334 us
+	Average total latency:  411.2506031990051 us
+	Throughput:  195926.45112183032  requests per second
+	Hit_rate:  99.9951 %
+
+
+=====  Block Size=  4500 Prefetch Size=  350  ======
+	 100000  requests completed in  0.5170592058591225  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  342.5590395927429 us
+	Average read latency:  5.025436878204346 us
+	Average total latency:  347.58447647094727 us
+	Throughput:  193401.44971182646  requests per second
+	Hit_rate:  99.9951 %
+
+
+=====  Block Size=  4500 Prefetch Size=  400  ======
+	 100000  requests completed in  0.510622181853715  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  341.1638116836548 us
+	Average read latency:  4.9587082862854 us
+	Average total latency:  346.1225199699402 us
+	Throughput:  195839.51413346236  requests per second
+	Hit_rate:  99.9961 %
+
+
+=====  Block Size=  4500 Prefetch Size=  450  ======
+	 100000  requests completed in  0.5134907149387666  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  381.54566526412964 us
+	Average read latency:  4.983651638031006 us
+	Average total latency:  386.52931690216064 us
+	Throughput:  194745.48826442737  requests per second
+	Hit_rate:  99.9961 %
+
+
+=====  Block Size=  4500 Prefetch Size=  500  ======
+	 100000  requests completed in  0.5123274908924662  s
+	 1  parallel clients
+	 64  payload
+	Average write latency:  406.4597201347351 us
+	Average read latency:  4.976980686187744 us
+	Average total latency:  411.43670082092285 us
+	Throughput:  195187.65199540945  requests per second
+	Hit_rate:  99.997 %
+
+

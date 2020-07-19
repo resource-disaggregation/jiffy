@@ -1,0 +1,229 @@
+host:  frog.zoo.cs.yale.edu
+service-port:  9090
+lease-port:  9091
+num-blocks:  1
+chain-length:  1
+num-ops:  100000
+data-size:  64
+path:  /tmp
+backing-path:  local://tmp
+=====  ht_Benchmark,  Cache_Size=  320000  ======
+	 100000  requests completed in  28.843803882598877  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  292.3714859363865 us
+	Average get latency:  287.86779023414624 us
+	Average total latency:  580.2392761705328 us
+	Throughput:  3466.9491030733575  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  640000  ======
+	 100000  requests completed in  28.696128368377686  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  293.6230982411753 us
+	Average get latency:  286.40074074690943 us
+	Average total latency:  580.0238389880847 us
+	Throughput:  3484.79065594776  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  960000  ======
+	 100000  requests completed in  28.685489416122437  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  290.9946477890377 us
+	Average get latency:  286.3008876632651 us
+	Average total latency:  577.2955354523028 us
+	Throughput:  3486.0831045746722  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  1280000  ======
+	 100000  requests completed in  28.8579580783844  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  286.6012623138927 us
+	Average get latency:  288.01265242724446 us
+	Average total latency:  574.6139147411371 us
+	Throughput:  3465.248640544094  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  1600000  ======
+	 100000  requests completed in  28.49590420722961  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  286.61954204914974 us
+	Average get latency:  284.4004913857427 us
+	Average total latency:  571.0200334348924 us
+	Throughput:  3509.276255028584  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  1920000  ======
+	 100000  requests completed in  28.261231899261475  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  289.05172913270883 us
+	Average get latency:  282.0226165976259 us
+	Average total latency:  571.0743457303347 us
+	Throughput:  3538.416172248076  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  2240000  ======
+	 100000  requests completed in  27.92678737640381  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  292.28158931216996 us
+	Average get latency:  278.71060609104626 us
+	Average total latency:  570.9921954032162 us
+	Throughput:  3580.791397598889  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  2560000  ======
+	 100000  requests completed in  27.83378314971924  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  279.65636721568023 us
+	Average get latency:  277.7855041428832 us
+	Average total latency:  557.4418713585635 us
+	Throughput:  3592.756308479349  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  2880000  ======
+	 100000  requests completed in  28.230759382247925  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  280.52389526962287 us
+	Average get latency:  281.75390186671643 us
+	Average total latency:  562.2777971363394 us
+	Throughput:  3542.2355681612316  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  3200000  ======
+	 100000  requests completed in  28.160067319869995  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  283.03194313528826 us
+	Average get latency:  281.0412711442178 us
+	Average total latency:  564.073214279506 us
+	Throughput:  3551.1278742376835  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  3520000  ======
+	 100000  requests completed in  29.878461837768555  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  286.07822632562875 us
+	Average get latency:  298.2040041881742 us
+	Average total latency:  584.2822305138029 us
+	Throughput:  3346.892505476728  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  3840000  ======
+	 100000  requests completed in  28.765531301498413  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  299.4491934322114 us
+	Average get latency:  287.0607710364823 us
+	Average total latency:  586.5099644686937 us
+	Throughput:  3476.382860857882  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  4160000  ======
+	 100000  requests completed in  29.09623122215271  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  290.50541750916165 us
+	Average get latency:  290.4217579773454 us
+	Average total latency:  580.927175486507 us
+	Throughput:  3436.871230383404  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  4480000  ======
+	 100000  requests completed in  34.56660318374634  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  343.7588639955003 us
+	Average get latency:  344.96677850613344 us
+	Average total latency:  688.7256425016337 us
+	Throughput:  2892.9657759088486  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  4800000  ======
+	 100000  requests completed in  35.00945544242859  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  342.71219119814486 us
+	Average get latency:  349.39735049892613 us
+	Average total latency:  692.109541697071 us
+	Throughput:  2856.3711927609193  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  5120000  ======
+	 100000  requests completed in  43.00696659088135  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  426.24409865695947 us
+	Average get latency:  429.0937846893728 us
+	Average total latency:  855.3378833463323 us
+	Throughput:  2325.2046802390087  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  5440000  ======
+	 100000  requests completed in  41.10461664199829  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  451.17261494422803 us
+	Average get latency:  410.0954677225605 us
+	Average total latency:  861.2680826667886 us
+	Throughput:  2432.8167531874233  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  5760000  ======
+	 100000  requests completed in  39.425893783569336  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  418.9552431718165 us
+	Average get latency:  393.358261261293 us
+	Average total latency:  812.3135044331095 us
+	Throughput:  2536.404134525285  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  6080000  ======
+	 100000  requests completed in  41.97665047645569  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  404.54199975044185 us
+	Average get latency:  418.83461885384844 us
+	Average total latency:  823.3766186042903 us
+	Throughput:  2382.2767863788717  requests per second
+	Hit_rate:  0.0 %
+
+
+=====  ht_Benchmark,  Cache_Size=  6400000  ======
+	 100000  requests completed in  0.2642848491668701  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  396.5522557752433 us
+	Average get latency:  2.446864278060505 us
+	Average total latency:  398.9991200533038 us
+	Throughput:  378379.61697478825  requests per second
+	Hit_rate:  100.0 %
+
+

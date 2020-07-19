@@ -77,6 +77,8 @@ class put_benchmark : public hash_table_benchmark {
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);
         }
+        LOG(log_level::info) << "total_time: " << tot_time;
+        LOG(log_level::info) << "j= " << j;
         latency_[i] = (double) tot_time / (double) j;
         throughput_[i] = j * 1E6 / (t1 - bench_begin);
       });

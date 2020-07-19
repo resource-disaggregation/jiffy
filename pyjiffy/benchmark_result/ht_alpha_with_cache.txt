@@ -1,0 +1,130 @@
+host:  frog.zoo.cs.yale.edu
+service-port:  9090
+lease-port:  9091
+num-blocks:  1
+chain-length:  1
+num-ops:  100000
+data-size:  64
+path:  /tmp
+backing-path:  local://tmp
+=====  Zipf_ht_Benchmark,  alpha=  0  ======
+	 100000  requests completed in  16.012760877609253  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  307.01953172683716 us
+	Average get latency:  159.73292350769043 us
+	Average total latency:  466.7524552345276 us
+	Throughput:  6245.019254601538  requests per second
+	Hit_rate:  49.934 %
+
+
+=====  Zipf_ht_Benchmark,  alpha=  1  ======
+	 100000  requests completed in  16.14107847213745  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  307.08585262298584 us
+	Average get latency:  161.01643323898315 us
+	Average total latency:  468.102285861969 us
+	Throughput:  6195.3728911372855  requests per second
+	Hit_rate:  49.204 %
+
+
+=====  Zipf_ht_Benchmark,  alpha=  2  ======
+	 100000  requests completed in  16.3516788482666  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  306.2993597984314 us
+	Average get latency:  163.12055110931396 us
+	Average total latency:  469.41991090774536 us
+	Throughput:  6115.579991995791  requests per second
+	Hit_rate:  48.709 %
+
+
+=====  Zipf_ht_Benchmark,  alpha=  3  ======
+	 100000  requests completed in  16.13135266304016  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  310.3881883621216 us
+	Average get latency:  160.92138528823853 us
+	Average total latency:  471.3095736503601 us
+	Throughput:  6199.108164631354  requests per second
+	Hit_rate:  49.901 %
+
+
+=====  Zipf_ht_Benchmark,  alpha=  4  ======
+	 100000  requests completed in  15.744431018829346  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  308.21982622146606 us
+	Average get latency:  157.04893112182617 us
+	Average total latency:  465.26875734329224 us
+	Throughput:  6351.452134434475  requests per second
+	Hit_rate:  50.973 %
+
+
+=====  Zipf_ht_Benchmark,  alpha=  5  ======
+	 100000  requests completed in  15.038211345672607  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  307.8717231750488 us
+	Average get latency:  149.9893355369568 us
+	Average total latency:  457.8610587120056 us
+	Throughput:  6649.726998867853  requests per second
+	Hit_rate:  53.661 %
+
+
+=====  Zipf_ht_Benchmark,  alpha=  6  ======
+	 100000  requests completed in  13.583842992782593  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  306.6372585296631 us
+	Average get latency:  135.47548532485962 us
+	Average total latency:  442.1127438545227 us
+	Throughput:  7361.686972761117  requests per second
+	Hit_rate:  57.322 %
+
+
+=====  Zipf_ht_Benchmark,  alpha=  7  ======
+	 100000  requests completed in  12.324926137924194  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  298.95684480667114 us
+	Average get latency:  122.89966583251953 us
+	Average total latency:  421.8565106391907 us
+	Throughput:  8113.6388876438605  requests per second
+	Hit_rate:  61.547 %
+
+
+=====  Zipf_ht_Benchmark,  alpha=  8  ======
+	 100000  requests completed in  10.974233150482178  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  306.55078887939453 us
+	Average get latency:  109.40741539001465 us
+	Average total latency:  415.9582042694092 us
+	Throughput:  9112.254007069849  requests per second
+	Hit_rate:  66.707 %
+
+
+=====  Zipf_ht_Benchmark,  alpha=  9  ======
+	 100000  requests completed in  9.12740683555603  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  305.29611110687256 us
+	Average get latency:  90.96631526947021 us
+	Average total latency:  396.2624263763428 us
+	Throughput:  10956.014320567767  requests per second
+	Hit_rate:  72.906 %
+
+
+=====  Zipf_ht_Benchmark,  alpha=  10  ======
+	 100000  requests completed in  6.966635704040527  s
+	 1  parallel clients
+	 64  payload
+	Average put latency:  303.83835792541504 us
+	Average get latency:  69.3857192993164 us
+	Average total latency:  373.22407722473145 us
+	Throughput:  14354.130781088747  requests per second
+	Hit_rate:  79.322 %
+
+
