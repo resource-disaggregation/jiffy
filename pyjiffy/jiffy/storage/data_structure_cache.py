@@ -1,7 +1,8 @@
 class Node(object):
-    def __init__(self, mark, data): # Only file cache will use param 'offset'
+    def __init__(self, mark, data, state): 
         self.mark = mark
         self.data = data
+        self.state = state # M/S/I
         self.next = None
         self.prev = None
 
@@ -56,8 +57,9 @@ class LinkedList(object):
             self.head = node
     
     def pop(self):
+        ret = self.tail
         if self.length == 0:
-            return 
+            pass
         elif self.length == 1:
             self.head = None
             self.tail = None
@@ -68,6 +70,7 @@ class LinkedList(object):
             self.size -= len(self.tail.data)
             self.tail.prev.next = None
             self.tail = self.tail.prev
+        return ret
     
     def remove(self, node):
         if self.head == self.tail:
@@ -110,8 +113,8 @@ class HashTableCache(DataStructureCache):
         super(HashTableCache, self).__init__(float('inf'), max_size)
         self.table = dict()
     
-    def insert(self, kv):
-        new_node = Node(kv[0], kv[1])
+    def insert(self, kv, state):
+        new_node = Node(kv[0], kv[1], state)
         self.table[kv[0]] = new_node
         self.list.insert_head(new_node)
     
@@ -123,37 +126,49 @@ class HashTableCache(DataStructureCache):
 
     def evict(self):
         del self.table[self.list.tail.mark]
-        self.list.pop()
+        return self.list.pop()
     
     def exists(self, key):
-        return key in self.table
+        return (key in self.table) and (self.table[key].state != "I") 
 
     def get(self, key):
         return self.table[key].data
+    
+    def get_state(self, key):
+        if key in self.table:
+            return self.table[key].state
+        else:
+            return "I"
+
+    def change_state(self, key, new_state):
+        self.table[key].state = new_state
 
     def update(self, key, new_value):
         self.table[key].data = new_value
 
-    def hit_handling(self, key):
+    def hit_handling(self, key, state=None):
         self.list.move_to_head(self.table[key])
+        if state != None:
+            self.table[key].state = state
 
-    def miss_handling(self, raw_data):
+    def miss_handling(self, raw_data, state):
+        evict_blocks = []
         new_value = raw_data[1]
         new_key = raw_data[0]
         if self.exists(new_key):
             if self.get(new_key) == new_value:
-                self.hit_handling(new_key)
+                self.hit_handling(new_key, state)
             else:
                 old_value = self.get(new_key)
                 while (self.size() + len(new_value)- len(old_value)) > self.list.max_size_():
                     self.evict()
-                self.update(new_key,new_value)
-                self.hit_handling(new_key)
+                self.update(new_key, new_value)
+                self.hit_handling(new_key, state)
         else:
             while (self.size() + len(new_value)) > self.list.max_size_():
-                self.evict()
-            self.insert([new_key,new_value])
-        
+                evict_blocks.append(self.evict())
+            self.insert([new_key, new_value], state)
+        return self.list.head, evict_blocks
     
     def print_out(self): # for debug use
         cur_node = self.list.head

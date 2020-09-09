@@ -30,7 +30,8 @@ enum hash_table_cmd_id: uint32_t {
   ht_get_metadata = 14,
   ht_get_range_data = 15,
   ht_scale_put = 16,
-  ht_scale_remove = 17
+  ht_scale_remove = 17,
+  ht_dir_op = 18
 };
 
 }

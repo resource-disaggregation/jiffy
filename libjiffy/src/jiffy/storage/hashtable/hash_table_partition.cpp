@@ -680,6 +680,12 @@ void hash_table_partition::remove_ls(response &_return, const arg_list &args) {
   }
 }
 
+void hash_table_partition::dir_op(response &_return, const arg_list &args) {
+  if (args.size() != 2) {
+    RETURN_ERR("!args_error");
+  }
+  RETURN_OK();
+}
 
 void hash_table_partition::scale_remove(response &_return, const arg_list &args) {
   for (size_t i = 1; i < args.size(); ++i) {
@@ -845,6 +851,8 @@ void hash_table_partition::run_command(response &_return, const arg_list &args) 
     case hash_table_cmd_id::ht_scale_put:scale_put(_return, args);
       break;
     case hash_table_cmd_id::ht_scale_remove:scale_remove(_return, args);
+      break;
+    case hash_table_cmd_id::ht_dir_op:dir_op(_return, args);
       break;
     default: {
       _return.emplace_back("!no_such_command");
