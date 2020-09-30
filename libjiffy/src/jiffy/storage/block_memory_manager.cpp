@@ -1,4 +1,5 @@
-#include <jemalloc/jemalloc.h>
+// #include <jemalloc/jemalloc.h>
+#include <memkind.h>
 #include <new>
 #include "block_memory_manager.h"
 #include "jiffy/utils/logger.h"
@@ -13,19 +14,20 @@ void *block_memory_manager::mb_malloc(size_t size) {
   if (used_.load() > capacity_) {
     return nullptr;
   }
-  auto ptr = mallocx(size, 0);
+  // auto ptr = mallocx(size, 0);
+  auto ptr = memkind_malloc(MEMKIND_DEFAULT, size);
   used_ += size;
   return ptr;
 }
 
 void block_memory_manager::mb_free(void *ptr) {
-  auto size = sallocx(ptr, 0);
-  free(ptr);
-  used_ -= size;
+  // auto size = sallocx(ptr, 0);
+  memkind_free(MEMKIND_DEFAULT, ptr);
+  // used_ -= size;
 }
 
 void block_memory_manager::mb_free(void *ptr, size_t size) {
-  free(ptr);
+  memkind_free(MEMKIND_DEFAULT, ptr);
   used_ -= size;
 }
 

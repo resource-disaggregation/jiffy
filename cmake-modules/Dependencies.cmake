@@ -11,6 +11,9 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_FIND_LIBR
 # Threads
 find_package(Threads REQUIRED)
 
+# Numa
+find_package(Numa REQUIRED)
+
 # Apache Thrift
 include(ThriftExternal)
 
@@ -18,7 +21,10 @@ include(ThriftExternal)
 include(AwsSDKExternal)
 
 # Jemalloc
-include(JemallocExternal)
+# include(JemallocExternal)
+
+# Memkind
+include(MemkindExternal)
 
 # If testing is enabled
 if (BUILD_TESTS)
