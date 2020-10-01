@@ -28,7 +28,7 @@ class FileOps:
 
 
 class FileClient(DataStructureClient):
-    def __init__(self, fs, path, block_info, timeout_ms, cache_size=0, cache_block_size=0, prefetch_size=0):
+    def __init__(self, fs, path, block_info, timeout_ms, cache_size=200, cache_block_size=32000, prefetch_size=5):
         super(FileClient, self).__init__(fs, path, block_info, FileOps.op_types, timeout_ms)
         self.cur_partition = 0
         self.cur_offset = 0
@@ -80,7 +80,7 @@ class FileClient(DataStructureClient):
                 self.cur_offset = 0
                 self.cur_partition += 1
         
-        return (ret, access_time, hit_time)
+        return ret
 
     def write(self, data):
         file_size = (self.last_partition + 1) * self.block_size

@@ -27,7 +27,6 @@ void block_memory_manager::mb_free(void *ptr) {
   // used_ -= size;
   auto size = memkind_malloc_usable_size(MEMKIND_DEFAULT, ptr);
   memkind_free(MEMKIND_DEFAULT, ptr);
-  std::cout<<"used_size="<<size<<std::endl;
   used_ -= size;
 
 }

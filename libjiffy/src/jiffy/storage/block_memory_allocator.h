@@ -66,7 +66,6 @@ class block_memory_allocator {
     size_t requested_bytes = num * sizeof(T);
     if (requested_bytes == 0) return nullptr;
     auto p = static_cast<pointer>(manager_->mb_malloc(num * sizeof(T)));
-    std::cout<<manager_->mb_used()<< " " <<requested_bytes <<" "<<manager_->mb_capacity()<<std::endl;
     if (p == nullptr) {
       if (manager_->mb_used() + requested_bytes > manager_->mb_capacity()) {
         throw memory_block_overflow();
