@@ -144,16 +144,12 @@ class HashTableCache(DataStructureCache):
             if self.get(new_key) == new_value:
                 self.hit_handling(new_key)
             else:
-                old_value = self.get(new_key)
-                while (self.size() + len(new_value)- len(old_value)) > self.list.max_size_():
-                    self.evict()
                 self.update(new_key,new_value)
                 self.hit_handling(new_key)
         else:
-            while (self.size() + len(new_value)) > self.list.max_size_():
+            if self.isFull():
                 self.evict()
             self.insert([new_key,new_value])
-        
     
     def print_out(self): # for debug use
         cur_node = self.list.head

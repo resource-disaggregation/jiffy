@@ -1,6 +1,7 @@
 // #include <jemalloc/jemalloc.h>
 #include <memkind.h>
 #include <new>
+#include <iostream>
 #include "block_memory_manager.h"
 #include "jiffy/utils/logger.h"
 using namespace jiffy::utils;
@@ -22,8 +23,13 @@ void *block_memory_manager::mb_malloc(size_t size) {
 
 void block_memory_manager::mb_free(void *ptr) {
   // auto size = sallocx(ptr, 0);
-  memkind_free(MEMKIND_DEFAULT, ptr);
+  
   // used_ -= size;
+  auto size = memkind_malloc_usable_size(MEMKIND_DEFAULT, ptr);
+  memkind_free(MEMKIND_DEFAULT, ptr);
+  std::cout<<"used_size="<<size<<std::endl;
+  used_ -= size;
+
 }
 
 void block_memory_manager::mb_free(void *ptr, size_t size) {
