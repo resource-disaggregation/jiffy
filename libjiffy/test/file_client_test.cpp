@@ -1,6 +1,7 @@
 #include <catch.hpp>
 #include <thrift/transport/TTransportException.h>
 #include <thread>
+#include <iostream>
 #include "test_utils.h"
 #include "jiffy/directory/fs/directory_tree.h"
 #include "jiffy/directory/fs/directory_server.h"
@@ -59,7 +60,6 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     buffer.clear();
     REQUIRE(client.read(buffer, std::to_string(i).size()) == std::to_string(i).size());
-    std::cout<<buffer<<std::endl;
     REQUIRE(buffer == std::to_string(i));
   }
 
@@ -92,24 +92,26 @@ TEST_CASE("file_client_concurrent_write_read_seek_test", "[write][read][seek]") 
 
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(20, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
+  std::cout<<"-----before add_blocks"<<std::endl;
   alloc->add_blocks(block_names);
+  std::cout<<"-----before init_file_blocks"<<std::endl;
   auto blocks = test_utils::init_file_blocks(block_names, BLOCK_SIZE);
-
+  std::cout<<"-----before storage_server"<<std::endl;
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
-
+  std::cout<<"-----before mgmt_server"<<std::endl;
   auto mgmt_server = storage_management_server::create(blocks, HOST, STORAGE_MANAGEMENT_PORT);
   std::thread mgmt_serve_thread([&mgmt_server] { mgmt_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_MANAGEMENT_PORT);
-
+  std::cout<<"-----before as_server"<<std::endl;
   auto as_server = auto_scaling_server::create(HOST, DIRECTORY_SERVICE_PORT, HOST, AUTO_SCALING_SERVICE_PORT);
   std::thread auto_scaling_thread([&as_server] { as_server->serve(); });
   test_utils::wait_till_server_ready(HOST, AUTO_SCALING_SERVICE_PORT);
 
   auto sm = std::make_shared<storage_manager>();
   auto t = std::make_shared<directory_tree>(alloc, sm);
-
+  std::cout<<"-----before dir_server"<<std::endl;
   auto dir_server = directory_server::create(t, HOST, DIRECTORY_SERVICE_PORT);
   std::thread dir_serve_thread([&dir_server] { dir_server->serve(); });
   test_utils::wait_till_server_ready(HOST, DIRECTORY_SERVICE_PORT);
@@ -120,44 +122,47 @@ TEST_CASE("file_client_concurrent_write_read_seek_test", "[write][read][seek]") 
 
   std::string buffer;
 
+  std::cout<<"-----before write"<<std::endl;
+
   for (std::size_t i = 0; i < 2; ++i) {
     REQUIRE(client.write(std::string(1024, 'x')) == 1024);
   }
 
+  std::cout<<"-----before seek 0"<<std::endl;
   REQUIRE_NOTHROW(client.seek(0));
-
+  std::cout<<"-----before read 2048"<<std::endl;
   REQUIRE(client.read(buffer, 2048) == 2048);
   REQUIRE(buffer == std::string(2048, 'x'));
-
+  std::cout<<"-----before seek 4096"<<std::endl;
   REQUIRE_NOTHROW(client.seek(4096));
-
+  std::cout<<"-----before read 256"<<std::endl;
   REQUIRE(client.read(buffer, 256) == -1);
-
+  std::cout<<"-----before write 4096"<<std::endl;
   REQUIRE(client.write(std::string(4096, 'y')) == 4096);
-
+  std::cout<<"-----before seek 0 again"<<std::endl;
   REQUIRE_NOTHROW(client.seek(0));
-
+  std::cout<<"-----before buffer cleared"<<std::endl;
   buffer.clear();
   REQUIRE(client.read(buffer, 8192) == 8192);
   REQUIRE(buffer.substr(0, 2048) == std::string(2048, 'x'));
   REQUIRE(buffer.substr(4096, 4096) == std::string(4096, 'y'));
 
-
+  std::cout<<"-----before as_server_stop"<<std::endl;
   as_server->stop();
   if (auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();
   }
-
+  std::cout<<"-----before storage_server_stop"<<std::endl;
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
   }
-
+  std::cout<<"-----before mgmt_server_stop"<<std::endl;
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
-
+  std::cout<<"-----before dir_server_stop"<<std::endl;
   dir_server->stop();
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();

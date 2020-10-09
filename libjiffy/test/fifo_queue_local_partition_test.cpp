@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <stdio.h>
 
 using namespace ::jiffy::storage;
 using namespace ::jiffy::persistent;
@@ -47,6 +48,7 @@ TEST_CASE("fifo_queue_local_enqueue_read_dequeue_csv_test", "[enqueue][dequeue]"
     REQUIRE_NOTHROW(block.dequeue_ls(resp, {"dequeue_ls"}));
     REQUIRE(resp[0] == "!queue_is_empty");
   }
+  remove("/tmp/0");
 }
 
 TEST_CASE("fifo_queue_local_enqueue_read_dequeue_binary_test", "[enqueue][dequeue]") {
@@ -56,7 +58,6 @@ TEST_CASE("fifo_queue_local_enqueue_read_dequeue_binary_test", "[enqueue][dequeu
   fifo_queue_partition block(&manager, "local://tmp", "0", "regular", conf);
 
   for (std::size_t i = 0; i < 500; ++i) {
-    std::cout<<i<<std::endl;
     response resp;
     REQUIRE_NOTHROW(block.run_command(resp, {"enqueue", std::to_string(i)}));
     REQUIRE(resp[0] == "!ok");
@@ -85,6 +86,7 @@ TEST_CASE("fifo_queue_local_enqueue_read_dequeue_binary_test", "[enqueue][dequeu
   for (std::size_t i = 1000; i < 2000; ++i) {
     response resp;
     REQUIRE_NOTHROW(block.dequeue_ls(resp, {"dequeue_ls"}));
-    REQUIRE(resp[0] != "!queue_is_empty");
+    REQUIRE(resp[0] == "!queue_is_empty");
   }
+  remove("/tmp/0");
 }

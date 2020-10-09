@@ -77,6 +77,10 @@ class block_memory_manager {
  private:
   size_t capacity_;
   std::atomic<size_t> used_;
+  char path[PATH_MAX];
+  int err;
+  memkind_t pmem_kind;
+
 };
 
 }

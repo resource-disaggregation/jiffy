@@ -5,6 +5,7 @@
 #include "jiffy/auto_scaling/auto_scaling_client.h"
 #include <jiffy/utils/directory_utils.h>
 #include <thread>
+#include <iostream>
 
 namespace jiffy {
 namespace storage {

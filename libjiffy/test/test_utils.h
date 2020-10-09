@@ -285,6 +285,7 @@ class test_utils {
     blks.resize(block_ids.size());
     for (size_t i = 0; i < block_ids.size(); ++i) {
       blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
+      std::cout<<i<<" "<<std::endl;
       blks[i]->setup("file", "local://tmp", "", "regular", conf);
     }
     return blks;
