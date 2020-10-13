@@ -1,3 +1,4 @@
+#include "catch.hpp"
 #include <vector>
 #include <thread>
 #include <string>
@@ -20,7 +21,7 @@ using namespace ::jiffy::utils;
 using namespace ::apache::thrift;
 
 
-int main() {
+TEST_CASE("hash_table_performance_test", "[put][get][remove]][performance]") {
     std::string address = "127.0.0.1";
     int service_port = 9090;
     int lease_port = 9091;
@@ -98,5 +99,4 @@ int main() {
 	LOG(log_level::info) << "\t" << data_size << " payload";
 	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E6 / tot_time << " requests per microsecond";
 	
-    return 0;
 }
