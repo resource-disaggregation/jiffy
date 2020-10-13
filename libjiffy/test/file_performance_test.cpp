@@ -24,7 +24,7 @@ TEST_CASE("file_performance_test", "[write][read][performance]") {
     int lease_port = 9091;
     int num_blocks = 1;
     int chain_length = 1;
-    int num_ops = 100;
+    int num_ops = 100000;
     int data_size = 1024;
     
     std::string path = "/tmp";

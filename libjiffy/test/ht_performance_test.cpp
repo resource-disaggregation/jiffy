@@ -28,7 +28,7 @@ TEST_CASE("hash_table_performance_test", "[put][get][remove]][performance]") {
     int num_blocks = 1;
     int chain_length = 1;
     int num_ops = 100000;
-    int data_size = 1024;
+    int data_size = 1024 * 8;
     
     std::string path = "/tmp";
     std::string backing_path = "local://tmp";
