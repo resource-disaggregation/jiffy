@@ -61,7 +61,7 @@ TEST_CASE("file_performance_test", "[write][read][performance]") {
 	LOG(log_level::info) << "\t" << 3 * num_ops << " requests completed in " << tot_time
 											<< " us";
 	LOG(log_level::info) << "\t" << data_size << " payload";
-	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E6 / tot_time << " requests per microsecond";
+	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E3 / tot_time << " requests per microsecond";
 
     bench_begin = time_utils::now_us();
     tot_time = 0;
@@ -78,5 +78,5 @@ TEST_CASE("file_performance_test", "[write][read][performance]") {
 	LOG(log_level::info) << "\t" << 3 * num_ops << " requests completed in " << tot_time
 											<< " us";
 	LOG(log_level::info) << "\t" << data_size << " payload";
-	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E6 / tot_time << " requests per microsecond";
+	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E3 / tot_time << " requests per microsecond";
 }

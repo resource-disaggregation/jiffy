@@ -28,7 +28,7 @@ TEST_CASE("hash_table_performance_test", "[put][get][remove]][performance]") {
     int num_blocks = 1;
     int chain_length = 1;
     int num_ops = 100000;
-    int data_size = 1024 * 8;
+    int data_size = 1024;
     
     std::string path = "/tmp";
     std::string backing_path = "local://tmp";
@@ -61,10 +61,10 @@ TEST_CASE("hash_table_performance_test", "[put][get][remove]][performance]") {
 	tot_time = bench_end - bench_begin;
 	LOG(log_level::info) << "===== " << "hash_table_put" << " ======";
 	LOG(log_level::info) << "total_time: " << tot_time;
-	LOG(log_level::info) << "\t" << 3 * num_ops << " requests completed in " << tot_time
+	LOG(log_level::info) << "\t" << num_ops << " requests completed in " << tot_time
 											<< " us";
 	LOG(log_level::info) << "\t" << data_size << " payload";
-	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E6 / tot_time << " requests per microsecond";
+	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E3 / tot_time << " requests per microsecond";
 
     bench_begin = time_utils::now_us();
     tot_time = 0;
@@ -77,10 +77,10 @@ TEST_CASE("hash_table_performance_test", "[put][get][remove]][performance]") {
 	tot_time = bench_end - bench_begin;
 	LOG(log_level::info) << "===== " << "hash_table_get" << " ======";
 	LOG(log_level::info) << "total_time: " << tot_time;
-	LOG(log_level::info) << "\t" << 3 * num_ops << " requests completed in " << tot_time
+	LOG(log_level::info) << "\t" << num_ops << " requests completed in " << tot_time
 											<< " us";
 	LOG(log_level::info) << "\t" << data_size << " payload";
-	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E6 / tot_time << " requests per microsecond";
+	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E3 / tot_time << " requests per microsecond";
   
 	bench_begin = time_utils::now_us();
     tot_time = 0;
@@ -94,9 +94,9 @@ TEST_CASE("hash_table_performance_test", "[put][get][remove]][performance]") {
 	tot_time = bench_end - bench_begin;
 	LOG(log_level::info) << "===== " << "hash_table_remove" << " ======";
 	LOG(log_level::info) << "total_time: " << tot_time;
-	LOG(log_level::info) << "\t" << 3 * num_ops << " requests completed in " << tot_time
+	LOG(log_level::info) << "\t" << num_ops << " requests completed in " << tot_time
 											<< " us";
 	LOG(log_level::info) << "\t" << data_size << " payload";
-	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E6 / tot_time << " requests per microsecond";
+	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E3 / tot_time << " requests per microsecond";
 	
 }
