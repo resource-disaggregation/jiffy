@@ -47,7 +47,7 @@ int main() {
     uint64_t tot_time = 0;
     std::string data_ (data_size, 'x');
 
-    for (std::size_t i = 0; i < num_ops; ++i) {
+    for (int i = 0; i < num_ops; ++i) {
         response resp;
         block.enqueue(resp, {"enqueue", data_});
     }
@@ -63,7 +63,7 @@ int main() {
     bench_begin = time_utils::now_us();
     tot_time = 0;
     int read_pos = 0;
-    for (std::size_t i = 0; i < num_ops; ++i) {
+    for (int i = 0; i < num_ops; ++i) {
         response resp;
         block.dequeue(resp, {"dequeue"});
     }

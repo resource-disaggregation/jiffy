@@ -52,7 +52,7 @@ int main() {
     uint64_t tot_time = 0;
     std::string data_ (data_size, 'x');
 
-    for (std::size_t i = 0; i < num_ops; ++i) {
+    for (int i = 0; i < num_ops; ++i) {
         response resp;
         block.put(resp, {"put", std::to_string(i), data_});
     }
@@ -68,7 +68,7 @@ int main() {
     bench_begin = time_utils::now_us();
     tot_time = 0;
 
-    for (std::size_t i = 0; i < num_ops; ++i) {
+    for (int i = 0; i < num_ops; ++i) {
         response resp;
         block.get(resp, {"get", std::to_string(i)});
     }
@@ -84,7 +84,7 @@ int main() {
 	bench_begin = time_utils::now_us();
     tot_time = 0;
 
-	for (std::size_t i = 0; i < num_ops; ++i) {
+	for (int i = 0; i < num_ops; ++i) {
         response resp;
         block.remove(resp, {"remove", std::to_string(i)});
     }

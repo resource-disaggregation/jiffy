@@ -48,7 +48,7 @@ int main() {
     auto bench_begin = time_utils::now_us();
     uint64_t tot_time = 0;
 
-    for (std::size_t i = 0; i < num_ops; ++i) {
+    for (int i = 0; i < num_ops; ++i) {
         response resp;
         block.write(resp, {"write", data_, std::to_string(offset)});
         offset += data_.size();
@@ -65,7 +65,7 @@ int main() {
     bench_begin = time_utils::now_us();
     tot_time = 0;
     int read_pos = 0;
-    for (std::size_t i = 0; i < num_ops; ++i) {
+    for (int i = 0; i < num_ops; ++i) {
         response resp;
         block.read(resp, {"read", std::to_string(read_pos), std::to_string(data_.size())});
         read_pos += data_.size();
