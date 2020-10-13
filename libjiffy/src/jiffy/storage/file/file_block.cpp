@@ -7,9 +7,7 @@ namespace storage {
 using namespace utils;
 
 file_block::file_block(std::size_t max_size, block_memory_allocator<char> alloc) : alloc_(alloc), max_(max_size) {
-  std::cout<<"before allocate"<<std::endl;
   data_ = alloc_.allocate(max_);
-  std::cout<<"after allocate"<<std::endl;
 }
 
 file_block::~file_block() {

@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <limits.h>
+#include <memkind.h>
 #include <thrift/transport/TBufferTransports.h>
 #include <thrift/transport/TSocket.h>
 #include "jiffy/storage/storage_management_ops.h"
@@ -248,8 +250,11 @@ class test_utils {
     conf.set("directory.port", std::to_string(dir_port));
     std::vector<std::shared_ptr<jiffy::storage::block>> blks;
     blks.resize(block_ids.size());
+    char path[PATH_MAX] = "/media/pmem0/shijie/";
+    struct memkind* pmem_kind = nullptr;
+    size_t err = memkind_create_pmem(path,0,&pmem_kind);
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, pmem_kind);
       blks[i]->setup("hashtable", "local://tmp", "0_65536", "regular", conf);
     }
     return blks;
@@ -283,8 +288,11 @@ class test_utils {
     conf.set("directory.port", std::to_string(dir_port));
     std::vector<std::shared_ptr<jiffy::storage::block>> blks;
     blks.resize(block_ids.size());
+    char path[PATH_MAX] = "/media/pmem0/shijie/";
+    struct memkind* pmem_kind = nullptr;
+    size_t err = memkind_create_pmem(path,0,&pmem_kind);
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, pmem_kind);
       std::cout<<i<<" "<<std::endl;
       blks[i]->setup("file", "local://tmp", "", "regular", conf);
     }
@@ -319,8 +327,11 @@ class test_utils {
     conf.set("directory.port", std::to_string(dir_port));
     std::vector<std::shared_ptr<jiffy::storage::block>> blks;
     blks.resize(block_ids.size());
+    char path[PATH_MAX] = "/media/pmem0/shijie/";
+    struct memkind* pmem_kind = nullptr;
+    size_t err = memkind_create_pmem(path,0,&pmem_kind);
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, pmem_kind);
       blks[i]->setup("fifoqueue", "local://tmp", "", "regular", conf);
     }
     return blks;

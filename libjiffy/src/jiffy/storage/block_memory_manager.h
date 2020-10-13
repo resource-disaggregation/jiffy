@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <atomic>
 #include <new>
+#include <limits.h>
+#include <memkind.h>
 
 namespace jiffy {
 namespace storage {
@@ -22,7 +24,7 @@ class block_memory_manager {
    * @brief Constructor.
    * @param capacity Maximum capacity of block.
    */
-  explicit block_memory_manager(size_t capacity = 134217728);
+  explicit block_memory_manager(size_t capacity = 134217728, struct memkind* pmem_kind = nullptr);
 
   /**
    * @brief Allocate memory.
@@ -78,9 +80,8 @@ class block_memory_manager {
   size_t capacity_;
   std::atomic<size_t> used_;
   char path[PATH_MAX];
-  int err;
-  memkind_t pmem_kind;
-
+  int err = 0;
+  struct memkind* pmem_kind_;
 };
 
 }

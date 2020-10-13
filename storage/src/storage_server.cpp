@@ -10,6 +10,7 @@
 #include <boost/program_options.hpp>
 #include <ifaddrs.h>
 #include "server_storage_tracker.h"
+#include <memkind.h>
 
 using namespace ::jiffy::directory;
 using namespace ::jiffy::storage;
@@ -187,8 +188,11 @@ int main(int argc, char **argv) {
 
   std::vector<std::shared_ptr<block>> blocks;
   blocks.resize(num_blocks);
+  char path[PATH_MAX] = "/media/pmem0/shijie/";
+  struct memkind* pmem_kind = nullptr;
+  size_t err = memkind_create_pmem(path,0,&pmem_kind);
   for (size_t i = 0; i < blocks.size(); ++i) {
-    blocks[i] = std::make_shared<block>(block_ids[i], block_capacity, address, auto_scaling_port);
+    blocks[i] = std::make_shared<block>(block_ids[i], block_capacity, pmem_kind, address, auto_scaling_port);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
 

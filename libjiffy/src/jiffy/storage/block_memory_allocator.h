@@ -64,11 +64,8 @@ class block_memory_allocator {
   // allocate but don't initialize num elements of type T
   pointer allocate(size_type num, const void * = 0) {
     size_t requested_bytes = num * sizeof(T);
-    std::cout<<"request_bytes="<<requested_bytes<<std::endl;
     if (requested_bytes == 0) return nullptr;
-    std::cout<<"before malloc"<<std::endl;
     auto p = static_cast<pointer>(manager_->mb_malloc(num * sizeof(T)));
-    std::cout<<"after malloc and p==nullptr is "<<int(p==nullptr)<<std::endl;
     if (p == nullptr) {
       if (manager_->mb_used() + requested_bytes > manager_->mb_capacity()) {
         throw memory_block_overflow();

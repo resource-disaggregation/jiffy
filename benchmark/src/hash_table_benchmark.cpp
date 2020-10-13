@@ -155,9 +155,10 @@ int main() {
   int num_ops = 100000;
   int data_size = 64;
   std::vector<std::string> op_type_set;
+  op_type_set.push_back("remove");
   op_type_set.push_back("put");
   op_type_set.push_back("get");
-  op_type_set.push_back("remove");
+  
   std::string path = "/tmp";
   std::string backing_path = "local://tmp";
   // Output all the configuration parameters:
