@@ -62,6 +62,7 @@ TEST_CASE("hash_table_client_put_get_test", "[put][get]") {
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
+  test_utils::destroy_blocks(pmem_kind);
 }
 
 TEST_CASE("hash_table_client_put_update_get_test", "[put][update][get]") {
@@ -112,6 +113,7 @@ TEST_CASE("hash_table_client_put_update_get_test", "[put][update][get]") {
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
+  test_utils::destroy_blocks(pmem_kind);
 }
 
 TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
@@ -173,5 +175,6 @@ TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
   }
+  test_utils::destroy_blocks(pmem_kind);
 }
 
