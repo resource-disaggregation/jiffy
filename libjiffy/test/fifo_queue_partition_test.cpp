@@ -1,18 +1,17 @@
-#include <memkind.h>
 #include "catch.hpp"
 #include "jiffy/storage/fifoqueue/fifo_queue_defs.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_partition.h"
 #include <vector>
 #include <string>
-
+#include <memkind.h>
 
 using namespace ::jiffy::storage;
 using namespace ::jiffy::persistent;
 
 TEST_CASE("fifo_queue_enqueue_dequeue_test", "[enqueue][dequeue]") {
   struct memkind* pmem_kind = nullptr;
-  std::string pmem_path = "media/pmem0/shijie"; 
-  std::string memory_mode = "DRAM";
+  std::string pmem_path = "/media/pmem0/shijie"; 
+  std::string memory_mode = "PMEM";
   size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
   if(err) {
     char error_message[MEMKIND_ERROR_MESSAGE_SIZE];

@@ -15,7 +15,7 @@ binary make_binary(const std::string& str, const block_memory_allocator<uint8_t>
 
 TEST_CASE("local_write_test", "[write]") {
   struct memkind* pmem_kind = nullptr;
-  std::string pmem_path = "media/pmem0/shijie"; 
+  std::string pmem_path = "/media/pmem0/shijie"; 
   std::string memory_mode = "PMEM";
   size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
   if(err) {
