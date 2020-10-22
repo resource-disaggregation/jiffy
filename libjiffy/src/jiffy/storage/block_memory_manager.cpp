@@ -36,11 +36,13 @@ void block_memory_manager::mb_free(void *ptr) {
   if (memory_mode_ == "PMEM"){
     auto size = memkind_malloc_usable_size(pmem_kind_, ptr);
     memkind_free(pmem_kind_, ptr);
+    memkind_destroy_kind(pmem_kind_);
     used_ -= size;
   }
   else if (memory_mode_ == "DRAM"){
     auto size = memkind_malloc_usable_size(MEMKIND_DEFAULT, ptr);
     memkind_free(MEMKIND_DEFAULT, ptr);
+    memkind_destroy_kind(pmem_kind_);
     used_ -= size;
   }
 }
@@ -48,10 +50,12 @@ void block_memory_manager::mb_free(void *ptr) {
 void block_memory_manager::mb_free(void *ptr, size_t size) {
   if (memory_mode_ == "PMEM"){
     memkind_free(pmem_kind_, ptr);
+    memkind_destroy_kind(pmem_kind_);
     used_ -= size;
   }
   else if (memory_mode_ == "DRAM"){
     memkind_free(MEMKIND_DEFAULT, ptr);
+    memkind_destroy_kind(pmem_kind_);
     used_ -= size;
   }
 }
