@@ -34,7 +34,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   auto block_pmemkind_pair = test_utils::init_file_blocks(block_names, 134217728);
   auto blocks = block_pmemkind_pair.blocks;
   auto pmem_kind = block_pmemkind_pair.pmem_kind;
-  auto avail = memkind_check_available(pmem_kind);
+
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
@@ -88,6 +88,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   }
   auto err = memkind_destroy_kind(pmem_kind);
   std::cout << "err=" << err << "\n";
+  REQUIRE(1==1);
 }
 
 
