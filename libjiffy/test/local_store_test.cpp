@@ -23,6 +23,7 @@ TEST_CASE("local_write_test", "[write]") {
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   std::cout<<"after manager\n";
   block_memory_allocator<uint8_t> binary_allocator(&manager);
+  std::cout<<"after allocator\n";
   hash_table_type table;
   auto bkey = binary("key", binary_allocator);
   auto bval = binary("value", binary_allocator);
