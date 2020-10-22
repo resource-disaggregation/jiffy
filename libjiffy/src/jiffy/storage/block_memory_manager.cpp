@@ -20,7 +20,7 @@ void *block_memory_manager::mb_malloc(size_t size) {
     return nullptr;
   }
   if (memory_mode_ == "PMEM"){
-    std::cout << memory_mode_ << pmem_kind_==nullptr << pmem_path_<< "\n"; 
+    std::cout << memory_mode_  << pmem_path_<< "\n"; 
     auto ptr = memkind_malloc(pmem_kind_, size);
     used_ += size;
     return ptr;
