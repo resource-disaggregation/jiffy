@@ -194,7 +194,7 @@ int main(int argc, char **argv) {
 
   std::vector<std::shared_ptr<block>> blocks;
   blocks.resize(num_blocks);
-
+  std::cout << "--------------------------fanbingle!"<< "\n";
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM"){  
     size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
