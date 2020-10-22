@@ -35,7 +35,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   auto blocks = block_pmemkind_pair.blocks;
   auto pmem_kind = block_pmemkind_pair.pmem_kind;
   auto avail = memkind_check_available(pmem_kind);
-  std::cout << avail << "\n";
+  std::cout << "avail 1:" << avail << "\n";
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
@@ -78,13 +78,13 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
     REQUIRE(buffer == std::to_string(i));
   }
   avail = memkind_check_available(pmem_kind);
-  std::cout << avail << "\n";
+  std::cout << "avail 2:" << avail << "\n";
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
   }
   avail = memkind_check_available(pmem_kind);
-  std::cout << avail << "\n";
+  std::cout << "avail 3:" << avail << "\n";
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
