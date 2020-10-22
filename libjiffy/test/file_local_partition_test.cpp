@@ -62,7 +62,7 @@ TEST_CASE("file_ls_write_read_csv_test", "[write][read]") {
   REQUIRE_NOTHROW(block.read_ls(resp, {"read_ls", std::to_string(read_pos + 1), std::to_string(std::to_string(1).size())}));
   REQUIRE(resp[1].size() == 0);
   remove("/tmp/0");
-  
+  memkind_destroy_kind(pmem_kind);
 }
 
 TEST_CASE("file_ls_write_read_binary_test", "[write][read]") {
@@ -118,7 +118,7 @@ TEST_CASE("file_ls_write_read_binary_test", "[write][read]") {
   REQUIRE_NOTHROW(block.read_ls(resp, {"read_ls", std::to_string(read_pos + 1), std::to_string(std::to_string(1).size())}));
   REQUIRE(resp[1].size() == 0);
   remove("/tmp/0");
-  
+  memkind_destroy_kind(pmem_kind);
 }
 
 

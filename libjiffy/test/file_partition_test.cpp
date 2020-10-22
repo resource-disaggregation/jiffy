@@ -39,6 +39,7 @@ TEST_CASE("file_write_read_test", "[write][read]") {
   response resp;
   REQUIRE_NOTHROW(block.read(resp, {"read", std::to_string(read_pos + 1), std::to_string(std::to_string(1).size())}));
   REQUIRE(resp[1] == std::string(std::to_string(1).size(), 0));
+  memkind_destroy_kind(pmem_kind);
 }
 
 TEST_CASE("file_write_clear_read_test", "[write][read]") {
@@ -75,6 +76,7 @@ TEST_CASE("file_write_clear_read_test", "[write][read]") {
     REQUIRE(resp[1] == std::string(std::to_string(i).size(), 0));
     read_pos += std::to_string(i).size();
   }
+  memkind_destroy_kind(pmem_kind);
 }
 
 TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
@@ -98,6 +100,7 @@ TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
     offset += std::to_string(i).size();
   }
   REQUIRE(block.storage_size() <= block.storage_capacity());
+  memkind_destroy_kind(pmem_kind);
 }
 
 TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
@@ -133,6 +136,7 @@ TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
     REQUIRE(resp[1] == std::to_string(i));
     read_pos += std::to_string(i).size();
   }
+  memkind_destroy_kind(pmem_kind);
 }
 
 

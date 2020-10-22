@@ -40,6 +40,7 @@ TEST_CASE("fifo_queue_enqueue_dequeue_test", "[enqueue][dequeue]") {
     REQUIRE_NOTHROW(block.dequeue(resp, {"dequeue"}));
     REQUIRE(resp[0] == "!msg_not_found");
   }
+  memkind_destroy_kind(pmem_kind);
 }
 
 TEST_CASE("fifo_queue_enqueue_clear_dequeue_test", "[enqueue][dequeue]") {
@@ -72,6 +73,7 @@ TEST_CASE("fifo_queue_enqueue_clear_dequeue_test", "[enqueue][dequeue]") {
     REQUIRE_NOTHROW(block.dequeue(resp, {"dequeue"}));
     REQUIRE(resp[0] == "!msg_not_found");
   }
+  memkind_destroy_kind(pmem_kind);
 }
 
 TEST_CASE("fifo_queue_enqueue_readnext_dequeue", "[enqueue][read_next][dequeue]") {
@@ -106,6 +108,7 @@ TEST_CASE("fifo_queue_enqueue_readnext_dequeue", "[enqueue][read_next][dequeue]"
     REQUIRE(resp1[1] == std::to_string(i));
     REQUIRE(resp2[0] == "!ok");
   }
+  memkind_destroy_kind(pmem_kind);
 }
 
 TEST_CASE("fifo_queue_storage_size_test", "[put][size][storage_size][reset]") {
@@ -127,6 +130,7 @@ TEST_CASE("fifo_queue_storage_size_test", "[put][size][storage_size][reset]") {
     REQUIRE(resp[0] == "!ok");
   }
   REQUIRE(block.storage_size() <= block.storage_capacity());
+  memkind_destroy_kind(pmem_kind);
 }
 
 TEST_CASE("fifo_queue_flush_load_test", "[enqueue][sync][reset][load][dequeue]") {
@@ -160,6 +164,7 @@ TEST_CASE("fifo_queue_flush_load_test", "[enqueue][sync][reset][load][dequeue]")
     REQUIRE(resp1[1] == std::to_string(i));
     REQUIRE(resp2[0] == "!ok");
   }
+  memkind_destroy_kind(pmem_kind);
 }
 
 

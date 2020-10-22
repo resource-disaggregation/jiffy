@@ -56,7 +56,7 @@ TEST_CASE("fifo_queue_local_enqueue_read_dequeue_csv_test", "[enqueue][dequeue]"
     REQUIRE(resp[0] == "!queue_is_empty");
   }
   remove("/tmp/0");
-  // test_utils::destroy_kind(pmem_kind);
+  memkind_destroy_kind(pmem_kind);
 }
 
 TEST_CASE("fifo_queue_local_enqueue_read_dequeue_binary_test", "[enqueue][dequeue]") {
@@ -102,5 +102,5 @@ TEST_CASE("fifo_queue_local_enqueue_read_dequeue_binary_test", "[enqueue][dequeu
     REQUIRE(resp[0] == "!queue_is_empty");
   }
   remove("/tmp/0");
-  test_utils::destroy_kind(pmem_kind);
+  memkind_destroy_kind(pmem_kind);
 }
