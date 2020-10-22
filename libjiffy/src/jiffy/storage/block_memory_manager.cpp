@@ -10,7 +10,7 @@ namespace jiffy {
 namespace storage {
 
 block_memory_manager::block_memory_manager(size_t capacity, const std::string memory_mode, struct memkind* pmem_kind) : capacity_(capacity), used_(0), memory_mode_(memory_mode), pmem_kind_(pmem_kind) {
-  if (pmem_kind_ == nullptr) std::cout<<"wocc!!!!!!\n"
+  if (pmem_kind_ == nullptr) std::cout<<"wocc!!!!!!\n";
 }
 
 void *block_memory_manager::mb_malloc(size_t size) {
