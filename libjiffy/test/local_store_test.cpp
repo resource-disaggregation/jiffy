@@ -38,7 +38,12 @@ TEST_CASE("local_write_test", "[write]") {
   in >> data;
   REQUIRE(data == "key,value");
   std::remove("/tmp/a.txt");
-  memkind_destroy_kind(pmem_kind);
+  err = memkind_destroy_kind(pmem_kind);
+  if(err) {
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+  }
 }
 
 TEST_CASE("local_read_test", "[read]") {
@@ -66,5 +71,5 @@ TEST_CASE("local_read_test", "[read]") {
   REQUIRE_NOTHROW(store.read("/tmp/a.txt", table));
   REQUIRE(table.at(bkey) == bval);
   std::remove("/tmp/a.txt");
-  memkind_destroy_kind(pmem_kind);
+  err = memkind_destroy_kind(pmem_kind);
 }
