@@ -49,7 +49,6 @@ void block::setup(const std::string &type,
                   const std::string &name,
                   const std::string &metadata,
                   const utils::property_map &conf) {
-  std::cout<<"enter setup"<<std::endl;
   impl_ = partition_manager::build_partition(&manager_,
                                              type,
                                              backing_path,
