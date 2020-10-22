@@ -23,7 +23,7 @@ TEST_CASE("fifo_queue_local_enqueue_read_dequeue_csv_test", "[enqueue][dequeue]"
   property_map conf;
   conf.set("fifoqueue.serializer", "csv");
   fifo_queue_partition block(&manager, "local://tmp", "0", "regular", conf);
-
+  std::cout<<"after init block\n";
   for (std::size_t i = 0; i < 500; ++i) {
     response resp;
     REQUIRE_NOTHROW(block.run_command(resp, {"enqueue", std::to_string(i)}));
@@ -32,7 +32,7 @@ TEST_CASE("fifo_queue_local_enqueue_read_dequeue_csv_test", "[enqueue][dequeue]"
 
   REQUIRE(block.is_dirty());
   REQUIRE(block.sync("local://tmp/0"));
-  
+  std::cout<<"after sync\n";
   for (std::size_t i = 500; i < 1000; ++i) {
     response resp;
     REQUIRE_NOTHROW(block.enqueue_ls(resp, {"enqueue_ls", std::to_string(i)}));
