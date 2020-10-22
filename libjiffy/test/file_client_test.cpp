@@ -83,11 +83,12 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
   }
-  memkind_destroy_kind(pmem_kind);
+
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
+  memkind_destroy_kind(pmem_kind);
 }
 
 
