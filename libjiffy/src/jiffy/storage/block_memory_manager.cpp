@@ -11,6 +11,7 @@ namespace storage {
 
 block_memory_manager::block_memory_manager(size_t capacity, const std::string memory_mode, const std::string pmem_path, struct memkind* pmem_kind) : capacity_(capacity), used_(0), memory_mode_(memory_mode), pmem_path_(pmem_path), pmem_kind_(pmem_kind) {
   if (memory_mode == "PMEM" && pmem_kind == nullptr){
+    std::cout << 1;
     size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
   }
 }
@@ -20,8 +21,9 @@ void *block_memory_manager::mb_malloc(size_t size) {
     return nullptr;
   }
   if (memory_mode_ == "PMEM"){
-    std::cout << memory_mode_  << pmem_path_<< "\n"; 
+    std::cout << 2;
     auto ptr = memkind_malloc(pmem_kind_, size);
+    std::cout << 3;
     used_ += size;
     return ptr;
   }
