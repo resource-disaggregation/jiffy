@@ -65,6 +65,8 @@ int main(int argc, char **argv) {
   // Configuration priority order: default < env < configuration file < commandline args
   // First set defaults
   std::string address = "127.0.0.1";
+  std::string memory_mode = "PMEM";
+  std::string pmem_path = "";
   int32_t mgmt_port = 9093;
   int32_t auto_scaling_port = 9094;
   int32_t service_port = 9095;
@@ -95,6 +97,8 @@ int main(int argc, char **argv) {
         ("storage.management_port", po::value<int>(&mgmt_port)->default_value(9093))
         ("storage.auto_scaling_port", po::value<int>(&auto_scaling_port)->default_value(9094))
         ("storage.service_port", po::value<int>(&service_port)->default_value(9095))
+        ("storage.memory_mode", po::value<std::string>(&memory_mode)->default_value("PMEM"))
+        ("storage.pmem_path", po::value<std::string>(&pmem_path)->default_value(""))
         ("directory.host", po::value<std::string>(&dir_host)->default_value("127.0.0.1"))
         ("directory.service_port", po::value<int>(&dir_port)->default_value(9090))
         ("directory.block_port", po::value<int>(&block_port)->default_value(9092))
@@ -155,6 +159,8 @@ int main(int argc, char **argv) {
     LOG(log_level::info) << "storage.service_port: " << service_port;
     LOG(log_level::info) << "storage.management_port: " << mgmt_port;
     LOG(log_level::info) << "storage.auto_scaling_port: " << auto_scaling_port;
+    LOG(log_level::info) << "storage.memory_mode: " << memory_mode;
+    LOG(log_level::info) << "storage.pmem_path: "  << pmem_path;
     LOG(log_level::info) << "storage.block.num_blocks: " << num_blocks;
     LOG(log_level::info) << "storage.block.num_block_groups: " << num_block_groups;
     LOG(log_level::info) << "storage.block.capacity: " << block_capacity;
@@ -188,11 +194,8 @@ int main(int argc, char **argv) {
 
   std::vector<std::shared_ptr<block>> blocks;
   blocks.resize(num_blocks);
-  char path[PATH_MAX] = "/media/pmem0/shijie/";
-  struct memkind* pmem_kind = nullptr;
-  size_t err = memkind_create_pmem(path,0,&pmem_kind);
   for (size_t i = 0; i < blocks.size(); ++i) {
-    blocks[i] = std::make_shared<block>(block_ids[i], block_capacity, pmem_kind, address, auto_scaling_port);
+    blocks[i] = std::make_shared<block>(block_ids[i], block_capacity, memory_mode, pmem_path, address, auto_scaling_port);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
 
