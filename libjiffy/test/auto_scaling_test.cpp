@@ -81,7 +81,7 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
     auto_scaling_thread.join();
   }
 
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -162,7 +162,7 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
     auto_scaling_thread.join();
   }
 
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -261,7 +261,7 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
     auto_scaling_thread.join();
   }
 
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -327,7 +327,7 @@ TEST_CASE("hash_table_auto_scale_large_data_test", "[directory_service][storage_
     auto_scaling_thread.join();
   }
 
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -426,7 +426,7 @@ TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][managemen
     auto_scaling_thread.join();
   }
 
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -521,7 +521,7 @@ TEST_CASE("file_auto_scale_chain_replica_test", "[directory_service][storage_ser
     auto_scaling_thread.join();
   }
 
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -620,7 +620,7 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
     auto_scaling_thread.join();
   }
 
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -717,7 +717,7 @@ TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][manag
     auto_scaling_thread.join();
   }
 
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -786,7 +786,7 @@ TEST_CASE("file_auto_scale_large_data_test", "[directory_service][storage_server
     auto_scaling_thread.join();
   }
 
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -856,7 +856,7 @@ TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][man
     auto_scaling_thread.join();
   }
 
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread1.joinable()) {
     storage_serve_thread1.join();
@@ -920,7 +920,7 @@ TEST_CASE("fifo_queue_auto_scale_replica_chain_test", "[directory_service][stora
     auto_scaling_thread.join();
   }
 
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread1.joinable()) {
     storage_serve_thread1.join();
@@ -988,7 +988,7 @@ TEST_CASE("fifo_queue_auto_scale_multi_block_test", "[directory_service][storage
     auto_scaling_thread.join();
   }
 
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread1.joinable()) {
     storage_serve_thread1.join();
@@ -1080,7 +1080,7 @@ TEST_CASE("fifo_queue_auto_scale_multi_block_test", "[directory_service][storage
 //  if(auto_scaling_thread.joinable()) {
 //    auto_scaling_thread.join();
 //  }
-//  test_utils::destroy_blocks(pmem_kind);
+//  
 // storage_server->stop();
 //  if (storage_serve_thread.joinable()) {
 //    storage_serve_thread.join();
@@ -1175,7 +1175,7 @@ TEST_CASE("fifo_queue_auto_scale_mix_test", "[directory_service][storage_server]
     auto_scaling_thread.join();
   }
 
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread1.joinable()) {
     storage_serve_thread1.join();
@@ -1241,7 +1241,7 @@ TEST_CASE("fifo_queue_large_data_test", "[enqueue][dequeue]") {
   if(auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();
   }
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -1316,7 +1316,7 @@ TEST_CASE("fifo_queue_queue_size_test", "[enqueue][dequeue]") {
   if(auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();
   }
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -1411,7 +1411,7 @@ TEST_CASE("fifo_queue_queue_size_test", "[enqueue][dequeue]") {
 //  if(auto_scaling_thread.joinable()) {
 //    auto_scaling_thread.join();
 //  }
-//  test_utils::destroy_blocks(pmem_kind);
+//  
 // storage_server->stop();
 //  if (storage_serve_thread.joinable()) {
 //    storage_serve_thread.join();
@@ -1505,7 +1505,7 @@ TEST_CASE("fifo_queue_in_rate_out_rate_auto_scale_test", "[enqueue][dequeue]") {
     auto_scaling_thread.join();
   }
 
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -1603,7 +1603,7 @@ TEST_CASE("fifo_queue_in_rate_out_rate_auto_scale_test", "[enqueue][dequeue]") {
 //  if(auto_scaling_thread.joinable()) {
 //    auto_scaling_thread.join();
 //  }
-//  test_utils::destroy_blocks(pmem_kind);
+//  
 // storage_server->stop();
 //  if (storage_serve_thread.joinable()) {
 //    storage_serve_thread.join();

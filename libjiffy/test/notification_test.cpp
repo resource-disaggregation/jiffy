@@ -91,7 +91,7 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
     REQUIRE_THROWS_AS(sub2.get_notification(100), std::out_of_range);
     REQUIRE_THROWS_AS(sub3.get_notification(100), std::out_of_range);
   }
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();

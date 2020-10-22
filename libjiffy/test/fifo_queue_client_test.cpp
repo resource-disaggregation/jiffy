@@ -64,7 +64,7 @@ TEST_CASE("fifo_queue_client_enqueue_dequeue_test", "[enqueue][dequeue]") {
     REQUIRE_THROWS_AS(client.dequeue(), std::logic_error);
   }
 
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -129,7 +129,7 @@ TEST_CASE("fifo_queue_client_enqueue_length_dequeue_test", "[enqueue][dequeue]")
   }
 
   REQUIRE(client.length() == length);
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -205,7 +205,7 @@ TEST_CASE("fifo_queue_client_enqueue_in_rate_out_rate_dequeue_test", "[enqueue][
   REQUIRE_NOTHROW(rate = client.out_rate());
   LOG(log_level::info) << "Out rate: " << rate;
 
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();

@@ -52,7 +52,7 @@ TEST_CASE("hash_table_client_put_get_test", "[put][get]") {
   for (std::size_t i = 1000; i < 2000; ++i) {
     REQUIRE_THROWS_AS(client.get(std::to_string(i)), std::logic_error);
   }
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -102,7 +102,7 @@ TEST_CASE("hash_table_client_put_update_get_test", "[put][update][get]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.get(std::to_string(i)) == std::to_string(i + 1000));
   }
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -158,7 +158,7 @@ TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_THROWS_AS(client.get(std::to_string(i)), std::logic_error);
   }
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();

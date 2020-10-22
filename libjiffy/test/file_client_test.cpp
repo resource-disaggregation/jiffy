@@ -75,7 +75,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
     REQUIRE(client.read(buffer, std::to_string(i).size()) == std::to_string(i).size());
     REQUIRE(buffer == std::to_string(i));
   }
-  // test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -138,7 +138,7 @@ TEST_CASE("file_client_concurrent_write_read_seek_test", "[write][read][seek]") 
   if (auto_scaling_thread.joinable()) {
     auto_scaling_thread.join();
   }
-  test_utils::destroy_blocks(pmem_kind);
+  
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
