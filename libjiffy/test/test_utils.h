@@ -262,7 +262,7 @@ class test_utils {
       size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
     }
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_path, pmem_kind);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
       blks[i]->setup("hashtable", "local://tmp", "0_65536", "regular", conf);
     }
     blk_pmemkind_pair pair = {blks,pmem_kind};
@@ -304,7 +304,7 @@ class test_utils {
       size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
     }
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_path, pmem_kind);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
       std::cout<<i<<" "<<std::endl;
       blks[i]->setup("file", "local://tmp", "", "regular", conf);
     }
@@ -347,14 +347,14 @@ class test_utils {
       size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
     }
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_path, pmem_kind);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
       blks[i]->setup("fifoqueue", "local://tmp", "", "regular", conf);
     }
     blk_pmemkind_pair pair = {blks,pmem_kind};
     return pair;
   }
 
-  static void destroy_blocks(struct memkind* pmem_kind){
+  static void destroy_kind(struct memkind* pmem_kind){
     memkind_destroy_kind(pmem_kind);
   }
 

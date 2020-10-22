@@ -200,7 +200,7 @@ int main(int argc, char **argv) {
   }
   
   for (size_t i = 0; i < blocks.size(); ++i) {
-    blocks[i] = std::make_shared<block>(block_ids[i], block_capacity, memory_mode, pmem_path, pmem_kind, address, auto_scaling_port);
+    blocks[i] = std::make_shared<block>(block_ids[i], block_capacity, memory_mode, pmem_kind, address, auto_scaling_port);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
 
