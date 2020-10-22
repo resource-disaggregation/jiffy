@@ -9,6 +9,7 @@
 #include <jiffy/utils/time_utils.h>
 #include "jiffy/storage/file/file_defs.h"
 #include "jiffy/storage/file/file_partition.h"
+#include <memkind.h>
 
 using namespace ::jiffy::client;
 using namespace ::jiffy::directory;
@@ -41,7 +42,17 @@ TEST_CASE("file_performance_test", "[write][read][performance]") {
     LOG(log_level::info) << "backing-path: " << backing_path;
   
 
-    block_memory_manager manager;
+    struct memkind* pmem_kind = nullptr;
+    std::string pmem_path = "/media/pmem0/shijie"; 
+    std::string memory_mode = "PMEM";
+    size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+    if(err) {
+        char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+        memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+        fprintf(stderr, "%s\n", error_message);
+    }
+    size_t capacity = 134217728;
+    block_memory_manager manager(capacity, memory_mode, pmem_kind);
     file_partition block(&manager);
     std::size_t offset = 0;
     std::string data_ (data_size, 'x');

@@ -3,12 +3,23 @@
 #include "jiffy/storage/file/file_partition.h"
 #include <vector>
 #include <string>
+#include <memkind.h>
 
 using namespace ::jiffy::storage;
 using namespace ::jiffy::persistent;
 
 TEST_CASE("file_write_read_test", "[write][read]") {
-  block_memory_manager manager;
+  struct memkind* pmem_kind = nullptr;
+  std::string pmem_path = "/media/pmem0/shijie"; 
+  std::string memory_mode = "PMEM";
+  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+  if(err) {
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+  }
+  size_t capacity = 134217728;
+  block_memory_manager manager(capacity, memory_mode, pmem_kind);
   file_partition block(&manager);
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -31,7 +42,17 @@ TEST_CASE("file_write_read_test", "[write][read]") {
 }
 
 TEST_CASE("file_write_clear_read_test", "[write][read]") {
-  block_memory_manager manager;
+  struct memkind* pmem_kind = nullptr;
+  std::string pmem_path = "/media/pmem0/shijie"; 
+  std::string memory_mode = "PMEM";
+  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+  if(err) {
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+  }
+  size_t capacity = 134217728;
+  block_memory_manager manager(capacity, memory_mode, pmem_kind);
   file_partition block(&manager);
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -57,7 +78,17 @@ TEST_CASE("file_write_clear_read_test", "[write][read]") {
 }
 
 TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
-  block_memory_manager manager;
+  struct memkind* pmem_kind = nullptr;
+  std::string pmem_path = "/media/pmem0/shijie"; 
+  std::string memory_mode = "PMEM";
+  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+  if(err) {
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+  }
+  size_t capacity = 134217728;
+  block_memory_manager manager(capacity, memory_mode, pmem_kind);
   file_partition block(&manager);
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -70,7 +101,17 @@ TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
 }
 
 TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
-  block_memory_manager manager;
+  struct memkind* pmem_kind = nullptr;
+  std::string pmem_path = "/media/pmem0/shijie"; 
+  std::string memory_mode = "PMEM";
+  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+  if(err) {
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+  }
+  size_t capacity = 134217728;
+  block_memory_manager manager(capacity, memory_mode, pmem_kind);
   file_partition block(&manager);
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {

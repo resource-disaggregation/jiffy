@@ -9,6 +9,7 @@
 #include <jiffy/utils/time_utils.h>
 #include "jiffy/storage/fifoqueue/fifo_queue_defs.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_partition.h"
+#include <memkind.h>
 
 using namespace ::jiffy::client;
 using namespace ::jiffy::directory;
@@ -41,7 +42,17 @@ TEST_CASE("fifo_queue_performance_test", "[enqueue][dequeue][performance]") {
     LOG(log_level::info) << "backing-path: " << backing_path;
   
 
-    block_memory_manager manager;
+    struct memkind* pmem_kind = nullptr;
+    std::string pmem_path = "/media/pmem0/shijie"; 
+    std::string memory_mode = "PMEM";
+    size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+    if(err) {
+        char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+        memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+        fprintf(stderr, "%s\n", error_message);
+    }
+    size_t capacity = 134217728;
+    block_memory_manager manager(capacity, memory_mode, pmem_kind);
     fifo_queue_partition block(&manager);
 
     auto bench_begin = time_utils::now_us();

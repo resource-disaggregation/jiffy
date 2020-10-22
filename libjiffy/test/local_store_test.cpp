@@ -44,7 +44,17 @@ TEST_CASE("local_read_test", "[read]") {
   std::ofstream out("/tmp/a.txt", std::ofstream::out);
   out << "key,value\n";
   out.close();
-  block_memory_manager manager;
+  struct memkind* pmem_kind = nullptr;
+  std::string pmem_path = "/media/pmem0/shijie"; 
+  std::string memory_mode = "PMEM";
+  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+  if(err) {
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+  }
+  size_t capacity = 134217728;
+  block_memory_manager manager(capacity, memory_mode, pmem_kind);
   block_memory_allocator<kv_pair_type> allocator(&manager);
   block_memory_allocator<uint8_t> binary_allocator(&manager);
   auto ser = std::make_shared<csv_serde>(binary_allocator);

@@ -4,12 +4,23 @@
 #include <vector>
 #include <string>
 #include <cstdio>
+#include <memkind.h>
 
 using namespace ::jiffy::storage;
 using namespace ::jiffy::persistent;
 
 TEST_CASE("file_ls_write_read_csv_test", "[write][read]") {
-  block_memory_manager manager;
+  struct memkind* pmem_kind = nullptr;
+  std::string pmem_path = "/media/pmem0/shijie"; 
+  std::string memory_mode = "PMEM";
+  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+  if(err) {
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+  }
+  size_t capacity = 134217728;
+  block_memory_manager manager(capacity, memory_mode, pmem_kind);
   property_map conf;
   conf.set("file.serializer", "csv");
   file_partition block(&manager, "local://tmp", "0", "regular", conf);
@@ -55,7 +66,17 @@ TEST_CASE("file_ls_write_read_csv_test", "[write][read]") {
 }
 
 TEST_CASE("file_ls_write_read_binary_test", "[write][read]") {
-  block_memory_manager manager;
+  struct memkind* pmem_kind = nullptr;
+  std::string pmem_path = "/media/pmem0/shijie"; 
+  std::string memory_mode = "PMEM";
+  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+  if(err) {
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+  }
+  size_t capacity = 134217728;
+  block_memory_manager manager(capacity, memory_mode, pmem_kind);
   property_map conf;
   conf.set("file.serializer", "binary");
   file_partition block(&manager, "local://tmp", "0", "regular", conf);
