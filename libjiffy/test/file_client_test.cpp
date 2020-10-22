@@ -75,9 +75,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
     REQUIRE(client.read(buffer, std::to_string(i).size()) == std::to_string(i).size());
     REQUIRE(buffer == std::to_string(i));
   }
-  std::cout<<"before destroy\n";
-  test_utils::destroy_blocks(pmem_kind);
-  std::cout<<"after destroy\n";
+  // test_utils::destroy_blocks(pmem_kind);
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
