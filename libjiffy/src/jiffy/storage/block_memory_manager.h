@@ -24,7 +24,7 @@ class block_memory_manager {
    * @brief Constructor.
    * @param capacity Maximum capacity of block.
    */
-  explicit block_memory_manager(const std::string memory_mode = "PMEM", struct memkind* pmem_kind = nullptr, size_t capacity = 134217728);
+  explicit block_memory_manager(size_t capacity = 134217728, const std::string memory_mode = "PMEM", struct memkind* pmem_kind = nullptr);
 
   /**
    * @brief Allocate memory.

@@ -16,7 +16,7 @@ block::block(const std::string &id,
              const std::string &auto_scaling_host,
              const int auto_scaling_port)
     : id_(id),
-      manager_(memory_mode, pmem_kind, capacity),
+      manager_(capacity, memory_mode, pmem_kind),
       impl_(partition_manager::build_partition(&manager_,
                                                "default",
                                                "local://tmp",
