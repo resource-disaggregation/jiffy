@@ -96,6 +96,7 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
   }
+  test_utils::destroy_blocks(pmem_kind);
 }
 
 TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server][management_server]") {

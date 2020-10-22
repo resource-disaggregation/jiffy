@@ -194,7 +194,6 @@ int main(int argc, char **argv) {
 
   std::vector<std::shared_ptr<block>> blocks;
   blocks.resize(num_blocks);
-  std::cout << "--------------------------fanbingle!"<< "\n";
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM"){  
     size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
@@ -239,7 +238,6 @@ int main(int argc, char **argv) {
     LOG(log_level::error) << "Failed to advertise blocks: " << e.what()
                           << "; make sure block allocation server is running";
     
-    std::cout << "fanbingle!"<< "\n";
     memkind_destroy_kind(pmem_kind);
     std::exit(-1);
   }
@@ -299,7 +297,7 @@ int main(int argc, char **argv) {
         } catch (std::exception &e) {
           LOG(log_level::error) << "ERROR: " << e.what();
           
-          std::cout << "fanbingle!"<< "\n";
+    
           memkind_destroy_kind(pmem_kind);
           std::exit(-1);
         }
@@ -313,8 +311,7 @@ int main(int argc, char **argv) {
           std::rethrow_exception(auto_scaling_exception);
         } catch (std::exception &e) {
           LOG(log_level::error) << "ERROR: " << e.what();
-          
-          std::cout << "fanbingle!"<< "\n";
+
           memkind_destroy_kind(pmem_kind);
           std::exit(-1);
         }
@@ -331,7 +328,6 @@ int main(int argc, char **argv) {
     LOG(log_level::error) << "Failed to retract blocks: " << e.what()
                           << "; make sure block allocation server is running\n";
     
-    std::cout << "fanbingle!"<< "\n";
     memkind_destroy_kind(pmem_kind);
     std::exit(-1);
   }
