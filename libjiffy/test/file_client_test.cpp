@@ -86,7 +86,8 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
-  test_utils::destroy_blocks(pmem_kind);
+  // test_utils::destroy_blocks(pmem_kind);
+  REQUIRE(1==2);
 }
 
 
