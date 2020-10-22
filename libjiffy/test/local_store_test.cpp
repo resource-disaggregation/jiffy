@@ -17,7 +17,8 @@ TEST_CASE("local_write_test", "[write]") {
   struct memkind* pmem_kind = nullptr;
   std::string pmem_path = "media/pmem0/shijie"; 
   std::string memory_mode = "PMEM";
-  auto err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+  if (err) std::cout << "create fails\n";
   if (pmem_kind == nullptr) std::cout<<"wocc!!!!!!\n";
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
