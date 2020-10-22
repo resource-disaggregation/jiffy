@@ -19,7 +19,9 @@ TEST_CASE("local_write_test", "[write]") {
   std::string memory_mode = "PMEM";
   auto err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
   size_t capacity = 134217728;
+  std::cout<<"before manager\n";
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  std::cout<<"after manager\n";
   block_memory_allocator<uint8_t> binary_allocator(&manager);
   hash_table_type table;
   auto bkey = binary("key", binary_allocator);
