@@ -124,7 +124,7 @@ TEST_CASE("jiffy_client_lease_worker_test", "[put][get][update][remove]") {
   if (lease_serve_thread.joinable()) {
     lease_serve_thread.join();
   }
-  test_utils::destroy_blocks(pmem_kind);
+  test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("jiffy_client_create_test", "[put][get][update][remove]") {
@@ -187,7 +187,7 @@ TEST_CASE("jiffy_client_create_test", "[put][get][update][remove]") {
   if (lease_serve_thread.joinable()) {
     lease_serve_thread.join();
   }
-  test_utils::destroy_blocks(pmem_kind);
+  test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("jiffy_client_open_test", "[put][get][update][remove]") {
@@ -251,7 +251,7 @@ TEST_CASE("jiffy_client_open_test", "[put][get][update][remove]") {
   if (lease_serve_thread.joinable()) {
     lease_serve_thread.join();
   }
-  test_utils::destroy_blocks(pmem_kind);
+  test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("jiffy_client_flush_remove_test", "[put][get][update][remove]") {
@@ -318,7 +318,7 @@ TEST_CASE("jiffy_client_flush_remove_test", "[put][get][update][remove]") {
   if (lease_serve_thread.joinable()) {
     lease_serve_thread.join();
   }
-  test_utils::destroy_blocks(pmem_kind);
+  test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("jiffy_client_close_test", "[put][get][update][remove]") {
@@ -398,7 +398,7 @@ TEST_CASE("jiffy_client_close_test", "[put][get][update][remove]") {
   if (lease_serve_thread.joinable()) {
     lease_serve_thread.join();
   }
-  test_utils::destroy_blocks(pmem_kind);
+  test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
@@ -495,7 +495,7 @@ TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
   if (lease_serve_thread.joinable()) {
     lease_serve_thread.join();
   }
-  test_utils::destroy_blocks(pmem_kind);
+  test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("jiffy_client_chain_replication_test", "[put][get][update][remove]") {
@@ -558,5 +558,5 @@ TEST_CASE("jiffy_client_chain_replication_test", "[put][get][update][remove]") {
   if (lease_serve_thread.joinable()) {
     lease_serve_thread.join();
   }
-  test_utils::destroy_blocks(pmem_kind);
+  test_utils::destroy_kind(pmem_kind);
 }

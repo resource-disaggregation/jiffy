@@ -101,5 +101,5 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
-  // test_utils::destroy_blocks(pmem_kind);
+  // test_utils::destroy_kind(pmem_kind);
 }
