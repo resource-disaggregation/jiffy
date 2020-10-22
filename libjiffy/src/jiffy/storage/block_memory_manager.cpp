@@ -38,14 +38,15 @@ void block_memory_manager::mb_free(void *ptr) {
     used_ -= size;
   }
   else if (memory_mode_ == "DRAM"){
-    auto size = memkind_malloc_usable_size(pmem_kind_, ptr);
-    memkind_free(pmem_kind_, ptr);
+    auto size = memkind_malloc_usable_size(MEMKIND_DEFAULT, ptr);
+    memkind_free(MEMKIND_DEFAULT, ptr);
     used_ -= size;
   }
 }
 
 void block_memory_manager::mb_free(void *ptr, size_t size) {
   if (memory_mode_ == "PMEM"){
+    std::cout << "fanbingle!"<< "\n";
     memkind_free(pmem_kind_, ptr);
     used_ -= size;
   }
