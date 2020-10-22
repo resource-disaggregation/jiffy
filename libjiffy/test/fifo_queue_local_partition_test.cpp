@@ -18,10 +18,8 @@ TEST_CASE("fifo_queue_local_enqueue_read_dequeue_csv_test", "[enqueue][dequeue]"
   std::string pmem_path = "media/pmem0/shijie"; 
   std::string memory_mode = "PMEM";
   auto err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
-  std::cout << "after create\n";
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
-  std::cout << "after init\n";
   property_map conf;
   conf.set("fifoqueue.serializer", "csv");
   fifo_queue_partition block(&manager, "local://tmp", "0", "regular", conf);
@@ -58,7 +56,7 @@ TEST_CASE("fifo_queue_local_enqueue_read_dequeue_csv_test", "[enqueue][dequeue]"
     REQUIRE(resp[0] == "!queue_is_empty");
   }
   remove("/tmp/0");
-  test_utils::destroy_kind(pmem_kind);
+  // test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("fifo_queue_local_enqueue_read_dequeue_binary_test", "[enqueue][dequeue]") {
