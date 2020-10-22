@@ -12,11 +12,12 @@ using namespace jiffy::utils;
 block::block(const std::string &id,
              const size_t capacity,
              const std::string memory_mode,
+             const std::string pmem_path,
              struct memkind* pmem_kind,
              const std::string &auto_scaling_host,
              const int auto_scaling_port)
     : id_(id),
-      manager_(capacity, memory_mode, pmem_kind),
+      manager_(capacity, memory_mode, pmem_path, pmem_kind),
       impl_(partition_manager::build_partition(&manager_,
                                                "default",
                                                "local://tmp",
