@@ -18,8 +18,7 @@ TEST_CASE("local_write_test", "[write]") {
   std::string pmem_path = "media/pmem0/shijie"; 
   std::string memory_mode = "PMEM";
   size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
-  if (err) std::cout << "create fails\n";
-  if (pmem_kind == nullptr) std::cout<<"wocc!!!!!!\n";
+  if (err) std::cout << "err=" << err << "\n";
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   block_memory_allocator<uint8_t> binary_allocator(&manager);
