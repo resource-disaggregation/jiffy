@@ -32,6 +32,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   auto block_pmemkind_pair = test_utils::init_file_blocks(block_names, 134217728);
+  std::cout << "init_sucess\n";
   auto blocks = block_pmemkind_pair.blocks;
   auto pmem_kind = block_pmemkind_pair.pmem_kind;
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -51,6 +52,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   file_client client(tree, "/sandbox/file.txt", status);
 
   for (std::size_t i = 0; i < 1000; ++i) {
+    std::cout << i <<"\n";
     REQUIRE(client.write(std::to_string(i)) == std::to_string(i).size());
   }
 
