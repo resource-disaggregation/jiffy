@@ -86,9 +86,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
-  auto err = memkind_destroy_kind(pmem_kind);
-  std::cout << "err=" << err << "\n";
-  REQUIRE(1==1);
+  test_utils::destroy_blocks(pmem_kind);
 }
 
 
