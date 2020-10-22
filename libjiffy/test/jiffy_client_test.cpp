@@ -67,7 +67,9 @@ TEST_CASE("jiffy_client_lease_worker_test", "[put][get][update][remove]") {
                                                   STORAGE_SERVICE_PORT,
                                                   STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_hash_table_blocks(block_names);
+  auto block_pmemkind_pair = test_utils::init_hash_table_blocks(block_names);
+  auto blocks = block_pmemkind_pair.blocks;
+  auto pmem_kind = block_pmemkind_pair.pmem_kind;
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
@@ -102,7 +104,7 @@ TEST_CASE("jiffy_client_lease_worker_test", "[put][get][update][remove]") {
     usleep(LEASE_PERIOD_US);
     REQUIRE(client.fs()->exists("/a/file.txt"));
   }
-
+  test_utils::destroy_blocks(pmem_kind);
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -130,7 +132,9 @@ TEST_CASE("jiffy_client_create_test", "[put][get][update][remove]") {
                                                   STORAGE_SERVICE_PORT,
                                                   STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_hash_table_blocks(block_names);
+  auto block_pmemkind_pair = test_utils::init_hash_table_blocks(block_names);
+  auto blocks = block_pmemkind_pair.blocks;
+  auto pmem_kind = block_pmemkind_pair.pmem_kind;
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
@@ -162,7 +166,7 @@ TEST_CASE("jiffy_client_create_test", "[put][get][update][remove]") {
     REQUIRE(client.fs()->exists("/a/file.txt"));
     test_hash_table_ops(table);
   }
-
+  test_utils::destroy_blocks(pmem_kind);
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -190,7 +194,9 @@ TEST_CASE("jiffy_client_open_test", "[put][get][update][remove]") {
                                                   STORAGE_SERVICE_PORT,
                                                   STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_hash_table_blocks(block_names);
+  auto block_pmemkind_pair = test_utils::init_hash_table_blocks(block_names);
+  auto blocks = block_pmemkind_pair.blocks;
+  auto pmem_kind = block_pmemkind_pair.pmem_kind;
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
@@ -223,7 +229,7 @@ TEST_CASE("jiffy_client_open_test", "[put][get][update][remove]") {
     auto table = client.open_hash_table("/a/file.txt");
     test_hash_table_ops(table);
   }
-
+  test_utils::destroy_blocks(pmem_kind);
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -251,7 +257,9 @@ TEST_CASE("jiffy_client_flush_remove_test", "[put][get][update][remove]") {
                                                   STORAGE_SERVICE_PORT,
                                                   STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_hash_table_blocks(block_names);
+  auto block_pmemkind_pair = test_utils::init_hash_table_blocks(block_names);
+  auto blocks = block_pmemkind_pair.blocks;
+  auto pmem_kind = block_pmemkind_pair.pmem_kind;
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
@@ -287,7 +295,7 @@ TEST_CASE("jiffy_client_flush_remove_test", "[put][get][update][remove]") {
     REQUIRE_FALSE(client.lease_worker().has_path("/file.txt"));
     REQUIRE_FALSE(client.fs()->exists("/file.txt"));
   }
-
+  test_utils::destroy_blocks(pmem_kind);
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -315,7 +323,9 @@ TEST_CASE("jiffy_client_close_test", "[put][get][update][remove]") {
                                                   STORAGE_SERVICE_PORT,
                                                   STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_hash_table_blocks(block_names);
+  auto block_pmemkind_pair = test_utils::init_hash_table_blocks(block_names);
+  auto blocks = block_pmemkind_pair.blocks;
+  auto pmem_kind = block_pmemkind_pair.pmem_kind;
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
@@ -364,7 +374,7 @@ TEST_CASE("jiffy_client_close_test", "[put][get][update][remove]") {
     REQUIRE(client.fs()->exists("/file1.txt"));
     REQUIRE(client.fs()->exists("/file2.txt"));
   }
-
+  test_utils::destroy_blocks(pmem_kind);
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -392,7 +402,9 @@ TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
                                                   STORAGE_SERVICE_PORT,
                                                   STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_hash_table_blocks(block_names);
+  auto block_pmemkind_pair = test_utils::init_hash_table_blocks(block_names);
+  auto blocks = block_pmemkind_pair.blocks;
+  auto pmem_kind = block_pmemkind_pair.pmem_kind;
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 
@@ -458,7 +470,7 @@ TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
     REQUIRE_THROWS_AS(n2->get_notification(100), std::out_of_range);
     REQUIRE_THROWS_AS(n3->get_notification(100), std::out_of_range);
   }
-
+  test_utils::destroy_blocks(pmem_kind);
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -486,7 +498,9 @@ TEST_CASE("jiffy_client_chain_replication_test", "[put][get][update][remove]") {
                                                   STORAGE_SERVICE_PORT,
                                                   STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_hash_table_blocks(block_names);
+  auto block_pmemkind_pair = test_utils::init_hash_table_blocks(block_names);
+  auto blocks = block_pmemkind_pair.blocks;
+  auto pmem_kind = block_pmemkind_pair.pmem_kind;
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
 

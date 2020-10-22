@@ -9,7 +9,7 @@ using namespace jiffy::utils;
 namespace jiffy {
 namespace storage {
 
-block_memory_manager::block_memory_manager(size_t capacity, const std::string memory_mode, const std::string pmem_path) : capacity_(capacity), used_(0), memory_mode_(memory_mode), pmem_path_(pmem_path) {
+block_memory_manager::block_memory_manager(size_t capacity, const std::string memory_mode, struct memkind* pmem_kind) : capacity_(capacity), used_(0), memory_mode_(memory_mode), pmem_kind_(pmem_kind) {
   if (memory_mode_ == "PMEM"){
     const char* p = pmem_path_.c_str();
     struct memkind* pmem_kind_ = nullptr;

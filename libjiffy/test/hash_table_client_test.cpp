@@ -26,8 +26,9 @@ TEST_CASE("hash_table_client_put_get_test", "[put][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_hash_table_blocks(block_names, 134217728, 0, 1);
-
+  auto block_pmemkind_pair = test_utils::init_hash_table_blocks(block_names, 134217728, 0, 1);
+  auto blocks = block_pmemkind_pair.blocks;
+  auto pmem_kind = block_pmemkind_pair.pmem_kind;
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
@@ -51,7 +52,7 @@ TEST_CASE("hash_table_client_put_get_test", "[put][get]") {
   for (std::size_t i = 1000; i < 2000; ++i) {
     REQUIRE_THROWS_AS(client.get(std::to_string(i)), std::logic_error);
   }
-
+  test_utils::destroy_blocks(pmem_kind);
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -67,8 +68,9 @@ TEST_CASE("hash_table_client_put_update_get_test", "[put][update][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_hash_table_blocks(block_names, 134217728, 0, 1);
-
+  auto block_pmemkind_pair = test_utils::init_hash_table_blocks(block_names, 134217728, 0, 1);
+  auto blocks = block_pmemkind_pair.blocks;
+  auto pmem_kind = block_pmemkind_pair.pmem_kind;
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
@@ -100,7 +102,7 @@ TEST_CASE("hash_table_client_put_update_get_test", "[put][update][get]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.get(std::to_string(i)) == std::to_string(i + 1000));
   }
-
+  test_utils::destroy_blocks(pmem_kind);
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
@@ -116,8 +118,9 @@ TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_hash_table_blocks(block_names, 134217728, 0, 1);
-
+  auto block_pmemkind_pair = test_utils::init_hash_table_blocks(block_names, 134217728, 0, 1);
+  auto blocks = block_pmemkind_pair.blocks;
+  auto pmem_kind = block_pmemkind_pair.pmem_kind;
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
@@ -155,7 +158,7 @@ TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE_THROWS_AS(client.get(std::to_string(i)), std::logic_error);
   }
-
+  test_utils::destroy_blocks(pmem_kind);
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();

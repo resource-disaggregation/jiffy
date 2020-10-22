@@ -34,7 +34,9 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
                                                   STORAGE_SERVICE_PORT,
                                                   STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_hash_table_blocks(block_names);
+  auto block_pmemkind_pair = test_utils::init_hash_table_blocks(block_names);
+  auto blocks = block_pmemkind_pair.blocks;
+  auto pmem_kind = block_pmemkind_pair.pmem_kind;
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -89,7 +91,7 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
     REQUIRE_THROWS_AS(sub2.get_notification(100), std::out_of_range);
     REQUIRE_THROWS_AS(sub3.get_notification(100), std::out_of_range);
   }
-
+  test_utils::destroy_blocks(pmem_kind);
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
