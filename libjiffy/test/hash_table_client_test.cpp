@@ -102,7 +102,7 @@ TEST_CASE("hash_table_client_put_update_get_test", "[put][update][get]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     REQUIRE(client.get(std::to_string(i)) == std::to_string(i + 1000));
   }
-  // test_utils::destroy_blocks(pmem_kind);
+  test_utils::destroy_blocks(pmem_kind);
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
