@@ -84,8 +84,8 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
     storage_serve_thread.join();
   }
   memkind_destroy_kind(pmem_kind);
-  avail = memkind_check_available(pmem_kind);
-  std::cout << "avail 3:" << avail << "\n";
+  // avail = memkind_check_available(pmem_kind);
+  // std::cout << "avail 3:" << avail << "\n";
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
