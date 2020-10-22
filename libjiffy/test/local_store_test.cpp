@@ -6,6 +6,23 @@
 #include "jiffy/utils/directory_utils.h"
 #include "jiffy/storage/serde/serde_all.h"
 
+#include <thrift/transport/TTransportException.h>
+#include <thread>
+#include <chrono>
+#include <queue>
+#include "jiffy/storage/manager/storage_management_server.h"
+#include "jiffy/storage/manager/storage_manager.h"
+#include "jiffy/storage/file/file_partition.h"
+#include "jiffy/storage/hashtable/hash_slot.h"
+#include "test_utils.h"
+#include "jiffy/storage/service/block_server.h"
+#include "jiffy/directory/fs/directory_tree.h"
+#include "jiffy/directory/fs/directory_server.h"
+#include "jiffy/storage/client/hash_table_client.h"
+#include "jiffy/storage/client/fifo_queue_client.h"
+#include "jiffy/storage/client/file_client.h"
+#include "jiffy/client/jiffy_client.h"
+
 using namespace ::jiffy::persistent;
 using namespace ::jiffy::storage;
 
