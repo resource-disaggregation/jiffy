@@ -4,6 +4,7 @@
 #include "jiffy/persistent/persistent_service.h"
 #include "jiffy/utils/directory_utils.h"
 #include "jiffy/storage/serde/serde_all.h"
+#include <memkind.h>
 
 using namespace ::jiffy::persistent;
 using namespace ::jiffy::storage;
@@ -13,7 +14,12 @@ binary make_binary(const std::string& str, const block_memory_allocator<uint8_t>
 }
 
 TEST_CASE("local_write_test", "[write]") {
-  block_memory_manager manager;
+  struct memkind* pmem_kind = nullptr;
+  std::string pmem_path = "media/pmem0/shijie"; 
+  std::string memory_mode = "PMEM";
+  auto err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+  size_t capacity = 134217728;
+  block_memory_manager manager(capacity, memory_mode, pmem_kind);
   block_memory_allocator<uint8_t> binary_allocator(&manager);
   hash_table_type table;
   auto bkey = binary("key", binary_allocator);
