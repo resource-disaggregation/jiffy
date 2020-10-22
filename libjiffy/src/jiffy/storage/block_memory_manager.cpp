@@ -46,7 +46,6 @@ void block_memory_manager::mb_free(void *ptr) {
 
 void block_memory_manager::mb_free(void *ptr, size_t size) {
   if (memory_mode_ == "PMEM"){
-    std::cout << "fanbingle!"<< "\n";
     memkind_free(pmem_kind_, ptr);
     used_ -= size;
   }

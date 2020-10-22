@@ -238,6 +238,8 @@ int main(int argc, char **argv) {
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to advertise blocks: " << e.what()
                           << "; make sure block allocation server is running";
+    
+    std::cout << "fanbingle!"<< "\n";
     memkind_destroy_kind(pmem_kind);
     std::exit(-1);
   }
@@ -296,6 +298,8 @@ int main(int argc, char **argv) {
           std::rethrow_exception(storage_exception);
         } catch (std::exception &e) {
           LOG(log_level::error) << "ERROR: " << e.what();
+          
+          std::cout << "fanbingle!"<< "\n";
           memkind_destroy_kind(pmem_kind);
           std::exit(-1);
         }
@@ -309,6 +313,8 @@ int main(int argc, char **argv) {
           std::rethrow_exception(auto_scaling_exception);
         } catch (std::exception &e) {
           LOG(log_level::error) << "ERROR: " << e.what();
+          
+          std::cout << "fanbingle!"<< "\n";
           memkind_destroy_kind(pmem_kind);
           std::exit(-1);
         }
@@ -324,6 +330,8 @@ int main(int argc, char **argv) {
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to retract blocks: " << e.what()
                           << "; make sure block allocation server is running\n";
+    
+    std::cout << "fanbingle!"<< "\n";
     memkind_destroy_kind(pmem_kind);
     std::exit(-1);
   }
