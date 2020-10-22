@@ -77,13 +77,13 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
     REQUIRE(client.read(buffer, std::to_string(i).size()) == std::to_string(i).size());
     REQUIRE(buffer == std::to_string(i));
   }
-  auto avail = memkind_check_available(pmem_kind);
+  avail = memkind_check_available(pmem_kind);
   std::cout << avail << "\n";
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
   }
-  auto avail = memkind_check_available(pmem_kind);
+  avail = memkind_check_available(pmem_kind);
   std::cout << avail << "\n";
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
