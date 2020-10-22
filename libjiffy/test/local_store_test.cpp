@@ -1,10 +1,10 @@
+#include <memkind.h>
 #include <fstream>
 #include <catch.hpp>
 #include <iostream>
 #include "jiffy/persistent/persistent_service.h"
 #include "jiffy/utils/directory_utils.h"
 #include "jiffy/storage/serde/serde_all.h"
-#include <memkind.h>
 
 using namespace ::jiffy::persistent;
 using namespace ::jiffy::storage;
