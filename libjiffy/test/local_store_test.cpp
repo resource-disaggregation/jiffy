@@ -38,7 +38,7 @@ TEST_CASE("local_write_test", "[write]") {
   in >> data;
   REQUIRE(data == "key,value");
   std::remove("/tmp/a.txt");
-  memkind_destroy_kind(pmem_kind);
+  // memkind_destroy_kind(pmem_kind);
 }
 
 TEST_CASE("local_read_test", "[read]") {
@@ -66,5 +66,5 @@ TEST_CASE("local_read_test", "[read]") {
   REQUIRE_NOTHROW(store.read("/tmp/a.txt", table));
   REQUIRE(table.at(bkey) == bval);
   std::remove("/tmp/a.txt");
-  memkind_destroy_kind(pmem_kind);
+  // memkind_destroy_kind(pmem_kind);
 }
