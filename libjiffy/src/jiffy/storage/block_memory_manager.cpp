@@ -36,7 +36,7 @@ void block_memory_manager::mb_free(void *ptr) {
   if (memory_mode_ == "PMEM"){
     auto size = memkind_malloc_usable_size(pmem_kind_, ptr);
     memkind_free(pmem_kind_, ptr);
-    memkind_destroy_kind(pmem_kind_);
+    // memkind_destroy_kind(pmem_kind_);
     used_ -= size;
   }
   else if (memory_mode_ == "DRAM"){
