@@ -89,7 +89,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   int err = memkind_check_available(pmem_kind);
   std::cout<<"before"<<err<<"\n";
 
-  test_utils::destroy_kind(pmem_kind);
+  memkind_destroy_kind(pmem_kind);
   err = memkind_check_available(pmem_kind);
   std::cout<<"good\n";
   std::cout<<"after"<<err<<"\n";
