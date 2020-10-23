@@ -28,6 +28,7 @@ void *block_memory_manager::mb_malloc(size_t size) {
 }
 
 void block_memory_manager::mb_free(void *ptr) {
+  std::cout<<"________fanbing________\n";
   if (memory_mode_ == "PMEM"){
     auto size = memkind_malloc_usable_size(pmem_kind_, ptr);
     memkind_free(pmem_kind_, ptr);
