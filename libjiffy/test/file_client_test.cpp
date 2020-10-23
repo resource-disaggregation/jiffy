@@ -87,11 +87,12 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
     mgmt_serve_thread.join();
   }
   int err = memkind_check_available(pmem_kind);
-  std::cout<<err<<"\n";
+  std::cout<<"before"<<err<<"\n";
 
   test_utils::destroy_kind(pmem_kind);
   err = memkind_check_available(pmem_kind);
-  std::cout<<err<<"\n";
+  std::cout<<"good\n";
+  std::cout<<"after"<<err<<"\n";
 }
 
 
