@@ -96,7 +96,6 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
     fprintf(stderr, "%s\n", error_message);
   }
   std::cout<<"end\n";
-  REQUIRE(1==2);
 }
 
 
