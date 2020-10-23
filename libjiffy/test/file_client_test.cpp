@@ -87,12 +87,14 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
     mgmt_serve_thread.join();
   }
   int err = memkind_check_available(pmem_kind);
-  std::cout<<"before"<<err<<"\n";
 
   memkind_destroy_kind(pmem_kind);
   err = memkind_check_available(pmem_kind);
-  std::cout<<"good\n";
-  std::cout<<"after"<<err<<"\n";
+  if(err) {
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+  }
 }
 
 
