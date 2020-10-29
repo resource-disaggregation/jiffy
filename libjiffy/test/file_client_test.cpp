@@ -76,12 +76,10 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
     REQUIRE(client.read(buffer, std::to_string(i).size()) == std::to_string(i).size());
     REQUIRE(buffer == std::to_string(i));
   }
-  std::cout<<"1\n";
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
     storage_serve_thread.join();
   }
-  std::cout<<"2\n";
   mgmt_server->stop();
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
@@ -94,7 +92,6 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
     memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
     fprintf(stderr, "%s\n", error_message);
   }
-  std::cout<<"3\n";
 }
 
 
