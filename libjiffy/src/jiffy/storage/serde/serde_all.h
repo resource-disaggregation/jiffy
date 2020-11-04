@@ -4,6 +4,7 @@
 #include "jiffy/storage/hashtable/hash_table_defs.h"
 #include "jiffy/storage/file/file_defs.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_defs.h"
+#include "jiffy/storage/shared_log/shared_log_defs.h"
 #include "jiffy/storage/types/binary.h"
 #include "jiffy/utils/logger.h"
 #include <sstream>
@@ -93,6 +94,15 @@ class serde {
 
   virtual std::size_t virtual_serialize(const file_type &table, std::string out_path) = 0;
 
+/**
+   * @brief Virtual serialize function for shared_log
+   * @param table Shared_log
+   * @param out Output stream
+   * @return Output stream position
+   */
+
+  virtual std::size_t virtual_serialize(const shared_log_type &table, std::string out_path) = 0;
+
   /**
    * @brief Virtual deserialize function for new hash table type
    * @param in Input stream
@@ -119,6 +129,15 @@ class serde {
    */
 
   virtual std::size_t virtual_deserialize(file_type &table, std::string in_path) = 0;
+
+  /**
+   * @brief Virtual deserialize function for shared_log
+   * @param in Input stream
+   * @param table Shared_log
+   * @return Input stream position
+   */
+
+  virtual std::size_t virtual_deserialize(shared_log_type &table, std::string in_path) = 0;
 
   /* Block memory allocator */
   block_memory_allocator<uint8_t> allocator_;
@@ -174,6 +193,17 @@ class derived : public impl {
   }
 
   /**
+   * @brief Virtual serialize function for shared_log
+   * @param table Shared_log
+   * @param out Output stream
+   * @return Output stream position
+   */
+
+  std::size_t virtual_serialize(const shared_log_type &table, std::string out_path) final {
+    return impl::serialize_impl(table, out_path);
+  }
+
+  /**
    * @brief Virtual deserialize function for new hash table type
    * @param in Input stream
    * @param table Hash table
@@ -202,6 +232,17 @@ class derived : public impl {
    */
 
   std::size_t virtual_deserialize(file_type &table, std::string in_path) final {
+    return impl::deserialize_impl(table, in_path);
+  }
+
+  /**
+   * @brief Virtual deserialize function for shared_log
+   * @param in Input stream
+   * @param table Shared_log
+   * @return Input stream position
+   */
+
+  std::size_t virtual_deserialize(shared_log_type &table, std::string in_path) final {
     return impl::deserialize_impl(table, in_path);
   }
 };
@@ -275,6 +316,17 @@ class csv_serde_impl : public serde {
   }
 
   /**
+   * @brief Serialize shared_log in CSV format
+   * @param table Shared_log
+   * @param out Output stream
+   * @return Output stream position after flushing
+   */
+
+  std::size_t serialize_impl(const shared_log_type &table, std::string out_path) {
+    return 0;
+  }
+
+  /**
    * @brief Deserialize Input stream to hash table in CSV format
    * @param in Input stream
    * @param data Locked hash table
@@ -339,6 +391,17 @@ class csv_serde_impl : public serde {
     auto sz = in.tellg();
     in.close();
     return static_cast<std::size_t>(sz);
+  }
+
+  /**
+   * @brief Deserialize input stream to shared_log in CSV format
+   * @param in Input stream
+   * @param data Shared_log
+   * @return Input stream position after reading
+   */
+
+  std::size_t deserialize_impl(shared_log_type &data, std::string in_path) {
+    return 0;
   }
 
  private:
@@ -464,6 +527,17 @@ class binary_serde_impl : public serde {
   }
 
   /**
+   * @brief Binary serialization
+   * @param table Shared_log
+   * @param out Output stream
+   * @return Output stream position
+   */
+
+  size_t serialize_impl(const shared_log_type &table, std::string out_path) {
+    return 0;
+  }
+
+  /**
    * @brief Binary deserialization
    * @param in Input stream
    * @param table Hash table
@@ -537,6 +611,17 @@ class binary_serde_impl : public serde {
     auto sz = in.tellg();
     in.close();
     return static_cast<std::size_t>(sz);
+  }
+
+  /**
+   * @brief Binary deserialization
+   * @param in Input stream
+   * @param table shared_log
+   * @return Input stream position
+   */
+
+  size_t deserialize_impl(shared_log_type &table, std::string in_path) {
+    return 0;
   }
 };
 
