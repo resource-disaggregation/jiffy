@@ -24,15 +24,15 @@ TEST_CASE("shared_log_write_scan_test", "[write][scan]") {
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 10; ++i) {
     response resp;
-    REQUIRE_NOTHROW(block.write(resp, {"write", std::to_string(i), std::to_string(offset), "data_", std::to_string(i)+"stream"}));
+    REQUIRE_NOTHROW(block.write(resp, {"write", std::to_string(i), std::to_string(offset), std::to_string(i)+"_data", std::to_string(i)+"stream"}));
     REQUIRE(resp[0] == "!ok");
-    offset += (11 + std::to_string(i).size());
+    offset += (11 + 2 * std::to_string(i).size());
   }
   for (std::size_t start_pos = 0; start_pos < 8; ++start_pos) {
     response resp;
     REQUIRE_NOTHROW(block.scan(resp, {"scan", std::to_string(start_pos), std::to_string(start_pos + 2), std::to_string(start_pos)+"stream"}));
     REQUIRE(resp[0] == "!ok");
-    REQUIRE(resp[1] == std::to_string(start_pos));
+    REQUIRE(resp[1] == std::to_string(start_pos)+"_data");
   }
 //   memkind_destroy_kind(pmem_kind);
 }
@@ -53,30 +53,30 @@ TEST_CASE("shared_log_write_trim_scan_test", "[write][read]") {
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
-    REQUIRE_NOTHROW(block.write(resp, {"write", std::to_string(i), std::to_string(offset), "data_", std::to_string(i)+"stream"}));
+    REQUIRE_NOTHROW(block.write(resp, {"write", std::to_string(i), std::to_string(offset), std::to_string(i)+"_data", std::to_string(i)+"_stream"}));
     REQUIRE(resp[0] == "!ok");
-    offset += (11 + std::to_string(i).size());
+    offset += (12 + 2 * std::to_string(i).size());
   }
 
   {
     response resp;
     REQUIRE_NOTHROW(block.trim(resp, {"trim", std::to_string(0), std::to_string(1)}));
     REQUIRE(resp[0] == "!ok");
-    REQUIRE(resp[1] == "4");
+    REQUIRE(resp[1] == "28");
   }
 
   for (std::size_t start_pos = 0; start_pos < 2; ++start_pos) {
     response resp;
-    REQUIRE_NOTHROW(block.scan(resp, {"scan", std::to_string(start_pos), std::to_string(start_pos + 2), std::to_string(start_pos)+"stream"}));
+    REQUIRE_NOTHROW(block.scan(resp, {"scan", std::to_string(start_pos), std::to_string(start_pos + 2), std::to_string(start_pos)+"_stream"}));
     REQUIRE(resp[0] == "!ok");
     REQUIRE(resp.size() == 1);
   }
   
   for (std::size_t start_pos = 2; start_pos < 998; ++start_pos) {
     response resp;
-    REQUIRE_NOTHROW(block.scan(resp, {"scan", std::to_string(start_pos), std::to_string(start_pos + 2), std::to_string(start_pos)}));
+    REQUIRE_NOTHROW(block.scan(resp, {"scan", std::to_string(start_pos), std::to_string(start_pos + 2), std::to_string(start_pos)+"_stream"}));
     REQUIRE(resp[0] == "!ok");
-    REQUIRE(resp[1] == std::to_string(start_pos));
+    REQUIRE(resp[1] == std::to_string(start_pos)+"_data");
   }
 //   memkind_destroy_kind(pmem_kind);
 }
