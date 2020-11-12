@@ -59,6 +59,7 @@ void shared_log_partition::write(response &_return, const arg_list &args) {
   }
   log_info_.push_back(info_set); 
   std::string writing_content = logical_stream + data;
+  std::cout<< writing_content << " "<<starting_offset<<"\n";
   auto ret = partition_.write(writing_content, starting_offset);
   if (!ret.first) {
     throw std::logic_error("Write failed");
@@ -78,9 +79,9 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
   for (int i = 3; i < args.size(); i++){
     logical_streams.push_back(args[i]);
   }
-  for (int i = 0; i < log_info_.size(); i++){
-    std::cout<<log_info_[i][0]<< " "<< log_info_[i][1]<<'\n';
-  }
+  // for (int i = 0; i < log_info_.size(); i++){
+  //   std::cout<<log_info_[i][0]<< " "<< log_info_[i][1]<<'\n';
+  // }
   std::vector<std::string> ret = {};
   if (log_info_.size() == 0) {
     _return = ret;
