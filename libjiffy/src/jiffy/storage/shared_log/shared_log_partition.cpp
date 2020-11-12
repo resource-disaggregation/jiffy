@@ -150,6 +150,7 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
       trimmed_length += info_set[j];
     }
   }
+  std::cout<<"length="<<trimmed_length <<"\n";
   if (end_pos < log_info_.size() - 1){
     for (int i = end_pos + 1; i < log_info_.size(); i++){
       auto info_set = log_info_[i];
