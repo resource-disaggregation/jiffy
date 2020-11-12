@@ -39,7 +39,7 @@ TEST_CASE("file_write_read_test", "[write][read]") {
   response resp;
   REQUIRE_NOTHROW(block.read(resp, {"read", std::to_string(read_pos + 1), std::to_string(std::to_string(1).size())}));
   REQUIRE(resp[1] == std::string(std::to_string(1).size(), 0));
-  memkind_destroy_kind(pmem_kind);
+  // memkind_destroy_kind(pmem_kind);
 }
 
 TEST_CASE("file_write_clear_read_test", "[write][read]") {
