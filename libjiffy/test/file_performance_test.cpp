@@ -90,5 +90,5 @@ TEST_CASE("file_performance_test", "[write][read][performance]") {
 											<< " us";
 	LOG(log_level::info) << "\t" << data_size << " payload";
 	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E3 / tot_time << " requests per microsecond";
-    memkind_destroy_kind(pmem_kind);
+    // memkind_destroy_kind(pmem_kind);
 }
