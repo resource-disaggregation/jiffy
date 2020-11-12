@@ -208,8 +208,6 @@ void shared_log_partition::run_command(response &_return, const arg_list &args) 
       break;
     case shared_log_cmd_id::shared_log_trim:trim(_return, args);
       break;
-    case shared_log_cmd_id::shared_log_clear:clear(_return, args);
-      break;
     case shared_log_cmd_id::shared_log_update_partition:update_partition(_return, args);
       break;
     case shared_log_cmd_id::shared_log_add_blocks:add_blocks(_return, args);
