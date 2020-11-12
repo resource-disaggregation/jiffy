@@ -71,18 +71,22 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
   if (args.size() < 4) {
     RETURN_ERR("!args_error");
   }
+  std::cout<<"size="<<log_info_.size();
   auto start_pos = std::stoi(args[1]) - seq_no;
   auto end_pos = std::stoi(args[2]) - seq_no;
+  std::cout<<"a";
   if (end_pos > log_info_.size()) end_pos = log_info_.size() - 1;
   std::vector<std::string> logical_streams = {}; 
   for (int i = 3; i < args.size(); i++){
     logical_streams.push_back(args[i]);
   }
+  std::cout<<"b";
   std::vector<std::string> ret = {};
   if (log_info_.size() == 0) {
     _return = ret;
     return;
   }
+  std::cout<<"c";
   if (start_pos < 0 || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("scan position invalid");
   for (int i = start_pos; i <= end_pos; i++){
     auto info_set = log_info_[i];
