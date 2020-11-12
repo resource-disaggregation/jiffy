@@ -157,7 +157,6 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
       int temp_offset = info_set[0];
       std::cout<<"off="<<temp_offset <<"\n";
       int data_size = info_set[1];
-      temp_offset += info_set[1];
       for (int j = 2; j < info_set.size(); j++){
         auto stream = partition_.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(info_set[j])).second;
         second_section += stream;
