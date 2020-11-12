@@ -29,7 +29,7 @@ TEST_CASE("shared_log_write_scan_test", "[write][scan]") {
     REQUIRE(resp[0] == "!ok");
     offset += 2 * std::to_string(i).size();
   }
-  std::cout<<(block.log_info_[0]);
+  std::cout<<(block.log_info_.size());
   for (std::size_t start_pos = 0; start_pos < 8; ++start_pos) {
     response resp;
     std::cout << start_pos << "\n";
