@@ -26,7 +26,7 @@ TEST_CASE("shared_log_write_scan_test", "[write][scan]") {
     response resp;
     REQUIRE_NOTHROW(block.write(resp, {"write", std::to_string(i), std::to_string(offset), "data_", std::to_string(i)+"stream"}));
     REQUIRE(resp[0] == "!ok");
-    offset += 2 * std::to_string(i).size();
+    offset += (11 + std::to_string(i).size());
   }
   for (std::size_t start_pos = 0; start_pos < 8; ++start_pos) {
     response resp;
@@ -55,7 +55,7 @@ TEST_CASE("shared_log_write_trim_scan_test", "[write][read]") {
     response resp;
     REQUIRE_NOTHROW(block.write(resp, {"write", std::to_string(i), std::to_string(offset), "data_", std::to_string(i)+"stream"}));
     REQUIRE(resp[0] == "!ok");
-    offset += 2 * std::to_string(i).size();
+    offset += (11 + std::to_string(i).size());
   }
 
   {
