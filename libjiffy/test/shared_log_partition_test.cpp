@@ -53,7 +53,7 @@ TEST_CASE("shared_log_write_trim_scan_test", "[write][read]") {
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
-    REQUIRE_NOTHROW(block.write(resp, {"write", std::to_string(i), std::to_string(offset), "data_", std:to_string(i)}));
+    REQUIRE_NOTHROW(block.write(resp, {"write", std::to_string(i), std::to_string(offset), "data_", std::to_string(i)}));
     REQUIRE(resp[0] == "!ok");
     offset += 2 * std::to_string(i).size();
   }
