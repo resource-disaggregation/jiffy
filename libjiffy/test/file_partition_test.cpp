@@ -10,7 +10,7 @@ using namespace ::jiffy::persistent;
 
 TEST_CASE("file_write_read_test", "[write][read]") {
   struct memkind* pmem_kind = nullptr;
-  std::string pmem_path = "/media/pmem0"; 
+  std::string pmem_path = "/media/pmem0/shijie"; 
   std::string memory_mode = "PMEM";
   size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
   if(err) {
