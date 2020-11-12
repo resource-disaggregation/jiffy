@@ -267,6 +267,8 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             #test/file_size_tracker_test.cpp
             test/directory_tree_test.cpp
             test/directory_service_test.cpp
+            test/shared_log_partition_test.cpp
+            test/shared_log_client_test.cpp
 	    test/file_partition_test.cpp
             test/file_local_partition_test.cpp
             test/file_client_test.cpp
@@ -284,6 +286,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             test/auto_scaling_test.cpp
             test/fifo_queue_performance_test.cpp
             test/file_performance_test.cpp
+            test/shared_log_performance_test.cpp
             test/ht_performance_test.cpp
             test/test_utils.h)
     target_link_libraries(jiffy_tests jiffy)
