@@ -41,6 +41,7 @@ shared_log_partition::shared_log_partition(block_memory_manager *manager,
 //need implementation
 void shared_log_partition::write(response &_return, const arg_list &args) {
   if (args.size() <= 5) {
+    std::cout << args.size();
     RETURN_ERR("!args_error");
   }
   auto position = std::stoi(args[1]);
