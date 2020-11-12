@@ -110,7 +110,7 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
     RETURN_ERR("!args_error");
   }
   if (log_info_.size() == 0) {
-    RETURN_OK();
+    RETURN_OK(0);
   }
   auto start_pos = std::stoi(args[1]) - seq_no;
   auto end_pos = std::stoi(args[2]) - seq_no;
@@ -157,8 +157,7 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
   }
   partition_.clear();
   auto ret = partition_.write(first_section + second_section, 0);
-  RETURN_OK();
-
+  RETURN_OK(std::to_string(trimmed_length));
 }
 
 void shared_log_partition::update_partition(response &_return, const arg_list &args) {
