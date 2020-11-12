@@ -29,11 +29,9 @@ shared_log_partition::shared_log_partition(block_memory_manager *manager,
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port),
       log_info_() {
-  auto ser = conf.get("shared_log.serializer", "csv");
+  auto ser = conf.get("shared_log.serializer", "binary");
   if (ser == "binary") {
     ser_ = std::make_shared<binary_serde>(binary_allocator_);
-  } else if (ser == "csv") {
-    ser_ = std::make_shared<csv_serde>(binary_allocator_);
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
@@ -69,7 +67,6 @@ void shared_log_partition::write(response &_return, const arg_list &args) {
 
 }
 
-//need implementation
 void shared_log_partition::scan(response &_return, const arg_list &args) {
   if (args.size() <= 4) {
     RETURN_ERR("!args_error");
@@ -82,9 +79,14 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
     logical_streams.push_back(args[i]);
   }
   std::vector<std::string> ret = {};
+  if (log_info_.size() == 0) {
+    _return = ret;
+    return;
+  }
   if (start_pos < 0 || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("scan position invalid");
   for (int i = start_pos; i <= end_pos; i++){
     auto info_set = log_info_[i];
+    if (info_set[0] == -1) continue;
     int temp_offset = info_set[0] + info_set[1];
     for (int j = 2; j < info_set.size(); j++){
       auto stream = partition_.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(info_set[j])).second;
@@ -106,6 +108,9 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
 void shared_log_partition::trim(response &_return, const arg_list &args) {
   if (args.size() != 3) {
     RETURN_ERR("!args_error");
+  }
+  if (log_info_.size() == 0) {
+    RETURN_OK();
   }
   auto start_pos = std::stoi(args[1]) - seq_no;
   auto end_pos = std::stoi(args[2]) - seq_no;
@@ -251,6 +256,7 @@ bool shared_log_partition::dump(const std::string &path) {
   if (dirty_) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
+    partition_.set_log_info(log_info_);
     remote->write<shared_log_type>(partition_, decomposed.second);
     flushed = true;
   }

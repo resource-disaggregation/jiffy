@@ -35,41 +35,29 @@ shared_log_client::shared_log_client(std::shared_ptr<directory::directory_interf
   }
 }
 
-int shared_log_client::scan(std::string &buf, const std::string &start_pos, const std::string &end_pos, const std::vector<std::string> &logical_streams) {
-  // std::size_t file_size = last_partition_ * block_size_ + last_offset_;
-  // if (file_size <= cur_partition_ * block_size_ + cur_offset_)
-  //   return -1;
-  // std::size_t remain_size = file_size - cur_partition_ * block_size_ - cur_offset_;
-  // std::size_t remaining_data = std::min(remain_size, size);
-  // if (remaining_data == 0)
-  //   return 0;
-  // // Parallel read here
-  // std::size_t start_partition = block_id();
-  // std::size_t count = 0;
-  // while (remaining_data > 0) {
-  //   count++;
-  //   std::size_t data_to_read = std::min(remaining_data, block_size_ - cur_offset_);
-  //   std::vector<std::string>
-  //       args{"scan", start_pos, end_pos};
-  //   for (int i = 0; i < logical_streams.size(); i++){
-  //     args.push_back(logical_streams[i]);
-  //   }
-  //   blocks_[block_id()]->send_command(args);
-  //   remaining_data -= data_to_read;
-  //   //to be modified
-  //   if (cur_offset_ == block_size_ && cur_partition_ != last_partition_) {
-  //     cur_offset_ = 0;
-  //     cur_partition_++;
-  //   }
-  //   //to be modified
-  // }
-  // auto previous_size = buf.size();
-  // for (std::size_t k = 0; k < count; k++) {
-  //   buf += blocks_[start_partition + k]->recv_response().back();
-  // }
-  // auto after_size = buf.size();
-  // return static_cast<int>(after_size - previous_size);
-  return 1;
+int shared_log_client::scan(std::vector<std::string> &buf, const std::string &start_pos, const std::string &end_pos, const std::vector<std::string> &logical_streams) {
+  // Parallel scan here
+  std::size_t start_partition = block_id();
+  std::size_t count = 0;
+  while (start_partition + count < blocks_.size()) {
+    count++;
+    std::vector<std::string>
+        args{"scan", start_pos, end_pos};
+    for (int i = 0; i < logical_streams.size(); i++){
+      args.push_back(logical_streams[i]);
+    }
+    blocks_[block_id()]->send_command(args);
+    cur_partition_ ++;
+  }
+  auto previous_size = buf.size();
+  for (std::size_t k = 0; k < count; k++) {
+    std::vector<std::string> resp = blocks_[start_partition + k]->recv_response();
+    for (std::size_t i = 1; i < resp.size(); i++){
+      buf.push_back(resp[i]);
+    }
+  }
+  auto after_size = buf.size();
+  return static_cast<int>(after_size - previous_size);
 }
 
 int shared_log_client::write(const std::string &position, const std::string &data_, const std::vector<std::string> &logical_streams) {
@@ -157,10 +145,18 @@ int shared_log_client::write(const std::string &position, const std::string &dat
 
 }
 
-bool shared_log_client::trim(const std::string &start_pos, const std::string &end_pos, const std::vector<std::string> &logical_streams) {
+bool shared_log_client::trim(const std::string &start_pos, const std::string &end_pos) {
+  // Parallel trim here
+  std::size_t start_partition = block_id();
+  std::size_t count = 0;
+  while (start_partition + count < blocks_.size()) {
+    count++;
+    std::vector<std::string>
+        args{"trim", start_pos, end_pos};
+    blocks_[block_id()]->send_command(args);
+    cur_partition_ ++;
+  }
   return true;
-
-  // TO BE IMPLEMENTED
 }
 
 void shared_log_client::refresh() {

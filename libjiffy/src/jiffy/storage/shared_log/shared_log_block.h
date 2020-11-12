@@ -102,6 +102,10 @@ class shared_log_block {
 
   char *data() const;
 
+  void set_log_info(std::vector<std::vector<int>> log_info);
+
+  std::vector<std::vector<int>> log_info();
+
  private:
   /* Block memory allocator */
   block_memory_allocator<char> alloc_;
@@ -111,6 +115,9 @@ class shared_log_block {
 
   /* Data pointer */
   char *data_{};
+
+  /* Info set */
+  std::vector<std::vector<int>> log_info_;
 };
 
 }

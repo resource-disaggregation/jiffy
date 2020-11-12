@@ -42,7 +42,7 @@ class shared_log_client : public data_structure_client {
    * @param size Size
    * @return Read status, -1 if reach EOF, number of bytes read otherwise
    */
-  int scan(std::string &buf, const std::string &start_pos, const std::string &end_pos, const std::vector<std::string> &logical_streams);
+  int scan(std::vector<std::string> &buf, const std::string &start_pos, const std::string &end_pos, const std::vector<std::string> &logical_streams);
 
   /**
    * @brief Write data to shared_log
@@ -56,7 +56,7 @@ class shared_log_client : public data_structure_client {
    * @param offset shared_log offset to seek
    * @return Boolean, true if offset is within shared_log range
    */
-  bool trim(const std::string &start_pos, const std::string &end_pos, const std::vector<std::string> &logical_streams);
+  bool trim(const std::string &start_pos, const std::string &end_pos);
 
   /**
    * @brief Handle command in redirect case

@@ -58,6 +58,14 @@ char *shared_log_block::data() const {
   return data_;
 }
 
+void shared_log_block::set_log_info(std::vector<std::vector<int>> log_info) {
+  log_info_ = log_info;
+}
+
+std::vector<std::vector<int>> shared_log_block::log_info() {
+  return log_info_; 
+}
+
 }
 }
 
