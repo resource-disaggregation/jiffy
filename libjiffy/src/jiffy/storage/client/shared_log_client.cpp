@@ -73,8 +73,6 @@ int shared_log_client::write(const std::string &position, const std::string &dat
   }
   data += data_;
 
-  std::cout<<data<<"\n";
-
   if (data.size() > block_size_){
     return -1;
   }
