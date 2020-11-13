@@ -59,7 +59,6 @@ void shared_log_partition::write(response &_return, const arg_list &args) {
   }
   log_info_.push_back(info_set); 
   std::string writing_content = logical_stream + data;
-  std::cout<<"logical_stream="<<logical_stream<<"data="<<data<<"\n";
   auto ret = partition_.write(writing_content, starting_offset);
   if (!ret.first) {
     throw std::logic_error("Write failed");

@@ -130,7 +130,7 @@ int shared_log_client::write(const std::string &position, const std::string &dat
       update_last_partition();
     }
     std::vector<std::string>
-        args{"write", position, data_, std::to_string(cur_offset_)};
+        args{"write", position, std::to_string(cur_offset_), data_};
     for (int i = 0; i < logical_streams.size(); i++){
       args.push_back(logical_streams[i]);
     }
