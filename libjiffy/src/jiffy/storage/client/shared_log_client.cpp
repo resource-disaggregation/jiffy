@@ -186,6 +186,7 @@ bool shared_log_client::need_chain() const {
 
 std::size_t shared_log_client::block_id() const {
   if (cur_partition_ >= blocks_.size()) {
+    std::cout<<cur_partition_<<","<<blocks_.size();
     throw std::logic_error("Blocks are insufficient, need to add more");
   }
   return cur_partition_;
