@@ -84,6 +84,7 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
     return;
   }
   if (start_pos < 0 || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("scan position invalid");
+  std::cout<<"start="<<start_pos<<"end="<<end_pos<<"\n";
   for (int i = start_pos; i <= end_pos; i++){
     auto info_set = log_info_[i];
     if (info_set[0] == -1) continue;
@@ -97,7 +98,6 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
     std::cout<<"stream_size="<<stream_size<<"\n";
     for (int j = 2; j < info_set.size(); j++){
       auto stream = partition_.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(info_set[j])).second;
-      std::cout<<stream;
       temp_offset += info_set[j];
       std::vector<std::string>::iterator it;
       it = find(logical_streams.begin(), logical_streams.end(), stream);
