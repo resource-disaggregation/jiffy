@@ -78,6 +78,7 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
   for (int i = 3; i < args.size(); i++){
     logical_streams.push_back(args[i]);
   }
+  std::cout<<args.size();
   std::vector<std::string> ret = {"!ok"};
   if (log_info_.size() == 0) {
     _return = ret;

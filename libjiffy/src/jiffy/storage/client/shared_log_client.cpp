@@ -39,7 +39,6 @@ int shared_log_client::scan(std::vector<std::string> &buf, const std::string &st
   // Parallel scan here
   std::size_t start_partition = block_id();
   std::size_t count = 0;
-  std::cout<<blocks_.size()<<"\n";
   while (start_partition + count < blocks_.size()) {
     count++;
     std::vector<std::string>
@@ -52,9 +51,7 @@ int shared_log_client::scan(std::vector<std::string> &buf, const std::string &st
   }
   auto previous_size = buf.size();
   for (std::size_t k = 0; k < count; k++) {
-    std::cout<<"k="<<k<<"\n";
     std::vector<std::string> resp = blocks_[start_partition + k]->recv_response();
-    std::cout<<"resp_size="<<resp.size()<<"\n";
     for (std::size_t i = 1; i < resp.size(); i++){
       buf.push_back(resp[i]);
     }
