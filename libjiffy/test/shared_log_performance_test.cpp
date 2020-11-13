@@ -25,8 +25,8 @@ TEST_CASE("shared_log_performance_test", "[write][read][performance]") {
     int lease_port = 9091;
     int num_blocks = 1;
     int chain_length = 1;
-    int num_ops = 100000;
-    int data_size = 1024;
+    int num_ops = 10000;
+    int data_size = 64;
     
     std::string path = "/tmp";
     std::string backing_path = "local://tmp";
@@ -62,8 +62,8 @@ TEST_CASE("shared_log_performance_test", "[write][read][performance]") {
 
     for (int i = 0; i < num_ops; ++i) {
         response resp;
-        block.write(resp, {"write", std::to_string(i), std::to_string(offset), std::to_string(i)+"_data", std::to_string(i)+"_stream"});
-        offset += (12 + 2 * std::to_string(i).size());
+        block.write(resp, {"write", std::to_string(i), std::to_string(offset), data_, std::to_string(i)+"_stream"});
+        offset += (71 + std::to_string(i).size());
     }
 	auto bench_end = time_utils::now_us();
 	tot_time = bench_end - bench_begin;
