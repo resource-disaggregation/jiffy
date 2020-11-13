@@ -73,6 +73,10 @@ int shared_log_client::write(const std::string &position, const std::string &dat
   }
   data += data_;
 
+  if (data.size() > block_size_){
+    return -1;
+  }
+
   if (cur_partition_ * block_size_ + cur_offset_ > file_size) {
     num_chain_needed = cur_partition_ - last_partition_;
     file_size = (cur_partition_ + 1) * block_size_;
@@ -120,22 +124,20 @@ int shared_log_client::write(const std::string &position, const std::string &dat
 
   while (remaining_data > 0) {
     count++;
-    std::string
-        data_to_write = data.substr(data.size() - remaining_data, std::min(remaining_data, block_size_ - cur_offset_));
-    std::vector<std::string>
-        args{"write", data_to_write, std::to_string(cur_offset_)};
-    for (int i = 0; i < logical_streams.size(); i++){
-      args.push_back(logical_streams[i]);
-    }
-    blocks_[block_id()]->send_command(args);
-    remaining_data -= data_to_write.size();
-    cur_offset_ += data_to_write.size();
-    update_last_offset();
-    if (cur_offset_ == block_size_ && cur_partition_ != last_partition_) {
+    if (data.size() > block_size_ - cur_offset_) {
       cur_offset_ = 0;
       cur_partition_++;
       update_last_partition();
     }
+    std::vector<std::string>
+        args{"write", data_, std::to_string(cur_offset_)};
+    for (int i = 0; i < logical_streams.size(); i++){
+      args.push_back(logical_streams[i]);
+    }
+    blocks_[block_id()]->send_command(args);
+    remaining_data -= data.size();
+    cur_offset_ += data.size();
+    update_last_offset();
   }
 
   for (std::size_t i = 0; i < count; i++) {
