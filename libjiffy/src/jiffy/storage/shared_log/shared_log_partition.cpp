@@ -119,6 +119,7 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
   }
   auto start_pos = std::stoi(args[1]) - seq_no;
   auto end_pos = std::stoi(args[2]) - seq_no;
+  std::cout<<end_pos<<"\n";
   if (start_pos < 0 || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("trim position invalid");
   if (end_pos > log_info_.size()) end_pos = log_info_.size() - 1;
   std::string first_section = "";
