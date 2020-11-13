@@ -78,7 +78,6 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
   for (int i = 3; i < args.size(); i++){
     logical_streams.push_back(args[i]);
   }
-  std::cout<<args.size();
   std::vector<std::string> ret = {"!ok"};
   if (log_info_.size() == 0) {
     _return = ret;
@@ -96,6 +95,7 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
     }
     for (int j = 2; j < info_set.size(); j++){
       auto stream = partition_.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(info_set[j])).second;
+      std::cout<<stream;
       temp_offset += info_set[j];
       std::vector<std::string>::iterator it;
       it = find(logical_streams.begin(), logical_streams.end(), stream);
