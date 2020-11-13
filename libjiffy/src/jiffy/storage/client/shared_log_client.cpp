@@ -76,7 +76,6 @@ int shared_log_client::write(const std::string &position, const std::string &dat
   std::cout<<data<<"\n";
 
   if (data.size() > block_size_){
-    std::cout<<"FAANBING";
     return -1;
   }
 
@@ -133,7 +132,7 @@ int shared_log_client::write(const std::string &position, const std::string &dat
       update_last_partition();
     }
     std::vector<std::string>
-        args{"write", data_, std::to_string(cur_offset_)};
+        args{"write", position, data_, std::to_string(cur_offset_)};
     for (int i = 0; i < logical_streams.size(); i++){
       args.push_back(logical_streams[i]);
     }
