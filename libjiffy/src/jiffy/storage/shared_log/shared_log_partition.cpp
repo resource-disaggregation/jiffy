@@ -204,7 +204,7 @@ void shared_log_partition::get_storage_capacity(response &_return, const arg_lis
 
 void shared_log_partition::run_command(response &_return, const arg_list &args) {
   auto cmd_name = args[0];
-  std::cout<"data="<<<args[1]<<"\n";
+  std::cout<"data="<<args[1]<<"\n";
   switch (command_id(cmd_name)) {
     case shared_log_cmd_id::shared_log_write:write(_return, args);
       break;
