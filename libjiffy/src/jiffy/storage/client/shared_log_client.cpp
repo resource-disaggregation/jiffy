@@ -122,6 +122,7 @@ int shared_log_client::write(const std::string &position, const std::string &dat
     count++;
     std::string
         data_to_write = data.substr(data.size() - remaining_data, std::min(remaining_data, block_size_ - cur_offset_));
+    std::cout<"data_to_write="<<data_to_write<<"\n";
     std::vector<std::string>
         args{"write", data_to_write, std::to_string(cur_offset_)};
     for (int i = 0; i < logical_streams.size(); i++){
