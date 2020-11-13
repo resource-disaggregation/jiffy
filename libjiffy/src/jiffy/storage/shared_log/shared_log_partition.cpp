@@ -121,24 +121,18 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
   auto end_pos = std::stoi(args[2]) - seq_no;
   if (start_pos < 0 || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("trim position invalid");
   if (end_pos > log_info_.size()) end_pos = log_info_.size() - 1;
-  std::string first_section = "";
-  std::string second_section = "";
+  std::size_t first_section_len = 0;
+  std::size_t second_section_len = 0;
   if (start_pos > 0){
     for (int i = 0; i < start_pos; i++){
       auto info_set = log_info_[i];
       if (info_set[0] == -1) continue;
-      int temp_offset = info_set[0];
-      int data_size = info_set[1];
-      int stream_size = 0;
-      for (int j = 2; j < info_set.size(); j++){
-        auto stream = partition_.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(info_set[j])).second;
-        first_section += stream;
-        temp_offset += info_set[j];
+      for (int j = 1; j < info_set.size(); j++){
+        first_section_len += info_set[j];
       }
-      auto data = partition_.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(data_size)).second;
-      first_section += data;
     }
   }
+  auto first_section = partition_.read(static_cast<std::size_t>(0), static_cast<std::size_t>(first_section_len)).second;
   int trimmed_length = 0;
   for (int i = start_pos; i <= end_pos; i++){
     auto info_set = log_info_[i];
@@ -152,18 +146,13 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
     for (int i = end_pos + 1; i < log_info_.size(); i++){
       auto info_set = log_info_[i];
       if (info_set[0] == -1) continue;
-      int temp_offset = info_set[0];
-      int data_size = info_set[1];
-      for (int j = 2; j < info_set.size(); j++){
-        auto stream = partition_.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(info_set[j])).second;
-        second_section += stream;
-        temp_offset += info_set[j];
+      for (int j = 1; j < info_set.size(); j++){
+        second_section_len += info_set[j];
       }
-      auto data = partition_.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(data_size)).second;
-      second_section += data;
       log_info_[i][0] -= trimmed_length;
     }
   }
+  auto second_section = partition_.read(static_cast<std::size_t>(first_section_len + trimmed_length), static_cast<std::size_t>(second_section_len)).second;
   partition_.clear();
   auto ret = partition_.write(first_section + second_section, 0);
   RETURN_OK(std::to_string(trimmed_length));
