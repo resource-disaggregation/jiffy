@@ -89,13 +89,13 @@ TEST_CASE("shared_log_performance_test", "[write][read][performance]") {
 	LOG(log_level::info) << "\t" << data_size << " payload";
 	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E3 / tot_time << " requests per microsecond";
     
-    // bench_begin = time_utils::now_us();
-    // tot_time = 0;
-    // for (int i = 0; i < num_ops; ++i) {
-    //     response resp;
-    //     block.trim(resp, {"trim", std::to_string(i), std::to_string(i)});
-    // }
-	// bench_end = time_utils::now_us();
+    bench_begin = time_utils::now_us();
+    tot_time = 0;
+    for (int i = 0; i < num_ops; ++i) {
+        response resp;
+        block.trim(resp, {"trim", std::to_string(i), std::to_string(i)});
+    }
+	bench_end = time_utils::now_us();
 	// tot_time = bench_end - bench_begin;
 	// LOG(log_level::info) << "===== " << "shared_log_trim" << " ======";
 	// LOG(log_level::info) << "total_time: " << tot_time;

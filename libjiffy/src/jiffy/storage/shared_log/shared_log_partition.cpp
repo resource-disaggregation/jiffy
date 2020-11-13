@@ -131,13 +131,11 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
       int stream_size = 0;
       for (int j = 2; j < info_set.size(); j++){
         auto stream = partition_.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(info_set[j])).second;
-        std::cout<<temp_offset<<"\n";
         first_section += stream;
         temp_offset += info_set[j];
       }
       auto data = partition_.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(data_size)).second;
       first_section += data;
-      std::cout<<temp_offset<<"\n";
     }
   }
   int trimmed_length = 0;
@@ -158,11 +156,9 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
         auto stream = partition_.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(info_set[j])).second;
         second_section += stream;
         temp_offset += info_set[j];
-        std::cout<<temp_offset<<"\n";
       }
       auto data = partition_.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(data_size)).second;
       second_section += data;
-      std::cout<<temp_offset<<"\n";
       log_info_[i][0] -= trimmed_length;
     }
   }

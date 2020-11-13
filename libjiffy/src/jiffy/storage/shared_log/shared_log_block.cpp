@@ -39,6 +39,7 @@ std::pair<bool, std::string> shared_log_block::write(const std::string &data, st
 
 const std::pair<bool, std::string> shared_log_block::read(std::size_t offset, std::size_t size) const {
   if (offset >= max_) {
+    std::cout<<offset<<" "<<max_;
     throw std::invalid_argument("Read offset exceeds partition capacity");
   }
   return std::make_pair(true, std::string(data_ + offset, size));
