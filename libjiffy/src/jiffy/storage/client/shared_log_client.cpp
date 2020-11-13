@@ -52,7 +52,7 @@ int shared_log_client::scan(std::vector<std::string> &buf, const std::string &st
   auto previous_size = buf.size();
   for (std::size_t k = 0; k < count; k++) {
     std::vector<std::string> resp = blocks_[start_partition + k]->recv_response();
-    for (std::size_t i = 1; i < resp.size(); i++){
+    for (std::size_t i = 0; i < resp.size(); i++){
       buf.push_back(resp[i]);
     }
   }
