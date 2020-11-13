@@ -96,13 +96,13 @@ TEST_CASE("shared_log_performance_test", "[write][read][performance]") {
         block.trim(resp, {"trim", std::to_string(i), std::to_string(i)});
     }
 	bench_end = time_utils::now_us();
-	// tot_time = bench_end - bench_begin;
-	// LOG(log_level::info) << "===== " << "shared_log_trim" << " ======";
-	// LOG(log_level::info) << "total_time: " << tot_time;
-	// LOG(log_level::info) << "\t" << num_ops << " requests completed in " << tot_time
-	// 										<< " us";
-	// LOG(log_level::info) << "\t" << data_size << " payload";
-	// LOG(log_level::info) << "\tThroughput: " << num_ops * 1E3 / tot_time << " requests per microsecond";
+	tot_time = bench_end - bench_begin;
+	LOG(log_level::info) << "===== " << "shared_log_trim" << " ======";
+	LOG(log_level::info) << "total_time: " << tot_time;
+	LOG(log_level::info) << "\t" << num_ops << " requests completed in " << tot_time
+											<< " us";
+	LOG(log_level::info) << "\t" << data_size << " payload";
+	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E3 / tot_time << " requests per microsecond";
     
     
     // memkind_destroy_kind(pmem_kind);
