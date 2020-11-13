@@ -46,6 +46,7 @@ int shared_log_client::scan(std::vector<std::string> &buf, const std::string &st
     for (int i = 0; i < logical_streams.size(); i++){
       args.push_back(logical_streams[i]);
     }
+    std::cout<<"size="<<args.size();
     blocks_[block_id()]->send_command(args);
     cur_partition_ ++;
   }
