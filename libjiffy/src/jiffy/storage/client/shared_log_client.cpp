@@ -156,6 +156,9 @@ bool shared_log_client::trim(const std::string &start_pos, const std::string &en
     blocks_[start_partition+count]->send_command(args);
     count++;
   }
+  for (std::size_t k = 0; k < count; k++) {
+    std::vector<std::string> resp = blocks_[start_partition + k]->recv_response();
+  }
   return true;
 }
 
