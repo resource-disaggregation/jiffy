@@ -71,6 +71,7 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
   if (args.size() < 4) {
     RETURN_ERR("!args_error");
   }
+  std::cout<<"log_info_size="<<log_info_.size()<<"\n";
   auto start_pos = std::stoi(args[1]) - seq_no;
   auto end_pos = std::stoi(args[2]) - seq_no;
   if (end_pos > log_info_.size()) end_pos = log_info_.size() - 1;
@@ -201,7 +202,6 @@ void shared_log_partition::get_storage_capacity(response &_return, const arg_lis
 
 void shared_log_partition::run_command(response &_return, const arg_list &args) {
   auto cmd_name = args[0];
-  std::cout<<"cmd_name="<<cmd_name<<"\n";
   switch (command_id(cmd_name)) {
     case shared_log_cmd_id::shared_log_write:write(_return, args);
       break;
