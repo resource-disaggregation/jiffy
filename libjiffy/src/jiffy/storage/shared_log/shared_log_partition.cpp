@@ -45,6 +45,7 @@ void shared_log_partition::write(response &_return, const arg_list &args) {
   }
   auto position = std::stoi(args[1]);
   auto starting_offset = std::stoi(args[2]);
+  std::cout<<"args="<<args[0]<<" "<<args[1]<<" "<<args[2]<<"\n";
   if (log_info_.size() == 0) {
     seq_no = position;
   }
