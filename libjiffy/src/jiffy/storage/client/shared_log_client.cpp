@@ -45,7 +45,6 @@ int shared_log_client::scan(std::vector<std::string> &buf, const std::string &st
     for (int i = 0; i < logical_streams.size(); i++){
       args.push_back(logical_streams[i]);
     }
-    std::cout<<"cur_partition="<<cur_partition_<<" block_size="<<blocks_.size()<<"\n";
     blocks_[start_partition+count]->send_command(args);
     count++;
   }
@@ -152,11 +151,10 @@ bool shared_log_client::trim(const std::string &start_pos, const std::string &en
   std::size_t start_partition = block_id();
   std::size_t count = 0;
   while (start_partition + count < blocks_.size()) {
-    count++;
     std::vector<std::string>
         args{"trim", start_pos, end_pos};
-    blocks_[block_id()]->send_command(args);
-    cur_partition_ ++;
+    blocks_[start_partition+count]->send_command(args);
+    count++;
   }
   return true;
 }
