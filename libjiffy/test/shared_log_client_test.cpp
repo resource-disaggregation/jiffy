@@ -27,7 +27,7 @@ using namespace ::apache::thrift::transport;
 #define AUTO_SCALING_SERVICE_PORT 9095
 
 
-TEST_CASE("shared_log_client_write_read_seek_test", "[write][read][seek]") {
+TEST_CASE("shared_log_client_write_scan_test", "[write][read][seek]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
