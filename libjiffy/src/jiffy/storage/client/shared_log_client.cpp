@@ -148,7 +148,7 @@ int shared_log_client::write(const std::string &position, const std::string &dat
 
 bool shared_log_client::trim(const std::string &start_pos, const std::string &end_pos) {
   // Parallel trim here
-  std::size_t start_partition = block_id();
+  std::size_t start_partition = 0;
   std::size_t count = 0;
   while (start_partition + count < blocks_.size()) {
     std::vector<std::string>
