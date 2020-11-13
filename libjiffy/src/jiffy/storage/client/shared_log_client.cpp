@@ -37,18 +37,17 @@ shared_log_client::shared_log_client(std::shared_ptr<directory::directory_interf
 
 int shared_log_client::scan(std::vector<std::string> &buf, const std::string &start_pos, const std::string &end_pos, const std::vector<std::string> &logical_streams) {
   // Parallel scan here
-  std::size_t start_partition = block_id();
+  std::size_t start_partition = 0;
   std::size_t count = 0;
   while (start_partition + count < blocks_.size()) {
-    count++;
     std::vector<std::string>
         args{"scan", start_pos, end_pos};
     for (int i = 0; i < logical_streams.size(); i++){
       args.push_back(logical_streams[i]);
     }
     std::cout<<"cur_partition="<<cur_partition_<<" block_size="<<blocks_.size()<<"\n";
-    blocks_[block_id()]->send_command(args);
-    cur_partition_ ++;
+    blocks_[start_partition+count]->send_command(args);
+    count++;
   }
   auto previous_size = buf.size();
   for (std::size_t k = 0; k < count; k++) {
@@ -186,7 +185,6 @@ bool shared_log_client::need_chain() const {
 
 std::size_t shared_log_client::block_id() const {
   if (cur_partition_ >= blocks_.size()) {
-    std::cout<<cur_partition_<<","<<blocks_.size();
     throw std::logic_error("Blocks are insufficient, need to add more");
   }
   return cur_partition_;
