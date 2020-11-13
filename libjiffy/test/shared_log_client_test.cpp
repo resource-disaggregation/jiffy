@@ -52,7 +52,8 @@ TEST_CASE("shared_log_client_write_read_seek_test", "[write][read][seek]") {
   shared_log_client client(tree, "/sandbox/shared_log.txt", status);
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.write(std::to_string(i), std::to_string(i)+"_data", std::to_string(i)+"_stream") == 2 * std::to_string(i).size() + 12);
+    std::vector<std::string> stream = {std::to_string(i)+"_stream"};
+    REQUIRE(client.write(std::to_string(i), std::to_string(i)+"_data", stream) == 2 * std::to_string(i).size() + 12);
   }
 
 
@@ -60,7 +61,8 @@ TEST_CASE("shared_log_client_write_read_seek_test", "[write][read][seek]") {
 
   for (std::size_t i = 0; i < 1000; ++i) {
     buffer.clear();
-    REQUIRE(client.scan(buffer, std::to_string(i), std::to_string(i), std::to_string(i)+"_stream") == 1);
+    std::vector<std::string> stream = {std::to_string(i)+"_stream"};
+    REQUIRE(client.scan(buffer, std::to_string(i), std::to_string(i), stream) == 1);
     REQUIRE(buffer[0] == std::to_string(i)+"_data");
   }
 
