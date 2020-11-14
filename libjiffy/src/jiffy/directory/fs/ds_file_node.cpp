@@ -155,8 +155,9 @@ void ds_file_node::load(const std::string &path,
 
   auto num_blocks = dstatus_.data_blocks().size();
   auto chain_length = dstatus_.chain_length();
+  std::string tenant_id = directory_utils::get_root(directory_utils::get_parent_path(path));
   for (std::size_t i = 0; i < num_blocks; ++i) {
-    replica_chain chain(allocator->allocate(chain_length, {}), storage_mode::in_memory);
+    replica_chain chain(allocator->allocate(chain_length, {}, tenant_id), storage_mode::in_memory);
     assert(chain.block_ids.size() == chain_length);
     chain.metadata = "regular";
     using namespace storage;
@@ -229,7 +230,8 @@ replica_chain ds_file_node::add_data_block(const std::string &path,
                                            const std::shared_ptr<block_allocator> &allocator) {
   using namespace utils;
   std::unique_lock<std::mutex> lock(mtx_);
-  replica_chain chain(allocator->allocate(static_cast<size_t>(dstatus_.chain_length()), {}), storage_mode::in_memory);
+  std::string tenant_id = directory_utils::get_root(directory_utils::get_parent_path(path));
+  replica_chain chain(allocator->allocate(static_cast<size_t>(dstatus_.chain_length()), {}, tenant_id), storage_mode::in_memory);
   chain.name = partition_name;
   chain.metadata = partition_metadata;
   assert(chain.block_ids.size() == chain_length);

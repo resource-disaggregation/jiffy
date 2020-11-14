@@ -73,6 +73,7 @@ data_status directory_tree::create(const std::string &path,
     throw directory_ops_exception("Path is a directory: " + path);
   }
   std::string parent_path = directory_utils::get_parent_path(path);
+  std::string tenant_id = directory_utils::get_root(parent_path);
   auto node = get_node_unsafe(parent_path);
   if (node == nullptr) {
     create_directories(parent_path);
@@ -86,7 +87,7 @@ data_status directory_tree::create(const std::string &path,
 
   std::vector<replica_chain> blocks;
   for (int32_t i = 0; i < num_blocks; ++i) {
-    replica_chain chain(allocator_->allocate(static_cast<size_t>(chain_length), {}), storage_mode::in_memory);
+    replica_chain chain(allocator_->allocate(static_cast<size_t>(chain_length), {}, tenant_id), storage_mode::in_memory);
     chain.name = partition_names[i];
     chain.metadata = partition_metadata[i];
     assert(chain.block_ids.size() == chain_length);
@@ -131,6 +132,7 @@ data_status directory_tree::open_or_create(const std::string &path,
     throw directory_ops_exception("Path is a directory: " + path);
   }
   std::string parent_path = directory_utils::get_parent_path(path);
+  std::string tenant_id = directory_utils::get_root(parent_path);
   auto node = get_node_unsafe(parent_path);
   if (node == nullptr) {
     create_directories(parent_path);
@@ -158,7 +160,7 @@ data_status directory_tree::open_or_create(const std::string &path,
   }
   std::vector<replica_chain> blocks;
   for (int32_t i = 0; i < num_blocks; ++i) {
-    replica_chain chain(allocator_->allocate(static_cast<size_t>(chain_length), {}), storage_mode::in_memory);
+    replica_chain chain(allocator_->allocate(static_cast<size_t>(chain_length), {}, tenant_id), storage_mode::in_memory);
     chain.name = partition_names[i];
     chain.metadata = partition_metadata[i];
     assert(chain.block_ids.size() == chain_length);
@@ -449,7 +451,8 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
     throw directory_ops_exception("No such chain for path " + path);
   }
 
-  auto new_blocks = allocator_->allocate(1, chain.block_ids);
+  std::string tenant_id = directory_utils::get_root(directory_utils::get_parent_path(path));
+  auto new_blocks = allocator_->allocate(1, chain.block_ids, tenant_id);
   auto updated_chain = chain.block_ids;
   updated_chain.insert(updated_chain.end(), new_blocks.begin(), new_blocks.end());
 

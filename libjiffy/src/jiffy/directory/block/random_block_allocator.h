@@ -24,7 +24,7 @@ class random_block_allocator : public block_allocator {
    * @return Block names
    */
 
-  std::vector<std::string> allocate(std::size_t count, const std::vector<std::string> &exclude_list) override;
+  std::vector<std::string> allocate(std::size_t count, const std::vector<std::string> &exclude_list, const std::string &tenant_id) override;
 
   /**
    * @brief Free blocks
