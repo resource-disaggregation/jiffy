@@ -88,6 +88,13 @@ class file_partition : public chain_module {
   void get_storage_capacity(response &_return, const arg_list &args);
 
   /**
+   * @brief Get size of the partition
+   * @param _return Response
+   * @param args Arguments
+   */
+  void get_partition_size(response &_return, const arg_list &args);
+
+  /**
    * @brief Run command on file partition
    * @param _return Response
    * @param args Arguments

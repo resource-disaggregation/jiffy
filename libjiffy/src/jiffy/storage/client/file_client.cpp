@@ -28,6 +28,10 @@ file_client::file_client(std::shared_ptr<directory::directory_interface> fs,
   auto ret = blocks_[block_id()]->run_command(get_storage_capacity_args);
   THROW_IF_NOT_OK(ret);
   block_size_ = std::stoul(ret[1]);
+  std::vector<std::string> get_partition_size_args{"get_partition_size"};
+  ret = blocks_[last_partition_]->run_command(get_partition_size_args);
+  THROW_IF_NOT_OK(ret);
+  last_offset_ = std::stoul(ret[1]);
   try {
     auto_scaling_ = (status.get_tag("file.auto_scale") == "true");
   } catch (directory::directory_ops_exception &e) {
