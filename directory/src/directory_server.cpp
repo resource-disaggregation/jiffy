@@ -3,6 +3,7 @@
 #include <thread>
 #include <jiffy/directory/fs/directory_tree.h>
 #include <jiffy/directory/block/random_block_allocator.h>
+#include <jiffy/directory/block/maxmin_block_allocator.h>
 #include <jiffy/directory/fs/directory_server.h>
 #include <jiffy/directory/lease/lease_expiry_worker.h>
 #include <jiffy/directory/lease/lease_server.h>
@@ -133,7 +134,7 @@ int main(int argc, char **argv) {
   std::atomic<int> failing_thread(-1); // alloc -> 0, directory -> 1, lease -> 2
 
   std::exception_ptr alloc_exception = nullptr;
-  auto alloc = std::make_shared<random_block_allocator>();
+  auto alloc = std::make_shared<maxmin_block_allocator>();
   auto alloc_server = block_registration_server::create(alloc, address, block_port);
   std::thread alloc_serve_thread([&alloc_exception, &alloc_server, &failing_thread, &failure_condition] {
     try {
