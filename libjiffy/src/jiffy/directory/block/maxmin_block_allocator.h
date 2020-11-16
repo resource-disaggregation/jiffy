@@ -79,8 +79,6 @@ class maxmin_block_allocator : public block_allocator {
   std::unordered_map<std::string, std::set<std::string> > allocated_blocks_;
   /* Free blocks */
   std::set<std::string> free_blocks_;
-  /*Block id to tenant mapping*/
-  std::unordered_map<std::string, std::string> block_to_tenant_;
   /*Fair share of each tenant*/
   std::size_t fair_share_;
 };

@@ -43,7 +43,6 @@ std::vector<std::string> maxmin_block_allocator::allocate(std::size_t count, con
       // TODO: Picking random block for now. Better policy?
       auto idx = static_cast<int64_t>(allocated_blocks_[max_tenant].size() - 1);
       auto block_it = std::next(allocated_blocks_[max_tenant].begin(), utils::rand_utils::rand_int64(idx));
-      assert(block_to_tenant_.erase(*block_it) == 1);
       free_blocks_.insert(*block_it);
       allocated_blocks_[max_tenant].erase(block_it);
     }
@@ -59,31 +58,32 @@ std::vector<std::string> maxmin_block_allocator::allocate(std::size_t count, con
   auto idx = static_cast<int64_t>(free_blocks_.size() - 1);
   auto block_it = std::next(free_blocks_.begin(), utils::rand_utils::rand_int64(idx));
   my->second.insert(*block_it);
-  block_to_tenant_[*block_it] = my->first;
   blocks.push_back(*block_it);
   free_blocks_.erase(block_it);
 
   return blocks;
 }
 
-void maxmin_block_allocator::free(const std::vector<std::string> &blocks, const std::string &/*tenant_id*/) {
+void maxmin_block_allocator::free(const std::vector<std::string> &blocks, const std::string &tenant_id) {
+  LOG(log_level::info) << "Free request for tenant_id: " << tenant_id;
   std::unique_lock<std::mutex> lock(mtx_);
   std::vector<std::string> not_freed;
-  for (auto &block_name: blocks) {
-    auto it = block_to_tenant_.find(block_name);
-    if(it == block_to_tenant_.end()) {
+  auto my = allocated_blocks_.find(tenant_id);
+  if(my == allocated_blocks_.end())
+  {
+    throw std::logic_error("Unknown tenant");
+  }
+  for (auto &block_name: blocks) { 
+    auto jt = my->second.find(block_name);
+    if (jt == my->second.end()) {
       not_freed.push_back(block_name);
       continue;
     }
-    std::string tenant = it->second; 
-    auto jt = allocated_blocks_[tenant].find(block_name);
-    if (jt == allocated_blocks_[tenant].end()) {
-      throw std::logic_error("Insistency between allocated_blocks and block_to_tenant");
-    }
     free_blocks_.insert(*jt);
-    allocated_blocks_[tenant].erase(jt);
-    block_to_tenant_.erase(it);
+    my->second.erase(jt);
   }
+
+  // TODO: Handle spurious deallocation that may be caused due to reclaims 
   if (!not_freed.empty()) {
     std::string not_freed_string;
     for (const auto &b: not_freed) {
