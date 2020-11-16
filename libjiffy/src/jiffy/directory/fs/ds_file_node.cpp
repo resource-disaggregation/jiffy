@@ -255,7 +255,8 @@ replica_chain ds_file_node::add_data_block(const std::string &path,
 
 void ds_file_node::remove_block(const std::string &partition_name,
                                 const std::shared_ptr<storage::storage_management_ops> &storage,
-                                const std::shared_ptr<block_allocator> &allocator) {
+                                const std::shared_ptr<block_allocator> &allocator,
+                                const std::string &tenant_id) {
   std::unique_lock<std::mutex> lock(mtx_);
   replica_chain block;
   if (!dstatus_.remove_data_block(partition_name, block)) {
@@ -264,7 +265,7 @@ void ds_file_node::remove_block(const std::string &partition_name,
   for (const auto &id: block.block_ids) {
     storage->destroy_partition(id);
   }
-  allocator->free(block.block_ids);
+  allocator->free(block.block_ids, tenant_id);
 }
 
 void ds_file_node::update_data_status_partition(const std::string &old_name,

@@ -30,7 +30,7 @@ class random_block_allocator : public block_allocator {
    * @brief Free blocks
    * @param blocks Block names
    */
-  void free(const std::vector<std::string> &block_name) override;
+  void free(const std::vector<std::string> &block_name, const std::string &tenant_id) override;
 
   /**
    * @brief Add blocks to free block list

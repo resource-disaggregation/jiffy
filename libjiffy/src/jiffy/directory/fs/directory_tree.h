@@ -342,7 +342,7 @@ class directory_tree : public directory_interface {
    * @param child_name Child name
    */
 
-  void remove_all(std::shared_ptr<ds_dir_node> parent, const std::string &child_name);
+  void remove_all(const std::string &path, std::shared_ptr<ds_dir_node> parent, const std::string &child_name);
 
   /**
    * @brief Get file or directory node, might be NULL ptr
