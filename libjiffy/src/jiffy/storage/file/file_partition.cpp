@@ -115,7 +115,13 @@ void file_partition::get_partition_size(response &_return, const arg_list &args)
   RETURN_OK(std::to_string(size()));
 }
 
-void file_partition::run_command(response &_return, const arg_list &args) {
+void file_partition::run_command(response &_return, const arg_list &_args) {
+  arg_list args;
+  int32_t block_seq_no = extract_block_seq_no(_args, args);
+  if(block_seq_no < block_seq_no_){
+    _return.emplace_back("!stale_seq_no");
+    return;
+  }
   auto cmd_name = args[0];
   switch (command_id(cmd_name)) {
     case file_cmd_id::file_write:write(_return, args);
@@ -187,6 +193,18 @@ bool file_partition::dump(const std::string &path) {
 void file_partition::forward_all() {
   std::vector<std::string> result;
   run_command_on_next(result, {"write", std::string(partition_.data(), partition_.size())});
+}
+
+int32_t file_partition::extract_block_seq_no(const arg_list &args, arg_list &out_list) {
+  if(args.size() >= 3 && args[1] == "$block_seq_no$") {
+    auto block_seq_no = std::stoi(args[2]);
+    out_list.push_back(args[0]);
+    out_list.insert(out_list.end(), args.begin()+3, args.end());
+    return block_seq_no;
+  }
+
+  out_list.insert(out_list.end(), args.begin(), args.end());
+  return 0;
 }
 
 REGISTER_IMPLEMENTATION("file", file_partition);

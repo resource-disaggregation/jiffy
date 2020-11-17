@@ -53,7 +53,8 @@ class storage_management_client {
                         const std::string &type,
                         const std::string &name,
                         const std::string &metadata,
-                        const std::map<std::string, std::string> &conf);
+                        const std::map<std::string, std::string> &conf,
+                        const int32_t block_seq_no);
 
   /**
    * @brief Setup chain
@@ -65,14 +66,15 @@ class storage_management_client {
    */
   void setup_chain(int32_t block_id, const std::string &path,
                    const std::vector<std::string> &chain, int32_t role,
-                   const std::string &next_block_id);
+                   const std::string &next_block_id,
+                   const int32_t block_seq_no);
 
   /**
    * @brief Reset block
    * @param block_id Block identifier
    */
 
-  void destroy_partition(int32_t block_id);
+  void destroy_partition(int32_t block_id, const int32_t block_seq_no);
 
   /**
    * @brief Fetch block path
@@ -80,7 +82,7 @@ class storage_management_client {
    * @return Block path
    */
 
-  std::string path(int32_t block_id);
+  std::string path(int32_t block_id, const int32_t block_seq_no);
 
   /**
    * @brief Write data back to persistent storage if dirty
@@ -88,7 +90,7 @@ class storage_management_client {
    * @param backing_path Backing path
    */
 
-  void sync(int32_t block_id, const std::string &backing_path);
+  void sync(int32_t block_id, const std::string &backing_path, const int32_t block_seq_no);
 
   /**
    * @brief Load data from persistent storage to block
@@ -96,7 +98,7 @@ class storage_management_client {
    * @param backing_path Backing path
    */
 
-  void load(int32_t block_id, const std::string &backing_path);
+  void load(int32_t block_id, const std::string &backing_path, const int32_t block_seq_no);
 
   /**
    * @brief Dump data back to persistent storage and clear the block
@@ -104,7 +106,7 @@ class storage_management_client {
    * @param backing_path Backing path
    */
 
-  void dump(int32_t block_id, const std::string &backing_path);
+  void dump(int32_t block_id, const std::string &backing_path, const int32_t block_seq_no);
 
   /**
    * @brief Fetch storage capacity
@@ -112,7 +114,7 @@ class storage_management_client {
    * @return Storage capacity
    */
 
-  int64_t storage_capacity(int32_t block_id);
+  int64_t storage_capacity(int32_t block_id, const int32_t block_seq_no);
 
   /**
    * @brief Fetch storage size
@@ -120,21 +122,21 @@ class storage_management_client {
    * @return Storage size
    */
 
-  int64_t storage_size(int32_t block_id);
+  int64_t storage_size(int32_t block_id, const int32_t block_seq_no);
 
   /**
    * @brief Resend pending request
    * @param block_id Block identifier
    */
 
-  void resend_pending(int32_t block_id);
+  void resend_pending(int32_t block_id, const int32_t block_seq_no);
 
   /**
    * @brief Forward all key and value to next block
    * @param block_id Block identifier
    */
 
-  void forward_all(int32_t block_id);
+  void forward_all(int32_t block_id, const int32_t block_seq_no);
 
   /**
    * @brief Update partition data and metadata
@@ -145,7 +147,8 @@ class storage_management_client {
 
   void update_partition(const int32_t block_id,
                         const std::string &partition_name,
-                        const std::string &partition_metadata);
+                        const std::string &partition_metadata,
+                        const int32_t block_seq_no);
 
  private:
   /* Socket */

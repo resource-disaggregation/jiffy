@@ -89,6 +89,14 @@ uint32_t storage_management_service_create_partition_args::read(Protocol_* iprot
           xfer += iprot->skip(ftype);
         }
         break;
+      case 7:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_seq_no);
+          this->__isset.block_seq_no = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -136,6 +144,10 @@ uint32_t storage_management_service_create_partition_args::write(Protocol_* opro
   }
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 7);
+  xfer += oprot->writeI32(this->block_seq_no);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -175,6 +187,10 @@ uint32_t storage_management_service_create_partition_pargs::write(Protocol_* opr
     }
     xfer += oprot->writeMapEnd();
   }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 7);
+  xfer += oprot->writeI32((*(this->block_seq_no)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -360,6 +376,14 @@ uint32_t storage_management_service_setup_chain_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 9:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_seq_no);
+          this->__isset.block_seq_no = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -406,6 +430,10 @@ uint32_t storage_management_service_setup_chain_args::write(Protocol_* oprot) co
   xfer += oprot->writeString(this->next_block_id);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 9);
+  xfer += oprot->writeI32(this->block_seq_no);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -444,6 +472,10 @@ uint32_t storage_management_service_setup_chain_pargs::write(Protocol_* oprot) c
 
   xfer += oprot->writeFieldBegin("next_block_id", ::apache::thrift::protocol::T_STRING, 8);
   xfer += oprot->writeString((*(this->next_block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 9);
+  xfer += oprot->writeI32((*(this->block_seq_no)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -585,6 +617,14 @@ uint32_t storage_management_service_destroy_partition_args::read(Protocol_* ipro
           xfer += iprot->skip(ftype);
         }
         break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_seq_no);
+          this->__isset.block_seq_no = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -607,6 +647,10 @@ uint32_t storage_management_service_destroy_partition_args::write(Protocol_* opr
   xfer += oprot->writeI32(this->block_id);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32(this->block_seq_no);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -621,6 +665,10 @@ uint32_t storage_management_service_destroy_partition_pargs::write(Protocol_* op
 
   xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
   xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32((*(this->block_seq_no)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -762,6 +810,14 @@ uint32_t storage_management_service_get_path_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_seq_no);
+          this->__isset.block_seq_no = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -784,6 +840,10 @@ uint32_t storage_management_service_get_path_args::write(Protocol_* oprot) const
   xfer += oprot->writeI32(this->block_id);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32(this->block_seq_no);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -798,6 +858,10 @@ uint32_t storage_management_service_get_path_pargs::write(Protocol_* oprot) cons
 
   xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
   xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32((*(this->block_seq_no)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -967,6 +1031,14 @@ uint32_t storage_management_service_sync_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_seq_no);
+          this->__isset.block_seq_no = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -993,6 +1065,10 @@ uint32_t storage_management_service_sync_args::write(Protocol_* oprot) const {
   xfer += oprot->writeString(this->backing_path);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32(this->block_seq_no);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -1011,6 +1087,10 @@ uint32_t storage_management_service_sync_pargs::write(Protocol_* oprot) const {
 
   xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString((*(this->backing_path)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32((*(this->block_seq_no)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -1160,6 +1240,14 @@ uint32_t storage_management_service_dump_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_seq_no);
+          this->__isset.block_seq_no = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -1186,6 +1274,10 @@ uint32_t storage_management_service_dump_args::write(Protocol_* oprot) const {
   xfer += oprot->writeString(this->backing_path);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32(this->block_seq_no);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -1204,6 +1296,10 @@ uint32_t storage_management_service_dump_pargs::write(Protocol_* oprot) const {
 
   xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString((*(this->backing_path)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32((*(this->block_seq_no)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -1353,6 +1449,14 @@ uint32_t storage_management_service_load_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_seq_no);
+          this->__isset.block_seq_no = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -1379,6 +1483,10 @@ uint32_t storage_management_service_load_args::write(Protocol_* oprot) const {
   xfer += oprot->writeString(this->backing_path);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32(this->block_seq_no);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -1397,6 +1505,10 @@ uint32_t storage_management_service_load_pargs::write(Protocol_* oprot) const {
 
   xfer += oprot->writeFieldBegin("backing_path", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString((*(this->backing_path)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32((*(this->block_seq_no)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -1538,6 +1650,14 @@ uint32_t storage_management_service_storage_capacity_args::read(Protocol_* iprot
           xfer += iprot->skip(ftype);
         }
         break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_seq_no);
+          this->__isset.block_seq_no = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -1560,6 +1680,10 @@ uint32_t storage_management_service_storage_capacity_args::write(Protocol_* opro
   xfer += oprot->writeI32(this->block_id);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32(this->block_seq_no);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -1574,6 +1698,10 @@ uint32_t storage_management_service_storage_capacity_pargs::write(Protocol_* opr
 
   xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
   xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32((*(this->block_seq_no)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -1735,6 +1863,14 @@ uint32_t storage_management_service_storage_size_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_seq_no);
+          this->__isset.block_seq_no = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -1757,6 +1893,10 @@ uint32_t storage_management_service_storage_size_args::write(Protocol_* oprot) c
   xfer += oprot->writeI32(this->block_id);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32(this->block_seq_no);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -1771,6 +1911,10 @@ uint32_t storage_management_service_storage_size_pargs::write(Protocol_* oprot) 
 
   xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
   xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32((*(this->block_seq_no)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -1932,6 +2076,14 @@ uint32_t storage_management_service_resend_pending_args::read(Protocol_* iprot) 
           xfer += iprot->skip(ftype);
         }
         break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_seq_no);
+          this->__isset.block_seq_no = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -1954,6 +2106,10 @@ uint32_t storage_management_service_resend_pending_args::write(Protocol_* oprot)
   xfer += oprot->writeI32(this->block_id);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32(this->block_seq_no);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -1968,6 +2124,10 @@ uint32_t storage_management_service_resend_pending_pargs::write(Protocol_* oprot
 
   xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
   xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32((*(this->block_seq_no)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -2109,6 +2269,14 @@ uint32_t storage_management_service_forward_all_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_seq_no);
+          this->__isset.block_seq_no = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -2131,6 +2299,10 @@ uint32_t storage_management_service_forward_all_args::write(Protocol_* oprot) co
   xfer += oprot->writeI32(this->block_id);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32(this->block_seq_no);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -2145,6 +2317,10 @@ uint32_t storage_management_service_forward_all_pargs::write(Protocol_* oprot) c
 
   xfer += oprot->writeFieldBegin("block_id", ::apache::thrift::protocol::T_I32, 1);
   xfer += oprot->writeI32((*(this->block_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32((*(this->block_seq_no)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -2302,6 +2478,14 @@ uint32_t storage_management_service_update_partition_data_args::read(Protocol_* 
           xfer += iprot->skip(ftype);
         }
         break;
+      case 4:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->block_seq_no);
+          this->__isset.block_seq_no = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -2332,6 +2516,10 @@ uint32_t storage_management_service_update_partition_data_args::write(Protocol_*
   xfer += oprot->writeString(this->partition_metadata);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 4);
+  xfer += oprot->writeI32(this->block_seq_no);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -2354,6 +2542,10 @@ uint32_t storage_management_service_update_partition_data_pargs::write(Protocol_
 
   xfer += oprot->writeFieldBegin("partition_metadata", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeString((*(this->partition_metadata)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("block_seq_no", ::apache::thrift::protocol::T_I32, 4);
+  xfer += oprot->writeI32((*(this->block_seq_no)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -2465,14 +2657,14 @@ uint32_t storage_management_service_update_partition_data_presult::read(Protocol
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf)
+void storage_management_serviceClientT<Protocol_>::create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf, const int32_t block_seq_no)
 {
-  send_create_partition(block_id, partition_type, partition_name, partition_metadata, conf);
+  send_create_partition(block_id, partition_type, partition_name, partition_metadata, conf, block_seq_no);
   recv_create_partition();
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::send_create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf)
+void storage_management_serviceClientT<Protocol_>::send_create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf, const int32_t block_seq_no)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("create_partition", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -2483,6 +2675,7 @@ void storage_management_serviceClientT<Protocol_>::send_create_partition(const i
   args.partition_name = &partition_name;
   args.partition_metadata = &partition_metadata;
   args.conf = &conf;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -2528,14 +2721,14 @@ void storage_management_serviceClientT<Protocol_>::recv_create_partition()
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id)
+void storage_management_serviceClientT<Protocol_>::setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id, const int32_t block_seq_no)
 {
-  send_setup_chain(block_id, path, chain, chain_role, next_block_id);
+  send_setup_chain(block_id, path, chain, chain_role, next_block_id, block_seq_no);
   recv_setup_chain();
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::send_setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id)
+void storage_management_serviceClientT<Protocol_>::send_setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id, const int32_t block_seq_no)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("setup_chain", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -2546,6 +2739,7 @@ void storage_management_serviceClientT<Protocol_>::send_setup_chain(const int32_
   args.chain = &chain;
   args.chain_role = &chain_role;
   args.next_block_id = &next_block_id;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -2591,20 +2785,21 @@ void storage_management_serviceClientT<Protocol_>::recv_setup_chain()
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::destroy_partition(const int32_t block_id)
+void storage_management_serviceClientT<Protocol_>::destroy_partition(const int32_t block_id, const int32_t block_seq_no)
 {
-  send_destroy_partition(block_id);
+  send_destroy_partition(block_id, block_seq_no);
   recv_destroy_partition();
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::send_destroy_partition(const int32_t block_id)
+void storage_management_serviceClientT<Protocol_>::send_destroy_partition(const int32_t block_id, const int32_t block_seq_no)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("destroy_partition", ::apache::thrift::protocol::T_CALL, cseqid);
 
   storage_management_service_destroy_partition_pargs args;
   args.block_id = &block_id;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -2650,20 +2845,21 @@ void storage_management_serviceClientT<Protocol_>::recv_destroy_partition()
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::get_path(std::string& _return, const int32_t block_id)
+void storage_management_serviceClientT<Protocol_>::get_path(std::string& _return, const int32_t block_id, const int32_t block_seq_no)
 {
-  send_get_path(block_id);
+  send_get_path(block_id, block_seq_no);
   recv_get_path(_return);
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::send_get_path(const int32_t block_id)
+void storage_management_serviceClientT<Protocol_>::send_get_path(const int32_t block_id, const int32_t block_seq_no)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("get_path", ::apache::thrift::protocol::T_CALL, cseqid);
 
   storage_management_service_get_path_pargs args;
   args.block_id = &block_id;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -2714,14 +2910,14 @@ void storage_management_serviceClientT<Protocol_>::recv_get_path(std::string& _r
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::sync(const int32_t block_id, const std::string& backing_path)
+void storage_management_serviceClientT<Protocol_>::sync(const int32_t block_id, const std::string& backing_path, const int32_t block_seq_no)
 {
-  send_sync(block_id, backing_path);
+  send_sync(block_id, backing_path, block_seq_no);
   recv_sync();
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::send_sync(const int32_t block_id, const std::string& backing_path)
+void storage_management_serviceClientT<Protocol_>::send_sync(const int32_t block_id, const std::string& backing_path, const int32_t block_seq_no)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("sync", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -2729,6 +2925,7 @@ void storage_management_serviceClientT<Protocol_>::send_sync(const int32_t block
   storage_management_service_sync_pargs args;
   args.block_id = &block_id;
   args.backing_path = &backing_path;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -2774,14 +2971,14 @@ void storage_management_serviceClientT<Protocol_>::recv_sync()
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::dump(const int32_t block_id, const std::string& backing_path)
+void storage_management_serviceClientT<Protocol_>::dump(const int32_t block_id, const std::string& backing_path, const int32_t block_seq_no)
 {
-  send_dump(block_id, backing_path);
+  send_dump(block_id, backing_path, block_seq_no);
   recv_dump();
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::send_dump(const int32_t block_id, const std::string& backing_path)
+void storage_management_serviceClientT<Protocol_>::send_dump(const int32_t block_id, const std::string& backing_path, const int32_t block_seq_no)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("dump", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -2789,6 +2986,7 @@ void storage_management_serviceClientT<Protocol_>::send_dump(const int32_t block
   storage_management_service_dump_pargs args;
   args.block_id = &block_id;
   args.backing_path = &backing_path;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -2834,14 +3032,14 @@ void storage_management_serviceClientT<Protocol_>::recv_dump()
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::load(const int32_t block_id, const std::string& backing_path)
+void storage_management_serviceClientT<Protocol_>::load(const int32_t block_id, const std::string& backing_path, const int32_t block_seq_no)
 {
-  send_load(block_id, backing_path);
+  send_load(block_id, backing_path, block_seq_no);
   recv_load();
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::send_load(const int32_t block_id, const std::string& backing_path)
+void storage_management_serviceClientT<Protocol_>::send_load(const int32_t block_id, const std::string& backing_path, const int32_t block_seq_no)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("load", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -2849,6 +3047,7 @@ void storage_management_serviceClientT<Protocol_>::send_load(const int32_t block
   storage_management_service_load_pargs args;
   args.block_id = &block_id;
   args.backing_path = &backing_path;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -2894,20 +3093,21 @@ void storage_management_serviceClientT<Protocol_>::recv_load()
 }
 
 template <class Protocol_>
-int64_t storage_management_serviceClientT<Protocol_>::storage_capacity(const int32_t block_id)
+int64_t storage_management_serviceClientT<Protocol_>::storage_capacity(const int32_t block_id, const int32_t block_seq_no)
 {
-  send_storage_capacity(block_id);
+  send_storage_capacity(block_id, block_seq_no);
   return recv_storage_capacity();
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::send_storage_capacity(const int32_t block_id)
+void storage_management_serviceClientT<Protocol_>::send_storage_capacity(const int32_t block_id, const int32_t block_seq_no)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("storage_capacity", ::apache::thrift::protocol::T_CALL, cseqid);
 
   storage_management_service_storage_capacity_pargs args;
   args.block_id = &block_id;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -2958,20 +3158,21 @@ int64_t storage_management_serviceClientT<Protocol_>::recv_storage_capacity()
 }
 
 template <class Protocol_>
-int64_t storage_management_serviceClientT<Protocol_>::storage_size(const int32_t block_id)
+int64_t storage_management_serviceClientT<Protocol_>::storage_size(const int32_t block_id, const int32_t block_seq_no)
 {
-  send_storage_size(block_id);
+  send_storage_size(block_id, block_seq_no);
   return recv_storage_size();
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::send_storage_size(const int32_t block_id)
+void storage_management_serviceClientT<Protocol_>::send_storage_size(const int32_t block_id, const int32_t block_seq_no)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("storage_size", ::apache::thrift::protocol::T_CALL, cseqid);
 
   storage_management_service_storage_size_pargs args;
   args.block_id = &block_id;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -3022,20 +3223,21 @@ int64_t storage_management_serviceClientT<Protocol_>::recv_storage_size()
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::resend_pending(const int32_t block_id)
+void storage_management_serviceClientT<Protocol_>::resend_pending(const int32_t block_id, const int32_t block_seq_no)
 {
-  send_resend_pending(block_id);
+  send_resend_pending(block_id, block_seq_no);
   recv_resend_pending();
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::send_resend_pending(const int32_t block_id)
+void storage_management_serviceClientT<Protocol_>::send_resend_pending(const int32_t block_id, const int32_t block_seq_no)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("resend_pending", ::apache::thrift::protocol::T_CALL, cseqid);
 
   storage_management_service_resend_pending_pargs args;
   args.block_id = &block_id;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -3081,20 +3283,21 @@ void storage_management_serviceClientT<Protocol_>::recv_resend_pending()
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::forward_all(const int32_t block_id)
+void storage_management_serviceClientT<Protocol_>::forward_all(const int32_t block_id, const int32_t block_seq_no)
 {
-  send_forward_all(block_id);
+  send_forward_all(block_id, block_seq_no);
   recv_forward_all();
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::send_forward_all(const int32_t block_id)
+void storage_management_serviceClientT<Protocol_>::send_forward_all(const int32_t block_id, const int32_t block_seq_no)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("forward_all", ::apache::thrift::protocol::T_CALL, cseqid);
 
   storage_management_service_forward_all_pargs args;
   args.block_id = &block_id;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -3140,14 +3343,14 @@ void storage_management_serviceClientT<Protocol_>::recv_forward_all()
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::update_partition_data(const int32_t block_id, const std::string& partition_name, const std::string& partition_metadata)
+void storage_management_serviceClientT<Protocol_>::update_partition_data(const int32_t block_id, const std::string& partition_name, const std::string& partition_metadata, const int32_t block_seq_no)
 {
-  send_update_partition_data(block_id, partition_name, partition_metadata);
+  send_update_partition_data(block_id, partition_name, partition_metadata, block_seq_no);
   recv_update_partition_data();
 }
 
 template <class Protocol_>
-void storage_management_serviceClientT<Protocol_>::send_update_partition_data(const int32_t block_id, const std::string& partition_name, const std::string& partition_metadata)
+void storage_management_serviceClientT<Protocol_>::send_update_partition_data(const int32_t block_id, const std::string& partition_name, const std::string& partition_metadata, const int32_t block_seq_no)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("update_partition_data", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -3156,6 +3359,7 @@ void storage_management_serviceClientT<Protocol_>::send_update_partition_data(co
   args.block_id = &block_id;
   args.partition_name = &partition_name;
   args.partition_metadata = &partition_metadata;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -3264,7 +3468,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_create_partition(i
 
   storage_management_service_create_partition_result result;
   try {
-    iface_->create_partition(args.block_id, args.partition_type, args.partition_name, args.partition_metadata, args.conf);
+    iface_->create_partition(args.block_id, args.partition_type, args.partition_name, args.partition_metadata, args.conf, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -3321,7 +3525,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_create_partition(i
 
   storage_management_service_create_partition_result result;
   try {
-    iface_->create_partition(args.block_id, args.partition_type, args.partition_name, args.partition_metadata, args.conf);
+    iface_->create_partition(args.block_id, args.partition_type, args.partition_name, args.partition_metadata, args.conf, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -3378,7 +3582,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_setup_chain(int32_
 
   storage_management_service_setup_chain_result result;
   try {
-    iface_->setup_chain(args.block_id, args.path, args.chain, args.chain_role, args.next_block_id);
+    iface_->setup_chain(args.block_id, args.path, args.chain, args.chain_role, args.next_block_id, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -3435,7 +3639,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_setup_chain(int32_
 
   storage_management_service_setup_chain_result result;
   try {
-    iface_->setup_chain(args.block_id, args.path, args.chain, args.chain_role, args.next_block_id);
+    iface_->setup_chain(args.block_id, args.path, args.chain, args.chain_role, args.next_block_id, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -3492,7 +3696,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_destroy_partition(
 
   storage_management_service_destroy_partition_result result;
   try {
-    iface_->destroy_partition(args.block_id);
+    iface_->destroy_partition(args.block_id, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -3549,7 +3753,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_destroy_partition(
 
   storage_management_service_destroy_partition_result result;
   try {
-    iface_->destroy_partition(args.block_id);
+    iface_->destroy_partition(args.block_id, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -3606,7 +3810,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_get_path(int32_t s
 
   storage_management_service_get_path_result result;
   try {
-    iface_->get_path(result.success, args.block_id);
+    iface_->get_path(result.success, args.block_id, args.block_seq_no);
     result.__isset.success = true;
   } catch (storage_management_exception &ex) {
     result.ex = ex;
@@ -3664,7 +3868,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_get_path(int32_t s
 
   storage_management_service_get_path_result result;
   try {
-    iface_->get_path(result.success, args.block_id);
+    iface_->get_path(result.success, args.block_id, args.block_seq_no);
     result.__isset.success = true;
   } catch (storage_management_exception &ex) {
     result.ex = ex;
@@ -3722,7 +3926,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_sync(int32_t seqid
 
   storage_management_service_sync_result result;
   try {
-    iface_->sync(args.block_id, args.backing_path);
+    iface_->sync(args.block_id, args.backing_path, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -3779,7 +3983,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_sync(int32_t seqid
 
   storage_management_service_sync_result result;
   try {
-    iface_->sync(args.block_id, args.backing_path);
+    iface_->sync(args.block_id, args.backing_path, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -3836,7 +4040,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_dump(int32_t seqid
 
   storage_management_service_dump_result result;
   try {
-    iface_->dump(args.block_id, args.backing_path);
+    iface_->dump(args.block_id, args.backing_path, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -3893,7 +4097,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_dump(int32_t seqid
 
   storage_management_service_dump_result result;
   try {
-    iface_->dump(args.block_id, args.backing_path);
+    iface_->dump(args.block_id, args.backing_path, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -3950,7 +4154,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_load(int32_t seqid
 
   storage_management_service_load_result result;
   try {
-    iface_->load(args.block_id, args.backing_path);
+    iface_->load(args.block_id, args.backing_path, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -4007,7 +4211,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_load(int32_t seqid
 
   storage_management_service_load_result result;
   try {
-    iface_->load(args.block_id, args.backing_path);
+    iface_->load(args.block_id, args.backing_path, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -4064,7 +4268,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_storage_capacity(i
 
   storage_management_service_storage_capacity_result result;
   try {
-    result.success = iface_->storage_capacity(args.block_id);
+    result.success = iface_->storage_capacity(args.block_id, args.block_seq_no);
     result.__isset.success = true;
   } catch (storage_management_exception &ex) {
     result.ex = ex;
@@ -4122,7 +4326,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_storage_capacity(i
 
   storage_management_service_storage_capacity_result result;
   try {
-    result.success = iface_->storage_capacity(args.block_id);
+    result.success = iface_->storage_capacity(args.block_id, args.block_seq_no);
     result.__isset.success = true;
   } catch (storage_management_exception &ex) {
     result.ex = ex;
@@ -4180,7 +4384,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_storage_size(int32
 
   storage_management_service_storage_size_result result;
   try {
-    result.success = iface_->storage_size(args.block_id);
+    result.success = iface_->storage_size(args.block_id, args.block_seq_no);
     result.__isset.success = true;
   } catch (storage_management_exception &ex) {
     result.ex = ex;
@@ -4238,7 +4442,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_storage_size(int32
 
   storage_management_service_storage_size_result result;
   try {
-    result.success = iface_->storage_size(args.block_id);
+    result.success = iface_->storage_size(args.block_id, args.block_seq_no);
     result.__isset.success = true;
   } catch (storage_management_exception &ex) {
     result.ex = ex;
@@ -4296,7 +4500,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_resend_pending(int
 
   storage_management_service_resend_pending_result result;
   try {
-    iface_->resend_pending(args.block_id);
+    iface_->resend_pending(args.block_id, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -4353,7 +4557,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_resend_pending(int
 
   storage_management_service_resend_pending_result result;
   try {
-    iface_->resend_pending(args.block_id);
+    iface_->resend_pending(args.block_id, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -4410,7 +4614,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_forward_all(int32_
 
   storage_management_service_forward_all_result result;
   try {
-    iface_->forward_all(args.block_id);
+    iface_->forward_all(args.block_id, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -4467,7 +4671,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_forward_all(int32_
 
   storage_management_service_forward_all_result result;
   try {
-    iface_->forward_all(args.block_id);
+    iface_->forward_all(args.block_id, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -4524,7 +4728,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_update_partition_d
 
   storage_management_service_update_partition_data_result result;
   try {
-    iface_->update_partition_data(args.block_id, args.partition_name, args.partition_metadata);
+    iface_->update_partition_data(args.block_id, args.partition_name, args.partition_metadata, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -4581,7 +4785,7 @@ void storage_management_serviceProcessorT<Protocol_>::process_update_partition_d
 
   storage_management_service_update_partition_data_result result;
   try {
-    iface_->update_partition_data(args.block_id, args.partition_name, args.partition_metadata);
+    iface_->update_partition_data(args.block_id, args.partition_name, args.partition_metadata, args.block_seq_no);
   } catch (storage_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -4623,14 +4827,14 @@ template <class Protocol_>
 }
 
 template <class Protocol_>
-void storage_management_serviceConcurrentClientT<Protocol_>::create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf)
+void storage_management_serviceConcurrentClientT<Protocol_>::create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf, const int32_t block_seq_no)
 {
-  int32_t seqid = send_create_partition(block_id, partition_type, partition_name, partition_metadata, conf);
+  int32_t seqid = send_create_partition(block_id, partition_type, partition_name, partition_metadata, conf, block_seq_no);
   recv_create_partition(seqid);
 }
 
 template <class Protocol_>
-int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf)
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf, const int32_t block_seq_no)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -4642,6 +4846,7 @@ int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_create_part
   args.partition_name = &partition_name;
   args.partition_metadata = &partition_metadata;
   args.conf = &conf;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -4712,14 +4917,14 @@ void storage_management_serviceConcurrentClientT<Protocol_>::recv_create_partiti
 }
 
 template <class Protocol_>
-void storage_management_serviceConcurrentClientT<Protocol_>::setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id)
+void storage_management_serviceConcurrentClientT<Protocol_>::setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id, const int32_t block_seq_no)
 {
-  int32_t seqid = send_setup_chain(block_id, path, chain, chain_role, next_block_id);
+  int32_t seqid = send_setup_chain(block_id, path, chain, chain_role, next_block_id, block_seq_no);
   recv_setup_chain(seqid);
 }
 
 template <class Protocol_>
-int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id)
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id, const int32_t block_seq_no)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -4731,6 +4936,7 @@ int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_setup_chain
   args.chain = &chain;
   args.chain_role = &chain_role;
   args.next_block_id = &next_block_id;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -4801,14 +5007,14 @@ void storage_management_serviceConcurrentClientT<Protocol_>::recv_setup_chain(co
 }
 
 template <class Protocol_>
-void storage_management_serviceConcurrentClientT<Protocol_>::destroy_partition(const int32_t block_id)
+void storage_management_serviceConcurrentClientT<Protocol_>::destroy_partition(const int32_t block_id, const int32_t block_seq_no)
 {
-  int32_t seqid = send_destroy_partition(block_id);
+  int32_t seqid = send_destroy_partition(block_id, block_seq_no);
   recv_destroy_partition(seqid);
 }
 
 template <class Protocol_>
-int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_destroy_partition(const int32_t block_id)
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_destroy_partition(const int32_t block_id, const int32_t block_seq_no)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -4816,6 +5022,7 @@ int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_destroy_par
 
   storage_management_service_destroy_partition_pargs args;
   args.block_id = &block_id;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -4886,14 +5093,14 @@ void storage_management_serviceConcurrentClientT<Protocol_>::recv_destroy_partit
 }
 
 template <class Protocol_>
-void storage_management_serviceConcurrentClientT<Protocol_>::get_path(std::string& _return, const int32_t block_id)
+void storage_management_serviceConcurrentClientT<Protocol_>::get_path(std::string& _return, const int32_t block_id, const int32_t block_seq_no)
 {
-  int32_t seqid = send_get_path(block_id);
+  int32_t seqid = send_get_path(block_id, block_seq_no);
   recv_get_path(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_get_path(const int32_t block_id)
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_get_path(const int32_t block_id, const int32_t block_seq_no)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -4901,6 +5108,7 @@ int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_get_path(co
 
   storage_management_service_get_path_pargs args;
   args.block_id = &block_id;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -4977,14 +5185,14 @@ void storage_management_serviceConcurrentClientT<Protocol_>::recv_get_path(std::
 }
 
 template <class Protocol_>
-void storage_management_serviceConcurrentClientT<Protocol_>::sync(const int32_t block_id, const std::string& backing_path)
+void storage_management_serviceConcurrentClientT<Protocol_>::sync(const int32_t block_id, const std::string& backing_path, const int32_t block_seq_no)
 {
-  int32_t seqid = send_sync(block_id, backing_path);
+  int32_t seqid = send_sync(block_id, backing_path, block_seq_no);
   recv_sync(seqid);
 }
 
 template <class Protocol_>
-int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_sync(const int32_t block_id, const std::string& backing_path)
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_sync(const int32_t block_id, const std::string& backing_path, const int32_t block_seq_no)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -4993,6 +5201,7 @@ int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_sync(const 
   storage_management_service_sync_pargs args;
   args.block_id = &block_id;
   args.backing_path = &backing_path;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -5063,14 +5272,14 @@ void storage_management_serviceConcurrentClientT<Protocol_>::recv_sync(const int
 }
 
 template <class Protocol_>
-void storage_management_serviceConcurrentClientT<Protocol_>::dump(const int32_t block_id, const std::string& backing_path)
+void storage_management_serviceConcurrentClientT<Protocol_>::dump(const int32_t block_id, const std::string& backing_path, const int32_t block_seq_no)
 {
-  int32_t seqid = send_dump(block_id, backing_path);
+  int32_t seqid = send_dump(block_id, backing_path, block_seq_no);
   recv_dump(seqid);
 }
 
 template <class Protocol_>
-int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_dump(const int32_t block_id, const std::string& backing_path)
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_dump(const int32_t block_id, const std::string& backing_path, const int32_t block_seq_no)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -5079,6 +5288,7 @@ int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_dump(const 
   storage_management_service_dump_pargs args;
   args.block_id = &block_id;
   args.backing_path = &backing_path;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -5149,14 +5359,14 @@ void storage_management_serviceConcurrentClientT<Protocol_>::recv_dump(const int
 }
 
 template <class Protocol_>
-void storage_management_serviceConcurrentClientT<Protocol_>::load(const int32_t block_id, const std::string& backing_path)
+void storage_management_serviceConcurrentClientT<Protocol_>::load(const int32_t block_id, const std::string& backing_path, const int32_t block_seq_no)
 {
-  int32_t seqid = send_load(block_id, backing_path);
+  int32_t seqid = send_load(block_id, backing_path, block_seq_no);
   recv_load(seqid);
 }
 
 template <class Protocol_>
-int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_load(const int32_t block_id, const std::string& backing_path)
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_load(const int32_t block_id, const std::string& backing_path, const int32_t block_seq_no)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -5165,6 +5375,7 @@ int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_load(const 
   storage_management_service_load_pargs args;
   args.block_id = &block_id;
   args.backing_path = &backing_path;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -5235,14 +5446,14 @@ void storage_management_serviceConcurrentClientT<Protocol_>::recv_load(const int
 }
 
 template <class Protocol_>
-int64_t storage_management_serviceConcurrentClientT<Protocol_>::storage_capacity(const int32_t block_id)
+int64_t storage_management_serviceConcurrentClientT<Protocol_>::storage_capacity(const int32_t block_id, const int32_t block_seq_no)
 {
-  int32_t seqid = send_storage_capacity(block_id);
+  int32_t seqid = send_storage_capacity(block_id, block_seq_no);
   return recv_storage_capacity(seqid);
 }
 
 template <class Protocol_>
-int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_storage_capacity(const int32_t block_id)
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_storage_capacity(const int32_t block_id, const int32_t block_seq_no)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -5250,6 +5461,7 @@ int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_storage_cap
 
   storage_management_service_storage_capacity_pargs args;
   args.block_id = &block_id;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -5326,14 +5538,14 @@ int64_t storage_management_serviceConcurrentClientT<Protocol_>::recv_storage_cap
 }
 
 template <class Protocol_>
-int64_t storage_management_serviceConcurrentClientT<Protocol_>::storage_size(const int32_t block_id)
+int64_t storage_management_serviceConcurrentClientT<Protocol_>::storage_size(const int32_t block_id, const int32_t block_seq_no)
 {
-  int32_t seqid = send_storage_size(block_id);
+  int32_t seqid = send_storage_size(block_id, block_seq_no);
   return recv_storage_size(seqid);
 }
 
 template <class Protocol_>
-int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_storage_size(const int32_t block_id)
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_storage_size(const int32_t block_id, const int32_t block_seq_no)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -5341,6 +5553,7 @@ int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_storage_siz
 
   storage_management_service_storage_size_pargs args;
   args.block_id = &block_id;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -5417,14 +5630,14 @@ int64_t storage_management_serviceConcurrentClientT<Protocol_>::recv_storage_siz
 }
 
 template <class Protocol_>
-void storage_management_serviceConcurrentClientT<Protocol_>::resend_pending(const int32_t block_id)
+void storage_management_serviceConcurrentClientT<Protocol_>::resend_pending(const int32_t block_id, const int32_t block_seq_no)
 {
-  int32_t seqid = send_resend_pending(block_id);
+  int32_t seqid = send_resend_pending(block_id, block_seq_no);
   recv_resend_pending(seqid);
 }
 
 template <class Protocol_>
-int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_resend_pending(const int32_t block_id)
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_resend_pending(const int32_t block_id, const int32_t block_seq_no)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -5432,6 +5645,7 @@ int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_resend_pend
 
   storage_management_service_resend_pending_pargs args;
   args.block_id = &block_id;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -5502,14 +5716,14 @@ void storage_management_serviceConcurrentClientT<Protocol_>::recv_resend_pending
 }
 
 template <class Protocol_>
-void storage_management_serviceConcurrentClientT<Protocol_>::forward_all(const int32_t block_id)
+void storage_management_serviceConcurrentClientT<Protocol_>::forward_all(const int32_t block_id, const int32_t block_seq_no)
 {
-  int32_t seqid = send_forward_all(block_id);
+  int32_t seqid = send_forward_all(block_id, block_seq_no);
   recv_forward_all(seqid);
 }
 
 template <class Protocol_>
-int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_forward_all(const int32_t block_id)
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_forward_all(const int32_t block_id, const int32_t block_seq_no)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -5517,6 +5731,7 @@ int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_forward_all
 
   storage_management_service_forward_all_pargs args;
   args.block_id = &block_id;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -5587,14 +5802,14 @@ void storage_management_serviceConcurrentClientT<Protocol_>::recv_forward_all(co
 }
 
 template <class Protocol_>
-void storage_management_serviceConcurrentClientT<Protocol_>::update_partition_data(const int32_t block_id, const std::string& partition_name, const std::string& partition_metadata)
+void storage_management_serviceConcurrentClientT<Protocol_>::update_partition_data(const int32_t block_id, const std::string& partition_name, const std::string& partition_metadata, const int32_t block_seq_no)
 {
-  int32_t seqid = send_update_partition_data(block_id, partition_name, partition_metadata);
+  int32_t seqid = send_update_partition_data(block_id, partition_name, partition_metadata, block_seq_no);
   recv_update_partition_data(seqid);
 }
 
 template <class Protocol_>
-int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_update_partition_data(const int32_t block_id, const std::string& partition_name, const std::string& partition_metadata)
+int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_update_partition_data(const int32_t block_id, const std::string& partition_name, const std::string& partition_metadata, const int32_t block_seq_no)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -5604,6 +5819,7 @@ int32_t storage_management_serviceConcurrentClientT<Protocol_>::send_update_part
   args.block_id = &block_id;
   args.partition_name = &partition_name;
   args.partition_metadata = &partition_metadata;
+  args.block_seq_no = &block_seq_no;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();

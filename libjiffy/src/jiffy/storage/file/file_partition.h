@@ -134,6 +134,9 @@ class file_partition : public chain_module {
 
  private:
 
+  
+  int32_t extract_block_seq_no(const arg_list &args, arg_list &out_list);
+
   /* File partition */
   file_type partition_;
 

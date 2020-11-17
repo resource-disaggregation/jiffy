@@ -11,7 +11,8 @@ partition::partition(block_memory_manager *manager,
       metadata_(metadata),
       supported_commands_(supported_commands),
       manager_(manager),
-      binary_allocator_(build_allocator<uint8_t>()) {
+      binary_allocator_(build_allocator<uint8_t>()),
+      block_seq_no_(0) {
   default_ = supported_commands_.empty();
 }
 
@@ -83,6 +84,14 @@ void partition::notify(const arg_list &args) {
 
 binary partition::make_binary(const std::string &str) {
   return binary(str, binary_allocator_);
+}
+
+int32_t partition::seq_no() {
+  return block_seq_no_;
+}
+
+void partition::update_seq_no(int32_t x) {
+  block_seq_no_ = x;
 }
 
 

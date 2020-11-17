@@ -193,6 +193,12 @@ class partition {
    */
   void notify(const arg_list & args);
 
+  // Return underlying block sequence number
+  // Increases monotonically over lifetime of block
+  int32_t seq_no();
+
+  void update_seq_no(int32_t x);
+
  protected:
   /**
    * @brief Construct binary string
@@ -219,6 +225,9 @@ class partition {
   allocator<uint8_t> binary_allocator_;
   /* Atomic bool to indicate that the partition is a default one */
   std::atomic<bool> default_{};
+
+  // Block sequence number
+  int32_t block_seq_no_;
 };
 
 }
