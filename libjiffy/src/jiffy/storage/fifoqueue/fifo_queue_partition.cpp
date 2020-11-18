@@ -223,7 +223,7 @@ void fifo_queue_partition::front(response &_return, const arg_list &args) {
   RETURN_ERR("!redo");
 }
 
-void fifo_queue_partition::run_command(response &_return, const arg_list &args) {
+void fifo_queue_partition::run_command_impl(response &_return, const arg_list &args) {
   auto cmd_name = args[0];
   update_rate();
   switch (command_id(cmd_name)) {
@@ -370,7 +370,7 @@ void fifo_queue_partition::update_rate() {
     dequeue_start_time_ = cur_time;
     dequeue_start_data_size_ = dequeue_data_size_;
   }
-};
+}
 
 void fifo_queue_partition::clear_partition() {
   partition_.clear();

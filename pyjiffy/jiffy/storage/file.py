@@ -12,7 +12,7 @@ class FileOps:
     seek = b('seek')
     add_blocks = b('add_blocks')
     get_storage_capacity = b('get_storage_capacity')
-    get_partition_size = b('get_storage_capacity')
+    get_partition_size = b('get_partition_size')
 
     op_types = {read: CommandType.accessor,
                 seek: CommandType.accessor,

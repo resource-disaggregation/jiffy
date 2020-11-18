@@ -21,7 +21,7 @@ default_partition::default_partition(block_memory_manager *manager,
                                      int)
     : chain_module(manager, name, metadata, {}) {}
 
-void default_partition::run_command(std::vector<std::string> &_return,
+void default_partition::run_command_impl(std::vector<std::string> &_return,
                                     const std::vector<std::string> &) {
   _return.emplace_back("!block_moved");
 }

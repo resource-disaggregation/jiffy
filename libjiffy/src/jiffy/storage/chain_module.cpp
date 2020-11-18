@@ -84,7 +84,9 @@ void chain_module::request(sequence_id seq, const arg_list &args) {
   auto cmd_name = args.front();
   if (is_tail()) {
     clients().respond_client(seq, result);
-    subscriptions().notify(cmd_name, args[1]); // TODO: Fix
+    arg_list actual_args;
+    extract_block_seq_no(args, actual_args);
+    subscriptions().notify(cmd_name, actual_args[1]); // TODO: Fix
   } else {
     if (is_accessor(cmd_name)) {
       LOG(log_level::error) << "Invalid state: Accessor request on non-tail node";
@@ -112,7 +114,9 @@ void chain_module::chain_request(const sequence_id &seq, const arg_list &args) {
 
   if (is_tail()) {
     clients().respond_client(seq, result);
-    subscriptions().notify(cmd_name, args[1]); // TODO: Fix
+    arg_list actual_args;
+    extract_block_seq_no(args, actual_args);
+    subscriptions().notify(cmd_name, actual_args[1]); // TODO: Fix
     ack(seq);
   } else {
     // Do not need a lock since this is the only thread handling chain requests

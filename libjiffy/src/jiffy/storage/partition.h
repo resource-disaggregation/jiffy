@@ -65,7 +65,9 @@ class partition {
    * @param cmd_id Operation identifier
    * @param args Operation arguments
    */
-  virtual void run_command(response &_return, const arg_list &args) = 0;
+  virtual void run_command_impl(response &_return, const arg_list &args) = 0;
+
+  void run_command(response &_return, const arg_list &args);
 
   /**
    * @brief Set block path
@@ -206,6 +208,8 @@ class partition {
    * @return Binary string
    */
   binary make_binary(const std::string &str);
+
+  int32_t extract_block_seq_no(const arg_list &args, arg_list &out_list);
 
   /* Partition name */
   std::string name_;
