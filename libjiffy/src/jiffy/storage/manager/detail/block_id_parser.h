@@ -11,6 +11,7 @@ struct block_id {
   int32_t service_port;
   int32_t management_port;
   int32_t id;
+  int32_t block_seq_no;
 };
 /* Block name parser class */
 class block_id_parser {
