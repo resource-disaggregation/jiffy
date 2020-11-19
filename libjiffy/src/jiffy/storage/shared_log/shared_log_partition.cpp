@@ -83,7 +83,7 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
     _return = ret;
     return;
   }
-  if (start_pos < 0 || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("scan position invalid");
+  if (start_pos < 0 || start_pos >= log_info_.size() || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("scan position invalid");
   for (int i = start_pos; i <= end_pos; i++){
     auto info_set = log_info_[i];
     if (info_set[0] == -1) continue;
@@ -120,20 +120,12 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
   }
   auto start_pos = std::stoi(args[1]) - seq_no;
   auto end_pos = std::stoi(args[2]) - seq_no;
-  if (start_pos < 0 || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("trim position invalid");
+  if (start_pos < 0 || start_pos >= log_info_.size() || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("trim position invalid");
   if (end_pos > log_info_.size()) end_pos = log_info_.size() - 1;
-  std::size_t first_section_len = 0;
-  std::size_t second_section_len = 0;
-  if (start_pos > 0){
-    for (int i = 0; i < start_pos; i++){
-      auto info_set = log_info_[i];
-      if (info_set[0] == -1) continue;
-      for (int j = 1; j < info_set.size(); j++){
-        first_section_len += info_set[j];
-      }
-    }
-  }
+  std::size_t first_section_len = log_info_[start_pos][0];
   auto first_section = partition_.read(static_cast<std::size_t>(0), static_cast<std::size_t>(first_section_len)).second;
+  std::size_t second_section_len = 0;
+  
   int trimmed_length = 0;
   for (int i = start_pos; i <= end_pos; i++){
     auto info_set = log_info_[i];
@@ -142,7 +134,7 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
       trimmed_length += info_set[j];
     }
   }
-  
+
   if (end_pos < log_info_.size() - 1){
     for (int i = end_pos + 1; i < log_info_.size(); i++){
       auto info_set = log_info_[i];
