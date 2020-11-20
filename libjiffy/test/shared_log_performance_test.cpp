@@ -77,10 +77,11 @@ TEST_CASE("shared_log_performance_test", "[write][read][performance]") {
     
     int scan_size = 1;
     while (scan_size <= num_ops) {
+        std::cout<<"1\n";
         bench_begin = time_utils::now_us();
         tot_time = 0;
-        int scan_offset = 0;
         for (int j = 0; j < num_ops/scan_size; j+= scan_size){
+            std::cout<<"2\n";
             response resp;
             std::vector<std::string> scan_args = {"scan", std::to_string(j), std::to_string(j + scan_size)};
             for (int i = 0; i < scan_size; ++i){
