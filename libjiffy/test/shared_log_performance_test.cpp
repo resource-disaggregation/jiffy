@@ -87,7 +87,7 @@ TEST_CASE("shared_log_performance_test", "[write][read][performance]") {
                 scan_args.push_back(std::to_string(i + j)+"_stream");
             }
             block.scan(resp, scan_args);
-            std::cout<<j<<"\n";
+            std::cout<<resp<<"\n";
         }
         
         bench_end = time_utils::now_us();
