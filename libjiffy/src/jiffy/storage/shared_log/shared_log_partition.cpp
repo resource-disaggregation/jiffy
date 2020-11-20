@@ -40,20 +40,19 @@ shared_log_partition::shared_log_partition(block_memory_manager *manager,
 
 //need implementation
 void shared_log_partition::write(response &_return, const arg_list &args) {
-  if (args.size() < 5) {
+  if (args.size() < 4) {
     RETURN_ERR("!args_error");
   }
   auto position = std::stoi(args[1]);
-  auto starting_offset = std::stoi(args[2]);
   if (log_info_.size() == 0) {
     seq_no = position;
   }
-  auto data = args[3];
+  auto data = args[2];
   std::string logical_stream = "";
   std::vector<int> info_set;
   info_set.push_back(starting_offset);
   info_set.push_back(data.size());
-  for (int i = 4; i < args.size(); i++){
+  for (int i = 3; i < args.size(); i++){
     logical_stream += args[i];
     info_set.push_back(args[i].size());
   }
@@ -63,6 +62,7 @@ void shared_log_partition::write(response &_return, const arg_list &args) {
   if (!ret.first) {
     throw std::logic_error("Write failed");
   }
+  starting_offset += writing_content.size();
   RETURN_OK();
 
 }
@@ -83,7 +83,7 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
     _return = ret;
     return;
   }
-  if (start_pos < 0 || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("scan position invalid");
+  if (start_pos < 0 || start_pos >= log_info_.size() || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("scan position invalid");
   for (int i = start_pos; i <= end_pos; i++){
     auto info_set = log_info_[i];
     if (info_set[0] == -1) continue;
@@ -120,7 +120,7 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
   }
   auto start_pos = std::stoi(args[1]) - seq_no;
   auto end_pos = std::stoi(args[2]) - seq_no;
-  if (start_pos < 0 || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("trim position invalid");
+  if (start_pos < 0 || start_pos >= log_info_.size() || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("trim position invalid");
   if (end_pos > log_info_.size()) end_pos = log_info_.size() - 1;
   std::size_t first_section_len = 0;
   std::size_t second_section_len = 0;

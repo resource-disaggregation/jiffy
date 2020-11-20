@@ -167,6 +167,9 @@ class shared_log_partition : public chain_module {
   /* starting seq no. in this partition */
   int seq_no = 0;
 
+  /* starting offset of the next input entry */
+  int starting_offset = 0;
+
 };
 
 }
