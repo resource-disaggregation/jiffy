@@ -87,9 +87,9 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
   for (int i = start_pos; i <= end_pos; i++){
     auto info_set = log_info_[i];
     if (info_set[0] == -1) continue;
-    int temp_offset = info_set[0];
-    int data_size = info_set[1];
-    int stream_size = 0;
+    // int temp_offset = info_set[0];
+    // int data_size = info_set[1];
+    // int stream_size = 0;
     // for (int j = 2; j < info_set.size(); j++){
     //   stream_size += info_set[j];
     // }
