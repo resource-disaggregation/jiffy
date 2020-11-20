@@ -101,6 +101,7 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
       it = find(logical_streams.begin(), logical_streams.end(), stream);
       if (it != logical_streams.end()){
         auto data = partition_.read(static_cast<std::size_t>(info_set[0]+stream_size), static_cast<std::size_t>(data_size)).second;
+        std::cout<<data<<"\n";
         ret.push_back(data);
         break;
       }
