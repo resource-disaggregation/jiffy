@@ -141,6 +141,7 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
     log_info_[i][0] = -1; // make the log entry invalid
     for (int j = 1; j < info_set.size(); j++){
       trimmed_length += info_set[j];
+      std::cout<<info_set[j]<<" "<<trimmed_length<<"\n";
     }
   }
   temp_offset = first_section_len + trimmed_length;
