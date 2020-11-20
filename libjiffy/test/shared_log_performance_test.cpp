@@ -44,7 +44,7 @@ TEST_CASE("shared_log_performance_test", "[write][read][performance]") {
 
     struct memkind* pmem_kind = nullptr;
     std::string pmem_path = "/media/pmem0/shijie"; 
-    std::string memory_mode = "DRAM";
+    std::string memory_mode = "PMEM";
     size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
     if(err) {
         char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
