@@ -42,7 +42,7 @@ class ReplicaChainClient:
 
     def _invalidate_cache(self):
         for block in self.chain.block_ids:
-            host, port, _, _ = block.split(':')
+            host, port, _, _ = block.split(':')[:4]
             self.client_cache.remove(host, int(port))
 
     def get_chain(self):
@@ -56,7 +56,7 @@ class ReplicaChainClient:
             raise RuntimeError("Cannot have more than one request in-flight")
         try:
             self.accessor = True
-            client.send_run_command(int(self.chain.block_ids[-1].split(":")[-1]), args)
+            client.send_run_command(int(self.chain.block_ids[-1].split(":")[:4][-1]), args)
         except:
             self.send_run_command_exception_ = True
         self.in_flight = True

@@ -73,6 +73,10 @@ class maxmin_block_allocator : public block_allocator {
 
  void register_tenant(std::string tenant_id);
 
+ std::vector<std::string> append_seq_nos(const std::vector<std::string> &blocks);
+
+ std::vector<std::string> strip_seq_nos(const std::vector<std::string> &blocks);
+
   /* Operation mutex */
   std::mutex mtx_;
   /* Allocated blocks per-tenant */
@@ -81,6 +85,10 @@ class maxmin_block_allocator : public block_allocator {
   std::set<std::string> free_blocks_;
   /*Fair share of each tenant*/
   std::size_t fair_share_;
+  /*Block sequence numbers*/
+  std::unordered_map<std::string, int32_t> block_seq_no_;
+  /*Last tenant that has used this block*/
+  std::unordered_map<std::string, std::string> last_tenant_;
 };
 
 }
