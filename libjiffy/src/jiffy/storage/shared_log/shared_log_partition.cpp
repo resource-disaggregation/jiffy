@@ -137,6 +137,7 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
   int trimmed_length = 0;
   for (int i = start_pos; i <= end_pos; i++){
     auto info_set = log_info_[i];
+    if (info_set[0] == -1) continue;
     log_info_[i][0] = -1; // make the log entry invalid
     for (int j = 1; j < info_set.size(); j++){
       trimmed_length += info_set[j];

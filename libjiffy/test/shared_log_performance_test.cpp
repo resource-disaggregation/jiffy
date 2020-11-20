@@ -76,24 +76,32 @@ TEST_CASE("shared_log_performance_test", "[write][read][performance]") {
 
     bench_begin = time_utils::now_us();
     tot_time = 0;
-    for (int i = 0; i < num_ops; ++i) {
+    int scan_offset = 0;
+    int scan_size = 4;
+    while (scan_offset < num_ops) {
         response resp;
-        block.scan(resp, {"scan", std::to_string(i), std::to_string(i), std::to_string(i)+"_stream"});
+        std::vector<std::string> scan_args = {"scan", std::to_string(scan_offset), std::to_string(scan_offset + scan_size)};
+        for (int i = 0; i < scan_size; ++i){
+            scan_args.push_back(std::to_string(i + scan_offset)+"_stream");
+        }
+        block.scan(resp, scan_args);
+        scan_offset += scan_size;
+        scan_size += 4;
     }
 	bench_end = time_utils::now_us();
 	tot_time = bench_end - bench_begin;
 	LOG(log_level::info) << "===== " << "shared_log_scan" << " ======";
 	LOG(log_level::info) << "total_time: " << tot_time;
-	LOG(log_level::info) << "\t" << num_ops << " requests completed in " << tot_time
+	LOG(log_level::info) << "\t" << num_ops / 10 << " requests completed in " << tot_time
 											<< " us";
 	LOG(log_level::info) << "\t" << data_size << " payload";
 	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E3 / tot_time << " requests per microsecond";
     
     bench_begin = time_utils::now_us();
     tot_time = 0;
-    for (int i = 0; i < num_ops; ++i) {
+    for (int i = 0; i < num_ops/10; ++i) {
         response resp;
-        block.trim(resp, {"trim", std::to_string(i), std::to_string(i)});
+        block.trim(resp, {"trim", std::to_string(i), std::to_string(i+10)});
     }
 	bench_end = time_utils::now_us();
 	tot_time = bench_end - bench_begin;
