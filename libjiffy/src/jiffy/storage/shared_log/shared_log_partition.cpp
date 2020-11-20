@@ -85,8 +85,8 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
   }
   if (start_pos < 0 || start_pos >= log_info_.size() || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("scan position invalid");
   for (int i = start_pos; i <= end_pos; i++){
-    auto info_set = log_info_[i];
-    if (info_set[0] == -1) continue;
+    // auto info_set = log_info_[i];
+    // if (info_set[0] == -1) continue;
     // int temp_offset = info_set[0];
     // int data_size = info_set[1];
     // int stream_size = 0;
