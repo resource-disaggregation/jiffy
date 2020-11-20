@@ -25,7 +25,7 @@ TEST_CASE("shared_log_performance_test", "[write][read][performance]") {
     int lease_port = 9091;
     int num_blocks = 1;
     int chain_length = 1;
-    int num_ops = 1000;
+    int num_ops = 1024;
     int data_size = 64;
     
     std::string path = "/tmp";
@@ -74,28 +74,34 @@ TEST_CASE("shared_log_performance_test", "[write][read][performance]") {
 	LOG(log_level::info) << "\t" << data_size << " payload";
 	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E3 / tot_time << " requests per microsecond";
 
-    bench_begin = time_utils::now_us();
-    tot_time = 0;
-    int scan_offset = 0;
-    int scan_size = 4;
-    while (scan_offset < num_ops) {
-        response resp;
-        std::vector<std::string> scan_args = {"scan", std::to_string(scan_offset), std::to_string(scan_offset + scan_size)};
-        for (int i = 0; i < scan_size; ++i){
-            scan_args.push_back(std::to_string(i + scan_offset)+"_stream");
+    
+    int scan_size = 1;
+    while (scan_size <= num_ops) {
+        bench_begin = time_utils::now_us();
+        tot_time = 0;
+        int scan_offset = 0;
+        for (int j = 0; j < num_ops/scan_size; j+= scan_size){
+            response resp;
+            std::vector<std::string> scan_args = {"scan", std::to_string(j), std::to_string(j + scan_size)};
+            for (int i = 0; i < scan_size; ++i){
+                scan_args.push_back(std::to_string(i + j)+"_stream");
+            }
+            block.scan(resp, scan_args);
         }
-        block.scan(resp, scan_args);
-        scan_offset += scan_size;
-        scan_size += 4;
+        
+        bench_end = time_utils::now_us();
+        tot_time = bench_end - bench_begin;
+        LOG(log_level::info) << "===== " << "shared_log_scan" << " ======";
+        LOG(log_level::info) << "total_time: " << tot_time;
+        LOG(log_level::info) << "scan_entry_size: " << scan_size;
+        LOG(log_level::info) << "\t" << num_ops / scan_size << " requests completed in " << tot_time
+                                                << " us";
+        LOG(log_level::info) << "\t" << data_size << " payload";
+        LOG(log_level::info) << "\tThroughput: " << num_ops * 1E3 / tot_time << " requests per microsecond";
+
+        scan_size *= 2;
     }
-	bench_end = time_utils::now_us();
-	tot_time = bench_end - bench_begin;
-	LOG(log_level::info) << "===== " << "shared_log_scan" << " ======";
-	LOG(log_level::info) << "total_time: " << tot_time;
-	LOG(log_level::info) << "\t" << num_ops / 10 << " requests completed in " << tot_time
-											<< " us";
-	LOG(log_level::info) << "\t" << data_size << " payload";
-	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E3 / tot_time << " requests per microsecond";
+	
     
     bench_begin = time_utils::now_us();
     tot_time = 0;
