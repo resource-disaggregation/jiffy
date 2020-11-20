@@ -79,7 +79,7 @@ TEST_CASE("shared_log_performance_test", "[write][read][performance]") {
     while (scan_size <= num_ops) {
         bench_begin = time_utils::now_us();
         tot_time = 0;
-        for (int j = 0; j < num_ops/scan_size; j+= scan_size){
+        for (int j = 0; j < num_ops/scan_size; j+= scan_size) {
             response resp;
             std::vector<std::string> scan_args = {"scan", std::to_string(j), std::to_string(j + scan_size - 1), std::to_string(j)+"_stream", std::to_string(j+1)+"_stream"};
             block.scan(resp, scan_args);
