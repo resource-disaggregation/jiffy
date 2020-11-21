@@ -49,7 +49,13 @@ void storage_management_service_handler::setup_chain(int32_t block_id,
 
 void storage_management_service_handler::destroy_partition(int32_t block_id, const int32_t block_seq_no) {
   try {
-    block_seq_no_check(block_id, block_seq_no);
+    // block_seq_no_check(block_id, block_seq_no);
+    auto blk = blocks_.at(static_cast<std::size_t>(block_id));
+    auto partition = blk->impl();
+    if(block_seq_no < partition->seq_no()) {
+      LOG(log_level::info) << "Ignoring partition destory on stale seq no, block: " << block_id;
+      return;
+    }
     blocks_.at(static_cast<std::size_t>(block_id))->destroy();
   } catch (std::exception &e) {
     throw make_exception(e);
