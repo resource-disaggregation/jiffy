@@ -2,6 +2,7 @@
 # python3 driver.py 127.0.0.1 9090 9091 a 1
 
 import time
+import os
 import sys
 from jiffy import JiffyClient
 from multiprocessing import Process, Queue
@@ -30,7 +31,7 @@ def worker(q, dir_host, dir_porta, dir_portb, block_size, backing_path):
                 f = client.create_file(filename, 'local:/' + backing_path)
                 f.write(buf)
                 print('Wrote to jiffy')
-            except:
+            except Exception as e:
                 print('Write to jiffy failed')
                 jiffy_write = False
 
@@ -40,6 +41,8 @@ def worker(q, dir_host, dir_porta, dir_portb, block_size, backing_path):
                 # Write to persistent storage
                 f = open(backing_path + filename, 'w')
                 f.write(buf)
+                f.flush()
+                os.fsync(f.fileno())
                 f.close()
                 print('Wrote to persistent storage')
 
@@ -59,11 +62,14 @@ if __name__ == "__main__":
     dir_host = sys.argv[1]
     dir_porta = int(sys.argv[2])
     dir_portb = int(sys.argv[3])
-    block_size = 128 * 1024
+    block_size = 2 * 1024 * 1024
     backing_path = '/home/midhul/jiffy_dump'
     tenant_id = sys.argv[4]
     para = int(sys.argv[5])
-    demands = [4, 6, 4, 4, 4]
+    demands = [1000, 0, 0, 0, 0]
+
+    if not os.path.exists('%s/%s' % (backing_path, tenant_id)):
+        os.makedirs('%s/%s' % (backing_path, tenant_id))
 
     # Create queues
     queues = []
