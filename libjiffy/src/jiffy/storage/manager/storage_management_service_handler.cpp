@@ -18,7 +18,9 @@ void storage_management_service_handler::create_partition(int32_t block_id,
   try {
     block_seq_no_check(block_id, block_seq_no);
     if(block_seq_no > blocks_.at(static_cast<std::size_t>(block_id))->impl()->seq_no()) {
-      // TODO: Sync to S3 if sequence number increments here
+      auto old_path = blocks_.at(static_cast<std::size_t>(block_id))->impl()->path();
+      LOG(log_level::info) << "Syncing block: " << block_id << " to " << "local://home/midhul/jiffy_dump" << old_path;
+      blocks_.at(static_cast<std::size_t>(block_id))->impl()->sync("local://home/midhul/jiffy_dump" + old_path);
       LOG(log_level::info) << "Updating block seq no, block: " << block_id << " " << block_seq_no;
     }
     blocks_.at(static_cast<std::size_t>(block_id))->setup(type, name, metadata, utils::property_map(conf));
