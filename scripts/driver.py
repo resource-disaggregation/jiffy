@@ -1,27 +1,33 @@
 # Workload driver program
-# python3 driver.py 127.0.0.1 9090 9091 a 1
+# python3 driver.py 127.0.0.1 9090 9091 92 1 /home/midhul/snowflake_demands_nogaps10.pickle
 
 import time
 import os
 import sys
 from jiffy import JiffyClient
 from multiprocessing import Process, Queue
+import pickle
+import math
+import datetime
 
 # Deterministic mapping from filename to worker
 def map_file_to_worker(filename, num_workers):
     return abs(hash(filename)) % num_workers
 
-def worker(q, dir_host, dir_porta, dir_portb, block_size, backing_path):
+def worker(q, resq, dir_host, dir_porta, dir_portb, block_size, backing_path):
     # Initialize
     # Connect the directory server with the corresponding port numbers
     client = JiffyClient(dir_host, dir_porta, dir_portb)
     buf = 'a' * block_size
     in_jiffy = {}
+    lat_sum = 0
+    lat_count = 0
     print('Worker connected')
 
     while True:
         task = q.get()
         if task is None:
+            resq.put({'lat_sum': lat_sum, 'lat_count': lat_count})
             print('Worker exiting')
             break
         filename = task['filename']
@@ -29,7 +35,11 @@ def worker(q, dir_host, dir_porta, dir_portb, block_size, backing_path):
             jiffy_write = True
             try:
                 f = client.create_file(filename, 'local:/' + backing_path)
+                start_time = datetime.datetime.now()
                 f.write(buf)
+                elapsed = datetime.datetime.now() - start_time
+                lat_sum += elapsed.total_seconds()
+                lat_count += 1
                 print('Wrote to jiffy')
             except Exception as e:
                 print('Write to jiffy failed')
@@ -40,10 +50,14 @@ def worker(q, dir_host, dir_porta, dir_portb, block_size, backing_path):
             if not jiffy_write:
                 # Write to persistent storage
                 f = open(backing_path + filename, 'w')
+                start_time = datetime.datetime.now()
                 f.write(buf)
                 f.flush()
                 os.fsync(f.fileno())
                 f.close()
+                elapsed = datetime.datetime.now() - start_time
+                lat_sum += elapsed.total_seconds()
+                lat_count += 1
                 print('Wrote to persistent storage')
 
         if task['op'] == 'remove':
@@ -58,14 +72,26 @@ def worker(q, dir_host, dir_porta, dir_portb, block_size, backing_path):
         
     return
 
+def get_demands(filename, scale_factor, t):
+    with open(filename, 'rb') as handle:
+        norm_d = pickle.load(handle)
+
+    ret = []
+    
+    for i in range(len(norm_d[t])):
+        ret.append(math.ceil(norm_d[t][i] * scale_factor))
+
+    return ret
+
 if __name__ == "__main__":
     dir_host = sys.argv[1]
     dir_porta = int(sys.argv[2])
     dir_portb = int(sys.argv[3])
-    block_size = 2 * 1024 * 1024
+    block_size = 4 * 1024
     backing_path = '/home/midhul/jiffy_dump'
     tenant_id = sys.argv[4]
     para = int(sys.argv[5])
+    # demands = get_demands(sys.argv[6], 100, tenant_id)[:60]
     demands = [1000, 0, 0, 0, 0]
 
     if not os.path.exists('%s/%s' % (backing_path, tenant_id)):
@@ -75,11 +101,13 @@ if __name__ == "__main__":
     queues = []
     for i in range(para):
         queues.append(Queue())
+
+    results = Queue()
     
     # Create workers
     workers = []
     for i in range(para):
-        p = Process(target=worker, args=(queues[i], dir_host, dir_porta, dir_portb, block_size, backing_path))
+        p = Process(target=worker, args=(queues[i], results, dir_host, dir_porta, dir_portb, block_size, backing_path))
         workers.append(p)
 
     # Start workers
@@ -121,6 +149,15 @@ if __name__ == "__main__":
         queues[i].close()
         queues[i].join_thread()
         workers[i].join()
+
+    # Get stats
+    lat_sum = 0
+    lat_count = 0
+    for i in range(para):
+        res = results.get()
+        lat_sum += res['lat_sum']
+        lat_count += res['lat_count']
+    print('Average latency: ' + str(float(lat_sum)/lat_count))
 
     time_end = time.time()
     print("Execution time")
