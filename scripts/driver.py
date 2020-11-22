@@ -1,5 +1,5 @@
 # Workload driver program
-# python3 driver.py 127.0.0.1 9090 9091 92 1 /home/midhul/snowflake_demands_nogaps10.pickle
+# python3 driver.py 127.0.0.1 9090 9091 92 1 /home/midhul/snowflake_demands_nogaps10.pickle $((4 * 1024))
 
 import time
 import os
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     dir_host = sys.argv[1]
     dir_porta = int(sys.argv[2])
     dir_portb = int(sys.argv[3])
-    block_size = 4 * 1024
+    block_size = int(sys.argv[7])
     backing_path = '/home/midhul/jiffy_dump'
     tenant_id = sys.argv[4]
     para = int(sys.argv[5])
