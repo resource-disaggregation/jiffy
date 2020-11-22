@@ -4,6 +4,7 @@
 #include <jiffy/directory/fs/directory_tree.h>
 #include <jiffy/directory/block/random_block_allocator.h>
 #include <jiffy/directory/block/maxmin_block_allocator.h>
+#include <jiffy/directory/block/static_block_allocator.h>
 #include <jiffy/directory/fs/directory_server.h>
 #include <jiffy/directory/lease/lease_expiry_worker.h>
 #include <jiffy/directory/lease/lease_server.h>
@@ -46,6 +47,8 @@ int main(int argc, char **argv) {
   uint64_t lease_period_ms = 10000;
   uint64_t grace_period_ms = 10000;
   std::string storage_trace = "";
+  std::string allocator_type = "maxmin";
+  uint32_t num_tenants = 1;
 
   try {
     namespace po = boost::program_options;
@@ -54,7 +57,9 @@ int main(int argc, char **argv) {
     generic.add_options()
         ("version,v", "Print version string")
         ("help,h", "Print help message")
-        ("config,c", po::value<std::string>(&config_file), "Configuration file");
+        ("config,c", po::value<std::string>(&config_file), "Configuration file")
+        ("alloc,a", po::value<std::string>(&allocator_type), "Allocator type")
+        ("num_tenants,n", po::value<uint32_t>(&num_tenants), "No of tenants");
 
     po::options_description hidden("Hidden options");
     hidden.add_options()
@@ -134,7 +139,21 @@ int main(int argc, char **argv) {
   std::atomic<int> failing_thread(-1); // alloc -> 0, directory -> 1, lease -> 2
 
   std::exception_ptr alloc_exception = nullptr;
-  auto alloc = std::make_shared<maxmin_block_allocator>();
+  std::shared_ptr<block_allocator> alloc;
+  if(allocator_type == "maxmin"){
+    alloc = std::make_shared<maxmin_block_allocator>();
+  } 
+  else if(allocator_type == "static") {
+    alloc = std::make_shared<static_block_allocator>(num_tenants);
+  }
+  else if(allocator_type == "random") {
+    alloc = std::make_shared<random_block_allocator>();
+  }
+  else 
+  {
+    std::cerr << "unkown allocator type" << std::endl;
+    return 1;
+  }
   auto alloc_server = block_registration_server::create(alloc, address, block_port);
   std::thread alloc_serve_thread([&alloc_exception, &alloc_server, &failing_thread, &failure_condition] {
     try {
