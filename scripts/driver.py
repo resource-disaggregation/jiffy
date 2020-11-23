@@ -39,7 +39,7 @@ def worker(q, resq, dir_host, dir_porta, dir_portb, block_size, backing_path):
             jiffy_write = True
             try:
                 f = client.create_file(filename, 'local:/' + backing_path)
-                jiffy_create_ts[filename] = datetime.now()
+                jiffy_create_ts[filename] = datetime.datetime.now()
                 start_time = datetime.datetime.now()
                 f.write(buf)
                 elapsed = datetime.datetime.now() - start_time
