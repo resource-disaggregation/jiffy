@@ -165,11 +165,21 @@ if __name__ == "__main__":
     # Get stats
     lat_sum = 0
     lat_count = 0
+    total_block_time = 0
+    jiffy_blocks = 0
+    persistent_blocks = 0
     for i in range(para):
         res = results.get()
         lat_sum += res['lat_sum']
         lat_count += res['lat_count']
+        total_block_time += res['total_block_time']
+        jiffy_blocks += res['jiffy_blocks']
+        persistent_blocks += res['persistent_blocks']
+
     print('Average latency: ' + str(float(lat_sum)/lat_count))
+    print('Total block time: ' + str(total_block_time))
+    print('Jiffy blocks: ' + str(jiffy_blocks))
+    print('Persistent blocks: ' + str(persistent_blocks))
 
     time_end = time.time()
     print("Execution time")
