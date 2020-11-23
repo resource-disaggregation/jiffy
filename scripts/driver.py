@@ -103,7 +103,7 @@ if __name__ == "__main__":
     backing_path = sys.argv[8]
     tenant_id = sys.argv[4]
     para = int(sys.argv[5])
-    demands = get_demands(sys.argv[6], 100, tenant_id)
+    demands = get_demands(sys.argv[6], 100, tenant_id) + [0]
     # demands = [1000, 0, 0, 0, 0]
 
     if not os.path.exists('%s/%s' % (backing_path, tenant_id)):
