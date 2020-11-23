@@ -20,14 +20,18 @@ def worker(q, resq, dir_host, dir_porta, dir_portb, block_size, backing_path):
     client = JiffyClient(dir_host, dir_porta, dir_portb)
     buf = 'a' * block_size
     in_jiffy = {}
+    jiffy_create_ts = {}
     lat_sum = 0
     lat_count = 0
+    total_block_time = 0
+    jiffy_blocks = 0
+    persistent_blocks = 0
     print('Worker connected')
 
     while True:
         task = q.get()
         if task is None:
-            resq.put({'lat_sum': lat_sum, 'lat_count': lat_count})
+            resq.put({'lat_sum': lat_sum, 'lat_count': lat_count, 'total_block_time': total_block_time, 'jiffy_blocks': jiffy_blocks, 'persistent_blocks': persistent_blocks})
             print('Worker exiting')
             break
         filename = task['filename']
@@ -35,15 +39,19 @@ def worker(q, resq, dir_host, dir_porta, dir_portb, block_size, backing_path):
             jiffy_write = True
             try:
                 f = client.create_file(filename, 'local:/' + backing_path)
+                jiffy_create_ts[filename] = datetime.now()
                 start_time = datetime.datetime.now()
                 f.write(buf)
                 elapsed = datetime.datetime.now() - start_time
                 lat_sum += elapsed.total_seconds()
                 lat_count += 1
+                jiffy_blocks += 1
                 print('Wrote to jiffy')
             except Exception as e:
                 print('Write to jiffy failed')
                 jiffy_write = False
+                if filename in jiffy_create_ts:
+                    del jiffy_create_ts[filename]
 
             in_jiffy[filename] = jiffy_write
             
@@ -58,15 +66,19 @@ def worker(q, resq, dir_host, dir_porta, dir_portb, block_size, backing_path):
                 elapsed = datetime.datetime.now() - start_time
                 lat_sum += elapsed.total_seconds()
                 lat_count += 1
+                persistent_blocks += 1
                 print('Wrote to persistent storage')
 
         if task['op'] == 'remove':
             if in_jiffy[filename]:
                 try:
                     client.remove(filename)
+                    duration_used = datetime.datetime.now() - jiffy_create_ts[filename]
+                    total_block_time += duration_used.total_seconds()
                     print('Removed from jiffy')
                 except:
                     print('Remove from jiffy failed')
+                del jiffy_create_ts[filename]
             
             del in_jiffy[filename]
         
