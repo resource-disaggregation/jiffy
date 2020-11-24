@@ -9,12 +9,40 @@ from multiprocessing import Process, Queue
 import pickle
 import math
 import datetime
+import queue
 
 # Deterministic mapping from filename to worker
 def map_file_to_worker(filename, num_workers):
     return abs(hash(filename)) % num_workers
 
-def worker(q, resq, dir_host, dir_porta, dir_portb, block_size, backing_path):
+def run_monitor(q, dir_host, dir_porta, dir_portb, tenant_id):
+    client = JiffyClient(dir_host, dir_porta, dir_portb)
+    print('Monitor connected')
+
+    exit_flag = False
+    cur_demand = 0
+
+    while True:
+        while True:
+            try:
+                stat = q.get_nowait()
+                if stat is None:
+                    exit_flag = True
+                elif stat == 'inc_demand':
+                    cur_demand += 1
+                elif stat == 'dec_demand':
+                    cur_demand -= 1    
+            except queue.Empty:
+                break
+
+        if exit_flag:
+            print('Monitor exiting')
+            break
+        client.fs.add_tags('advertise_demand', {'tenant_id': tenant_id, 'demand': str(cur_demand)})
+        time.sleep(1)
+
+
+def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backing_path):
     # Initialize
     # Connect the directory server with the corresponding port numbers
     client = JiffyClient(dir_host, dir_porta, dir_portb)
@@ -36,6 +64,7 @@ def worker(q, resq, dir_host, dir_porta, dir_portb, block_size, backing_path):
             break
         filename = task['filename']
         if task['op'] == 'put':
+            monitor_queue.put('inc_demand')
             jiffy_write = True
             try:
                 f = client.create_file(filename, 'local:/' + backing_path)
@@ -70,6 +99,7 @@ def worker(q, resq, dir_host, dir_porta, dir_portb, block_size, backing_path):
                 print('Wrote to persistent storage')
 
         if task['op'] == 'remove':
+            monitor_q.put('dec_demand')
             if in_jiffy[filename]:
                 try:
                     client.remove(filename)
@@ -115,11 +145,18 @@ if __name__ == "__main__":
         queues.append(Queue())
 
     results = Queue()
+    monitor_queue = Queue()
+
+    # Create monitor
+    monitor = Process(target=run_monitor, args=(monitor_queue, dir_host, dir_porta, dir_portb, tenant_id))
+
+    # Start monitor
+    monitor.start()
     
     # Create workers
     workers = []
     for i in range(para):
-        p = Process(target=worker, args=(queues[i], results, dir_host, dir_porta, dir_portb, block_size, backing_path))
+        p = Process(target=worker, args=(queues[i], results, monitor_queue, dir_host, dir_porta, dir_portb, block_size, backing_path))
         workers.append(p)
 
     # Start workers
