@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iostream>
 #include <cassert>
+#include <chrono>
 #include "karma_block_allocator.h"
 
 namespace jiffy {
@@ -9,9 +10,10 @@ namespace directory {
 
 using namespace utils;
 
-karma_block_allocator::karma_block_allocator(uint32_t num_tenants, uint64_t init_credits) {
+karma_block_allocator::karma_block_allocator(uint32_t num_tenants, uint64_t init_credits, uint32_t interval_ms) {
     num_tenants_ = num_tenants;
     init_credits_ = init_credits;
+    thread_ = std::thread(&karma_block_allocator::thread_run, this, interval_ms);
 }
 
 std::vector<std::string> karma_block_allocator::allocate(std::size_t count, const std::vector<std::string> &, const std::string &tenant_id) {
@@ -30,35 +32,74 @@ std::vector<std::string> karma_block_allocator::allocate(std::size_t count, cons
     assert(my != active_blocks_.end());
   }
 
-  if(free_blocks_.size() == 0)
-  {
-    // Pick tenant with maximum allocation
-    std::size_t max_allocation = 0;
-    std::string max_tenant = "$none$";
-    for(auto &jt : active_blocks_) {
-      if(jt.second.size() > max_allocation) {
-        max_allocation = jt.second.size();
-        max_tenant = jt.first;
+  auto fair_share = total_blocks_ / num_tenants_;
+
+  // Tenant is asking for more than what the algorithm allocated
+  if(my->second.size() == allocations_[tenant_id]) {
+      if(allocations_[tenant_id] >= fair_share) {
+          throw std::out_of_range("Could not find free blocks");
       }
-    }
 
-    if(max_tenant != "$none$" && max_tenant != my->first && max_allocation > my->second.size())
-    {
-      // Takeaway block from max_tenant
-      // TODO: Picking random block for now. Better policy?
-      auto idx = static_cast<int64_t>(active_blocks_[max_tenant].size() - 1);
-      auto block_it = std::next(active_blocks_[max_tenant].begin(), utils::rand_utils::rand_int64(idx));
-      free_blocks_.insert(*block_it);
-      active_blocks_[max_tenant].erase(block_it);
-    }
+      // allocation < fair_share, so we increase the allocation
+      assert(rate_[tenant_id] >= 0);
+      if(static_cast<uint32_t>(rate_[tenant_id]) == fair_share - allocations_[tenant_id]) {
+            // Find a substitute supplier if possible
+            // Pick one with minimum no of credits if there are multiple
+            LOG(log_level::info) << "Testing uint64 max: " << std::numeric_limits<uint64_t>::max();
+            uint64_t poorest_credits = std::numeric_limits<uint64_t>::max();
+            std::string poorest_supplier = "$none$";
+            for(auto &jt : credits_) {
+                assert(rate_[jt.first] >= 0);
+                if(allocations_[jt.first] < fair_share && (static_cast<uint32_t>(rate_[jt.first]) < fair_share - allocations_[jt.first])) {
+                    if(jt.second < poorest_credits) {
+                        poorest_credits = jt.second;
+                        poorest_supplier = jt.first;
+                    }
+                }
+            }
+            if(poorest_supplier != "$none$") {
+                // Adjust credits
+                credits_[tenant_id] -= 1;
+                rate_[tenant_id] -= 1;
+                credits_[poorest_supplier] += 1;
+                rate_[poorest_supplier] += 1;
+
+            } else {
+                // Need to reclaim block from borrower
+                // Pick min-credits borrower
+                uint64_t min_credits = std::numeric_limits<uint64_t>::max();
+                std::string min_borrower = "$none$";
+                for(auto &jt : credits_) {
+                    if(allocations_[jt.first] > fair_share) {
+                        if(jt.second < min_credits) {
+                            min_credits = jt.second;
+                            min_borrower = jt.first;
+                        }
+                    }
+                }
+                assert(min_borrower != "$none$");
+                if(active_blocks_[min_borrower].size() == allocations_[min_borrower]) {
+                    // Takeaway block from max_tenant
+                    // TODO: Picking random block for now. Better policy?
+                    auto idx = static_cast<int64_t>(active_blocks_[min_borrower].size() - 1);
+                    auto block_it = std::next(active_blocks_[min_borrower].begin(), utils::rand_utils::rand_int64(idx));
+                    free_blocks_.insert(*block_it);
+                    active_blocks_[min_borrower].erase(block_it);
+                }
+                allocations_[min_borrower] -= 1;
+                // Adjust credits (give borrower back its credits)
+                credits_[min_borrower] += 1;
+                rate_[min_borrower] += 1;
+                credits_[tenant_id] -= 1;
+                rate_[tenant_id] -= 1;
+            }
+      }   
+      allocations_[tenant_id] += 1;
   }
 
-  if(free_blocks_.size() == 0)
-  {
-    throw std::out_of_range("Could not find free blocks");
-  }
+  assert(free_blocks_.size() > 0);
 
-  // Pick random block
+  // Pick random block from free pool
   std::vector<std::string> blocks;
   auto idx = static_cast<int64_t>(free_blocks_.size() - 1);
   auto block_it = std::next(free_blocks_.begin(), utils::rand_utils::rand_int64(idx));
@@ -159,6 +200,11 @@ std::size_t karma_block_allocator::num_total_blocks() {
 void karma_block_allocator::register_tenant(std::string tenant_id) {
   auto & tenant_blocks = active_blocks_[tenant_id];
   tenant_blocks.clear();
+  auto fair_share = total_blocks_ / num_tenants_;
+  demands_[tenant_id] = fair_share;
+  credits_[tenant_id] = init_credits_;
+  rate_[tenant_id] = 0;
+  allocations_[tenant_id] = fair_share;
 }
 
 // Must be called with lock
@@ -183,6 +229,121 @@ std::vector<std::string> karma_block_allocator::strip_seq_nos(const std::vector<
 
 void karma_block_allocator::update_demand(const std::string &tenant_id, uint32_t demand) {
     LOG(log_level::info) << "Demand advertisement: " << tenant_id << " " << demand;
+    std::unique_lock<std::mutex> lock(mtx_);
+    auto my = demands_.find(tenant_id);
+    if(my == demands_.end())
+    {
+      // First time seeing this tenant, register
+      register_tenant(tenant_id);
+      my = demands_.find(tenant_id);
+      assert(my != demands_.end());
+    }
+    my->second = demand;
+}
+
+// Compute allocations and adjust blocks
+// Also updates credits, rates
+void karma_block_allocator::compute_allocations() {
+  std::unique_lock<std::mutex> lock(mtx_);
+  if(demands_.size() == 0) {
+    return;
+  }
+  auto fair_share = total_blocks_ / num_tenants_;
+  std::unordered_map<std::string, uint32_t> demands;
+  for(auto &jt : demands_)
+  {
+    // Adjust demands to deal with situations where tenants advertise low demands, but have still not released the blocks
+    demands[jt.first] = std::max(jt.second, (uint32_t)active_blocks_[jt.first].size());
+  }
+
+  // Reset rates
+  for(auto &jt : rate_) {
+    jt.second = 0;
+  }
+
+  for(auto &jt : demands) {
+    allocations_[jt.first] = std::min(jt.second, (uint32_t) fair_share);
+  }
+
+  // Iteratively match donors to borrowers
+  // TODO: optimize this implementation
+  while(true) {
+    // Pick richest borrower
+    std::string borrower = "$none$";
+    uint64_t richest_credits = 0;
+    for(auto &jt : credits_) {
+      if(demands[jt.first] > fair_share && allocations_[jt.first] < demands[jt.first] && jt.second > 0 && jt.second > richest_credits) {
+        borrower = jt.first;
+        richest_credits = jt.second;
+      }
+    }
+    if(borrower == "$none$") {
+      break;
+    }
+
+    // Pick poorest donor
+    std::string donor = "$none$";
+    uint64_t poorest_credits = std::numeric_limits<uint64_t>::max();
+    for(auto &jt : credits_) 
+    {
+      if(demands[jt.first] < fair_share && (uint32_t)rate_[jt.first] < fair_share - demands[jt.first] && jt.second < poorest_credits) {
+        donor = jt.first;
+        poorest_credits = jt.second;
+      }
+    }
+    if(donor  == "$none$") {
+      break;
+    }
+
+    // Block transaction
+    allocations_[borrower] += 1;
+    // LOG(log_level::info) << "borrower, alloc=" << allocations_[borrower] << " " << borrower;
+    credits_[borrower] -= 1;
+    // LOG(log_level::info) << "borrower, c=" << credits_[borrower] << " " << borrower;
+    rate_[borrower] -= 1;
+    credits_[donor] += 1;
+    // LOG(log_level::info) << "donor, c=" << credits_[donor] << " " << donor;
+    rate_[donor] += 1;
+  }
+
+  // Adjust blocks to ensure the invariant --- active_blocks.size() <= allocation
+  for(auto &jt : active_blocks_) {
+    while(jt.second.size() > allocations_[jt.first]) {
+      // Take away blocks
+      // TODO: Picking random block for now. Better policy?
+      auto idx = static_cast<int64_t>(jt.second.size() - 1);
+      auto block_it = std::next(jt.second.begin(), utils::rand_utils::rand_int64(idx));
+      free_blocks_.insert(*block_it);
+      jt.second.erase(block_it);
+    }
+  }
+
+  // Log state
+  std::stringstream ss;
+  ss << "Demands: ";
+  for(auto &jt : demands) {
+    ss << jt.first << " " << jt.second << " ";
+  }
+  ss << "Allocs: ";
+  for(auto &jt : allocations_) 
+  {
+    ss << jt.first << " " << jt.second << " ";
+  }
+  ss << "Credits: ";
+  for(auto &jt : credits_)
+  {
+    ss << jt.first << " " << jt.second << " ";
+  }
+  LOG(log_level::info) << ss.str(); 
+
+}
+
+void karma_block_allocator::thread_run(uint32_t interval_ms) {
+  while(true) {
+    compute_allocations();
+    std::this_thread::sleep_for(std::chrono::milliseconds(interval_ms));
+  }
+  
 }
 
 }

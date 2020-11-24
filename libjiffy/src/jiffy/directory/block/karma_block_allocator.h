@@ -6,6 +6,7 @@
 #include <set>
 #include <map>
 #include <unordered_map>
+#include <thread>
 #include "block_allocator.h"
 #include "../../utils/rand_utils.h"
 #include "../../utils/logger.h"
@@ -15,7 +16,7 @@ namespace directory {
 /* Max-min fairness block allocator class, inherited from block allocator */
 class karma_block_allocator : public block_allocator {
  public:
-  karma_block_allocator(uint32_t num_tenants, uint64_t init_credits);
+  karma_block_allocator(uint32_t num_tenants, uint64_t init_credits, uint32_t interval_ms);
 
   virtual ~karma_block_allocator() = default;
 
@@ -72,6 +73,10 @@ class karma_block_allocator : public block_allocator {
 
  private:
 
+ void compute_allocations();
+
+ void thread_run(uint32_t interval_ms);
+
  std::size_t num_allocated_blocks_unsafe();
 
  void register_tenant(std::string tenant_id);
@@ -87,7 +92,7 @@ class karma_block_allocator : public block_allocator {
   /* Free blocks */
   std::set<std::string> free_blocks_;
   /*Fair share of each tenant*/
-  std::size_t fair_share_;
+//   std::size_t fair_share_;
   /*Block sequence numbers*/
   std::unordered_map<std::string, int32_t> block_seq_no_;
   /*Last tenant that has used this block*/
@@ -95,6 +100,14 @@ class karma_block_allocator : public block_allocator {
   std::size_t total_blocks_;
   uint32_t num_tenants_;
   uint64_t init_credits_;
+
+  std::unordered_map<std::string, uint32_t> demands_;
+  std::unordered_map<std::string, uint64_t> credits_;
+  std::unordered_map<std::string, int32_t> rate_;
+  std::unordered_map<std::string, uint32_t> allocations_;
+
+  std::thread thread_;
+
 };
 
 }
