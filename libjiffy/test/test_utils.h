@@ -93,7 +93,7 @@ class sequential_block_allocator : public jiffy::directory::block_allocator {
 
   virtual ~sequential_block_allocator() = default;
 
-  std::vector<std::string> allocate(std::size_t count, const std::vector<std::string> &) override {
+  std::vector<std::string> allocate(std::size_t count, const std::vector<std::string> &, const std::string &/*tenant_id*/) override {
     std::vector<std::string> allocated;
     for (std::size_t i = 0; i < count; i++) {
       allocated.push_back(free_.front());
@@ -102,7 +102,7 @@ class sequential_block_allocator : public jiffy::directory::block_allocator {
     }
     return allocated;
   }
-  void free(const std::vector<std::string> &block_names) override {
+  void free(const std::vector<std::string> &block_names, const std::string &/*tenant_id*/) override {
     free_.insert(free_.end(), block_names.begin(), block_names.end());
     for (const auto &block_name: block_names) {
       alloc_.erase(std::remove(alloc_.begin(), alloc_.end(), block_name), alloc_.end());
@@ -137,7 +137,7 @@ class dummy_block_allocator : public jiffy::directory::block_allocator {
 
   virtual ~dummy_block_allocator() = default;
 
-  std::vector<std::string> allocate(std::size_t count, const std::vector<std::string> &) override {
+  std::vector<std::string> allocate(std::size_t count, const std::vector<std::string> &, const std::string &/*tenant_id*/) override {
     if (num_free_ == 0) {
       throw std::out_of_range("Cannot allocate since nothing is free");
     }
@@ -150,7 +150,7 @@ class dummy_block_allocator : public jiffy::directory::block_allocator {
     return ret;
   }
 
-  void free(const std::vector<std::string> &blocks) override {
+  void free(const std::vector<std::string> &blocks, const std::string &/*tenant_id*/) override {
     if (num_alloc_ == 0 && !blocks.empty()) {
       throw std::out_of_range("Cannot free since nothing is allocated");
     }

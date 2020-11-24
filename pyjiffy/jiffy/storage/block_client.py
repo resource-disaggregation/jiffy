@@ -83,9 +83,10 @@ class CommandResponseReader:
 
 
 class BlockClient:
-    def __init__(self, client_cache, host, port, block_id):
+    def __init__(self, client_cache, host, port, block_id, block_seq_no):
         self.transport_, self.protocol_, self.client_ = client_cache.get(host, port)
         self.id_ = block_id
+        self.block_seq_no_ = block_seq_no
 
     def __del__(self):
         self.transport_.close()
@@ -101,10 +102,15 @@ class BlockClient:
         return self.client_.get_client_id()
 
     def send_request(self, seq, arguments):
-        self.client_.command_request(seq, self.id_, arguments)
+        self.client_.command_request(seq, self.id_, self.inject_seq_no(arguments))
 
     def send_run_command(self, block_id, arguments):
-        self.client_.send_run_command(block_id, arguments)
+        self.client_.send_run_command(block_id, self.inject_seq_no(arguments))
 
     def recv_run_command(self):
         return self.client_.recv_run_command()
+
+    def inject_seq_no(self, arguments):
+        if len(arguments) == 0:
+            return arguments[:]
+        return [arguments[0], "$block_seq_no$", str(self.block_seq_no_)] + arguments[1:]

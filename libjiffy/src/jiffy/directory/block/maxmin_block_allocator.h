@@ -1,22 +1,23 @@
-#ifndef JIFFY_RANDOM_BLOCK_ALLOCATOR_H
-#define JIFFY_RANDOM_BLOCK_ALLOCATOR_H
+#ifndef JIFFY_MAXMIN_BLOCK_ALLOCATOR_H
+#define JIFFY_MAXMIN_BLOCK_ALLOCATOR_H
 
 #include <iostream>
 #include <shared_mutex>
 #include <set>
 #include <map>
+#include <unordered_map>
 #include "block_allocator.h"
 #include "../../utils/rand_utils.h"
 #include "../../utils/logger.h"
 
 namespace jiffy {
 namespace directory {
-/* Random block allocator class, inherited from block allocator */
-class random_block_allocator : public block_allocator {
+/* Max-min fairness block allocator class, inherited from block allocator */
+class maxmin_block_allocator : public block_allocator {
  public:
-  random_block_allocator() = default;
+  maxmin_block_allocator() = default;
 
-  virtual ~random_block_allocator() = default;
+  virtual ~maxmin_block_allocator() = default;
 
   /**
    * @brief Allocate blocks in different prefixes
@@ -68,26 +69,29 @@ class random_block_allocator : public block_allocator {
   std::size_t num_total_blocks() override;
  private:
 
-  /*
-   * Fetch prefix of block name
-   */
+ std::size_t num_allocated_blocks_unsafe();
 
-  std::string prefix(const std::string &block_name) const {
-    auto pos = block_name.find_last_of(':');
-    if (pos == std::string::npos) {
-      throw std::logic_error("Malformed block name [" + block_name + "]");
-    }
-    return block_name.substr(0, pos);
-  }
+ void register_tenant(std::string tenant_id);
+
+ std::vector<std::string> append_seq_nos(const std::vector<std::string> &blocks);
+
+ std::vector<std::string> strip_seq_nos(const std::vector<std::string> &blocks);
+
   /* Operation mutex */
   std::mutex mtx_;
-  /* Allocated blocks */
-  std::set<std::string> allocated_blocks_;
+  /* Allocated blocks per-tenant */
+  std::unordered_map<std::string, std::set<std::string> > allocated_blocks_;
   /* Free blocks */
   std::set<std::string> free_blocks_;
+  /*Fair share of each tenant*/
+  std::size_t fair_share_;
+  /*Block sequence numbers*/
+  std::unordered_map<std::string, int32_t> block_seq_no_;
+  /*Last tenant that has used this block*/
+  std::unordered_map<std::string, std::string> last_tenant_;
 };
 
 }
 }
 
-#endif //JIFFY_RANDOM_BLOCK_ALLOCATOR_H
+#endif //JIFFY_MAXMIN_BLOCK_ALLOCATOR_H

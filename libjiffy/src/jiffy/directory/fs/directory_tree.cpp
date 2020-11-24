@@ -73,6 +73,7 @@ data_status directory_tree::create(const std::string &path,
     throw directory_ops_exception("Path is a directory: " + path);
   }
   std::string parent_path = directory_utils::get_parent_path(path);
+  std::string tenant_id = directory_utils::get_root(parent_path);
   auto node = get_node_unsafe(parent_path);
   if (node == nullptr) {
     create_directories(parent_path);
@@ -86,7 +87,7 @@ data_status directory_tree::create(const std::string &path,
 
   std::vector<replica_chain> blocks;
   for (int32_t i = 0; i < num_blocks; ++i) {
-    replica_chain chain(allocator_->allocate(static_cast<size_t>(chain_length), {}), storage_mode::in_memory);
+    replica_chain chain(allocator_->allocate(static_cast<size_t>(chain_length), {}, tenant_id), storage_mode::in_memory);
     chain.name = partition_names[i];
     chain.metadata = partition_metadata[i];
     assert(chain.block_ids.size() == chain_length);
@@ -131,6 +132,7 @@ data_status directory_tree::open_or_create(const std::string &path,
     throw directory_ops_exception("Path is a directory: " + path);
   }
   std::string parent_path = directory_utils::get_parent_path(path);
+  std::string tenant_id = directory_utils::get_root(parent_path);
   auto node = get_node_unsafe(parent_path);
   if (node == nullptr) {
     create_directories(parent_path);
@@ -158,7 +160,7 @@ data_status directory_tree::open_or_create(const std::string &path,
   }
   std::vector<replica_chain> blocks;
   for (int32_t i = 0; i < num_blocks; ++i) {
-    replica_chain chain(allocator_->allocate(static_cast<size_t>(chain_length), {}), storage_mode::in_memory);
+    replica_chain chain(allocator_->allocate(static_cast<size_t>(chain_length), {}, tenant_id), storage_mode::in_memory);
     chain.name = partition_names[i];
     chain.metadata = partition_metadata[i];
     assert(chain.block_ids.size() == chain_length);
@@ -234,23 +236,31 @@ void directory_tree::remove(const std::string &path) {
   if (child->is_directory() && !std::dynamic_pointer_cast<ds_dir_node>(child)->empty()) {
     throw directory_ops_exception("Directory not empty: " + path);
   }
+  std::string tenant_id = directory_utils::get_root((child->is_directory())?(path):(ptemp));
   parent->remove_child(child_name);
   std::vector<std::string> cleared_blocks;
   clear_storage(cleared_blocks, child);
-  allocator_->free(cleared_blocks);
+  allocator_->free(cleared_blocks, tenant_id);
 }
 
-void directory_tree::remove_all(std::shared_ptr<ds_dir_node> parent, const std::string &child_name) {
+void directory_tree::remove_all(const std::string &path, std::shared_ptr<ds_dir_node> parent, const std::string &child_name) {
   auto child = parent->get_child(child_name);
   if (child == nullptr) {
     throw directory_ops_exception("Node does not exist: " + child_name);
+  }
+  std::string tenant_id;
+  if(child->is_directory()) {
+    tenant_id = directory_utils::get_root(path);
+  }
+  else {
+    tenant_id = directory_utils::get_root(directory_utils::get_parent_path(path));
   }
   parent->remove_child(child_name);
   LOG(log_level::info) << "Removed child " << child_name;
   std::vector<std::string> cleared_blocks;
   clear_storage(cleared_blocks, child);
   LOG(log_level::info) << "Cleared all blocks " << child_name;
-  allocator_->free(cleared_blocks);
+  allocator_->free(cleared_blocks, tenant_id);
 }
 
 void directory_tree::remove_all(const std::string &path) {
@@ -259,14 +269,14 @@ void directory_tree::remove_all(const std::string &path) {
     auto parent = root_;
     auto children = root_->child_names();
     for (const auto &child_name: children) {
-      remove_all(parent, child_name);
+      remove_all("/" + child_name, parent, child_name);
     }
     return;
   }
   std::string ptemp = path;
   std::string child_name = directory_utils::pop_path_element(ptemp);
   auto parent = get_node_as_dir(ptemp);
-  remove_all(parent, child_name);
+  remove_all(path, parent, child_name);
 }
 
 void directory_tree::sync(const std::string &path, const std::string &backing_path) {
@@ -275,10 +285,26 @@ void directory_tree::sync(const std::string &path, const std::string &backing_pa
 }
 
 void directory_tree::dump(const std::string &path, const std::string &backing_path) {
+  if (path == "/") {
+    auto parent = root_;
+    auto children = root_->child_names();
+    for (const auto &child_name: children) {
+      dump("/" + child_name, backing_path);
+    }
+    return;
+  }
   LOG(log_level::info) << "Dumping path " << path;
   std::vector<std::string> cleared_blocks;
-  get_node(path)->dump(cleared_blocks, backing_path, storage_);
-  allocator_->free(cleared_blocks);
+  auto node = get_node(path);
+  node->dump(cleared_blocks, backing_path, storage_);
+  std::string tenant_id;
+  if(node->is_directory()) {
+    tenant_id = directory_utils::get_root(path);
+  }
+  else {
+    tenant_id = directory_utils::get_root(directory_utils::get_parent_path(path));
+  }
+  allocator_->free(cleared_blocks, tenant_id);
 }
 
 void directory_tree::load(const std::string &path, const std::string &backing_path) {
@@ -310,7 +336,8 @@ void directory_tree::rename(const std::string &old_path, const std::string &new_
       new_parent->remove_child(new_child_name);
       std::vector<std::string> cleared_blocks;
       clear_storage(cleared_blocks, new_child);
-      allocator_->free(cleared_blocks);
+      std::string tenant_id = directory_utils::get_root(ptemp);
+      allocator_->free(cleared_blocks, tenant_id);
     }
   }
   old_parent->remove_child(old_child->name());
@@ -335,6 +362,12 @@ data_status directory_tree::dstatus(const std::string &path) {
 }
 
 void directory_tree::add_tags(const std::string &path, const std::map<std::string, std::string> &tags) {
+  // TODO: HACK for now. Implement proper API for this
+  if(path == "advertise_demand") {
+    // LOG(log_level::info) << "Demand advertisement";
+    allocator_->update_demand(tags.at("tenant_id"), std::stoi(tags.at("demand")));
+    return;
+  }
   get_node_as_file(path)->add_tags(tags);
 }
 
@@ -449,7 +482,8 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
     throw directory_ops_exception("No such chain for path " + path);
   }
 
-  auto new_blocks = allocator_->allocate(1, chain.block_ids);
+  std::string tenant_id = directory_utils::get_root(directory_utils::get_parent_path(path));
+  auto new_blocks = allocator_->allocate(1, chain.block_ids, tenant_id);
   auto updated_chain = chain.block_ids;
   updated_chain.insert(updated_chain.end(), new_blocks.begin(), new_blocks.end());
 
@@ -484,6 +518,15 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
 
 void directory_tree::handle_lease_expiry(const std::string &path) {
   LOG(log_level::info) << "Handling expiry for " << path;
+  auto node = get_node(path);
+  std::string tenant_id;
+  if(node->is_directory()) {
+    tenant_id = directory_utils::get_root(path);
+  }
+  else {
+    tenant_id = directory_utils::get_root(directory_utils::get_parent_path(path));
+  }
+  
   std::string ptemp = path;
   std::string child_name = directory_utils::pop_path_element(ptemp);
   auto parent = get_node_as_dir(ptemp);
@@ -491,7 +534,7 @@ void directory_tree::handle_lease_expiry(const std::string &path) {
   parent->handle_lease_expiry(cleared_blocks, child_name, storage_);
   if (!cleared_blocks.empty()) {
     LOG(log_level::info) << "Handled lease expiry, freeing blocks for " << path;
-    allocator_->free(cleared_blocks);
+    allocator_->free(cleared_blocks, tenant_id);
   }
 }
 
@@ -595,7 +638,8 @@ replica_chain directory_tree::add_block(const std::string &path,
 
 void directory_tree::remove_block(const std::string &path, const std::string &partition_name) {
   LOG(log_level::info) << "Removing block with partition_name = " << partition_name << " from file " << path;
-  get_node_as_file(path)->remove_block(partition_name, storage_, allocator_);
+  std::string tenant_id = directory_utils::get_root(directory_utils::get_parent_path(path));
+  get_node_as_file(path)->remove_block(partition_name, storage_, allocator_, tenant_id);
 }
 
 void directory_tree::update_partition(const std::string &path,

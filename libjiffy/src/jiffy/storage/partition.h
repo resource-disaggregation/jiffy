@@ -65,7 +65,9 @@ class partition {
    * @param cmd_id Operation identifier
    * @param args Operation arguments
    */
-  virtual void run_command(response &_return, const arg_list &args) = 0;
+  virtual void run_command_impl(response &_return, const arg_list &args) = 0;
+
+  void run_command(response &_return, const arg_list &args);
 
   /**
    * @brief Set block path
@@ -193,6 +195,12 @@ class partition {
    */
   void notify(const arg_list & args);
 
+  // Return underlying block sequence number
+  // Increases monotonically over lifetime of block
+  int32_t seq_no();
+
+  void update_seq_no(int32_t x);
+
  protected:
   /**
    * @brief Construct binary string
@@ -200,6 +208,8 @@ class partition {
    * @return Binary string
    */
   binary make_binary(const std::string &str);
+
+  int32_t extract_block_seq_no(const arg_list &args, arg_list &out_list);
 
   /* Partition name */
   std::string name_;
@@ -219,6 +229,9 @@ class partition {
   allocator<uint8_t> binary_allocator_;
   /* Atomic bool to indicate that the partition is a default one */
   std::atomic<bool> default_{};
+
+  // Block sequence number
+  int32_t block_seq_no_;
 };
 
 }

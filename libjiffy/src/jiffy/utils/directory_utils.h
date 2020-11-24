@@ -148,6 +148,15 @@ class directory_utils {
     path = path.substr(0, i + 1);
     return element;
   }
+
+  // Get root element of path
+  static std::string get_root(const std::string &path) {
+    auto elems = path_elements(path);
+    if(elems.size() == 0) {
+      return "";
+    }
+    return elems[0];
+  }
 };
 
 }

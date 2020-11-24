@@ -196,7 +196,8 @@ class ds_file_node : public ds_node {
    */
   void remove_block(const std::string &partition_name,
                     const std::shared_ptr<storage::storage_management_ops> &storage,
-                    const std::shared_ptr<block_allocator> &allocator);
+                    const std::shared_ptr<block_allocator> &allocator,
+                    const std::string &tenant_id);
 
   /**
    * @brief Write all dirty blocks back to persistent storage

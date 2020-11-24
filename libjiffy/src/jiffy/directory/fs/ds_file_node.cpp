@@ -155,8 +155,9 @@ void ds_file_node::load(const std::string &path,
 
   auto num_blocks = dstatus_.data_blocks().size();
   auto chain_length = dstatus_.chain_length();
+  std::string tenant_id = directory_utils::get_root(directory_utils::get_parent_path(path));
   for (std::size_t i = 0; i < num_blocks; ++i) {
-    replica_chain chain(allocator->allocate(chain_length, {}), storage_mode::in_memory);
+    replica_chain chain(allocator->allocate(chain_length, {}, tenant_id), storage_mode::in_memory);
     assert(chain.block_ids.size() == chain_length);
     chain.metadata = "regular";
     using namespace storage;
@@ -229,7 +230,8 @@ replica_chain ds_file_node::add_data_block(const std::string &path,
                                            const std::shared_ptr<block_allocator> &allocator) {
   using namespace utils;
   std::unique_lock<std::mutex> lock(mtx_);
-  replica_chain chain(allocator->allocate(static_cast<size_t>(dstatus_.chain_length()), {}), storage_mode::in_memory);
+  std::string tenant_id = directory_utils::get_root(directory_utils::get_parent_path(path));
+  replica_chain chain(allocator->allocate(static_cast<size_t>(dstatus_.chain_length()), {}, tenant_id), storage_mode::in_memory);
   chain.name = partition_name;
   chain.metadata = partition_metadata;
   assert(chain.block_ids.size() == chain_length);
@@ -253,7 +255,8 @@ replica_chain ds_file_node::add_data_block(const std::string &path,
 
 void ds_file_node::remove_block(const std::string &partition_name,
                                 const std::shared_ptr<storage::storage_management_ops> &storage,
-                                const std::shared_ptr<block_allocator> &allocator) {
+                                const std::shared_ptr<block_allocator> &allocator,
+                                const std::string &tenant_id) {
   std::unique_lock<std::mutex> lock(mtx_);
   replica_chain block;
   if (!dstatus_.remove_data_block(partition_name, block)) {
@@ -262,7 +265,7 @@ void ds_file_node::remove_block(const std::string &partition_name,
   for (const auto &id: block.block_ids) {
     storage->destroy_partition(id);
   }
-  allocator->free(block.block_ids);
+  allocator->free(block.block_ids, tenant_id);
 }
 
 void ds_file_node::update_data_status_partition(const std::string &old_name,

@@ -88,11 +88,18 @@ class file_partition : public chain_module {
   void get_storage_capacity(response &_return, const arg_list &args);
 
   /**
+   * @brief Get size of the partition
+   * @param _return Response
+   * @param args Arguments
+   */
+  void get_partition_size(response &_return, const arg_list &args);
+
+  /**
    * @brief Run command on file partition
    * @param _return Response
    * @param args Arguments
    */
-  void run_command(response &_return, const arg_list &args) override;
+  void run_command_impl(response &_return, const arg_list &args) override;
 
   /**
    * @brief Atomically check dirty bit
@@ -126,6 +133,8 @@ class file_partition : public chain_module {
   void forward_all() override;
 
  private:
+
+  
 
   /* File partition */
   file_type partition_;
