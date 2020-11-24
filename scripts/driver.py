@@ -170,6 +170,7 @@ if __name__ == "__main__":
     cur_demand = 0
     file_seq = 0
     for e in range(len(demands)):
+        num_queued = 0
         if demands[e] > cur_demand:
             # Create files and write
             for i in range(demands[e] - cur_demand):
@@ -178,6 +179,7 @@ if __name__ == "__main__":
                 cur_files.append(filename)
                 wid = map_file_to_worker(filename, para)
                 queues[wid].put({'op': 'put', 'filename': filename})
+                num_queued += 1
 
         elif demands[e] < cur_demand:
             # Remove files
@@ -185,12 +187,15 @@ if __name__ == "__main__":
                 filename = cur_files.pop(0)
                 wid = map_file_to_worker(filename, para)
                 queues[wid].put({'op': 'remove', 'filename': filename})
+                num_queued += 1
         
         cur_demand = demands[e]
         assert len(cur_files) == cur_demand
         # Log queue sizes
         for i in range(para):
+            print('Queue this epoch: ' + str(num_queued))
             print('Queue size: ' + str(queues[i].qsize()))
+            print('Left over: ' + str(queues[i].qsize() - num_queued))
         time.sleep(1)
 
     for i in range(para):
