@@ -11,7 +11,8 @@ partition::partition(block_memory_manager *manager,
       metadata_(metadata),
       supported_commands_(supported_commands),
       manager_(manager),
-      binary_allocator_(build_allocator<uint8_t>()) {
+      binary_allocator_(build_allocator<uint8_t>()),
+      block_seq_no_(0) {
   default_ = supported_commands_.empty();
 }
 
@@ -83,6 +84,36 @@ void partition::notify(const arg_list &args) {
 
 binary partition::make_binary(const std::string &str) {
   return binary(str, binary_allocator_);
+}
+
+int32_t partition::seq_no() {
+  return block_seq_no_;
+}
+
+void partition::update_seq_no(int32_t x) {
+  block_seq_no_ = x;
+}
+
+int32_t partition::extract_block_seq_no(const arg_list &args, arg_list &out_list) {
+  if(args.size() >= 3 && args[1] == "$block_seq_no$") {
+    auto block_seq_no = std::stoi(args[2]);
+    out_list.push_back(args[0]);
+    out_list.insert(out_list.end(), args.begin()+3, args.end());
+    return block_seq_no;
+  }
+
+  out_list.insert(out_list.end(), args.begin(), args.end());
+  return 0;
+}
+
+void partition::run_command(response &_return, const arg_list &_args) {
+  arg_list args;
+  int32_t block_seq_no = extract_block_seq_no(_args, args);
+  if(block_seq_no < block_seq_no_){
+    _return.emplace_back("!stale_seq_no");
+    return;
+  }
+  run_command_impl(_return, args);
 }
 
 

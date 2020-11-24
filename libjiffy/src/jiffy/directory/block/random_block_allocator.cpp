@@ -7,7 +7,10 @@
 namespace jiffy {
 namespace directory {
 
-std::vector<std::string> random_block_allocator::allocate(std::size_t count, const std::vector<std::string> &) {
+using namespace utils;
+
+std::vector<std::string> random_block_allocator::allocate(std::size_t count, const std::vector<std::string> &, const std::string &/*tenant_id*/) {
+  // LOG(log_level::info) << "Allocation tenant_id: " << tenant_id;
   std::unique_lock<std::mutex> lock(mtx_);
   if (count > free_blocks_.size()) {
     throw std::out_of_range(
@@ -45,7 +48,7 @@ std::vector<std::string> random_block_allocator::allocate(std::size_t count, con
   return blocks;
 }
 
-void random_block_allocator::free(const std::vector<std::string> &blocks) {
+void random_block_allocator::free(const std::vector<std::string> &blocks, const std::string &/*tenant_id*/) {
   std::unique_lock<std::mutex> lock(mtx_);
   std::vector<std::string> not_freed;
   for (auto &block_name: blocks) {

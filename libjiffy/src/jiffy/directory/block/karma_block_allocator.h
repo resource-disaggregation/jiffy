@@ -1,22 +1,24 @@
-#ifndef JIFFY_RANDOM_BLOCK_ALLOCATOR_H
-#define JIFFY_RANDOM_BLOCK_ALLOCATOR_H
+#ifndef JIFFY_KARMA_BLOCK_ALLOCATOR_H
+#define JIFFY_KARMA_BLOCK_ALLOCATOR_H
 
 #include <iostream>
 #include <shared_mutex>
 #include <set>
 #include <map>
+#include <unordered_map>
+#include <thread>
 #include "block_allocator.h"
 #include "../../utils/rand_utils.h"
 #include "../../utils/logger.h"
 
 namespace jiffy {
 namespace directory {
-/* Random block allocator class, inherited from block allocator */
-class random_block_allocator : public block_allocator {
+/* Max-min fairness block allocator class, inherited from block allocator */
+class karma_block_allocator : public block_allocator {
  public:
-  random_block_allocator() = default;
+  karma_block_allocator(uint32_t num_tenants, uint64_t init_credits, uint32_t interval_ms);
 
-  virtual ~random_block_allocator() = default;
+  virtual ~karma_block_allocator() = default;
 
   /**
    * @brief Allocate blocks in different prefixes
@@ -66,28 +68,49 @@ class random_block_allocator : public block_allocator {
    */
 
   std::size_t num_total_blocks() override;
+
+  void update_demand(const std::string &tenant_id, uint32_t demand) override;
+
  private:
 
-  /*
-   * Fetch prefix of block name
-   */
+ void compute_allocations();
 
-  std::string prefix(const std::string &block_name) const {
-    auto pos = block_name.find_last_of(':');
-    if (pos == std::string::npos) {
-      throw std::logic_error("Malformed block name [" + block_name + "]");
-    }
-    return block_name.substr(0, pos);
-  }
+ void thread_run(uint32_t interval_ms);
+
+ std::size_t num_allocated_blocks_unsafe();
+
+ void register_tenant(std::string tenant_id);
+
+ std::vector<std::string> append_seq_nos(const std::vector<std::string> &blocks);
+
+ std::vector<std::string> strip_seq_nos(const std::vector<std::string> &blocks);
+
   /* Operation mutex */
   std::mutex mtx_;
-  /* Allocated blocks */
-  std::set<std::string> allocated_blocks_;
+  /* Allocated blocks per-tenant */
+  std::unordered_map<std::string, std::set<std::string> > active_blocks_;
   /* Free blocks */
   std::set<std::string> free_blocks_;
+  /*Fair share of each tenant*/
+//   std::size_t fair_share_;
+  /*Block sequence numbers*/
+  std::unordered_map<std::string, int32_t> block_seq_no_;
+  /*Last tenant that has used this block*/
+  std::unordered_map<std::string, std::string> last_tenant_;
+  std::size_t total_blocks_;
+  uint32_t num_tenants_;
+  uint64_t init_credits_;
+
+  std::unordered_map<std::string, uint32_t> demands_;
+  std::unordered_map<std::string, uint64_t> credits_;
+  std::unordered_map<std::string, int32_t> rate_;
+  std::unordered_map<std::string, uint32_t> allocations_;
+
+  std::thread thread_;
+
 };
 
 }
 }
 
-#endif //JIFFY_RANDOM_BLOCK_ALLOCATOR_H
+#endif //JIFFY_KARMA_BLOCK_ALLOCATOR_H

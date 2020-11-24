@@ -255,7 +255,7 @@ class hash_table_partition : public chain_module {
    * @param _return Response
    * @param args Arguments
    */
-  void run_command(response &_return, const arg_list &args) override;
+  void run_command_impl(response &_return, const arg_list &args) override;
 
   /**
    * @brief Atomically check dirty bit

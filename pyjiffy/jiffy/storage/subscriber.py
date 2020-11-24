@@ -96,7 +96,7 @@ class SubscriptionWorker(threading.Thread):
 
 class SubscriptionClient:
     def __init__(self, data_status, callback=Mailbox()):
-        self.block_names = [block_chain.block_ids[-1].split(':') for block_chain in data_status.data_blocks]
+        self.block_names = [block_chain.block_ids[-1].split(':')[:4] for block_chain in data_status.data_blocks]
         self.block_ids = [int(b[-1]) for b in self.block_names]
         self.transports = [TTransport.TFramedTransport(TSocket.TSocket(b[0], int(b[1]))) for b in self.block_names]
         self.protocols = [TBinaryProtocol.TBinaryProtocolAccelerated(transport) for transport in self.transports]

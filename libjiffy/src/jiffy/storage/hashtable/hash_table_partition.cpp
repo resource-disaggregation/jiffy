@@ -367,7 +367,7 @@ void hash_table_partition::get_metadata(response &_return, const arg_list &args)
   RETURN_OK(metadata_);
 }
 
-void hash_table_partition::run_command(response &_return, const arg_list &args) {
+void hash_table_partition::run_command_impl(response &_return, const arg_list &args) {
   auto cmd_name = args[0];
   switch (command_id(cmd_name)) {
     case hash_table_cmd_id::ht_exists:exists(_return, args);

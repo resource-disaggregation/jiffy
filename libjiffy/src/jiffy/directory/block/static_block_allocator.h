@@ -1,10 +1,11 @@
-#ifndef JIFFY_RANDOM_BLOCK_ALLOCATOR_H
-#define JIFFY_RANDOM_BLOCK_ALLOCATOR_H
+#ifndef JIFFY_STATIC_BLOCK_ALLOCATOR_H
+#define JIFFY_STATIC_BLOCK_ALLOCATOR_H
 
 #include <iostream>
 #include <shared_mutex>
 #include <set>
 #include <map>
+#include <unordered_map>
 #include "block_allocator.h"
 #include "../../utils/rand_utils.h"
 #include "../../utils/logger.h"
@@ -12,11 +13,11 @@
 namespace jiffy {
 namespace directory {
 /* Random block allocator class, inherited from block allocator */
-class random_block_allocator : public block_allocator {
+class static_block_allocator : public block_allocator {
  public:
-  random_block_allocator() = default;
+  static_block_allocator(uint32_t num_tenants);
 
-  virtual ~random_block_allocator() = default;
+  virtual ~static_block_allocator() = default;
 
   /**
    * @brief Allocate blocks in different prefixes
@@ -68,6 +69,10 @@ class random_block_allocator : public block_allocator {
   std::size_t num_total_blocks() override;
  private:
 
+ std::size_t num_allocated_blocks_unsafe();
+ 
+ void register_tenant(std::string tenant_id);
+
   /*
    * Fetch prefix of block name
    */
@@ -81,13 +86,17 @@ class random_block_allocator : public block_allocator {
   }
   /* Operation mutex */
   std::mutex mtx_;
-  /* Allocated blocks */
-  std::set<std::string> allocated_blocks_;
+
   /* Free blocks */
   std::set<std::string> free_blocks_;
+  uint32_t num_tenants_;
+  std::size_t total_blocks_;
+
+  /* Allocated blocks per-tenant */
+  std::unordered_map<std::string, std::set<std::string> > allocated_blocks_;
 };
 
 }
 }
 
-#endif //JIFFY_RANDOM_BLOCK_ALLOCATOR_H
+#endif //JIFFY_STATIC_BLOCK_ALLOCATOR_H
