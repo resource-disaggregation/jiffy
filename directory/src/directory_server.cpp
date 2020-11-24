@@ -5,6 +5,7 @@
 #include <jiffy/directory/block/random_block_allocator.h>
 #include <jiffy/directory/block/maxmin_block_allocator.h>
 #include <jiffy/directory/block/static_block_allocator.h>
+#include <jiffy/directory/block/karma_block_allocator.h>
 #include <jiffy/directory/fs/directory_server.h>
 #include <jiffy/directory/lease/lease_expiry_worker.h>
 #include <jiffy/directory/lease/lease_server.h>
@@ -148,6 +149,9 @@ int main(int argc, char **argv) {
   }
   else if(allocator_type == "random") {
     alloc = std::make_shared<random_block_allocator>();
+  }
+  else if(allocator_type == "karma") {
+    alloc = std::make_shared<karma_block_allocator>(num_tenants, 0);
   }
   else 
   {

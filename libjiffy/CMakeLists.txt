@@ -31,6 +31,8 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/directory/block/maxmin_block_allocator.h
           src/jiffy/directory/block/static_block_allocator.cpp
           src/jiffy/directory/block/static_block_allocator.h
+          src/jiffy/directory/block/karma_block_allocator.cpp
+          src/jiffy/directory/block/karma_block_allocator.h
           src/jiffy/directory/client/directory_client.cpp
           src/jiffy/directory/client/directory_client.h
           src/jiffy/directory/fs/directory_server.cpp

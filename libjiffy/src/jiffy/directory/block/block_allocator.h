@@ -19,6 +19,11 @@ class block_allocator {
   virtual std::size_t num_free_blocks() = 0;
   virtual std::size_t num_allocated_blocks() = 0;
   virtual std::size_t num_total_blocks() = 0;
+
+  virtual void update_demand(const std::string &/*tenant_id*/, uint32_t /*demand*/) {
+    // By default do nothing
+    
+  }
 };
 
 }
