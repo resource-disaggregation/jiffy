@@ -190,7 +190,7 @@ if __name__ == "__main__":
         assert len(cur_files) == cur_demand
         # Log queue sizes
         for i in range(para):
-            print('Queue size: ' + queues[i].qsize())
+            print('Queue size: ' + str(queues[i].qsize()))
         time.sleep(1)
 
     for i in range(para):
