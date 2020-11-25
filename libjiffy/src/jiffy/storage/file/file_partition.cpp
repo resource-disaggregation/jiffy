@@ -158,12 +158,14 @@ void file_partition::load(const std::string &path) {
 
 bool file_partition::sync(const std::string &path) {
   if (dirty_) {
+    LOG(log_level::info) << "Reclaim: Syncing dirty block: " << path;
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
     remote->write<file_type>(partition_, decomposed.second);
     dirty_ = false;
     return true;
   }
+  LOG(log_level::info) << "Reclaim: Syncing no-op: " << path;
   return false;
 }
 

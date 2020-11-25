@@ -207,6 +207,12 @@ if __name__ == "__main__":
         queues[i].join_thread()
         workers[i].join()
 
+    monitor_queue.put(None)
+    # Wait for monitor to exit
+    monitor_queue.close()
+    monitor_queue.join_thread()
+    monitor.join()
+
     # Get stats
     lat_sum = 0
     lat_count = 0

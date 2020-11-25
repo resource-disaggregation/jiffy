@@ -76,6 +76,9 @@ class karma_block_allocator : public block_allocator {
  void compute_allocations();
 
  void thread_run(uint32_t interval_ms);
+ void stats_thread_run(uint32_t interval_ms);
+
+ void log_stats();
 
  std::size_t num_allocated_blocks_unsafe();
 
@@ -107,6 +110,7 @@ class karma_block_allocator : public block_allocator {
   std::unordered_map<std::string, uint32_t> allocations_;
 
   std::thread thread_;
+  std::thread stats_thread_;
 
 };
 

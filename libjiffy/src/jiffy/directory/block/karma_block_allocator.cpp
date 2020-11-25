@@ -13,7 +13,9 @@ using namespace utils;
 karma_block_allocator::karma_block_allocator(uint32_t num_tenants, uint64_t init_credits, uint32_t interval_ms) {
     num_tenants_ = num_tenants;
     init_credits_ = init_credits;
+    total_blocks_ = 0;
     thread_ = std::thread(&karma_block_allocator::thread_run, this, interval_ms);
+    stats_thread_ = std::thread(&karma_block_allocator::stats_thread_run, this, 10);
 }
 
 std::vector<std::string> karma_block_allocator::allocate(std::size_t count, const std::vector<std::string> &, const std::string &tenant_id) {
@@ -338,12 +340,26 @@ void karma_block_allocator::compute_allocations() {
 
 }
 
+void karma_block_allocator::log_stats() {
+  std::unique_lock<std::mutex> lock(mtx_);
+  if(demands_.size() == 0) {
+    return;
+  }
+  LOG(log_level::info) << "Utilization: " << ((double)(total_blocks_ - free_blocks_.size()))/((double)total_blocks_);
+}
+
 void karma_block_allocator::thread_run(uint32_t interval_ms) {
   while(true) {
     compute_allocations();
     std::this_thread::sleep_for(std::chrono::milliseconds(interval_ms));
+  } 
+}
+
+void karma_block_allocator::stats_thread_run(uint32_t interval_ms) {
+  while(true) {
+    log_stats();
+    std::this_thread::sleep_for(std::chrono::milliseconds(interval_ms));
   }
-  
 }
 
 }
