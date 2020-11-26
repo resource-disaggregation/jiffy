@@ -562,6 +562,7 @@ class binary_serde_impl : public serde {
       for (int j = 2; j < info_set.size(); j++){
         size_t stream_size = info_set[j];
         std::string stream = shared_log_block.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(info_set[j])).second;
+        
         offset_out.write(reinterpret_cast<const char *>(&stream_size), sizeof(size_t));
         out.write(reinterpret_cast<const char *>(stream.data()), stream_size);
         temp_offset += info_set[j];
