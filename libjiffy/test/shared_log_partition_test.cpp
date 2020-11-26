@@ -114,6 +114,7 @@ TEST_CASE("shared_log_flush_load_test", "[write][sync][reset][load][read]") {
     response resp;
     REQUIRE_NOTHROW(block.scan(resp, {"scan", std::to_string(start_pos), std::to_string(start_pos + 2), std::to_string(start_pos)+"_stream"}));
     REQUIRE(resp[0] == "!ok");
+    std::cout << "resp=" <<resp[1] << "\n";
     REQUIRE(resp[1] == std::to_string(start_pos)+"_data");
   }
   // memkind_destroy_kind(pmem_kind);
