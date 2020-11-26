@@ -215,7 +215,9 @@ void shared_log_partition::load(const std::string &path) {
   auto decomposed = persistent::persistent_store::decompose_path(path);
   std::pair<std::vector<std::vector<int>>, int> inner_pair = std::make_pair(log_info_, seq_no_);
   shared_log_serde_type pair = std::make_pair(partition_, inner_pair);
+  std::cout<<"previous:"<<partition_.data()<<"\n";
   remote->read<shared_log_serde_type>(decomposed.second, pair);
+  std::cout<<"after:"<<partition_.data()<<"\n";
 }
 
 bool shared_log_partition::sync(const std::string &path) {
@@ -224,9 +226,7 @@ bool shared_log_partition::sync(const std::string &path) {
     auto decomposed = persistent::persistent_store::decompose_path(path);
     std::pair<std::vector<std::vector<int>>, int> inner_pair = std::make_pair(log_info_, seq_no_);
     shared_log_serde_type pair = std::make_pair(partition_, inner_pair);
-    std::cout<<"previous:"<<partition_.data()<<"\n";
     remote->write<shared_log_serde_type>(pair, decomposed.second);
-    std::cout<<"after:"<<partition_.data()<<"\n";
     dirty_ = false;
     return true;
   }
