@@ -101,7 +101,7 @@ class serde {
    * @return Output stream position
    */
 
-  virtual std::size_t virtual_serialize(const shared_log_type &table, std::string out_path) = 0;
+  virtual std::size_t virtual_serialize(const shared_log_serde_type &table, std::string out_path) = 0;
 
   /**
    * @brief Virtual deserialize function for new hash table type
@@ -137,7 +137,7 @@ class serde {
    * @return Input stream position
    */
 
-  virtual std::size_t virtual_deserialize(shared_log_type &table, std::string in_path) = 0;
+  virtual std::size_t virtual_deserialize(shared_log_serde_type &table, std::string in_path) = 0;
 
   /* Block memory allocator */
   block_memory_allocator<uint8_t> allocator_;
@@ -199,7 +199,7 @@ class derived : public impl {
    * @return Output stream position
    */
 
-  std::size_t virtual_serialize(const shared_log_type &table, std::string out_path) final {
+  std::size_t virtual_serialize(const shared_log_serde_type &table, std::string out_path) final {
     return impl::serialize_impl(table, out_path);
   }
 
@@ -242,7 +242,7 @@ class derived : public impl {
    * @return Input stream position
    */
 
-  std::size_t virtual_deserialize(shared_log_type &table, std::string in_path) final {
+  std::size_t virtual_deserialize(shared_log_serde_type &table, std::string in_path) final {
     return impl::deserialize_impl(table, in_path);
   }
 };
@@ -322,7 +322,7 @@ class csv_serde_impl : public serde {
    * @return Output stream position after flushing
    */
 
-  std::size_t serialize_impl(const shared_log_type &table, std::string out_path) {
+  std::size_t serialize_impl(const shared_log_serde_type &table, std::string out_path) {
     return 0;
   }
 
@@ -400,7 +400,7 @@ class csv_serde_impl : public serde {
    * @return Input stream position after reading
    */
 
-  std::size_t deserialize_impl(shared_log_type &data, std::string in_path) {
+  std::size_t deserialize_impl(shared_log_serde_type &data, std::string in_path) {
     return 0;
   }
 
@@ -533,7 +533,7 @@ class binary_serde_impl : public serde {
    * @return Output stream position
    */
 
-  size_t serialize_impl(const shared_log_type &table, std::string out_path) {
+  size_t serialize_impl(const shared_log_serde_type &table, std::string out_path) {
     return 0;
   }
 
@@ -620,7 +620,7 @@ class binary_serde_impl : public serde {
    * @return Input stream position
    */
 
-  size_t deserialize_impl(shared_log_type &table, std::string in_path) {
+  size_t deserialize_impl(shared_log_serde_type &table, std::string in_path) {
     return 0;
   }
 };
