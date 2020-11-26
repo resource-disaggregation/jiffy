@@ -208,7 +208,8 @@ bool shared_log_partition::is_dirty() const {
 void shared_log_partition::load(const std::string &path) {
   auto remote = persistent::persistent_store::instance(path, ser_);
   auto decomposed = persistent::persistent_store::decompose_path(path);
-  remote->read<shared_log_serde_type>(decomposed.second, std::make_pair(partition_, log_info_));
+  std::pair<shared_log_block, std::vector<std::vector<int>>> pair = std::make_pair(partition_, log_info_);
+  remote->read<shared_log_serde_type>(decomposed.second, pair);
 }
 
 bool shared_log_partition::sync(const std::string &path) {
