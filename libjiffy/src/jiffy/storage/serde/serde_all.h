@@ -572,15 +572,11 @@ class binary_serde_impl : public serde {
       out.write(reinterpret_cast<const char *>(data.data()), data_size);
 
     }
-    std::cout<<"slb:"<<shared_log_block.data()<<"\n";
-    std::cout<<"tbf:"<<table.first.data()<<"\n";
     out.flush();
     offset_out.flush();
     auto sz = out.tellp();
     out.close();
     offset_out.close();
-    std::cout<<"slb:"<<shared_log_block.data()<<"\n";
-    std::cout<<"tbf:"<<table.first.data()<<"\n";
     return static_cast<std::size_t>(sz);
   }
 
