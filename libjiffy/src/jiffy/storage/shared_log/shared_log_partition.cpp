@@ -211,6 +211,7 @@ bool shared_log_partition::is_dirty() const {
 }
 
 void shared_log_partition::load(const std::string &path) {
+  std::cout<<"previous:"<<partition_.data()<<"\n";
   auto remote = persistent::persistent_store::instance(path, ser_);
   auto decomposed = persistent::persistent_store::decompose_path(path);
   std::pair<std::vector<std::vector<int>>, int> inner_pair = std::make_pair(log_info_, seq_no_);
