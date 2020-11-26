@@ -238,9 +238,11 @@ void file_partition::load(const std::string &path) {
 
 bool file_partition::sync(const std::string &path) {
   if (dirty_) {
+    std::cout<<"previous:"<<partition_.data()<<"\n";
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
     remote->write<file_type>(partition_, decomposed.second);
+    std::cout<<"after:"<<partition_.data()<<"\n";
     dirty_ = false;
     return true;
   }
