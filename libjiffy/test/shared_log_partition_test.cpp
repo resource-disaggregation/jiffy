@@ -104,17 +104,12 @@ TEST_CASE("shared_log_flush_load_test", "[write][sync][reset][load][read]") {
   REQUIRE_FALSE(block.sync("local://tmp/test"));
   REQUIRE_NOTHROW(block.load("local://tmp/test"));
   
-  std::cout<<block.log_info_[0][0]<<" "<<block.log_info_[0][1]<< " "<<block.log_info_[0][2]<<"\n";
-  response resp;
-  REQUIRE_NOTHROW(block.scan(resp, {"scan", std::to_string(0), std::to_string(0 + 2), std::to_string(0)+"_stream"}));
-  REQUIRE(resp[0] == "!ok");
-  REQUIRE(resp[1] == std::to_string(0)+"_data");
-  // for (std::size_t start_pos = 0; start_pos < 998; ++start_pos) {
-  //   response resp;
-  //   REQUIRE_NOTHROW(block.scan(resp, {"scan", std::to_string(start_pos), std::to_string(start_pos + 2), std::to_string(start_pos)+"_stream"}));
-  //   REQUIRE(resp[0] == "!ok");
-  //   REQUIRE(resp[1] == std::to_string(start_pos)+"_data");
-  // }
+  for (std::size_t start_pos = 0; start_pos < 998; ++start_pos) {
+    response resp;
+    REQUIRE_NOTHROW(block.scan(resp, {"scan", std::to_string(start_pos), std::to_string(start_pos + 2), std::to_string(start_pos)+"_stream"}));
+    REQUIRE(resp[0] == "!ok");
+    REQUIRE(resp[1] == std::to_string(start_pos)+"_data");
+  }
   // memkind_destroy_kind(pmem_kind);
 }
 
