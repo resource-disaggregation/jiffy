@@ -225,12 +225,12 @@ TEST_CASE("hash_table_flush_load_test", "[put][sync][reset][load][get]") {
   struct memkind* pmem_kind = nullptr;
   std::string pmem_path = "/media/pmem0/shijie"; 
   std::string memory_mode = "PMEM";
-  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
-  if(err) {
-    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
-    fprintf(stderr, "%s\n", error_message);
-  }
+  // size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+  // if(err) {
+  //   char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+  //   memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+  //   fprintf(stderr, "%s\n", error_message);
+  // }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   hash_table_partition block(&manager);
@@ -250,5 +250,5 @@ TEST_CASE("hash_table_flush_load_test", "[put][sync][reset][load][get]") {
     REQUIRE(resp[0] == "!ok");
     REQUIRE(resp[1] == std::to_string(i));
   }
-  memkind_destroy_kind(pmem_kind);
+  // memkind_destroy_kind(pmem_kind);
 }
