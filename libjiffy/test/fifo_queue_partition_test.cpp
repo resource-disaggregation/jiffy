@@ -146,7 +146,7 @@ TEST_CASE("fifo_queue_flush_load_test", "[enqueue][sync][reset][load][dequeue]")
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   fifo_queue_partition block(&manager);
-  for (std::size_t i = 0; i < 1000; ++i) {
+  for (std::size_t i = 0; i < 10; ++i) {
     std::vector<std::string> res;
     block.run_command(res, {"enqueue", std::to_string(i)});
     REQUIRE(res.front() == "!ok");
@@ -156,7 +156,7 @@ TEST_CASE("fifo_queue_flush_load_test", "[enqueue][sync][reset][load][dequeue]")
   REQUIRE(!block.is_dirty());
   REQUIRE_FALSE(block.sync("local://tmp/test"));
   REQUIRE_NOTHROW(block.load("local://tmp/test"));
-  for (std::size_t i = 0; i < 1000; ++i) {
+  for (std::size_t i = 0; i < 10; ++i) {
     response resp1, resp2;
     REQUIRE_NOTHROW(block.front(resp1, {"front"}));
     REQUIRE_NOTHROW(block.dequeue(resp2, {"dequeue"}));
