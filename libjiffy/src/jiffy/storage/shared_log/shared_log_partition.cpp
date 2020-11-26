@@ -225,7 +225,6 @@ bool shared_log_partition::sync(const std::string &path) {
     std::pair<std::vector<std::vector<int>>, int> inner_pair = std::make_pair(log_info_, seq_no_);
     shared_log_serde_type pair = std::make_pair(partition_, inner_pair);
     remote->write<shared_log_serde_type>(pair, decomposed.second);
-    partition_.clear();
     dirty_ = false;
     return true;
   }

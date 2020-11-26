@@ -136,13 +136,13 @@ TEST_CASE("fifo_queue_storage_size_test", "[put][size][storage_size][reset]") {
 TEST_CASE("fifo_queue_flush_load_test", "[enqueue][sync][reset][load][dequeue]") {
   struct memkind* pmem_kind = nullptr;
   std::string pmem_path = "/media/pmem0/shijie"; 
-  std::string memory_mode = "PMEM";
-  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
-  if(err) {
-    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
-    fprintf(stderr, "%s\n", error_message);
-  }
+  std::string memory_mode = "DRAM";
+  // size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+  // if(err) {
+  //   char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+  //   memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+  //   fprintf(stderr, "%s\n", error_message);
+  // }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   fifo_queue_partition block(&manager);
@@ -164,7 +164,7 @@ TEST_CASE("fifo_queue_flush_load_test", "[enqueue][sync][reset][load][dequeue]")
     REQUIRE(resp1[1] == std::to_string(i));
     REQUIRE(resp2[0] == "!ok");
   }
-  memkind_destroy_kind(pmem_kind);
+  // memkind_destroy_kind(pmem_kind);
 }
 
 
