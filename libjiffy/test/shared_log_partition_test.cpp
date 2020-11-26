@@ -94,9 +94,9 @@ TEST_CASE("shared_log_flush_load_test", "[write][sync][reset][load][read]") {
   shared_log_partition block(&manager);
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    response resp;
-    REQUIRE_NOTHROW(block.write(resp, {"write", std::to_string(i), std::to_string(i)+"_data", std::to_string(i)+"_stream"}));
-    REQUIRE(resp[0] == "!ok");
+    std::vector<std::string> res;
+    block.run_command(res,{"write", std::to_string(i), std::to_string(i)+"_data", std::to_string(i)+"_stream"});
+    REQUIRE(res.front() == "!ok");
   }
   REQUIRE(block.is_dirty());
   REQUIRE(block.sync("local://tmp/test"));
