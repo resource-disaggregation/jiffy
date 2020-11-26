@@ -45,12 +45,12 @@ void shared_log_partition::write(response &_return, const arg_list &args) {
   }
   auto position = std::stoi(args[1]);
   if (log_info_.size() == 0) {
-    seq_no = position;
+    seq_no_ = position;
   }
   auto data = args[2];
   std::string logical_stream = "";
   std::vector<int> info_set;
-  info_set.push_back(starting_offset);
+  info_set.push_back(starting_offset_);
   info_set.push_back(data.size());
   for (int i = 3; i < args.size(); i++){
     logical_stream += args[i];
@@ -58,11 +58,11 @@ void shared_log_partition::write(response &_return, const arg_list &args) {
   }
   log_info_.push_back(info_set); 
   std::string writing_content = logical_stream + data;
-  auto ret = partition_.write(writing_content, starting_offset);
+  auto ret = partition_.write(writing_content, starting_offset_);
   if (!ret.first) {
     throw std::logic_error("Write failed");
   }
-  starting_offset += writing_content.size();
+  starting_offset_ += writing_content.size();
   RETURN_OK();
 
 }
@@ -71,8 +71,8 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
   if (args.size() < 4) {
     RETURN_ERR("!args_error");
   }
-  auto start_pos = std::stoi(args[1]) - seq_no;
-  auto end_pos = std::stoi(args[2]) - seq_no;
+  auto start_pos = std::stoi(args[1]) - seq_no_;
+  auto end_pos = std::stoi(args[2]) - seq_no_;
   if (end_pos > log_info_.size()) end_pos = log_info_.size() - 1;
   std::vector<std::string> logical_streams = {}; 
   for (int i = 3; i < args.size(); i++){
@@ -117,45 +117,16 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
   if (log_info_.size() == 0) {
     RETURN_OK(0);
   }
-  auto start_pos = std::stoi(args[1]) - seq_no;
-  auto end_pos = std::stoi(args[2]) - seq_no;
+  auto start_pos = std::stoi(args[1]) - seq_no_;
+  auto end_pos = std::stoi(args[2]) - seq_no_;
   if (start_pos < 0 || start_pos >= log_info_.size() || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("trim position invalid");
   if (end_pos > log_info_.size()) end_pos = log_info_.size() - 1;
-  std::size_t first_section_len = 0;
-  std::size_t second_section_len = 0;
-  std::size_t temp_offset = 0;
-  if (start_pos > 0){
-    for (int i = 0; i <= start_pos; i++){
-      auto info_set = log_info_[i];
-      if (info_set[0] == -1) continue;
-      first_section_len += info_set[0]-temp_offset;
-      temp_offset = info_set[0];
-    }
-  }
-  auto first_section = partition_.read(static_cast<std::size_t>(0), static_cast<std::size_t>(first_section_len)).second;
   int trimmed_length = 0;
   for (int i = start_pos; i <= end_pos; i++){
     auto info_set = log_info_[i];
     if (info_set[0] == -1) continue;
     log_info_[i][0] = -1; // make the log entry invalid
-    for (int j = 1; j < info_set.size(); j++){
-      trimmed_length += info_set[j];
-    }
   }
-  temp_offset = first_section_len + trimmed_length;
-  if (end_pos < log_info_.size() - 1){
-    for (int i = end_pos + 1; i < log_info_.size(); i++){
-      auto info_set = log_info_[i];
-      if (info_set[0] == -1) continue;
-      for (int j = 1; j < info_set.size(); j++){
-        second_section_len += info_set[j];
-      }
-      log_info_[i][0] -= trimmed_length;
-    }
-  }
-  auto second_section = partition_.read(static_cast<std::size_t>(first_section_len + trimmed_length), static_cast<std::size_t>(second_section_len)).second;
-  partition_.clear();
-  auto ret = partition_.write(first_section + second_section, 0);
   RETURN_OK(std::to_string(trimmed_length));
 }
 

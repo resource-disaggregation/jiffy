@@ -165,10 +165,10 @@ class shared_log_partition : public chain_module {
   std::vector<std::vector<int>> log_info_;
 
   /* starting seq no. in this partition */
-  int seq_no = 0;
+  int seq_no_ = 0;
 
   /* starting offset of the next input entry */
-  int starting_offset = 0;
+  int starting_offset_ = 0;
 
 };
 
