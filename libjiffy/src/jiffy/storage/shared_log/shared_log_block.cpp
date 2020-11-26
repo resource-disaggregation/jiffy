@@ -33,7 +33,6 @@ bool shared_log_block::operator==(const shared_log_block &other) const {
 
 std::pair<bool, std::string> shared_log_block::write(const std::string &data, std::size_t offset) {
   auto len = data.size();
-  std::cout<<"data="<<data<<"\n";
   std::memcpy(data_ + offset, data.c_str(), len);
   return std::make_pair(true, std::string("!success"));
 }
@@ -42,6 +41,7 @@ const std::pair<bool, std::string> shared_log_block::read(std::size_t offset, st
   if (offset >= max_) {
     throw std::invalid_argument("Read offset exceeds partition capacity");
   }
+  std::cout<<"data+offset="<<data_ + offset<<"size="<<size<<"\n";
   return std::make_pair(true, std::string(data_ + offset, size));
 }
 
