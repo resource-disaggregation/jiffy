@@ -35,6 +35,7 @@ std::pair<bool, std::string> shared_log_block::write(const std::string &data, st
   auto len = data.size();
   std::cout<<"offset="<<offset<<"data_="<<data.c_str()<<"\n";
   std::memcpy(data_ + offset, data.c_str(), len);
+  std::cout<<data_<<"\n";
   return std::make_pair(true, std::string("!success"));
 }
 
