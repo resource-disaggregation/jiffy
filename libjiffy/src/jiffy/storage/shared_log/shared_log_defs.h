@@ -13,7 +13,7 @@ typedef shared_log_block shared_log_type;
 
 struct shared_log_triple
 {
-    shared_log_block block;
+    shared_log_block* block;
     std::vector<std::vector<int>> log_info;
     int seq_no;
 };

@@ -561,13 +561,13 @@ class binary_serde_impl : public serde {
 
       for (int j = 2; j < info_set.size(); j++){
         size_t stream_size = info_set[j];
-        std::string stream = table.block.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(info_set[j])).second;
+        std::string stream = (*table.block).read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(info_set[j])).second;
         
         offset_out.write(reinterpret_cast<const char *>(&stream_size), sizeof(size_t));
         out.write(reinterpret_cast<const char *>(stream.data()), stream_size);
         temp_offset += info_set[j];
       }
-      std::string data = table.block.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(data_size)).second;
+      std::string data = (*table.block).read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(data_size)).second;
       out.write(reinterpret_cast<const char *>(data.data()), data_size);
 
     }
@@ -695,13 +695,13 @@ class binary_serde_impl : public serde {
         std::string stream;
         stream.resize(stream_size);
         in.read(&stream[0], stream_size);
-        table.block.write(stream, temp_offset);
+        (*table.block).write(stream, temp_offset);
         temp_offset += stream.size();
       }
       std::string data;
       data.resize(data_size);
       in.read(&data[0], data_size);
-      table.block.write(data, temp_offset);
+      (*table.block).write(data, temp_offset);
       temp_offset += data.size();
     }
     
