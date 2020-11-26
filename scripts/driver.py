@@ -109,12 +109,12 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
                 persistent_blocks += 1
                 print('Wrote to persistent storage')
             
-            monitor_queue.put('put_complete')
+            monitor_q.put('put_complete')
 
         if task['op'] == 'remove':
             # monitor_q.put('dec_demand')
             if in_jiffy[filename]:
-                monitor_q.put('remove_jiffy')
+                # monitor_q.put('remove_jiffy')
                 try:
                     client.remove(filename)
                     duration_used = datetime.datetime.now() - jiffy_create_ts[filename]
@@ -123,11 +123,11 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
                 except:
                     print('Remove from jiffy failed')
                 del jiffy_create_ts[filename]
-            else:
-                monitor_q.put('remove_persistent')
+            # else:
+            #     monitor_q.put('remove_persistent')
             
             del in_jiffy[filename]
-            monitor_queue.put('remove_complete')
+            monitor_q.put('remove_complete')
         
     return
 
@@ -196,9 +196,7 @@ if __name__ == "__main__":
         while True:
             try:
                 stat = monitor_queue.get_nowait()
-                if stat is None:
-                    exit_flag = True
-                elif stat == 'put_complete':
+                if stat == 'put_complete':
                     inflight_puts -= 1
             except queue.Empty:
                 break
