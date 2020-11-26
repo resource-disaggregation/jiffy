@@ -547,6 +547,8 @@ class binary_serde_impl : public serde {
     std::size_t log_info_size = log_info.size();
     out.write(reinterpret_cast<const char *>(&log_info_size), sizeof(size_t));
     for (int i = 0; i < log_info.size(); ++i) {
+      std::cout<<"slb:"<<shared_log_block.data()<<"\n";
+      std::cout<<"tbf:"<<table.first.data()<<"\n";
       auto info_set = log_info[i];
       std::size_t num_args = info_set.size() - 1;
       std::size_t temp_offset = info_set[0];
