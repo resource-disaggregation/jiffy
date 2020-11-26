@@ -700,7 +700,6 @@ class binary_serde_impl : public serde {
       std::string data;
       data.resize(data_size);
       in.read(&data[0], data_size);
-      std::cout << data<<"\n";
       table.first.write(data, temp_offset);
       temp_offset += data.size();
     }
