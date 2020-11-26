@@ -95,15 +95,11 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
     }
     for (int j = 2; j < info_set.size(); j++){
       auto stream = partition_.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(info_set[j])).second;
-      std::cout<<"stream_offset="<<temp_offset<<"\n";
-      std::cout<<"stream="<<stream<<"\n";
       temp_offset += info_set[j];
       std::vector<std::string>::iterator it;
       it = find(logical_streams.begin(), logical_streams.end(), stream);
       if (it != logical_streams.end()){
         auto data = partition_.read(static_cast<std::size_t>(info_set[0]+stream_size), static_cast<std::size_t>(data_size)).second;
-        std::cout<<"data_offset="<<info_set[0]+stream_size<<"\n";
-        std::cout<<"data="<<data<<"\n";
         ret.push_back(data);
         break;
       }
@@ -211,12 +207,10 @@ bool shared_log_partition::is_dirty() const {
 }
 
 void shared_log_partition::load(const std::string &path) {
-  std::cout<<"previous:"<<partition_.data()<<"\n";
   auto remote = persistent::persistent_store::instance(path, ser_);
   auto decomposed = persistent::persistent_store::decompose_path(path);
   shared_log_serde_type triple = {&partition_, log_info_, seq_no_};
   remote->read<shared_log_serde_type>(decomposed.second, triple);
-  std::cout<<"after:"<<partition_.data()<<"\n";
 }
 
 bool shared_log_partition::sync(const std::string &path) {

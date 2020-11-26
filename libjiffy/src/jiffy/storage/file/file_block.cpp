@@ -11,7 +11,6 @@ file_block::file_block(std::size_t max_size, block_memory_allocator<char> alloc)
 }
 
 file_block::~file_block() {
-  std::cout<<"deallocate!!!!!!!!!!!\n";
   alloc_.deallocate(data_, max_);
 }
 
