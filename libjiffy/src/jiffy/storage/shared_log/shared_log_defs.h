@@ -10,7 +10,14 @@ namespace jiffy {
 namespace storage {
 // shared_log definition
 typedef shared_log_block shared_log_type;
-typedef std::pair<shared_log_block, std::pair<std::vector<std::vector<int>>, int>> shared_log_serde_type;
+
+struct shared_log_triple
+{
+    shared_log_block block;
+    std::vector<std::vector<int>> log_info;
+    int seq_no;
+};
+typedef struct shared_log_triple shared_log_serde_type;
 
 }
 }

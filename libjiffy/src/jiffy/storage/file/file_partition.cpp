@@ -231,11 +231,9 @@ bool file_partition::is_dirty() const {
 }
 
 void file_partition::load(const std::string &path) {
-  std::cout<<"previous:"<<partition_.data()<<"\n";
   auto remote = persistent::persistent_store::instance(path, ser_);
   auto decomposed = persistent::persistent_store::decompose_path(path);
   remote->read<file_type>(decomposed.second, partition_);
-  std::cout<<"after:"<<partition_.data()<<"\n";
 }
 
 bool file_partition::sync(const std::string &path) {

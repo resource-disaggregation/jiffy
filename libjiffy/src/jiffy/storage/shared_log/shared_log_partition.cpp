@@ -213,18 +213,16 @@ bool shared_log_partition::is_dirty() const {
 void shared_log_partition::load(const std::string &path) {
   auto remote = persistent::persistent_store::instance(path, ser_);
   auto decomposed = persistent::persistent_store::decompose_path(path);
-  std::pair<std::vector<std::vector<int>>, int> inner_pair = std::make_pair(log_info_, seq_no_);
-  shared_log_serde_type pair = std::make_pair(partition_, inner_pair);
-  remote->read<shared_log_serde_type>(decomposed.second, pair);
+  shared_log_serde_type triple = {partition_, log_info_, seq_no_};
+  remote->read<shared_log_serde_type>(decomposed.second, triple);
 }
 
 bool shared_log_partition::sync(const std::string &path) {
   if (dirty_) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    std::pair<std::vector<std::vector<int>>, int> inner_pair = std::make_pair(log_info_, seq_no_);
-    shared_log_serde_type pair = std::make_pair(partition_, inner_pair);
-    remote->write<shared_log_serde_type>(pair, decomposed.second);
+    shared_log_serde_type triple = {partition_, log_info_, seq_no_};
+    remote->write<shared_log_serde_type>(triple, decomposed.second);
     dirty_ = false;
     return true;
   }
@@ -236,9 +234,8 @@ bool shared_log_partition::dump(const std::string &path) {
   if (dirty_) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    std::pair<std::vector<std::vector<int>>, int> inner_pair = std::make_pair(log_info_, seq_no_);
-    shared_log_serde_type pair = std::make_pair(partition_, inner_pair);
-    remote->write<shared_log_serde_type>(pair, decomposed.second);
+    shared_log_serde_type triple = {partition_, log_info_, seq_no_};
+    remote->write<shared_log_serde_type>(triple, decomposed.second);
     flushed = true;
   }
   partition_.clear();
