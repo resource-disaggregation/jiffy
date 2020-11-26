@@ -18,10 +18,9 @@ enum shared_log_cmd_id : uint32_t {
   shared_log_write = 0,
   shared_log_scan = 1,
   shared_log_trim = 2,
-  shared_log_clear = 3,
-  shared_log_update_partition = 4,
-  shared_log_add_blocks = 5,
-  shared_log_get_storage_capacity = 6
+  shared_log_update_partition = 3,
+  shared_log_add_blocks = 4,
+  shared_log_get_storage_capacity = 5
 };
 
 }
