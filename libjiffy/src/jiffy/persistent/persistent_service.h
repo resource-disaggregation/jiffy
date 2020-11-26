@@ -4,6 +4,7 @@
 #include <string>
 #include "jiffy/storage/hashtable/hash_table_defs.h"
 #include "jiffy/storage/file/file_defs.h"
+#include "jiffy/storage/fifoqueue/fifo_queue_defs.h"
 #include "jiffy/storage/shared_log/shared_log_defs.h"
 #include "jiffy/storage/serde/serde_all.h"
 #include <aws/core/Aws.h>

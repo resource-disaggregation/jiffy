@@ -50,11 +50,11 @@ void shared_log_partition::write(response &_return, const arg_list &args) {
   auto data = args[2];
   std::string logical_stream = "";
   std::vector<int> info_set;
-  info_set.push_back(starting_offset_);
-  info_set.push_back(data.size());
+  info_set.push_back(int(starting_offset_));
+  info_set.push_back(int(data.size()));
   for (int i = 3; i < args.size(); i++){
     logical_stream += args[i];
-    info_set.push_back(args[i].size());
+    info_set.push_back(int(args[i].size()));
   }
   log_info_.push_back(info_set); 
   std::string writing_content = logical_stream + data;
