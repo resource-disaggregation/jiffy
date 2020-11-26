@@ -100,6 +100,7 @@ TEST_CASE("shared_log_flush_load_test", "[write][sync][reset][load][read]") {
   }
   REQUIRE(block.is_dirty());
   REQUIRE(block.sync("local://tmp/test"));
+  std::cout << "sync succeeded. \n";
   REQUIRE(!block.is_dirty());
   REQUIRE_FALSE(block.sync("local://tmp/test"));
   REQUIRE_NOTHROW(block.load("local://tmp/test"));

@@ -192,7 +192,6 @@ void shared_log_partition::run_command(response &_return, const arg_list &args) 
       return;
     }
   }
-  std::cout<<cmd_name<<"!!!!!!!!!!!!!!!!!!\n";
 
   if (is_mutator(cmd_name)) {
     dirty_ = true;
