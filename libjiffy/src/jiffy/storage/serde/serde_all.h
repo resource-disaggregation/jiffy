@@ -689,7 +689,7 @@ class binary_serde_impl : public serde {
     in.read(reinterpret_cast<char *>(&log_size), sizeof(log_size));
     std::cout << "basic read2 succeeded. \n";
 
-    std::size_t temp_offset;
+    std::size_t temp_offset = 0;
 
     while (in.peek() != EOF && offset_in.peek() != EOF) {
       std::size_t log_position;
