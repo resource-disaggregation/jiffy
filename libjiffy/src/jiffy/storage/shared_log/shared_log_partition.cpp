@@ -220,7 +220,6 @@ bool shared_log_partition::sync(const std::string &path) {
     auto decomposed = persistent::persistent_store::decompose_path(path);
     std::pair<std::vector<std::vector<int>>, int> inner_pair = std::make_pair(log_info_, seq_no_);
     shared_log_serde_type pair = std::make_pair(partition_, inner_pair);
-    std::cout << "make_pair succeeded. \n";
     remote->write<shared_log_serde_type>(pair, decomposed.second);
     dirty_ = false;
     return true;
