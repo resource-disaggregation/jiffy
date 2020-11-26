@@ -537,7 +537,7 @@ class binary_serde_impl : public serde {
     shared_log_type shared_log_block = table.first;
     std::vector<std::vector<int>> log_info = table.second.first;
     std::size_t seq_no = table.second.second;
-
+    std::cout << "out path = " << out_path<< "\n";
     std::cout << "enter ser succeeded. \n";
 
     std::ofstream out(out_path, std::ios::binary);
