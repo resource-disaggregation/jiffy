@@ -5,67 +5,50 @@ import time
 import os
 import sys
 from jiffy import JiffyClient
-from multiprocessing import Process, Queue, Value, Lock
+from multiprocessing import Process, Queue
 import pickle
 import math
 import datetime
 import queue
 
-class Counter(object):
-    def __init__(self, initval=0):
-        self.val = Value('i', initval)
-        self.lock = Lock()
-
-    def increment(self):
-        with self.lock:
-            self.val.value += 1
-
-    def decrement(self):
-        with self.lock:
-            self.val.value -= 1
-
-    def value(self):
-        with self.lock:
-            return self.val.value
-
 # Deterministic mapping from filename to worker
 def map_file_to_worker(filename, num_workers):
     return abs(hash(filename)) % num_workers
 
-def run_monitor(q, num_jiffy_blocks, dir_host, dir_porta, dir_portb, tenant_id):
+def run_monitor(q, dir_host, dir_porta, dir_portb, tenant_id):
     client = JiffyClient(dir_host, dir_porta, dir_portb)
     print('Monitor connected')
 
     exit_flag = False
-    jiffy_blocks = 0
+    cur_jiffy_blocks = 0
 
     while True:
-        prev_delta = 0
+        extra_persistent_blocks = 0
         while True:
             try:
                 stat = q.get_nowait()
                 if stat is None:
                     exit_flag = True
-                elif stat == 'inc_demand':
-                    prev_delta += 1
-                elif stat == 'dec_demand':
-                    prev_delta -= 1    
+                elif stat == 'put_jiffy':
+                    cur_jiffy_blocks += 1
+                elif stat == 'remove_jiffy':
+                    cur_jiffy_blocks -= 1
+                elif stat == 'put_persistent':
+                    extra_persistent_blocks += 1
+                # Ignore remove_persistent 
             except queue.Empty:
                 break
 
         if exit_flag:
             print('Monitor exiting')
             break
-        adv_demand = jiffy_blocks + prev_delta
+        adv_demand = cur_jiffy_blocks + extra_persistent_blocks
+        assert adv_demand >= 0
         client.fs.add_tags('advertise_demand', {'tenant_id': tenant_id, 'demand': str(adv_demand)})
-
-        # Record num_jiffy_blocks for next epoch
-        jiffy_blocks = num_jiffy_blocks.value()
-
         time.sleep(1)
 
 
-def worker(q, resq, monitor_q, num_jiffy_blocks, dir_host, dir_porta, dir_portb, block_size, backing_path):
+def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backing_path):
     # Initialize
     # Connect the directory server with the corresponding port numbers
     client = JiffyClient(dir_host, dir_porta, dir_portb)
@@ -87,7 +70,7 @@ def worker(q, resq, monitor_q, num_jiffy_blocks, dir_host, dir_porta, dir_portb,
             break
         filename = task['filename']
         if task['op'] == 'put':
-            monitor_queue.put('inc_demand')
+            # monitor_queue.put('inc_demand')
             jiffy_write = True
             try:
                 start_time = datetime.datetime.now()
@@ -101,7 +84,7 @@ def worker(q, resq, monitor_q, num_jiffy_blocks, dir_host, dir_porta, dir_portb,
                 lat_sum += elapsed.total_seconds()
                 lat_count += 1
                 jiffy_blocks += 1
-                num_jiffy_blocks.increment()
+                monitor_queue.put('put_jiffy')
                 print('Wrote to jiffy')
             except Exception as e:
                 print('Write to jiffy failed')
@@ -113,6 +96,7 @@ def worker(q, resq, monitor_q, num_jiffy_blocks, dir_host, dir_porta, dir_portb,
             
             if not jiffy_write:
                 # Write to persistent storage
+                monitor_queue.put('put_persistent')
                 f = open(backing_path + filename, 'w')
                 start_time = datetime.datetime.now()
                 f.write(buf)
@@ -126,9 +110,9 @@ def worker(q, resq, monitor_q, num_jiffy_blocks, dir_host, dir_porta, dir_portb,
                 print('Wrote to persistent storage')
 
         if task['op'] == 'remove':
-            monitor_q.put('dec_demand')
+            # monitor_q.put('dec_demand')
             if in_jiffy[filename]:
-                num_jiffy_blocks.decrement()
+                monitor_q.put('remove_jiffy')
                 try:
                     client.remove(filename)
                     duration_used = datetime.datetime.now() - jiffy_create_ts[filename]
@@ -137,6 +121,8 @@ def worker(q, resq, monitor_q, num_jiffy_blocks, dir_host, dir_porta, dir_portb,
                 except:
                     print('Remove from jiffy failed')
                 del jiffy_create_ts[filename]
+            else:
+                monitor_q.put('remove_persistent')
             
             del in_jiffy[filename]
         
@@ -174,10 +160,9 @@ if __name__ == "__main__":
 
     results = Queue()
     monitor_queue = Queue()
-    num_jiffy_blocks = Counter(0)
 
     # Create monitor
-    monitor = Process(target=run_monitor, args=(monitor_queue, num_jiffy_blocks, dir_host, dir_porta, dir_portb, tenant_id))
+    monitor = Process(target=run_monitor, args=(monitor_queue, dir_host, dir_porta, dir_portb, tenant_id))
 
     # Start monitor
     monitor.start()
@@ -185,7 +170,7 @@ if __name__ == "__main__":
     # Create workers
     workers = []
     for i in range(para):
-        p = Process(target=worker, args=(queues[i], results, monitor_queue, num_jiffy_blocks, dir_host, dir_porta, dir_portb, block_size, backing_path))
+        p = Process(target=worker, args=(queues[i], results, monitor_queue, dir_host, dir_porta, dir_portb, block_size, backing_path))
         workers.append(p)
 
     # Start workers
