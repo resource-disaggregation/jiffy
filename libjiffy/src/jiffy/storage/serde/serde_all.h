@@ -701,16 +701,21 @@ class binary_serde_impl : public serde {
       }
       std::size_t num_args;
       offset_in.read(reinterpret_cast<char *>(&num_args), sizeof(num_args));
-
+      std::cout << " read2 succeeded. \n";
       std::size_t data_size;
       offset_in.read(reinterpret_cast<char *>(&data_size), sizeof(data_size));
+      std::cout << " read3 succeeded. \n";
       for (int i = 0; i < num_args - 1; ++i) {
+        std::cout << i<< "\n";
         std::size_t stream_size;
         offset_in.read(reinterpret_cast<char *>(&stream_size), sizeof(stream_size));
+        std::cout << " innerread1 succeeded. \n";
         std::string stream;
         stream.resize(stream_size);
         in.read(&stream[0], stream_size);
+        std::cout << " innerread2 succeeded. \n";
         table.first.write(stream, temp_offset);
+        std::cout << " write succeeded. \n";
         temp_offset += stream.size();
       }
       std::string data;
