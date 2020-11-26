@@ -133,6 +133,9 @@ class shared_log_partition : public chain_module {
    */
   void forward_all() override;
 
+  /* index: seq no. of log; value: <metadata.start_offset, metadata.length, log_info.length>*/
+  std::vector<std::vector<int>> log_info_;
+
  private:
 
   /* File partition */
@@ -161,8 +164,7 @@ class shared_log_partition : public chain_module {
 
   std::vector<std::string> allocated_blocks_;
 
-  /* index: seq no. of log; value: <metadata.start_offset, metadata.length, log_info.length>*/
-  std::vector<std::vector<int>> log_info_;
+  
 
   /* starting seq no. in this partition */
   int seq_no_ = 0;

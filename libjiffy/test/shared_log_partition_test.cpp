@@ -104,7 +104,9 @@ TEST_CASE("shared_log_flush_load_test", "[write][sync][reset][load][read]") {
   REQUIRE_FALSE(block.sync("local://tmp/test"));
   REQUIRE_NOTHROW(block.load("local://tmp/test"));
   
+  std::cout<<"info_size = "<<block.log_info_.size()<<"\n";
   for (std::size_t start_pos = 0; start_pos < 998; ++start_pos) {
+    std::cout<<start_pos<<"\n";
     response resp;
     REQUIRE_NOTHROW(block.scan(resp, {"scan", std::to_string(start_pos), std::to_string(start_pos + 2), std::to_string(start_pos)+"_stream"}));
     REQUIRE(resp[0] == "!ok");
