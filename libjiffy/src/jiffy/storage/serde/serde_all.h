@@ -534,7 +534,6 @@ class binary_serde_impl : public serde {
    */
 
   size_t serialize_impl(const shared_log_serde_type &table, std::string out_path) {
-    shared_log_type shared_log_block = table.first;
     std::vector<std::vector<int>> log_info = table.second.first;
     std::size_t seq_no = table.second.second;
 
@@ -562,13 +561,13 @@ class binary_serde_impl : public serde {
 
       for (int j = 2; j < info_set.size(); j++){
         size_t stream_size = info_set[j];
-        std::string stream = shared_log_block.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(info_set[j])).second;
+        std::string stream = table.first.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(info_set[j])).second;
         
         offset_out.write(reinterpret_cast<const char *>(&stream_size), sizeof(size_t));
         out.write(reinterpret_cast<const char *>(stream.data()), stream_size);
         temp_offset += info_set[j];
       }
-      std::string data = shared_log_block.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(data_size)).second;
+      std::string data = table.first.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(data_size)).second;
       out.write(reinterpret_cast<const char *>(data.data()), data_size);
 
     }

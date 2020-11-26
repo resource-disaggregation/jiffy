@@ -11,7 +11,6 @@ shared_log_block::shared_log_block(std::size_t max_size, block_memory_allocator<
 }
 
 shared_log_block::~shared_log_block() {
-  std::cout<<"deallocate!!!!!!!!!!!\n";
   alloc_.deallocate(data_, max_);
 }
 
@@ -50,7 +49,6 @@ std::size_t shared_log_block::size() const {
 }
 
 void shared_log_block::clear() {
-  std::cout<<"cleared!!!!!!!!!!!\n";
   for (std::size_t i = 0; i < max_; i++) {
     data_[i] = 0;
   }
