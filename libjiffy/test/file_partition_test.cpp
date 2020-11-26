@@ -107,12 +107,12 @@ TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
   struct memkind* pmem_kind = nullptr;
   std::string pmem_path = "/media/pmem0/shijie"; 
   std::string memory_mode = "DRAM";
-  // size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
-  // if(err) {
-  //   char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-  //   memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
-  //   fprintf(stderr, "%s\n", error_message);
-  // }
+  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+  if(err) {
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+  }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   file_partition block(&manager);
