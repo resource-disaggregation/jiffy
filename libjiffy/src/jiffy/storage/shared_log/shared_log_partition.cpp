@@ -71,8 +71,8 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
   if (args.size() < 4) {
     RETURN_ERR("!args_error");
   }
-  auto start_pos = std::stoi(args[1]) - seq_no;
-  auto end_pos = std::stoi(args[2]) - seq_no;
+  auto start_pos = std::stoi(args[1]) - seq_no_;
+  auto end_pos = std::stoi(args[2]) - seq_no_;
   if (end_pos > log_info_.size()) end_pos = log_info_.size() - 1;
   std::vector<std::string> logical_streams = {}; 
   for (int i = 3; i < args.size(); i++){
@@ -117,8 +117,8 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
   if (log_info_.size() == 0) {
     RETURN_OK(0);
   }
-  auto start_pos = std::stoi(args[1]) - seq_no;
-  auto end_pos = std::stoi(args[2]) - seq_no;
+  auto start_pos = std::stoi(args[1]) - seq_no_;
+  auto end_pos = std::stoi(args[2]) - seq_no_;
   if (start_pos < 0 || start_pos >= log_info_.size() || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("trim position invalid");
   if (end_pos > log_info_.size()) end_pos = log_info_.size() - 1;
   int trimmed_length = 0;
