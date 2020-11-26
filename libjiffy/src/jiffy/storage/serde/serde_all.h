@@ -712,6 +712,7 @@ class binary_serde_impl : public serde {
 
     auto sz = in.tellg();
     in.close();
+    offset_in.close();
     return static_cast<std::size_t>(sz);
   }
 };
