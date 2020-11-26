@@ -538,6 +538,8 @@ class binary_serde_impl : public serde {
     std::vector<std::vector<int>> log_info = table.second.first;
     std::size_t seq_no = table.second.second;
 
+    std::cout << "enter ser succeeded. \n";
+
     std::ofstream out(out_path, std::ios::binary);
     std::string offset_out_path = out_path;
     offset_out_path.append("_offset");
@@ -712,7 +714,7 @@ class binary_serde_impl : public serde {
       log_info.push_back(info_set);
     }
     table.second.first = log_info;
-    
+
     auto sz = in.tellg();
     in.close();
     return static_cast<std::size_t>(sz);
