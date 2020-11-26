@@ -26,7 +26,7 @@ TEST_CASE("shared_log_performance_test", "[write][read][performance]") {
     int num_blocks = 1;
     int chain_length = 1;
     int num_ops = 100000;
-    int data_size = 1024;
+    int data_size = 1280;
     
     std::string path = "/tmp";
     std::string backing_path = "local://tmp";
