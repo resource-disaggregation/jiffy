@@ -537,24 +537,16 @@ class binary_serde_impl : public serde {
     shared_log_type shared_log_block = table.first;
     std::vector<std::vector<int>> log_info = table.second.first;
     std::size_t seq_no = table.second.second;
-    std::cout << "out path = " << out_path<< "\n";
-    std::cout << "enter ser succeeded. \n";
 
     std::ofstream out(out_path, std::ios::binary);
-    std::cout << "out succeeded. \n";
     std::string offset_out_path = out_path;
     offset_out_path.append("_offset");
     std::ofstream offset_out(offset_out_path, std::ios::binary);
-    std::cout << "offset_out succeeded. \n";
 
-    std::cout<<"seq_no = "<<seq_no<<"\n";
     out.write(reinterpret_cast<const char *>(&seq_no), sizeof(size_t));
-    std::cout << "basic write2 succeeded. \n";
     std::size_t log_info_size = log_info.size();
     out.write(reinterpret_cast<const char *>(&log_info_size), sizeof(size_t));
-    std::cout << "basic write2 succeeded. \n";
     for (int i = 0; i < log_info.size(); ++i) {
-      std::cout << "i = "<<i<<"\n";
       auto info_set = log_info[i];
       std::size_t num_args = info_set.size() - 1;
       std::size_t temp_offset = info_set[0];
@@ -566,7 +558,6 @@ class binary_serde_impl : public serde {
       offset_out.write(reinterpret_cast<const char *>(&i), sizeof(size_t));
       offset_out.write(reinterpret_cast<const char *>(&num_args), sizeof(size_t));
       offset_out.write(reinterpret_cast<const char *>(&data_size), sizeof(size_t));
-      std::cout << "write1 succeeded. \n";
 
       for (int j = 2; j < info_set.size(); j++){
         size_t stream_size = info_set[j];
@@ -575,10 +566,8 @@ class binary_serde_impl : public serde {
         out.write(reinterpret_cast<const char *>(stream.data()), stream_size);
         temp_offset += info_set[j];
       }
-      std::cout << "write2 succeeded. \n";
       std::string data = shared_log_block.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(data_size)).second;
       out.write(reinterpret_cast<const char *>(data.data()), data_size);
-      std::cout << "write3 succeeded. \n";
 
     }
     out.flush();
@@ -677,50 +666,41 @@ class binary_serde_impl : public serde {
     std::string offset_in_path = in_path;
     offset_in_path.append("_offset");
     std::ifstream offset_in(offset_in_path,std::ios::binary);
-    std::cout << "out succeeded. \n";
     std::vector<std::vector<int>> log_info;
 
     std::size_t seq_no;
     in.read(reinterpret_cast<char *>(&seq_no), sizeof(seq_no));
-    std::cout << "basic read1 succeeded. \n";
     table.second.second = seq_no;
 
     std::size_t log_size;
     in.read(reinterpret_cast<char *>(&log_size), sizeof(log_size));
-    std::cout << "basic read2 succeeded. \n";
 
     std::size_t temp_offset = 0;
 
     while (in.peek() != EOF && offset_in.peek() != EOF) {
       std::size_t log_position;
       offset_in.read(reinterpret_cast<char *>(&log_position), sizeof(log_position));
-      std::cout << " read1 succeeded. \n";
       while (log_position > log_info.size()) {
         std::vector<int> info_set = {-1,0};
         log_info.push_back(info_set);
       }
       std::size_t num_args;
       offset_in.read(reinterpret_cast<char *>(&num_args), sizeof(num_args));
-      std::cout << " read2 succeeded. \n";
       std::size_t data_size;
       offset_in.read(reinterpret_cast<char *>(&data_size), sizeof(data_size));
-      std::cout << " read3 succeeded. \n";
       for (int i = 0; i < num_args - 1; ++i) {
-        std::cout << i<< "\n";
         std::size_t stream_size;
         offset_in.read(reinterpret_cast<char *>(&stream_size), sizeof(stream_size));
-        std::cout << " innerread1 succeeded. \n";
         std::string stream;
         stream.resize(stream_size);
         in.read(&stream[0], stream_size);
-        std::cout << " innerread2 succeeded. \n";
         table.first.write(stream, temp_offset);
-        std::cout << " write succeeded. \n";
         temp_offset += stream.size();
       }
       std::string data;
       data.resize(data_size);
       in.read(&data[0], data_size);
+      std::cout << data<<"\n";
       table.first.write(data, temp_offset);
       temp_offset += data.size();
     }
