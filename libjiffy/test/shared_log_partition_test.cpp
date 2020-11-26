@@ -99,6 +99,7 @@ TEST_CASE("shared_log_flush_load_test", "[write][sync][reset][load][read]") {
     REQUIRE(res.front() == "!ok");
   }
   REQUIRE(block.is_dirty());
+  std::cout << "before sync. \n";
   REQUIRE(block.sync("local://tmp/test"));
   std::cout << "sync succeeded. \n";
   REQUIRE(!block.is_dirty());
