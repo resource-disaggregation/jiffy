@@ -15,37 +15,37 @@ import queue
 def map_file_to_worker(filename, num_workers):
     return abs(hash(filename)) % num_workers
 
-def run_monitor(q, dir_host, dir_porta, dir_portb, tenant_id):
-    client = JiffyClient(dir_host, dir_porta, dir_portb)
-    print('Monitor connected')
+# def run_monitor(q, dir_host, dir_porta, dir_portb, tenant_id):
+#     client = JiffyClient(dir_host, dir_porta, dir_portb)
+#     print('Monitor connected')
 
-    exit_flag = False
-    cur_jiffy_blocks = 0
+#     exit_flag = False
+#     cur_jiffy_blocks = 0
 
-    while True:
-        extra_persistent_blocks = 0
-        while True:
-            try:
-                stat = q.get_nowait()
-                if stat is None:
-                    exit_flag = True
-                elif stat == 'put_jiffy':
-                    cur_jiffy_blocks += 1
-                elif stat == 'remove_jiffy':
-                    cur_jiffy_blocks -= 1
-                elif stat == 'put_persistent':
-                    extra_persistent_blocks += 1
-                # Ignore remove_persistent 
-            except queue.Empty:
-                break
+#     while True:
+#         extra_persistent_blocks = 0
+#         while True:
+#             try:
+#                 stat = q.get_nowait()
+#                 if stat is None:
+#                     exit_flag = True
+#                 elif stat == 'put_jiffy':
+#                     cur_jiffy_blocks += 1
+#                 elif stat == 'remove_jiffy':
+#                     cur_jiffy_blocks -= 1
+#                 elif stat == 'put_persistent':
+#                     extra_persistent_blocks += 1
+#                 # Ignore remove_persistent 
+#             except queue.Empty:
+#                 break
 
-        if exit_flag:
-            print('Monitor exiting')
-            break
-        adv_demand = cur_jiffy_blocks + extra_persistent_blocks
-        assert adv_demand >= 0
-        client.fs.add_tags('advertise_demand', {'tenant_id': tenant_id, 'demand': str(adv_demand)})
-        time.sleep(1)
+#         if exit_flag:
+#             print('Monitor exiting')
+#             break
+#         adv_demand = cur_jiffy_blocks + extra_persistent_blocks
+#         assert adv_demand >= 0
+#         client.fs.add_tags('advertise_demand', {'tenant_id': tenant_id, 'demand': str(adv_demand)})
+#         time.sleep(1)
 
 
 def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backing_path):
@@ -84,7 +84,7 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
                 lat_sum += elapsed.total_seconds()
                 lat_count += 1
                 jiffy_blocks += 1
-                monitor_queue.put('put_jiffy')
+                # monitor_queue.put('put_jiffy')
                 print('Wrote to jiffy')
             except Exception as e:
                 print('Write to jiffy failed')
@@ -96,7 +96,7 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
             
             if not jiffy_write:
                 # Write to persistent storage
-                monitor_queue.put('put_persistent')
+                # monitor_queue.put('put_persistent')
                 f = open(backing_path + filename, 'w')
                 start_time = datetime.datetime.now()
                 f.write(buf)
@@ -108,6 +108,8 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
                 lat_count += 1
                 persistent_blocks += 1
                 print('Wrote to persistent storage')
+            
+            monitor_queue.put('put_complete')
 
         if task['op'] == 'remove':
             # monitor_q.put('dec_demand')
@@ -125,6 +127,7 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
                 monitor_q.put('remove_persistent')
             
             del in_jiffy[filename]
+            monitor_queue.put('remove_complete')
         
     return
 
@@ -147,7 +150,8 @@ if __name__ == "__main__":
     backing_path = sys.argv[8]
     tenant_id = sys.argv[4]
     para = int(sys.argv[5])
-    demands = get_demands(sys.argv[6], 100, tenant_id) + [0]
+    fair_share = 100
+    demands = get_demands(sys.argv[6], fair_share, tenant_id) + [0]
     # demands = [1000, 0, 0, 0, 0]
 
     if not os.path.exists('%s/%s' % (backing_path, tenant_id)):
@@ -162,10 +166,12 @@ if __name__ == "__main__":
     monitor_queue = Queue()
 
     # Create monitor
-    monitor = Process(target=run_monitor, args=(monitor_queue, dir_host, dir_porta, dir_portb, tenant_id))
+    # monitor = Process(target=run_monitor, args=(monitor_queue, dir_host, dir_porta, dir_portb, tenant_id))
 
     # Start monitor
-    monitor.start()
+    # monitor.start()
+    client = JiffyClient(dir_host, dir_porta, dir_portb)
+    print('Monitor connected')
     
     # Create workers
     workers = []
@@ -183,7 +189,24 @@ if __name__ == "__main__":
     cur_files = []
     cur_demand = 0
     file_seq = 0
+    inflight_puts = 0
     for e in range(len(demands)):
+        # Advertise demand
+        # Use previous epoch demand, taking into account carry-over
+        while True:
+            try:
+                stat = monitor_queue.get_nowait()
+                if stat is None:
+                    exit_flag = True
+                elif stat == 'put_complete':
+                    inflight_puts -= 1
+            except queue.Empty:
+                break
+        
+        adv_demand = cur_demand + inflight_puts
+        assert adv_demand >= 0
+        client.fs.add_tags('advertise_demand', {'tenant_id': tenant_id, 'demand': str(adv_demand)})
+
         num_queued = 0
         if demands[e] > cur_demand:
             # Create files and write
@@ -194,6 +217,7 @@ if __name__ == "__main__":
                 wid = map_file_to_worker(filename, para)
                 queues[wid].put({'op': 'put', 'filename': filename})
                 num_queued += 1
+                inflight_puts += 1
 
         elif demands[e] < cur_demand:
             # Remove files
@@ -221,11 +245,11 @@ if __name__ == "__main__":
         queues[i].join_thread()
         workers[i].join()
 
-    monitor_queue.put(None)
+    # monitor_queue.put(None)
     # Wait for monitor to exit
     monitor_queue.close()
     monitor_queue.join_thread()
-    monitor.join()
+    # monitor.join()
 
     # Get stats
     lat_sum = 0
