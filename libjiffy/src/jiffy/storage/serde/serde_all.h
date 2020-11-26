@@ -549,6 +549,7 @@ class binary_serde_impl : public serde {
     out.write(reinterpret_cast<const char *>(log_info.size()), sizeof(size_t));
 
     for (int i = 0; i < log_info.size(); ++i) {
+      std::cout << "i = "<<i<<"\n";
       auto info_set = log_info[i];
       std::size_t num_args = info_set.size() - 1;
       std::size_t temp_offset = info_set[0];
@@ -560,6 +561,7 @@ class binary_serde_impl : public serde {
       offset_out.write(reinterpret_cast<const char *>(&i), sizeof(size_t));
       offset_out.write(reinterpret_cast<const char *>(&num_args), sizeof(size_t));
       offset_out.write(reinterpret_cast<const char *>(&data_size), sizeof(size_t));
+      std::cout << "write1 succeeded. \n";
 
       for (int j = 2; j < info_set.size(); j++){
         size_t stream_size = info_set[j];
@@ -568,9 +570,10 @@ class binary_serde_impl : public serde {
         out.write(reinterpret_cast<const char *>(stream.data()), stream_size);
         temp_offset += info_set[j];
       }
-
+      std::cout << "write2 succeeded. \n";
       std::string data = shared_log_block.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(data_size)).second;
       out.write(reinterpret_cast<const char *>(data.data()), data_size);
+      std::cout << "write3 succeeded. \n";
 
     }
     out.flush();
