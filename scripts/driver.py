@@ -203,6 +203,7 @@ if __name__ == "__main__":
         
         adv_demand = cur_demand + inflight_puts
         assert adv_demand >= 0
+        print('Avertising demand: ' + str(adv_demand))
         client.fs.add_tags('advertise_demand', {'tenant_id': tenant_id, 'demand': str(adv_demand)})
 
         num_queued = 0
