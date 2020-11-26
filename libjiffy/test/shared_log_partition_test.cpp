@@ -100,11 +100,11 @@ TEST_CASE("shared_log_flush_load_test", "[write][sync][reset][load][read]") {
   }
   REQUIRE(block.is_dirty());
   std::cout << "before sync. \n";
-  REQUIRE(block.sync("local://tmp/test"));
+  REQUIRE(block.sync("local://media/pmem0/shijie/test"));
   std::cout << "sync succeeded. \n";
   REQUIRE(!block.is_dirty());
-  REQUIRE_FALSE(block.sync("local://tmp/test"));
-  REQUIRE_NOTHROW(block.load("local://tmp/test"));
+  REQUIRE_FALSE(block.sync("local://media/pmem0/shijie/test"));
+  REQUIRE_NOTHROW(block.load("local://media/pmem0/shijie/test"));
   
   std::cout<<"info_size = "<<block.log_info_.size()<<"\n";
   for (std::size_t start_pos = 0; start_pos < 998; ++start_pos) {
