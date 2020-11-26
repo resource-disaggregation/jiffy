@@ -104,7 +104,9 @@ TEST_CASE("shared_log_flush_load_test", "[write][sync][reset][load][read]") {
   std::cout << "sync succeeded. \n";
   REQUIRE(!block.is_dirty());
   REQUIRE_FALSE(block.sync("local://tmp/test"));
+  std::cout << "before load. \n";
   REQUIRE_NOTHROW(block.load("local://tmp/test"));
+  std::cout << "load succeeded. \n";
   
   std::cout<<"info_size = "<<block.log_info_.size()<<"\n";
   for (std::size_t start_pos = 0; start_pos < 998; ++start_pos) {

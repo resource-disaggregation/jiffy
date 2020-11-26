@@ -677,21 +677,24 @@ class binary_serde_impl : public serde {
     std::string offset_in_path = in_path;
     offset_in_path.append("_offset");
     std::ifstream offset_in(offset_in_path,std::ios::binary);
-
+    std::cout << "out succeeded. \n";
     std::vector<std::vector<int>> log_info;
 
     std::size_t seq_no;
     in.read(reinterpret_cast<char *>(&seq_no), sizeof(seq_no));
+    std::cout << "basic read1 succeeded. \n";
     table.second.second = seq_no;
 
     std::size_t log_size;
     in.read(reinterpret_cast<char *>(&log_size), sizeof(log_size));
+    std::cout << "basic read2 succeeded. \n";
 
     std::size_t temp_offset;
 
     while (in.peek() != EOF && offset_in.peek() != EOF) {
       std::size_t log_position;
       offset_in.read(reinterpret_cast<char *>(&log_position), sizeof(log_position));
+      std::cout << " read1 succeeded. \n";
       while (log_position > log_info.size()) {
         std::vector<int> info_set = {-1,0};
         log_info.push_back(info_set);
