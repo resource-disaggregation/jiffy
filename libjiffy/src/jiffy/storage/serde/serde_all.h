@@ -547,9 +547,11 @@ class binary_serde_impl : public serde {
     std::ofstream offset_out(offset_out_path, std::ios::binary);
     std::cout << "offset_out succeeded. \n";
 
+    std::cout<<"seq_no = "<<seq_no<<"\n";
     out.write(reinterpret_cast<const char *>(seq_no), sizeof(size_t));
+    std::cout << "basic write2 succeeded. \n";
     out.write(reinterpret_cast<const char *>(log_info.size()), sizeof(size_t));
-
+    std::cout << "basic write2 succeeded. \n";
     for (int i = 0; i < log_info.size(); ++i) {
       std::cout << "i = "<<i<<"\n";
       auto info_set = log_info[i];
