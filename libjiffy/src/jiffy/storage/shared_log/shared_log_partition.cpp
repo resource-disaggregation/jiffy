@@ -208,14 +208,14 @@ bool shared_log_partition::is_dirty() const {
 void shared_log_partition::load(const std::string &path) {
   auto remote = persistent::persistent_store::instance(path, ser_);
   auto decomposed = persistent::persistent_store::decompose_path(path);
-  remote->read<shared_log_type>(decomposed.second, partition_);
+  remote->read<shared_log_serde_type>(decomposed.second, std::make_pair(partition_, log_info_));
 }
 
 bool shared_log_partition::sync(const std::string &path) {
   if (dirty_) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    remote->write<shared_log_type>(partition_, decomposed.second);
+    remote->write<shared_log_serde_type>(std::make_pair(partition_, log_info_), decomposed.second);
     dirty_ = false;
     return true;
   }
@@ -228,7 +228,7 @@ bool shared_log_partition::dump(const std::string &path) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
     partition_.set_log_info(log_info_);
-    remote->write<shared_log_type>(partition_, decomposed.second);
+    remote->write<shared_log_serde_type>(std::make_pair(partition_, log_info_), decomposed.second);
     flushed = true;
   }
   partition_.clear();
