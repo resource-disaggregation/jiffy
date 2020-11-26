@@ -97,7 +97,7 @@ class persistent_service {
    * @param out_path Persistent store path
    */
 
-  virtual void virtual_write(const storage::shared_log_type &table, const std::string &out_path) = 0;
+  virtual void virtual_write(const storage::shared_log_serde_type &table, const std::string &out_path) = 0;
 
   /**
    * @brief Virtual write for new hash table type
@@ -129,7 +129,7 @@ class persistent_service {
    * @param table shared_log
    */
 
-  virtual void virtual_read(const std::string &in_path, storage::shared_log_type &table) = 0;
+  virtual void virtual_read(const std::string &in_path, storage::shared_log_serde_type &table) = 0;
 
   /**
    * @brief Virtual read for new hash table type
@@ -182,7 +182,7 @@ class derived_persistent : public persistent_service_impl {
    * @param out_path Persistent store path
    */
 
-  void virtual_write(const storage::shared_log_type &table, const std::string &out_path) final {
+  void virtual_write(const storage::shared_log_serde_type &table, const std::string &out_path) final {
     return persistent_service_impl::write_impl(table, out_path);
   }
 
@@ -222,7 +222,7 @@ class derived_persistent : public persistent_service_impl {
    * @param table shared_log
    */
 
-  void virtual_read(const std::string &in_path, storage::shared_log_type &table) final {
+  void virtual_read(const std::string &in_path, storage::shared_log_serde_type &table) final {
     return persistent_service_impl::read_impl(in_path, table);
   }
 
