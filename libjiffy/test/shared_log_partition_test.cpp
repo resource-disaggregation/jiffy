@@ -114,7 +114,7 @@ TEST_CASE("shared_log_flush_load_test", "[write][sync][reset][load][read]") {
     REQUIRE(resp[0] == "!ok");
     REQUIRE(resp[1] == std::to_string(start_pos)+"_data");
   }
-  memkind_destroy_kind(pmem_kind);
+  // memkind_destroy_kind(pmem_kind);
 }
 
 
