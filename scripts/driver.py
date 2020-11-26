@@ -67,7 +67,10 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
             monitor_queue.put('inc_demand')
             jiffy_write = True
             try:
+                start_time = datetime.datetime.now()
                 f = client.create_file(filename, 'local:/' + backing_path)
+                elapsed = datetime.datetime.now() - start_time
+                print('Create time: ' + str(elapsed.total_seconds()))
                 jiffy_create_ts[filename] = datetime.datetime.now()
                 start_time = datetime.datetime.now()
                 f.write(buf)
