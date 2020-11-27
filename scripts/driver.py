@@ -55,6 +55,7 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
     buf = 'a' * block_size
     in_jiffy = {}
     jiffy_create_ts = {}
+    jiffy_fd = {}
     lat_sum = 0
     lat_count = 0
     total_block_time = 0
@@ -78,6 +79,7 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
                 elapsed = datetime.datetime.now() - start_time
                 print('Create time: ' + str(elapsed.total_seconds()))
                 jiffy_create_ts[filename] = datetime.datetime.now()
+                jiffy_fd[filename] = f
                 start_time = datetime.datetime.now()
                 f.write(buf)
                 elapsed = datetime.datetime.now() - start_time
@@ -91,6 +93,8 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
                 jiffy_write = False
                 if filename in jiffy_create_ts:
                     del jiffy_create_ts[filename]
+                if filename in jiffy_fd:
+                    del jiffy_fd[filename]
 
             in_jiffy[filename] = jiffy_write
             
@@ -116,6 +120,7 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
             if in_jiffy[filename]:
                 # monitor_q.put('remove_jiffy')
                 try:
+                    jiffy_fd[filename].clear()
                     client.remove(filename)
                     duration_used = datetime.datetime.now() - jiffy_create_ts[filename]
                     total_block_time += duration_used.total_seconds()
