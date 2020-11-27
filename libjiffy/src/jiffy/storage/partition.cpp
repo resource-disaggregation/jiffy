@@ -113,6 +113,11 @@ void partition::run_command(response &_return, const arg_list &_args) {
     _return.emplace_back("!stale_seq_no");
     return;
   }
+  if(block_seq_no > block_seq_no_) {
+      sync("local://home/midhul/nfs/jiffy_dump" + path_ + "_" + std::to_string(block_seq_no_));
+      LOG(log_level::info) << "Updating block seq no, block: " << metadata_ << " " << block_seq_no;
+      block_seq_no_ = block_seq_no;
+  }
   run_command_impl(_return, args);
 }
 

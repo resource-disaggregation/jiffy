@@ -94,15 +94,15 @@ data_status directory_tree::create(const std::string &path,
     blocks.push_back(chain);
     using namespace storage;
     if (chain_length == 1) {
-      storage_->create_partition(chain.block_ids[0], type, chain.name, chain.metadata, tags);
-      storage_->setup_chain(chain.block_ids[0], path, chain.block_ids, chain_role::singleton, "nil");
+      // storage_->create_partition(chain.block_ids[0], type, chain.name, chain.metadata, tags);
+      // storage_->setup_chain(chain.block_ids[0], path, chain.block_ids, chain_role::singleton, "nil");
     } else {
       for (int32_t j = 0; j < chain_length; ++j) {
         std::string block_id = chain.block_ids[j];
         std::string next_block_id = (j == chain_length - 1) ? "nil" : chain.block_ids[j + 1];
-        int32_t role = (j == 0) ? chain_role::head : (j == chain_length - 1) ? chain_role::tail : chain_role::mid;
-        storage_->create_partition(block_id, type, chain.name, chain.metadata, tags);
-        storage_->setup_chain(block_id, path, chain.block_ids, role, next_block_id);
+        // int32_t role = (j == 0) ? chain_role::head : (j == chain_length - 1) ? chain_role::tail : chain_role::mid;
+        // storage_->create_partition(block_id, type, chain.name, chain.metadata, tags);
+        // storage_->setup_chain(block_id, path, chain.block_ids, role, next_block_id);
       }
     }
   }
@@ -167,15 +167,15 @@ data_status directory_tree::open_or_create(const std::string &path,
     blocks.push_back(chain);
     using namespace storage;
     if (chain_length == 1) {
-      storage_->create_partition(chain.block_ids[0], type, chain.name, chain.metadata, tags);
-      storage_->setup_chain(chain.block_ids[0], path, chain.block_ids, chain_role::singleton, "nil");
+      // storage_->create_partition(chain.block_ids[0], type, chain.name, chain.metadata, tags);
+      // storage_->setup_chain(chain.block_ids[0], path, chain.block_ids, chain_role::singleton, "nil");
     } else {
       for (int32_t j = 0; j < chain_length; ++j) {
         std::string block_id = chain.block_ids[j];
         std::string next_block_id = (j == chain_length - 1) ? "nil" : chain.block_ids[j + 1];
-        int32_t role = (j == 0) ? chain_role::head : (j == chain_length - 1) ? chain_role::tail : chain_role::mid;
-        storage_->create_partition(block_id, type, chain.name, chain.metadata, tags);
-        storage_->setup_chain(block_id, path, chain.block_ids, role, next_block_id);
+        // int32_t role = (j == 0) ? chain_role::head : (j == chain_length - 1) ? chain_role::tail : chain_role::mid;
+        // storage_->create_partition(block_id, type, chain.name, chain.metadata, tags);
+        // storage_->setup_chain(block_id, path, chain.block_ids, role, next_block_id);
       }
     }
   }
@@ -613,9 +613,9 @@ void directory_tree::clear_storage(std::vector<std::string> &cleared_blocks, std
     auto s = file->dstatus();
     for (const auto &block: s.data_blocks()) {
       for (const auto &block_id: block.block_ids) {
-        LOG(log_level::info) << "Destroying partition @ block " << block_id;
-        storage_->destroy_partition(block_id);
-        LOG(log_level::info) << "Destroyed partition @ block " << block_id;
+        // LOG(log_level::info) << "Destroying partition @ block " << block_id;
+        // storage_->destroy_partition(block_id);
+        // LOG(log_level::info) << "Destroyed partition @ block " << block_id;
         cleared_blocks.push_back(block_id);
       }
     }

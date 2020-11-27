@@ -13,10 +13,11 @@ block::block(const std::string &id,
              const int auto_scaling_port)
     : id_(id),
       manager_(capacity),
+      // HACK: create file_partition and setup chain in constructor
       impl_(partition_manager::build_partition(&manager_,
-                                               "default",
-                                               "default",
-                                               "default",
+                                               "file",
+                                               "0",
+                                               ("block_" + id_),
                                                utils::property_map(),
                                                auto_scaling_host,
                                                auto_scaling_port)),
@@ -25,6 +26,10 @@ block::block(const std::string &id,
   if (impl_ == nullptr) {
     throw std::invalid_argument("No such type ");
   }
+  
+  // auto block_uuid = reinterpret_cast<std::uintptr_t>(this);
+  impl_->setup("/block_dump/" + id_, std::vector<std::string>{id_}, chain_role::singleton, "nil");
+  // impl_->update_seq_no(0);
 }
 
 const std::string &block::id() const {

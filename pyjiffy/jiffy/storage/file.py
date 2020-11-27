@@ -63,7 +63,10 @@ class FileClient(DataStructureClient):
                 self.cur_offset = 0
                 self.cur_partition += 1
         for k in range(0, count):
-            ret += self.blocks[start_partition + k].recv_response()[-1]
+            res = self.blocks[start_partition + k].recv_response()
+            if b'!stale_seq_no' in res:
+                raise RuntimeError('Stale sequence number')
+            ret += res[-1]
         return ret
 
     def write(self, data):
@@ -118,7 +121,9 @@ class FileClient(DataStructureClient):
                     self.last_partition = self.cur_partition
                     self.last_offset = self.cur_offset
         for i in range(0, count):
-            self.blocks[start_partition + i].recv_response()
+            res = self.blocks[start_partition + i].recv_response()
+            if b'!stale_seq_no' in res:
+                raise RuntimeError('Stale sequence number')
 
         return len(data)
 

@@ -16,6 +16,7 @@ void storage_management_service_handler::create_partition(int32_t block_id,
                                                           const std::map<std::string, std::string> &conf,
                                                           const int32_t block_seq_no) {
   try {
+    throw std::logic_error("Not supposed to be called");
     block_seq_no_check(block_id, block_seq_no);
     if(block_seq_no > blocks_.at(static_cast<std::size_t>(block_id))->impl()->seq_no()) {
       auto old_path = blocks_.at(static_cast<std::size_t>(block_id))->impl()->path();
@@ -38,6 +39,7 @@ void storage_management_service_handler::setup_chain(int32_t block_id,
                                                      const std::string &next_block_name,
                                                      const int32_t block_seq_no) {
   try {
+    throw std::logic_error("Not supposed to be called");
     block_seq_no_check(block_id, block_seq_no);
     blocks_.at(static_cast<std::size_t>(block_id))->impl()->setup(path, chain,
                                                                   static_cast<storage::chain_role>(chain_role),
@@ -49,6 +51,7 @@ void storage_management_service_handler::setup_chain(int32_t block_id,
 
 void storage_management_service_handler::destroy_partition(int32_t block_id, const int32_t block_seq_no) {
   try {
+    throw std::logic_error("Not supposed to be called");
     // block_seq_no_check(block_id, block_seq_no);
     auto blk = blocks_.at(static_cast<std::size_t>(block_id));
     auto partition = blk->impl();
