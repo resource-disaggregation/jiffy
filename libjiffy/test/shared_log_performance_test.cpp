@@ -62,8 +62,8 @@ TEST_CASE("shared_log_performance_test", "[write][read][performance]") {
 
     for (int i = 0; i < num_ops; ++i) {
         response resp;
-        block.write(resp, {"write", std::to_string(i), data_, std::to_string(i) + data_});
-        offset += (2 * data_.size() + std::to_string(i).size());
+        block.write(resp, {"write", std::to_string(i), data_, std::to_string(i)+"_stream"});
+        offset += (71 + std::to_string(i).size());
     }
 	auto bench_end = time_utils::now_us();
 	tot_time = bench_end - bench_begin;
