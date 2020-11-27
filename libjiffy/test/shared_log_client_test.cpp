@@ -31,7 +31,7 @@ TEST_CASE("shared_log_client_write_scan_test", "[write][read][seek]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto block_pmemkind_pair = test_utils::init_shared_log_blocks(block_names, 134217728);
+  auto block_pmemkind_pair = test_utils::init_shared_log_blocks(block_names, 134217728, 0.95, 0.95, "DRAM");
   auto blocks = block_pmemkind_pair.blocks;
   auto pmem_kind = block_pmemkind_pair.pmem_kind;
 
@@ -77,14 +77,14 @@ TEST_CASE("shared_log_client_write_scan_test", "[write][read][seek]") {
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
-  int err = memkind_check_available(pmem_kind);
+  // int err = memkind_check_available(pmem_kind);
   // err = memkind_destroy_kind(pmem_kind);
   // err = memkind_check_available(pmem_kind);
-  if(err) {
-    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
-    fprintf(stderr, "%s\n", error_message);
-  }
+  // if(err) {
+  //   char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+  //   memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+  //   fprintf(stderr, "%s\n", error_message);
+  // }
 }
 
 
