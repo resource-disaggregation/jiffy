@@ -128,6 +128,7 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
                 except:
                     print('Remove from jiffy failed')
                 del jiffy_create_ts[filename]
+                del jiffy_fd[filename]
             # else:
             #     monitor_q.put('remove_persistent')
             
