@@ -75,7 +75,7 @@ TEST_CASE("shared_log_performance_test", "[write][read][performance]") {
 	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E3 / tot_time << " requests per microsecond";
 
     
-    int scan_size = 2;
+    int scan_size = 1;
     while (scan_size <= num_ops) {
         bench_begin = time_utils::now_us();
         tot_time = 0;
@@ -95,7 +95,7 @@ TEST_CASE("shared_log_performance_test", "[write][read][performance]") {
         LOG(log_level::info) << "\t" << data_size << " payload";
         LOG(log_level::info) << "\tThroughput: " << num_ops * 1E3 / tot_time << " requests per microsecond";
 
-        scan_size *= 5;
+        scan_size *= 10;
     }
 	
     
