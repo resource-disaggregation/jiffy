@@ -13,13 +13,15 @@ class FileOps:
     add_blocks = b('add_blocks')
     get_storage_capacity = b('get_storage_capacity')
     get_partition_size = b('get_partition_size')
+    clear = b('clear')
 
     op_types = {read: CommandType.accessor,
                 seek: CommandType.accessor,
                 write: CommandType.mutator,
                 add_blocks: CommandType.accessor,
                 get_storage_capacity: CommandType.accessor,
-                get_partition_size: CommandType.accessor}
+                get_partition_size: CommandType.accessor,
+                clear: CommandType.mutator}
 
 
 class FileClient(DataStructureClient):
@@ -131,3 +133,7 @@ class FileClient(DataStructureClient):
         self.cur_partition = int(offset / self.block_size)
         self.cur_offset = int(offset % self.block_size)
         return True
+
+    def clear(self):
+        for i in range(len(self.block_info.data_blocks)):
+            self.blocks[i].run_command([FileOps.clear])
