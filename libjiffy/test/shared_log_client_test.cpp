@@ -67,7 +67,7 @@ TEST_CASE("shared_log_client_write_scan_test", "[write][read][seek]") {
   }
 
   for (std::size_t i = 0; i < 1000; ++i) {
-    REQUIRE(client.trim(std::to_string(i), std::to_string(i)) == 2 * std::to_string(i).size() + 12);
+    REQUIRE(client.trim(std::to_string(i), std::to_string(i)) == true);
   }
   storage_server->stop();
   if (storage_serve_thread.joinable()) {
