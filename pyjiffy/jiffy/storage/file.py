@@ -30,8 +30,10 @@ class FileClient(DataStructureClient):
         self.cur_partition = 0
         self.cur_offset = 0
         self.last_partition = len(self.block_info.data_blocks) - 1
-        self.last_offset = int(self.blocks[self.last_partition].run_command([FileOps.get_partition_size])[1])
-        self.block_size = int(self.blocks[self._block_id()].run_command([FileOps.get_storage_capacity])[1])
+        # self.last_offset = int(self.blocks[self.last_partition].run_command([FileOps.get_partition_size])[1])
+        self.last_offset = 128*1024*1024
+        # self.block_size = int(self.blocks[self._block_id()].run_command([FileOps.get_storage_capacity])[1])
+        self.block_size = 128*1024*1024
         if self.block_info.tags.get("file.auto_scale") is None:
             self.auto_scale = True
         else:
