@@ -51,6 +51,7 @@ def map_file_to_worker(filename, num_workers):
 def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backing_path):
     # Initialize
     # Connect the directory server with the corresponding port numbers
+    monitor_q.cancel_join_thread()
     client = JiffyClient(dir_host, dir_porta, dir_portb)
     buf = 'a' * block_size
     in_jiffy = {}
@@ -253,7 +254,7 @@ if __name__ == "__main__":
     # monitor_queue.put(None)
     # Wait for monitor to exit
     monitor_queue.close()
-    monitor_queue.join_thread()
+    # monitor_queue.join_thread()
     # monitor.join()
 
     # Get stats
