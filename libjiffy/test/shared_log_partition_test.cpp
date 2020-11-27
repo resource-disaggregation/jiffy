@@ -82,7 +82,7 @@ TEST_CASE("shared_log_write_trim_scan_test", "[write][read]") {
 TEST_CASE("shared_log_flush_load_test", "[write][sync][reset][load][read]") {
   struct memkind* pmem_kind = nullptr;
   std::string pmem_path = "/media/pmem0/shijie"; 
-  std::string memory_mode = "DRAM";
+  std::string memory_mode = "PMEM";
   // size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
   // if(err) {
   //   char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
@@ -99,10 +99,10 @@ TEST_CASE("shared_log_flush_load_test", "[write][sync][reset][load][read]") {
     REQUIRE(res.front() == "!ok");
   }
   REQUIRE(block.is_dirty());
-  REQUIRE(block.sync("local://tmp/test"));
+  REQUIRE(block.sync("/media/pmem0/shijie/test"));
   REQUIRE(!block.is_dirty());
-  REQUIRE_FALSE(block.sync("local://tmp/test"));
-  REQUIRE_NOTHROW(block.load("local://tmp/test"));
+  REQUIRE_FALSE(block.sync("/media/pmem0/shijie/test"));
+  REQUIRE_NOTHROW(block.load("/media/pmem0/shijie/test"));
   
   for (std::size_t start_pos = 0; start_pos < 8; ++start_pos) {
     response resp;
