@@ -331,7 +331,7 @@ class test_utils {
                                                                               size_t block_capacity = 134217728,
                                                                               double threshold_lo = 0.05,
                                                                               double threshold_hi = 0.95,
-                                                                              std::string memory_mode = "PMEM",
+                                                                              std::string memory_mode = "DRAM",
                                                                               std::string pmem_path = "/media/pmem0/shijie",
                                                                               const std::string &dir_host = "127.0.0.1",
                                                                               int dir_port = 9090) {
