@@ -137,7 +137,7 @@ void file_partition::run_command_impl(response &_return, const arg_list &args) {
       return;
     }
   }
-  if (is_mutator(cmd_name)) {
+  if (is_mutator(cmd_name) && command_id(cmd_name) != file_cmd_id::file_clear) {
     dirty_ = true;
   }
 }
