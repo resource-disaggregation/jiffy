@@ -99,10 +99,10 @@ TEST_CASE("shared_log_flush_load_test", "[write][sync][reset][load][read]") {
     REQUIRE(res.front() == "!ok");
   }
   REQUIRE(block.is_dirty());
-  REQUIRE(block.sync("/media/pmem0/shijie/test"));
+  REQUIRE(block.sync("local://media/pmem0/shijie/test"));
   REQUIRE(!block.is_dirty());
-  REQUIRE_FALSE(block.sync("/media/pmem0/shijie/test"));
-  REQUIRE_NOTHROW(block.load("/media/pmem0/shijie/test"));
+  REQUIRE_FALSE(block.sync("local://media/pmem0/shijie/test"));
+  REQUIRE_NOTHROW(block.load("local://media/pmem0/shijie/test"));
   
   for (std::size_t start_pos = 0; start_pos < 8; ++start_pos) {
     response resp;
