@@ -88,7 +88,7 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
                 lat_count += 1
                 jiffy_blocks += 1
                 # monitor_queue.put('put_jiffy')
-                print('Wrote to jiffy')
+                print('Wrote to jiffy ' + str(elapsed.total_seconds()))
             except Exception as e:
                 print('Write to jiffy failed')
                 jiffy_write = False
@@ -112,7 +112,7 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
                 lat_sum += elapsed.total_seconds()
                 lat_count += 1
                 persistent_blocks += 1
-                print('Wrote to persistent storage')
+                print('Wrote to persistent storage ' + str(elapsed.total_seconds()))
             
             monitor_q.put('put_complete')
 

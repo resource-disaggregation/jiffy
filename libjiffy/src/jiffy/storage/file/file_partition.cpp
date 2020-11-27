@@ -4,6 +4,7 @@
 #include "jiffy/storage/file/file_ops.h"
 #include "jiffy/auto_scaling/auto_scaling_client.h"
 #include <thread>
+#include <chrono>
 
 namespace jiffy {
 namespace storage {
@@ -159,9 +160,13 @@ void file_partition::load(const std::string &path) {
 bool file_partition::sync(const std::string &path) {
   if (dirty_) {
     LOG(log_level::info) << "Reclaim: Syncing dirty block: " << path;
+    auto t1 = std::chrono::high_resolution_clock::now();
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
     remote->write<file_type>(partition_, decomposed.second);
+    auto t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+    LOG(log_level::info) << "Reclaim: Synced dirty block in: " << duration << " us";
     dirty_ = false;
     return true;
   }
