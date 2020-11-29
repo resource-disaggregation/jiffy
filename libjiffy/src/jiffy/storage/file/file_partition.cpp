@@ -26,14 +26,15 @@ file_partition::file_partition(block_memory_manager *manager,
       block_allocated_(false),
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port) {
-  auto ser = conf.get("file.serializer", "csv");
-  if (ser == "binary") {
-    ser_ = std::make_shared<csv_serde>(binary_allocator_);
-  } else if (ser == "csv") {
-    ser_ = std::make_shared<binary_serde>(binary_allocator_);
-  } else {
-    throw std::invalid_argument("No such serializer/deserializer " + ser);
-  }
+  // auto ser = conf.get("file.serializer", "csv");
+  // if (ser == "binary") {
+  //   ser_ = std::make_shared<csv_serde>(binary_allocator_);
+  // } else if (ser == "csv") {
+  //   ser_ = std::make_shared<binary_serde>(binary_allocator_);
+  // } else {
+  //   throw std::invalid_argument("No such serializer/deserializer " + ser);
+  // }
+  ser_ = std::make_shared<binary_serde>(binary_allocator_);
   auto_scale_ = conf.get_as<bool>("file.auto_scale", true);
 }
 
