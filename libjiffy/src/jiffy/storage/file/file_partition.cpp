@@ -163,17 +163,17 @@ bool file_partition::sync(const std::string &path) {
   if (dirty_) {
     LOG(log_level::info) << "Reclaim: Syncing dirty block: " << path;
     auto t1 = std::chrono::high_resolution_clock::now();
-    // auto remote = persistent::persistent_store::instance(path, ser_);
-    // auto decomposed = persistent::persistent_store::decompose_path(path);
-    // remote->write<file_type>(partition_, decomposed.second);
+    auto remote = persistent::persistent_store::instance(path, ser_);
+    auto decomposed = persistent::persistent_store::decompose_path(path);
+    remote->write<file_type>(partition_, decomposed.second);
     // auto myfile = std::fstream(path, std::ios::out | std::ios::binary);
     // myfile.write(partition_.data(), partition_.size());
     // myfile.close();
-    FILE* pFile;
-    pFile = fopen(path.c_str(), "wb");
-    fwrite(partition_.data(), partition_.size(), 1, pFile);
-    fdatasync(fileno(pFile));
-    fclose(pFile);
+    // FILE* pFile;
+    // pFile = fopen(path.c_str(), "wb");
+    // fwrite(partition_.data(), partition_.size(), 1, pFile);
+    // fdatasync(fileno(pFile));
+    // fclose(pFile);
     
     auto t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
