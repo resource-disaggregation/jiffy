@@ -24,6 +24,11 @@ std::string mapper(const std::string &env_var) {
   else if (env_var == "JIFFY_BLOCK_PORT") return "directory.block_port";
   else if (env_var == "JIFFY_STORAGE_HOST") return "storage.host";
   else if (env_var == "JIFFY_STORAGE_SERVICE_PORT") return "storage.service_port";
+  else if (env_var == "JIFFY_STORAGE_MGMT_PORT") return "storage.management_port";
+  else if (env_var == "JIFFY_STORAGE_SCALING_PORT") return "storage.auto_scaling_port";
+  else if (env_var == "JIFFY_STORAGE_NUM_BLOCKS") return "storage.block.num_blocks";
+  else if (env_var == "JIFFY_BLOCK_CAPACITY") return "storage.block.capacity";
+  else if (env_var == "JIFFY_STORAGE_NUM_BLOCK_GROUPS") return "storage.block.num_block_groups";
   return "";
 }
 
@@ -128,22 +133,22 @@ int main(int argc, char **argv) {
     }
 
     // Configuration files have higher priority than env vars
-    std::vector<std::string> config_files;
-    if (config_file == "") {
-      config_files = {"conf/jiffy.conf", "/etc/jiffy/jiffy.conf", "/usr/conf/jiffy.conf", "/usr/local/conf/jiffy.conf"};
-    } else {
-      config_files = {config_file};
-    }
+    // std::vector<std::string> config_files;
+    // if (config_file == "") {
+    //   config_files = {"conf/jiffy.conf", "/etc/jiffy/jiffy.conf", "/usr/conf/jiffy.conf", "/usr/local/conf/jiffy.conf"};
+    // } else {
+    //   config_files = {config_file};
+    // }
 
-    for (const auto &cfile: config_files) {
-      std::ifstream ifs(cfile.c_str());
-      if (ifs) {
-        LOG(log_level::info) << "config: " << cfile;
-        store(parse_config_file(ifs, config_file_options, true), vm);
-        notify(vm);
-        break;
-      }
-    }
+    // for (const auto &cfile: config_files) {
+    //   std::ifstream ifs(cfile.c_str());
+    //   if (ifs) {
+    //     LOG(log_level::info) << "config: " << cfile;
+    //     store(parse_config_file(ifs, config_file_options, true), vm);
+    //     notify(vm);
+    //     break;
+    //   }
+    // }
 
     // Env vars have lowest priority
     store(po::parse_environment(env_options, boost::function1<std::string, std::string>(mapper)), vm);

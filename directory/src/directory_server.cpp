@@ -105,22 +105,22 @@ int main(int argc, char **argv) {
     }
 
     // Configuration files have higher priority than env vars
-    std::vector<std::string> config_files;
-    if (config_file == "") {
-      config_files = {"conf/jiffy.conf", "/etc/jiffy/jiffy.conf", "/usr/conf/jiffy.conf", "/usr/local/conf/jiffy.conf"};
-    } else {
-      config_files = {config_file};
-    }
+    // std::vector<std::string> config_files;
+    // if (config_file == "") {
+    //   config_files = {"conf/jiffy.conf", "/etc/jiffy/jiffy.conf", "/usr/conf/jiffy.conf", "/usr/local/conf/jiffy.conf"};
+    // } else {
+    //   config_files = {config_file};
+    // }
 
-    for (const auto &cfile: config_files) {
-      std::ifstream ifs(cfile.c_str());
-      if (ifs) {
-        LOG(log_level::info) << "config: " << cfile;
-        store(parse_config_file(ifs, config_file_options, true), vm);
-        notify(vm);
-        break;
-      }
-    }
+    // for (const auto &cfile: config_files) {
+    //   std::ifstream ifs(cfile.c_str());
+    //   if (ifs) {
+    //     LOG(log_level::info) << "config: " << cfile;
+    //     store(parse_config_file(ifs, config_file_options, true), vm);
+    //     notify(vm);
+    //     break;
+    //   }
+    // }
 
     // Env vars have lowest priority
     store(po::parse_environment(env_options, boost::function1<std::string, std::string>(mapper)), vm);
