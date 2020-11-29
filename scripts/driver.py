@@ -166,6 +166,8 @@ if __name__ == "__main__":
     fair_share = 100
     demands = get_demands(sys.argv[6], fair_share, tenant_id) + [0]
     #demands = [1000, 0, 0, 0, 0]
+    micro_epochs = 10 # Micro-epochs per epoch
+    dur_micro_epoch = 0.1 # Micro-epoch duration
 
     if not os.path.exists('%s/%s' % (backing_path, tenant_id)):
         os.makedirs('%s/%s' % (backing_path, tenant_id))
@@ -201,20 +203,30 @@ if __name__ == "__main__":
 
     cur_files = []
     cur_demand = 0
+    prev_demand = 0
     file_seq = 0
     inflight_puts = 0
     inflight_removes = 0
-    for e in range(len(demands)):
+    for wakeup_iter in range(len(demands) * micro_epochs):
+        # Wake-up every micro-epoch
         # Log queue sizes
-        total_left_over = 0
-        for i in range(para):
-            # print('Queue this epoch: ' + str(num_queued))
-            # print('Queue size: ' + str(queues[i].qsize()))
-            # print('Left over: ' + str(queues[i].qsize() - num_queued))
-            total_left_over += queues[i].qsize()
-        print('Left over: ' + str(total_left_over))
+        # total_left_over = 0
+        # for i in range(para):
+        #     # print('Queue this epoch: ' + str(num_queued))
+        #     # print('Queue size: ' + str(queues[i].qsize()))
+        #     # print('Left over: ' + str(queues[i].qsize() - num_queued))
+        #     total_left_over += queues[i].qsize()
+        # print('Left over: ' + str(total_left_over))
+
+        e = wakeup_iter // micro_epochs
+
+        # Every epoch
+        if wakeup_iter % micro_epochs == 0:
+            prev_demand = cur_demand
+            cur_demand = demands[e]
 
         # Advertise demand
+        # Every micro-epoch
         # Use previous epoch demand, taking into account carry-over
         while True:
             try:
@@ -229,36 +241,38 @@ if __name__ == "__main__":
         # adv_demand = cur_demand + inflight_puts
         print('outstanding puts: ' + str(inflight_puts))
         print('outstanding removes: ' + str(inflight_removes))
-        adv_demand = max(0, cur_demand + inflight_puts - inflight_removes)
+        adv_demand = max(0, prev_demand + inflight_puts - inflight_removes)
         assert adv_demand >= 0
         print('Avertising demand: ' + str(adv_demand))
         client.fs.add_tags('advertise_demand', {'tenant_id': tenant_id, 'demand': str(adv_demand)})
 
-        num_queued = 0
-        if demands[e] > cur_demand:
-            # Create files and write
-            for i in range(demands[e] - cur_demand):
-                filename = '/%s/block%d.txt' % (tenant_id, file_seq)
-                file_seq += 1
-                cur_files.append(filename)
-                wid = map_file_to_worker(filename, para)
-                queues[wid].put({'op': 'put', 'filename': filename})
-                num_queued += 1
-                inflight_puts += 1
+        # Queue requests
+        # Every epoch
+        if wakeup_iter % micro_epochs == 0:
+            num_queued = 0
+            if cur_demand > prev_demand:
+                # Create files and write
+                for i in range(cur_demand - prev_demand):
+                    filename = '/%s/block%d.txt' % (tenant_id, file_seq)
+                    file_seq += 1
+                    cur_files.append(filename)
+                    wid = map_file_to_worker(filename, para)
+                    queues[wid].put({'op': 'put', 'filename': filename})
+                    num_queued += 1
+                    inflight_puts += 1
 
-        elif demands[e] < cur_demand:
-            # Remove files
-            for i in range(cur_demand - demands[e]):
-                filename = cur_files.pop(0)
-                wid = map_file_to_worker(filename, para)
-                queues[wid].put({'op': 'remove', 'filename': filename})
-                num_queued += 1
-                inflight_removes += 1
+            elif cur_demand < prev_demand:
+                # Remove files
+                for i in range(prev_demand - cur_demand):
+                    filename = cur_files.pop(0)
+                    wid = map_file_to_worker(filename, para)
+                    queues[wid].put({'op': 'remove', 'filename': filename})
+                    num_queued += 1
+                    inflight_removes += 1
+            
+            assert len(cur_files) == cur_demand
         
-        cur_demand = demands[e]
-        assert len(cur_files) == cur_demand
-        
-        time.sleep(1)
+        time.sleep(dur_micro_epoch)
 
     for i in range(para):
         queues[i].put(None)
