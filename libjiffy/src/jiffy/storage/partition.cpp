@@ -6,7 +6,9 @@ namespace storage {
 
 namespace karma_rand {
   int intRand(const int & min, const int & max) {
-    static thread_local std::mt19937 generator;
+    static thread_local std::random_device r;
+    static thread_local std::seed_seq seed{r(), r(), r(), r(), r(), r(), r(), r()};
+    static thread_local std::mt19937 generator(seed);
     std::uniform_int_distribution<int> distribution(min,max);
     return distribution(generator);
 }
