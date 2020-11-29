@@ -8,3 +8,5 @@ ifconfig enp126s0 txqueuelen 5000
 echo "/sbin/ifconfig enp126s0 txqueuelen 5000" >> /etc/rc.local
 
 sysctl net.core.netdev_max_backlog=2000
+
+ulimit -n 500000
