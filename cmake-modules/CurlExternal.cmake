@@ -37,7 +37,7 @@ if (CURL_BUILD)
   ExternalProject_Add(curl_ep
           URL https://github.com/curl/curl/releases/download/curl-${CURL_VERSION_UNDERSCORE}/curl-${CURL_VERSION}.tar.gz
           BUILD_IN_SOURCE 1
-          CONFIGURE_COMMAND ./configure --prefix=${CURL_PREFIX} --without-ssl --without-libidn2 --without-zlib --disable-ldap --enable-shared=no --enable-static=yes CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER}
+          CONFIGURE_COMMAND ./configure --prefix=${CURL_PREFIX} --with-ssl --without-libidn2 --without-zlib --disable-ldap --enable-shared=no --enable-static=yes CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER}
           BUILD_COMMAND "$(MAKE)"
           INSTALL_COMMAND "$(MAKE)" install
           LOG_DOWNLOAD ON
