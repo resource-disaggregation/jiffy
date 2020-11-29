@@ -280,9 +280,11 @@ class s3_store_impl : public persistent_service {
     auto key = path_elements.second.c_str();
 
     Aws::Client::ClientConfiguration client_config;
+    client_config.region = "us-east-2";
     Aws::S3::S3Client s3_client(client_config);
 
     Aws::S3::Model::PutObjectRequest object_request;
+    LOG(log_level::info) << "Bucket: " << bucket_name;
     object_request.WithBucket(bucket_name).WithKey(key);
 
     Aws::Utils::Stream::SimpleStreamBuf sbuf;
