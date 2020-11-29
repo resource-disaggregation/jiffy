@@ -162,6 +162,8 @@ class file_partition : public chain_module {
 
   std::vector<std::string> allocated_blocks_;
 
+  std::shared_ptr<persistent::persistent_service> remote_;
+
 };
 
 }

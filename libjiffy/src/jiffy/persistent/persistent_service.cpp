@@ -24,6 +24,10 @@ std::string local_store_impl::URI() {
 s3_store_impl::s3_store_impl(std::shared_ptr<storage::serde> ser) : persistent_service(std::move(ser)), options_{} {
   options_.loggingOptions.logLevel = Aws::Utils::Logging::LogLevel::Warn;
   Aws::InitAPI(options_);
+  
+  Aws::Client::ClientConfiguration client_config;
+  client_config.region = "us-east-2";
+  s3_client_ = Aws::MakeShared<Aws::S3::S3Client>("client", client_config);
 }
 
 s3_store_impl::~s3_store_impl() {

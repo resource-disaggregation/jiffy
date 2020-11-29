@@ -279,9 +279,9 @@ class s3_store_impl : public persistent_service {
     auto bucket_name = path_elements.first.c_str();
     auto key = path_elements.second.c_str();
 
-    Aws::Client::ClientConfiguration client_config;
-    client_config.region = "us-east-2";
-    Aws::S3::S3Client s3_client(client_config);
+    // Aws::Client::ClientConfiguration client_config;
+    // client_config.region = "us-east-2";
+    // Aws::S3::S3Client s3_client(client_config);
 
     Aws::S3::Model::PutObjectRequest object_request;
     LOG(log_level::info) << "Bucket: " << bucket_name;
@@ -293,7 +293,7 @@ class s3_store_impl : public persistent_service {
     out->seekg(0, std::ios_base::beg);
 
     object_request.SetBody(out);
-    auto put_object_outcome = s3_client.PutObject(object_request);
+    auto put_object_outcome = s3_client_->PutObject(object_request);
     if (put_object_outcome.IsSuccess()) {
       LOG(log_level::info) << "Successfully wrote table to " << out_path;
     } else {
@@ -315,12 +315,12 @@ class s3_store_impl : public persistent_service {
     auto bucket_name = path_elements.first.c_str();
     auto key = path_elements.second.c_str();
 
-    Aws::S3::S3Client s3_client;
+    // Aws::S3::S3Client s3_client;
 
     Aws::S3::Model::GetObjectRequest object_request;
     object_request.WithBucket(bucket_name).WithKey(key);
 
-    auto get_object_outcome = s3_client.GetObject(object_request);
+    auto get_object_outcome = s3_client_->GetObject(object_request);
 
     if (get_object_outcome.IsSuccess()) {
       Aws::OFStream local_file;
@@ -350,6 +350,8 @@ class s3_store_impl : public persistent_service {
   std::pair<std::string, std::string> extract_path_elements(const std::string &s3_path);
   /* AWS SDK options */
   Aws::SDKOptions options_;
+  std::shared_ptr<Aws::S3::S3Client> s3_client_;
+
 };
 
 using s3_store = derived_persistent<s3_store_impl>;

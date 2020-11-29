@@ -36,6 +36,7 @@ file_partition::file_partition(block_memory_manager *manager,
   // }
   ser_ = std::make_shared<binary_serde>(binary_allocator_);
   auto_scale_ = conf.get_as<bool>("file.auto_scale", true);
+  remote_ = persistent::persistent_store::instance("s3://foo", ser_);
 }
 
 void file_partition::write(response &_return, const arg_list &args) {
@@ -164,9 +165,9 @@ bool file_partition::sync(const std::string &path) {
   if (dirty_) {
     LOG(log_level::info) << "Reclaim: Syncing dirty block: " << path;
     auto t1 = std::chrono::high_resolution_clock::now();
-    auto remote = persistent::persistent_store::instance(path, ser_);
+    // auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    remote->write<file_type>(partition_, decomposed.second);
+    remote_->write<file_type>(partition_, decomposed.second);
     // auto myfile = std::fstream(path, std::ios::out | std::ios::binary);
     // myfile.write(partition_.data(), partition_.size());
     // myfile.close();
@@ -191,7 +192,7 @@ bool file_partition::dump(const std::string &path) {
   if (dirty_) {
     auto remote = persistent::persistent_store::instance(path, ser_);
     auto decomposed = persistent::persistent_store::decompose_path(path);
-    remote->write<file_type>(partition_, decomposed.second);
+    remote_->write<file_type>(partition_, decomposed.second);
     flushed = true;
   }
   partition_.clear();
