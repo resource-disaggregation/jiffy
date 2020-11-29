@@ -10,6 +10,8 @@ import pickle
 import math
 import datetime
 import queue
+import boto3
+import uuid
 
 # Deterministic mapping from filename to worker
 def map_file_to_worker(filename, num_workers):
@@ -53,6 +55,7 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
     # Connect the directory server with the corresponding port numbers
     monitor_q.cancel_join_thread()
     client = JiffyClient(dir_host, dir_porta, dir_portb)
+    s3 = boto3.client('s3')
     buf = 'a' * block_size
     in_jiffy = {}
     jiffy_create_ts = {}
@@ -102,12 +105,15 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
             if not jiffy_write:
                 # Write to persistent storage
                 # monitor_queue.put('put_persistent')
-                f = open(backing_path + filename, 'w')
+                # f = open(backing_path + filename, 'w')
                 start_time = datetime.datetime.now()
-                f.write(buf)
-                f.flush()
-                os.fsync(f.fileno())
-                f.close()
+                # f.write(buf)
+                # f.flush()
+                # os.fsync(f.fileno())
+                # f.close()
+                resp = s3.put_object(Bucket=backing_path, Key=uuid.uuid4().hex + '/' + filename, Body=buf)
+                if resp['ResponseMetadata']['HTTPStatusCode'] != 200:
+                    raise Exception('S3 write failed')
                 elapsed = datetime.datetime.now() - start_time
                 lat_sum += elapsed.total_seconds()
                 lat_count += 1
@@ -159,7 +165,7 @@ if __name__ == "__main__":
     para = int(sys.argv[5])
     fair_share = 100
     demands = get_demands(sys.argv[6], fair_share, tenant_id) + [0]
-    # demands = [1000, 0, 0, 0, 0]
+    #demands = [1000, 0, 0, 0, 0]
 
     if not os.path.exists('%s/%s' % (backing_path, tenant_id)):
         os.makedirs('%s/%s' % (backing_path, tenant_id))
