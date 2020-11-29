@@ -1,4 +1,14 @@
 # ./run_drivers.sh karma-tenants10-dur15-c100 128.84.155.69 9090 9091 /home/midhul/snowflake_demands_nogaps10_15min.pickle $((128 * 1024)) /home/midhul/nfs/jiffy_dump 1
+
+function cleanup() {
+    killall python3;
+    echo "Cleaned up";
+}
+
+trap cleanup EXIT
+
+cleanup;
+
 config=$1
 dir_host=$2
 dir_porta=$3
