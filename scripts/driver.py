@@ -204,6 +204,15 @@ if __name__ == "__main__":
     file_seq = 0
     inflight_puts = 0
     for e in range(len(demands)):
+        # Log queue sizes
+        total_left_over = 0
+        for i in range(para):
+            # print('Queue this epoch: ' + str(num_queued))
+            # print('Queue size: ' + str(queues[i].qsize()))
+            # print('Left over: ' + str(queues[i].qsize() - num_queued))
+            total_left_over += queues[i].qsize()
+        print('Left over: ' + str(total_left_over))
+
         # Advertise demand
         # Use previous epoch demand, taking into account carry-over
         while True:
@@ -242,11 +251,7 @@ if __name__ == "__main__":
         
         cur_demand = demands[e]
         assert len(cur_files) == cur_demand
-        # Log queue sizes
-        for i in range(para):
-            print('Queue this epoch: ' + str(num_queued))
-            print('Queue size: ' + str(queues[i].qsize()))
-            print('Left over: ' + str(queues[i].qsize() - num_queued))
+        
         time.sleep(1)
 
     for i in range(para):
