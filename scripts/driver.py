@@ -203,6 +203,7 @@ if __name__ == "__main__":
     cur_demand = 0
     file_seq = 0
     inflight_puts = 0
+    inflight_removes = 0
     for e in range(len(demands)):
         # Log queue sizes
         total_left_over = 0
@@ -220,11 +221,15 @@ if __name__ == "__main__":
                 stat = monitor_queue.get_nowait()
                 if stat == 'put_complete':
                     inflight_puts -= 1
+                elif stat == 'remove_complete':
+                    inflight_removes -= 1
             except queue.Empty:
                 break
         
         # adv_demand = cur_demand + inflight_puts
-        adv_demand = cur_demand
+        print('outstanding puts: ' + str(inflight_puts))
+        print('outstanding removes: ' + str(inflight_removes))
+        adv_demand = max(0, cur_demand + inflight_puts - inflight_removes)
         assert adv_demand >= 0
         print('Avertising demand: ' + str(adv_demand))
         client.fs.add_tags('advertise_demand', {'tenant_id': tenant_id, 'demand': str(adv_demand)})
@@ -248,6 +253,7 @@ if __name__ == "__main__":
                 wid = map_file_to_worker(filename, para)
                 queues[wid].put({'op': 'remove', 'filename': filename})
                 num_queued += 1
+                inflight_removes += 1
         
         cur_demand = demands[e]
         assert len(cur_files) == cur_demand
