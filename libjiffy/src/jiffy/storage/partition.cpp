@@ -1,7 +1,16 @@
 #include "partition.h"
+#include <random>
 
 namespace jiffy {
 namespace storage {
+
+namespace karma_rand {
+  int intRand(const int & min, const int & max) {
+    static thread_local std::mt19937 generator;
+    std::uniform_int_distribution<int> distribution(min,max);
+    return distribution(generator);
+}
+}
 
 partition::partition(block_memory_manager *manager,
                      const std::string &name,
@@ -106,6 +115,7 @@ int32_t partition::extract_block_seq_no(const arg_list &args, arg_list &out_list
   return 0;
 }
 
+
 void partition::run_command(response &_return, const arg_list &_args) {
   arg_list args;
   int32_t block_seq_no = extract_block_seq_no(_args, args);
@@ -114,7 +124,8 @@ void partition::run_command(response &_return, const arg_list &_args) {
     return;
   }
   if(block_seq_no > block_seq_no_) {
-      sync("/home/midhul/iscsi/jiffy_dump" + path_ + "_" + std::to_string(block_seq_no_));
+      auto rand_prefix = std::to_string(karma_rand::intRand(0, 99999999)) + std::to_string(karma_rand::intRand(0, 99999999)) + std::to_string(karma_rand::intRand(0, 99999999)) + std::to_string(karma_rand::intRand(0, 99999999));
+      sync("s3://synergy-karma/" + rand_prefix + path_ + "_" + std::to_string(block_seq_no_));
       LOG(log_level::info) << "Updating block seq no, block: " << metadata_ << " " << block_seq_no;
       block_seq_no_ = block_seq_no;
   }
