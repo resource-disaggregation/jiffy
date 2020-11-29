@@ -1,4 +1,4 @@
-# ./run_servers.sh test 127.0.0.1 random 2 100 1 $((128*1024)) 4
+# ./run_servers.sh test 127.0.0.1 random 2 100 1 $((128*1024)) 4 1000
 
 function cleanup() {
     killall directoryd;
@@ -20,11 +20,12 @@ init_credits=$5
 num_storaged=$6
 block_size=$7
 num_blocks=$8
+algo_interval=$9
 
 pids=()
 
 # Start directory server
-JIFFY_DIRECTORY_HOST=$host JIFFY_LEASE_PERIOD_MS=999999999 ../build/directory/directoryd --alloc $alloc -n $num_tenants --init_credits $init_credits > ~/karma-eval/$config.dir.log 2>&1 &
+JIFFY_DIRECTORY_HOST=$host JIFFY_LEASE_PERIOD_MS=999999999 ../build/directory/directoryd --alloc $alloc -n $num_tenants --init_credits $init_credits --algo_interval $algo_interval > ~/karma-eval/$config.dir.log 2>&1 &
 pids+=($!);
 echo "Launched directory server";
 
