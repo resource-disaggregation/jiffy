@@ -75,7 +75,7 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
             break
         filename = task['filename']
         if task['op'] == 'put':
-            # monitor_queue.put('inc_demand')
+            monitor_q.put(('put_dequeue', filename))
             jiffy_write = True
             try:
                 start_time = datetime.datetime.now()
@@ -91,6 +91,7 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
                 lat_count += 1
                 jiffy_blocks += 1
                 # monitor_queue.put('put_jiffy')
+                monitor_q.put(('in_jiffy', filename))
                 print('Wrote to jiffy ' + str(elapsed.total_seconds()))
             except Exception as e:
                 print('Write to jiffy failed')
@@ -120,12 +121,12 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
                 persistent_blocks += 1
                 print('Wrote to persistent storage ' + str(elapsed.total_seconds()))
             
-            monitor_q.put('put_complete')
+            # monitor_q.put('put_complete')
 
         if task['op'] == 'remove':
-            # monitor_q.put('dec_demand')
+            monitor_q.put(('remove_dequeue', filename))
             if in_jiffy[filename]:
-                # monitor_q.put('remove_jiffy')
+                monitor_q.put(('out_jiffy', filename))
                 try:
                     jiffy_fd[filename].clear()
                     client.remove(filename)
@@ -140,7 +141,7 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
             #     monitor_q.put('remove_persistent')
             
             del in_jiffy[filename]
-            monitor_q.put('remove_complete')
+            # monitor_q.put('remove_complete')
         
     return
 
@@ -205,8 +206,12 @@ if __name__ == "__main__":
     cur_demand = 0
     prev_demand = 0
     file_seq = 0
-    inflight_puts = 0
-    inflight_removes = 0
+    # inflight_puts = 0
+    # inflight_removes = 0
+    outstanding_puts = set()
+    outstanding_removes = set()
+    outstanding_removes_jiffy = set() # Oustanding removes that we know are for blocks in jiffy
+    files_in_jiffy = set()
     for wakeup_iter in range(len(demands) * micro_epochs):
         # Wake-up every micro-epoch
         # Log queue sizes
@@ -231,17 +236,31 @@ if __name__ == "__main__":
         while True:
             try:
                 stat = monitor_queue.get_nowait()
-                if stat == 'put_complete':
-                    inflight_puts -= 1
-                elif stat == 'remove_complete':
-                    inflight_removes -= 1
+                if stat[0] == 'put_deqeue':
+                    outstanding_puts.remove(stat[1])
+                elif stat[0] == 'remove_dequeue':
+                    if stat[1] in outstanding_removes_jiffy:
+                        outstanding_removes_jiffy.remove(stat[1])
+                    else:
+                        outstanding_removes.remove(stat[1])
+                elif stat[0] == 'in_jiffy':
+                    # cur_jiffy_blocks += 1
+                    files_in_jiffy.add(stat[1])
+                    if stat[1] in outstanding_removes:
+                        outstanding_removes.remove(stat[1])
+                        outstanding_removes_jiffy.add(stat[1])
+                elif stat[0] == 'out_jiffy':
+                    # cur_jiffy_blocks -= 1
+                    files_in_jiffy.remove(stat[1])
             except queue.Empty:
                 break
         
         # adv_demand = cur_demand + inflight_puts
-        print('outstanding puts: ' + str(inflight_puts))
-        print('outstanding removes: ' + str(inflight_removes))
-        adv_demand = max(0, prev_demand + inflight_puts - inflight_removes)
+        print('outstanding puts: ' + str(len(outstanding_puts)))
+        print('outstanding removes: ' + str(len(outstanding_removes)))
+        print('outstanding jiffy removes: ' + str(len(outstanding_removes_jiffy)))
+        # adv_demand = max(0, prev_demand + inflight_puts - inflight_removes)
+        adv_demand = max(0, len(files_in_jiffy) + len(outstanding_puts) - len(outstanding_removes_jiffy))
         assert adv_demand >= 0
         print('Avertising demand: ' + str(adv_demand))
         client.fs.add_tags('advertise_demand', {'tenant_id': tenant_id, 'demand': str(adv_demand)})
@@ -259,7 +278,7 @@ if __name__ == "__main__":
                     wid = map_file_to_worker(filename, para)
                     queues[wid].put({'op': 'put', 'filename': filename})
                     num_queued += 1
-                    inflight_puts += 1
+                    outstanding_puts.add(filename)
 
             elif cur_demand < prev_demand:
                 # Remove files
@@ -268,7 +287,10 @@ if __name__ == "__main__":
                     wid = map_file_to_worker(filename, para)
                     queues[wid].put({'op': 'remove', 'filename': filename})
                     num_queued += 1
-                    inflight_removes += 1
+                    if filename in files_in_jiffy:
+                        outstanding_removes_jiffy.add(filename)
+                    else:
+                        outstanding_removes.add(filename)
             
             assert len(cur_files) == cur_demand
         
