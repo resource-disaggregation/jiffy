@@ -236,7 +236,7 @@ if __name__ == "__main__":
         while True:
             try:
                 stat = monitor_queue.get_nowait()
-                if stat[0] == 'put_deqeue':
+                if stat[0] == 'put_dequeue':
                     outstanding_puts.remove(stat[1])
                 elif stat[0] == 'remove_dequeue':
                     if stat[1] in outstanding_removes_jiffy:
