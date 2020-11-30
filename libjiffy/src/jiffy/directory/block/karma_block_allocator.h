@@ -112,6 +112,9 @@ class karma_block_allocator : public block_allocator {
   std::thread thread_;
   std::thread stats_thread_;
 
+  std::unordered_map<std::string, bool> used_bitmap_;
+  std::unordered_map<std::string, bool> temp_used_bitmap_;
+
 };
 
 }

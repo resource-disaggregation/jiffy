@@ -15,7 +15,7 @@ karma_block_allocator::karma_block_allocator(uint32_t num_tenants, uint64_t init
     init_credits_ = init_credits;
     total_blocks_ = 0;
     thread_ = std::thread(&karma_block_allocator::thread_run, this, interval_ms);
-    stats_thread_ = std::thread(&karma_block_allocator::stats_thread_run, this, 10);
+    // stats_thread_ = std::thread(&karma_block_allocator::stats_thread_run, this, 10);
 }
 
 std::vector<std::string> karma_block_allocator::allocate(std::size_t count, const std::vector<std::string> &, const std::string &tenant_id) {
@@ -85,6 +85,7 @@ std::vector<std::string> karma_block_allocator::allocate(std::size_t count, cons
                     // TODO: Picking random block for now. Better policy?
                     auto idx = static_cast<int64_t>(active_blocks_[min_borrower].size() - 1);
                     auto block_it = std::next(active_blocks_[min_borrower].begin(), utils::rand_utils::rand_int64(idx));
+                    used_bitmap_[*block_it] = false;
                     free_blocks_.insert(*block_it);
                     active_blocks_[min_borrower].erase(block_it);
                 }
@@ -112,6 +113,8 @@ std::vector<std::string> karma_block_allocator::allocate(std::size_t count, cons
   my->second.insert(*block_it);
   blocks.push_back(*block_it);
   last_tenant_[*block_it] = tenant_id;
+  used_bitmap_[*block_it] = true;
+  temp_used_bitmap_[*block_it] = true;
   free_blocks_.erase(block_it);
 
   return append_seq_nos(blocks);
@@ -133,6 +136,7 @@ void karma_block_allocator::free(const std::vector<std::string> &_blocks, const 
       not_freed.push_back(block_name);
       continue;
     }
+    used_bitmap_[*jt] = false;
     free_blocks_.insert(*jt);
     my->second.erase(jt);
   }
@@ -153,6 +157,8 @@ void karma_block_allocator::add_blocks(const std::vector<std::string> &block_nam
   for(auto blk : block_names) {
     block_seq_no_[blk] = 0;
     last_tenant_[blk] = "$none$";
+    used_bitmap_[blk] = false;
+    temp_used_bitmap_[blk] = false;
   }
   total_blocks_ += block_names.size();
 }
@@ -167,6 +173,8 @@ void karma_block_allocator::remove_blocks(const std::vector<std::string> &block_
     free_blocks_.erase(it);
     assert(block_seq_no_.erase(block_name) == 1);
     assert(last_tenant_.erase(block_name) == 1);
+    assert(used_bitmap_.erase(block_name) == 1);
+    assert(temp_used_bitmap_.erase(block_name) == 1);
     total_blocks_ -= 1;
   }
 }
@@ -250,6 +258,18 @@ void karma_block_allocator::compute_allocations() {
   if(demands_.size() == 0) {
     return;
   }
+
+  // Log utilization for previous epoch
+  std::size_t num_used_blocks = 0;
+  for(auto &jt : temp_used_bitmap_) {
+    if(jt.second) {
+      num_used_blocks += 1;
+    }
+  }
+
+  LOG(log_level::info) << "Epoch used blocks: " << num_used_blocks;
+
+  // Karma algorithm
   auto fair_share = total_blocks_ / num_tenants_;
   std::unordered_map<std::string, uint32_t> demands;
   for(auto &jt : demands_)
@@ -315,6 +335,7 @@ void karma_block_allocator::compute_allocations() {
       // TODO: Picking random block for now. Better policy?
       auto idx = static_cast<int64_t>(jt.second.size() - 1);
       auto block_it = std::next(jt.second.begin(), utils::rand_utils::rand_int64(idx));
+      used_bitmap_[*block_it] = false;
       free_blocks_.insert(*block_it);
       jt.second.erase(block_it);
     }
@@ -336,7 +357,12 @@ void karma_block_allocator::compute_allocations() {
   {
     ss << jt.first << " " << jt.second << " ";
   }
-  LOG(log_level::info) << ss.str(); 
+  LOG(log_level::info) << ss.str();
+
+  // Reset temp bitmap
+  for(auto &jt : temp_used_bitmap_) {
+    jt.second = used_bitmap_[jt.first];
+  }
 
 }
 

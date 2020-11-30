@@ -19,6 +19,7 @@ time.sleep(5)
 client.create_file('/a/foo0.txt', 'local://tmp')
 client.create_file('/a/foo1.txt', 'local://tmp')
 client.create_file('/a/foo2.txt', 'local://tmp')
+client.remove('/a/foo0.txt')
 
 client.fs.add_tags('advertise_demand', {'tenant_id': 'a', 'demand': '6'})
 client.fs.add_tags('advertise_demand', {'tenant_id': 'b', 'demand': '12'})
