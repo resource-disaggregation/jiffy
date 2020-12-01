@@ -259,6 +259,8 @@ void karma_block_allocator::compute_allocations() {
     return;
   }
 
+  auto t1 = std::chrono::high_resolution_clock::now();
+
   // Log utilization for previous epoch
   std::size_t num_used_blocks = 0;
   for(auto &jt : temp_used_bitmap_) {
@@ -363,6 +365,10 @@ void karma_block_allocator::compute_allocations() {
   for(auto &jt : temp_used_bitmap_) {
     jt.second = used_bitmap_[jt.first];
   }
+
+  auto t2 = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+  LOG(log_level::info) << "compute_allocations took " << duration << " us";
 
 }
 
