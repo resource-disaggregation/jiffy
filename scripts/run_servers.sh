@@ -29,6 +29,8 @@ JIFFY_DIRECTORY_HOST=$host JIFFY_LEASE_PERIOD_MS=999999999 ../build/directory/di
 pids+=($!);
 echo "Launched directory server";
 
+sleep 5;
+
 # Start storage servers
 base_port=9090
 for ((i = 0 ; i < $num_storaged ; i++)); do
