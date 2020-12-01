@@ -1,5 +1,5 @@
 # Workload driver program
-# python3 driver.py 127.0.0.1 9090 9091 92 1 /home/midhul/snowflake_demands_nogaps10.pickle $((4 * 1024)) /home/midhul/nfs/jiffy_dump
+# python3 driver.py 127.0.0.1 9090 9091 92 1 /home/midhul/snowflake_demands_nogaps10.pickle $((4 * 1024)) /home/midhul/nfs/jiffy_dump 0
 
 import time
 import os
@@ -156,6 +156,18 @@ def get_demands(filename, scale_factor, t):
 
     return ret
 
+
+def advertise_demand(client, tenant_id, files_in_jiffy, outstanding_puts, outstanding_removes_jiffy):
+    # adv_demand = cur_demand + inflight_puts
+    print('outstanding puts: ' + str(len(outstanding_puts)))
+    print('outstanding removes: ' + str(len(outstanding_removes)))
+    print('outstanding jiffy removes: ' + str(len(outstanding_removes_jiffy)))
+    # adv_demand = max(0, prev_demand + inflight_puts - inflight_removes)
+    adv_demand = max(0, len(files_in_jiffy) + len(outstanding_puts) - len(outstanding_removes_jiffy))
+    assert adv_demand >= 0
+    print('Avertising demand: ' + str(adv_demand))
+    client.fs.add_tags('advertise_demand', {'tenant_id': tenant_id, 'demand': str(adv_demand)})
+
 if __name__ == "__main__":
     dir_host = sys.argv[1]
     dir_porta = int(sys.argv[2])
@@ -167,8 +179,9 @@ if __name__ == "__main__":
     fair_share = 100
     demands = get_demands(sys.argv[6], fair_share, tenant_id) + [0]
     #demands = [1000, 0, 0, 0, 0]
-    micro_epochs = 10 # Micro-epochs per epoch
-    dur_micro_epoch = 0.1 # Micro-epoch duration
+    micro_epochs = 1 # Micro-epochs per epoch
+    dur_micro_epoch = 1 # Micro-epoch duration
+    oracle = bool(int(sys.argv[9]))
 
     if not os.path.exists('%s/%s' % (backing_path, tenant_id)):
         os.makedirs('%s/%s' % (backing_path, tenant_id))
@@ -255,20 +268,15 @@ if __name__ == "__main__":
             except queue.Empty:
                 break
         
-        # adv_demand = cur_demand + inflight_puts
-        print('outstanding puts: ' + str(len(outstanding_puts)))
-        print('outstanding removes: ' + str(len(outstanding_removes)))
-        print('outstanding jiffy removes: ' + str(len(outstanding_removes_jiffy)))
-        # adv_demand = max(0, prev_demand + inflight_puts - inflight_removes)
-        adv_demand = max(0, len(files_in_jiffy) + len(outstanding_puts) - len(outstanding_removes_jiffy))
-        assert adv_demand >= 0
-        print('Avertising demand: ' + str(adv_demand))
-        client.fs.add_tags('advertise_demand', {'tenant_id': tenant_id, 'demand': str(adv_demand)})
-
-        # Queue requests
+        # For normal advertise demands before generating requests
+        if not oracle:
+            advertise_demand(client, tenant_id, files_in_jiffy, outstanding_puts, outstanding_removes_jiffy)
+        
+        # Generate requests
         # Every epoch
+        to_queue = []
+        num_queued = 0
         if wakeup_iter % micro_epochs == 0:
-            num_queued = 0
             if cur_demand > prev_demand:
                 # Create files and write
                 for i in range(cur_demand - prev_demand):
@@ -276,8 +284,7 @@ if __name__ == "__main__":
                     file_seq += 1
                     cur_files.append(filename)
                     wid = map_file_to_worker(filename, para)
-                    queues[wid].put({'op': 'put', 'filename': filename})
-                    num_queued += 1
+                    to_queue.append((wid, {'op': 'put', 'filename': filename}))
                     outstanding_puts.add(filename)
 
             elif cur_demand < prev_demand:
@@ -285,14 +292,26 @@ if __name__ == "__main__":
                 for i in range(prev_demand - cur_demand):
                     filename = cur_files.pop(0)
                     wid = map_file_to_worker(filename, para)
-                    queues[wid].put({'op': 'remove', 'filename': filename})
-                    num_queued += 1
+                    to_queue.append((wid, {'op': 'remove', 'filename': filename}))
                     if filename in files_in_jiffy:
                         outstanding_removes_jiffy.add(filename)
                     else:
                         outstanding_removes.add(filename)
             
             assert len(cur_files) == cur_demand
+
+        #  For oracle advertise demands after generating requests
+        if oracle:
+            advertise_demand(client, tenant_id, files_in_jiffy, outstanding_puts, outstanding_removes_jiffy)
+
+        # Queue requests to workers
+        # Every epoch
+        if wakeup_iter % micro_epochs == 0:
+            for entry in to_queue:
+                wid = entry[0]
+                task = entry[1]
+                queues[wid].put(task)
+                num_queued += 1
         
         time.sleep(dur_micro_epoch)
 
