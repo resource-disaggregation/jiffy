@@ -33,6 +33,8 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/directory/block/static_block_allocator.h
           src/jiffy/directory/block/karma_block_allocator.cpp
           src/jiffy/directory/block/karma_block_allocator.h
+          src/jiffy/directory/block/bheap.cpp
+          src/jiffy/directory/block/bheap.h
           src/jiffy/directory/client/directory_client.cpp
           src/jiffy/directory/client/directory_client.h
           src/jiffy/directory/fs/directory_server.cpp
@@ -272,6 +274,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             test/sync_worker_test.cpp
             test/chain_replication_test.cpp
             test/auto_scaling_test.cpp
+            test/bheap_test.cpp
             test/test_utils.h)
     target_link_libraries(jiffy_tests jiffy)
     add_dependencies(jiffy_tests catch_ep boost_ep jemalloc_ep thrift_ep awssdk_ep)
