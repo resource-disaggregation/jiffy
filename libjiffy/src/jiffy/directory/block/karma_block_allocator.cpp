@@ -261,6 +261,7 @@ void karma_block_allocator::compute_allocations() {
 
   auto t1 = std::chrono::high_resolution_clock::now();
 
+  auto start_tim = std::chrono::high_resolution_clock::now();
   // Log utilization for previous epoch
   std::size_t num_used_blocks = 0;
   for(auto &jt : temp_used_bitmap_) {
@@ -269,17 +270,24 @@ void karma_block_allocator::compute_allocations() {
     }
   }
 
+  auto end_tim = std::chrono::high_resolution_clock::now();
+
   LOG(log_level::info) << "Epoch used blocks: " << num_used_blocks;
+  auto duration_log_util = std::chrono::duration_cast<std::chrono::microseconds>( end_tim - start_tim ).count();
 
   // Karma algorithm
   auto fair_share = total_blocks_ / num_tenants_;
+  start_tim = std::chrono::high_resolution_clock::now();
   std::unordered_map<std::string, uint32_t> demands;
   for(auto &jt : demands_)
   {
     // Adjust demands to deal with situations where tenants advertise low demands, but have still not released the blocks
     demands[jt.first] = std::max(jt.second, (uint32_t)active_blocks_[jt.first].size());
   }
+  end_tim = std::chrono::high_resolution_clock::now();
+  auto duration_adj_demands = std::chrono::duration_cast<std::chrono::microseconds>( end_tim - start_tim ).count();
 
+  start_tim = std::chrono::high_resolution_clock::now();
   // Reset rates
   for(auto &jt : rate_) {
     jt.second = 0;
@@ -329,7 +337,10 @@ void karma_block_allocator::compute_allocations() {
     // LOG(log_level::info) << "donor, c=" << credits_[donor] << " " << donor;
     rate_[donor] += 1;
   }
+  end_tim = std::chrono::high_resolution_clock::now();
+  auto duration_karma_algo = std::chrono::duration_cast<std::chrono::microseconds>( end_tim - start_tim ).count();
 
+  start_tim = std::chrono::high_resolution_clock::now();
   // Adjust blocks to ensure the invariant --- active_blocks.size() <= allocation
   for(auto &jt : active_blocks_) {
     while(jt.second.size() > allocations_[jt.first]) {
@@ -342,7 +353,11 @@ void karma_block_allocator::compute_allocations() {
       jt.second.erase(block_it);
     }
   }
+  end_tim = std::chrono::high_resolution_clock::now();
+  auto duration_adj_blocks = std::chrono::duration_cast<std::chrono::microseconds>( end_tim - start_tim ).count();
 
+
+  start_tim = std::chrono::high_resolution_clock::now();
   // Log state
   std::stringstream ss;
   ss << "Demands: ";
@@ -360,16 +375,27 @@ void karma_block_allocator::compute_allocations() {
     ss << jt.first << " " << jt.second << " ";
   }
   LOG(log_level::info) << ss.str();
+  end_tim = std::chrono::high_resolution_clock::now();
+  auto duration_log_state = std::chrono::duration_cast<std::chrono::microseconds>( end_tim - start_tim ).count();
 
+  start_tim = std::chrono::high_resolution_clock::now();
   // Reset temp bitmap
   for(auto &jt : temp_used_bitmap_) {
     jt.second = used_bitmap_[jt.first];
   }
+  end_tim = std::chrono::high_resolution_clock::now();
+  auto duration_reset_bitmap = std::chrono::duration_cast<std::chrono::microseconds>( end_tim - start_tim ).count();
 
   auto t2 = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
   LOG(log_level::info) << "compute_allocations took " << duration << " us";
-
+  LOG(log_level::info) << "log_util took " << duration_log_util << " us";
+  LOG(log_level::info) << "adj_demands took " << duration_adj_demands << "us";
+  LOG(log_level::info) << "karma_algo took " << duration_karma_algo << "us";
+  LOG(log_level::info) << "adj_blocks took " << duration_adj_blocks << "us";
+  LOG(log_level::info) << "log_state took " << duration_log_state << "us";
+  LOG(log_level::info) << "reset_bitmap took " << duration_reset_bitmap << "us";
+  
 }
 
 void karma_block_allocator::log_stats() {
