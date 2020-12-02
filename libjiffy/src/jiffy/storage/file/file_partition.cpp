@@ -164,22 +164,22 @@ void file_partition::load(const std::string &path) {
 bool file_partition::sync(const std::string &path) {
   if (dirty_) {
     LOG(log_level::info) << "Reclaim: Syncing dirty block: " << path;
-    auto t1 = std::chrono::high_resolution_clock::now();
-    // auto remote = persistent::persistent_store::instance(path, ser_);
-    // auto decomposed = persistent::persistent_store::decompose_path(path);
-    // remote_->write<file_type>(partition_, decomposed.second);
-    // auto myfile = std::fstream(path, std::ios::out | std::ios::binary);
-    // myfile.write(partition_.data(), partition_.size());
-    // myfile.close();
-    // FILE* pFile;
-    // pFile = fopen(path.c_str(), "wb");
-    // fwrite(partition_.data(), partition_.size(), 1, pFile);
-    // fdatasync(fileno(pFile));
-    // fclose(pFile);
+    // auto t1 = std::chrono::high_resolution_clock::now();
+    // // auto remote = persistent::persistent_store::instance(path, ser_);
+    // // auto decomposed = persistent::persistent_store::decompose_path(path);
+    // // remote_->write<file_type>(partition_, decomposed.second);
+    // // auto myfile = std::fstream(path, std::ios::out | std::ios::binary);
+    // // myfile.write(partition_.data(), partition_.size());
+    // // myfile.close();
+    // // FILE* pFile;
+    // // pFile = fopen(path.c_str(), "wb");
+    // // fwrite(partition_.data(), partition_.size(), 1, pFile);
+    // // fdatasync(fileno(pFile));
+    // // fclose(pFile);
     
-    auto t2 = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-    LOG(log_level::info) << "Reclaim: Synced dirty block in: " << duration << " us";
+    // auto t2 = std::chrono::high_resolution_clock::now();
+    // auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+    // LOG(log_level::info) << "Reclaim: Synced dirty block in: " << duration << " us";
     dirty_ = false;
     return true;
   }

@@ -52,7 +52,7 @@ std::vector<std::string> karma_block_allocator::allocate(std::size_t count, cons
       if(static_cast<uint32_t>(rate_[tenant_id]) == fair_share - allocations_[tenant_id]) {
             // Find a substitute supplier if possible
             // Pick one with minimum no of credits if there are multiple
-            LOG(log_level::info) << "Testing uint64 max: " << std::numeric_limits<uint64_t>::max();
+            // LOG(log_level::info) << "Testing uint64 max: " << std::numeric_limits<uint64_t>::max();
             uint64_t poorest_credits = std::numeric_limits<uint64_t>::max();
             std::string poorest_supplier = "$none$";
             for(auto &jt : credits_) {
@@ -531,7 +531,7 @@ void karma_block_allocator::borrow_from_poorest_fast(std::unordered_map<std::str
   std::size_t idx = 0;
 
   while(dem > 0) {
-    LOG(log_level::info) << "Entering while";
+    // LOG(log_level::info) << "Entering while";
     // Update poorest donors
     if(poorest_donors.size() == 0) {
       cur_c = next_c;
