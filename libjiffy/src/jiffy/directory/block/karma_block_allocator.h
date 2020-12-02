@@ -75,6 +75,20 @@ class karma_block_allocator : public block_allocator {
 
  void compute_allocations();
 
+ // Must be called with lock
+ // Updates allocations, credits, rates
+ void karma_algorithm(std::unordered_map<std::string, uint32_t> &demands);
+
+// HACK: making these public for testing
+public:
+
+// Optimized karma algorithm
+ void karma_algorithm_fast(std::unordered_map<std::string, uint32_t> &demands);
+ void borrow_from_poorest_fast(std::unordered_map<std::string, uint32_t> &demands, std::vector<std::string>& donors, std::vector<std::string>& borrowers);
+ void give_to_richest_fast(std::unordered_map<std::string, uint32_t> &demands, std::vector<std::string>& donors, std::vector<std::string>& borrowers);
+
+private:
+
  void thread_run(uint32_t interval_ms);
  void stats_thread_run(uint32_t interval_ms);
 
@@ -100,14 +114,19 @@ class karma_block_allocator : public block_allocator {
   std::unordered_map<std::string, int32_t> block_seq_no_;
   /*Last tenant that has used this block*/
   std::unordered_map<std::string, std::string> last_tenant_;
+  public:
   std::size_t total_blocks_;
+  private:
   uint32_t num_tenants_;
   uint64_t init_credits_;
 
+public:
   std::unordered_map<std::string, uint32_t> demands_;
   std::unordered_map<std::string, uint64_t> credits_;
   std::unordered_map<std::string, int32_t> rate_;
   std::unordered_map<std::string, uint32_t> allocations_;
+
+private:
 
   std::thread thread_;
   std::thread stats_thread_;

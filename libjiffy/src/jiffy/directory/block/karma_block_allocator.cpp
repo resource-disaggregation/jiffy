@@ -4,6 +4,7 @@
 #include <cassert>
 #include <chrono>
 #include "karma_block_allocator.h"
+#include "bheap.h"
 
 namespace jiffy {
 namespace directory {
@@ -14,7 +15,11 @@ karma_block_allocator::karma_block_allocator(uint32_t num_tenants, uint64_t init
     num_tenants_ = num_tenants;
     init_credits_ = init_credits;
     total_blocks_ = 0;
-    thread_ = std::thread(&karma_block_allocator::thread_run, this, interval_ms);
+    if(interval_ms > 0) 
+    {
+      thread_ = std::thread(&karma_block_allocator::thread_run, this, interval_ms);
+    }
+    
     // stats_thread_ = std::thread(&karma_block_allocator::stats_thread_run, this, 10);
 }
 
@@ -255,7 +260,7 @@ void karma_block_allocator::update_demand(const std::string &tenant_id, uint32_t
 // Also updates credits, rates
 void karma_block_allocator::compute_allocations() {
   std::unique_lock<std::mutex> lock(mtx_);
-  if(demands_.size() == 0) {
+  if(demands_.size() < num_tenants_) {
     return;
   }
 
@@ -275,8 +280,8 @@ void karma_block_allocator::compute_allocations() {
   LOG(log_level::info) << "Epoch used blocks: " << num_used_blocks;
   auto duration_log_util = std::chrono::duration_cast<std::chrono::microseconds>( end_tim - start_tim ).count();
 
-  // Karma algorithm
-  auto fair_share = total_blocks_ / num_tenants_;
+  
+  
   start_tim = std::chrono::high_resolution_clock::now();
   std::unordered_map<std::string, uint32_t> demands;
   for(auto &jt : demands_)
@@ -288,55 +293,10 @@ void karma_block_allocator::compute_allocations() {
   auto duration_adj_demands = std::chrono::duration_cast<std::chrono::microseconds>( end_tim - start_tim ).count();
 
   start_tim = std::chrono::high_resolution_clock::now();
-  // Reset rates
-  for(auto &jt : rate_) {
-    jt.second = 0;
-  }
-
-  for(auto &jt : demands) {
-    allocations_[jt.first] = std::min(jt.second, (uint32_t) fair_share);
-  }
-
-  // Iteratively match donors to borrowers
-  // TODO: optimize this implementation
-  while(true) {
-    // Pick richest borrower
-    std::string borrower = "$none$";
-    uint64_t richest_credits = 0;
-    for(auto &jt : credits_) {
-      if(demands[jt.first] > fair_share && allocations_[jt.first] < demands[jt.first] && jt.second > 0 && jt.second > richest_credits) {
-        borrower = jt.first;
-        richest_credits = jt.second;
-      }
-    }
-    if(borrower == "$none$") {
-      break;
-    }
-
-    // Pick poorest donor
-    std::string donor = "$none$";
-    uint64_t poorest_credits = std::numeric_limits<uint64_t>::max();
-    for(auto &jt : credits_) 
-    {
-      if(demands[jt.first] < fair_share && (uint32_t)rate_[jt.first] < fair_share - demands[jt.first] && jt.second < poorest_credits) {
-        donor = jt.first;
-        poorest_credits = jt.second;
-      }
-    }
-    if(donor  == "$none$") {
-      break;
-    }
-
-    // Block transaction
-    allocations_[borrower] += 1;
-    // LOG(log_level::info) << "borrower, alloc=" << allocations_[borrower] << " " << borrower;
-    credits_[borrower] -= 1;
-    // LOG(log_level::info) << "borrower, c=" << credits_[borrower] << " " << borrower;
-    rate_[borrower] -= 1;
-    credits_[donor] += 1;
-    // LOG(log_level::info) << "donor, c=" << credits_[donor] << " " << donor;
-    rate_[donor] += 1;
-  }
+  
+  // Karma algorithm
+  karma_algorithm_fast(demands);
+  
   end_tim = std::chrono::high_resolution_clock::now();
   auto duration_karma_algo = std::chrono::duration_cast<std::chrono::microseconds>( end_tim - start_tim ).count();
 
@@ -418,6 +378,286 @@ void karma_block_allocator::stats_thread_run(uint32_t interval_ms) {
     log_stats();
     std::this_thread::sleep_for(std::chrono::milliseconds(interval_ms));
   }
+}
+
+
+// MUST be called with lock
+void karma_block_allocator::karma_algorithm(std::unordered_map<std::string, uint32_t> &demands) {
+  auto fair_share = total_blocks_ / num_tenants_;
+  // Reset rates
+  for(auto &jt : rate_) {
+    jt.second = 0;
+  }
+
+  for(auto &jt : demands) {
+    allocations_[jt.first] = std::min(jt.second, (uint32_t) fair_share);
+  }
+
+  // Iteratively match donors to borrowers
+  // TODO: optimize this implementation
+  while(true) {
+    // Pick richest borrower
+    std::string borrower = "$none$";
+    uint64_t richest_credits = 0;
+    for(auto &jt : credits_) {
+      if(demands[jt.first] > fair_share && allocations_[jt.first] < demands[jt.first] && jt.second > 0 && jt.second > richest_credits) {
+        borrower = jt.first;
+        richest_credits = jt.second;
+      }
+    }
+    if(borrower == "$none$") {
+      break;
+    }
+
+    // Pick poorest donor
+    std::string donor = "$none$";
+    uint64_t poorest_credits = std::numeric_limits<uint64_t>::max();
+    for(auto &jt : credits_) 
+    {
+      if(demands[jt.first] < fair_share && (uint32_t)rate_[jt.first] < fair_share - demands[jt.first] && jt.second < poorest_credits) {
+        donor = jt.first;
+        poorest_credits = jt.second;
+      }
+    }
+    if(donor  == "$none$") {
+      break;
+    }
+
+    // Block transaction
+    allocations_[borrower] += 1;
+    // LOG(log_level::info) << "borrower, alloc=" << allocations_[borrower] << " " << borrower;
+    credits_[borrower] -= 1;
+    // LOG(log_level::info) << "borrower, c=" << credits_[borrower] << " " << borrower;
+    rate_[borrower] -= 1;
+    credits_[donor] += 1;
+    // LOG(log_level::info) << "donor, c=" << credits_[donor] << " " << donor;
+    rate_[donor] += 1;
+  }
+}
+
+// MUST be called with lock
+void karma_block_allocator::karma_algorithm_fast(std::unordered_map<std::string, uint32_t> &demands) {
+  auto fair_share = total_blocks_ / num_tenants_;
+  // Reset rates
+  for(auto &jt : rate_) {
+    jt.second = 0;
+  }
+
+  std::vector<std::string> donors, borrowers;
+  uint32_t total_supply = 0;
+  uint32_t total_demand = 0;
+  for(auto &jt : demands) {
+    if(jt.second < fair_share) {
+      donors.push_back(jt.first);
+      total_supply += fair_share - jt.second;
+    }
+    else if(jt.second > fair_share) {
+      borrowers.push_back(jt.first);
+      total_demand += std::min(jt.second - fair_share, credits_[jt.first]);
+    }
+    // Allocate upto fair share
+    allocations_[jt.first] = std::min(jt.second, (uint32_t) fair_share);
+  }
+
+  // Match supply to demand
+  if(total_supply >= total_demand) {
+    borrow_from_poorest_fast(demands, donors, borrowers);
+  }
+  else if(total_supply < total_demand) 
+  {
+    give_to_richest_fast(demands, donors, borrowers);
+  }
+
+  // Update credits based on computed rates
+  for(auto &jt : rate_) {
+    credits_[jt.first] += jt.second;
+  }
+
+}
+
+namespace {
+  struct karma_candidate {
+    std::string id;
+    int64_t c;
+    uint32_t x;
+  };
+
+  bool poorer(const karma_candidate& a, const karma_candidate& b) 
+  {
+    return a.c < b.c;
+  }
+
+  bool richer(const karma_candidate& a, const karma_candidate& b) 
+  {
+    return a.c > b.c;
+  }
+}
+
+// MUST be called with lock
+// Note this does NOT update credits_
+void karma_block_allocator::borrow_from_poorest_fast(std::unordered_map<std::string, uint32_t> &demands, std::vector<std::string>& donors, std::vector<std::string>& borrowers) {
+
+  auto fair_share = total_blocks_ / num_tenants_;
+
+  // Can satisfy demands of all borrowers
+  uint32_t total_demand = 0;
+  for(auto &b : borrowers) {
+    auto to_borrow = std::min(credits_[b], demands[b] - fair_share);
+    allocations_[b] += to_borrow;
+    rate_[b] -= to_borrow;
+    total_demand += to_borrow;
+  }
+
+
+  // Borrow from poorest donors and update their rates
+  std::vector<karma_candidate> donor_list;
+  for(auto &d : donors) {
+    karma_candidate elem;
+    elem.id = d;
+    elem.c = credits_[d];
+    elem.x = fair_share - demands[d];
+    donor_list.push_back(elem);
+  }
+  donor_list.push_back({"$dummy$", std::numeric_limits<int64_t>::max(), 0});
+
+  // Sort donor_list by credits
+  std::sort(donor_list.begin(), donor_list.end(), poorer);
+
+  auto dem = total_demand;
+  int64_t cur_c = -1;
+  auto next_c = donor_list[0].c;
+  // poorest active donor set (heap internally ordered by x)
+  auto poorest_donors = BroadcastHeap();
+  std::size_t idx = 0;
+
+  while(dem > 0) {
+    LOG(log_level::info) << "Entering while";
+    // Update poorest donors
+    if(poorest_donors.size() == 0) {
+      cur_c = next_c;
+      assert(cur_c != std::numeric_limits<int64_t>::max());
+    }
+    while(donor_list[idx].c == cur_c) {
+      poorest_donors.push(donor_list[idx].id, donor_list[idx].x);
+      idx += 1;
+    }
+    next_c = donor_list[idx].c;
+
+    // Perform c,x update
+    if(dem < poorest_donors.size()) 
+    {
+      for(std::size_t i = 0; i < dem; i++) {
+        bheap_item item = poorest_donors.pop();
+        auto x = item.second - 1;
+        dem -= 1;
+        rate_[item.first] += fair_share - demands[item.first] - x;
+      }
+    } else {
+      auto alpha = (int32_t) std::min({(int64_t)poorest_donors.min_val(), (int64_t)(dem/poorest_donors.size()), (int64_t)(next_c - cur_c)});
+      assert(alpha > 0);
+      poorest_donors.add_to_all(-1*alpha);
+      cur_c += alpha;
+      dem -= poorest_donors.size() * alpha;
+    }
+
+    // get rid of donors with x = 0
+    while(poorest_donors.size() > 0 && poorest_donors.min_val() == 0) {
+      bheap_item item = poorest_donors.pop();
+      rate_[item.first] += fair_share - demands[item.first];
+    }
+
+  }
+
+  while(poorest_donors.size() > 0) {
+    bheap_item item = poorest_donors.pop();
+    rate_[item.first] += fair_share - demands[item.first] - item.second;
+  }
+
+}
+
+// MUST be called with lock
+// Note this does NOT update credits_
+void karma_block_allocator::give_to_richest_fast(std::unordered_map<std::string, uint32_t> &demands, std::vector<std::string>& donors, std::vector<std::string>& borrowers) {
+
+  auto fair_share = total_blocks_ / num_tenants_;
+
+  // Can match all donations
+  uint32_t total_supply = 0;
+  for(auto &d : donors) {
+    auto to_give = fair_share - demands[d];
+    rate_[d] += to_give;
+    total_supply += to_give;
+  }
+
+  // # Give to richest borrowers and update their allocations/rate
+  std::vector<karma_candidate> borrower_list;
+  for(auto &b : borrowers) {
+    karma_candidate elem;
+    elem.id = b;
+    elem.c = credits_[b];
+    elem.x = std::min(credits_[b], demands[b] - fair_share);
+    borrower_list.push_back(elem);
+  }
+  borrower_list.push_back({"$dummy$", -1, 0});
+
+  std::sort(borrower_list.begin(), borrower_list.end(), richer);
+
+  auto sup = total_supply;
+  int64_t cur_c = std::numeric_limits<int64_t>::max();
+  int64_t next_c = borrower_list[0].c;
+  // richest active borrower set (heap internally ordered by x)
+  auto richest_borrowers = BroadcastHeap();
+  std::size_t idx = 0;
+
+  while(sup > 0) {
+    // Update richest borrowers
+    if(richest_borrowers.size() == 0) {
+      cur_c = next_c;
+      assert(cur_c != std::numeric_limits<int64_t>::min());
+    }
+    while(borrower_list[idx].c == cur_c) {
+      richest_borrowers.push(borrower_list[idx].id, borrower_list[idx].x);
+      idx += 1;
+    }
+    next_c = borrower_list[idx].c;
+
+    // perform c,x update
+    if(sup < richest_borrowers.size()) {
+      for(std::size_t i = 0; i < sup; i++) {
+        bheap_item item = richest_borrowers.pop();
+        auto x = item.second - 1;
+        sup -= 1;
+        auto delta = std::min(credits_[item.first], demands[item.first] - fair_share) - x;
+        allocations_[item.first] += delta;
+        rate_[item.first] -= delta;
+      }
+    } else {
+      auto alpha = (int32_t) std::min((int64_t)(richest_borrowers.min_val()), (int64_t)(sup/richest_borrowers.size()));
+      assert(alpha > 0);
+      if(next_c != -1) {
+        alpha = (int32_t) std::min((int64_t)alpha, (int64_t)(cur_c - next_c));
+      }
+      richest_borrowers.add_to_all(-1 * alpha);
+      cur_c -= alpha;
+      sup -= richest_borrowers.size() * alpha;
+    }
+
+    // Get rid of borrowers with x = 0
+    while(richest_borrowers.size() > 0 && richest_borrowers.min_val() == 0) {
+      bheap_item item = richest_borrowers.pop();
+      auto delta = std::min(credits_[item.first], demands[item.first] - fair_share);
+      allocations_[item.first] += delta;
+      rate_[item.first] -= delta;
+    }
+  }
+
+  while(richest_borrowers.size() > 0) {
+    bheap_item item = richest_borrowers.pop();
+    auto delta = std::min(credits_[item.first], demands[item.first] - fair_share) - item.second;
+    allocations_[item.first] += delta;
+    rate_[item.first] -= delta;
+  }
+
 }
 
 }
