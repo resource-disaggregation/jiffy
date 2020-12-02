@@ -6,7 +6,6 @@
 #include <set>
 #include <map>
 #include <unordered_map>
-#include <thread>
 #include "block_allocator.h"
 #include "../../utils/rand_utils.h"
 #include "../../utils/logger.h"
@@ -16,7 +15,7 @@ namespace directory {
 /* Max-min fairness block allocator class, inherited from block allocator */
 class maxmin_block_allocator : public block_allocator {
  public:
-  maxmin_block_allocator(uint32_t num_tenants, uint32_t interval_ms);
+  maxmin_block_allocator() = default;
 
   virtual ~maxmin_block_allocator() = default;
 
@@ -68,26 +67,7 @@ class maxmin_block_allocator : public block_allocator {
    */
 
   std::size_t num_total_blocks() override;
-
-  void update_demand(const std::string &tenant_id, uint32_t demand) override;
-
  private:
-
- void compute_allocations();
-
- // Must be called with lock
- // Updates allocations, credits, rates
- void karma_algorithm(std::unordered_map<std::string, uint32_t> &demands);
-
-// HACK: making these public for testing
-public:
-
-// Maxmin algorithm
- void maxmin_algorithm_fast(std::unordered_map<std::string, uint32_t> &demands);
-
-private:
-
- void thread_run(uint32_t interval_ms);
 
  std::size_t num_allocated_blocks_unsafe();
 
@@ -100,32 +80,15 @@ private:
   /* Operation mutex */
   std::mutex mtx_;
   /* Allocated blocks per-tenant */
-  std::unordered_map<std::string, std::set<std::string> > active_blocks_;
+  std::unordered_map<std::string, std::set<std::string> > allocated_blocks_;
   /* Free blocks */
   std::set<std::string> free_blocks_;
   /*Fair share of each tenant*/
-//   std::size_t fair_share_;
+  std::size_t fair_share_;
   /*Block sequence numbers*/
   std::unordered_map<std::string, int32_t> block_seq_no_;
   /*Last tenant that has used this block*/
   std::unordered_map<std::string, std::string> last_tenant_;
-  public:
-  std::size_t total_blocks_;
-  std::size_t not_allocated_;
-  private:
-  uint32_t num_tenants_;
-
-public:
-  std::unordered_map<std::string, uint32_t> demands_;
-  std::unordered_map<std::string, uint32_t> allocations_;
-
-private:
-
-  std::thread thread_;
-
-  std::unordered_map<std::string, bool> used_bitmap_;
-  std::unordered_map<std::string, bool> temp_used_bitmap_;
-
 };
 
 }

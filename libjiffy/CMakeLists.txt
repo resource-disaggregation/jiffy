@@ -276,6 +276,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             test/auto_scaling_test.cpp
             test/bheap_test.cpp
             test/karma_test.cpp
+            test/maxmin_test.cpp
             test/test_utils.h)
     target_link_libraries(jiffy_tests jiffy)
     add_dependencies(jiffy_tests catch_ep boost_ep jemalloc_ep thrift_ep awssdk_ep)

@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
   std::exception_ptr alloc_exception = nullptr;
   std::shared_ptr<block_allocator> alloc;
   if(allocator_type == "maxmin"){
-    alloc = std::make_shared<maxmin_block_allocator>();
+    alloc = std::make_shared<maxmin_block_allocator>(num_tenants, algo_interval_ms);
   } 
   else if(allocator_type == "static") {
     alloc = std::make_shared<static_block_allocator>(num_tenants, algo_interval_ms);
