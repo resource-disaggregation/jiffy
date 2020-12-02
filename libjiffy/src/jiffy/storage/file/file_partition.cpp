@@ -166,8 +166,8 @@ bool file_partition::sync(const std::string &path) {
     LOG(log_level::info) << "Reclaim: Syncing dirty block: " << path;
     auto t1 = std::chrono::high_resolution_clock::now();
     // auto remote = persistent::persistent_store::instance(path, ser_);
-    auto decomposed = persistent::persistent_store::decompose_path(path);
-    remote_->write<file_type>(partition_, decomposed.second);
+    // auto decomposed = persistent::persistent_store::decompose_path(path);
+    // remote_->write<file_type>(partition_, decomposed.second);
     // auto myfile = std::fstream(path, std::ios::out | std::ios::binary);
     // myfile.write(partition_.data(), partition_.size());
     // myfile.close();
