@@ -9,9 +9,13 @@ namespace directory {
 
 using namespace utils;
 
-static_block_allocator::static_block_allocator(uint32_t num_tenants) {
+static_block_allocator::static_block_allocator(uint32_t num_tenants, uint32_t interval_ms) {
     num_tenants_ = num_tenants;
     total_blocks_ = 0;
+    if(interval_ms > 0) 
+    {
+      thread_ = std::thread(&static_block_allocator::thread_run, this, interval_ms);
+    }
 }
 
 std::vector<std::string> static_block_allocator::allocate(std::size_t count, const std::vector<std::string> &, const std::string &tenant_id) {
@@ -45,6 +49,8 @@ std::vector<std::string> static_block_allocator::allocate(std::size_t count, con
   
   my->second.insert(*block_it);
   blocks.push_back(*block_it);
+  used_bitmap_[*block_it] = true;
+  temp_used_bitmap_[*block_it] = true;
   free_blocks_.erase(block_it);
 
   return blocks;
@@ -65,6 +71,7 @@ void static_block_allocator::free(const std::vector<std::string> &blocks, const 
       not_freed.push_back(block_name);
       continue;
     }
+    used_bitmap_[*jt] = false;
     free_blocks_.insert(*jt);
     my->second.erase(jt);
   }
@@ -82,6 +89,10 @@ void static_block_allocator::add_blocks(const std::vector<std::string> &block_na
   std::unique_lock<std::mutex> lock(mtx_);
   total_blocks_ += block_names.size();
   free_blocks_.insert(block_names.begin(), block_names.end());
+  for(auto blk : block_names) {
+    used_bitmap_[blk] = false;
+    temp_used_bitmap_[blk] = false;
+  }
 }
 
 void static_block_allocator::remove_blocks(const std::vector<std::string> &block_names) {
@@ -93,6 +104,8 @@ void static_block_allocator::remove_blocks(const std::vector<std::string> &block
     }
     total_blocks_ -= 1;
     free_blocks_.erase(it);
+    assert(used_bitmap_.erase(block_name) == 1);
+    assert(temp_used_bitmap_.erase(block_name) == 1);
   }
 }
 
@@ -131,6 +144,50 @@ void static_block_allocator::register_tenant(std::string tenant_id) {
   }  
   auto & tenant_blocks = allocated_blocks_[tenant_id];
   tenant_blocks.clear();
+}
+
+void static_block_allocator::thread_run(uint32_t interval_ms) {
+  while(true) {
+    compute_allocations();
+    std::this_thread::sleep_for(std::chrono::milliseconds(interval_ms));
+  } 
+}
+
+void static_block_allocator::compute_allocations() {
+  std::unique_lock<std::mutex> lock(mtx_);
+  if(allocated_blocks_.size() < num_tenants_) {
+    return;
+  }
+
+  auto t1 = std::chrono::high_resolution_clock::now();
+
+  auto start_tim = std::chrono::high_resolution_clock::now();
+  // Log utilization for previous epoch
+  std::size_t num_used_blocks = 0;
+  for(auto &jt : temp_used_bitmap_) {
+    if(jt.second) {
+      num_used_blocks += 1;
+    }
+  }
+
+  auto end_tim = std::chrono::high_resolution_clock::now();
+
+  LOG(log_level::info) << "Epoch used blocks: " << num_used_blocks;
+  auto duration_log_util = std::chrono::duration_cast<std::chrono::microseconds>( end_tim - start_tim ).count();
+
+  start_tim = std::chrono::high_resolution_clock::now();
+  // Reset temp bitmap
+  for(auto &jt : temp_used_bitmap_) {
+    jt.second = used_bitmap_[jt.first];
+  }
+  end_tim = std::chrono::high_resolution_clock::now();
+  auto duration_reset_bitmap = std::chrono::duration_cast<std::chrono::microseconds>( end_tim - start_tim ).count();
+
+  auto t2 = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+  LOG(log_level::info) << "compute_allocations took " << duration << " us";
+  LOG(log_level::info) << "log_util took " << duration_log_util << " us";
+  LOG(log_level::info) << "reset_bitmap took " << duration_reset_bitmap << "us";
 }
 
 }

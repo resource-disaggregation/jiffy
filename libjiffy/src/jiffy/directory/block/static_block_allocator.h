@@ -6,6 +6,7 @@
 #include <set>
 #include <map>
 #include <unordered_map>
+#include <thread>
 #include "block_allocator.h"
 #include "../../utils/rand_utils.h"
 #include "../../utils/logger.h"
@@ -15,7 +16,7 @@ namespace directory {
 /* Random block allocator class, inherited from block allocator */
 class static_block_allocator : public block_allocator {
  public:
-  static_block_allocator(uint32_t num_tenants);
+  static_block_allocator(uint32_t num_tenants, uint32_t interval_ms);
 
   virtual ~static_block_allocator() = default;
 
@@ -73,6 +74,10 @@ class static_block_allocator : public block_allocator {
  
  void register_tenant(std::string tenant_id);
 
+ void thread_run(uint32_t interval_ms);
+
+ void compute_allocations();
+
   /*
    * Fetch prefix of block name
    */
@@ -94,6 +99,12 @@ class static_block_allocator : public block_allocator {
 
   /* Allocated blocks per-tenant */
   std::unordered_map<std::string, std::set<std::string> > allocated_blocks_;
+
+  /* Stats thread*/
+  std::thread thread_;
+
+  std::unordered_map<std::string, bool> used_bitmap_;
+  std::unordered_map<std::string, bool> temp_used_bitmap_;
 };
 
 }

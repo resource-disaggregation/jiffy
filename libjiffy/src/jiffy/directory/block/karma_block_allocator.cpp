@@ -355,7 +355,6 @@ void karma_block_allocator::compute_allocations() {
   LOG(log_level::info) << "adj_blocks took " << duration_adj_blocks << "us";
   LOG(log_level::info) << "log_state took " << duration_log_state << "us";
   LOG(log_level::info) << "reset_bitmap took " << duration_reset_bitmap << "us";
-  
 }
 
 void karma_block_allocator::log_stats() {

@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
     alloc = std::make_shared<maxmin_block_allocator>();
   } 
   else if(allocator_type == "static") {
-    alloc = std::make_shared<static_block_allocator>(num_tenants);
+    alloc = std::make_shared<static_block_allocator>(num_tenants, algo_interval_ms);
   }
   else if(allocator_type == "random") {
     alloc = std::make_shared<random_block_allocator>();
