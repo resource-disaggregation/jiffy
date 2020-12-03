@@ -5,7 +5,7 @@ import time
 import os
 import sys
 from jiffy import JiffyClient
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Event
 import pickle
 import math
 import datetime
@@ -50,7 +50,7 @@ def map_file_to_worker(filename, num_workers):
 #         time.sleep(1)
 
 
-def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backing_path):
+def worker(quit_signal, q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backing_path):
     # Initialize
     # Connect the directory server with the corresponding port numbers
     monitor_q.cancel_join_thread()
@@ -69,7 +69,7 @@ def worker(q, resq, monitor_q, dir_host, dir_porta, dir_portb, block_size, backi
 
     while True:
         task = q.get()
-        if task is None:
+        if quit_signal.is_set() or task is None:
             resq.put({'lat_sum': lat_sum, 'lat_count': lat_count, 'total_block_time': total_block_time, 'jiffy_blocks': jiffy_blocks, 'persistent_blocks': persistent_blocks})
             print('Worker exiting')
             break
@@ -191,8 +191,12 @@ if __name__ == "__main__":
     for i in range(para):
         queues.append(Queue())
 
+    for i in range(para):
+        queues[i].cancel_join_thread()
+
     results = Queue()
     monitor_queue = Queue()
+    quit_signal = Event()
 
     # Create monitor
     # monitor = Process(target=run_monitor, args=(monitor_queue, dir_host, dir_porta, dir_portb, tenant_id))
@@ -205,7 +209,7 @@ if __name__ == "__main__":
     # Create workers
     workers = []
     for i in range(para):
-        p = Process(target=worker, args=(queues[i], results, monitor_queue, dir_host, dir_porta, dir_portb, block_size, backing_path))
+        p = Process(target=worker, args=(quit_signal, queues[i], results, monitor_queue, dir_host, dir_porta, dir_portb, block_size, backing_path))
         workers.append(p)
 
     # Start workers
@@ -317,11 +321,14 @@ if __name__ == "__main__":
 
     for i in range(para):
         queues[i].put(None)
+    
+    quit_signal.set()
+    print('Epochs complete')
 
     # Wait for worker to finish
     for i in range(para):
         queues[i].close()
-        queues[i].join_thread()
+        # queues[i].join_thread()
         workers[i].join()
 
     # monitor_queue.put(None)
