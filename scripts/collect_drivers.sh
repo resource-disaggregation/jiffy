@@ -1,8 +1,17 @@
 config=$1
+tenants_file=$2
 
-cat ~/karma-eval/$config.tenant*.txt | grep -i '\[alt\]' > ~/karma-eval/$config.alt.txt
-cat ~/karma-eval/$config.tenant*.txt | grep -i '\[selfish\]' > ~/karma-eval/$config.selfish.txt
-cat ~/karma-eval/$config.tenant*.txt | grep -i -e '\[selfish\]' -e '\[alt\]' > ~/karma-eval/$config.all.txt
+mapfile -t tenant_ids < $tenants_file;
+
+rm ~/karma-eval/$config.dump.txt
+for tenant in "${alt_tenants[@]}"
+do
+    cat ~/karma-eval/$config.tenant$tenant.txt | grep -i -e '\[selfish\]' -e '\[alt\]' >> ~/karma-eval/$config.dump.txt
+done
+
+# cat ~/karma-eval/$config.tenant*.txt | grep -i '\[alt\]' > ~/karma-eval/$config.alt.txt
+# cat ~/karma-eval/$config.tenant*.txt | grep -i '\[selfish\]' > ~/karma-eval/$config.selfish.txt
+# cat ~/karma-eval/$config.tenant*.txt | grep -i -e '\[selfish\]' -e '\[alt\]' > ~/karma-eval/$config.all.txt
 
 function print_stats() {
     # avg_lat=$(cat ~/karma-eval/$config.tenant*.txt | grep -i 'average latency' | awk '{sum += $3;} END {print sum/NR}')
@@ -16,17 +25,18 @@ function print_stats() {
     echo "Persistent blocks: " $persistent_blocks
 }
 
-echo "All tenants"
-print_stats ~/karma-eval/$config.all.txt
-jiffy_lat=$(cat ~/karma-eval/$config.tenant*.txt  | grep -i 'wrote to jiffy' | awk '{sum+=$4} END {print sum/NR}')
-persistent_lat=$(cat ~/karma-eval/$config.tenant*.txt  | grep -i 'wrote to persistent' | awk '{sum += $5} END {print sum/NR}')
+echo "Tenant stats"
+echo "-------------"
+print_stats ~/karma-eval/$config.dump.txt
+jiffy_lat=$(cat ~/karma-eval/$config.dump.txt  | grep -i 'wrote to jiffy' | awk '{sum+=$4} END {print sum/NR}')
+persistent_lat=$(cat ~/karma-eval/$config.dump.txt  | grep -i 'wrote to persistent' | awk '{sum += $5} END {print sum/NR}')
 echo "Jiffy latency: " $jiffy_lat
 echo "Persistent latency: " $persistent_lat
 
-echo "Altruistic tenants"
-print_stats ~/karma-eval/$config.alt.txt
+# echo "Altruistic tenants"
+# print_stats ~/karma-eval/$config.alt.txt
 
-echo "Selfish tenants"
-print_stats ~/karma-eval/$config.selfish.txt
+# echo "Selfish tenants"
+# print_stats ~/karma-eval/$config.selfish.txt
 
 
