@@ -4,7 +4,7 @@ tenants_file=$2
 mapfile -t tenant_ids < $tenants_file;
 
 rm ~/karma-eval/$config.dump.txt
-for tenant in "${alt_tenants[@]}"
+for tenant in "${tenant_ids[@]}"
 do
     cat ~/karma-eval/$config.tenant$tenant.txt | grep -i -e '\[selfish\]' -e '\[alt\]' >> ~/karma-eval/$config.dump.txt
 done
