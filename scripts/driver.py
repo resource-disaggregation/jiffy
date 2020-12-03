@@ -350,8 +350,7 @@ if __name__ == "__main__":
     print('Persistent blocks: ' + str(persistent_blocks))
 
     time_end = time.time()
-    print("Execution time")
-    print(time_end -  time_start)
+    print("Execution time: " + str(time_end -  time_start))
 
 
     
