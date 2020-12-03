@@ -354,15 +354,17 @@ if __name__ == "__main__":
         jiffy_blocks += res['jiffy_blocks']
         persistent_blocks += res['persistent_blocks']
 
-    print('Average latency: ' + str(float(lat_sum)/lat_count))
-    print('Latency sum: ' + str(lat_sum))
-    print('Latency count: ' + str(lat_count))
-    print('Total block time: ' + str(total_block_time))
-    print('Jiffy blocks: ' + str(jiffy_blocks))
-    print('Persistent blocks: ' + str(persistent_blocks))
+    type_str = 'selfish' if selfish else 'alt'
+    prefix_str = '<' + tenant_id + '>' + ' [' + type_str + '] '
+    print(prefix_str + 'Average latency: ' + str(float(lat_sum)/lat_count))
+    print(prefix_str + 'Latency sum: ' + str(lat_sum))
+    print(prefix_str + 'Latency count: ' + str(lat_count))
+    print(prefix_str + 'Total block time: ' + str(total_block_time))
+    print(prefix_str + 'Jiffy blocks: ' + str(jiffy_blocks))
+    print(prefix_str + 'Persistent blocks: ' + str(persistent_blocks))
 
     time_end = time.time()
-    print("Execution time: " + str(time_end -  time_start))
+    print(prefix_str + "Execution time: " + str(time_end -  time_start))
 
 
     
