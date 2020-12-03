@@ -352,6 +352,8 @@ if __name__ == "__main__":
         persistent_blocks += res['persistent_blocks']
 
     print('Average latency: ' + str(float(lat_sum)/lat_count))
+    print('Latency sum: ' + str(lat_sum))
+    print('Latency count: ' + str(lat_count))
     print('Total block time: ' + str(total_block_time))
     print('Jiffy blocks: ' + str(jiffy_blocks))
     print('Persistent blocks: ' + str(persistent_blocks))
