@@ -1,5 +1,5 @@
 # Workload driver program
-# python3 driver.py 127.0.0.1 9090 9091 92 1 /home/midhul/snowflake_demands_nogaps10.pickle $((4 * 1024)) /home/midhul/nfs/jiffy_dump 0
+# python3 driver.py 127.0.0.1 9090 9091 92 1 /home/midhul/snowflake_demands_nogaps10.pickle $((4 * 1024)) /home/midhul/nfs/jiffy_dump 0 0
 
 import time
 import os
@@ -157,7 +157,7 @@ def get_demands(filename, scale_factor, t):
     return ret
 
 
-def advertise_demand(client, tenant_id, files_in_jiffy, outstanding_puts, outstanding_removes_jiffy):
+def advertise_demand(client, tenant_id, files_in_jiffy, outstanding_puts, outstanding_removes_jiffy, selfish, fair_share):
     # adv_demand = cur_demand + inflight_puts
     print('outstanding puts: ' + str(len(outstanding_puts)))
     print('outstanding removes: ' + str(len(outstanding_removes)))
@@ -165,6 +165,8 @@ def advertise_demand(client, tenant_id, files_in_jiffy, outstanding_puts, outsta
     # adv_demand = max(0, prev_demand + inflight_puts - inflight_removes)
     adv_demand = max(0, len(files_in_jiffy) + len(outstanding_puts) - len(outstanding_removes_jiffy))
     assert adv_demand >= 0
+    if selfish:
+        adv_demand = max(adv_demand, fair_share)
     print('Avertising demand: ' + str(adv_demand))
     client.fs.add_tags('advertise_demand', {'tenant_id': tenant_id, 'demand': str(adv_demand)})
 
@@ -182,6 +184,7 @@ if __name__ == "__main__":
     micro_epochs = 1 # Micro-epochs per epoch
     dur_micro_epoch = 1 # Micro-epoch duration
     oracle = bool(int(sys.argv[9]))
+    selfish = bool(int(sys.argv[10]))
 
     if not os.path.exists('%s/%s' % (backing_path, tenant_id)):
         os.makedirs('%s/%s' % (backing_path, tenant_id))
@@ -274,7 +277,7 @@ if __name__ == "__main__":
         
         # For normal advertise demands before generating requests
         if not oracle:
-            advertise_demand(client, tenant_id, files_in_jiffy, outstanding_puts, outstanding_removes_jiffy)
+            advertise_demand(client, tenant_id, files_in_jiffy, outstanding_puts, outstanding_removes_jiffy, selfish, fair_share)
         
         # Generate requests
         # Every epoch
@@ -306,7 +309,7 @@ if __name__ == "__main__":
 
         #  For oracle advertise demands after generating requests
         if oracle:
-            advertise_demand(client, tenant_id, files_in_jiffy, outstanding_puts, outstanding_removes_jiffy)
+            advertise_demand(client, tenant_id, files_in_jiffy, outstanding_puts, outstanding_removes_jiffy, selfish, fair_share)
 
         # Queue requests to workers
         # Every epoch
