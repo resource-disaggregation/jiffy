@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
   // First set defaults
   std::string address = "127.0.0.1";
   std::string memory_mode = "PMEM";
-  std::string pmem_path = "";
+  std::string pmem_path = "/media/pmem0/shijie";
   int32_t mgmt_port = 9093;
   int32_t auto_scaling_port = 9094;
   int32_t service_port = 9095;
