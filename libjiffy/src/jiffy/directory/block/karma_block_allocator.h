@@ -69,7 +69,7 @@ class karma_block_allocator : public block_allocator {
 
   std::size_t num_total_blocks() override;
 
-  void update_demand(const std::string &tenant_id, uint32_t demand) override;
+  void update_demand(const std::string &tenant_id, uint32_t demand, uint32_t oracle_demand) override;
 
  private:
 
@@ -122,6 +122,7 @@ private:
 
 public:
   std::unordered_map<std::string, uint32_t> demands_;
+  std::unordered_map<std::string, uint32_t> oracle_demands_;
   std::unordered_map<std::string, uint64_t> credits_;
   std::unordered_map<std::string, int32_t> rate_;
   std::unordered_map<std::string, uint32_t> allocations_;

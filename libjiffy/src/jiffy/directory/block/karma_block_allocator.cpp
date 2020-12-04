@@ -217,6 +217,7 @@ void karma_block_allocator::register_tenant(std::string tenant_id) {
   tenant_blocks.clear();
   auto fair_share = total_blocks_ / num_tenants_;
   demands_[tenant_id] = fair_share;
+  oracle_demands_[tenant_id] = fair_share;
   credits_[tenant_id] = init_credits_;
   rate_[tenant_id] = 0;
   allocations_[tenant_id] = fair_share;
@@ -242,7 +243,7 @@ std::vector<std::string> karma_block_allocator::strip_seq_nos(const std::vector<
   return res;
 }
 
-void karma_block_allocator::update_demand(const std::string &tenant_id, uint32_t demand) {
+void karma_block_allocator::update_demand(const std::string &tenant_id, uint32_t demand, uint32_t oracle_demand) {
     LOG(log_level::info) << "Demand advertisement: " << tenant_id << " " << demand;
     std::unique_lock<std::mutex> lock(mtx_);
     auto my = demands_.find(tenant_id);
@@ -254,6 +255,7 @@ void karma_block_allocator::update_demand(const std::string &tenant_id, uint32_t
       assert(my != demands_.end());
     }
     my->second = demand;
+    oracle_demands_[tenant_id] = oracle_demand;
 }
 
 // Compute allocations and adjust blocks
@@ -269,15 +271,26 @@ void karma_block_allocator::compute_allocations() {
   auto start_tim = std::chrono::high_resolution_clock::now();
   // Log utilization for previous epoch
   std::size_t num_used_blocks = 0;
+  std::unordered_map<std::string, std::size_t> tenant_used_blocks;
   for(auto &jt : temp_used_bitmap_) {
     if(jt.second) {
       num_used_blocks += 1;
+      tenant_used_blocks[last_tenant_[jt.first]] += 1;
     }
   }
 
   auto end_tim = std::chrono::high_resolution_clock::now();
 
   LOG(log_level::info) << "Epoch used blocks: " << num_used_blocks;
+  
+  std::stringstream ss1;
+  ss1 << "Tenant used blocks: ";
+  for(auto &jt : tenant_used_blocks) {
+    ss1 << jt.first << " " << jt.second << " ";
+  }
+
+  LOG(log_level::info) << ss1.str();
+
   auto duration_log_util = std::chrono::duration_cast<std::chrono::microseconds>( end_tim - start_tim ).count();
 
   
@@ -334,6 +347,11 @@ void karma_block_allocator::compute_allocations() {
   {
     ss << jt.first << " " << jt.second << " ";
   }
+  ss << "oracle_demands: ";
+  for(auto &jt : oracle_demands_) {
+    ss << jt.first << " " << jt.second << " ";
+  }
+  
   LOG(log_level::info) << ss.str();
   end_tim = std::chrono::high_resolution_clock::now();
   auto duration_log_state = std::chrono::duration_cast<std::chrono::microseconds>( end_tim - start_tim ).count();

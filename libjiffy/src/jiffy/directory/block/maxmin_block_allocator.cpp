@@ -213,7 +213,7 @@ std::vector<std::string> maxmin_block_allocator::strip_seq_nos(const std::vector
   return res;
 }
 
-void maxmin_block_allocator::update_demand(const std::string &tenant_id, uint32_t demand) {
+void maxmin_block_allocator::update_demand(const std::string &tenant_id, uint32_t demand, uint32_t /*oracle_demand*/) {
     LOG(log_level::info) << "Demand advertisement: " << tenant_id << " " << demand;
     std::unique_lock<std::mutex> lock(mtx_);
     auto my = demands_.find(tenant_id);

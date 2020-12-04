@@ -157,7 +157,7 @@ def get_demands(filename, scale_factor, t):
     return ret
 
 
-def advertise_demand(client, tenant_id, files_in_jiffy, outstanding_puts, outstanding_removes_jiffy, selfish, fair_share):
+def compute_demand(tenant_id, files_in_jiffy, outstanding_puts, outstanding_removes_jiffy):
     # adv_demand = cur_demand + inflight_puts
     print('outstanding puts: ' + str(len(outstanding_puts)))
     print('outstanding removes: ' + str(len(outstanding_removes)))
@@ -165,10 +165,7 @@ def advertise_demand(client, tenant_id, files_in_jiffy, outstanding_puts, outsta
     # adv_demand = max(0, prev_demand + inflight_puts - inflight_removes)
     adv_demand = max(0, len(files_in_jiffy) + len(outstanding_puts) - len(outstanding_removes_jiffy))
     assert adv_demand >= 0
-    if selfish:
-        adv_demand = max(adv_demand, fair_share)
-    print('Avertising demand: ' + str(adv_demand))
-    client.fs.add_tags('advertise_demand', {'tenant_id': tenant_id, 'demand': str(adv_demand)})
+    return adv_demand
 
 if __name__ == "__main__":
     dir_host = sys.argv[1]
@@ -275,9 +272,8 @@ if __name__ == "__main__":
             except queue.Empty:
                 break
         
-        # For normal advertise demands before generating requests
-        if not oracle:
-            advertise_demand(client, tenant_id, files_in_jiffy, outstanding_puts, outstanding_removes_jiffy, selfish, fair_share)
+        # Compute estimated demand before generating requests
+        est_demand = compute_demand(tenant_id, files_in_jiffy, outstanding_puts, outstanding_removes_jiffy)
         
         # Generate requests
         # Every epoch
@@ -307,9 +303,20 @@ if __name__ == "__main__":
             
             assert len(cur_files) == cur_demand
 
-        #  For oracle advertise demands after generating requests
+        #  Compute oracle demand after generating requests
+        oracle_demand = compute_demand(tenant_id, files_in_jiffy, outstanding_puts, outstanding_removes_jiffy)
+
+        # Advertise demand
+        if selfish:
+            adv_demand = max(est_demand, fair_share)
+        else:
+            adv_demand = est_demand
+
         if oracle:
-            advertise_demand(client, tenant_id, files_in_jiffy, outstanding_puts, outstanding_removes_jiffy, selfish, fair_share)
+            adv_demand = oracle_demand
+
+        print('Avertising demand: ' + str(adv_demand) + ' ' + str(oracle_demand))
+        client.fs.add_tags('advertise_demand', {'tenant_id': tenant_id, 'demand': str(adv_demand), 'oracle_demand': str(oracle_demand)})
 
         # Queue requests to workers
         # Every epoch

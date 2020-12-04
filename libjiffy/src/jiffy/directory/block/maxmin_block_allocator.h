@@ -69,7 +69,7 @@ class maxmin_block_allocator : public block_allocator {
 
   std::size_t num_total_blocks() override;
 
-  void update_demand(const std::string &tenant_id, uint32_t demand) override;
+  void update_demand(const std::string &tenant_id, uint32_t demand, uint32_t oracle_demand) override;
 
  private:
 

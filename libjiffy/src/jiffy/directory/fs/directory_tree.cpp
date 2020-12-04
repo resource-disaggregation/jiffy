@@ -365,7 +365,7 @@ void directory_tree::add_tags(const std::string &path, const std::map<std::strin
   // TODO: HACK for now. Implement proper API for this
   if(path == "advertise_demand") {
     // LOG(log_level::info) << "Demand advertisement";
-    allocator_->update_demand(tags.at("tenant_id"), std::stoi(tags.at("demand")));
+    allocator_->update_demand(tags.at("tenant_id"), std::stoi(tags.at("demand")), std::stoi(tags.at("oracle_demand")));
     return;
   }
   get_node_as_file(path)->add_tags(tags);
