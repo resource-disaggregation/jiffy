@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
   // Configuration priority order: default < env < configuration file < commandline args
   // First set defaults
   std::string address = "127.0.0.1";
-  std::string memory_mode = "PMEM";
+  std::string memory_mode = "DRAM";
   std::string pmem_path = "/media/pmem0/shijie";
   int32_t mgmt_port = 9093;
   int32_t auto_scaling_port = 9094;
