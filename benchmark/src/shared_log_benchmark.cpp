@@ -193,8 +193,10 @@ int main() {
       std::shared_ptr<shared_log_benchmark> benchmark = nullptr;
       if (op_type == "write") {
         benchmark = std::make_shared<write_benchmark>(shared_log_clients, data_size, num_clients, num_ops);
-      } else if (op_type == "read") {
-        benchmark = std::make_shared<read_benchmark>(shared_log_clients, data_size, num_clients, num_ops);
+      } else if (op_type == "scan") {
+        benchmark = std::make_shared<scan_benchmark>(shared_log_clients, data_size, num_clients, num_ops);
+      } else if (op_type == "trim") {
+        benchmark = std::make_shared<trim_benchmark>(shared_log_clients, data_size, num_clients, num_ops);
       } else {
         LOG(log_level::info) << "Incorrect operation type for shared_log: " << op_type;
         return 0;
