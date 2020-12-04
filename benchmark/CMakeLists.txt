@@ -14,14 +14,14 @@ target_link_libraries(hash_table_bench jiffy_client ${MEMKIND_LIBRARY} ${Boost_P
 install(TARGETS hash_table_bench
         RUNTIME DESTINATION bin)
 
-# add_executable(file_bench src/file_benchmark.cpp)
+add_executable(file_bench src/file_benchmark.cpp)
 
-# add_dependencies(file_bench boost_ep  memkind_ep)
+add_dependencies(file_bench boost_ep  memkind_ep)
 
-# target_link_libraries(file_bench jiffy_client ${MEMKIND_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(file_bench jiffy_client ${MEMKIND_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-# install(TARGETS file_bench
-#         RUNTIME DESTINATION bin)
+install(TARGETS file_bench
+        RUNTIME DESTINATION bin)
 
 add_executable(shared_log_bench src/shared_log_benchmark.cpp)
 
