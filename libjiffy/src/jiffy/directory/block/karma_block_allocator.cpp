@@ -244,7 +244,7 @@ std::vector<std::string> karma_block_allocator::strip_seq_nos(const std::vector<
 }
 
 void karma_block_allocator::update_demand(const std::string &tenant_id, uint32_t demand, uint32_t oracle_demand) {
-    LOG(log_level::info) << "Demand advertisement: " << tenant_id << " " << demand;
+    LOG(log_level::info) << "Demand advertisement: " << tenant_id << " " << demand << " " << oracle_demand;
     std::unique_lock<std::mutex> lock(mtx_);
     auto my = demands_.find(tenant_id);
     if(my == demands_.end())
@@ -351,7 +351,7 @@ void karma_block_allocator::compute_allocations() {
   for(auto &jt : oracle_demands_) {
     ss << jt.first << " " << jt.second << " ";
   }
-  
+
   LOG(log_level::info) << ss.str();
   end_tim = std::chrono::high_resolution_clock::now();
   auto duration_log_state = std::chrono::duration_cast<std::chrono::microseconds>( end_tim - start_tim ).count();
