@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
     // Configuration files have higher priority than env vars
     std::vector<std::string> config_files;
     if (config_file == "") {
-      config_files = {"conf/jiffy.conf", "../conf/jiffy.conf""/etc/jiffy/jiffy.conf", "/usr/conf/jiffy.conf", "/usr/local/conf/jiffy.conf"};
+      config_files = {"conf/jiffy.conf", "../conf/jiffy.conf", "/etc/jiffy/jiffy.conf", "/usr/conf/jiffy.conf", "/usr/local/conf/jiffy.conf"};
     } else {
       config_files = {config_file};
     }
