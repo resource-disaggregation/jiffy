@@ -107,7 +107,7 @@ class scan_benchmark : public shared_log_benchmark {
         auto bench_begin = time_utils::now_us();
         uint64_t tot_time = 0, t0, t1 = bench_begin;
         size_t j;
-        std::string buffer;
+        std::vector<std::string> buffer;
         for (j = 0; j < num_ops_; j += num_ops_/10) {
           buffer.clear();
           t0 = time_utils::now_us();
