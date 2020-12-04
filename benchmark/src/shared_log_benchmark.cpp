@@ -82,7 +82,7 @@ class write_benchmark : public shared_log_benchmark {
           tot_time += (t1 - t0);
         }
         latency_[i] = (double) tot_time / (double) j;
-        throughput_[i] = j * 1E6 / (t1 - bench_begin);
+        throughput_[i] = j * 1E3 / (t1 - bench_begin);
       });
       thread_utils::set_core_affinity(workers_[i], i);
     }
@@ -117,7 +117,7 @@ class scan_benchmark : public shared_log_benchmark {
           tot_time += (t1 - t0);
         }
         latency_[i] = (double) tot_time / (double) j;
-        throughput_[i] = (double) j * 1E6 / (double) (t1 - bench_begin);
+        throughput_[i] = (double) j * 1E3 / (double) (t1 - bench_begin);
       });
       thread_utils::set_core_affinity(workers_[i], i);
     }
@@ -150,7 +150,7 @@ class trim_benchmark : public shared_log_benchmark {
           tot_time += (t1 - t0);
         }
         latency_[i] = (double) tot_time / (double) j;
-        throughput_[i] = (double) j * 1E6 / (double) (t1 - bench_begin);
+        throughput_[i] = (double) j * 1E3 / (double) (t1 - bench_begin);
       });
       thread_utils::set_core_affinity(workers_[i], i);
     }
