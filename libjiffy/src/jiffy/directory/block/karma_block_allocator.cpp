@@ -285,8 +285,8 @@ void karma_block_allocator::compute_allocations() {
   
   std::stringstream ss1;
   ss1 << "Tenant used blocks: ";
-  for(auto &jt : tenant_used_blocks) {
-    ss1 << jt.first << " " << jt.second << " ";
+  for(auto &jt : demands_) {
+    ss1 << jt.first << " " << tenant_used_blocks[jt.first] << " ";
   }
 
   LOG(log_level::info) << ss1.str();
