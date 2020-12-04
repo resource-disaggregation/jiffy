@@ -76,7 +76,8 @@ class write_benchmark : public shared_log_benchmark {
         size_t j;
         for (j = 0; j < num_ops_; ++j) {
           t0 = time_utils::now_us();
-          clients_[i]->write(std::to_string(j), data_, std::to_string(j) + "_stream");
+          std::vector<std::string> stream = {std::to_string(j)+"_stream"};
+          clients_[i]->write(std::to_string(j), data_, stream);
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);
         }
@@ -100,7 +101,8 @@ class scan_benchmark : public shared_log_benchmark {
     for (size_t i = 0; i < num_clients_; ++i) {
       workers_[i] = std::thread([i, this]() {
         for (size_t j = 0; j < num_ops_; ++j) {
-          clients_[i]->write(std::to_string(j), data_, std::to_string(j) + "_stream");
+          std::vector<std::string> stream = {std::to_string(j)+"_stream"};
+          clients_[i]->write(std::to_string(j), data_, stream);
         }
         auto bench_begin = time_utils::now_us();
         uint64_t tot_time = 0, t0, t1 = bench_begin;
@@ -110,7 +112,7 @@ class scan_benchmark : public shared_log_benchmark {
           buffer.clear();
           t0 = time_utils::now_us();
           std::vector<std::string> stream = {std::to_string(j)+"_stream"};
-          clients_[i]->scan(buffer, j, j + num_ops_/10 - 1, stream);
+          clients_[i]->scan(buffer, std::to_string(j), std::to_string(j + num_ops_/10 - 1), stream);
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);
         }
@@ -135,7 +137,8 @@ class trim_benchmark : public shared_log_benchmark {
     for (size_t i = 0; i < num_clients_; ++i) {
       workers_[i] = std::thread([i, this]() {
         for (size_t j = 0; j < num_ops_; ++j) {
-          clients_[i]->write(std::to_string(j), data_, std::to_string(j) + "_stream");
+          std::vector<std::string> stream = {std::to_string(j)+"_stream"};
+          clients_[i]->write(std::to_string(j), data_, stream);
         }
         auto bench_begin = time_utils::now_us();
         uint64_t tot_time = 0, t0, t1 = bench_begin;
