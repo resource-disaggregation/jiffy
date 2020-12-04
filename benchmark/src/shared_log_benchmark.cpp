@@ -167,8 +167,8 @@ int main() {
   int num_ops = 100000;
   int data_size = 1280;
   std::vector<std::string> op_type_set;
-  op_type_set.push_back("write");
-  op_type_set.push_back("scan");
+  // op_type_set.push_back("write");
+  // op_type_set.push_back("scan");
   op_type_set.push_back("trim");
   std::string path = "/tmp";
   std::string backing_path = "local://tmp";
