@@ -134,11 +134,11 @@ int main(int argc, char **argv) {
 
     // Configuration files have higher priority than env vars
     std::vector<std::string> config_files;
-    if (config_file == "") {
-      config_files = {"conf/jiffy.conf", "../conf/jiffy.conf", "/etc/jiffy/jiffy.conf", "/usr/conf/jiffy.conf", "/usr/local/conf/jiffy.conf"};
-    } else {
-      config_files = {config_file};
-    }
+    // if (config_file == "") {
+    //   config_files = {"conf/jiffy.conf", "../conf/jiffy.conf", "/etc/jiffy/jiffy.conf", "/usr/conf/jiffy.conf", "/usr/local/conf/jiffy.conf"};
+    // } else {
+    config_files = {config_file};
+    // }
 
     for (const auto &cfile: config_files) {
       std::ifstream ifs(cfile.c_str());
