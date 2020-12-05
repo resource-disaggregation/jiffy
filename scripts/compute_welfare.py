@@ -8,6 +8,17 @@ import sys
 log_file = sys.argv[1]
 num_tenants = int(sys.argv[2])
 num_epochs = int(sys.argv[3])
+tenants_file = sys.argv[4]
+
+tenant_subset = []
+f = open(tenants_file, 'r')
+for line in f:
+    if line.strip() == '':
+        continue
+    tenant_subset.append(line.strip())
+f.close()
+
+print('Set of tenants: ' + len(tenant_subset))
 
 blocks_used = {}
 oracle_demands = {}
@@ -53,5 +64,10 @@ for t in blocks_used:
             welfare[t] += 1.0
     welfare[t] /= num_epochs
 
-print('Total welfare: ' + str(sum([welfare[t] for t in welfare])))
+
+for t in tenant_subset:
+    print(t + ' ' + welfare[t])
+
+avg_welfare = sum([welfare[t] for t in tenant_subset]) / len(tenant_subset)
+print('Avg welfare: ' + str(avg_welfare))
 
