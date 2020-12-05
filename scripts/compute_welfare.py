@@ -66,7 +66,7 @@ f.close()
 
 welfare = {}
 for t in blocks_used:
-    welfare[t] = min(1.0, sum([blocks_used[t][i] for i in range(900)])/sum([oracle_demands[t][i] for i in range(900)]))
+    welfare[t] = min(1.0, sum([blocks_used[t][i] for i in range(num_epochs)])/sum([oracle_demands[t][i] for i in range(num_epochs)]))
 
 for t in tenant_subset:
     print(t + ' ' + str(welfare[t]))
