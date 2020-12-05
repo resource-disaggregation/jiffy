@@ -481,6 +481,7 @@ void karma_block_allocator::karma_algorithm_fast(std::unordered_map<std::string,
 
   // Re-distribute public credits
   if(credits_["$public$"] >= num_tenants_) {
+    LOG(log_level::info) << "Re-distributing public credits";
     for(auto &jt : credits_) {
       if(jt.first == "$public$") {
         continue;

@@ -136,6 +136,12 @@ int main(int argc, char **argv) {
     LOG(log_level::info) << "directory.lease.lease_period_ms: " << lease_period_ms;
     LOG(log_level::info) << "directory.lease.grace_period_ms: " << grace_period_ms;
 
+    LOG(log_level::info) << "public_blocks: " << public_blocks;
+    LOG(log_level::info) << "init credits: " << init_credits;
+    LOG(log_level::info) << "num tenants: " << num_tenants;
+    LOG(log_level::info) << "algo interval: " << algo_interval_ms;
+    LOG(log_level::info) << "allocator: " << allocator_type;
+
   } catch (std::exception &e) {
     std::cerr << e.what() << std::endl;
     return 1;
