@@ -66,7 +66,7 @@ for t in blocks_used:
 
 
 for t in tenant_subset:
-    print(t + ' ' + welfare[t])
+    print(t + ' ' + str(welfare[t]))
 
 avg_welfare = sum([welfare[t] for t in tenant_subset]) / len(tenant_subset)
 print('Avg welfare: ' + str(avg_welfare))
