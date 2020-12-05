@@ -54,16 +54,19 @@ for line in f:
 
 f.close()
 
+# welfare = {}
+# for t in blocks_used:
+#     welfare[t] = 0
+#     for i in range(num_epochs):
+#         if oracle_demands[t][i] > 0:
+#             welfare[t] += min(1.0, float(blocks_used[t][i]) / float(oracle_demands[t][i]))
+#         else:
+#             welfare[t] += 1.0
+#     welfare[t] /= num_epochs
+
 welfare = {}
 for t in blocks_used:
-    welfare[t] = 0
-    for i in range(num_epochs):
-        if oracle_demands[t][i] > 0:
-            welfare[t] += min(1.0, float(blocks_used[t][i]) / float(oracle_demands[t][i]))
-        else:
-            welfare[t] += 1.0
-    welfare[t] /= num_epochs
-
+    welfare[t] = min(1.0, sum([blocks_used[t][i] for i in range(900)])/sum([oracle_demands[t][i] for i in range(900)]))
 
 for t in tenant_subset:
     print(t + ' ' + str(welfare[t]))
