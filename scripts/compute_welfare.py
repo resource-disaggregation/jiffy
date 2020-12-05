@@ -18,7 +18,7 @@ for line in f:
     tenant_subset.append(line.strip())
 f.close()
 
-print('Set of tenants: ' + len(tenant_subset))
+print('Set of tenants: ' + str(len(tenant_subset)))
 
 blocks_used = {}
 oracle_demands = {}
