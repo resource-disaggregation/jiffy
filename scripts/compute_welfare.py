@@ -47,7 +47,10 @@ welfare = {}
 for t in blocks_used:
     welfare[t] = 0
     for i in range(num_epochs):
-        welfare[t] += min(1.0, float(blocks_used[t][i]) / float(oracle_demands[t][i]))
+        if oracle_demands[t][i] > 0:
+            welfare[t] += min(1.0, float(blocks_used[t][i]) / float(oracle_demands[t][i]))
+        else:
+            welfare[t] += 1.0
     welfare[t] /= num_epochs
 
 print('Total welfare: ' + str(sum([welfare[t] for t in welfare])))
