@@ -16,7 +16,7 @@ namespace directory {
 /* Max-min fairness block allocator class, inherited from block allocator */
 class karma_block_allocator : public block_allocator {
  public:
-  karma_block_allocator(uint32_t num_tenants, uint64_t init_credits, uint32_t interval_ms);
+  karma_block_allocator(uint32_t num_tenants, uint64_t init_credits, uint32_t interval_ms, uint32_t public_blocks);
 
   virtual ~karma_block_allocator() = default;
 
@@ -71,9 +71,10 @@ class karma_block_allocator : public block_allocator {
 
   void update_demand(const std::string &tenant_id, uint32_t demand, uint32_t oracle_demand) override;
 
- private:
 
  void compute_allocations();
+
+  private:
 
  // Must be called with lock
  // Updates allocations, credits, rates
@@ -96,7 +97,10 @@ private:
 
  std::size_t num_allocated_blocks_unsafe();
 
+public:
  void register_tenant(std::string tenant_id);
+
+private:
 
  std::vector<std::string> append_seq_nos(const std::vector<std::string> &blocks);
 
@@ -134,6 +138,8 @@ private:
 
   std::unordered_map<std::string, bool> used_bitmap_;
   std::unordered_map<std::string, bool> temp_used_bitmap_;
+  
+  uint32_t public_blocks_;
 
 };
 

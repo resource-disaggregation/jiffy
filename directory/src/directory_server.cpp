@@ -52,6 +52,7 @@ int main(int argc, char **argv) {
   uint32_t num_tenants = 1;
   uint64_t init_credits = 0;
   uint32_t algo_interval_ms = 1000;
+  uint32_t public_blocks = 0;
 
   try {
     namespace po = boost::program_options;
@@ -64,7 +65,8 @@ int main(int argc, char **argv) {
         ("alloc,a", po::value<std::string>(&allocator_type), "Allocator type")
         ("num_tenants,n", po::value<uint32_t>(&num_tenants), "No of tenants")
         ("init_credits,i", po::value<uint64_t>(&init_credits), "Initial credits")
-        ("algo_interval,z", po::value<uint32_t>(&algo_interval_ms), "Algorithm interval in ms");
+        ("algo_interval,z", po::value<uint32_t>(&algo_interval_ms), "Algorithm interval in ms")
+        ("public_blocks,p", po::value<uint32_t>(&public_blocks), "Public blocks");
 
     po::options_description hidden("Hidden options");
     hidden.add_options()
@@ -155,7 +157,7 @@ int main(int argc, char **argv) {
     alloc = std::make_shared<random_block_allocator>();
   }
   else if(allocator_type == "karma") {
-    alloc = std::make_shared<karma_block_allocator>(num_tenants, init_credits, algo_interval_ms);
+    alloc = std::make_shared<karma_block_allocator>(num_tenants, init_credits, algo_interval_ms, public_blocks);
   }
   else 
   {

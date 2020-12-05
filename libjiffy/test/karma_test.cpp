@@ -6,7 +6,7 @@ using namespace ::jiffy::directory;
 
 TEST_CASE("matching_supply_one", "[borrow_from_poorest_fast]") {
     std::unordered_map<std::string, uint32_t> demands({{"A", 10 }, {"B", 0}, {"C", 1}, {"D", 1}});
-    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0);
+    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0, 0);
     alloc->total_blocks_ = 20;
     alloc->credits_["A"] = 10;
     alloc->credits_["B"] = 1;
@@ -30,7 +30,7 @@ TEST_CASE("matching_supply_one", "[borrow_from_poorest_fast]") {
 
 TEST_CASE("matching_supply_two", "[borrow_from_poorest_fast]") {
     std::unordered_map<std::string, uint32_t> demands({{"A", 10 }, {"B", 0}, {"C", 0}, {"D", 1}});
-    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0);
+    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0, 0);
     alloc->total_blocks_ = 20;
     alloc->credits_["A"] = 10;
     alloc->credits_["B"] = 100;
@@ -64,7 +64,7 @@ TEST_CASE("matching_supply_two", "[borrow_from_poorest_fast]") {
 
 TEST_CASE("matching_supply_three", "[borrow_from_poorest_fast]") {
     std::unordered_map<std::string, uint32_t> demands({{"A", 10 }, {"B", 0}, {"C", 0}, {"D", 0}});
-    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0);
+    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0, 0);
     alloc->total_blocks_ = 20;
     alloc->credits_["A"] = 10;
     alloc->credits_["B"] = 100;
@@ -101,7 +101,7 @@ TEST_CASE("matching_supply_three", "[borrow_from_poorest_fast]") {
 
 TEST_CASE("matching_supply_four", "[borrow_from_poorest_fast]") {
     std::unordered_map<std::string, uint32_t> demands({{"A", 10 }, {"B", 0}, {"C", 0}, {"D", 0}});
-    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0);
+    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0, 0);
     alloc->total_blocks_ = 20;
     alloc->credits_["A"] = 10;
     alloc->credits_["B"] = 100;
@@ -140,7 +140,7 @@ TEST_CASE("matching_supply_four", "[borrow_from_poorest_fast]") {
 
 TEST_CASE("matching_supply_eight", "[borrow_from_poorest_fast]") {
     std::unordered_map<std::string, uint32_t> demands({{"A", 10 }, {"B", 4}, {"C", 0}, {"D", 0}});
-    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0);
+    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0, 0);
     alloc->total_blocks_ = 20;
     alloc->credits_["A"] = 10;
     alloc->credits_["B"] = 1;
@@ -164,7 +164,7 @@ TEST_CASE("matching_supply_eight", "[borrow_from_poorest_fast]") {
 
 TEST_CASE("matching_supply_largec", "[borrow_from_poorest_fast]") {
     std::unordered_map<std::string, uint32_t> demands({{"A", 10 }, {"B", 0}, {"C", 0}, {"D", 0}});
-    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0);
+    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0, 0);
     alloc->total_blocks_ = 20;
     alloc->credits_["A"] = 9999999999LL + 10;
     alloc->credits_["B"] = 9999999999LL + 100;
@@ -189,9 +189,86 @@ TEST_CASE("matching_supply_largec", "[borrow_from_poorest_fast]") {
 }
 
 
+TEST_CASE("matching_supply_five", "[borrow_from_poorest_fast]") {
+    std::unordered_map<std::string, uint32_t> demands({{"A", 10 }, {"B", 4}, {"C", 4}, {"D", 4}});
+    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0, 5);
+    alloc->total_blocks_ = 25;
+    alloc->credits_["A"] = 10;
+    alloc->credits_["B"] = 100;
+    alloc->credits_["C"] = 100;
+    alloc->credits_["D"] = 100;
+
+    alloc->allocations_["A"] = 5;
+    alloc->allocations_["B"] = 4;
+    alloc->allocations_["C"] = 4;
+    alloc->allocations_["D"] = 4;
+
+    std::vector<std::string> donors = {"B", "C", "D"};
+    std::vector<std::string> borrowers = {"A"};
+    alloc->borrow_from_poorest_fast(demands, donors, borrowers);
+
+    REQUIRE(alloc->rate_["B"] == 1);
+    REQUIRE(alloc->rate_["C"] == 1);
+    REQUIRE(alloc->rate_["D"] == 1);
+    REQUIRE(alloc->rate_["$public$"] == 2);
+    REQUIRE(alloc->allocations_["A"] == 10);
+}
+
+TEST_CASE("matching_supply_six", "[borrow_from_poorest_fast]") {
+    std::unordered_map<std::string, uint32_t> demands({{"A", 10}, {"B", 3}, {"C", 4}, {"D", 4}});
+    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0, 5);
+    alloc->total_blocks_ = 25;
+    alloc->credits_["A"] = 10;
+    alloc->credits_["B"] = 1;
+    alloc->credits_["C"] = 100;
+    alloc->credits_["D"] = 100;
+
+    alloc->allocations_["A"] = 5;
+    alloc->allocations_["B"] = 3;
+    alloc->allocations_["C"] = 4;
+    alloc->allocations_["D"] = 4;
+
+    std::vector<std::string> donors = {"B", "C", "D"};
+    std::vector<std::string> borrowers = {"A"};
+    alloc->borrow_from_poorest_fast(demands, donors, borrowers);
+
+    REQUIRE(alloc->rate_["B"] == 2);
+    REQUIRE(alloc->rate_["C"] == 1);
+    REQUIRE(alloc->rate_["D"] == 1);
+    REQUIRE(alloc->rate_["$public$"] == 1);
+    REQUIRE(alloc->allocations_["A"] == 10);
+}
+
+
+TEST_CASE("matching_supply_seven", "[borrow_from_poorest_fast]") {
+    std::unordered_map<std::string, uint32_t> demands({{"A", 10}, {"B", 3}, {"C", 3}, {"D", 4}});
+    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0, 5);
+    alloc->total_blocks_ = 25;
+    alloc->credits_["A"] = 10;
+    alloc->credits_["B"] = 1;
+    alloc->credits_["C"] = 100;
+    alloc->credits_["D"] = 100;
+
+    alloc->allocations_["A"] = 5;
+    alloc->allocations_["B"] = 3;
+    alloc->allocations_["C"] = 3;
+    alloc->allocations_["D"] = 4;
+
+    std::vector<std::string> donors = {"B", "C", "D"};
+    std::vector<std::string> borrowers = {"A"};
+    alloc->borrow_from_poorest_fast(demands, donors, borrowers);
+
+    REQUIRE(alloc->rate_["B"] == 2);
+    REQUIRE(alloc->rate_["C"] == 2);
+    REQUIRE(alloc->rate_["D"] == 1);
+    REQUIRE(alloc->rate_["$public$"] == 0);
+    REQUIRE(alloc->allocations_["A"] == 10);
+}
+
+
 TEST_CASE("matching_demand_one", "[borrow_from_poorest_fast]") {
     std::unordered_map<std::string, uint32_t> demands({{"A", 0}, {"B", 10}, {"C", 10}, {"D", 10}});
-    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0);
+    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0, 0);
     alloc->total_blocks_ = 20;
     alloc->credits_["A"] = 10;
     alloc->credits_["B"] = 100;
@@ -228,7 +305,7 @@ TEST_CASE("matching_demand_one", "[borrow_from_poorest_fast]") {
 // assert sorted([alloc.allocations[x][0] for x in ['B', 'C', 'D']]) == [5,7,8]
 TEST_CASE("matching_demand_two", "[borrow_from_poorest_fast]") {
     std::unordered_map<std::string, uint32_t> demands({{"A", 0}, {"B", 10}, {"C", 10}, {"D", 10}});
-    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0);
+    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0, 0);
     alloc->total_blocks_ = 20;
     alloc->credits_["A"] = 10;
     alloc->credits_["B"] = 100;
@@ -264,7 +341,7 @@ TEST_CASE("matching_demand_two", "[borrow_from_poorest_fast]") {
 // assert sorted([alloc.allocations[x][0] for x in ['B', 'C', 'D']]) == [6,7,7]
 TEST_CASE("matching_demand_three", "[borrow_from_poorest_fast]") {
     std::unordered_map<std::string, uint32_t> demands({{"A", 0}, {"B", 10}, {"C", 10}, {"D", 10}});
-    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0);
+    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0, 0);
     alloc->total_blocks_ = 20;
     alloc->credits_["A"] = 10;
     alloc->credits_["B"] = 100;
@@ -302,7 +379,7 @@ TEST_CASE("matching_demand_three", "[borrow_from_poorest_fast]") {
 // assert res == [5,7,8] or res == [6,7,7]
 TEST_CASE("matching_demand_four", "[borrow_from_poorest_fast]") {
     std::unordered_map<std::string, uint32_t> demands({{"A", 0}, {"B", 10}, {"C", 10}, {"D", 10}});
-    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0);
+    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0, 0);
     alloc->total_blocks_ = 20;
     alloc->credits_["A"] = 10;
     alloc->credits_["B"] = 102;
@@ -346,7 +423,7 @@ TEST_CASE("matching_demand_four", "[borrow_from_poorest_fast]") {
 // assert alloc.rate_map['D'] == -2
 TEST_CASE("matching_demand_five", "[borrow_from_poorest_fast]") {
     std::unordered_map<std::string, uint32_t> demands({{"A", 0}, {"B", 6}, {"C", 10}, {"D", 10}});
-    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0);
+    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0, 0);
     alloc->total_blocks_ = 20;
     alloc->credits_["A"] = 10;
     alloc->credits_["B"] = 100;
@@ -387,7 +464,7 @@ TEST_CASE("matching_demand_five", "[borrow_from_poorest_fast]") {
 // assert alloc.rate_map['D'] == 0
 TEST_CASE("matching_demand_six", "[borrow_from_poorest_fast]") {
     std::unordered_map<std::string, uint32_t> demands({{"A", 0}, {"B", 10}, {"C", 10}, {"D", 10}});
-    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0);
+    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0, 0);
     alloc->total_blocks_ = 20;
     alloc->credits_["A"] = 10;
     alloc->credits_["B"] = 4;
@@ -415,7 +492,7 @@ TEST_CASE("matching_demand_six", "[borrow_from_poorest_fast]") {
 
 TEST_CASE("matching_demand_largec", "[borrow_from_poorest_fast]") {
     std::unordered_map<std::string, uint32_t> demands({{"A", 0}, {"B", 10}, {"C", 10}, {"D", 10}});
-    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0);
+    auto alloc = std::make_shared<karma_block_allocator>(4, 0, 0, 0);
     alloc->total_blocks_ = 20;
     alloc->credits_["A"] = 9999999999LL + 10;
     alloc->credits_["B"] = 9999999999LL + 100;
@@ -439,4 +516,146 @@ TEST_CASE("matching_demand_largec", "[borrow_from_poorest_fast]") {
     std::sort(allocations.begin(), allocations.end());
     std::vector<uint32_t> expected_allocations = {6,7,7};
     REQUIRE(allocations == expected_allocations);
+}
+
+
+TEST_CASE("karma_e2e_one", "[karma_algo_fast]") {
+    auto alloc = std::make_shared<karma_block_allocator>(3, 10, 0, 3);
+    alloc->total_blocks_ = 33;
+    alloc->register_tenant("A");
+    alloc->register_tenant("B");
+    alloc->register_tenant("C");
+
+    alloc->demands_["A"] = 10;
+    alloc->demands_["B"] = 10;
+    alloc->demands_["C"] = 10;
+    alloc->compute_allocations();
+    REQUIRE(alloc->allocations_["A"] == 10);
+    REQUIRE(alloc->allocations_["B"] == 10);
+    REQUIRE(alloc->allocations_["C"] == 10);
+    REQUIRE(alloc->credits_["A"] == 10);
+    REQUIRE(alloc->credits_["B"] == 10);
+    REQUIRE(alloc->credits_["C"] == 10);
+
+    alloc->demands_["A"] = 2;
+    alloc->demands_["B"] = 12;
+    alloc->demands_["C"] = 16;
+    alloc->compute_allocations();
+    REQUIRE(alloc->allocations_["A"] == 2);
+    REQUIRE(alloc->allocations_["B"] == 12);
+    REQUIRE(alloc->allocations_["C"] == 16);
+    REQUIRE(alloc->credits_["A"] == 18);
+    REQUIRE(alloc->credits_["B"] == 8);
+    REQUIRE(alloc->credits_["C"] == 4);
+
+    alloc->demands_["A"] = 6;
+    alloc->demands_["B"] = 12;
+    alloc->demands_["C"] = 6;
+    alloc->compute_allocations();
+    REQUIRE(alloc->allocations_["A"] == 6);
+    REQUIRE(alloc->allocations_["B"] == 12);
+    REQUIRE(alloc->allocations_["C"] == 6);
+    REQUIRE(alloc->credits_["A"] == 18);
+    REQUIRE(alloc->credits_["B"] == 6);
+    REQUIRE(alloc->credits_["C"] == 6);
+
+    alloc->demands_["A"] = 18;
+    alloc->demands_["B"] = 5;
+    alloc->demands_["C"] = 12;
+    alloc->compute_allocations();
+    REQUIRE(alloc->allocations_["A"] == 18);
+    REQUIRE(alloc->allocations_["B"] == 5);
+    REQUIRE(alloc->allocations_["C"] == 10);
+    REQUIRE(alloc->credits_["A"] == 10);
+    REQUIRE(alloc->credits_["B"] == 11);
+    REQUIRE(alloc->credits_["C"] == 6);
+    REQUIRE(alloc->credits_["$public$"] == 3);
+
+    alloc->demands_["A"] = 10;
+    alloc->demands_["B"] = 10;
+    alloc->demands_["C"] = 10;
+    alloc->compute_allocations();
+    REQUIRE(alloc->allocations_["A"] == 10);
+    REQUIRE(alloc->allocations_["B"] == 10);
+    REQUIRE(alloc->allocations_["C"] == 10);
+    REQUIRE(alloc->credits_["A"] == 11);
+    REQUIRE(alloc->credits_["B"] == 12);
+    REQUIRE(alloc->credits_["C"] == 7);
+    REQUIRE(alloc->credits_["$public$"] == 0);
+}
+
+TEST_CASE("karma_reclaim_one", "[karma_algo_fast]") {
+    auto alloc = std::make_shared<karma_block_allocator>(3, 10, 0, 3);
+    std::vector<std::string> blocks;
+    for(int i = 0; i < 33; i++) 
+    {
+        blocks.push_back("block" + std::to_string(i));
+    }
+    alloc->add_blocks(blocks);
+
+
+    alloc->total_blocks_ = 33;
+    alloc->register_tenant("A");
+    alloc->register_tenant("B");
+    alloc->register_tenant("C");
+
+    alloc->demands_["A"] = 10;
+    alloc->demands_["B"] = 5;
+    alloc->demands_["C"] = 15;
+    alloc->compute_allocations();
+    REQUIRE(alloc->allocations_["A"] == 10);
+    REQUIRE(alloc->allocations_["B"] == 5);
+    REQUIRE(alloc->allocations_["C"] == 15);
+
+    for(int i = 0; i < 10; i++) 
+    {
+        REQUIRE_NOTHROW(alloc->allocate(1, {}, "A"));
+    }
+    REQUIRE_THROWS(alloc->allocate(1, {}, "A"));
+
+    for(int i = 0; i < 15; i++) 
+    {
+        REQUIRE_NOTHROW(alloc->allocate(1, {}, "C"));
+    }
+    REQUIRE_THROWS(alloc->allocate(1, {}, "C"));
+
+    for(int i = 0; i < 5; i++) 
+    {
+        REQUIRE_NOTHROW(alloc->allocate(1, {}, "B"));
+    }
+    REQUIRE_NOTHROW(alloc->allocate(1, {}, "B"));
+    REQUIRE(alloc->credits_["C"] == 5);
+    REQUIRE(alloc->rate_["C"] == -5);
+    REQUIRE(alloc->credits_["A"] == 10);
+    REQUIRE(alloc->rate_["A"] == 0);
+    REQUIRE(alloc->credits_["$public$"] == 1);
+    REQUIRE(alloc->rate_["$public$"] == 1);
+
+
+    REQUIRE_NOTHROW(alloc->allocate(1, {}, "B"));
+    REQUIRE(alloc->credits_["C"] == 5);
+    REQUIRE(alloc->rate_["C"] == -5);
+    REQUIRE(alloc->credits_["$public$"] == 2);
+    REQUIRE(alloc->rate_["$public$"] == 2);
+
+    REQUIRE_NOTHROW(alloc->allocate(1, {}, "B"));
+    REQUIRE(alloc->credits_["C"] == 5);
+    REQUIRE(alloc->rate_["C"] == -5);
+    REQUIRE(alloc->credits_["$public$"] == 3);
+    REQUIRE(alloc->rate_["$public$"] == 3);
+
+    REQUIRE_NOTHROW(alloc->allocate(1, {}, "B"));
+    REQUIRE(alloc->credits_["C"] == 6);
+    REQUIRE(alloc->rate_["C"] == -4);
+    REQUIRE(alloc->credits_["$public$"] == 3);
+    REQUIRE(alloc->rate_["$public$"] == 3);
+
+    REQUIRE_NOTHROW(alloc->allocate(1, {}, "B"));
+    REQUIRE(alloc->credits_["C"] == 7);
+    REQUIRE(alloc->rate_["C"] == -3);
+    REQUIRE(alloc->credits_["$public$"] == 3);
+    REQUIRE(alloc->rate_["$public$"] == 3);
+
+    REQUIRE_THROWS(alloc->allocate(1, {}, "B"));
+
 }

@@ -11,14 +11,18 @@ namespace directory {
 
 using namespace utils;
 
-karma_block_allocator::karma_block_allocator(uint32_t num_tenants, uint64_t init_credits, uint32_t interval_ms) {
+karma_block_allocator::karma_block_allocator(uint32_t num_tenants, uint64_t init_credits, uint32_t interval_ms, uint32_t public_blocks) {
     num_tenants_ = num_tenants;
     init_credits_ = init_credits;
     total_blocks_ = 0;
+    public_blocks_ = public_blocks;
     if(interval_ms > 0) 
     {
       thread_ = std::thread(&karma_block_allocator::thread_run, this, interval_ms);
     }
+
+    rate_["$public$"] = 0;
+    credits_["$public$"] = 0;
     
     // stats_thread_ = std::thread(&karma_block_allocator::stats_thread_run, this, 10);
 }
@@ -39,7 +43,7 @@ std::vector<std::string> karma_block_allocator::allocate(std::size_t count, cons
     assert(my != active_blocks_.end());
   }
 
-  auto fair_share = total_blocks_ / num_tenants_;
+  auto fair_share = (total_blocks_ - public_blocks_) / num_tenants_;
 
   // Tenant is asking for more than what the algorithm allocated
   if(my->second.size() == allocations_[tenant_id]) {
@@ -56,13 +60,19 @@ std::vector<std::string> karma_block_allocator::allocate(std::size_t count, cons
             uint64_t poorest_credits = std::numeric_limits<uint64_t>::max();
             std::string poorest_supplier = "$none$";
             for(auto &jt : credits_) {
-                assert(rate_[jt.first] >= 0);
+                if(jt.first == "$public$") {
+                  continue;
+                }
                 if(allocations_[jt.first] < fair_share && (static_cast<uint32_t>(rate_[jt.first]) < fair_share - allocations_[jt.first])) {
+                    assert(rate_[jt.first] >= 0);
                     if(jt.second < poorest_credits) {
                         poorest_credits = jt.second;
                         poorest_supplier = jt.first;
                     }
                 }
+            }
+            if(poorest_supplier == "$none$" && rate_["$public$"] < (int32_t) public_blocks_) {
+              poorest_supplier = "$public$";
             }
             if(poorest_supplier != "$none$") {
                 // Adjust credits
@@ -77,6 +87,9 @@ std::vector<std::string> karma_block_allocator::allocate(std::size_t count, cons
                 uint64_t min_credits = std::numeric_limits<uint64_t>::max();
                 std::string min_borrower = "$none$";
                 for(auto &jt : credits_) {
+                    if(jt.first == "$public$") {
+                      continue;
+                    }
                     if(allocations_[jt.first] > fair_share) {
                         if(jt.second < min_credits) {
                             min_credits = jt.second;
@@ -215,7 +228,7 @@ std::size_t karma_block_allocator::num_total_blocks() {
 void karma_block_allocator::register_tenant(std::string tenant_id) {
   auto & tenant_blocks = active_blocks_[tenant_id];
   tenant_blocks.clear();
-  auto fair_share = total_blocks_ / num_tenants_;
+  auto fair_share = (total_blocks_ - public_blocks_) / num_tenants_;
   demands_[tenant_id] = fair_share;
   oracle_demands_[tenant_id] = fair_share;
   credits_[tenant_id] = init_credits_;
@@ -400,7 +413,7 @@ void karma_block_allocator::stats_thread_run(uint32_t interval_ms) {
 
 // MUST be called with lock
 void karma_block_allocator::karma_algorithm(std::unordered_map<std::string, uint32_t> &demands) {
-  auto fair_share = total_blocks_ / num_tenants_;
+  auto fair_share = (total_blocks_ - public_blocks_) / num_tenants_;
   // Reset rates
   for(auto &jt : rate_) {
     jt.second = 0;
@@ -417,6 +430,9 @@ void karma_block_allocator::karma_algorithm(std::unordered_map<std::string, uint
     std::string borrower = "$none$";
     uint64_t richest_credits = 0;
     for(auto &jt : credits_) {
+      if(jt.first == "$public$") {
+        continue;
+      }
       if(demands[jt.first] > fair_share && allocations_[jt.first] < demands[jt.first] && jt.second > 0 && jt.second > richest_credits) {
         borrower = jt.first;
         richest_credits = jt.second;
@@ -431,6 +447,9 @@ void karma_block_allocator::karma_algorithm(std::unordered_map<std::string, uint
     uint64_t poorest_credits = std::numeric_limits<uint64_t>::max();
     for(auto &jt : credits_) 
     {
+      if(jt.first == "$public$") {
+        continue;
+      }
       if(demands[jt.first] < fair_share && (uint32_t)rate_[jt.first] < fair_share - demands[jt.first] && jt.second < poorest_credits) {
         donor = jt.first;
         poorest_credits = jt.second;
@@ -454,10 +473,21 @@ void karma_block_allocator::karma_algorithm(std::unordered_map<std::string, uint
 
 // MUST be called with lock
 void karma_block_allocator::karma_algorithm_fast(std::unordered_map<std::string, uint32_t> &demands) {
-  auto fair_share = total_blocks_ / num_tenants_;
+  auto fair_share = (total_blocks_ - public_blocks_) / num_tenants_;
   // Reset rates
   for(auto &jt : rate_) {
     jt.second = 0;
+  }
+
+  // Re-distribute public credits
+  if(credits_["$public$"] >= num_tenants_) {
+    for(auto &jt : credits_) {
+      if(jt.first == "$public$") {
+        continue;
+      }
+      jt.second += credits_["$public$"] / num_tenants_;
+    }
+    credits_["$public$"] = credits_["$public$"] % num_tenants_;
   }
 
   std::vector<std::string> donors, borrowers;
@@ -475,6 +505,8 @@ void karma_block_allocator::karma_algorithm_fast(std::unordered_map<std::string,
     // Allocate upto fair share
     allocations_[jt.first] = std::min(jt.second, (uint32_t) fair_share);
   }
+
+  total_supply += public_blocks_;
 
   // Match supply to demand
   if(total_supply >= total_demand) {
@@ -514,7 +546,7 @@ namespace {
 // Note this does NOT update credits_
 void karma_block_allocator::borrow_from_poorest_fast(std::unordered_map<std::string, uint32_t> &demands, std::vector<std::string>& donors, std::vector<std::string>& borrowers) {
 
-  auto fair_share = total_blocks_ / num_tenants_;
+  auto fair_share = (total_blocks_ - public_blocks_) / num_tenants_;
 
   // Can satisfy demands of all borrowers
   uint32_t total_demand = 0;
@@ -534,6 +566,11 @@ void karma_block_allocator::borrow_from_poorest_fast(std::unordered_map<std::str
     elem.c = credits_[d];
     elem.x = fair_share - demands[d];
     donor_list.push_back(elem);
+  }
+  // Give normal donors priority over public pool
+  if(public_blocks_ > 0)
+  {
+      donor_list.push_back({"$public$", (int64_t)(num_tenants_*init_credits_ + 777777), public_blocks_});
   }
   donor_list.push_back({"$dummy$", std::numeric_limits<int64_t>::max(), 0});
 
@@ -567,7 +604,8 @@ void karma_block_allocator::borrow_from_poorest_fast(std::unordered_map<std::str
         bheap_item item = poorest_donors.pop();
         auto x = item.second - 1;
         dem -= 1;
-        rate_[item.first] += fair_share - demands[item.first] - x;
+        auto base_val = (item.first != "$public$")?(fair_share - demands[item.first]):(public_blocks_);
+        rate_[item.first] += base_val - x;
       }
     } else {
       auto alpha = (int32_t) std::min({(int64_t)poorest_donors.min_val(), (int64_t)(dem/poorest_donors.size()), (int64_t)(next_c - cur_c)});
@@ -580,14 +618,16 @@ void karma_block_allocator::borrow_from_poorest_fast(std::unordered_map<std::str
     // get rid of donors with x = 0
     while(poorest_donors.size() > 0 && poorest_donors.min_val() == 0) {
       bheap_item item = poorest_donors.pop();
-      rate_[item.first] += fair_share - demands[item.first];
+      auto base_val = (item.first != "$public$")?(fair_share - demands[item.first]):(public_blocks_);
+      rate_[item.first] += base_val;
     }
 
   }
 
   while(poorest_donors.size() > 0) {
     bheap_item item = poorest_donors.pop();
-    rate_[item.first] += fair_share - demands[item.first] - item.second;
+    auto base_val = (item.first != "$public$")?(fair_share - demands[item.first]):(public_blocks_);
+    rate_[item.first] += base_val - item.second;
   }
 
 }
@@ -596,7 +636,7 @@ void karma_block_allocator::borrow_from_poorest_fast(std::unordered_map<std::str
 // Note this does NOT update credits_
 void karma_block_allocator::give_to_richest_fast(std::unordered_map<std::string, uint32_t> &demands, std::vector<std::string>& donors, std::vector<std::string>& borrowers) {
 
-  auto fair_share = total_blocks_ / num_tenants_;
+  auto fair_share = (total_blocks_ - public_blocks_) / num_tenants_;
 
   // Can match all donations
   uint32_t total_supply = 0;
@@ -604,6 +644,10 @@ void karma_block_allocator::give_to_richest_fast(std::unordered_map<std::string,
     auto to_give = fair_share - demands[d];
     rate_[d] += to_give;
     total_supply += to_give;
+  }
+  if(public_blocks_ > 0) {
+    rate_["$public$"] += public_blocks_;
+    total_supply += public_blocks_; 
   }
 
   // # Give to richest borrowers and update their allocations/rate
