@@ -65,11 +65,15 @@ f.close()
 #     welfare[t] /= num_epochs
 
 welfare = {}
+agg_blocks_used = {}
+agg_oracle_demand = {}
 for t in blocks_used:
+    agg_blocks_used[t] = sum([blocks_used[t][i] for i in range(num_epochs)])
+    agg_oracle_demand[t] = sum([oracle_demands[t][i] for i in range(num_epochs)])
     welfare[t] = min(1.0, sum([blocks_used[t][i] for i in range(num_epochs)])/sum([oracle_demands[t][i] for i in range(num_epochs)]))
 
 for t in tenant_subset:
-    print(t + ' ' + str(welfare[t]))
+    print(t + ' ' + str(welfare[t]) + ' ' + str(agg_blocks_used[t]) + ' ' + str(agg_oracle_demand[t]))
 
 avg_welfare = sum([welfare[t] for t in tenant_subset]) / len(tenant_subset)
 print('Avg welfare: ' + str(avg_welfare))
