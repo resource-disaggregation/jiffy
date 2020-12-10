@@ -123,7 +123,8 @@ std::vector<std::string> karma_block_allocator::allocate(std::size_t count, cons
   // Pick random block from free pool
   std::vector<std::string> blocks;
   auto idx = static_cast<int64_t>(free_blocks_.size() - 1);
-  auto block_it = std::next(free_blocks_.begin(), utils::rand_utils::rand_int64(idx));
+  // auto block_it = std::next(free_blocks_.begin(), utils::rand_utils::rand_int64(idx));
+  auto block_it = free_blocks_.begin();
   // Increment sequence number if ownership transfer
   if(last_tenant_[*block_it] != tenant_id) {
     block_seq_no_[*block_it] += 1;
