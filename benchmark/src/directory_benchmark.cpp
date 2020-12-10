@@ -8,6 +8,7 @@
 #include <jiffy/utils/signal_handling.h>
 #include <jiffy/utils/time_utils.h>
 #include <jiffy/utils/thread_utils.h>
+#include <random>
 
 using namespace ::jiffy::client;
 using namespace ::jiffy::directory;
@@ -89,6 +90,9 @@ class open_or_create_benchmark : public directory_benchmark {
     // d_clients_[0]->open_or_create("/a", "hashtable", std::string("local/a"));
     for (size_t i = 0; i < num_clients_; ++i) {
       workers_[i] = std::thread([i, this]() {
+        std::random_device rd; // obtain a random number from hardware
+        std::mt19937 gen(rd()); // seed the generator
+        std::uniform_int_distribution<uint64_t> distr(0, std::numeric_limits<uint64_t>::max() - 1); // define the range
         auto bench_begin = time_utils::now_us();
         uint64_t tot_time = 0, t0, t1 = bench_begin;
         size_t j;
@@ -97,7 +101,7 @@ class open_or_create_benchmark : public directory_benchmark {
 //          d_clients_[i]->open_or_create(std::string("/") + std::to_string(i) + std::string("/") +  std::to_string(j), "hashtable", std::string("local/") + path_[j] + std::string("-") + std::to_string(i));
           //d_clients_[i]->open(std::string("/") + std::to_string(i) + std::string("/") +  std::to_string(j));
         //   d_clients_[i]->open("/a");
-            d_clients_[i]->create("/a/foo" + std::to_string(j), "local://tmp");
+            d_clients_[i]->create("/a/foo" + std::to_string(distr(gen)), "local://tmp");
           t1 = time_utils::now_us();
           tot_time += (t1 - t0);
         }
