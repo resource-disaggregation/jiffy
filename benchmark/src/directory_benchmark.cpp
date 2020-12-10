@@ -181,11 +181,12 @@ class renew_leases_benchmark : public directory_benchmark {
 
 };
 
-int main() {
+int main(int argc, const char **argv) {
   std::string address = "172.31.8.153";
   int service_port = 9090;
   int lease_port = 9091;
   int num_ops = 100000;
+  int para = std::stoi(std::string(argv[1]));
   std::vector<std::string> op_type_set;
   op_type_set.push_back("open_or_create");
   //op_type_set.push_back("add_block");
@@ -204,7 +205,7 @@ int main() {
   LOG(log_level::info) << "num-ops: " << num_ops;
 
   for (const auto &op_type:op_type_set) {
-    for (int i = 1; i <= 256; i *= 2) {
+    for (int i = para; i <= para; i *= 2) {
       int num_clients = i;
       d_client_list d_clients(static_cast<size_t>(num_clients), nullptr);
       l_client_list l_clients(static_cast<size_t>(num_clients), nullptr);
