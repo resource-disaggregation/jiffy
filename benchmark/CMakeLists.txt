@@ -67,3 +67,12 @@ target_link_libraries(hash_table_auto_scaling_get jiffy_client ${JEMALLOC_LIBRAR
 
 install(TARGETS hash_table_auto_scaling_get
         RUNTIME DESTINATION bin)
+
+add_executable(directory_benchmark src/directory_benchmark.cpp)
+
+add_dependencies(directory_benchmark boost_ep jemalloc_ep)
+
+target_link_libraries(directory_benchmark jiffy_client ${JEMALLOC_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+install(TARGETS directory_benchmark
+        RUNTIME DESTINATION bin)
