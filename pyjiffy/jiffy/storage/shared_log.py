@@ -130,5 +130,4 @@ class SharedLogClient(DataStructureClient):
         ret = []
         for k in range(0, count):
             resp = self.blocks[start_partition + k].recv_response()
-            
         return True

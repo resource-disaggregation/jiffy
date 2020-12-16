@@ -27,6 +27,7 @@ jiffy/storage/hash_table.py
 jiffy/storage/partition.py
 jiffy/storage/queue.py
 jiffy/storage/replica_chain_client.py
+jiffy/storage/shared_log.py
 jiffy/storage/subscriber.py
 jiffy/storage/ttypes.py
 pyjiffy.egg-info/PKG-INFO
