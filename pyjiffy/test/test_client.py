@@ -357,19 +357,19 @@ class TestClient(TestCase):
             self.assertEqual(b(str(i)+"_data"), c.scan(i,i+1,b(str(i)+"_stream")))
 
 
-    def test_lease_worker(self):
-        self.start_servers()
-        client = self.jiffy_client()
-        try:
-            client.create_hash_table("/a/file.txt", "local://tmp")
-            self.assertTrue(client.fs.exists("/a/file.txt"))
-            time.sleep(client.lease_worker.renewal_duration_s)
-            self.assertTrue(client.fs.exists("/a/file.txt"))
-            time.sleep(client.lease_worker.renewal_duration_s)
-            self.assertTrue(client.fs.exists("/a/file.txt"))
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_lease_worker(self):
+    #     self.start_servers()
+    #     client = self.jiffy_client()
+    #     try:
+    #         client.create_hash_table("/a/file.txt", "local://tmp")
+    #         self.assertTrue(client.fs.exists("/a/file.txt"))
+    #         time.sleep(client.lease_worker.renewal_duration_s)
+    #         self.assertTrue(client.fs.exists("/a/file.txt"))
+    #         time.sleep(client.lease_worker.renewal_duration_s)
+    #         self.assertTrue(client.fs.exists("/a/file.txt"))
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
     def test_hash_table(self):
         self.start_servers()
@@ -418,49 +418,49 @@ class TestClient(TestCase):
             client.disconnect()
             self.stop_servers()
 
-    def test_hash_table_ls(self):
-        self.start_servers()
-        client = self.jiffy_client()
-        try:
-            client.create_hash_table('/a/file.txt', 'local://tmp')
-            self.assertTrue(client.fs.exists('/a/file.txt'))
-            kv = client.open_hash_table('/a/file.txt')
-            os.mknod("/tmp/0_65536")
-            client.sync('/a/file.txt', 'local://tmp')
-            self.hash_table_ls_ops(kv)
-            os.remove("/tmp/0_65536")
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_hash_table_ls(self):
+    #     self.start_servers()
+    #     client = self.jiffy_client()
+    #     try:
+    #         client.create_hash_table('/a/file.txt', 'local://tmp')
+    #         self.assertTrue(client.fs.exists('/a/file.txt'))
+    #         kv = client.open_hash_table('/a/file.txt')
+    #         os.mknod("/tmp/0_65536")
+    #         client.sync('/a/file.txt', 'local://tmp')
+    #         self.hash_table_ls_ops(kv)
+    #         os.remove("/tmp/0_65536")
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
-    def test_queue_ls(self):
-        self.start_servers()
-        client = self.jiffy_client()
-        try:
-            client.create_queue('/a/file.txt', 'local://tmp')
-            self.assertTrue(client.fs.exists('/a/file.txt'))
-            q = client.open_queue('/a/file.txt')
-            os.mknod("/tmp/0")
-            client.sync('/a/file.txt', 'local://tmp')
-            self.queue_ls_ops(q)
-            os.remove("/tmp/0")
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_queue_ls(self):
+    #     self.start_servers()
+    #     client = self.jiffy_client()
+    #     try:
+    #         client.create_queue('/a/file.txt', 'local://tmp')
+    #         self.assertTrue(client.fs.exists('/a/file.txt'))
+    #         q = client.open_queue('/a/file.txt')
+    #         os.mknod("/tmp/0")
+    #         client.sync('/a/file.txt', 'local://tmp')
+    #         self.queue_ls_ops(q)
+    #         os.remove("/tmp/0")
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
-    def test_file_ls(self):
-        self.start_servers()
-        client = self.jiffy_client()
-        try:
-            c = client.create_file('/a/file.txt', 'local://tmp')
-            self.assertTrue(client.fs.exists('/a/file.txt'))
-            os.mknod("/tmp/0")
-            client.sync('/a/file.txt', 'local://tmp')
-            self.file_ls_ops(c)
-            os.remove("/tmp/0")
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_file_ls(self):
+    #     self.start_servers()
+    #     client = self.jiffy_client()
+    #     try:
+    #         c = client.create_file('/a/file.txt', 'local://tmp')
+    #         self.assertTrue(client.fs.exists('/a/file.txt'))
+    #         os.mknod("/tmp/0")
+    #         client.sync('/a/file.txt', 'local://tmp')
+    #         self.file_ls_ops(c)
+    #         os.remove("/tmp/0")
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
 
     # def test_sync_remove(self):
