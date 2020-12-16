@@ -354,7 +354,7 @@ class TestClient(TestCase):
                 self.fail('Received error message: {}'.format(k))
 
         for i in range(0, 1000):
-            self.assertEqual(str(i)+"_data", c.scan(i, i+1, [str(i)+"_stream"]))
+            self.assertEqual([b(str(i)+"_data")], c.scan(i, i+1, [str(i)+"_stream"]))
 
 
     # def test_lease_worker(self):
