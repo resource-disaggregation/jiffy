@@ -383,40 +383,40 @@ class TestClient(TestCase):
             client.disconnect()
             self.stop_servers()
 
-    def test_queue(self):
-        self.start_servers()
-        client = self.jiffy_client()
-        try:
-            client.create_queue('/a/file.txt', 'local://tmp')
-            self.assertTrue(client.fs.exists('/a/file.txt'))
-            q = client.open_queue('/a/file.txt')
-            self.queue_ops(q)
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_queue(self):
+    #     self.start_servers()
+    #     client = self.jiffy_client()
+    #     try:
+    #         client.create_queue('/a/file.txt', 'local://tmp')
+    #         self.assertTrue(client.fs.exists('/a/file.txt'))
+    #         q = client.open_queue('/a/file.txt')
+    #         self.queue_ops(q)
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
 
-    def test_file(self):
-        self.start_servers()
-        client = self.jiffy_client()
-        try:
-            c = client.create_file('/a/file.txt', 'local://tmp')
-            self.assertTrue(client.fs.exists('/a/file.txt'))
-            self.file_ops(c)
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_file(self):
+    #     self.start_servers()
+    #     client = self.jiffy_client()
+    #     try:
+    #         c = client.create_file('/a/file.txt', 'local://tmp')
+    #         self.assertTrue(client.fs.exists('/a/file.txt'))
+    #         self.file_ops(c)
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
     
-    def test_shared_log(self):
-        self.start_servers()
-        client = self.jiffy_client()
-        try:
-            c = client.create_shared_log('/a/file.txt', 'local://tmp')
-            self.assertTrue(client.fs.exists('/a/file.txt'))
-            self.shared_log_ops(c)
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_shared_log(self):
+    #     self.start_servers()
+    #     client = self.jiffy_client()
+    #     try:
+    #         c = client.create_shared_log('/a/file.txt', 'local://tmp')
+    #         self.assertTrue(client.fs.exists('/a/file.txt'))
+    #         self.shared_log_ops(c)
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
     # def test_hash_table_ls(self):
     #     self.start_servers()
