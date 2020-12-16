@@ -349,12 +349,12 @@ class TestClient(TestCase):
     def shared_log_ops(self, c):
         for i in range(0, 1000):
             try:
-                c.write(i, b(str(i)+"_data"), b(str(i)+"_stream"))
+                c.write(i, b(str(i)+"_data"), [b(str(i)+"_stream")])
             except KeyError as k:
                 self.fail('Received error message: {}'.format(k))
 
         for i in range(0, 1000):
-            self.assertEqual(b(str(i)+"_data"), c.scan(i,i+1,b(str(i)+"_stream")))
+            self.assertEqual(b(str(i)+"_data"), c.scan(i, i+1, [b(str(i)+"_stream")]))
 
 
     # def test_lease_worker(self):
