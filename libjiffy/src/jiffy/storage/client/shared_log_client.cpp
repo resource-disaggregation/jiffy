@@ -42,7 +42,7 @@ int shared_log_client::scan(std::vector<std::string> &buf, const std::string &st
   while (start_partition + count < blocks_.size()) {
     std::vector<std::string>
         args{"scan", start_pos, end_pos};
-    for (int i = 0; i < logical_streams.size(); i++){
+    for (int i = 0; i < logical_streams.size(); i++) {
       args.push_back(logical_streams[i]);
     }
     blocks_[start_partition+count]->send_command(args);
@@ -51,7 +51,7 @@ int shared_log_client::scan(std::vector<std::string> &buf, const std::string &st
   auto previous_size = buf.size();
   for (std::size_t k = 0; k < count; k++) {
     std::vector<std::string> resp = blocks_[start_partition + k]->recv_response();
-    for (std::size_t i = 1; i < resp.size(); i++){
+    for (std::size_t i = 1; i < resp.size(); i++) {
       buf.push_back(resp[i]);
     }
   }
@@ -67,12 +67,12 @@ int shared_log_client::write(const std::string &position, const std::string &dat
   std::size_t num_chain_needed = 0;
 
   std::string data = "";
-  for (int i = 0; i < logical_streams.size(); i++){
+  for (int i = 0; i < logical_streams.size(); i++) {
     data += logical_streams[i];
   }
   data += data_;
 
-  if (data.size() > block_size_){
+  if (data.size() > block_size_) {
     return -1;
   }
 
@@ -130,7 +130,7 @@ int shared_log_client::write(const std::string &position, const std::string &dat
     }
     std::vector<std::string>
         args{"write", position, data_};
-    for (int i = 0; i < logical_streams.size(); i++){
+    for (int i = 0; i < logical_streams.size(); i++) {
       args.push_back(logical_streams[i]);
     }
     blocks_[block_id()]->send_command(args);
