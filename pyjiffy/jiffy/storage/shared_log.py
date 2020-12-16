@@ -100,7 +100,7 @@ class SharedLogClient(DataStructureClient):
         count = 0
         while remaining_data > 0:
             count += 1
-            if len(data > self.block_size - self.cur_offset): 
+            if len(data) > self.block_size - self.cur_offset: 
                 self.cur_offset = 0
                 self.cur_partition += 1
                 if self.last_partition < self.cur_partition:
