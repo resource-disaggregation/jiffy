@@ -4,6 +4,7 @@
 #include <string>
 #include "jiffy/directory/directory_ops.h"
 #include "jiffy/directory/client/lease_renewal_worker.h"
+#include "jiffy/storage/client/shared_log_client.h"
 #include "jiffy/storage/client/hash_table_client.h"
 #include "jiffy/storage/client/file_client.h"
 #include "jiffy/storage/client/fifo_queue_client.h"
@@ -85,6 +86,25 @@ class jiffy_client {
                                                     int32_t permissions = directory::perms::all(),
                                                     const std::map<std::string, std::string> &tags = {});
 
+/**
+   * @brief Create shared_log
+   * @param path shared_log path
+   * @param backing_path shared_log backing path
+   * @param num_blocks Number of blocks
+   * @param chain_length Replication chain length
+   * @param flags Flags
+   * @param permissions Permissions
+   * @param tags Tags
+   * @return shared_log writer
+   */
+  std::shared_ptr<storage::shared_log_client> create_shared_log(const std::string &path,
+                                                    const std::string &backing_path,
+                                                    int32_t num_blocks = 1,
+                                                    int32_t chain_length = 1,
+                                                    int32_t flags = 0,
+                                                    int32_t permissions = directory::perms::all(),
+                                                    const std::map<std::string, std::string> &tags = {});
+
   /**
    * @brief Create fifo queue
    * @param path File path
@@ -117,6 +137,13 @@ class jiffy_client {
    * @return File reader client
    */
   std::shared_ptr<storage::file_client> open_file(const std::string &path);
+
+  /**
+   * @brief Open shared_log, begin lease
+   * @param path shared_log path
+   * @return shared_log reader client
+   */
+  std::shared_ptr<storage::shared_log_client> open_shared_log(const std::string &path);
 
   /**
    * @brief Open file, begin lease
@@ -165,6 +192,26 @@ class jiffy_client {
                                                             int32_t permissions = directory::perms::all(),
                                                             const std::map<std::string,
                                                                            std::string> &tags = {});
+
+  /**
+   * @brief Open or create shared_log
+   * @param path shared_log path
+   * @param backing_path shared_log backing path
+   * @param num_blocks Number of blocks
+   * @param chain_length Replication chain length
+   * @param flags Flags
+   * @param permissions Permissions
+   * @param tags Tags
+   * @return shared_log client
+   */
+  std::shared_ptr<storage::shared_log_client> open_or_create_shared_log(const std::string &path,
+                                                            const std::string &backing_path,
+                                                            int32_t num_blocks = 1,
+                                                            int32_t chain_length = 1,
+                                                            int32_t flags = 0,
+                                                            int32_t permissions = directory::perms::all(),
+                                                            const std::map<std::string,
+                                                            std::string> &tags = {});
 
   /**
    * @brief Open or create fifo queue

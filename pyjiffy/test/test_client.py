@@ -345,7 +345,16 @@ class TestClient(TestCase):
             c.seek(read_offset)
             self.assertEqual(b(str(i)), c.read_ls(len(b(str(i)))))
             read_offset += len(b(str(i)))
-            
+    
+    def shared_log_ops(self, c):
+        for i in range(0, 1000):
+            try:
+                c.write(i, str(i)+"_data", [str(i)+"_stream"])
+            except KeyError as k:
+                self.fail('Received error message: {}'.format(k))
+
+        for i in range(0, 1000):
+            self.assertEqual([b(str(i)+"_data")], c.scan(i, i, [str(i)+"_stream"]))
 
 
     def test_lease_worker(self):
@@ -397,6 +406,17 @@ class TestClient(TestCase):
         finally:
             client.disconnect()
             self.stop_servers()
+    
+    def test_shared_log(self):
+        self.start_servers()
+        client = self.jiffy_client()
+        try:
+            c = client.create_shared_log('/a/file.txt', 'local://tmp')
+            self.assertTrue(client.fs.exists('/a/file.txt'))
+            self.shared_log_ops(c)
+        finally:
+            client.disconnect()
+            self.stop_servers()
 
     def test_hash_table_ls(self):
         self.start_servers()
@@ -405,6 +425,7 @@ class TestClient(TestCase):
             client.create_hash_table('/a/file.txt', 'local://tmp')
             self.assertTrue(client.fs.exists('/a/file.txt'))
             kv = client.open_hash_table('/a/file.txt')
+            os.mknod("/tmp/0_65536")
             client.sync('/a/file.txt', 'local://tmp')
             self.hash_table_ls_ops(kv)
             os.remove("/tmp/0_65536")
@@ -419,8 +440,10 @@ class TestClient(TestCase):
             client.create_queue('/a/file.txt', 'local://tmp')
             self.assertTrue(client.fs.exists('/a/file.txt'))
             q = client.open_queue('/a/file.txt')
+            os.mknod("/tmp/0")
             client.sync('/a/file.txt', 'local://tmp')
             self.queue_ls_ops(q)
+            os.remove("/tmp/0")
         finally:
             client.disconnect()
             self.stop_servers()
@@ -431,6 +454,7 @@ class TestClient(TestCase):
         try:
             c = client.create_file('/a/file.txt', 'local://tmp')
             self.assertTrue(client.fs.exists('/a/file.txt'))
+            os.mknod("/tmp/0")
             client.sync('/a/file.txt', 'local://tmp')
             self.file_ls_ops(c)
             os.remove("/tmp/0")

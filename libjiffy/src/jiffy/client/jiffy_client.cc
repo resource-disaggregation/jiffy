@@ -97,12 +97,36 @@ std::shared_ptr<storage::hash_table_client> jiffy_client::open_hash_table(const 
   return std::make_shared<storage::hash_table_client>(fs_, path, s);
 }
 
+std::shared_ptr<storage::shared_log_client> jiffy_client::create_shared_log(const std::string &path,
+                                                                const std::string &backing_path,
+                                                                int32_t num_blocks,
+                                                                int32_t chain_length,
+                                                                int32_t flags,
+                                                                int32_t permissions,
+                                                                const std::map<std::string, std::string> &tags) {
+  std::vector<std::string> block_names;
+  std::vector<std::string> block_metadata;
+  for (int32_t i = 0; i < num_blocks; ++i) {
+    block_names.push_back(std::to_string(i));
+    block_metadata.emplace_back("regular");
+  }
+  auto s = fs_->create(path, "shared_log", backing_path, num_blocks, chain_length, flags, permissions, block_names,
+                       block_metadata, tags);
+  begin_scope(path);
+  return std::make_shared<storage::shared_log_client>(fs_, path, s);
+}
+
 std::shared_ptr<storage::file_client> jiffy_client::open_file(const std::string &path) {
   auto s = fs_->open(path);
   begin_scope(path);
   return std::make_shared<storage::file_client>(fs_, path, s);
 }
 
+std::shared_ptr<storage::shared_log_client> jiffy_client::open_shared_log(const std::string &path) {
+  auto s = fs_->open(path);
+  begin_scope(path);
+  return std::make_shared<storage::shared_log_client>(fs_, path, s);
+}
 
 std::shared_ptr<storage::fifo_queue_client> jiffy_client::open_fifo_queue(const std::string &path) {
   auto s = fs_->open(path);
@@ -152,6 +176,26 @@ std::shared_ptr<storage::file_client> jiffy_client::open_or_create_file(const st
                                block_names, block_metadata, tags);
   begin_scope(path);
   return std::make_shared<storage::file_client>(fs_, path, s);
+}
+
+std::shared_ptr<storage::shared_log_client> jiffy_client::open_or_create_shared_log(const std::string &path,
+                                                                        const std::string &backing_path,
+                                                                        int32_t num_blocks,
+                                                                        int32_t chain_length,
+                                                                        int32_t flags,
+                                                                        int32_t permissions,
+                                                                        const std::map<std::string,
+                                                                                       std::string> &tags) {
+  std::vector<std::string> block_names;
+  std::vector<std::string> block_metadata;
+  for (int32_t i = 0; i < num_blocks; ++i) {
+    block_names.push_back(std::to_string(i));
+    block_metadata.emplace_back("regular");
+  }
+  auto s = fs_->open_or_create(path, "shared_log", backing_path, num_blocks, chain_length, flags, permissions,
+                               block_names, block_metadata, tags);
+  begin_scope(path);
+  return std::make_shared<storage::shared_log_client>(fs_, path, s);
 }
 
 std::shared_ptr<storage::fifo_queue_client> jiffy_client::open_or_create_fifo_queue(const std::string &path,

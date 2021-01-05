@@ -23,6 +23,15 @@ target_link_libraries(file_bench jiffy_client ${JEMALLOC_LIBRARY} ${Boost_PROGRA
 install(TARGETS file_bench
         RUNTIME DESTINATION bin)
 
+add_executable(shared_log_bench src/shared_log_benchmark.cpp)
+
+add_dependencies(shared_log_bench boost_ep jemalloc_ep)
+
+target_link_libraries(shared_log_bench jiffy_client ${JEMALLOC_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+install(TARGETS shared_log_bench
+        RUNTIME DESTINATION bin)
+
 add_executable(fifo_queue_bench src/fifo_queue_benchmark.cpp)
 
 add_dependencies(fifo_queue_bench boost_ep jemalloc_ep)

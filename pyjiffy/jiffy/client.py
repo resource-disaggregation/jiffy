@@ -8,6 +8,7 @@ from jiffy.directory.directory_client import DirectoryClient, Perms
 from jiffy.lease.lease_client import LeaseClient
 from jiffy.storage.file import FileClient
 from jiffy.storage.hash_table import HashTable
+from jiffy.storage.shared_log import SharedLogClient
 from jiffy.storage.partition import HashTableNameFormatter, DefaultNameFormatter
 from jiffy.storage.queue import Queue
 from jiffy.storage.subscriber import SubscriptionClient, Mailbox
@@ -172,6 +173,29 @@ class JiffyClient:
                                    Perms.all, block_names, block_metadata)
         self.begin_scope(path)
         return FileClient(self.fs, path, s, self.timeout_ms)
+    
+    def create_shared_log(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+        fmt = DefaultNameFormatter()
+        block_names = [fmt.get(i) for i in range(num_blocks)]
+        block_metadata = ['regular' for _ in range(num_blocks)]
+        s = self.fs.create(path, 'shared_log', persistent_store_prefix, num_blocks, chain_length, flags, Perms.all,
+                           block_names, block_metadata)
+        self.begin_scope(path)
+        return SharedLogClient(self.fs, path, s, self.timeout_ms)
+
+    def open_shared_log(self, path):
+        s = self.fs.open(path)
+        self.begin_scope(path)
+        return SharedLogClient(self.fs, path, s, self.timeout_ms)
+
+    def open_or_create_shared_log(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+        fmt = DefaultNameFormatter()
+        block_names = [fmt.get(i) for i in range(num_blocks)]
+        block_metadata = ['regular' for _ in range(num_blocks)]
+        s = self.fs.open_or_create(path, 'shared_log', persistent_store_prefix, num_blocks, chain_length, flags,
+                                   Perms.all, block_names, block_metadata)
+        self.begin_scope(path)
+        return SharedLogClient(self.fs, path, s, self.timeout_ms)
 
     def close(self, path):
         self.end_scope(path)

@@ -100,6 +100,13 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/fifoqueue/fifo_queue_ops.cpp
           src/jiffy/storage/fifoqueue/fifo_queue_partition.h
           src/jiffy/storage/fifoqueue/fifo_queue_partition.cpp
+          src/jiffy/storage/shared_log/shared_log_defs.h
+          src/jiffy/storage/shared_log/shared_log_ops.h
+          src/jiffy/storage/shared_log/shared_log_ops.cpp
+          src/jiffy/storage/shared_log/shared_log_partition.h
+          src/jiffy/storage/shared_log/shared_log_partition.cpp
+          src/jiffy/storage/shared_log/shared_log_block.h
+          src/jiffy/storage/shared_log/shared_log_block.cpp
           src/jiffy/storage/fifoqueue/string_array.h
           src/jiffy/storage/fifoqueue/string_array.cpp
           src/jiffy/storage/client/replica_chain_client.cpp
@@ -120,6 +127,8 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/client/file_client.h
           src/jiffy/storage/client/fifo_queue_client.cpp
           src/jiffy/storage/client/fifo_queue_client.h
+          src/jiffy/storage/client/shared_log_client.cpp
+          src/jiffy/storage/client/shared_log_client.h
           src/jiffy/storage/client/data_structure_listener.cpp
           src/jiffy/storage/client/data_structure_listener.h
           src/jiffy/storage/service/block_request_handler.cpp
@@ -254,6 +263,8 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             #test/file_size_tracker_test.cpp
             test/directory_tree_test.cpp
             test/directory_service_test.cpp
+            test/shared_log_partition_test.cpp
+            test/shared_log_client_test.cpp
 	    test/file_partition_test.cpp
             test/file_local_partition_test.cpp
             test/file_client_test.cpp
@@ -318,6 +329,10 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/file/file_ops.cpp
           src/jiffy/storage/file/file_block.h
           src/jiffy/storage/file/file_block.cpp
+          src/jiffy/storage/shared_log/shared_log_ops.h
+          src/jiffy/storage/shared_log/shared_log_ops.cpp
+          src/jiffy/storage/shared_log/shared_log_block.h
+          src/jiffy/storage/shared_log/shared_log_block.cpp
           src/jiffy/storage/fifoqueue/fifo_queue_ops.h
           src/jiffy/storage/fifoqueue/fifo_queue_ops.cpp
           src/jiffy/storage/fifoqueue/string_array.h
@@ -336,6 +351,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/client/hash_table_client.h
           src/jiffy/storage/client/file_client.cpp
           src/jiffy/storage/client/file_client.h
+          src/jiffy/storage/client/shared_log_client.cpp
+          src/jiffy/storage/client/shared_log_client.h
           src/jiffy/storage/client/fifo_queue_client.cpp
           src/jiffy/storage/client/fifo_queue_client.h
           src/jiffy/storage/client/data_structure_listener.cpp
