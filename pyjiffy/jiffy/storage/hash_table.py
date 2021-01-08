@@ -56,7 +56,7 @@ class HashTable(DataStructureClient):
     def __init__(self, fs, path, block_info, timeout_ms):
         super(HashTable, self).__init__(fs, path, block_info, HashTableOps.op_types, timeout_ms)
         self.slots = [int(chain.name.split('_')[0]) for chain in self.block_info.data_blocks]
-    
+
     def _refresh(self):
         super(HashTable, self)._refresh()
         self.slots = [int(chain.name.split('_')[0]) for chain in self.block_info.data_blocks]
