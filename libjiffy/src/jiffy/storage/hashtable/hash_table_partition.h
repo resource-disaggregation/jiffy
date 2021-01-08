@@ -196,48 +196,6 @@ class hash_table_partition : public chain_module {
    */
   void remove(response &_return, const arg_list &args);
 
- /**
-   * @brief Check if hash map contains key
-   * @param _return Response
-   * @param args Arguments
-   */
-  void exists_ls(response &_return, const arg_list &args);
-
-  /**
-   * @brief Insert new key value pair
-   * @param _return Response
-   * @param args Arguments
-   */
-  void put_ls(response &_return, const arg_list &args);
-
-  /**
-   * @brief Insert or update key value pair
-   * @param _return Response
-   * @param args Arguments
-   */
-  void upsert_ls(response &_return, const arg_list &args);
-
-  /**
-   * @brief Get value for specified key
-   * @param _return Response
-   * @param args Arguments
-   */
-  void get_ls(response &_return, const arg_list &args);
-
-  /**
-   * @brief Update the value for specified key
-   * @param _return Response
-   * @param args Arguments
-   */
-  void update_ls(response &_return, const arg_list &args);
-
-  /**
-   * @brief Remove value for specified key
-   * @param _return Response
-   * @param args Arguments
-   */
-  void remove_ls(response &_return, const arg_list &args);
-
   /**
    * @brief Remove key from hash table during scaling
    * @param _return Response

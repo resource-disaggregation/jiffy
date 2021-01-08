@@ -19,25 +19,13 @@ class HashTableOps:
     remove = b('remove')
     update = b('update')
     upsert = b('upsert')
-    exists_ls = b('exists_ls')
-    get_ls = b('get_ls')
-    put_ls = b('put_ls')
-    remove_ls = b('remove_ls')
-    update_ls = b('update_ls')
-    upsert_ls = b('upsert_ls')
 
     op_types = {exists: CommandType.accessor,
                 get: CommandType.accessor,
                 put: CommandType.mutator,
                 remove: CommandType.mutator,
                 update: CommandType.accessor,
-                upsert: CommandType.mutator,
-                exists_ls: CommandType.accessor,
-                get_ls: CommandType.accessor,
-                put_ls: CommandType.mutator,
-                remove_ls: CommandType.mutator,
-                update_ls: CommandType.accessor,
-                upsert_ls: CommandType.mutator}
+                upsert: CommandType.mutator}
 
 
 def encode(value):
@@ -116,28 +104,6 @@ class HashTable(DataStructureClient):
 
     def remove(self, key):
         return self._run_repeated([HashTableOps.remove, key])[0]
-
-    def put_ls(self, key, value):
-        self._run_repeated([HashTableOps.put_ls, key, value])
-
-    def get_ls(self, key):
-        return self._run_repeated([HashTableOps.get_ls, key])[1]
-
-    def exists_ls(self, key):
-        try:
-            self._run_repeated([HashTableOps.exists_ls, key])[0]
-        except:
-            return False
-        return True
-
-    def update_ls(self, key, value):
-        return self._run_repeated([HashTableOps.update_ls, key, value])[0]
-
-    def upsert_ls(self, key, value):
-        self._run_repeated([HashTableOps.upsert_ls, key, value])
-
-    def remove_ls(self, key):
-        return self._run_repeated([HashTableOps.remove_ls, key])[0]
 
     def _block_id(self, args):
         i = bisect_right(self.slots, crc.crc16(encode(args[1])))

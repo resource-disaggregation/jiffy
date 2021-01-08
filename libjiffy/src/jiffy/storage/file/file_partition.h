@@ -61,20 +61,6 @@ class file_partition : public chain_module {
   void read(response &_return, const arg_list &args);
 
   /**
-   * @brief Write data to the file
-   * @param _return Response
-   * @param args Arguments
-   */
-  void write_ls(response &_return, const arg_list &args);
-
-  /**
-   * @brief Read data from the file
-   * @param _return Response
-   * @param args Arguments
-   */
-  void read_ls(response &_return, const arg_list &args);
-
-  /**
    * @brief Clear the file
    * @param _return Response
    * @param args Arguments

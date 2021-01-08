@@ -70,32 +70,11 @@ class fifo_queue_partition : public chain_module {
   void dequeue(response &_return, const arg_list &args);
 
   /**
-   * @brief Enqueue a new item to the fifo queue
-   * @param item New message
-   * @return Enqueue return status string
-   */
-  void enqueue_ls(response &_return, const arg_list &args);
-
-  /**
-   * @brief Dequeue an item from the fifo queue
-   * @param _return Response
-   * @param args Arguments
-   */
-  void dequeue_ls(response &_return, const arg_list &args);
-
-  /**
    * @brief Fetch an item without dequeue
    * @param _return Response
    * @param args Arguments
    */
   void read_next(response &_return, const arg_list &args);
-
-/**
-   * @brief Fetch an item without dequeue
-   * @param _return Response
-   * @param args Arguments
-   */
-  void read_next_ls(response &_return, const arg_list &args);
 
   /**
    * @brief Clear the fifo queue
@@ -117,13 +96,6 @@ class fifo_queue_partition : public chain_module {
    * @param args Arguments
    */
   void length(response &_return, const arg_list &args);
-
-  /**
-   * @brief Fetch number of elements of the queue
-   * @param _return Response
-   * @param args Arguments
-   */
-  void length_ls(response &_return, const arg_list &args);
 
   /**
    * @brief Fetch in rate of the queue
@@ -296,12 +268,6 @@ class fifo_queue_partition : public chain_module {
 
   /* Number of elements removed from the queue */
   std::size_t dequeue_data_size_;
-
-  /* Number of elements inserted in the queue */
-  std::size_t enqueue_ls_data_size_;
-
-  /* Number of elements removed from the queue */
-  std::size_t dequeue_ls_data_size_;
 
   /* Total number of elements from all of the previous partitions */
   std::size_t prev_data_size_;
