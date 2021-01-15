@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstring>
 #include <unordered_map>
+#include <string>
 
 namespace jiffy {
 namespace storage {
