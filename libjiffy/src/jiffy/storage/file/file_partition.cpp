@@ -49,7 +49,7 @@ void file_partition::write(response &_return, const arg_list &args) {
     int start_offset = (int(off)) / cache_block_size * cache_block_size;
     int end_offset = (int(off) + args[1].size() - 1) / cache_block_size * cache_block_size;
     int num_of_blocks = (end_offset - start_offset) / cache_block_size + 1;
-    auto full_block_data = partition_.read(static_cast<std::size_t>(start_offset), static_cast<std::size_t>(min(last_offset - start_offset, cache_block_size * num_of_blocks)));
+    auto full_block_data = partition_.read(static_cast<std::size_t>(start_offset), static_cast<std::size_t>(std::min(last_offset - start_offset, cache_block_size * num_of_blocks)));
     if (full_block_data.first) {
       RETURN_OK(full_block_data.second);
     }
