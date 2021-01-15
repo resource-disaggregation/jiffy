@@ -34,17 +34,14 @@ class PutBenchmark(HashTableBenchmark):
 		super(PutBenchmark, self).__init__(clients, data_size, num_clients, num_ops)
 
 	def run(self):
-		# print("+++++++++ Put Benchmark +++++++++")
 		t0 = time.time()
 		for i in range(self.num_clients):
 			self.workers_[i] = threading.Thread(target = self.single_thread_action, args = (i,))
 		t1 = time.time()
-		# print("Time to Create Thread: ", t1-t0)
 		t0 = time.time()
 		for i in range(self.num_clients):
 			self.workers_[i].start()
 		t1 = time.time()
-		# print("Time to Start Thread: ", t1-t0)
 				
 	def single_thread_action(self, thread_index):
 		bench_begin = time.time()
@@ -65,7 +62,6 @@ class GetBenchmark(HashTableBenchmark):
 		super(GetBenchmark, self).__init__(clients, data_size, num_clients, num_ops)
 
 	def run(self):
-		# print("+++++++++ Get Benchmark +++++++++")
 		t0 = time.time()
 		for i in range(self.num_clients):
 			self.workers_[i] = threading.Thread(target = self.single_thread_action, args = (i,))
@@ -103,7 +99,6 @@ class RemoveBenchmark(HashTableBenchmark):
 		super(RemoveBenchmark, self).__init__(clients, data_size, num_clients, num_ops)
 
 	def run(self):
-		# print("+++++++++ Remove Benchmark +++++++++")
 		t0 = time.time()
 		for i in range(self.num_clients):
 			self.workers_[i] = threading.Thread(target = self.single_thread_action, args = (i,))
@@ -143,15 +138,15 @@ def ht_alpha():
     file_name = './benchmark/ht_alpha_with_cache.txt'
     data = open(file_name,'w+')
     # Output all the configuration parameters:
-    print("host: ", address, file=data)
-    print("service-port: ", service_port, file=data)
-    print("lease-port: ", lease_port, file=data)
-    print("num-blocks: ", num_blocks, file=data)
-    print("chain-length: ", chain_length, file=data)
-    print("num-ops: ", num_ops, file=data)
-    print("data-size: ", data_size, file=data)
-    print("path: ", path, file=data)
-    print("backing-path: ", backing_path, file=data)
+    print >> data, "host: ", address
+    print >> data, "service-port: ", service_port
+    print >> data, "lease-port: ", lease_port
+    print >> data, "num-blocks: ", num_blocks
+    print >> data, "chain-length: ", chain_length
+    print >> data, "num-ops: ", num_ops
+    print >> data, "data-size: ", data_size
+    print >> data, "path: ", path
+    print >> data, "backing-path: ", backing_path
 
     num_clients = 1
     loading = 0
@@ -165,17 +160,16 @@ def ht_alpha():
         benchmark.run()
         result = benchmark.wait()
         client.remove(path)
-        print("===== ", "Zipf_ht_Benchmark, ","alpha= ", a, " ======", file=data)
-        print("\t", num_ops, " requests completed in ", (float(num_ops) / result[0])
-                                                , " s", file=data)
-        print("\t", num_clients, " parallel clients", file=data)
-        print("\t", data_size, " payload", file=data)
-        print("\tAverage put latency: ", result[1], "us", file=data)
-        print("\tAverage get latency: ", result[2], "us", file=data)
-        print("\tAverage total latency: ", result[1]+result[2], "us", file=data)
-        print("\tThroughput: ", result[0], " requests per second", file=data)
-        print("\tHit_rate: ", round(result[3],4), "%", file=data)
-        print("\n", file=data)
+        print >> data, "===== ", "Zipf_ht_Benchmark, ","alpha= ", a, " ======"
+        print >> data, "\t", num_ops, " requests completed in ", (float(num_ops) / result[0]), " s"
+        print >> data, "\t", num_clients, " parallel clients"
+        print >> data, "\t", data_size, " payload"
+        print >> data, "\tAverage put latency: ", result[1], "us"
+        print >> data, "\tAverage get latency: ", result[2], "us"
+        print >> data, "\tAverage total latency: ", result[1]+result[2], "us"
+        print >> data, "\tThroughput: ", result[0], " requests per second"
+        print >> data, "\tHit_rate: ", round(result[3],4), "%"
+        print >> data, "\n"
         loading += 1
         print("Loading -- ", round(float(loading*100/11),1), "%")
 
@@ -199,15 +193,15 @@ def ht_seq():
     data = open(file_name,'w+')
 
     # Output all the configuration parameters:
-    print("host: ", address, file=data)
-    print("service-port: ", service_port, file=data)
-    print("lease-port: ", lease_port, file=data)
-    print("num-blocks: ", num_blocks, file=data)
-    print("chain-length: ", chain_length, file=data)
-    print("num-ops: ", num_ops, file=data)
-    print("data-size: ", data_size, file=data)
-    print("path: ", path, file=data)
-    print("backing-path: ", backing_path, file=data)
+    print >> data, "host: ", address
+    print >> data, "service-port: ", service_port
+    print >> data, "lease-port: ", lease_port
+    print >> data, "num-blocks: ", num_blocks
+    print >> data, "chain-length: ", chain_length
+    print >> data, "num-ops: ", num_ops
+    print >> data, "data-size: ", data_size
+    print >> data, "path: ", path
+    print >> data, "backing-path: ", backing_path
 
     loading = 0
     for op_type in op_type_set:
@@ -233,17 +227,16 @@ def ht_seq():
                 benchmark.run()
                 result = benchmark.wait()
                 client.remove(path)
-                print("===== ", "ht_Benchmark, ","Cache_Size= ", cache_size, " ======", file=data)
-                print("\t", num_ops, " requests completed in ", (float(num_ops) / result[0])
-                                                        , " s", file=data)
-                print("\t", num_clients, " parallel clients", file=data)
-                print("\t", data_size, " payload", file=data)
-                print("\tAverage put latency: ", result[1], "us", file=data)
-                print("\tAverage get latency: ", result[2], "us", file=data)
-                print("\tAverage total latency: ", result[1]+result[2], "us", file=data)
-                print("\tThroughput: ", result[0], " requests per second", file=data)
-                print("\tHit_rate: ", round(result[3],4), "%", file=data)
-                print("\n", file=data)
+                print >> data, "===== ", "ht_Benchmark, ","Cache_Size= ", cache_size, " ======"
+                print >> data, "\t", num_ops, " requests completed in ", (float(num_ops) / result[0]), " s"
+                print >> data, "\t", num_clients, " parallel clients"
+                print >> data, "\t", data_size, " payload"
+                print >> data, "\tAverage put latency: ", result[1], "us"
+                print >> data, "\tAverage get latency: ", result[2], "us"
+                print >> data, "\tAverage total latency: ", result[1]+result[2], "us"
+                print >> data, "\tThroughput: ", result[0], " requests per second"
+                print >> data, "\tHit_rate: ", round(result[3],4), "%"
+                print >> data, "\n"
                 loading += 1
                 print("Loading -- ", round(float(loading*100/20),1), "%")
 
@@ -266,16 +259,17 @@ def ht_zipf():
     backing_path = "local://tmp"
     file_name = './benchmark/ht_zipf_with_cache.txt'
     data = open(file_name,'w+')
+    
     # Output all the configuration parameters:
-    print("host: ", address, file=data)
-    print("service-port: ", service_port, file=data)
-    print("lease-port: ", lease_port, file=data)
-    print("num-blocks: ", num_blocks, file=data)
-    print("chain-length: ", chain_length, file=data)
-    print("num-ops: ", num_ops, file=data)
-    print("data-size: ", data_size, file=data)
-    print("path: ", path, file=data)
-    print("backing-path: ", backing_path, file=data)
+    print >> data, "host: ", address
+    print >> data, "service-port: ", service_port
+    print >> data, "lease-port: ", lease_port
+    print >> data, "num-blocks: ", num_blocks
+    print >> data, "chain-length: ", chain_length
+    print >> data, "num-ops: ", num_ops
+    print >> data, "data-size: ", data_size
+    print >> data, "path: ", path
+    print >> data, "backing-path: ", backing_path
 
     num_clients = 1
     loading = 0
@@ -287,17 +281,16 @@ def ht_zipf():
         benchmark.run()
         result = benchmark.wait()
         client.remove(path)
-        print("===== ", "Zipf_ht_Benchmark, ","Cache_Size= ", cache_size, " ======", file=data)
-        print("\t", num_ops, " requests completed in ", (float(num_ops) / result[0])
-                                                , " s", file=data)
-        print("\t", num_clients, " parallel clients", file=data)
-        print("\t", data_size, " payload", file=data)
-        print("\tAverage put latency: ", result[1], "us", file=data)
-        print("\tAverage get latency: ", result[2], "us", file=data)
-        print("\tAverage total latency: ", result[1]+result[2], "us", file=data)
-        print("\tThroughput: ", result[0], " requests per second", file=data)
-        print("\tHit_rate: ", round(result[3],4), "%", file=data)
-        print("\n", file=data)
+        print >> data, "===== ", "Zipf_ht_Benchmark, ","Cache_Size= ", cache_size, " ======"
+        print >> data, "\t", num_ops, " requests completed in ", (float(num_ops) / result[0]), " s"
+        print >> data, "\t", num_clients, " parallel clients"
+        print >> data, "\t", data_size, " payload"
+        print >> data, "\tAverage put latency: ", result[1], "us"
+        print >> data, "\tAverage get latency: ", result[2], "us"
+        print >> data, "\tAverage total latency: ", result[1]+result[2], "us"
+        print >> data, "\tThroughput: ", result[0], " requests per second"
+        print >> data, "\tHit_rate: ", round(result[3],4), "%"
+        print >> data, "\n"
         loading += 1
         print("Loading -- ", round(float(loading*100/20),1), "%")
 

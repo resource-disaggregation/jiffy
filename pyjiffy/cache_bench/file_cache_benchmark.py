@@ -119,15 +119,15 @@ def file_bp_zipf():
     # Output all the configuration parameters:
     file_name = './benchmark/file_bp_zipf.txt'
     data = open(file_name,'w+') 
-    # print("host: ", address, file=data)
-    # print("service-port: ", service_port, file=data)
-    # print("lease-port: ", lease_port, file=data)
-    # print("num-blocks: ", num_blocks, file=data)
-    # print("chain-length: ", chain_length, file=data)
-    # print("num-ops: ", num_ops, file=data)
-    # print("data-size: ", data_size, file=data)
-    # print("path: ", path, file=data)
-    # print("backing-path: ", backing_path, file=data)
+    print >> data, "host: ", address
+    print >> data, "service-port: ", service_port
+    print >> data, "lease-port: ", lease_port
+    print >> data, "num-blocks: ", num_blocks
+    print >> data, "chain-length: ", chain_length
+    print >> data, "num-ops: ", num_ops
+    print >> data, "data-size: ", data_size
+    print >> data, "path: ", path
+    print >> data, "backing-path: ", backing_path
     for op_type in op_type_set:
         count = 1
         while count <= 1:
@@ -146,24 +146,23 @@ def file_bp_zipf():
                     if (op_type == "read"):
                         benchmark = ReadBenchmark(ht_clients, data_size, num_clients, num_ops)
                     else:
-                        # print("Incorrect operation type for file: ", op_type, file=data)
+                        print >> data, "Incorrect operation type for file: ", op_type
                         return 0
                     
                     benchmark.run()
                     result = benchmark.wait()
                     client.remove(path)
                     
-                    # print("===== ", "Block Size= ", cache_block_size, "Prefetch Size= ", prefetch_size, " ======", file=data)
-                    # print("\t", num_ops, " requests completed in ", (float(num_ops) / result[0])
-                    #                                         , " s", file=data)
-                    # print("\t", num_clients, " parallel clients", file=data)
-                    # print("\t", data_size, " payload", file=data)
-                    # print("\tAverage write latency: ", result[1], "us", file=data)
-                    # print("\tAverage read latency: ", result[2], "us", file=data)
-                    # print("\tAverage total latency: ", result[1]+result[2], "us", file=data)
-                    # print("\tThroughput: ", result[0], " bytes per second", file=data)
-                    # print("\tHit_rate: ", round(result[3],4), "%", file=data)
-                    # print("\n", file=data)
+                    print >> data, "===== ", "Block Size= ", cache_block_size, "Prefetch Size= ", prefetch_size, " ======"
+                    print >> data, "\t", num_ops, " requests completed in ", (float(num_ops) / result[0]), " s"
+                    print >> data, "\t", num_clients, " parallel clients"
+                    print >> data, "\t", data_size, " payload"
+                    print >> data, "\tAverage write latency: ", result[1], "us"
+                    print >> data, "\tAverage read latency: ", result[2], "us"
+                    print >> data, "\tAverage total latency: ", result[1]+result[2], "us"
+                    print >> data, "\tThroughput: ", result[0], " bytes per second"
+                    print >> data, "\tHit_rate: ", round(result[3],4), "%"
+                    print >> data, "\n"
                     loading += 1
                     print("Loading -- ", round(float(loading*100/320),1), "%")
             count *= 2
@@ -188,15 +187,15 @@ def file_bp():
     # Output all the configuration parameters:
     file_name = './benchmark/file_bp.txt'
     data = open(file_name,'w+') 
-    # print("host: ", address, file=data)
-    # print("service-port: ", service_port, file=data)
-    # print("lease-port: ", lease_port, file=data)
-    # print("num-blocks: ", num_blocks, file=data)
-    # print("chain-length: ", chain_length, file=data)
-    # print("num-ops: ", num_ops, file=data)
-    # print("data-size: ", data_size, file=data)
-    # print("path: ", path, file=data)
-    # print("backing-path: ", backing_path, file=data)
+    print >> data, "host: ", address
+    print >> data, "service-port: ", service_port
+    print >> data, "lease-port: ", lease_port
+    print >> data, "num-blocks: ", num_blocks
+    print >> data, "chain-length: ", chain_length
+    print >> data, "num-ops: ", num_ops
+    print >> data, "data-size: ", data_size
+    print >> data, "path: ", path
+    print >> data, "backing-path: ", backing_path
     for op_type in op_type_set:
         count = 1
         while count <= 1:
@@ -215,24 +214,23 @@ def file_bp():
                     if (op_type == "read"):
                         benchmark = ReadBenchmark(ht_clients, data_size, num_clients, num_ops)
                     else:
-                        # print("Incorrect operation type for file: ", op_type, file=data)
+                        print >> data, "Incorrect operation type for file: ", op_type
                         return 0
                     
                     benchmark.run()
                     result = benchmark.wait()
                     client.remove(path)
                     
-                    # print("===== ", "Block Size= ", cache_block_size, "Prefetch Size= ", prefetch_size, " ======", file=data)
-                    # print("\t", num_ops, " requests completed in ", (float(num_ops) / result[0])
-                                                            # , " s", file=data)
-                    # print("\t", num_clients, " parallel clients", file=data)
-                    # print("\t", data_size, " payload", file=data)
-                    # print("\tAverage write latency: ", result[1], "us", file=data)
-                    # print("\tAverage read latency: ", result[2], "us", file=data)
-                    # print("\tAverage total latency: ", result[1]+result[2], "us", file=data)
-                    # print("\tThroughput: ", result[0], " bytes per second", file=data)
-                    # print("\tHit_rate: ", round(result[3],4), "%", file=data)
-                    # print("\n", file=data)
+                    print >> data, "===== ", "Block Size= ", cache_block_size, "Prefetch Size= ", prefetch_size, " ======"
+                    print >> data, "\t", num_ops, " requests completed in ", (float(num_ops) / result[0]), " s"
+                    print >> data, "\t", num_clients, " parallel clients"
+                    print >> data, "\t", data_size, " payload"
+                    print >> data, "\tAverage write latency: ", result[1], "us"
+                    print >> data, "\tAverage read latency: ", result[2], "us"
+                    print >> data, "\tAverage total latency: ", result[1]+result[2], "us"
+                    print >> data, "\tThroughput: ", result[0], " bytes per second"
+                    print >> data, "\tHit_rate: ", round(result[3],4), "%"
+                    print >> data, "\n"
                     loading += 1
                     print("Loading -- ", round(float(loading*100/320),1), "%")
             count *= 2
@@ -257,15 +255,15 @@ def file_cb_zipf():
     # Output all the configuration parameters:
     file_name = './benchmark/file_cb_zipf.txt'
     data = open(file_name,'w+') 
-    # print("host: ", address, file=data)
-    # print("service-port: ", service_port, file=data)
-    # print("lease-port: ", lease_port, file=data)
-    # print("num-blocks: ", num_blocks, file=data)
-    # print("chain-length: ", chain_length, file=data)
-    # print("num-ops: ", num_ops, file=data)
-    # print("data-size: ", data_size, file=data)
-    # print("path: ", path, file=data)
-    # print("backing-path: ", backing_path, file=data)
+    print >> data, "host: ", address
+    print >> data, "service-port: ", service_port
+    print >> data, "lease-port: ", lease_port
+    print >> data, "num-blocks: ", num_blocks
+    print >> data, "chain-length: ", chain_length
+    print >> data, "num-ops: ", num_ops
+    print >> data, "data-size: ", data_size
+    print >> data, "path: ", path
+    print >> data, "backing-path: ", backing_path
     for op_type in op_type_set:
         count = 1
         while count <= 1:
@@ -284,24 +282,23 @@ def file_cb_zipf():
                     if (op_type == "read"):
                         benchmark = ReadBenchmark(ht_clients, data_size, num_clients, num_ops)
                     else:
-                        # print("Incorrect operation type for file: ", op_type, file=data)
+                        print >> data, "Incorrect operation type for file: ", op_type
                         return 0
                     
                     benchmark.run()
                     result = benchmark.wait()
                     client.remove(path)
                     
-                    # print("===== ", "Cache_Size= ", cache_size, "Block Size= ", cache_block_size, " ======", file=data)
-                    # print("\t", num_ops, " requests completed in ", (float(num_ops) / result[0])
-                                                            # , " s", file=data)
-                    # print("\t", num_clients, " parallel clients", file=data)
-                    # print("\t", data_size, " payload", file=data)
-                    # print("\tAverage write latency: ", result[1], "us", file=data)
-                    # print("\tAverage read latency: ", result[2], "us", file=data)
-                    # print("\tAverage total latency: ", result[1]+result[2], "us", file=data)
-                    # print("\tThroughput: ", result[0], " bytes per second", file=data)
-                    # print("\tHit_rate: ", round(result[3],4), "%", file=data)
-                    # print("\n", file=data)
+                    print >> data, "===== ", "Cache_Size= ", cache_size, "Block Size= ", cache_block_size, " ======"
+                    print >> data, "\t", num_ops, " requests completed in ", (float(num_ops) / result[0]), " s"
+                    print >> data, "\t", num_clients, " parallel clients"
+                    print >> data, "\t", data_size, " payload"
+                    print >> data, "\tAverage write latency: ", result[1], "us"
+                    print >> data, "\tAverage read latency: ", result[2], "us"
+                    print >> data, "\tAverage total latency: ", result[1]+result[2], "us"
+                    print >> data, "\tThroughput: ", result[0], " bytes per second"
+                    print >> data, "\tHit_rate: ", round(result[3],4), "%"
+                    print >> data, "\n"
                     loading += 1
                     print("Loading -- ", round(float(loading*100/220),1), "%")
             count *= 2
@@ -326,15 +323,15 @@ def file_cb():
     # Output all the configuration parameters:
     file_name = './benchmark/file_cb.txt'
     data = open(file_name,'w+') 
-    # print("host: ", address, file=data)
-    # print("service-port: ", service_port, file=data)
-    # print("lease-port: ", lease_port, file=data)
-    # print("num-blocks: ", num_blocks, file=data)
-    # print("chain-length: ", chain_length, file=data)
-    # print("num-ops: ", num_ops, file=data)
-    # print("data-size: ", data_size, file=data)
-    # print("path: ", path, file=data)
-    # print("backing-path: ", backing_path, file=data)
+    print >> data, "host: ", address
+    print >> data, "service-port: ", service_port
+    print >> data, "lease-port: ", lease_port
+    print >> data, "num-blocks: ", num_blocks
+    print >> data, "chain-length: ", chain_length
+    print >> data, "num-ops: ", num_ops
+    print >> data, "data-size: ", data_size
+    print >> data, "path: ", path
+    print >> data, "backing-path: ", backing_path
     for op_type in op_type_set:
         count = 1
         while count <= 1:
@@ -353,24 +350,23 @@ def file_cb():
                     if (op_type == "read"):
                         benchmark = ReadBenchmark(ht_clients, data_size, num_clients, num_ops)
                     else:
-                        # print("Incorrect operation type for file: ", op_type, file=data)
+                        print >> data, "Incorrect operation type for file: ", op_type
                         return 0
                     
                     benchmark.run()
                     result = benchmark.wait()
                     client.remove(path)
                     
-                    # print("===== ", "Cache_Size= ", cache_size, "Block Size= ", cache_block_size, " ======", file=data)
-                    # print("\t", num_ops, " requests completed in ", (float(num_ops) / result[0])
-                                                            # , " s", file=data)
-                    # print("\t", num_clients, " parallel clients", file=data)
-                    # print("\t", data_size, " payload", file=data)
-                    # print("\tAverage write latency: ", result[1], "us", file=data)
-                    # print("\tAverage read latency: ", result[2], "us", file=data)
-                    # print("\tAverage total latency: ", result[1]+result[2], "us", file=data)
-                    # print("\tThroughput: ", result[0], " bytes per second", file=data)
-                    # print("\tHit_rate: ", round(result[3],4), "%", file=data)
-                    # print("\n", file=data)
+                    print >> data, "===== ", "Cache_Size= ", cache_size, "Block Size= ", cache_block_size, " ======"
+                    print >> data, "\t", num_ops, " requests completed in ", (float(num_ops) / result[0]), " s"
+                    print >> data, "\t", num_clients, " parallel clients"
+                    print >> data, "\t", data_size, " payload"
+                    print >> data, "\tAverage write latency: ", result[1], "us"
+                    print >> data, "\tAverage read latency: ", result[2], "us"
+                    print >> data, "\tAverage total latency: ", result[1]+result[2], "us"
+                    print >> data, "\tThroughput: ", result[0], " bytes per second"
+                    print >> data, "\tHit_rate: ", round(result[3],4), "%"
+                    print >> data, "\n"
                     loading += 1
                     print("Loading -- ", round(float(loading*100/220),1), "%")
             count *= 2
@@ -395,15 +391,15 @@ def file_cp_zipf():
     # Output all the configuration parameters:
     file_name = './benchmark/file_cp_zipf.txt'
     data = open(file_name,'w+') 
-    # print("host: ", address, file=data)
-    # print("service-port: ", service_port, file=data)
-    # print("lease-port: ", lease_port, file=data)
-    # print("num-blocks: ", num_blocks, file=data)
-    # print("chain-length: ", chain_length, file=data)
-    # print("num-ops: ", num_ops, file=data)
-    # print("data-size: ", data_size, file=data)
-    # print("path: ", path, file=data)
-    # print("backing-path: ", backing_path, file=data)
+    print >> data, "host: ", address
+    print >> data, "service-port: ", service_port
+    print >> data, "lease-port: ", lease_port
+    print >> data, "num-blocks: ", num_blocks
+    print >> data, "chain-length: ", chain_length
+    print >> data, "num-ops: ", num_ops
+    print >> data, "data-size: ", data_size
+    print >> data, "path: ", path
+    print >> data, "backing-path: ", backing_path
     for op_type in op_type_set:
         count = 1
         while count <= 1:
@@ -422,24 +418,23 @@ def file_cp_zipf():
                     if (op_type == "read"):
                         benchmark = ReadBenchmark(ht_clients, data_size, num_clients, num_ops)
                     else:
-                        # print("Incorrect operation type for file: ", op_type, file=data)
+                        print >> data, "Incorrect operation type for file: ", op_type
                         return 0
                     
                     benchmark.run()
                     result = benchmark.wait()
                     client.remove(path)
                     
-                    # print("===== ", "Cache_Size= ", cache_size, "Prefetch Size= ", prefetch_size, " ======", file=data)
-                    # print("\t", num_ops, " requests completed in ", (float(num_ops) / result[0])
-                                                            # , " s", file=data)
-                    # print("\t", num_clients, " parallel clients", file=data)
-                    # print("\t", data_size, " payload", file=data)
-                    # print("\tAverage write latency: ", result[1], "us", file=data)
-                    # print("\tAverage read latency: ", result[2], "us", file=data)
-                    # print("\tAverage total latency: ", result[1]+result[2], "us", file=data)
-                    # print("\tThroughput: ", result[0], " bytes per second", file=data)
-                    # print("\tHit_rate: ", round(result[3],4), "%", file=data)
-                    # print("\n", file=data)
+                    print >> data, "===== ", "Cache_Size= ", cache_size, "Prefetch Size= ", prefetch_size, " ======"
+                    print >> data, "\t", num_ops, " requests completed in ", (float(num_ops) / result[0]), " s"
+                    print >> data, "\t", num_clients, " parallel clients"
+                    print >> data, "\t", data_size, " payload"
+                    print >> data, "\tAverage write latency: ", result[1], "us"
+                    print >> data, "\tAverage read latency: ", result[2], "us"
+                    print >> data, "\tAverage total latency: ", result[1]+result[2], "us"
+                    print >> data, "\tThroughput: ", result[0], " bytes per second"
+                    print >> data, "\tHit_rate: ", round(result[3],4), "%"
+                    print >> data, "\n"
                     loading += 1
                     print("Loading -- ", round(float(loading*100/110),1), "%")
             count *= 2
@@ -464,15 +459,15 @@ def file_cp():
     # Output all the configuration parameters:
     file_name = './benchmark/file_cp.txt'
     data = open(file_name,'w+') 
-    # print("host: ", address, file=data)
-    # print("service-port: ", service_port, file=data)
-    # print("lease-port: ", lease_port, file=data)
-    # print("num-blocks: ", num_blocks, file=data)
-    # print("chain-length: ", chain_length, file=data)
-    # print("num-ops: ", num_ops, file=data)
-    # print("data-size: ", data_size, file=data)
-    # print("path: ", path, file=data)
-    # print("backing-path: ", backing_path, file=data)
+    print >> data, "host: ", address
+    print >> data, "service-port: ", service_port
+    print >> data, "lease-port: ", lease_port
+    print >> data, "num-blocks: ", num_blocks
+    print >> data, "chain-length: ", chain_length
+    print >> data, "num-ops: ", num_ops
+    print >> data, "data-size: ", data_size
+    print >> data, "path: ", path
+    print >> data, "backing-path: ", backing_path
     for op_type in op_type_set:
         count = 1
         while count <= 1:
@@ -491,24 +486,23 @@ def file_cp():
                     if (op_type == "read"):
                         benchmark = ReadBenchmark(ht_clients, data_size, num_clients, num_ops)
                     else:
-                        # print("Incorrect operation type for file: ", op_type, file=data)
+                        print >> data, "Incorrect operation type for file: ", op_type
                         return 0
                     
                     benchmark.run()
                     result = benchmark.wait()
                     client.remove(path)
                     
-                    # print("===== ", "Cache_Size= ", cache_size, "Prefetch Size= ", prefetch_size, " ======", file=data)
-                    # print("\t", num_ops, " requests completed in ", (float(num_ops) / result[0])
-                                                            # , " s", file=data)
-                    # print("\t", num_clients, " parallel clients", file=data)
-                    # print("\t", data_size, " payload", file=data)
-                    # print("\tAverage write latency: ", result[1], "us", file=data)
-                    # print("\tAverage read latency: ", result[2], "us", file=data)
-                    # print("\tAverage total latency: ", result[1]+result[2], "us", file=data)
-                    # print("\tThroughput: ", result[0], " bytes per second", file=data)
-                    # print("\tHit_rate: ", round(result[3],4), "%", file=data)
-                    # print("\n", file=data)
+                    print >> data, "===== ", "Cache_Size= ", cache_size, "Prefetch Size= ", prefetch_size, " ======"
+                    print >> data, "\t", num_ops, " requests completed in ", (float(num_ops) / result[0]), " s"
+                    print >> data, "\t", num_clients, " parallel clients"
+                    print >> data, "\t", data_size, " payload"
+                    print >> data, "\tAverage write latency: ", result[1], "us"
+                    print >> data, "\tAverage read latency: ", result[2], "us"
+                    print >> data, "\tAverage total latency: ", result[1]+result[2], "us"
+                    print >> data, "\tThroughput: ", result[0], " bytes per second"
+                    print >> data, "\tHit_rate: ", round(result[3],4), "%"
+                    print >> data, "\n"
                     loading += 1
                     print("Loading -- ", round(float(loading*100/110),1), "%")
             count *= 2
@@ -518,9 +512,24 @@ def file_cp():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-bpz', action=file_bp_zipf, help="Variants are block_size and prefetch_size. Blocks are visited according to Zipf distribution.")
-    parser.add_argument('-bp', action=file_bp, help="Variants are block_size and prefetch_size. Blocks are visited sequentially.")
-    parser.add_argument('-cbz', action=file_cb_zipf, help="Variants are block_size and cache_size. Blocks are visited according to Zipf distribution.")
-    parser.add_argument('-cb', action=file_cb, help="Variants are block_size and cache. Blocks are visited sequentially.")
-    parser.add_argument('-cpz', action=file_cp_zipf, help="Variants are cache_size and prefetch_size. Blocks are visited according to Zipf distribution.")
-    parser.add_argument('-cp', action=file_cp, help="Variants are cache_size and prefetch_size. Blocks are visited sequentially.")
+    parser.add_argument('-m', "--mode", dest="mode", default="bp", 
+                        help="""
+                            Specify different variants. Use the following flags to specify: 'bp', 'bpz', 'cp', 'cpz', 'cb', cbz'.
+                            Notice here 'b' = block size, 'c' = cache size, 'p' = prefetch size, 'z' = block visited by zipf distribution.
+                            Default mode is bp. """)
+    args = parser.parse_args()
+    if args.mode == "bp":
+        file_bp()
+    elif args.mode == "bpz":
+        file_bp_zipf()
+    elif args.mode == "cp":
+        file_cp()
+    elif args.mode == "cpz":
+        file_cp_zipf()
+    elif args.mode == "cb":
+        file_cb()
+    elif args.mode == "cbz":
+        file_cb_zipf()
+    else:
+        print("Wrong mode arguments!")
+    
