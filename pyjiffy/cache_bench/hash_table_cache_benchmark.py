@@ -300,6 +300,17 @@ def ht_zipf():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-a', action=ht_alpha, help="Test the best alpha value of Zipf distribution.")
-    parser.add_argument('-s', action=ht_seq, help="Variants are block_size and prefetch_size. Blocks are visited sequentially.")
-    parser.add_argument('-z', action=ht_zipf, help="Variants are block_size and cache_size. Blocks are visited according to Zipf distribution.")
+    parser.add_argument('-m', "--mode", dest="mode", default="s", 
+                        help="""
+                            Specify different variants. Use the following flags to specify: 'a', 'z', 's'.
+                            Notice here 'a' = Test on alpha value of Zipf distribution, 's' = ht elements visited sequentially, 'z' = ht elements visited by zipf distribution.
+                            Default mode is s. """)
+    args = parser.parse_args()
+    if args.mode == "a":
+        ht_alpha()
+    elif args.mode == "z":
+        ht_zipf()
+    elif args.mode == "s":
+        ht_seq()
+    else:
+        print("Wrong mode arguments!")
