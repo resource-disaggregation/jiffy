@@ -106,7 +106,7 @@ class DataStructureCache(object):
 
 
 class HashTableCache(DataStructureCache):
-    def __init__(self,max_size): 
+    def __init__(self, max_size): 
         super(HashTableCache, self).__init__(float('inf'), max_size)
         self.table = dict()
     
@@ -216,5 +216,3 @@ class FileCache(DataStructureCache):
             print(cur_node.mark,cur_node.data)
             cur_node = cur_node.next
         
-    
-    
