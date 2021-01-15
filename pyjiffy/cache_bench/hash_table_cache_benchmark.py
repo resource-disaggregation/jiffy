@@ -141,17 +141,17 @@ def ht_alpha():
     path = "/tmp"
     backing_path = "local://tmp"
     file_name = './benchmark/ht_alpha_with_cache.txt'
-    data=open(file_name,'w+')
+    data = open(file_name,'w+')
     # Output all the configuration parameters:
-    print("host: ", address,file=data)
-    print("service-port: ", service_port,file=data)
-    print("lease-port: ", lease_port,file=data)
-    print("num-blocks: ", num_blocks,file=data)
-    print("chain-length: ", chain_length,file=data)
-    print("num-ops: ", num_ops,file=data)
-    print("data-size: ", data_size,file=data)
-    print("path: ", path,file=data)
-    print("backing-path: ", backing_path,file=data)
+    print("host: ", address, file=data)
+    print("service-port: ", service_port, file=data)
+    print("lease-port: ", lease_port, file=data)
+    print("num-blocks: ", num_blocks, file=data)
+    print("chain-length: ", chain_length, file=data)
+    print("num-ops: ", num_ops, file=data)
+    print("data-size: ", data_size, file=data)
+    print("path: ", path, file=data)
+    print("backing-path: ", backing_path, file=data)
 
     num_clients = 1
     loading = 0
@@ -196,18 +196,18 @@ def ht_seq():
     path = "/tmp"
     backing_path = "local://tmp"
     file_name = './benchmark/ht_with_cache.txt'
-    data=open(file_name,'w+')
+    data = open(file_name,'w+')
 
     # Output all the configuration parameters:
-    print("host: ", address,file=data)
-    print("service-port: ", service_port,file=data)
-    print("lease-port: ", lease_port,file=data)
-    print("num-blocks: ", num_blocks,file=data)
-    print("chain-length: ", chain_length,file=data)
-    print("num-ops: ", num_ops,file=data)
-    print("data-size: ", data_size,file=data)
-    print("path: ", path,file=data)
-    print("backing-path: ", backing_path,file=data)
+    print("host: ", address, file=data)
+    print("service-port: ", service_port, file=data)
+    print("lease-port: ", lease_port, file=data)
+    print("num-blocks: ", num_blocks, file=data)
+    print("chain-length: ", chain_length, file=data)
+    print("num-ops: ", num_ops, file=data)
+    print("data-size: ", data_size, file=data)
+    print("path: ", path, file=data)
+    print("backing-path: ", backing_path, file=data)
 
     loading = 0
     for op_type in op_type_set:
@@ -265,17 +265,17 @@ def ht_zipf():
     path = "/tmp"
     backing_path = "local://tmp"
     file_name = './benchmark/ht_zipf_with_cache.txt'
-    data=open(file_name,'w+')
+    data = open(file_name,'w+')
     # Output all the configuration parameters:
-    print("host: ", address,file=data)
-    print("service-port: ", service_port,file=data)
-    print("lease-port: ", lease_port,file=data)
-    print("num-blocks: ", num_blocks,file=data)
-    print("chain-length: ", chain_length,file=data)
-    print("num-ops: ", num_ops,file=data)
-    print("data-size: ", data_size,file=data)
-    print("path: ", path,file=data)
-    print("backing-path: ", backing_path,file=data)
+    print("host: ", address, file=data)
+    print("service-port: ", service_port, file=data)
+    print("lease-port: ", lease_port, file=data)
+    print("num-blocks: ", num_blocks, file=data)
+    print("chain-length: ", chain_length, file=data)
+    print("num-ops: ", num_ops, file=data)
+    print("data-size: ", data_size, file=data)
+    print("path: ", path, file=data)
+    print("backing-path: ", backing_path, file=data)
 
     num_clients = 1
     loading = 0
