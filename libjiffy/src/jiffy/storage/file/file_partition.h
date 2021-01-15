@@ -148,6 +148,9 @@ class file_partition : public chain_module {
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
 
+/* Name of format, either binary or csv */
+  std::string ser_name_;
+  
   /* Bool for partition slot range splitting */
   bool scaling_up_;
 

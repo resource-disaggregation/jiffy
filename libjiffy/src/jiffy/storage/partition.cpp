@@ -33,7 +33,6 @@ const std::string &partition::backing_path() const {
   return backing_path_;
 }
 
-
 void partition::name(const std::string &name) {
   name_ = name;
 }

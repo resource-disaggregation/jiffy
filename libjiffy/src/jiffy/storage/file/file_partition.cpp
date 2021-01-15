@@ -25,10 +25,10 @@ file_partition::file_partition(block_memory_manager *manager,
       block_allocated_(false),
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port) {
-  auto ser = conf.get("file.serializer", "csv");
-  if (ser == "binary") {
+  ser_name_ = conf.get("file.serializer", "csv");
+  if (ser_name_ == "binary") {
     ser_ = std::make_shared<binary_serde>(binary_allocator_);
-  } else if (ser == "csv") {
+  } else if (ser_name_ == "csv") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
@@ -68,7 +68,7 @@ void file_partition::write_ls(response &_return, const arg_list &args) {
   }
   std::string file_path, line, data;
   int pos = std::stoi(args[2]);
-  file_path = directory_utils::decompose_path(backing_path());
+  file_path = directory_utils::remove_uri(backing_path());
   directory_utils::push_path_element(file_path,name());
   std::ofstream out(file_path,std::ios::in|std::ios::out);
   if (out) {
@@ -90,7 +90,7 @@ void file_partition::read_ls(response &_return, const arg_list &args) {
   std::string file_path, line, ret_str;
   auto pos = std::stoi(args[1]);
   auto size = std::stoi(args[2]);
-  file_path = directory_utils::decompose_path(backing_path());
+  file_path = directory_utils::remove_uri(backing_path());
   directory_utils::push_path_element(file_path,name());
   std::ifstream in(file_path,std::ios::in);
   if (in) {

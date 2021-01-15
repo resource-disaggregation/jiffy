@@ -25,9 +25,9 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port),
       head_(0),
-      head_index_(0),
+      head_index_(0), /* Record the index of the current head element in order to help local query functions. */ 
       read_head_(0),
-      read_head_index_(0),
+      read_head_index_(0), /* Record the index of next element to read in order to help read_ls(). */ 
       enqueue_redirected_(false),
       dequeue_redirected_(false),
       readnext_redirected_(false),
@@ -40,13 +40,13 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
       dequeue_start_data_size_(0),
       in_rate_set_(false),
       out_rate_set_(false) {
-  ser = conf.get("fifoqueue.serializer", "csv");
-  if (ser == "binary") {
+  ser_name_ = conf.get("fifoqueue.serializer", "csv");
+  if (ser_name_ == "binary") {
     ser_ = std::make_shared<binary_serde>(binary_allocator_);
-  } else if (ser == "csv") {
+  } else if (ser_name_ == "csv") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
   } else {
-    throw std::invalid_argument("No such serializer/deserializer " + ser);
+    throw std::invalid_argument("No such serializer/deserializer " + ser_name_);
   }
   auto_scale_ = conf.get_as<bool>("fifoqueue.auto_scale", true);
   periodicity_us_ = conf.get_as<std::size_t>("fifoqueue.periodicity", 100000);
@@ -103,7 +103,7 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
   auto ret = partition_.at(head_);
   if (ret.first) {
     head_ += (string_array::METADATA_LEN + ret.second.size());
-    head_index_ += 1;
+    head_index_ ++;
     update_read_head();
     update_read_head_index();
     dequeue_data_size_ += ret.second.size();
@@ -133,9 +133,9 @@ void fifo_queue_partition::enqueue_ls(response &_return, const arg_list &args) {
     RETURN_ERR("!args_error");
   }
   std::string file_path, line, data;
-  file_path = directory_utils::decompose_path(backing_path());
+  file_path = directory_utils::remove_uri(backing_path());
   directory_utils::push_path_element(file_path,name());
-  if (ser == "csv") {
+  if (ser_name_ == "csv") {
     std::ofstream out(file_path,std::ios::app);
     if (out) {
       data = args[1];
@@ -148,7 +148,7 @@ void fifo_queue_partition::enqueue_ls(response &_return, const arg_list &args) {
     enqueue_data_size_ += args[1].size();
     RETURN_OK();
   }
-  else if (ser == "binary") {
+  else if (ser_name_ == "binary") {
     std::ofstream out(file_path,std::ios::app);
     std::string offset_path = file_path;
     offset_path.append("_offset");
@@ -175,9 +175,9 @@ void fifo_queue_partition::dequeue_ls(response &_return, const arg_list &args) {
   }
   std::vector<std::string> v;
   std::string file_path, line;
-  file_path = directory_utils::decompose_path(backing_path());
+  file_path = directory_utils::remove_uri(backing_path());
   directory_utils::push_path_element(file_path,name());
-  if (ser == "csv") {
+  if (ser_name_ == "csv") {
     std::ifstream in(file_path);
     if (in) {
       while(getline(in,line)) {
@@ -200,7 +200,7 @@ void fifo_queue_partition::dequeue_ls(response &_return, const arg_list &args) {
     dequeue_data_size_ += v[0].size();
     RETURN_OK(v[0]);
   }
-  else if (ser == "binary") {
+  else if (ser_name_ == "binary") {
     std::ifstream in(file_path,std::ios::binary);
     std::string offset_path = file_path;
     offset_path.append("_offset");
@@ -269,9 +269,9 @@ void fifo_queue_partition::read_next_ls(response &_return, const arg_list &args)
   }
   std::vector<std::string> v;
   std::string file_path, line;
-  file_path = directory_utils::decompose_path(backing_path());
+  file_path = directory_utils::remove_uri(backing_path());
   directory_utils::push_path_element(file_path,name());
-  if (ser == "csv") {
+  if (ser_name_ == "csv") {
     std::ifstream in(file_path);
     if (in) {
       int count = read_head_index_ - head_index_;
@@ -287,7 +287,7 @@ void fifo_queue_partition::read_next_ls(response &_return, const arg_list &args)
       RETURN_ERR("!fifo_queue_does_not_exist");
     }
   }
-  else if (ser == "binary") {
+  else if (ser_name_ == "binary") {
     std::ifstream in(file_path,std::ios::binary);
     std::string offset_path = file_path;
     offset_path.append("_offset");

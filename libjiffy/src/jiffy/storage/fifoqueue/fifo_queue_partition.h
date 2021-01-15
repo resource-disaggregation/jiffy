@@ -247,7 +247,7 @@ class fifo_queue_partition : public chain_module {
   std::shared_ptr<serde> ser_;
 
   /* Name of format, either binary or csv */
-  std::string ser;
+  std::string ser_name_;
 
   /* Bool for overload partition */
   bool scaling_up_;
