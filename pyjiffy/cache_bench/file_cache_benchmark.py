@@ -18,88 +18,88 @@ class FileBenchmark:
         self.latency_write_ = [None] * self.num_clients
         self.latency_read_ = [None] * self.num_clients
 
-	def wait(self):
-		throughput = 0.0
-		latency_read = 0.0
-		latency_write = 0.0
-		hit = 0
-		access = 0
-		for i in range(self.num_clients):
-			self.workers_[i].join()
-			throughput += self.throughput_[i]
-			latency_read += self.latency_read_[i]
-			latency_write += self.latency_write_[i]
-			hit += self.cache_hit_[i]
-			access += self.total_access_[i]
-		return [throughput, latency_write / self.num_clients, latency_read / self.num_clients, float(hit * 100 / access)]
+    def wait(self):
+        throughput = 0.0
+        latency_read = 0.0
+        latency_write = 0.0
+        hit = 0
+        access = 0
+        for i in range(self.num_clients):
+            self.workers_[i].join()
+            throughput += self.throughput_[i]
+            latency_read += self.latency_read_[i]
+            latency_write += self.latency_write_[i]
+            hit += self.cache_hit_[i]
+            access += self.total_access_[i]
+        return [throughput, latency_write / self.num_clients, latency_read / self.num_clients, float(hit * 100 / access)]
 
 class WriteBenchmark(FileBenchmark):
-	def __init__(self, clients, data_size, num_clients, num_ops):
-		super(WriteBenchmark, self).__init__(clients, data_size, num_clients, num_ops)
+    def __init__(self, clients, data_size, num_clients, num_ops):
+        super(WriteBenchmark, self).__init__(clients, data_size, num_clients, num_ops)
 
-	def run(self):
-		for i in range(self.num_clients):
-			self.workers_[i] = threading.Thread(target = self.single_thread_action, args = (i,))
-		for i in range(self.num_clients):
-			self.workers_[i].start()
-				
-	def single_thread_action(self, thread_index):
-		bench_begin = time.time()
-		tot_time = 0.0
-		t0, t1 = bench_begin, bench_begin
-		for j in range(self.num_ops_):
-			t0 = time.time()
-			self.clients_[thread_index].write(self.data_)
-			t1 = time.time()
-			tot_time += (t1 - t0)
-		j += 1
-		self.latency_[thread_index] = (10 ** 6) * float(tot_time) / float(j)
-		self.throughput_[thread_index] = j / (t1 - bench_begin)
+    def run(self):
+        for i in range(self.num_clients):
+            self.workers_[i] = threading.Thread(target = self.single_thread_action, args = (i,))
+        for i in range(self.num_clients):
+            self.workers_[i].start()
+                
+    def single_thread_action(self, thread_index):
+        bench_begin = time.time()
+        tot_time = 0.0
+        t0, t1 = bench_begin, bench_begin
+        for j in range(self.num_ops_):
+            t0 = time.time()
+            self.clients_[thread_index].write(self.data_)
+            t1 = time.time()
+            tot_time += (t1 - t0)
+        j += 1
+        self.latency_[thread_index] = (10 ** 6) * float(tot_time) / float(j)
+        self.throughput_[thread_index] = j / (t1 - bench_begin)
 
 
 class ReadBenchmark(FileBenchmark):
-	def __init__(self, clients, data_size, num_clients, num_ops):
-		super(ReadBenchmark, self).__init__(clients, data_size, num_clients, num_ops)
-		self.reading_offsets = gen_zipf(1, len(self.data_) * num_ops, num_ops)
+    def __init__(self, clients, data_size, num_clients, num_ops):
+        super(ReadBenchmark, self).__init__(clients, data_size, num_clients, num_ops)
+        self.reading_offsets = gen_zipf(1, len(self.data_) * num_ops, num_ops)
 
-	def run(self):
-		for i in range(self.num_clients):
-			self.workers_[i] = threading.Thread(target = self.single_thread_action, args = (i,))
-		for i in range(self.num_clients):
-			self.workers_[i].start()
-				
-	def single_thread_action(self, thread_index):
-		cache_hit = 0
-		total_access = 0
-		total_bytes = 0
-		write_begin = time.time()
-		write_time = 0.0
-		t0, t1 = write_begin, write_begin
-		for j in range(self.num_ops_):
-			t0 = time.time()
-			self.clients_[thread_index].write(self.data_)
-			t1 = time.time()
-			write_time += (t1 - t0)
-		self.clients_[thread_index].seek(0)
-		read_begin = time.time()
-		read_time = 0.0
-		t0, t1 = read_begin, read_begin
-		for j in range(self.num_ops_):
-			self.clients_[thread_index].seek(self.reading_offsets[j])
-			t0 = time.time()
-			resp = self.clients_[thread_index].read(len(self.data_))
-			t1 = time.time()
-			read_time += (t1 - t0)
-			total_access += resp[1]
-			cache_hit += resp[2]
-			total_bytes += len(resp[0])
-			
-		self.total_access_[thread_index] = total_access
-		self.cache_hit_[thread_index] = cache_hit 
-		self.total_bytes_[thread_index] = total_bytes
-		self.latency_write_[thread_index] = (10 ** 6) * float(write_time) / float(self.num_ops_)
-		self.latency_read_[thread_index] = (10 ** 6) * float(read_time) / float(self.num_ops_)
-		self.throughput_[thread_index] = total_bytes / (t1 - read_begin)
+    def run(self):
+        for i in range(self.num_clients):
+            self.workers_[i] = threading.Thread(target = self.single_thread_action, args = (i,))
+        for i in range(self.num_clients):
+            self.workers_[i].start()
+                
+    def single_thread_action(self, thread_index):
+        cache_hit = 0
+        total_access = 0
+        total_bytes = 0
+        write_begin = time.time()
+        write_time = 0.0
+        t0, t1 = write_begin, write_begin
+        for j in range(self.num_ops_):
+            t0 = time.time()
+            self.clients_[thread_index].write(self.data_)
+            t1 = time.time()
+            write_time += (t1 - t0)
+        self.clients_[thread_index].seek(0)
+        read_begin = time.time()
+        read_time = 0.0
+        t0, t1 = read_begin, read_begin
+        for j in range(self.num_ops_):
+            self.clients_[thread_index].seek(self.reading_offsets[j])
+            t0 = time.time()
+            resp = self.clients_[thread_index].read(len(self.data_))
+            t1 = time.time()
+            read_time += (t1 - t0)
+            total_access += resp[1]
+            cache_hit += resp[2]
+            total_bytes += len(resp[0])
+            
+        self.total_access_[thread_index] = total_access
+        self.cache_hit_[thread_index] = cache_hit 
+        self.total_bytes_[thread_index] = total_bytes
+        self.latency_write_[thread_index] = (10 ** 6) * float(write_time) / float(self.num_ops_)
+        self.latency_read_[thread_index] = (10 ** 6) * float(read_time) / float(self.num_ops_)
+        self.throughput_[thread_index] = total_bytes / (t1 - read_begin)
 
 
 def file_bp_zipf():
