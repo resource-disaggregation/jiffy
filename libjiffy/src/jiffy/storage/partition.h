@@ -46,7 +46,6 @@ class partition {
    */
 
   explicit partition(block_memory_manager *manager,
-                     const std::string &backing_path,
                      const std::string &name,
                      const std::string &metadata,
                      const command_map &supported_commands);
@@ -79,18 +78,6 @@ class partition {
    * @return Block path
    */
   const std::string &path() const;
-
-  /**
-   * @brief Set Backing path
-   * @param backing_path Backing path
-   */
-  void backing_path(const std::string &backing_path);
-
-  /**
-   * @brief Fetch Backing path
-   * @return Backing path
-   */
-  const std::string &backing_path() const;
 
   /**
    * @brief Set partition name
@@ -214,8 +201,6 @@ class partition {
    */
   binary make_binary(const std::string &str);
 
-  /* Partition backing_path */
-  std::string backing_path_;
   /* Partition name */
   std::string name_;
   /* Partition metadata */

@@ -83,7 +83,7 @@ TEST_CASE("manager_sync_load_test", "[put][sync][reset][load][get]") {
   auto block_name = block_id_parser::make(HOST, SERVICE_PORT, MANAGEMENT_PORT, 0);
   REQUIRE_NOTHROW(manager.sync(block_name, "local://tmp"));
   REQUIRE_NOTHROW(manager.destroy_partition(block_name));
-  REQUIRE_NOTHROW(manager.create_partition(block_name, "hashtable", "local://tmp", "0_65536", "regular", {}));
+  REQUIRE_NOTHROW(manager.create_partition(block_name, "hashtable", "0_65536", "regular", {}));
   REQUIRE_NOTHROW(manager.load(block_name, "local://tmp"));
 
   server->stop();

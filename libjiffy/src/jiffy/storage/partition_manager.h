@@ -23,7 +23,6 @@ class partition_builder {
    * @return An instance of the partition.
    */
   virtual std::shared_ptr<chain_module> build(block_memory_manager *manager,
-                                              const std::string &backing_path,
                                               const std::string &name,
                                               const std::string &metadata,
                                               const utils::property_map &conf,
@@ -52,7 +51,6 @@ class partition_manager {
    */
   static std::shared_ptr<chain_module> build_partition(block_memory_manager *manager,
                                                        const std::string &type,
-                                                       const std::string &backing_path,
                                                        const std::string &name,
                                                        const std::string &metadata,
                                                        const utils::property_map &conf,
@@ -76,13 +74,12 @@ class impl##_builder : public partition_builder {                               
   virtual ~impl##_builder() = default;                                                                \
                                                                                                       \
   std::shared_ptr<chain_module> build(block_memory_manager *manager,                                  \
-                                      const std::string& backing_path,                                \
                                       const std::string& name,                                        \
                                       const std::string& metadata,                                    \
                                       const utils::property_map& conf,                                \
                                       const std::string& auto_scaling_host,                           \
                                       const int auto_scaling_port) override {                         \
-    return std::make_shared<impl>(manager, backing_path, name, metadata, conf,                                      \
+    return std::make_shared<impl>(manager, name, metadata, conf,                                      \
         auto_scaling_host, auto_scaling_port);                                                        \
   }                                                                                                   \
 };                                                                                                    \

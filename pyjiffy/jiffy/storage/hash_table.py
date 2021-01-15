@@ -20,25 +20,13 @@ class HashTableOps:
     remove = b('remove')
     update = b('update')
     upsert = b('upsert')
-    exists_ls = b('exists_ls')
-    get_ls = b('get_ls')
-    put_ls = b('put_ls')
-    remove_ls = b('remove_ls')
-    update_ls = b('update_ls')
-    upsert_ls = b('upsert_ls')
 
     op_types = {exists: CommandType.accessor,
                 get: CommandType.accessor,
                 put: CommandType.mutator,
                 remove: CommandType.mutator,
                 update: CommandType.accessor,
-                upsert: CommandType.mutator,
-                exists_ls: CommandType.accessor,
-                get_ls: CommandType.accessor,
-                put_ls: CommandType.mutator,
-                remove_ls: CommandType.mutator,
-                update_ls: CommandType.accessor,
-                upsert_ls: CommandType.mutator}
+                upsert: CommandType.mutator}
 
 
 def encode(value):
@@ -132,44 +120,6 @@ class HashTable(DataStructureClient):
 
     def remove(self, key):
         resp = self._run_repeated([HashTableOps.remove, key])
-        if resp[0] == b'!ok':
-            self.cache.delete(key)
-        return resp[0]
-
-    def put_ls(self, key, value):
-        if self._run_repeated([HashTableOps.put_ls, key, value])[0] == b'!ok':
-            self.cache.miss_handling([key,value])
-
-    def get_ls(self, key):
-        if self.cache.exists(key):
-            self.cache.hit_handling(key)
-            return self.cache.get(key)
-        else:
-            value = self._run_repeated([HashTableOps.get_ls, key])[1]
-            self.cache.miss_handling([key,value])
-            return value
-
-    def exists_ls(self, key):
-        try:
-            if self.cache.exists(key):
-                return True
-            self._run_repeated([HashTableOps.exists_ls, key])[0]
-        except:
-            return False
-        return True
-
-    def update_ls(self, key, value):
-        resp = self._run_repeated([HashTableOps.update_ls, key, value])
-        if resp[0] == b'!ok':
-            self.cache.miss_handling([key,value])
-        return resp[0]
-
-    def upsert_ls(self, key, value):
-        if self._run_repeated([HashTableOps.upsert_ls, key, value])[0] == b'!ok':
-            self.cache.miss_handling([key,value])
-
-    def remove_ls(self, key):
-        resp = self._run_repeated([HashTableOps.remove_ls, key])
         if resp[0] == b'!ok':
             self.cache.delete(key)
         return resp[0]

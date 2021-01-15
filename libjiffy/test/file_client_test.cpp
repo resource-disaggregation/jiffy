@@ -59,7 +59,6 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     buffer.clear();
     REQUIRE(client.read(buffer, std::to_string(i).size()) == std::to_string(i).size());
-    std::cout<<buffer<<std::endl;
     REQUIRE(buffer == std::to_string(i));
   }
 

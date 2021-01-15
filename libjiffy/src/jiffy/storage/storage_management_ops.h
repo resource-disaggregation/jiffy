@@ -18,7 +18,6 @@ class storage_management_ops {
 
   virtual void create_partition(const std::string &block_id,
                                 const std::string &type,
-                                const std::string &backing_path,
                                 const std::string &name,
                                 const std::string &metadata,
                                 const std::map<std::string, std::string> &conf) = 0;

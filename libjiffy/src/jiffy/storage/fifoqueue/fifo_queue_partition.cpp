@@ -3,7 +3,6 @@
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_ops.h"
 #include "jiffy/auto_scaling/auto_scaling_client.h"
-#include <jiffy/utils/directory_utils.h>
 
 namespace jiffy {
 namespace storage {
@@ -11,13 +10,12 @@ namespace storage {
 using namespace utils;
 
 fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
-                                           const std::string &backing_path,
                                            const std::string &name,
                                            const std::string &metadata,
                                            const utils::property_map &conf,
                                            const std::string &auto_scaling_host,
                                            int auto_scaling_port)
-    : chain_module(manager, backing_path, name, metadata, FQ_CMDS),
+    : chain_module(manager, name, metadata, FQ_CMDS),
       partition_(manager->mb_capacity(), build_allocator<char>()),
       scaling_up_(false),
       scaling_down_(false),
@@ -25,26 +23,22 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port),
       head_(0),
-      head_index_(0),
       read_head_(0),
-      read_head_index_(0),
       enqueue_redirected_(false),
       dequeue_redirected_(false),
       readnext_redirected_(false),
       enqueue_data_size_(0),
       dequeue_data_size_(0),
-      enqueue_ls_data_size_(0),
-      dequeue_ls_data_size_(0),
       prev_data_size_(0),
       enqueue_start_data_size_(0),
       dequeue_start_data_size_(0),
       in_rate_set_(false),
       out_rate_set_(false) {
-  ser = conf.get("fifoqueue.serializer", "csv");
+  auto ser = conf.get("fifoqueue.serializer", "csv");
   if (ser == "binary") {
-    ser_ = std::make_shared<binary_serde>(binary_allocator_);
-  } else if (ser == "csv") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
+  } else if (ser == "csv") {
+    ser_ = std::make_shared<binary_serde>(binary_allocator_);
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
@@ -103,9 +97,7 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
   auto ret = partition_.at(head_);
   if (ret.first) {
     head_ += (string_array::METADATA_LEN + ret.second.size());
-    head_index_ += 1;
     update_read_head();
-    update_read_head_index();
     dequeue_data_size_ += ret.second.size();
     RETURN_OK(ret.second);
   }
@@ -128,118 +120,6 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
   RETURN_ERR("!redo");
 }
 
-void fifo_queue_partition::enqueue_ls(response &_return, const arg_list &args) {
-  if (args.size() != 2) {
-    RETURN_ERR("!args_error");
-  }
-  std::string file_path, line, data;
-  file_path = directory_utils::decompose_path(backing_path());
-  directory_utils::push_path_element(file_path,name());
-  if (ser == "csv") {
-    std::ofstream out(file_path,std::ios::app);
-    if (out) {
-      data = args[1];
-      out << data << std::endl;
-      out.close();
-    }
-    else {
-      RETURN_ERR("!fifo_queue_does_not_exist");
-    }
-    enqueue_data_size_ += args[1].size();
-    RETURN_OK();
-  }
-  else if (ser == "binary") {
-    std::ofstream out(file_path,std::ios::app);
-    std::string offset_path = file_path;
-    offset_path.append("_offset");
-    std::ofstream offset_out(offset_path,std::ios::app);
-    if (out && offset_out) {
-      data = args[1];
-      std::size_t msg_size = data.size();
-      offset_out.write(reinterpret_cast<const char *>(&msg_size), sizeof(size_t));
-      out.write(reinterpret_cast<const char *>(data.data()), msg_size);
-      out.close();
-      offset_out.close();
-    }
-    else {
-      RETURN_ERR("!fifo_queue_does_not_exist");
-    }
-    enqueue_data_size_ += args[1].size();
-    RETURN_OK();
-  }
-}
-
-void fifo_queue_partition::dequeue_ls(response &_return, const arg_list &args) {
-  if (args.size() != 1) {
-    RETURN_ERR("!args_error");
-  }
-  std::vector<std::string> v;
-  std::string file_path, line;
-  file_path = directory_utils::decompose_path(backing_path());
-  directory_utils::push_path_element(file_path,name());
-  if (ser == "csv") {
-    std::ifstream in(file_path);
-    if (in) {
-      while(getline(in,line)) {
-        v.push_back(line);
-      }
-      in.close();
-    }
-    else {
-      RETURN_ERR("!fifo_queue_does_not_exist");
-    }
-    if (v.size() == 0) {
-      RETURN_ERR("!queue_is_empty");
-    }
-    std::ofstream out(file_path);
-    for (int i = 1; i < v.size(); i++) {
-      out << v[i] << std::endl;
-    }
-    out.close();
-    head_index_++;
-    dequeue_data_size_ += v[0].size();
-    RETURN_OK(v[0]);
-  }
-  else if (ser == "binary") {
-    std::ifstream in(file_path,std::ios::binary);
-    std::string offset_path = file_path;
-    offset_path.append("_offset");
-    std::ifstream offset_in(offset_path,std::ios::binary);
-    if (in && offset_in) {
-      while (in.peek() != EOF && offset_in.peek() != EOF) {
-        std::size_t msg_size;
-        offset_in.read(reinterpret_cast<char *>(&msg_size), sizeof(msg_size));
-        std::string msg;
-        msg.resize(msg_size);
-        in.read(&msg[0], msg_size);
-        v.push_back(msg);
-      }
-      in.close();
-      offset_in.close();
-    }
-    else {
-      RETURN_ERR("!fifo_queue_does_not_exist");
-    }
-    if (v.size() == 0) {
-      RETURN_ERR("!queue_is_empty");
-    }
-    std::ofstream out(file_path,std::ios::binary);
-    std::ofstream offset_out(offset_path,std::ios::binary);
-    for (int i = 1; i < v.size(); i++) {
-      std::size_t msg_size = v[i].size();
-      offset_out.write(reinterpret_cast<const char *>(&msg_size), sizeof(size_t));
-      out.write(reinterpret_cast<const char *>(v[i].data()), msg_size);
-    }
-    out.flush();
-    offset_out.flush();
-    out.close();
-    offset_out.close();
-    head_index_++;
-    dequeue_data_size_ += v[0].size();
-    RETURN_OK(v[0]);
-  }
-}
-
 void fifo_queue_partition::read_next(response &_return, const arg_list &args) {
   if (!(args.size() == 1 || (args.size() == 2 && args[1] == "!redirected"))) {
     RETURN_ERR("!args_error");
@@ -247,7 +127,6 @@ void fifo_queue_partition::read_next(response &_return, const arg_list &args) {
   auto ret = partition_.at(read_head_);
   if (ret.first) {
     read_head_ += (string_array::METADATA_LEN + ret.second.size());
-    read_head_index_ += 1;
     RETURN_OK(ret.second);
   }
   if (ret.second == "!not_available") {
@@ -261,59 +140,6 @@ void fifo_queue_partition::read_next(response &_return, const arg_list &args) {
     RETURN_ERR("!redirected_readnext", next_target_str_);
   }
   RETURN_ERR("!redo");
-}
-
-void fifo_queue_partition::read_next_ls(response &_return, const arg_list &args) {
-  if (args.size() != 1) {
-    RETURN_ERR("!args_error");
-  }
-  std::vector<std::string> v;
-  std::string file_path, line;
-  file_path = directory_utils::decompose_path(backing_path());
-  directory_utils::push_path_element(file_path,name());
-  if (ser == "csv") {
-    std::ifstream in(file_path);
-    if (in) {
-      int count = read_head_index_ - head_index_;
-      while(count >= 0) {
-        count--;
-        getline(in,line);
-      }
-      in.close();
-      read_head_index_ += 1;
-      RETURN_OK(line);
-    }
-    else {
-      RETURN_ERR("!fifo_queue_does_not_exist");
-    }
-  }
-  else if (ser == "binary") {
-    std::ifstream in(file_path,std::ios::binary);
-    std::string offset_path = file_path;
-    offset_path.append("_offset");
-    std::ifstream offset_in(offset_path,std::ios::binary);
-    std::size_t offset = 0;
-    std::size_t msg_size = 0;
-    if (in && offset_in) {
-      int count = read_head_index_ - head_index_;
-      while(count >= 0) {
-        count--;
-        offset_in.read(reinterpret_cast<char *>(&msg_size), sizeof(msg_size));
-        in.seekg(offset, std::ios::beg);
-        offset += msg_size;
-      }
-      std::string msg;
-      msg.resize(msg_size);
-      in.read(&msg[0], msg_size);
-      in.close();
-      offset_in.close();
-      read_head_index_ += 1;
-      RETURN_OK(msg);
-    }
-    else {
-      RETURN_ERR("!fifo_queue_does_not_exist");
-    }
-  }
 }
 
 void fifo_queue_partition::clear(response &_return, const arg_list &args) {
@@ -349,20 +175,6 @@ void fifo_queue_partition::length(response &_return, const arg_list &args) {
     default:throw std::logic_error("Undefined type for length operation");
   }
 }
-
-void fifo_queue_partition::length_ls(response &_return, const arg_list &args) {
-  if (!(args.size() == 2)) {
-    RETURN_ERR("!args_error");
-  }
-  switch (std::stoi(args[1])) {
-    case fifo_queue_size_type::head_size:
-      RETURN_OK(std::to_string(enqueue_ls_data_size_));
-    case fifo_queue_size_type::tail_size:
-      RETURN_OK(std::to_string(dequeue_ls_data_size_));
-    default:throw std::logic_error("Undefined type for length operation");
-  }
-}
-
 
 void fifo_queue_partition::in_rate(response &_return, const arg_list &args) {
   if (!(args.size() == 1 || (args.size() == 2 && args[1] == "!redirected"))) {
@@ -419,21 +231,13 @@ void fifo_queue_partition::run_command(response &_return, const arg_list &args) 
       break;
     case fifo_queue_cmd_id::fq_dequeue:dequeue(_return, args);
       break;
-    case fifo_queue_cmd_id::fq_enqueue_ls:enqueue_ls(_return, args);
-      break;
-    case fifo_queue_cmd_id::fq_dequeue_ls:dequeue_ls(_return, args);
-      break;
     case fifo_queue_cmd_id::fq_readnext:read_next(_return, args);
-      break;
-    case fifo_queue_cmd_id::fq_readnext_ls:read_next_ls(_return, args);
       break;
     case fifo_queue_cmd_id::fq_clear:clear(_return, args);
       break;
     case fifo_queue_cmd_id::fq_update_partition:update_partition(_return, args);
       break;
     case fifo_queue_cmd_id::fq_length:length(_return, args);
-      break;
-    case fifo_queue_cmd_id::fq_length_ls:length_ls(_return, args);
       break;
     case fifo_queue_cmd_id::fq_in_rate:in_rate(_return, args);
       break;
@@ -566,7 +370,7 @@ void fifo_queue_partition::update_rate() {
     dequeue_start_time_ = cur_time;
     dequeue_start_data_size_ = dequeue_data_size_;
   }
-}
+};
 
 void fifo_queue_partition::clear_partition() {
   partition_.clear();

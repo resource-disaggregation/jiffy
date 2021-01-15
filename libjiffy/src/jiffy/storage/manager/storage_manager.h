@@ -27,7 +27,6 @@ class storage_manager : public storage_management_ops {
    */
   void create_partition(const std::string &block_id,
                         const std::string &type,
-                        const std::string &backing_path,
                         const std::string &name,
                         const std::string &metadata,
                         const std::map<std::string, std::string> &conf) override;
