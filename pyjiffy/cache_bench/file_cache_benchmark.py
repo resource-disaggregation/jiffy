@@ -117,7 +117,7 @@ def file_bp_zipf():
     backing_path = "local://tmp"
 
     # Output all the configuration parameters:
-    file_name = './benchmark/file_bp_zipf.txt'
+    file_name = './file_bp_zipf.txt'
     data = open(file_name,'w+') 
     print >> data, "host: ", address
     print >> data, "service-port: ", service_port
@@ -185,7 +185,7 @@ def file_bp():
     backing_path = "local://tmp"
 
     # Output all the configuration parameters:
-    file_name = './benchmark/file_bp.txt'
+    file_name = './file_bp.txt'
     data = open(file_name,'w+') 
     print >> data, "host: ", address
     print >> data, "service-port: ", service_port
@@ -253,7 +253,7 @@ def file_cb_zipf():
     backing_path = "local://tmp"
 
     # Output all the configuration parameters:
-    file_name = './benchmark/file_cb_zipf.txt'
+    file_name = './file_cb_zipf.txt'
     data = open(file_name,'w+') 
     print >> data, "host: ", address
     print >> data, "service-port: ", service_port
@@ -321,7 +321,7 @@ def file_cb():
     backing_path = "local://tmp"
 
     # Output all the configuration parameters:
-    file_name = './benchmark/file_cb.txt'
+    file_name = './file_cb.txt'
     data = open(file_name,'w+') 
     print >> data, "host: ", address
     print >> data, "service-port: ", service_port
@@ -389,7 +389,7 @@ def file_cp_zipf():
     backing_path = "local://tmp"
 
     # Output all the configuration parameters:
-    file_name = './benchmark/file_cp_zipf.txt'
+    file_name = './file_cp_zipf.txt'
     data = open(file_name,'w+') 
     print >> data, "host: ", address
     print >> data, "service-port: ", service_port
@@ -457,7 +457,7 @@ def file_cp():
     backing_path = "local://tmp"
 
     # Output all the configuration parameters:
-    file_name = './benchmark/file_cp.txt'
+    file_name = './file_cp.txt'
     data = open(file_name,'w+') 
     print >> data, "host: ", address
     print >> data, "service-port: ", service_port

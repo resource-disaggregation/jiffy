@@ -135,7 +135,7 @@ def ht_alpha():
     op_type_set.append("get")
     path = "/tmp"
     backing_path = "local://tmp"
-    file_name = './benchmark/ht_alpha_with_cache.txt'
+    file_name = './ht_alpha_with_cache.txt'
     data = open(file_name,'w+')
     # Output all the configuration parameters:
     print >> data, "host: ", address
@@ -189,7 +189,7 @@ def ht_seq():
     op_type_set.append("remove")
     path = "/tmp"
     backing_path = "local://tmp"
-    file_name = './benchmark/ht_with_cache.txt'
+    file_name = './ht_with_cache.txt'
     data = open(file_name,'w+')
 
     # Output all the configuration parameters:
@@ -257,9 +257,9 @@ def ht_zipf():
     op_type_set.append("get")
     path = "/tmp"
     backing_path = "local://tmp"
-    file_name = './benchmark/ht_zipf_with_cache.txt'
+    file_name = './ht_zipf_with_cache.txt'
     data = open(file_name,'w+')
-    
+
     # Output all the configuration parameters:
     print >> data, "host: ", address
     print >> data, "service-port: ", service_port
