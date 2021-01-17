@@ -77,6 +77,7 @@ TEST_CASE("fifo_queue_client_enqueue_dequeue_test", "[enqueue][dequeue]") {
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
   }
+  test_utils::destroy_kind(pmem_kind);
 }
 
 
@@ -141,6 +142,7 @@ TEST_CASE("fifo_queue_client_enqueue_length_dequeue_test", "[enqueue][dequeue]")
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
   }
+  test_utils::destroy_kind(pmem_kind);
 }
 
 
@@ -216,4 +218,5 @@ TEST_CASE("fifo_queue_client_enqueue_in_rate_out_rate_dequeue_test", "[enqueue][
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
   }
+  test_utils::destroy_kind(pmem_kind);
 }

@@ -67,3 +67,30 @@ target_link_libraries(hash_table_auto_scaling_get jiffy_client ${MEMKIND_LIBRARY
 
 install(TARGETS hash_table_auto_scaling_get
         RUNTIME DESTINATION bin)
+
+add_executable(fifo_queue_block_bench src/fifo_queue_block_benchmark.cpp)
+
+add_dependencies(fifo_queue_block_bench boost_ep memkind_ep)
+
+target_link_libraries(fifo_queue_block_bench jiffy_client ${MEMKIND_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+install(TARGETS fifo_queue_block_bench
+        RUNTIME DESTINATION bin)
+
+add_executable(hash_table_block_bench src/hash_table_block_benchmark.cpp)
+
+add_dependencies(hash_table_block_bench boost_ep memkind_ep)
+
+target_link_libraries(hash_table_block_bench jiffy_client ${MEMKIND_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+install(TARGETS hash_table_block_bench
+        RUNTIME DESTINATION bin)
+
+add_executable(file_block_bench src/file_block_benchmark.cpp)
+
+add_dependencies(file_block_bench boost_ep memkind_ep)
+
+target_link_libraries(file_block_bench jiffy_client ${MEMKIND_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+install(TARGETS file_block_bench
+        RUNTIME DESTINATION bin)

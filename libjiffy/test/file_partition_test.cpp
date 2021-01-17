@@ -75,7 +75,7 @@ TEST_CASE("file_write_clear_read_test", "[write][read]") {
     REQUIRE(resp[1] == std::string(std::to_string(i).size(), 0));
     read_pos += std::to_string(i).size();
   }
-  memkind_destroy_kind(pmem_kind);
+  test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
@@ -99,7 +99,7 @@ TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
     offset += std::to_string(i).size();
   }
   REQUIRE(block.storage_size() <= block.storage_capacity());
-  memkind_destroy_kind(pmem_kind);
+  test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
