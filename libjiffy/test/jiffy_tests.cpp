@@ -8,17 +8,15 @@ using namespace ::apache::thrift;
 using namespace ::jiffy::utils;
 using namespace Catch::clara;
 
-std::string pmem_path = "/Shijie!!!!!!!!!!!";
-
 int main(int argc, char *argv[]) {
   Catch::Session session;
   log_utils::configure_log_level(log_level::info);
   GlobalOutput.setOutputFunction(log_utils::log_thrift_msg);
-  bool pmem_mode = false;
-  // std::string pmem_path = "/Shijie!!!!!!!!!!!";
+  std::string mode;
+  std::string pmem_path;
   auto cli = session.cli()
-            |Opt(pmem_mode, "pmem_mode")
-              ["-p"]["--pmem"]
+            |Opt(mode, "pmem_mode")
+              ["-m"]["--mode"]
               ("Run test in PMEM mode. DRAM is default if '-p' is not specified.")
             |Opt(pmem_path, "pmem_path")
               ["--path"]
@@ -28,5 +26,9 @@ int main(int argc, char *argv[]) {
   if (ret) {
       return ret;
   }
+  if (mode == "DRAM" || mode == "PMEM") {
+    setenv(“JIFFY_TEST_MODE”,mode,1);
+  }
+  setenv(“PMEM_PATH”,pmem_path,1);
   return session.run();
 }
