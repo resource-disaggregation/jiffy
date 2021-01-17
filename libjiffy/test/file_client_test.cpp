@@ -85,12 +85,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
-  int err = memkind_check_available(pmem_kind);
-  if(err) {
-    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
-    fprintf(stderr, "%s\n", error_message);
-  }
+  test_utils::destroy_kind(pmem_kind);
 }
 
 
@@ -170,5 +165,5 @@ TEST_CASE("file_client_concurrent_write_read_seek_test", "[write][read][seek]") 
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
   }
-
+  test_utils::destroy_kind(pmem_kind);
 }

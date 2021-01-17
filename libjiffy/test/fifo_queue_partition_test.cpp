@@ -10,15 +10,10 @@ using namespace ::jiffy::storage;
 using namespace ::jiffy::persistent;
 
 TEST_CASE("fifo_queue_enqueue_dequeue_test", "[enqueue][dequeue]") {
-  struct memkind* pmem_kind = nullptr;
+  
   std::string pmem_path = "/media/pmem0/shijie"; 
   std::string memory_mode = "PMEM";
-  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
-  if(err) {
-    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
-    fprintf(stderr, "%s\n", error_message);
-  }
+  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   fifo_queue_partition block(&manager);
@@ -45,15 +40,10 @@ TEST_CASE("fifo_queue_enqueue_dequeue_test", "[enqueue][dequeue]") {
 }
 
 TEST_CASE("fifo_queue_enqueue_clear_dequeue_test", "[enqueue][dequeue]") {
-  struct memkind* pmem_kind = nullptr;
+  
   std::string pmem_path = "/media/pmem0/shijie"; 
   std::string memory_mode = "PMEM";
-  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
-  if(err) {
-    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
-    fprintf(stderr, "%s\n", error_message);
-  }
+  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   fifo_queue_partition block(&manager);
@@ -78,15 +68,10 @@ TEST_CASE("fifo_queue_enqueue_clear_dequeue_test", "[enqueue][dequeue]") {
 }
 
 TEST_CASE("fifo_queue_enqueue_readnext_dequeue", "[enqueue][read_next][dequeue]") {
-  struct memkind* pmem_kind = nullptr;
+  
   std::string pmem_path = "/media/pmem0/shijie"; 
   std::string memory_mode = "PMEM";
-  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
-  if(err) {
-    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
-    fprintf(stderr, "%s\n", error_message);
-  }
+  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   fifo_queue_partition block(&manager);
@@ -113,15 +98,10 @@ TEST_CASE("fifo_queue_enqueue_readnext_dequeue", "[enqueue][read_next][dequeue]"
 }
 
 TEST_CASE("fifo_queue_storage_size_test", "[put][size][storage_size][reset]") {
-  struct memkind* pmem_kind = nullptr;
+  
   std::string pmem_path = "/media/pmem0/shijie"; 
   std::string memory_mode = "PMEM";
-  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
-  if(err) {
-    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
-    fprintf(stderr, "%s\n", error_message);
-  }
+  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   fifo_queue_partition block(&manager);
@@ -135,15 +115,10 @@ TEST_CASE("fifo_queue_storage_size_test", "[put][size][storage_size][reset]") {
 }
 
 TEST_CASE("fifo_queue_flush_load_test", "[enqueue][sync][reset][load][dequeue]") {
-  struct memkind* pmem_kind = nullptr;
+  
   std::string pmem_path = "/media/pmem0/shijie"; 
   std::string memory_mode = "PMEM";
-  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
-  if(err) {
-    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
-    fprintf(stderr, "%s\n", error_message);
-  }
+  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   fifo_queue_partition block(&manager);
