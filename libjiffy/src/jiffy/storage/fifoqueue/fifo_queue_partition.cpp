@@ -128,6 +128,7 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
   RETURN_ERR("!redo");
 }
 
+/* enqueue_ls() works on the index of queue elements on local storage, while enqueue() works on memory address. */
 void fifo_queue_partition::enqueue_ls(response &_return, const arg_list &args) {
   if (args.size() != 2) {
     RETURN_ERR("!args_error");
@@ -169,6 +170,7 @@ void fifo_queue_partition::enqueue_ls(response &_return, const arg_list &args) {
   }
 }
 
+/* dequeue_ls() works on the index of queue elements on local storage, while dequeue() works on memory address. */
 void fifo_queue_partition::dequeue_ls(response &_return, const arg_list &args) {
   if (args.size() != 1) {
     RETURN_ERR("!args_error");
