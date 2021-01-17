@@ -20,7 +20,7 @@ shared_log_partition::shared_log_partition(block_memory_manager *manager,
                                const utils::property_map &conf,
                                const std::string &auto_scaling_host,
                                int auto_scaling_port)
-    : chain_module(manager, backing_path, name, metadata, SHARED_LOG_OPS),
+    : chain_module(manager,  name, metadata, SHARED_LOG_OPS),
       partition_(manager->mb_capacity(), build_allocator<char>()),
       scaling_up_(false),
       dirty_(false),
