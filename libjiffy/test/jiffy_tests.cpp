@@ -27,8 +27,8 @@ int main(int argc, char *argv[]) {
       return ret;
   }
   if (mode == "DRAM" || mode == "PMEM") {
-    setenv("JIFFY_TEST_MODE",mode,1);
+    setenv("JIFFY_TEST_MODE", mode.c_str(), 1);
   }
-  setenv("PMEM_PATH",pmem_path,1);
+  setenv("PMEM_PATH", pmem_path.c_str(), 1);
   return session.run();
 }
