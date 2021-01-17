@@ -14,13 +14,12 @@ namespace storage {
 using namespace utils;
 
 default_partition::default_partition(block_memory_manager *manager,
-                                     const std::string &backing_path,
                                      const std::string &name,
                                      const std::string &metadata,
                                      const utils::property_map &,
                                      const std::string &,
                                      int)
-    : chain_module(manager, backing_path, name, metadata, {}) {}
+    : chain_module(manager, name, metadata, {}) {}
 
 void default_partition::run_command(std::vector<std::string> &_return,
                                     const std::vector<std::string> &) {

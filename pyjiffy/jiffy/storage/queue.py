@@ -21,7 +21,7 @@ class QueueOps:
     out_rate = b('out_rate')
 
     op_types = {enqueue: CommandType.mutator,
-                dequeue: CommandType.mutator,
+                dequeue: CommandType.accessor,
                 read_next: CommandType.accessor,
                 length: CommandType.accessor,
                 in_rate: CommandType.accessor,
@@ -37,7 +37,6 @@ class Queue(DataStructureClient):
         self.dequeue_partition = 0
         self.read_partition = 0
         self.start = 0
-        self.read_head = 0
         if self.block_info.tags.get("fifoqueue.auto_scale") is None:
             self.auto_scale = True
         else:
@@ -134,7 +133,7 @@ class Queue(DataStructureClient):
             raise ValueError
 
     def add_blocks(self, response, args):
-        if self._block_id(args) >= len(self.blocks) - 1:
+        if self._block_id(args) >= len(self.block_info.data_blocks) - 1:
             if self.auto_scale:
                 block_ids = [bytes_to_str(j) for j in response[1].split(b('!'))]
                 chain = ReplicaChain(block_ids, 0, 0, rpc_storage_mode.rpc_in_memory)

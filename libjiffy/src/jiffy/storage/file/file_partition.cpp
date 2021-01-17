@@ -3,7 +3,6 @@
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/storage/file/file_ops.h"
 #include "jiffy/auto_scaling/auto_scaling_client.h"
-#include <jiffy/utils/directory_utils.h>
 #include <thread>
 
 namespace jiffy {
@@ -12,13 +11,12 @@ namespace storage {
 using namespace utils;
 
 file_partition::file_partition(block_memory_manager *manager,
-                               const std::string &backing_path,
                                const std::string &name,
                                const std::string &metadata,
                                const utils::property_map &conf,
                                const std::string &auto_scaling_host,
                                int auto_scaling_port)
-    : chain_module(manager, backing_path, name, metadata, FILE_OPS),
+    : chain_module(manager, name, metadata, FILE_OPS),
       partition_(manager->mb_capacity(), build_allocator<char>()),
       scaling_up_(false),
       dirty_(false),
@@ -27,9 +25,9 @@ file_partition::file_partition(block_memory_manager *manager,
       auto_scaling_port_(auto_scaling_port) {
   auto ser = conf.get("file.serializer", "csv");
   if (ser == "binary") {
-    ser_ = std::make_shared<binary_serde>(binary_allocator_);
-  } else if (ser == "csv") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
+  } else if (ser == "csv") {
+    ser_ = std::make_shared<binary_serde>(binary_allocator_);
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }

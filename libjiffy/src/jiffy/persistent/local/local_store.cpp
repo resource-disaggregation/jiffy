@@ -12,12 +12,23 @@ void local_store::write(const storage::locked_hash_table_type &table, const std:
   size_t found = out_path.find_last_of("/\\");
   auto dir = out_path.substr(0, found);
   directory_utils::create_directory(dir);
-  serde()->serialize(table, out_path);
+  try {
+    serde()->serialize(table, out_path);
+  }
+  catch (...) {
+    std::cout << "catch (...)" << std::endl;
+  }
+  
   out->close();
 }
 
 void local_store::read(const std::string &in_path, storage::locked_hash_table_type &table) {
-  serde()->deserialize(table, in_path);
+  try {
+    serde()->deserialize(table, in_path);
+  }
+  catch (...) {
+    std::cout << "catch (...)" << std::endl;
+  }
   in->close();
 }
 

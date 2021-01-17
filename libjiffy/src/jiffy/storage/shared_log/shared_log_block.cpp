@@ -60,4 +60,3 @@ char *shared_log_block::data() const {
 
 }
 }
-

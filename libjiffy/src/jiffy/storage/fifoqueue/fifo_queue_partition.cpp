@@ -3,7 +3,6 @@
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_ops.h"
 #include "jiffy/auto_scaling/auto_scaling_client.h"
-#include <jiffy/utils/directory_utils.h>
 
 namespace jiffy {
 namespace storage {
@@ -11,13 +10,12 @@ namespace storage {
 using namespace utils;
 
 fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
-                                           const std::string &backing_path,
                                            const std::string &name,
                                            const std::string &metadata,
                                            const utils::property_map &conf,
                                            const std::string &auto_scaling_host,
                                            int auto_scaling_port)
-    : chain_module(manager, backing_path, name, metadata, FQ_CMDS),
+    : chain_module(manager, name, metadata, FQ_CMDS),
       partition_(manager->mb_capacity(), build_allocator<char>()),
       scaling_up_(false),
       scaling_down_(false),
@@ -25,9 +23,7 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port),
       head_(0),
-      head_index_(0),
       read_head_(0),
-      read_head_index_(0),
       enqueue_redirected_(false),
       dequeue_redirected_(false),
       readnext_redirected_(false),
@@ -38,11 +34,11 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
       dequeue_start_data_size_(0),
       in_rate_set_(false),
       out_rate_set_(false) {
-  ser = conf.get("fifoqueue.serializer", "csv");
+  auto ser = conf.get("fifoqueue.serializer", "csv");
   if (ser == "binary") {
-    ser_ = std::make_shared<binary_serde>(binary_allocator_);
-  } else if (ser == "csv") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
+  } else if (ser == "csv") {
+    ser_ = std::make_shared<binary_serde>(binary_allocator_);
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
@@ -101,9 +97,7 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
   auto ret = partition_.at(head_);
   if (ret.first) {
     head_ += (string_array::METADATA_LEN + ret.second.size());
-    head_index_ += 1;
     update_read_head();
-    update_read_head_index();
     dequeue_data_size_ += ret.second.size();
     RETURN_OK(ret.second);
   }
@@ -133,7 +127,6 @@ void fifo_queue_partition::read_next(response &_return, const arg_list &args) {
   auto ret = partition_.at(read_head_);
   if (ret.first) {
     read_head_ += (string_array::METADATA_LEN + ret.second.size());
-    read_head_index_ += 1;
     RETURN_OK(ret.second);
   }
   if (ret.second == "!not_available") {
@@ -377,7 +370,7 @@ void fifo_queue_partition::update_rate() {
     dequeue_start_time_ = cur_time;
     dequeue_start_data_size_ = dequeue_data_size_;
   }
-}
+};
 
 void fifo_queue_partition::clear_partition() {
   partition_.clear();

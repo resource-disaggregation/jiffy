@@ -33,7 +33,6 @@ class hash_table_partition : public chain_module {
    * @param conf Configuration properties
    */
   explicit hash_table_partition(block_memory_manager *manager,
-                                const std::string &backing_path = "local://tmp",
                                 const std::string &name = "0_65536",
                                 const std::string &metadata = "regular",
                                 const utils::property_map &conf = {},
@@ -201,7 +200,6 @@ class hash_table_partition : public chain_module {
    * @param _return Response
    * @param args Arguments
    */
-  
   void scale_remove(response &_return, const arg_list &args);
 
   /**
@@ -322,9 +320,6 @@ class hash_table_partition : public chain_module {
 
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
-
-  /* Name of format, either binary or csv */
-  std::string ser;
 
   /* Low threshold */
   double threshold_lo_;

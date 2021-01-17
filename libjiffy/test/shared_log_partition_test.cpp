@@ -75,6 +75,3 @@ TEST_CASE("shared_log_flush_load_test", "[write][sync][reset][load][scan]") {
     REQUIRE(resp[1] == std::to_string(start_pos)+"_data");
   }
 }
-
-
-

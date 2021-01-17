@@ -31,7 +31,6 @@ class fifo_queue_partition : public chain_module {
    * @param auto_scaling_port Auto scaling server port number
    */
   explicit fifo_queue_partition(block_memory_manager *manager,
-                                const std::string &backing_path = "local://tmp",
                                 const std::string &name = "0",
                                 const std::string &metadata = "regular",
                                 const utils::property_map &conf = {},
@@ -191,18 +190,6 @@ class fifo_queue_partition : public chain_module {
   }
 
   /**
-   * @brief Update read head index
-   * @return Bool value, true if index updated
-   */
-  bool update_read_head_index() {
-    if (read_head_index_ < head_index_) {
-      read_head_index_ = head_index_;
-      return true;
-    }
-    return false;
-  }
-
-  /**
    * @brief Update in rate and out rate
    */
   void update_rate();
@@ -217,9 +204,6 @@ class fifo_queue_partition : public chain_module {
 
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
-
-  /* Name of format, either binary or csv */
-  std::string ser;
 
   /* Bool for overload partition */
   bool scaling_up_;
@@ -247,12 +231,6 @@ class fifo_queue_partition : public chain_module {
 
   /* Head position for read next operation */
   std::size_t read_head_;
-
-  /* Head index of queue */
-  std::size_t head_index_;
-
-  /* Head index for read next operation */
-  std::size_t read_head_index_;
 
   /* Boolean indicating whether enqueues are redirected to the next chain */
   bool enqueue_redirected_;

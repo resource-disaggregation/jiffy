@@ -1,5 +1,4 @@
 #include <jiffy/utils/string_utils.h>
-#include <jiffy/utils/directory_utils.h>
 #include <queue>
 #include "hash_table_partition.h"
 #include "hash_slot.h"
@@ -9,7 +8,6 @@
 #include "jiffy/auto_scaling/auto_scaling_client.h"
 #include <chrono>
 #include <thread>
-#include <string>
 
 namespace jiffy {
 namespace storage {
@@ -17,13 +15,12 @@ namespace storage {
 using namespace utils;
 
 hash_table_partition::hash_table_partition(block_memory_manager *manager,
-                                           const std::string &backing_path,
                                            const std::string &name,
                                            const std::string &metadata,
                                            const utils::property_map &conf,
                                            const std::string &auto_scaling_host,
                                            int auto_scaling_port)
-    : chain_module(manager, backing_path, name, metadata, HT_OPS),
+    : chain_module(manager, name, metadata, HT_OPS),
       scaling_up_(false),
       scaling_down_(false),
       dirty_(false),
@@ -31,7 +28,7 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
       import_slot_range_(0, -1),
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port) {
-  ser = conf.get("hashtable.serializer", "csv");
+  auto ser = conf.get("hashtable.serializer", "csv");
   if (ser == "binary") {
     ser_ = std::make_shared<binary_serde>(binary_allocator_);
   } else if (ser == "csv") {

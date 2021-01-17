@@ -28,7 +28,6 @@ class file_partition : public chain_module {
    * @param auto_scaling_port Auto scaling server port number
    */
   explicit file_partition(block_memory_manager *manager,
-                          const std::string &backing_path = "local://tmp",
                           const std::string &name = "0",
                           const std::string &metadata = "regular",
                           const utils::property_map &conf = {},
