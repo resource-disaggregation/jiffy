@@ -6,6 +6,7 @@
 
 using namespace ::apache::thrift;
 using namespace ::jiffy::utils;
+using namespace Catch::clara;
 
 std::string pmem_path = "/Shijie!!!!!!!!!!!";
 
@@ -14,7 +15,7 @@ int main(int argc, char *argv[]) {
   log_utils::configure_log_level(log_level::info);
   GlobalOutput.setOutputFunction(log_utils::log_thrift_msg);
   bool pmem_mode = false;
-  std::string pmem_path = "/Shijie!!!!!!!!!!!";
+  // std::string pmem_path = "/Shijie!!!!!!!!!!!";
   auto cli = session.cli()
             |Opt(pmem_mode, "pmem_mode")
               ["-p"]["--pmem"]
