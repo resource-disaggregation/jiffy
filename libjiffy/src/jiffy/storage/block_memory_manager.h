@@ -6,6 +6,7 @@
 #include <atomic>
 #include <new>
 #include <memkind.h>
+#include <string>
 
 namespace jiffy {
 namespace storage {
