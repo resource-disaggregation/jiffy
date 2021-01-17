@@ -333,7 +333,7 @@ class test_utils {
     return blks;
   }
 
-  static struct memkind* pmem_kind create_kind(const std::string& pmem_path) {
+  static struct memkind* create_kind(const std::string& pmem_path) {
     struct memkind* pmem_kind = nullptr;
     std::string memory_mode = "PMEM";
     size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
