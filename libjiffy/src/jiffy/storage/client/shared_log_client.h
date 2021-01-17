@@ -20,7 +20,6 @@ class shared_log_client : public data_structure_client {
    * @param status Data status
    * @param timeout_ms Timeout
    */
-
   shared_log_client(std::shared_ptr<directory::directory_interface> fs,
               const std::string &path,
               const directory::data_status &status,
