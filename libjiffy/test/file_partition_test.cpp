@@ -10,7 +10,8 @@ using namespace ::jiffy::storage;
 using namespace ::jiffy::persistent;
 
 TEST_CASE("file_write_read_test", "[write][read]") {
-  std::cout << argv;
+  std::cout << pmem_path << std::endl;
+  std::cout << pmem_mode << std::endl;
   std::string pmem_path = "/media/pmem0/shijie"; 
   std::string memory_mode = "PMEM";
   struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
@@ -91,7 +92,8 @@ TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
 TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
   
   std::string pmem_path = "/media/pmem0/shijie"; 
-  std::string memory_mode = "DRAM";
+  std::string memory_mode = "PMEM";
+  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   file_partition block(&manager);
