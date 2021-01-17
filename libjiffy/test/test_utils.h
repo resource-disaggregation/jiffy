@@ -235,7 +235,7 @@ class test_utils {
     return blks;
   }
 
-  static blk_pmemkind_pair init_hash_table_blocks(const std::vector<std::string> &block_ids,
+  static std::vector<std::shared_ptr<jiffy::storage::block>> init_hash_table_blocks(const std::vector<std::string> &block_ids,
                                                                                     std::string memory_mode = "DRAM",
                                                                                     struct memkind* pmem_kind = nullptr,
                                                                                     size_t block_capacity = 134217728,
@@ -273,7 +273,7 @@ class test_utils {
     return blks;
   }
 
-  static blk_pmemkind_pair init_file_blocks(const std::vector<std::string> &block_ids,
+  static std::vector<std::shared_ptr<jiffy::storage::block>> init_file_blocks(const std::vector<std::string> &block_ids,
                                                                               std::string memory_mode = "DRAM",
                                                                               struct memkind* pmem_kind = nullptr,
                                                                               size_t block_capacity = 134217728,
@@ -311,7 +311,7 @@ class test_utils {
     return blks;
   }
 
-  static blk_pmemkind_pair init_fifo_queue_blocks(const std::vector<std::string> &block_ids,
+  static std::vector<std::shared_ptr<jiffy::storage::block>> init_fifo_queue_blocks(const std::vector<std::string> &block_ids,
                                                                                     std::string memory_mode = "DRAM",
                                                                                     struct memkind* pmem_kind = nullptr,
                                                                                     size_t block_capacity = 134217728,

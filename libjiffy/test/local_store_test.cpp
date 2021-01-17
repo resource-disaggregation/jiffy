@@ -15,15 +15,9 @@ binary make_binary(const std::string& str, const block_memory_allocator<uint8_t>
 }
 
 TEST_CASE("local_write_test", "[write]") {
-  struct memkind* pmem_kind = nullptr;
   std::string pmem_path = "/media/pmem0/shijie"; 
   std::string memory_mode = "PMEM";
-  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
-  if(err) {
-    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
-    fprintf(stderr, "%s\n", error_message);
-  }
+  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   block_memory_allocator<uint8_t> binary_allocator(&manager);
@@ -46,15 +40,9 @@ TEST_CASE("local_read_test", "[read]") {
   std::ofstream out("/tmp/a.txt", std::ofstream::out);
   out << "key,value\n";
   out.close();
-  struct memkind* pmem_kind = nullptr;
   std::string pmem_path = "/media/pmem0/shijie"; 
   std::string memory_mode = "PMEM";
-  size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
-  if(err) {
-    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
-    fprintf(stderr, "%s\n", error_message);
-  }
+  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   block_memory_allocator<kv_pair_type> allocator(&manager);

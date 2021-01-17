@@ -40,7 +40,7 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
   auto block_names = test_utils::init_block_names(100, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
 
-  std::string memory_mode = argv[]
+  std::string memory_mode;
   std::string pmem_path;
   struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind, 2200);
