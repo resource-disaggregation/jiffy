@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
               ("Run test in PMEM mode. DRAM is default if '-p' is not specified.")
             |Opt(pmem_path, "pmem_path")
               ["--path"]
-              ("Input the PMEM path you are using.")
+              ("Input the PMEM path you are using.");
   session.cli(cli);
   auto ret = session.applyCommandLine(argc, argv);
   if (ret) {
