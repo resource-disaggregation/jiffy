@@ -10,6 +10,13 @@
 #include "jiffy/storage/file/file_partition.h"
 #include <memkind.h>
 
+using namespace ::jiffy::client;
+using namespace ::jiffy::directory;
+using namespace ::jiffy::storage;
+using namespace ::jiffy::utils;
+
+using namespace ::apache::thrift;
+
 namespace  bpo = boost::program_options;
 
 int main(int argc, char const *argv[])

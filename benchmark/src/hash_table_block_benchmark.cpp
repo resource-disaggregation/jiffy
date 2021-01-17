@@ -10,6 +10,13 @@
 #include "jiffy/storage/hashtable/hash_table_ops.h"
 #include "jiffy/storage/hashtable/hash_table_partition.h"
 
+using namespace ::jiffy::client;
+using namespace ::jiffy::directory;
+using namespace ::jiffy::storage;
+using namespace ::jiffy::utils;
+
+using namespace ::apache::thrift;
+
 namespace  bpo = boost::program_options;
 
 int main(int argc, char const *argv[])
