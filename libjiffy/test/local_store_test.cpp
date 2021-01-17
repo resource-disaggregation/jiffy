@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memkind.h>
 #include "jiffy/persistent/persistent_service.h"
+#include "test_utils.h"
 #include "jiffy/utils/directory_utils.h"
 #include "jiffy/storage/serde/serde_all.h"
 

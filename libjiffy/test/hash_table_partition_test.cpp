@@ -1,4 +1,5 @@
 #include "catch.hpp"
+#include "test_utils.h"
 #include "jiffy/storage/hashtable/hash_slot.h"
 #include "jiffy/storage/hashtable/hash_table_ops.h"
 #include "jiffy/storage/hashtable/hash_table_partition.h"

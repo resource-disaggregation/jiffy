@@ -1,4 +1,5 @@
 #include "catch.hpp"
+#include "test_utils.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_defs.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_partition.h"
 #include <vector>
