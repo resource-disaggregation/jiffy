@@ -154,7 +154,6 @@ class HashTableCache(DataStructureCache):
                 self.evict()
             self.insert([new_key,new_value])
         
-    
     def print_out(self): # for debug use
         cur_node = self.list.head
         while cur_node:
