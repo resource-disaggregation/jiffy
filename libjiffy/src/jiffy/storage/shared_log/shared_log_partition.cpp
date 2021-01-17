@@ -15,7 +15,6 @@ using namespace utils;
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
 shared_log_partition::shared_log_partition(block_memory_manager *manager,
-                               const std::string &backing_path,
                                const std::string &name,
                                const std::string &metadata,
                                const utils::property_map &conf,
