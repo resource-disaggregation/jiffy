@@ -6,7 +6,8 @@
 
 using namespace ::apache::thrift;
 using namespace ::jiffy::utils;
-using namespace Catch::clara;
+
+std::string pmem_path = "/Shijie!!!!!!!!!!!";
 
 int main(int argc, char *argv[]) {
   Catch::Session session;
