@@ -30,7 +30,9 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_file_blocks(block_names, 134217728);
+  auto block_pmemkind_pair = test_utils::init_file_blocks(block_names, 134217728);
+  auto blocks = block_pmemkind_pair.blocks;
+  auto pmem_kind = block_pmemkind_pair.pmem_kind;
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -83,6 +85,12 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
+  int err = memkind_check_available(pmem_kind);
+  if(err) {
+    char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+    memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+    fprintf(stderr, "%s\n", error_message);
+  }
 }
 
 
@@ -92,8 +100,9 @@ TEST_CASE("file_client_concurrent_write_read_seek_test", "[write][read][seek]") 
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(20, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_file_blocks(block_names, BLOCK_SIZE);
-
+  auto block_pmemkind_pair = test_utils::init_file_blocks(block_names, BLOCK_SIZE);
+  auto blocks = block_pmemkind_pair.blocks;
+  auto pmem_kind = block_pmemkind_pair.pmem_kind;
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);

@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <memkind.h>
 #include <thrift/transport/TBufferTransports.h>
 #include <thrift/transport/TSocket.h>
 #include "jiffy/storage/storage_management_ops.h"
@@ -189,6 +190,10 @@ class dummy_block_allocator : public jiffy::directory::block_allocator {
 
 class test_utils {
  public:
+  struct blk_pmemkind_pair{
+    std::vector<std::shared_ptr<jiffy::storage::block>> blocks;
+    memkind* pmem_kind;
+  };
   static void wait_till_server_ready(const std::string &host, int port) {
     bool check = true;
     while (check) {
@@ -234,10 +239,12 @@ class test_utils {
     return blks;
   }
 
-  static std::vector<std::shared_ptr<jiffy::storage::block>> init_hash_table_blocks(const std::vector<std::string> &block_ids,
+  static blk_pmemkind_pair init_hash_table_blocks(const std::vector<std::string> &block_ids,
                                                                                     size_t block_capacity = 134217728,
                                                                                     double threshold_lo = 0.05,
                                                                                     double threshold_hi = 0.95,
+                                                                                    std::string memory_mode = "PMEM",
+                                                                                    std::string pmem_path = "/media/pmem0/shijie",
                                                                                     const std::string &dir_host = "127.0.0.1",
                                                                                     int dir_port = 9090) {
     jiffy::utils::property_map conf;
@@ -247,11 +254,17 @@ class test_utils {
     conf.set("directory.port", std::to_string(dir_port));
     std::vector<std::shared_ptr<jiffy::storage::block>> blks;
     blks.resize(block_ids.size());
+
+    struct memkind* pmem_kind = nullptr;
+    if (memory_mode == "PMEM"){  
+      size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+    }
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
       blks[i]->setup("hashtable", "0_65536", "regular", conf);
     }
-    return blks;
+    blk_pmemkind_pair pair = {blks,pmem_kind};
+    return pair;
   }
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_file_blocks(size_t num_blocks,
@@ -269,10 +282,12 @@ class test_utils {
     return blks;
   }
 
-  static std::vector<std::shared_ptr<jiffy::storage::block>> init_file_blocks(const std::vector<std::string> &block_ids,
+  static blk_pmemkind_pair init_file_blocks(const std::vector<std::string> &block_ids,
                                                                               size_t block_capacity = 134217728,
                                                                               double threshold_lo = 0.05,
                                                                               double threshold_hi = 0.95,
+                                                                              std::string memory_mode = "PMEM",
+                                                                              std::string pmem_path = "/media/pmem0/shijie",
                                                                               const std::string &dir_host = "127.0.0.1",
                                                                               int dir_port = 9090) {
     jiffy::utils::property_map conf;
@@ -282,11 +297,16 @@ class test_utils {
     conf.set("directory.port", std::to_string(dir_port));
     std::vector<std::shared_ptr<jiffy::storage::block>> blks;
     blks.resize(block_ids.size());
+    struct memkind* pmem_kind = nullptr;
+    if (memory_mode == "PMEM"){  
+      size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+    }
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
       blks[i]->setup("file", "", "regular", conf);
     }
-    return blks;
+    blk_pmemkind_pair pair = {blks,pmem_kind};
+    return pair;
   }
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_fifo_queue_blocks(size_t num_blocks,
@@ -304,10 +324,12 @@ class test_utils {
     return blks;
   }
 
-  static std::vector<std::shared_ptr<jiffy::storage::block>> init_fifo_queue_blocks(const std::vector<std::string> &block_ids,
+  static blk_pmemkind_pair init_fifo_queue_blocks(const std::vector<std::string> &block_ids,
                                                                                     size_t block_capacity = 134217728,
                                                                                     double threshold_lo = 0.05,
                                                                                     double threshold_hi = 0.95,
+                                                                                    std::string memory_mode = "PMEM",
+                                                                                    std::string pmem_path = "/media/pmem0/shijie",
                                                                                     const std::string &dir_host = "127.0.0.1",
                                                                                     int dir_port = 9090) {
     jiffy::utils::property_map conf;
@@ -317,12 +339,22 @@ class test_utils {
     conf.set("directory.port", std::to_string(dir_port));
     std::vector<std::shared_ptr<jiffy::storage::block>> blks;
     blks.resize(block_ids.size());
+    struct memkind* pmem_kind = nullptr;
+    if (memory_mode == "PMEM"){  
+      size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+    }
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
       blks[i]->setup("fifoqueue", "", "regular", conf);
     }
-    return blks;
+    blk_pmemkind_pair pair = {blks,pmem_kind};
+    return pair;
   }
+
+  static void destroy_kind(struct memkind* pmem_kind){
+    memkind_destroy_kind(pmem_kind);
+  }
+
 };
 
 #endif //JIFFY_TEST_UTILS_H

@@ -224,12 +224,14 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/types/byte_string.h
           src/jiffy/storage/types/byte_string.cc)
 
-  add_dependencies(jiffy thrift_ep awssdk_ep jemalloc_ep)
+  add_dependencies(jiffy thrift_ep awssdk_ep memkind_ep)
+  message(STATUS "numalibrary = ${NUMA_LIBRARY}")
   target_link_libraries(jiffy ${THRIFT_LIBRARY}
           ${THRIFTNB_LIBRARY}
           ${LIBEVENT_LIBRARY}
           ${AWSSDK_LINK_LIBRARIES}
-          ${JEMALLOC_LIBRARY}
+          ${MEMKIND_LIBRARY}
+          ${NUMA_LIBRARY}
           ${CMAKE_DL_LIBS}
           ${CMAKE_THREAD_LIBS_INIT})
   set_target_properties(jiffy PROPERTIES LINKER_LANGUAGE CXX)
@@ -266,9 +268,12 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             test/sync_worker_test.cpp
             test/chain_replication_test.cpp
             test/auto_scaling_test.cpp
+            test/fifo_queue_performance_test.cpp
+            test/file_performance_test.cpp
+            test/ht_performance_test.cpp
             test/test_utils.h)
     target_link_libraries(jiffy_tests jiffy)
-    add_dependencies(jiffy_tests catch_ep boost_ep jemalloc_ep thrift_ep awssdk_ep)
+    add_dependencies(jiffy_tests catch_ep boost_ep memkind_ep thrift_ep awssdk_ep)
     # Register test
     add_test(JiffyTest jiffy_tests)
   endif ()
