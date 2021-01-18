@@ -1,7 +1,6 @@
 #include <fstream>
 #include <catch.hpp>
 #include <iostream>
-#include <memkind.h>
 #include "jiffy/persistent/persistent_service.h"
 #include "test_utils.h"
 #include "jiffy/utils/directory_utils.h"
@@ -15,9 +14,14 @@ binary make_binary(const std::string& str, const block_memory_allocator<uint8_t>
 }
 
 TEST_CASE("local_write_test", "[write]") {
-  std::string pmem_path = "/media/pmem0/shijie"; 
-  std::string memory_mode = "PMEM";
-  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  std::string pmem_path = getenv("PMEM_PATH"); 
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  if (memory_mode == "PMEM") {
+    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  }  
+  else if (memory_mode == "DRAM") {
+    struct memkind* pmem_kind = nullptr;
+  }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   block_memory_allocator<uint8_t> binary_allocator(&manager);
@@ -40,9 +44,14 @@ TEST_CASE("local_read_test", "[read]") {
   std::ofstream out("/tmp/a.txt", std::ofstream::out);
   out << "key,value\n";
   out.close();
-  std::string pmem_path = "/media/pmem0/shijie"; 
-  std::string memory_mode = "PMEM";
-  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  std::string pmem_path = getenv("PMEM_PATH"); 
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  if (memory_mode == "PMEM") {
+    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  }  
+  else if (memory_mode == "DRAM") {
+    struct memkind* pmem_kind = nullptr;
+  }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   block_memory_allocator<kv_pair_type> allocator(&manager);

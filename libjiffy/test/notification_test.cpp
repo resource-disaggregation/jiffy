@@ -34,9 +34,14 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
                                                   STORAGE_SERVICE_PORT,
                                                   STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  std::string memory_mode;
-  std::string pmem_path;
-  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  std::string pmem_path = getenv("PMEM_PATH"); 
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  if (memory_mode == "PMEM") {
+    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  }  
+  else if (memory_mode == "DRAM") {
+    struct memkind* pmem_kind = nullptr;
+  }
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);

@@ -67,9 +67,14 @@ TEST_CASE("jiffy_client_lease_worker_test", "[put][get][update][remove]") {
                                                   STORAGE_SERVICE_PORT,
                                                   STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  std::string memory_mode;
-  std::string pmem_path;
-  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  std::string pmem_path = getenv("PMEM_PATH"); 
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  if (memory_mode == "PMEM") {
+    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  }  
+  else if (memory_mode == "DRAM") {
+    struct memkind* pmem_kind = nullptr;
+  }
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
@@ -134,9 +139,14 @@ TEST_CASE("jiffy_client_create_test", "[put][get][update][remove]") {
                                                   STORAGE_SERVICE_PORT,
                                                   STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  std::string memory_mode;
-  std::string pmem_path;
-  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  std::string pmem_path = getenv("PMEM_PATH"); 
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  if (memory_mode == "PMEM") {
+    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  }  
+  else if (memory_mode == "DRAM") {
+    struct memkind* pmem_kind = nullptr;
+  }
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
@@ -198,9 +208,14 @@ TEST_CASE("jiffy_client_open_test", "[put][get][update][remove]") {
                                                   STORAGE_SERVICE_PORT,
                                                   STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  std::string memory_mode;
-  std::string pmem_path;
-  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  std::string pmem_path = getenv("PMEM_PATH"); 
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  if (memory_mode == "PMEM") {
+    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  }  
+  else if (memory_mode == "DRAM") {
+    struct memkind* pmem_kind = nullptr;
+  }
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
@@ -263,9 +278,14 @@ TEST_CASE("jiffy_client_flush_remove_test", "[put][get][update][remove]") {
                                                   STORAGE_SERVICE_PORT,
                                                   STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  std::string memory_mode;
-  std::string pmem_path;
-  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  std::string pmem_path = getenv("PMEM_PATH"); 
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  if (memory_mode == "PMEM") {
+    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  }  
+  else if (memory_mode == "DRAM") {
+    struct memkind* pmem_kind = nullptr;
+  }
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
@@ -331,9 +351,14 @@ TEST_CASE("jiffy_client_close_test", "[put][get][update][remove]") {
                                                   STORAGE_SERVICE_PORT,
                                                   STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  std::string memory_mode;
-  std::string pmem_path;
-  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  std::string pmem_path = getenv("PMEM_PATH"); 
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  if (memory_mode == "PMEM") {
+    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  }  
+  else if (memory_mode == "DRAM") {
+    struct memkind* pmem_kind = nullptr;
+  }
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
@@ -412,9 +437,14 @@ TEST_CASE("jiffy_client_notification_test", "[put][get][update][remove]") {
                                                   STORAGE_SERVICE_PORT,
                                                   STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  std::string memory_mode;
-  std::string pmem_path;
-  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  std::string pmem_path = getenv("PMEM_PATH"); 
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  if (memory_mode == "PMEM") {
+    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  }  
+  else if (memory_mode == "DRAM") {
+    struct memkind* pmem_kind = nullptr;
+  }
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
@@ -510,9 +540,14 @@ TEST_CASE("jiffy_client_chain_replication_test", "[put][get][update][remove]") {
                                                   STORAGE_SERVICE_PORT,
                                                   STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  std::string memory_mode;
-  std::string pmem_path;
-  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  std::string pmem_path = getenv("PMEM_PATH"); 
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  if (memory_mode == "PMEM") {
+    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+  }  
+  else if (memory_mode == "DRAM") {
+    struct memkind* pmem_kind = nullptr;
+  }
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind);
   auto sm = std::make_shared<storage_manager>();
   auto tree = std::make_shared<directory_tree>(alloc, sm);
