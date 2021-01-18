@@ -30,7 +30,7 @@ TEST_CASE("fifo_queue_client_enqueue_dequeue_test", "[enqueue][dequeue]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
-    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+    pmem_kind = test_utils::create_kind(pmem_path);
   }
   auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind, 134217728, 0, 1);
   
@@ -94,7 +94,7 @@ TEST_CASE("fifo_queue_client_enqueue_length_dequeue_test", "[enqueue][dequeue]")
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
-    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+    pmem_kind = test_utils::create_kind(pmem_path);
   }
   auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind, 134217728);
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -163,7 +163,7 @@ TEST_CASE("fifo_queue_client_enqueue_in_rate_out_rate_dequeue_test", "[enqueue][
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
-    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+    pmem_kind = test_utils::create_kind(pmem_path);
   }
   auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind, 134217728);
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);

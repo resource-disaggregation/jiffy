@@ -18,7 +18,7 @@ TEST_CASE("local_write_test", "[write]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
-    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+    pmem_kind = test_utils::create_kind(pmem_path);
   }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
@@ -46,7 +46,7 @@ TEST_CASE("local_read_test", "[read]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
-    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+    pmem_kind = test_utils::create_kind(pmem_path);
   }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);

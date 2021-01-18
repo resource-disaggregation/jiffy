@@ -38,7 +38,7 @@ TEST_CASE("notification_test", "[subscribe][get_message]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
-    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+    pmem_kind = test_utils::create_kind(pmem_path);
   }
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind);
 

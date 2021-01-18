@@ -14,7 +14,7 @@ TEST_CASE("fifo_queue_enqueue_dequeue_test", "[enqueue][dequeue]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
-    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+    pmem_kind = test_utils::create_kind(pmem_path);
   }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
@@ -47,7 +47,7 @@ TEST_CASE("fifo_queue_enqueue_clear_dequeue_test", "[enqueue][dequeue]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
-    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+    pmem_kind = test_utils::create_kind(pmem_path);
   }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
@@ -78,7 +78,7 @@ TEST_CASE("fifo_queue_enqueue_readnext_dequeue", "[enqueue][read_next][dequeue]"
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
-    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+    pmem_kind = test_utils::create_kind(pmem_path);
   }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
@@ -111,7 +111,7 @@ TEST_CASE("fifo_queue_storage_size_test", "[put][size][storage_size][reset]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
-    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+    pmem_kind = test_utils::create_kind(pmem_path);
   }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
@@ -131,7 +131,7 @@ TEST_CASE("fifo_queue_flush_load_test", "[enqueue][sync][reset][load][dequeue]")
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
-    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+    pmem_kind = test_utils::create_kind(pmem_path);
   }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);

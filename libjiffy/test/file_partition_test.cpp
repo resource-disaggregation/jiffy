@@ -17,9 +17,7 @@ TEST_CASE("file_write_read_test", "[write][read]") {
   }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
-  std::cout<<"1";
   file_partition block(&manager);
-  std::cout<<"2";
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
@@ -45,7 +43,7 @@ TEST_CASE("file_write_clear_read_test", "[write][read]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
-    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+    pmem_kind = test_utils::create_kind(pmem_path);
   }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
@@ -79,7 +77,7 @@ TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
-    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+    pmem_kind = test_utils::create_kind(pmem_path);
   }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
@@ -100,7 +98,7 @@ TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
-    struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
+    pmem_kind = test_utils::create_kind(pmem_path);
   }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
