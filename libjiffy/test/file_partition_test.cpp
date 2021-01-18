@@ -11,16 +11,10 @@ using namespace ::jiffy::persistent;
 TEST_CASE("file_write_read_test", "[write][read]") {
   std::string pmem_path = getenv("PMEM_PATH"); 
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  // struct memkind* pmem_kind = nullptr;
-  // if (memory_mode == "PMEM") {
-  struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
-  // }
-  // // size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
-  // if(err) {
-  //   char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-  //   memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
-  //   fprintf(stderr, "%s\n", error_message);
-  // }
+  struct memkind* pmem_kind = nullptr;
+  if (memory_mode == "PMEM") {
+    pmem_kind = test_utils::create_kind(pmem_path);
+  }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   std::cout<<"1";
