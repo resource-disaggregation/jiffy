@@ -17,8 +17,9 @@ TEST_CASE("file_write_read_test", "[write][read]") {
   }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
-  std::cout<<pmem_path<<memory_mode<<std::endl;
+  std::cout<<"1";
   file_partition block(&manager);
+  std::cout<<"2";
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
