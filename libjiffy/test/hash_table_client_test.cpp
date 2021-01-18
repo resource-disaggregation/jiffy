@@ -28,11 +28,9 @@ TEST_CASE("hash_table_client_put_get_test", "[put][get]") {
   alloc->add_blocks(block_names);
   std::string pmem_path = getenv("PMEM_PATH"); 
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
     struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
-  }  
-  else if (memory_mode == "DRAM") {
-    struct memkind* pmem_kind = nullptr;
   }
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind, 134217728, 0, 1);
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -76,11 +74,9 @@ TEST_CASE("hash_table_client_put_update_get_test", "[put][update][get]") {
   alloc->add_blocks(block_names);
   std::string pmem_path = getenv("PMEM_PATH"); 
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
     struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
-  }  
-  else if (memory_mode == "DRAM") {
-    struct memkind* pmem_kind = nullptr;
   }
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind, 134217728, 0, 1);
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -132,11 +128,9 @@ TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
   alloc->add_blocks(block_names);
   std::string pmem_path = getenv("PMEM_PATH"); 
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
     struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
-  }  
-  else if (memory_mode == "DRAM") {
-    struct memkind* pmem_kind = nullptr;
   }
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind, 134217728, 0, 1);
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);

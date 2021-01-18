@@ -16,11 +16,9 @@ binary make_binary(const std::string& str, const block_memory_allocator<uint8_t>
 TEST_CASE("local_write_test", "[write]") {
   std::string pmem_path = getenv("PMEM_PATH"); 
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
     struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
-  }  
-  else if (memory_mode == "DRAM") {
-    struct memkind* pmem_kind = nullptr;
   }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
@@ -46,11 +44,9 @@ TEST_CASE("local_read_test", "[read]") {
   out.close();
   std::string pmem_path = getenv("PMEM_PATH"); 
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
     struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
-  }  
-  else if (memory_mode == "DRAM") {
-    struct memkind* pmem_kind = nullptr;
   }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);

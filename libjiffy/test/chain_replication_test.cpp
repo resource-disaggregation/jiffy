@@ -34,11 +34,9 @@ TEST_CASE("chain_replication_no_failure_test", "[put][get]") {
     alloc->add_blocks(block_names[i]);
     std::string pmem_path = getenv("PMEM_PATH"); 
     std::string memory_mode = getenv("JIFFY_TEST_MODE");
+    struct memkind* pmem_kind = nullptr;
     if (memory_mode == "PMEM") {
       struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
-    }  
-    else if (memory_mode == "DRAM") {
-      struct memkind* pmem_kind = nullptr;
     }
     blocks[i] = test_utils::init_hash_table_blocks(block_names[i], memory_mode, pmem_kind);
 
@@ -126,11 +124,9 @@ TEST_CASE("chain_replication_head_failure_test", "[put][get]") {
     alloc->add_blocks(block_names[i]);
     std::string pmem_path = getenv("PMEM_PATH"); 
     std::string memory_mode = getenv("JIFFY_TEST_MODE");
+    struct memkind* pmem_kind = nullptr;
     if (memory_mode == "PMEM") {
       struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
-    }  
-    else if (memory_mode == "DRAM") {
-      struct memkind* pmem_kind = nullptr;
     }
     blocks[i] = test_utils::init_hash_table_blocks(block_names[i], memory_mode, pmem_kind);
 
@@ -228,11 +224,9 @@ TEST_CASE("chain_replication_mid_failure_test", "[put][get]") {
     alloc->add_blocks(block_names[i]);
     std::string pmem_path = getenv("PMEM_PATH"); 
     std::string memory_mode = getenv("JIFFY_TEST_MODE");
+    struct memkind* pmem_kind = nullptr;
     if (memory_mode == "PMEM") {
       struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
-    }  
-    else if (memory_mode == "DRAM") {
-      struct memkind* pmem_kind = nullptr;
     }
     blocks[i] = test_utils::init_hash_table_blocks(block_names[i], memory_mode, pmem_kind);
 
@@ -330,11 +324,9 @@ TEST_CASE("chain_replication_tail_failure_test", "[put][get]") {
     alloc->add_blocks(block_names[i]);
     std::string pmem_path = getenv("PMEM_PATH"); 
     std::string memory_mode = getenv("JIFFY_TEST_MODE");
+    struct memkind* pmem_kind = nullptr;
     if (memory_mode == "PMEM") {
       struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
-    }  
-    else if (memory_mode == "DRAM") {
-      struct memkind* pmem_kind = nullptr;
     }
     blocks[i] = test_utils::init_hash_table_blocks(block_names[i], memory_mode, pmem_kind);
 
@@ -432,11 +424,9 @@ TEST_CASE("chain_replication_add_block_test", "[put][get]") {
     alloc->add_blocks(block_names[i]);
     std::string pmem_path = getenv("PMEM_PATH"); 
     std::string memory_mode = getenv("JIFFY_TEST_MODE");
+    struct memkind* pmem_kind = nullptr;
     if (memory_mode == "PMEM") {
       struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
-    }  
-    else if (memory_mode == "DRAM") {
-      struct memkind* pmem_kind = nullptr;
     }
     blocks[i] = test_utils::init_hash_table_blocks(block_names[i], memory_mode, pmem_kind);
 

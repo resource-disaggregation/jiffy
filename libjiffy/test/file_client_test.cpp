@@ -32,11 +32,9 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   alloc->add_blocks(block_names);
   std::string pmem_path = getenv("PMEM_PATH"); 
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
     struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
-  }  
-  else if (memory_mode == "DRAM") {
-    struct memkind* pmem_kind = nullptr;
   }
   auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind, 134217728);
 
@@ -103,11 +101,9 @@ TEST_CASE("file_client_concurrent_write_read_seek_test", "[write][read][seek]") 
   alloc->add_blocks(block_names);
   std::string pmem_path = getenv("PMEM_PATH"); 
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
     struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
-  }  
-  else if (memory_mode == "DRAM") {
-    struct memkind* pmem_kind = nullptr;
   }
   auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind, BLOCK_SIZE);
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
