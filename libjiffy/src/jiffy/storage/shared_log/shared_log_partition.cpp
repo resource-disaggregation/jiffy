@@ -37,7 +37,6 @@ shared_log_partition::shared_log_partition(block_memory_manager *manager,
   auto_scale_ = conf.get_as<bool>("shared_log.auto_scale", true);
 }
 
-//need implementation
 void shared_log_partition::write(response &_return, const arg_list &args) {
   if (args.size() < 4) {
     RETURN_ERR("!args_error");
