@@ -16,8 +16,10 @@ TEST_CASE("file_write_read_test", "[write][read]") {
   //   struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
   // }
   struct memkind* pmem_kind = nullptr;
-  std::string pmem_path = "/media/pmem0/shijie"; 
-  std::string memory_mode = "PMEM";
+  // std::string pmem_path = "/media/pmem0/shijie"; 
+  // std::string memory_mode = "PMEM";
+  std::string pmem_path = getenv("PMEM_PATH"); 
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
   size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
   if(err) {
     char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
