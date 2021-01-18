@@ -65,8 +65,6 @@ int main(int argc, char **argv) {
   // Configuration priority order: default < env < configuration file < commandline args
   // First set defaults
   std::string address = "127.0.0.1";
-  std::string memory_mode = "DRAM";
-  std::string pmem_path = "/media/pmem0/shijie";
   int32_t mgmt_port = 9093;
   int32_t auto_scaling_port = 9094;
   int32_t service_port = 9095;
@@ -98,7 +96,7 @@ int main(int argc, char **argv) {
         ("storage.auto_scaling_port", po::value<int>(&auto_scaling_port)->default_value(9094))
         ("storage.service_port", po::value<int>(&service_port)->default_value(9095))
         ("storage.memory_mode", po::value<std::string>(&memory_mode)->default_value("DRAM"))
-        ("storage.pmem_path", po::value<std::string>(&pmem_path)->default_value("/media/pmem0/shijie"))
+        ("storage.pmem_path", po::value<std::string>(&pmem_path)->default_value(""))
         ("directory.host", po::value<std::string>(&dir_host)->default_value("127.0.0.1"))
         ("directory.service_port", po::value<int>(&dir_port)->default_value(9090))
         ("directory.block_port", po::value<int>(&block_port)->default_value(9092))
