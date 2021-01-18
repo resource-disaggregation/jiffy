@@ -11,7 +11,7 @@ using namespace ::jiffy::persistent;
 TEST_CASE("file_write_read_test", "[write][read]") {
   std::string pmem_path = getenv("PMEM_PATH"); 
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = nullptr;
+  // struct memkind* pmem_kind = nullptr;
   // if (memory_mode == "PMEM") {
   struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
   // }
