@@ -14,10 +14,10 @@ TEST_CASE("file_write_read_test", "[write][read]") {
   struct memkind* pmem_kind = nullptr;
   if (memory_mode == "PMEM") {
     struct memkind* pmem_kind = test_utils::create_kind(pmem_path);
-    std::cout<<pmem_path<<memory_mode<<std::endl;
   }
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  std::cout<<pmem_path<<memory_mode<<std::endl;
   file_partition block(&manager);
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
