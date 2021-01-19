@@ -9,6 +9,7 @@ from jiffy.storage import crc
 from jiffy.storage.command import CommandType
 from jiffy.storage.compat import b, unicode, bytes, long, basestring, bytes_to_str
 from jiffy.storage.data_structure_client import DataStructureClient
+from jiffy.storage.data_structure_cache import HashTableCache
 from jiffy.storage.replica_chain_client import ReplicaChainClient
 
 
@@ -19,25 +20,13 @@ class HashTableOps:
     remove = b('remove')
     update = b('update')
     upsert = b('upsert')
-    exists_ls = b('exists_ls')
-    get_ls = b('get_ls')
-    put_ls = b('put_ls')
-    remove_ls = b('remove_ls')
-    update_ls = b('update_ls')
-    upsert_ls = b('upsert_ls')
 
     op_types = {exists: CommandType.accessor,
                 get: CommandType.accessor,
                 put: CommandType.mutator,
                 remove: CommandType.mutator,
                 update: CommandType.accessor,
-                upsert: CommandType.mutator,
-                exists_ls: CommandType.accessor,
-                get_ls: CommandType.accessor,
-                put_ls: CommandType.mutator,
-                remove_ls: CommandType.mutator,
-                update_ls: CommandType.accessor,
-                upsert_ls: CommandType.mutator}
+                upsert: CommandType.mutator}
 
 
 def encode(value):
@@ -65,9 +54,11 @@ class RedirectError(Exception):
 
 
 class HashTable(DataStructureClient):
-    def __init__(self, fs, path, block_info, timeout_ms):
+    def __init__(self, fs, path, block_info, timeout_ms, cache_size=32000000):
         super(HashTable, self).__init__(fs, path, block_info, HashTableOps.op_types, timeout_ms)
         self.slots = [int(chain.name.split('_')[0]) for chain in self.block_info.data_blocks]
+        self.cache = HashTableCache(cache_size) 
+        
     def _refresh(self):
         super(HashTable, self)._refresh()
         self.slots = [int(chain.name.split('_')[0]) for chain in self.block_info.data_blocks]
@@ -96,48 +87,42 @@ class HashTable(DataStructureClient):
         return response
 
     def put(self, key, value):
-        self._run_repeated([HashTableOps.put, key, value])
+        if self._run_repeated([HashTableOps.put, key, value])[0] == b'!ok':
+            self.cache.miss_handling([key,value])
 
     def get(self, key):
-        return self._run_repeated([HashTableOps.get, key])[1]
+        if self.cache.exists(key):
+            self.cache.hit_handling(key)
+            return self.cache.get(key)
+        else:
+            value = self._run_repeated([HashTableOps.get, key])[1]
+            self.cache.miss_handling([key,value])
+            return value
 
     def exists(self, key):
         try:
+            if self.cache.exists(key):
+                return True
             self._run_repeated([HashTableOps.exists, key])[0]
         except:
             return False
         return True
 
     def update(self, key, value):
-        return self._run_repeated([HashTableOps.update, key, value])[0]
+        resp = self._run_repeated([HashTableOps.update, key, value])
+        if resp[0] == b'!ok':
+            self.cache.miss_handling([key,value])
+        return resp[0]
 
     def upsert(self, key, value):
-        self._run_repeated([HashTableOps.upsert, key, value])
+        if self._run_repeated([HashTableOps.upsert, key, value])[0] == b'!ok':
+            self.cache.miss_handling([key,value])
 
     def remove(self, key):
-        return self._run_repeated([HashTableOps.remove, key])[0]
-
-    def put_ls(self, key, value):
-        self._run_repeated([HashTableOps.put_ls, key, value])
-
-    def get_ls(self, key):
-        return self._run_repeated([HashTableOps.get_ls, key])[1]
-
-    def exists_ls(self, key):
-        try:
-            self._run_repeated([HashTableOps.exists_ls, key])[0]
-        except:
-            return False
-        return True
-
-    def update_ls(self, key, value):
-        return self._run_repeated([HashTableOps.update_ls, key, value])[0]
-
-    def upsert_ls(self, key, value):
-        self._run_repeated([HashTableOps.upsert_ls, key, value])
-
-    def remove_ls(self, key):
-        return self._run_repeated([HashTableOps.remove_ls, key])[0]
+        resp = self._run_repeated([HashTableOps.remove, key])
+        if resp[0] == b'!ok':
+            self.cache.delete(key)
+        return resp[0]
 
     def _block_id(self, args):
         i = bisect_right(self.slots, crc.crc16(encode(args[1])))

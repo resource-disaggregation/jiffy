@@ -29,7 +29,6 @@ class storage_management_service_handler : public storage_management_serviceIf {
 
   void create_partition(int32_t block_id,
                         const std::string &type,
-                        const std::string &backing_path,
                         const std::string &name,
                         const std::string &metadata,
                         const std::map<std::string, std::string> &conf) override;
