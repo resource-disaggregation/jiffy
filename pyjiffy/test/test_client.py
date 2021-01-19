@@ -323,7 +323,7 @@ class TestClient(TestCase):
         finally:
             client.disconnect()
             self.stop_servers()
-    
+            
     def test_shared_log(self):
         self.start_servers()
         client = self.jiffy_client()

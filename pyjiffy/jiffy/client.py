@@ -105,28 +105,28 @@ class JiffyClient:
         if path in self.to_renew:
             self.to_renew.remove(path)
 
-    def create_hash_table(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+    def create_hash_table(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_size=0, flags=0):
         fmt = HashTableNameFormatter(num_blocks)
         block_names = [fmt.get(i) for i in range(num_blocks)]
         block_metadata = ['regular' for _ in range(num_blocks)]
         s = self.fs.create(path, 'hashtable', persistent_store_prefix, num_blocks, chain_length, flags, Perms.all,
                            block_names, block_metadata)
         self.begin_scope(path)
-        return HashTable(self.fs, path, s, self.timeout_ms)
+        return HashTable(self.fs, path, s, self.timeout_ms, cache_size)
 
     def open_hash_table(self, path):
         s = self.fs.open(path)
         self.begin_scope(path)
         return HashTable(self.fs, path, s, self.timeout_ms)
 
-    def open_or_create_hash_table(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+    def open_or_create_hash_table(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_size=0, flags=0):
         fmt = HashTableNameFormatter(num_blocks)
         block_names = [fmt.get(i) for i in range(num_blocks)]
         block_metadata = ['regular' for _ in range(num_blocks)]
         s = self.fs.open_or_create(path, 'hashtable', persistent_store_prefix, num_blocks, chain_length, flags,
                                    Perms.all, block_names, block_metadata)
         self.begin_scope(path)
-        return HashTable(self.fs, path, s, self.timeout_ms)
+        return HashTable(self.fs, path, s, self.timeout_ms, cache_size)
 
     def create_queue(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
         fmt = DefaultNameFormatter()
@@ -151,28 +151,28 @@ class JiffyClient:
         self.begin_scope(path)
         return Queue(self.fs, path, s, self.timeout_ms)
 
-    def create_file(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+    def create_file(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_size=0, cache_block_size=0, prefetch_size=0, flags=0):
         fmt = DefaultNameFormatter()
         block_names = [fmt.get(i) for i in range(num_blocks)]
         block_metadata = ['regular' for _ in range(num_blocks)]
         s = self.fs.create(path, 'file', persistent_store_prefix, num_blocks, chain_length, flags, Perms.all,
                            block_names, block_metadata)
         self.begin_scope(path)
-        return FileClient(self.fs, path, s, self.timeout_ms)
+        return FileClient(self.fs, path, s, self.timeout_ms, cache_size, cache_block_size, prefetch_size)
 
     def open_file(self, path):
         s = self.fs.open(path)
         self.begin_scope(path)
         return FileClient(self.fs, path, s, self.timeout_ms)
 
-    def open_or_create_file(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
+    def open_or_create_file(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_size=0, cache_block_size=0, prefetch_size=0, flags=0):
         fmt = DefaultNameFormatter()
         block_names = [fmt.get(i) for i in range(num_blocks)]
         block_metadata = ['regular' for _ in range(num_blocks)]
         s = self.fs.open_or_create(path, 'file', persistent_store_prefix, num_blocks, chain_length, flags,
                                    Perms.all, block_names, block_metadata)
         self.begin_scope(path)
-        return FileClient(self.fs, path, s, self.timeout_ms)
+        return FileClient(self.fs, path, s, self.timeout_ms, cache_size, cache_block_size, prefetch_size)
     
     def create_shared_log(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, flags=0):
         fmt = DefaultNameFormatter()

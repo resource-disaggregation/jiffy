@@ -73,7 +73,7 @@ class serde {
    * @param out Output stream
    * @return Output stream position
    */
-
+  
   virtual std::size_t virtual_serialize(const hash_table_type &table, const std::string& out_path) = 0;
 
   /**
@@ -272,12 +272,11 @@ class csv_serde_impl : public serde {
   std::size_t serialize_impl(const DataType &table, const std::string& out_path) {
     std::ofstream out(out_path,std::ios::out);
     for (auto e: table) {
-      out << to_string(e.first) << "," << to_string(e.second)
+      *out << to_string(e.first) << "," << to_string(e.second)
            << "\n";
     }
-    out.flush();
-    auto sz = out.tellp();
-    out.close();
+    out->flush();
+    auto sz = out->tellp();
     return static_cast<std::size_t>(sz);
   }
 
@@ -291,11 +290,10 @@ class csv_serde_impl : public serde {
   std::size_t serialize_impl(const fifo_queue_type &table, const std::string& out_path) {
     std::ofstream out(out_path, std::ios::out);
     for (auto e = table.begin(); e != table.end(); e++) {
-      out << *e << "\n";
+      *out << *e << "\n";
     }
-    out.flush();
-    auto sz = out.tellp();
-    out.close();
+    out->flush();
+    auto sz = out->tellp();
     return static_cast<std::size_t>(sz);
   }
 
@@ -338,14 +336,13 @@ class csv_serde_impl : public serde {
     std::ifstream in(in_path);
     while (!in.eof()) {
       std::string line;
-      std::getline(in, line, '\n');
+      std::getline(*in, line, '\n');
       if (line.empty())
         break;
       auto ret = split(line, ',', 2);
       data.emplace(std::make_pair(make_binary(ret[0]), make_binary(ret[1])));
     }
-    auto sz = in.tellg();
-    in.close();
+    auto sz = in->tellg();
     return static_cast<std::size_t>(sz);
   }
 
@@ -360,13 +357,12 @@ class csv_serde_impl : public serde {
     std::ifstream in(in_path);
     while (!in.eof()) {
       std::string line;
-      std::getline(in, line, '\n');
+      std::getline(*in, line, '\n');
       if (line.empty())
         break;
       data.push_back(line);
     }
-    auto sz = in.tellg();
-    in.close();
+    auto sz = in->tellg();
     return static_cast<std::size_t>(sz);
   }
 
@@ -380,16 +376,15 @@ class csv_serde_impl : public serde {
   std::size_t deserialize_impl(file_type &data, const std::string& in_path) {
     std::ifstream in(in_path);
     std::size_t offset = 0;
-    while (!in.eof()) {
+    while (!in->eof()) {
       std::string line;
-      std::getline(in, line, '\n');
+      std::getline(*in, line, '\n');
       if (line.empty())
         break;
       data.write(line, offset);
       offset += line.size();
     }
-    auto sz = in.tellg();
-    in.close();
+    auto sz = in->tellg();
     return static_cast<std::size_t>(sz);
   }
 
@@ -471,16 +466,13 @@ class binary_serde_impl : public serde {
     for (const auto &e: table) {
       std::size_t key_size = e.first.size();
       std::size_t value_size = e.second.size();
-      offset_out.write(reinterpret_cast<const char *>(&key_size), sizeof(size_t));
-      offset_out.write(reinterpret_cast<const char *>(e.first.data()), key_size);
-      offset_out.write(reinterpret_cast<const char *>(&value_size), sizeof(size_t));
-      out.write(reinterpret_cast<const char *>(e.second.data()), value_size);
+      out->write(reinterpret_cast<const char *>(&key_size), sizeof(size_t))
+          .write(reinterpret_cast<const char *>(e.first.data()), key_size)
+          .write(reinterpret_cast<const char *>(&value_size), sizeof(size_t))
+          .write(reinterpret_cast<const char *>(e.second.data()), value_size);
     }
-    out.flush();
-    offset_out.flush();
-    auto sz = out.tellp();
-    out.close();
-    offset_out.close();
+    out->flush();
+    auto sz = out->tellp();
     return static_cast<std::size_t>(sz);
   }
 
@@ -498,14 +490,11 @@ class binary_serde_impl : public serde {
     std::ofstream offset_out(offset_out_path, std::ios::binary);
     for (auto e = table.begin(); e != table.end(); e++) {
       std::size_t msg_size = (*e).size();
-      offset_out.write(reinterpret_cast<const char *>(&msg_size), sizeof(size_t));
-      out.write(reinterpret_cast<const char *>((*e).data()), msg_size);
+      out->write(reinterpret_cast<const char *>(&msg_size), sizeof(size_t))
+          .write(reinterpret_cast<const char *>((*e).data()), msg_size);
     }
-    out.flush();
-    offset_out.flush();
-    offset_out.close();
-    auto sz = out.tellp();
-    out.close();
+    out->flush();
+    auto sz = out->tellp();
     return static_cast<std::size_t>(sz);
   }
 
@@ -519,10 +508,9 @@ class binary_serde_impl : public serde {
   size_t serialize_impl(const file_type &table, const std::string& out_path) {
     std::ofstream out(out_path, std::ios::binary);
     std::size_t msg_size = table.size();
-    out.write(reinterpret_cast<const char *>(table.data()), msg_size);
-    out.flush();
-    auto sz = out.tellp();
-    out.close();
+    out->write(reinterpret_cast<const char *>(table.data()), msg_size);
+    out->flush();
+    auto sz = out->tellp();
     return static_cast<std::size_t>(sz);
   }
 
@@ -594,19 +582,18 @@ class binary_serde_impl : public serde {
     std::ifstream offset_in(offset_in_path,std::ios::binary);
     while (in.peek() != EOF && offset_in.peek() != EOF) {
       std::size_t key_size;
-      offset_in.read(reinterpret_cast<char *>(&key_size), sizeof(key_size));
+      std::size_t value_size;
+      in->read(reinterpret_cast<char *>(&key_size), sizeof(key_size));
       std::string key;
       key.resize(key_size);
-      offset_in.read(&key[0], key_size);
-      std::size_t value_size;
-      offset_in.read(reinterpret_cast<char *>(&value_size), sizeof(value_size));
+      in->read(&key[0], key_size);
+      in->read(reinterpret_cast<char *>(&value_size), sizeof(value_size));
       std::string value;
       value.resize(value_size);
-      in.read(&value[0], value_size);
+      in->read(&value[0], value_size);
       table.emplace(std::make_pair(make_binary(key), make_binary(value)));
     }
-    auto sz = in.tellg();
-    in.close();
+    auto sz = in->tellg();
     return static_cast<std::size_t>(sz);
   }
 
@@ -624,15 +611,13 @@ class binary_serde_impl : public serde {
     std::ifstream offset_in(offset_in_path,std::ios::binary);
     while (in.peek() != EOF && offset_in.peek() != EOF) {
       std::size_t msg_size;
-      offset_in.read(reinterpret_cast<char *>(&msg_size), sizeof(msg_size));
+      in->read(reinterpret_cast<char *>(&msg_size), sizeof(msg_size));
       std::string msg;
       msg.resize(msg_size);
-      in.read(&msg[0], msg_size);
+      in->read(&msg[0], msg_size);
       table.push_back(msg);
     }
-    auto sz = in.tellg();
-    offset_in.close();
-    in.close();
+    auto sz = in->tellg();
     return static_cast<std::size_t>(sz);
   }
 
@@ -648,10 +633,9 @@ class binary_serde_impl : public serde {
     std::size_t msg_size = table.size();
     std::string msg;
     msg.resize(msg_size);
-    in.read(&msg[0], msg_size);
+    in->read(&msg[0], msg_size);
     table.write(msg, 0);
-    auto sz = in.tellg();
-    in.close();
+    auto sz = in->tellg();
     return static_cast<std::size_t>(sz);
   }
 

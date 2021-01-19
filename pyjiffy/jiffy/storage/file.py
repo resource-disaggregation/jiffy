@@ -2,6 +2,7 @@ from jiffy.storage.replica_chain_client import ReplicaChainClient
 from jiffy.storage.command import CommandType
 from jiffy.storage.compat import b, unicode, bytes, long, basestring, bytes_to_str
 from jiffy.storage.data_structure_client import DataStructureClient
+from jiffy.storage.data_structure_cache import FileCache
 from jiffy.directory.directory_client import ReplicaChain
 from jiffy.directory.ttypes import rpc_storage_mode
 
@@ -21,13 +22,14 @@ class FileOps:
 
 
 class FileClient(DataStructureClient):
-    def __init__(self, fs, path, block_info, timeout_ms):
+    def __init__(self, fs, path, block_info, timeout_ms, cache_size=200, cache_block_size=32000, prefetch_size=5):
         super(FileClient, self).__init__(fs, path, block_info, FileOps.op_types, timeout_ms)
         self.cur_partition = 0
         self.cur_offset = 0
         self.last_partition = len(self.block_info.data_blocks) - 1
         self.last_offset = 0
         self.block_size = int(self.blocks[self._block_id()].run_command([FileOps.get_storage_capacity])[1])
+        self.cache = FileCache(max_length=cache_size, block_size=cache_block_size, prefetch_block_num=prefetch_size) 
         if self.block_info.tags.get("file.auto_scale") is None:
             self.auto_scale = True
         else:
@@ -50,18 +52,22 @@ class FileClient(DataStructureClient):
             return b""
         #Parallel read here
         start_partition = self._block_id()
-        count = 0
         while remaining_data > 0:
-            count += 1
-            data_to_read = min(remaining_data, self.block_size - self.cur_offset)
-            self.blocks[self._block_id()].send_command([FileOps.read, b(str(self.cur_offset)), b(str(data_to_read))])
+            data_to_read = min(self.cache.block_size - (self.cur_offset % self.cache.block_size), remaining_data, self.block_size - self.cur_offset)
+            if self.cache.exists(self.cur_offset):
+                ret += self.cache.hit_handling(self.cur_offset,data_to_read)
+            else:
+                start_offset = (self.cur_offset // self.cache.block_size) * self.cache.block_size
+                self.blocks[self._block_id()].send_command([FileOps.read, b(str(start_offset)), b(str(min(file_size - self.cur_partition * self.block_size - self.cur_offset, self.cache.prefetch_block_num * self.cache.block_size)))])
+                prefetched_data = self.blocks[self._block_id()].recv_response()[-1]
+                self.cache.prefetch_handling(start_offset, prefetched_data)
+                ret += self.cache.hit_handling(self.cur_offset,data_to_read)
             remaining_data -= data_to_read
             self.cur_offset += data_to_read
             if self.cur_offset == self.block_size and self.cur_partition != self.last_partition:
                 self.cur_offset = 0
                 self.cur_partition += 1
-        for k in range(0, count):
-            ret += self.blocks[start_partition + k].recv_response()[-1]
+        
         return ret
 
     def write(self, data):
@@ -103,8 +109,10 @@ class FileClient(DataStructureClient):
         count = 0
         while remaining_data > 0:
             count += 1
-            data_to_write = data[len(data) - remaining_data : len(data) - remaining_data + min(remaining_data, self.block_size - self.cur_offset)]
-            self.blocks[self._block_id()].send_command([FileOps.write, data_to_write, b(str(self.cur_offset))])
+            data_to_write = data[len(data) - remaining_data : len(data) - remaining_data + min(self.cache.block_size - (self.cur_offset % self.cache.block_size), remaining_data, self.block_size - self.cur_offset)]
+            self.blocks[self._block_id()].send_command([FileOps.write, data_to_write, b(str(self.cur_offset)), b(str(self.cache.block_size)), b(str(self.last_offset))])
+            resp = self.blocks[self._block_id()].recv_response()
+            self.cache.miss_handling(self.cur_offset,resp[-1])
             remaining_data -= len(data_to_write)
             self.cur_offset += len(data_to_write)
             if self.last_offset < self.cur_offset and self.cur_partition == self.last_partition:
@@ -115,8 +123,6 @@ class FileClient(DataStructureClient):
                 if self.last_partition < self.cur_partition:
                     self.last_partition = self.cur_partition
                     self.last_offset = self.cur_offset
-        for i in range(0, count):
-            self.blocks[start_partition + i].recv_response()
 
         return len(data)
 

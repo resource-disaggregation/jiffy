@@ -35,7 +35,7 @@ file_partition::file_partition(block_memory_manager *manager,
 }
 
 void file_partition::write(response &_return, const arg_list &args) {
-  if (args.size() != 3) {
+  if (args.size() != 5 && args.size() != 3) {
     RETURN_ERR("!args_error");
   }
   auto off = std::stoi(args[2]);
@@ -43,7 +43,19 @@ void file_partition::write(response &_return, const arg_list &args) {
   if (!ret.first) {
     throw std::logic_error("Write failed");
   }
+  if (args.size() == 5) {
+    int cache_block_size = std::stoi(args[3]);
+    int last_offset = std::stoi(args[4]) + args[1].size();
+    int start_offset = (int(off)) / cache_block_size * cache_block_size;
+    int end_offset = (int(off) + args[1].size() - 1) / cache_block_size * cache_block_size;
+    int num_of_blocks = (end_offset - start_offset) / cache_block_size + 1;
+    auto full_block_data = partition_.read(static_cast<std::size_t>(start_offset), static_cast<std::size_t>(std::min(last_offset - start_offset, cache_block_size * num_of_blocks)));
+    if (full_block_data.first) {
+      RETURN_OK(full_block_data.second);
+    }
+  }
   RETURN_OK();
+  
 }
 
 void file_partition::read(response &_return, const arg_list &args) {
