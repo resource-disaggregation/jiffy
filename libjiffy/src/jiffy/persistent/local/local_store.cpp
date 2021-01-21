@@ -15,8 +15,8 @@ void local_store::write(const storage::locked_hash_table_type &table, const std:
   try {
     serde()->serialize(table, out_path);
   }
-  catch (...) {
-    std::cout << "catch (...)" << std::endl;
+  catch(std::exception& err) {
+    std::cout<<err.what()<<std::endl;
   }
   
   out->close();

@@ -260,7 +260,7 @@ class local_store_impl : public persistent_service {
     auto dir = out_path.substr(0, found);
     directory_utils::create_directory(dir);
     std::shared_ptr<std::ofstream> out(new std::ofstream(out_path));
-    serde()->serialize<Datatype>(table, out);
+    serde()->serialize<Datatype>(table, out_path);
     out->close();
   }
 
@@ -272,7 +272,7 @@ class local_store_impl : public persistent_service {
   template<typename Datatype>
   void read_impl(const std::string &in_path, Datatype &table) {
     auto in = std::make_shared<std::ifstream>(in_path.c_str(), std::fstream::in);
-    serde()->deserialize<Datatype>(in, table);
+    serde()->deserialize<Datatype>(table, in_path);
     in->close();
   }
 
@@ -325,7 +325,7 @@ class s3_store_impl : public persistent_service {
 
     Aws::Utils::Stream::SimpleStreamBuf sbuf;
     auto out = Aws::MakeShared<Aws::IOStream>("StreamBuf", &sbuf);
-    serde()->serialize<Datatype>(table, out);
+    serde()->serialize<Datatype>(table, out_path);
     out->seekg(0, std::ios_base::beg);
 
     object_request.SetBody(out);
@@ -361,7 +361,7 @@ class s3_store_impl : public persistent_service {
     if (get_object_outcome.IsSuccess()) {
       Aws::OFStream local_file;
       auto in = std::make_shared<Aws::IOStream>(get_object_outcome.GetResult().GetBody().rdbuf());
-      serde()->deserialize<Datatype>(in, table);
+      serde()->deserialize<Datatype>(table, in_path);
       LOG(log_level::info) << "Successfully read table from " << in_path;
     } else {
       LOG(log_level::error) << "S3 GetObject error: " << get_object_outcome.GetError().GetExceptionName() << " " <<
