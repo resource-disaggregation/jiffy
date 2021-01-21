@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <jiffy/utils/property_map.h>
+#include <memkind.h>
 #include "chain_module.h"
 #include "partition.h"
 
@@ -21,6 +22,8 @@ class block {
    */
   explicit block(const std::string &id,
         const size_t capacity = 134217728,
+        const std::string memory_mode = "PMEM",
+        struct memkind* pmem_kind = nullptr,
         const std::string &auto_scaling_host = "127.0.0.1",
         const int auto_scaling_port = 9095);
 
@@ -78,6 +81,7 @@ class block {
  private:
   std::string id_;
   block_memory_manager manager_;
+  struct memkind* pmem_kind_;
   std::shared_ptr<chain_module> impl_;
 
   std::string directory_host_;

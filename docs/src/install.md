@@ -40,7 +40,7 @@ The external libraries are automatically downloaded and built. User can specify 
 * `USE_SYSTEM_AWS_SDK`: Use system AWS SDK (OFF by default)
 * `USE_SYSTEM_BOOST`: Use system boost library (OFF by default)
 * `USE_SYSTEM_CATCH`: Use system catch library (OFF by default)
-* `USE_SYSTEM_JEMALLOC`: Use system Jemalloc (OFF by default)
+* `USE_SYSTEM_MEMKIND`: Use system Memkind (OFF by default)
 * `USE_SYSTEM_LIBCUCKOO`: Use system libcuckoo library (OFF by default)
 * `USE_SYSTEM_THRIFT`: Use system thrift library (OFF by default)
 

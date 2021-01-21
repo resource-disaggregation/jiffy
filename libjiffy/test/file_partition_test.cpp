@@ -1,4 +1,5 @@
 #include "catch.hpp"
+#include "test_utils.h"
 #include "jiffy/storage/file/file_defs.h"
 #include "jiffy/storage/file/file_partition.h"
 #include <vector>
@@ -8,7 +9,10 @@ using namespace ::jiffy::storage;
 using namespace ::jiffy::persistent;
 
 TEST_CASE("file_write_read_test", "[write][read]") {
-  block_memory_manager manager;
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  size_t capacity = 134217728;
+  block_memory_manager manager(capacity, memory_mode, pmem_kind);
   file_partition block(&manager);
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -31,7 +35,10 @@ TEST_CASE("file_write_read_test", "[write][read]") {
 }
 
 TEST_CASE("file_write_clear_read_test", "[write][read]") {
-  block_memory_manager manager;
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  size_t capacity = 134217728;
+  block_memory_manager manager(capacity, memory_mode, pmem_kind);
   file_partition block(&manager);
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -54,10 +61,14 @@ TEST_CASE("file_write_clear_read_test", "[write][read]") {
     REQUIRE(resp[1] == std::string(std::to_string(i).size(), 0));
     read_pos += std::to_string(i).size();
   }
+  test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
-  block_memory_manager manager;
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  size_t capacity = 134217728;
+  block_memory_manager manager(capacity, memory_mode, pmem_kind);
   file_partition block(&manager);
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -67,10 +78,14 @@ TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
     offset += std::to_string(i).size();
   }
   REQUIRE(block.storage_size() <= block.storage_capacity());
+  test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
-  block_memory_manager manager;
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  size_t capacity = 134217728;
+  block_memory_manager manager(capacity, memory_mode, pmem_kind);
   file_partition block(&manager);
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
