@@ -28,8 +28,6 @@ file_partition::file_partition(block_memory_manager *manager,
     ser_ = std::make_shared<binary_serde>(binary_allocator_);
   } else if (ser_name_ == "csv") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
-  } else if (ser == "csv") {
-    ser_ = std::make_shared<binary_serde>(binary_allocator_);
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
