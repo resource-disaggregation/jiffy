@@ -38,8 +38,8 @@ class serde {
    */
 
   template<typename DataType>
-  std::size_t serialize(const DataType &data, std::shared_ptr<std::ostream> out) {
-    return virtual_serialize(data, out);
+  std::size_t serialize(const DataType &data, const std::string& out_path) {
+    return virtual_serialize(data, out_path);
   }
 
   /**
@@ -50,8 +50,8 @@ class serde {
    */
 
   template<typename DataType>
-  std::size_t deserialize(std::shared_ptr<std::istream> in, DataType &data) {
-    return virtual_deserialize(in, data);
+  std::size_t deserialize(DataType &data, const std::string& in_path) {
+    return virtual_deserialize(data, in_path);
   }
 
   /**
@@ -73,7 +73,7 @@ class serde {
    * @return Output stream position
    */
 
-  virtual std::size_t virtual_serialize(const hash_table_type &table, std::shared_ptr<std::ostream> out) = 0;
+  virtual std::size_t virtual_serialize(const hash_table_type &table, const std::string& out_path) = 0;
 
   /**
    * @brief Virtual serialize function for fifo queue
@@ -82,8 +82,7 @@ class serde {
    * @return Output stream position
    */
 
-  virtual std::size_t virtual_serialize(const fifo_queue_type &table, std::shared_ptr<std::ostream> out) = 0;
-
+  virtual std::size_t virtual_serialize(const fifo_queue_type &table, const std::string& out_path) = 0;
   /**
    * @brief Virtual serialize function for file
    * @param table File
@@ -91,7 +90,7 @@ class serde {
    * @return Output stream position
    */
 
-  virtual std::size_t virtual_serialize(const file_type &table, std::shared_ptr<std::ostream> out) = 0;
+  virtual std::size_t virtual_serialize(const file_type &table, const std::string& out_path) = 0;
 
   /**
    * @brief Virtual deserialize function for new hash table type
@@ -100,7 +99,7 @@ class serde {
    * @return Input stream position
    */
 
-  virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, hash_table_type &table) = 0;
+  virtual std::size_t virtual_deserialize(hash_table_type &table, const std::string& in_path) = 0;
 
   /**
    * @brief Virtual deserialize function for fifo queue
@@ -109,7 +108,7 @@ class serde {
    * @return Input stream position
    */
 
-  virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, fifo_queue_type &table) = 0;
+  virtual std::size_t virtual_deserialize(fifo_queue_type &table, const std::string& in_path) = 0;
 
   /**
    * @brief Virtual deserialize function for file
@@ -118,7 +117,7 @@ class serde {
    * @return Input stream position
    */
 
-  virtual std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, file_type &table) = 0;
+  virtual std::size_t virtual_deserialize(file_type &table, const std::string& in_path) = 0;
 
   /* Block memory allocator */
   block_memory_allocator<uint8_t> allocator_;
@@ -147,8 +146,9 @@ class derived : public impl {
    * @param out Output stream
    * @return Output stream position
    */
-  std::size_t virtual_serialize(const hash_table_type &table, std::shared_ptr<std::ostream> out) final {
-    return impl::serialize_impl(table, out);
+   
+  std::size_t virtual_serialize(const hash_table_type &table, const std::string& out_path) final {
+    return impl::serialize_impl(table, out_path);
   }
 
   /**
@@ -158,8 +158,8 @@ class derived : public impl {
    * @return Output stream position
    */
 
-  std::size_t virtual_serialize(const fifo_queue_type &table, std::shared_ptr<std::ostream> out) final {
-    return impl::serialize_impl(table, out);
+  std::size_t virtual_serialize(const fifo_queue_type &table, const std::string& out_path) final {
+    return impl::serialize_impl(table, out_path);
   }
 
   /**
@@ -169,8 +169,8 @@ class derived : public impl {
    * @return Output stream position
    */
 
-  std::size_t virtual_serialize(const file_type &table, std::shared_ptr<std::ostream> out) final {
-    return impl::serialize_impl(table, out);
+  std::size_t virtual_serialize(const file_type &table, const std::string& out_path) final {
+    return impl::serialize_impl(table, out_path);
   }
 
   /**
@@ -179,8 +179,8 @@ class derived : public impl {
    * @param table Hash table
    * @return Input stream position
    */
-  std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, hash_table_type &table) final {
-    return impl::deserialize_impl(in, table);
+  std::size_t virtual_deserialize(hash_table_type &table, const std::string& in_path) final {
+    return impl::deserialize_impl(table, in_path);
   }
 
   /**
@@ -190,8 +190,8 @@ class derived : public impl {
    * @return Input stream position
    */
 
-  std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, fifo_queue_type &table) final {
-    return impl::deserialize_impl(in, table);
+  std::size_t virtual_deserialize(fifo_queue_type &table, const std::string& in_path) final {
+    return impl::deserialize_impl(table, in_path);
   }
 
   /**
@@ -201,8 +201,8 @@ class derived : public impl {
    * @return Input stream position
    */
 
-  std::size_t virtual_deserialize(std::shared_ptr<std::istream> in, file_type &table) final {
-    return impl::deserialize_impl(in, table);
+  std::size_t virtual_deserialize(file_type &table, const std::string& in_path) final {
+    return impl::deserialize_impl(table, in_path);
   }
 };
 
@@ -228,7 +228,8 @@ class csv_serde_impl : public serde {
    */
 
   template<typename DataType>
-  std::size_t serialize_impl(const DataType &table, const std::shared_ptr<std::ostream> &out) {
+  std::size_t serialize_impl(const DataType &table, const std::string& out_path) {
+    std::ofstream out(out_path,std::ios::out);
     for (auto e: table) {
       *out << to_string(e.first) << "," << to_string(e.second)
            << "\n";
@@ -245,7 +246,8 @@ class csv_serde_impl : public serde {
    * @return Output stream position after flushing
    */
 
-  std::size_t serialize_impl(const fifo_queue_type &table, const std::shared_ptr<std::ostream> &out) {
+  std::size_t serialize_impl(const fifo_queue_type &table, const std::string& out_path) {
+    std::ofstream out(out_path,std::ios::out);
     for (auto e = table.begin(); e != table.end(); e++) {
       *out << *e << "\n";
     }
@@ -261,10 +263,12 @@ class csv_serde_impl : public serde {
    * @return Output stream position after flushing
    */
 
-  std::size_t serialize_impl(const file_type &table, const std::shared_ptr<std::ostream> &out) {
-    *out << std::string(table.data(), table.size()) << "\n";
-    out->flush();
-    auto sz = out->tellp();
+  std::size_t serialize_impl(const file_type &table, const std::string& out_path) {
+    std::ofstream out(out_path,std::ios::out);
+    out << std::string(table.data(), table.size()) << "\n";
+    out.flush();
+    auto sz = out.tellp();
+    out.close();
     return static_cast<std::size_t>(sz);
   }
 
@@ -276,8 +280,9 @@ class csv_serde_impl : public serde {
    */
 
   template<typename DataType>
-  std::size_t deserialize_impl(const std::shared_ptr<std::istream> &in, DataType &data) {
-    while (!in->eof()) {
+  std::size_t deserialize_impl(DataType &data, const std::string& in_path) {
+    std::ifstream in(in_path);
+    while (!in.eof()) {
       std::string line;
       std::getline(*in, line, '\n');
       if (line.empty())
@@ -296,8 +301,9 @@ class csv_serde_impl : public serde {
    * @return Input stream position after reading
    */
 
-  std::size_t deserialize_impl(const std::shared_ptr<std::istream> &in, fifo_queue_type &data) {
-    while (!in->eof()) {
+  std::size_t deserialize_impl(fifo_queue_type &data, const std::string& in_path) {
+    std::ifstream in(in_path);
+    while (!in.eof()) {
       std::string line;
       std::getline(*in, line, '\n');
       if (line.empty())
@@ -315,7 +321,8 @@ class csv_serde_impl : public serde {
    * @return Input stream position after reading
    */
 
-  std::size_t deserialize_impl(const std::shared_ptr<std::istream> &in, file_type &data) {
+  std::size_t deserialize_impl(file_type &data, const std::string& in_path) {
+    std::ifstream in(in_path);
     std::size_t offset = 0;
     while (!in->eof()) {
       std::string line;
@@ -388,7 +395,11 @@ class binary_serde_impl : public serde {
    */
 
   template<typename Datatype>
-  size_t serialize_impl(const Datatype &table, const std::shared_ptr<std::ostream> &out) {
+  size_t serialize_impl(const Datatype &table, const std::string& out_path) {
+    std::ofstream out(out_path,std::ios::binary);
+    std::string offset_out_path = out_path;
+    offset_out_path.append("_offset");
+    std::ofstream offset_out(offset_out_path,std::ios::binary);
     for (const auto &e: table) {
       std::size_t key_size = e.first.size();
       std::size_t value_size = e.second.size();
@@ -409,7 +420,11 @@ class binary_serde_impl : public serde {
    * @return Output stream position
    */
 
-  size_t serialize_impl(const fifo_queue_type &table, const std::shared_ptr<std::ostream> &out) {
+  size_t serialize_impl(const fifo_queue_type &table, const std::string& out_path) {
+    std::ofstream out(out_path,std::ios::binary);
+    std::string offset_out_path = out_path;
+    offset_out_path.append("_offset");
+    std::ofstream offset_out(offset_out_path,std::ios::binary);
     for (auto e = table.begin(); e != table.end(); e++) {
       std::size_t msg_size = (*e).size();
       out->write(reinterpret_cast<const char *>(&msg_size), sizeof(size_t))
@@ -427,7 +442,8 @@ class binary_serde_impl : public serde {
    * @return Output stream position
    */
 
-  size_t serialize_impl(const file_type &table, const std::shared_ptr<std::ostream> &out) {
+  size_t serialize_impl(const file_type &table, const std::string& out_path) {
+    std::ofstream out(out_path,std::ios::binary);
     std::size_t msg_size = table.size();
     out->write(reinterpret_cast<const char *>(table.data()), msg_size);
     out->flush();
@@ -443,8 +459,12 @@ class binary_serde_impl : public serde {
    */
 
   template<typename DataType>
-  size_t deserialize_impl(const std::shared_ptr<std::istream> &in, DataType &table) {
-    while (!in->eof()) {
+  size_t deserialize_impl(DataType &table, const std::string& in_path) {
+    std::ifstream in(in_path,std::ios::binary);
+    std::string offset_in_path = in_path;
+    offset_in_path.append("_offset");
+    std::ifstream offset_in(offset_in_path,std::ios::binary);
+    while (in.peek() != EOF && offset_in.peek() != EOF) {
       std::size_t key_size;
       std::size_t value_size;
       in->read(reinterpret_cast<char *>(&key_size), sizeof(key_size));
@@ -468,8 +488,12 @@ class binary_serde_impl : public serde {
    * @return Input stream position
    */
 
-  size_t deserialize_impl(const std::shared_ptr<std::istream> &in, fifo_queue_type &table) {
-    while (!in->eof()) {
+  size_t deserialize_impl(fifo_queue_type &table, const std::string& in_path) {
+    std::ifstream in(in_path,std::ios::binary);
+    std::string offset_in_path = in_path;
+    offset_in_path.append("_offset");
+    std::ifstream offset_in(offset_in_path,std::ios::binary);
+    while (in.peek() != EOF && offset_in.peek() != EOF) {
       std::size_t msg_size;
       in->read(reinterpret_cast<char *>(&msg_size), sizeof(msg_size));
       std::string msg;
@@ -488,7 +512,8 @@ class binary_serde_impl : public serde {
    * @return Input stream position
    */
 
-  size_t deserialize_impl(const std::shared_ptr<std::istream> &in, file_type &table) {
+  size_t deserialize_impl(file_type &table, const std::string& in_path) {
+    std::ifstream in(in_path,std::ios::binary);
     std::size_t msg_size = table.size();
     std::string msg;
     msg.resize(msg_size);

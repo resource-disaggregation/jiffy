@@ -23,11 +23,11 @@ file_partition::file_partition(block_memory_manager *manager,
       block_allocated_(false),
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port) {
-  auto ser = conf.get("file.serializer", "csv");
-  if (ser == "binary") {
-    ser_ = std::make_shared<csv_serde>(binary_allocator_);
-  } else if (ser == "csv") {
+  ser_name_ = conf.get("file.serializer", "csv");
+  if (ser_name_ == "binary") {
     ser_ = std::make_shared<binary_serde>(binary_allocator_);
+  } else if (ser_name_ == "csv") {
+    ser_ = std::make_shared<csv_serde>(binary_allocator_);
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
   }
@@ -68,6 +68,54 @@ void file_partition::read(response &_return, const arg_list &args) {
   auto ret = partition_.read(static_cast<std::size_t>(pos), static_cast<std::size_t>(size));
   if (ret.first) {
     RETURN_OK(ret.second);
+  }
+
+}
+
+void file_partition::write_ls(response &_return, const arg_list &args) {
+  if (args.size() != 3) {
+    RETURN_ERR("!args_error");
+  }
+  std::string file_path, line, data;
+  int pos = std::stoi(args[2]);
+  file_path = directory_utils::remove_uri(backing_path());
+  directory_utils::push_path_element(file_path,name());
+  std::ofstream out(file_path,std::ios::in|std::ios::out);
+  if (out) {
+    data = args[1];
+    out.seekp(pos, std::ios::beg);
+    out << data;
+    out.close();
+    RETURN_OK();  
+  }
+  else {
+    RETURN_ERR("!file_does_not_exist");
+  }
+}
+
+void file_partition::read_ls(response &_return, const arg_list &args) {
+  if (args.size() != 3) {
+    RETURN_ERR("!args_error");
+  }
+  std::string file_path, line, ret_str;
+  auto pos = std::stoi(args[1]);
+  auto size = std::stoi(args[2]);
+  file_path = directory_utils::remove_uri(backing_path());
+  directory_utils::push_path_element(file_path,name());
+  std::ifstream in(file_path,std::ios::in);
+  if (in) {
+    if (pos < 0) throw std::invalid_argument("read position invalid");
+    in.seekg(0, std::ios::end);
+    in.seekg(pos, std::ios::beg);
+    char *ret = new char[size];
+    in.read(ret,size);
+    ret_str = ret;
+    memset(ret,0,size);
+    delete[] ret;
+    RETURN_OK(ret_str);
+  }
+  else {
+    RETURN_ERR("file_does_not_exist");
   }
 
 }

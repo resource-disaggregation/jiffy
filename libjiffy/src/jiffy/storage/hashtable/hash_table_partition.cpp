@@ -28,10 +28,10 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
       import_slot_range_(0, -1),
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port) {
-  auto ser = conf.get("hashtable.serializer", "csv");
-  if (ser == "binary") {
+  ser_name_ = conf.get("hashtable.serializer", "csv");
+  if (ser_name_ == "binary") {
     ser_ = std::make_shared<binary_serde>(binary_allocator_);
-  } else if (ser == "csv") {
+  } else if (ser_name_ == "csv") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
@@ -239,6 +239,442 @@ void hash_table_partition::remove(response &_return, const arg_list &args) {
     RETURN_OK();
   }
   RETURN_ERR("!block_moved");
+}
+
+void hash_table_partition::exists_ls(response &_return, const arg_list &args) {
+  if (args.size() != 2) {
+    RETURN("!args_error");
+  }
+  std::string file_path, line, key, value;
+  file_path = directory_utils::remove_uri(backing_path());
+  directory_utils::push_path_element(file_path,name());
+  if (ser_name_ == "csv") {
+    std::ifstream in(file_path);
+    if (in) {
+      while(getline(in,line)) {
+        int split_index = line.find(",");
+        key = line.substr(0,split_index);
+        if (key == args[1]) {
+          RETURN_OK();
+        }
+      }
+      in.close();
+      RETURN_ERR("!key_not_found");
+    }
+    else {
+      RETURN_ERR("!hash_table_does_not_exist");
+    }
+  }
+  else if (ser_name_ == "binary") {
+    std::string offset_path = file_path;
+    offset_path.append("_offset");
+    std::ifstream offset_in(offset_path,std::ios::binary);
+    std::size_t key_size = 0;
+    std::size_t value_size = 0;
+    if (offset_in) {
+      while (offset_in.peek() != EOF) {
+        offset_in.read(reinterpret_cast<char *>(&key_size), sizeof(key_size));
+        key.resize(key_size);
+        offset_in.read(&key[0], key_size);
+        offset_in.read(reinterpret_cast<char *>(&value_size), sizeof(value_size));
+        if (key == args[1]) {
+          offset_in.close();
+          RETURN_OK();
+        }
+      }
+      offset_in.close();
+      RETURN_ERR("!key_not_found");
+    }
+    else {
+      RETURN_ERR("!fifo_queue_does_not_exist");
+    }
+  }
+}
+
+void hash_table_partition::put_ls(response &_return, const arg_list &args) {
+  if (args.size() != 3) {
+    RETURN_ERR("!args_error");
+  }
+  std::string file_path, line, key, value;
+  file_path = directory_utils::remove_uri(backing_path());
+  directory_utils::push_path_element(file_path,name());
+  if (ser_name_ == "csv") {
+    std::ifstream in(file_path);
+    if (in) {
+      while(getline(in,line)) {
+        int split_index = line.find(",");
+        key = line.substr(0,split_index);
+        if (key == args[1]) {
+          in.close();
+          RETURN_ERR("!duplicate_key");
+        }
+      }
+      in.close();
+      std::ofstream out(file_path,std::ios::app);
+      out << args[1] << "," << args[2] << std::endl;
+      out.close();
+      RETURN_OK();
+    }
+    else {
+      RETURN_ERR("!hash_table_does_not_exist");
+    }
+  }
+  else if (ser_name_ == "binary") {
+    std::string offset_path = file_path;
+    offset_path.append("_offset");
+    std::ifstream offset_in(offset_path,std::ios::binary);
+    std::size_t key_size = 0;
+    std::size_t value_size = 0;
+    if (offset_in) {
+      while (offset_in.peek() != EOF) {
+        offset_in.read(reinterpret_cast<char *>(&key_size), sizeof(key_size));
+        key.resize(key_size);
+        offset_in.read(&key[0], key_size);
+        offset_in.read(reinterpret_cast<char *>(&value_size), sizeof(value_size));
+        if (key == args[1]) {
+          offset_in.close();
+          RETURN_ERR("!duplicate_key");
+        }
+      }
+      offset_in.close();
+      std::ofstream out(file_path,std::ios::app);
+      std::ofstream offset_out(offset_path,std::ios::app);
+      key_size = args[1].size();
+      value_size = args[2].size();
+      offset_out.write(reinterpret_cast<const char *>(&key_size), sizeof(size_t));
+      offset_out.write(reinterpret_cast<const char *>(args[1].data()), key_size);
+      offset_out.write(reinterpret_cast<const char *>(&value_size), sizeof(size_t));
+      out.write(reinterpret_cast<const char *>(args[2].data()), value_size);
+      out.close();
+      offset_out.close();
+      RETURN_OK();
+    }
+    else {
+      RETURN_ERR("!fifo_queue_does_not_exist");
+    }
+  }
+}
+
+void hash_table_partition::upsert_ls(response &_return, const arg_list &args) {
+  if (args.size() != 3) {
+    RETURN_ERR("!args_error");
+  }
+  std::unordered_map<std::string,std::string> ht;
+  std::string file_path, line, key, value;
+  int key_exist = 0;
+  file_path = directory_utils::remove_uri(backing_path());
+  directory_utils::push_path_element(file_path,name());
+  if (ser_name_ == "csv") {
+    std::ifstream in(file_path);
+    if (in) {
+      while(getline(in,line)) {
+        int split_index = line.find(",");
+        key = line.substr(0,split_index);
+        if (key == args[1]) {
+          key_exist = 1;
+          value = args[2];
+          ht.insert({key,value});
+          continue;
+        }
+        value = line.substr(split_index+1);
+        ht.insert({key,value});
+      }
+      in.close();
+    }
+    else {
+      RETURN_ERR("!hash_table_does_not_exist");
+    }
+    if (key_exist == 0) {
+      ht.insert({args[1],args[2]});
+    }
+    std::ofstream out(file_path);
+    for (auto x: ht) {
+      out << (x.first) << "," << (x.second) << std::endl;
+    }
+    out.close();
+    RETURN_OK();
+  }
+  else if (ser_name_ == "binary") {
+    std::ifstream in(file_path,std::ios::binary);
+    std::string offset_path = file_path;
+    offset_path.append("_offset");
+    std::ifstream offset_in(offset_path,std::ios::binary);
+    std::size_t key_size = 0;
+    std::size_t value_size = 0;
+    if (in && offset_in) {
+      while (offset_in.peek() != EOF) {
+        offset_in.read(reinterpret_cast<char *>(&key_size), sizeof(key_size));
+        key.resize(key_size);
+        offset_in.read(&key[0], key_size);
+        offset_in.read(reinterpret_cast<char *>(&value_size), sizeof(value_size));
+        if (key == args[1]) {
+          key_exist = 1;
+          in.read(&value[0], value_size);
+          ht.insert({key,args[2]});
+          continue;
+        }
+        value.resize(value_size);
+        in.read(&value[0], value_size);
+        ht.insert({key,value});
+      }
+      in.close();
+      offset_in.close();
+    }
+    else {
+      RETURN_ERR("!hash_table_does_not_exist");
+    }
+    if (key_exist == 0) {
+      ht.insert({args[1],args[2]});
+    }
+    std::ofstream out(file_path,std::ios::binary);
+    std::ofstream offset_out(offset_path,std::ios::binary);
+    for (auto x: ht) {
+      key_size = x.first.size();
+      value_size = x.second.size();
+      offset_out.write(reinterpret_cast<const char *>(&key_size), sizeof(size_t));
+      offset_out.write(reinterpret_cast<const char *>(x.first.data()), key_size);
+      offset_out.write(reinterpret_cast<const char *>(&value_size), sizeof(size_t));
+      out.write(reinterpret_cast<const char *>(x.second.data()), value_size);
+    }
+    out.close();
+    offset_out.close();
+    RETURN_OK();
+  }
+  
+}
+
+void hash_table_partition::get_ls(response &_return, const arg_list &args) {
+  if (args.size() != 2) {
+    RETURN("!args_error");
+  }
+  std::string file_path, line, key, value;
+  file_path = directory_utils::remove_uri(backing_path());
+  directory_utils::push_path_element(file_path,name());
+  if (ser_name_ == "csv") {
+    std::ifstream in(file_path);
+    if (in) {
+      while(getline(in,line)) {
+        int split_index = line.find(",");
+        key = line.substr(0,split_index);
+        if (key == args[1]) {
+          value = line.substr(split_index+1);
+          RETURN_OK(value);
+        }
+      }
+      in.close();
+      RETURN_ERR("!key_not_found");
+    }
+    else {
+      RETURN_ERR("!hash_table_does_not_exist");
+    }
+  }
+  else if (ser_name_ == "binary") {
+    std::ifstream in(file_path,std::ios::binary);
+    std::string offset_path = file_path;
+    offset_path.append("_offset");
+    std::ifstream offset_in(offset_path,std::ios::binary);
+    std::size_t offset = 0;
+    std::size_t key_size = 0;
+    std::size_t value_size = 0;
+    if (in && offset_in) {
+      while (offset_in.peek() != EOF) {
+        offset_in.read(reinterpret_cast<char *>(&key_size), sizeof(key_size));
+        key.resize(key_size);
+        offset_in.read(&key[0], key_size);
+        offset_in.read(reinterpret_cast<char *>(&value_size), sizeof(value_size));
+        if (key == args[1]) {
+          value.resize(value_size);
+          in.seekg(offset,std::ios::beg);
+          in.read(&value[0], value_size);
+          RETURN_OK(value);
+        }
+        offset += value_size;
+      }
+      in.close();
+      offset_in.close();
+      RETURN_ERR("!key_not_found");
+    }
+    else {
+      RETURN_ERR("!hash_table_does_not_exist");
+    }
+  }
+}
+
+void hash_table_partition::update_ls(response &_return, const arg_list &args) {
+  if (args.size() != 3) {
+    RETURN_ERR("!args_error");
+  }
+  
+  std::unordered_map<std::string,std::string> ht;
+  std::string file_path, line, key, value;
+  int key_exist = 0;
+  file_path = directory_utils::remove_uri(backing_path());
+  directory_utils::push_path_element(file_path,name());
+  if (ser_name_ == "csv") {
+    std::ifstream in(file_path);
+    if (in) {
+      while(getline(in,line)) {
+        int split_index = line.find(",");
+        key = line.substr(0,split_index);
+        if (key == args[1]) {
+          key_exist = 1;
+          value = args[2];
+          ht.insert({key,value});
+          continue;
+        }
+        value = line.substr(split_index+1);
+        ht.insert({key,value});
+      }
+      in.close();
+    }
+    else {
+      RETURN_ERR("!hash_table_does_not_exist");
+    }
+    if (key_exist == 1) {
+      std::ofstream out(file_path);
+      for (auto x: ht) {
+        out << (x.first) << "," << (x.second) << std::endl;
+      }
+      out.close();
+      RETURN_OK();
+    }
+    else {
+      RETURN_ERR("!key_not_found");
+    }
+  }
+  else if (ser_name_ == "binary") {
+    std::ifstream in(file_path,std::ios::binary);
+    std::string offset_path = file_path;
+    offset_path.append("_offset");
+    std::ifstream offset_in(offset_path,std::ios::binary);
+    std::size_t key_size = 0;
+    std::size_t value_size = 0;
+    if (in && offset_in) {
+      while (offset_in.peek() != EOF) {
+        offset_in.read(reinterpret_cast<char *>(&key_size), sizeof(key_size));
+        key.resize(key_size);
+        offset_in.read(&key[0], key_size);
+        offset_in.read(reinterpret_cast<char *>(&value_size), sizeof(value_size));
+        if (key == args[1]) {
+          key_exist = 1;
+          in.read(&value[0], value_size);
+          ht.insert({key,args[2]});
+          continue;
+        }
+        value.resize(value_size);
+        in.read(&value[0], value_size);
+        ht.insert({key,value});
+      }
+      in.close();
+      offset_in.close();
+    }
+    else {
+      RETURN_ERR("!hash_table_does_not_exist");
+    }
+    if (key_exist == 0) {
+      RETURN_ERR("!key_not_found");
+    }
+    std::ofstream out(file_path,std::ios::binary);
+    std::ofstream offset_out(offset_path,std::ios::binary);
+    for (auto x: ht) {
+      key_size = x.first.size();
+      value_size = x.second.size();
+      offset_out.write(reinterpret_cast<const char *>(&key_size), sizeof(size_t));
+      offset_out.write(reinterpret_cast<const char *>(x.first.data()), key_size);
+      offset_out.write(reinterpret_cast<const char *>(&value_size), sizeof(size_t));
+      out.write(reinterpret_cast<const char *>(x.second.data()), value_size);
+    }
+    out.close();
+    offset_out.close();
+    RETURN_OK();
+  }
+}
+
+void hash_table_partition::remove_ls(response &_return, const arg_list &args) {
+  if (args.size() != 2) {
+    RETURN_ERR("!args_error");
+  }
+  // Ordinary remove or buffered remove
+  std::unordered_map<std::string,std::string> ht;
+  std::string file_path, line, key, value;
+  int key_exist = 0;
+  file_path = directory_utils::remove_uri(backing_path());
+  directory_utils::push_path_element(file_path,name());
+  if (ser_name_ == "csv") {
+    std::ifstream in(file_path);
+    if (in) {
+      while(getline(in,line)) {
+        int split_index = line.find(",");
+        key = line.substr(0,split_index);
+        if (key == args[1]) {
+          key_exist = 1;
+          continue;
+        }
+        value = line.substr(split_index+1);
+        ht.insert({key,value});
+      }
+      in.close();
+    }
+    else {
+      RETURN_ERR("!hash_table_does_not_exist");
+    }
+    if (key_exist == 1) {
+      std::ofstream out(file_path);
+      for (auto x: ht) {
+        out << (x.first) << "," << (x.second) << std::endl;
+      }
+      out.close();
+      RETURN_OK();
+    }
+    else {
+      RETURN_ERR("!key_not_found");
+    }
+  }
+  else if (ser_name_ == "binary") {
+    std::ifstream in(file_path,std::ios::binary);
+    std::string offset_path = file_path;
+    offset_path.append("_offset");
+    std::ifstream offset_in(offset_path,std::ios::binary);
+    std::size_t key_size = 0;
+    std::size_t value_size = 0;
+    if (in && offset_in) {
+      while (offset_in.peek() != EOF) {
+        offset_in.read(reinterpret_cast<char *>(&key_size), sizeof(key_size));
+        key.resize(key_size);
+        offset_in.read(&key[0], key_size);
+        offset_in.read(reinterpret_cast<char *>(&value_size), sizeof(value_size));
+        if (key == args[1]) {
+          key_exist = 1;
+          in.read(&value[0], value_size);
+          continue;
+        }
+        value.resize(value_size);
+        in.read(&value[0], value_size);
+        ht.insert({key,value});
+      }
+      in.close();
+      offset_in.close();
+    }
+    else {
+      RETURN_ERR("!hash_table_does_not_exist");
+    }
+    if (key_exist == 0) {
+      RETURN_ERR("!key_not_found");
+    }
+    std::ofstream out(file_path,std::ios::binary);
+    std::ofstream offset_out(offset_path,std::ios::binary);
+    for (auto x: ht) {
+      key_size = x.first.size();
+      value_size = x.second.size();
+      offset_out.write(reinterpret_cast<const char *>(&key_size), sizeof(size_t));
+      offset_out.write(reinterpret_cast<const char *>(x.first.data()), key_size);
+      offset_out.write(reinterpret_cast<const char *>(&value_size), sizeof(size_t));
+      out.write(reinterpret_cast<const char *>(x.second.data()), value_size);
+    }
+    out.close();
+    offset_out.close();
+    RETURN_OK();
+  }
 }
 
 void hash_table_partition::scale_remove(response &_return, const arg_list &args) {

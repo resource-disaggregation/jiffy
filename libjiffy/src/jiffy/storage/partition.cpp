@@ -23,6 +23,14 @@ const std::string &partition::path() const {
   return path_;
 }
 
+void partition::backing_path(const std::string &backing_path) {
+  backing_path_ = backing_path;
+}
+
+const std::string &partition::backing_path() const {
+  return backing_path_;
+}
+
 void partition::name(const std::string &name) {
   name_ = name;
 }
