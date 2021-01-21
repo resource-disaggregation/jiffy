@@ -333,14 +333,17 @@ class test_utils {
     return blks;
   }
 
-  static struct memkind* create_kind(const std::string& pmem_path) {
+  static struct memkind* init_pmem_kind() {
+    std::string pmem_path = getenv("PMEM_PATH"); 
+    std::string memory_mode = getenv("JIFFY_TEST_MODE");
     struct memkind* pmem_kind = nullptr;
-    std::string memory_mode = "PMEM";
-    size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
-    if(err) {
-      char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-      memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
-      fprintf(stderr, "%s\n", error_message);
+    if (memory_mode == "PMEM") {
+      size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+      if(err) {
+        char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+        memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+        fprintf(stderr, "%s\n", error_message);
+      }
     }
     return pmem_kind;
   }

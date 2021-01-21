@@ -32,12 +32,8 @@ TEST_CASE("chain_replication_no_failure_test", "[put][get]") {
                                                   STORAGE_SERVICE_PORT_N(i),
                                                   STORAGE_MANAGEMENT_PORT_N(i));
     alloc->add_blocks(block_names[i]);
-    std::string pmem_path = getenv("PMEM_PATH"); 
     std::string memory_mode = getenv("JIFFY_TEST_MODE");
-    struct memkind* pmem_kind = nullptr;
-    if (memory_mode == "PMEM") {
-      pmem_kind = test_utils::create_kind(pmem_path);
-    }
+    struct memkind* pmem_kind = test_utils::init_pmem_kind();
     blocks[i] = test_utils::init_hash_table_blocks(block_names[i], memory_mode, pmem_kind);
 
     management_servers[i] = storage_management_server::create(blocks[i], HOST, STORAGE_MANAGEMENT_PORT_N(i));
@@ -122,12 +118,8 @@ TEST_CASE("chain_replication_head_failure_test", "[put][get]") {
                                                   STORAGE_SERVICE_PORT_N(i),
                                                   STORAGE_MANAGEMENT_PORT_N(i));
     alloc->add_blocks(block_names[i]);
-    std::string pmem_path = getenv("PMEM_PATH"); 
     std::string memory_mode = getenv("JIFFY_TEST_MODE");
-    struct memkind* pmem_kind = nullptr;
-    if (memory_mode == "PMEM") {
-      pmem_kind = test_utils::create_kind(pmem_path);
-    }
+    struct memkind* pmem_kind = test_utils::init_pmem_kind();
     blocks[i] = test_utils::init_hash_table_blocks(block_names[i], memory_mode, pmem_kind);
 
     management_servers[i] = storage_management_server::create(blocks[i], HOST, STORAGE_MANAGEMENT_PORT_N(i));
@@ -222,12 +214,8 @@ TEST_CASE("chain_replication_mid_failure_test", "[put][get]") {
                                                   STORAGE_SERVICE_PORT_N(i),
                                                   STORAGE_MANAGEMENT_PORT_N(i));
     alloc->add_blocks(block_names[i]);
-    std::string pmem_path = getenv("PMEM_PATH"); 
     std::string memory_mode = getenv("JIFFY_TEST_MODE");
-    struct memkind* pmem_kind = nullptr;
-    if (memory_mode == "PMEM") {
-      pmem_kind = test_utils::create_kind(pmem_path);
-    }
+    struct memkind* pmem_kind = test_utils::init_pmem_kind();
     blocks[i] = test_utils::init_hash_table_blocks(block_names[i], memory_mode, pmem_kind);
 
     management_servers[i] = storage_management_server::create(blocks[i], HOST, STORAGE_MANAGEMENT_PORT_N(i));
@@ -322,12 +310,8 @@ TEST_CASE("chain_replication_tail_failure_test", "[put][get]") {
                                                   STORAGE_SERVICE_PORT_N(i),
                                                   STORAGE_MANAGEMENT_PORT_N(i));
     alloc->add_blocks(block_names[i]);
-    std::string pmem_path = getenv("PMEM_PATH"); 
     std::string memory_mode = getenv("JIFFY_TEST_MODE");
-    struct memkind* pmem_kind = nullptr;
-    if (memory_mode == "PMEM") {
-      pmem_kind = test_utils::create_kind(pmem_path);
-    }
+    struct memkind* pmem_kind = test_utils::init_pmem_kind();
     blocks[i] = test_utils::init_hash_table_blocks(block_names[i], memory_mode, pmem_kind);
 
     management_servers[i] = storage_management_server::create(blocks[i], HOST, STORAGE_MANAGEMENT_PORT_N(i));
@@ -422,12 +406,8 @@ TEST_CASE("chain_replication_add_block_test", "[put][get]") {
                                                   STORAGE_SERVICE_PORT_N(i),
                                                   STORAGE_MANAGEMENT_PORT_N(i));
     alloc->add_blocks(block_names[i]);
-    std::string pmem_path = getenv("PMEM_PATH"); 
     std::string memory_mode = getenv("JIFFY_TEST_MODE");
-    struct memkind* pmem_kind = nullptr;
-    if (memory_mode == "PMEM") {
-      pmem_kind = test_utils::create_kind(pmem_path);
-    }
+    struct memkind* pmem_kind = test_utils::init_pmem_kind();
     blocks[i] = test_utils::init_hash_table_blocks(block_names[i], memory_mode, pmem_kind);
 
     management_servers[i] = storage_management_server::create(blocks[i], HOST, STORAGE_MANAGEMENT_PORT_N(i));

@@ -68,6 +68,8 @@ int main(int argc, char **argv) {
   int32_t mgmt_port = 9093;
   int32_t auto_scaling_port = 9094;
   int32_t service_port = 9095;
+  std::string memory_mode = "DRAM";
+  std::string pmem_path = "";
   int32_t dir_port = 9090;
   std::size_t num_blocks = 64;
   std::size_t num_block_groups = std::thread::hardware_concurrency() / 2;
