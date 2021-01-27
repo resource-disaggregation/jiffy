@@ -166,6 +166,7 @@ class derived : public impl {
    * @param out Output stream
    * @return Output stream position
    */
+   
   std::size_t virtual_serialize(const hash_table_type &table, const std::string& out_path) final {
     return impl::serialize_impl(table, out_path);
   }

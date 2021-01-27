@@ -23,7 +23,9 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port),
       head_(0),
+      head_index_(0), /* Record the index of the current head element in order to help local query functions. */ 
       read_head_(0),
+      read_head_index_(0), /* Record the index of next element to read in order to help read_ls(). */ 
       enqueue_redirected_(false),
       dequeue_redirected_(false),
       readnext_redirected_(false),
@@ -34,13 +36,13 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
       dequeue_start_data_size_(0),
       in_rate_set_(false),
       out_rate_set_(false) {
-  auto ser = conf.get("fifoqueue.serializer", "csv");
-  if (ser == "binary") {
-    ser_ = std::make_shared<csv_serde>(binary_allocator_);
-  } else if (ser == "csv") {
+  ser_name_ = conf.get("fifoqueue.serializer", "csv");
+  if (ser_name_ == "binary") {
     ser_ = std::make_shared<binary_serde>(binary_allocator_);
+  } else if (ser_name_ == "csv") {
+    ser_ = std::make_shared<csv_serde>(binary_allocator_);
   } else {
-    throw std::invalid_argument("No such serializer/deserializer " + ser);
+    throw std::invalid_argument("No such serializer/deserializer " + ser_name_);
   }
   auto_scale_ = conf.get_as<bool>("fifoqueue.auto_scale", true);
   periodicity_us_ = conf.get_as<std::size_t>("fifoqueue.periodicity", 100000);
@@ -97,6 +99,7 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
   auto ret = partition_.at(head_);
   if (ret.first) {
     head_ += (string_array::METADATA_LEN + ret.second.size());
+    head_index_ ++;
     update_read_head();
     dequeue_data_size_ += ret.second.size();
     RETURN_OK(ret.second);
@@ -120,6 +123,120 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
   RETURN_ERR("!redo");
 }
 
+/* enqueue_ls() works on the index of queue elements on local storage, while enqueue() works on memory address. */
+void fifo_queue_partition::enqueue_ls(response &_return, const arg_list &args) {
+  if (args.size() != 2) {
+    RETURN_ERR("!args_error");
+  }
+  std::string file_path, line, data;
+  file_path = directory_utils::remove_uri(backing_path());
+  directory_utils::push_path_element(file_path,name());
+  if (ser_name_ == "csv") {
+    std::ofstream out(file_path,std::ios::app);
+    if (out) {
+      data = args[1];
+      out << data << std::endl;
+      out.close();
+    }
+    else {
+      RETURN_ERR("!fifo_queue_does_not_exist");
+    }
+    enqueue_data_size_ += args[1].size();
+    RETURN_OK();
+  }
+  else if (ser_name_ == "binary") {
+    std::ofstream out(file_path,std::ios::app);
+    std::string offset_path = file_path;
+    offset_path.append("_offset");
+    std::ofstream offset_out(offset_path,std::ios::app);
+    if (out && offset_out) {
+      data = args[1];
+      std::size_t msg_size = data.size();
+      offset_out.write(reinterpret_cast<const char *>(&msg_size), sizeof(size_t));
+      out.write(reinterpret_cast<const char *>(data.data()), msg_size);
+      out.close();
+      offset_out.close();
+    }
+    else {
+      RETURN_ERR("!fifo_queue_does_not_exist");
+    }
+    enqueue_data_size_ += args[1].size();
+    RETURN_OK();
+  }
+}
+
+/* dequeue_ls() works on the index of queue elements on local storage, while dequeue() works on memory address. */
+void fifo_queue_partition::dequeue_ls(response &_return, const arg_list &args) {
+  if (args.size() != 1) {
+    RETURN_ERR("!args_error");
+  }
+  std::vector<std::string> v;
+  std::string file_path, line;
+  file_path = directory_utils::remove_uri(backing_path());
+  directory_utils::push_path_element(file_path,name());
+  if (ser_name_ == "csv") {
+    std::ifstream in(file_path);
+    if (in) {
+      while(getline(in,line)) {
+        v.push_back(line);
+      }
+      in.close();
+    }
+    else {
+      RETURN_ERR("!fifo_queue_does_not_exist");
+    }
+    if (v.size() == 0) {
+      RETURN_ERR("!queue_is_empty");
+    }
+    std::ofstream out(file_path);
+    for (int i = 1; i < v.size(); i++) {
+      out << v[i] << std::endl;
+    }
+    out.close();
+    head_index_++;
+    dequeue_data_size_ += v[0].size();
+    RETURN_OK(v[0]);
+  }
+  else if (ser_name_ == "binary") {
+    std::ifstream in(file_path,std::ios::binary);
+    std::string offset_path = file_path;
+    offset_path.append("_offset");
+    std::ifstream offset_in(offset_path,std::ios::binary);
+    if (in && offset_in) {
+      while (in.peek() != EOF && offset_in.peek() != EOF) {
+        std::size_t msg_size;
+        offset_in.read(reinterpret_cast<char *>(&msg_size), sizeof(msg_size));
+        std::string msg;
+        msg.resize(msg_size);
+        in.read(&msg[0], msg_size);
+        v.push_back(msg);
+      }
+      in.close();
+      offset_in.close();
+    }
+    else {
+      RETURN_ERR("!fifo_queue_does_not_exist");
+    }
+    if (v.size() == 0) {
+      RETURN_ERR("!queue_is_empty");
+    }
+    std::ofstream out(file_path,std::ios::binary);
+    std::ofstream offset_out(offset_path,std::ios::binary);
+    for (int i = 1; i < v.size(); i++) {
+      std::size_t msg_size = v[i].size();
+      offset_out.write(reinterpret_cast<const char *>(&msg_size), sizeof(size_t));
+      out.write(reinterpret_cast<const char *>(v[i].data()), msg_size);
+    }
+    out.flush();
+    offset_out.flush();
+    out.close();
+    offset_out.close();
+    head_index_++;
+    dequeue_data_size_ += v[0].size();
+    RETURN_OK(v[0]);
+  }
+}
+
 void fifo_queue_partition::read_next(response &_return, const arg_list &args) {
   if (!(args.size() == 1 || (args.size() == 2 && args[1] == "!redirected"))) {
     RETURN_ERR("!args_error");
@@ -140,6 +257,59 @@ void fifo_queue_partition::read_next(response &_return, const arg_list &args) {
     RETURN_ERR("!redirected_readnext", next_target_str_);
   }
   RETURN_ERR("!redo");
+}
+
+void fifo_queue_partition::read_next_ls(response &_return, const arg_list &args) {
+  if (args.size() != 1) {
+    RETURN_ERR("!args_error");
+  }
+  std::vector<std::string> v;
+  std::string file_path, line;
+  file_path = directory_utils::remove_uri(backing_path());
+  directory_utils::push_path_element(file_path,name());
+  if (ser_name_ == "csv") {
+    std::ifstream in(file_path);
+    if (in) {
+      int count = read_head_index_ - head_index_;
+      while(count >= 0) {
+        count--;
+        getline(in,line);
+      }
+      in.close();
+      read_head_index_ += 1;
+      RETURN_OK(line);
+    }
+    else {
+      RETURN_ERR("!fifo_queue_does_not_exist");
+    }
+  }
+  else if (ser_name_ == "binary") {
+    std::ifstream in(file_path,std::ios::binary);
+    std::string offset_path = file_path;
+    offset_path.append("_offset");
+    std::ifstream offset_in(offset_path,std::ios::binary);
+    std::size_t offset = 0;
+    std::size_t msg_size = 0;
+    if (in && offset_in) {
+      int count = read_head_index_ - head_index_;
+      while(count >= 0) {
+        count--;
+        offset_in.read(reinterpret_cast<char *>(&msg_size), sizeof(msg_size));
+        in.seekg(offset, std::ios::beg);
+        offset += msg_size;
+      }
+      std::string msg;
+      msg.resize(msg_size);
+      in.read(&msg[0], msg_size);
+      in.close();
+      offset_in.close();
+      read_head_index_ += 1;
+      RETURN_OK(msg);
+    }
+    else {
+      RETURN_ERR("!fifo_queue_does_not_exist");
+    }
+  }
 }
 
 void fifo_queue_partition::clear(response &_return, const arg_list &args) {

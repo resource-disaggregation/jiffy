@@ -148,6 +148,25 @@ class directory_utils {
     path = path.substr(0, i + 1);
     return element;
   }
+
+  /**
+   * @brief Delete path URI"
+   * @param path File path
+   * @return path name
+   */
+
+  static std::string remove_uri(const std::string& path) {
+    std::string separator = ":/";
+    std::size_t pos = path.find(separator);
+    if (pos == std::string::npos) {
+      return path;
+    }
+    std::string uri = path.substr(0, pos);
+    std::size_t key_pos = pos + separator.length();
+    std::size_t key_len = path.length() - separator.length() - uri.length();
+    std::string key = path.substr(key_pos, key_len);
+    return key;
+  }
 };
 
 }

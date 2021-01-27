@@ -2,6 +2,7 @@
 #include <catch.hpp>
 #include <iostream>
 #include "jiffy/persistent/persistent_service.h"
+#include "test_utils.h"
 #include "jiffy/utils/directory_utils.h"
 #include "jiffy/storage/serde/serde_all.h"
 
@@ -13,7 +14,10 @@ binary make_binary(const std::string& str, const block_memory_allocator<uint8_t>
 }
 
 TEST_CASE("local_write_test", "[write]") {
-  block_memory_manager manager;
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  size_t capacity = 134217728;
+  block_memory_manager manager(capacity, memory_mode, pmem_kind);
   block_memory_allocator<uint8_t> binary_allocator(&manager);
   hash_table_type table;
   auto bkey = binary("key", binary_allocator);
@@ -27,13 +31,17 @@ TEST_CASE("local_write_test", "[write]") {
   in >> data;
   REQUIRE(data == "key,value");
   std::remove("/tmp/a.txt");
+  test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("local_read_test", "[read]") {
   std::ofstream out("/tmp/a.txt", std::ofstream::out);
   out << "key,value\n";
   out.close();
-  block_memory_manager manager;
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  size_t capacity = 134217728;
+  block_memory_manager manager(capacity, memory_mode, pmem_kind);
   block_memory_allocator<kv_pair_type> allocator(&manager);
   block_memory_allocator<uint8_t> binary_allocator(&manager);
   auto ser = std::make_shared<csv_serde>(binary_allocator);
@@ -44,4 +52,5 @@ TEST_CASE("local_read_test", "[read]") {
   REQUIRE_NOTHROW(store.read("/tmp/a.txt", table));
   REQUIRE(table.at(bkey) == bval);
   std::remove("/tmp/a.txt");
+  test_utils::destroy_kind(pmem_kind);
 }
