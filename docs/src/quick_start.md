@@ -105,7 +105,7 @@ JiffyClient client = JiffyClient("127.0.0.1", 9090, 9091);
 
 The first argument to the JiffyClient constructor corresponds to the server hostname, while the second and third argument correspond to the directory server port and lease server port.
 
-We could then create a file and also back it up in persistent storage. The backing path on persistent storage, the number of blocks, the replication chain length and also the flag are the four arguments that can be specified when creating a file. 
+We could then create a file and also back it up in persistent storage. The backing path on persistent storage, the number of blocks, the replication chain length and also the flag are the four arguments that can be specified when creating a file.
 The create method also accepts flags as it's last argument, details can be seen in the following chart.
 
 ```python tab="Python"
@@ -236,18 +236,22 @@ client.close();
 
 
 
-### Hash table API 
+### Hash table API
 
 After file creation, user can achieve multiple commands with the hash table client.
 
-
+```python tab="Python"
+client = JiffyClient("127.0.0.1", 9090, 9091)
+client.create_hash_table("/a/file.txt", "local://tmp")
+hash_table = client.open_hash_table("/a/file.txt")
+```
 
 We can put key-value pairs in the storage server and also get them in byte-strings.
 
 ```python tab="Python"
 hash_table.put(b"key", b"value")
 if hash_table.exists(b"key") == b'true':
-	value = hash_table.get(b"key")
+    value = hash_table.get(b"key")
 ```
 
 ```java tab="Java"
@@ -313,3 +317,72 @@ response = kv.remove(args_key);
 
 ```
 
+### Fifo Queue API
+
+After file creation, user can achieve multiple commands with the fifo queue client.
+
+```python tab="Python"
+client = JiffyClient("127.0.0.1", 9090, 9091)
+client.create_queue("/a/file.txt", "local://tmp")
+queue = client.open_queue("/a/file.txt")
+```
+
+We can put string elements in the storage server and also get them in byte-strings according to the sequence of the put strings.
+
+```python tab="Python"
+queue.put(b"string")
+value = queue.get(b)
+```
+
+```java tab="Java"
+
+```
+
+
+### File API
+
+After file creation, user can achieve multiple commands with the file client.
+
+```python tab="Python"
+client = JiffyClient("127.0.0.1", 9090, 9091)
+client.create_file("/a/file.txt", "local://tmp")
+file = client.open_file("/a/file.txt")
+```
+
+We can write data in the storage server, and also read certain bytes of them according to the current offset. Before you read, locate the specific offset you want to read by seeking the offset. 
+
+```python tab="Python"
+file.write(b"abcdefghijklmnopqrstuvwxyz")
+file.seek(0)
+value = file.read(3)
+```
+
+```java tab="Java"
+
+```
+
+### Shared Log API
+
+After file creation, user can achieve multiple commands with the shared log client.
+
+```python tab="Python"
+client = JiffyClient("127.0.0.1", 9090, 9091)
+client.create_shared_log("/a/file.txt", "local://tmp")
+shared_log = client.open_shared_log("/a/file.txt")
+```
+
+We have to pass a sequential log entry position, data to be written and a list of logical streams(serve as tags) when we write to shared log.
+We can also scan data with specified logical streams and certain range of entry positions. The storage server will return entries if they contain any specified logical streams.
+To trim data, simply pass the starting position and the ending position to delete the log entries in the storage server. But notice that the position of trimmed entries will not be reclaimed.
+
+```python tab="Python"
+shared_log.write(0, b"abc", ["letter", "lower_case"])
+shared_log.write(1, b"def", ["letter", "lower_case"])
+shared_log.write(2, b"ghi", ["letter", "lower_case"])
+shared_log.scan(0,2,["letter"])
+shared_log.trim(0,2)
+```
+
+```java tab="Java"
+
+```

@@ -4,6 +4,8 @@
 #include <string>
 #include "jiffy/storage/hashtable/hash_table_defs.h"
 #include "jiffy/storage/file/file_defs.h"
+#include "jiffy/storage/fifoqueue/fifo_queue_defs.h"
+#include "jiffy/storage/shared_log/shared_log_defs.h"
 #include "jiffy/storage/serde/serde_all.h"
 #include <aws/core/Aws.h>
 #include "../utils/logger.h"
@@ -90,6 +92,14 @@ class persistent_service {
 
   virtual void virtual_write(const storage::file_type &table, const std::string &out_path) = 0;
 
+   /**
+   * @brief Virtual write for shared_log
+   * @param table shared_log
+   * @param out_path Persistent store path
+   */
+
+  virtual void virtual_write(const storage::shared_log_serde_type &table, const std::string &out_path) = 0;
+
   /**
    * @brief Virtual write for new hash table type
    * @param table Hash table
@@ -113,6 +123,14 @@ class persistent_service {
    */
 
   virtual void virtual_read(const std::string &in_path, storage::file_type &table) = 0;
+
+  /**
+   * @brief Virtual read for shared_log
+   * @param in_path Persistent store path
+   * @param table shared_log
+   */
+
+  virtual void virtual_read(const std::string &in_path, storage::shared_log_serde_type &table) = 0;
 
   /**
    * @brief Virtual read for new hash table type
@@ -160,6 +178,16 @@ class derived_persistent : public persistent_service_impl {
   }
 
   /**
+   * @brief Virtual write for shared_log
+   * @param table shared_log
+   * @param out_path Persistent store path
+   */
+
+  void virtual_write(const storage::shared_log_serde_type &table, const std::string &out_path) final {
+    return persistent_service_impl::write_impl(table, out_path);
+  }
+
+  /**
    * @brief Virtual write for new hash table type
    * @param table Hash table
    * @param out_path Persistent store path
@@ -186,6 +214,16 @@ class derived_persistent : public persistent_service_impl {
    */
 
   void virtual_read(const std::string &in_path, storage::file_type &table) final {
+    return persistent_service_impl::read_impl(in_path, table);
+  }
+
+  /**
+   * @brief Virtual read for shared_log
+   * @param in_path Persistent store path
+   * @param table shared_log
+   */
+
+  void virtual_read(const std::string &in_path, storage::shared_log_serde_type &table) final {
     return persistent_service_impl::read_impl(in_path, table);
   }
 
@@ -222,7 +260,7 @@ class local_store_impl : public persistent_service {
     auto dir = out_path.substr(0, found);
     directory_utils::create_directory(dir);
     std::shared_ptr<std::ofstream> out(new std::ofstream(out_path));
-    serde()->serialize<Datatype>(table, out);
+    serde()->serialize<Datatype>(table, out_path);
     out->close();
   }
 
@@ -234,7 +272,7 @@ class local_store_impl : public persistent_service {
   template<typename Datatype>
   void read_impl(const std::string &in_path, Datatype &table) {
     auto in = std::make_shared<std::ifstream>(in_path.c_str(), std::fstream::in);
-    serde()->deserialize<Datatype>(in, table);
+    serde()->deserialize<Datatype>(table, in_path);
     in->close();
   }
 
@@ -287,7 +325,7 @@ class s3_store_impl : public persistent_service {
 
     Aws::Utils::Stream::SimpleStreamBuf sbuf;
     auto out = Aws::MakeShared<Aws::IOStream>("StreamBuf", &sbuf);
-    serde()->serialize<Datatype>(table, out);
+    serde()->serialize<Datatype>(table, out_path);
     out->seekg(0, std::ios_base::beg);
 
     object_request.SetBody(out);
@@ -323,7 +361,7 @@ class s3_store_impl : public persistent_service {
     if (get_object_outcome.IsSuccess()) {
       Aws::OFStream local_file;
       auto in = std::make_shared<Aws::IOStream>(get_object_outcome.GetResult().GetBody().rdbuf());
-      serde()->deserialize<Datatype>(in, table);
+      serde()->deserialize<Datatype>(table, in_path);
       LOG(log_level::info) << "Successfully read table from " << in_path;
     } else {
       LOG(log_level::error) << "S3 GetObject error: " << get_object_outcome.GetError().GetExceptionName() << " " <<

@@ -265,6 +265,16 @@ class TestClient(TestCase):
         for i in range(0, 1000):
             self.assertEqual(b(str(i)), c.read(len(b(str(i)))))
 
+    def shared_log_ops(self, c):
+        for i in range(0, 1000):
+            try:
+                c.write(i, str(i)+"_data", [str(i)+"_stream"])
+            except KeyError as k:
+                self.fail('Received error message: {}'.format(k))
+
+        for i in range(0, 1000):
+            self.assertEqual([b(str(i)+"_data")], c.scan(i, i, [str(i)+"_stream"]))
+
     def test_lease_worker(self):
         self.start_servers()
         client = self.jiffy_client()
@@ -303,7 +313,6 @@ class TestClient(TestCase):
             client.disconnect()
             self.stop_servers()
 
-
     def test_file(self):
         self.start_servers()
         client = self.jiffy_client()
@@ -311,6 +320,17 @@ class TestClient(TestCase):
             c = client.create_file('/a/file.txt', 'local://tmp')
             self.assertTrue(client.fs.exists('/a/file.txt'))
             self.file_ops(c)
+        finally:
+            client.disconnect()
+            self.stop_servers()
+            
+    def test_shared_log(self):
+        self.start_servers()
+        client = self.jiffy_client()
+        try:
+            c = client.create_shared_log('/a/file.txt', 'local://tmp')
+            self.assertTrue(client.fs.exists('/a/file.txt'))
+            self.shared_log_ops(c)
         finally:
             client.disconnect()
             self.stop_servers()
