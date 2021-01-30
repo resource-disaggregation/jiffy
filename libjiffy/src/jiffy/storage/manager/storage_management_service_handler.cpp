@@ -11,11 +11,12 @@ storage_management_service_handler::storage_management_service_handler(std::vect
 
 void storage_management_service_handler::create_partition(int32_t block_id,
                                                           const std::string &type,
+                                                          const std::string &backing_path,
                                                           const std::string &name,
                                                           const std::string &metadata,
                                                           const std::map<std::string, std::string> &conf) {
   try {
-    blocks_.at(static_cast<std::size_t>(block_id))->setup(type, name, metadata, utils::property_map(conf));
+    blocks_.at(static_cast<std::size_t>(block_id))->setup(type, backing_path, name, metadata, utils::property_map(conf));
   } catch (std::exception &e) {
     LOG(log_level::info) << "Caught exception: " << e.what();
     throw make_exception(e);
