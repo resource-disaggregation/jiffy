@@ -93,14 +93,14 @@ data_status directory_tree::create(const std::string &path,
     blocks.push_back(chain);
     using namespace storage;
     if (chain_length == 1) {
-      storage_->create_partition(chain.block_ids[0], type, chain.name, chain.metadata, tags);
+      storage_->create_partition(chain.block_ids[0], type, backing_path, chain.name, chain.metadata, tags);
       storage_->setup_chain(chain.block_ids[0], path, chain.block_ids, chain_role::singleton, "nil");
     } else {
       for (int32_t j = 0; j < chain_length; ++j) {
         std::string block_id = chain.block_ids[j];
         std::string next_block_id = (j == chain_length - 1) ? "nil" : chain.block_ids[j + 1];
         int32_t role = (j == 0) ? chain_role::head : (j == chain_length - 1) ? chain_role::tail : chain_role::mid;
-        storage_->create_partition(block_id, type, chain.name, chain.metadata, tags);
+        storage_->create_partition(block_id, type, backing_path, chain.name, chain.metadata, tags);
         storage_->setup_chain(block_id, path, chain.block_ids, role, next_block_id);
       }
     }
@@ -165,14 +165,14 @@ data_status directory_tree::open_or_create(const std::string &path,
     blocks.push_back(chain);
     using namespace storage;
     if (chain_length == 1) {
-      storage_->create_partition(chain.block_ids[0], type, chain.name, chain.metadata, tags);
+      storage_->create_partition(chain.block_ids[0], type, backing_path, chain.name, chain.metadata, tags);
       storage_->setup_chain(chain.block_ids[0], path, chain.block_ids, chain_role::singleton, "nil");
     } else {
       for (int32_t j = 0; j < chain_length; ++j) {
         std::string block_id = chain.block_ids[j];
         std::string next_block_id = (j == chain_length - 1) ? "nil" : chain.block_ids[j + 1];
         int32_t role = (j == 0) ? chain_role::head : (j == chain_length - 1) ? chain_role::tail : chain_role::mid;
-        storage_->create_partition(block_id, type, chain.name, chain.metadata, tags);
+        storage_->create_partition(block_id, type, backing_path, chain.name, chain.metadata, tags);
         storage_->setup_chain(block_id, path, chain.block_ids, role, next_block_id);
       }
     }
@@ -465,7 +465,7 @@ replica_chain directory_tree::add_replica_to_chain(const std::string &path, cons
     LOG(log_level::info) << "Setting partition <" << block_id << ">: path=" << path << ", role=" << role
                          << ", next=" << next_block_id << ">";
     // TODO: this is incorrect -- we shouldn't be setting the chain to updated_chain right now...
-    storage_->create_partition(block_id, dstatus.type(), chain.name, chain.metadata, dstatus.get_tags());
+    storage_->create_partition(block_id, dstatus.type(), dstatus.backing_path(), chain.name, chain.metadata, dstatus.get_tags());
     storage_->setup_chain(block_id, path, updated_chain, role, next_block_id);
   }
 
