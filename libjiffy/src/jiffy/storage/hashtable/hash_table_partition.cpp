@@ -1,5 +1,4 @@
 #include <jiffy/utils/string_utils.h>
-#include <jiffy/utils/directory_utils.h>
 #include <queue>
 #include "hash_table_partition.h"
 #include "hash_slot.h"
@@ -9,7 +8,6 @@
 #include "jiffy/auto_scaling/auto_scaling_client.h"
 #include <chrono>
 #include <thread>
-#include <string>
 
 namespace jiffy {
 namespace storage {
@@ -17,13 +15,12 @@ namespace storage {
 using namespace utils;
 
 hash_table_partition::hash_table_partition(block_memory_manager *manager,
-                                           const std::string &backing_path,
                                            const std::string &name,
                                            const std::string &metadata,
                                            const utils::property_map &conf,
                                            const std::string &auto_scaling_host,
                                            int auto_scaling_port)
-    : chain_module(manager, backing_path, name, metadata, HT_OPS),
+    : chain_module(manager, name, metadata, HT_OPS),
       scaling_up_(false),
       scaling_down_(false),
       dirty_(false),
@@ -31,10 +28,10 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
       import_slot_range_(0, -1),
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port) {
-  ser = conf.get("hashtable.serializer", "csv");
-  if (ser == "binary") {
+  ser_name_ = conf.get("hashtable.serializer", "csv");
+  if (ser_name_ == "binary") {
     ser_ = std::make_shared<binary_serde>(binary_allocator_);
-  } else if (ser == "csv") {
+  } else if (ser_name_ == "csv") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
@@ -249,9 +246,9 @@ void hash_table_partition::exists_ls(response &_return, const arg_list &args) {
     RETURN("!args_error");
   }
   std::string file_path, line, key, value;
-  file_path = directory_utils::decompose_path(backing_path());
+  file_path = directory_utils::remove_uri(backing_path());
   directory_utils::push_path_element(file_path,name());
-  if (ser == "csv") {
+  if (ser_name_ == "csv") {
     std::ifstream in(file_path);
     if (in) {
       while(getline(in,line)) {
@@ -268,7 +265,7 @@ void hash_table_partition::exists_ls(response &_return, const arg_list &args) {
       RETURN_ERR("!hash_table_does_not_exist");
     }
   }
-  else if (ser == "binary") {
+  else if (ser_name_ == "binary") {
     std::string offset_path = file_path;
     offset_path.append("_offset");
     std::ifstream offset_in(offset_path,std::ios::binary);
@@ -299,9 +296,9 @@ void hash_table_partition::put_ls(response &_return, const arg_list &args) {
     RETURN_ERR("!args_error");
   }
   std::string file_path, line, key, value;
-  file_path = directory_utils::decompose_path(backing_path());
+  file_path = directory_utils::remove_uri(backing_path());
   directory_utils::push_path_element(file_path,name());
-  if (ser == "csv") {
+  if (ser_name_ == "csv") {
     std::ifstream in(file_path);
     if (in) {
       while(getline(in,line)) {
@@ -322,7 +319,7 @@ void hash_table_partition::put_ls(response &_return, const arg_list &args) {
       RETURN_ERR("!hash_table_does_not_exist");
     }
   }
-  else if (ser == "binary") {
+  else if (ser_name_ == "binary") {
     std::string offset_path = file_path;
     offset_path.append("_offset");
     std::ifstream offset_in(offset_path,std::ios::binary);
@@ -353,7 +350,7 @@ void hash_table_partition::put_ls(response &_return, const arg_list &args) {
       RETURN_OK();
     }
     else {
-      RETURN_ERR("!hash_table_does_not_exist");
+      RETURN_ERR("!fifo_queue_does_not_exist");
     }
   }
 }
@@ -365,9 +362,9 @@ void hash_table_partition::upsert_ls(response &_return, const arg_list &args) {
   std::unordered_map<std::string,std::string> ht;
   std::string file_path, line, key, value;
   int key_exist = 0;
-  file_path = directory_utils::decompose_path(backing_path());
+  file_path = directory_utils::remove_uri(backing_path());
   directory_utils::push_path_element(file_path,name());
-  if (ser == "csv") {
+  if (ser_name_ == "csv") {
     std::ifstream in(file_path);
     if (in) {
       while(getline(in,line)) {
@@ -397,7 +394,7 @@ void hash_table_partition::upsert_ls(response &_return, const arg_list &args) {
     out.close();
     RETURN_OK();
   }
-  else if (ser == "binary") {
+  else if (ser_name_ == "binary") {
     std::ifstream in(file_path,std::ios::binary);
     std::string offset_path = file_path;
     offset_path.append("_offset");
@@ -451,9 +448,9 @@ void hash_table_partition::get_ls(response &_return, const arg_list &args) {
     RETURN("!args_error");
   }
   std::string file_path, line, key, value;
-  file_path = directory_utils::decompose_path(backing_path());
+  file_path = directory_utils::remove_uri(backing_path());
   directory_utils::push_path_element(file_path,name());
-  if (ser == "csv") {
+  if (ser_name_ == "csv") {
     std::ifstream in(file_path);
     if (in) {
       while(getline(in,line)) {
@@ -471,7 +468,7 @@ void hash_table_partition::get_ls(response &_return, const arg_list &args) {
       RETURN_ERR("!hash_table_does_not_exist");
     }
   }
-  else if (ser == "binary") {
+  else if (ser_name_ == "binary") {
     std::ifstream in(file_path,std::ios::binary);
     std::string offset_path = file_path;
     offset_path.append("_offset");
@@ -511,9 +508,9 @@ void hash_table_partition::update_ls(response &_return, const arg_list &args) {
   std::unordered_map<std::string,std::string> ht;
   std::string file_path, line, key, value;
   int key_exist = 0;
-  file_path = directory_utils::decompose_path(backing_path());
+  file_path = directory_utils::remove_uri(backing_path());
   directory_utils::push_path_element(file_path,name());
-  if (ser == "csv") {
+  if (ser_name_ == "csv") {
     std::ifstream in(file_path);
     if (in) {
       while(getline(in,line)) {
@@ -545,7 +542,7 @@ void hash_table_partition::update_ls(response &_return, const arg_list &args) {
       RETURN_ERR("!key_not_found");
     }
   }
-  else if (ser == "binary") {
+  else if (ser_name_ == "binary") {
     std::ifstream in(file_path,std::ios::binary);
     std::string offset_path = file_path;
     offset_path.append("_offset");
@@ -601,9 +598,9 @@ void hash_table_partition::remove_ls(response &_return, const arg_list &args) {
   std::unordered_map<std::string,std::string> ht;
   std::string file_path, line, key, value;
   int key_exist = 0;
-  file_path = directory_utils::decompose_path(backing_path());
+  file_path = directory_utils::remove_uri(backing_path());
   directory_utils::push_path_element(file_path,name());
-  if (ser == "csv") {
+  if (ser_name_ == "csv") {
     std::ifstream in(file_path);
     if (in) {
       while(getline(in,line)) {
@@ -633,7 +630,7 @@ void hash_table_partition::remove_ls(response &_return, const arg_list &args) {
       RETURN_ERR("!key_not_found");
     }
   }
-  else if (ser == "binary") {
+  else if (ser_name_ == "binary") {
     std::ifstream in(file_path,std::ios::binary);
     std::string offset_path = file_path;
     offset_path.append("_offset");
@@ -679,7 +676,6 @@ void hash_table_partition::remove_ls(response &_return, const arg_list &args) {
     RETURN_OK();
   }
 }
-
 
 void hash_table_partition::scale_remove(response &_return, const arg_list &args) {
   for (size_t i = 1; i < args.size(); ++i) {
@@ -821,18 +817,6 @@ void hash_table_partition::run_command(response &_return, const arg_list &args) 
     case hash_table_cmd_id::ht_remove:remove(_return, args);
       break;
     case hash_table_cmd_id::ht_update:update(_return, args);
-      break;
-    case hash_table_cmd_id::ht_exists_ls:exists_ls(_return, args);
-      break;
-    case hash_table_cmd_id::ht_get_ls:get_ls(_return, args);
-      break;
-    case hash_table_cmd_id::ht_put_ls:put_ls(_return, args);
-      break;
-    case hash_table_cmd_id::ht_upsert_ls:upsert_ls(_return, args);
-      break;
-    case hash_table_cmd_id::ht_remove_ls:remove_ls(_return, args);
-      break;
-    case hash_table_cmd_id::ht_update_ls:update_ls(_return, args);
       break;
     case hash_table_cmd_id::ht_update_partition:update_partition(_return, args);;
       break;

@@ -30,7 +30,9 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_file_blocks(block_names, 134217728);
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind, 134217728);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -59,7 +61,6 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   for (std::size_t i = 0; i < 1000; ++i) {
     buffer.clear();
     REQUIRE(client.read(buffer, std::to_string(i).size()) == std::to_string(i).size());
-    std::cout<<buffer<<std::endl;
     REQUIRE(buffer == std::to_string(i));
   }
 
@@ -84,6 +85,7 @@ TEST_CASE("file_client_write_read_seek_test", "[write][read][seek]") {
   if (mgmt_serve_thread.joinable()) {
     mgmt_serve_thread.join();
   }
+  test_utils::destroy_kind(pmem_kind);
 }
 
 
@@ -93,8 +95,9 @@ TEST_CASE("file_client_concurrent_write_read_seek_test", "[write][read][seek]") 
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(20, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_file_blocks(block_names, BLOCK_SIZE);
-
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind, BLOCK_SIZE);
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
@@ -162,5 +165,5 @@ TEST_CASE("file_client_concurrent_write_read_seek_test", "[write][read][seek]") 
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
   }
-
+  test_utils::destroy_kind(pmem_kind);
 }

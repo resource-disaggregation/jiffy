@@ -20,26 +20,13 @@ class HashTableOps:
     remove = b('remove')
     update = b('update')
     upsert = b('upsert')
-    exists_ls = b('exists_ls')
-    get_ls = b('get_ls')
-    put_ls = b('put_ls')
-    remove_ls = b('remove_ls')
-    update_ls = b('update_ls')
-    upsert_ls = b('upsert_ls')
-    multi_get = b('multi_get')
 
     op_types = {exists: CommandType.accessor,
                 get: CommandType.accessor,
                 put: CommandType.mutator,
                 remove: CommandType.mutator,
                 update: CommandType.accessor,
-                upsert: CommandType.mutator,
-                exists_ls: CommandType.accessor,
-                get_ls: CommandType.accessor,
-                put_ls: CommandType.mutator,
-                remove_ls: CommandType.mutator,
-                update_ls: CommandType.accessor,
-                upsert_ls: CommandType.mutator}
+                upsert: CommandType.mutator}
 
 
 def encode(value):
@@ -67,12 +54,11 @@ class RedirectError(Exception):
 
 
 class HashTable(DataStructureClient):
-    def __init__(self, fs, path, block_info, timeout_ms):
+    def __init__(self, fs, path, block_info, timeout_ms, cache_size=32000000):
         super(HashTable, self).__init__(fs, path, block_info, HashTableOps.op_types, timeout_ms)
         self.slots = [int(chain.name.split('_')[0]) for chain in self.block_info.data_blocks]
-        self.cache = HashTableCache(max_length=5, prefetch_size=4) 
-        # need to pass the two param to the init() of HashTable
-    
+        self.cache = HashTableCache(cache_size) 
+        
     def _refresh(self):
         super(HashTable, self)._refresh()
         self.slots = [int(chain.name.split('_')[0]) for chain in self.block_info.data_blocks]
@@ -116,7 +102,6 @@ class HashTable(DataStructureClient):
     def exists(self, key):
         try:
             if self.cache.exists(key):
-                self.hit_handling(key)
                 return True
             self._run_repeated([HashTableOps.exists, key])[0]
         except:
@@ -135,45 +120,6 @@ class HashTable(DataStructureClient):
 
     def remove(self, key):
         resp = self._run_repeated([HashTableOps.remove, key])
-        if resp[0] == b'!ok':
-            self.cache.delete(key)
-        return resp[0]
-
-    def put_ls(self, key, value):
-        if self._run_repeated([HashTableOps.put_ls, key, value])[0] == b'!ok':
-            self.cache.miss_handling([key,value])
-
-    def get_ls(self, key):
-        if self.cache.exists(key):
-            self.cache.hit_handling(key)
-            return self.cache.get(key)
-        else:
-            value = self._run_repeated([HashTableOps.get_ls, key])[1]
-            self.cache.miss_handling([key,value])
-            return value
-    
-    def exists_ls(self, key):
-        try:
-            if self.cache.exists(key):
-                self.hit_handling(key)
-                return True
-            self._run_repeated([HashTableOps.exists_ls, key])[0]
-        except:
-            return False
-        return True
-
-    def update_ls(self, key, value):
-        resp = self._run_repeated([HashTableOps.update_ls, key, value])
-        if resp[0] == b'!ok':
-            self.cache.miss_handling([key,value])
-        return resp[0]
-
-    def upsert_ls(self, key, value):
-        if self._run_repeated([HashTableOps.upsert_ls, key, value])[0] == b'!ok':
-            self.cache.miss_handling([key,value])
-
-    def remove_ls(self, key):
-        resp = self._run_repeated([HashTableOps.remove_ls, key])
         if resp[0] == b'!ok':
             self.cache.delete(key)
         return resp[0]

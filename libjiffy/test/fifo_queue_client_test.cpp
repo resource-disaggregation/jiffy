@@ -26,8 +26,10 @@ TEST_CASE("fifo_queue_client_enqueue_dequeue_test", "[enqueue][dequeue]") {
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_fifo_queue_blocks(block_names, 134217728, 0, 1);
-
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind, 134217728, 0, 1);
+  
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
@@ -76,6 +78,7 @@ TEST_CASE("fifo_queue_client_enqueue_dequeue_test", "[enqueue][dequeue]") {
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
   }
+  test_utils::destroy_kind(pmem_kind);
 }
 
 
@@ -83,8 +86,9 @@ TEST_CASE("fifo_queue_client_enqueue_length_dequeue_test", "[enqueue][dequeue]")
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_fifo_queue_blocks(block_names, 134217728);
-
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind, 134217728);
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
@@ -139,6 +143,7 @@ TEST_CASE("fifo_queue_client_enqueue_length_dequeue_test", "[enqueue][dequeue]")
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
   }
+  test_utils::destroy_kind(pmem_kind);
 }
 
 
@@ -146,8 +151,9 @@ TEST_CASE("fifo_queue_client_enqueue_in_rate_out_rate_dequeue_test", "[enqueue][
   auto alloc = std::make_shared<sequential_block_allocator>();
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
-  auto blocks = test_utils::init_fifo_queue_blocks(block_names, 134217728);
-
+  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind, 134217728);
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
   test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
@@ -213,4 +219,5 @@ TEST_CASE("fifo_queue_client_enqueue_in_rate_out_rate_dequeue_test", "[enqueue][
   if (dir_serve_thread.joinable()) {
     dir_serve_thread.join();
   }
+  test_utils::destroy_kind(pmem_kind);
 }

@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <memkind.h>
 #include <thrift/transport/TBufferTransports.h>
 #include <thrift/transport/TSocket.h>
 #include "jiffy/storage/storage_management_ops.h"
@@ -21,7 +22,6 @@ class dummy_storage_manager : public jiffy::storage::storage_management_ops {
 
   void create_partition(const std::string &block_id,
                         const std::string &type,
-                        const std::string &backing_path,
                         const std::string &name,
                         const std::string &metadata,
                         const std::map<std::string, std::string> &conf) override {
@@ -229,16 +229,18 @@ class test_utils {
       std::string id = block_id_parser::make("127.0.0.1", service_port, management_port,
                                              static_cast<int32_t>(i));
       blks[i] = std::make_shared<block>(id);
-      blks[i]->setup("hashtable", "local://tmp", "0_65536", "regular", {});
+      blks[i]->setup("hashtable", "0_65536", "regular", {});
       std::dynamic_pointer_cast<hash_table_partition>(blks[i]->impl())->slot_range(0, 65536);
     }
     return blks;
   }
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_hash_table_blocks(const std::vector<std::string> &block_ids,
+                                                                                    std::string memory_mode = "DRAM",
+                                                                                    struct memkind* pmem_kind = nullptr,
                                                                                     size_t block_capacity = 134217728,
                                                                                     double threshold_lo = 0.05,
-                                                                                    double threshold_hi = 0.95,
+                                                                                    double threshold_hi = 0.95,                                          
                                                                                     const std::string &dir_host = "127.0.0.1",
                                                                                     int dir_port = 9090) {
     jiffy::utils::property_map conf;
@@ -248,9 +250,10 @@ class test_utils {
     conf.set("directory.port", std::to_string(dir_port));
     std::vector<std::shared_ptr<jiffy::storage::block>> blks;
     blks.resize(block_ids.size());
+
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
-      blks[i]->setup("hashtable", "local://tmp", "0_65536", "regular", conf);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
+      blks[i]->setup("hashtable", "0_65536", "regular", conf);
     }
     return blks;
   }
@@ -265,15 +268,17 @@ class test_utils {
       std::string id = block_id_parser::make("127.0.0.1", service_port, management_port,
                                              static_cast<int32_t>(i));
       blks[i] = std::make_shared<block>(id);
-      blks[i]->setup("file", "local://tmp", "", "regular", {});
+      blks[i]->setup("file", "", "regular", {});
     }
     return blks;
   }
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_file_blocks(const std::vector<std::string> &block_ids,
+                                                                              std::string memory_mode = "DRAM",
+                                                                              struct memkind* pmem_kind = nullptr,
                                                                               size_t block_capacity = 134217728,
                                                                               double threshold_lo = 0.05,
-                                                                              double threshold_hi = 0.95,
+                                                                              double threshold_hi = 0.95,                                    
                                                                               const std::string &dir_host = "127.0.0.1",
                                                                               int dir_port = 9090) {
     jiffy::utils::property_map conf;
@@ -283,9 +288,45 @@ class test_utils {
     conf.set("directory.port", std::to_string(dir_port));
     std::vector<std::shared_ptr<jiffy::storage::block>> blks;
     blks.resize(block_ids.size());
+    
+    for (size_t i = 0; i < block_ids.size(); ++i) {
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
+      blks[i]->setup("file", "", "regular", conf);
+    }
+    return blks;
+  }
+
+  static std::vector<std::shared_ptr<jiffy::storage::block>> init_shared_log_blocks(size_t num_blocks,
+                                                                              int32_t service_port,
+                                                                              int32_t management_port) {
+    using namespace jiffy::storage;
+    std::vector<std::shared_ptr<block>> blks;
+    blks.resize(num_blocks);
+    for (size_t i = 0; i < num_blocks; ++i) {
+      std::string id = block_id_parser::make("127.0.0.1", service_port, management_port,
+                                             static_cast<int32_t>(i));
+      blks[i] = std::make_shared<block>(id);
+      blks[i]->setup("shared_log", "", "regular", {});
+    }
+    return blks;
+  }
+
+  static std::vector<std::shared_ptr<jiffy::storage::block>> init_shared_log_blocks(const std::vector<std::string> &block_ids,
+                                                                              size_t block_capacity = 134217728,
+                                                                              double threshold_lo = 0.05,
+                                                                              double threshold_hi = 0.95,
+                                                                              const std::string &dir_host = "127.0.0.1",
+                                                                              int dir_port = 9090) {
+    jiffy::utils::property_map conf;
+    conf.set("shared_log.capacity_threshold_lo", std::to_string(threshold_lo));
+    conf.set("shared_log.capacity_threshold_hi", std::to_string(threshold_hi));
+    conf.set("directory.host", dir_host);
+    conf.set("directory.port", std::to_string(dir_port));
+    std::vector<std::shared_ptr<jiffy::storage::block>> blks;
+    blks.resize(block_ids.size());
     for (size_t i = 0; i < block_ids.size(); ++i) {
       blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
-      blks[i]->setup("file", "local://tmp", "", "regular", conf);
+      blks[i]->setup("shared_log", "", "regular", conf);
     }
     return blks;
   }
@@ -300,15 +341,17 @@ class test_utils {
       std::string id = block_id_parser::make("127.0.0.1", service_port, management_port,
                                              static_cast<int32_t>(i));
       blks[i] = std::make_shared<block>(id);
-      blks[i]->setup("fifoqueue", "local://tmp", "", "regular", {});
+      blks[i]->setup("fifoqueue", "", "regular", {});
     }
     return blks;
   }
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_fifo_queue_blocks(const std::vector<std::string> &block_ids,
+                                                                                    std::string memory_mode = "DRAM",
+                                                                                    struct memkind* pmem_kind = nullptr,
                                                                                     size_t block_capacity = 134217728,
                                                                                     double threshold_lo = 0.05,
-                                                                                    double threshold_hi = 0.95,
+                                                                                    double threshold_hi = 0.95,                                          
                                                                                     const std::string &dir_host = "127.0.0.1",
                                                                                     int dir_port = 9090) {
     jiffy::utils::property_map conf;
@@ -319,11 +362,31 @@ class test_utils {
     std::vector<std::shared_ptr<jiffy::storage::block>> blks;
     blks.resize(block_ids.size());
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
-      blks[i]->setup("fifoqueue", "local://tmp", "", "regular", conf);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
+      blks[i]->setup("fifoqueue", "", "regular", conf);
     }
     return blks;
   }
+
+  static struct memkind* init_pmem_kind() {
+    std::string pmem_path = getenv("PMEM_PATH"); 
+    std::string memory_mode = getenv("JIFFY_TEST_MODE");
+    struct memkind* pmem_kind = nullptr;
+    if (memory_mode == "PMEM") {
+      size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
+      if(err) {
+        char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+        memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+        fprintf(stderr, "%s\n", error_message);
+      }
+    }
+    return pmem_kind;
+  }
+
+  static void destroy_kind(struct memkind* pmem_kind) {
+    memkind_destroy_kind(pmem_kind);
+  }
+
 };
 
 #endif //JIFFY_TEST_UTILS_H

@@ -95,6 +95,13 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/file/file_partition.cpp
           src/jiffy/storage/file/file_block.h
           src/jiffy/storage/file/file_block.cpp
+          src/jiffy/storage/shared_log/shared_log_defs.h
+          src/jiffy/storage/shared_log/shared_log_ops.h
+          src/jiffy/storage/shared_log/shared_log_ops.cpp
+          src/jiffy/storage/shared_log/shared_log_partition.h
+          src/jiffy/storage/shared_log/shared_log_partition.cpp
+          src/jiffy/storage/shared_log/shared_log_block.h
+          src/jiffy/storage/shared_log/shared_log_block.cpp
           src/jiffy/storage/fifoqueue/fifo_queue_defs.h
           src/jiffy/storage/fifoqueue/fifo_queue_ops.h
           src/jiffy/storage/fifoqueue/fifo_queue_ops.cpp
@@ -118,6 +125,8 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/client/hash_table_client.h
           src/jiffy/storage/client/file_client.cpp
           src/jiffy/storage/client/file_client.h
+          src/jiffy/storage/client/shared_log_client.cpp
+          src/jiffy/storage/client/shared_log_client.h
           src/jiffy/storage/client/fifo_queue_client.cpp
           src/jiffy/storage/client/fifo_queue_client.h
           src/jiffy/storage/client/data_structure_listener.cpp
@@ -224,12 +233,14 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/types/byte_string.h
           src/jiffy/storage/types/byte_string.cc)
 
-  add_dependencies(jiffy thrift_ep awssdk_ep jemalloc_ep)
+  add_dependencies(jiffy thrift_ep awssdk_ep memkind_ep)
+  message(STATUS "numalibrary = ${NUMA_LIBRARY}")
   target_link_libraries(jiffy ${THRIFT_LIBRARY}
           ${THRIFTNB_LIBRARY}
           ${LIBEVENT_LIBRARY}
           ${AWSSDK_LINK_LIBRARIES}
-          ${JEMALLOC_LIBRARY}
+          ${MEMKIND_LIBRARY}
+          ${NUMA_LIBRARY}
           ${CMAKE_DL_LIBS}
           ${CMAKE_THREAD_LIBS_INIT})
   set_target_properties(jiffy PROPERTIES LINKER_LANGUAGE CXX)
@@ -246,32 +257,31 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
     include_directories(${CATCH_INCLUDE_DIR})
     add_executable(jiffy_tests
             test/jiffy_tests.cpp
-            test/block_allocation_service_test.cpp
-	    test/block_allocator_test.cpp
+	          test/block_allocation_service_test.cpp
+	          test/block_allocator_test.cpp
             test/directory_lease_test.cpp
             test/lease_expiry_worker_test.cpp
             test/local_store_test.cpp
             #test/file_size_tracker_test.cpp
             test/directory_tree_test.cpp
             test/directory_service_test.cpp
-	    test/file_partition_test.cpp
-            test/file_local_partition_test.cpp
-            test/file_client_test.cpp
+	          test/file_partition_test.cpp
+	          test/file_client_test.cpp
             test/fifo_queue_partition_test.cpp
-            test/fifo_queue_local_partition_test.cpp
             test/fifo_queue_client_test.cpp
             test/hash_table_partition_test.cpp
-            test/hash_table_local_partition_test.cpp
             test/hash_table_client_test.cpp
+            test/shared_log_partition_test.cpp
+            test/shared_log_client_test.cpp
             test/jiffy_client_test.cpp
             test/notification_test.cpp
-	    test/storage_manager_test.cpp
+	          test/storage_manager_test.cpp
             test/sync_worker_test.cpp
             test/chain_replication_test.cpp
             test/auto_scaling_test.cpp
             test/test_utils.h)
     target_link_libraries(jiffy_tests jiffy)
-    add_dependencies(jiffy_tests catch_ep boost_ep jemalloc_ep thrift_ep awssdk_ep)
+    add_dependencies(jiffy_tests catch_ep boost_ep memkind_ep thrift_ep awssdk_ep)
     # Register test
     add_test(JiffyTest jiffy_tests)
   endif ()
@@ -318,6 +328,10 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/file/file_ops.cpp
           src/jiffy/storage/file/file_block.h
           src/jiffy/storage/file/file_block.cpp
+          src/jiffy/storage/shared_log/shared_log_ops.h
+          src/jiffy/storage/shared_log/shared_log_ops.cpp
+          src/jiffy/storage/shared_log/shared_log_block.h
+          src/jiffy/storage/shared_log/shared_log_block.cpp
           src/jiffy/storage/fifoqueue/fifo_queue_ops.h
           src/jiffy/storage/fifoqueue/fifo_queue_ops.cpp
           src/jiffy/storage/fifoqueue/string_array.h
@@ -336,6 +350,8 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/storage/client/hash_table_client.h
           src/jiffy/storage/client/file_client.cpp
           src/jiffy/storage/client/file_client.h
+          src/jiffy/storage/client/shared_log_client.cpp
+          src/jiffy/storage/client/shared_log_client.h
           src/jiffy/storage/client/fifo_queue_client.cpp
           src/jiffy/storage/client/fifo_queue_client.h
           src/jiffy/storage/client/data_structure_listener.cpp

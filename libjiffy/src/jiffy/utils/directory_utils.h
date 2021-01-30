@@ -150,12 +150,12 @@ class directory_utils {
   }
 
   /**
-   * @brief Delete prefix like "local:/"
+   * @brief Delete path URI"
    * @param path File path
    * @return path name
    */
 
-  static std::string decompose_path(std::string path) {
+  static std::string remove_uri(const std::string& path) {
     std::string separator = ":/";
     std::size_t pos = path.find(separator);
     if (pos == std::string::npos) {

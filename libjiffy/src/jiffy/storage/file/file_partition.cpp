@@ -3,7 +3,6 @@
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/storage/file/file_ops.h"
 #include "jiffy/auto_scaling/auto_scaling_client.h"
-#include <jiffy/utils/directory_utils.h>
 #include <thread>
 
 namespace jiffy {
@@ -11,26 +10,23 @@ namespace storage {
 
 using namespace utils;
 
-#define min(a,b) ((a) < (b) ? (a) : (b))
-
 file_partition::file_partition(block_memory_manager *manager,
-                               const std::string &backing_path,
                                const std::string &name,
                                const std::string &metadata,
                                const utils::property_map &conf,
                                const std::string &auto_scaling_host,
                                int auto_scaling_port)
-    : chain_module(manager, backing_path, name, metadata, FILE_OPS),
+    : chain_module(manager, name, metadata, FILE_OPS),
       partition_(manager->mb_capacity(), build_allocator<char>()),
       scaling_up_(false),
       dirty_(false),
       block_allocated_(false),
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port) {
-  auto ser = conf.get("file.serializer", "csv");
-  if (ser == "binary") {
+  ser_name_ = conf.get("file.serializer", "csv");
+  if (ser_name_ == "binary") {
     ser_ = std::make_shared<binary_serde>(binary_allocator_);
-  } else if (ser == "csv") {
+  } else if (ser_name_ == "csv") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
   } else {
     throw std::invalid_argument("No such serializer/deserializer " + ser);
@@ -53,7 +49,7 @@ void file_partition::write(response &_return, const arg_list &args) {
     int start_offset = (int(off)) / cache_block_size * cache_block_size;
     int end_offset = (int(off) + args[1].size() - 1) / cache_block_size * cache_block_size;
     int num_of_blocks = (end_offset - start_offset) / cache_block_size + 1;
-    auto full_block_data = partition_.read(static_cast<std::size_t>(start_offset), static_cast<std::size_t>(min(last_offset - start_offset, cache_block_size * num_of_blocks)));
+    auto full_block_data = partition_.read(static_cast<std::size_t>(start_offset), static_cast<std::size_t>(std::min(last_offset - start_offset, cache_block_size * num_of_blocks)));
     if (full_block_data.first) {
       RETURN_OK(full_block_data.second);
     }
@@ -77,12 +73,12 @@ void file_partition::read(response &_return, const arg_list &args) {
 }
 
 void file_partition::write_ls(response &_return, const arg_list &args) {
-  if (args.size() != 3 && args.size() != 5) {
+  if (args.size() != 3) {
     RETURN_ERR("!args_error");
   }
   std::string file_path, line, data;
   int pos = std::stoi(args[2]);
-  file_path = directory_utils::decompose_path(backing_path());
+  file_path = directory_utils::remove_uri(backing_path());
   directory_utils::push_path_element(file_path,name());
   std::ofstream out(file_path,std::ios::in|std::ios::out);
   if (out) {
@@ -90,31 +86,11 @@ void file_partition::write_ls(response &_return, const arg_list &args) {
     out.seekp(pos, std::ios::beg);
     out << data;
     out.close();
+    RETURN_OK();  
   }
   else {
     RETURN_ERR("!file_does_not_exist");
   }
-  if (args.size() == 5) {
-    std::ifstream in(file_path,std::ios::in);
-    int cache_block_size = std::stoi(args[3]);
-    int last_offset = std::stoi(args[4]) + args[1].size();
-    int start_offset = (int(off)) / cache_block_size * cache_block_size;
-    int end_offset = (int(off) + args[1].size() - 1) / cache_block_size * cache_block_size;
-    int num_of_blocks = (end_offset - start_offset) / cache_block_size + 1;
-    if (in) {
-      in.seekg(0, std::ios::end);
-      in.seekg(start_offset, std::ios::beg);
-      int read_size = min(last_offset - start_offset, cache_block_size * num_of_blocks);
-      char *ret = new char[read_size];
-      in.read(ret, read_size);
-      std::string ret_str = ret;
-      memset(ret, 0, read_size);
-      delete[] ret;
-      RETURN_OK(ret_str);
-    }
-  }
-  RETURN_OK();
-  
 }
 
 void file_partition::read_ls(response &_return, const arg_list &args) {
@@ -124,7 +100,7 @@ void file_partition::read_ls(response &_return, const arg_list &args) {
   std::string file_path, line, ret_str;
   auto pos = std::stoi(args[1]);
   auto size = std::stoi(args[2]);
-  file_path = directory_utils::decompose_path(backing_path());
+  file_path = directory_utils::remove_uri(backing_path());
   directory_utils::push_path_element(file_path,name());
   std::ifstream in(file_path,std::ios::in);
   if (in) {
@@ -198,10 +174,6 @@ void file_partition::run_command(response &_return, const arg_list &args) {
     case file_cmd_id::file_write:write(_return, args);
       break;
     case file_cmd_id::file_read:read(_return, args);
-      break;
-    case file_cmd_id::file_write_ls:write_ls(_return, args);
-      break;
-    case file_cmd_id::file_read_ls:read_ls(_return, args);
       break;
     case file_cmd_id::file_clear:clear(_return, args);
       break;
