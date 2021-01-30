@@ -5,6 +5,7 @@
 #include <string>
 #include <cstdio>
 #include <memkind.h>
+#include "test_utils.h"
 
 using namespace ::jiffy::storage;
 using namespace ::jiffy::persistent;

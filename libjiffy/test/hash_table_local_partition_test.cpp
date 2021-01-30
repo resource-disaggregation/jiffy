@@ -3,6 +3,7 @@
 #include "jiffy/storage/hashtable/hash_table_ops.h"
 #include "jiffy/storage/hashtable/hash_table_partition.h"
 #include <memkind.h>
+#include "test_utils.h"
 
 using namespace ::jiffy::storage;
 using namespace ::jiffy::persistent;
