@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <limits.h>
 #include <memkind.h>
 #include <thrift/transport/TBufferTransports.h>
 #include <thrift/transport/TSocket.h>
@@ -22,6 +23,7 @@ class dummy_storage_manager : public jiffy::storage::storage_management_ops {
 
   void create_partition(const std::string &block_id,
                         const std::string &type,
+                        const std::string &backing_path,
                         const std::string &name,
                         const std::string &metadata,
                         const std::map<std::string, std::string> &conf) override {
@@ -229,7 +231,7 @@ class test_utils {
       std::string id = block_id_parser::make("127.0.0.1", service_port, management_port,
                                              static_cast<int32_t>(i));
       blks[i] = std::make_shared<block>(id);
-      blks[i]->setup("hashtable", "0_65536", "regular", {});
+      blks[i]->setup("hashtable", "local://tmp", "0_65536", "regular", {});
       std::dynamic_pointer_cast<hash_table_partition>(blks[i]->impl())->slot_range(0, 65536);
     }
     return blks;
@@ -253,7 +255,7 @@ class test_utils {
 
     for (size_t i = 0; i < block_ids.size(); ++i) {
       blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
-      blks[i]->setup("hashtable", "0_65536", "regular", conf);
+      blks[i]->setup("hashtable", "local://tmp", "0_65536", "regular", conf);
     }
     return blks;
   }
@@ -268,7 +270,7 @@ class test_utils {
       std::string id = block_id_parser::make("127.0.0.1", service_port, management_port,
                                              static_cast<int32_t>(i));
       blks[i] = std::make_shared<block>(id);
-      blks[i]->setup("file", "", "regular", {});
+      blks[i]->setup("file", "local://tmp", "", "regular", {});
     }
     return blks;
   }
@@ -291,7 +293,7 @@ class test_utils {
     
     for (size_t i = 0; i < block_ids.size(); ++i) {
       blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
-      blks[i]->setup("file", "", "regular", conf);
+      blks[i]->setup("file", "local://tmp", "", "regular", conf);
     }
     return blks;
   }
@@ -306,7 +308,7 @@ class test_utils {
       std::string id = block_id_parser::make("127.0.0.1", service_port, management_port,
                                              static_cast<int32_t>(i));
       blks[i] = std::make_shared<block>(id);
-      blks[i]->setup("shared_log", "", "regular", {});
+      blks[i]->setup("shared_log", "local://tmp", "", "regular", {});
     }
     return blks;
   }
@@ -326,7 +328,7 @@ class test_utils {
     blks.resize(block_ids.size());
     for (size_t i = 0; i < block_ids.size(); ++i) {
       blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
-      blks[i]->setup("shared_log", "", "regular", conf);
+      blks[i]->setup("shared_log", "local://tmp", "", "regular", conf);
     }
     return blks;
   }
@@ -341,7 +343,7 @@ class test_utils {
       std::string id = block_id_parser::make("127.0.0.1", service_port, management_port,
                                              static_cast<int32_t>(i));
       blks[i] = std::make_shared<block>(id);
-      blks[i]->setup("fifoqueue", "", "regular", {});
+      blks[i]->setup("fifoqueue", "local://tmp", "", "regular", {});
     }
     return blks;
   }
@@ -363,7 +365,7 @@ class test_utils {
     blks.resize(block_ids.size());
     for (size_t i = 0; i < block_ids.size(); ++i) {
       blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
-      blks[i]->setup("fifoqueue", "", "regular", conf);
+      blks[i]->setup("fifoqueue", "local://tmp", "", "regular", conf);
     }
     return blks;
   }
