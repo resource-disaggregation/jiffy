@@ -314,6 +314,8 @@ class test_utils {
   }
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_shared_log_blocks(const std::vector<std::string> &block_ids,
+                                                                              std::string memory_mode = "DRAM",
+                                                                              struct memkind* pmem_kind = nullptr,
                                                                               size_t block_capacity = 134217728,
                                                                               double threshold_lo = 0.05,
                                                                               double threshold_hi = 0.95,
@@ -327,7 +329,7 @@ class test_utils {
     std::vector<std::shared_ptr<jiffy::storage::block>> blks;
     blks.resize(block_ids.size());
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
       blks[i]->setup("shared_log", "local://tmp", "", "regular", conf);
     }
     return blks;
@@ -386,7 +388,12 @@ class test_utils {
   }
 
   static void destroy_kind(struct memkind* pmem_kind) {
-    memkind_destroy_kind(pmem_kind);
+    int err = memkind_destroy_kind(pmem_kind);
+    if(err) {
+      char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
+      memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
+      fprintf(stderr, "%s\n", error_message);
+    }
   }
 
 };

@@ -22,7 +22,7 @@ class block {
    */
   explicit block(const std::string &id,
         const size_t capacity = 134217728,
-        const std::string memory_mode = "PMEM",
+        const std::string memory_mode = "DRAM",
         struct memkind* pmem_kind = nullptr,
         const std::string &auto_scaling_host = "127.0.0.1",
         const int auto_scaling_port = 9095);

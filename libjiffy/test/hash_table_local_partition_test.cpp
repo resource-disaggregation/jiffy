@@ -44,7 +44,6 @@ TEST_CASE("hash_table_ls_put_get_csv_test", "[put][get]") {
     REQUIRE(resp[0] == "!key_not_found");
   }
   remove("/tmp/0_65536");
-  test_utils::destroy_kind(pmem_kind);
 }
 
 
@@ -87,7 +86,6 @@ TEST_CASE("hash_table_ls_put_update_get_csv_test", "[put][update][get]") {
     REQUIRE(resp[1] == std::to_string(i + 1000));
   }
   remove("/tmp/0_65536");
-  test_utils::destroy_kind(pmem_kind);
 }
 
 
@@ -131,7 +129,6 @@ TEST_CASE("hash_table_ls_put_upsert_get_csv_test", "[put][upsert][get]") {
     REQUIRE(resp[1] == std::to_string(i + 1000));
   }
   remove("/tmp/0_65536");
-  test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("hash_table_ls_put_exists_remove_exists_csv_test", "[put][exists][remove][exists]") {
@@ -174,7 +171,6 @@ TEST_CASE("hash_table_ls_put_exists_remove_exists_csv_test", "[put][exists][remo
     REQUIRE(resp[0] == "!key_not_found");
   }
   remove("/tmp/0_65536");
-  test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("hash_table_ls_put_remove_get_csv_test", "[put][update][get]") {
@@ -218,7 +214,6 @@ TEST_CASE("hash_table_ls_put_remove_get_csv_test", "[put][update][get]") {
     REQUIRE(resp[0] == "!key_not_found");
   }
   remove("/tmp/0_65536");
-  test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("hash_table_ls_put_get_binary_test", "[put][get]") {
@@ -256,7 +251,6 @@ TEST_CASE("hash_table_ls_put_get_binary_test", "[put][get]") {
     REQUIRE(resp[0] == "!key_not_found");
   }
   remove("/tmp/0_65536");
-  test_utils::destroy_kind(pmem_kind);
 }
 
 
@@ -299,7 +293,6 @@ TEST_CASE("hash_table_ls_put_update_get_binary_test", "[put][update][get]") {
     REQUIRE(resp[1] == std::to_string(i + 1000));
   }
   remove("/tmp/0_65536");
-  test_utils::destroy_kind(pmem_kind);
 }
 
 
@@ -343,7 +336,6 @@ TEST_CASE("hash_table_ls_put_upsert_get_binary_test", "[put][upsert][get]") {
     REQUIRE(resp[1] == std::to_string(i + 1000));
   }
   remove("/tmp/0_65536");
-  test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("hash_table_ls_put_exists_remove_exists_binary_test", "[put][exists][remove][exists]") {
@@ -386,7 +378,6 @@ TEST_CASE("hash_table_ls_put_exists_remove_exists_binary_test", "[put][exists][r
     REQUIRE(resp[0] == "!key_not_found");
   }
   remove("/tmp/0_65536");
-  test_utils::destroy_kind(pmem_kind);
 }
 
 TEST_CASE("hash_table_ls_put_remove_get_binary_test", "[put][update][get]") {
@@ -430,5 +421,4 @@ TEST_CASE("hash_table_ls_put_remove_get_binary_test", "[put][update][get]") {
     REQUIRE(resp[0] == "!key_not_found");
   }
   remove("/tmp/0_65536");
-  test_utils::destroy_kind(pmem_kind);
 }
