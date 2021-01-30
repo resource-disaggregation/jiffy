@@ -137,11 +137,14 @@ class shared_log_partition : public chain_module {
 
  private:
 
-  /* File partition */
+  /* Shared_log partition */
   shared_log_type partition_;
 
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
+
+  /* Name of format, either binary or csv */
+  std::string ser_name_;
 
   /* Bool for partition slot range splitting */
   bool scaling_up_;

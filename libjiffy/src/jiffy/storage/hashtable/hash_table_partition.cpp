@@ -36,7 +36,7 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
   } else if (ser_name_ == "csv") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
   } else {
-    throw std::invalid_argument("No such serializer/deserializer " + ser);
+    throw std::invalid_argument("No such serializer/deserializer " + ser_name_);
   }
   threshold_hi_ = conf.get_as<double>("hashtable.capacity_threshold_hi", 0.95);
   threshold_lo_ = conf.get_as<double>("hashtable.capacity_threshold_lo", 0.05);

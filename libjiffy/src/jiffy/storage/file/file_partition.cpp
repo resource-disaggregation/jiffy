@@ -31,7 +31,7 @@ file_partition::file_partition(block_memory_manager *manager,
   } else if (ser_name_ == "csv") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
   } else {
-    throw std::invalid_argument("No such serializer/deserializer " + ser);
+    throw std::invalid_argument("No such serializer/deserializer " + ser_name_);
   }
   auto_scale_ = conf.get_as<bool>("file.auto_scale", true);
 }

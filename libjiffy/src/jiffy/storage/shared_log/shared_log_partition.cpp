@@ -15,12 +15,13 @@ using namespace utils;
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
 shared_log_partition::shared_log_partition(block_memory_manager *manager,
+                               const std::string &backing_path,
                                const std::string &name,
                                const std::string &metadata,
                                const utils::property_map &conf,
                                const std::string &auto_scaling_host,
                                int auto_scaling_port)
-    : chain_module(manager,  name, metadata, SHARED_LOG_OPS),
+    : chain_module(manager, backing_path, name, metadata, SHARED_LOG_OPS),
       partition_(manager->mb_capacity(), build_allocator<char>()),
       scaling_up_(false),
       dirty_(false),
@@ -28,11 +29,11 @@ shared_log_partition::shared_log_partition(block_memory_manager *manager,
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port),
       log_info_() {
-  auto ser = conf.get("shared_log.serializer", "binary");
-  if (ser == "binary") {
+  auto ser_name_ = conf.get("shared_log.serializer", "binary");
+  if (ser_name_ == "binary") {
     ser_ = std::make_shared<binary_serde>(binary_allocator_);
   } else {
-    throw std::invalid_argument("No such serializer/deserializer " + ser);
+    throw std::invalid_argument("No such serializer/deserializer " + ser_name_);
   }
   auto_scale_ = conf.get_as<bool>("shared_log.auto_scale", true);
 }
