@@ -8,10 +8,11 @@ namespace storage {
 using namespace utils;
 
 chain_module::chain_module(block_memory_manager *manager,
+                           const std::string &backing_path,
                            const std::string &name,
                            const std::string &metadata,
                            const command_map &supported_cmds)
-    : partition(manager, name, metadata, supported_cmds),
+    : partition(manager, backing_path, name, metadata, supported_cmds),
       next_(std::make_unique<next_chain_module_cxn>("nil")),
       prev_(std::make_unique<prev_chain_module_cxn>()),
       pending_(0) {}

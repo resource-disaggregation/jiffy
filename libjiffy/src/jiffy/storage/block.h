@@ -51,6 +51,7 @@ class block {
    * @param conf Configuration parameters for constructing the partition.
    */
   void setup(const std::string &type,
+             const std::string &backing_path,
              const std::string &name,
              const std::string &metadata,
              const utils::property_map &conf);

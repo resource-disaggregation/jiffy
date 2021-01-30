@@ -3,6 +3,7 @@
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/storage/file/file_ops.h"
 #include "jiffy/auto_scaling/auto_scaling_client.h"
+#include <jiffy/utils/directory_utils.h>
 #include <thread>
 
 namespace jiffy {
@@ -11,12 +12,13 @@ namespace storage {
 using namespace utils;
 
 file_partition::file_partition(block_memory_manager *manager,
+                               const std::string &backing_path,
                                const std::string &name,
                                const std::string &metadata,
                                const utils::property_map &conf,
                                const std::string &auto_scaling_host,
                                int auto_scaling_port)
-    : chain_module(manager, name, metadata, FILE_OPS),
+    : chain_module(manager, backing_path, name, metadata, FILE_OPS),
       partition_(manager->mb_capacity(), build_allocator<char>()),
       scaling_up_(false),
       dirty_(false),
@@ -73,10 +75,10 @@ void file_partition::read(response &_return, const arg_list &args) {
 }
 
 void file_partition::write_ls(response &_return, const arg_list &args) {
-  if (args.size() != 3) {
+  if (args.size() != 5 && args.size() != 3) {
     RETURN_ERR("!args_error");
   }
-  std::string file_path, line, data;
+  std::string file_path, data;
   int pos = std::stoi(args[2]);
   file_path = directory_utils::remove_uri(backing_path());
   directory_utils::push_path_element(file_path,name());
@@ -86,6 +88,24 @@ void file_partition::write_ls(response &_return, const arg_list &args) {
     out.seekp(pos, std::ios::beg);
     out << data;
     out.close();
+    if (args.size() == 5) {
+      int cache_block_size = std::stoi(args[3]);
+      int last_offset = std::stoi(args[4]) + args[1].size();
+      int start_offset = (int(off)) / cache_block_size * cache_block_size;
+      int end_offset = (int(off) + args[1].size() - 1) / cache_block_size * cache_block_size;
+      int num_of_blocks = (end_offset - start_offset) / cache_block_size + 1;
+      int size = end_offset - start_offset;
+      std::string ret_str;
+      std::ifstream in(file_path,std::ios::in);
+      in.seekg(0, std::ios::end);
+      in.seekg(start_offset, std::ios::beg);
+      char *ret = new char[size];
+      in.read(ret,size);
+      ret_str = ret;
+      memset(ret,0,size);
+      delete[] ret;
+      RETURN_OK(ret_str);
+    }
     RETURN_OK();  
   }
   else {
@@ -97,7 +117,7 @@ void file_partition::read_ls(response &_return, const arg_list &args) {
   if (args.size() != 3) {
     RETURN_ERR("!args_error");
   }
-  std::string file_path, line, ret_str;
+  std::string file_path, ret_str;
   auto pos = std::stoi(args[1]);
   auto size = std::stoi(args[2]);
   file_path = directory_utils::remove_uri(backing_path());

@@ -153,13 +153,6 @@ class HashTableCache(DataStructureCache):
             while (self.size() + len(new_value)) > self.list.max_size_():
                 self.evict()
             self.insert([new_key,new_value])
-        
-    def print_out(self): # for debug use
-        cur_node = self.list.head
-        while cur_node:
-            print(cur_node.mark,self.table[cur_node.mark])
-            cur_node = cur_node.next
-
 
 class FileCache(DataStructureCache):
     def __init__(self, max_length, block_size, prefetch_block_num):
@@ -208,10 +201,5 @@ class FileCache(DataStructureCache):
     def hit_handling(self,cur_offset, read_size):
         start_offset = (cur_offset // self.block_size) * self.block_size
         return self.table[start_offset].data[(cur_offset - start_offset) : min(read_size + cur_offset - start_offset, len(self.table[start_offset].data))]
-        
-    def print_out(self): # for debug use
-        cur_node = self.list.head
-        while cur_node:
-            print(cur_node.mark,cur_node.data)
-            cur_node = cur_node.next
+
         
