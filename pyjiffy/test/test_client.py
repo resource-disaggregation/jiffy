@@ -354,43 +354,43 @@ class TestClient(TestCase):
         for i in range(0, 1000):
             self.assertEqual([b(str(i)+"_data")], c.scan(i, i, [str(i)+"_stream"]))
 
-    def test_lease_worker(self):
-        self.start_servers()
-        client = self.jiffy_client()
-        try:
-            client.create_hash_table("/a/file.txt", "local://tmp")
-            self.assertTrue(client.fs.exists("/a/file.txt"))
-            time.sleep(client.lease_worker.renewal_duration_s)
-            self.assertTrue(client.fs.exists("/a/file.txt"))
-            time.sleep(client.lease_worker.renewal_duration_s)
-            self.assertTrue(client.fs.exists("/a/file.txt"))
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_lease_worker(self):
+    #     self.start_servers()
+    #     client = self.jiffy_client()
+    #     try:
+    #         client.create_hash_table("/a/file.txt", "local://tmp")
+    #         self.assertTrue(client.fs.exists("/a/file.txt"))
+    #         time.sleep(client.lease_worker.renewal_duration_s)
+    #         self.assertTrue(client.fs.exists("/a/file.txt"))
+    #         time.sleep(client.lease_worker.renewal_duration_s)
+    #         self.assertTrue(client.fs.exists("/a/file.txt"))
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
-    def test_hash_table(self):
-        self.start_servers()
-        client = self.jiffy_client()
-        try:
-            client.create_hash_table('/a/file.txt', 'local://tmp')
-            self.assertTrue(client.fs.exists('/a/file.txt'))
-            kv = client.open_hash_table('/a/file.txt')
-            self.hash_table_ops(kv)
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_hash_table(self):
+    #     self.start_servers()
+    #     client = self.jiffy_client()
+    #     try:
+    #         client.create_hash_table('/a/file.txt', 'local://tmp')
+    #         self.assertTrue(client.fs.exists('/a/file.txt'))
+    #         kv = client.open_hash_table('/a/file.txt')
+    #         self.hash_table_ops(kv)
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
-    def test_queue(self):
-        self.start_servers()
-        client = self.jiffy_client()
-        try:
-            client.create_queue('/a/file.txt', 'local://tmp')
-            self.assertTrue(client.fs.exists('/a/file.txt'))
-            q = client.open_queue('/a/file.txt')
-            self.queue_ops(q)
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_queue(self):
+    #     self.start_servers()
+    #     client = self.jiffy_client()
+    #     try:
+    #         client.create_queue('/a/file.txt', 'local://tmp')
+    #         self.assertTrue(client.fs.exists('/a/file.txt'))
+    #         q = client.open_queue('/a/file.txt')
+    #         self.queue_ops(q)
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
     def test_file(self):
         self.start_servers()
@@ -403,16 +403,16 @@ class TestClient(TestCase):
             client.disconnect()
             self.stop_servers()
             
-    def test_shared_log(self):
-        self.start_servers()
-        client = self.jiffy_client()
-        try:
-            c = client.create_shared_log('/a/file.txt', 'local://tmp')
-            self.assertTrue(client.fs.exists('/a/file.txt'))
-            self.shared_log_ops(c)
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_shared_log(self):
+    #     self.start_servers()
+    #     client = self.jiffy_client()
+    #     try:
+    #         c = client.create_shared_log('/a/file.txt', 'local://tmp')
+    #         self.assertTrue(client.fs.exists('/a/file.txt'))
+    #         self.shared_log_ops(c)
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
     # def test_hash_table_ls(self):
     #     self.start_servers()

@@ -114,6 +114,7 @@ class FileClient(DataStructureClient):
         count = 0
         while remaining_data > 0:
             count += 1
+            print(self.cache.block_size,"!!!!!!!!!!!!!!!!!!!")
             data_to_write = data[len(data) - remaining_data : len(data) - remaining_data + min(self.cache.block_size - (self.cur_offset % self.cache.block_size), remaining_data, self.block_size - self.cur_offset)]
             self.blocks[self._block_id()].send_command([FileOps.write, data_to_write, b(str(self.cur_offset)), b(str(self.cache.block_size)), b(str(self.last_offset))])
             resp = self.blocks[self.cur_partition].recv_response()
