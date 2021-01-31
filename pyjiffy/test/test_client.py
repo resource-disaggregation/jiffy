@@ -354,19 +354,19 @@ class TestClient(TestCase):
         for i in range(0, 1000):
             self.assertEqual([b(str(i)+"_data")], c.scan(i, i, [str(i)+"_stream"]))
 
-    def test_lease_worker(self):
-        self.start_servers()
-        client = self.jiffy_client()
-        try:
-            client.create_hash_table("/a/file.txt", "local://tmp")
-            self.assertTrue(client.fs.exists("/a/file.txt"))
-            time.sleep(client.lease_worker.renewal_duration_s)
-            self.assertTrue(client.fs.exists("/a/file.txt"))
-            time.sleep(client.lease_worker.renewal_duration_s)
-            self.assertTrue(client.fs.exists("/a/file.txt"))
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_lease_worker(self):
+    #     self.start_servers()
+    #     client = self.jiffy_client()
+    #     try:
+    #         client.create_hash_table("/a/file.txt", "local://tmp")
+    #         self.assertTrue(client.fs.exists("/a/file.txt"))
+    #         time.sleep(client.lease_worker.renewal_duration_s)
+    #         self.assertTrue(client.fs.exists("/a/file.txt"))
+    #         time.sleep(client.lease_worker.renewal_duration_s)
+    #         self.assertTrue(client.fs.exists("/a/file.txt"))
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
     def test_hash_table(self):
         self.start_servers()
