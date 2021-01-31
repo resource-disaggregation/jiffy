@@ -1,5 +1,5 @@
 class Node(object):
-    def __init__(self, mark, data): # Only file cache will use param 'offset'
+    def __init__(self, mark, data): 
         self.mark = mark
         self.data = data
         self.next = None
@@ -56,8 +56,9 @@ class LinkedList(object):
             self.head = node
     
     def pop(self):
+        ret = self.tail
         if self.length == 0:
-            return 
+            pass
         elif self.length == 1:
             self.head = None
             self.tail = None
@@ -68,6 +69,7 @@ class LinkedList(object):
             self.size -= len(self.tail.data)
             self.tail.prev.next = None
             self.tail = self.tail.prev
+        return ret
     
     def remove(self, node):
         if self.head == self.tail:
