@@ -174,6 +174,7 @@ class TestClient(TestCase):
         # Test exists/get/put
         for i in range(0, 1000):
             try:
+                print(i)
                 kv.put(b(str(i)), b(str(i)))
             except KeyError as k:
                 self.fail("Received error message: {}".format(k))
