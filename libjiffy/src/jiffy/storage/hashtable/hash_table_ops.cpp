@@ -21,7 +21,6 @@ command_map HT_OPS = {{"exists", {command_type::accessor, 0}},
                       {"get_metadata", {command_type::accessor, 14}},
                       {"get_range_data", {command_type::accessor, 15}},
                       {"scale_put", {command_type::mutator, 16}},
-                      {"scale_remove", {command_type::mutator, 17}},
-                      {"dir_op", {command_type::mutator, 18}}};
+                      {"scale_remove", {command_type::mutator, 17}}};
 }
 }
