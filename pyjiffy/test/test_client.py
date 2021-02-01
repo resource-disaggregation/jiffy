@@ -459,20 +459,20 @@ class TestClient(TestCase):
             self.stop_servers()
 
 
-    def test_sync_remove(self):
-        self.start_servers()
-        client = self.jiffy_client()
-        try:
-            client.create_hash_table("/a/file.txt", "local://tmp")
-            self.assertTrue('/a/file.txt' in client.to_renew)
-            client.sync('/a/file.txt', 'local://tmp')
-            self.assertTrue('/a/file.txt' in client.to_renew)
-            client.remove('/a/file.txt')
-            self.assertFalse('/a/file.txt' in client.to_renew)
-            self.assertFalse(client.fs.exists('/a/file.txt'))
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_sync_remove(self):
+    #     self.start_servers()
+    #     client = self.jiffy_client()
+    #     try:
+    #         client.create_hash_table("/a/file.txt", "local://tmp")
+    #         self.assertTrue('/a/file.txt' in client.to_renew)
+    #         client.sync('/a/file.txt', 'local://tmp')
+    #         self.assertTrue('/a/file.txt' in client.to_renew)
+    #         client.remove('/a/file.txt')
+    #         self.assertFalse('/a/file.txt' in client.to_renew)
+    #         self.assertFalse(client.fs.exists('/a/file.txt'))
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
     # def test_close(self):
     #     self.start_servers()
@@ -502,16 +502,16 @@ class TestClient(TestCase):
         #     client.disconnect()
         #     self.stop_servers()
 
-    def test_chain_replication(self):
-        self.start_servers(chain=True)
-        client = self.jiffy_client()
-        try:
-            kv = client.create_hash_table("/a/file.txt", "local://tmp", 1, 3)
-            self.assertEqual(3, kv.block_info.chain_length)
-            self.hash_table_ops(kv)
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_chain_replication(self):
+    #     self.start_servers(chain=True)
+    #     client = self.jiffy_client()
+    #     try:
+    #         kv = client.create_hash_table("/a/file.txt", "local://tmp", 1, 3)
+    #         self.assertEqual(3, kv.block_info.chain_length)
+    #         self.hash_table_ops(kv)
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
     # def test_failures(self):
     #     servers = [self.storage_server_1, self.storage_server_2, self.storage_server_3]
@@ -527,177 +527,177 @@ class TestClient(TestCase):
     #             client.disconnect()
     #             self.stop_servers()
 
-    def test_hash_table_auto_scale(self):
-        self.start_servers(auto_scale=True)
-        client = self.jiffy_client()
-        try:
-            kv = client.create_hash_table("/a/file.txt", "local://tmp")
-            for i in range(0, 2000):
-                try:
-                    kv.put(b(str(i)), b(str(i)))
-                except KeyError as k:
-                    self.fail("Received error message: {}".format(k))
+    # def test_hash_table_auto_scale(self):
+    #     self.start_servers(auto_scale=True)
+    #     client = self.jiffy_client()
+    #     try:
+    #         kv = client.create_hash_table("/a/file.txt", "local://tmp")
+    #         for i in range(0, 2000):
+    #             try:
+    #                 kv.put(b(str(i)), b(str(i)))
+    #             except KeyError as k:
+    #                 self.fail("Received error message: {}".format(k))
 
-            self.assertEqual(2, len(client.fs.dstatus("/a/file.txt").data_blocks))
-            for i in range(0, 2000):
-                self.assertEqual(b("!ok"), kv.remove(b(str(i))))
-            self.assertEqual(1, len(client.fs.dstatus("/a/file.txt").data_blocks))
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    #         self.assertEqual(2, len(client.fs.dstatus("/a/file.txt").data_blocks))
+    #         for i in range(0, 2000):
+    #             self.assertEqual(b("!ok"), kv.remove(b(str(i))))
+    #         self.assertEqual(1, len(client.fs.dstatus("/a/file.txt").data_blocks))
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
-    def test_file_auto_scale(self):
-        self.start_servers(auto_scale=True)
-        client = self.jiffy_client()
-        try:
-            file_client = client.create_file("/a/file.txt", "local://tmp")
-            for i in range(0, 4000):
-                try:
-                    file_client.write(b(str(i)))
-                except KeyError as k:
-                    self.fail("Received error message: {}".format(k))
+    # def test_file_auto_scale(self):
+    #     self.start_servers(auto_scale=True)
+    #     client = self.jiffy_client()
+    #     try:
+    #         file_client = client.create_file("/a/file.txt", "local://tmp")
+    #         for i in range(0, 4000):
+    #             try:
+    #                 file_client.write(b(str(i)))
+    #             except KeyError as k:
+    #                 self.fail("Received error message: {}".format(k))
 
-            self.assertEqual(2, len(client.fs.dstatus("/a/file.txt").data_blocks))
-            self.assertTrue(file_client.seek(0))
-            for i in range(0, 4000):
-                self.assertEqual(b(str(i)), file_client.read(len(b(str(i)))))
-            self.assertEqual(2, len(client.fs.dstatus("/a/file.txt").data_blocks))
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    #         self.assertEqual(2, len(client.fs.dstatus("/a/file.txt").data_blocks))
+    #         self.assertTrue(file_client.seek(0))
+    #         for i in range(0, 4000):
+    #             self.assertEqual(b(str(i)), file_client.read(len(b(str(i)))))
+    #         self.assertEqual(2, len(client.fs.dstatus("/a/file.txt").data_blocks))
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
-    def test_file_asyn_read_write(self):
-        self.start_servers(auto_scale=True)
-        client = self.jiffy_client()
-        data_size = 25000
-        data = b("")
-        for i in range(0, data_size):
-            data += b("a")
-        file_client = client.create_file("/a/file.txt", "local://tmp")
-        self.assertEqual(data_size, file_client.write(data))
-        self.assertEqual(4, len(client.fs.dstatus("/a/file.txt").data_blocks))
-        self.assertTrue(file_client.seek(0))
-        self.assertEqual(data, file_client.read(len(data)))
-        self.assertEqual(4, len(client.fs.dstatus("/a/file.txt").data_blocks))
-        client.disconnect()
-        self.stop_servers()
+    # def test_file_asyn_read_write(self):
+    #     self.start_servers(auto_scale=True)
+    #     client = self.jiffy_client()
+    #     data_size = 25000
+    #     data = b("")
+    #     for i in range(0, data_size):
+    #         data += b("a")
+    #     file_client = client.create_file("/a/file.txt", "local://tmp")
+    #     self.assertEqual(data_size, file_client.write(data))
+    #     self.assertEqual(4, len(client.fs.dstatus("/a/file.txt").data_blocks))
+    #     self.assertTrue(file_client.seek(0))
+    #     self.assertEqual(data, file_client.read(len(data)))
+    #     self.assertEqual(4, len(client.fs.dstatus("/a/file.txt").data_blocks))
+    #     client.disconnect()
+    #     self.stop_servers()
 
-    def test_fifo_queue_auto_scale(self):
-        self.start_servers(auto_scale=True)
-        client = self.jiffy_client()
-        try:
-            queue_client = client.create_queue("/a/file.txt", "local://tmp")
-            for i in range(0, 1000):
-                try:
-                    queue_client.put(b(str(i)))
-                except KeyError as k:
-                    self.fail("Received error message: {}".format(k))
-            self.assertEqual(2, len(client.fs.dstatus("/a/file.txt").data_blocks))
-            for i in range(0, 1000):
-                self.assertEqual(b(str(i)), queue_client.get())
-            self.assertEqual(1, len(client.fs.dstatus("/a/file.txt").data_blocks))
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_fifo_queue_auto_scale(self):
+    #     self.start_servers(auto_scale=True)
+    #     client = self.jiffy_client()
+    #     try:
+    #         queue_client = client.create_queue("/a/file.txt", "local://tmp")
+    #         for i in range(0, 1000):
+    #             try:
+    #                 queue_client.put(b(str(i)))
+    #             except KeyError as k:
+    #                 self.fail("Received error message: {}".format(k))
+    #         self.assertEqual(2, len(client.fs.dstatus("/a/file.txt").data_blocks))
+    #         for i in range(0, 1000):
+    #             self.assertEqual(b(str(i)), queue_client.get())
+    #         self.assertEqual(1, len(client.fs.dstatus("/a/file.txt").data_blocks))
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
-    def test_notifications(self):
-        self.start_servers()
-        client = self.jiffy_client()
-        try:
-            client.create_hash_table("/a/file.txt", "local://tmp")
+    # def test_notifications(self):
+    #     self.start_servers()
+    #     client = self.jiffy_client()
+    #     try:
+    #         client.create_hash_table("/a/file.txt", "local://tmp")
 
-            n1 = client.listen("/a/file.txt")
-            n2 = client.listen("/a/file.txt")
-            n3 = client.listen("/a/file.txt")
+    #         n1 = client.listen("/a/file.txt")
+    #         n2 = client.listen("/a/file.txt")
+    #         n3 = client.listen("/a/file.txt")
 
-            n1.subscribe(['put'])
-            n2.subscribe(['put', 'remove'])
-            n3.subscribe(['remove'])
+    #         n1.subscribe(['put'])
+    #         n2.subscribe(['put', 'remove'])
+    #         n3.subscribe(['remove'])
 
-            kv = client.open_hash_table("/a/file.txt")
-            kv.put(b'key1', b'value1')
-            kv.remove(b'key1')
+    #         kv = client.open_hash_table("/a/file.txt")
+    #         kv.put(b'key1', b'value1')
+    #         kv.remove(b'key1')
 
-            self.assertEqual(Notification('put', b('key1')), n1.get_notification())
-            n2_notifs = [n2.get_notification(), n2.get_notification()]
-            self.assertTrue(Notification('put', b('key1')) in n2_notifs)
-            self.assertTrue(Notification('remove', b('key1')) in n2_notifs)
-            self.assertEqual(Notification('remove', b('key1')), n3.get_notification())
+    #         self.assertEqual(Notification('put', b('key1')), n1.get_notification())
+    #         n2_notifs = [n2.get_notification(), n2.get_notification()]
+    #         self.assertTrue(Notification('put', b('key1')) in n2_notifs)
+    #         self.assertTrue(Notification('remove', b('key1')) in n2_notifs)
+    #         self.assertEqual(Notification('remove', b('key1')), n3.get_notification())
 
-            with self.assertRaises(queue.Empty):
-                n1.get_notification(block=False)
-            with self.assertRaises(queue.Empty):
-                n2.get_notification(block=False)
-            with self.assertRaises(queue.Empty):
-                n3.get_notification(block=False)
+    #         with self.assertRaises(queue.Empty):
+    #             n1.get_notification(block=False)
+    #         with self.assertRaises(queue.Empty):
+    #             n2.get_notification(block=False)
+    #         with self.assertRaises(queue.Empty):
+    #             n3.get_notification(block=False)
 
-            n1.unsubscribe(['put'])
-            n2.unsubscribe(['remove'])
+    #         n1.unsubscribe(['put'])
+    #         n2.unsubscribe(['remove'])
 
-            kv.put(b'key1', b'value1')
-            kv.remove(b'key1')
+    #         kv.put(b'key1', b'value1')
+    #         kv.remove(b'key1')
 
-            self.assertEqual(Notification('put', b'key1'), n2.get_notification())
-            self.assertEqual(Notification('remove', b'key1'), n3.get_notification())
+    #         self.assertEqual(Notification('put', b'key1'), n2.get_notification())
+    #         self.assertEqual(Notification('remove', b'key1'), n3.get_notification())
 
-            with self.assertRaises(queue.Empty):
-                n1.get_notification(block=False)
-            with self.assertRaises(queue.Empty):
-                n2.get_notification(block=False)
-            with self.assertRaises(queue.Empty):
-                n3.get_notification(block=False)
+    #         with self.assertRaises(queue.Empty):
+    #             n1.get_notification(block=False)
+    #         with self.assertRaises(queue.Empty):
+    #             n2.get_notification(block=False)
+    #         with self.assertRaises(queue.Empty):
+    #             n3.get_notification(block=False)
 
-            n1.disconnect()
-            n2.disconnect()
-            n3.disconnect()
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    #         n1.disconnect()
+    #         n2.disconnect()
+    #         n3.disconnect()
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
-    def test_large_data_read(self):
-        self.start_servers()
-        client = self.jiffy_client()
-        try:
-            c = client.create_file('/a/file.txt', 'local://tmp')
-            self.assertTrue(client.fs.exists('/a/file.txt'))
-            data = b("")
-            data_size = 1024 * 1024
-            for i in range(0, data_size):
-                data += b("a")
-            for i in range(0, 50):
-                try:
-                    c.write(data)
-                except KeyError as k:
-                    self.fail('Received error message: {}'.format(k))
-            self.assertTrue(c.seek(0))
-            for i in range(0, 50):
-                self.assertEqual(data, c.read(len(data)))
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_large_data_read(self):
+    #     self.start_servers()
+    #     client = self.jiffy_client()
+    #     try:
+    #         c = client.create_file('/a/file.txt', 'local://tmp')
+    #         self.assertTrue(client.fs.exists('/a/file.txt'))
+    #         data = b("")
+    #         data_size = 1024 * 1024
+    #         for i in range(0, data_size):
+    #             data += b("a")
+    #         for i in range(0, 50):
+    #             try:
+    #                 c.write(data)
+    #             except KeyError as k:
+    #                 self.fail('Received error message: {}'.format(k))
+    #         self.assertTrue(c.seek(0))
+    #         for i in range(0, 50):
+    #             self.assertEqual(data, c.read(len(data)))
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
-    def test_queue_multithread(self):
-        self.start_servers()
-        client = self.jiffy_client()
-        threads = list()
-        workers = 3
-        ops = 1000
-        try:
-            client.create_queue('/a/file.txt', 'local://tmp')
-            self.assertTrue(client.fs.exists('/a/file.txt'))
-            result_queue = queue.Queue()
-            for index in range(workers):
-                x = threading.Thread(target=self.queue_worker, args=(client, QueryType.PUT_QUERY, result_queue, ops))
-                threads.append(x)
-                x.start()
-            for index in range(workers):
-                x = threading.Thread(target=self.queue_worker, args=(client, QueryType.GET_QUERY, result_queue, ops))
-                threads.append(x)
-                x.start()
-            for index, thread in enumerate(threads):
-                thread.join()
-            self.assertEqual(workers * ops, result_queue.qsize())
-        finally:
-            client.disconnect()
-            self.stop_servers()
+    # def test_queue_multithread(self):
+    #     self.start_servers()
+    #     client = self.jiffy_client()
+    #     threads = list()
+    #     workers = 3
+    #     ops = 1000
+    #     try:
+    #         client.create_queue('/a/file.txt', 'local://tmp')
+    #         self.assertTrue(client.fs.exists('/a/file.txt'))
+    #         result_queue = queue.Queue()
+    #         for index in range(workers):
+    #             x = threading.Thread(target=self.queue_worker, args=(client, QueryType.PUT_QUERY, result_queue, ops))
+    #             threads.append(x)
+    #             x.start()
+    #         for index in range(workers):
+    #             x = threading.Thread(target=self.queue_worker, args=(client, QueryType.GET_QUERY, result_queue, ops))
+    #             threads.append(x)
+    #             x.start()
+    #         for index, thread in enumerate(threads):
+    #             thread.join()
+    #         self.assertEqual(workers * ops, result_queue.qsize())
+    #     finally:
+    #         client.disconnect()
+    #         self.stop_servers()
 
