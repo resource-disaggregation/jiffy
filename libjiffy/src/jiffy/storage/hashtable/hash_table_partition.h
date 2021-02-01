@@ -239,13 +239,6 @@ class hash_table_partition : public chain_module {
   void remove_ls(response &_return, const arg_list &args);
 
   /**
-   * @brief Bridge of coomunication between clients
-   * @param _return Response
-   * @param args Arguments
-   */
-  void dir_op(response &_return, const arg_list &args);
-
-  /**
    * @brief Remove key from hash table during scaling
    * @param _return Response
    * @param args Arguments

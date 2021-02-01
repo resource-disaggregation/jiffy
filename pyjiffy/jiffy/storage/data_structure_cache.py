@@ -204,4 +204,8 @@ class FileCache(DataStructureCache):
         start_offset = (cur_offset // self.block_size) * self.block_size
         return self.table[start_offset].data[(cur_offset - start_offset) : min(read_size + cur_offset - start_offset, len(self.table[start_offset].data))]
 
-        
+    def print_out(self): # for debug use
+        cur_node = self.list.head
+        while cur_node:
+            print(cur_node.mark,cur_node.data)
+            cur_node = cur_node.next    

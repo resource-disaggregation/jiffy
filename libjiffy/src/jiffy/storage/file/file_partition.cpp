@@ -91,10 +91,10 @@ void file_partition::write_ls(response &_return, const arg_list &args) {
     if (args.size() == 5) {
       int cache_block_size = std::stoi(args[3]);
       int last_offset = std::stoi(args[4]) + args[1].size();
-      int start_offset = (int(off)) / cache_block_size * cache_block_size;
-      int end_offset = (int(off) + args[1].size() - 1) / cache_block_size * cache_block_size;
+      int start_offset = (int(pos)) / cache_block_size * cache_block_size;
+      int end_offset = (int(pos) + args[1].size() - 1) / cache_block_size * cache_block_size;
       int num_of_blocks = (end_offset - start_offset) / cache_block_size + 1;
-      int size = end_offset - start_offset;
+      int size = std::min(last_offset - start_offset, cache_block_size * num_of_blocks);
       std::string ret_str;
       std::ifstream in(file_path,std::ios::in);
       in.seekg(0, std::ios::end);
@@ -194,6 +194,10 @@ void file_partition::run_command(response &_return, const arg_list &args) {
     case file_cmd_id::file_write:write(_return, args);
       break;
     case file_cmd_id::file_read:read(_return, args);
+      break;
+    case file_cmd_id::file_write_ls:write_ls(_return, args);
+      break;
+    case file_cmd_id::file_read_ls:read_ls(_return, args);
       break;
     case file_cmd_id::file_clear:clear(_return, args);
       break;

@@ -820,6 +820,18 @@ void hash_table_partition::run_command(response &_return, const arg_list &args) 
       break;
     case hash_table_cmd_id::ht_update:update(_return, args);
       break;
+    case hash_table_cmd_id::ht_exists_ls:exists_ls(_return, args);
+      break;
+    case hash_table_cmd_id::ht_get_ls:get_ls(_return, args);
+      break;
+    case hash_table_cmd_id::ht_put_ls:put_ls(_return, args);
+      break;
+    case hash_table_cmd_id::ht_upsert_ls:upsert_ls(_return, args);
+      break;
+    case hash_table_cmd_id::ht_remove_ls:remove_ls(_return, args);
+      break;
+    case hash_table_cmd_id::ht_update_ls:update_ls(_return, args);
+      break;
     case hash_table_cmd_id::ht_update_partition:update_partition(_return, args);;
       break;
     case hash_table_cmd_id::ht_get_storage_size:get_storage_size(_return, args);
