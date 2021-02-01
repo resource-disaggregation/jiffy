@@ -513,19 +513,19 @@ class TestClient(TestCase):
             client.disconnect()
             self.stop_servers()
 
-    # def test_failures(self):
-    #     servers = [self.storage_server_1, self.storage_server_2, self.storage_server_3]
-    #     for s in servers:
-    #         self.start_servers(chain=True)
-    #         client = self.jiffy_client()
-    #         try:
-    #             kv = client.create_hash_table("/a/file.txt", "local://tmp", 1, 3)
-    #             self.assertEqual(3, kv.block_info.chain_length)
-    #             s.stop()
-    #             self.hash_table_ops(kv)
-    #         finally:
-    #             client.disconnect()
-    #             self.stop_servers()
+    def test_failures(self):
+        servers = [self.storage_server_1, self.storage_server_2, self.storage_server_3]
+        for s in servers:
+            self.start_servers(chain=True)
+            client = self.jiffy_client()
+            try:
+                kv = client.create_hash_table("/a/file.txt", "local://tmp", 1, 3)
+                self.assertEqual(3, kv.block_info.chain_length)
+                s.stop()
+                self.hash_table_ops(kv)
+            finally:
+                client.disconnect()
+                self.stop_servers()
 
     def test_hash_table_auto_scale(self):
         self.start_servers(auto_scale=True)
