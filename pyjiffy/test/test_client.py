@@ -474,33 +474,33 @@ class TestClient(TestCase):
     #         client.disconnect()
     #         self.stop_servers()
 
-    # def test_close(self):
-    #     self.start_servers()
-    #     client = self.jiffy_client()
-    #     try:
-    #         client.create_hash_table("/a/file.txt", "local://tmp")
-    #         client.create_hash_table("/a/file1.txt", "local://tmp", 1, 1, Flags.pinned)
-    #         client.create_hash_table("/a/file2.txt", "local://tmp", 1, 1, Flags.mapped)
-    #         self.assertTrue('/a/file.txt' in client.to_renew)
-    #         self.assertTrue('/a/file1.txt' in client.to_renew)
-    #         self.assertTrue('/a/file2.txt' in client.to_renew)
-    #         client.close('/a/file.txt')
-    #         client.close('/a/file1.txt')
-    #         client.close('/a/file2.txt')
-    #         self.assertFalse('/a/file.txt' in client.to_renew)
-    #         self.assertFalse('/a/file1.txt' in client.to_renew)
-    #         self.assertFalse('/a/file2.txt' in client.to_renew)
-    #         time.sleep(client.lease_worker.renewal_duration_s)
-    #         self.assertTrue(client.fs.exists('/a/file.txt'))
-    #         self.assertTrue(client.fs.exists('/a/file1.txt'))
-    #         self.assertTrue(client.fs.exists('/a/file2.txt'))
-    #         time.sleep(client.lease_worker.renewal_duration_s * 2)
-    #         self.assertFalse(client.fs.exists('/a/file.txt'))
-    #         self.assertTrue(client.fs.exists('/a/file1.txt'))
-    #         self.assertTrue(client.fs.exists('/a/file2.txt'))
-    #     finally:
-    #         client.disconnect()
-    #         self.stop_servers()
+    def test_close(self):
+        self.start_servers()
+        client = self.jiffy_client()
+        try:
+            client.create_hash_table("/a/file.txt", "local://tmp")
+            client.create_hash_table("/a/file1.txt", "local://tmp", 1, 1, Flags.pinned)
+            client.create_hash_table("/a/file2.txt", "local://tmp", 1, 1, Flags.mapped)
+            self.assertTrue('/a/file.txt' in client.to_renew)
+            self.assertTrue('/a/file1.txt' in client.to_renew)
+            self.assertTrue('/a/file2.txt' in client.to_renew)
+            client.close('/a/file.txt')
+            client.close('/a/file1.txt')
+            client.close('/a/file2.txt')
+            self.assertFalse('/a/file.txt' in client.to_renew)
+            self.assertFalse('/a/file1.txt' in client.to_renew)
+            self.assertFalse('/a/file2.txt' in client.to_renew)
+            time.sleep(client.lease_worker.renewal_duration_s)
+            self.assertTrue(client.fs.exists('/a/file.txt'))
+            self.assertTrue(client.fs.exists('/a/file1.txt'))
+            self.assertTrue(client.fs.exists('/a/file2.txt'))
+            time.sleep(client.lease_worker.renewal_duration_s * 2)
+            self.assertFalse(client.fs.exists('/a/file.txt'))
+            self.assertTrue(client.fs.exists('/a/file1.txt'))
+            self.assertTrue(client.fs.exists('/a/file2.txt'))
+        finally:
+            client.disconnect()
+            self.stop_servers()
 
     # def test_chain_replication(self):
     #     self.start_servers(chain=True)
@@ -513,19 +513,19 @@ class TestClient(TestCase):
     #         client.disconnect()
     #         self.stop_servers()
 
-    # def test_failures(self):
-    #     servers = [self.storage_server_1, self.storage_server_2, self.storage_server_3]
-    #     for s in servers:
-    #         self.start_servers(chain=True)
-    #         client = self.jiffy_client()
-    #         try:
-    #             kv = client.create_hash_table("/a/file.txt", "local://tmp", 1, 3)
-    #             self.assertEqual(3, kv.block_info.chain_length)
-    #             s.stop()
-    #             self.hash_table_ops(kv)
-    #         finally:
-    #             client.disconnect()
-    #             self.stop_servers()
+    def test_failures(self):
+        servers = [self.storage_server_1, self.storage_server_2, self.storage_server_3]
+        for s in servers:
+            self.start_servers(chain=True)
+            client = self.jiffy_client()
+            try:
+                kv = client.create_hash_table("/a/file.txt", "local://tmp", 1, 3)
+                self.assertEqual(3, kv.block_info.chain_length)
+                s.stop()
+                self.hash_table_ops(kv)
+            finally:
+                client.disconnect()
+                self.stop_servers()
 
     # def test_hash_table_auto_scale(self):
     #     self.start_servers(auto_scale=True)
