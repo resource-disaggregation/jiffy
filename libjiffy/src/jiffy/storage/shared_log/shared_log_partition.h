@@ -138,7 +138,7 @@ class shared_log_partition : public chain_module {
 
  private:
 
-  /* Shared_log partition */
+  /* Shared log partition */
   shared_log_type partition_;
 
   /* Custom serializer/deserializer */
