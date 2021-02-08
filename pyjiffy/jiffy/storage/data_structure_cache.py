@@ -1,5 +1,5 @@
 class Node(object):
-    def __init__(self, mark, data): # Only file cache will use param 'offset'
+    def __init__(self, mark, data): 
         self.mark = mark
         self.data = data
         self.next = None
@@ -56,8 +56,9 @@ class LinkedList(object):
             self.head = node
     
     def pop(self):
+        ret = self.tail
         if self.length == 0:
-            return 
+            pass
         elif self.length == 1:
             self.head = None
             self.tail = None
@@ -68,6 +69,7 @@ class LinkedList(object):
             self.size -= len(self.tail.data)
             self.tail.prev.next = None
             self.tail = self.tail.prev
+        return ret
     
     def remove(self, node):
         if self.head == self.tail:
@@ -153,13 +155,6 @@ class HashTableCache(DataStructureCache):
             while (self.size() + len(new_value)) > self.list.max_size_():
                 self.evict()
             self.insert([new_key,new_value])
-        
-    def print_out(self): # for debug use
-        cur_node = self.list.head
-        while cur_node:
-            print(cur_node.mark,self.table[cur_node.mark])
-            cur_node = cur_node.next
-
 
 class FileCache(DataStructureCache):
     def __init__(self, max_length, block_size, prefetch_block_num):
@@ -208,10 +203,9 @@ class FileCache(DataStructureCache):
     def hit_handling(self,cur_offset, read_size):
         start_offset = (cur_offset // self.block_size) * self.block_size
         return self.table[start_offset].data[(cur_offset - start_offset) : min(read_size + cur_offset - start_offset, len(self.table[start_offset].data))]
-        
+
     def print_out(self): # for debug use
         cur_node = self.list.head
         while cur_node:
             print(cur_node.mark,cur_node.data)
-            cur_node = cur_node.next
-        
+            cur_node = cur_node.next    

@@ -11,13 +11,14 @@ using namespace utils;
 
 void storage_manager::create_partition(const std::string &block_id,
                                        const std::string &type,
+                                       const std::string &backing_path,
                                        const std::string &name,
                                        const std::string &metadata,
                                        const std::map<std::string, std::string> &conf) {
   auto bid = block_id_parser::parse(block_id);
   storage_management_client client(bid.host, bid.management_port);
   LOG(log_level::info) << "Creating partition name : " << name << " on " << bid.host << ":" << bid.management_port;
-  client.create_partition(bid.id, type, name, metadata, conf);
+  client.create_partition(bid.id, type, backing_path, name, metadata, conf);
 }
 
 void storage_manager::setup_chain(const std::string &block_id,

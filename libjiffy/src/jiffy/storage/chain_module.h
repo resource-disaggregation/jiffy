@@ -207,6 +207,7 @@ class chain_module : public partition {
    * @param supported_cmds Supported commands
    */
   chain_module(block_memory_manager *manager,
+               const std::string &backing_path,
                const std::string &name,
                const std::string &metadata,
                const command_map &supported_cmds);

@@ -21,7 +21,7 @@ namespace jiffy { namespace storage {
 class storage_management_serviceIf {
  public:
   virtual ~storage_management_serviceIf() {}
-  virtual void create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf) = 0;
+  virtual void create_partition(const int32_t block_id, const std::string& partition_type, const std::string& backing_path, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf) = 0;
   virtual void setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id) = 0;
   virtual void destroy_partition(const int32_t block_id) = 0;
   virtual void get_path(std::string& _return, const int32_t block_id) = 0;
@@ -62,7 +62,7 @@ class storage_management_serviceIfSingletonFactory : virtual public storage_mana
 class storage_management_serviceNull : virtual public storage_management_serviceIf {
  public:
   virtual ~storage_management_serviceNull() {}
-  void create_partition(const int32_t /* block_id */, const std::string& /* partition_type */, const std::string& /* partition_name */, const std::string& /* partition_metadata */, const std::map<std::string, std::string> & /* conf */) {
+  void create_partition(const int32_t /* block_id */, const std::string& /* partition_type */, const std::string& /* backing_path */, const std::string& /* partition_name */, const std::string& /* partition_metadata */, const std::map<std::string, std::string> & /* conf */) {
     return;
   }
   void setup_chain(const int32_t /* block_id */, const std::string& /* path */, const std::vector<std::string> & /* chain */, const int32_t /* chain_role */, const std::string& /* next_block_id */) {
@@ -103,9 +103,10 @@ class storage_management_serviceNull : virtual public storage_management_service
 };
 
 typedef struct _storage_management_service_create_partition_args__isset {
-  _storage_management_service_create_partition_args__isset() : block_id(false), partition_type(false), partition_name(false), partition_metadata(false), conf(false) {}
+  _storage_management_service_create_partition_args__isset() : block_id(false), partition_type(false), backing_path(false), partition_name(false), partition_metadata(false), conf(false) {}
   bool block_id :1;
   bool partition_type :1;
+  bool backing_path :1;
   bool partition_name :1;
   bool partition_metadata :1;
   bool conf :1;
@@ -116,12 +117,13 @@ class storage_management_service_create_partition_args {
 
   storage_management_service_create_partition_args(const storage_management_service_create_partition_args&);
   storage_management_service_create_partition_args& operator=(const storage_management_service_create_partition_args&);
-  storage_management_service_create_partition_args() : block_id(0), partition_type(), partition_name(), partition_metadata() {
+  storage_management_service_create_partition_args() : block_id(0), partition_type(), backing_path(), partition_name(), partition_metadata() {
   }
 
   virtual ~storage_management_service_create_partition_args() throw();
   int32_t block_id;
   std::string partition_type;
+  std::string backing_path;
   std::string partition_name;
   std::string partition_metadata;
   std::map<std::string, std::string>  conf;
@@ -131,6 +133,8 @@ class storage_management_service_create_partition_args {
   void __set_block_id(const int32_t val);
 
   void __set_partition_type(const std::string& val);
+
+  void __set_backing_path(const std::string& val);
 
   void __set_partition_name(const std::string& val);
 
@@ -143,6 +147,8 @@ class storage_management_service_create_partition_args {
     if (!(block_id == rhs.block_id))
       return false;
     if (!(partition_type == rhs.partition_type))
+      return false;
+    if (!(backing_path == rhs.backing_path))
       return false;
     if (!(partition_name == rhs.partition_name))
       return false;
@@ -173,6 +179,7 @@ class storage_management_service_create_partition_pargs {
   virtual ~storage_management_service_create_partition_pargs() throw();
   const int32_t* block_id;
   const std::string* partition_type;
+  const std::string* backing_path;
   const std::string* partition_name;
   const std::string* partition_metadata;
   const std::map<std::string, std::string> * conf;
@@ -1563,8 +1570,8 @@ class storage_management_serviceClientT : virtual public storage_management_serv
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf);
-  void send_create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf);
+  void create_partition(const int32_t block_id, const std::string& partition_type, const std::string& backing_path, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf);
+  void send_create_partition(const int32_t block_id, const std::string& partition_type, const std::string& backing_path, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf);
   void recv_create_partition();
   void setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id);
   void send_setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id);
@@ -1723,13 +1730,13 @@ class storage_management_serviceMultiface : virtual public storage_management_se
     ifaces_.push_back(iface);
   }
  public:
-  void create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf) {
+  void create_partition(const int32_t block_id, const std::string& partition_type, const std::string& backing_path, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->create_partition(block_id, partition_type, partition_name, partition_metadata, conf);
+      ifaces_[i]->create_partition(block_id, partition_type, backing_path, partition_name, partition_metadata, conf);
     }
-    ifaces_[i]->create_partition(block_id, partition_type, partition_name, partition_metadata, conf);
+    ifaces_[i]->create_partition(block_id, partition_type, backing_path, partition_name, partition_metadata, conf);
   }
 
   void setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id) {
@@ -1863,8 +1870,8 @@ class storage_management_serviceConcurrentClientT : virtual public storage_manag
   apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
-  void create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf);
-  int32_t send_create_partition(const int32_t block_id, const std::string& partition_type, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf);
+  void create_partition(const int32_t block_id, const std::string& partition_type, const std::string& backing_path, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf);
+  int32_t send_create_partition(const int32_t block_id, const std::string& partition_type, const std::string& backing_path, const std::string& partition_name, const std::string& partition_metadata, const std::map<std::string, std::string> & conf);
   void recv_create_partition(const int32_t seqid);
   void setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id);
   int32_t send_setup_chain(const int32_t block_id, const std::string& path, const std::vector<std::string> & chain, const int32_t chain_role, const std::string& next_block_id);

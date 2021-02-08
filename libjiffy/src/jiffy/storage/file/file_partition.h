@@ -28,6 +28,7 @@ class file_partition : public chain_module {
    * @param auto_scaling_port Auto scaling server port number
    */
   explicit file_partition(block_memory_manager *manager,
+                          const std::string &backing_path = "local://tmp",
                           const std::string &name = "0",
                           const std::string &metadata = "regular",
                           const utils::property_map &conf = {},
@@ -58,6 +59,20 @@ class file_partition : public chain_module {
    * @param args Arguments
    */
   void read(response &_return, const arg_list &args);
+
+  /**
+   * @brief Write data to the file
+   * @param _return Response
+   * @param args Arguments
+   */
+  void write_ls(response &_return, const arg_list &args);
+
+  /**
+   * @brief Read data from the file
+   * @param _return Response
+   * @param args Arguments
+   */
+  void read_ls(response &_return, const arg_list &args);
 
   /**
    * @brief Clear the file
@@ -133,7 +148,7 @@ class file_partition : public chain_module {
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
 
-/* Name of format, either binary or csv */
+  /* Name of format, either binary or csv */
   std::string ser_name_;
   
   /* Bool for partition slot range splitting */

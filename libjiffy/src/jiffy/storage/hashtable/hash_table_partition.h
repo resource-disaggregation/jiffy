@@ -33,6 +33,7 @@ class hash_table_partition : public chain_module {
    * @param conf Configuration properties
    */
   explicit hash_table_partition(block_memory_manager *manager,
+                                const std::string &backing_path = "local://tmp",
                                 const std::string &name = "0_65536",
                                 const std::string &metadata = "regular",
                                 const utils::property_map &conf = {},
@@ -194,6 +195,48 @@ class hash_table_partition : public chain_module {
    * @param args Arguments
    */
   void remove(response &_return, const arg_list &args);
+
+ /**
+   * @brief Check if hash map contains key
+   * @param _return Response
+   * @param args Arguments
+   */
+  void exists_ls(response &_return, const arg_list &args);
+
+  /**
+   * @brief Insert new key value pair
+   * @param _return Response
+   * @param args Arguments
+   */
+  void put_ls(response &_return, const arg_list &args);
+
+  /**
+   * @brief Insert or update key value pair
+   * @param _return Response
+   * @param args Arguments
+   */
+  void upsert_ls(response &_return, const arg_list &args);
+
+  /**
+   * @brief Get value for specified key
+   * @param _return Response
+   * @param args Arguments
+   */
+  void get_ls(response &_return, const arg_list &args);
+
+  /**
+   * @brief Update the value for specified key
+   * @param _return Response
+   * @param args Arguments
+   */
+  void update_ls(response &_return, const arg_list &args);
+
+  /**
+   * @brief Remove value for specified key
+   * @param _return Response
+   * @param args Arguments
+   */
+  void remove_ls(response &_return, const arg_list &args);
 
   /**
    * @brief Remove key from hash table during scaling

@@ -3,6 +3,7 @@
 #include "jiffy/storage/partition_manager.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_ops.h"
 #include "jiffy/auto_scaling/auto_scaling_client.h"
+#include <jiffy/utils/directory_utils.h>
 
 namespace jiffy {
 namespace storage {
@@ -10,12 +11,13 @@ namespace storage {
 using namespace utils;
 
 fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
+                                           const std::string &backing_path,
                                            const std::string &name,
                                            const std::string &metadata,
                                            const utils::property_map &conf,
                                            const std::string &auto_scaling_host,
                                            int auto_scaling_port)
-    : chain_module(manager, name, metadata, FQ_CMDS),
+    : chain_module(manager, backing_path, name, metadata, FQ_CMDS),
       partition_(manager->mb_capacity(), build_allocator<char>()),
       scaling_up_(false),
       scaling_down_(false),
@@ -23,9 +25,9 @@ fifo_queue_partition::fifo_queue_partition(block_memory_manager *manager,
       auto_scaling_host_(auto_scaling_host),
       auto_scaling_port_(auto_scaling_port),
       head_(0),
-      head_index_(0), /* Record the index of the current head element in order to help local query functions. */ 
+      head_index_(0),
       read_head_(0),
-      read_head_index_(0), /* Record the index of next element to read in order to help read_ls(). */ 
+      read_head_index_(0),
       enqueue_redirected_(false),
       dequeue_redirected_(false),
       readnext_redirected_(false),
@@ -101,6 +103,7 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
     head_ += (string_array::METADATA_LEN + ret.second.size());
     head_index_ ++;
     update_read_head();
+    update_read_head_index();
     dequeue_data_size_ += ret.second.size();
     RETURN_OK(ret.second);
   }
@@ -165,7 +168,6 @@ void fifo_queue_partition::enqueue_ls(response &_return, const arg_list &args) {
   }
 }
 
-/* dequeue_ls() works on the index of queue elements on local storage, while dequeue() works on memory address. */
 void fifo_queue_partition::dequeue_ls(response &_return, const arg_list &args) {
   if (args.size() != 1) {
     RETURN_ERR("!args_error");
@@ -244,6 +246,7 @@ void fifo_queue_partition::read_next(response &_return, const arg_list &args) {
   auto ret = partition_.at(read_head_);
   if (ret.first) {
     read_head_ += (string_array::METADATA_LEN + ret.second.size());
+    read_head_index_ += 1;
     RETURN_OK(ret.second);
   }
   if (ret.second == "!not_available") {
@@ -401,7 +404,13 @@ void fifo_queue_partition::run_command(response &_return, const arg_list &args) 
       break;
     case fifo_queue_cmd_id::fq_dequeue:dequeue(_return, args);
       break;
+    case fifo_queue_cmd_id::fq_enqueue_ls:enqueue_ls(_return, args);
+      break;
+    case fifo_queue_cmd_id::fq_dequeue_ls:dequeue_ls(_return, args);
+      break;
     case fifo_queue_cmd_id::fq_readnext:read_next(_return, args);
+      break;
+    case fifo_queue_cmd_id::fq_readnext_ls:read_next_ls(_return, args);
       break;
     case fifo_queue_cmd_id::fq_clear:clear(_return, args);
       break;

@@ -1,4 +1,5 @@
 #include <jiffy/utils/string_utils.h>
+#include <jiffy/utils/directory_utils.h>
 #include <queue>
 #include "hash_table_partition.h"
 #include "hash_slot.h"
@@ -15,12 +16,13 @@ namespace storage {
 using namespace utils;
 
 hash_table_partition::hash_table_partition(block_memory_manager *manager,
+                                           const std::string &backing_path,
                                            const std::string &name,
                                            const std::string &metadata,
                                            const utils::property_map &conf,
                                            const std::string &auto_scaling_host,
                                            int auto_scaling_port)
-    : chain_module(manager, name, metadata, HT_OPS),
+    : chain_module(manager, backing_path, name, metadata, HT_OPS),
       scaling_up_(false),
       scaling_down_(false),
       dirty_(false),
@@ -34,7 +36,7 @@ hash_table_partition::hash_table_partition(block_memory_manager *manager,
   } else if (ser_name_ == "csv") {
     ser_ = std::make_shared<csv_serde>(binary_allocator_);
   } else {
-    throw std::invalid_argument("No such serializer/deserializer " + ser);
+    throw std::invalid_argument("No such serializer/deserializer " + ser_name_);
   }
   threshold_hi_ = conf.get_as<double>("hashtable.capacity_threshold_hi", 0.95);
   threshold_lo_ = conf.get_as<double>("hashtable.capacity_threshold_lo", 0.05);
@@ -817,6 +819,18 @@ void hash_table_partition::run_command(response &_return, const arg_list &args) 
     case hash_table_cmd_id::ht_remove:remove(_return, args);
       break;
     case hash_table_cmd_id::ht_update:update(_return, args);
+      break;
+    case hash_table_cmd_id::ht_exists_ls:exists_ls(_return, args);
+      break;
+    case hash_table_cmd_id::ht_get_ls:get_ls(_return, args);
+      break;
+    case hash_table_cmd_id::ht_put_ls:put_ls(_return, args);
+      break;
+    case hash_table_cmd_id::ht_upsert_ls:upsert_ls(_return, args);
+      break;
+    case hash_table_cmd_id::ht_remove_ls:remove_ls(_return, args);
+      break;
+    case hash_table_cmd_id::ht_update_ls:update_ls(_return, args);
       break;
     case hash_table_cmd_id::ht_update_partition:update_partition(_return, args);;
       break;

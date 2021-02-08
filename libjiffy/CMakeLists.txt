@@ -266,10 +266,13 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             test/directory_tree_test.cpp
             test/directory_service_test.cpp
 	          test/file_partition_test.cpp
+            test/file_local_partition_test.cpp
 	          test/file_client_test.cpp
             test/fifo_queue_partition_test.cpp
+            test/fifo_queue_local_partition_test.cpp
             test/fifo_queue_client_test.cpp
             test/hash_table_partition_test.cpp
+            test/hash_table_local_partition_test.cpp
             test/hash_table_client_test.cpp
             test/shared_log_partition_test.cpp
             test/shared_log_client_test.cpp

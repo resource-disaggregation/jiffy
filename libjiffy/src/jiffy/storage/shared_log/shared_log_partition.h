@@ -28,6 +28,7 @@ class shared_log_partition : public chain_module {
    * @param auto_scaling_port Auto scaling server port number
    */
   explicit shared_log_partition(block_memory_manager *manager,
+                          const std::string &backing_path = "local://tmp",
                           const std::string &name = "0",
                           const std::string &metadata = "regular",
                           const utils::property_map &conf = {},
@@ -137,11 +138,14 @@ class shared_log_partition : public chain_module {
 
  private:
 
-  /* File partition */
+  /* Shared log partition */
   shared_log_type partition_;
 
   /* Custom serializer/deserializer */
   std::shared_ptr<serde> ser_;
+
+  /* Name of format, either binary or csv */
+  std::string ser_name_;
 
   /* Bool for partition slot range splitting */
   bool scaling_up_;

@@ -31,6 +31,7 @@ class fifo_queue_partition : public chain_module {
    * @param auto_scaling_port Auto scaling server port number
    */
   explicit fifo_queue_partition(block_memory_manager *manager,
+                                const std::string &backing_path = "local://tmp",
                                 const std::string &name = "0",
                                 const std::string &metadata = "regular",
                                 const utils::property_map &conf = {},
@@ -69,11 +70,32 @@ class fifo_queue_partition : public chain_module {
   void dequeue(response &_return, const arg_list &args);
 
   /**
+   * @brief Enqueue a new item to the fifo queue
+   * @param item New message
+   * @return Enqueue return status string
+   */
+  void enqueue_ls(response &_return, const arg_list &args);
+
+  /**
+   * @brief Dequeue an item from the fifo queue
+   * @param _return Response
+   * @param args Arguments
+   */
+  void dequeue_ls(response &_return, const arg_list &args);
+
+  /**
    * @brief Fetch an item without dequeue
    * @param _return Response
    * @param args Arguments
    */
   void read_next(response &_return, const arg_list &args);
+
+/**
+   * @brief Fetch an item without dequeue
+   * @param _return Response
+   * @param args Arguments
+   */
+  void read_next_ls(response &_return, const arg_list &args);
 
   /**
    * @brief Clear the fifo queue
@@ -190,6 +212,18 @@ class fifo_queue_partition : public chain_module {
   }
 
   /**
+   * @brief Update read head index
+   * @return Bool value, true if index updated
+   */
+  bool update_read_head_index() {
+    if (read_head_index_ < head_index_) {
+      read_head_index_ = head_index_;
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * @brief Update in rate and out rate
    */
   void update_rate();
@@ -234,6 +268,12 @@ class fifo_queue_partition : public chain_module {
 
   /* Head position for read next operation */
   std::size_t read_head_;
+
+  /* Head index of queue */
+  std::size_t head_index_;
+
+  /* Head index for read next operation */
+  std::size_t read_head_index_;
 
   /* Boolean indicating whether enqueues are redirected to the next chain */
   bool enqueue_redirected_;

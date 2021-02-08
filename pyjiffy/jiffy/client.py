@@ -105,7 +105,7 @@ class JiffyClient:
         if path in self.to_renew:
             self.to_renew.remove(path)
 
-    def create_hash_table(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_size=0, flags=0):
+    def create_hash_table(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_size=32000000, flags=0):
         fmt = HashTableNameFormatter(num_blocks)
         block_names = [fmt.get(i) for i in range(num_blocks)]
         block_metadata = ['regular' for _ in range(num_blocks)]
@@ -119,7 +119,7 @@ class JiffyClient:
         self.begin_scope(path)
         return HashTable(self.fs, path, s, self.timeout_ms)
 
-    def open_or_create_hash_table(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_size=0, flags=0):
+    def open_or_create_hash_table(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_size=32000000, flags=0):
         fmt = HashTableNameFormatter(num_blocks)
         block_names = [fmt.get(i) for i in range(num_blocks)]
         block_metadata = ['regular' for _ in range(num_blocks)]
@@ -151,7 +151,7 @@ class JiffyClient:
         self.begin_scope(path)
         return Queue(self.fs, path, s, self.timeout_ms)
 
-    def create_file(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_size=0, cache_block_size=0, prefetch_size=0, flags=0):
+    def create_file(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_size=200, cache_block_size=32000, prefetch_size=5, flags=0):
         fmt = DefaultNameFormatter()
         block_names = [fmt.get(i) for i in range(num_blocks)]
         block_metadata = ['regular' for _ in range(num_blocks)]
@@ -165,7 +165,7 @@ class JiffyClient:
         self.begin_scope(path)
         return FileClient(self.fs, path, s, self.timeout_ms)
 
-    def open_or_create_file(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_size=0, cache_block_size=0, prefetch_size=0, flags=0):
+    def open_or_create_file(self, path, persistent_store_prefix, num_blocks=1, chain_length=1, cache_size=200, cache_block_size=32000, prefetch_size=5, flags=0):
         fmt = DefaultNameFormatter()
         block_names = [fmt.get(i) for i in range(num_blocks)]
         block_metadata = ['regular' for _ in range(num_blocks)]
