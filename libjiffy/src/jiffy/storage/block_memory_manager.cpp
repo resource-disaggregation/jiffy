@@ -7,13 +7,14 @@ using namespace jiffy::utils;
 namespace jiffy {
 namespace storage {
 
-block_memory_manager::block_memory_manager(size_t capacity, const std::string memory_mode, struct memkind* pmem_kind) : capacity_(capacity), used_(0), memory_mode_(memory_mode), pmem_kind_(pmem_kind) {}
+block_memory_manager::block_memory_manager(size_t capacity, const std::string memory_mode, struct memkind *pmem_kind)
+    : capacity_(capacity), used_(0), memory_mode_(memory_mode), pmem_kind_(pmem_kind) {}
 
 void *block_memory_manager::mb_malloc(size_t size) {
   if (used_.load() > capacity_) {
     return nullptr;
   }
-  if (memory_mode_ == "DRAM"){
+  if (memory_mode_ == "DRAM") {
     pmem_kind_ = MEMKIND_DEFAULT;
   }
   auto ptr = memkind_malloc(pmem_kind_, size);

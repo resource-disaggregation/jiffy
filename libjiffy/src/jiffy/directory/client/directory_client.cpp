@@ -95,8 +95,8 @@ perms directory_client::permissions(const std::string &path) {
   return perms(static_cast<uint16_t>(client_->get_permissions(path)));
 }
 
-void directory_client::permissions(const std::string &path, const perms &prms, perm_options opts) {
-  client_->set_permissions(path, prms(), static_cast<const rpc_perm_options>(opts));
+void directory_client::permissions(const std::string &path, const perms &prms, const perm_options opts) {
+  client_->set_permissions(path, prms(), (rpc_perm_options) opts);
 }
 
 void directory_client::remove(const std::string &path) {

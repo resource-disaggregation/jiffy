@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  directory:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.directory
+    ports:
+      - "9090:9092"
+  storage:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.storage
+    ports:
+      - "9093:9193"

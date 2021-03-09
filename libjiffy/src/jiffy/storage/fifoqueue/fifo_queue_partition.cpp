@@ -101,7 +101,7 @@ void fifo_queue_partition::dequeue(response &_return, const arg_list &args) {
   auto ret = partition_.at(head_);
   if (ret.first) {
     head_ += (string_array::METADATA_LEN + ret.second.size());
-    head_index_ ++;
+    head_index_++;
     update_read_head();
     update_read_head_index();
     dequeue_data_size_ += ret.second.size();
@@ -133,25 +133,23 @@ void fifo_queue_partition::enqueue_ls(response &_return, const arg_list &args) {
   }
   std::string file_path, line, data;
   file_path = directory_utils::remove_uri(backing_path());
-  directory_utils::push_path_element(file_path,name());
+  directory_utils::push_path_element(file_path, name());
   if (ser_name_ == "csv") {
-    std::ofstream out(file_path,std::ios::app);
+    std::ofstream out(file_path, std::ios::app);
     if (out) {
       data = args[1];
       out << data << std::endl;
       out.close();
-    }
-    else {
+    } else {
       RETURN_ERR("!fifo_queue_does_not_exist");
     }
     enqueue_data_size_ += args[1].size();
     RETURN_OK();
-  }
-  else if (ser_name_ == "binary") {
-    std::ofstream out(file_path,std::ios::app);
+  } else if (ser_name_ == "binary") {
+    std::ofstream out(file_path, std::ios::app);
     std::string offset_path = file_path;
     offset_path.append("_offset");
-    std::ofstream offset_out(offset_path,std::ios::app);
+    std::ofstream offset_out(offset_path, std::ios::app);
     if (out && offset_out) {
       data = args[1];
       std::size_t msg_size = data.size();
@@ -159,8 +157,7 @@ void fifo_queue_partition::enqueue_ls(response &_return, const arg_list &args) {
       out.write(reinterpret_cast<const char *>(data.data()), msg_size);
       out.close();
       offset_out.close();
-    }
-    else {
+    } else {
       RETURN_ERR("!fifo_queue_does_not_exist");
     }
     enqueue_data_size_ += args[1].size();
@@ -175,35 +172,33 @@ void fifo_queue_partition::dequeue_ls(response &_return, const arg_list &args) {
   std::vector<std::string> v;
   std::string file_path, line;
   file_path = directory_utils::remove_uri(backing_path());
-  directory_utils::push_path_element(file_path,name());
+  directory_utils::push_path_element(file_path, name());
   if (ser_name_ == "csv") {
     std::ifstream in(file_path);
     if (in) {
-      while(getline(in,line)) {
+      while (getline(in, line)) {
         v.push_back(line);
       }
       in.close();
-    }
-    else {
+    } else {
       RETURN_ERR("!fifo_queue_does_not_exist");
     }
     if (v.size() == 0) {
       RETURN_ERR("!queue_is_empty");
     }
     std::ofstream out(file_path);
-    for (int i = 1; i < v.size(); i++) {
+    for (std::size_t i = 1; i < v.size(); i++) {
       out << v[i] << std::endl;
     }
     out.close();
     head_index_++;
     dequeue_data_size_ += v[0].size();
     RETURN_OK(v[0]);
-  }
-  else if (ser_name_ == "binary") {
-    std::ifstream in(file_path,std::ios::binary);
+  } else if (ser_name_ == "binary") {
+    std::ifstream in(file_path, std::ios::binary);
     std::string offset_path = file_path;
     offset_path.append("_offset");
-    std::ifstream offset_in(offset_path,std::ios::binary);
+    std::ifstream offset_in(offset_path, std::ios::binary);
     if (in && offset_in) {
       while (in.peek() != EOF && offset_in.peek() != EOF) {
         std::size_t msg_size;
@@ -215,16 +210,15 @@ void fifo_queue_partition::dequeue_ls(response &_return, const arg_list &args) {
       }
       in.close();
       offset_in.close();
-    }
-    else {
+    } else {
       RETURN_ERR("!fifo_queue_does_not_exist");
     }
     if (v.size() == 0) {
       RETURN_ERR("!queue_is_empty");
     }
-    std::ofstream out(file_path,std::ios::binary);
-    std::ofstream offset_out(offset_path,std::ios::binary);
-    for (int i = 1; i < v.size(); i++) {
+    std::ofstream out(file_path, std::ios::binary);
+    std::ofstream offset_out(offset_path, std::ios::binary);
+    for (std::size_t i = 1; i < v.size(); i++) {
       std::size_t msg_size = v[i].size();
       offset_out.write(reinterpret_cast<const char *>(&msg_size), sizeof(size_t));
       out.write(reinterpret_cast<const char *>(v[i].data()), msg_size);
@@ -269,33 +263,31 @@ void fifo_queue_partition::read_next_ls(response &_return, const arg_list &args)
   std::vector<std::string> v;
   std::string file_path, line;
   file_path = directory_utils::remove_uri(backing_path());
-  directory_utils::push_path_element(file_path,name());
+  directory_utils::push_path_element(file_path, name());
   if (ser_name_ == "csv") {
     std::ifstream in(file_path);
     if (in) {
       int count = read_head_index_ - head_index_;
-      while(count >= 0) {
+      while (count >= 0) {
         count--;
-        getline(in,line);
+        getline(in, line);
       }
       in.close();
       read_head_index_ += 1;
       RETURN_OK(line);
-    }
-    else {
+    } else {
       RETURN_ERR("!fifo_queue_does_not_exist");
     }
-  }
-  else if (ser_name_ == "binary") {
-    std::ifstream in(file_path,std::ios::binary);
+  } else if (ser_name_ == "binary") {
+    std::ifstream in(file_path, std::ios::binary);
     std::string offset_path = file_path;
     offset_path.append("_offset");
-    std::ifstream offset_in(offset_path,std::ios::binary);
+    std::ifstream offset_in(offset_path, std::ios::binary);
     std::size_t offset = 0;
     std::size_t msg_size = 0;
     if (in && offset_in) {
       int count = read_head_index_ - head_index_;
-      while(count >= 0) {
+      while (count >= 0) {
         count--;
         offset_in.read(reinterpret_cast<char *>(&msg_size), sizeof(msg_size));
         in.seekg(offset, std::ios::beg);
@@ -308,8 +300,7 @@ void fifo_queue_partition::read_next_ls(response &_return, const arg_list &args)
       offset_in.close();
       read_head_index_ += 1;
       RETURN_OK(msg);
-    }
-    else {
+    } else {
       RETURN_ERR("!fifo_queue_does_not_exist");
     }
   }
@@ -529,6 +520,7 @@ bool fifo_queue_partition::overload() {
 bool fifo_queue_partition::underload() {
   return head_ > partition_.last_element_offset() && partition_.full();
 }
+
 void fifo_queue_partition::update_rate() {
   auto cur_time = utils::time_utils::now_us();
   enqueue_time_count_ += cur_time - enqueue_start_time_;
@@ -549,7 +541,7 @@ void fifo_queue_partition::update_rate() {
     dequeue_start_time_ = cur_time;
     dequeue_start_data_size_ = dequeue_data_size_;
   }
-};
+}
 
 void fifo_queue_partition::clear_partition() {
   partition_.clear();

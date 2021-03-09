@@ -42,7 +42,7 @@ int shared_log_client::scan(std::vector<std::string> &buf, const std::string &st
   while (start_partition + count < blocks_.size()) {
     std::vector<std::string>
         args{"scan", start_pos, end_pos};
-    for (int i = 0; i < logical_streams.size(); i++) {
+    for (std::size_t i = 0; i < logical_streams.size(); i++) {
       args.push_back(logical_streams[i]);
     }
     blocks_[start_partition+count]->send_command(args);
@@ -67,7 +67,7 @@ int shared_log_client::write(const std::string &position, const std::string &dat
   std::size_t num_chain_needed = 0;
 
   std::string data = "";
-  for (int i = 0; i < logical_streams.size(); i++) {
+  for (std::size_t i = 0; i < logical_streams.size(); i++) {
     data += logical_streams[i];
   }
   data += data_;
@@ -130,7 +130,7 @@ int shared_log_client::write(const std::string &position, const std::string &dat
     }
     std::vector<std::string>
         args{"write", position, data_};
-    for (int i = 0; i < logical_streams.size(); i++) {
+    for (std::size_t i = 0; i < logical_streams.size(); i++) {
       args.push_back(logical_streams[i]);
     }
     blocks_[block_id()]->send_command(args);

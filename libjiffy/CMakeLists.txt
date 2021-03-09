@@ -233,7 +233,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/types/byte_string.h
           src/jiffy/storage/types/byte_string.cc)
 
-  add_dependencies(jiffy thrift_ep awssdk_ep memkind_ep)
+  add_dependencies(jiffy thrift_ep memkind_ep)
   message(STATUS "numalibrary = ${NUMA_LIBRARY}")
   target_link_libraries(jiffy ${THRIFT_LIBRARY}
           ${THRIFTNB_LIBRARY}
@@ -284,7 +284,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             test/auto_scaling_test.cpp
             test/test_utils.h)
     target_link_libraries(jiffy_tests jiffy)
-    add_dependencies(jiffy_tests catch_ep boost_ep memkind_ep thrift_ep awssdk_ep)
+    add_dependencies(jiffy_tests catch_ep boost_ep memkind_ep thrift_ep)
     # Register test
     add_test(JiffyTest jiffy_tests)
   endif ()
@@ -392,7 +392,7 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/utils/property_map.cpp
           src/jiffy/utils/property_map.h
           src/jiffy/utils/thread_utils.h)
-  add_dependencies(jiffy_client thrift_ep awssdk_ep)
+  add_dependencies(jiffy_client thrift_ep memkind_ep)
   target_link_libraries(jiffy_client ${THRIFT_LIBRARY}
           ${THRIFTNB_LIBRARY}
           ${LIBEVENT_LIBRARY}

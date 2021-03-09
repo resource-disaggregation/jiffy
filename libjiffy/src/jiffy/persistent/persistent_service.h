@@ -2,22 +2,15 @@
 #define JIFFY_PERSISTENT_SERVICE_H
 
 #include <string>
+
 #include "jiffy/storage/hashtable/hash_table_defs.h"
 #include "jiffy/storage/file/file_defs.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_defs.h"
 #include "jiffy/storage/shared_log/shared_log_defs.h"
 #include "jiffy/storage/serde/serde_all.h"
-#include <aws/core/Aws.h>
-#include "../utils/logger.h"
-#include "../utils/directory_utils.h"
-#include <aws/s3/S3Client.h>
-#include <aws/s3/model/PutObjectRequest.h>
-#include <aws/s3/model/GetObjectRequest.h>
-#include <aws/s3/model/DeleteObjectRequest.h>
-#include <aws/core/utils/stream/SimpleStreamBuf.h>
-#include <aws/core/utils/logging/DefaultLogSystem.h>
-#include <aws/core/utils/logging/AWSLogging.h>
-#include <fstream>
+
+#include "jiffy/utils/logger.h"
+#include "jiffy/utils/directory_utils.h"
 
 namespace jiffy {
 namespace persistent {
@@ -239,6 +232,8 @@ class derived_persistent : public persistent_service_impl {
 
 };
 
+#include <fstream>
+
 /* Local store, inherited persistent_service */
 class local_store_impl : public persistent_service {
  protected:
@@ -286,6 +281,17 @@ class local_store_impl : public persistent_service {
 };
 
 using local_store = derived_persistent<local_store_impl>;
+
+#ifdef S3_EXTERNAL
+
+#include <aws/core/Aws.h>
+#include <aws/core/utils/stream/SimpleStreamBuf.h>
+#include <aws/core/utils/logging/DefaultLogSystem.h>
+#include <aws/core/utils/logging/AWSLogging.h>
+#include <aws/s3/S3Client.h>
+#include <aws/s3/model/PutObjectRequest.h>
+#include <aws/s3/model/GetObjectRequest.h>
+#include <aws/s3/model/DeleteObjectRequest.h>
 
 /* s3_store class, inherited from persistent_service class */
 class s3_store_impl : public persistent_service {
@@ -389,6 +395,8 @@ class s3_store_impl : public persistent_service {
 };
 
 using s3_store = derived_persistent<s3_store_impl>;
+
+#endif
 
 }
 }

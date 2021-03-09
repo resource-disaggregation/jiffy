@@ -143,7 +143,7 @@ class directory_client : public directory_interface {
    * @param opts Permission options
    */
 
-  void permissions(const std::string &path, const perms &prms, perm_options opts) override;
+  void permissions(const std::string &path, const perms &prms, const perm_options opts) override;
 
   /**
    * @brief Remove file

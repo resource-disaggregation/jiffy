@@ -12,23 +12,22 @@ namespace storage {
 
 using namespace utils;
 
-#define min(a,b) ((a) < (b) ? (a) : (b))
+#define min(a, b) ((a) < (b) ? (a) : (b))
 
 shared_log_partition::shared_log_partition(block_memory_manager *manager,
-                               const std::string &backing_path,
-                               const std::string &name,
-                               const std::string &metadata,
-                               const utils::property_map &conf,
-                               const std::string &auto_scaling_host,
-                               int auto_scaling_port)
+                                           const std::string &backing_path,
+                                           const std::string &name,
+                                           const std::string &metadata,
+                                           const utils::property_map &conf,
+                                           const std::string &auto_scaling_host,
+                                           int auto_scaling_port)
     : chain_module(manager, backing_path, name, metadata, SHARED_LOG_OPS),
       partition_(manager->mb_capacity(), build_allocator<char>()),
       scaling_up_(false),
       dirty_(false),
       block_allocated_(false),
       auto_scaling_host_(auto_scaling_host),
-      auto_scaling_port_(auto_scaling_port),
-      log_info_() {
+      auto_scaling_port_(auto_scaling_port) {
   auto ser_name_ = conf.get("shared_log.serializer", "binary");
   if (ser_name_ == "binary") {
     ser_ = std::make_shared<binary_serde>(binary_allocator_);
@@ -51,11 +50,11 @@ void shared_log_partition::write(response &_return, const arg_list &args) {
   std::vector<int> info_set;
   info_set.push_back(int(starting_offset_));
   info_set.push_back(int(data.size()));
-  for (int i = 3; i < args.size(); i++) {
+  for (std::size_t i = 3; i < args.size(); i++) {
     logical_stream += args[i];
     info_set.push_back(int(args[i].size()));
   }
-  log_info_.push_back(info_set); 
+  log_info_.push_back(info_set);
   std::string writing_content = logical_stream + data;
   auto ret = partition_.write(writing_content, starting_offset_);
   if (!ret.first) {
@@ -72,9 +71,9 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
   }
   auto start_pos = std::stoi(args[1]) - seq_no_;
   auto end_pos = std::stoi(args[2]) - seq_no_;
-  if (end_pos > log_info_.size()) end_pos = log_info_.size() - 1;
-  std::vector<std::string> logical_streams = {}; 
-  for (int i = 3; i < args.size(); i++) {
+  if (static_cast<size_t>(end_pos) > log_info_.size()) end_pos = log_info_.size() - 1;
+  std::vector<std::string> logical_streams = {};
+  for (std::size_t i = 3; i < args.size(); i++) {
     logical_streams.push_back(args[i]);
   }
   std::vector<std::string> ret = {"!ok"};
@@ -82,23 +81,26 @@ void shared_log_partition::scan(response &_return, const arg_list &args) {
     _return = ret;
     return;
   }
-  if (start_pos < 0 || start_pos >= log_info_.size() || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("scan position invalid");
+  if (start_pos < 0 || static_cast<size_t>(start_pos) >= log_info_.size() || end_pos < 0 || end_pos < start_pos)
+    throw std::invalid_argument("scan position invalid");
   for (int i = start_pos; i <= end_pos; i++) {
     auto info_set = log_info_[i];
     if (info_set[0] == -1) continue;
     int temp_offset = info_set[0];
     int data_size = info_set[1];
     int stream_size = 0;
-    for (int j = 2; j < info_set.size(); j++) {
+    for (std::size_t j = 2; j < info_set.size(); j++) {
       stream_size += info_set[j];
     }
-    for (int j = 2; j < info_set.size(); j++) {
-      auto stream = partition_.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(info_set[j])).second;
+    for (std::size_t j = 2; j < info_set.size(); j++) {
+      auto
+          stream = partition_.read(static_cast<std::size_t>(temp_offset), static_cast<std::size_t>(info_set[j])).second;
       temp_offset += info_set[j];
       std::vector<std::string>::iterator it;
       it = find(logical_streams.begin(), logical_streams.end(), stream);
       if (it != logical_streams.end()) {
-        auto data = partition_.read(static_cast<std::size_t>(info_set[0]+stream_size), static_cast<std::size_t>(data_size)).second;
+        auto data = partition_.read(static_cast<std::size_t>(info_set[0] + stream_size),
+                                    static_cast<std::size_t>(data_size)).second;
         ret.push_back(data);
         break;
       }
@@ -117,18 +119,19 @@ void shared_log_partition::trim(response &_return, const arg_list &args) {
   }
   auto start_pos = std::stoi(args[1]) - seq_no_;
   auto end_pos = std::stoi(args[2]) - seq_no_;
-  if (start_pos < 0 || start_pos >= log_info_.size() || end_pos < 0 || end_pos < start_pos) throw std::invalid_argument("trim position invalid");
-  if (end_pos > log_info_.size()) end_pos = log_info_.size() - 1;
+  if (start_pos < 0 || static_cast<size_t>(start_pos) >= log_info_.size() || end_pos < 0 || end_pos < start_pos)
+    throw std::invalid_argument("trim position invalid");
+  if (static_cast<size_t>(end_pos) > log_info_.size()) end_pos = log_info_.size() - 1;
   int trimmed_length = 0;
   for (int i = start_pos; i <= end_pos; i++) {
     auto info_set = log_info_[i];
     if (info_set[0] == -1) continue;
     log_info_[i][0] = -1; // make the log entry invalid
-    for (int j = 1; j < info_set.size(); j++) {
+    for (std::size_t j = 1; j < info_set.size(); j++) {
       trimmed_length += info_set[j];
     }
   }
-  
+
   RETURN_OK(std::to_string(trimmed_length));
 }
 
