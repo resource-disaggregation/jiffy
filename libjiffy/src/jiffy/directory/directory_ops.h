@@ -1047,7 +1047,7 @@ class directory_ops {
    * @param opts Permission options
    */
 
-  virtual void permissions(const std::string &path, const perms &permissions, perm_options opts) = 0;
+  virtual void permissions(const std::string &path, const perms &permissions, const perm_options opts) = 0;
 
   /**
    * @brief Remove file given path

@@ -266,11 +266,11 @@ class fifo_queue_partition : public chain_module {
   /* Head position of queue */
   std::size_t head_;
 
-  /* Head position for read next operation */
-  std::size_t read_head_;
-
   /* Head index of queue */
   std::size_t head_index_;
+
+  /* Head position for read next operation */
+  std::size_t read_head_;
 
   /* Head index for read next operation */
   std::size_t read_head_index_;

@@ -65,13 +65,13 @@ const std::pair<bool, std::string> string_array::at(std::size_t offset) const {
       return std::make_pair(false, "");
     return std::make_pair(false, std::string("!not_available"));
   }
-  auto len = *((std::size_t *) (data_ + offset));
+  auto len = *((std::size_t * )(data_ + offset));
   return std::make_pair(true, std::string(data_ + offset + METADATA_LEN, len));
 }
 
 std::size_t string_array::find_next(std::size_t offset) const {
   if (offset >= last_element_offset_ || offset >= tail_) return 0;
-  return offset + *reinterpret_cast<size_t*>(data_ + offset) + METADATA_LEN;
+  return offset + *reinterpret_cast<size_t *>(data_ + offset) + METADATA_LEN;
 }
 
 std::size_t string_array::size() const {
@@ -114,6 +114,7 @@ string_array::const_iterator string_array::begin() const {
 string_array::const_iterator string_array::end() const {
   return string_array::const_iterator(*this, max_);
 }
+
 bool string_array::full() const {
   return split_string_;
 }
@@ -121,6 +122,10 @@ bool string_array::full() const {
 string_array_iterator::string_array_iterator(string_array &impl, std::size_t pos)
     : impl_(impl),
       pos_(pos) {}
+
+string_array_iterator::string_array_iterator(const string_array_iterator &other)
+    : impl_(other.impl_),
+      pos_(other.pos_) {}
 
 string_array_iterator::value_type string_array_iterator::operator*() const {
   auto ret = impl_.at(pos_);

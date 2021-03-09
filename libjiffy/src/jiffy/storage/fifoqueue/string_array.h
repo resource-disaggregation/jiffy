@@ -205,6 +205,12 @@ class string_array_iterator {
   string_array_iterator(string_array &impl, std::size_t pos);
 
   /**
+   * @brief Copy constructor
+   * @param other Other iterator
+   */
+  string_array_iterator(const string_array_iterator& other);
+
+  /**
    * @brief Operator *
    * @return Value
    */

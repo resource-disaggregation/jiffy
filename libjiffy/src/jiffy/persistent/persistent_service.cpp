@@ -1,14 +1,4 @@
-#include "../utils/logger.h"
-#include "../utils/directory_utils.h"
 #include "persistent_service.h"
-#include <aws/s3/S3Client.h>
-#include <aws/s3/model/PutObjectRequest.h>
-#include <aws/s3/model/GetObjectRequest.h>
-#include <aws/s3/model/DeleteObjectRequest.h>
-#include <aws/core/utils/stream/SimpleStreamBuf.h>
-#include <aws/core/utils/logging/DefaultLogSystem.h>
-#include <aws/core/utils/logging/AWSLogging.h>
-#include <fstream>
 
 namespace jiffy {
 namespace persistent {
@@ -20,6 +10,8 @@ local_store_impl::local_store_impl(std::shared_ptr<storage::serde> ser) : persis
 std::string local_store_impl::URI() {
   return "local";
 }
+
+#ifdef S3_EXTERNAL
 
 s3_store_impl::s3_store_impl(std::shared_ptr<storage::serde> ser) : persistent_service(std::move(ser)), options_{} {
   options_.loggingOptions.logLevel = Aws::Utils::Logging::LogLevel::Warn;
@@ -42,6 +34,8 @@ std::pair<std::string, std::string> s3_store_impl::extract_path_elements(const s
 std::string s3_store_impl::URI() {
   return "s3";
 }
+
+#endif
 
 }
 }
