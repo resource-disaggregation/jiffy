@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 public class JiffyFileSystemTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(JiffyFileSystemTest.class);
+  private static final boolean REMOTE_SERVER_JIFFY = true;
 
   @Rule
   public TestName testName = new TestName();
@@ -32,9 +33,16 @@ public class JiffyFileSystemTest {
   private static final String TEST_STRING = "teststring";
 
   public JiffyFileSystemTest() {
-    nameServer = new NameServer(System.getProperty("jiffy.directory.exec", "directoryd"));
-    storageServer = new StorageServer(System.getProperty("jiffy.storage.exec", "storaged"));
+    if(REMOTE_SERVER_JIFFY) {
+      nameServer = new NameServer();
+      storageServer = new StorageServer();
+    } else {
+      nameServer = new NameServer(System.getProperty("jiffy.directory.exec", "directoryd"));
+      storageServer = new StorageServer(System.getProperty("jiffy.storage.exec", "storaged"));
+    }
   }
+
+
 
   private static String formatTestDescription(String s) {
     return s.replaceAll(

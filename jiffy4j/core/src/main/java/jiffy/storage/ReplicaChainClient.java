@@ -153,13 +153,13 @@ public class ReplicaChainClient implements Closeable {
   private void connect() throws TException {
     this.seq = new sequence_id(-1, 0, -1);
     BlockMetadata h = BlockNameParser.parse(chain.block_ids.get(0));
-    this.head = new BlockClient(cache, h.getHost(), h.getServicePort(), h.getBlockId());
+    this.head = new BlockClient(cache, h.getHost(), h.getServicePort(), h.getBlockId(), h.getSequenceId());
     this.seq.setClientId(this.head.getClientId());
     if (chain.block_ids.size() == 1) {
       this.tail = this.head;
     } else {
       BlockMetadata t = BlockNameParser.parse(chain.block_ids.get(chain.block_ids.size() - 1));
-      this.tail = new BlockClient(cache, t.getHost(), t.getServicePort(), t.getBlockId());
+      this.tail = new BlockClient(cache, t.getHost(), t.getServicePort(), t.getBlockId(), h.getSequenceId());
     }
     this.responseReader = this.tail.newCommandResponseReader(seq.getClientId());
     this.inFlight = false;

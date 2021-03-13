@@ -1,6 +1,5 @@
 #include <sstream>
 #include <tuple>
-#include <iostream>
 #include "block_id_parser.h"
 
 namespace jiffy {

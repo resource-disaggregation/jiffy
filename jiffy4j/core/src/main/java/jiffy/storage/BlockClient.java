@@ -1,8 +1,10 @@
 package jiffy.storage;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import jiffy.storage.block_response_service.response_args;
+import jiffy.util.ByteBufferUtils;
 import org.apache.thrift.TApplicationException;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TMessage;
@@ -51,17 +53,19 @@ public class BlockClient {
   }
 
   private int blockId;
+  private Integer sequenceId;
   private TTransport transport;
   private TProtocol protocol;
   private block_request_service.Client client;
 
-  BlockClient(BlockClientCache cache, String host, int port, int blockId)
+  BlockClient(BlockClientCache cache, String host, int port, int blockId, Integer sequenceId)
       throws TTransportException {
     BlockClientCache.Value value = cache.get(host, port);
     this.transport = value.getTransport();
     this.protocol = value.getProtocol();
     this.client = value.getClient();
     this.blockId = blockId;
+    this.sequenceId = sequenceId;
   }
 
   public void close() {
@@ -78,6 +82,14 @@ public class BlockClient {
   }
 
   void sendCommandRequest(sequence_id seq, List<ByteBuffer> args) throws TException {
+    System.out.println("sendCommand" + blockId);
+    if(sequenceId != null) {
+      System.out.println("seq:" + sequenceId);
+      System.out.println("args:" + args.size());
+      List<ByteBuffer> newArgs = new ArrayList<>(args);
+      newArgs.add(ByteBufferUtils.fromString("seq:" + -1));
+      args = newArgs;
+    }
     client.commandRequest(seq, blockId, args);
   }
 }

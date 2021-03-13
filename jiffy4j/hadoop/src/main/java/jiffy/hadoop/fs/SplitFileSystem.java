@@ -32,7 +32,7 @@ public class SplitFileSystem extends FileSystem {
 
   private URI uri;
 
-  private final static String EPHEMERAL_PREFIX = "tmp";
+  private final static String EPHEMERAL_PREFIX = "/maestro";
   private final static String SCHEME = "splitfs";
 
   /**
@@ -194,7 +194,12 @@ public class SplitFileSystem extends FileSystem {
   public boolean mkdirs(Path path, FsPermission fsPermission) throws IOException {
     path = prefixWithFsURI(path);
     if (isEphemeralPath(path)) {
-      return ephemeralFileSystem.mkdirs(path, fsPermission);
+      try {
+        return ephemeralFileSystem.mkdirs(path, fsPermission);
+      } catch (Exception e) {
+        e.printStackTrace();
+        throw e;
+      }
     } else {
       return persistentFileSystem.mkdirs(path, fsPermission);
     }
@@ -224,6 +229,7 @@ public class SplitFileSystem extends FileSystem {
   }
 
   private boolean isEphemeralPath(Path p) {
+//    System.out.println(p.toString());
     if (p.getParent() == null) {
       return false;
     } else {

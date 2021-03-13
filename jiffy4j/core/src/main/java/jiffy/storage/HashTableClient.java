@@ -89,8 +89,16 @@ public class HashTableClient extends DataStructureClient implements Closeable {
     List<ByteBuffer> args = ByteBufferUtils.fromByteBuffers(HashTableCommands.GET, key);
     ByteBuffer response = null;
     while (response == null) {
-      response = blocks[blockId(key)].runCommand(args).get(0);
-      response = handleRedirect(args, response);
+      List<ByteBuffer> byteBuffers = blocks[blockId(key)].runCommand(args);
+      String responseType = ByteBufferUtils.toString(byteBuffers.get(0).slice());
+      if("!ok".equals(responseType)) {
+        response = byteBuffers.get(1);
+      } else if("!block_reclaimed".equals(responseType)) {
+        throw new RuntimeException("block reclaimed");
+      } else {
+        response = byteBuffers.get(0);
+        response = handleRedirect(args, response);
+      }
     }
     return response;
   }

@@ -11,13 +11,19 @@ class JiffyServer {
   protected Process handle;
   private String executable;
 
+  JiffyServer() {
+    // connects to remote jiffy
+  }
+
   JiffyServer(String executable) {
     this.executable = executable;
     handle = null;
   }
 
   public void start(String conf) throws IOException, InterruptedException {
-    this.handle = startProcess(executable, "--config", conf);
+    if (this.executable != null) {
+      this.handle = startProcess(executable, "--config", conf);
+    }
   }
 
   public void stop() throws InterruptedException {
@@ -28,6 +34,9 @@ class JiffyServer {
   }
 
   private Process startProcess(String... cmd) throws IOException {
+    if(executable == null) {
+      return null;
+    }
     ProcessBuilder ps = new ProcessBuilder(cmd);
     File cmdFile = new File(cmd[0]);
     File log = new File("/tmp/" + cmdFile.getName() + ".log");
