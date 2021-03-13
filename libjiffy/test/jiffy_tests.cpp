@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
   Catch::Session session;
   log_utils::configure_log_level(log_level::info);
   GlobalOutput.setOutputFunction(log_utils::log_thrift_msg);
-  std::string mode;
+  std::string mode = "DRAM";
   std::string pmem_path;
   auto cli = session.cli()
             |Opt(mode, "pmem_mode")
