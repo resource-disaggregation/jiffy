@@ -27,7 +27,7 @@ TEST_CASE("hash_table_client_put_get_test", "[put][get]") {
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind, 134217728, 0, 1);
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -69,7 +69,7 @@ TEST_CASE("hash_table_client_put_update_get_test", "[put][update][get]") {
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind, 134217728, 0, 1);
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -119,7 +119,7 @@ TEST_CASE("hash_table_client_put_remove_get_test", "[put][remove][get]") {
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind, 134217728, 0, 1);
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });

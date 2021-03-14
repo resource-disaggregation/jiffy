@@ -10,7 +10,7 @@ using namespace ::jiffy::persistent;
 
 TEST_CASE("file_write_read_test", "[write][read]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   file_partition block(&manager);
@@ -36,7 +36,7 @@ TEST_CASE("file_write_read_test", "[write][read]") {
 
 TEST_CASE("file_write_clear_read_test", "[write][read]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   file_partition block(&manager);
@@ -65,7 +65,7 @@ TEST_CASE("file_write_clear_read_test", "[write][read]") {
 
 TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   file_partition block(&manager);
@@ -81,7 +81,7 @@ TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
 
 TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
   block_memory_manager manager(capacity, memory_mode, pmem_kind);
   file_partition block(&manager);

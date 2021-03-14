@@ -232,17 +232,27 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/types/binary.cpp
           src/jiffy/storage/types/byte_string.h
           src/jiffy/storage/types/byte_string.cc)
-
-  add_dependencies(jiffy thrift_ep memkind_ep)
-  message(STATUS "numalibrary = ${NUMA_LIBRARY}")
-  target_link_libraries(jiffy ${THRIFT_LIBRARY}
-          ${THRIFTNB_LIBRARY}
-          ${LIBEVENT_LIBRARY}
-          ${AWSSDK_LINK_LIBRARIES}
-          ${MEMKIND_LIBRARY}
-          ${NUMA_LIBRARY}
-          ${CMAKE_DL_LIBS}
-          ${CMAKE_THREAD_LIBS_INIT})
+  if (BUILD_MEMKIND_SUPPORT)
+    add_dependencies(jiffy thrift_ep memkind_ep)
+    message(STATUS "numalibrary = ${NUMA_LIBRARY}")
+    target_link_libraries(jiffy ${THRIFT_LIBRARY}
+            ${THRIFTNB_LIBRARY}
+            ${LIBEVENT_LIBRARY}
+            ${AWSSDK_LINK_LIBRARIES}
+            ${MEMKIND_LIBRARY}
+            ${NUMA_LIBRARY}
+            ${CMAKE_DL_LIBS}
+            ${CMAKE_THREAD_LIBS_INIT})
+  else()
+    add_dependencies(jiffy thrift_ep jemalloc_ep)
+    target_link_libraries(jiffy ${THRIFT_LIBRARY}
+            ${THRIFTNB_LIBRARY}
+            ${LIBEVENT_LIBRARY}
+            ${AWSSDK_LINK_LIBRARIES}
+            ${JEMALLOC_LIBRARY}
+            ${CMAKE_DL_LIBS}
+            ${CMAKE_THREAD_LIBS_INIT})
+  endif()
   set_target_properties(jiffy PROPERTIES LINKER_LANGUAGE CXX)
 
   install(TARGETS jiffy
@@ -284,7 +294,11 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
             test/auto_scaling_test.cpp
             test/test_utils.h)
     target_link_libraries(jiffy_tests jiffy)
-    add_dependencies(jiffy_tests catch_ep boost_ep memkind_ep thrift_ep)
+    if (BUILD_MEMKIND_SUPPORT)
+      add_dependencies(jiffy_tests catch_ep boost_ep memkind_ep thrift_ep)
+    else()
+      add_dependencies(jiffy_tests catch_ep boost_ep jemalloc_ep thrift_ep)
+    endif()
     # Register test
     add_test(JiffyTest jiffy_tests)
   endif ()
@@ -392,7 +406,11 @@ if (BUILD_CPP_CLIENT)
           src/jiffy/utils/property_map.cpp
           src/jiffy/utils/property_map.h
           src/jiffy/utils/thread_utils.h)
-  add_dependencies(jiffy_client thrift_ep memkind_ep)
+  if (BUILD_MEMKIND_SUPPORT)
+    add_dependencies(jiffy_client thrift_ep memkind_ep)
+  else()
+    add_dependencies(jiffy_client thrift_ep jemalloc_ep)
+  endif()
   target_link_libraries(jiffy_client ${THRIFT_LIBRARY}
           ${THRIFTNB_LIBRARY}
           ${LIBEVENT_LIBRARY}

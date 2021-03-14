@@ -1,6 +1,6 @@
 # Memkind external project
 # target:
-#  - zlib_ep
+#  - memkind_ep
 # defines:
 #  - MEMKIND_HOME
 #  - MEMKIND_INCLUDE_DIR

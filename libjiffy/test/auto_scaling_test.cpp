@@ -40,7 +40,7 @@ TEST_CASE("hash_table_auto_scale_up_test", "[directory_service][storage_server][
   alloc->add_blocks(block_names);
 
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind, 2200);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -105,7 +105,7 @@ TEST_CASE("hash_table_auto_scale_down_test", "[directory_service][storage_server
   auto block_names = test_utils::init_block_names(100, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -186,7 +186,7 @@ TEST_CASE("hash_table_auto_scale_mix_test", "[directory_service][storage_server]
   auto block_names = test_utils::init_block_names(500, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -287,7 +287,7 @@ TEST_CASE("hash_table_auto_scale_large_data_test", "[directory_service][storage_
   alloc->add_blocks(block_names);
 
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -353,7 +353,7 @@ TEST_CASE("file_auto_scale_test", "[directory_service][storage_server][managemen
   auto block_names = test_utils::init_block_names(21, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -452,7 +452,7 @@ TEST_CASE("file_auto_scale_chain_replica_test", "[directory_service][storage_ser
   auto block_names = test_utils::init_block_names(64, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -547,7 +547,7 @@ TEST_CASE("file_auto_scale_multi_blocks_test", "[directory_service][storage_serv
   auto block_names = test_utils::init_block_names(64, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -646,7 +646,7 @@ TEST_CASE("file_auto_scale_mix_test", "[directory_service][storage_server][manag
   auto block_names = test_utils::init_block_names(1000, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind, 50000);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -743,7 +743,7 @@ TEST_CASE("file_auto_scale_large_data_test", "[directory_service][storage_server
   auto block_names = test_utils::init_block_names(21, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -812,7 +812,7 @@ TEST_CASE("fifo_queue_auto_scale_test", "[directory_service][storage_server][man
   auto block_names = test_utils::init_block_names(50, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_hash_table_blocks(block_names, memory_mode, pmem_kind, 5000);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -880,7 +880,7 @@ TEST_CASE("fifo_queue_auto_scale_replica_chain_test", "[directory_service][stora
   auto block_names = test_utils::init_block_names(100, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -946,7 +946,7 @@ TEST_CASE("fifo_queue_auto_scale_multi_block_test", "[directory_service][storage
   auto block_names = test_utils::init_block_names(21, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -1014,9 +1014,9 @@ TEST_CASE("fifo_queue_auto_scale_multi_block_test", "[directory_service][storage
 //  auto alloc = std::make_shared<sequential_block_allocator>();
 //  auto block_names = test_utils::init_block_names(64, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
 //  alloc->add_blocks(block_names);
-//  auto block_pmemkind_pair = test_utils::init_fifo_queue_blocks(block_names);
-// auto blocks = block_pmemkind_pair.blocks;
-// auto pmem_kind = block_pmemkind_pair.pmem_kind;
+//  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+//  void* pmem_kind = test_utils::init_kind();
+//  auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind);
 //  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
 //  std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
 //  test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
@@ -1106,7 +1106,7 @@ TEST_CASE("fifo_queue_auto_scale_mix_test", "[directory_service][storage_server]
   auto block_names = test_utils::init_block_names(50, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -1201,7 +1201,7 @@ TEST_CASE("fifo_queue_large_data_test", "[enqueue][dequeue]") {
   auto block_names = test_utils::init_block_names(64, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind, 134217728, 0, 1);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -1268,7 +1268,7 @@ TEST_CASE("fifo_queue_queue_size_test", "[enqueue][dequeue]") {
   auto block_names = test_utils::init_block_names(64, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind, 134217728, 0, 1);
   
 
@@ -1342,9 +1342,9 @@ TEST_CASE("fifo_queue_queue_size_test", "[enqueue][dequeue]") {
 //  auto alloc = std::make_shared<sequential_block_allocator>();
 //  auto block_names = test_utils::init_block_names(64, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
 //  alloc->add_blocks(block_names);
-//  std::string memory_mode;
-//  std::string pmem_path;
-//  pmem_kind = test_utils::create_kind(pmem_path);
+//  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+//  void* pmem_kind = test_utils::init_kind();
+//  auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind);
 //  auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind);
 //  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
 //  std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
@@ -1438,7 +1438,7 @@ TEST_CASE("fifo_queue_in_rate_out_rate_auto_scale_test", "[enqueue][dequeue]") {
   auto block_names = test_utils::init_block_names(64, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* pmem_kind = test_utils::init_kind();
   auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
@@ -1532,11 +1532,9 @@ TEST_CASE("fifo_queue_in_rate_out_rate_auto_scale_test", "[enqueue][dequeue]") {
 //  auto alloc = std::make_shared<sequential_block_allocator>();
 //  auto block_names = test_utils::init_block_names(64, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
 //  alloc->add_blocks(block_names);
-// std::string memory_mode;
-//   std::string pmem_path;
-//   pmem_kind = test_utils::create_kind(pmem_path);
-//   auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind);
-//  auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
+//  std::string memory_mode = getenv("JIFFY_TEST_MODE");
+//  void* pmem_kind = test_utils::init_kind();
+//  auto blocks = test_utils::init_fifo_queue_blocks(block_names, memory_mode, pmem_kind);auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
 //  std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });
 //  test_utils::wait_till_server_ready(HOST, STORAGE_SERVICE_PORT);
 //

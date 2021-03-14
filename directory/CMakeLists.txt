@@ -7,9 +7,13 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../libjiffy/src
         ${Boost_INCLUDE_DIRS})
 add_executable(directoryd src/directory_server.cpp)
 
-add_dependencies(directoryd boost_ep memkind_ep thrift_ep)
-
-target_link_libraries(directoryd jiffy ${MEMKIND_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+if (BUILD_MEMKIND_SUPPORT)
+  add_dependencies(directoryd boost_ep memkind_ep thrift_ep)
+  target_link_libraries(directoryd jiffy ${MEMKIND_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+else()
+  add_dependencies(directoryd boost_ep jemalloc_ep thrift_ep)
+  target_link_libraries(directoryd jiffy ${JEMALLOC_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+endif()
 
 install(TARGETS directoryd
         RUNTIME DESTINATION bin
