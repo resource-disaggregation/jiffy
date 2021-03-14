@@ -2,7 +2,9 @@
 #define JIFFY_MEM_UTILS_H
 
 #include <string>
-
+#ifdef MEMKIND_IN_USE
+  #include <memkind.h>
+#endif
 namespace jiffy {
 namespace utils {
 
@@ -10,7 +12,6 @@ class mem_utils {
  public:
   static void* init_kind(const std::string &memory_mode, const std::string &pmem_path) {
     #ifdef MEMKIND_IN_USE
-      #include <memkind.h>
       struct memkind *pmem_kind = nullptr;
       if (memory_mode == "PMEM") {
         size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
