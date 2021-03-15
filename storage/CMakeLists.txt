@@ -9,13 +9,9 @@ add_executable(storaged src/storage_server.cpp
         src/server_storage_tracker.cpp
         src/server_storage_tracker.h)
 
-if (BUILD_MEMKIND_SUPPORT)
-  add_dependencies(storaged boost_ep memkind_ep thrift_ep)
-  target_link_libraries(storaged jiffy ${MEMKIND_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
-else()
-  add_dependencies(storaged boost_ep jemalloc_ep thrift_ep)
-  target_link_libraries(storaged jiffy ${JEMALLOC_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
-endif()
+add_dependencies(storaged boost_ep ${HEAP_MANAGER_EP} thrift_ep)
+
+target_link_libraries(storaged jiffy ${HEAP_MANAGER_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 install(TARGETS storaged
         RUNTIME DESTINATION bin

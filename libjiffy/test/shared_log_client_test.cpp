@@ -31,8 +31,8 @@ TEST_CASE("shared_log_client_write_scan_test", "[write][scan]") {
   auto block_names = test_utils::init_block_names(NUM_BLOCKS, STORAGE_SERVICE_PORT, STORAGE_MANAGEMENT_PORT);
   alloc->add_blocks(block_names);
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
-  auto blocks = test_utils::init_shared_log_blocks(block_names, memory_mode, pmem_kind, 134217728);
+  void* mem_kind = test_utils::init_kind();
+  auto blocks = test_utils::init_shared_log_blocks(block_names, memory_mode, mem_kind, 134217728);
 
   auto storage_server = block_server::create(blocks, STORAGE_SERVICE_PORT);
   std::thread storage_serve_thread([&storage_server] { storage_server->serve(); });

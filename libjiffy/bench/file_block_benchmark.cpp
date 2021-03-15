@@ -47,12 +47,14 @@ int main(int argc, char const *argv[])
     
     else if (vm.count("dram")) {
         std::string memory_mode = "DRAM";
+        std::string pmem_path = "";
+        void* mem_kind = mem_utils::init_kind(memory_mode, pmem_path);
     }
     else if (vm.count("pmem")) {
         std::string memory_mode = "PMEM";
         std::string pmem_path = vm["pmem"].as<std::string>();
+        void* mem_kind = mem_utils::init_kind(memory_mode, pmem_path);
     }
-    void* pmem_kind = mem_utils::init_kind(memory_mode, pmem_path);
 
     std::string address = "127.0.0.1";
     int service_port = 9090;
@@ -76,7 +78,7 @@ int main(int argc, char const *argv[])
     LOG(log_level::info) << "backing-path: " << backing_path;
     
     size_t capacity = 134217728;
-    block_memory_manager manager(capacity, memory_mode, pmem_kind);
+    block_memory_manager manager(capacity, memory_mode, mem_kind);
     file_partition block(&manager);
     std::size_t offset = 0;
     std::string data_ (data_size, 'x');

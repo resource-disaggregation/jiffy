@@ -9,9 +9,9 @@ using namespace ::jiffy::persistent;
 
 TEST_CASE("hash_table_ls_put_get_csv_test", "[put][get]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   property_map conf;
   conf.set("hashtable.serializer", "csv");
   hash_table_partition block(&manager, "local://tmp", "0_65536", "regular", conf);
@@ -48,9 +48,9 @@ TEST_CASE("hash_table_ls_put_get_csv_test", "[put][get]") {
 
 TEST_CASE("hash_table_ls_put_update_get_csv_test", "[put][update][get]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   property_map conf;
   conf.set("hashtable.serializer", "csv");
   hash_table_partition block(&manager, "local://tmp", "0_65536", "regular", conf);
@@ -90,9 +90,9 @@ TEST_CASE("hash_table_ls_put_update_get_csv_test", "[put][update][get]") {
 
 TEST_CASE("hash_table_ls_put_upsert_get_csv_test", "[put][upsert][get]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   property_map conf;
   conf.set("hashtable.serializer", "csv");
   hash_table_partition block(&manager, "local://tmp", "0_65536", "regular", conf);
@@ -132,9 +132,9 @@ TEST_CASE("hash_table_ls_put_upsert_get_csv_test", "[put][upsert][get]") {
 
 TEST_CASE("hash_table_ls_put_exists_remove_exists_csv_test", "[put][exists][remove][exists]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   property_map conf;
   conf.set("hashtable.serializer", "csv");
   hash_table_partition block(&manager, "local://tmp", "0_65536", "regular", conf);
@@ -174,9 +174,9 @@ TEST_CASE("hash_table_ls_put_exists_remove_exists_csv_test", "[put][exists][remo
 
 TEST_CASE("hash_table_ls_put_remove_get_csv_test", "[put][update][get]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   property_map conf;
   conf.set("hashtable.serializer", "csv");
   hash_table_partition block(&manager, "local://tmp", "0_65536", "regular", conf);
@@ -217,9 +217,9 @@ TEST_CASE("hash_table_ls_put_remove_get_csv_test", "[put][update][get]") {
 
 TEST_CASE("hash_table_ls_put_get_binary_test", "[put][get]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   property_map conf;
   conf.set("hashtable.serializer", "binary");
   hash_table_partition block(&manager, "local://tmp", "0_65536", "regular", conf);
@@ -255,9 +255,9 @@ TEST_CASE("hash_table_ls_put_get_binary_test", "[put][get]") {
 
 TEST_CASE("hash_table_ls_put_update_get_binary_test", "[put][update][get]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   property_map conf;
   conf.set("hashtable.serializer", "binary");
   hash_table_partition block(&manager, "local://tmp", "0_65536", "regular", conf);
@@ -297,9 +297,9 @@ TEST_CASE("hash_table_ls_put_update_get_binary_test", "[put][update][get]") {
 
 TEST_CASE("hash_table_ls_put_upsert_get_binary_test", "[put][upsert][get]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   property_map conf;
   conf.set("hashtable.serializer", "binary");
   hash_table_partition block(&manager, "local://tmp", "0_65536", "regular", conf);
@@ -339,9 +339,9 @@ TEST_CASE("hash_table_ls_put_upsert_get_binary_test", "[put][upsert][get]") {
 
 TEST_CASE("hash_table_ls_put_exists_remove_exists_binary_test", "[put][exists][remove][exists]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   property_map conf;
   conf.set("hashtable.serializer", "binary");
   hash_table_partition block(&manager, "local://tmp", "0_65536", "regular", conf);
@@ -381,9 +381,9 @@ TEST_CASE("hash_table_ls_put_exists_remove_exists_binary_test", "[put][exists][r
 
 TEST_CASE("hash_table_ls_put_remove_get_binary_test", "[put][update][get]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   property_map conf;
   conf.set("hashtable.serializer", "binary");
   hash_table_partition block(&manager, "local://tmp", "0_65536", "regular", conf);

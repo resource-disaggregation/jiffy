@@ -10,9 +10,9 @@ using namespace ::jiffy::persistent;
 
 TEST_CASE("file_write_read_test", "[write][read]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   file_partition block(&manager);
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -36,9 +36,9 @@ TEST_CASE("file_write_read_test", "[write][read]") {
 
 TEST_CASE("file_write_clear_read_test", "[write][read]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   file_partition block(&manager);
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -65,9 +65,9 @@ TEST_CASE("file_write_clear_read_test", "[write][read]") {
 
 TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   file_partition block(&manager);
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -81,9 +81,9 @@ TEST_CASE("file_storage_size_test", "[put][size][storage_size][reset]") {
 
 TEST_CASE("file_flush_load_test", "[write][sync][reset][load][read]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   file_partition block(&manager);
   std::size_t offset = 0;
   for (std::size_t i = 0; i < 1000; ++i) {

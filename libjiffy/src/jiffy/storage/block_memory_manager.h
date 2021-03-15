@@ -25,7 +25,7 @@ class block_memory_manager {
    */
   explicit block_memory_manager(size_t capacity = 134217728,
                                 const std::string memory_mode = "DRAM",
-                                void* pmem_kind = nullptr);
+                                void* mem_kind = nullptr);
 
   /**
    * @brief Allocate memory.
@@ -81,7 +81,7 @@ class block_memory_manager {
   size_t capacity_;
   std::atomic<size_t> used_;
   std::string memory_mode_;
-  void* pmem_kind_;
+  void* mem_kind_;
 };
 
 }

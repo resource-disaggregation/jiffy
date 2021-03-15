@@ -11,9 +11,9 @@ using namespace ::jiffy::persistent;
 
 TEST_CASE("file_ls_write_read_csv_test", "[write][read]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   property_map conf;
   conf.set("file.serializer", "csv");
   file_partition block(&manager, "local://tmp", "0", "regular", conf);
@@ -59,9 +59,9 @@ TEST_CASE("file_ls_write_read_csv_test", "[write][read]") {
 
 TEST_CASE("file_ls_write_read_binary_test", "[write][read]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   property_map conf;
   conf.set("file.serializer", "binary");
   file_partition block(&manager, "local://tmp", "0", "regular", conf);

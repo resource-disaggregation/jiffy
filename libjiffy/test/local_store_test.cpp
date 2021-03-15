@@ -15,9 +15,9 @@ binary make_binary(const std::string& str, const block_memory_allocator<uint8_t>
 
 TEST_CASE("local_write_test", "[write]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   block_memory_allocator<uint8_t> binary_allocator(&manager);
   hash_table_type table;
   auto bkey = binary("key", binary_allocator);
@@ -38,9 +38,9 @@ TEST_CASE("local_read_test", "[read]") {
   out << "key,value\n";
   out.close();
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   block_memory_allocator<kv_pair_type> allocator(&manager);
   block_memory_allocator<uint8_t> binary_allocator(&manager);
   auto ser = std::make_shared<csv_serde>(binary_allocator);

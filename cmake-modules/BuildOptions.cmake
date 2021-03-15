@@ -21,6 +21,13 @@ option(USE_SYSTEM_ZLIB "Use system Zlib" ON)
 option(BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(GENERATE_THRIFT "Generate thrift files" OFF)
 
+# Exception for Darwin
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(BUILD_MEMKIND_SUPPORT "OFF")
+else ()
+  set(BUILD_MEMKIND_SUPPORT "ON")
+endif()
+
 message(STATUS "----------------------------------------------------------")
 message(STATUS "${PROJECT_NAME} version:                            ${PROJECT_VERSION}")
 message(STATUS "Build configuration Summary")

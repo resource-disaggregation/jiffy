@@ -239,7 +239,7 @@ class test_utils {
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_hash_table_blocks(const std::vector<std::string> &block_ids,
                                                                                     std::string memory_mode = "DRAM",
-                                                                                    void* pmem_kind = nullptr,
+                                                                                    void* mem_kind = nullptr,
                                                                                     size_t block_capacity = 134217728,
                                                                                     double threshold_lo = 0.05,
                                                                                     double threshold_hi = 0.95,                                          
@@ -254,7 +254,7 @@ class test_utils {
     blks.resize(block_ids.size());
 
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, mem_kind);
       blks[i]->setup("hashtable", "local://tmp", "0_65536", "regular", conf);
     }
     return blks;
@@ -277,7 +277,7 @@ class test_utils {
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_file_blocks(const std::vector<std::string> &block_ids,
                                                                               std::string memory_mode = "DRAM",
-                                                                              void* pmem_kind = nullptr,
+                                                                              void* mem_kind = nullptr,
                                                                               size_t block_capacity = 134217728,
                                                                               double threshold_lo = 0.05,
                                                                               double threshold_hi = 0.95,                                    
@@ -292,7 +292,7 @@ class test_utils {
     blks.resize(block_ids.size());
     
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, mem_kind);
       blks[i]->setup("file", "local://tmp", "", "regular", conf);
     }
     return blks;
@@ -315,7 +315,7 @@ class test_utils {
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_shared_log_blocks(const std::vector<std::string> &block_ids,
                                                                               std::string memory_mode = "DRAM",
-                                                                              void* pmem_kind = nullptr,
+                                                                              void* mem_kind = nullptr,
                                                                               size_t block_capacity = 134217728,
                                                                               double threshold_lo = 0.05,
                                                                               double threshold_hi = 0.95,
@@ -329,7 +329,7 @@ class test_utils {
     std::vector<std::shared_ptr<jiffy::storage::block>> blks;
     blks.resize(block_ids.size());
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, mem_kind);
       blks[i]->setup("shared_log", "local://tmp", "", "regular", conf);
     }
     return blks;
@@ -352,7 +352,7 @@ class test_utils {
 
   static std::vector<std::shared_ptr<jiffy::storage::block>> init_fifo_queue_blocks(const std::vector<std::string> &block_ids,
                                                                                     std::string memory_mode = "DRAM",
-                                                                                    void* pmem_kind = nullptr,
+                                                                                    void* mem_kind = nullptr,
                                                                                     size_t block_capacity = 134217728,
                                                                                     double threshold_lo = 0.05,
                                                                                     double threshold_hi = 0.95,                                          
@@ -366,7 +366,7 @@ class test_utils {
     std::vector<std::shared_ptr<jiffy::storage::block>> blks;
     blks.resize(block_ids.size());
     for (size_t i = 0; i < block_ids.size(); ++i) {
-      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, pmem_kind);
+      blks[i] = std::make_shared<jiffy::storage::block>(block_ids[i], block_capacity, memory_mode, mem_kind);
       blks[i]->setup("fifoqueue", "local://tmp", "", "regular", conf);
     }
     return blks;
@@ -375,8 +375,8 @@ class test_utils {
   static void* init_kind() {
     std::string pmem_path = getenv("PMEM_PATH"); 
     std::string memory_mode = getenv("JIFFY_TEST_MODE");
-    void* pmem_kind = mem_utils::init_kind(memory_mode, pmem_path);
-    return pmem_kind;
+    void* mem_kind = mem_utils::init_kind(memory_mode, pmem_path);
+    return mem_kind;
   }
 
 };

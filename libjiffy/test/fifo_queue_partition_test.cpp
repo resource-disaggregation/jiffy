@@ -11,9 +11,9 @@ using namespace ::jiffy::persistent;
 TEST_CASE("fifo_queue_enqueue_dequeue_test", "[enqueue][dequeue]") {
   
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   fifo_queue_partition block(&manager);
 
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -39,9 +39,9 @@ TEST_CASE("fifo_queue_enqueue_dequeue_test", "[enqueue][dequeue]") {
 TEST_CASE("fifo_queue_enqueue_clear_dequeue_test", "[enqueue][dequeue]") {
   
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   fifo_queue_partition block(&manager);
 
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -65,9 +65,9 @@ TEST_CASE("fifo_queue_enqueue_clear_dequeue_test", "[enqueue][dequeue]") {
 TEST_CASE("fifo_queue_enqueue_readnext_dequeue", "[enqueue][read_next][dequeue]") {
   
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   fifo_queue_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
@@ -93,9 +93,9 @@ TEST_CASE("fifo_queue_enqueue_readnext_dequeue", "[enqueue][read_next][dequeue]"
 TEST_CASE("fifo_queue_storage_size_test", "[put][size][storage_size][reset]") {
   
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   fifo_queue_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
@@ -108,9 +108,9 @@ TEST_CASE("fifo_queue_storage_size_test", "[put][size][storage_size][reset]") {
 TEST_CASE("fifo_queue_flush_load_test", "[enqueue][sync][reset][load][dequeue]") {
   
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  void* pmem_kind = test_utils::init_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   fifo_queue_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {
     std::vector<std::string> res;

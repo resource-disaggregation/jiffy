@@ -197,11 +197,11 @@ int main(int argc, char **argv) {
   std::vector<std::shared_ptr<block>> blocks;
   blocks.resize(num_blocks);
 
-  void* pmem_kind = mem_utils::init_kind(memory_mode, pmem_path);
+  void* mem_kind = mem_utils::init_kind(memory_mode, pmem_path);
 
   for (size_t i = 0; i < blocks.size(); ++i) {
     blocks[i] =
-        std::make_shared<block>(block_ids[i], block_capacity, memory_mode, pmem_kind, address, auto_scaling_port);
+        std::make_shared<block>(block_ids[i], block_capacity, memory_mode, mem_kind, address, auto_scaling_port);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
 

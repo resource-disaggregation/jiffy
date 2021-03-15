@@ -33,9 +33,13 @@ if (BUILD_MEMKIND_SUPPORT)
   find_package(Numa REQUIRED)
   include(MemkindExternal)
   add_definitions(-DMEMKIND_IN_USE)
+  set(HEAP_MANAGER_EP "memkind_ep")
+  set(HEAP_MANAGER_LIBRARY ${MEMKIND_LIBRARY})
 else()
   # Jemalloc
   include(JemallocExternal)
+  set(HEAP_MANAGER_EP "jemalloc_ep")
+  set(HEAP_MANAGER_LIBRARY ${JEMALLOC_LIBRARY})
 endif ()
 
 # If testing is enabled
