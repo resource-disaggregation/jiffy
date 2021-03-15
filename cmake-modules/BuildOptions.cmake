@@ -24,8 +24,8 @@ option(GENERATE_THRIFT "Generate thrift files" OFF)
 # Exception for Darwin
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(BUILD_MEMKIND_SUPPORT "OFF")
-else ()
-  set(BUILD_MEMKIND_SUPPORT "ON")
+# else ()
+#   set(BUILD_MEMKIND_SUPPORT "ON")
 endif()
 
 message(STATUS "----------------------------------------------------------")
