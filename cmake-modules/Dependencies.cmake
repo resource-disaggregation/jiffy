@@ -34,7 +34,7 @@ if (BUILD_MEMKIND_SUPPORT)
   include(MemkindExternal)
   add_definitions(-DMEMKIND_IN_USE)
   set(HEAP_MANAGER_EP "memkind_ep")
-  set(HEAP_MANAGER_LIBRARY ${MEMKIND_LIBRARY})
+  set(HEAP_MANAGER_LIBRARY ${MEMKIND_LIBRARY} ${NUMA_LIBRARY})
 else()
   # Jemalloc
   include(JemallocExternal)

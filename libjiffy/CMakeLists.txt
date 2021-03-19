@@ -232,27 +232,15 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/types/binary.cpp
           src/jiffy/storage/types/byte_string.h
           src/jiffy/storage/types/byte_string.cc)
-  if (BUILD_MEMKIND_SUPPORT)
-    add_dependencies(jiffy thrift_ep memkind_ep)
-    message(STATUS "numalibrary: ${NUMA_LIBRARY}")
-    target_link_libraries(jiffy ${THRIFT_LIBRARY}
+  add_dependencies(jiffy thrift_ep ${HEAP_MANAGER_EP})
+  target_link_libraries(jiffy ${THRIFT_LIBRARY}
             ${THRIFTNB_LIBRARY}
             ${LIBEVENT_LIBRARY}
             ${AWSSDK_LINK_LIBRARIES}
-            ${MEMKIND_LIBRARY}
+            ${HEAP_MANAGER_LIBRARY}
             ${NUMA_LIBRARY}
             ${CMAKE_DL_LIBS}
             ${CMAKE_THREAD_LIBS_INIT})
-  else()
-    add_dependencies(jiffy thrift_ep jemalloc_ep)
-    target_link_libraries(jiffy ${THRIFT_LIBRARY}
-            ${THRIFTNB_LIBRARY}
-            ${LIBEVENT_LIBRARY}
-            ${AWSSDK_LINK_LIBRARIES}
-            ${JEMALLOC_LIBRARY}
-            ${CMAKE_DL_LIBS}
-            ${CMAKE_THREAD_LIBS_INIT})
-  endif()
   set_target_properties(jiffy PROPERTIES LINKER_LANGUAGE CXX)
 
   install(TARGETS jiffy
