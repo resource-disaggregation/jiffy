@@ -1,5 +1,4 @@
 #include "block.h"
-#include <memkind.h>
 #include "partition_manager.h"
 #include "jiffy/utils/logger.h"
 #include <iostream>
@@ -12,11 +11,11 @@ using namespace jiffy::utils;
 block::block(const std::string &id,
              const size_t capacity,
              const std::string memory_mode,
-             struct memkind* pmem_kind,
+             void* mem_kind,
              const std::string &auto_scaling_host,
              const int auto_scaling_port)
     : id_(id),
-      manager_(capacity, memory_mode, pmem_kind),
+      manager_(capacity, memory_mode, mem_kind),
       impl_(partition_manager::build_partition(&manager_,
                                                "default",
                                                "local://tmp",

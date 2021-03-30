@@ -7,10 +7,10 @@
 #include <jiffy/storage/service/block_server.h>
 #include <jiffy/utils/signal_handling.h>
 #include <jiffy/utils/logger.h>
+#include <jiffy/utils/mem_utils.h>
 #include <boost/program_options.hpp>
 #include <ifaddrs.h>
 #include "server_storage_tracker.h"
-#include <memkind.h>
 
 using namespace ::jiffy::directory;
 using namespace ::jiffy::storage;
@@ -196,14 +196,12 @@ int main(int argc, char **argv) {
 
   std::vector<std::shared_ptr<block>> blocks;
   blocks.resize(num_blocks);
-  struct memkind *pmem_kind = nullptr;
-  if (memory_mode == "PMEM") {
-    memkind_create_pmem(pmem_path.c_str(), 0, &pmem_kind);
-  }
+
+  void* mem_kind = mem_utils::init_kind(memory_mode, pmem_path);
 
   for (size_t i = 0; i < blocks.size(); ++i) {
     blocks[i] =
-        std::make_shared<block>(block_ids[i], block_capacity, memory_mode, pmem_kind, address, auto_scaling_port);
+        std::make_shared<block>(block_ids[i], block_capacity, memory_mode, mem_kind, address, auto_scaling_port);
   }
   LOG(log_level::info) << "Created " << blocks.size() << " blocks";
 
@@ -240,7 +238,6 @@ int main(int argc, char **argv) {
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to advertise blocks: " << e.what()
                           << "; make sure block allocation server is running";
-    memkind_destroy_kind(pmem_kind);
     std::exit(-1);
   }
 
@@ -298,7 +295,6 @@ int main(int argc, char **argv) {
           std::rethrow_exception(storage_exception);
         } catch (std::exception &e) {
           LOG(log_level::error) << "ERROR: " << e.what();
-          memkind_destroy_kind(pmem_kind);
           std::exit(-1);
         }
       }
@@ -311,7 +307,6 @@ int main(int argc, char **argv) {
           std::rethrow_exception(auto_scaling_exception);
         } catch (std::exception &e) {
           LOG(log_level::error) << "ERROR: " << e.what();
-          memkind_destroy_kind(pmem_kind);
           std::exit(-1);
         }
       }
@@ -326,7 +321,6 @@ int main(int argc, char **argv) {
   } catch (std::exception &e) {
     LOG(log_level::error) << "Failed to retract blocks: " << e.what()
                           << "; make sure block allocation server is running\n";
-    memkind_destroy_kind(pmem_kind);
     std::exit(-1);
   }
 

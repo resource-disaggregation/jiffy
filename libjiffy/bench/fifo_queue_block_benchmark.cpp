@@ -6,9 +6,9 @@
 #include <jiffy/utils/logger.h>
 #include <jiffy/utils/signal_handling.h>
 #include <jiffy/utils/time_utils.h>
+#include <jiffy/utils/mem_utils.h>
 #include "jiffy/storage/fifoqueue/fifo_queue_defs.h"
 #include "jiffy/storage/fifoqueue/fifo_queue_partition.h"
-#include <memkind.h>
 
 using namespace ::jiffy::client;
 using namespace ::jiffy::directory;
@@ -46,19 +46,14 @@ int main(int argc, char const *argv[])
     }
     
     else if (vm.count("dram")) {
-        struct memkind* pmem_kind = nullptr;
         std::string memory_mode = "DRAM";
+        std::string pmem_path = "";
+        void* mem_kind = mem_utils::init_kind(memory_mode, pmem_path);
     }
-    if (vm.count("pmem")) {
-        struct memkind* pmem_kind = nullptr;
+    else if (vm.count("pmem")) {
         std::string memory_mode = "PMEM";
         std::string pmem_path = vm["pmem"].as<std::string>();
-        size_t err = memkind_create_pmem(pmem_path.c_str(),0,&pmem_kind);
-        if (err) {
-            char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
-            memkind_error_message(err, error_message, MEMKIND_ERROR_MESSAGE_SIZE);
-            fprintf(stderr, "%s\n", error_message);
-        }
+        void* mem_kind = mem_utils::init_kind(memory_mode, pmem_path);
     }
 
     std::string address = "127.0.0.1";
@@ -83,7 +78,7 @@ int main(int argc, char const *argv[])
     LOG(log_level::info) << "backing-path: " << backing_path;
   
     size_t capacity = 134217728;
-    block_memory_manager manager(capacity, memory_mode, pmem_kind);
+    block_memory_manager manager(capacity, memory_mode, mem_kind);
     fifo_queue_partition block(&manager);
 
     auto bench_begin = time_utils::now_us();
@@ -118,6 +113,5 @@ int main(int argc, char const *argv[])
 											<< " us";
 	LOG(log_level::info) << "\t" << data_size << " payload";
 	LOG(log_level::info) << "\tThroughput: " << num_ops * 1E3 / tot_time << " requests per microsecond";
-    
-    memkind_destroy_kind(pmem_kind);
+
 }

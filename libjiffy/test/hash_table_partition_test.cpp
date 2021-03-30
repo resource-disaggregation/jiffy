@@ -9,9 +9,9 @@ using namespace ::jiffy::persistent;
 
 TEST_CASE("hash_table_put_get_test", "[put][get]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   hash_table_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
@@ -34,9 +34,9 @@ TEST_CASE("hash_table_put_get_test", "[put][get]") {
 
 TEST_CASE("hash_table_put_update_get_test", "[put][update][get]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   hash_table_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
@@ -70,9 +70,9 @@ TEST_CASE("hash_table_put_update_get_test", "[put][update][get]") {
 
 TEST_CASE("hash_table_put_upsert_get_test", "[put][upsert][get]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   hash_table_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
@@ -100,9 +100,9 @@ TEST_CASE("hash_table_put_upsert_get_test", "[put][upsert][get]") {
 
 TEST_CASE("hash_table_put_exists_remove_exists_test", "[put][exists][remove][exists]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   hash_table_partition block(&manager);
   block.slot_range(0, hash_slot::MAX);
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -129,10 +129,10 @@ TEST_CASE("hash_table_put_exists_remove_exists_test", "[put][exists][remove][exi
 
 TEST_CASE("hash_table_put_remove_get_test", "[put][update][get]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* mem_kind = test_utils::init_kind();
   
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   hash_table_partition block(&manager);
   block.slot_range(0, hash_slot::MAX);
   for (std::size_t i = 0; i < 1000; ++i) {
@@ -160,9 +160,9 @@ TEST_CASE("hash_table_put_remove_get_test", "[put][update][get]") {
 
 TEST_CASE("hash_table_storage_size_test", "[put][size][storage_size][reset]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   hash_table_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {
     response resp;
@@ -176,9 +176,9 @@ TEST_CASE("hash_table_storage_size_test", "[put][size][storage_size][reset]") {
 
 TEST_CASE("hash_table_flush_load_test", "[put][sync][reset][load][get]") {
   std::string memory_mode = getenv("JIFFY_TEST_MODE");
-  struct memkind* pmem_kind = test_utils::init_pmem_kind();
+  void* mem_kind = test_utils::init_kind();
   size_t capacity = 134217728;
-  block_memory_manager manager(capacity, memory_mode, pmem_kind);
+  block_memory_manager manager(capacity, memory_mode, mem_kind);
   hash_table_partition block(&manager);
   for (std::size_t i = 0; i < 1000; ++i) {
     std::vector<std::string> res;
