@@ -5,7 +5,7 @@
 # MEMKIND_FOUND - True if memkind found.
 
 find_path(MEMKIND_INCLUDE_DIR
-        NAMES memkind/memkind.h
+        NAMES memkind.h
         HINTS ${MEMKIND_ROOT_DIR}/include)
 
 find_library(MEMKIND_LIBRARY
