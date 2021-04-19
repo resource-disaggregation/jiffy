@@ -3,6 +3,7 @@
 
 #include "block_registration_service.h"
 #include "block_allocator.h"
+#include <stdexcept>
 
 namespace jiffy {
 namespace directory {
