@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <string>
-#include "jiffy/storage/block_memory_allocator.h"
+#include "jiffy/storage/heap/block_memory_allocator.h"
 #include "byte_string.h"
 
 namespace jiffy {

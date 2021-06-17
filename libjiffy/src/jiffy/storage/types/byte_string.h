@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <algorithm>
 #include <string>
-#include "jiffy/storage/block_memory_allocator.h"
+#include "jiffy/storage/heap/block_memory_allocator.h"
 #include "jiffy/utils/byte_utils.h"
 
 namespace jiffy {

@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
   std::vector<std::shared_ptr<block>> blocks;
   blocks.resize(num_blocks);
 
-  void* mem_kind = mem_utils::init_kind(memory_mode, pmem_path);
+  void *mem_kind = mem_utils::init_kind(memory_mode, pmem_path, num_blocks, block_capacity);
 
   for (size_t i = 0; i < blocks.size(); ++i) {
     blocks[i] =
@@ -246,9 +246,9 @@ int main(int argc, char **argv) {
   std::exception_ptr storage_exception;
   std::vector<std::thread> storage_serve_thread(num_block_groups);
   std::vector<std::shared_ptr<TServer>> storage_server(num_block_groups);
-  std::vector < std::vector < std::shared_ptr < block>>> block_vec(num_block_groups);
+  std::vector<std::vector<std::shared_ptr<block>>> block_vec(num_block_groups);
   for (size_t i = 0; i < num_block_groups; i++) {
-    auto block_group = std::vector < std::shared_ptr < block >> ();
+    auto block_group = std::vector<std::shared_ptr<block >>();
     for (size_t j = i; j < num_blocks; j += num_block_groups)
       block_group.push_back(blocks[j]);
     storage_server[i] = block_server::create(block_group, service_port + i);

@@ -2,7 +2,7 @@
 #define JIFFY_SHARED_LOG_H
 
 #include <functional>
-#include "jiffy/storage/block_memory_allocator.h"
+#include "jiffy/storage/heap/block_memory_allocator.h"
 #include "jiffy/storage/types/binary.h"
 #include "jiffy/storage/shared_log/shared_log_block.h"
 

@@ -13,8 +13,8 @@
 #include "jiffy/storage/notification/subscription_map.h"
 #include "jiffy/storage/service/block_response_client_map.h"
 #include "jiffy/storage/command.h"
-#include "jiffy/storage/block_memory_manager.h"
-#include "jiffy/storage/block_memory_allocator.h"
+#include "jiffy/storage/heap/block_memory_manager.h"
+#include "jiffy/storage/heap/block_memory_allocator.h"
 #include "jiffy/utils/logger.h"
 
 #define RETURN(...)           \

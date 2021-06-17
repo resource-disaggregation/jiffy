@@ -20,11 +20,11 @@ class block {
    * @param directory_port The directory port.
    */
   explicit block(const std::string &id,
-        const size_t capacity = 134217728,
-        const std::string memory_mode = "DRAM",
-        void* mem_kind = nullptr,
-        const std::string &auto_scaling_host = "127.0.0.1",
-        const int auto_scaling_port = 9095);
+                 size_t capacity = 134217728,
+                 const std::string &memory_mode = "DRAM",
+                 void *mem_kind = nullptr,
+                 const std::string &auto_scaling_host = "127.0.0.1",
+                 int auto_scaling_port = 9095);
 
   /**
    * @brief Get memory block identifier.
@@ -81,11 +81,11 @@ class block {
  private:
   std::string id_;
   block_memory_manager manager_;
-  void* mem_kind_;
+  void *mem_kind_{};
   std::shared_ptr<chain_module> impl_;
 
   std::string directory_host_;
-  int directory_port_;
+  int directory_port_{};
 
   std::string auto_scaling_host_;
   int auto_scaling_port_;

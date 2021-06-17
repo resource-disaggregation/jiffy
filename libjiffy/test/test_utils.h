@@ -372,10 +372,10 @@ class test_utils {
     return blks;
   }
 
-  static void* init_kind() {
+  static void *init_kind() {
     std::string pmem_path = getenv("PMEM_PATH"); 
     std::string memory_mode = getenv("JIFFY_TEST_MODE");
-    void* mem_kind = mem_utils::init_kind(memory_mode, pmem_path);
+    void* mem_kind = mem_utils::init_kind(memory_mode, pmem_path, 0, 0);
     return mem_kind;
   }
 

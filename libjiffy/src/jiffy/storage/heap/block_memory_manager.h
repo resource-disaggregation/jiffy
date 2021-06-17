@@ -24,7 +24,7 @@ class block_memory_manager {
    * @param capacity Maximum capacity of block.
    */
   explicit block_memory_manager(size_t capacity = 134217728,
-                                const std::string memory_mode = "DRAM",
+                                std::string  memory_mode = "DRAM",
                                 void* mem_kind = nullptr);
 
   /**

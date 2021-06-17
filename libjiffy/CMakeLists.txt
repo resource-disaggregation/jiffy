@@ -213,13 +213,14 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/utils/retry_utils.h
           src/jiffy/utils/string_utils.h
           src/jiffy/utils/thread_utils.h
+          src/jiffy/utils/mem_utils.h
           src/jiffy/storage/block.cpp
           src/jiffy/storage/block.h
           src/jiffy/utils/property_map.cpp
           src/jiffy/utils/property_map.h
-          src/jiffy/storage/block_memory_manager.h
-          src/jiffy/storage/block_memory_manager.cpp
-          src/jiffy/storage/block_memory_allocator.h
+          src/jiffy/storage/heap/block_memory_manager.h
+          src/jiffy/storage/heap/block_memory_manager.cpp
+          src/jiffy/storage/heap/block_memory_allocator.h
           src/jiffy/directory/fs/ds_node.cpp
           src/jiffy/directory/fs/ds_node.h
           src/jiffy/directory/fs/ds_file_node.cpp
@@ -231,7 +232,7 @@ if (BUILD_STORAGE OR BUILD_DIRECTORY)
           src/jiffy/storage/types/binary.h
           src/jiffy/storage/types/binary.cpp
           src/jiffy/storage/types/byte_string.h
-          src/jiffy/storage/types/byte_string.cc)
+          src/jiffy/storage/types/byte_string.cc src/jiffy/utils/mmap_kind.cpp src/jiffy/utils/mmap_kind.h src/jiffy/utils/mem_kind.cpp src/jiffy/utils/mem_kind.h)
   add_dependencies(jiffy thrift_ep ${HEAP_MANAGER_EP})
   target_link_libraries(jiffy ${THRIFT_LIBRARY}
             ${THRIFTNB_LIBRARY}
