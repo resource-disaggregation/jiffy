@@ -7,7 +7,7 @@ A virtual memory abstraction for serverless architectures. See [docs](docs) for 
 Before you can install Jiffy, make sure you have the following prerequisites:
 
 - MacOS X, CentOS, or Ubuntu(16.04 or later)
-- C++ compiler that supports C++11 standard (e.g., GCC 5.3 or later)
+- C++ compiler that supports C++17 standard (e.g., GCC 7.5 or later)
 - CMake 3.9 or later
 
 For Python client, you will additionally require:
