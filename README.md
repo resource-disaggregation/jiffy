@@ -1,6 +1,6 @@
 # Jiffy
 
-A virtual memory abstraction for serverless architectures. See [docs](docs) for detailed documentation.
+Jiffy is a far-memory system for stateful serverless analytics. See [docs](docs) for detailed documentation, and our [EuroSys'22 paper](https://anuragkhandelwal.com/papers/jiffy.pdf) for a comprehensive system description.
 
 ## Installation
 
